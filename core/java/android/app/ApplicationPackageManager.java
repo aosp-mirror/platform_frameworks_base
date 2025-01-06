@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
 import static android.app.PropertyInvalidatedCache.createSystemCacheKey;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_COLORED;
 import static android.app.admin.DevicePolicyResources.Drawables.Style.SOLID_NOT_COLORED;
@@ -129,7 +130,6 @@ import android.util.Slog;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.Immutable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.pm.RoSystemFeatures;
@@ -783,43 +783,24 @@ public class ApplicationPackageManager extends PackageManager {
     }
 
     /**
+     * The API and cache name for hasSystemFeature.
+     */
+    private static final String HAS_SYSTEM_FEATURE_API = "has_system_feature";
+
+    /**
      * Identifies a single hasSystemFeature query.
      */
-    @Immutable
-    private static final class HasSystemFeatureQuery {
-        public final String name;
-        public final int version;
-        public HasSystemFeatureQuery(String n, int v) {
-            name = n;
-            version = v;
-        }
-        @Override
-        public String toString() {
-            return String.format("HasSystemFeatureQuery(name=\"%s\", version=%d)",
-                    name, version);
-        }
-        @Override
-        public boolean equals(@Nullable Object o) {
-            if (o instanceof HasSystemFeatureQuery) {
-                HasSystemFeatureQuery r = (HasSystemFeatureQuery) o;
-                return Objects.equals(name, r.name) &&  version == r.version;
-            } else {
-                return false;
-            }
-        }
-        @Override
-        public int hashCode() {
-            return Objects.hashCode(name) * 13 + version;
-        }
-    }
+    private record HasSystemFeatureQuery(String name, int version) {}
 
     // Make this cache relatively large.  There are many system features and
     // none are ever invalidated.  MPTS tests suggests that the cache should
     // hold at least 150 entries.
     private final static PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>
-            mHasSystemFeatureCache =
-            new PropertyInvalidatedCache<HasSystemFeatureQuery, Boolean>(
-                256, createSystemCacheKey("has_system_feature")) {
+            mHasSystemFeatureCache = new PropertyInvalidatedCache<>(
+                new PropertyInvalidatedCache.Args(MODULE_SYSTEM)
+                .api(HAS_SYSTEM_FEATURE_API).maxEntries(SDK_FEATURE_COUNT).isolateUids(false),
+                HAS_SYSTEM_FEATURE_API, null) {
+
                 @Override
                 public Boolean recompute(HasSystemFeatureQuery query) {
                     try {
@@ -1033,6 +1014,33 @@ public class ApplicationPackageManager extends PackageManager {
             int uid, byte[] certificate, @CertificateInputType int type) {
         try {
             return mPM.hasUidSigningCertificate(uid, certificate, type);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public void setPageSizeAppCompatFlagsSettingsOverride(String packageName, boolean enabled) {
+        try {
+            mPM.setPageSizeAppCompatFlagsSettingsOverride(packageName, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public boolean isPageSizeCompatEnabled(String packageName) {
+        try {
+            return mPM.isPageSizeCompatEnabled(packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    @Override
+    public String getPageSizeCompatWarningMessage(String packageName) {
+        try {
+            return mPM.getPageSizeCompatWarningMessage(packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1743,6 +1751,19 @@ public class ApplicationPackageManager extends PackageManager {
         }
     }
 
+    /** @hide **/
+    @Override
+    public ProviderInfo resolveContentProviderForUid(@NonNull String authority,
+            ComponentInfoFlags flags, int callingUid) {
+        try {
+            return mPM.resolveContentProviderForUid(authority,
+                updateFlagsForComponent(flags.getValue(), getUserId(), null), getUserId(),
+                callingUid);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
     @Override
     public List<ProviderInfo> queryContentProviders(String processName, int uid, int flags) {
         return queryContentProviders(processName, uid, ComponentInfoFlags.of(flags));
@@ -1835,7 +1856,6 @@ public class ApplicationPackageManager extends PackageManager {
 
                 if (false) {
                     RuntimeException e = new RuntimeException("here");
-                    e.fillInStackTrace();
                     Log.w(TAG, "Getting drawable 0x" + Integer.toHexString(resId)
                                     + " from package " + packageName
                                     + ": app scale=" + r.getCompatibilityInfo().applicationScale

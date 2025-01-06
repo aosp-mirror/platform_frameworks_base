@@ -79,6 +79,12 @@ message PreferenceProto {
   optional IntentProto launch_intent = 14;
   // Descriptor of the preference value.
   optional PreferenceValueDescriptorProto value_descriptor = 15;
+  // Indicate how sensitive of the preference.
+  optional int32 sensitivity_level = 16;
+  // The required permissions to read preference value.
+  optional PermissionsProto read_permissions = 17;
+  // The required permissions to write preference value.
+  optional PermissionsProto write_permissions = 18;
 
   // Target of an Intent
   message ActionTarget {
@@ -90,6 +96,20 @@ message PreferenceProto {
       // app or activity belongs to other app.
       IntentProto intent = 2;
     }
+  }
+}
+
+// Proto of permissions
+message PermissionsProto {
+  repeated PermissionProto all_of = 1;
+  repeated PermissionProto any_of = 2;
+}
+
+// Proto of permission
+message PermissionProto {
+  oneof kind {
+    string permission = 1;
+    PermissionsProto permissions = 2;
   }
 }
 
@@ -106,6 +126,7 @@ message PreferenceValueProto {
   oneof value {
     bool boolean_value = 1;
     int32 int_value = 2;
+    float float_value = 3;
   }
 }
 
@@ -114,6 +135,7 @@ message PreferenceValueDescriptorProto {
   oneof type {
     bool boolean_type = 1;
     RangeValueProto range_value = 2;
+    bool float_type = 3;
   }
 }
 

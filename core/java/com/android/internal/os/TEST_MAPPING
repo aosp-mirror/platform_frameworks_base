@@ -20,7 +20,7 @@
       "file_patterns": [
         "BinderDeathDispatcher\\.java"
       ],
-      "name": "FrameworksCoreTests_internal_os_binder"
+      "name": "FrameworksCoreTests_all_binder"
     },
     {
       "file_patterns": [

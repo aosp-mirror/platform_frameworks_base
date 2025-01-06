@@ -63,7 +63,7 @@ flag {
    name: "remove_user_during_user_switch"
    namespace: "backstage_power"
    description: "Remove started user if user will be stopped due to user switch"
-   bug: "321598070"
+   bug: "337077643"
 }
 
 flag {
@@ -95,4 +95,14 @@ flag {
    namespace: "backstage_power"
    description: "Apply the quota policy to jobs started when the app was in TOP state"
    bug: "374323858"
+}
+
+flag {
+    name: "enforce_schedule_limit_to_proxy_jobs"
+    namespace: "backstage_power"
+    description: "Limit the schedule calls towards the persisted proxy jobs"
+    bug: "377912323"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

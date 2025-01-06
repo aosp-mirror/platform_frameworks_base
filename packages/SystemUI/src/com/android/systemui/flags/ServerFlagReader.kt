@@ -126,24 +126,24 @@ interface ServerFlagReaderModule {
 }
 
 class ServerFlagReaderFake : ServerFlagReader {
-    private val flagMap: MutableMap<String, Boolean> = mutableMapOf()
+    private val flagMap: MutableMap<Pair<String, String>, Boolean> = mutableMapOf()
     private val listeners =
         mutableListOf<Pair<ServerFlagReader.ChangeListener, Collection<Flag<*>>>>()
 
     override fun hasOverride(namespace: String, name: String): Boolean {
-        return flagMap.containsKey(name)
+        return flagMap.containsKey(namespace to name)
     }
 
     override fun readServerOverride(namespace: String, name: String, default: Boolean): Boolean {
-        return flagMap.getOrDefault(name, default)
+        return flagMap.getOrDefault(namespace to name, default)
     }
 
     fun setFlagValue(namespace: String, name: String, value: Boolean) {
-        flagMap.put(name, value)
+        flagMap.put(namespace to name, value)
 
         for ((listener, flags) in listeners) {
             flagLoop@ for (flag in flags) {
-                if (name == flag.name) {
+                if (namespace == flag.namespace && name == flag.name) {
                     listener.onChange(flag, if (value) "true" else "false")
                     break@flagLoop
                 }
@@ -152,13 +152,13 @@ class ServerFlagReaderFake : ServerFlagReader {
     }
 
     fun eraseFlag(namespace: String, name: String) {
-        flagMap.remove(name)
+        flagMap.remove(namespace to name)
     }
 
     override fun listenForChanges(
         flags: Collection<Flag<*>>,
         listener: ServerFlagReader.ChangeListener
     ) {
-        listeners.add(Pair(listener, flags))
+        listeners.add(listener to flags)
     }
 }

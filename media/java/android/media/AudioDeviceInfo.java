@@ -17,6 +17,7 @@
 package android.media;
 
 import static android.media.audio.Flags.FLAG_ENABLE_MULTICHANNEL_GROUP_DEVICE;
+import static android.media.audio.Flags.FLAG_SPEAKER_LAYOUT_API;
 
 import android.Manifest;
 import android.annotation.FlaggedApi;
@@ -545,6 +546,57 @@ public final class AudioDeviceInfo {
             counts[index++] = count;
         }
         return counts;
+    }
+
+    /** @hide */
+    @IntDef(flag = true, prefix = "AudioFormat.CHANNEL_OUT_", value = {
+            AudioFormat.CHANNEL_INVALID,
+            AudioFormat.CHANNEL_OUT_DEFAULT,
+            AudioFormat.CHANNEL_OUT_FRONT_LEFT,
+            AudioFormat.CHANNEL_OUT_FRONT_RIGHT,
+            AudioFormat.CHANNEL_OUT_FRONT_CENTER,
+            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY,
+            AudioFormat.CHANNEL_OUT_BACK_LEFT,
+            AudioFormat.CHANNEL_OUT_BACK_RIGHT,
+            AudioFormat.CHANNEL_OUT_FRONT_LEFT_OF_CENTER,
+            AudioFormat.CHANNEL_OUT_FRONT_RIGHT_OF_CENTER,
+            AudioFormat.CHANNEL_OUT_BACK_CENTER,
+            AudioFormat.CHANNEL_OUT_SIDE_LEFT,
+            AudioFormat.CHANNEL_OUT_SIDE_RIGHT,
+            AudioFormat.CHANNEL_OUT_TOP_CENTER,
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_LEFT,
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_CENTER,
+            AudioFormat.CHANNEL_OUT_TOP_FRONT_RIGHT,
+            AudioFormat.CHANNEL_OUT_TOP_BACK_LEFT,
+            AudioFormat.CHANNEL_OUT_TOP_BACK_CENTER,
+            AudioFormat.CHANNEL_OUT_TOP_BACK_RIGHT,
+            AudioFormat.CHANNEL_OUT_TOP_SIDE_LEFT,
+            AudioFormat.CHANNEL_OUT_TOP_SIDE_RIGHT,
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_LEFT,
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_CENTER,
+            AudioFormat.CHANNEL_OUT_BOTTOM_FRONT_RIGHT,
+            AudioFormat.CHANNEL_OUT_LOW_FREQUENCY_2,
+            AudioFormat.CHANNEL_OUT_FRONT_WIDE_LEFT,
+            AudioFormat.CHANNEL_OUT_FRONT_WIDE_RIGHT}
+    )
+    @Retention(RetentionPolicy.SOURCE)
+    @FlaggedApi(FLAG_SPEAKER_LAYOUT_API)
+    public @interface SpeakerLayoutChannelMask {}
+
+    /**
+     * @return A ChannelMask representing the speaker layout of a TYPE_BUILTIN_SPEAKER device.
+     *
+     * Valid only for speakers built-in to the device.
+     *
+     * The layout channel mask only indicates which speaker channels are present, the
+     * physical layout of the speakers should be informed by a standard for multi-channel
+     * sound playback systems, such as ITU-R BS.2051.
+     * @see AudioFormat
+     */
+    @FlaggedApi(FLAG_SPEAKER_LAYOUT_API)
+    @SpeakerLayoutChannelMask
+    public int getSpeakerLayoutChannelMask() {
+        return mPort.speakerLayoutChannelMask();
     }
 
     /**

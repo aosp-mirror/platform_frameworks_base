@@ -18,11 +18,13 @@
     android:layout_height="@dimen/volume_dialog_slider_height">
 
     <com.google.android.material.slider.Slider
-        style="@style/SystemUI.Material3.Slider.Volume"
         android:id="@+id/volume_dialog_slider"
-        android:layout_width="@dimen/volume_dialog_slider_height"
+        style="@style/SystemUI.Material3.Slider.Volume"
+        android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="center"
-        android:rotation="270"
-        android:theme="@style/Theme.Material3.Light" />
+        android:layout_marginTop="-20dp"
+        android:layout_marginBottom="-20dp"
+        android:orientation="vertical"
+        android:theme="@style/Theme.Material3.DayNight" />
 </FrameLayout>

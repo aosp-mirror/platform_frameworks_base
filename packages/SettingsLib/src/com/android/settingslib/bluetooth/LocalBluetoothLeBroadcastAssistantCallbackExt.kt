@@ -35,11 +35,7 @@ val LocalBluetoothLeBroadcastAssistant.onSourceConnectedOrRemoved: Flow<Unit>
                     sink: BluetoothDevice,
                     sourceId: Int,
                     state: BluetoothLeBroadcastReceiveState
-                ) {
-                    if (BluetoothUtils.isConnected(state)) {
-                        launch { send(Unit) }
-                    }
-                }
+                ) {}
 
                 override fun onSourceRemoved(sink: BluetoothDevice, sourceId: Int, reason: Int) {
                     launch { send(Unit) }
@@ -55,7 +51,9 @@ val LocalBluetoothLeBroadcastAssistant.onSourceConnectedOrRemoved: Flow<Unit>
 
                 override fun onSourceFound(source: BluetoothLeBroadcastMetadata) {}
 
-                override fun onSourceAdded(sink: BluetoothDevice, sourceId: Int, reason: Int) {}
+                override fun onSourceAdded(sink: BluetoothDevice, sourceId: Int, reason: Int) {
+                    launch { send(Unit) }
+                }
 
                 override fun onSourceAddFailed(
                     sink: BluetoothDevice,

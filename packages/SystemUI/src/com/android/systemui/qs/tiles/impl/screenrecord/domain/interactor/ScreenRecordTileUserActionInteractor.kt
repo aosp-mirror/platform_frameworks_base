@@ -16,16 +16,14 @@
 
 package com.android.systemui.qs.tiles.impl.screenrecord.domain.interactor
 
-import android.content.Context
+import android.media.projection.StopReason
 import android.util.Log
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.plugins.ActivityStarter
@@ -45,7 +43,6 @@ import kotlinx.coroutines.withContext
 class ScreenRecordTileUserActionInteractor
 @Inject
 constructor(
-    @Application private val context: Context,
     @Main private val mainContext: CoroutineContext,
     @Background private val backgroundContext: CoroutineContext,
     private val screenRecordRepository: ScreenRecordRepository,
@@ -55,8 +52,6 @@ constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val panelInteractor: PanelInteractor,
     private val mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
-    private val featureFlags: FeatureFlagsClassic,
-    private val activityStarter: ActivityStarter,
 ) : QSTileUserActionInteractor<ScreenRecordModel> {
     override suspend fun handleInput(input: QSTileInput<ScreenRecordModel>): Unit =
         with(input) {
@@ -67,7 +62,9 @@ constructor(
                             Log.d(TAG, "Cancelling countdown")
                             withContext(backgroundContext) { recordingController.cancelCountdown() }
                         }
-                        is ScreenRecordModel.Recording -> screenRecordRepository.stopRecording()
+                        is ScreenRecordModel.Recording -> {
+                            screenRecordRepository.stopRecording(StopReason.STOP_QS_TILE)
+                        }
                         is ScreenRecordModel.DoingNothing ->
                             withContext(mainContext) {
                                 showPrompt(action.expandable, user.identifier)
@@ -89,14 +86,7 @@ constructor(
             panelInteractor.collapsePanels()
         }
 
-        val dialog =
-            recordingController.createScreenRecordDialog(
-                context,
-                featureFlags,
-                dialogTransitionAnimator,
-                activityStarter,
-                onStartRecordingClicked
-            )
+        val dialog = recordingController.createScreenRecordDialog(onStartRecordingClicked)
 
         if (dialog == null) {
             Log.w(TAG, "showPrompt: dialog was null")
@@ -115,7 +105,7 @@ constructor(
                         expandable?.dialogTransitionController(
                             DialogCuj(
                                 InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                INTERACTION_JANK_TAG
+                                INTERACTION_JANK_TAG,
                             )
                         )
                     controller?.let {
@@ -135,7 +125,7 @@ constructor(
         keyguardDismissUtil.executeWhenUnlocked(
             dismissAction,
             false /* requiresShadeOpen */,
-            true /* afterKeyguardDone */
+            true, /* afterKeyguardDone */
         )
     }
 

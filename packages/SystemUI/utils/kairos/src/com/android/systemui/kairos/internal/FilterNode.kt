@@ -16,32 +16,33 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.util.Just
+import com.android.systemui.kairos.internal.store.Single
+import com.android.systemui.kairos.internal.store.SingletonMapK
 import com.android.systemui.kairos.util.Maybe
+import com.android.systemui.kairos.util.Maybe.Just
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
 
-internal inline fun <A, B> mapMaybeNode(
-    crossinline getPulse: suspend EvalScope.() -> TFlowImpl<A>,
-    crossinline f: suspend EvalScope.(A) -> Maybe<B>,
-): TFlowImpl<B> {
-    return DemuxImpl(
-            {
-                mapImpl(getPulse) {
-                    val maybeResult = f(it)
-                    if (maybeResult is Just) {
-                        mapOf(Unit to maybeResult.value)
-                    } else {
-                        emptyMap()
-                    }
+internal inline fun <A> filterJustImpl(
+    crossinline getPulse: EvalScope.() -> EventsImpl<Maybe<A>>
+): EventsImpl<A> =
+    DemuxImpl(
+            mapImpl(getPulse) { maybeResult, _ ->
+                if (maybeResult is Just) {
+                    Single(maybeResult.value)
+                } else {
+                    Single<A>()
                 }
             },
             numKeys = 1,
+            storeFactory = SingletonMapK.Factory(),
         )
         .eventsForKey(Unit)
-}
 
-internal inline fun <A> filterNode(
-    crossinline getPulse: suspend EvalScope.() -> TFlowImpl<A>,
-    crossinline f: suspend EvalScope.(A) -> Boolean,
-): TFlowImpl<A> = mapMaybeNode(getPulse) { if (f(it)) just(it) else none }
+internal inline fun <A> filterImpl(
+    crossinline getPulse: EvalScope.() -> EventsImpl<A>,
+    crossinline f: EvalScope.(A) -> Boolean,
+): EventsImpl<A> {
+    val mapped = mapImpl(getPulse) { it, _ -> if (f(it)) just(it) else none }.cached()
+    return filterJustImpl { mapped }
+}

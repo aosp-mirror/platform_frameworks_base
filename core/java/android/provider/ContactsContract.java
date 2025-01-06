@@ -3151,7 +3151,7 @@ public final class ContactsContract {
                  *                {@link #DEFAULT_ACCOUNT_STATE_CLOUD} or
                  *                {@link #DEFAULT_ACCOUNT_STATE_SIM}, or null otherwise.
                  */
-                public DefaultAccountAndState(@DefaultAccountState int state,
+                private DefaultAccountAndState(@DefaultAccountState int state,
                         @Nullable Account account) {
                     if (!isValidDefaultAccountState(state)) {
                         throw new IllegalArgumentException("Invalid default account state.");

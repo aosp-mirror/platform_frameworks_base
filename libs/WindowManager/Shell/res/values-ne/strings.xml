@@ -125,13 +125,15 @@
     <string name="select_text" msgid="5139083974039906583">"चयन गर्नुहोस्"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"स्क्रिनसट"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ब्राउजरमा खोल्नुहोस्"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"एपमा खोल्नुहोस्"</string>
     <string name="new_window_text" msgid="6318648868380652280">"नयाँ विन्डो"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"विन्डोहरू व्यवस्थापन गर्नुहोस्"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"एस्पेक्ट रेसियो परिवर्तन गर्नुहोस्"</string>
     <string name="close_text" msgid="4986518933445178928">"बन्द गर्नुहोस्"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"मेनु बन्द गर्नुहोस्"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"मेनु खोल्नुहोस्"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"स्क्रिन ठुलो बनाउनुहोस्"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"स्क्रिन स्न्याप गर्नुहोस्"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"आकार बदल्नुहोस्"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"एप सारेर यहाँ ल्याउन सकिएन"</string>
     <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"इमर्सिभ"</string>
     <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"रिस्टोर गर्नुहोस्"</string>
@@ -144,4 +146,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"एपमा"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"तपाईंको ब्राउजरमा"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"ठिक छ"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"आफ्नो ब्राउजरबाट यहाँ तुरुन्तै एपहरू खोल्नुहोस्"</string>
 </resources>

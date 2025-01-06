@@ -111,9 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"ለአንድ የማያ ገፅ ቀረጻ ክፍለ-ጊዜ በመካሄድ ያለ ማሳወቂያ"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"ማያ ገፅዎን ይቀዳሉ?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"አንድ መተግበሪያ ቅዳ"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"መላው ማያ ገፅን ቅረጽ"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"ይህን ማያ ገፅ ይቅዱ"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s ይቅዱ"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"መላው ማያ ገፅዎን በሚቀዱበት ጊዜ፣ በማያ ገፅዎ ላይ የሚታየው ማንኛውም ነገር ይቀዳል። ስለዚህ እንደ የይለፍ ቃላት፣ የክፍያ ዝርዝሮች፣ መልዕክቶች፣ ፎቶዎች እና ኦዲዮ እና ቪድዮ ላሉ ነገሮች ጥንቃቄ ያድርጉ።"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"መተግበሪያን ሲቀዱ በዚያ መተግበሪያ ውስጥ የሚታይ ወይም የሚጫወት ማንኛውም ነገር ይቀዳል። ስለዚህ እንደ የይለፍ ቃላት፣ የክፍያ ዝርዝሮች፣ መልዕክቶች፣ ፎቶዎች እና ኦዲዮ እና ቪድዮ ላሉ ነገሮች ጥንቃቄ ያድርጉ።"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"ማያ ገፅን ቅረጽ"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"በአሁኑ ጊዜ <xliff:g id="APP_NAME">%1$s</xliff:g> በመቅዳት ላይ ነዎት"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"መቅረጽ አቁም"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"ማያ ገፅን በማጋራት ላይ"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"ይዘት በማጋራት ላይ"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"ማያ ገፅን ማጋራት ይቁም?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"ማጋራት ይቁም?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"በአሁኑ ጊዜ ሙሉ ማያ ገፅዎን ከ<xliff:g id="HOST_APP_NAME">%1$s</xliff:g> ጋር በማጋራት ላይ ነዎት"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"በአሁኑ ጊዜ መሉ ማያ ገፅዎን ከመተግበሪያ ጋር በማጋራት ላይ ነዎት"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"በአሁኑ ጊዜ <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> በማጋራት ላይ ነዎት"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"በአሁኑ ጊዜ መተግበሪያ በማጋራት ላይ ነዎት"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"በአሁኑ ጊዜ በመተግበሪያ በማጋራት ላይ ነዎት"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"ማጋራት አቁም"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"ማያ ገፅን cast በማድረግ ላይ"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"cast ማድረግ ይቁም?"</string>
@@ -310,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"ብሉቱዝን ይጠቀሙ"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"ተገናኝቷል"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"የድምጽ ማጋራት"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ኦዲዮ ለመቀየር ወይም ለማጋራት መታ ያድርጉ"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"የድምፅ ማጋራትን ይደግፋል"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"ተቀምጧል"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"ግንኙነትን አቋርጥ"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"ያግብሩ"</string>
@@ -330,6 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"ግቤት"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"መስሚያ አጋዥ መሣሪያዎች"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"በማብራት ላይ..."</string>
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"ከላይ ባለው መተግበሪያ ቁጥጥር ላይ ስለሆነ\n ብሩህነትን ማስተካከል አልተቻለም"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"በራስ ሰር አሽከርክር"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"ማያ ገጽን በራስ-አሽከርክር"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"አካባቢ"</string>
@@ -417,7 +414,17 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"አዲስ መሣሪያ ለማጣመር ጠቅ ያድርጉ"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ቅድመ-ቅምጥን ማዘመን አልተቻለም"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ቅድመ-ቅምጥ"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"ተመርጧል"</string>
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"በዙሪያ ያሉ"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"ግራ"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"ቀኝ"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"ወደ ግራ እና ቀኝ የተለያዩ ቁጥጥሮች ዘርጋ"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"ወደ የተዋሃደ ቁጥጥር ሰብስብ"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"በዙሪያ ያሉትን ድምፀ-ከል አድርግ"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"በዙሪያ ያሉትን ድምፅ-ከል አንሳ"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"መሣሪያዎች"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"የቀጥታ መግለጫ ጽሑፍ"</string>
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"ማስታወሻ"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"የመሣሪያ ማይክሮፎን እገዳ ይነሳ?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"የመሣሪያ ካሜራ እገዳ ይነሳ?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"የመሣሪያ ካሜራ እና ማይክሮፎን እገዳ ይነሳ?"</string>
@@ -523,13 +530,15 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"የማያ ገፅ ቁልፍ ምግብሮች"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"የእርስዎ ጡባዊ ቁልፍ ተቆልፎ ቢሆን እንኳን ማንኛውም ሰው በማያ ገፅ ቁልፍዎ ላይ ምግብሮችን ማየት ይችላል።"</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ምግብር አትምረጥ"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"ቁመት ቀንስ"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"ቁመት ጨምር"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"የማያ ገፅ ቁልፍ ምግብሮች"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ምግብር በመጠቀም መተግበሪያ ለመክፈት እርስዎ መሆንዎን ማረጋገጥ አለብዎት። እንዲሁም የእርስዎ ጡባዊ በተቆለፈበት ጊዜ እንኳን ማንኛውም ሰው እነሱን ማየት እንደሚችል ከግምት ውስጥ ያስገቡ። አንዳንድ ምግብሮች ለማያ ገፅ ቁልፍዎ የታሰቡ ላይሆኑ ይችላሉ እና እዚህ ለማከል አስተማማኝ ላይሆኑ ይችላሉ።"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ገባኝ"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ምግብሮች"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"የ«ምግብሮች» አቋራጭን ለማከል በቅንብሮች ውስጥ «ምግብሮችን በማያ ገፅ ቁልፍ ላይ አሳይ» የሚለው መንቃቱን ያረጋግጡ።"</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"ቅንብሮች"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"የገፀ ማያ አሳራፊ አዝራርን አሳይ"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ተጠቃሚ ቀይር"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"ወደታች ተጎታች ምናሌ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"በዚህ ክፍለ-ጊዜ ውስጥ ያሉ ሁሉም መተግበሪያዎች እና ውሂብ ይሰረዛሉ።"</string>
@@ -583,21 +592,20 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"ሁሉንም አጽዳ"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"ያቀናብሩ"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"ታሪክ"</string>
-    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
-    <skip />
-    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
-    <skip />
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"የማሳወቂያ ቅንብሮች"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"የማሳወቂያ ታሪክ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"አዲስ"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"ጸጥ ያለ"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"ማሳወቂያዎች"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"ውይይቶች"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"ሁሉንም ጸጥ ያሉ ማሳወቂያዎችን ያጽዱ"</string>
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"የማሳወቂያ ቅንብሮችን ክፈት"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"ማሳወቂያዎች በአትረብሽ ባሉበት ቆመዋል"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{ምንም ማሳወቂያዎች የሉም}=1{ማሳወቂያዎች በ{mode} ባሉበት ቆመዋል}=2{ማሳወቂያዎች በ{mode} እና አንድ ሌላ ሁነታ ባሉበት ቆመዋል}one{ማሳወቂያዎች በ{mode} እና # ሌላ ሁነታ ባሉበት ቆመዋል}other{ማሳወቂያዎች በ{mode} እና # ሌላ ሁነታዎች ባሉበት ቆመዋል}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"አሁን ጀምር"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"ምንም ማሳወቂያ የለም"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"ምንም አዲስ ማሳወቂያዎች የሉም"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"የማሳወቂያ ረጋ ማለት በርቷል"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"የማሳወቂያ ረጋ ማለት አሁን በርቷል"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"በአንድ ጊዜ ብዙ ማሳወቂያዎችን ሲያገኙ የመሣሪያዎ ድምፅ እና ማንቂያዎች እስከ 2 ደቂቃዎች ድረስ በራስ-ሰር ይቀንሳሉ።"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"አጥፋ"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"የቆዩ ማሳወቂያዎችን ለማየት ይክፈቱ"</string>
@@ -705,6 +713,8 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ቋሚ"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"የጭንቅላት ክትትል"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"የደዋይ ሁነታን ለመቀየር መታ ያድርጉ"</string>
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"ደዋይ ሁነታ"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>፣ የደዋይ ሁነታን ለመቀየር መታ ያድርጉ"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ድምጸ-ከል አድርግ"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ድምጸ-ከልን አንሳ"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"ንዘር"</string>
@@ -750,6 +760,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"ሳተላይት፣ ግንኙነት አለ"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ሳተላይት ኤስኦኤስ"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"የአደጋ ጥሪዎች ወይም ኤስኦኤስ"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>፣ <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>።"</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"ምንም ምልክት የለም"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"አንድ አሞሌ"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"ሁለት አሞሌዎች"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"ሦስት አሞሌዎች"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"አራት አሞሌዎች"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"ምልክት ሙሉ ነው"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"የስራ መገለጫ"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"ለአንዳንዶች አስደሳች ቢሆንም ለሁሉም አይደለም"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"የስርዓት በይነገጽ መቃኛ የAndroid ተጠቃሚ በይነገጹን የሚነካኩበት እና የሚያበጁበት ተጨማሪ መንገዶች ይሰጠዎታል። እነዚህ የሙከራ ባህሪዎች ወደፊት በሚኖሩ ልቀቶች ላይ ሊለወጡ፣ ሊሰበሩ ወይም ሊጠፉ ይችላሉ። ከጥንቃቄ ጋር ወደፊት ይቀጥሉ።"</string>
@@ -868,12 +885,17 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"ማያ ገፅ ቁልፍ"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"ማስታወሻ ይውሰዱ"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"ብዙ ተግባራትን በተመሳሳይ ጊዜ ማከናወን"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"የአሁኑ መተግበሪያ በስተቀኝ ላይ ሆኖ የተከፈለ ማያ ገጽን ይጠቀሙ"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"የአሁኑ መተግበሪያ በስተግራ ላይ ሆኖ የተከፈለ ማያ ገጽን ይጠቀሙ"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"ከየተከፈለ ማያ ገጽ ወደ ሙሉ ገጽ ዕይታ ቀይር"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"መተግበሪያ በስተቀኝ ላይ ሆኖ የተከፈለ ማያ ገፅን ይጠቀሙ"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"መተግበሪያ በስተግራ ላይ ሆኖ የተከፈለ ማያ ገፅን ይጠቀሙ"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"ወደ ሙሉ ገፅ ዕይታ ይቀይሩ"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"የተከፈለ ማያ ገጽን ሲጠቀሙ በቀኝ ወይም ከታች ወዳለ መተግበሪያ ይቀይሩ"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"የተከፈለ ማያ ገጽን ሲጠቀሙ በቀኝ ወይም ከላይ ወዳለ መተግበሪያ ይቀይሩ"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"በተከፈለ ማያ ገጽ ወቅት፡- መተግበሪያን ከአንዱ ወደ ሌላው ተካ"</string>
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"በማሳያዎች መካከል ንቁ መስኮትን ያንቀሳቅሱ"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"መስኮትን ወደ ግራ አሳንስ"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"መስኮትን ወደ ቀኝ አሳንስ"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"መስኮትን አሳድግ"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"መስኮት አሳንስ"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ግቤት"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"ወደ ቀጣዩ ቋንቋ ቀይር"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"ወደ ቀዳሚ ቋንቋ ቀይር"</string>
@@ -945,9 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"አነስተኛ ቅድሚያ ያላቸው የማሳወቂያ አዶዎችን አሳይ"</string>
     <string name="other" msgid="429768510980739978">"ሌላ"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"ሰቅ አስወግድ"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ሰቅ መጨረሻው ላይ አክል"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"በመጨረሻው ቦታ ላይ ሰቅ ያክሉ"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"ሰቁን ውሰድ"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"ሰቅ ያክሉ"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"ወደተፈለገው ቦታ ሰቅ ያክሉ"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"ወደ <xliff:g id="POSITION">%1$d</xliff:g> ውሰድ"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"ወደ <xliff:g id="POSITION">%1$d</xliff:g> ቦታ አክል"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"አቀማመጡ ተቀባይነት የለውም።"</string>
@@ -963,11 +985,10 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ተጠቃሚ ይምረጡ"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ምንም በይነመረብ የለም"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"የ<xliff:g id="ID_1">%s</xliff:g> ቅንብሮችን ክፈት።"</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"የቅንብሮድ ቅደም-ተከተል አርትዕ።"</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"የፈጣን ቅንብሮችን ቅደም ተከተል ያርትዑ።"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"የኃይል ምናሌ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ገፅ <xliff:g id="ID_1">%1$d</xliff:g> ከ <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ማያ ገፅ ቁልፍ"</string>
-    <string name="finder_active" msgid="7907846989716941952">"ይህ መሣሪያ ኃይል ጠፍቶ ቢሆንም እንኳን በየእኔን መሣሪያ አግኝ ማግኘት ይችላሉ"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"በመዝጋት ላይ…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"የእንክብካቤ ደረጃዎችን ይመልከቱ"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"የእንክብካቤ ደረጃዎችን ይመልከቱ"</string>
@@ -1195,7 +1216,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ተቋርጧል)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"መቀየር አይቻልም። እንደገና ለመሞከር መታ ያድርጉ።"</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"አንድ መሣሪያ ያገናኙ"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ይህን ክፍለ ጊዜ cast ለማድረግ፣ እባክዎ መተግበሪያውን ይክፈቱ።"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"የማይታወቅ መተግበሪያ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Cast ማድረግ አቁም"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ለኦዲዮ ውጽዓት ተገኚ የሆኑ መሣሪያዎች"</string>
@@ -1222,6 +1242,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"ከ<xliff:g id="LENGTH">%1$d</xliff:g> የሚያንሱ ቁምፊዎችን ይጠቀሙ"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"የግንብ ቁጥር"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"የገንባ ቁጥር ወደ ቅንጥብ ሰሌዳ ተቀድቷል።"</string>
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"ወደ ቅንጥብ ሰሌዳ ቅዳ።"</string>
     <string name="basic_status" msgid="2315371112182658176">"ውይይት ይክፈቱ"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"የውይይት ምግብሮች"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"በመነሻ ማያ ገጽዎ ላይ ለማከል አንድ ውይይት መታ ያድርጉ"</string>
@@ -1268,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"መሣሪያን ያስገቡ"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"ለመክፈት የጣት አሻራ ይጠቀሙ"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ማረጋገጥ ያስፈልጋል። ለማረጋገጥ የጣት አሻራ ዳሳሹን ይንኩ።"</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"በመካሄድ ላይ የስልክ ጥሪ"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"የተንቀሳቃሽ ስልክ ውሂብ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"ተገናኝቷል"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"በጊዜያዊነት ተገናኝቷል"</string>
@@ -1357,6 +1379,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"ለከፍተኛ ጥራት ስልኩን ይቀይሩ"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"መታጠፍ የሚችል መሣሪያ እየተዘረጋ ነው"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"መታጠፍ የሚችል መሣሪያ እየተገለበጠ ነው"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"የፊት ለፊት ማያ ገፅ በርቷል"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"የታጠፈ"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"የተዘረጋ"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1408,26 +1431,40 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"የሥርዓት መቆጣጠሪያዎች"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"የሥርዓት መተግበሪያዎች"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"ብዙ ተግባራትን በተመሳሳይ ጊዜ ማከናወን"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"የቅርብ ጊዜ መተግበሪያዎች"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"የተከፈለ ማያ ገፅ"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ግብዓት"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"የመተግበሪያ አቋራጮች"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"የአሁን መተግበሪያ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ተደራሽነት"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"የቁልፍ ሰሌዳ አቋራጮች"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"የቁልፍ ሰሌዳ አቋራጮችን ያብጁ"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"አቋራጭ ይወገድ?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"ወደ ነባሪ ዳግም ይጀመር?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"አቋራጭ ለመመደብ ቁልፍ ይጫኑ"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ይህ ብጁ አቋራጭዎን በቋሚነት ይሰርዛል።"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ይህ ሁሉንም ብጁ አቋራጮችዎን በቋሚነት ይሰርዛል።"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"የፍለጋ አቋራጮች"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"ምንም የፍለጋ ውጤቶች የሉም"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"መሰብሰቢያ አዶ"</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"የእርምጃ ወይም ሜታ ቁልፍ አዶ"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"የመደመር አዶ"</string>
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"አብጅ"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"ዳግም አስጀምር"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"ተከናውኗል"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"መዘርጊያ አዶ"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"ወይም"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"ሲደመር"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"ወደፊት ህዝባር"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"መያዣ ይጎትቱ"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"የቁልፍ ሰሌዳ ቅንብሮች"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"አቋራጭ አቀናብር"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"አስወግድ"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"አዎ፣ ዳግም አስጀምር"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ይቅር"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"ቁልፍ ይጫኑ"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"የቁልፍ ጥምረት አስቀድሞ በሥራ ላይ ነው። ሌላ ቁልፍ ይሞክሩ።"</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"አቋራጩ ሊቀናበር አይችልም።"</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"የቁልፍ ሰሌዳዎን በመጠቀም ያስሱ"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"የቁልፍ ሰሌዳ አቋራጮችን ይወቁ"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"የመዳሰሻ ሰሌዳዎን በመጠቀም ያስሱ"</string>
@@ -1438,22 +1475,28 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ወደ መነሻ ሂድ"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"የቅርብ ጊዜ መተግበሪያዎችን አሳይ"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ተከናውኗል"</string>
+    <string name="gesture_error_title" msgid="469064941635578511">"እንደገና ይሞክሩ!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"ወደኋላ ተመለስ"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"የመዳሰሻ ሰሌዳዎ ላይ ሦስት ጣቶችን በመጠቀም ወደ ግራ ወይም ወደ ቀኝ ያንሸራትቱ"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"አሪፍ!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"ወደኋላ የመመለስ ምልክትን አጠናቅቀዋል።"</string>
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"የመዳሰሻ ሰሌዳዎን ወደመጠቀም ለመመለስ ሦስት ጣቶችን በመጠቀም ወደ ግራ ወይም ወደ ቀኝ ያንሸራትቱ"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ወደ መነሻ ሂድ"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"በመዳሰሻ ሰሌዳዎ ላይ በሦስት ጣቶች ወደ ላይ ያንሸራትቱ"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"ጥሩ ሥራ!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"ወደ መነሻ ሂድ ምልክትን አጠናቅቀዋል"</string>
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"ወደ መነሻ ማያ ገፅዎ ለመሄድ የመዳሰሻ ሰሌዳዎ ላይ በሦስት ጣቶች ወደ ላይ ያንሸራትቱ"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"የቅርብ ጊዜ መተግበሪያዎችን አሳይ"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"የመዳሰሻ ሰሌዳዎ ላይ ሦስት ጣቶችን በመጠቀም ወደላይ ያንሸራትቱ እና ይያዙ"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"ጥሩ ሠርተዋል!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"የቅርብ ጊዜ መተግበሪያዎች አሳይ ምልክትን አጠናቅቀዋል።"</string>
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"የቅርብ ጊዜ መተግበሪያዎችን ለማየት የመዳሰሻ ሰሌዳዎ ላይ ሦስት ጣቶችን በመጠቀም ወደላይ ያንሸራትቱ እና ይያዙ"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"ሁሉንም መተግበሪያዎች ይመልከቱ"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"በቁልፍ ሰሌዳዎ ላይ ያለውን የተግባር ቁልፍ ይጫኑ"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"ጥሩ ሠርተዋል!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"የሁሉንም መተግበሪያዎች አሳይ ምልክትን አጠናቅቀዋል"</string>
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"ሁሉንም መተግበሪያዎችዎን ለማየት በቁልፍ ሰሌዳዎ ላይ ያለውን የድርጊት ቁልፍ ይጫኑ"</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"የአጋዥ ሥልጠና እነማ፣ ማጫወትን ባለበት ለማቆም እና ከቆመበት ለመቀጠል ጠቅ ያድርጉ።"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"የቁልፍ ሰሌዳ የጀርባ ብርሃን"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"ደረጃ %1$d ከ %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"የቤት ውስጥ ቁጥጥሮች"</string>
@@ -1485,6 +1528,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"በመተግበሪያዎች የቀረበ"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"ማሳያ"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"ያልታወቀ"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"ሰቆችን ዳግም ያስጀምሩ"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"ሰቆችን ወደ የመጀመሪያው ቅደም ተከተል እና መጠኖቻቸው ይመለሱ?"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"ሁሉም ሰቆች ዳግም ይጀምሩ?"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"ሁሉም የፈጣን ቅንብሮች ሰቆች ወደ የመሣሪያው የመጀመሪያ ቅንብሮች ዳግም ይጀምራሉ"</string>
 </resources>

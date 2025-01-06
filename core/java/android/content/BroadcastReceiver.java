@@ -356,7 +356,6 @@ public abstract class BroadcastReceiver {
             }
             RuntimeException e = new RuntimeException(
                     "BroadcastReceiver trying to return result during a non-ordered broadcast");
-            e.fillInStackTrace();
             Log.e("BroadcastReceiver", e.getMessage(), e);
         }
     }
@@ -768,7 +767,6 @@ public abstract class BroadcastReceiver {
         }
         RuntimeException e = new RuntimeException(
                 "BroadcastReceiver trying to return result during a non-ordered broadcast");
-        e.fillInStackTrace();
         Log.e("BroadcastReceiver", e.getMessage(), e);
     }
 }

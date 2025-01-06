@@ -22,15 +22,17 @@ import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.os.Bundle
 import android.os.Handler
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import com.android.systemui.volume.panel.component.mediaoutput.domain.model.MediaControllerChangeModel
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.flow.flowOn
 
 interface MediaControllerInteractor {
 
@@ -43,14 +45,16 @@ class MediaControllerInteractorImpl
 @Inject
 constructor(
     @Background private val backgroundHandler: Handler,
+    @Background private val backgroundCoroutineContext: CoroutineContext,
 ) : MediaControllerInteractor {
 
     override fun stateChanges(mediaController: MediaController): Flow<MediaControllerChangeModel> {
         return conflatedCallbackFlow {
-            val callback = MediaControllerCallbackProducer(this)
-            mediaController.registerCallback(callback, backgroundHandler)
-            awaitClose { mediaController.unregisterCallback(callback) }
-        }
+                val callback = MediaControllerCallbackProducer(this)
+                mediaController.registerCallback(callback, backgroundHandler)
+                awaitClose { mediaController.unregisterCallback(callback) }
+            }
+            .flowOn(backgroundCoroutineContext)
     }
 }
 

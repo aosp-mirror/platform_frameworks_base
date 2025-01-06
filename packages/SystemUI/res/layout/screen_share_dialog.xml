@@ -36,7 +36,7 @@
             android:layout_width="@dimen/screenrecord_logo_size"
             android:layout_height="@dimen/screenrecord_logo_size"
             android:src="@drawable/ic_media_projection_permission"
-            android:tint="?androidprv:attr/materialColorPrimary"
+            android:tint="@androidprv:color/materialColorPrimary"
             android:importantForAccessibility="no"/>
         <TextView
             android:id="@+id/screen_share_dialog_title"
@@ -51,6 +51,7 @@
             android:layout_height="@dimen/screenrecord_spinner_height"
             android:layout_marginTop="@dimen/screenrecord_spinner_margin"
             android:layout_marginBottom="@dimen/screenrecord_spinner_margin"
+            android:dropDownWidth="match_parent"
             android:gravity="center_vertical"
             android:background="@drawable/screenshare_options_spinner_background"
             android:popupBackground="@drawable/screenrecord_options_spinner_popup_background"/>

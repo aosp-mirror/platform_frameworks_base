@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Bitmap;
 import android.graphics.ColorSpace;
+import android.graphics.Gainmap;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.hardware.HardwareBuffer;
@@ -184,17 +185,29 @@ public class ScreenCapture {
      * @hide
      */
     public static class ScreenshotHardwareBuffer {
+        private static final float EPSILON = 1.0f / 64.0f;
+
         private final HardwareBuffer mHardwareBuffer;
         private final ColorSpace mColorSpace;
         private final boolean mContainsSecureLayers;
         private final boolean mContainsHdrLayers;
+        private final HardwareBuffer mGainmap;
+        private final float mHdrSdrRatio;
 
         public ScreenshotHardwareBuffer(HardwareBuffer hardwareBuffer, ColorSpace colorSpace,
                 boolean containsSecureLayers, boolean containsHdrLayers) {
+            this(hardwareBuffer, colorSpace, containsSecureLayers, containsHdrLayers, null, 1.0f);
+        }
+
+        public ScreenshotHardwareBuffer(HardwareBuffer hardwareBuffer, ColorSpace colorSpace,
+                boolean containsSecureLayers, boolean containsHdrLayers, HardwareBuffer gainmap,
+                float hdrSdrRatio) {
             mHardwareBuffer = hardwareBuffer;
             mColorSpace = colorSpace;
             mContainsSecureLayers = containsSecureLayers;
             mContainsHdrLayers = containsHdrLayers;
+            mGainmap = gainmap;
+            mHdrSdrRatio = hdrSdrRatio;
         }
 
         /**
@@ -209,13 +222,12 @@ public class ScreenCapture {
          * @param containsHdrLayers    Indicates whether this graphic buffer contains HDR content.
          */
         private static ScreenshotHardwareBuffer createFromNative(HardwareBuffer hardwareBuffer,
-                int dataspace, boolean containsSecureLayers, boolean containsHdrLayers) {
+                int dataspace, boolean containsSecureLayers, boolean containsHdrLayers,
+                HardwareBuffer gainmap, float hdrSdrRatio) {
             ColorSpace colorSpace = ColorSpace.getFromDataSpace(dataspace);
-            return new ScreenshotHardwareBuffer(
-                    hardwareBuffer,
+            return new ScreenshotHardwareBuffer(hardwareBuffer,
                     colorSpace != null ? colorSpace : ColorSpace.get(ColorSpace.Named.SRGB),
-                    containsSecureLayers,
-                    containsHdrLayers);
+                    containsSecureLayers, containsHdrLayers, gainmap, hdrSdrRatio);
         }
 
         public ColorSpace getColorSpace() {
@@ -259,7 +271,22 @@ public class ScreenCapture {
                 Log.w(TAG, "Failed to take screenshot. Null screenshot object");
                 return null;
             }
-            return Bitmap.wrapHardwareBuffer(mHardwareBuffer, mColorSpace);
+
+            Bitmap bitmap = Bitmap.wrapHardwareBuffer(mHardwareBuffer, mColorSpace);
+            if (mGainmap != null) {
+                Bitmap gainmapBitmap = Bitmap.wrapHardwareBuffer(mGainmap, null);
+                Gainmap gainmap = new Gainmap(gainmapBitmap);
+                gainmap.setRatioMin(1.0f, 1.0f, 1.0f);
+                gainmap.setRatioMax(mHdrSdrRatio, mHdrSdrRatio, mHdrSdrRatio);
+                gainmap.setGamma(1.0f, 1.0f, 1.0f);
+                gainmap.setEpsilonSdr(EPSILON, EPSILON, EPSILON);
+                gainmap.setEpsilonHdr(EPSILON, EPSILON, EPSILON);
+                gainmap.setMinDisplayRatioForHdrTransition(1.0f);
+                gainmap.setDisplayRatioForFullHdr(mHdrSdrRatio);
+                bitmap.setGainmap(gainmap);
+            }
+
+            return bitmap;
         }
     }
 

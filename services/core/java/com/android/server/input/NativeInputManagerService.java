@@ -18,6 +18,7 @@ package com.android.server.input;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.hardware.display.DisplayTopologyGraph;
 import android.hardware.display.DisplayViewport;
 import android.hardware.input.InputSensorInfo;
 import android.hardware.lights.Light;
@@ -41,6 +42,8 @@ interface NativeInputManagerService {
     void start();
 
     void setDisplayViewports(DisplayViewport[] viewports);
+
+    void setDisplayTopology(DisplayTopologyGraph topologyGraph);
 
     int getScanCodeState(int deviceId, int sourceMask, int scanCode);
 
@@ -98,6 +101,8 @@ interface NativeInputManagerService {
 
     void toggleCapsLock(int deviceId);
 
+    void resetLockedModifierState();
+
     void displayRemoved(int displayId);
 
     void setInputDispatchMode(boolean enabled, boolean frozen);
@@ -129,7 +134,11 @@ interface NativeInputManagerService {
 
     void setMouseReverseVerticalScrollingEnabled(boolean enabled);
 
+    void setMouseScrollingAccelerationEnabled(boolean enabled);
+
     void setMouseSwapPrimaryButtonEnabled(boolean enabled);
+
+    void setMouseAccelerationEnabled(boolean enabled);
 
     void setTouchpadPointerSpeed(int speed);
 
@@ -144,6 +153,8 @@ interface NativeInputManagerService {
     void setTouchpadRightClickZoneEnabled(boolean enabled);
 
     void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
+
+    void setTouchpadSystemGesturesEnabled(boolean enabled);
 
     void setShowTouches(boolean enabled);
 
@@ -319,6 +330,9 @@ interface NativeInputManagerService {
         public native void setDisplayViewports(DisplayViewport[] viewports);
 
         @Override
+        public native void setDisplayTopology(DisplayTopologyGraph topologyGraph);
+
+        @Override
         public native int getScanCodeState(int deviceId, int sourceMask, int scanCode);
 
         @Override
@@ -370,6 +384,9 @@ interface NativeInputManagerService {
         public native void toggleCapsLock(int deviceId);
 
         @Override
+        public native void resetLockedModifierState();
+
+        @Override
         public native void displayRemoved(int displayId);
 
         @Override
@@ -408,7 +425,13 @@ interface NativeInputManagerService {
         public native void setMouseReverseVerticalScrollingEnabled(boolean enabled);
 
         @Override
+        public native void setMouseScrollingAccelerationEnabled(boolean enabled);
+
+        @Override
         public native void setMouseSwapPrimaryButtonEnabled(boolean enabled);
+
+        @Override
+        public native void setMouseAccelerationEnabled(boolean enabled);
 
         @Override
         public native void setTouchpadPointerSpeed(int speed);
@@ -430,6 +453,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setTouchpadThreeFingerTapShortcutEnabled(boolean enabled);
+
+        @Override
+        public native void setTouchpadSystemGesturesEnabled(boolean enabled);
 
         @Override
         public native void setShowTouches(boolean enabled);

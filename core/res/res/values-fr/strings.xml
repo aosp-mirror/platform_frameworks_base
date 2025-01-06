@@ -72,6 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : restreint"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Par défaut, les numéros des appelants ne sont pas restreints. Appel suivant : non restreint"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Cette appli n\'est pas compatible avec les pages de 16 ko. Échec de la vérification de l\'alignement de l\'APK. Cette appli sera exécutée dans un mode compatible avec la taille de la page. Pour une compatibilité optimale, veuillez recompiler l\'application de manière à ce que la taille de 16 ko soit prise en charge. Pour en savoir plus, consultez &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Cette appli n\'est pas compatible avec les pages de 16 ko. Échec de la vérification de l\'alignement de l\'ELF. Cette appli sera exécutée dans un mode compatible avec la taille de la page. Pour une compatibilité optimale, veuillez recompiler l\'application afin de prendre en charge les pages de 16 ko. Pour en savoir plus, consultez &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Cette appli n\'est pas compatible avec les pages de 16 ko. Échec des vérifications de l\'alignement de l\'APK et de l\'ELF. Cette appli sera exécutée dans un mode compatible avec la taille de la page. Pour une compatibilité optimale, veuillez recompiler l\'application afin de prendre en charge les pages de 16 ko. Pour en savoir plus, consultez &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Ce service n\'est pas pris en charge."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Impossible de modifier le paramètre relatif au numéro de l\'appelant."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Données transférées vers <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -85,6 +88,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossible d\'accéder au réseau mobile"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Essayez de changer le réseau préféré. Appuyez pour le modifier."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Appels d\'urgence non disponibles"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Les appels d\'urgence requièrent un réseau mobile"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertes"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Transfert d\'appel"</string>
@@ -613,6 +618,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Autoriser l\'appli à déterminer la position relative entre des appareils ultra-wideband à proximité"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagir avec les appareils Wi-Fi à proximité"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Permet à l\'appli de déterminer la position approximative des appareils Wi‑Fi à proximité, de les afficher et de s\'y connecter"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"déterminer l\'emplacement relatif entre des appareils à proximité"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Autorisez l\'appli à déterminer l\'emplacement relatif entre des appareils à proximité"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informations sur le service de paiement NFC préféré"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Permet à l\'application d\'obtenir des informations sur le service de paiement NFC préféré, y compris les ID d\'applications et les destinations de routage enregistrés."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"contrôler la communication en champ proche"</string>
@@ -1154,6 +1161,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"dans <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"dans <xliff:g id="COUNT">%d</xliff:g> j"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"dans <xliff:g id="COUNT">%d</xliff:g> an"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"il y a <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"il y a <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"il y a <xliff:g id="COUNT">%d</xliff:g> j"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"il y a <xliff:g id="COUNT">%d</xliff:g> an(s)"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> j"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> an(s)"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"dans <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"dans <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"dans <xliff:g id="COUNT">%d</xliff:g> j"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"dans <xliff:g id="COUNT">%d</xliff:g> an(s)"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"il y a <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"il y a <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"il y a <xliff:g id="COUNT">%d</xliff:g> j"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"il y a <xliff:g id="COUNT">%d</xliff:g> an(s)"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Il y a # minute}one{Il y a # minute}many{Il y a # minutes}other{Il y a # minutes}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Il y a # heure}one{Il y a # heure}many{Il y a # heures}other{Il y a # heures}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Il y a # jour}one{Il y a # jour}many{Il y a # jours}other{Il y a # jours}}"</string>
@@ -1758,6 +1781,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Mode une main"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Luminosité ultra-réduite"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Appareils auditifs"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Touches de volume appuyées de manière prolongée. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> activé."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Touches de volume appuyées de manière prolongée. Service <xliff:g id="SERVICE_NAME">%1$s</xliff:g> désactivé."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Relâchez les boutons de volume. Pour activer <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, appuyez de nouveau sur les deux boutons de volume pendant trois secondes."</string>
@@ -1939,13 +1970,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Week-end"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Événement"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sommeil"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Ne pas déranger (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Géré par <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Activé"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Désactivé"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"De <xliff:g id="START">%1$s</xliff:g> à <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Tous les agendas"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> coupe certains sons"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Un problème interne lié à votre appareil est survenu. Ce dernier risque d\'être instable jusqu\'à ce que vous rétablissiez la configuration d\'usine."</string>
@@ -2427,15 +2459,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envoyer et recevoir des messages sans réseau mobile ou Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ouvrir Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Fonctionnement"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Activer \"Sélectionner automatiquement le réseau\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Activez \"Sélectionner automatiquement le réseau\" dans Paramètres pour que votre téléphone puisse trouver un réseau compatible avec un satellite"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Activer"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Retour"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"En attente…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS par satellite est maintenant disponible"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Vous pouvez envoyer des messages aux services d\'urgence s\'il n\'y a pas de réseau mobile ou Wi-Fi. Google Messages doit être votre application de chat par défaut."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"SOS par satellite n\'est pas disponible"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"SOS par satellite n\'est pas disponible sur cet appareil"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"SOS par satellite n\'est pas configuré"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Vérifiez votre connexion à Internet, puis essayez à nouveau de lancer la configuration."</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS par satellite n\'est pas disponible"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS par satellite n\'est pas disponible dans ce pays ou cette région"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"SOS par satellite non configuré"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Pour envoyer des messages par satellite, définissez Google Messages comme application de chat par défaut"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS par satellite n\'est pas disponible"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Pour savoir si SOS par satellite est disponible dans ce pays ou cette région, activez les paramètres de localisation"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Messagerie par satellite disponible"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Vous pouvez envoyer des messages par satellite s\'il n\'y a pas de réseau mobile ou Wi-Fi. Google Messages doit être votre application de chat par défaut."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Messagerie par satellite non disponible"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"La messagerie par satellite n\'est pas disponible sur cet appareil"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Messagerie par satellite non configurée"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Vérifiez votre connexion à Internet, puis essayez à nouveau de lancer la configuration."</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Messagerie par satellite non disponible"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"La messagerie par satellite n\'est pas disponible dans ce pays ou cette région"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Messagerie par satellite non configurée"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Pour envoyer des messages par satellite, définissez Google Messages comme application de chat par défaut"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Messagerie par satellite non disponible"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Pour savoir si la messagerie par satellite est disponible dans ce pays ou cette région, activez les paramètres de localisation"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Reconfigurer le déverrouillage par empreinte digitale"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ne peut plus être reconnue."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> et <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ne peuvent plus être reconnues."</string>

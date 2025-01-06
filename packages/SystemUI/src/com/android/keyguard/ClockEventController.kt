@@ -35,6 +35,7 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.annotation.VisibleForTesting
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.customization.R
 import com.android.systemui.dagger.qualifiers.Background
@@ -42,7 +43,6 @@ import com.android.systemui.dagger.qualifiers.DisplaySpecific
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags.REGION_SAMPLING
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -62,6 +62,8 @@ import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
 import com.android.systemui.res.R as SysuiR
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.regionsampling.RegionSampler
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
@@ -80,11 +82,10 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
- * Controller for a Clock provided by the registry and used on the keyguard. Instantiated by
- * [KeyguardClockSwitchController]. Functionality is forked from [AnimatableClockController].
+ * Controller for a Clock provided by the registry and used on the keyguard. Functionality is forked
+ * from [AnimatableClockController].
  */
 open class ClockEventController
 @Inject
@@ -94,15 +95,17 @@ constructor(
     private val broadcastDispatcher: BroadcastDispatcher,
     private val batteryController: BatteryController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
+    // TODO b/362719719 - We should use the configuration controller associated with the display.
     private val configurationController: ConfigurationController,
     @DisplaySpecific private val resources: Resources,
-    private val context: Context,
+    @DisplaySpecific val context: Context,
     @Main private val mainExecutor: DelayableExecutor,
     @Background private val bgExecutor: Executor,
     private val clockBuffers: ClockMessageBuffers,
     private val featureFlags: FeatureFlagsClassic,
     private val zenModeController: ZenModeController,
     private val zenModeInteractor: ZenModeInteractor,
+    private val userTracker: UserTracker,
 ) {
     var loggers =
         listOf(
@@ -119,6 +122,10 @@ constructor(
             field = value
             connectClock(value)
         }
+
+    private fun is24HourFormat(userId: Int? = null): Boolean {
+        return DateFormat.is24HourFormat(context, userId ?: userTracker.userId)
+    }
 
     private fun disconnectClock(clock: ClockController?) {
         if (clock == null) {
@@ -186,7 +193,7 @@ constructor(
                 var pastVisibility: Int? = null
 
                 override fun onViewAttachedToWindow(view: View) {
-                    clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                    clock.events.onTimeFormatChanged(is24HourFormat())
                     // Match the asing for view.parent's layout classes.
                     smallClockFrame =
                         (view.parent as ViewGroup)?.also { frame ->
@@ -218,7 +225,7 @@ constructor(
         largeClockOnAttachStateChangeListener =
             object : OnAttachStateChangeListener {
                 override fun onViewAttachedToWindow(p0: View) {
-                    clock.events.onTimeFormatChanged(DateFormat.is24HourFormat(context))
+                    clock.events.onTimeFormatChanged(is24HourFormat())
                 }
 
                 override fun onViewDetachedFromWindow(p0: View) {}
@@ -340,14 +347,6 @@ constructor(
         object : KeyguardUpdateMonitorCallback() {
             override fun onKeyguardVisibilityChanged(visible: Boolean) {
                 isKeyguardVisible = visible
-                if (!MigrateClocksToBlueprint.isEnabled) {
-                    if (!isKeyguardVisible) {
-                        clock?.run {
-                            smallClock.animations.doze(if (isDozing) 1f else 0f)
-                            largeClock.animations.doze(if (isDozing) 1f else 0f)
-                        }
-                    }
-                }
 
                 if (visible) {
                     refreshTime()
@@ -358,7 +357,7 @@ constructor(
             }
 
             override fun onTimeFormatChanged(timeFormat: String?) {
-                clock?.run { events.onTimeFormatChanged(DateFormat.is24HourFormat(context)) }
+                clock?.run { events.onTimeFormatChanged(is24HourFormat()) }
             }
 
             override fun onTimeZoneChanged(timeZone: TimeZone) {
@@ -366,7 +365,7 @@ constructor(
             }
 
             override fun onUserSwitchComplete(userId: Int) {
-                clock?.run { events.onTimeFormatChanged(DateFormat.is24HourFormat(context)) }
+                clock?.run { events.onTimeFormatChanged(is24HourFormat(userId)) }
                 zenModeCallback.onNextAlarmChanged()
             }
 
@@ -380,10 +379,6 @@ constructor(
             }
 
             private fun refreshTime() {
-                if (!MigrateClocksToBlueprint.isEnabled) {
-                    return
-                }
-
                 clock?.smallClock?.events?.onTimeTick()
                 clock?.largeClock?.events?.onTimeTick()
             }
@@ -459,6 +454,15 @@ constructor(
         batteryController.addCallback(batteryCallback)
         keyguardUpdateMonitor.registerCallback(keyguardUpdateMonitorCallback)
         zenModeController.addCallback(zenModeCallback)
+        if (SceneContainerFlag.isEnabled) {
+            handleDoze(
+                when (AOD) {
+                    keyguardTransitionInteractor.getCurrentState() -> 1f
+                    keyguardTransitionInteractor.getStartedState() -> 1f
+                    else -> 0f
+                }
+            )
+        }
         disposableHandle =
             parent.repeatWhenAttached {
                 repeatOnLifecycle(Lifecycle.State.CREATED) {
@@ -466,14 +470,10 @@ constructor(
                     if (ModesUi.isEnabled) {
                         listenForDnd(this)
                     }
-                    if (MigrateClocksToBlueprint.isEnabled) {
-                        listenForDozeAmountTransition(this)
-                        listenForAnyStateToAodTransition(this)
-                        listenForAnyStateToLockscreenTransition(this)
-                        listenForAnyStateToDozingTransition(this)
-                    } else {
-                        listenForDozeAmount(this)
-                    }
+                    listenForDozeAmountTransition(this)
+                    listenForAnyStateToAodTransition(this)
+                    listenForAnyStateToLockscreenTransition(this)
+                    listenForAnyStateToDozingTransition(this)
                 }
             }
         smallTimeListener?.update(shouldTimeListenerRun)
@@ -579,11 +579,6 @@ constructor(
     }
 
     @VisibleForTesting
-    internal fun listenForDozeAmount(scope: CoroutineScope): Job {
-        return scope.launch { keyguardInteractor.dozeAmount.collect { handleDoze(it) } }
-    }
-
-    @VisibleForTesting
     internal fun listenForDozeAmountTransition(scope: CoroutineScope): Job {
         return scope.launch {
             merge(
@@ -678,8 +673,7 @@ constructor(
             isRunning = true
             when (clockFace.config.tickRate) {
                 ClockTickRate.PER_MINUTE -> {
-                    // Handled by KeyguardClockSwitchController and
-                    // by KeyguardUpdateMonitorCallback#onTimeChanged.
+                    // Handled by KeyguardUpdateMonitorCallback#onTimeChanged.
                 }
                 ClockTickRate.PER_SECOND -> executor.execute(secondsRunnable)
                 ClockTickRate.PER_FRAME -> {

@@ -19,12 +19,12 @@ package com.android.systemui.qs.tiles.impl.rotation.ui.mapper
 import android.content.res.Resources
 import android.hardware.devicestate.DeviceStateManager
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.rotation.domain.model.RotationLockTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.DevicePostureController
 import com.android.systemui.util.Utils.isDeviceFoldable
 import javax.inject.Inject
@@ -33,7 +33,7 @@ import javax.inject.Inject
 class RotationLockTileMapper
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val theme: Resources.Theme,
     private val devicePostureController: DevicePostureController,
     private val deviceStateManager: DeviceStateManager,
@@ -42,7 +42,7 @@ constructor(
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.quick_settings_rotation_unlocked_label)
             contentDescription = resources.getString(R.string.accessibility_quick_settings_rotation)
-
+            val iconRes: Int
             if (data.isRotationLocked) {
                 activationState = QSTileState.ActivationState.INACTIVE
                 secondaryLabel = EMPTY_SECONDARY_STRING
@@ -57,7 +57,7 @@ constructor(
                     }
                 iconRes = R.drawable.qs_auto_rotate_icon_on
             }
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             if (isDeviceFoldable(resources, deviceStateManager)) {
                 secondaryLabel = getSecondaryLabelWithPosture(activationState)
             }

@@ -309,7 +309,7 @@ public class SharedConnectivityManager {
      */
     @TestApi
     @NonNull
-    @FlaggedApi("com.android.wifi.flags.shared_connectivity_broadcast_receiver_test_api")
+    @SuppressLint("UnflaggedApi") // Exempt: Test API for already shipped feature
     public BroadcastReceiver getBroadcastReceiver() {
         return mBroadcastReceiver;
     }

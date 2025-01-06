@@ -32,7 +32,7 @@ object ShadeWindowGoesAround {
 
     /** Is the refactor enabled */
     @JvmStatic
-    inline val isEnabled
+    inline val isEnabled: Boolean
         get() = Flags.shadeWindowGoesAround()
 
     /**

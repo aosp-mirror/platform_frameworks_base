@@ -20,9 +20,9 @@ import android.annotation.SuppressLint
 import android.hardware.display.DisplayManager
 import android.hardware.display.DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED
 import android.hardware.display.DisplayManager.DisplayListener
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_REMOVED
+import android.hardware.display.DisplayManager.EVENT_TYPE_DISPLAY_ADDED
+import android.hardware.display.DisplayManager.EVENT_TYPE_DISPLAY_CHANGED
+import android.hardware.display.DisplayManager.EVENT_TYPE_DISPLAY_REMOVED
 import android.os.Handler
 import android.util.Log
 import android.view.Display
@@ -66,8 +66,20 @@ interface DisplayRepository {
     /** Display removal event indicating a display has been removed. */
     val displayRemovalEvent: Flow<Int>
 
-    /** Provides the current set of displays. */
+    /**
+     * Provides the current set of displays.
+     *
+     * Consider using [displayIds] if only the [Display.getDisplayId] is needed.
+     */
     val displays: StateFlow<Set<Display>>
+
+    /**
+     * Provides the current set of display ids.
+     *
+     * Note that it is preferred to use this instead of [displays] if only the
+     * [Display.getDisplayId] is needed.
+     */
+    val displayIds: StateFlow<Set<Int>>
 
     /**
      * Pending display id that can be enabled/disabled.
@@ -135,9 +147,9 @@ constructor(
                 displayManager.registerDisplayListener(
                     callback,
                     backgroundHandler,
-                    EVENT_FLAG_DISPLAY_ADDED or
-                        EVENT_FLAG_DISPLAY_CHANGED or
-                        EVENT_FLAG_DISPLAY_REMOVED,
+                    EVENT_TYPE_DISPLAY_ADDED or
+                        EVENT_TYPE_DISPLAY_CHANGED or
+                        EVENT_TYPE_DISPLAY_REMOVED,
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }
@@ -159,7 +171,7 @@ constructor(
     private val initialDisplayIds = initialDisplays.map { display -> display.displayId }.toSet()
 
     /** Propagate to the listeners only enabled displays */
-    private val enabledDisplayIds: Flow<Set<Int>> =
+    private val enabledDisplayIds: StateFlow<Set<Int>> =
         allDisplayEvents
             .scan(initial = initialDisplayIds) { previousIds: Set<Int>, event: DisplayEvent ->
                 val id = event.displayId
@@ -170,8 +182,8 @@ constructor(
                 }
             }
             .distinctUntilChanged()
-            .stateIn(bgApplicationScope, SharingStarted.WhileSubscribed(), initialDisplayIds)
             .debugLog("enabledDisplayIds")
+            .stateIn(bgApplicationScope, SharingStarted.WhileSubscribed(), initialDisplayIds)
 
     private val defaultDisplay by lazy {
         getDisplayFromDisplayManager(Display.DEFAULT_DISPLAY)
@@ -208,6 +220,8 @@ constructor(
      * Those are commonly the ones provided by [DisplayManager.getDisplays] by default.
      */
     override val displays: StateFlow<Set<Display>> = enabledDisplays
+
+    override val displayIds: StateFlow<Set<Int>> = enabledDisplayIds
 
     /**
      * Implementation that maps from [displays], instead of [allDisplayEvents] for 2 reasons:
@@ -264,7 +278,8 @@ constructor(
                 displayManager.registerDisplayListener(
                     callback,
                     backgroundHandler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_CONNECTION_CHANGED,
+                    /* eventFlags */ 0,
+                    DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_CONNECTION_CHANGED,
                 )
                 awaitClose { displayManager.unregisterDisplayListener(callback) }
             }

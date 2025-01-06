@@ -520,6 +520,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
             mListenForCanShowAlternateBouncer.cancel(null);
         }
         mListenForCanShowAlternateBouncer = null;
+
         // Collector that keeps the AlternateBouncerInteractor#canShowAlternateBouncer flow hot.
         mListenForCanShowAlternateBouncer = mJavaAdapter.alwaysCollectFlow(
                 mAlternateBouncerInteractor.getCanShowAlternateBouncer(),
@@ -568,6 +569,12 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     }
 
     private void consumeCanShowAlternateBouncer(boolean canShow) {
+        if (SceneContainerFlag.isEnabled()) {
+            // When the scene framework is enabled, the alternative bouncer is hidden from the scene
+            // framework logic so there's no need for this logic here.
+            return;
+        }
+
         // Hack: this is required to fix issues where
         // KeyguardBouncerRepository#alternateBouncerVisible state is incorrectly set and then never
         // reset. This is caused by usages of show()/forceShow() that only read this flow to set the
@@ -811,7 +818,10 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      * dragging it and translation should be deferred {@see KeyguardBouncer#show(boolean, boolean)}
      */
     public void showPrimaryBouncer(boolean scrimmed) {
-        hideAlternateBouncer(false);
+        hideAlternateBouncer(
+                /* updateScrim= */ false,
+                // When the scene framework is on, don't ever clear the pending dismiss action from
+                /* clearDismissAction= */ !SceneContainerFlag.isEnabled());
         if (mKeyguardStateController.isShowing() && !isBouncerShowing()) {
             if (SceneContainerFlag.isEnabled()) {
                 mSceneInteractorLazy.get().changeScene(
@@ -998,6 +1008,15 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     @Override
     public void hideAlternateBouncer(boolean updateScrim) {
+        hideAlternateBouncer(updateScrim, /* clearDismissAction= */ true);
+    }
+
+    @Override
+    public void hideAlternateBouncer(boolean updateScrim, boolean clearDismissAction) {
+        if (clearDismissAction) {
+            mKeyguardDismissActionInteractor.get().clearDismissAction();
+        }
+
         updateAlternateBouncerShowing(mAlternateBouncerInteractor.hide() && updateScrim);
     }
 
@@ -1159,7 +1178,6 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void startPreHideAnimation(Runnable finishRunnable) {
         if (primaryBouncerIsShowing()) {
             mPrimaryBouncerInteractor.startDisappearAnimation(finishRunnable);
-            mShadeLockscreenInteractor.startBouncerPreHideAnimation();
 
             // We update the state (which will show the keyguard) only if an animation will run on
             // the keyguard. If there is no animation, we wait before updating the state so that we

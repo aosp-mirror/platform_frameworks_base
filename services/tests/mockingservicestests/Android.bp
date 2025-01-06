@@ -12,7 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 java_defaults {
-    name: "FrameworkMockingServicesTests-jni-defaults",
+    name: "FrameworksMockingServicesTests-jni-defaults",
     jni_libs: [
         "libmockingservicestestjni",
     ],
@@ -30,7 +30,7 @@ package {
 android_test {
     name: "FrameworksMockingServicesTests",
     defaults: [
-        "FrameworkMockingServicesTests-jni-defaults",
+        "FrameworksMockingServicesTests-jni-defaults",
         "modules-utils-testable-device-config-defaults",
     ],
 
@@ -77,7 +77,10 @@ android_test {
         "flag-junit",
         "am_flags_lib",
         "device_policy_aconfig_flags_lib",
-    ],
+    ] + select(soong_config_variable("ANDROID", "release_crashrecovery_module"), {
+        "true": ["service-crashrecovery-pre-jarjar"],
+        default: [],
+    }),
 
     libs: [
         "android.test.mock.stubs.system",
@@ -106,6 +109,10 @@ android_test {
     optimize: {
         enabled: false,
     },
+
+    data: [
+        ":HelloWorldUsingSdk1And2",
+    ],
 }
 
 java_library {
@@ -120,22 +127,6 @@ java_library {
     libs: [
         "android.test.runner.stubs.system",
     ],
-}
-
-android_ravenwood_test {
-    name: "FrameworksMockingServicesTestsRavenwood",
-    libs: [
-        "android.test.mock.stubs.system",
-    ],
-    static_libs: [
-        "androidx.annotation_annotation",
-        "androidx.test.rules",
-        "services.core",
-    ],
-    srcs: [
-        "src/com/android/server/am/BroadcastRecordTest.java",
-    ],
-    auto_gen_config: true,
 }
 
 test_module_config {
@@ -247,7 +238,7 @@ test_module_config {
     include_filters: [
         "com.android.server.am.BroadcastQueueTest",
         "com.android.server.am.BroadcastRecordTest",
-        "com.android.server.am.BroadcastQueueModernImplTest",
+        "com.android.server.am.BroadcastQueueImplTest",
     ],
 }
 
@@ -400,4 +391,11 @@ test_module_config {
         "device-tests",
     ],
     include_filters: ["com.android.server.StorageManagerServiceTest"],
+}
+
+test_module_config {
+    name: "FrameworksMockingServicesTests_service_batteryServiceTest",
+    base: "FrameworksMockingServicesTests",
+    test_suites: ["device-tests"],
+    include_filters: ["com.android.server.BatteryServiceTest"],
 }

@@ -129,23 +129,20 @@ public class TaskSnapshotLowResDisabledTest extends TaskSnapshotPersisterTestBas
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
         mSnapshotPersistQueue.waitForQueueEmpty();
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
 
         // Attempt to load the low-res snapshot from the disk
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                true /* restoreFromDisk */, true /* isLowResolution */));
+        assertNull(mCache.getSnapshotFromDisk(window.getTask().mTaskId, mWm.mCurrentUserId,
+                true/* isLowResolution */, TaskSnapshot.REFERENCE_NONE));
 
         // Load the high-res (default) snapshot from disk
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                true /* restoreFromDisk */, false /* isLowResolution */));
+        assertNotNull(mCache.getSnapshotFromDisk(window.getTask().mTaskId, mWm.mCurrentUserId,
+                false /* isLowResolution */, TaskSnapshot.REFERENCE_NONE));
 
         // Make sure it's not in the cache now.
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                false /* restoreFromDisk */, true /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, true /* isLowResolution */));
 
         // Make sure it's not in the cache now.
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
     }
 }

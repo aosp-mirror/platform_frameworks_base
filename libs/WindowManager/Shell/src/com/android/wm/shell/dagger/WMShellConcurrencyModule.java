@@ -18,6 +18,7 @@ package com.android.wm.shell.dagger;
 
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_DISPLAY;
+import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 import static android.os.Process.THREAD_PRIORITY_TOP_APP_BOOST;
 
 import android.content.Context;
@@ -205,13 +206,14 @@ public abstract class WMShellConcurrencyModule {
     }
 
     /**
-     * Provides a Shell background thread Executor for low priority background tasks.
+     * Provides a Shell background thread Executor for low priority background tasks.  The thread
+     * may also be boosted to THREAD_PRIORITY_FOREGROUND if necessary.
      */
     @WMSingleton
     @Provides
     @ShellBackgroundThread
     public static ShellExecutor provideSharedBackgroundExecutor(
             @ShellBackgroundThread Handler handler) {
-        return new HandlerExecutor(handler);
+        return new HandlerExecutor(handler, THREAD_PRIORITY_BACKGROUND, THREAD_PRIORITY_FOREGROUND);
     }
 }

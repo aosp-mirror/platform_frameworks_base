@@ -21,7 +21,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -35,7 +34,6 @@ import androidx.compose.ui.unit.IntRect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.padding
-import com.android.compose.modifiers.thenIf
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
 import com.android.systemui.keyguard.ui.composable.section.AmbientIndicationSection
@@ -70,10 +68,7 @@ constructor(
     override val id: String = "default"
 
     @Composable
-    override fun SceneScope.Content(
-        viewModel: LockscreenContentViewModel,
-        modifier: Modifier,
-    ) {
+    override fun SceneScope.Content(viewModel: LockscreenContentViewModel, modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()
@@ -85,37 +80,31 @@ constructor(
             with(notificationSection) { HeadsUpNotifications() }
         }
 
-        LockscreenLongPress(
-            viewModel = viewModel.touchHandling,
-            modifier = modifier,
-        ) { onSettingsMenuPlaced ->
+        LockscreenLongPress(viewModel = viewModel.touchHandling, modifier = modifier) {
+            onSettingsMenuPlaced ->
             Layout(
                 content = {
                     // Constrained to above the lock icon.
-                    Column(
-                        modifier = Modifier.fillMaxSize(),
-                    ) {
+                    Column(modifier = Modifier.fillMaxSize()) {
                         with(statusBarSection) {
                             StatusBar(
                                 modifier =
                                     Modifier.fillMaxWidth()
                                         .padding(
-                                            horizontal = { unfoldTranslations.start.roundToInt() },
+                                            horizontal = { unfoldTranslations.start.roundToInt() }
                                         )
                             )
                         }
 
-                        Box {
+                        Box(modifier = Modifier.fillMaxWidth()) {
                             with(topAreaSection) {
                                 DefaultClockLayout(
                                     smartSpacePaddingTop = viewModel::getSmartSpacePaddingTop,
+                                    isShadeLayoutWide = isShadeLayoutWide,
                                     modifier =
-                                        Modifier.thenIf(isShadeLayoutWide) {
-                                                Modifier.fillMaxWidth(0.5f)
-                                            }
-                                            .graphicsLayer {
-                                                translationX = unfoldTranslations.start
-                                            }
+                                        Modifier.fillMaxWidth().graphicsLayer {
+                                            translationX = unfoldTranslations.start
+                                        },
                                 )
                             }
                             if (isShadeLayoutWide && !isBypassEnabled) {
@@ -127,7 +116,7 @@ constructor(
                                         modifier =
                                             Modifier.fillMaxWidth(0.5f)
                                                 .fillMaxHeight()
-                                                .align(alignment = Alignment.TopEnd)
+                                                .align(alignment = Alignment.TopEnd),
                                     )
                                 }
                             }
@@ -142,7 +131,7 @@ constructor(
                                     AodNotificationIcons(
                                         modifier =
                                             Modifier.align(alignment = Alignment.TopStart)
-                                                .padding(start = aodIconPadding),
+                                                .padding(start = aodIconPadding)
                                     )
                                     Notifications(
                                         areNotificationsVisible = areNotificationsVisible,
@@ -152,7 +141,7 @@ constructor(
                                 }
                             } else {
                                 AodNotificationIcons(
-                                    modifier = Modifier.padding(start = aodIconPadding),
+                                    modifier = Modifier.padding(start = aodIconPadding)
                                 )
                             }
                         }
@@ -166,6 +155,7 @@ constructor(
                     with(lockSection) { LockIcon() }
 
                     // Aligned to bottom and constrained to below the lock icon.
+                    // TODO("b/383588832") change this away from "keyguard_bottom_area"
                     Column(modifier = Modifier.fillMaxWidth().sysuiResTag("keyguard_bottom_area")) {
                         if (isUdfpsVisible && ambientIndicationSectionOptional.isPresent) {
                             with(ambientIndicationSectionOptional.get()) {
@@ -205,11 +195,7 @@ constructor(
                 val endShortcutMeasurable = measurables[4]
                 val settingsMenuMeasurable = measurables[5]
 
-                val noMinConstraints =
-                    constraints.copy(
-                        minWidth = 0,
-                        minHeight = 0,
-                    )
+                val noMinConstraints = constraints.copy(minWidth = 0, minHeight = 0)
                 val lockIconPlaceable = lockIconMeasurable.measure(noMinConstraints)
                 val lockIconBounds =
                     IntRect(
@@ -235,14 +221,8 @@ constructor(
                 val settingsMenuPlaceable = settingsMenuMeasurable.measure(noMinConstraints)
 
                 layout(constraints.maxWidth, constraints.maxHeight) {
-                    aboveLockIconPlaceable.place(
-                        x = 0,
-                        y = 0,
-                    )
-                    lockIconPlaceable.place(
-                        x = lockIconBounds.left,
-                        y = lockIconBounds.top,
-                    )
+                    aboveLockIconPlaceable.place(x = 0, y = 0)
+                    lockIconPlaceable.place(x = lockIconBounds.left, y = lockIconBounds.top)
                     belowLockIconPlaceable.place(
                         x = 0,
                         y = constraints.maxHeight - belowLockIconPlaceable.height,

@@ -100,4 +100,7 @@
     <!-- Whether to enable scaling and fading animation to scrollviews while scrolling.
          P.S this is a change only intended for wear devices. -->
     <bool name="config_enableViewGroupScalingFading">true</bool>
+
+    <!-- Allow the gesture to double tap the power button to trigger a target action. -->
+    <bool name="config_doubleTapPowerGestureEnabled">false</bool>
 </resources>

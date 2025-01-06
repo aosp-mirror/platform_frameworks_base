@@ -33,12 +33,12 @@
         <item name="contentScrim">@color/settingslib_materialColorSurfaceContainer</item>
     </style>
 
-    <style name="SettingsLibCollapsingToolbarTitle.Collapsed" parent="@android:style/TextAppearance.DeviceDefault.Headline">
+    <style name="SettingsLibCollapsingToolbarTitle.Collapsed" parent="@style/TextAppearance.SettingsLib.TitleLarge.Emphasized">
         <!--set dp because we don't want size adjust when font size change-->
-        <item name="android:textSize">20dp</item>
+        <item name="android:textSize">22dp</item>
     </style>
 
-    <style name="SettingsLibCollapsingToolbarTitle.Expanded" parent="CollapsingToolbarTitle.Collapsed">
+    <style name="SettingsLibCollapsingToolbarTitle.Expanded" parent="@style/TextAppearance.SettingsLib.DisplaySmall.Emphasized">
         <item name="android:textSize">36dp</item>
     </style>
 </resources>

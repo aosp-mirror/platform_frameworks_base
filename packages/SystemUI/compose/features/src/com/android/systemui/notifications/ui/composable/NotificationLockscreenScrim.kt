@@ -29,7 +29,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.shared.model.ShadeMode
@@ -42,7 +42,7 @@ import kotlinx.coroutines.launch
  * transition.
  */
 @Composable
-fun SceneScope.NotificationLockscreenScrim(
+fun ContentScope.NotificationLockscreenScrim(
     viewModel: NotificationLockscreenScrimViewModel,
     modifier: Modifier = Modifier,
 ) {

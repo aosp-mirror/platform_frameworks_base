@@ -430,7 +430,7 @@ public class FlashNotificationsControllerTest {
         AudioPlaybackConfiguration config = new AudioPlaybackConfiguration(
                 mock(PlayerBase.PlayerIdCard.class), 0, 0, 0);
         config.handleStateEvent(AudioPlaybackConfiguration.PLAYER_STATE_STARTED,
-                AudioPlaybackConfiguration.PLAYER_DEVICEID_INVALID);
+                AudioPlaybackConfiguration.PLAYER_DEVICEIDS_INVALID);
 
         AudioAttributes.Builder builder = new AudioAttributes.Builder();
         builder.setUsage(AudioAttributes.USAGE_ALARM);

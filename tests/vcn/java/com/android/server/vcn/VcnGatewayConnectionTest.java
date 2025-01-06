@@ -25,13 +25,13 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VCN_MANAGED;
 import static android.net.NetworkCapabilities.TRANSPORT_CELLULAR;
 import static android.net.NetworkCapabilities.TRANSPORT_WIFI;
 import static android.net.vcn.VcnGatewayConnectionConfig.VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY;
+import static android.net.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import static com.android.server.vcn.VcnGatewayConnection.DUMMY_ADDR;
 import static com.android.server.vcn.VcnGatewayConnection.SAFEMODE_TIMEOUT_SECONDS;
 import static com.android.server.vcn.VcnGatewayConnection.VcnChildSessionConfiguration;
 import static com.android.server.vcn.VcnGatewayConnection.VcnIkeSession;
 import static com.android.server.vcn.VcnGatewayConnection.VcnNetworkAgent;
-import static com.android.server.vcn.util.PersistableBundleUtils.PersistableBundleWrapper;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
@@ -360,12 +360,10 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
 
     private void verifyGetSafeModeTimeoutMs(
             boolean isInTestMode,
-            boolean isConfigTimeoutSupported,
             PersistableBundleWrapper carrierConfig,
             long expectedTimeoutMs)
             throws Exception {
         doReturn(isInTestMode).when(mVcnContext).isInTestMode();
-        doReturn(isConfigTimeoutSupported).when(mVcnContext).isFlagSafeModeTimeoutConfigEnabled();
 
         final TelephonySubscriptionSnapshot snapshot = mock(TelephonySubscriptionSnapshot.class);
         doReturn(carrierConfig).when(snapshot).getCarrierConfigForSubGrp(TEST_SUB_GRP);
@@ -377,16 +375,7 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
     }
 
     @Test
-    public void testGetSafeModeTimeoutMs_configTimeoutUnsupported() throws Exception {
-        verifyGetSafeModeTimeoutMs(
-                false /* isInTestMode */,
-                false /* isConfigTimeoutSupported */,
-                null /* carrierConfig */,
-                TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
-    }
-
-    @Test
-    public void testGetSafeModeTimeoutMs_configTimeoutSupported() throws Exception {
+    public void testGetSafeModeTimeoutMs() throws Exception {
         final int carrierConfigTimeoutSeconds = 20;
         final PersistableBundleWrapper carrierConfig = mock(PersistableBundleWrapper.class);
         doReturn(carrierConfigTimeoutSeconds)
@@ -395,17 +384,14 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
 
         verifyGetSafeModeTimeoutMs(
                 false /* isInTestMode */,
-                true /* isConfigTimeoutSupported */,
                 carrierConfig,
                 TimeUnit.SECONDS.toMillis(carrierConfigTimeoutSeconds));
     }
 
     @Test
-    public void testGetSafeModeTimeoutMs_configTimeoutSupported_carrierConfigNull()
-            throws Exception {
+    public void testGetSafeModeTimeoutMs_carrierConfigNull() throws Exception {
         verifyGetSafeModeTimeoutMs(
                 false /* isInTestMode */,
-                true /* isConfigTimeoutSupported */,
                 null /* carrierConfig */,
                 TimeUnit.SECONDS.toMillis(SAFEMODE_TIMEOUT_SECONDS));
     }
@@ -420,7 +406,6 @@ public class VcnGatewayConnectionTest extends VcnGatewayConnectionTestBase {
 
         verifyGetSafeModeTimeoutMs(
                 true /* isInTestMode */,
-                true /* isConfigTimeoutSupported */,
                 carrierConfig,
                 TimeUnit.SECONDS.toMillis(carrierConfigTimeoutSeconds));
     }

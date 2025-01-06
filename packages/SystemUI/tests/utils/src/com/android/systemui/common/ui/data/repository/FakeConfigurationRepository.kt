@@ -17,6 +17,7 @@
 package com.android.systemui.common.ui.data.repository
 
 import android.content.res.Configuration
+import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import dagger.Binds
 import dagger.Module
@@ -25,6 +26,7 @@ import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 
@@ -46,6 +48,10 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
     override val configurationValues: Flow<Configuration> =
         _configurationChangeValues.asSharedFlow()
 
+    private val _onMovedToDisplay = MutableStateFlow<Int>(Display.DEFAULT_DISPLAY)
+    override val onMovedToDisplay: StateFlow<Int>
+        get() = _onMovedToDisplay
+
     private val _scaleForResolution = MutableStateFlow(1f)
     override val scaleForResolution: Flow<Float> = _scaleForResolution.asStateFlow()
 
@@ -62,6 +68,10 @@ class FakeConfigurationRepository @Inject constructor() : ConfigurationRepositor
     fun onConfigurationChange(configChange: Configuration) {
         _configurationChangeValues.tryEmit(configChange)
         onAnyConfigurationChange()
+    }
+
+    fun onMovedToDisplay(newDisplayId: Int) {
+        _onMovedToDisplay.value = newDisplayId
     }
 
     fun setScaleForResolution(scale: Float) {

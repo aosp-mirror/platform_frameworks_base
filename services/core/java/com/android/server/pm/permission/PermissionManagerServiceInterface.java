@@ -20,6 +20,7 @@ import android.annotation.AppIdInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
@@ -405,6 +406,16 @@ public interface PermissionManagerServiceInterface extends PermissionManagerInte
      * @return permission result {@link PackageManager.PermissionResult}
      */
     int checkUidPermission(int uid, String permName, String deviceId);
+
+    /**
+     * Returns one of the permission state
+     * {@link Context.PermissionRequestState#PERMISSION_REQUEST_STATE_GRANTED},
+     * {@link Context.PermissionRequestState#PERMISSION_REQUEST_STATE_REQUESTABLE}, or
+     * {@link Context.PermissionRequestState#PERMISSION_REQUEST_STATE_UNREQUESTABLE}
+     *  for permission request permission flow.
+     */
+    int getPermissionRequestState(@NonNull String packageName, @NonNull String permName,
+            @NonNull String deviceId);
 
     /**
      * Gets the permission states for requested package, persistent device and user.

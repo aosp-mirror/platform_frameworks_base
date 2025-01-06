@@ -1167,6 +1167,7 @@ class ContextImpl extends Context {
     @Override
     public void startActivityAsUser(Intent intent, Bundle options, UserHandle user) {
         try {
+            intent.collectExtraIntentKeys();
             ActivityTaskManager.getService().startActivityAsUser(
                     mMainThread.getApplicationThread(), getOpPackageName(), getAttributionTag(),
                     intent, intent.resolveTypeIfNeeded(getContentResolver()),
@@ -1923,17 +1924,21 @@ class ContextImpl extends Context {
         try {
             final Intent intent;
             if (receiver == null && BroadcastStickyCache.useCache(filter)) {
-                intent = BroadcastStickyCache.getIntentUnchecked(filter);
+                intent = BroadcastStickyCache.getIntent(
+                        mMainThread.getApplicationThread(),
+                        mBasePackageName,
+                        getAttributionTag(),
+                        filter,
+                        broadcastPermission,
+                        userId,
+                        flags);
             } else {
                 intent = ActivityManager.getService().registerReceiverWithFeature(
                         mMainThread.getApplicationThread(), mBasePackageName, getAttributionTag(),
                         AppOpsManager.toReceiverId(receiver), rd, filter, broadcastPermission,
-                        userId,
-                        flags);
-                if (receiver == null) {
-                    BroadcastStickyCache.add(filter, intent);
-                }
+                        userId, flags);
             }
+
             if (intent != null) {
                 intent.setExtrasClassLoader(getClassLoader());
                 // TODO: determine at registration time if caller is
@@ -2361,7 +2366,11 @@ class ContextImpl extends Context {
             Log.v(TAG, "Treating renounced permission " + permission + " as denied");
             return PERMISSION_DENIED;
         }
+        int deviceId = resolveDeviceIdForPermissionCheck(permission);
+        return PermissionManager.checkPermission(permission, pid, uid, deviceId);
+    }
 
+    private int resolveDeviceIdForPermissionCheck(String permission) {
         // When checking a device-aware permission on a remote device, if the permission is CAMERA
         // or RECORD_AUDIO we need to check remote device's corresponding capability. If the remote
         // device doesn't have capability fall back to checking permission on the default device.
@@ -2382,9 +2391,9 @@ class ContextImpl extends Context {
                 VirtualDevice virtualDevice = virtualDeviceManager.getVirtualDevice(deviceId);
                 if (virtualDevice != null) {
                     if ((Objects.equals(permission, Manifest.permission.RECORD_AUDIO)
-                                    && !virtualDevice.hasCustomAudioInputSupport())
+                            && !virtualDevice.hasCustomAudioInputSupport())
                             || (Objects.equals(permission, Manifest.permission.CAMERA)
-                                    && !virtualDevice.hasCustomCameraSupport())) {
+                            && !virtualDevice.hasCustomCameraSupport())) {
                         deviceId = Context.DEVICE_ID_DEFAULT;
                     }
                 } else {
@@ -2395,8 +2404,7 @@ class ContextImpl extends Context {
                 }
             }
         }
-
-        return PermissionManager.checkPermission(permission, pid, uid, deviceId);
+        return deviceId;
     }
 
     /** @hide */
@@ -2496,6 +2504,16 @@ class ContextImpl extends Context {
                 true,
                 Binder.getCallingUid(),
                 message);
+    }
+
+    /** @hide */
+    @Override
+    public int getPermissionRequestState(String permission) {
+        Objects.requireNonNull(permission, "Permission name can't be null");
+        int deviceId = resolveDeviceIdForPermissionCheck(permission);
+        PermissionManager permissionManager = getSystemService(PermissionManager.class);
+        return permissionManager.getPermissionRequestState(getOpPackageName(), permission,
+                deviceId);
     }
 
     @Override

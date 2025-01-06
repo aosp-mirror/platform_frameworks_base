@@ -18,7 +18,6 @@ package com.android.server.notification;
 
 import static android.app.AutomaticZenRule.TYPE_BEDTIME;
 import static android.app.Flags.FLAG_BACKUP_RESTORE_LOGGING;
-import static android.app.Flags.FLAG_MODES_API;
 import static android.app.Flags.FLAG_MODES_UI;
 import static android.app.Flags.modesUi;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_AMBIENT;
@@ -26,7 +25,6 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 import static android.app.NotificationManager.Policy.suppressedEffectsToString;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
 import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_RULES;
 import static android.provider.Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
 import static android.provider.Settings.Global.ZEN_MODE_OFF;
@@ -56,9 +54,7 @@ import static junit.framework.TestCase.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -71,7 +67,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.net.Uri;
 import android.os.Parcel;
-import android.os.UserHandle;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
@@ -100,6 +95,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.xmlpull.v1.XmlPullParserException;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
@@ -107,9 +105,6 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.time.Instant;
 import java.util.List;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -731,19 +726,21 @@ public class ZenModeConfigTest extends UiServiceTestCase {
         rule.setConditionOverride(OVERRIDE_DEACTIVATE);
         rule.pkg = OWNER.getPackageName();
         rule.zenPolicy = POLICY;
-        rule.zenDeviceEffects = new ZenDeviceEffects.Builder()
-                .setShouldDisplayGrayscale(false)
-                .setShouldSuppressAmbientDisplay(true)
-                .setShouldDimWallpaper(false)
-                .setShouldUseNightMode(true)
-                .setShouldDisableAutoBrightness(false)
-                .setShouldDisableTapToWake(true)
-                .setShouldDisableTiltToWake(false)
-                .setShouldDisableTouch(true)
-                .setShouldMinimizeRadioUsage(false)
-                .setShouldMaximizeDoze(true)
-                .setExtraEffects(ImmutableSet.of("one", "two"))
-                .build();
+        rule.zenDeviceEffects =
+                new ZenDeviceEffects.Builder()
+                        .setShouldDisplayGrayscale(false)
+                        .setShouldSuppressAmbientDisplay(true)
+                        .setShouldDimWallpaper(false)
+                        .setShouldUseNightMode(true)
+                        .setShouldDisableAutoBrightness(false)
+                        .setShouldDisableTapToWake(true)
+                        .setShouldDisableTiltToWake(false)
+                        .setShouldDisableTouch(true)
+                        .setShouldMinimizeRadioUsage(false)
+                        .setShouldMaximizeDoze(true)
+                        .setShouldUseNightLight(true)
+                        .setExtraEffects(ImmutableSet.of("one", "two"))
+                        .build();
         rule.creationTime = CREATION_TIME;
 
         rule.allowManualInvocation = ALLOW_MANUAL;

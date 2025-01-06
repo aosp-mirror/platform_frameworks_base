@@ -16,6 +16,17 @@
 
 package android.net.http;
 
+import static org.junit.Assert.fail;
+
+import android.platform.test.annotations.Presubmit;
+
+import androidx.test.ext.junit.runners.AndroidJUnit4;
+
+import com.android.org.conscrypt.TrustManagerImpl;
+
+import org.junit.Test;
+import org.junit.runner.RunWith;
+
 import java.security.KeyStore;
 import java.security.cert.X509Certificate;
 
@@ -23,11 +34,9 @@ import javax.net.ssl.TrustManager;
 import javax.net.ssl.TrustManagerFactory;
 import javax.net.ssl.X509TrustManager;
 
-import junit.framework.TestCase;
-
-import com.android.org.conscrypt.TrustManagerImpl;
-
-public class X509TrustManagerExtensionsTest extends TestCase {
+@Presubmit
+@RunWith(AndroidJUnit4.class)
+public class X509TrustManagerExtensionsTest {
 
     private class NotATrustManagerImpl implements X509TrustManager {
 
@@ -40,6 +49,7 @@ public class X509TrustManagerExtensionsTest extends TestCase {
         }
     }
 
+    @Test
     public void testBadCast() throws Exception {
         NotATrustManagerImpl ntmi = new NotATrustManagerImpl();
         try {
@@ -49,12 +59,14 @@ public class X509TrustManagerExtensionsTest extends TestCase {
         }
     }
 
+    @Test
     public void testGoodCast() throws Exception {
         String defaultType = KeyStore.getDefaultType();
         TrustManagerImpl tmi = new TrustManagerImpl(KeyStore.getInstance(defaultType));
         X509TrustManagerExtensions tme = new X509TrustManagerExtensions(tmi);
     }
 
+    @Test
     public void testNormalUseCase() throws Exception {
         String defaultAlgorithm = TrustManagerFactory.getDefaultAlgorithm();
         TrustManagerFactory tmf = TrustManagerFactory.getInstance(defaultAlgorithm);

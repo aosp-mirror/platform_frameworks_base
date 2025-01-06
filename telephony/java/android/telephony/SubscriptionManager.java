@@ -3708,7 +3708,7 @@ public class SubscriptionManager {
      * Caller will either have {@link android.Manifest.permission#MODIFY_PHONE_STATE} or carrier
      * privilege permission of the subscription.
      *
-     * @param opportunistic whether it’s opportunistic subscription.
+     * @param opportunistic whether it's an opportunistic subscription.
      * @param subId the unique SubscriptionInfo index in database
      * @return {@code true} if the operation is succeed, {@code false} otherwise.
      *

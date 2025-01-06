@@ -29,6 +29,7 @@ import com.android.systemui.animation.LaunchableView
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.qs.shared.QSSettingsPackageRepository
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.actions.intentInputs
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
@@ -36,11 +37,7 @@ import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx.click
 import com.android.systemui.qs.tiles.impl.fontscaling.domain.model.FontScalingTileModel
 import com.android.systemui.statusbar.phone.FakeKeyguardStateController
 import com.android.systemui.statusbar.phone.SystemUIDialog
-import com.android.systemui.util.mockito.any
-import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
-import com.android.systemui.util.mockito.whenever
-import com.google.common.truth.Truth
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
@@ -51,15 +48,14 @@ import org.mockito.Captor
 import org.mockito.Mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class FontScalingUserActionInteractorTest : SysuiTestCase() {
-    private val kosmos = Kosmos()
-    private val qsTileIntentUserActionHandler = FakeQSTileIntentUserInputHandler()
-    private val keyguardStateController = FakeKeyguardStateController()
-
-    private lateinit var underTest: FontScalingTileUserActionInteractor
 
     @Mock private lateinit var fontScalingDialogDelegate: FontScalingDialogDelegate
     @Mock private lateinit var mDialogTransitionAnimator: DialogTransitionAnimator
@@ -67,35 +63,47 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
     @Mock private lateinit var activityStarter: ActivityStarter
     @Mock private lateinit var expandable: Expandable
     @Mock private lateinit var controller: DialogTransitionAnimator.Controller
+    @Mock private lateinit var settingsPackageRepository: QSSettingsPackageRepository
 
     @Captor private lateinit var argumentCaptor: ArgumentCaptor<Runnable>
+
+    private val kosmos = Kosmos()
+    private val scope = kosmos.testScope
+    private val qsTileIntentUserActionHandler = FakeQSTileIntentUserInputHandler()
+    private val keyguardStateController = FakeKeyguardStateController()
+
+    private lateinit var underTest: FontScalingTileUserActionInteractor
 
     @Before
     fun setup() {
         activityStarter = mock<ActivityStarter>()
         mDialogTransitionAnimator = mock<DialogTransitionAnimator>()
         dialog = mock<SystemUIDialog>()
-        fontScalingDialogDelegate =
-            mock<FontScalingDialogDelegate> { whenever(createDialog()).thenReturn(dialog) }
+        fontScalingDialogDelegate = mock<FontScalingDialogDelegate>()
+        whenever(fontScalingDialogDelegate.createDialog()).thenReturn(dialog)
         controller = mock<DialogTransitionAnimator.Controller>()
-        expandable =
-            mock<Expandable> { whenever(dialogTransitionController(any())).thenReturn(controller) }
+        expandable = mock<Expandable>()
+        whenever(expandable.dialogTransitionController(any())).thenReturn(controller)
+        settingsPackageRepository = mock<QSSettingsPackageRepository>()
+        whenever(settingsPackageRepository.getSettingsPackageName())
+            .thenReturn(SETTINGS_PACKAGE_NAME)
         argumentCaptor = ArgumentCaptor.forClass(Runnable::class.java)
 
         underTest =
             FontScalingTileUserActionInteractor(
-                kosmos.testScope.coroutineContext,
+                scope.coroutineContext,
                 qsTileIntentUserActionHandler,
                 { fontScalingDialogDelegate },
                 keyguardStateController,
                 mDialogTransitionAnimator,
-                activityStarter
+                activityStarter,
+                settingsPackageRepository,
             )
     }
 
     @Test
     fun clickTile_screenUnlocked_showDialogAnimationFromView() =
-        kosmos.testScope.runTest {
+        scope.runTest {
             keyguardStateController.isShowing = false
 
             underTest.handleInput(click(FontScalingTileModel, expandable = expandable))
@@ -106,7 +114,7 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
                     eq(null),
                     eq(true),
                     eq(true),
-                    eq(false)
+                    eq(false),
                 )
             argumentCaptor.value.run()
             verify(mDialogTransitionAnimator).show(any(), any(), anyBoolean())
@@ -114,7 +122,7 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
 
     @Test
     fun clickTile_onLockScreen_neverShowDialogAnimationFromView_butShowsDialog() =
-        kosmos.testScope.runTest {
+        scope.runTest {
             keyguardStateController.isShowing = true
 
             underTest.handleInput(click(FontScalingTileModel, expandable = expandable))
@@ -125,7 +133,7 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
                     eq(null),
                     eq(true),
                     eq(true),
-                    eq(false)
+                    eq(false),
                 )
             argumentCaptor.value.run()
             verify(mDialogTransitionAnimator, never()).show(any(), any(), anyBoolean())
@@ -134,17 +142,20 @@ class FontScalingUserActionInteractorTest : SysuiTestCase() {
 
     @Test
     fun handleLongClick() =
-        kosmos.testScope.runTest {
+        scope.runTest {
             underTest.handleInput(QSTileInputTestKtx.longClick(FontScalingTileModel))
 
-            Truth.assertThat(qsTileIntentUserActionHandler.handledInputs).hasSize(1)
-            val intentInput = qsTileIntentUserActionHandler.intentInputs.last()
-            val actualIntentAction = intentInput.intent.action
-            val expectedIntentAction = Settings.ACTION_TEXT_READING_SETTINGS
-            Truth.assertThat(actualIntentAction).isEqualTo(expectedIntentAction)
+            assertThat(qsTileIntentUserActionHandler.handledInputs).hasSize(1)
+            val it = qsTileIntentUserActionHandler.intentInputs.last()
+            assertThat(it.intent.action).isEqualTo(Settings.ACTION_TEXT_READING_SETTINGS)
+            assertThat(it.intent.getPackage()).isEqualTo(SETTINGS_PACKAGE_NAME)
         }
 
     private class FontScalingTileTestView(context: Context) : View(context), LaunchableView {
         override fun setShouldBlockVisibilityChanges(block: Boolean) {}
+    }
+
+    companion object {
+        private const val SETTINGS_PACKAGE_NAME = "com.android.settings"
     }
 }

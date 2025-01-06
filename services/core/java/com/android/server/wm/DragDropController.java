@@ -289,7 +289,8 @@ class DragDropController {
                 transaction.setAlpha(surfaceControl, mDragState.mOriginalAlpha);
                 transaction.show(surfaceControl);
                 displayContent.reparentToOverlay(transaction, surfaceControl);
-                mDragState.updateDragSurfaceLocked(true, touchX, touchY);
+                mDragState.updateDragSurfaceLocked(true /* keepHandling */,
+                        displayContent.getDisplayId(), touchX, touchY);
                 if (SHOW_LIGHT_TRANSACTIONS) {
                     Slog.i(TAG_WM, "<<< CLOSE TRANSACTION performDrag");
                 }
@@ -483,10 +484,11 @@ class DragDropController {
      * Handles motion events.
      * @param keepHandling Whether if the drag operation is continuing or this is the last motion
      *          event.
+     * @param displayId id of the display the X,Y coordinate is n.
      * @param newX X coordinate value in dp in the screen coordinate
      * @param newY Y coordinate value in dp in the screen coordinate
      */
-    void handleMotionEvent(boolean keepHandling, float newX, float newY) {
+    void handleMotionEvent(boolean keepHandling, int displayId, float newX, float newY) {
         synchronized (mService.mGlobalLock) {
             if (!dragDropActiveLocked()) {
                 // The drag has ended but the clean-up message has not been processed by
@@ -495,7 +497,7 @@ class DragDropController {
                 return;
             }
 
-            mDragState.updateDragSurfaceLocked(keepHandling, newX, newY);
+            mDragState.updateDragSurfaceLocked(keepHandling, displayId, newX, newY);
         }
     }
 

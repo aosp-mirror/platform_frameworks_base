@@ -23,17 +23,19 @@ import com.android.systemui.haptics.vibratorHelper
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.settings.brightness.BrightnessSliderController
+import com.android.systemui.settings.brightness.ui.brightnessWarningToast
 import com.android.systemui.util.time.systemClock
 
 /** This factory creates empty mocks. */
 var Kosmos.brightnessSliderControllerFactory by
     Kosmos.Fixture<BrightnessSliderController.Factory> {
-        BrightnessSliderController.Factory(
+        BrightnessSliderController.BrightnessSliderControllerFactory(
             falsingManager,
             uiEventLogger,
             vibratorHelper,
             msdlPlayer,
             systemClock,
             activityStarter,
+            brightnessWarningToast,
         )
     }

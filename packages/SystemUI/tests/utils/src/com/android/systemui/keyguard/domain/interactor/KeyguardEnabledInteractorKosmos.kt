@@ -16,18 +16,24 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import com.android.internal.widget.lockPatternUtils
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testDispatcher
+import com.android.systemui.user.domain.interactor.selectedUserInteractor
 
 val Kosmos.keyguardEnabledInteractor by
     Kosmos.Fixture {
         KeyguardEnabledInteractor(
             applicationCoroutineScope,
+            testDispatcher,
             keyguardRepository,
             biometricSettingsRepository,
-            keyguardDismissTransitionInteractor,
+            selectedUserInteractor,
+            lockPatternUtils,
+            { keyguardDismissTransitionInteractor },
             internalTransitionInteractor = internalKeyguardTransitionInteractor,
         )
     }

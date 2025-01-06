@@ -54,20 +54,21 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
 
     private static final String TAG = "InternetAdapter";
 
-    private final InternetDialogController mInternetDialogController;
+    private final InternetDetailsContentController mInternetDetailsContentController;
     private final CoroutineScope mCoroutineScope;
     @Nullable
     private List<WifiEntry> mWifiEntries;
     @VisibleForTesting
     protected int mWifiEntriesCount;
     @VisibleForTesting
-    protected int mMaxEntriesCount = InternetDialogController.MAX_WIFI_ENTRY_COUNT;
+    protected int mMaxEntriesCount = InternetDetailsContentController.MAX_WIFI_ENTRY_COUNT;
 
     protected View mHolderView;
     protected Context mContext;
 
-    public InternetAdapter(InternetDialogController controller, CoroutineScope coroutineScope) {
-        mInternetDialogController = controller;
+    public InternetAdapter(InternetDetailsContentController controller,
+            CoroutineScope coroutineScope) {
+        mInternetDetailsContentController = controller;
         mCoroutineScope = coroutineScope;
     }
 
@@ -77,7 +78,8 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         mContext = viewGroup.getContext();
         mHolderView = LayoutInflater.from(mContext).inflate(R.layout.internet_list_item,
                 viewGroup, false);
-        return new InternetViewHolder(mHolderView, mInternetDialogController, mCoroutineScope);
+        return new InternetViewHolder(mHolderView, mInternetDetailsContentController,
+                mCoroutineScope);
     }
 
     @Override
@@ -137,16 +139,17 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
         final TextView mWifiSummaryText;
         final ImageView mWifiEndIcon;
         final Context mContext;
-        final InternetDialogController mInternetDialogController;
+        final InternetDetailsContentController mInternetDetailsContentController;
         final CoroutineScope mCoroutineScope;
         @Nullable
         private Job mJob;
 
-        InternetViewHolder(View view, InternetDialogController internetDialogController,
+        InternetViewHolder(View view,
+                InternetDetailsContentController internetDetailsContentController,
                 CoroutineScope coroutineScope) {
             super(view);
             mContext = view.getContext();
-            mInternetDialogController = internetDialogController;
+            mInternetDetailsContentController = internetDetailsContentController;
             mCoroutineScope = coroutineScope;
             mContainerLayout = view.requireViewById(R.id.internet_container);
             mWifiListLayout = view.requireViewById(R.id.wifi_list);
@@ -169,7 +172,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
             mWifiListLayout.setEnabled(shouldEnabled(wifiEntry));
             if (connectedState != WifiEntry.CONNECTED_STATE_DISCONNECTED) {
                 mWifiListLayout.setOnClickListener(
-                        v -> mInternetDialogController.launchWifiDetailsSetting(
+                        v -> mInternetDetailsContentController.launchWifiDetailsSetting(
                                 wifiEntry.getKey(), v));
                 return;
             }
@@ -193,7 +196,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
                 if (mJob == null) {
                     mJob = WifiUtils.checkWepAllowed(mContext, mCoroutineScope, wifiEntry.getSsid(),
                             WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG, intent -> {
-                                mInternetDialogController.startActivity(intent, view);
+                                mInternetDetailsContentController.startActivityForDialog(intent);
                                 return null;
                             }, () -> {
                                 wifiConnect(wifiEntry, view);
@@ -211,19 +214,20 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
                         true /* connectForCaller */);
                 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
-                mContext.startActivity(intent);
+                mInternetDetailsContentController.startActivityForDialog(intent);
                 return;
             }
 
             if (wifiEntry.canConnect()) {
-                mInternetDialogController.connect(wifiEntry);
+                mInternetDetailsContentController.connect(wifiEntry);
                 return;
             }
 
             if (wifiEntry.isSaved()) {
                 Log.w(TAG, "The saved Wi-Fi network does not allow to connect. SSID:"
                         + wifiEntry.getSsid());
-                mInternetDialogController.launchWifiDetailsSetting(wifiEntry.getKey(), view);
+                mInternetDetailsContentController.launchWifiDetailsSetting(wifiEntry.getKey(),
+                        view);
             }
         }
 
@@ -239,7 +243,7 @@ public class InternetAdapter extends RecyclerView.Adapter<InternetAdapter.Intern
 
         @Nullable
         Drawable getWifiDrawable(@NonNull WifiEntry wifiEntry) {
-            Drawable drawable = mInternetDialogController.getWifiDrawable(wifiEntry);
+            Drawable drawable = mInternetDetailsContentController.getWifiDrawable(wifiEntry);
             if (drawable == null) {
                 return null;
             }

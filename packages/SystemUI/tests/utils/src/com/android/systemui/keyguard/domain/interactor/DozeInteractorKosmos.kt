@@ -19,11 +19,9 @@ package com.android.systemui.keyguard.domain.interactor
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
+import com.android.systemui.power.data.repository.powerRepository
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 
 val Kosmos.dozeInteractor: DozeInteractor by Fixture {
-    DozeInteractor(
-        keyguardRepository,
-        { sceneInteractor },
-    )
+    DozeInteractor(keyguardRepository, powerRepository, { sceneInteractor })
 }

@@ -49,11 +49,25 @@ import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.Overlay
 import com.android.compose.animation.scene.content.Scene
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.effect.GestureEffect
 import com.android.compose.ui.util.lerp
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** The type for the content of movable elements. */
 internal typealias MovableElementContent = @Composable (@Composable () -> Unit) -> Unit
+
+internal data class Ancestor(
+    val layoutImpl: SceneTransitionLayoutImpl,
+
+    /**
+     * This is the content in which the corresponding descendant of this ancestor appears in.
+     *
+     * Example: When A is the root and has two scenes SA and SB and SB contains a NestedSTL called
+     * B. Then A is the ancestor of B and inContent is SB.
+     */
+    val inContent: ContentKey,
+)
 
 @Stable
 internal class SceneTransitionLayoutImpl(
@@ -70,7 +84,40 @@ internal class SceneTransitionLayoutImpl(
      * animations.
      */
     internal val animationScope: CoroutineScope,
+
+    /**
+     * The map of [Element]s.
+     *
+     * Important: [Element]s from this map should never be accessed during composition because the
+     * Elements are added when the associated Modifier.element() node is attached to the Modifier
+     * tree, i.e. after composition.
+     */
+    internal val elements: MutableMap<ElementKey, Element> = mutableMapOf(),
+
+    /**
+     * When this STL is a [NestedSceneTransitionLayout], this is a list of [Ancestor]s which
+     * provides a reference to the ancestor STLs and indicates where this STL is composed in within
+     * its ancestors.
+     *
+     * The root STL holds an emptyList. With each nesting level the parent is supposed to add
+     * exactly one scene to the list, therefore the size of this list is equal to the nesting depth
+     * of this STL.
+     *
+     * This is used to enable transformations and shared elements across NestedSTLs.
+     */
+    internal val ancestors: List<Ancestor> = emptyList(),
+    lookaheadScope: LookaheadScope? = null,
 ) {
+
+    /**
+     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
+     * layout. For [NestedSceneTransitionLayout]s this scope is the scope of the root STL, such that
+     * offset computations can be shared among all children.
+     */
+    private var _lookaheadScope: LookaheadScope? = lookaheadScope
+    internal val lookaheadScope: LookaheadScope
+        get() = _lookaheadScope!!
+
     /**
      * The map of [Scene]s.
      *
@@ -89,15 +136,6 @@ internal class SceneTransitionLayoutImpl(
         get() = _overlays ?: SnapshotStateMap<OverlayKey, Overlay>().also { _overlays = it }
 
     /**
-     * The map of [Element]s.
-     *
-     * Important: [Element]s from this map should never be accessed during composition because the
-     * Elements are added when the associated Modifier.element() node is attached to the Modifier
-     * tree, i.e. after composition.
-     */
-    internal val elements = mutableMapOf<ElementKey, Element>()
-
-    /**
      * The map of contents of movable elements.
      *
      * Note that given that this map is mutated directly during a composition, it has to be a
@@ -110,6 +148,18 @@ internal class SceneTransitionLayoutImpl(
                 ?: SnapshotStateMap<ElementKey, MovableElementContent>().also {
                     _movableContents = it
                 }
+
+    internal var horizontalOverscrollableContent =
+        OverscrollableContent(
+            animationScope = animationScope,
+            overscrollEffect = { content(it).scope.horizontalOverscrollGestureEffect },
+        )
+
+    internal var verticalOverscrollableContent =
+        OverscrollableContent(
+            animationScope = animationScope,
+            overscrollEffect = { content(it).scope.verticalOverscrollGestureEffect },
+        )
 
     /**
      * The different values of a shared value keyed by a a [ValueKey] and the different elements and
@@ -125,8 +175,8 @@ internal class SceneTransitionLayoutImpl(
                 }
 
     // TODO(b/317958526): Lazily allocate scene gesture handlers the first time they are needed.
-    private val horizontalDraggableHandler: DraggableHandlerImpl
-    private val verticalDraggableHandler: DraggableHandlerImpl
+    internal val horizontalDraggableHandler: DraggableHandlerImpl
+    internal val verticalDraggableHandler: DraggableHandlerImpl
 
     internal val elementStateScope = ElementStateScopeImpl(this)
     internal val propertyTransformationScope = PropertyTransformationScopeImpl(this)
@@ -137,13 +187,6 @@ internal class SceneTransitionLayoutImpl(
                 ?: UserActionDistanceScopeImpl(layoutImpl = this).also {
                     _userActionDistanceScope = it
                 }
-
-    /**
-     * The [LookaheadScope] of this layout, that can be used to compute offsets relative to the
-     * layout.
-     */
-    internal lateinit var lookaheadScope: LookaheadScope
-        private set
 
     internal var lastSize: IntSize = IntSize.Zero
 
@@ -162,12 +205,6 @@ internal class SceneTransitionLayoutImpl(
         // than this STLImpl.
         state.checkThread()
     }
-
-    internal fun draggableHandler(orientation: Orientation): DraggableHandlerImpl =
-        when (orientation) {
-            Orientation.Vertical -> verticalDraggableHandler
-            Orientation.Horizontal -> horizontalDraggableHandler
-        }
 
     internal fun scene(key: SceneKey): Scene {
         return scenes[key] ?: error("Scene $key is not configured")
@@ -353,7 +390,12 @@ internal class SceneTransitionLayoutImpl(
                 .then(LayoutElement(layoutImpl = this))
         ) {
             LookaheadScope {
-                lookaheadScope = this
+                if (_lookaheadScope == null) {
+                    // We can't init this in a SideEffect as other NestedSTLs are already calling
+                    // this during composition. However, when composition is canceled
+                    // SceneTransitionLayoutImpl is discarded as well. So it's fine to do this here.
+                    _lookaheadScope = this
+                }
 
                 BackHandler()
                 Scenes()
@@ -529,20 +571,32 @@ private class LayoutNode(var layoutImpl: SceneTransitionLayoutImpl) :
                 width = fromSize.width
                 height = fromSize.height
             } else {
-                val overscrollSpec = transition.currentOverscrollSpec
-                val progress =
-                    when {
-                        overscrollSpec == null -> transition.progress
-                        overscrollSpec.content == transition.toScene -> 1f
-                        else -> 0f
-                    }
-
-                val size = lerp(fromSize, toSize, progress)
+                val size = lerp(fromSize, toSize, transition.progress)
                 width = size.width.coerceAtLeast(0)
                 height = size.height.coerceAtLeast(0)
             }
         }
 
         return layout(width, height) { placeable.place(0, 0) }
+    }
+}
+
+internal class OverscrollableContent(
+    private val animationScope: CoroutineScope,
+    private val overscrollEffect: (ContentKey) -> GestureEffect,
+) {
+    private var currentContent: ContentKey? = null
+    var currentOverscrollEffect: GestureEffect? = null
+
+    fun applyOverscrollEffectOn(contentKey: ContentKey): GestureEffect {
+        if (currentContent == contentKey) return currentOverscrollEffect!!
+
+        currentOverscrollEffect?.apply { animationScope.launch { ensureApplyToFlingIsCalled() } }
+
+        // We are wrapping the overscroll effect.
+        val overscrollEffect = overscrollEffect(contentKey)
+        currentContent = contentKey
+        currentOverscrollEffect = overscrollEffect
+        return overscrollEffect
     }
 }

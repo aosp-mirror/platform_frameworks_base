@@ -20,10 +20,13 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -89,6 +92,7 @@ public class ColorDisplayServiceTest {
     private ColorDisplayService.BinderService mBinderService;
 
     private Resources mResourcesSpy;
+    private ReduceBrightColorsTintController mRbcSpy;
 
     private static final int[] MINIMAL_COLOR_MODES = new int[] {
         ColorDisplayManager.COLOR_MODE_NATURAL,
@@ -135,7 +139,8 @@ public class ColorDisplayServiceTest {
         mLocalServiceKeeperRule.overrideLocalService(
                 DisplayManagerInternal.class, mDisplayManagerInternal);
 
-        mCds = new ColorDisplayService(mContext);
+        mRbcSpy = Mockito.spy(new ReduceBrightColorsTintController());
+        mCds = new ColorDisplayService(mContext, mRbcSpy);
         mBinderService = mCds.new BinderService();
         mLocalServiceKeeperRule.overrideLocalService(
                 ColorDisplayService.ColorDisplayServiceInternal.class,
@@ -1106,7 +1111,8 @@ public class ColorDisplayServiceTest {
         setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
         verify(mDisplayTransformManager).setColorMode(
-                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), eq(Display.COLOR_MODE_INVALID));
+                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), any(),
+                eq(Display.COLOR_MODE_INVALID));
     }
 
     @Test
@@ -1124,7 +1130,8 @@ public class ColorDisplayServiceTest {
         setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
         verify(mDisplayTransformManager).setColorMode(
-                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), eq(Display.COLOR_MODE_INVALID));
+                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), any(),
+                eq(Display.COLOR_MODE_INVALID));
     }
 
     @Test
@@ -1140,7 +1147,8 @@ public class ColorDisplayServiceTest {
         setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL);
         startService();
         verify(mDisplayTransformManager).setColorMode(
-                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), eq(Display.COLOR_MODE_SRGB));
+                eq(ColorDisplayManager.COLOR_MODE_NATURAL), any(), any(),
+                eq(Display.COLOR_MODE_SRGB));
     }
 
     @Test
@@ -1156,7 +1164,8 @@ public class ColorDisplayServiceTest {
         setColorMode(ColorDisplayManager.COLOR_MODE_BOOSTED);
         startService();
         verify(mDisplayTransformManager).setColorMode(
-                eq(ColorDisplayManager.COLOR_MODE_BOOSTED), any(), eq(Display.COLOR_MODE_INVALID));
+                eq(ColorDisplayManager.COLOR_MODE_BOOSTED), any(), any(),
+                eq(Display.COLOR_MODE_INVALID));
     }
 
     @Test
@@ -1164,8 +1173,25 @@ public class ColorDisplayServiceTest {
         when(mResourcesSpy.getIntArray(R.array.config_availableColorModes))
                     .thenReturn(new int[] {});
         startService();
-        verify(mDisplayTransformManager, never()).setColorMode(anyInt(), any(), anyInt());
+        verify(mDisplayTransformManager, never()).setColorMode(anyInt(), any(), any(), anyInt());
         assertThat(mBinderService.getColorMode()).isEqualTo(-1);
+    }
+
+    @Test
+    public void ensureColorModeChangeTriggersRbcReload() {
+        // should set up RBC once at startup
+        startService();
+        reset(mRbcSpy);
+
+        // Make sure RBC is enabled and available for this test
+        doReturn(true).when(mRbcSpy).isAvailable(mContext);
+
+        // When Color Mode changes, RBC needs to re-setup
+        // onDisplayColorModeChanged cancels animations, and should be called in handler thread
+        mCds.mHandler.runWithScissors(
+                () -> mCds.onDisplayColorModeChanged(ColorDisplayManager.COLOR_MODE_NATURAL),
+                1000);
+        verify(mRbcSpy, times(1)).setUp(eq(mContext), anyBoolean());
     }
 
     /**

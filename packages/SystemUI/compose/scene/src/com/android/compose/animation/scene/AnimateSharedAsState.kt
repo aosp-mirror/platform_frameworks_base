@@ -225,7 +225,7 @@ fun ElementScope<*>.animateElementColorAsState(value: Color, key: ValueKey): Ani
     return animateElementValueAsState(value, key, SharedColorType, canOverflow = false)
 }
 
-private object SharedColorType : SharedValueType<Color, ColorDelta> {
+internal object SharedColorType : SharedValueType<Color, ColorDelta> {
     override val unspecifiedValue: Color = Color.Unspecified
     override val zeroDeltaValue: ColorDelta = ColorDelta(0f, 0f, 0f, 0f)
 
@@ -255,17 +255,17 @@ private object SharedColorType : SharedValueType<Color, ColorDelta> {
                 alpha = aOklab.alpha + b.alpha * bWeight,
                 colorSpace = ColorSpaces.Oklab,
             )
-            .convert(aOklab.colorSpace)
+            .convert(a.colorSpace)
     }
 }
 
 /**
- * Represents the diff between two colors in the same color space.
+ * Represents the diff between two colors in the Oklab color space.
  *
  * Note: This class is necessary because Color() checks the bounds of its values and UncheckedColor
  * is internal.
  */
-private class ColorDelta(val red: Float, val green: Float, val blue: Float, val alpha: Float)
+internal class ColorDelta(val red: Float, val green: Float, val blue: Float, val alpha: Float)
 
 @Composable
 internal fun <T> animateSharedValueAsState(
@@ -418,15 +418,11 @@ private class AnimatedStateImpl<T, Delta>(
             return fromValue
         }
 
-        val overscrollSpec = transition.currentOverscrollSpec
         val progress =
-            when {
-                overscrollSpec == null -> {
-                    if (canOverflow) transition.progress
-                    else transition.progress.fastCoerceIn(0f, 1f)
-                }
-                overscrollSpec.content == transition.toContent -> 1f
-                else -> 0f
+            if (canOverflow) {
+                transition.progress
+            } else {
+                transition.progress.fastCoerceIn(0f, 1f)
             }
 
         return sharedValue.type.lerp(fromValue, toValue, progress)
@@ -438,7 +434,8 @@ private class AnimatedStateImpl<T, Delta>(
             if (element != null) {
                 layoutImpl.elements[element]?.let { element ->
                     elementState(
-                        layoutImpl.state.transitionStates,
+                        listOf(layoutImpl.state.transitionStates),
+                        elementKey = element.key,
                         isInContent = { it in element.stateByContent },
                     )
                         as? TransitionState.Transition

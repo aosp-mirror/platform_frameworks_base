@@ -26,7 +26,6 @@ import static android.view.KeyEvent.KEYCODE_E;
 import static android.view.KeyEvent.KEYCODE_ENTER;
 import static android.view.KeyEvent.KEYCODE_H;
 import static android.view.KeyEvent.KEYCODE_J;
-import static android.view.KeyEvent.KEYCODE_K;
 import static android.view.KeyEvent.KEYCODE_M;
 import static android.view.KeyEvent.KEYCODE_META_LEFT;
 import static android.view.KeyEvent.KEYCODE_N;
@@ -67,14 +66,12 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
         // These shortcuts should align with those defined in
         // services/tests/wmtests/res/xml/bookmarks.xml
         INTENT_SHORTCUTS.append(KEYCODE_U, Intent.CATEGORY_APP_CALCULATOR);
-        INTENT_SHORTCUTS.append(KEYCODE_C, Intent.CATEGORY_APP_CONTACTS);
+        INTENT_SHORTCUTS.append(KEYCODE_P, Intent.CATEGORY_APP_CONTACTS);
         INTENT_SHORTCUTS.append(KEYCODE_E, Intent.CATEGORY_APP_EMAIL);
-        INTENT_SHORTCUTS.append(KEYCODE_K, Intent.CATEGORY_APP_CALENDAR);
+        INTENT_SHORTCUTS.append(KEYCODE_C, Intent.CATEGORY_APP_CALENDAR);
         INTENT_SHORTCUTS.append(KEYCODE_M, Intent.CATEGORY_APP_MAPS);
-        INTENT_SHORTCUTS.append(KEYCODE_P, Intent.CATEGORY_APP_MUSIC);
 
         ROLE_SHORTCUTS.append(KEYCODE_B, RoleManager.ROLE_BROWSER);
-        ROLE_SHORTCUTS.append(KEYCODE_S, RoleManager.ROLE_SMS);
     }
     private static final int ANY_DISPLAY_ID = 123;
 
@@ -109,7 +106,7 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_B}, 0);
         mPhoneWindowManager.assertLaunchRole(RoleManager.ROLE_BROWSER);
 
-        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_C}, 0);
+        sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_P}, 0);
         mPhoneWindowManager.assertLaunchCategory(Intent.CATEGORY_APP_CONTACTS);
 
         sendKeyCombination(new int[]{KEYCODE_META_LEFT, KEYCODE_SHIFT_LEFT, KEYCODE_J}, 0);
@@ -288,22 +285,10 @@ public class ModifierShortcutTests extends ShortcutKeyTestBase {
      * Sends a KEYCODE_SCREENSHOT and validates screenshot is taken if flag is enabled
      */
     @Test
-    @EnableFlags(com.android.hardware.input.Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     public void testTakeScreenshot_flagEnabled() {
         sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
         mPhoneWindowManager.assertTakeScreenshotCalled();
-    }
-
-    /**
-     * Sends a KEYCODE_SCREENSHOT and validates screenshot is not taken if flag is disabled
-     */
-    @Test
-    @DisableFlags({com.android.hardware.input.Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE,
-            com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER})
-    public void testTakeScreenshot_flagDisabled() {
-        sendKeyCombination(new int[]{KEYCODE_SCREENSHOT}, 0);
-        mPhoneWindowManager.assertTakeScreenshotNotCalled();
     }
 
     /**

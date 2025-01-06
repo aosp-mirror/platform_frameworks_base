@@ -190,6 +190,8 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
     private ArgumentCaptor<OnBackInvokedCallback> mBackCallbackCaptor;
     @Captor
     private ArgumentCaptor<KeyguardUpdateMonitorCallback> mKeyguardUpdateMonitorCallback;
+    @Mock
+    private KeyguardDismissActionInteractor mKeyguardDismissActionInteractor;
 
     @Rule
     public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
@@ -236,7 +238,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                         mKeyguardTransitionInteractor,
                         mock(KeyguardDismissTransitionInteractor.class),
                         StandardTestDispatcher(null, null),
-                        () -> mock(KeyguardDismissActionInteractor.class),
+                        () -> mKeyguardDismissActionInteractor,
                         mSelectedUserInteractor,
                         mock(JavaAdapter.class),
                         () -> mSceneInteractor,
@@ -967,5 +969,34 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
                 )
         );
         verify(mAlternateBouncerInteractor).hide();
+    }
+
+    @Test
+    public void hideAlternateBouncer_clearsDismissActionByDefault() {
+        clearInvocations(mKeyguardDismissActionInteractor);
+
+        mStatusBarKeyguardViewManager.hideAlternateBouncer(/* updateScrim= */ true);
+
+        verify(mKeyguardDismissActionInteractor).clearDismissAction();
+    }
+
+    @Test
+    public void hideAlternateBouncer_clearsDismissActionExplicitly() {
+        clearInvocations(mKeyguardDismissActionInteractor);
+
+        mStatusBarKeyguardViewManager.hideAlternateBouncer(
+                /* updateScrim= */ true, /* clearDismissAction= */ true);
+
+        verify(mKeyguardDismissActionInteractor).clearDismissAction();
+    }
+
+    @Test
+    public void hideAlternateBouncer_doNotClearDismissActionExplicitly() {
+        clearInvocations(mKeyguardDismissActionInteractor);
+
+        mStatusBarKeyguardViewManager.hideAlternateBouncer(
+                /* updateScrim= */ true, /* clearDismissAction= */ false);
+
+        verify(mKeyguardDismissActionInteractor, never()).clearDismissAction();
     }
 }

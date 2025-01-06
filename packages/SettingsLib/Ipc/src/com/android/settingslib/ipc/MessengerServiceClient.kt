@@ -28,6 +28,7 @@ import android.os.IBinder
 import android.os.Looper
 import android.os.Message
 import android.os.Messenger
+import android.os.Process
 import android.util.Log
 import androidx.annotation.OpenForTesting
 import androidx.annotation.VisibleForTesting
@@ -190,6 +191,7 @@ constructor(
         private val metricsLogger: MetricsLogger?,
     ) : Handler(looper), ServiceConnection {
         private val clientMessenger = Messenger(this)
+        internal val myPid = Process.myPid()
         internal val pendingRequests = ArrayDeque<RequestWrapper<*, *>>()
         internal var serviceMessenger: Messenger? = null
         internal open var connectionState: Int = STATE_INIT
@@ -320,6 +322,11 @@ constructor(
             }
         }
 
+        override fun onNullBinding(name: ComponentName) {
+            Log.i(TAG, "onNullBinding $name")
+            close(ClientBindServiceException(null))
+        }
+
         internal open fun drainPendingRequests() {
             disposableHandle = null
             if (pendingRequests.isEmpty()) {
@@ -359,7 +366,7 @@ constructor(
                 drainPendingRequests()
             }
             val message =
-                obtainMessage(request.apiDescriptor.id, request.txnId, 0).apply {
+                obtainMessage(request.apiDescriptor.id, request.txnId, myPid).apply {
                     replyTo = clientMessenger
                 }
             try {

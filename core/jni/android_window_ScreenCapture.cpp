@@ -110,13 +110,19 @@ public:
         captureResults.fenceResult.value()->waitForever(LOG_TAG);
         jobject jhardwareBuffer = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
                 env, captureResults.buffer->toAHardwareBuffer());
+        jobject jGainmap = nullptr;
+        if (captureResults.optionalGainMap) {
+            jGainmap = android_hardware_HardwareBuffer_createFromAHardwareBuffer(
+                    env, captureResults.optionalGainMap->toAHardwareBuffer());
+        }
         jobject screenshotHardwareBuffer =
                 env->CallStaticObjectMethod(gScreenshotHardwareBufferClassInfo.clazz,
                                             gScreenshotHardwareBufferClassInfo.builder,
                                             jhardwareBuffer,
                                             static_cast<jint>(captureResults.capturedDataspace),
                                             captureResults.capturedSecureLayers,
-                                            captureResults.capturedHdrLayers);
+                                            captureResults.capturedHdrLayers, jGainmap,
+                                            captureResults.hdrSdrRatio);
         checkAndClearException(env, "builder");
         env->CallVoidMethod(consumer.get(), gConsumerClassInfo.accept, screenshotHardwareBuffer,
                             fenceStatus(captureResults.fenceResult));
@@ -340,7 +346,8 @@ int register_android_window_ScreenCapture(JNIEnv* env) {
             MakeGlobalRefOrDie(env, screenshotGraphicsBufferClazz);
     gScreenshotHardwareBufferClassInfo.builder =
             GetStaticMethodIDOrDie(env, screenshotGraphicsBufferClazz, "createFromNative",
-                                   "(Landroid/hardware/HardwareBuffer;IZZ)Landroid/window/"
+                                   "(Landroid/hardware/HardwareBuffer;IZZLandroid/hardware/"
+                                   "HardwareBuffer;F)Landroid/window/"
                                    "ScreenCapture$ScreenshotHardwareBuffer;");
 
     return err;

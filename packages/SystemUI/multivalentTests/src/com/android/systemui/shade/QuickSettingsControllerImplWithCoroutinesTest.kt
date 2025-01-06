@@ -19,7 +19,7 @@ package com.android.systemui.shade
 import android.app.StatusBarManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.cancelChildren
@@ -61,7 +61,7 @@ class QuickSettingsControllerImplWithCoroutinesTest : QuickSettingsControllerImp
             mDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
                     StatusBarManager.DISABLE_NONE,
-                    StatusBarManager.DISABLE2_QUICK_SETTINGS
+                    StatusBarManager.DISABLE2_QUICK_SETTINGS,
                 )
             runCurrent()
 
@@ -76,7 +76,7 @@ class QuickSettingsControllerImplWithCoroutinesTest : QuickSettingsControllerImp
             mDisableFlagsRepository.disableFlags.value =
                 DisableFlagsModel(
                     StatusBarManager.DISABLE_NONE,
-                    StatusBarManager.DISABLE2_NOTIFICATION_SHADE
+                    StatusBarManager.DISABLE2_NOTIFICATION_SHADE,
                 )
             runCurrent()
 

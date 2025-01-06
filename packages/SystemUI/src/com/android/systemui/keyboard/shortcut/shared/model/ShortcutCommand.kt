@@ -18,10 +18,14 @@ package com.android.systemui.keyboard.shortcut.shared.model
 
 import androidx.annotation.DrawableRes
 
-data class ShortcutCommand(val keys: List<ShortcutKey>)
+data class ShortcutCommand(
+    val keys: List<ShortcutKey> = emptyList(),
+    val isCustom: Boolean = false,
+)
 
 class ShortcutCommandBuilder {
     private val keys = mutableListOf<ShortcutKey>()
+    private var isCustom = false
 
     fun key(text: String) {
         keys += ShortcutKey.Text(text)
@@ -31,7 +35,11 @@ class ShortcutCommandBuilder {
         keys += ShortcutKey.Icon.ResIdIcon(drawableResId)
     }
 
-    fun build() = ShortcutCommand(keys)
+    fun isCustom(isCustom: Boolean) {
+        this.isCustom = isCustom
+    }
+
+    fun build() = ShortcutCommand(keys, isCustom)
 }
 
 fun shortcutCommand(block: ShortcutCommandBuilder.() -> Unit) =

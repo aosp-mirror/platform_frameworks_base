@@ -19,6 +19,7 @@ package com.android.systemui.qs.panels.ui.compose.infinitegrid
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -30,11 +31,13 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
 import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.qs.panels.shared.model.SizedTileImpl
 import com.android.systemui.qs.panels.ui.compose.PaginatableGridLayout
 import com.android.systemui.qs.panels.ui.compose.bounceableInfo
 import com.android.systemui.qs.panels.ui.compose.rememberEditListState
 import com.android.systemui.qs.panels.ui.viewmodel.BounceableTileViewModel
+import com.android.systemui.qs.panels.ui.viewmodel.DetailsViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.EditTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.IconTilesViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.InfiniteGridViewModel
@@ -48,17 +51,14 @@ import javax.inject.Inject
 class InfiniteGridLayout
 @Inject
 constructor(
+    private val detailsViewModel: DetailsViewModel,
     private val iconTilesViewModel: IconTilesViewModel,
     private val viewModelFactory: InfiniteGridViewModel.Factory,
     private val tileHapticsViewModelFactoryProvider: TileHapticsViewModelFactoryProvider,
 ) : PaginatableGridLayout {
 
     @Composable
-    override fun SceneScope.TileGrid(
-        tiles: List<TileViewModel>,
-        modifier: Modifier,
-        editModeStart: () -> Unit,
-    ) {
+    override fun SceneScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }
@@ -72,8 +72,14 @@ constructor(
             rememberViewModel(traceName = "InfiniteGridLayout.TileGrid") {
                 viewModel.dynamicIconTilesViewModelFactory.create()
             }
-        val columns by viewModel.gridSizeViewModel.columns
-        val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width()) }
+        val columnsWithMediaViewModel =
+            rememberViewModel(traceName = "InfiniteGridLAyout.TileGrid") {
+                viewModel.columnsWithMediaViewModelFactory.create(LOCATION_QS)
+            }
+
+        val columns = columnsWithMediaViewModel.columns
+        val largeTilesSpan by iconTilesViewModel.largeTilesSpanState
+        val sizedTiles = tiles.map { SizedTileImpl(it, it.spec.width(largeTilesSpan)) }
         val bounceables =
             remember(sizedTiles) { List(sizedTiles.size) { BounceableTileViewModel() } }
         val squishiness by viewModel.squishinessViewModel.squishiness.collectAsStateWithLifecycle()
@@ -89,15 +95,18 @@ constructor(
             val it = sizedTiles[spanIndex]
             val column = cellIndex % columns
             cellIndex += it.width
-            Tile(
-                tile = it.tile,
-                iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
-                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
-                squishiness = { squishiness },
-                tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
-                coroutineScope = scope,
-                bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
-            )
+            key(it.tile.spec) {
+                Tile(
+                    tile = it.tile,
+                    iconOnly = iconTilesViewModel.isIconTile(it.tile.spec),
+                    modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                    squishiness = { squishiness },
+                    tileHapticsViewModelFactoryProvider = tileHapticsViewModelFactoryProvider,
+                    coroutineScope = scope,
+                    bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                    detailsViewModel = detailsViewModel,
+                )
+            }
         }
     }
 
@@ -118,22 +127,28 @@ constructor(
             rememberViewModel(traceName = "InfiniteGridLayout.EditTileGrid") {
                 viewModel.dynamicIconTilesViewModelFactory.create()
             }
-        val columns by viewModel.gridSizeViewModel.columns
+        val columnsViewModel =
+            rememberViewModel(traceName = "InfiniteGridLayout.EditTileGrid") {
+                viewModel.columnsWithMediaViewModelFactory.createWithoutMediaTracking()
+            }
+        val columns = columnsViewModel.columns
+        val largeTilesSpan by iconTilesViewModel.largeTilesSpanState
         val largeTiles by iconTilesViewModel.largeTiles.collectAsStateWithLifecycle()
 
         // Non-current tiles should always be displayed as icon tiles.
         val sizedTiles =
-            remember(tiles, largeTiles) {
+            remember(tiles, largeTiles, largeTilesSpan) {
                 tiles.map {
                     SizedTileImpl(
                         it,
-                        if (!it.isCurrent || !largeTiles.contains(it.tileSpec)) 1 else 2,
+                        if (!it.isCurrent || !largeTiles.contains(it.tileSpec)) 1
+                        else largeTilesSpan,
                     )
                 }
             }
 
         val (currentTiles, otherTiles) = sizedTiles.partition { it.tile.isCurrent }
-        val currentListState = rememberEditListState(currentTiles, columns)
+        val currentListState = rememberEditListState(currentTiles, columns, largeTilesSpan)
         DefaultEditTileGrid(
             listState = currentListState,
             otherTiles = otherTiles,
@@ -144,6 +159,7 @@ constructor(
             onResize = iconTilesViewModel::resize,
             onStopEditing = onStopEditing,
             onReset = viewModel::showResetDialog,
+            largeTilesSpan = largeTilesSpan,
         )
     }
 
@@ -161,7 +177,7 @@ constructor(
             .map { it.flatten().map { it.tile } }
     }
 
-    private fun TileSpec.width(): Int {
-        return if (iconTilesViewModel.isIconTile(this)) 1 else 2
+    private fun TileSpec.width(largeSize: Int = iconTilesViewModel.largeTilesSpan.value): Int {
+        return if (iconTilesViewModel.isIconTile(this)) 1 else largeSize
     }
 }

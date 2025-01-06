@@ -17,14 +17,12 @@
 package com.android.systemui.statusbar.pipeline.airplane.data.repository
 
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 
 class FakeAirplaneModeRepository : AirplaneModeRepository {
 
-    private val _isAirplaneMode = MutableStateFlow(false)
-    override val isAirplaneMode: StateFlow<Boolean> = _isAirplaneMode
+    override val isAirplaneMode = MutableStateFlow(false)
 
     override suspend fun setIsAirplaneMode(isEnabled: Boolean) {
-        _isAirplaneMode.value = isEnabled
+        isAirplaneMode.value = isEnabled
     }
 }

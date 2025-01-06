@@ -33,9 +33,8 @@ object SettingsDimension {
     val spinnerHorizontalPadding = paddingExtraLarge
     val spinnerVerticalPadding = paddingLarge
 
-    val actionIconWidth = 32.dp
-    val actionIconHeight = 40.dp
-    val actionIconPadding = 4.dp
+    val actionIconSize = 40.dp
+    val actionIconPadding = 8.dp
 
     val itemIconSize = 24.dp
     val itemIconContainerSizeSmall = 40.dp
@@ -65,7 +64,7 @@ object SettingsDimension {
         bottom = itemPaddingVertical,
     )
     val itemPaddingAround = 8.dp
-    val itemDividerHeight = 32.dp
+    val itemDividerHeight = if (isSpaExpressiveEnabled) 40.dp else 32.dp
 
     val iconLarge = 48.dp
     val introIconSize = 40.dp

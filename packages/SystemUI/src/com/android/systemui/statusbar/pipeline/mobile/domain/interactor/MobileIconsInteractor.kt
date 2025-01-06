@@ -23,7 +23,7 @@ import android.telephony.SubscriptionManager.PROFILE_CLASS_PROVISIONING
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags.FILTER_PROVISIONING_NETWORK_SUBSCRIPTIONS
 import com.android.systemui.log.table.TableLogBuffer
@@ -71,6 +71,9 @@ interface MobileIconsInteractor {
     /** List of subscriptions, potentially filtered for CBRS */
     val filteredSubscriptions: Flow<List<SubscriptionModel>>
 
+    /** Subscription ID of the current default data subscription */
+    val defaultDataSubId: Flow<Int>
+
     /**
      * The current list of [MobileIconInteractor]s associated with the current list of
      * [filteredSubscriptions]
@@ -82,7 +85,7 @@ interface MobileIconsInteractor {
 
     /**
      * Flow providing a reference to the Interactor for the active data subId. This represents the
-     * [MobileConnectionInteractor] responsible for the active data connection, if any.
+     * [MobileIconInteractor] responsible for the active data connection, if any.
      */
     val activeDataIconInteractor: StateFlow<MobileIconInteractor?>
 
@@ -135,7 +138,7 @@ constructor(
     @MobileSummaryLog private val tableLogger: TableLogBuffer,
     connectivityRepository: ConnectivityRepository,
     userSetupRepo: UserSetupRepository,
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     private val context: Context,
     private val featureFlagsClassic: FeatureFlagsClassic,
 ) : MobileIconsInteractor {
@@ -280,6 +283,8 @@ constructor(
         }
     }
 
+    override val defaultDataSubId = mobileConnectionsRepo.defaultDataSubId
+
     override val icons =
         filteredSubscriptions
             .mapLatest { subs ->
@@ -321,7 +326,7 @@ constructor(
         mobileConnectionsRepo.defaultMobileIconMapping.stateIn(
             scope,
             SharingStarted.WhileSubscribed(),
-            initialValue = mapOf()
+            initialValue = mapOf(),
         )
 
     override val alwaysShowDataRatIcon: StateFlow<Boolean> =
@@ -350,7 +355,7 @@ constructor(
         mobileConnectionsRepo.defaultMobileIconGroup.stateIn(
             scope,
             SharingStarted.WhileSubscribed(),
-            initialValue = TelephonyIcons.G
+            initialValue = TelephonyIcons.G,
         )
 
     /**

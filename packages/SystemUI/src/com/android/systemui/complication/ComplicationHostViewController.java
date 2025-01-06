@@ -29,6 +29,7 @@ import android.view.View;
 
 import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.lifecycle.LifecycleOwner;
+import androidx.lifecycle.Observer;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.dreams.DreamOverlayStateController;
@@ -58,6 +59,14 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
     private final LifecycleOwner mLifecycleOwner;
     private final ComplicationCollectionViewModel mComplicationCollectionViewModel;
     private final HashMap<ComplicationId, Complication.ViewHolder> mComplications = new HashMap<>();
+
+    private final Observer<Collection<ComplicationViewModel>> mComplicationViewModelObserver =
+            new Observer<>() {
+                @Override
+                public void onChanged(Collection<ComplicationViewModel> complicationViewModels) {
+                    updateComplications(complicationViewModels);
+                }
+            };
     @VisibleForTesting
     boolean mIsAnimationEnabled;
 
@@ -78,13 +87,6 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
         // Whether animations are enabled.
         mIsAnimationEnabled = secureSettings.getFloatForUser(
                 Settings.Global.ANIMATOR_DURATION_SCALE, 1.0f, UserHandle.USER_CURRENT) != 0.0f;
-    }
-
-    @Override
-    protected void onInit() {
-        super.onInit();
-        mComplicationCollectionViewModel.getComplications().observe(mLifecycleOwner,
-                complicationViewModels -> updateComplications(complicationViewModels));
     }
 
     /**
@@ -166,10 +168,14 @@ public class ComplicationHostViewController extends ViewController<ConstraintLay
 
     @Override
     protected void onViewAttached() {
+        mComplicationCollectionViewModel.getComplications().observe(mLifecycleOwner,
+                mComplicationViewModelObserver);
     }
 
     @Override
     protected void onViewDetached() {
+        mComplicationCollectionViewModel.getComplications().removeObserver(
+                mComplicationViewModelObserver);
     }
 
     /**

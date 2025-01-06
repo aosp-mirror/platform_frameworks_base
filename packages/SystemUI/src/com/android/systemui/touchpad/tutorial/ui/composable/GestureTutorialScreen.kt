@@ -16,6 +16,7 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
+import android.view.MotionEvent
 import androidx.activity.compose.BackHandler
 import androidx.annotation.RawRes
 import androidx.compose.animation.core.Animatable
@@ -38,10 +39,7 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionSta
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.Finished
 import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState.NotStarted
-import com.android.systemui.touchpad.tutorial.ui.gesture.EasterEggGestureMonitor
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState
-import com.android.systemui.touchpad.tutorial.ui.gesture.TouchpadGestureHandler
 import kotlinx.coroutines.flow.Flow
 
 sealed interface GestureUiState {
@@ -54,6 +52,8 @@ sealed interface GestureUiState {
         val progressStartMarker: String,
         val progressEndMarker: String,
     ) : GestureUiState
+
+    data object Error : GestureUiState
 }
 
 fun GestureState.toGestureUiState(
@@ -66,56 +66,67 @@ fun GestureState.toGestureUiState(
         is GestureState.InProgress ->
             GestureUiState.InProgress(this.progress, progressStartMarker, progressEndMarker)
         is GestureState.Finished -> GestureUiState.Finished(successAnimation)
+        GestureState.Error -> GestureUiState.Error
     }
 }
 
-fun GestureUiState.toTutorialActionState(): TutorialActionState {
+fun GestureUiState.toTutorialActionState(previousState: TutorialActionState): TutorialActionState {
     return when (this) {
         NotStarted -> TutorialActionState.NotStarted
-        is GestureUiState.InProgress ->
-            TutorialActionState.InProgress(
-                progress = progress,
-                startMarker = progressStartMarker,
-                endMarker = progressEndMarker,
-            )
+        is GestureUiState.InProgress -> {
+            val inProgress =
+                TutorialActionState.InProgress(
+                    progress = progress,
+                    startMarker = progressStartMarker,
+                    endMarker = progressEndMarker,
+                )
+            if (
+                previousState is TutorialActionState.InProgressAfterError ||
+                    previousState is TutorialActionState.Error
+            ) {
+                return TutorialActionState.InProgressAfterError(inProgress)
+            } else {
+                return inProgress
+            }
+        }
         is Finished -> TutorialActionState.Finished(successAnimation)
+        GestureUiState.Error -> TutorialActionState.Error
     }
 }
 
 @Composable
 fun GestureTutorialScreen(
     screenConfig: TutorialScreenConfig,
-    gestureRecognizer: GestureRecognizer,
     gestureUiStateFlow: Flow<GestureUiState>,
+    motionEventConsumer: (MotionEvent) -> Boolean,
+    easterEggTriggeredFlow: Flow<Boolean>,
+    onEasterEggFinished: () -> Unit,
     onDoneButtonClicked: () -> Unit,
     onBack: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
-    var easterEggTriggered by remember { mutableStateOf(false) }
+    val easterEggTriggered by easterEggTriggeredFlow.collectAsStateWithLifecycle(false)
     val gestureState by gestureUiStateFlow.collectAsStateWithLifecycle(NotStarted)
-    val easterEggMonitor = EasterEggGestureMonitor { easterEggTriggered = true }
-    val gestureHandler =
-        remember(gestureRecognizer) { TouchpadGestureHandler(gestureRecognizer, easterEggMonitor) }
     TouchpadGesturesHandlingBox(
-        gestureHandler,
+        motionEventConsumer,
         gestureState,
         easterEggTriggered,
-        resetEasterEggFlag = { easterEggTriggered = false },
+        onEasterEggFinished,
     ) {
-        ActionTutorialContent(
-            gestureState.toTutorialActionState(),
-            onDoneButtonClicked,
-            screenConfig,
-        )
+        var lastState: TutorialActionState by remember {
+            mutableStateOf(TutorialActionState.NotStarted)
+        }
+        lastState = gestureState.toTutorialActionState(lastState)
+        ActionTutorialContent(lastState, onDoneButtonClicked, screenConfig)
     }
 }
 
 @Composable
 private fun TouchpadGesturesHandlingBox(
-    gestureHandler: TouchpadGestureHandler,
+    motionEventConsumer: (MotionEvent) -> Boolean,
     gestureState: GestureUiState,
     easterEggTriggered: Boolean,
-    resetEasterEggFlag: () -> Unit,
+    onEasterEggFinished: () -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit,
 ) {
@@ -127,7 +138,7 @@ private fun TouchpadGesturesHandlingBox(
                 targetValue = 360f,
                 animationSpec = tween(durationMillis = 2000),
             )
-            resetEasterEggFlag()
+            onEasterEggFinished()
         }
     }
     Box(
@@ -142,7 +153,7 @@ private fun TouchpadGesturesHandlingBox(
                         if (gestureState is Finished) {
                             false
                         } else {
-                            gestureHandler.onMotionEvent(event)
+                            motionEventConsumer(event)
                         }
                     }
                 )

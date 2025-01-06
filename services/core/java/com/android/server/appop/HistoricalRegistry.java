@@ -475,7 +475,7 @@ final class HistoricalRegistry {
             @NonNull String deviceId, @Nullable String attributionTag, @UidState int uidState,
             @OpFlags int flags, long accessTime,
             @AppOpsManager.AttributionFlags int attributionFlags, int attributionChainId,
-            @DiscreteRegistry.AccessType int accessType) {
+            @DiscreteRegistry.AccessType int accessType, int accessCount) {
         synchronized (mInMemoryLock) {
             if (mMode == AppOpsManager.HISTORICAL_MODE_ENABLED_ACTIVE) {
                 if (!isPersistenceInitializedMLocked()) {
@@ -484,7 +484,7 @@ final class HistoricalRegistry {
                 }
                 getUpdatedPendingHistoricalOpsMLocked(
                         System.currentTimeMillis()).increaseAccessCount(op, uid, packageName,
-                        attributionTag, uidState, flags, 1);
+                        attributionTag, uidState, flags, accessCount);
 
                 mDiscreteRegistry.recordDiscreteAccess(uid, packageName, deviceId, op,
                         attributionTag, flags, uidState, accessTime, -1, attributionFlags,

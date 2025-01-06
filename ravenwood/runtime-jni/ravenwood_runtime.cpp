@@ -174,28 +174,13 @@ static void Linux_setenv(JNIEnv* env, jobject, jstring javaName, jstring javaVal
     throwIfMinusOne(env, "setenv", setenv(name.c_str(), value.c_str(), overwrite ? 1 : 0));
 }
 
+static jint Linux_getpid(JNIEnv* env, jobject) {
+    return getpid();
+}
 
 static jint Linux_gettid(JNIEnv* env, jobject) {
     // gettid(2() was added in glibc 2.30 but Android uses an older version in prebuilt.
     return syscall(__NR_gettid);
-}
-
-static void maybeRedirectLog() {
-    auto ravenwoodLogOut = getenv("RAVENWOOD_LOG_OUT");
-    if (ravenwoodLogOut == NULL) {
-        return;
-    }
-    ALOGI("RAVENWOOD_LOG_OUT set. Redirecting output to %s", ravenwoodLogOut);
-
-    // Redirect stdin / stdout to /dev/tty.
-    int ttyFd = open(ravenwoodLogOut, O_WRONLY);
-    if (ttyFd == -1) {
-        ALOGW("$RAVENWOOD_LOG_OUT is set to %s, but failed to open: %s ", ravenwoodLogOut,
-                strerror(errno));
-        return;
-    }
-    dup2(ttyFd, 1);
-    dup2(ttyFd, 2);
 }
 
 // ---- Registration ----
@@ -214,13 +199,12 @@ static const JNINativeMethod sMethods[] =
     { "stat", "(Ljava/lang/String;)Landroid/system/StructStat;", (void*)Linux_stat },
     { "nOpen", "(Ljava/lang/String;II)I", (void*)Linux_open },
     { "setenv", "(Ljava/lang/String;Ljava/lang/String;Z)V", (void*)Linux_setenv },
+    { "getpid", "()I", (void*)Linux_getpid },
     { "gettid", "()I", (void*)Linux_gettid },
 };
 
 extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */) {
-    maybeRedirectLog();
-
-    ALOGI("%s: JNI_OnLoad", __FILE__);
+    ALOGV("%s: JNI_OnLoad", __FILE__);
 
     JNIEnv* env = GetJNIEnvOrDie(vm);
     g_StructStat = FindGlobalClassOrDie(env, "android/system/StructStat");

@@ -361,12 +361,6 @@ public class ActivityStarterTests extends WindowTestsBase {
         return prepareStarter(launchFlags, mockGetRootTask, LAUNCH_MULTIPLE);
     }
 
-    private void setupImeWindow() {
-        final WindowState imeWindow = createWindow(null, W_INPUT_METHOD,
-                "mImeWindow", CURRENT_IME_UID);
-        mDisplayContent.mInputMethodWindow = imeWindow;
-    }
-
     /**
      * Creates a {@link ActivityStarter} with default parameters and necessary mocks.
      *

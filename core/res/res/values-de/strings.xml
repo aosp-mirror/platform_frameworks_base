@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Anrufer-ID ist standardmäßig beschränkt. Nächster Anruf: Nicht beschränkt"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Anrufer-ID ist standardmäßig nicht beschränkt. Nächster Anruf: Beschränkt"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Anrufer-ID ist standardmäßig nicht beschränkt. Nächster Anruf: Nicht beschränkt"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Diese App ist nicht mit 16 KB kompatibel. Die APK-Abgleichsprüfung ist fehlgeschlagen. Diese App wird im mit der Seitengröße kompatiblen Modus ausgeführt. Für eine optimale Kompatibilität rekompiliere die App, sodass sie 16 KB unterstützt. Weitere Informationen findest du unter &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Diese App ist nicht mit 16 KB kompatibel. Die ELF-Abgleichsprüfung ist fehlgeschlagen. Diese App wird im mit der Seitengröße kompatiblen Modus ausgeführt. Für eine optimale Kompatibilität rekompiliere die App, sodass sie 16 KB unterstützt. Weitere Informationen findest du unter &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Diese App ist nicht mit 16 KB kompatibel. APK- und ELF-Abgleichsprüfungen sind fehlgeschlagen. Diese App wird im mit der Seitengröße kompatiblen Modus ausgeführt. Für eine optimale Kompatibilität rekompiliere die App, sodass sie 16 KB unterstützt. Weitere Informationen findest du unter &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Dienst nicht eingerichtet."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Du kannst die Einstellung für die Anrufer-ID nicht ändern."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Mobile Daten wurden auf <xliff:g id="CARRIERDISPLAY">%s</xliff:g> umgestellt"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilfunknetz nicht erreichbar"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Versuche, das bevorzugte Netzwerk zu ändern. Tippe, um ein anderes auszuwählen."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Notrufe nicht möglich"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Für Notrufe ist ein Mobilfunknetz erforderlich"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Warnmeldungen"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Anrufweiterleitung"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Ermöglicht der App, die relative Distanz zwischen Ultrabreitband-Geräten in der Nähe zu bestimmen"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Mit WLAN-Geräten in der Nähe interagieren"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Erlaubt der App, Inhalte an WLAN-Geräte in der Nähe zu senden, sich mit ihnen zu verbinden und ihre relative Position zu ermitteln"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"Relative Position zu Geräten in der Nähe bestimmen"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Ermöglicht es der App, die relative Position zu Geräten in der Nähe zu bestimmen"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informationen zum bevorzugten NFC-Zahlungsdienst"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ermöglicht der App, Informationen zum bevorzugten NFC-Zahlungsdienst abzurufen, etwa registrierte Hilfsmittel oder das Routenziel."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Nahfeldkommunikation steuern"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"in <xliff:g id="COUNT">%d</xliff:g> Std."</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"in <xliff:g id="COUNT">%d</xliff:g> T"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"in <xliff:g id="COUNT">%d</xliff:g> J"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"vor <xliff:g id="COUNT">%d</xliff:g> Min."</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"vor <xliff:g id="COUNT">%d</xliff:g> Std."</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"vor <xliff:g id="COUNT">%d</xliff:g> T"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"vor <xliff:g id="COUNT">%d</xliff:g> J"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> Min."</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> Std."</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> T"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> J"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"in <xliff:g id="COUNT">%d</xliff:g> Min."</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"in <xliff:g id="COUNT">%d</xliff:g> Std."</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"in <xliff:g id="COUNT">%d</xliff:g> T"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"in <xliff:g id="COUNT">%d</xliff:g> J"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"vor <xliff:g id="COUNT">%d</xliff:g> Min."</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"vor <xliff:g id="COUNT">%d</xliff:g> Std."</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"vor <xliff:g id="COUNT">%d</xliff:g> T"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"vor <xliff:g id="COUNT">%d</xliff:g> J"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Vor # Minute}other{Vor # Minuten}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Vor # Stunde}other{Vor # Stunden}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Vor # Tag}other{Vor # Tagen}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Einhandmodus"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Extradunkel"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Hörgeräte"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Lautstärketasten wurden gedrückt gehalten. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ist aktiviert."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Lautstärketasten wurden gedrückt gehalten. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ist deaktiviert."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Lass die Lautstärketasten los. Halte zum Aktivieren von <xliff:g id="SERVICE_NAME">%1$s</xliff:g> beide Lautstärketasten noch einmal 3 Sekunden lang gedrückt."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Wochenende"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Termin"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Schlafen"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Bitte nicht stören (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Verwaltet von <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"An"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Aus"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> bis <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Alle Kalender"</string>
     <string name="muted_by" msgid="91464083490094950">"Einige Töne werden von <xliff:g id="THIRD_PARTY">%1$s</xliff:g> stummgeschaltet"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Es liegt ein internes Problem mit deinem Gerät vor. Möglicherweise verhält es sich instabil, bis du es auf die Werkseinstellungen zurücksetzt."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Du kannst ohne Mobilgerät oder WLAN Nachrichten senden und empfangen"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages öffnen"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"So funktionierts"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"„Netz automatisch auswählen“ aktivieren"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Aktiviere in den Einstellungen die Option „Netz automatisch auswählen“, damit dein Smartphone ein Netzwerk finden kann, das mit dem Satelliten funktioniert"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Aktivieren"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Zurück"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ausstehend…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"„Notruf über Satellit“ jetzt verfügbar"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Du kannst dem Rettungsdienst eine Nachricht senden, wenn kein Mobilfunknetz oder WLAN verfügbar ist. Dazu muss Google Messages als Standard-Messaging-App festgelegt sein."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"„Notruf über Satellit“ nicht unterstützt"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"„Notruf über Satellit“ wird auf diesem Gerät nicht unterstützt"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"„Notruf über Satellit“ nicht eingerichtet"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Vergewissere dich, dass du mit dem Internet verbunden bist, und versuche noch einmal, die Einrichtung durchzuführen"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"„Notruf über Satellit“ nicht verfügbar"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"„Notruf über Satellit“ ist in diesem Land oder in dieser Region nicht verfügbar"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"„Notruf über Satellit“ nicht eingerichtet"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Wenn du Nachrichten per Satellit senden möchtest, musst du Google Messages als Standard-Messaging-App festlegen"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"„Notruf über Satellit“ nicht verfügbar"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Wenn du wissen möchtest, ob „Notruf über Satellit“ in diesem Land oder dieser Region verfügbar ist, aktiviere die Standorteinstellungen"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"„Nachrichten per Satellit“ verfügbar"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Du kannst Nachrichten per Satellit senden, wenn kein Mobilfunknetz oder WLAN verfügbar ist. Dazu muss Google Messages als Standard-Messaging-App festgelegt sein."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"„Nachrichten per Satellit“ nicht unterstützt"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"„Nachrichten per Satellit“ wird auf diesem Gerät nicht unterstützt"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"„Nachrichten per Satellit“ nicht eingerichtet"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Vergewissere dich, dass du mit dem Internet verbunden bist, und versuche noch einmal, die Einrichtung durchzuführen"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"„Nachrichten per Satellit“ nicht verfügbar"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"„Nachrichten per Satellit“ ist in diesem Land oder dieser Region nicht verfügbar"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"„Nachrichten per Satellit“ nicht eingerichtet"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Wenn du Nachrichten per Satellit senden möchtest, musst du Google Messages als Standard-Messaging-App festlegen"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"„Nachrichten per Satellit“ nicht verfügbar"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Wenn du wissen möchtest, ob „Nachrichten per Satellit“ in diesem Land oder dieser Region verfügbar ist, aktiviere die Standorteinstellungen"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Entsperrung per Fingerabdruck neu einrichten"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> wird nicht mehr erkannt."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> und <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> werden nicht mehr erkannt."</string>

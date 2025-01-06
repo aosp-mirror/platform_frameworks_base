@@ -81,10 +81,12 @@ public interface CallerValidator {
             @NonNull String functionId);
 
     /**
-     * Checks if the user is organization managed.
+     * Checks if the app function policy is allowed.
      *
+     * @param callingUser The current calling user.
      * @param targetUser The user which the caller is requesting to execute as.
-     * @return Whether the user is organization managed.
+     * @return Whether the app function policy is allowed.
      */
-    boolean isUserOrganizationManaged(@NonNull UserHandle targetUser);
+    boolean verifyEnterprisePolicyIsAllowed(
+            @NonNull UserHandle callingUser, @NonNull UserHandle targetUser);
 }

@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar
 
-import android.content.res.Resources
 import android.view.CrossWindowBlurListeners
 import android.view.SurfaceControl
 import android.view.ViewRootImpl
@@ -24,11 +23,11 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.any
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.clearInvocations
@@ -36,13 +35,14 @@ import org.mockito.Mockito.eq
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class BlurUtilsTest : SysuiTestCase() {
 
-    @Mock lateinit var resources: Resources
+    val blurConfig: BlurConfig = BlurConfig(minBlurRadiusPx = 1.0f, maxBlurRadiusPx = 100.0f)
     @Mock lateinit var dumpManager: DumpManager
     @Mock lateinit var transaction: SurfaceControl.Transaction
     @Mock lateinit var crossWindowBlurListeners: CrossWindowBlurListeners
@@ -109,7 +109,7 @@ class BlurUtilsTest : SysuiTestCase() {
         verify(transaction).setEarlyWakeupEnd()
     }
 
-    inner class TestableBlurUtils : BlurUtils(resources, crossWindowBlurListeners, dumpManager) {
+    inner class TestableBlurUtils : BlurUtils(blurConfig, crossWindowBlurListeners, dumpManager) {
         var blursEnabled = true
 
         override fun supportsBlursOnWindows(): Boolean {

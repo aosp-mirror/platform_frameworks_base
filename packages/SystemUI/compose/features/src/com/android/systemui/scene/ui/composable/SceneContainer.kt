@@ -39,6 +39,7 @@ import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.SceneTransitions
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
@@ -49,7 +50,6 @@ import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import javax.inject.Provider
-import kotlinx.coroutines.flow.collectLatest
 
 /**
  * Renders a container of a collection of "scenes" that the user can switch between using certain
@@ -79,6 +79,7 @@ fun SceneContainer(
     sceneByKey: Map<SceneKey, Scene>,
     overlayByKey: Map<OverlayKey, Overlay>,
     initialSceneKey: SceneKey,
+    sceneTransitions: SceneTransitions,
     dataSourceDelegator: SceneDataSourceDelegator,
     qsSceneAdapter: Provider<QSSceneAdapter>,
     modifier: Modifier = Modifier,
@@ -88,7 +89,7 @@ fun SceneContainer(
         MutableSceneTransitionLayoutState(
             initialScene = initialSceneKey,
             canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
-            transitions = SceneContainerTransitions,
+            transitions = sceneTransitions,
         )
     }
 
@@ -117,7 +118,7 @@ fun SceneContainer(
                 ) {
                     "invalid ContentKey: $actionableContentKey"
                 }
-            actionableContent.userActions.collectLatest { userActions ->
+            viewModel.filteredUserActions(actionableContent.userActions).collect { userActions ->
                 userActionsByContentKey[actionableContentKey] =
                     viewModel.resolveSceneFamilies(userActions)
             }

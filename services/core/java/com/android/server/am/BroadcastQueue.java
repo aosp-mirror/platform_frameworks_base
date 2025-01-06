@@ -49,14 +49,12 @@ public abstract class BroadcastQueue {
     final @NonNull Handler mHandler;
     final @NonNull BroadcastSkipPolicy mSkipPolicy;
     final @NonNull BroadcastHistory mHistory;
-    final @NonNull String mQueueName;
 
     BroadcastQueue(@NonNull ActivityManagerService service, @NonNull Handler handler,
-            @NonNull String name, @NonNull BroadcastSkipPolicy skipPolicy,
+            @NonNull BroadcastSkipPolicy skipPolicy,
             @NonNull BroadcastHistory history) {
         mService = Objects.requireNonNull(service);
         mHandler = Objects.requireNonNull(handler);
-        mQueueName = Objects.requireNonNull(name);
         mSkipPolicy = Objects.requireNonNull(skipPolicy);
         mHistory = Objects.requireNonNull(history);
     }
@@ -85,11 +83,6 @@ public abstract class BroadcastQueue {
     static void traceEnd(int cookie) {
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER,
                 TAG, cookie);
-    }
-
-    @Override
-    public String toString() {
-        return mQueueName;
     }
 
     public abstract void start(@NonNull ContentResolver resolver);
@@ -128,9 +121,6 @@ public abstract class BroadcastQueue {
     public abstract boolean finishReceiverLocked(@NonNull ProcessRecord app, int resultCode,
             @Nullable String resultData, @Nullable Bundle resultExtras, boolean resultAbort,
             boolean waitForServices);
-
-    @GuardedBy("mService")
-    public abstract void backgroundServicesFinishedLocked(int userId);
 
     /**
      * Signal from OS internals that the given process has just been actively
@@ -244,8 +234,6 @@ public abstract class BroadcastQueue {
 
     /**
      * Delays delivering broadcasts to the specified package.
-     *
-     * <p> Note that this is only valid for modern queue.
      */
     public void forceDelayBroadcastDelivery(@NonNull String targetPackage,
             long delayedDurationMs) {
@@ -264,7 +252,8 @@ public abstract class BroadcastQueue {
     @GuardedBy("mService")
     public abstract boolean dumpLocked(@NonNull FileDescriptor fd, @NonNull PrintWriter pw,
             @NonNull String[] args, int opti, boolean dumpConstants, boolean dumpHistory,
-            boolean dumpAll, @Nullable String dumpPackage, boolean needSep);
+            boolean dumpAll, @Nullable String dumpPackage, @Nullable String dumpIntentAction,
+            boolean needSep);
 
     /**
      * Execute {@link #dumpLocked} and store the output into
@@ -276,7 +265,7 @@ public abstract class BroadcastQueue {
                     PrintWriter pw = new PrintWriter(out)) {
                 pw.print("Message: ");
                 pw.println(msg);
-                dumpLocked(fd, pw, null, 0, false, false, false, null, false);
+                dumpLocked(fd, pw, null, 0, false, false, false, null, null, false);
                 pw.flush();
             }
         }, DropBoxManager.IS_TEXT);

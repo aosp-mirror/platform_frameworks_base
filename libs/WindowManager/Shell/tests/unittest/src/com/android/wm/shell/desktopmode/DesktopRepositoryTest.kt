@@ -30,7 +30,6 @@ import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.persistence.Desktop
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
-import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
 import com.android.wm.shell.sysui.ShellInit
 import com.google.common.truth.Truth.assertThat
 import junit.framework.Assert.fail
@@ -57,6 +56,11 @@ import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 
+/**
+ * Tests for [@link DesktopRepository].
+ *
+ * Build/Install/Run: atest WMShellUnitTests:DesktopRepositoryTest
+ */
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 @ExperimentalCoroutinesApi
@@ -70,7 +74,6 @@ class DesktopRepositoryTest : ShellTestCase() {
 
     @Mock private lateinit var testExecutor: ShellExecutor
     @Mock private lateinit var persistentRepository: DesktopPersistentRepository
-    @Mock lateinit var repositoryInitializer: DesktopRepositoryInitializer
 
     @Before
     fun setUp() {
@@ -78,17 +81,9 @@ class DesktopRepositoryTest : ShellTestCase() {
         datastoreScope = CoroutineScope(Dispatchers.Unconfined + SupervisorJob())
         shellInit = spy(ShellInit(testExecutor))
 
-        repo =
-            DesktopRepository(
-                context,
-                shellInit,
-                persistentRepository,
-                repositoryInitializer,
-                datastoreScope
-            )
-        whenever(runBlocking { persistentRepository.readDesktop(any(), any()) }).thenReturn(
-            Desktop.getDefaultInstance()
-        )
+        repo = DesktopRepository(persistentRepository, datastoreScope, DEFAULT_USER_ID)
+        whenever(runBlocking { persistentRepository.readDesktop(any(), any()) })
+            .thenReturn(Desktop.getDefaultInstance())
         shellInit.init()
     }
 
@@ -150,6 +145,14 @@ class DesktopRepositoryTest : ShellTestCase() {
 
         assertThat(listener.activeChangesOnDefaultDisplay).isEqualTo(2)
         assertThat(listener.activeChangesOnSecondaryDisplay).isEqualTo(1)
+    }
+
+    @Test
+    fun addTask_multipleDisplays_moveToAnotherDisplay() {
+        repo.addTask(DEFAULT_DISPLAY, taskId = 1, isVisible = true)
+        repo.addTask(SECOND_DISPLAY, taskId = 1, isVisible = true)
+        assertThat(repo.getFreeformTasksInZOrder(DEFAULT_DISPLAY)).isEmpty()
+        assertThat(repo.getFreeformTasksInZOrder(SECOND_DISPLAY)).containsExactly(1)
     }
 
     @Test
@@ -241,7 +244,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(arrayOf(1)),
                         minimizedTasks = ArraySet(),
-                        freeformTasksInZOrder = arrayListOf()
+                        freeformTasksInZOrder = arrayListOf(),
                     )
                 verify(persistentRepository)
                     .addOrUpdateDesktop(
@@ -249,7 +252,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(arrayOf(1, 2)),
                         minimizedTasks = ArraySet(),
-                        freeformTasksInZOrder = arrayListOf()
+                        freeformTasksInZOrder = arrayListOf(),
                     )
             }
         }
@@ -437,8 +440,8 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     /**
-     * When a task vanishes, the displayId of the task is set to INVALID_DISPLAY.
-     * This tests that task is removed from the last parent display when it vanishes.
+     * When a task vanishes, the displayId of the task is set to INVALID_DISPLAY. This tests that
+     * task is removed from the last parent display when it vanishes.
      */
     @Test
     fun updateTask_removeVisibleTasksRemovesTaskWithInvalidDisplay() {
@@ -558,7 +561,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(),
                         minimizedTasks = ArraySet(),
-                        freeformTasksInZOrder = arrayListOf(5)
+                        freeformTasksInZOrder = arrayListOf(5),
                     )
                 verify(persistentRepository)
                     .addOrUpdateDesktop(
@@ -566,7 +569,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(arrayOf(5)),
                         minimizedTasks = ArraySet(),
-                        freeformTasksInZOrder = arrayListOf(6, 5)
+                        freeformTasksInZOrder = arrayListOf(6, 5),
                     )
                 verify(persistentRepository)
                     .addOrUpdateDesktop(
@@ -574,10 +577,10 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(arrayOf(5, 6)),
                         minimizedTasks = ArraySet(),
-                        freeformTasksInZOrder = arrayListOf(7, 6, 5)
+                        freeformTasksInZOrder = arrayListOf(7, 6, 5),
                     )
             }
-    }
+        }
 
     @Test
     fun addTask_alreadyExists_movesToTop() {
@@ -624,7 +627,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(),
                         minimizedTasks = ArraySet(),
-                        freeformTasksInZOrder = arrayListOf(5)
+                        freeformTasksInZOrder = arrayListOf(5),
                     )
                 verify(persistentRepository)
                     .addOrUpdateDesktop(
@@ -632,7 +635,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(arrayOf(5)),
                         minimizedTasks = ArraySet(),
-                        freeformTasksInZOrder = arrayListOf(6, 5)
+                        freeformTasksInZOrder = arrayListOf(6, 5),
                     )
                 verify(persistentRepository)
                     .addOrUpdateDesktop(
@@ -640,7 +643,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(arrayOf(5, 6)),
                         minimizedTasks = ArraySet(),
-                        freeformTasksInZOrder = arrayListOf(7, 6, 5)
+                        freeformTasksInZOrder = arrayListOf(7, 6, 5),
                     )
                 verify(persistentRepository, times(2))
                     .addOrUpdateDesktop(
@@ -648,10 +651,10 @@ class DesktopRepositoryTest : ShellTestCase() {
                         DEFAULT_DESKTOP_ID,
                         visibleTasks = ArraySet(arrayOf(5, 7)),
                         minimizedTasks = ArraySet(arrayOf(6)),
-                        freeformTasksInZOrder = arrayListOf(7, 6, 5)
+                        freeformTasksInZOrder = arrayListOf(7, 6, 5),
                     )
             }
-    }
+        }
 
     @Test
     fun addTask_taskIsUnminimized_noop() {
@@ -690,7 +693,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                     DEFAULT_DESKTOP_ID,
                     visibleTasks = ArraySet(),
                     minimizedTasks = ArraySet(),
-                    freeformTasksInZOrder = arrayListOf(1)
+                    freeformTasksInZOrder = arrayListOf(1),
                 )
             verify(persistentRepository)
                 .addOrUpdateDesktop(
@@ -698,7 +701,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                     DEFAULT_DESKTOP_ID,
                     visibleTasks = ArraySet(),
                     minimizedTasks = ArraySet(),
-                    freeformTasksInZOrder = ArrayList()
+                    freeformTasksInZOrder = ArrayList(),
                 )
         }
     }
@@ -727,7 +730,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                     DEFAULT_DESKTOP_ID,
                     visibleTasks = ArraySet(),
                     minimizedTasks = ArraySet(),
-                    freeformTasksInZOrder = arrayListOf(1)
+                    freeformTasksInZOrder = arrayListOf(1),
                 )
             verify(persistentRepository)
                 .addOrUpdateDesktop(
@@ -735,7 +738,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                     DEFAULT_DESKTOP_ID,
                     visibleTasks = ArraySet(),
                     minimizedTasks = ArraySet(),
-                    freeformTasksInZOrder = ArrayList()
+                    freeformTasksInZOrder = ArrayList(),
                 )
         }
     }
@@ -764,7 +767,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                     DEFAULT_DESKTOP_ID,
                     visibleTasks = ArraySet(),
                     minimizedTasks = ArraySet(),
-                    freeformTasksInZOrder = arrayListOf(1)
+                    freeformTasksInZOrder = arrayListOf(1),
                 )
             verify(persistentRepository, never())
                 .addOrUpdateDesktop(
@@ -772,7 +775,7 @@ class DesktopRepositoryTest : ShellTestCase() {
                     DEFAULT_DESKTOP_ID,
                     visibleTasks = ArraySet(),
                     minimizedTasks = ArraySet(),
-                    freeformTasksInZOrder = ArrayList()
+                    freeformTasksInZOrder = ArrayList(),
                 )
         }
     }
@@ -924,7 +927,6 @@ class DesktopRepositoryTest : ShellTestCase() {
         assertThat(repo.isMinimizedTask(taskId = 2)).isFalse()
     }
 
-
     @Test
     fun updateTask_minimizedTaskBecomesVisible_unminimizesTask() {
         repo.minimizeTask(displayId = 10, taskId = 2)
@@ -933,6 +935,28 @@ class DesktopRepositoryTest : ShellTestCase() {
         val isMinimizedTask = repo.isMinimizedTask(taskId = 2)
 
         assertThat(isMinimizedTask).isFalse()
+    }
+
+    @Test
+    fun saveBoundsBeforeMinimize_boundsSavedByTaskId() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+
+        repo.saveBoundsBeforeMinimize(taskId, bounds)
+
+        assertThat(repo.removeBoundsBeforeMinimize(taskId)).isEqualTo(bounds)
+    }
+
+    @Test
+    fun removeBoundsBeforeMinimize_returnsNullAfterBoundsRemoved() {
+        val taskId = 1
+        val bounds = Rect(0, 0, 200, 200)
+        repo.saveBoundsBeforeMinimize(taskId, bounds)
+        repo.removeBoundsBeforeMinimize(taskId)
+
+        val boundsBeforeMinimize = repo.removeBoundsBeforeMinimize(taskId)
+
+        assertThat(boundsBeforeMinimize).isNull()
     }
 
     @Test
@@ -956,6 +980,22 @@ class DesktopRepositoryTest : ShellTestCase() {
         val tasks = repo.getExpandedTasksOrdered(displayId = DEFAULT_DISPLAY)
 
         assertThat(tasks).containsExactly(1, 3).inOrder()
+    }
+
+    @Test
+    fun setTaskIdAsTopTransparentFullscreenTaskId_savesTaskId() {
+        repo.setTopTransparentFullscreenTaskId(displayId = DEFAULT_DISPLAY, taskId = 1)
+
+        assertThat(repo.getTopTransparentFullscreenTaskId(DEFAULT_DISPLAY)).isEqualTo(1)
+    }
+
+    @Test
+    fun clearTaskIdAsTopTransparentFullscreenTaskId_clearsTaskId() {
+        repo.setTopTransparentFullscreenTaskId(displayId = DEFAULT_DISPLAY, taskId = 1)
+
+        repo.clearTopTransparentFullscreenTaskId(DEFAULT_DISPLAY)
+
+        assertThat(repo.getTopTransparentFullscreenTaskId(DEFAULT_DISPLAY)).isNull()
     }
 
     @Test
@@ -1030,6 +1070,7 @@ class DesktopRepositoryTest : ShellTestCase() {
     class TestListener : DesktopRepository.ActiveTasksListener {
         var activeChangesOnDefaultDisplay = 0
         var activeChangesOnSecondaryDisplay = 0
+
         override fun onActiveTasksChanged(displayId: Int) {
             when (displayId) {
                 DEFAULT_DISPLAY -> activeChangesOnDefaultDisplay++

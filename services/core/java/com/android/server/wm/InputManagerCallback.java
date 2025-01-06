@@ -128,8 +128,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
     @Override
     public void notifyConfigurationChanged() {
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "notifyConfigurationChanged");
-        final boolean changed = !com.android.window.flags.Flags.filterIrrelevantInputDeviceChange()
-                || updateLastInputConfigurationSources();
+        final boolean changed = updateLastInputConfigurationSources();
 
         // Even if the input devices are not changed, there could be other pending changes
         // during booting. It's fine to apply earlier.

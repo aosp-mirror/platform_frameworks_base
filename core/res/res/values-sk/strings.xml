@@ -73,6 +73,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"V predvolenom nastavení je identifikácia volajúceho obmedzená. Ďalší hovor: Bez obmedzenia"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"V predvolenom nastavení nie je identifikácia volajúceho obmedzená. Ďalší hovor: Obmedzené"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"V predvolenom nastavení nie je identifikácia volajúceho obmedzená. Ďalší hovor: Bez obmedzenia"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Táto aplikácia nie je kompatibilná s režimom 16 kB. Nepodarilo sa skontrolovať zarovnanie súboru APK. Táto aplikácia bude spustená v režime kompatibilnom s veľkosťou stránky. Ak chcete dosiahnuť najlepšiu kompatibilitu, znova skompilujte aplikáciu s podporou 16 kB. Viac sa dozviete na &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Táto aplikácia nie je kompatibilná s režimom 16 kB. Nepodarilo sa skontrolovať zarovnanie formátu ELF. Táto aplikácia bude spustená v režime kompatibilnom s veľkosťou stránky. Ak chcete dosiahnuť najlepšiu kompatibilitu, znova skompilujte aplikáciu s podporou 16 kB. Viac sa dozviete na &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Táto aplikácia nie je kompatibilná s režimom 16 kB. Nepodarilo sa skontrolovať zarovnanie súboru APK a formátu ELF. Táto aplikácia bude spustená v režime kompatibilnom s veľkosťou stránky. Ak chcete dosiahnuť najlepšiu kompatibilitu, znova skompilujte aplikáciu s podporou 16 kB. Viac sa dozviete na &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Služba nie je poskytovaná."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nemôžete meniť nastavenie identifikácie volajúcich."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Dátové pripojenie bolo prepnuté na operátora <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -86,6 +89,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Nepodarilo sa pripojiť k mobilnej sieti"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Skúste zmeniť predvolenú sieť. Zmeníte ju klepnutím."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Tiesňové volania nie sú k dispozícii"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Tiesňové volania vyžadujú mobilnú sieť"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Upozornenia"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Presmerovanie hovorov"</string>
@@ -614,6 +619,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Povoľte aplikácii určovať relatívnu polohu medzi zariadeniami s ultraširokopásmovým pripojením v okolí"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interakcia so zariadeniami Wi-Fi v okolí"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Umožňuje aplikácii oznamovať a rozpoznávať relatívnu polohu zariadení Wi‑Fi v okolí a pripájať sa k nim"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"určovať relatívnu polohu medzi zariadeniami v okolí"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Povoľte aplikácii určovať relatívnu polohu medzi zariadeniami v okolí"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Preferované informácie platenej služby NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Umožňuje aplikácii získavať preferované informácie platenej služby NFC, napríklad o registrovanej pomoci a trasách k cieľu."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ovládať technológiu NFC"</string>
@@ -1155,6 +1162,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"o <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"o <xliff:g id="COUNT">%d</xliff:g> d."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"o <xliff:g id="COUNT">%d</xliff:g> r."</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"Pred <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"Pred <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"Pred <xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"Pred <xliff:g id="COUNT">%d</xliff:g> r."</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> r."</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"O <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"O <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"O <xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"O <xliff:g id="COUNT">%d</xliff:g> r."</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"Pred <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"Pred <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"Pred <xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"Pred <xliff:g id="COUNT">%d</xliff:g> r."</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Pred # minútou}few{Pred # minútami}many{Pred # minúty}other{Pred # minútami}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Pred # hodinou}few{Pred # hodinami}many{Pred # hodiny}other{Pred # hodinami}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Pred # dňom}few{Pred # dňami}many{Pred # dňa}other{Pred # dňami}}"</string>
@@ -1759,6 +1782,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Režim jednej ruky"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mimoriadne stmavenie"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Načúvacie zariadenia"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je zapnutá."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Pridržali ste tlačidlá hlasitosti. Služba <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vypnutá."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Uvoľnite tlačidlá hlasitosti. Ak chcete zapnúť službu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, znova pridržte tri sekundy obe tlačidlá hlasitosti."</string>
@@ -1940,13 +1971,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Víkend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Udalosť"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Spánok"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Režim bez vyrušení (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Spravované aplikáciou <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Zapnuté"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Vypnuté"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Ľubovoľný kalendár"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> vypína niektoré zvuky"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Vo vašom zariadení došlo k internému problému. Môže byť nestabilné, kým neobnovíte jeho výrobné nastavenia."</string>
@@ -2428,15 +2460,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Odosielajte a prijímajte správy bez mobilnej siete či siete Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otvoriť Správy"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ako to funguje"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Zapnite Vyberať sieť automaticky"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Zapnite v Nastaveniach možnosť Vyberať sieť automaticky, aby telefón mohol nájsť sieť, ktorá spolupracuje so satelitom"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Zapnúť"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Prejsť späť"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Nespracovaná…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Pomoc cez satelit je teraz k dispozícii"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Tiesňovej linke môžete poslať správu, keď nie je dostupná mobilná sieť ani sieť Wi‑Fi. Správy Google musíte mať nastavené ako predvolený komunikátor."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Pomoc cez satelit nie je podporovaná"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Pomoc cez satelit nie je v tomto zariadení podporovaná"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Pomoc cez satelit nie je nastavená"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Skontrolujte, či máte internetové pripojenie, a skúste nastavenie zopakovať"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Pomoc cez satelit nie je k dispozícii"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Pomoc cez satelit nie je v tejto krajine alebo regióne k dispozícii"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Pomoc cez satelit nie je nastavená"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Ak chcete posielať správy cez satelit, nastavte Správy Google ako predvolený komunikátor"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Pomoc cez satelit nie je k dispozícii"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Ak chcete skontrolovať, či je pomoc cez satelit v tejto krajine alebo regióne k dispozícii, zapnite nastavenia polohy"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Správy cez satelit sú k dispozícii"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Keď nie je dostupná mobilná sieť ani sieť Wi‑Fi, môžete posielať správy cez satelit. Správy Google musíte mať nastavené ako predvolený komunikátor."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Správy cez satelit nie sú podporované"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Správy cez satelit nie sú v tomto zariadení podporované"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Správy cez satelit nie sú nastavené"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Skontrolujte, či máte internetové pripojenie, a skúste nastavenie zopakovať"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Správy cez satelit nie sú k dispozícii"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Správy cez satelit nie sú v tejto krajine alebo regióne k dispozícii"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Správy cez satelit nie sú nastavené"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Ak chcete posielať správy cez satelit, nastavte Správy Google ako predvolený komunikátor"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Správy cez satelit nie sú k dispozícii"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Ak chcete skontrolovať, či sú správy cez satelit v tejto krajine alebo regióne k dispozícii, zapnite nastavenia polohy"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Znova nastavte odomknutie odtlačkom prsta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> sa už nedari rozpoznať."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> a <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> sa už nedari rozpoznať."</string>

@@ -53,7 +53,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.function.DodecFunction;
 import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.OctFunction;
+import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.UndecFunction;
 import com.android.server.LocalServices;
@@ -136,7 +136,8 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
 
         final LocationManagerInternal locationManagerInternal = LocalServices.getService(
                 LocationManagerInternal.class);
-        locationManagerInternal.setLocationPackageTagsListener(
+        if (locationManagerInternal != null) {
+            locationManagerInternal.setLocationPackageTagsListener(
                 (uid, packageTagsList) -> {
                     synchronized (mLock) {
                         if (packageTagsList.isEmpty()) {
@@ -158,6 +159,7 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
                                 mLocationTags);
                     }
                 });
+        }
 
         final IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
@@ -246,11 +248,12 @@ public final class AppOpsPolicy implements AppOpsManagerInternal.CheckOpsDelegat
     public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
             @Nullable String attributionTag, int virtualDeviceId,
             boolean shouldCollectAsyncNotedOp, @Nullable String message,
-            boolean shouldCollectMessage, @NonNull OctFunction<Integer, Integer, String, String,
-                    Integer, Boolean, String, Boolean, SyncNotedAppOp> superImpl) {
+            boolean shouldCollectMessage, int notedCount,
+            @NonNull NonaFunction<Integer, Integer, String, String,
+                    Integer, Boolean, String, Boolean, Integer, SyncNotedAppOp> superImpl) {
         return superImpl.apply(resolveDatasourceOp(code, uid, packageName, attributionTag),
                 resolveUid(code, uid), packageName, attributionTag, virtualDeviceId,
-                shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                shouldCollectAsyncNotedOp, message, shouldCollectMessage, notedCount);
     }
 
     @Override

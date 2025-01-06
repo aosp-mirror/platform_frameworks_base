@@ -53,6 +53,24 @@ flag {
 }
 
 flag {
+    name: "enhanced_confirmation_in_call_apis_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "DEPRECATED, does not gate any apis"
+    bug: "364535720"
+}
+
+flag {
+    name: "unknown_call_package_install_blocking_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "enable the blocking of certain app installs during an unknown call"
+    bug: "364535720"
+}
+
+flag {
     name: "op_enable_mobile_data_by_user"
     is_exported: true
     namespace: "permissions"
@@ -195,6 +213,7 @@ flag {
     namespace: "permissions"
     description: "Enable getDeviceId API in OpEventProxyInfo"
     bug: "337340961"
+    is_exported: true
 }
 
 flag {
@@ -236,6 +255,7 @@ flag {
   namespace: "permissions"
   description: "New setOnOpNotedCallback API to allow subscribing to only sync ops."
   bug: "372910217"
+  is_exported: true
 }
 
 flag {
@@ -266,7 +286,7 @@ flag {
     is_fixed_read_only: true
     is_exported: true
     namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable replacing permission BODY_SENSORS (and BODY_SENSORS_BACKGROUND) with granular health permission READ_HEART_RATE (and READ_HEALTH_DATA_IN_BACKGROUND)"
+    description: "Enables replacement of BODY_SENSORS/BODY_SENSORS_BACKGROUND permissions with granular health permissions READ_HEART_RATE, READ_SKIN_TEMPERATURE, READ_OXYGEN_SATURATION, and READ_HEALTH_DATA_IN_BACKGROUND"
     bug: "364638912"
 }
 
@@ -279,24 +299,6 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
-}
-
-flag {
-    name: "platform_skin_temperature_enabled"
-    is_fixed_read_only: true
-    is_exported: true
-    namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable platform support for Skin Temperature."
-    bug: "369872443"
-}
-
-flag {
-    name: "platform_oxygen_saturation_enabled"
-    is_fixed_read_only: true
-    is_exported: true
-    namespace: "android_health_services"
-    description: "This fixed read-only flag is used to enable platform support for Oxygen Saturation (SpO2)."
-    bug: "369873227"
 }
 
 flag {
@@ -332,3 +334,162 @@ flag {
     description: "Enables ExtServices to leverage TextClassifier for OTP detection"
     bug: "351976749"
 }
+
+flag {
+    name: "health_connect_backup_restore_permission_enabled"
+    is_fixed_read_only: true
+    namespace: "health_fitness_aconfig"
+    description: "This flag protects the permission that is required to call Health Connect backup and restore apis"
+    bug: "324019102" # android_fr bug
+    is_exported: true
+}
+
+flag {
+    name: "enable_aiai_proxied_text_classifiers"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables the AiAi to utilize the default OTP text classifier that is also used by ExtServices"
+    bug: "377229653"
+}
+
+flag {
+    name: "enable_sqlite_appops_accesses"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables SQlite for recording discrete and historical AppOp accesses"
+    bug: "377584611"
+}
+
+flag {
+    name: "ranging_permission_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "uwb"
+    description: "This fixed read-only flag is used to enable new ranging permission for all ranging use cases."
+    bug: "370977414"
+}
+
+flag {
+    name: "system_selection_toolbar_enabled"
+    namespace: "permissions"
+    description: "Enables the system selection toolbar feature."
+    bug: "363318732"
+}
+
+flag {
+    name: "use_system_selection_toolbar_in_sysui"
+    namespace: "permissions"
+    description: "Uses the SysUi process to host the SelectionToolbarRenderService."
+    bug: "363318732"
+}
+
+flag {
+    name: "note_op_batching_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Batch noteOperations on the client to reduce binder call volume"
+    bug: "366013082"
+}
+
+flag {
+    name: "supervision_role_permission_update_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "supervision"
+    description: "This flag is used to enable all the remaining permissions required to the supervision role"
+    bug: "367333883"
+}
+
+flag {
+    name: "permission_request_short_circuit_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "This flag is used to short circuit the request for permananently denied permissions"
+    bug: "378923900"
+}
+
+flag {
+    name: "check_op_overload_api_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "Add new checkOp APIs that accept attributionTag"
+    bug: "240617242"
+}
+
+flag {
+    name: "device_policy_management_role_split_create_managed_profile_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "enterprise"
+    description: "Gives the device policy management role the ability to create a managed profile using new APIs"
+    bug: "375382324"
+}
+
+flag {
+    name: "use_profile_labels_for_default_app_section_titles"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "profile_experiences"
+    description: "Use profile labels from UserManager for default app section titles to allow partner customization"
+    bug: "358369931"
+}
+
+flag {
+    name: "wallet_role_cross_user_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "wallet_integration"
+    description: "Enable the Wallet role within profiles"
+    bug: "356107987"
+}
+
+flag {
+    name: "text_classifier_choice_api_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "API change to enable getTextClassifier by type"
+    bug: "377229653"
+}
+
+flag {
+    name: "updatable_text_classifier_for_otp_detection_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Enables text classifier for OTP detection that is updatable from mainline module"
+    bug: "377229653"
+}
+
+flag {
+    name: "rate_limit_batched_note_op_async_callbacks_enabled"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Rate limit async noteOp callbacks for batched noteOperation binder call"
+    bug: "366013082"
+}
+
+flag {
+    name: "system_vendor_intelligence_role_enabled"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "permissions"
+    description: "This flag is used to enable the role system_vendor_intelligence"
+    bug: "377553620"
+}
+
+flag {
+    name: "fine_power_monitor_permission"
+    is_fixed_read_only: true
+    is_exported: true
+    namespace: "permissions"
+    description: "Add support for fine-grained PowerMonitor readings"
+    bug: "341941666"
+}
+

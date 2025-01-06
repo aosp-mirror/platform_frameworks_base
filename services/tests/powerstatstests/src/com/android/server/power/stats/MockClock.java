@@ -40,4 +40,13 @@ public class MockClock extends Clock {
     public long currentTimeMillis() {
         return currentTime;
     }
+
+    /**
+     * Advances the clock by the given number of milliseconds.
+     */
+    public void advance(long milliseconds) {
+        realtime += milliseconds;
+        uptime += milliseconds;
+        currentTime += milliseconds;
+    }
 }

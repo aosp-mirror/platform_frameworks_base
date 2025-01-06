@@ -16,8 +16,10 @@
 
 package com.android.settingslib.widget
 
+import android.annotation.SuppressLint
 import android.os.Handler
 import android.os.Looper
+import android.util.TypedValue
 import androidx.annotation.DrawableRes
 import androidx.preference.Preference
 import androidx.preference.PreferenceCategory
@@ -27,12 +29,12 @@ import androidx.preference.PreferenceViewHolder
 import com.android.settingslib.widget.theme.R
 
 /**
- * A custom adapter for displaying settings preferences in a list, handling rounded corners
- * for preference items within a group.
+ * A custom adapter for displaying settings preferences in a list, handling rounded corners for
+ * preference items within a group.
  */
-open class SettingsPreferenceGroupAdapter @JvmOverloads constructor(
-    preferenceGroup: PreferenceGroup
-) : PreferenceGroupAdapter(preferenceGroup) {
+@SuppressLint("RestrictedApi")
+open class SettingsPreferenceGroupAdapter(preferenceGroup: PreferenceGroup) :
+    PreferenceGroupAdapter(preferenceGroup) {
 
     private val mPreferenceGroup = preferenceGroup
     private var mRoundCornerMappingList: ArrayList<Int> = ArrayList()
@@ -41,6 +43,7 @@ open class SettingsPreferenceGroupAdapter @JvmOverloads constructor(
     private var mGroupPaddingStart = 0
     private var mNormalPaddingEnd = 0
     private var mGroupPaddingEnd = 0
+    @DrawableRes private var mLegacyBackgroundRes: Int
 
     private val mHandler = Handler(Looper.getMainLooper())
 
@@ -54,9 +57,17 @@ open class SettingsPreferenceGroupAdapter @JvmOverloads constructor(
         mNormalPaddingEnd =
             context.resources.getDimensionPixelSize(R.dimen.settingslib_expressive_space_small1)
         mGroupPaddingEnd = mNormalPaddingEnd * 2
+        val outValue = TypedValue()
+        context.theme.resolveAttribute(
+            android.R.attr.selectableItemBackground,
+            outValue,
+            true, /* resolveRefs */
+        )
+        mLegacyBackgroundRes = outValue.resourceId
         updatePreferences()
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onPreferenceHierarchyChange(preference: Preference) {
         super.onPreferenceHierarchyChange(preference)
 
@@ -65,6 +76,7 @@ open class SettingsPreferenceGroupAdapter @JvmOverloads constructor(
         mHandler.post(syncRunnable)
     }
 
+    @SuppressLint("RestrictedApi")
     override fun onBindViewHolder(holder: PreferenceViewHolder, position: Int) {
         super.onBindViewHolder(holder, position)
         updateBackground(holder, position)
@@ -79,6 +91,7 @@ open class SettingsPreferenceGroupAdapter @JvmOverloads constructor(
         }
     }
 
+    @SuppressLint("RestrictedApi")
     private fun mappingPreferenceGroup(cornerStyles: MutableList<Int>, group: PreferenceGroup) {
         cornerStyles.clear()
         cornerStyles.addAll(MutableList(itemCount) { 0 })
@@ -151,20 +164,38 @@ open class SettingsPreferenceGroupAdapter @JvmOverloads constructor(
         }
     }
 
-    /** handle roundCorner background  */
+    /** handle roundCorner background */
     private fun updateBackground(holder: PreferenceViewHolder, position: Int) {
-        @DrawableRes val backgroundRes = getRoundCornerDrawableRes(position, false /* isSelected*/)
+        val context = holder.itemView.context
+        @DrawableRes
+        val backgroundRes =
+            when (SettingsThemeHelper.isExpressiveTheme(context)) {
+                true -> getRoundCornerDrawableRes(position, isSelected = false)
+                else -> mLegacyBackgroundRes
+            }
 
         val v = holder.itemView
-        val paddingStart = if (backgroundRes == 0) mNormalPaddingStart else mGroupPaddingStart
-        val paddingEnd = if (backgroundRes == 0) mNormalPaddingEnd else mGroupPaddingEnd
-
-        v.setPaddingRelative(paddingStart, v.paddingTop, paddingEnd, v.paddingBottom)
+        // Update padding
+        if (SettingsThemeHelper.isExpressiveTheme(context)) {
+            val paddingStart = if (backgroundRes == 0) mNormalPaddingStart else mGroupPaddingStart
+            val paddingEnd = if (backgroundRes == 0) mNormalPaddingEnd else mGroupPaddingEnd
+            v.setPaddingRelative(paddingStart, v.paddingTop, paddingEnd, v.paddingBottom)
+        }
+        // Update background
         v.setBackgroundResource(backgroundRes)
     }
 
     @DrawableRes
     protected fun getRoundCornerDrawableRes(position: Int, isSelected: Boolean): Int {
+        return getRoundCornerDrawableRes(position, isSelected, false)
+    }
+
+    @DrawableRes
+    protected fun getRoundCornerDrawableRes(
+        position: Int,
+        isSelected: Boolean,
+        isHighlighted: Boolean,
+    ): Int {
         val cornerType = mRoundCornerMappingList[position]
 
         if ((cornerType and ROUND_CORNER_CENTER) == 0) {
@@ -175,24 +206,28 @@ open class SettingsPreferenceGroupAdapter @JvmOverloads constructor(
             (cornerType and ROUND_CORNER_TOP) != 0 && (cornerType and ROUND_CORNER_BOTTOM) == 0 -> {
                 // the first
                 if (isSelected) R.drawable.settingslib_round_background_top_selected
+                else if (isHighlighted) R.drawable.settingslib_round_background_top_highlighted
                 else R.drawable.settingslib_round_background_top
             }
 
             (cornerType and ROUND_CORNER_BOTTOM) != 0 && (cornerType and ROUND_CORNER_TOP) == 0 -> {
                 // the last
                 if (isSelected) R.drawable.settingslib_round_background_bottom_selected
+                else if (isHighlighted) R.drawable.settingslib_round_background_bottom_highlighted
                 else R.drawable.settingslib_round_background_bottom
             }
 
             (cornerType and ROUND_CORNER_TOP) != 0 && (cornerType and ROUND_CORNER_BOTTOM) != 0 -> {
                 // the only one preference
                 if (isSelected) R.drawable.settingslib_round_background_selected
+                else if (isHighlighted) R.drawable.settingslib_round_background_highlighted
                 else R.drawable.settingslib_round_background
             }
 
             else -> {
                 // in the center
                 if (isSelected) R.drawable.settingslib_round_background_center_selected
+                else if (isHighlighted) R.drawable.settingslib_round_background_center_highlighted
                 else R.drawable.settingslib_round_background_center
             }
         }

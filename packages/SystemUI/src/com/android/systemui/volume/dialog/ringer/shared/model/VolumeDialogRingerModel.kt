@@ -23,8 +23,6 @@ data class VolumeDialogRingerModel(
     val availableModes: List<RingerMode>,
     /** Current ringer mode internal */
     val currentRingerMode: RingerMode,
-    /** whether the ringer is allowed given the current ZenMode */
-    val isEnabled: Boolean,
     /** Whether the current ring stream level is zero or the controller state is muted */
     val isMuted: Boolean,
     /** Ring stream level */

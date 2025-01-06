@@ -26,10 +26,10 @@ import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.flags.FeatureFlags;
 import com.android.systemui.flags.Flags;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.plugins.PluginManager;
 import com.android.systemui.plugins.clocks.ClockMessageBuffers;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shared.clocks.ClockRegistry;
 import com.android.systemui.shared.clocks.DefaultClockProvider;
 import com.android.systemui.util.ThreadAssert;
@@ -47,7 +47,7 @@ public abstract class ClockRegistryModule {
     @Provides
     @SysUISingleton
     public static ClockRegistry getClockRegistry(
-            @Application Context context,
+            @ShadeDisplayAware Context context,
             PluginManager pluginManager,
             @Application CoroutineScope scope,
             @Main CoroutineDispatcher mainDispatcher,
@@ -62,14 +62,14 @@ public abstract class ClockRegistryModule {
                 scope,
                 mainDispatcher,
                 bgDispatcher,
-                featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
+                com.android.systemui.Flags.lockscreenCustomClocks()
+                        || featureFlags.isEnabled(Flags.LOCKSCREEN_CUSTOM_CLOCKS),
                 /* handleAllUsers= */ true,
                 new DefaultClockProvider(
                         context,
                         layoutInflater,
                         resources,
-                        featureFlags.isEnabled(Flags.STEP_CLOCK_ANIMATION),
-                        MigrateClocksToBlueprint.isEnabled(),
+
                         com.android.systemui.Flags.clockReactiveVariants()
                 ),
                 context.getString(R.string.lockscreen_clock_id_fallback),

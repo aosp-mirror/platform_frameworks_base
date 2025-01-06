@@ -538,7 +538,6 @@ public final class ProcessState {
     public void incActiveServices(String serviceName) {
         if (DEBUG && "".equals(mName)) {
             RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
             Slog.d(TAG, "incActiveServices: " + this + " service=" + serviceName
                     + " to " + (mNumActiveServices+1), here);
         }
@@ -551,7 +550,6 @@ public final class ProcessState {
     public void decActiveServices(String serviceName) {
         if (DEBUG && "".equals(mName)) {
             RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
             Slog.d(TAG, "decActiveServices: " + this + " service=" + serviceName
                     + " to " + (mNumActiveServices-1), here);
         }
@@ -569,7 +567,6 @@ public final class ProcessState {
     public void incStartedServices(int memFactor, long now, String serviceName) {
         if (false) {
             RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
             Slog.d(TAG, "incStartedServices: " + this + " service=" + serviceName
                     + " to " + (mNumStartedServices+1), here);
         }
@@ -585,7 +582,6 @@ public final class ProcessState {
     public void decStartedServices(int memFactor, long now, String serviceName) {
         if (false) {
             RuntimeException here = new RuntimeException("here");
-            here.fillInStackTrace();
             Slog.d(TAG, "decActiveServices: " + this + " service=" + serviceName
                     + " to " + (mNumStartedServices-1), here);
         }

@@ -124,7 +124,7 @@ interface INotificationManager
     boolean onlyHasDefaultChannel(String pkg, int uid);
     boolean areChannelsBypassingDnd();
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);
-    List<String> getPackagesBypassingDnd(int userId, boolean includeConversationChannels);
+    ParceledListSlice getPackagesBypassingDnd(int userId);
     boolean isPackagePaused(String pkg);
     void deleteNotificationHistoryItem(String pkg, int uid, long postedTime);
     boolean isPermissionFixed(String pkg, int userId);
@@ -267,4 +267,9 @@ interface INotificationManager
 
     void setAdjustmentTypeSupportedState(in INotificationListener token, String key, boolean supported);
     List<String> getUnsupportedAdjustmentTypes();
+
+    int[] getAllowedAdjustmentKeyTypes();
+    void setAssistantAdjustmentKeyTypeState(int type, boolean enabled);
+    int[] getAllowedAdjustmentKeyTypesForPackage(String pkg);
+    void setAssistantAdjustmentKeyTypeStateForPackage(String pkg, int type, boolean enabled);
 }

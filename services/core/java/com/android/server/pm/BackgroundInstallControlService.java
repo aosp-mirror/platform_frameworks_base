@@ -265,6 +265,7 @@ public class BackgroundInstallControlService extends SystemService {
 
         @Override
         public void handleMessage(Message msg) {
+            Slog.d(TAG, "Package event received: " + msg.what);
             switch (msg.what) {
                 case MSG_USAGE_EVENT_RECEIVED:
                     mService.handleUsageEvent(
@@ -326,6 +327,8 @@ public class BackgroundInstallControlService extends SystemService {
             return;
         }
 
+        Slog.d(TAG, "handlePackageAdd: adding " + packageName + " from "
+            + userId + " and notifying callbacks");
         initBackgroundInstalledPackages();
         mBackgroundInstalledPackages.add(userId, packageName);
         mCallbackHelper.notifyAllCallbacks(userId, packageName, INSTALL_EVENT_TYPE_INSTALL);
@@ -364,7 +367,11 @@ public class BackgroundInstallControlService extends SystemService {
     // ADB sets installerPackageName to null, this creates a loophole to bypass BIC which will be
     // addressed with b/265203007
     private boolean installedByAdb(String initiatingPackageName) {
-        return PackageManagerServiceUtils.isInstalledByAdb(initiatingPackageName);
+        if(PackageManagerServiceUtils.isInstalledByAdb(initiatingPackageName)) {
+            Slog.d(TAG, "handlePackageAdd: is installed by ADB, skipping");
+            return true;
+        }
+        return false;
     }
 
     private boolean wasForegroundInstallation(
@@ -407,6 +414,7 @@ public class BackgroundInstallControlService extends SystemService {
         if (mBackgroundInstalledPackages.contains(userId, packageName)) {
             mCallbackHelper.notifyAllCallbacks(userId, packageName, INSTALL_EVENT_TYPE_UNINSTALL);
         }
+        Slog.d(TAG, "handlePackageRemove: removing " + packageName + " from " + userId);
         mBackgroundInstalledPackages.remove(userId, packageName);
         writeBackgroundInstalledPackagesToDisk();
     }

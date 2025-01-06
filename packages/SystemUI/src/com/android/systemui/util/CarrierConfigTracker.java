@@ -60,10 +60,6 @@ public class CarrierConfigTracker
     private final Set<CarrierConfigChangedListener> mListeners = new ArraySet<>();
     private final Set<DefaultDataSubscriptionChangedListener> mDataListeners =
             new ArraySet<>();
-    private boolean mDefaultCallStrengthConfigLoaded;
-    private boolean mDefaultCallStrengthConfig;
-    private boolean mDefaultNoCallingConfigLoaded;
-    private boolean mDefaultNoCallingConfig;
     private boolean mDefaultCarrierProvisionsWifiMergedNetworksLoaded;
     private boolean mDefaultCarrierProvisionsWifiMergedNetworks;
     private boolean mDefaultShowOperatorNameConfigLoaded;
@@ -143,42 +139,6 @@ public class CarrierConfigTracker
         for (DefaultDataSubscriptionChangedListener l : mDataListeners) {
             l.onDefaultSubscriptionChanged(subId);
         }
-    }
-
-    /**
-     * Returns the KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL value for the given subId.
-     */
-    public boolean getCallStrengthConfig(int subId) {
-        synchronized (mCallStrengthConfigs) {
-            if (mCallStrengthConfigs.indexOfKey(subId) >= 0) {
-                return mCallStrengthConfigs.get(subId);
-            }
-        }
-        if (!mDefaultCallStrengthConfigLoaded) {
-            mDefaultCallStrengthConfig =
-                    CarrierConfigManager.getDefaultConfig().getBoolean(
-                            CarrierConfigManager.KEY_DISPLAY_CALL_STRENGTH_INDICATOR_BOOL);
-            mDefaultCallStrengthConfigLoaded = true;
-        }
-        return mDefaultCallStrengthConfig;
-    }
-
-    /**
-     * Returns the KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL value for the given subId.
-     */
-    public boolean getNoCallingConfig(int subId) {
-        synchronized (mNoCallingConfigs) {
-            if (mNoCallingConfigs.indexOfKey(subId) >= 0) {
-                return mNoCallingConfigs.get(subId);
-            }
-        }
-        if (!mDefaultNoCallingConfigLoaded) {
-            mDefaultNoCallingConfig =
-                    CarrierConfigManager.getDefaultConfig().getBoolean(
-                            CarrierConfigManager.KEY_USE_IP_FOR_CALLING_INDICATOR_BOOL);
-            mDefaultNoCallingConfigLoaded = true;
-        }
-        return mDefaultNoCallingConfig;
     }
 
     /**

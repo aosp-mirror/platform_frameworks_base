@@ -527,6 +527,7 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testHandlesOrientationChangeFromDescendant() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final Task rootTask = createTask(mDisplayContent,
                 WINDOWING_MODE_MULTI_WINDOW, ACTIVITY_TYPE_STANDARD);
         final Task leafTask1 = createTaskInRootTask(rootTask, 0 /* userId */);
@@ -1570,6 +1571,7 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testNotSpecifyOrientationByFloatingTask() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final Task task = new TaskBuilder(mSupervisor)
                 .setCreateActivity(true).setCreateParentTask(true).build();
         final ActivityRecord activity = task.getTopMostActivity();
@@ -1589,6 +1591,7 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testNotSpecifyOrientation_taskDisplayAreaNotFocused() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea firstTaskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final TaskDisplayArea secondTaskDisplayArea = createTaskDisplayArea(
                 mDisplayContent, mRootWindowContainer.mWmService, "TestTaskDisplayArea",
@@ -1625,6 +1628,7 @@ public class TaskTests extends WindowTestsBase {
 
     @Test
     public void testTaskOrientationOnDisplayWindowingModeChange() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         // Skip unnecessary operations to speed up the test.
         mAtm.deferWindowLayout();
         final Task task = getTestTask();

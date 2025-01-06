@@ -21,7 +21,6 @@ import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.telephony.TelephonyManager
 import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.statusbar.pipeline.mobile.data.model.DataConnectionState
@@ -59,7 +58,7 @@ class CarrierMergedConnectionRepository(
     override val tableLogBuffer: TableLogBuffer,
     private val telephonyManager: TelephonyManager,
     private val bgContext: CoroutineContext,
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
     val wifiRepository: WifiRepository,
 ) : MobileConnectionRepository {
     init {
@@ -90,7 +89,7 @@ class CarrierMergedConnectionRepository(
                         TAG,
                         "Connection repo subId=$subId " +
                             "does not equal wifi repo subId=${network.subscriptionId}; " +
-                            "not showing carrier merged"
+                            "not showing carrier merged",
                     )
                     null
                 }
@@ -149,7 +148,7 @@ class CarrierMergedConnectionRepository(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                ResolvedNetworkType.UnknownNetworkType
+                ResolvedNetworkType.UnknownNetworkType,
             )
 
     override val dataConnectionState =
@@ -173,6 +172,7 @@ class CarrierMergedConnectionRepository(
     override val isNonTerrestrial = MutableStateFlow(false).asStateFlow()
     override val isGsm = MutableStateFlow(false).asStateFlow()
     override val carrierNetworkChangeActive = MutableStateFlow(false).asStateFlow()
+    override val satelliteLevel = MutableStateFlow(0)
 
     /**
      * Carrier merged connections happen over wifi but are displayed as a mobile triangle. Because
@@ -204,13 +204,10 @@ class CarrierMergedConnectionRepository(
     constructor(
         private val telephonyManager: TelephonyManager,
         @Background private val bgContext: CoroutineContext,
-        @Application private val scope: CoroutineScope,
+        @Background private val scope: CoroutineScope,
         private val wifiRepository: WifiRepository,
     ) {
-        fun build(
-            subId: Int,
-            mobileLogger: TableLogBuffer,
-        ): MobileConnectionRepository {
+        fun build(subId: Int, mobileLogger: TableLogBuffer): MobileConnectionRepository {
             return CarrierMergedConnectionRepository(
                 subId,
                 mobileLogger,

@@ -1,4 +1,12 @@
 {
+  "presubmit": [
+    {
+      "name": "FrameworksVcnTests"
+    },
+    {
+      "name": "CtsVcnTestCases"
+    }
+  ],
   "postsubmit": [
     {
       "name": "FrameworksVcnTests"

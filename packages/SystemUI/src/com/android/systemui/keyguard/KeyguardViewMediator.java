@@ -239,7 +239,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     private static final boolean ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS =
             Flags.ensureKeyguardDoesTransitionStarting();
-    private static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
+    public static final int KEYGUARD_DISPLAY_TIMEOUT_DELAY_DEFAULT = 30000;
     private static final long KEYGUARD_DONE_PENDING_TIMEOUT_MS = 3000;
 
     private static final boolean DEBUG = KeyguardConstants.DEBUG;
@@ -2875,7 +2875,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             }
 
             if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
-                mKeyguardTransitions.startKeyguardTransition(showing, aodShowing);
+                startKeyguardTransition(showing, aodShowing);
             } else {
                 try {
 
@@ -3019,7 +3019,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 final int keyguardFlag = flags;
                 mUiBgExecutor.execute(() -> {
                     if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
-                        mKeyguardTransitions.startKeyguardTransition(
+                        startKeyguardTransition(
                                 false /* keyguardShowing */, false /* aodShowing */);
                         return;
                     }
@@ -3034,6 +3034,10 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
             Trace.endSection();
         }
     };
+
+    private void startKeyguardTransition(boolean keyguardShowing, boolean aodShowing) {
+        mKeyguardTransitions.startKeyguardTransition(keyguardShowing, aodShowing);
+    }
 
     private final Runnable mHideAnimationFinishedRunnable = () -> {
         Log.e(TAG, "mHideAnimationFinishedRunnable#run");
@@ -3490,8 +3494,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
         mSurfaceBehindRemoteAnimationRequested = true;
 
         if (ENABLE_NEW_KEYGUARD_SHELL_TRANSITIONS) {
-            mKeyguardTransitions.startKeyguardTransition(
-                    false /* keyguardShowing */, false /* aodShowing */);
+            startKeyguardTransition(false /* keyguardShowing */, false /* aodShowing */);
             return;
         }
 
@@ -3940,7 +3943,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
     }
 
     private void notifyDefaultDisplayCallbacks(boolean showing) {
-        if (SceneContainerFlag.isEnabled()) {
+        if (SceneContainerFlag.isEnabled() || KeyguardWmStateRefactor.isEnabled()) {
             return;
         }
 
@@ -4055,7 +4058,8 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
                 RemoteAnimationTarget[] nonApps,
                 IRemoteAnimationFinishedCallback finishedCallback)
                 throws RemoteException {
-            mRunner = mActivityTransitionAnimator.get().createRunner(mActivityLaunchController);
+            mRunner = mActivityTransitionAnimator.get()
+                    .createEphemeralRunner(mActivityLaunchController);
             mRunner.onAnimationStart(transit, apps, wallpapers, nonApps, finishedCallback);
         }
     }

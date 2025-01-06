@@ -20,9 +20,11 @@ import android.view.ViewGroup
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.CoreStartable
 import com.android.systemui.fragments.FragmentHostManager
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewInitializedListener
 import com.android.systemui.statusbar.core.StatusBarInitializer.OnStatusBarViewUpdatedListener
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
 import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions
 import com.android.systemui.statusbar.phone.PhoneStatusBarView
@@ -34,7 +36,6 @@ import com.android.systemui.statusbar.window.StatusBarWindowController
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import java.lang.IllegalStateException
 import javax.inject.Provider
 
 /**
@@ -75,6 +76,8 @@ interface StatusBarInitializer : CoreStartable {
         fun create(
             statusBarWindowController: StatusBarWindowController,
             statusBarModePerDisplayRepository: StatusBarModePerDisplayRepository,
+            statusBarConfigurationController: StatusBarConfigurationController,
+            darkIconDispatcher: DarkIconDispatcher,
         ): StatusBarInitializer
     }
 }
@@ -84,6 +87,8 @@ class StatusBarInitializerImpl
 constructor(
     @Assisted private val statusBarWindowController: StatusBarWindowController,
     @Assisted private val statusBarModePerDisplayRepository: StatusBarModePerDisplayRepository,
+    @Assisted private val statusBarConfigurationController: StatusBarConfigurationController,
+    @Assisted private val darkIconDispatcher: DarkIconDispatcher,
     private val collapsedStatusBarFragmentProvider: Provider<CollapsedStatusBarFragment>,
     private val statusBarRootFactory: StatusBarRootFactory,
     private val componentFactory: HomeStatusBarComponent.Factory,
@@ -112,12 +117,12 @@ constructor(
     }
 
     override fun initializeStatusBar() {
-        StatusBarSimpleFragment.assertInLegacyMode()
+        StatusBarRootModernization.assertInLegacyMode()
         doStart()
     }
 
     private fun doStart() {
-        if (StatusBarSimpleFragment.isEnabled) doComposeStart() else doLegacyStart()
+        if (StatusBarRootModernization.isEnabled) doComposeStart() else doLegacyStart()
     }
 
     /**
@@ -131,23 +136,32 @@ constructor(
                 ->
                 val phoneStatusBarView = cv.findViewById<PhoneStatusBarView>(R.id.status_bar)
                 component =
-                    componentFactory.create(phoneStatusBarView).also { component ->
-                        // CollapsedStatusBarFragment used to be responsible initializing
-                        component.init()
-
-                        statusBarViewUpdatedListener?.onStatusBarViewUpdated(
-                            component.phoneStatusBarViewController,
-                            component.phoneStatusBarTransitions,
+                    componentFactory
+                        .create(
+                            phoneStatusBarView,
+                            statusBarConfigurationController,
+                            statusBarWindowController,
+                            darkIconDispatcher,
                         )
+                        .also { component ->
+                            // CollapsedStatusBarFragment used to be responsible initializing
+                            component.init()
 
-                        if (StatusBarConnectedDisplays.isEnabled) {
-                            statusBarModePerDisplayRepository.onStatusBarViewInitialized(component)
-                        } else {
-                            creationListeners.forEach { listener ->
-                                listener.onStatusBarViewInitialized(component)
+                            statusBarViewUpdatedListener?.onStatusBarViewUpdated(
+                                component.phoneStatusBarViewController,
+                                component.phoneStatusBarTransitions,
+                            )
+
+                            if (StatusBarConnectedDisplays.isEnabled) {
+                                statusBarModePerDisplayRepository.onStatusBarViewInitialized(
+                                    component
+                                )
+                            } else {
+                                creationListeners.forEach { listener ->
+                                    listener.onStatusBarViewInitialized(component)
+                                }
                             }
                         }
-                    }
             }
 
         // Add the new compose view to the hierarchy because we don't use fragment transactions
@@ -163,9 +177,11 @@ constructor(
                 CollapsedStatusBarFragment.TAG,
                 object : FragmentHostManager.FragmentListener {
                     override fun onFragmentViewCreated(tag: String, fragment: Fragment) {
-                        component =
-                            (fragment as CollapsedStatusBarFragment).homeStatusBarComponent
-                                ?: throw IllegalStateException()
+                        val statusBarFragment = fragment as CollapsedStatusBarFragment
+                        if (statusBarFragment.homeStatusBarComponent == null) {
+                            return
+                        }
+                        component = fragment.homeStatusBarComponent
                         statusBarViewUpdatedListener?.onStatusBarViewUpdated(
                             component!!.phoneStatusBarViewController,
                             component!!.phoneStatusBarTransitions,
@@ -195,6 +211,8 @@ constructor(
         override fun create(
             statusBarWindowController: StatusBarWindowController,
             statusBarModePerDisplayRepository: StatusBarModePerDisplayRepository,
+            statusBarConfigurationController: StatusBarConfigurationController,
+            darkIconDispatcher: DarkIconDispatcher,
         ): StatusBarInitializerImpl
     }
 }

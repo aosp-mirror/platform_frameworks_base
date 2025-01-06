@@ -21,13 +21,18 @@ import android.view.GestureDetector
 import android.view.GestureDetector.SimpleOnGestureListener
 import android.view.MotionEvent
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import javax.inject.Inject
 
 /** Accepts touch events, detects long press, and calls ShadeViewController#onStatusBarLongPress. */
 @SysUISingleton
 class StatusBarLongPressGestureDetector
 @Inject
-constructor(context: Context, val shadeViewController: ShadeViewController) {
+constructor(
+    // TODO b/383125226 - Make this class per-display
+    @Main context: Context,
+    val shadeViewController: ShadeViewController,
+) {
     val gestureDetector =
         GestureDetector(
             context,

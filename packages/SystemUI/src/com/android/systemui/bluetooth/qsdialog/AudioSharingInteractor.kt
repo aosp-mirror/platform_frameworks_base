@@ -16,10 +16,13 @@
 
 package com.android.systemui.bluetooth.qsdialog
 
+import android.content.Context
+import androidx.annotation.WorkerThread
 import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
-import com.android.settingslib.bluetooth.onPlaybackStarted
+import com.android.settingslib.bluetooth.onBroadcastMetadataChanged
+import com.android.settingslib.flags.Flags.audioSharingQsDialogImprovement
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
@@ -52,6 +55,8 @@ interface AudioSharingInteractor {
     suspend fun startAudioSharing()
 
     suspend fun audioSharingAvailable(): Boolean
+
+    suspend fun qsDialogImprovementAvailable(): Boolean
 }
 
 @SysUISingleton
@@ -59,10 +64,13 @@ interface AudioSharingInteractor {
 class AudioSharingInteractorImpl
 @Inject
 constructor(
+    private val context: Context,
     private val localBluetoothManager: LocalBluetoothManager?,
     private val audioSharingRepository: AudioSharingRepository,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : AudioSharingInteractor {
+
+    private var previewEnabled: Boolean? = null
 
     override val isAudioSharingOn: Flow<Boolean> =
         flow { emit(audioSharingAvailable()) }
@@ -93,10 +101,10 @@ constructor(
                     isAudioSharingOn
                         .mapNotNull { audioSharingOn ->
                             if (audioSharingOn) {
-                                // onPlaybackStarted could emit multiple times during one
-                                // audio sharing session, we only perform add source on the
-                                // first time
-                                profile.onPlaybackStarted.firstOrNull()
+                                // onBroadcastMetadataChanged could emit multiple times during one
+                                // audio sharing session, we only perform add source on the first
+                                // time
+                                profile.onBroadcastMetadataChanged.firstOrNull()
                             } else {
                                 null
                             }
@@ -141,6 +149,20 @@ constructor(
     override suspend fun audioSharingAvailable(): Boolean {
         return audioSharingRepository.audioSharingAvailable()
     }
+
+    override suspend fun qsDialogImprovementAvailable(): Boolean {
+        return withContext(backgroundDispatcher) {
+            audioSharingQsDialogImprovement() || isAudioSharingPreviewEnabled()
+        }
+    }
+
+    @WorkerThread
+    private fun isAudioSharingPreviewEnabled(): Boolean {
+        if (previewEnabled == null) {
+            previewEnabled = BluetoothUtils.isAudioSharingPreviewEnabled(context.contentResolver)
+        }
+        return previewEnabled ?: false
+    }
 }
 
 @SysUISingleton
@@ -160,4 +182,6 @@ class AudioSharingInteractorEmptyImpl @Inject constructor() : AudioSharingIntera
     override suspend fun startAudioSharing() {}
 
     override suspend fun audioSharingAvailable(): Boolean = false
+
+    override suspend fun qsDialogImprovementAvailable(): Boolean = false
 }

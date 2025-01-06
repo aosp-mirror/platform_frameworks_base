@@ -182,7 +182,7 @@ class PhysicsBasedUnfoldTransitionProgressProviderTest : SysuiTestCase() {
 
     private fun runOnProgressThreadWithInterval(
         vararg blocks: () -> Unit,
-        intervalMillis: Long = 60,
+        intervalMillis: Long = 100,
     ) {
         blocks.forEach {
             bgHandler.post(it)

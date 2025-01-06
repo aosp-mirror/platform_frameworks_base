@@ -22,11 +22,18 @@ import static com.android.compatibility.common.util.PollingCheck.waitFor;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
+import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertThrows;
 
 import android.content.Context;
+import android.frameworks.devicestate.DeviceStateConfiguration;
+import android.frameworks.devicestate.ErrorCode;
+import android.frameworks.devicestate.IDeviceStateListener;
+import android.frameworks.devicestate.IDeviceStateService;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateRequest;
@@ -34,6 +41,7 @@ import android.hardware.devicestate.IDeviceStateManagerCallback;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.ServiceSpecificException;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -333,6 +341,53 @@ public final class DeviceStateManagerServiceTest {
                 .containsExactlyElementsIn(SUPPORTED_DEVICE_STATES).inOrder();
         assertThat(info.baseState.getIdentifier()).isEqualTo(INVALID_DEVICE_STATE_IDENTIFIER);
         assertThat(info.currentState.getIdentifier()).isEqualTo(INVALID_DEVICE_STATE_IDENTIFIER);
+    }
+
+    @Test
+    public void halRegisterUnregisterCallback() throws RemoteException {
+        IDeviceStateService halService = mService.getHalBinderService();
+        IDeviceStateListener halListener = new IDeviceStateListener.Stub() {
+            @Override
+            public void onDeviceStateChanged(DeviceStateConfiguration deviceState) { }
+
+            @Override
+            public int getInterfaceVersion() {
+                return IDeviceStateListener.VERSION;
+            }
+
+            @Override
+            public String getInterfaceHash() {
+                return IDeviceStateListener.HASH;
+            }
+        };
+
+        int errorCode = ErrorCode.OK;
+        try {
+            halService.unregisterListener(halListener);
+        } catch(ServiceSpecificException e) {
+            errorCode = e.errorCode;
+        }
+        assertEquals(errorCode, ErrorCode.BAD_INPUT);
+
+        errorCode = ErrorCode.OK;
+        try {
+            halService.unregisterListener(null);
+        } catch(ServiceSpecificException e) {
+            errorCode = e.errorCode;
+        }
+        assertEquals(errorCode, ErrorCode.BAD_INPUT);
+
+        halService.registerListener(halListener);
+
+        errorCode = ErrorCode.OK;
+        try {
+            halService.registerListener(halListener);
+        } catch (ServiceSpecificException e) {
+            errorCode = e.errorCode;
+        }
+        assertEquals(errorCode, ErrorCode.ALREADY_EXISTS);
+
+        halService.unregisterListener(halListener);
     }
 
     @Test
@@ -866,6 +921,41 @@ public final class DeviceStateManagerServiceTest {
                     DEFAULT_DEVICE_STATE_IDENTIFIER,
                     0 /* flags */);
         });
+    }
+
+    @Test
+    public void shouldShowRdmEduDialog1() {
+        // RDM V1 Cases
+        assertTrue(DeviceStateManagerService.shouldShowRdmEduDialog(
+                false /* hasControlDeviceStatePermission */,
+                false /* requestingRdmOuterDefault */,
+                false /* isDeviceClosed (no-op) */));
+
+        assertFalse(DeviceStateManagerService.shouldShowRdmEduDialog(
+                true /* hasControlDeviceStatePermission */,
+                false /* requestingRdmOuterDefault */,
+                true /* isDeviceClosed (no-op) */));
+
+        // RDM V2 Cases
+        // hasControlDeviceStatePermission = false
+        assertFalse(DeviceStateManagerService.shouldShowRdmEduDialog(
+                false /* hasControlDeviceStatePermission */,
+                true /* requestingRdmOuterDefault */,
+                false /* isDeviceClosed */));
+        assertTrue(DeviceStateManagerService.shouldShowRdmEduDialog(
+                false /* hasControlDeviceStatePermission */,
+                true /* requestingRdmOuterDefault */,
+                true /* isDeviceClosed */));
+
+        // hasControlDeviceStatePermission = true
+        assertFalse(DeviceStateManagerService.shouldShowRdmEduDialog(
+                true /* hasControlDeviceStatePermission */,
+                true /* requestingRdmOuterDefault */,
+                false /* isDeviceClosed */));
+        assertFalse(DeviceStateManagerService.shouldShowRdmEduDialog(
+                true /* hasControlDeviceStatePermission */,
+                true /* requestingRdmOuterDefault */,
+                true /* isDeviceClosed */));
     }
 
     /**

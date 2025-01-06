@@ -16,16 +16,23 @@
 
 package android.view.textclassifier;
 
+import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
+
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertThrows;
 import static org.mockito.Mockito.mock;
 
+import android.Manifest;
 import android.content.Context;
+import android.permission.flags.Flags;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 
 import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import org.junit.Assume;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -60,5 +67,29 @@ public class TextClassificationManagerTest {
     public void testGetSystemTextClassifier() {
         assertThat(mTcm.getTextClassifier(TextClassifier.SYSTEM))
                 .isInstanceOf(SystemTextClassifier.class);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_TEXT_CLASSIFIER_CHOICE_API_ENABLED)
+    public void testGetClassifier() {
+        Assume.assumeTrue(Flags.textClassifierChoiceApiEnabled());
+        assertThrows(SecurityException.class,
+                () -> mTcm.getClassifier(TextClassifier.CLASSIFIER_TYPE_DEVICE_DEFAULT));
+        assertThrows(SecurityException.class,
+                () -> mTcm.getClassifier(TextClassifier.CLASSIFIER_TYPE_ANDROID_DEFAULT));
+        assertThrows(SecurityException.class,
+                () -> mTcm.getClassifier(TextClassifier.CLASSIFIER_TYPE_SELF_PROVIDED));
+
+        runWithShellPermissionIdentity(() -> {
+            assertThat(
+                    mTcm.getClassifier(TextClassifier.CLASSIFIER_TYPE_DEVICE_DEFAULT)).isInstanceOf(
+                    SystemTextClassifier.class);
+            assertThat(mTcm.getClassifier(
+                    TextClassifier.CLASSIFIER_TYPE_ANDROID_DEFAULT)).isInstanceOf(
+                    SystemTextClassifier.class);
+            assertThat(mTcm.getClassifier(
+                    TextClassifier.CLASSIFIER_TYPE_SELF_PROVIDED)).isSameInstanceAs(
+                    TextClassifier.NO_OP);
+        }, Manifest.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE);
     }
 }

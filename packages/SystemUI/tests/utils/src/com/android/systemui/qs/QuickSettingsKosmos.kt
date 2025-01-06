@@ -18,6 +18,7 @@ package com.android.systemui.qs
 
 import android.app.admin.devicePolicyManager
 import android.content.applicationContext
+import android.content.mockedContext
 import android.os.fakeExecutorHandler
 import android.os.looper
 import com.android.internal.logging.metricsLogger
@@ -54,9 +55,7 @@ var Kosmos.qsTileFactory by Fixture<QSFactory> { FakeQSFactory(::tileCreator) }
 val Kosmos.fgsManagerController by Fixture { FakeFgsManagerController() }
 
 val Kosmos.footerActionsController by Fixture {
-    FooterActionsController(
-        fgsManagerController = fgsManagerController,
-    )
+    FooterActionsController(fgsManagerController = fgsManagerController)
 }
 
 val Kosmos.qsSecurityFooterUtils by Fixture {
@@ -86,6 +85,7 @@ val Kosmos.footerActionsInteractor by Fixture {
         userSwitcherRepository = userSwitcherRepository,
         broadcastDispatcher = broadcastDispatcher,
         bgDispatcher = testDispatcher,
+        context = mockedContext,
     )
 }
 

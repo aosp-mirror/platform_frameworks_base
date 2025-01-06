@@ -54,6 +54,36 @@
                 <xs:element name="primitive-effect" type="PrimitiveEffect"/>
             </xs:sequence>
 
+            <!-- Waveform envelope effect -->
+            <xs:element name="waveform-envelope-effect" type="WaveformEnvelopeEffect"/>
+
+            <!-- Basic envelope effect -->
+            <xs:element name="basic-envelope-effect" type="BasicEnvelopeEffect"/>
+
+            <!-- Repeating vibration effect -->
+            <xs:element name="repeating-effect" type="RepeatingEffect"/>
+
+        </xs:choice>
+    </xs:complexType>
+
+    <xs:complexType name="RepeatingEffect">
+        <xs:sequence>
+            <xs:element name="preamble" maxOccurs="1" minOccurs="0" type="RepeatingEffectEntry" />
+            <xs:element name="repeating" maxOccurs="1" minOccurs="1" type="RepeatingEffectEntry" />
+        </xs:sequence>
+    </xs:complexType>
+
+    <xs:complexType name="RepeatingEffectEntry">
+        <xs:choice>
+            <xs:element name="predefined-effect" type="PredefinedEffect" />
+            <xs:element name="waveform-envelope-effect" type="WaveformEnvelopeEffect" />
+            <xs:element name="basic-envelope-effect" type="BasicEnvelopeEffect" />
+            <xs:sequence>
+                <xs:element name="waveform-entry" type="WaveformEntry" />
+            </xs:sequence>
+            <xs:sequence>
+                <xs:element name="primitive-effect" type="PrimitiveEffect" />
+            </xs:sequence>
         </xs:choice>
     </xs:complexType>
 
@@ -147,6 +177,7 @@
         <xs:attribute name="name" type="PrimitiveEffectName" use="required"/>
         <xs:attribute name="scale" type="PrimitiveScale"/>
         <xs:attribute name="delayMs" type="xs:nonNegativeInteger"/>
+        <xs:attribute name="delayType" type="PrimitiveDelayType"/>
     </xs:complexType>
 
     <!-- Primitive names as defined by VibrationEffect.Composition.PRIMITIVE_* -->
@@ -165,6 +196,64 @@
 
     <!-- Primitive scale float in [0,1] -->
     <xs:simpleType name="PrimitiveScale">
+        <xs:restriction base="xs:float">
+            <xs:minInclusive value="0"/>
+            <xs:maxInclusive value="1"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Primitive delay types VibrationEffect.Composition.DELAY_TYPE_* -->
+    <xs:simpleType  name="PrimitiveDelayType">
+        <xs:restriction base="xs:string">
+            <xs:enumeration value="pause"/>
+            <xs:enumeration value="relative_start_offset"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Definition of a waveform envelope effect -->
+    <xs:complexType name="WaveformEnvelopeEffect">
+        <xs:sequence>
+            <xs:element name="control-point" maxOccurs="unbounded" minOccurs="1"
+                type="WaveformControlPoint" />
+        </xs:sequence>
+        <xs:attribute name="initialFrequencyHz" type="ControlPointFrequency" />
+    </xs:complexType>
+
+    <!-- Definition of a basic envelope effect -->
+    <xs:complexType name="BasicEnvelopeEffect">
+        <xs:sequence>
+            <xs:element name="control-point" maxOccurs="unbounded" minOccurs="1"
+                type="BasicControlPoint" />
+        </xs:sequence>
+        <xs:attribute name="initialSharpness" type="NormalizedControlPointUnit" />
+    </xs:complexType>
+
+    <xs:complexType name="WaveformControlPoint">
+        <xs:attribute name="amplitude" type="NormalizedControlPointUnit" use="required"/>
+        <xs:attribute name="frequencyHz" type="ControlPointFrequency" use="required"/>
+        <xs:attribute name="durationMs" type="PositiveLong" use="required"/>
+    </xs:complexType>
+
+    <xs:complexType name="BasicControlPoint">
+        <xs:attribute name="intensity" type="NormalizedControlPointUnit" use="required"/>
+        <xs:attribute name="sharpness" type="NormalizedControlPointUnit" use="required"/>
+        <xs:attribute name="durationMs" type="PositiveLong" use="required"/>
+    </xs:complexType>
+
+    <xs:simpleType name="ControlPointFrequency">
+        <xs:restriction base="xs:float">
+            <xs:minExclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <xs:simpleType name="PositiveLong">
+        <xs:restriction base="xs:long">
+            <xs:minExclusive value="0"/>
+        </xs:restriction>
+    </xs:simpleType>
+
+    <!-- Normalized control point unit float in [0,1] -->
+    <xs:simpleType name="NormalizedControlPointUnit">
         <xs:restriction base="xs:float">
             <xs:minInclusive value="0"/>
             <xs:maxInclusive value="1"/>

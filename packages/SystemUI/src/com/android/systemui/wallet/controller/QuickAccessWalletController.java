@@ -32,6 +32,7 @@ import android.provider.Settings;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.service.quickaccesswallet.QuickAccessWalletClientImpl;
+import android.service.quickaccesswallet.WalletCard;
 import android.util.Log;
 
 import com.android.systemui.animation.ActivityTransitionAnimator;
@@ -228,6 +229,35 @@ public class QuickAccessWalletController {
     }
 
     /**
+     * Starts the QuickAccessWallet Gesture UI (the app is launched by a hardware gesture).
+     *
+     *
+     * The Wallet target activity is defined as the {@link android.app.PendingIntent} returned by
+     * {@link QuickAccessWalletClient#getGestureTargetActivityPendingIntent} if that is not null.
+     * If that is null, then the method {@link QuickAccessWalletController#startQuickAccessUiIntent}
+     * as defined below is called, which starts the QuickAccessWallet UI.
+     *
+     * @param activityStarter an {@link ActivityStarter} to launch the Intent or PendingIntent.
+     * @param animationController an {@link ActivityTransitionAnimator.Controller} to provide a
+     *                            smooth animation for the activity launch.
+     */
+    public void startGestureUiIntent(ActivityStarter activityStarter,
+            ActivityTransitionAnimator.Controller animationController){
+        mQuickAccessWalletClient.getGestureTargetActivityPendingIntent(
+                mExecutor,
+                gesturePendingIntent -> {
+                    if (gesturePendingIntent != null) {
+                        activityStarter.startPendingIntentMaybeDismissingKeyguard(
+                                gesturePendingIntent, null, null);
+                        return;
+                    }
+
+                    startQuickAccessUiIntent(activityStarter, animationController, true);
+                }
+        );
+    }
+
+    /**
      * Starts the QuickAccessWallet UI: either the app's designated UI, or the built-in Wallet UI.
      *
      * If the service has configured itself so that
@@ -266,6 +296,23 @@ public class QuickAccessWalletController {
                             animationController);
 
                 });
+    }
+
+    /**
+     * Starts the {@link android.app.PendingIntent} for a {@link WalletCard}.
+     *
+     * This should be used to open a selected card from the QuickAccessWallet UI or
+     * the settings tile.
+     *
+     * @param activityStarter an {@link ActivityStarter} to launch the Intent or PendingIntent.
+     * @param animationController an {@link ActivityTransitionAnimator.Controller} to provide a
+     *                            smooth animation for the activity launch.
+     */
+    public void startWalletCardPendingIntent(WalletCard card,
+            ActivityStarter activityStarter,
+            ActivityTransitionAnimator.Controller animationController) {
+        activityStarter.postStartActivityDismissingKeyguard(
+                card.getPendingIntent(), animationController);
     }
 
     private Intent getSysUiWalletIntent() {

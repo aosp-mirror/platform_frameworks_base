@@ -17,7 +17,9 @@
 package com.android.server.media;
 
 import static android.content.pm.PackageManager.GET_RESOLVED_FILTER;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -30,6 +32,7 @@ import android.content.pm.ServiceInfo;
 import android.media.MediaRoute2ProviderService;
 import android.os.Handler;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 
@@ -130,27 +133,44 @@ final class MediaRoute2ProviderWatcher {
             ServiceInfo serviceInfo = resolveInfo.serviceInfo;
             if (serviceInfo != null) {
                 boolean isSelfScanOnlyProvider = false;
+                boolean supportsSystemMediaRouting = false;
                 Iterator<String> categoriesIterator = resolveInfo.filter.categoriesIterator();
                 if (categoriesIterator != null) {
                     while (categoriesIterator.hasNext()) {
+                        String category = categoriesIterator.next();
                         isSelfScanOnlyProvider |=
-                                MediaRoute2ProviderService.CATEGORY_SELF_SCAN_ONLY.equals(
-                                        categoriesIterator.next());
+                                MediaRoute2ProviderService.CATEGORY_SELF_SCAN_ONLY.equals(category);
+                        supportsSystemMediaRouting |=
+                                MediaRoute2ProviderService.SERVICE_INTERFACE_SYSTEM_MEDIA.equals(
+                                        category);
                     }
                 }
                 int sourceIndex = findProvider(serviceInfo.packageName, serviceInfo.name);
                 if (sourceIndex < 0) {
+                    supportsSystemMediaRouting &= Flags.enableMirroringInMediaRouter2();
+                    supportsSystemMediaRouting &=
+                            mPackageManager.checkPermission(
+                                            Manifest.permission.MODIFY_AUDIO_ROUTING,
+                                            serviceInfo.packageName)
+                                    == PERMISSION_GRANTED;
                     MediaRoute2ProviderServiceProxy proxy =
                             new MediaRoute2ProviderServiceProxy(
                                     mContext,
                                     mHandler.getLooper(),
                                     new ComponentName(serviceInfo.packageName, serviceInfo.name),
                                     isSelfScanOnlyProvider,
+                                    supportsSystemMediaRouting,
                                     mUserId);
                     Slog.i(
                             TAG,
-                            "Enabling proxy for MediaRoute2ProviderService: "
-                                    + proxy.mComponentName);
+                            TextUtils.formatSimple(
+                                    "Enabling proxy for MediaRoute2ProviderService: %s"
+                                        + " (isSelfScan=%b, supportsSystemMediaRouting=%b,"
+                                        + " userId=%d)",
+                                    proxy.mComponentName,
+                                    isSelfScanOnlyProvider,
+                                    supportsSystemMediaRouting,
+                                    mUserId));
                     proxy.start(/* rebindIfDisconnected= */ false);
                     mProxies.add(targetIndex++, proxy);
                     mCallback.onAddProviderService(proxy);

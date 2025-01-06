@@ -30,6 +30,8 @@ import android.util.Log;
 
 import androidx.test.platform.app.InstrumentationRegistry;
 
+import com.android.ravenwood.common.RavenwoodCommonUtils;
+
 import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runner.Runner;
@@ -61,8 +63,6 @@ import java.util.function.BiConsumer;
  * - Handle {@link android.platform.test.annotations.DisabledOnRavenwood}.
  */
 public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase {
-    public static final String TAG = "Ravenwood";
-
     /** Scope of a hook. */
     public enum Scope {
         Class,
@@ -129,10 +129,7 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
 
         mTestClass = new TestClass(testClass);
 
-        Log.v(TAG, "RavenwoodAwareTestRunner starting for " + testClass.getCanonicalName());
-
-        // This is needed to make AndroidJUnit4ClassRunner happy.
-        InstrumentationRegistry.registerInstance(null, Bundle.EMPTY);
+        Log.v(TAG, "RavenwoodAwareTestRunner initializing for " + testClass.getCanonicalName());
 
         // Hook point to allow more customization.
         runAnnotatedMethodsOnRavenwood(RavenwoodTestRunnerInitializing.class, null);
@@ -149,7 +146,9 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
 
     private void runAnnotatedMethodsOnRavenwood(Class<? extends Annotation> annotationClass,
             Object instance) {
-        Log.v(TAG, "runAnnotatedMethodsOnRavenwood() " + annotationClass.getName());
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "runAnnotatedMethodsOnRavenwood() " + annotationClass.getName());
+        }
 
         for (var method : mTestClass.getAnnotatedMethods(annotationClass)) {
             ensureIsPublicVoidMethod(method.getMethod(), /* isStatic=*/ instance == null);
@@ -172,12 +171,14 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
         RavenwoodTestStats.getInstance().attachToRunNotifier(notifier);
 
         if (mRealRunner instanceof ClassSkippingTestRunner) {
-            Log.i(TAG, "onClassSkipped: description=" + description);
+            Log.v(TAG, "onClassSkipped: description=" + description);
             mRealRunner.run(notifier);
             return;
         }
 
-        Log.v(TAG, "Starting " + mTestJavaClass.getCanonicalName());
+        if (RAVENWOOD_VERBOSE_LOGGING) {
+            Log.v(TAG, "Running " + mTestJavaClass.getCanonicalName());
+        }
         if (RAVENWOOD_VERBOSE_LOGGING) {
             dumpDescription(description);
         }
@@ -229,7 +230,9 @@ public final class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase
             s.evaluate();
             onAfter(description, scope, order, null);
         } catch (Throwable t) {
-            if (onAfter(description, scope, order, t)) {
+            var shouldReportFailure = RavenwoodCommonUtils.runIgnoringException(
+                    () -> onAfter(description, scope, order, t));
+            if (shouldReportFailure == null || shouldReportFailure) {
                 throw t;
             }
         }

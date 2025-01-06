@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?><!-- Copyright (C) 2021 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="168dp"
+    android:height="168dp"
+    android:viewportWidth="168"
+    android:viewportHeight="168">
+    <group android:name="_R_G">
+        <group
+            android:name="_R_G_L_2_G"
+            android:translateX="121.161"
+            android:translateY="83.911">
+            <path
+                android:name="_R_G_L_2_G_D_0_P_0"
+                android:fillAlpha="1"
+                android:fillColor="#ffffff"
+                android:fillType="nonZero"
+                android:pathData=" M-37.16 -5.87 C-33.94,-5.87 -31.32,-3.32 -31.2,-0.13 C-31.2,-0.06 -31.2,0.02 -31.2,0.09 C-31.2,0.16 -31.2,0.23 -31.2,0.29 C-31.31,3.49 -33.94,6.05 -37.16,6.05 C-40.39,6.05 -43.01,3.49 -43.12,0.29 C-43.12,0.23 -43.12,0.16 -43.12,0.09 C-43.12,0.01 -43.12,-0.07 -43.12,-0.15 C-42.99,-3.33 -40.37,-5.87 -37.16,-5.87c " />
+        </group>
+        <group
+            android:name="_R_G_L_1_G"
+            android:translateX="102.911"
+            android:translateY="83.911">
+            <path
+                android:name="_R_G_L_1_G_D_0_P_0"
+                android:fillAlpha="1"
+                android:fillColor="#ffffff"
+                android:fillType="nonZero"
+                android:pathData=" M-37.16 -5.87 C-33.94,-5.87 -31.32,-3.32 -31.2,-0.13 C-31.2,-0.06 -31.2,0.02 -31.2,0.09 C-31.2,0.16 -31.2,0.23 -31.2,0.29 C-31.31,3.49 -33.94,6.05 -37.16,6.05 C-40.39,6.05 -43.01,3.49 -43.12,0.29 C-43.12,0.23 -43.12,0.16 -43.12,0.09 C-43.12,0.01 -43.12,-0.07 -43.12,-0.15 C-42.99,-3.33 -40.37,-5.87 -37.16,-5.87c " />
+        </group>
+        <group
+            android:name="_R_G_L_0_G"
+            android:translateX="139.661"
+            android:translateY="83.911">
+            <path
+                android:name="_R_G_L_0_G_D_0_P_0"
+                android:fillAlpha="1"
+                android:fillColor="#ffffff"
+                android:fillType="nonZero"
+                android:pathData=" M-37.16 -5.87 C-33.94,-5.87 -31.32,-3.32 -31.2,-0.13 C-31.2,-0.06 -31.2,0.02 -31.2,0.09 C-31.2,0.16 -31.2,0.23 -31.2,0.29 C-31.31,3.49 -33.94,6.05 -37.16,6.05 C-40.39,6.05 -43.01,3.49 -43.12,0.29 C-43.12,0.23 -43.12,0.16 -43.12,0.09 C-43.12,0.01 -43.12,-0.07 -43.12,-0.15 C-42.99,-3.33 -40.37,-5.87 -37.16,-5.87c " />
+        </group>
+    </group>
+    <group android:name="time_group" />
+</vector>

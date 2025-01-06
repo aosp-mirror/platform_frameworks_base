@@ -32,16 +32,13 @@ import android.widget.FrameLayout;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.keyguard.KeyguardConstants;
-import com.android.keyguard.KeyguardVisibilityHelper;
 import com.android.keyguard.dagger.KeyguardUserSwitcherScope;
 import com.android.settingslib.drawable.CircleFramedDrawable;
 import com.android.systemui.animation.Expandable;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.plugins.FalsingManager;
-import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.user.UserSwitchDialogController;
 import com.android.systemui.res.R;
-import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
@@ -57,6 +54,7 @@ import javax.inject.Inject;
 
 /**
  * Manages the user switch on the Keyguard that is used for opening the QS user panel.
+ * TODO: b/384064264 - Move to blueprint sections
  */
 @KeyguardUserSwitcherScope
 public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> {
@@ -73,9 +71,7 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
     private BaseUserSwitcherAdapter mAdapter;
     private final KeyguardStateController mKeyguardStateController;
     private final FalsingManager mFalsingManager;
-    protected final SysuiStatusBarStateController mStatusBarStateController;
     private final ConfigurationController mConfigurationController;
-    private final KeyguardVisibilityHelper mKeyguardVisibilityHelper;
     private final UserSwitchDialogController mUserSwitchDialogController;
     private final UiEventLogger mUiEventLogger;
     @VisibleForTesting
@@ -83,26 +79,6 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
     private View mUserAvatarViewWithBackground;
     UserRecord mCurrentUser;
     private boolean mIsKeyguardShowing;
-
-    // State info for the user switch and keyguard
-    private int mBarState;
-
-    private final StatusBarStateController.StateListener mStatusBarStateListener =
-            new StatusBarStateController.StateListener() {
-                @Override
-                public void onStateChanged(int newState) {
-                    boolean goingToFullShade = mStatusBarStateController.goingToFullShade();
-                    boolean keyguardFadingAway = mKeyguardStateController.isKeyguardFadingAway();
-                    int oldState = mBarState;
-                    mBarState = newState;
-
-                    setKeyguardQsUserSwitchVisibility(
-                            newState,
-                            keyguardFadingAway,
-                            goingToFullShade,
-                            oldState);
-                }
-            };
 
     private ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -144,7 +120,6 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             KeyguardStateController keyguardStateController,
             FalsingManager falsingManager,
             ConfigurationController configurationController,
-            SysuiStatusBarStateController statusBarStateController,
             DozeParameters dozeParameters,
             ScreenOffAnimationController screenOffAnimationController,
             UserSwitchDialogController userSwitchDialogController,
@@ -157,11 +132,6 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         mKeyguardStateController = keyguardStateController;
         mFalsingManager = falsingManager;
         mConfigurationController = configurationController;
-        mStatusBarStateController = statusBarStateController;
-        mKeyguardVisibilityHelper = new KeyguardVisibilityHelper(mView,
-                keyguardStateController, dozeParameters,
-                screenOffAnimationController,  /* animateYPos= */ false,
-                /* logBuffer= */ null);
         mUserSwitchDialogController = userSwitchDialogController;
         mUiEventLogger = uiEventLogger;
     }
@@ -184,15 +154,12 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
             if (mFalsingManager.isFalseTap(FalsingManager.LOW_PENALTY)) {
                 return;
             }
-            if (isListAnimating()) {
-                return;
-            }
 
             // Tapping anywhere in the view will open the user switcher
             mUiEventLogger.log(
                     LockscreenGestureLogger.LockscreenUiEvent.LOCKSCREEN_SWITCH_USER_TAP);
 
-            mUserSwitchDialogController.showDialog(mUserAvatarViewWithBackground.getContext(),
+            mUserSwitchDialogController.showDialog(
                     Expandable.fromView(mUserAvatarViewWithBackground));
         });
 
@@ -212,7 +179,6 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         if (DEBUG) Log.d(TAG, "onViewAttached");
         mAdapter.registerDataSetObserver(mDataSetObserver);
         mDataSetObserver.onChanged();
-        mStatusBarStateController.addCallback(mStatusBarStateListener);
         mConfigurationController.addCallback(mConfigurationListener);
         mKeyguardStateController.addCallback(mKeyguardStateCallback);
         // Force update when view attached in case configuration changed while the view was detached
@@ -225,7 +191,6 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
         if (DEBUG) Log.d(TAG, "onViewDetached");
 
         mAdapter.unregisterDataSetObserver(mDataSetObserver);
-        mStatusBarStateController.removeCallback(mStatusBarStateListener);
         mConfigurationController.removeCallback(mConfigurationListener);
         mKeyguardStateController.removeCallback(mKeyguardStateCallback);
     }
@@ -333,18 +298,6 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
     }
 
     /**
-     * Set the visibility of the user avatar view based on some new state.
-     */
-    public void setKeyguardQsUserSwitchVisibility(
-            int statusBarState,
-            boolean keyguardFadingAway,
-            boolean goingToFullShade,
-            int oldStatusBarState) {
-        mKeyguardVisibilityHelper.setViewVisibility(
-                statusBarState, keyguardFadingAway, goingToFullShade, oldStatusBarState);
-    }
-
-    /**
      * Update position of the view with an optional animation
      */
     public void updatePosition(int x, int y, boolean animate) {
@@ -357,12 +310,6 @@ public class KeyguardQsUserSwitchController extends ViewController<FrameLayout> 
      * Set keyguard user avatar view alpha.
      */
     public void setAlpha(float alpha) {
-        if (!mKeyguardVisibilityHelper.isVisibilityAnimating()) {
-            mView.setAlpha(alpha);
-        }
-    }
-
-    private boolean isListAnimating() {
-        return mKeyguardVisibilityHelper.isVisibilityAnimating();
+        mView.setAlpha(alpha);
     }
 }

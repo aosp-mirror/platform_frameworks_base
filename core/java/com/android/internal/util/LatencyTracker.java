@@ -38,6 +38,7 @@ import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPOR
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_CAMERA_CHECK;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_ROTATE_SCREEN_SENSOR;
+import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHADE_WINDOW_DISPLAY_CHANGE;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_BACK_ARROW;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_SELECTION_TOOLBAR;
 import static com.android.internal.util.FrameworkStatsLog.UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHOW_VOICE_INTERACTION;
@@ -257,6 +258,14 @@ public class LatencyTracker {
      */
     public static final int ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME = 28;
 
+    /**
+     * Time it takes for the shade window to move display after a user interaction.
+     * <p>
+     * This starts when the user does an interaction that triggers the window reparenting, and
+     * finishes after the first doFrame done with the new display configuration.
+     */
+    public static final int ACTION_SHADE_WINDOW_DISPLAY_CHANGE = 29;
+
     private static final int[] ACTIONS_ALL = {
         ACTION_EXPAND_PANEL,
         ACTION_TOGGLE_RECENTS,
@@ -287,6 +296,7 @@ public class LatencyTracker {
         ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE,
         ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN,
         ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME,
+        ACTION_SHADE_WINDOW_DISPLAY_CHANGE,
     };
 
     /** @hide */
@@ -320,6 +330,7 @@ public class LatencyTracker {
         ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE,
         ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN,
         ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME,
+        ACTION_SHADE_WINDOW_DISPLAY_CHANGE,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Action {
@@ -356,6 +367,7 @@ public class LatencyTracker {
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN,
             UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME,
+            UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHADE_WINDOW_DISPLAY_CHANGE,
     };
 
     private final Object mLock = new Object();
@@ -435,9 +447,11 @@ public class LatencyTracker {
     public void startListeningForLatencyTrackerConfigChanges() {
         final Context context = ActivityThread.currentApplication();
         if (context == null) {
-            if (DEBUG) {
-                Log.d(TAG, "No application for package: " + ActivityThread.currentPackageName());
-            }
+            Log.e(
+                    TAG,
+                    String.format(
+                            "No application for package: %s. Latency Tracker Disabled",
+                            ActivityThread.currentPackageName()));
             return;
         }
         if (context.checkCallingOrSelfPermission(READ_DEVICE_CONFIG) != PERMISSION_GRANTED) {
@@ -552,6 +566,8 @@ public class LatencyTracker {
                 return "ACTION_NOTIFICATIONS_HIDDEN_FOR_MEASURE_WITH_SHADE_OPEN";
             case UIACTION_LATENCY_REPORTED__ACTION__ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME:
                 return "ACTION_KEYGUARD_FACE_UNLOCK_TO_HOME";
+            case UIACTION_LATENCY_REPORTED__ACTION__ACTION_SHADE_WINDOW_DISPLAY_CHANGE:
+                return "ACTION_SHADE_WINDOW_DISPLAY_CHANGE";
             default:
                 throw new IllegalArgumentException("Invalid action");
         }

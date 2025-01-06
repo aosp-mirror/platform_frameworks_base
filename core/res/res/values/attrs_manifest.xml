@@ -1855,12 +1855,26 @@
          {@link android.R.styleable#AndroidManifestProcess process} tag, or to an
          {@link android.R.styleable#AndroidManifestApplication application} tag (to supply
          a default setting for all application components). -->
-    <attr name="memtagMode">
+     <attr name="memtagMode">
        <enum name="default" value="-1" />
        <enum name="off" value="0" />
        <enum name="async" value="1" />
        <enum name="sync" value="2" />
     </attr>
+
+    <!-- This attribute will be used to override app compatibility mode on 16 KB devices.
+         If set to enabled, Natives lib will be extracted from APK if they are not page aligned on
+         16 KB device. 4 KB natives libs will be loaded app-compat mode if they are eligible.
+         @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
+    <attr name="pageSizeCompat">
+        <!-- value for enabled must match with
+        ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_MANIFEST_OVERRIDE_ENABLED -->
+        <enum name="enabled" value="32" />
+        <!-- value for disabled must match with
+        ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_MANIFEST_OVERRIDE_DISABLED -->
+        <enum name="disabled" value="64" />
+    </attr>
+
 
     <!-- Attribution tag to be used for permission sub-attribution if a
       permission is checked in  {@link android.content.Context#sendBroadcast(Intent, String)}.
@@ -2212,6 +2226,9 @@
 
         <attr name="memtagMode" />
 
+        <!-- @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
+        <attr name="pageSizeCompat" />
+
         <!-- If {@code true} enables automatic zero initialization of all native heap
              allocations. -->
         <attr name="nativeHeapZeroInitialized" format="boolean" />
@@ -2273,6 +2290,22 @@
         <attr name="enableOnBackInvokedCallback" format="boolean"/>
 
         <attr name="intentMatchingFlags"/>
+
+        <!-- Specifies the set of drawable resources that can be used in place
+             of an existing declared icon or banner for activities that appear
+             in the app launcher. The resource referenced must be an array of
+             drawable resources and can contain at most 500 items.
+             {@link android.content.pm.PackageManager#changeLauncherIconConfig}
+             @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
+        <attr name="alternateLauncherIcons" format="reference" />
+
+        <!-- Specifies the set of string resources that can be used in place
+             of an existing declared label for activities that appear
+             in the app launcher. The resource referenced must be an array of
+             string resources and can contain at most 500 items.
+             {@link android.content.pm.PackageManager#changeLauncherIconConfig}
+             @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
+        <attr name="alternateLauncherLabels" format="reference" />
     </declare-styleable>
 
     <!-- An attribution is a logical part of an app and is identified by a tag.
@@ -2539,6 +2572,10 @@
              against a development branch, in which case it will only work against
              the development builds. -->
         <attr name="minSdkVersion" format="integer|string" />
+        <!-- This is the minimum SDK major and minor version (e.g. "36.1") that
+             the application requires. Verified independently of minSdkVersion.
+             @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
+        <attr name="minSdkVersionFull" format="string" />
         <!-- This is the SDK version number that the application is targeting.
              It is able to run on older versions (down to minSdkVersion), but
              was explicitly tested to work with the version specified here.
@@ -2852,6 +2889,17 @@
          <p>This appears as a child tag of the root
          {@link #AndroidManifest manifest} tag. -->
     <declare-styleable name="AndroidManifestOriginalPackage" parent="AndroidManifest">
+        <attr name="name" />
+    </declare-styleable>
+
+    <!-- Private tag to declare the package name that the permissions of this package
+         is based on.  Only used for packages installed in the system image.  If
+         given, the permissions from the other package will be propagated into the
+         new package.
+
+         <p>This appears as a child tag of the root
+         {@link #AndroidManifest manifest} tag. -->
+    <declare-styleable name="AndroidManifestAdoptPermissions" parent="AndroidManifest">
         <attr name="name" />
     </declare-styleable>
 

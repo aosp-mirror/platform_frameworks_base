@@ -16,8 +16,18 @@
 
 package com.android.server.location.contexthub;
 
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+
 import android.Manifest;
+import android.app.AppOpsManager;
 import android.content.Context;
+import android.hardware.contexthub.EndpointInfo;
+import android.hardware.contexthub.HubEndpoint;
+import android.hardware.contexthub.HubEndpointInfo;
+import android.hardware.contexthub.HubMessage;
+import android.hardware.contexthub.HubServiceInfo;
+import android.hardware.contexthub.Message;
+import android.hardware.contexthub.Reason;
 import android.hardware.contexthub.V1_0.AsyncEventType;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.HostEndPoint;
@@ -414,5 +424,207 @@ import java.util.List;
     /* package */
     static String formatDateFromTimestamp(long timeStampInMs) {
         return DATE_FORMATTER.format(Instant.ofEpochMilli(timeStampInMs));
+    }
+
+    /**
+     * Converts a context hub HAL EndpointInfo object based on the provided HubEndpointInfo.
+     *
+     * @param info the HubEndpointInfo object
+     * @return the equivalent EndpointInfo object
+     */
+    /* package */
+    static EndpointInfo convertHalEndpointInfo(HubEndpointInfo info) {
+        return createHalEndpointInfo(
+                info, info.getIdentifier().getEndpoint(), info.getIdentifier().getHub());
+    }
+
+    /**
+     * Creates a context hub HAL EndpointInfo object based on the provided HubEndpointInfo. As
+     * opposed to convertHalEndpointInfo, this method can be used to overwrite/specify the endpoint
+     * and hub ID.
+     *
+     * @param info the HubEndpointInfo object
+     * @param endpointId the endpoint ID of this object
+     * @param hubId the hub ID of this object
+     * @return the equivalent EndpointInfo object
+     */
+    /* package */
+    static EndpointInfo createHalEndpointInfo(HubEndpointInfo info, long endpointId, long hubId) {
+        EndpointInfo outputInfo = new EndpointInfo();
+        outputInfo.id = new android.hardware.contexthub.EndpointId();
+        outputInfo.id.id = endpointId;
+        outputInfo.id.hubId = hubId;
+        outputInfo.name = info.getName();
+        outputInfo.version = info.getVersion();
+        outputInfo.tag = info.getTag();
+        Collection<String> permissions = info.getRequiredPermissions();
+        outputInfo.requiredPermissions = permissions.toArray(new String[permissions.size()]);
+        Collection<HubServiceInfo> services = info.getServiceInfoCollection();
+        outputInfo.services = new android.hardware.contexthub.Service[services.size()];
+        int i = 0;
+        for (HubServiceInfo service : services) {
+            outputInfo.services[i] = new android.hardware.contexthub.Service();
+            outputInfo.services[i].format = service.getFormat();
+            outputInfo.services[i].serviceDescriptor = service.getServiceDescriptor();
+            outputInfo.services[i].majorVersion = service.getMajorVersion();
+            outputInfo.services[i].minorVersion = service.getMinorVersion();
+            i++;
+        }
+        return outputInfo;
+    }
+
+    /**
+     * Converts a HubMessage object to a AIDL HAL Message object.
+     *
+     * @param message the HubMessage message to convert
+     * @return the AIDL HAL message
+     */
+    /* package */
+    static Message createHalMessage(HubMessage message) {
+        Message outMessage = new Message();
+        outMessage.flags = message.isResponseRequired() ? Message.FLAG_REQUIRES_DELIVERY_STATUS : 0;
+        outMessage.permissions = new String[0];
+        outMessage.sequenceNumber = message.getMessageSequenceNumber();
+        outMessage.type = message.getMessageType();
+        outMessage.content = message.getMessageBody();
+        return outMessage;
+    }
+
+    /**
+     * Converts a AIDL HAL Message object to a HubMessage object.
+     *
+     * @param message the AIDL HAL Message message to convert
+     * @return the HubMessage
+     */
+    /* package */
+    static HubMessage createHubMessage(Message message) {
+        boolean isReliable = (message.flags & Message.FLAG_REQUIRES_DELIVERY_STATUS) != 0;
+        return new HubMessage.Builder(message.type, message.content)
+                .setResponseRequired(isReliable)
+                .build();
+    }
+
+    /**
+     * Converts a byte integer defined by Reason.aidl to HubEndpoint.Reason values exposed to apps.
+     *
+     * @param reason The Reason.aidl value
+     * @return The converted HubEndpoint.Reason value
+     */
+    /* package */
+    static @HubEndpoint.Reason int toAppHubEndpointReason(byte reason) {
+        switch (reason) {
+            case Reason.UNSPECIFIED:
+            case Reason.OUT_OF_MEMORY:
+            case Reason.TIMEOUT:
+                return HubEndpoint.REASON_FAILURE;
+            case Reason.OPEN_ENDPOINT_SESSION_REQUEST_REJECTED:
+                return HubEndpoint.REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED;
+            case Reason.CLOSE_ENDPOINT_SESSION_REQUESTED:
+                return HubEndpoint.REASON_CLOSE_ENDPOINT_SESSION_REQUESTED;
+            case Reason.ENDPOINT_INVALID:
+                return HubEndpoint.REASON_ENDPOINT_INVALID;
+            case Reason.ENDPOINT_GONE:
+            case Reason.ENDPOINT_CRASHED:
+            case Reason.HUB_RESET:
+                return HubEndpoint.REASON_ENDPOINT_STOPPED;
+            case Reason.PERMISSION_DENIED:
+                return HubEndpoint.REASON_PERMISSION_DENIED;
+            default:
+                Log.w(TAG, "toAppHubEndpointReason: invalid reason: " + reason);
+                return HubEndpoint.REASON_FAILURE;
+        }
+    }
+
+    /**
+     * Converts a byte integer defined by Reason.aidl to HubEndpoint.Reason values exposed to apps.
+     *
+     * @param reason The Reason.aidl value
+     * @return The converted HubEndpoint.Reason value
+     */
+    /* package */
+    static byte toHalReason(@HubEndpoint.Reason int reason) {
+        switch (reason) {
+            case HubEndpoint.REASON_FAILURE:
+                return Reason.UNSPECIFIED;
+            case HubEndpoint.REASON_OPEN_ENDPOINT_SESSION_REQUEST_REJECTED:
+                return Reason.OPEN_ENDPOINT_SESSION_REQUEST_REJECTED;
+            case HubEndpoint.REASON_CLOSE_ENDPOINT_SESSION_REQUESTED:
+                return Reason.CLOSE_ENDPOINT_SESSION_REQUESTED;
+            case HubEndpoint.REASON_ENDPOINT_INVALID:
+                return Reason.ENDPOINT_INVALID;
+            case HubEndpoint.REASON_ENDPOINT_STOPPED:
+                return Reason.ENDPOINT_GONE;
+            case HubEndpoint.REASON_PERMISSION_DENIED:
+                return Reason.PERMISSION_DENIED;
+            default:
+                Log.w(TAG, "toHalReason: invalid reason: " + reason);
+                return Reason.UNSPECIFIED;
+        }
+    }
+
+    /**
+     * Checks that the module with the provided context/pid/uid has all of the provided permissions.
+     *
+     * @param context The context to validate permissions for
+     * @param pid The PID to validate permissions for
+     * @param uid The UID to validate permissions for
+     * @param permissions The collection of permissions to check
+     * @return true if the module has all of the permissions granted
+     */
+    /* package */
+    static boolean hasPermissions(
+            Context context, int pid, int uid, Collection<String> permissions) {
+        for (String permission : permissions) {
+            if (context.checkPermission(permission, pid, uid) != PERMISSION_GRANTED) {
+                Log.e(TAG, "no permission for " + permission);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    /**
+     * Attributes the provided permissions to the package of this client.
+     *
+     * @param appOpsManager The app ops manager to use
+     * @param uid The UID of the module to note permissions for
+     * @param packageName The package name of the module to note permissions for
+     * @param attributionTag The attribution tag of the module to note permissions for
+     * @param permissions The list of permissions covering data the client is about to receive
+     * @param noteMessage The message that should be noted alongside permissions attribution to
+     *     facilitate debugging
+     * @return true if client has ability to use all of the provided permissions
+     */
+    /* package */
+    static boolean notePermissions(
+            AppOpsManager appOpsManager,
+            int uid,
+            String packageName,
+            String attributionTag,
+            Collection<String> permissions,
+            String noteMessage) {
+        for (String permission : permissions) {
+            int opCode = AppOpsManager.permissionToOpCode(permission);
+            if (opCode != AppOpsManager.OP_NONE) {
+                try {
+                    if (appOpsManager.noteOp(opCode, uid, packageName, attributionTag, noteMessage)
+                            != AppOpsManager.MODE_ALLOWED) {
+                        return false;
+                    }
+                } catch (SecurityException e) {
+                    Log.e(
+                            TAG,
+                            "SecurityException: noteOp for pkg "
+                                    + packageName
+                                    + " opcode "
+                                    + opCode
+                                    + ": "
+                                    + e.getMessage());
+                    return false;
+                }
+            }
+        }
+
+        return true;
     }
 }

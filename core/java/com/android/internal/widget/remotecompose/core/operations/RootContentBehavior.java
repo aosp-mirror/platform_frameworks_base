@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteComposeOperation;
@@ -31,7 +33,7 @@ import java.util.List;
  * <p>It encodes the version of the document (following semantic versioning) as well as the
  * dimensions of the document in pixels.
  */
-public class RootContentBehavior implements RemoteComposeOperation {
+public class RootContentBehavior extends Operation implements RemoteComposeOperation {
     private static final int OP_CODE = Operations.ROOT_CONTENT_BEHAVIOR;
     private static final String CLASS_NAME = "RootContentBehavior";
     int mScroll = NONE;
@@ -172,10 +174,11 @@ public class RootContentBehavior implements RemoteComposeOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mScroll, mAlignment, mSizing, mMode);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ROOT_CONTENT_BEHAVIOR scroll: "
@@ -187,24 +190,46 @@ public class RootContentBehavior implements RemoteComposeOperation {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         context.setRootContentBehavior(mScroll, mAlignment, mSizing, mMode);
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return toString();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
-    public static void apply(WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param scroll
+     * @param alignment
+     * @param sizing
+     * @param mode
+     */
+    public static void apply(
+            @NonNull WireBuffer buffer, int scroll, int alignment, int sizing, int mode) {
         buffer.start(OP_CODE);
         buffer.writeInt(scroll);
         buffer.writeInt(alignment);
@@ -212,7 +237,13 @@ public class RootContentBehavior implements RemoteComposeOperation {
         buffer.writeInt(mode);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int scroll = buffer.readInt();
         int alignment = buffer.readInt();
         int sizing = buffer.readInt();
@@ -222,7 +253,12 @@ public class RootContentBehavior implements RemoteComposeOperation {
         operations.add(rootContentBehavior);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Protocol Operations", OP_CODE, CLASS_NAME)
                 .description("Describes the behaviour of the root")
                 .field(DocumentedOperation.INT, "scroll", "scroll")

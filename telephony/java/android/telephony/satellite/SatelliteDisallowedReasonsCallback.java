@@ -18,6 +18,7 @@ package android.telephony.satellite;
 
 import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 
 import com.android.internal.telephony.flags.Flags;
 
@@ -26,13 +27,14 @@ import com.android.internal.telephony.flags.Flags;
  *
  * @hide
  */
-@FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
+@SystemApi
+@FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
 public interface SatelliteDisallowedReasonsCallback {
 
     /**
      * Called when disallowed reason of satellite has changed.
      * @param disallowedReasons Integer array of disallowed reasons.
      */
-    @FlaggedApi(Flags.FLAG_OEM_ENABLED_SATELLITE_FLAG)
-    void onSatelliteDisallowedReasonsChanged(@NonNull int[] disallowedReasons);
+    void onSatelliteDisallowedReasonsChanged(
+            @NonNull @SatelliteManager.SatelliteDisallowedReason int[] disallowedReasons);
 }

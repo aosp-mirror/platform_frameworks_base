@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
@@ -28,12 +29,15 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 
 /**
  * SystemRequestObserver responsible for handling system requests to filter allowable display
  * modes
  */
 class SystemRequestObserver {
+    private static final String TAG = "SystemRequestObserver";
+
     private final VotesStorage mVotesStorage;
 
     private final IBinder.DeathRecipient mDeathRecipient = new IBinder.DeathRecipient() {
@@ -43,6 +47,7 @@ class SystemRequestObserver {
         }
         @Override
         public void binderDied(@NonNull IBinder who) {
+            Slog.d(TAG, "binder died: " + who);
             removeSystemRequestedVotes(who);
             who.unlinkToDeath(mDeathRecipient, 0);
         }
@@ -83,9 +88,11 @@ class SystemRequestObserver {
                 updateStorageLocked(displayId);
             }
             if (needLinkToDeath) {
+                Slog.d(TAG, "binder linking to death: " + token);
                 token.linkToDeath(mDeathRecipient, 0);
             }
         } catch (RemoteException re) {
+            Slog.d(TAG, "linking to death failed: " + token, re);
             removeSystemRequestedVotes(token);
         }
     }
@@ -94,14 +101,19 @@ class SystemRequestObserver {
         boolean needToUnlink = false;
         synchronized (mLock) {
             SparseArray<List<Integer>> modesByDisplay = mDisplaysRestrictions.get(token);
-            if (modesByDisplay != null) {
+            if (modesByDisplay != null && modesByDisplay.size() > 0) {
                 modesByDisplay.remove(displayId);
                 needToUnlink = modesByDisplay.size() == 0;
                 updateStorageLocked(displayId);
             }
         }
         if (needToUnlink) {
-            token.unlinkToDeath(mDeathRecipient, 0);
+            try {
+                Slog.d(TAG, "binder unlinking to death: " + token);
+                token.unlinkToDeath(mDeathRecipient, 0);
+            } catch (NoSuchElementException e) {
+                Slog.d(TAG, "unlinking to death failed: " + token, e);
+            }
         }
     }
 

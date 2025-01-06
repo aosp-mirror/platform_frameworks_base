@@ -21,10 +21,8 @@ import android.content.Context
 import android.hardware.devicestate.DeviceStateManager
 import android.os.PowerManager
 import android.provider.Settings
-import androidx.core.view.OneShotPreDrawListener
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.ToAodFoldTransitionInteractor
@@ -125,11 +123,7 @@ constructor(
 
     private val shadeFoldAnimator: ShadeFoldAnimator
         get() {
-            return if (MigrateClocksToBlueprint.isEnabled) {
-                foldTransitionInteractor.get().foldAnimator
-            } else {
-                shadeViewController.shadeFoldAnimator
-            }
+            return foldTransitionInteractor.get().foldAnimator
         }
 
     private fun setAnimationState(playing: Boolean) {
@@ -164,15 +158,7 @@ constructor(
                 setAnimationState(playing = true)
                 shadeFoldAnimator.prepareFoldToAodAnimation()
 
-                // We don't need to wait for the scrim as it is already displayed
-                // but we should wait for the initial animation preparations to be drawn
-                // (setting initial alpha/translation)
-                // TODO(b/254878364): remove this call to NPVC.getView()
-                if (!MigrateClocksToBlueprint.isEnabled) {
-                    shadeFoldAnimator.view?.let { OneShotPreDrawListener.add(it, onReady) }
-                } else {
-                    onReady.run()
-                }
+                onReady.run()
             } else {
                 // No animation, call ready callback immediately
                 onReady.run()
@@ -252,7 +238,7 @@ constructor(
                 if (isFolded) {
                     foldToAodLatencyTracker.onFolded()
                 }
-            }
+            },
         )
 
     /**
@@ -272,6 +258,7 @@ constructor(
                 latencyTracker.onActionStart(LatencyTracker.ACTION_FOLD_TO_AOD)
             }
         }
+
         /**
          * Called once the Fold -> AOD animation is started.
          *

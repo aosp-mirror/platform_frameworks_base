@@ -199,6 +199,21 @@
     <!-- Displayed to confirm to the user that caller ID will not be restricted on the next call or in general. -->
     <string name="CLIRDefaultOffNextCallOff">Caller ID defaults to not restricted. Next call: Not restricted</string>
 
+    <!-- Message displayed in dialog when APK is not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_apk_warning">This app isn’t 16 KB compatible. APK alignment check failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; </string>
+
+    <!-- Message displayed in dialog when ELF is not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_elf_warning">This app isn’t 16 KB compatible. ELF alignment check failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;</string>
+
+    <!-- Message displayed in dialog when APK and ELF are not 16 KB aligned. [CHAR LIMIT=NONE] -->
+    <string name="page_size_compat_apk_and_elf_warning">This app isn’t 16 KB compatible. APK and ELF alignment checks failed.
+        This app will be run using page size compatible mode. For best compatibility, please recompile the application with 16 KB support.
+        For more information, see &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;</string>
+
 
     <!-- Displayed to tell the user that caller ID is not provisioned for their SIM. -->
     <string name="serviceNotProvisioned">Service not provisioned.</string>
@@ -231,6 +246,8 @@
     <string name="NetworkPreferenceSwitchSummary">Try changing preferred network. Tap to change.</string>
     <!-- Displayed to tell the user that emergency calls might not be available. -->
     <string name="EmergencyCallWarningTitle">Emergency calling unavailable</string>
+    <!-- Displayed to tell the user that the notification can be permanently turned off -->
+    <string name="emergency_calling_do_not_show_again">Do Not Show Again</string>
     <!-- Displayed to tell the user that emergency calls might not be available; this is shown to
          the user when only WiFi calling is available and the carrier does not support emergency
          calls over WiFi calling. -->
@@ -1766,6 +1783,11 @@
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=140]-->
     <string name="permdesc_nearby_wifi_devices">Allows the app to advertise, connect, and determine the relative position of nearby Wi\u2011Fi devices</string>
 
+    <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=50]-->
+    <string name="permlab_ranging">determine relative position between nearby devices</string>
+    <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. [CHAR LIMIT=120]-->
+    <string name="permdesc_ranging">Allow the app to determine relative position between nearby devices</string>
+
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_preferredPaymentInfo">Preferred NFC Payment Service Information</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
@@ -3113,6 +3135,86 @@
     <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
     <string name="duration_years_shortest_future">
         in <xliff:g id="count">%d</xliff:g>y
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_minutes_shortest_past">
+        <xliff:g id="count">%d</xliff:g>m ago
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_hours_shortest_past">
+        <xliff:g id="count">%d</xliff:g>h ago
+    </string>
+
+    <!-- Phrase describing a time duration using days that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_days_shortest_past">
+        <xliff:g example="1" id="count">%d</xliff:g>d ago
+    </string>
+
+    <!-- Phrase describing a time duration using years that is as short as possible, preferrably one character. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=14] -->
+    <string name="duration_years_shortest_past">
+        <xliff:g id="count">%d</xliff:g>y ago
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_minutes_medium">
+        <xliff:g id="count">%d</xliff:g>min
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_hours_medium">
+        <xliff:g id="count">%d</xliff:g>hr
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_days_medium">
+       <xliff:g id="count">%d</xliff:g>d
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=8] -->
+    <string name="duration_years_medium">
+        <xliff:g id="count">%d</xliff:g>yr
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_minutes_medium_future">
+        in <xliff:g id="count">%d</xliff:g>min
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_hours_medium_future">
+        in <xliff:g id="count">%d</xliff:g>hr
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_days_medium_future">
+        in <xliff:g example="1" id="count">%d</xliff:g>d
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. This version should be a future point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_years_medium_future">
+        in <xliff:g id="count">%d</xliff:g>yr
+    </string>
+
+    <!-- Phrase describing a time duration using minutes that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_minutes_medium_past">
+        <xliff:g id="count">%d</xliff:g>min ago
+    </string>
+
+    <!-- Phrase describing a time duration using hours that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_hours_medium_past">
+        <xliff:g id="count">%d</xliff:g>hr ago
+    </string>
+
+    <!-- Phrase describing a time duration using days that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_days_medium_past">
+        <xliff:g example="1" id="count">%d</xliff:g>d ago
+    </string>
+
+    <!-- Phrase describing a time duration using years that is a medium length, preferrably two or three characters. This version should be a past point in time. If the language needs a space in between the integer and the unit, please also integrate it in the string, but preferably it should not have a space in between.[CHAR LIMIT=18] -->
+    <string name="duration_years_medium_past">
+        <xliff:g id="count">%d</xliff:g>yr ago
     </string>
 
     <!-- Phrase describing a relative time using minutes in the past that is not shown on the screen but used for accessibility. [CHAR LIMIT=NONE] -->
@@ -4845,6 +4947,18 @@
     <!-- Title of hearing aids feature, shown in the warning dialog about the accessibility shortcut. [CHAR LIMIT=none] -->
     <string name="hearing_aids_feature_name">Hearing devices</string>
 
+    <!-- Text of hearing device disconnected state. [CHAR LIMIT=20] -->
+    <string name="hearing_device_status_disconnected">Disconnected</string>
+
+    <!-- Text of hearing device connected state. [CHAR LIMIT=20] -->
+    <string name="hearing_device_status_connected">Connected</string>
+
+    <!-- Text of hearing device active state. Active means device is currently connected and able to streaming the sound. [CHAR LIMIT=20] -->
+    <string name="hearing_device_status_active">Active</string>
+
+    <!-- Text of hearing device loading state. Loading means device is not available yet, it might be in connecting or disconnecting. [CHAR LIMIT=20] -->
+    <string name="hearing_device_status_loading">Loading</string>
+
     <!-- Text in toast to alert the user that the accessibility shortcut turned on an accessibility service. [CHAR LIMIT=none] -->
     <string name="accessibility_shortcut_enabling_service">Held volume keys. <xliff:g id="service_name" example="TalkBack">%1$s</xliff:g> turned on.</string>
 
@@ -5352,6 +5466,8 @@
     <string name="zen_mode_trigger_summary_range_symbol_combination"><xliff:g id="start" example="Sun">%1$s</xliff:g> - <xliff:g id="end" example="Thu">%2$s</xliff:g></string>
     <!-- [CHAR LIMIT=40] General template for a start - end range in a text summary, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_summary_range_words"><xliff:g id="start" example="Sunday">%1$s</xliff:g> to <xliff:g id="end" example="Thursday">%2$s</xliff:g></string>
+    <!-- [CHAR LIMIT=NONE] General template for combining a days of week start-end range with a time-based start-end range, for example: "Sun-Thurs, 10:00 PM - 7:00 AM" -->
+    <string name="zen_mode_trigger_summary_combined"><xliff:g id="days" example="Sat-Thurs">%1$s</xliff:g>,\u0020<xliff:g id="times" example="10:00 PM - 7:00 AM">%2$s</xliff:g></string>
     <!-- [CHAR LIMIT=40] Event-based rule calendar option value for any calendar, used for the trigger description of a Zen mode -->
     <string name="zen_mode_trigger_event_calendar_any">Any calendar</string>
 

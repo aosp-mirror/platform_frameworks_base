@@ -27,7 +27,7 @@ import android.view.View;
  * Data class containing display information (message, icon, styling) for indication to show at
  * the bottom of the keyguard.
  *
- * See {@link com.android.systemui.statusbar.phone.KeyguardBottomAreaView}.
+ * See {@link com.android.systemui.keyguard.ui.view.KeyguardRootView}.
  */
 public class KeyguardIndication {
     @Nullable

@@ -306,6 +306,14 @@ abstract class DisplayDevice {
     }
 
     /**
+     * Returns if the display should only mirror another display rather than showing other content
+     * until it is destroyed.
+     */
+    public boolean shouldOnlyMirror() {
+        return false;
+    }
+
+    /**
      * Sets the display layer stack while in a transaction.
      */
     public final void setLayerStackLocked(SurfaceControl.Transaction t, int layerStack,

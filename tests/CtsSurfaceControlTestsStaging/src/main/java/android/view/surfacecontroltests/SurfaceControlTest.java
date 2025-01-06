@@ -85,7 +85,8 @@ public class SurfaceControlTest {
     @Test
     public void testSurfaceControlFrameRateCompatibilityGte() throws InterruptedException {
         GraphicsActivity activity = mActivityRule.getActivity();
-        activity.testSurfaceControlFrameRateCompatibility(Surface.FRAME_RATE_COMPATIBILITY_GTE);
+        activity.testSurfaceControlFrameRateCompatibility(
+                Surface.FRAME_RATE_COMPATIBILITY_AT_LEAST);
     }
 
     @Test

@@ -56,7 +56,13 @@ public class RavenwoodRuntimeNative {
 
     public static native boolean setSystemProperty(String key, String value);
 
-    public static native void clearSystemProperties();
+    public static native boolean removeSystemProperty(String key);
+
+    public static void clearSystemProperties() {
+        removeSystemProperty(null);
+    }
+
+    public static native int getpid();
 
     public static native int gettid();
 

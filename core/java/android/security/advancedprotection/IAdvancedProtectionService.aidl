@@ -31,8 +31,8 @@ interface IAdvancedProtectionService {
     void registerAdvancedProtectionCallback(IAdvancedProtectionCallback callback);
     @EnforcePermission("QUERY_ADVANCED_PROTECTION_MODE")
     void unregisterAdvancedProtectionCallback(IAdvancedProtectionCallback callback);
-    @EnforcePermission("SET_ADVANCED_PROTECTION_MODE")
+    @EnforcePermission("MANAGE_ADVANCED_PROTECTION_MODE")
     void setAdvancedProtectionEnabled(boolean enabled);
-    @EnforcePermission("SET_ADVANCED_PROTECTION_MODE")
+    @EnforcePermission("MANAGE_ADVANCED_PROTECTION_MODE")
     List<AdvancedProtectionFeature> getAdvancedProtectionFeatures();
 }

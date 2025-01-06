@@ -63,6 +63,10 @@ class SystemSettingsRepositoryImpl(
             .flowOn(backgroundDispatcher)
     }
 
+    override fun boolSetting(name: String, defaultValue: Boolean): Flow<Boolean> {
+        return intSetting(name, if (defaultValue) 1 else 0).map { it != 0 }
+    }
+
     override suspend fun setInt(name: String, value: Int) {
         withContext(backgroundDispatcher) { Settings.System.putInt(contentResolver, name, value) }
     }

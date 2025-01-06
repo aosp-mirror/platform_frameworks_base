@@ -40,6 +40,7 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.shared.model.AuthenticationFlags
 import com.android.systemui.keyguard.shared.model.DevicePosture
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.user.data.repository.UserRepository
 import java.io.PrintWriter
@@ -123,7 +124,7 @@ private const val TAG = "BiometricsRepositoryImpl"
 class BiometricSettingsRepositoryImpl
 @Inject
 constructor(
-    context: Context,
+    @ShadeDisplayAware context: Context,
     lockPatternUtils: LockPatternUtils,
     broadcastDispatcher: BroadcastDispatcher,
     authController: AuthController,
@@ -354,7 +355,10 @@ constructor(
 }
 
 @OptIn(ExperimentalCoroutinesApi::class)
-private class StrongAuthTracker(private val userRepository: UserRepository, context: Context?) :
+private class StrongAuthTracker(
+    private val userRepository: UserRepository,
+    @ShadeDisplayAware context: Context?
+) :
     LockPatternUtils.StrongAuthTracker(context) {
 
     private val selectedUserId =

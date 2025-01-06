@@ -65,33 +65,27 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
     public void testAppRemoved() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mCache.putSnapshot(window.getTask(), createSnapshot());
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
         mCache.onAppRemoved(window.mActivityRecord);
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
     }
 
     @Test
     public void testAppDied() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mCache.putSnapshot(window.getTask(), createSnapshot());
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
         mCache.onAppDied(window.mActivityRecord);
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
     }
 
     @Test
     public void testTaskRemoved() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mCache.putSnapshot(window.getTask(), createSnapshot());
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
         mCache.onIdRemoved(window.getTask().mTaskId);
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
     }
 
     @Test
@@ -99,16 +93,14 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
         mSnapshotPersistQueue.waitForQueueEmpty();
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
 
         // Load it from disk
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                true /* restoreFromDisk */, true /* isLowResolution */));
+        assertNotNull(mCache.getSnapshotFromDisk(window.getTask().mTaskId, mWm.mCurrentUserId,
+                true /* isLowResolution */, TaskSnapshot.REFERENCE_NONE));
 
         // Make sure it's not in the cache now.
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
     }
 
     @Test
@@ -116,20 +108,20 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
         mSnapshotPersistQueue.waitForQueueEmpty();
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                false /* restoreFromDisk */, false /* isLowResolution */));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
 
         // Load it from disk
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
-                true /* restoreFromDisk */, false /* isLowResolution */));
+        assertNotNull(mCache.getSnapshotFromDisk(window.getTask().mTaskId, mWm.mCurrentUserId,
+                false/* isLowResolution */, TaskSnapshot.REFERENCE_NONE));
     }
 
     @Test
     public void testClearCache() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mCache.putSnapshot(window.getTask(), mSnapshot);
-        assertEquals(mSnapshot, mCache.getSnapshot(window.getTask().mTaskId, 0, false, false));
+        assertEquals(mSnapshot, mCache.getSnapshot(window.getTask().mTaskId,
+                false /* isLowResolution */));
         mCache.clearRunningCache();
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, 0, false, false));
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, false /* isLowResolution */));
     }
 }

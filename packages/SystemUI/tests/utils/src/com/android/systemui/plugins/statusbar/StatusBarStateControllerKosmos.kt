@@ -28,6 +28,7 @@ import com.android.systemui.scene.domain.interactor.sceneBackInteractor
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.FakeStatusBarStateController
 import com.android.systemui.statusbar.StatusBarStateControllerImpl
 import com.android.systemui.statusbar.SysuiStatusBarStateController
 import com.android.systemui.util.mockito.mock
@@ -49,3 +50,6 @@ var Kosmos.statusBarStateController: SysuiStatusBarStateController by
             { alternateBouncerInteractor },
         )
     }
+
+var Kosmos.fakeStatusBarStateController: SysuiStatusBarStateController by
+    Kosmos.Fixture { FakeStatusBarStateController() }

@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Ierīce aktīva (tikai kreisā auss)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Ierīce aktīva (tikai labā auss)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Ierīces aktīvas (kreisā un labā auss)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Nevarēja atjaunināt apkārtnes skaņas"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktīvs (tikai multividei). Akumulatora uzlādes līmenis: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktīvs (tikai multividei). Akumulatora uzlādes līmenis kreisajā austiņā: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, labajā austiņā: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Izveidots savienojums (atbalsta audio kopīgošanu). Akumulatora uzlādes līmenis: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -235,9 +236,9 @@
     <item msgid="6946761421234586000">"400%"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Profila izvēlēšanās"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Privāts"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personīgais"</string>
     <string name="category_work" msgid="4014193632325996115">"Darba"</string>
-    <string name="category_private" msgid="4244892185452788977">"Privāti"</string>
+    <string name="category_private" msgid="4244892185452788977">"Privāts"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klons"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Izstrādātāju opcijas"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Izstrādātāju opciju iespējošana"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Vietējā beigu lietotne"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Iespējot beigu lietotni, kurā piedāvāta vietējā čaulas piekļuve"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux izstrādes vide"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Palaist Linux termināli Android ierīcē"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Eksperimentāls) Palaist Linux termināli Android ierīcē"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ja atspējosiet, Linux termināļa dati tiks notīrīti"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP pārbaude"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP pārb. iestatīšana"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Atkļūdošana"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Pārejas animācijas mērogs"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animācijas ilguma mērogs"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulēt sekundāros ekr."</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Ēnas parādīšanas pozīcija"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Lietotnes"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Nesaglabāt darbības"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Iznīcināt katru darbību, kad lietotājs to pārtrauc"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Šis tālrunis"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Šis planšetdators"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Šī datora iekšējais skaļrunis"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Šis televizors"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Doka skaļrunis"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ārēja ierīce"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pievienotā ierīce"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Šis tālrunis"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analogā"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nevar atskaņot šajā ierīcē."</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Lai pārslēgtu, jauniniet kontu"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Šeit nevar atskaņot lejupielādes"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Savienojums izveidots, izmantojot ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Savienojums izveidots, izmantojot eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Noklusējuma iestatījums televizorā"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI izvade"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Iekšējie skaļruņi"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Iebūvēts skaļrunis"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Televizora audio"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Radās problēma ar savienojuma izveidi. Izslēdziet un atkal ieslēdziet ierīci."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Vadu audioierīce"</string>
     <string name="help_label" msgid="3528360748637781274">"Palīdzība un atsauksmes"</string>

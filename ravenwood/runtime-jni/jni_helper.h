@@ -26,6 +26,7 @@
 constexpr const char* kCommonUtils = "com/android/ravenwood/common/RavenwoodCommonUtils";
 constexpr const char* kRuntimeEnvController =
         "android/platform/test/ravenwood/RavenwoodRuntimeEnvironmentController";
+constexpr const char* kRunnerState = "android/platform/test/ravenwood/RavenwoodRunnerState";
 constexpr const char* kRuntimeNative = "com/android/ravenwood/RavenwoodRuntimeNative";
 
 // We have to explicitly decode the string to real UTF-8, because when using GetStringUTFChars

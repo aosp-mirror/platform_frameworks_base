@@ -20,11 +20,10 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
 import android.content.res.Configuration
 import android.content.res.Resources
-import android.graphics.Bitmap
 import android.graphics.Rect
 import android.os.IBinder
 import android.os.UserHandle
-import android.util.Slog
+import android.view.MotionEvent
 import android.view.SurfaceControl
 import android.view.SurfaceControl.Transaction
 import android.view.WindowManager.TRANSIT_CHANGE
@@ -36,18 +35,20 @@ import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
 import com.android.internal.annotations.VisibleForTesting
 import com.android.launcher3.icons.BaseIconFactory
-import com.android.launcher3.icons.BaseIconFactory.MODE_DEFAULT
-import com.android.launcher3.icons.IconProvider
 import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.desktopmode.DesktopRepository
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_MINIMIZE
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
@@ -56,20 +57,27 @@ import com.android.wm.shell.windowdecor.DragPositioningCallbackUtility.DragEvent
 import com.android.wm.shell.windowdecor.DragResizeWindowGeometry
 import com.android.wm.shell.windowdecor.DragResizeWindowGeometry.DisabledEdge.NONE
 import com.android.wm.shell.windowdecor.ResizeVeil
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
 import com.android.wm.shell.windowdecor.extension.isFullscreen
 import java.util.function.Supplier
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.MainCoroutineDispatcher
 
 class DesktopTilingWindowDecoration(
     private var context: Context,
+    @ShellMainThread private val mainDispatcher: MainCoroutineDispatcher,
+    @ShellBackgroundThread private val bgScope: CoroutineScope,
     private val syncQueue: SyncTransactionQueue,
     private val displayController: DisplayController,
+    private val taskResourceLoader: WindowDecorTaskResourceLoader,
     private val displayId: Int,
     private val rootTdaOrganizer: RootTaskDisplayAreaOrganizer,
     private val transitions: Transitions,
     private val shellTaskOrganizer: ShellTaskOrganizer,
     private val toggleResizeDesktopTaskTransitionHandler: ToggleResizeDesktopTaskTransitionHandler,
     private val returnToDragStartAnimator: ReturnToDragStartAnimator,
-    private val taskRepository: DesktopRepository,
+    private val desktopUserRepositories: DesktopUserRepositories,
+    private val desktopModeEventLogger: DesktopModeEventLogger,
     private val transactionSupplier: Supplier<Transaction> = Supplier { Transaction() },
 ) :
     Transitions.TransitionHandler,
@@ -105,6 +113,9 @@ class DesktopTilingWindowDecoration(
                 context,
                 destinationBounds,
                 displayController,
+                taskResourceLoader,
+                mainDispatcher,
+                bgScope,
                 transactionSupplier,
             )
         val isFirstTiledApp = leftTaskResizingHelper == null && rightTaskResizingHelper == null
@@ -218,6 +229,30 @@ class DesktopTilingWindowDecoration(
         return tilingManager
     }
 
+    fun onDividerHandleDragStart(motionEvent: MotionEvent) {
+        val leftTiledTask = leftTaskResizingHelper ?: return
+        val rightTiledTask = rightTaskResizingHelper ?: return
+        val inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
+
+        desktopModeEventLogger.logTaskResizingStarted(
+            ResizeTrigger.TILING_DIVIDER,
+            inputMethod,
+            leftTiledTask.taskInfo,
+            leftTiledTask.bounds.width(),
+            leftTiledTask.bounds.height(),
+            displayController,
+        )
+
+        desktopModeEventLogger.logTaskResizingStarted(
+            ResizeTrigger.TILING_DIVIDER,
+            inputMethod,
+            rightTiledTask.taskInfo,
+            rightTiledTask.bounds.width(),
+            rightTiledTask.bounds.height(),
+            displayController,
+        )
+    }
+
     fun onDividerHandleMoved(dividerBounds: Rect, t: SurfaceControl.Transaction): Boolean {
         val leftTiledTask = leftTaskResizingHelper ?: return false
         val rightTiledTask = rightTaskResizingHelper ?: return false
@@ -266,9 +301,32 @@ class DesktopTilingWindowDecoration(
         return true
     }
 
-    fun onDividerHandleDragEnd(dividerBounds: Rect, t: SurfaceControl.Transaction) {
+    fun onDividerHandleDragEnd(
+        dividerBounds: Rect,
+        t: SurfaceControl.Transaction,
+        motionEvent: MotionEvent,
+    ) {
         val leftTiledTask = leftTaskResizingHelper ?: return
         val rightTiledTask = rightTaskResizingHelper ?: return
+        val inputMethod = DesktopModeEventLogger.getInputMethodFromMotionEvent(motionEvent)
+
+        desktopModeEventLogger.logTaskResizingEnded(
+            ResizeTrigger.TILING_DIVIDER,
+            inputMethod,
+            leftTiledTask.taskInfo,
+            leftTiledTask.newBounds.width(),
+            leftTiledTask.newBounds.height(),
+            displayController,
+        )
+
+        desktopModeEventLogger.logTaskResizingEnded(
+            ResizeTrigger.TILING_DIVIDER,
+            inputMethod,
+            rightTiledTask.taskInfo,
+            rightTiledTask.newBounds.width(),
+            rightTiledTask.newBounds.height(),
+            displayController,
+        )
 
         if (leftTiledTask.newBounds == leftTiledTask.bounds) {
             leftTiledTask.hideVeil()
@@ -356,11 +414,13 @@ class DesktopTilingWindowDecoration(
         val context: Context,
         val bounds: Rect,
         val displayController: DisplayController,
+        private val taskResourceLoader: WindowDecorTaskResourceLoader,
+        @ShellMainThread val mainDispatcher: MainCoroutineDispatcher,
+        @ShellBackgroundThread val bgScope: CoroutineScope,
         val transactionSupplier: Supplier<Transaction>,
     ) {
         var isInitialised = false
         var newBounds = Rect(bounds)
-        private lateinit var resizeVeilBitmap: Bitmap
         private lateinit var resizeVeil: ResizeVeil
         private val displayContext = displayController.getDisplayContext(taskInfo.displayId)
         private val userContext =
@@ -374,26 +434,14 @@ class DesktopTilingWindowDecoration(
         }
 
         private fun initVeil() {
-            val baseActivity = taskInfo.baseActivity
-            if (baseActivity == null) {
-                Slog.e(TAG, "Base activity component not found in task")
-                return
-            }
-            val resizeVeilIconFactory =
-                displayContext?.let {
-                    createIconFactory(displayContext, R.dimen.desktop_mode_resize_veil_icon_size)
-                } ?: return
-            val pm = userContext.getPackageManager()
-            val activityInfo = pm.getActivityInfo(baseActivity, 0 /* flags */)
-            val provider = IconProvider(displayContext)
-            val appIconDrawable = provider.getIcon(activityInfo)
-            resizeVeilBitmap =
-                resizeVeilIconFactory.createScaledBitmap(appIconDrawable, MODE_DEFAULT)
+            displayContext ?: return
             resizeVeil =
                 ResizeVeil(
                     context = displayContext,
                     displayController = displayController,
-                    appIcon = resizeVeilBitmap,
+                    taskResourceLoader = taskResourceLoader,
+                    mainDispatcher = mainDispatcher,
+                    bgScope = bgScope,
                     parentSurface = desktopModeWindowDecoration.getLeash(),
                     surfaceControlTransactionSupplier = transactionSupplier,
                     taskInfo = taskInfo,
@@ -426,9 +474,9 @@ class DesktopTilingWindowDecoration(
         }
     }
 
+    // Only called if [taskInfo] relates to a focused task
     private fun isTilingFocusRemoved(taskInfo: RunningTaskInfo): Boolean {
-        return taskInfo.isFocused &&
-            isTilingFocused &&
+        return isTilingFocused &&
             taskInfo.taskId != leftTaskResizingHelper?.taskInfo?.taskId &&
             taskInfo.taskId != rightTaskResizingHelper?.taskInfo?.taskId
     }
@@ -439,11 +487,10 @@ class DesktopTilingWindowDecoration(
         }
     }
 
+    // Only called if [taskInfo] relates to a focused task
     private fun isTilingRefocused(taskInfo: RunningTaskInfo): Boolean {
-        return !isTilingFocused &&
-            taskInfo.isFocused &&
-            (taskInfo.taskId == leftTaskResizingHelper?.taskInfo?.taskId ||
-                taskInfo.taskId == rightTaskResizingHelper?.taskInfo?.taskId)
+        return taskInfo.taskId == leftTaskResizingHelper?.taskInfo?.taskId ||
+                taskInfo.taskId == rightTaskResizingHelper?.taskInfo?.taskId
     }
 
     private fun buildTiledTasksMoveToFront(leftOnTop: Boolean): WindowContainerTransaction {
@@ -528,8 +575,18 @@ class DesktopTilingWindowDecoration(
         removeTaskIfTiled(taskId, taskVanished = true, shouldDelayUpdate = true)
     }
 
-    fun moveTiledPairToFront(taskInfo: RunningTaskInfo): Boolean {
+    /**
+     * Moves the tiled pair to the front of the task stack, if the [taskInfo] is focused and one of
+     * the two tiled tasks.
+     *
+     * If specified, [isTaskFocused] will override [RunningTaskInfo.isFocused]. This is to be used
+     * when called when the task will be focused, but the [taskInfo] hasn't been updated yet.
+     */
+    fun moveTiledPairToFront(taskInfo: RunningTaskInfo, isTaskFocused: Boolean? = null): Boolean {
         if (!isTilingManagerInitialised) return false
+
+        val isFocused = isTaskFocused ?: taskInfo.isFocused
+        if (!isFocused) return false
 
         // If a task that isn't tiled is being focused, let the generic handler do the work.
         if (isTilingFocusRemoved(taskInfo)) {
@@ -570,6 +627,7 @@ class DesktopTilingWindowDecoration(
     private fun allTiledTasksVisible(): Boolean {
         val leftTiledTask = leftTaskResizingHelper ?: return false
         val rightTiledTask = rightTaskResizingHelper ?: return false
+        val taskRepository = desktopUserRepositories.current
         return taskRepository.isVisibleTask(leftTiledTask.taskInfo.taskId) &&
             taskRepository.isVisibleTask(rightTiledTask.taskInfo.taskId)
     }

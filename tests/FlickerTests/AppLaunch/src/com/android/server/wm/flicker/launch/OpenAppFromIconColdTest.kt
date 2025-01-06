@@ -30,7 +30,7 @@ import org.junit.runners.Parameterized
 /**
  * Test cold launching an app from launcher
  *
- * To run this test: `atest FlickerTestsAppLaunch:OpenAppColdFromIcon`
+ * To run this test: `atest FlickerTestsAppLaunch:OpenAppFromIconColdTest`
  *
  * Actions:
  * ```

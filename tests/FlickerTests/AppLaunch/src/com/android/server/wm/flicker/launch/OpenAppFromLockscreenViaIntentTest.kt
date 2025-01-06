@@ -41,7 +41,7 @@ import org.junit.runners.Parameterized
  *
  * This test assumes the device doesn't have AOD enabled
  *
- * To run this test: `atest FlickerTestsAppLaunch:OpenAppNonResizeableTest`
+ * To run this test: `atest FlickerTestsAppLaunch:OpenAppFromLockscreenViaIntentTest`
  *
  * Actions:
  * ```

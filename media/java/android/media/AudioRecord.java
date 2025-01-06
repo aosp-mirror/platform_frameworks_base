@@ -20,8 +20,10 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAUL
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_AUDIO;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.media.AudioManager.AUDIO_SESSION_ID_GENERATE;
+import static android.media.audio.Flags.FLAG_ROUTED_DEVICE_IDS;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.FlaggedApi;
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
@@ -1906,17 +1908,49 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
     }
 
     /**
+     * Internal API of getRoutedDevices(). We should not call flag APIs internally.
+     */
+    private @NonNull List<AudioDeviceInfo> getRoutedDevicesInternal() {
+        List<AudioDeviceInfo> audioDeviceInfos = new ArrayList<AudioDeviceInfo>();
+        final int[] deviceIds = native_getRoutedDeviceIds();
+        if (deviceIds == null || deviceIds.length == 0) {
+            return audioDeviceInfos;
+        }
+
+        for (int i = 0; i < deviceIds.length; i++) {
+            AudioDeviceInfo audioDeviceInfo = AudioManager.getDeviceForPortId(deviceIds[i],
+                    AudioManager.GET_DEVICES_INPUTS);
+            if (audioDeviceInfo != null) {
+                audioDeviceInfos.add(audioDeviceInfo);
+            }
+        }
+        return audioDeviceInfos;
+    }
+
+    /**
      * Returns an {@link AudioDeviceInfo} identifying the current routing of this AudioRecord.
      * Note: The query is only valid if the AudioRecord is currently recording. If it is not,
      * <code>getRoutedDevice()</code> will return null.
      */
     @Override
     public AudioDeviceInfo getRoutedDevice() {
-        int deviceId = native_getRoutedDeviceId();
-        if (deviceId == 0) {
+        final List<AudioDeviceInfo> audioDeviceInfos = getRoutedDevicesInternal();
+        if (audioDeviceInfos.isEmpty()) {
             return null;
         }
-        return AudioManager.getDeviceForPortId(deviceId, AudioManager.GET_DEVICES_INPUTS);
+        return audioDeviceInfos.get(0);
+    }
+
+    /**
+     * Returns a List of {@link AudioDeviceInfo} identifying the current routing of this
+     * AudioRecord.
+     * Note: The query is only valid if the AudioRecord is currently playing. If it is not,
+     * <code>getRoutedDevices()</code> will return an empty list.
+     */
+    @Override
+    @FlaggedApi(FLAG_ROUTED_DEVICE_IDS)
+    public @NonNull List<AudioDeviceInfo> getRoutedDevices() {
+        return getRoutedDevicesInternal();
     }
 
     /**
@@ -2494,7 +2528,7 @@ public class AudioRecord implements AudioRouting, MicrophoneDirection,
             int sampleRateInHz, int channelCount, int audioFormat);
 
     private native final boolean native_setInputDevice(int deviceId);
-    private native final int native_getRoutedDeviceId();
+    private native int[] native_getRoutedDeviceIds();
     private native final void native_enableDeviceCallback();
     private native final void native_disableDeviceCallback();
 

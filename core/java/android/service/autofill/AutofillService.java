@@ -15,9 +15,12 @@
  */
 package android.service.autofill;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_SESSION_DESTROYED;
+
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 
 import android.annotation.CallSuper;
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -669,6 +672,14 @@ public abstract class AutofillService extends Service {
                     AutofillService.this,
                     new SavedDatasetsInfoCallbackImpl(receiver, SavedDatasetsInfo.TYPE_PASSWORDS)));
         }
+
+        @Override
+        public void onSessionDestroyed(@Nullable FillEventHistory history) {
+            mHandler.sendMessage(obtainMessage(
+                    AutofillService::onSessionDestroyed,
+                    AutofillService.this,
+                    history));
+        }
     };
 
     private Handler mHandler;
@@ -783,26 +794,42 @@ public abstract class AutofillService extends Service {
     }
 
     /**
-     * Gets the events that happened after the last
-     * {@link AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
+     * Called when an Autofill context has ended and the Autofill session is finished. This will be
+     * called as the last step of the Autofill lifecycle described in {@link AutofillManager}.
+     *
+     * <p>This will also contain the finished Session's FillEventHistory, so providers do not need
+     * to explicitly call {@link #getFillEventHistory()}
+     *
+     * <p>This will usually happens whenever {@link AutofillManager#commit()} or {@link
+     * AutofillManager#cancel()} is called.
+     */
+    @FlaggedApi(FLAG_AUTOFILL_SESSION_DESTROYED)
+    public void onSessionDestroyed(@Nullable FillEventHistory history) {}
+
+    /**
+     * Gets the events that happened after the last {@link
+     * AutofillService#onFillRequest(FillRequest, android.os.CancellationSignal, FillCallback)}
      * call.
      *
      * <p>This method is typically used to keep track of previous user actions to optimize further
      * requests. For example, the service might return email addresses in alphabetical order by
      * default, but change that order based on the address the user picked on previous requests.
      *
-     * <p>The history is not persisted over reboots, and it's cleared every time the service
-     * replies to a {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} by calling
-     * {@link FillCallback#onSuccess(FillResponse)} or {@link FillCallback#onFailure(CharSequence)}
-     * (if the service doesn't call any of these methods, the history will clear out after some
-     * pre-defined time). Hence, the service should call {@link #getFillEventHistory()} before
-     * finishing the {@link FillCallback}.
+     * <p>The history is not persisted over reboots, and it's cleared every time the service replies
+     * to a {@link #onFillRequest(FillRequest, CancellationSignal, FillCallback)} by calling {@link
+     * FillCallback#onSuccess(FillResponse)} or {@link FillCallback#onFailure(CharSequence)} (if the
+     * service doesn't call any of these methods, the history will clear out after some pre-defined
+     * time). Hence, the service should call {@link #getFillEventHistory()} before finishing the
+     * {@link FillCallback}.
      *
      * @return The history or {@code null} if there are no events.
-     *
      * @throws RuntimeException if the event history could not be retrieved.
+     * @deprecated Use {@link #onSessionDestroyed(FillEventHistory) instead}
      */
-    @Nullable public final FillEventHistory getFillEventHistory() {
+    @FlaggedApi(FLAG_AUTOFILL_SESSION_DESTROYED)
+    @Deprecated
+    @Nullable
+    public final FillEventHistory getFillEventHistory() {
         final AutofillManager afm = getSystemService(AutofillManager.class);
 
         if (afm == null) {

@@ -23,6 +23,7 @@ import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.BrightnessInfo;
 import android.hardware.display.Curve;
 import android.hardware.graphics.common.DisplayDecorationSupport;
+import android.hardware.display.DisplayTopology;
 import android.hardware.display.HdrConversionMode;
 import android.hardware.display.IDisplayManagerCallback;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -55,15 +56,18 @@ interface IDisplayManager {
     void stopWifiDisplayScan();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void connectWifiDisplay(String address);
 
     // No permissions required.
     void disconnectWifiDisplay();
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void renameWifiDisplay(String address, String alias);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
+    @EnforcePermission("CONFIGURE_WIFI_DISPLAY")
     void forgetWifiDisplay(String address);
 
     // Requires CONFIGURE_WIFI_DISPLAY permission.
@@ -168,6 +172,7 @@ interface IDisplayManager {
     void setBrightness(int displayId, float brightness);
 
     // Retrieves the display brightness.
+    @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     float getBrightness(int displayId);
 
     // Temporarily sets the auto brightness adjustment factor.
@@ -195,8 +200,7 @@ interface IDisplayManager {
 
     // Sets the HDR conversion mode for a device.
     // Requires MODIFY_HDR_CONVERSION_MODE permission.
-    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
-                + ".permission.MODIFY_HDR_CONVERSION_MODE)")
+    @EnforcePermission("MODIFY_HDR_CONVERSION_MODE")
     void setHdrConversionMode(in HdrConversionMode hdrConversionMode);
     HdrConversionMode getHdrConversionModeSetting();
     HdrConversionMode getHdrConversionMode();
@@ -254,4 +258,13 @@ interface IDisplayManager {
     // Get the default doze brightness
     @EnforcePermission("CONTROL_DISPLAY_BRIGHTNESS")
     float getDefaultDozeBrightness(int displayId);
+
+    // Get the display topology
+    @EnforcePermission("MANAGE_DISPLAYS")
+    @nullable
+    DisplayTopology getDisplayTopology();
+
+    // Set the display topology
+    @EnforcePermission("MANAGE_DISPLAYS")
+    void setDisplayTopology(in DisplayTopology topology);
 }

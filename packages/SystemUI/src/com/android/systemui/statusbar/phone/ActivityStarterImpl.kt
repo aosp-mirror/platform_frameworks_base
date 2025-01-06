@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.os.UserHandle
 import android.view.View
 import com.android.systemui.animation.ActivityTransitionAnimator
+import com.android.systemui.animation.TransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.plugins.ActivityStarter
@@ -38,7 +39,7 @@ constructor(
     private val statusBarStateController: SysuiStatusBarStateController,
     @Main private val mainExecutor: DelayableExecutor,
     activityStarterInternal: Lazy<ActivityStarterInternalImpl>,
-    legacyActivityStarter: Lazy<LegacyActivityStarterInternalImpl>
+    legacyActivityStarter: Lazy<LegacyActivityStarterInternalImpl>,
 ) : ActivityStarter {
 
     private val activityStarterInternal: ActivityStarterInternal =
@@ -48,10 +49,23 @@ constructor(
             legacyActivityStarter.get()
         }
 
+    override fun registerTransition(
+        cookie: ActivityTransitionAnimator.TransitionCookie,
+        controllerFactory: ActivityTransitionAnimator.ControllerFactory,
+    ) {
+        if (!TransitionAnimator.longLivedReturnAnimationsEnabled()) return
+        activityStarterInternal.registerTransition(cookie, controllerFactory)
+    }
+
+    override fun unregisterTransition(cookie: ActivityTransitionAnimator.TransitionCookie) {
+        if (!TransitionAnimator.longLivedReturnAnimationsEnabled()) return
+        activityStarterInternal.unregisterTransition(cookie)
+    }
+
     override fun startPendingIntentDismissingKeyguard(intent: PendingIntent) {
         activityStarterInternal.startPendingIntentDismissingKeyguard(
             intent = intent,
-            dismissShade = true
+            dismissShade = true,
         )
     }
 
@@ -98,7 +112,7 @@ constructor(
         intentSentUiThreadCallback: Runnable?,
         animationController: ActivityTransitionAnimator.Controller?,
         fillInIntent: Intent?,
-        extraOptions: Bundle?
+        extraOptions: Bundle?,
     ) {
         activityStarterInternal.startPendingIntentDismissingKeyguard(
             intent = intent,
@@ -115,7 +129,7 @@ constructor(
     override fun startPendingIntentMaybeDismissingKeyguard(
         intent: PendingIntent,
         intentSentUiThreadCallback: Runnable?,
-        animationController: ActivityTransitionAnimator.Controller?
+        animationController: ActivityTransitionAnimator.Controller?,
     ) {
         activityStarterInternal.startPendingIntentDismissingKeyguard(
             intent = intent,
@@ -245,7 +259,7 @@ constructor(
 
     override fun postStartActivityDismissingKeyguard(
         intent: PendingIntent,
-        animationController: ActivityTransitionAnimator.Controller?
+        animationController: ActivityTransitionAnimator.Controller?,
     ) {
         postOnUiThread {
             activityStarterInternal.startPendingIntentDismissingKeyguard(
@@ -381,7 +395,7 @@ constructor(
         postOnUiThread {
             statusBarStateController.setLeaveOpenOnKeyguardHide(true)
             activityStarterInternal.executeRunnableDismissingKeyguard(
-                runnable = { runnable?.let { postOnUiThread(runnable = it) } },
+                runnable = { runnable?.let { postOnUiThread(runnable = it) } }
             )
         }
     }

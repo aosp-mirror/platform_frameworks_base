@@ -89,7 +89,7 @@ public class ActivityRelaunchItem extends ActivityTransactionItem {
     public void preExecute(@NonNull ClientTransactionHandler client) {
         // The local config is already scaled so only apply if this item is from server side.
         if (!client.isExecutingLocalTransaction()) {
-            CompatibilityInfo.applyOverrideScaleIfNeeded(mConfig);
+            CompatibilityInfo.applyOverrideIfNeeded(mConfig);
         }
         mActivityClientRecord = client.prepareRelaunchActivity(getActivityToken(), mPendingResults,
                 mPendingNewIntents, mConfigChanges, mConfig, mPreserveWindow, mActivityWindowInfo);

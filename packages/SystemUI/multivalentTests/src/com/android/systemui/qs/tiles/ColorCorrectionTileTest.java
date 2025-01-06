@@ -39,6 +39,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.shared.QSSettingsPackageRepository;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.util.settings.FakeSettings;
 import com.android.systemui.util.settings.SecureSettings;
@@ -55,6 +56,7 @@ import org.mockito.MockitoAnnotations;
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
 public class ColorCorrectionTileTest extends SysuiTestCase {
+    private static final String SETTINGS_PACKAGE_NAME = "com.android.settings";
 
     @Mock
     private QSHost mHost;
@@ -70,6 +72,8 @@ public class ColorCorrectionTileTest extends SysuiTestCase {
     private QsEventLogger mUiEventLogger;
     @Mock
     private UserTracker mUserTracker;
+    @Mock
+    private QSSettingsPackageRepository mQSSettingsPackageRepository;
 
     private TestableLooper mTestableLooper;
     private SecureSettings mSecureSettings;
@@ -83,6 +87,8 @@ public class ColorCorrectionTileTest extends SysuiTestCase {
         mTestableLooper = TestableLooper.get(this);
 
         when(mHost.getContext()).thenReturn(mContext);
+        when(mQSSettingsPackageRepository.getSettingsPackageName())
+                .thenReturn(SETTINGS_PACKAGE_NAME);
 
         mTile = new ColorCorrectionTile(
                 mHost,
@@ -95,7 +101,8 @@ public class ColorCorrectionTileTest extends SysuiTestCase {
                 mActivityStarter,
                 mQSLogger,
                 mUserTracker,
-                mSecureSettings
+                mSecureSettings,
+                mQSSettingsPackageRepository
         );
 
         mTile.initialize();
@@ -119,5 +126,6 @@ public class ColorCorrectionTileTest extends SysuiTestCase {
                 anyInt(), any());
         assertThat(IntentCaptor.getValue().getAction()).isEqualTo(
                 Settings.ACTION_COLOR_CORRECTION_SETTINGS);
+        assertThat(IntentCaptor.getValue().getPackage()).isEqualTo(SETTINGS_PACKAGE_NAME);
     }
 }

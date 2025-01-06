@@ -26,10 +26,10 @@ import com.android.systemui.keyguard.wakefulnessLifecycle
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.plugins.statusbar.statusBarStateController
 import com.android.systemui.shade.domain.interactor.shadeLockscreenInteractor
+import com.android.systemui.statusbar.notification.headsup.mockHeadsUpManager
 import com.android.systemui.statusbar.notificationShadeWindowController
 import com.android.systemui.statusbar.policy.batteryController
 import com.android.systemui.statusbar.policy.deviceProvisionedController
-import com.android.systemui.statusbar.policy.headsUpManager
 import com.android.systemui.statusbar.pulseExpansionHandler
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
@@ -42,7 +42,7 @@ val Kosmos.dozeServiceHost: DozeServiceHost by
             wakefulnessLifecycle,
             statusBarStateController,
             deviceProvisionedController,
-            headsUpManager,
+            mockHeadsUpManager,
             batteryController,
             scrimController,
             { biometricUnlockController },

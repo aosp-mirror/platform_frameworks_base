@@ -176,7 +176,6 @@ public class BasePowerStatsProcessorTest {
                 powerStatsAggregator, /* batterySessionTimeSpanSlackMillis */ 0);
 
         BatteryUsageStats.Builder builder = new BatteryUsageStats.Builder(new String[0],
-                /* includePowerModels */ false,
                 /* includeProcessStateData */ true,
                 /* includeScreenStateData */ true,
                 /* includesPowerStateData */ true,

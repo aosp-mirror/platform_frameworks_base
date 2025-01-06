@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_EXCLUDE_PORTRAIT_FULLSCREEN;
 import static android.content.pm.ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE;
@@ -35,6 +36,8 @@ import android.app.WindowConfiguration;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+
+import com.android.window.flags.Flags;
 
 /**
  * Encapsulate app compat policy logic related to aspect ratio.
@@ -70,15 +73,8 @@ class AppCompatAspectRatioPolicy {
         mAppCompatAspectRatioState.reset();
     }
 
-    float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
+    private float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
             @NonNull Rect parentBounds) {
-        // If in camera compat mode, aspect ratio from the camera compat policy has priority over
-        // default letterbox aspect ratio.
-        if (AppCompatCameraPolicy.shouldCameraCompatControlAspectRatio(
-                mActivityRecord)) {
-            return AppCompatCameraPolicy.getCameraCompatAspectRatio(mActivityRecord);
-        }
-
         final float letterboxAspectRatioOverride =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides()
                         .getFixedOrientationLetterboxAspectRatio(newParentConfig);
@@ -120,7 +116,16 @@ class AppCompatAspectRatioPolicy {
         if (mTransparentPolicy.isRunning()) {
             return mTransparentPolicy.getInheritedMinAspectRatio();
         }
+
         final ActivityInfo info = mActivityRecord.info;
+
+        // If in camera compat mode, aspect ratio from the camera compat policy has priority over
+        // the default aspect ratio.
+        if (AppCompatCameraPolicy.shouldCameraCompatControlAspectRatio(mActivityRecord)) {
+            return Math.max(AppCompatCameraPolicy.getCameraCompatMinAspectRatio(mActivityRecord),
+                    info.getMinAspectRatio());
+        }
+
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
                 mAppCompatOverrides.getAppCompatAspectRatioOverrides();
         if (aspectRatioOverrides.shouldApplyUserMinAspectRatioOverride()) {
@@ -237,7 +242,14 @@ class AppCompatAspectRatioPolicy {
                 || AppCompatUtils.isInVrUiMode(mActivityRecord.getConfiguration())
                 // TODO(b/232898850): Always respect aspect ratio requests.
                 // Don't set aspect ratio for activity in ActivityEmbedding split.
-                || (organizedTf != null && !organizedTf.fillsParent())) {
+                || (organizedTf != null && !organizedTf.fillsParent())
+                // Don't set aspect ratio for resizeable activities in freeform.
+                // {@link ActivityRecord#shouldCreateAppCompatDisplayInsets()} will be false for
+                // both activities that are naturally resizeable and activities that have been
+                // forced resizeable.
+                || (Flags.ignoreAspectRatioRestrictionsForResizeableFreeformActivities()
+                    && task.getWindowingMode() == WINDOWING_MODE_FREEFORM
+                    && !mActivityRecord.shouldCreateAppCompatDisplayInsets())) {
             return false;
         }
 

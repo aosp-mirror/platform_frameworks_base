@@ -25,9 +25,11 @@ import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_BIND_SERVICE;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_COMPONENT_DISABLED;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_EXECUTING_SERVICE;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FINISH_RECEIVER;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_FOLLOW_UP;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_GET_PROVIDER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_BEGIN;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RECONFIGURATION;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_PROVIDER;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_REMOVE_TASK;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RESTRICTION_CHANGE;
@@ -101,7 +103,7 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.Executor;
 
-public final class CachedAppOptimizer {
+public class CachedAppOptimizer {
 
     // Flags stored in the DeviceConfig API.
     @VisibleForTesting static final String KEY_USE_COMPACTION = "use_compaction";
@@ -203,6 +205,10 @@ public final class CachedAppOptimizer {
             FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_RESTRICTION_CHANGE;
     static final int UNFREEZE_REASON_COMPONENT_DISABLED =
             FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_COMPONENT_DISABLED;
+    static final int UNFREEZE_REASON_OOM_ADJ_FOLLOW_UP =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_OOM_ADJ_FOLLOW_UP;
+    static final int UNFREEZE_REASON_OOM_ADJ_RECONFIGURATION =
+            FrameworkStatsLog.APP_FREEZE_CHANGED__UNFREEZE_REASON_V2__UFR_OOM_ADJ_RECONFIGURATION;
 
     @IntDef(prefix = {"UNFREEZE_REASON_"}, value = {
         UNFREEZE_REASON_NONE,
@@ -234,6 +240,8 @@ public final class CachedAppOptimizer {
         UNFREEZE_REASON_EXECUTING_SERVICE,
         UNFREEZE_REASON_RESTRICTION_CHANGE,
         UNFREEZE_REASON_COMPONENT_DISABLED,
+        UNFREEZE_REASON_OOM_ADJ_FOLLOW_UP,
+        UNFREEZE_REASON_OOM_ADJ_RECONFIGURATION,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface UnfreezeReason {}
@@ -2122,7 +2130,7 @@ public final class CachedAppOptimizer {
                     Slog.d(TAG_AM,
                             "Performing native compaction for pid=" + pid
                                     + " type=" + compactProfile.name());
-                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactSystem");
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "compactNative");
                     try {
                         mProcessDependencies.performCompaction(compactProfile, pid);
                     } catch (Exception e) {
@@ -2451,8 +2459,8 @@ public final class CachedAppOptimizer {
                             synchronized (mAm.mPidsSelfLocked) {
                                 pr = mAm.mPidsSelfLocked.get(blocked);
                             }
-                            if (pr != null
-                                    && pr.mState.getCurAdj() < ProcessList.FREEZER_CUTOFF_ADJ) {
+                            if (pr != null && pr.mState.getCurAdj()
+                                    < mAm.mConstants.FREEZER_CUTOFF_ADJ) {
                                 Slog.d(TAG_AM, app.processName + " (" + pid + ") blocks "
                                         + pr.processName + " (" + blocked + ")");
                                 // Found at least one blocked non-cached process
@@ -2539,6 +2547,10 @@ public final class CachedAppOptimizer {
                 return UNFREEZE_REASON_RESTRICTION_CHANGE;
             case OOM_ADJ_REASON_COMPONENT_DISABLED:
                 return UNFREEZE_REASON_COMPONENT_DISABLED;
+            case OOM_ADJ_REASON_FOLLOW_UP:
+                return UNFREEZE_REASON_OOM_ADJ_FOLLOW_UP;
+            case OOM_ADJ_REASON_RECONFIGURATION:
+                return UNFREEZE_REASON_OOM_ADJ_RECONFIGURATION;
             default:
                 return UNFREEZE_REASON_NONE;
         }

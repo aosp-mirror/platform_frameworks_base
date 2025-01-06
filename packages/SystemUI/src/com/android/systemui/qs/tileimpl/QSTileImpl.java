@@ -31,6 +31,7 @@ import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.drawable.Drawable;
@@ -68,6 +69,7 @@ import com.android.systemui.qs.QSEvent;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.SideLabelTileLayout;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 
 import java.io.PrintWriter;
@@ -367,6 +369,7 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         mHandler.sendEmptyMessage(H.INITIALIZE);
     }
 
+    @androidx.annotation.NonNull
     public TState getState() {
         return mState;
     }
@@ -532,6 +535,23 @@ public abstract class QSTileImpl<TState extends State> implements QSTile, Lifecy
         } else {
             state.disabledByPolicy = false;
             mEnforcedAdmin = null;
+        }
+    }
+
+    protected Icon maybeLoadResourceIcon(int id) {
+        return maybeLoadResourceIcon(id, mContext);
+    }
+
+    /**
+     * Returns the {@link QSTile.Icon} for the resource ID, optionally loading the drawable if
+     * {@link QsInCompose#isEnabled()} is true.
+     */
+    @SuppressLint("UseCompatLoadingForDrawables")
+    public static Icon maybeLoadResourceIcon(int id, Context context) {
+        if (QsInCompose.isEnabled()) {
+            return new DrawableIconWithRes(context.getDrawable(id), id);
+        } else {
+            return ResourceIcon.get(id);
         }
     }
 

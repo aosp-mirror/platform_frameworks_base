@@ -74,7 +74,8 @@ class CommandParser {
      */
     fun parse(args: List<String>): Boolean {
         if (args.isEmpty()) {
-            return false
+            // An empty args list might be valid here if there are no required inputs
+            return validateRequiredParams()
         }
 
         val iterator = args.listIterator()
@@ -268,11 +269,7 @@ class CommandParser {
         _subCommands.add(new)
     }
 
-    internal fun flag(
-        longName: String,
-        shortName: String? = null,
-        description: String = "",
-    ): Flag {
+    internal fun flag(longName: String, shortName: String? = null, description: String = ""): Flag {
         checkCliNames(shortName, longName)?.let {
             throw IllegalArgumentException("Detected reused flag name ($it)")
         }
@@ -305,9 +302,7 @@ class CommandParser {
         return param
     }
 
-    internal fun <T : ParseableCommand> subCommand(
-        command: T,
-    ): OptionalSubCommand<T> {
+    internal fun <T : ParseableCommand> subCommand(command: T): OptionalSubCommand<T> {
         checkCliNames(null, command.name)?.let {
             throw IllegalArgumentException("Cannot re-use name for subcommand ($it)")
         }

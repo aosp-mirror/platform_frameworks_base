@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.notification.data.repository.activeNotific
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.policy.data.repository.fakeUserSetupRepository
 import com.android.systemui.statusbar.policy.fakeConfigurationController
@@ -522,21 +523,21 @@ class NotificationListViewModelTest(flags: FlagsParameterization) : SysuiTestCas
             assertThat(pinnedHeadsUpRows).isEmpty()
 
             // WHEN a row gets pinned
-            rows[0].isPinned.value = true
+            rows[0].pinnedStatus.value = PinnedStatus.PinnedBySystem
             runCurrent()
 
             // THEN it's added to the list
             assertThat(pinnedHeadsUpRows).containsExactly(rows[0])
 
             // WHEN more rows are pinned
-            rows[1].isPinned.value = true
+            rows[1].pinnedStatus.value = PinnedStatus.PinnedBySystem
             runCurrent()
 
             // THEN they are all in the list
             assertThat(pinnedHeadsUpRows).containsExactly(rows[0], rows[1])
 
             // WHEN a row gets unpinned
-            rows[0].isPinned.value = false
+            rows[0].pinnedStatus.value = PinnedStatus.NotPinned
             runCurrent()
 
             // THEN it's removed from the list

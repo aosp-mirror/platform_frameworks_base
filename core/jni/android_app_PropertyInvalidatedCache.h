@@ -18,10 +18,100 @@
 #include <memory.h>
 
 #include <atomic>
+#include <cstdint>
 
-namespace android {
-namespace app {
-namespace PropertyInvalidatedCache {
+namespace android::app::PropertyInvalidatedCache {
+
+/**
+ * A head of a CacheNonce object.  This contains all the fields that have a fixed size and
+ * location.  Fields with a variable location are found via offsets.  The offsets make this
+ * object position-independent, which is required because it is in shared memory and would be
+ * mapped into different virtual addresses for different processes.
+ */
+class NonceStore {
+  protected:
+    // A convenient typedef.  The jbyteArray element type is jbyte, which the compiler treats as
+    // signed char.
+    typedef signed char block_t;
+
+    // The nonce type.
+    typedef std::atomic<int64_t> nonce_t;
+
+    // Atomics should be safe to use across processes if they are lock free.
+    static_assert(nonce_t::is_always_lock_free == true);
+
+    // The value of an unset field.
+    static constexpr int UNSET = 0;
+
+    // The size of the nonce array.
+    const int32_t kMaxNonce;
+
+    // The size of the byte array.
+    const size_t kMaxByte;
+
+    // The offset to the nonce array.
+    const size_t mNonceOffset;
+
+    // The offset to the byte array.
+    const size_t mByteOffset;
+
+    // The byte block hash.  This is fixed and at a known offset, so leave it in the base class.
+    volatile std::atomic<int32_t> mByteHash;
+
+    // The constructor is protected!  It only makes sense when called from a subclass.
+    NonceStore(int kMaxNonce, size_t kMaxByte, volatile nonce_t* nonce, volatile block_t* block) :
+            kMaxNonce(kMaxNonce),
+            kMaxByte(kMaxByte),
+            mNonceOffset(offset(this, const_cast<nonce_t*>(nonce))),
+            mByteOffset(offset(this, const_cast<block_t*>(block))) {
+    }
+
+  public:
+
+    // These provide run-time access to the sizing parameters.
+    int getMaxNonce() const;
+    size_t getMaxByte() const;
+
+    // Fetch a nonce, returning UNSET if the index is out of range.  This method specifically
+    // does not throw or generate an error if the index is out of range; this allows the method
+    // to be called in a CriticalNative JNI API.
+    int64_t getNonce(int index) const;
+
+    // Set a nonce and return true. Return false if the index is out of range.  This method
+    // specifically does not throw or generate an error if the index is out of range; this
+    // allows the method to be called in a CriticalNative JNI API.
+    bool setNonce(int index, int64_t value);
+
+    // Fetch just the byte-block hash
+    int32_t getHash() const;
+
+    // Copy the byte block to the target and return the current hash.
+    int32_t getByteBlock(block_t* block, size_t len) const;
+
+    // Set the byte block and the hash.
+    void setByteBlock(int hash, const block_t* block, size_t len);
+
+  private:
+
+    // A convenience function to compute the offset between two unlike pointers.
+    static size_t offset(void const* base, void const* member) {
+        return reinterpret_cast<uintptr_t>(member) - reinterpret_cast<std::uintptr_t>(base);
+    }
+
+    // Return the address of the nonce array.
+    volatile nonce_t* nonce() const {
+        // The array is located at an offset from <this>.
+        return reinterpret_cast<nonce_t*>(
+            reinterpret_cast<std::uintptr_t>(this) + mNonceOffset);
+    }
+
+    // Return the address of the byte block array.
+    volatile block_t* byteBlock() const {
+        // The array is located at an offset from <this>.
+        return reinterpret_cast<block_t*>(
+            reinterpret_cast<std::uintptr_t>(this) + mByteOffset);
+    }
+};
 
 /**
  * A cache nonce block contains an array of std::atomic<int64_t> and an array of bytes.  The
@@ -36,111 +126,31 @@ namespace PropertyInvalidatedCache {
  * The template is parameterized by the number of nonces it supports and the number of bytes in
  * the string block.
  */
-template<int maxNonce, size_t maxByte> class CacheNonce {
-
-    // The value of an unset field.
-    static const int UNSET = 0;
-
-    // A convenient typedef.  The jbyteArray element type is jbyte, which the compiler treats as
-    // signed char.
-    typedef signed char block_t;
+template<int maxNonce, size_t maxByte> class CacheNonce : public NonceStore {
 
     // The array of nonces
-    volatile std::atomic<int64_t> mNonce[maxNonce];
+    volatile nonce_t mNonce[maxNonce];
 
     // The byte array.  This is not atomic but it is guarded by the mByteHash.
     volatile block_t mByteBlock[maxByte];
 
-    // The hash that validates the byte block
-    volatile std::atomic<int32_t> mByteHash;
-
-    // Pad the class to a multiple of 8 bytes.
-    int32_t _pad;
-
   public:
-
-    // The expected size of this instance.  This is a compile-time constant and can be used in a
-    // static assertion.
-    static const int expectedSize =
-            maxNonce * sizeof(std::atomic<int64_t>)
-            + sizeof(std::atomic<int32_t>)
-            + maxByte * sizeof(block_t)
-            + sizeof(int32_t);
-
-    // These provide run-time access to the sizing parameters.
-    int getMaxNonce() const {
-        return maxNonce;
-    }
-
-    size_t getMaxByte() const {
-        return maxByte;
-    }
-
     // Construct and initialize the memory.
-    CacheNonce() {
+    CacheNonce() :
+            NonceStore(maxNonce, maxByte, &mNonce[0], &mByteBlock[0])
+    {
         for (int i = 0; i < maxNonce; i++) {
             mNonce[i] = UNSET;
         }
         mByteHash = UNSET;
         memset((void*) mByteBlock, UNSET, sizeof(mByteBlock));
     }
-
-    // Fetch a nonce, returning UNSET if the index is out of range.  This method specifically
-    // does not throw or generate an error if the index is out of range; this allows the method
-    // to be called in a CriticalNative JNI API.
-    int64_t getNonce(int index) const {
-        if (index < 0 || index >= maxNonce) {
-            return UNSET;
-        } else {
-            return mNonce[index];
-        }
-    }
-
-    // Set a nonce and return true. Return false if the index is out of range.  This method
-    // specifically does not throw or generate an error if the index is out of range; this
-    // allows the method to be called in a CriticalNative JNI API.
-    bool setNonce(int index, int64_t value) {
-        if (index < 0 || index >= maxNonce) {
-            return false;
-        } else {
-            mNonce[index] = value;
-            return true;
-        }
-    }
-
-    // Fetch just the byte-block hash
-    int32_t getHash() const {
-        return mByteHash;
-    }
-
-    // Copy the byte block to the target and return the current hash.
-    int32_t getByteBlock(block_t* block, size_t len) const {
-        memcpy(block, (void*) mByteBlock, std::min(maxByte, len));
-        return mByteHash;
-    }
-
-    // Set the byte block and the hash.
-    void setByteBlock(int hash, const block_t* block, size_t len) {
-        memcpy((void*) mByteBlock, block, len = std::min(maxByte, len));
-        mByteHash = hash;
-    }
 };
 
-/**
- * Sizing parameters for the system_server PropertyInvalidatedCache support.  A client can
- * retrieve the values through the accessors in CacheNonce instances.
- */
-static const int MAX_NONCE = 64;
-static const int BYTE_BLOCK_SIZE = 8192;
+// The CacheNonce for system server holds 64 nonces with a string block of 8192 bytes.  This is
+// more than enough for system_server PropertyInvalidatedCache support.  The configuration
+// values are not defined as visible constants.  Clients should use the accessors on the
+// SystemCacheNonce instance if they need the sizing parameters.
+typedef CacheNonce</* max nonce */ 64, /* byte block size */ 8192> SystemCacheNonce;
 
-// The CacheNonce for system server holds 64 nonces with a string block of 8192 bytes.
-typedef CacheNonce<MAX_NONCE, BYTE_BLOCK_SIZE> SystemCacheNonce;
-
-// The goal of this assertion is to ensure that the data structure is the same size across 32-bit
-// and 64-bit systems.
-static_assert(sizeof(SystemCacheNonce) == SystemCacheNonce::expectedSize,
-              "Unexpected SystemCacheNonce size");
-
-} // namespace PropertyInvalidatedCache
-} // namespace app
-} // namespace android
+} // namespace android.app.PropertyInvalidatedCache

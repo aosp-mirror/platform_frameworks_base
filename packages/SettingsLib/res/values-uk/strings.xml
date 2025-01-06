@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Активовано (лише лівий)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Активовано (лише правий)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Активовано (лівий і правий)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Не вдалось оновити стан оточення"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Активне з’єднання (лише для мультимедіа). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряду акумулятора."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Активне з’єднання (лише для мультимедіа). Рівень заряду: лівий <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, правий: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Підключено (підтримує надсилання аудіо). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> заряду акумулятора."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локальний термінал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Увімк. програму-термінал, що надає локальний доступ до оболонки"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Середовище Linux для розробки"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Запуск термінала Linux на Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Експериментальна функція) Запуск термінала Linux на Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Якщо вимкнути, дані термінала Linux буде видалено"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Перевірка HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Порядок перевірки HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Налагодження"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Анімація переходів"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Тривалість анімації"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Імітувати додаткові екрани"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Місце відображення панелі"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Додатки"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Не зберігати дії"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Видаляти зведення дій після їх завершення"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Цей телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Цей планшет"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Цей комп’ютер (внутрішній)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Цей телевізор"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Динамік док-станції"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Зовнішній пристрій"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Підключений пристрій"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Цей телефон"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Аналоговий"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не можна відтворювати тут"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Потрібний платний обліковий запис"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Завантаження не відтворюватимуться"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Підключено через ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Підключено через eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Стандартний вихід телевізора"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Вихід HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Внутрішні динаміки"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Вбудований динамік"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Аудіо з телевізора"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Не вдається підключитися. Перезавантажте пристрій."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Дротовий аудіопристрій"</string>
     <string name="help_label" msgid="3528360748637781274">"Довідка й відгуки"</string>

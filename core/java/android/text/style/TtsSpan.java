@@ -19,6 +19,7 @@ package android.text.style;
 import static com.android.text.flags.Flags.FLAG_TTS_SPAN_DURATION;
 
 import android.annotation.FlaggedApi;
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.PersistableBundle;
@@ -324,7 +325,8 @@ public class TtsSpan implements ParcelableSpan {
 
     /**
      * Argument used to specify the seconds of a time or duration. The seconds should be
-     * provided as an integer in the range from 0 up to and including 59.
+     * provided as an integer in the range from 0 up to and including 59 for
+     * {@link #TYPE_TIME}.
      * Can be used with {@link #TYPE_TIME} or {@link #TYPE_DURATION}.
      */
     @FlaggedApi(FLAG_TTS_SPAN_DURATION)
@@ -1140,7 +1142,7 @@ public class TtsSpan implements ParcelableSpan {
          * @return This instance.
          * @see #ARG_HOURS
          */
-        public TimeBuilder setHours(int hours) {
+        public TimeBuilder setHours(@IntRange(from = 0, to = 24) int hours) {
             return setIntArgument(TtsSpan.ARG_HOURS, hours);
         }
 
@@ -1151,7 +1153,7 @@ public class TtsSpan implements ParcelableSpan {
          * @return This instance.
          * @see #ARG_MINUTES
          */
-        public TimeBuilder setMinutes(int minutes) {
+        public TimeBuilder setMinutes(@IntRange(from = 0, to = 59) int minutes) {
             return setIntArgument(TtsSpan.ARG_MINUTES, minutes);
         }
 
@@ -1162,7 +1164,7 @@ public class TtsSpan implements ParcelableSpan {
          */
         @FlaggedApi(FLAG_TTS_SPAN_DURATION)
         @NonNull
-        public TimeBuilder setSeconds(int seconds) {
+        public TimeBuilder setSeconds(@IntRange(from = 0, to = 59) int seconds) {
             return setIntArgument(TtsSpan.ARG_SECONDS, seconds);
         }
     }

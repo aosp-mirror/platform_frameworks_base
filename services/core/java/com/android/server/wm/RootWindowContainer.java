@@ -46,6 +46,7 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STATES;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_WALLPAPER;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_SURFACE_ALLOC;
+import static com.android.server.display.feature.flags.Flags.enableDisplayContentModeManagement;
 import static com.android.server.policy.PhoneWindowManager.SYSTEM_DIALOG_REASON_ASSIST;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
@@ -108,6 +109,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerInternal;
+import android.hardware.display.DisplayManagerInternal.DisplayBrightnessOverrideRequest;
 import android.hardware.power.Mode;
 import android.net.Uri;
 import android.os.Binder;
@@ -150,11 +152,13 @@ import com.android.server.LocalServices;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.AppTimeTracker;
 import com.android.server.am.UserState;
+import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.PermissionPolicyInternal;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.utils.Slogf;
 import com.android.server.wm.utils.RegionUtils;
+import com.android.window.flags.Flags;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -185,8 +189,9 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private static final long SLEEP_TRANSITION_WAIT_MILLIS = 1000L;
 
     private Object mLastWindowFreezeSource = null;
-    private float mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-    private CharSequence mScreenBrightnessOverrideTag;
+    // Per-display WindowManager overrides that are passed on.
+    private final SparseArray<DisplayBrightnessOverrideRequest> mDisplayBrightnessOverrides =
+            new SparseArray<>();
     private long mUserActivityTimeout = -1;
     private boolean mUpdateRotation = false;
     // Only set while traversing the default display based on its content.
@@ -260,6 +265,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     int mCurrentUser;
     /** Root task id of the front root task when user switched, indexed by userId. */
     SparseIntArray mUserRootTaskInFront = new SparseIntArray(2);
+    SparseArray<IntArray> mUserVisibleRootTasks = new SparseArray<>();
 
     /**
      * A list of tokens that cause the top activity to be put to sleep.
@@ -775,8 +781,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     UPDATE_FOCUS_WILL_PLACE_SURFACES, false /*updateInputWindows*/);
         }
 
-        mScreenBrightnessOverride = PowerManager.BRIGHTNESS_INVALID_FLOAT;
-        mScreenBrightnessOverrideTag = null;
+        mDisplayBrightnessOverrides.clear();
         mUserActivityTimeout = -1;
         mObscureApplicationContentOnSecondaryDisplays = false;
         mSustainedPerformanceModeCurrent = false;
@@ -879,18 +884,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         if (!mWmService.mDisplayFrozen) {
-            final float brightnessOverride = mScreenBrightnessOverride < PowerManager.BRIGHTNESS_MIN
-                    || mScreenBrightnessOverride > PowerManager.BRIGHTNESS_MAX
-                    ? PowerManager.BRIGHTNESS_INVALID_FLOAT : mScreenBrightnessOverride;
-            CharSequence overrideTag = null;
-            if (brightnessOverride != PowerManager.BRIGHTNESS_INVALID_FLOAT) {
-                overrideTag = mScreenBrightnessOverrideTag;
-            }
-            int brightnessFloatAsIntBits = Float.floatToIntBits(brightnessOverride);
             // Post these on a handler such that we don't call into power manager service while
             // holding the window manager lock to avoid lock contention with power manager lock.
-            mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, brightnessFloatAsIntBits,
-                    0, overrideTag).sendToTarget();
+            mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, mDisplayBrightnessOverrides)
+                    .sendToTarget();
             mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
         }
 
@@ -1043,10 +1040,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
         if (w.isDrawn() || (w.mActivityRecord != null && w.mActivityRecord.firstWindowDrawn
                 && w.mActivityRecord.isVisibleRequested())) {
-            if (!syswin && w.mAttrs.screenBrightness >= 0
-                    && Float.isNaN(mScreenBrightnessOverride)) {
-                mScreenBrightnessOverride = w.mAttrs.screenBrightness;
-                mScreenBrightnessOverrideTag = w.getWindowTag();
+            if (!syswin && w.mAttrs.screenBrightness >= PowerManager.BRIGHTNESS_MIN
+                    && w.mAttrs.screenBrightness <= PowerManager.BRIGHTNESS_MAX
+                    && !mDisplayBrightnessOverrides.contains(w.getDisplayId())) {
+                var brightnessOverride = new DisplayBrightnessOverrideRequest();
+                brightnessOverride.brightness = w.mAttrs.screenBrightness;
+                brightnessOverride.tag = w.getWindowTag();
+                mDisplayBrightnessOverrides.put(w.getDisplayId(), brightnessOverride);
             }
 
             // This function assumes that the contents of the default display are processed first
@@ -1118,8 +1118,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case SET_SCREEN_BRIGHTNESS_OVERRIDE:
-                    mWmService.mPowerManagerInternal.setScreenBrightnessOverrideFromWindowManager(
-                            Float.intBitsToFloat(msg.arg1), (CharSequence) msg.obj);
+                    var brightnessOverrides =
+                            (SparseArray<DisplayBrightnessOverrideRequest>) msg.obj;
+                    mWmService.mDisplayManagerInternal.setScreenBrightnessOverrideFromWindowManager(
+                            brightnessOverrides);
                     break;
                 case SET_USER_ACTIVITY_TIMEOUT:
                     mWmService.mPowerManagerInternal.
@@ -1436,6 +1438,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             final Task rootTask = getTopDisplayFocusedRootTask();
             taskDisplayArea = rootTask != null ? rootTask.getDisplayArea()
                     : getDefaultTaskDisplayArea();
+        }
+
+        // When display content mode management flag is enabled, the task display area is marked as
+        // removed when switching from extended display to mirroring display. We need to restart the
+        // task display area before starting the home.
+        if (enableDisplayContentModeManagement() && taskDisplayArea.isRemoved()) {
+            taskDisplayArea.restart();
         }
 
         Intent homeIntent = null;
@@ -1796,12 +1805,24 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     activityAssistInfos.clear();
                     activityAssistInfos.add(new ActivityAssistInfo(top));
                     // Check if the activity on the split screen.
-                    final Task adjacentTask = top.getTask().getAdjacentTask();
-                    if (adjacentTask != null) {
-                        final ActivityRecord adjacentActivityRecord =
-                                adjacentTask.getTopNonFinishingActivity();
-                        if (adjacentActivityRecord != null) {
-                            activityAssistInfos.add(new ActivityAssistInfo(adjacentActivityRecord));
+                    if (Flags.allowMultipleAdjacentTaskFragments()) {
+                        top.getTask().forOtherAdjacentTasks(task -> {
+                            final ActivityRecord adjacentActivityRecord =
+                                    task.getTopNonFinishingActivity();
+                            if (adjacentActivityRecord != null) {
+                                activityAssistInfos.add(
+                                        new ActivityAssistInfo(adjacentActivityRecord));
+                            }
+                        });
+                    } else {
+                        final Task adjacentTask = top.getTask().getAdjacentTask();
+                        if (adjacentTask != null) {
+                            final ActivityRecord adjacentActivityRecord =
+                                    adjacentTask.getTopNonFinishingActivity();
+                            if (adjacentActivityRecord != null) {
+                                activityAssistInfos.add(
+                                        new ActivityAssistInfo(adjacentActivityRecord));
+                            }
                         }
                     }
                     if (rootTask == topFocusedRootTask) {
@@ -1926,7 +1947,19 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // appropriate.
         removeRootTasksInWindowingModes(WINDOWING_MODE_PINNED);
 
-        mUserRootTaskInFront.put(mCurrentUser, focusRootTaskId);
+        if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
+            final IntArray visibleRootTasks = new IntArray();
+            forAllRootTasks(rootTask -> {
+                if ((mCurrentUser == rootTask.mUserId || rootTask.showForAllUsers())
+                        && rootTask.isVisible()) {
+                    visibleRootTasks.add(rootTask.getRootTaskId());
+                }
+            }, /* traverseTopToBottom */ false);
+            mUserVisibleRootTasks.put(mCurrentUser, visibleRootTasks);
+        } else {
+            mUserRootTaskInFront.put(mCurrentUser, focusRootTaskId);
+        }
+
         mCurrentUser = userId;
 
         mTaskSupervisor.mStartingUsers.add(uss);
@@ -1939,22 +1972,60 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             Slog.i(TAG, "Persisting top task because it belongs to an always-visible user");
             // For a normal user-switch, we will restore the new user's task. But if the pre-switch
             // top task is an always-visible (Communal) one, keep it even after the switch.
-            mUserRootTaskInFront.put(mCurrentUser, focusRootTaskId);
+            if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
+                final IntArray rootTasks = mUserVisibleRootTasks.get(mCurrentUser);
+                rootTasks.add(focusRootTaskId);
+                mUserVisibleRootTasks.put(mCurrentUser, rootTasks);
+            } else {
+                mUserRootTaskInFront.put(mCurrentUser, focusRootTaskId);
+            }
+
         }
 
         final int restoreRootTaskId = mUserRootTaskInFront.get(userId);
+        final IntArray rootTaskIdsToRestore = mUserVisibleRootTasks.get(userId);
+        boolean homeInFront = false;
+        if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
+            if (rootTaskIdsToRestore == null) {
+                // If there are no root tasks saved, try restore id 0 which should create and launch
+                // the home task.
+                handleRootTaskLaunchOnUserSwitch(/* restoreRootTaskId */INVALID_TASK_ID);
+                homeInFront = true;
+            } else {
+                for (int i = 0; i < rootTaskIdsToRestore.size(); i++) {
+                    handleRootTaskLaunchOnUserSwitch(rootTaskIdsToRestore.get(i));
+                }
+                // Check if the top task is type home
+                if (rootTaskIdsToRestore.size() > 0) {
+                    final int topRootTaskId = rootTaskIdsToRestore.get(
+                            rootTaskIdsToRestore.size() - 1);
+                    homeInFront = isHomeTask(topRootTaskId);
+                }
+            }
+        } else {
+            handleRootTaskLaunchOnUserSwitch(restoreRootTaskId);
+            // Check if the top task is type home
+            homeInFront = isHomeTask(restoreRootTaskId);
+        }
+        return homeInFront;
+    }
+
+    private boolean isHomeTask(int taskId) {
+        final Task rootTask = getRootTask(taskId);
+        return rootTask != null && rootTask.isActivityTypeHome();
+    }
+
+    private void handleRootTaskLaunchOnUserSwitch(int restoreRootTaskId) {
         Task rootTask = getRootTask(restoreRootTaskId);
         if (rootTask == null) {
             rootTask = getDefaultTaskDisplayArea().getOrCreateRootHomeTask();
         }
-        final boolean homeInFront = rootTask.isActivityTypeHome();
         if (rootTask.isOnHomeDisplay()) {
             rootTask.moveToFront("switchUserOnHomeDisplay");
         } else {
             // Root task was moved to another display while user was swapped out.
             resumeHomeActivity(null, "switchUserOnOtherDisplay", getDefaultTaskDisplayArea());
         }
-        return homeInFront;
     }
 
     /** Returns whether the given user is to be always-visible (e.g. a communal profile). */
@@ -1965,7 +2036,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     }
 
     void removeUser(int userId) {
-        mUserRootTaskInFront.delete(userId);
+        if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
+            mUserVisibleRootTasks.delete(userId);
+        } else {
+            mUserRootTaskInFront.delete(userId);
+        }
     }
 
     /**
@@ -1978,7 +2053,18 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                 rootTask = getDefaultTaskDisplayArea().getOrCreateRootHomeTask();
             }
 
-            mUserRootTaskInFront.put(userId, rootTask.getRootTaskId());
+            if (Flags.enableTopVisibleRootTaskPerUserTracking()) {
+                final IntArray rootTasks = mUserVisibleRootTasks.get(userId, new IntArray());
+                // If root task already exists in the list, move it to the top instead.
+                final int rootTaskIndex = rootTasks.indexOf(rootTask.getRootTaskId());
+                if (rootTaskIndex != -1) {
+                    rootTasks.remove(rootTaskIndex);
+                }
+                rootTasks.add(rootTask.getRootTaskId());
+                mUserVisibleRootTasks.put(userId, rootTasks);
+            } else {
+                mUserRootTaskInFront.put(userId, rootTask.getRootTaskId());
+            }
         }
     }
 
@@ -2126,7 +2212,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
                     if (!tf.isOrganizedTaskFragment()) {
                         return;
                     }
-                    tf.resetAdjacentTaskFragment();
+                    tf.clearAdjacentTaskFragments();
                     tf.setCompanionTaskFragment(null /* companionTaskFragment */);
                     tf.setAnimationParams(TaskFragmentAnimationParams.DEFAULT);
                     if (tf.getTopNonFinishingActivity() != null) {
@@ -2779,20 +2865,24 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (display == null) {
                 return;
             }
-            // Do not start home before booting, or it may accidentally finish booting before it
-            // starts. Instead, we expect home activities to be launched when the system is ready
-            // (ActivityManagerService#systemReady).
-            if (mService.isBooted() || mService.isBooting()) {
-                startSystemDecorations(display);
-            }
+
+            startSystemDecorations(display, "displayAdded");
+
             // Drop any cached DisplayInfos associated with this display id - the values are now
             // out of date given this display added event.
             mWmService.mPossibleDisplayInfoMapper.removePossibleDisplayInfos(displayId);
         }
     }
 
-    private void startSystemDecorations(final DisplayContent displayContent) {
-        startHomeOnDisplay(mCurrentUser, "displayAdded", displayContent.getDisplayId());
+    void startSystemDecorations(final DisplayContent displayContent, String reason) {
+        // Do not start home before booting, or it may accidentally finish booting before it
+        // starts. Instead, we expect home activities to be launched when the system is ready
+        // (ActivityManagerService#systemReady).
+        if (!mService.isBooted() && !mService.isBooting()) {
+            return;
+        }
+
+        startHomeOnDisplay(mCurrentUser, reason, displayContent.getDisplayId());
         displayContent.getDisplayPolicy().notifyDisplayReady();
     }
 
@@ -2819,7 +2909,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         synchronized (mService.mGlobalLock) {
             final DisplayContent displayContent = getDisplayContent(displayId);
             if (displayContent != null) {
-                displayContent.requestDisplayUpdate(() -> clearDisplayInfoCaches(displayId));
+                displayContent.requestDisplayUpdate(
+                        () -> {
+                            clearDisplayInfoCaches(displayId);
+                            if (enableDisplayContentModeManagement()) {
+                                displayContent.onDisplayInfoChangeApplied();
+                            }
+                        });
             } else {
                 clearDisplayInfoCaches(displayId);
             }

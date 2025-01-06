@@ -1227,7 +1227,7 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
         }
 
         if (finished) {
-            endAnimation();
+            endAnimation(true /* fromLastFrame */);
             return true;
         }
         return false;
@@ -1442,8 +1442,12 @@ public final class AnimatorSet extends Animator implements AnimationHandler.Anim
     }
 
     private void endAnimation() {
+        endAnimation(false /* fromLastFrame */);
+    }
+
+    private void endAnimation(boolean fromLastFrame) {
         final boolean postNotifyEndListener = sPostNotifyEndListenerEnabled && mListeners != null
-                && mLastFrameTime > 0;
+                && fromLastFrame && mTotalDuration > 0;
         mStarted = false;
         mLastFrameTime = -1;
         mFirstFrame = -1;

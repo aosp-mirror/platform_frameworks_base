@@ -26,16 +26,18 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeight
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.battery.BatteryMeterViewController
@@ -45,14 +47,17 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.qs.composefragment.ui.GridAnchor
+import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.qs.panels.ui.compose.EditMode
+import com.android.systemui.qs.panels.ui.compose.TileDetails
 import com.android.systemui.qs.panels.ui.compose.TileGrid
+import com.android.systemui.qs.panels.ui.compose.toolbar.Toolbar
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsContainerViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeOverlayActionsViewModel
 import com.android.systemui.qs.ui.viewmodel.QuickSettingsShadeOverlayContentViewModel
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.ui.composable.Overlay
-import com.android.systemui.shade.ui.composable.ExpandedShadeHeader
+import com.android.systemui.shade.ui.composable.CollapsedShadeHeader
 import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationsPlaceholderViewModel
@@ -92,15 +97,21 @@ constructor(
         val viewModel =
             rememberViewModel("QuickSettingsShadeOverlay") { contentViewModelFactory.create() }
 
-        OverlayShade(modifier = modifier, onScrimClicked = viewModel::onScrimClicked) {
+        OverlayShade(
+            panelAlignment = Alignment.TopEnd,
+            modifier = modifier,
+            onScrimClicked = viewModel::onScrimClicked,
+        ) {
             Column {
-                ExpandedShadeHeader(
-                    viewModelFactory = viewModel.shadeHeaderViewModelFactory,
-                    createTintedIconManager = tintedIconManagerFactory::create,
-                    createBatteryMeterViewController = batteryMeterViewControllerFactory::create,
-                    statusBarIconController = statusBarIconController,
-                    modifier = Modifier.padding(QuickSettingsShade.Dimensions.Padding),
-                )
+                if (viewModel.showHeader) {
+                    CollapsedShadeHeader(
+                        viewModelFactory = viewModel.shadeHeaderViewModelFactory,
+                        createTintedIconManager = tintedIconManagerFactory::create,
+                        createBatteryMeterViewController =
+                            batteryMeterViewControllerFactory::create,
+                        statusBarIconController = statusBarIconController,
+                    )
+                }
 
                 ShadeBody(viewModel = viewModel.quickSettingsContainerViewModel)
             }
@@ -116,31 +127,54 @@ constructor(
     }
 }
 
+// The possible states of the `ShadeBody`.
+sealed interface ShadeBodyState {
+    data object Editing : ShadeBodyState
+
+    data object TileDetails : ShadeBodyState
+
+    data object Default : ShadeBodyState
+}
+
 @Composable
-fun SceneScope.ShadeBody(viewModel: QuickSettingsContainerViewModel) {
+fun ContentScope.ShadeBody(viewModel: QuickSettingsContainerViewModel) {
     val isEditing by viewModel.editModeViewModel.isEditing.collectAsStateWithLifecycle()
+    val tileDetails =
+        if (QsDetailedView.isEnabled) viewModel.detailsViewModel.activeTileDetails else null
 
     AnimatedContent(
-        targetState = isEditing,
+        targetState =
+            when {
+                isEditing -> ShadeBodyState.Editing
+                tileDetails != null -> ShadeBodyState.TileDetails
+                else -> ShadeBodyState.Default
+            },
         transitionSpec = { fadeIn(tween(500)) togetherWith fadeOut(tween(500)) },
-    ) { editing ->
-        if (editing) {
-            EditMode(
-                viewModel = viewModel.editModeViewModel,
-                modifier = Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding),
-            )
-        } else {
-            QuickSettingsLayout(
-                viewModel = viewModel,
-                modifier = Modifier.sysuiResTag("quick_settings_panel"),
-            )
+    ) { state ->
+        when (state) {
+            ShadeBodyState.Editing -> {
+                EditMode(
+                    viewModel = viewModel.editModeViewModel,
+                    modifier =
+                        Modifier.fillMaxWidth().padding(QuickSettingsShade.Dimensions.Padding),
+                )
+            }
+            ShadeBodyState.TileDetails -> {
+                TileDetails(viewModel.detailsViewModel)
+            }
+            else -> {
+                QuickSettingsLayout(
+                    viewModel = viewModel,
+                    modifier = Modifier.sysuiResTag("quick_settings_panel"),
+                )
+            }
         }
     }
 }
 
 /** Column containing Brightness and QS tiles. */
 @Composable
-fun SceneScope.QuickSettingsLayout(
+fun ContentScope.QuickSettingsLayout(
     viewModel: QuickSettingsContainerViewModel,
     modifier: Modifier = Modifier,
 ) {
@@ -148,28 +182,35 @@ fun SceneScope.QuickSettingsLayout(
         verticalArrangement = Arrangement.spacedBy(QuickSettingsShade.Dimensions.Padding),
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier =
-            modifier
-                .fillMaxWidth()
-                .padding(
-                    start = QuickSettingsShade.Dimensions.Padding,
-                    end = QuickSettingsShade.Dimensions.Padding,
-                    top = QuickSettingsShade.Dimensions.Padding,
-                ),
+            modifier.padding(
+                start = QuickSettingsShade.Dimensions.Padding,
+                end = QuickSettingsShade.Dimensions.Padding,
+                bottom = QuickSettingsShade.Dimensions.Padding,
+            ),
     ) {
-        BrightnessSliderContainer(
-            viewModel = viewModel.brightnessSliderViewModel,
+        Toolbar(
             modifier =
-                Modifier.fillMaxWidth().height(QuickSettingsShade.Dimensions.BrightnessSliderHeight),
+                Modifier.fillMaxWidth().requiredHeight(QuickSettingsShade.Dimensions.ToolbarHeight),
+            toolbarViewModelFactory = viewModel.toolbarViewModelFactory,
         )
-        Box {
-            GridAnchor()
-            TileGrid(
-                viewModel = viewModel.tileGridViewModel,
+        Column(
+            verticalArrangement = Arrangement.spacedBy(QuickSettingsShade.Dimensions.Padding),
+            modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState()),
+        ) {
+            BrightnessSliderContainer(
+                viewModel = viewModel.brightnessSliderViewModel,
+                containerColor = Color.Transparent,
                 modifier =
                     Modifier.fillMaxWidth()
-                        .heightIn(max = QuickSettingsShade.Dimensions.GridMaxHeight),
-                viewModel.editModeViewModel::startEditing,
+                        .height(QuickSettingsShade.Dimensions.BrightnessSliderHeight),
             )
+            Box {
+                GridAnchor()
+                TileGrid(
+                    viewModel = viewModel.tileGridViewModel,
+                    modifier = Modifier.fillMaxWidth(),
+                )
+            }
         }
     }
 }
@@ -178,7 +219,7 @@ object QuickSettingsShade {
 
     object Dimensions {
         val Padding = 16.dp
+        val ToolbarHeight = 48.dp
         val BrightnessSliderHeight = 64.dp
-        val GridMaxHeight = 800.dp
     }
 }

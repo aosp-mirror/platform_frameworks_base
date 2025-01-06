@@ -19,26 +19,27 @@ package com.android.systemui.keyboard.docking.ui.viewmodel
 import android.content.Context
 import android.view.Surface
 import android.view.WindowManager
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.Utils
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyboard.docking.domain.interactor.KeyboardDockingIndicationInteractor
 import com.android.systemui.surfaceeffects.glowboxeffect.GlowBoxConfig
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 @SysUISingleton
 class KeyboardDockingIndicationViewModel
 @Inject
 constructor(
-    private val windowManager: WindowManager,
-    private val context: Context,
+    @Main private val windowManager: WindowManager,
+    @Main private val context: Context,
     keyboardDockingIndicationInteractor: KeyboardDockingIndicationInteractor,
-    configurationInteractor: ConfigurationInteractor,
+    @Main configurationInteractor: ConfigurationInteractor,
     @Background private val backgroundScope: CoroutineScope,
 ) {
 
@@ -128,7 +129,7 @@ constructor(
             blurAmount = BLUR_AMOUNT,
             duration = DURATION,
             easeInDuration = EASE_DURATION,
-            easeOutDuration = EASE_DURATION
+            easeOutDuration = EASE_DURATION,
         )
     }
 

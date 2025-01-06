@@ -116,7 +116,7 @@ public class ShortcutManagerTest4 extends BaseShortcutManagerTest {
         final Intent intent = new Intent(Intent.ACTION_MAIN)
                 .putExtras(sIntentExtras);
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcutWithExtras("s1", intent, sShortcutExtras),
                     makeShortcut("s{\u0000}{\u0001}{\uD800\uDC00}x[\uD801][\uDC01]")
@@ -125,9 +125,9 @@ public class ShortcutManagerTest4 extends BaseShortcutManagerTest {
 
         // Make sure save & load works fine. (i.e. shouldn't crash even with invalid characters.)
         initService();
-        mService.handleUnlockUser(USER_0);
+        mService.handleUnlockUser(USER_10);
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertWith(getCallerShortcuts())
                     .haveIds("s1", "s{\u0000}{\u0001}{\uD800\uDC00}x[?][?]")
                     .forShortcutWithId("s1", si -> {

@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
+import android.annotation.NonNull;
+
 /**
  * This class translates a series of floating point values into a continuous curve for use in an
  * easing function including quantize functions it is used with the "spline(0,0.3,0.3,0.5,...0.9,1)"
@@ -22,13 +24,14 @@ package com.android.internal.widget.remotecompose.core.operations.utilities.easi
  */
 public class StepCurve extends Easing {
     //    private static final boolean DEBUG = false;
-    MonotonicCurveFit mCurveFit;
+    @NonNull private final MonotonicCurveFit mCurveFit;
 
-    public StepCurve(float[] params, int offset, int len) {
+    public StepCurve(@NonNull float[] params, int offset, int len) {
         mCurveFit = genSpline(params, offset, len);
     }
 
-    private static MonotonicCurveFit genSpline(float[] values, int off, int arrayLen) {
+    @NonNull
+    private static MonotonicCurveFit genSpline(@NonNull float[] values, int off, int arrayLen) {
         int length = arrayLen * 3 - 2;
         int len = arrayLen - 1;
         double gap = 1.0 / len;

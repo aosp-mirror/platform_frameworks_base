@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ସକ୍ରିୟ (କେବଳ ବାମ)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ସକ୍ରିୟ (କେବଳ ଡାହାଣ)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ସକ୍ରିୟ (ବାମ ଏବଂ ଡାହାଣ)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"ପରିପାର୍ଶ୍ୱକୁ ଅପଡେଟ କରାଯାଇପାରିଲା ନାହିଁ"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ସକ୍ରିୟ (କେବଳ ମିଡିଆ)। ବାମ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ଡାହାଣ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ବେଟେରୀ।"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"କନେକ୍ଟ କରାଯାଇଛି (ଅଡିଓ ସେୟାରିଂକୁ ସପୋର୍ଟ କରେ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ବେଟେରୀ।"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"ସ୍ଥାନୀୟ ଟର୍ମିନାଲ୍‌"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"ସ୍ଥାନୀୟ ଶେଲ୍‌କୁ ଆକ‌ସେସ୍‌ ଦେଉଥିବା ଟର୍ମିନଲ୍‌ ଆପ୍‌କୁ ସକ୍ଷମ କରନ୍ତୁ"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ଡେଭେଲପମେଣ୍ଟର ପରିବେଶ"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidରେ Linux ଟର୍ମିନାଲ ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ପରୀକ୍ଷାମୂଳକ) Androidରେ Linux ଟର୍ମିନାଲ ଚଲାନ୍ତୁ"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ଯଦି ଆପଣ ଅକ୍ଷମ କରନ୍ତି, ତେବେ Linux ଟର୍ମିନାଲ ଡାଟା ଖାଲି ହୋଇଯିବ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP ଯାଞ୍ଚ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCPର ଯାଞ୍ଚ ଗତିବିଧି ସେଟ୍‍ କରନ୍ତୁ"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ଡିବଗ୍‌ କରୁଛି"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ଟ୍ରାଞ୍ଜିସନ୍‌ ଆନିମେସନ୍‌ ସ୍କେଲ୍‌"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ଆନିମେଟର୍‌ ଅବଧି ସ୍କେଲ୍‌"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ସେକେଣ୍ଡାରୀ ଡିସ୍‌ପ୍ଲେ ସିମୁଲେଟ୍ କରନ୍ତୁ"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ସେଡ ଡିସପ୍ଲେ ସ୍ଥିତି"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ଆପ୍ସ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"କାର୍ଯ୍ୟକଳାପଗୁଡ଼ିକୁ ରଖନ୍ତୁ ନାହିଁ"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ୟୁଜର୍ ଏହାକୁ ଛାଡ଼ିବା କ୍ଷଣି ସମସ୍ତ କାର୍ଯ୍ୟକଳାପ ନଷ୍ଟ କରିଦିଅନ୍ତୁ"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ଏହି ଫୋନ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ଏହି ଟାବଲେଟ"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ଏହି କମ୍ପ୍ୟୁଟର (ଇଣ୍ଟର୍ନଲ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ଏହି ଟିଭି"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ଡକ ସ୍ପିକର"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ଏକ୍ସଟର୍ନଲ ଡିଭାଇସ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"କନେକ୍ଟ କରାଯାଇଥିବା ଡିଭାଇସ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ଏହି ଫୋନ୍"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"ଆନାଲଗ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"ଅକ୍ସିଲାରି"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ଏହି ଡିଭାଇସରେ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ସ୍ୱିଚ କରିବା ପାଇଁ ଆକାଉଣ୍ଟକୁ ଅପଗ୍ରେଡ କରନ୍ତୁ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ଏଠାରେ ଡାଉନଲୋଡଗୁଡ଼ିକୁ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
@@ -598,14 +603,13 @@
     <string name="media_output_status_device_in_low_power_mode" msgid="8184631698321758451">"ଏଠାରେ ପ୍ଲେ କରିବା ପାଇଁ ଡିଭାଇସକୁ ସକ୍ରିୟ କରନ୍ତୁ"</string>
     <string name="media_output_status_unauthorized" msgid="5880222828273853838">"ପ୍ଲେ କରିବା ପାଇଁ ଡିଭାଇସକୁ ଅନୁମୋଦନ କରାଯାଇନାହିଁ"</string>
     <string name="media_output_status_track_unsupported" msgid="5576313219317709664">"ଏଠାରେ ମିଡିଆ ପ୍ଲେ କରାଯାଇପାରିବ ନାହିଁ"</string>
-    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"କନେକ୍ଟ କରାଯାଇଛି"</string>
+    <string name="tv_media_transfer_connected" msgid="5145011475885290725">"କନେକ୍ଟ ହୋଇଛି"</string>
     <string name="tv_media_transfer_arc_fallback_title" msgid="3674360098755328601">"HDMI ARC"</string>
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ମାଧ୍ୟମରେ କନେକ୍ଟ କରାଯାଇଛି"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ଟିଭିର ଡିଫଲ୍ଟ ଅଡିଓ ଆଉଟପୁଟ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ଆଉଟପୁଟ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ଇଣ୍ଟର୍ନଲ ସ୍ପିକର"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"ବିଲ୍ଟ-ଇନ ସ୍ପିକର"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"ଟିଭି ଅଡିଓ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ସଂଯୋଗ କରିବାରେ ସମସ୍ୟା ହେଉଛି। ଡିଭାଇସ୍ ବନ୍ଦ କରି ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ତାରଯୁକ୍ତ ଅଡିଓ ଡିଭାଇସ୍"</string>
     <string name="help_label" msgid="3528360748637781274">"ସାହାଯ୍ୟ ଓ ମତାମତ"</string>

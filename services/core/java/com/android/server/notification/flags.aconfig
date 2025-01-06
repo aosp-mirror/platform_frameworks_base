@@ -123,13 +123,6 @@ flag {
 }
 
 flag {
-  name: "use_ipcdatacache_channels"
-  namespace: "systemui"
-  description: "Adds an IPCDataCache for notification channel/group lookups"
-  bug: "331677193"
-}
-
-flag {
   name: "use_ssm_user_switch_signal"
   namespace: "systemui"
   description: "This flag controls which signal is used to handle a user switch system event"
@@ -196,10 +189,10 @@ flag {
 }
 
 flag {
-  name: "notification_nls_rebind"
+  name: "nm_binder_perf_reduce_zen_broadcasts"
   namespace: "systemui"
-  description: "Check for NLS service intent filter when rebinding services"
-  bug: "347674739"
+  description: "Don't send duplicate zen-related (policy changed, etc) broadcasts"
+  bug: "324376849"
   metadata {
     purpose: PURPOSE_BUGFIX
   }

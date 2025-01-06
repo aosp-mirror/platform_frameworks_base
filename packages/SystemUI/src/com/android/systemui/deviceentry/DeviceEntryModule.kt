@@ -16,15 +16,15 @@
 
 package com.android.systemui.deviceentry
 
-import com.android.keyguard.EmptyLockIconViewController
-import com.android.keyguard.LockIconViewController
-import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.CoreStartable
 import com.android.systemui.deviceentry.data.repository.DeviceEntryRepositoryModule
 import com.android.systemui.deviceentry.data.repository.FaceWakeUpTriggersConfigModule
+import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
-import dagger.Lazy
+import dagger.Binds
 import dagger.Module
-import dagger.Provides
+import dagger.multibindings.ClassKey
+import dagger.multibindings.IntoMap
 import dagger.multibindings.Multibinds
 
 @Module(includes = [DeviceEntryRepositoryModule::class, FaceWakeUpTriggersConfigModule::class])
@@ -34,13 +34,10 @@ abstract class DeviceEntryModule {
      */
     @Multibinds abstract fun deviceEntryIconTransitionSet(): Set<DeviceEntryIconTransition>
 
-    companion object {
-        @Provides
-        @SysUISingleton
-        fun provideLockIconViewController(
-            emptyLockIconViewController: Lazy<EmptyLockIconViewController>
-        ): LockIconViewController {
-            return emptyLockIconViewController.get()
-        }
-    }
+    @Binds
+    @IntoMap
+    @ClassKey(DeviceUnlockedInteractor.Activator::class)
+    abstract fun deviceUnlockedInteractorActivator(
+        activator: DeviceUnlockedInteractor.Activator
+    ): CoreStartable
 }

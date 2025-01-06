@@ -58,8 +58,8 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
 
         verify(pms).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
-        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(any(Computer::class.java),
-            eq(Intent.ACTION_PACKAGES_SUSPENDED), pkgListCaptor.capture(), any(), any(), any())
+        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(any(),
+                eq(Intent.ACTION_PACKAGES_SUSPENDED), pkgListCaptor.capture(), any(), any(), any())
 
         var modifiedPackages = pkgListCaptor.value
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
@@ -149,11 +149,11 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
         testHandler.flush()
 
         verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
-        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(any(Computer::class.java),
-                eq(Intent.ACTION_PACKAGES_UNSUSPENDED), pkgListCaptor.capture(), any(), any(),
-                any())
-        verify(broadcastHelper).sendMyPackageSuspendedOrUnsuspended(any(Computer::class.java),
-                any(), any(), any())
+        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(
+                any(), eq(Intent.ACTION_PACKAGES_UNSUSPENDED),
+                pkgListCaptor.capture(), any(), any(), any())
+        verify(broadcastHelper).sendMyPackageSuspendedOrUnsuspended(
+                any(), any(), any(), any())
 
         var modifiedPackages = pkgListCaptor.value
         assertThat(modifiedPackages).asList().containsExactly(TEST_PACKAGE_1, TEST_PACKAGE_2)
@@ -230,10 +230,10 @@ class SuspendPackageHelperTest : PackageHelperTestBase() {
 
         testHandler.flush()
         verify(pms, times(2)).scheduleWritePackageRestrictions(eq(TEST_USER_ID))
-        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(any(Computer::class.java),
-                eq(Intent.ACTION_PACKAGES_UNSUSPENDED), any(), any(), any(), any())
-        verify(broadcastHelper).sendMyPackageSuspendedOrUnsuspended(any(Computer::class.java),
-                any(), any(), any())
+        verify(broadcastHelper).sendPackagesSuspendedOrUnsuspendedForUser(
+                any(), eq(Intent.ACTION_PACKAGES_UNSUSPENDED), any(), any(), any(), any())
+        verify(broadcastHelper).sendMyPackageSuspendedOrUnsuspended(
+                any(), any(), any(), any())
 
         assertThat(suspendPackageHelper.getSuspendingPackage(pms.snapshotComputer(),
             TEST_PACKAGE_1, TEST_USER_ID, deviceOwnerUid)).isNull()

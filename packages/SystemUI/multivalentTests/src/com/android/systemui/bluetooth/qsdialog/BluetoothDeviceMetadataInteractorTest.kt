@@ -18,7 +18,9 @@ package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothDevice
+import android.graphics.drawable.Drawable
 import android.testing.TestableLooper
+import android.util.Pair
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
@@ -64,6 +66,7 @@ class BluetoothDeviceMetadataInteractorTest : SysuiTestCase() {
     @Mock private lateinit var bluetoothDevice1: BluetoothDevice
     @Mock private lateinit var cachedDevice2: CachedBluetoothDevice
     @Mock private lateinit var bluetoothDevice2: BluetoothDevice
+    @Mock private lateinit var drawable: Drawable
     @Captor
     private lateinit var argumentCaptor: ArgumentCaptor<BluetoothAdapter.OnMetadataChangedListener>
     private lateinit var interactor: BluetoothDeviceMetadataInteractor
@@ -77,12 +80,14 @@ class BluetoothDeviceMetadataInteractorTest : SysuiTestCase() {
             whenever(cachedDevice1.name).thenReturn(DEVICE_NAME)
             whenever(cachedDevice1.address).thenReturn(DEVICE_ADDRESS)
             whenever(cachedDevice1.connectionSummary).thenReturn(CONNECTION_SUMMARY)
+            whenever(cachedDevice1.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
             whenever(bluetoothDevice1.address).thenReturn(DEVICE_ADDRESS)
 
             whenever(cachedDevice2.device).thenReturn(bluetoothDevice2)
             whenever(cachedDevice2.name).thenReturn(DEVICE_NAME)
             whenever(cachedDevice2.address).thenReturn(DEVICE_ADDRESS)
             whenever(cachedDevice2.connectionSummary).thenReturn(CONNECTION_SUMMARY)
+            whenever(cachedDevice2.drawableWithDescription).thenReturn(Pair.create(drawable, ""))
             whenever(bluetoothDevice2.address).thenReturn(DEVICE_ADDRESS)
 
             interactor = bluetoothDeviceMetadataInteractor
@@ -175,14 +180,14 @@ class BluetoothDeviceMetadataInteractorTest : SysuiTestCase() {
                     .addOnMetadataChangedListener(
                         eq(bluetoothDevice1),
                         any(),
-                        argumentCaptor.capture()
+                        argumentCaptor.capture(),
                     )
 
                 val listener = argumentCaptor.value
                 listener.onMetadataChanged(
                     bluetoothDevice1,
                     BluetoothDevice.METADATA_UNTETHERED_LEFT_BATTERY,
-                    ByteArray(0)
+                    ByteArray(0),
                 )
                 assertThat(update).isEqualTo(Unit)
             }
@@ -203,14 +208,14 @@ class BluetoothDeviceMetadataInteractorTest : SysuiTestCase() {
                     .addOnMetadataChangedListener(
                         eq(bluetoothDevice1),
                         any(),
-                        argumentCaptor.capture()
+                        argumentCaptor.capture(),
                     )
 
                 val listener = argumentCaptor.value
                 listener.onMetadataChanged(
                     bluetoothDevice1,
                     BluetoothDevice.METADATA_MODEL_NAME,
-                    ByteArray(0)
+                    ByteArray(0),
                 )
 
                 assertThat(update).isNull()

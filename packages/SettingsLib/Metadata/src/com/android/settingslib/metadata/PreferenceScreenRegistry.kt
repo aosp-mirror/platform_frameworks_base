@@ -18,11 +18,6 @@ package com.android.settingslib.metadata
 
 import android.content.Context
 import com.android.settingslib.datastore.KeyValueStore
-import com.google.common.base.Supplier
-import com.google.common.base.Suppliers
-import com.google.common.collect.ImmutableMap
-
-private typealias PreferenceScreenMap = ImmutableMap<String, PreferenceScreenMetadata>
 
 /** Registry of all available preference screens in the app. */
 object PreferenceScreenRegistry : ReadWritePermitProvider {
@@ -30,14 +25,15 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
     /** Provider of key-value store. */
     private lateinit var keyValueStoreProvider: KeyValueStoreProvider
 
-    private var preferenceScreensSupplier: Supplier<PreferenceScreenMap> = Supplier {
-        ImmutableMap.of()
-    }
+    /**
+     * Factories of all available [PreferenceScreenMetadata]s.
+     *
+     * The map key is preference screen key.
+     */
+    var preferenceScreenMetadataFactories = FixedArrayMap<String, PreferenceScreenMetadataFactory>()
 
-    val preferenceScreens: PreferenceScreenMap
-        get() = preferenceScreensSupplier.get()
-
-    private var readWritePermitProvider: ReadWritePermitProvider? = null
+    private var readWritePermitProvider: ReadWritePermitProvider =
+        object : ReadWritePermitProvider {}
 
     /** Sets the [KeyValueStoreProvider]. */
     fun setKeyValueStoreProvider(keyValueStoreProvider: KeyValueStoreProvider) {
@@ -53,52 +49,31 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
     fun getKeyValueStore(context: Context, preference: PreferenceMetadata): KeyValueStore? =
         keyValueStoreProvider.getKeyValueStore(context, preference)
 
-    /** Sets supplier to provide available preference screens. */
-    fun setPreferenceScreensSupplier(supplier: Supplier<List<PreferenceScreenMetadata>>) {
-        preferenceScreensSupplier =
-            Suppliers.memoize {
-                val screensBuilder = ImmutableMap.builder<String, PreferenceScreenMetadata>()
-                for (screen in supplier.get()) screensBuilder.put(screen.key, screen)
-                screensBuilder.buildOrThrow()
-            }
-    }
-
-    /** Sets available preference screens. */
-    fun setPreferenceScreens(vararg screens: PreferenceScreenMetadata) {
-        val screensBuilder = ImmutableMap.builder<String, PreferenceScreenMetadata>()
-        for (screen in screens) screensBuilder.put(screen.key, screen)
-        preferenceScreensSupplier = Suppliers.ofInstance(screensBuilder.buildOrThrow())
-    }
-
-    /** Returns [PreferenceScreenMetadata] of particular key. */
-    operator fun get(key: String?): PreferenceScreenMetadata? =
-        if (key != null) preferenceScreens[key] else null
+    /** Creates [PreferenceScreenMetadata] of particular screen key. */
+    fun create(context: Context, screenKey: String?): PreferenceScreenMetadata? =
+        screenKey?.let { preferenceScreenMetadataFactories[it]?.create(context.applicationContext) }
 
     /**
      * Sets the provider to check read write permit. Read and write requests are denied by default.
      */
-    fun setReadWritePermitProvider(readWritePermitProvider: ReadWritePermitProvider?) {
+    fun setReadWritePermitProvider(readWritePermitProvider: ReadWritePermitProvider) {
         this.readWritePermitProvider = readWritePermitProvider
     }
 
     override fun getReadPermit(
         context: Context,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
-    ) =
-        readWritePermitProvider?.getReadPermit(context, myUid, callingUid, preference)
-            ?: ReadWritePermit.DISALLOW
+    ) = readWritePermitProvider.getReadPermit(context, callingPid, callingUid, preference)
 
     override fun getWritePermit(
         context: Context,
         value: Any?,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
-    ) =
-        readWritePermitProvider?.getWritePermit(context, value, myUid, callingUid, preference)
-            ?: ReadWritePermit.DISALLOW
+    ) = readWritePermitProvider.getWritePermit(context, value, callingPid, callingUid, preference)
 }
 
 /** Provider of [KeyValueStore]. */
@@ -117,41 +92,21 @@ fun interface KeyValueStoreProvider {
 /** Provider of read and write permit. */
 interface ReadWritePermitProvider {
 
-    @ReadWritePermit
+    val defaultReadWritePermit: @ReadWritePermit Int
+        get() = ReadWritePermit.DISALLOW
+
     fun getReadPermit(
         context: Context,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
-    ): Int
+    ): @ReadWritePermit Int = defaultReadWritePermit
 
-    @ReadWritePermit
     fun getWritePermit(
         context: Context,
         value: Any?,
-        myUid: Int,
+        callingPid: Int,
         callingUid: Int,
         preference: PreferenceMetadata,
-    ): Int
-
-    companion object {
-        @JvmField
-        val ALLOW_ALL_READ_WRITE =
-            object : ReadWritePermitProvider {
-                override fun getReadPermit(
-                    context: Context,
-                    myUid: Int,
-                    callingUid: Int,
-                    preference: PreferenceMetadata,
-                ) = ReadWritePermit.ALLOW
-
-                override fun getWritePermit(
-                    context: Context,
-                    value: Any?,
-                    myUid: Int,
-                    callingUid: Int,
-                    preference: PreferenceMetadata,
-                ) = ReadWritePermit.ALLOW
-            }
-    }
+    ): @ReadWritePermit Int = defaultReadWritePermit
 }

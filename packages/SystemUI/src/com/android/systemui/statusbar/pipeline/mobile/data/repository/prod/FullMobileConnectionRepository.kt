@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.pipeline.mobile.data.repository.prod
 
 import android.util.IndentingPrintWriter
 import androidx.annotation.VisibleForTesting
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.table.TableLogBuffer
 import com.android.systemui.log.table.TableLogBufferFactory
 import com.android.systemui.log.table.logDiffsForTable
@@ -54,7 +54,7 @@ class FullMobileConnectionRepository(
     subscriptionModel: Flow<SubscriptionModel?>,
     private val defaultNetworkName: NetworkNameModel,
     private val networkNameSeparator: String,
-    @Application scope: CoroutineScope,
+    @Background scope: CoroutineScope,
     private val mobileRepoFactory: MobileConnectionRepositoryImpl.Factory,
     private val carrierMergedRepoFactory: CarrierMergedConnectionRepository.Factory,
 ) : MobileConnectionRepository {
@@ -132,12 +132,12 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_EMERGENCY,
-                activeRepo.value.isEmergencyOnly.value
+                activeRepo.value.isEmergencyOnly.value,
             )
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.isEmergencyOnly.value
+                activeRepo.value.isEmergencyOnly.value,
             )
 
     override val isRoaming =
@@ -147,7 +147,7 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_ROAMING,
-                activeRepo.value.isRoaming.value
+                activeRepo.value.isRoaming.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.isRoaming.value)
 
@@ -158,12 +158,12 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_OPERATOR,
-                activeRepo.value.operatorAlphaShort.value
+                activeRepo.value.operatorAlphaShort.value,
             )
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.operatorAlphaShort.value
+                activeRepo.value.operatorAlphaShort.value,
             )
 
     override val isInService =
@@ -173,7 +173,7 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_IS_IN_SERVICE,
-                activeRepo.value.isInService.value
+                activeRepo.value.isInService.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.isInService.value)
 
@@ -184,12 +184,12 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_IS_NTN,
-                activeRepo.value.isNonTerrestrial.value
+                activeRepo.value.isNonTerrestrial.value,
             )
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.isNonTerrestrial.value
+                activeRepo.value.isNonTerrestrial.value,
             )
 
     override val isGsm =
@@ -199,7 +199,7 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_IS_GSM,
-                activeRepo.value.isGsm.value
+                activeRepo.value.isGsm.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.isGsm.value)
 
@@ -210,7 +210,7 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_CDMA_LEVEL,
-                activeRepo.value.cdmaLevel.value
+                activeRepo.value.cdmaLevel.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.cdmaLevel.value)
 
@@ -221,9 +221,20 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_PRIMARY_LEVEL,
-                activeRepo.value.primaryLevel.value
+                activeRepo.value.primaryLevel.value,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.primaryLevel.value)
+
+    override val satelliteLevel: StateFlow<Int> =
+        activeRepo
+            .flatMapLatest { it.satelliteLevel }
+            .logDiffsForTable(
+                tableLogBuffer,
+                columnPrefix = "",
+                columnName = COL_SATELLITE_LEVEL,
+                activeRepo.value.satelliteLevel.value,
+            )
+            .stateIn(scope, SharingStarted.WhileSubscribed(), activeRepo.value.satelliteLevel.value)
 
     override val dataConnectionState =
         activeRepo
@@ -231,12 +242,12 @@ class FullMobileConnectionRepository(
             .logDiffsForTable(
                 tableLogBuffer,
                 columnPrefix = "",
-                activeRepo.value.dataConnectionState.value
+                activeRepo.value.dataConnectionState.value,
             )
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.dataConnectionState.value
+                activeRepo.value.dataConnectionState.value,
             )
 
     override val dataActivityDirection =
@@ -245,12 +256,12 @@ class FullMobileConnectionRepository(
             .logDiffsForTable(
                 tableLogBuffer,
                 columnPrefix = "",
-                activeRepo.value.dataActivityDirection.value
+                activeRepo.value.dataActivityDirection.value,
             )
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.dataActivityDirection.value
+                activeRepo.value.dataActivityDirection.value,
             )
 
     override val carrierNetworkChangeActive =
@@ -260,12 +271,12 @@ class FullMobileConnectionRepository(
                 tableLogBuffer,
                 columnPrefix = "",
                 columnName = COL_CARRIER_NETWORK_CHANGE,
-                activeRepo.value.carrierNetworkChangeActive.value
+                activeRepo.value.carrierNetworkChangeActive.value,
             )
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.carrierNetworkChangeActive.value
+                activeRepo.value.carrierNetworkChangeActive.value,
             )
 
     override val resolvedNetworkType =
@@ -274,12 +285,12 @@ class FullMobileConnectionRepository(
             .logDiffsForTable(
                 tableLogBuffer,
                 columnPrefix = "",
-                activeRepo.value.resolvedNetworkType.value
+                activeRepo.value.resolvedNetworkType.value,
             )
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.resolvedNetworkType.value
+                activeRepo.value.resolvedNetworkType.value,
             )
 
     override val dataEnabled =
@@ -305,7 +316,7 @@ class FullMobileConnectionRepository(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.inflateSignalStrength.value
+                activeRepo.value.inflateSignalStrength.value,
             )
 
     override val allowNetworkSliceIndicator =
@@ -320,7 +331,7 @@ class FullMobileConnectionRepository(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                activeRepo.value.allowNetworkSliceIndicator.value
+                activeRepo.value.allowNetworkSliceIndicator.value,
             )
 
     override val numberOfLevels =
@@ -392,7 +403,7 @@ class FullMobileConnectionRepository(
     class Factory
     @Inject
     constructor(
-        @Application private val scope: CoroutineScope,
+        @Background private val scope: CoroutineScope,
         private val logFactory: TableLogBufferFactory,
         private val mobileRepoFactory: MobileConnectionRepositoryImpl.Factory,
         private val carrierMergedRepoFactory: CarrierMergedConnectionRepository.Factory,
@@ -439,6 +450,7 @@ class FullMobileConnectionRepository(
         const val COL_IS_IN_SERVICE = "isInService"
         const val COL_OPERATOR = "operatorName"
         const val COL_PRIMARY_LEVEL = "primaryLevel"
+        const val COL_SATELLITE_LEVEL = "satelliteLevel"
         const val COL_ROAMING = "roaming"
     }
 }

@@ -154,7 +154,10 @@ cc_defaults {
                 "libstatssocket_lazy",
                 "libtonemap",
             ],
-            whole_static_libs: ["hwui_flags_cc_lib"],
+            whole_static_libs: [
+                "hwui_flags_cc_lib",
+                "libsurfaceflingerflags",
+            ],
         },
         host: {
             static_libs: [
@@ -355,6 +358,7 @@ cc_defaults {
         "jni/AnimatedImageDrawable.cpp",
         "jni/Bitmap.cpp",
         "jni/BitmapRegionDecoder.cpp",
+        "jni/RuntimeXfermode.cpp",
         "jni/BufferUtils.cpp",
         "jni/HardwareBufferHelpers.cpp",
         "jni/BitmapFactory.cpp",
@@ -580,6 +584,7 @@ cc_defaults {
         "utils/Color.cpp",
         "utils/LinearAllocator.cpp",
         "utils/StringUtils.cpp",
+        "utils/StatsUtils.cpp",
         "utils/TypefaceUtils.cpp",
         "utils/VectorDrawableUtils.cpp",
         "AnimationContext.cpp",

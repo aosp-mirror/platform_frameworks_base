@@ -301,10 +301,7 @@ public class Path {
      *
      * @param bounds Returns the computed bounds of the path's control points.
      * @param exact This parameter is no longer used.
-     *
-     * @deprecated use computeBounds(RectF) instead
      */
-    @Deprecated
     @SuppressWarnings({"UnusedDeclaration"})
     public void computeBounds(@NonNull RectF bounds, boolean exact) {
         computeBounds(bounds);

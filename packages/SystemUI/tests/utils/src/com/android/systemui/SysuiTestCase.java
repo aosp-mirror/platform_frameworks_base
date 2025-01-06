@@ -118,6 +118,7 @@ public abstract class SysuiTestCase {
                     android.net.platform.flags.Flags.class,
                     android.os.Flags.class,
                     android.service.controls.flags.Flags.class,
+                    android.service.quickaccesswallet.Flags.class,
                     com.android.internal.telephony.flags.Flags.class,
                     com.android.server.notification.Flags.class,
                     com.android.systemui.Flags.class);
@@ -341,7 +342,7 @@ public abstract class SysuiTestCase {
     }
 
     /** Delegates to {@link android.testing.TestableResources#addOverride(int, Object)}. */
-    protected void overrideResource(int resourceId, Object value) {
+    public void overrideResource(int resourceId, Object value) {
         mContext.getOrCreateTestableResources().addOverride(resourceId, value);
     }
 

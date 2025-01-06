@@ -20,6 +20,11 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.junit.Assume.assumeFalse;
 import static org.junit.Assume.assumeTrue;
@@ -45,7 +50,8 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.graphics.Region;
 import android.os.Looper;
-import android.testing.AndroidTestingRunner;
+import android.platform.test.flag.junit.FlagsParameterization;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.TestableLooper;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
@@ -55,6 +61,7 @@ import android.window.WindowContainerTransaction;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestHandler;
@@ -65,16 +72,32 @@ import com.android.wm.shell.transition.Transitions;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
+import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 
+import java.util.List;
+
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 @SmallTest
-@RunWith(AndroidTestingRunner.class)
+@RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class TaskViewTest extends ShellTestCase {
+
+    @Parameters(name = "{0}")
+    public static List<FlagsParameterization> getParams() {
+        return FlagsParameterization.allCombinationsOf(Flags.FLAG_TASK_VIEW_REPOSITORY);
+    }
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule;
 
     @Mock
     TaskView.Listener mViewListener;
@@ -84,6 +107,8 @@ public class TaskViewTest extends ShellTestCase {
     WindowContainerToken mToken;
     @Mock
     ShellTaskOrganizer mOrganizer;
+    @Captor
+    ArgumentCaptor<WindowContainerTransaction> mWctCaptor;
     @Mock
     HandlerExecutor mExecutor;
     @Mock
@@ -98,8 +123,13 @@ public class TaskViewTest extends ShellTestCase {
 
     Context mContext;
     TaskView mTaskView;
+    TaskViewRepository mTaskViewRepository;
     TaskViewTransitions mTaskViewTransitions;
     TaskViewTaskController mTaskViewTaskController;
+
+    public TaskViewTest(FlagsParameterization flags) {
+        mSetFlagsRule = new SetFlagsRule(flags);
+    }
 
     @Before
     public void setUp() {
@@ -134,9 +164,10 @@ public class TaskViewTest extends ShellTestCase {
         if (Transitions.ENABLE_SHELL_TRANSITIONS) {
             doReturn(true).when(mTransitions).isRegistered();
         }
-        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions));
-        mTaskViewTaskController = spy(new TaskViewTaskController(mContext, mOrganizer,
-                mTaskViewTransitions, mSyncQueue));
+        mTaskViewRepository = new TaskViewRepository();
+        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository));
+        mTaskViewTaskController = new TaskViewTaskController(mContext, mOrganizer,
+                mTaskViewTransitions, mSyncQueue);
         mTaskView = new TaskView(mContext, mTaskViewTaskController);
         mTaskView.setHandler(mViewHandler);
         mTaskView.setListener(mExecutor, mViewListener);
@@ -482,8 +513,14 @@ public class TaskViewTest extends ShellTestCase {
 
         // Surface created, but task not available so bounds / visibility isn't set
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
-        verify(mTaskViewTransitions, never()).updateVisibilityState(
-                eq(mTaskViewTaskController), eq(true));
+        if (TaskViewTransitions.useRepo()) {
+            assertNotNull(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController));
+            assertFalse(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController)
+                    .mVisible);
+        } else {
+            verify(mTaskViewTransitions, never()).updateVisibilityState(
+                    eq(mTaskViewTaskController), eq(true));
+        }
 
         // Make the task available
         WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
@@ -492,8 +529,16 @@ public class TaskViewTest extends ShellTestCase {
         // Bounds got set
         verify(wct).setBounds(any(WindowContainerToken.class), eq(bounds));
         // Visibility & bounds state got set
-        verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController), eq(true));
-        verify(mTaskViewTransitions).updateBoundsState(eq(mTaskViewTaskController), eq(bounds));
+        if (TaskViewTransitions.useRepo()) {
+            assertTrue(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController)
+                    .mVisible);
+            assertEquals(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController)
+                    .mBounds, bounds);
+        } else {
+            verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController),
+                    eq(true));
+            verify(mTaskViewTransitions).updateBoundsState(eq(mTaskViewTaskController), eq(bounds));
+        }
     }
 
     @Test
@@ -507,8 +552,15 @@ public class TaskViewTest extends ShellTestCase {
 
         // Surface created, but task not available so bounds / visibility isn't set
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
-        verify(mTaskViewTransitions, never()).updateVisibilityState(
-                eq(mTaskViewTaskController), eq(true));
+        if (TaskViewTransitions.useRepo()) {
+            assertNotNull(mTaskViewTransitions.getRepository().byTaskView(
+                    mTaskViewTaskController));
+            assertFalse(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController)
+                    .mVisible);
+        } else {
+            verify(mTaskViewTransitions, never()).updateVisibilityState(
+                    eq(mTaskViewTaskController), eq(true));
+        }
 
         // Make the task available / start prepareOpen
         WindowContainerTransaction wct = mock(WindowContainerTransaction.class);
@@ -519,8 +571,16 @@ public class TaskViewTest extends ShellTestCase {
         // Bounds got set
         verify(wct).setBounds(any(WindowContainerToken.class), eq(bounds));
         // Visibility & bounds state got set
-        verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController), eq(true));
-        verify(mTaskViewTransitions).updateBoundsState(eq(mTaskViewTaskController), eq(bounds));
+        if (TaskViewTransitions.useRepo()) {
+            assertTrue(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController)
+                    .mVisible);
+            assertEquals(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController)
+                    .mBounds, bounds);
+        } else {
+            verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController),
+                    eq(true));
+            verify(mTaskViewTransitions).updateBoundsState(eq(mTaskViewTaskController), eq(bounds));
+        }
     }
 
     @Test
@@ -541,8 +601,17 @@ public class TaskViewTest extends ShellTestCase {
         // Bounds do not get set as there is no surface
         verify(wct, never()).setBounds(any(WindowContainerToken.class), any());
         // Visibility is set to false, bounds aren't set
-        verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController), eq(false));
-        verify(mTaskViewTransitions, never()).updateBoundsState(eq(mTaskViewTaskController), any());
+        if (TaskViewTransitions.useRepo()) {
+            assertFalse(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController)
+                    .mVisible);
+            assertTrue(mTaskViewTransitions.getRepository().byTaskView(mTaskViewTaskController)
+                    .mBounds.isEmpty());
+        } else {
+            verify(mTaskViewTransitions).updateVisibilityState(eq(mTaskViewTaskController),
+                    eq(false));
+            verify(mTaskViewTransitions, never()).updateBoundsState(eq(mTaskViewTaskController),
+                    any());
+        }
     }
 
     @Test
@@ -576,7 +645,7 @@ public class TaskViewTest extends ShellTestCase {
         mTaskViewTaskController.setTaskNotFound();
         mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
 
-        verify(mTaskViewTaskController).cleanUpPendingTask();
+        assertNull(mTaskViewTaskController.getTaskInfo());
         verify(mTaskViewTransitions).closeTaskView(any(), eq(mTaskViewTaskController));
     }
 
@@ -585,7 +654,8 @@ public class TaskViewTest extends ShellTestCase {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
 
         mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
-        verify(mTaskViewTaskController, never()).cleanUpPendingTask();
+        assertEquals(mTaskInfo, mTaskViewTaskController.getPendingInfo());
+        verify(mTaskViewTransitions, never()).closeTaskView(any(), any());
     }
 
     @Test
@@ -596,20 +666,20 @@ public class TaskViewTest extends ShellTestCase {
         mTaskView.setCaptionInsets(Insets.of(insets));
         mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
 
-        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
         verify(mOrganizer, never()).applyTransaction(any());
 
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
         reset(mOrganizer);
-        reset(mTaskViewTaskController);
         WindowContainerTransaction wct = new WindowContainerTransaction();
         mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
 
-        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
-        verify(mOrganizer).applyTransaction(any());
+        verify(mOrganizer).applyTransaction(mWctCaptor.capture());
+        assertTrue(mWctCaptor.getValue().getHierarchyOps().stream().anyMatch(hop ->
+                hop.getType() == WindowContainerTransaction.HierarchyOp
+                        .HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER));
     }
 
     @Test
@@ -621,14 +691,15 @@ public class TaskViewTest extends ShellTestCase {
         mTaskViewTaskController.prepareOpenAnimation(true /* newTask */,
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
-        reset(mTaskViewTaskController);
         reset(mOrganizer);
 
         Rect insets = new Rect(0, 400, 0, 0);
         mTaskView.setCaptionInsets(Insets.of(insets));
         mTaskView.onComputeInternalInsets(new ViewTreeObserver.InternalInsetsInfo());
-        verify(mTaskViewTaskController).applyCaptionInsetsIfNeeded();
-        verify(mOrganizer).applyTransaction(any());
+        verify(mOrganizer).applyTransaction(mWctCaptor.capture());
+        assertTrue(mWctCaptor.getValue().getHierarchyOps().stream().anyMatch(hop ->
+                hop.getType() == WindowContainerTransaction.HierarchyOp
+                        .HIERARCHY_OP_TYPE_ADD_INSETS_FRAME_PROVIDER));
     }
 
     @Test

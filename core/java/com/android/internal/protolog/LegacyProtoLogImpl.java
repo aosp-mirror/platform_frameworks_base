@@ -70,7 +70,7 @@ public class LegacyProtoLogImpl implements IProtoLog {
     private final TraceBuffer mBuffer;
     private final LegacyProtoLogViewerConfigReader mViewerConfig;
     private final Map<String, IProtoLogGroup> mLogGroups = new TreeMap<>();
-    private final Runnable mCacheUpdater;
+    private final ProtoLogCacheUpdater mCacheUpdater;
     private final int mPerChunkSize;
 
     private boolean mProtoLogEnabled;
@@ -78,14 +78,14 @@ public class LegacyProtoLogImpl implements IProtoLog {
     private final Object mProtoLogEnabledLock = new Object();
 
     public LegacyProtoLogImpl(String outputFile, String viewerConfigFilename,
-            Runnable cacheUpdater) {
+            ProtoLogCacheUpdater cacheUpdater) {
         this(new File(outputFile), viewerConfigFilename, BUFFER_CAPACITY,
                 new LegacyProtoLogViewerConfigReader(), PER_CHUNK_SIZE, cacheUpdater);
     }
 
     public LegacyProtoLogImpl(File file, String viewerConfigFilename, int bufferCapacity,
             LegacyProtoLogViewerConfigReader viewerConfig, int perChunkSize,
-            Runnable cacheUpdater) {
+            ProtoLogCacheUpdater cacheUpdater) {
         mLogFile = file;
         mBuffer = new TraceBuffer(bufferCapacity);
         mLegacyViewerConfigFilename = viewerConfigFilename;
@@ -298,7 +298,7 @@ public class LegacyProtoLogImpl implements IProtoLog {
             }
         }
 
-        mCacheUpdater.run();
+        mCacheUpdater.update(this);
         return 0;
     }
 

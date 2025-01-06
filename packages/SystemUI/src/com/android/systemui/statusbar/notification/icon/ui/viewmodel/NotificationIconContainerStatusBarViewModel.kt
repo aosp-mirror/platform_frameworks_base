@@ -45,8 +45,8 @@ import kotlinx.coroutines.flow.map
 class NotificationIconContainerStatusBarViewModel
 @Inject
 constructor(
-    @Background bgContext: CoroutineContext,
-    darkIconInteractor: DarkIconInteractor,
+    @Background private val bgContext: CoroutineContext,
+    private val darkIconInteractor: DarkIconInteractor,
     iconsInteractor: StatusBarNotificationIconsInteractor,
     headsUpIconInteractor: HeadsUpNotificationIconInteractor,
     keyguardInteractor: KeyguardInteractor,
@@ -58,10 +58,9 @@ constructor(
 
     /** Are changes to the icon container animated? */
     val animationsEnabled: Flow<Boolean> =
-        combine(
-                shadeInteractor.isShadeTouchable,
-                keyguardInteractor.isKeyguardShowing,
-            ) { panelTouchesEnabled, isKeyguardShowing ->
+        combine(shadeInteractor.isShadeTouchable, keyguardInteractor.isKeyguardShowing) {
+                panelTouchesEnabled,
+                isKeyguardShowing ->
                 panelTouchesEnabled && !isKeyguardShowing
             }
             .flowOn(bgContext)
@@ -69,20 +68,14 @@ constructor(
             .distinctUntilChanged()
 
     /** The colors with which to display the notification icons. */
-    val iconColors: Flow<NotificationIconColorLookup> =
-        darkIconInteractor.darkState
-            .map { (areas: Collection<Rect>, tint: Int) ->
-                NotificationIconColorLookup { viewBounds: Rect ->
-                    if (DarkIconDispatcher.isInAreas(areas, viewBounds)) {
-                        IconColorsImpl(tint, areas)
-                    } else {
-                        null
-                    }
-                }
-            }
+    fun iconColors(displayId: Int): Flow<NotificationIconColors> {
+        return darkIconInteractor
+            .darkState(displayId)
+            .map { (areas: Collection<Rect>, tint: Int) -> IconColorsImpl(tint, areas) }
             .flowOn(bgContext)
             .conflate()
             .distinctUntilChanged()
+    }
 
     /** [NotificationIconsViewData] indicating which icons to display in the view. */
     val icons: Flow<NotificationIconsViewData> =
@@ -125,10 +118,8 @@ constructor(
     val isolatedIconLocation: Flow<Rect> =
         headsUpIconInteractor.isolatedIconLocation.filterNotNull().conflate().distinctUntilChanged()
 
-    private class IconColorsImpl(
-        override val tint: Int,
-        private val areas: Collection<Rect>,
-    ) : NotificationIconColors {
+    private class IconColorsImpl(override val tint: Int, private val areas: Collection<Rect>) :
+        NotificationIconColors {
         override fun staticDrawableColor(viewBounds: Rect): Int {
             return if (DarkIconDispatcher.isInAreas(areas, viewBounds)) {
                 tint

@@ -21,15 +21,16 @@ import android.os.Bundle
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.activity.enableEdgeToEdge
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.people.ui.compose.PeopleScreen
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
 import javax.inject.Inject
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** People Tile Widget configuration activity that shows the user their conversation tiles. */
 class PeopleSpaceActivity
@@ -37,6 +38,8 @@ class PeopleSpaceActivity
 constructor(private val viewModelFactory: PeopleViewModel.Factory) : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+        enableEdgeToEdge()
+
         setResult(RESULT_CANCELED)
 
         // Update the widget ID coming from the intent.

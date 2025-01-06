@@ -22,7 +22,6 @@ import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.NaturalScrollingSettingObserver
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
-import com.android.systemui.navigationbar.gestural.Utilities.isTrackpadScroll
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction
 import com.android.systemui.plugins.FalsingManager
@@ -760,7 +759,6 @@ class DragDownHelper(
     private var draggedFarEnough = false
     private var startingChild: ExpandableView? = null
     private var lastHeight = 0f
-    private var isTrackpadReverseScroll = false
     var isDraggingDown = false
         private set
 
@@ -798,12 +796,9 @@ class DragDownHelper(
                 startingChild = null
                 initialTouchY = y
                 initialTouchX = x
-                isTrackpadReverseScroll =
-                    !naturalScrollingSettingObserver.isNaturalScrollingEnabled &&
-                        isTrackpadScroll(event)
             }
             MotionEvent.ACTION_MOVE -> {
-                val h = (if (isTrackpadReverseScroll) -1 else 1) * (y - initialTouchY)
+                val h = y - initialTouchY
                 // Adjust the touch slop if another gesture may be being performed.
                 val touchSlop =
                     if (event.classification == MotionEvent.CLASSIFICATION_AMBIGUOUS_GESTURE) {
@@ -837,7 +832,7 @@ class DragDownHelper(
         val y = event.y
         when (event.actionMasked) {
             MotionEvent.ACTION_MOVE -> {
-                lastHeight = (if (isTrackpadReverseScroll) -1 else 1) * (y - initialTouchY)
+                lastHeight = y - initialTouchY
                 captureStartingChild(initialTouchX, initialTouchY)
                 dragDownCallback.dragDownAmount = lastHeight + dragDownAmountOnStart
                 if (startingChild != null) {
@@ -862,14 +857,13 @@ class DragDownHelper(
                         !isFalseTouch &&
                         dragDownCallback.canDragDown()
                 ) {
-                    val dragDown = (if (isTrackpadReverseScroll) -1 else 1) * (y - initialTouchY)
+                    val dragDown = y - initialTouchY
                     dragDownCallback.onDraggedDown(startingChild, dragDown.toInt())
                     if (startingChild != null) {
                         expandCallback.setUserLockedChild(startingChild, false)
                         startingChild = null
                     }
                     isDraggingDown = false
-                    isTrackpadReverseScroll = false
                     shadeRepository.setLegacyLockscreenShadeTracking(false)
                     return true
                 } else {
@@ -950,7 +944,6 @@ class DragDownHelper(
             startingChild = null
         }
         isDraggingDown = false
-        isTrackpadReverseScroll = false
         shadeRepository.setLegacyLockscreenShadeTracking(false)
         dragDownCallback.onDragDownReset()
     }

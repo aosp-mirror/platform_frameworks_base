@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"預設不顯示本機號碼，但下一通電話顯示。"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"預設顯示本機號碼，但下一通電話不顯示。"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"預設顯示本機號碼，下一通電話也繼續顯示。"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"這個應用程式不支援 16 KB，APK 校驗檢查失敗。這個應用程式將以頁面大小相容性模式執行。為獲得最佳相容性，請重新編譯，讓應用程式支援 16 KB。詳情請參閱 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"這個應用程式不支援 16 KB，ELF 校驗檢查失敗。這個應用程式將以頁面大小相容性模式執行。為獲得最佳相容性，請重新編譯，讓應用程式支援 16 KB。詳情請參閱 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"這個應用程式不支援 16 KB，APK 和 ELF 校驗檢查失敗。這個應用程式將以頁面大小相容性模式執行。為獲得最佳相容性，請重新編譯，讓應用程式支援 16 KB。詳情請參閱 &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"無法提供此服務。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"你無法變更來電顯示設定。"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"行動數據已切換至「<xliff:g id="CARRIERDISPLAY">%s</xliff:g>」"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"無法連上行動網路"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"請嘗試變更偏好的網路。輕觸即可變更。"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"無法撥打緊急電話"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"撥打緊急電話需要使用行動網路"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"快訊"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"來電轉接"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"允許應用程式判斷附近超寬頻裝置間的相對位置"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"與鄰近的 Wi-Fi 裝置互動"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"允許應用程式顯示鄰近的 Wi-Fi 裝置的資料、與其連線並判斷相對位置"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"判斷鄰近裝置間的相對位置"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"允許應用程式判斷鄰近裝置間的相對位置"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"首選 NFC 付費服務資訊"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"允許應用程式取得首選 NFC 付費服務資訊，例如已註冊的輔助工具和路線目的地。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"控制近距離無線通訊"</string>
@@ -640,12 +647,12 @@
     <string name="permdesc_imagesWrite" msgid="5195054463269193317">"允許應用程式修改你的相片收藏。"</string>
     <string name="permlab_mediaLocation" msgid="7368098373378598066">"讀取你的媒體收藏的位置資訊"</string>
     <string name="permdesc_mediaLocation" msgid="597912899423578138">"允許應用程式讀取你的媒體收藏的位置資訊。"</string>
-    <string name="biometric_app_setting_name" msgid="3339209978734534457">"使用生物特徵辨識功能"</string>
-    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"使用生物特徵辨識或螢幕鎖定功能"</string>
+    <string name="biometric_app_setting_name" msgid="3339209978734534457">"使用生物辨識功能"</string>
+    <string name="biometric_or_screen_lock_app_setting_name" msgid="5348462421758257752">"使用生物辨識或螢幕鎖定功能"</string>
     <string name="biometric_dialog_default_title" msgid="55026799173208210">"驗證你的身分"</string>
-    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"如要繼續操作，請使用生物特徵辨識功能驗證身分"</string>
-    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"請使用生物特徵辨識或螢幕鎖定功能驗證身分，才能繼續操作"</string>
-    <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"無法使用生物特徵辨識硬體"</string>
+    <string name="biometric_dialog_default_subtitle" msgid="8457232339298571992">"如要繼續操作，請使用生物辨識功能驗證身分"</string>
+    <string name="biometric_or_screen_lock_dialog_default_subtitle" msgid="159539678371552009">"請使用生物辨識或螢幕鎖定功能驗證身分，才能繼續操作"</string>
+    <string name="biometric_error_hw_unavailable" msgid="2494077380540615216">"無法使用生物辨識硬體"</string>
     <string name="biometric_error_user_canceled" msgid="6732303949695293730">"已取消驗證"</string>
     <string name="biometric_not_recognized" msgid="5106687642694635888">"無法辨識"</string>
     <string name="biometric_face_not_recognized" msgid="5535599455744525200">"無法辨識臉孔"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> 小時後"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> 天後"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> 年後"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> 分鐘前"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> 小時前"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> 天前"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> 年前"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> 分鐘"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> 小時"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> 天"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> 年"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> 分鐘後"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> 小時後"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> 天後"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> 年後"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> 分鐘前"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> 小時前"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> 天前"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> 年前"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# 分鐘前}other{# 分鐘前}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# 小時前}other{# 小時前}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# 天前}other{# 天前}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"單手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"超暗"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"助聽器"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量鍵。「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」已開啟。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量鍵。「<xliff:g id="SERVICE_NAME">%1$s</xliff:g>」已關閉。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"放開音量鍵。如要開啟 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>，請同時按住音量調高鍵和調低鍵 3 秒。"</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"週末"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"活動"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"睡眠"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"零打擾 (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"由「<xliff:g id="APP_NAME">%1$s</xliff:g>」管理"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"已啟用"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"已停用"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"、 "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>到<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>、<xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"任何日曆"</string>
     <string name="muted_by" msgid="91464083490094950">"「<xliff:g id="THIRD_PARTY">%1$s</xliff:g>」正在關閉部分音效"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"你的裝置發生內部問題，必須將裝置恢復原廠設定才能解除不穩定狀態。"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"即使沒有行動或 Wi-Fi 網路，還是可以收發訊息"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」應用程式"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"運作方式"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"開啟「自動選取網路」"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"請前往「設定」開啟「自動選取網路」，讓手機可以找到支援衛星的網路"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"開啟"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"返回"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"待處理…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"現在可使用「緊急衛星連線」"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"如果沒有行動網路或 Wi-Fi 網路，也可以傳訊息給緊急救援服務。Google 訊息必須是預設訊息應用程式，你才能使用這項功能。"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"不支援「緊急衛星連線」"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"這部裝置不支援「緊急衛星連線」"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"未設定「緊急衛星連線」"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"請確定已連上網際網路，然後再重新嘗試設定"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"「緊急衛星連線」無法使用"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"無法在這個國家/地區使用「緊急衛星連線」"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"未設定「緊急衛星連線」"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"如要透過衛星傳送訊息，請將 Google 訊息設為預設訊息應用程式"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"「緊急衛星連線」無法使用"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"如要確認「緊急衛星連線」能否在這個國家/地區使用，請開啟位置資訊設定"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"現在可使用「衛星訊息」"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"如果沒有行動網路或 Wi-Fi 網路，可以透過衛星傳送訊息。Google 訊息必須是預設訊息應用程式，你才能使用這項功能。"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"不支援「衛星訊息」"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"這部裝置不支援「衛星訊息」"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"未設定「衛星訊息」"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"請確定已連上網際網路，然後再重新嘗試設定"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"「衛星訊息」無法使用"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"無法在這個國家/地區使用「衛星訊息」"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"未設定「衛星訊息」"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"如要透過衛星傳送訊息，請將 Google 訊息設為預設訊息應用程式"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"「衛星訊息」無法使用"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"如要確認「衛星訊息」能否在這個國家/地區使用，請開啟位置資訊設定"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"重新設定指紋解鎖"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"系統無法再辨識「<xliff:g id="FINGERPRINT">%s</xliff:g>」。"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"系統無法再辨識「<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>」和「<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>」。"</string>

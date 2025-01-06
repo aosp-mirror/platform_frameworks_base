@@ -85,8 +85,7 @@ class ReduceBrightColorsTileMapperTest : SysuiTestCase() {
                 R.drawable.qs_extra_dim_icon_on
             else R.drawable.qs_extra_dim_icon_off
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label,
             activationState,
             context.resources

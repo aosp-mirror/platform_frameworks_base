@@ -19,22 +19,23 @@ package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
 import android.view.View
+import android.view.ViewGroup
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardClockViewModel
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Adds a layer to group elements for translation for burn-in preventation */
 class AodBurnInSection
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val rootView: KeyguardRootView,
     private val clockViewModel: KeyguardClockViewModel,
 ) : KeyguardSection() {
@@ -46,11 +47,12 @@ constructor(
             visibility = View.GONE
         }
     }
-    override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
 
+    override fun addViews(constraintLayout: ConstraintLayout) {
+        if (emptyView.parent != null) {
+            // As emptyView is lazy, it might be already attached.
+            (emptyView.parent as? ViewGroup)?.removeView(emptyView)
+        }
         constraintLayout.addView(emptyView)
         burnInLayer =
             AodBurnInLayer(context).apply {
@@ -62,17 +64,10 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
         clockViewModel.burnInLayer = burnInLayer
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         constraintSet.apply {
             // The empty view should not occupy any space
             constrainHeight(R.id.burn_in_layer_empty_view, 1)

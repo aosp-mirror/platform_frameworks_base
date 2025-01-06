@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static android.Manifest.permission.POST_NOTIFICATIONS;
+import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.service.notification.Flags.notificationClassification;
 
 import android.annotation.CallbackExecutor;
@@ -47,27 +49,31 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
 import android.service.notification.Adjustment;
 import android.service.notification.Condition;
+import android.service.notification.RateEstimator;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
 import android.util.Log;
+import android.util.LruCache;
+import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.InstantSource;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -641,8 +647,21 @@ public class NotificationManager {
      */
     public static int MAX_SERVICE_COMPONENT_NAME_LENGTH = 500;
 
+    private static final float MAX_NOTIFICATION_UPDATE_RATE = 5f;
+    private static final float MAX_NOTIFICATION_UNNECESSARY_CANCEL_RATE = 5f;
+    private static final int KNOWN_STATUS_ENQUEUED = 1;
+    private static final int KNOWN_STATUS_CANCELLED = 2;
+
+    private final Context mContext;
     private final Map<CallNotificationEventListener, CallNotificationEventCallbackStub>
             mCallNotificationEventCallbacks = new HashMap<>();
+
+    private final InstantSource mClock;
+    private final RateEstimator mUpdateRateEstimator = new RateEstimator();
+    private final RateEstimator mUnnecessaryCancelRateEstimator = new RateEstimator();
+    // Value is KNOWN_STATUS_ENQUEUED/_CANCELLED
+    private final LruCache<NotificationKey, Integer> mKnownNotifications = new LruCache<>(100);
+    private final Object mThrottleLock = new Object();
 
     @UnsupportedAppUsage
     private static INotificationManager sService;
@@ -659,10 +678,22 @@ public class NotificationManager {
         return sService;
     }
 
-    @UnsupportedAppUsage
-    /*package*/ NotificationManager(Context context, Handler handler)
+    /** @hide */
+    protected INotificationManager service() {
+        return getService();
+    }
+
+    /** {@hide} */
+    public NotificationManager(Context context)
     {
+        this(context, SystemClock.elapsedRealtimeClock());
+    }
+
+    /** {@hide} */
+    @UnsupportedAppUsage
+    public NotificationManager(Context context, InstantSource clock) {
         mContext = context;
+        mClock = clock;
     }
 
     /** {@hide} */
@@ -734,8 +765,12 @@ public class NotificationManager {
      */
     public void notifyAsPackage(@NonNull String targetPackage, @Nullable String tag, int id,
             @NonNull Notification notification) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         String sender = mContext.getPackageName();
+
+        if (discardNotify(mContext.getUser(), targetPackage, tag, id, notification)) {
+            return;
+        }
 
         try {
             if (localLOGV) Log.v(TAG, sender + ": notify(" + id + ", " + notification + ")");
@@ -750,13 +785,12 @@ public class NotificationManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public void notifyAsUser(String tag, int id, Notification notification, UserHandle user)
+    public void notifyAsUser(@Nullable String tag, int id, Notification notification,
+            UserHandle user)
     {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         String pkg = mContext.getPackageName();
-
-        if (notificationClassification()
-                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(notification.getChannelId())) {
+        if (discardNotify(user, pkg, tag, id, notification)) {
             return;
         }
 
@@ -768,6 +802,44 @@ public class NotificationManager {
             throw e.rethrowFromSystemServer();
         }
     }
+
+    /**
+     * Determines whether a {@link #notify} call should be skipped. If the notification is not
+     * skipped, updates tracking metadata to use in future decisions.
+     */
+    private boolean discardNotify(UserHandle user, String pkg, @Nullable String tag, int id,
+            Notification notification) {
+        if (notificationClassification()
+                && NotificationChannel.SYSTEM_RESERVED_IDS.contains(notification.getChannelId())) {
+            return true;
+        }
+
+        if (Flags.nmBinderPerfThrottleNotify()) {
+            NotificationKey key = new NotificationKey(user, pkg, tag, id);
+            long now = mClock.millis();
+            synchronized (mThrottleLock) {
+                Integer status = mKnownNotifications.get(key);
+                if (status != null && status == KNOWN_STATUS_ENQUEUED
+                        && !notification.hasCompletedProgress()) {
+                    float updateRate = mUpdateRateEstimator.getRate(now);
+                    if (updateRate > MAX_NOTIFICATION_UPDATE_RATE) {
+                        Slog.w(TAG, "Shedding update of " + key
+                                + ", notification update maximum rate exceeded (" + updateRate
+                                + ")");
+                        return true;
+                    }
+                    mUpdateRateEstimator.update(now);
+                }
+
+                mKnownNotifications.put(key, KNOWN_STATUS_ENQUEUED);
+            }
+        }
+
+        return false;
+    }
+
+    private record NotificationKey(@NonNull UserHandle user, @NonNull String pkg,
+                                   @Nullable String tag, int id) { }
 
     private Notification fixNotification(Notification notification) {
         String pkg = mContext.getPackageName();
@@ -850,7 +922,11 @@ public class NotificationManager {
      * @param id An identifier for this notification.
      */
     public void cancelAsPackage(@NonNull String targetPackage, @Nullable String tag, int id) {
-        INotificationManager service = getService();
+        if (discardCancel(mContext.getUser(), targetPackage, tag, id)) {
+            return;
+        }
+
+        INotificationManager service = service();
         try {
             service.cancelNotificationWithTag(targetPackage, mContext.getOpPackageName(),
                     tag, id, mContext.getUser().getIdentifier());
@@ -863,10 +939,14 @@ public class NotificationManager {
      * @hide
      */
     @UnsupportedAppUsage
-    public void cancelAsUser(String tag, int id, UserHandle user)
+    public void cancelAsUser(@Nullable String tag, int id, UserHandle user)
     {
-        INotificationManager service = getService();
         String pkg = mContext.getPackageName();
+        if (discardCancel(user, pkg, tag, id)) {
+            return;
+        }
+
+        INotificationManager service = service();
         if (localLOGV) Log.v(TAG, pkg + ": cancel(" + id + ")");
         try {
             service.cancelNotificationWithTag(
@@ -877,13 +957,52 @@ public class NotificationManager {
     }
 
     /**
+     * Determines whether a {@link #cancel} call should be skipped. If not skipped, updates tracking
+     * metadata to use in future decisions.
+     */
+    private boolean discardCancel(UserHandle user, String pkg, @Nullable String tag, int id) {
+        if (Flags.nmBinderPerfThrottleNotify()) {
+            NotificationKey key = new NotificationKey(user, pkg, tag, id);
+            long now = mClock.millis();
+            synchronized (mThrottleLock) {
+                Integer status = mKnownNotifications.get(key);
+                if (status != null && status == KNOWN_STATUS_CANCELLED) {
+                    float cancelRate = mUnnecessaryCancelRateEstimator.getRate(now);
+                    if (cancelRate > MAX_NOTIFICATION_UNNECESSARY_CANCEL_RATE) {
+                        Slog.w(TAG, "Shedding cancel of " + key
+                                + ", presumably unnecessary and maximum rate exceeded ("
+                                + cancelRate + ")");
+                        return true;
+                    }
+                    mUnnecessaryCancelRateEstimator.update(now);
+                }
+                mKnownNotifications.put(key, KNOWN_STATUS_CANCELLED);
+            }
+        }
+
+        return false;
+    }
+
+    /**
      * Cancel all previously shown notifications. See {@link #cancel} for the
      * detailed behavior.
      */
     public void cancelAll()
     {
-        INotificationManager service = getService();
         String pkg = mContext.getPackageName();
+        UserHandle user = mContext.getUser();
+
+        if (Flags.nmBinderPerfThrottleNotify()) {
+            synchronized (mThrottleLock) {
+                for (NotificationKey key : mKnownNotifications.snapshot().keySet()) {
+                    if (key.pkg.equals(pkg) && key.user.equals(user)) {
+                        mKnownNotifications.put(key, KNOWN_STATUS_CANCELLED);
+                    }
+                }
+            }
+        }
+
+        INotificationManager service = service();
         if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
         try {
             service.cancelAllNotifications(pkg, mContext.getUserId());
@@ -905,9 +1024,9 @@ public class NotificationManager {
      * @param delegate Package name of the app which can send notifications on your behalf.
      */
     public void setNotificationDelegate(@Nullable String delegate) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         String pkg = mContext.getPackageName();
-        if (localLOGV) Log.v(TAG, pkg + ": cancelAll()");
+        if (localLOGV) Log.v(TAG, pkg + ": setNotificationDelegate()");
         try {
             service.setNotificationDelegate(pkg, delegate);
         } catch (RemoteException e) {
@@ -920,7 +1039,7 @@ public class NotificationManager {
      * your behalf, if there currently is one.
      */
     public @Nullable String getNotificationDelegate() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         String pkg = mContext.getPackageName();
         try {
             return service.getNotificationDelegate(pkg);
@@ -936,7 +1055,7 @@ public class NotificationManager {
      * See {@link #setNotificationDelegate(String)}.
      */
     public boolean canNotifyAsPackage(@NonNull String pkg) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.canNotifyAsPackage(mContext.getPackageName(), pkg, mContext.getUserId());
         } catch (RemoteException e) {
@@ -954,7 +1073,7 @@ public class NotificationManager {
      * {@link android.provider.Settings#ACTION_MANAGE_APP_USE_FULL_SCREEN_INTENT}.
      */
     public boolean canUseFullScreenIntent() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.canUseFullScreenIntent(mContext.getAttributionSource());
         } catch (RemoteException e) {
@@ -972,7 +1091,7 @@ public class NotificationManager {
      */
     @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
     public boolean canPostPromotedNotifications() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.canBePromoted(mContext.getPackageName());
         } catch (RemoteException e) {
@@ -987,7 +1106,7 @@ public class NotificationManager {
     @TestApi
     @FlaggedApi(android.app.Flags.FLAG_API_RICH_ONGOING)
     public void setCanPostPromotedNotifications(@NonNull String pkg, int uid, boolean allowed) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setCanBePromoted(pkg, uid, allowed, true);
         } catch (RemoteException e) {
@@ -1022,7 +1141,7 @@ public class NotificationManager {
      * @param groups The list of groups to create
      */
     public void createNotificationChannelGroups(@NonNull List<NotificationChannelGroup> groups) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.createNotificationChannelGroups(mContext.getPackageName(),
                     new ParceledListSlice(groups));
@@ -1065,7 +1184,7 @@ public class NotificationManager {
      * @param channels the list of channels to attempt to create.
      */
     public void createNotificationChannels(@NonNull List<NotificationChannel> channels) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.createNotificationChannels(mContext.getPackageName(),
                     new ParceledListSlice(channels));
@@ -1083,7 +1202,7 @@ public class NotificationManager {
      * package (see {@link Context#createPackageContext(String, int)}).</p>
      */
     public NotificationChannel getNotificationChannel(String channelId) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getNotificationChannel(mContext.getOpPackageName(),
                     mContext.getUserId(), mContext.getPackageName(), channelId);
@@ -1103,7 +1222,7 @@ public class NotificationManager {
      */
     public @Nullable NotificationChannel getNotificationChannel(@NonNull String channelId,
             @NonNull String conversationId) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getConversationNotificationChannel(mContext.getOpPackageName(),
                     mContext.getUserId(), mContext.getPackageName(), channelId, true,
@@ -1122,7 +1241,7 @@ public class NotificationManager {
      * {@link Context#createPackageContext(String, int)}).</p>
      */
     public List<NotificationChannel> getNotificationChannels() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getNotificationChannels(mContext.getOpPackageName(),
                     mContext.getPackageName(), mContext.getUserId()).getList();
@@ -1143,7 +1262,7 @@ public class NotificationManager {
                 && NotificationChannel.SYSTEM_RESERVED_IDS.contains(channelId)) {
             return;
         }
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.deleteNotificationChannel(mContext.getPackageName(), channelId);
         } catch (RemoteException e) {
@@ -1157,7 +1276,7 @@ public class NotificationManager {
      * The channel group must belong to your package, or null will be returned.
      */
     public NotificationChannelGroup getNotificationChannelGroup(String channelGroupId) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getNotificationChannelGroup(mContext.getPackageName(), channelGroupId);
         } catch (RemoteException e) {
@@ -1169,7 +1288,7 @@ public class NotificationManager {
      * Returns all notification channel groups belonging to the calling app.
      */
     public List<NotificationChannelGroup> getNotificationChannelGroups() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             final ParceledListSlice<NotificationChannelGroup> parceledList =
                     service.getNotificationChannelGroups(mContext.getPackageName());
@@ -1187,7 +1306,7 @@ public class NotificationManager {
      * belong to it.
      */
     public void deleteNotificationChannelGroup(String groupId) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.deleteNotificationChannelGroup(mContext.getPackageName(), groupId);
         } catch (RemoteException e) {
@@ -1201,7 +1320,7 @@ public class NotificationManager {
     @TestApi
     public void updateNotificationChannel(@NonNull String pkg, int uid,
             @NonNull NotificationChannel channel) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.updateNotificationChannelForPackage(pkg, uid, channel);
         } catch (RemoteException e) {
@@ -1214,7 +1333,7 @@ public class NotificationManager {
      */
     @TestApi
     public ComponentName getEffectsSuppressor() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getEffectsSuppressor();
         } catch (RemoteException e) {
@@ -1226,7 +1345,7 @@ public class NotificationManager {
      * @hide
      */
     public boolean matchesCallFilter(Bundle extras) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.matchesCallFilter(extras);
         } catch (RemoteException e) {
@@ -1239,7 +1358,7 @@ public class NotificationManager {
      */
     @TestApi
     public void cleanUpCallersAfter(long timeThreshold) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.cleanUpCallersAfter(timeThreshold);
         } catch (RemoteException e) {
@@ -1251,7 +1370,7 @@ public class NotificationManager {
      * @hide
      */
     public boolean isSystemConditionProviderEnabled(String path) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.isSystemConditionProviderEnabled(path);
         } catch (RemoteException e) {
@@ -1269,7 +1388,7 @@ public class NotificationManager {
 
     /** @hide */
     public void setZenMode(int mode, Uri conditionId, String reason, boolean fromUser) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setZenMode(mode, conditionId, reason, fromUser);
         } catch (RemoteException e) {
@@ -1282,7 +1401,7 @@ public class NotificationManager {
      * @hide
      */
     public int getZenMode() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getZenMode();
         } catch (RemoteException e) {
@@ -1295,7 +1414,7 @@ public class NotificationManager {
      */
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ZenModeConfig getZenModeConfig() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getZenModeConfig();
         } catch (RemoteException e) {
@@ -1313,7 +1432,7 @@ public class NotificationManager {
      * </p>
      */
     public @NonNull NotificationManager.Policy getConsolidatedNotificationPolicy() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getConsolidatedNotificationPolicy();
         } catch (RemoteException e) {
@@ -1325,7 +1444,7 @@ public class NotificationManager {
      * @hide
      */
     public int getRuleInstanceCount(ComponentName owner) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getRuleInstanceCount(owner);
         } catch (RemoteException e) {
@@ -1362,7 +1481,7 @@ public class NotificationManager {
      * See {@link #isNotificationPolicyAccessGranted}.
      */
     public Map<String, AutomaticZenRule> getAutomaticZenRules() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             if (Flags.modesApi()) {
                 return service.getAutomaticZenRules();
@@ -1396,7 +1515,7 @@ public class NotificationManager {
      * doesn't own the matching rule. See {@link AutomaticZenRule#getOwner}.
      */
     public AutomaticZenRule getAutomaticZenRule(String id) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getAutomaticZenRule(id);
         } catch (RemoteException e) {
@@ -1424,7 +1543,7 @@ public class NotificationManager {
     @NonNull
     public String addAutomaticZenRule(@NonNull AutomaticZenRule automaticZenRule,
             boolean fromUser) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.addAutomaticZenRule(automaticZenRule,
                     mContext.getPackageName(), fromUser);
@@ -1459,7 +1578,7 @@ public class NotificationManager {
     @FlaggedApi(Flags.FLAG_MODES_API)
     public boolean updateAutomaticZenRule(@NonNull String id,
             @NonNull AutomaticZenRule automaticZenRule, boolean fromUser) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.updateAutomaticZenRule(id, automaticZenRule, fromUser);
         } catch (RemoteException e) {
@@ -1479,7 +1598,7 @@ public class NotificationManager {
     @FlaggedApi(Flags.FLAG_MODES_API)
     @Condition.State
     public int getAutomaticZenRuleState(@NonNull String id) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getAutomaticZenRuleState(id);
         } catch (RemoteException e) {
@@ -1525,7 +1644,7 @@ public class NotificationManager {
      * @param condition The new state of this rule
      */
     public void setAutomaticZenRuleState(@NonNull String id, @NonNull Condition condition) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setAutomaticZenRuleState(id, condition);
         } catch (RemoteException e) {
@@ -1553,7 +1672,7 @@ public class NotificationManager {
     @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public boolean removeAutomaticZenRule(@NonNull String id, boolean fromUser) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.removeAutomaticZenRule(id, fromUser);
         } catch (RemoteException e) {
@@ -1572,7 +1691,7 @@ public class NotificationManager {
 
     /** @hide */
     public boolean removeAutomaticZenRules(String packageName, boolean fromUser) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.removeAutomaticZenRules(packageName, fromUser);
         } catch (RemoteException e) {
@@ -1585,7 +1704,7 @@ public class NotificationManager {
      * package.
      */
     public @Importance int getImportance() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getPackageImportance(mContext.getPackageName());
         } catch (RemoteException e) {
@@ -1597,11 +1716,15 @@ public class NotificationManager {
      * Returns whether notifications from the calling package are enabled.
      */
     public boolean areNotificationsEnabled() {
-        INotificationManager service = getService();
-        try {
-            return service.areNotificationsEnabled(mContext.getPackageName());
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
+        if (Flags.nmBinderPerfPermissionCheck()) {
+            return mContext.checkSelfPermission(POST_NOTIFICATIONS) == PERMISSION_GRANTED;
+        } else {
+            INotificationManager service = service();
+            try {
+                return service.areNotificationsEnabled(mContext.getPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         }
     }
 
@@ -1617,7 +1740,7 @@ public class NotificationManager {
      */
     @Deprecated
     public boolean areBubblesAllowed() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.areBubblesAllowed(mContext.getPackageName());
         } catch (RemoteException e) {
@@ -1632,7 +1755,7 @@ public class NotificationManager {
      * @see Notification.Builder#setBubbleMetadata(Notification.BubbleMetadata)
      */
     public boolean areBubblesEnabled() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.areBubblesEnabled(mContext.getUser());
         } catch (RemoteException e) {
@@ -1659,7 +1782,7 @@ public class NotificationManager {
      * @return the users' bubble preference for the app.
      */
     public @BubblePreference int getBubblePreference() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getBubblePreferenceForPackage(mContext.getPackageName(),
                     Binder.getCallingUid());
@@ -1679,7 +1802,7 @@ public class NotificationManager {
      * @hide
      */
     public void silenceNotificationSound() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.silenceNotificationSound();
         } catch (RemoteException e) {
@@ -1695,7 +1818,7 @@ public class NotificationManager {
      * PersistableBundle, SuspendDialogInfo) suspended}.
      */
     public boolean areNotificationsPaused() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.isPackagePaused(mContext.getPackageName());
         } catch (RemoteException e) {
@@ -1718,7 +1841,7 @@ public class NotificationManager {
      * user grant or denial of this access.
      */
     public boolean isNotificationPolicyAccessGranted() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.isNotificationPolicyAccessGranted(mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1739,7 +1862,7 @@ public class NotificationManager {
      * {@link android.provider.Settings#ACTION_NOTIFICATION_LISTENER_SETTINGS}.
      */
     public boolean isNotificationListenerAccessGranted(ComponentName listener) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.isNotificationListenerAccessGranted(listener);
         } catch (RemoteException e) {
@@ -1763,7 +1886,7 @@ public class NotificationManager {
      */
     @SystemApi
     public boolean isNotificationAssistantAccessGranted(@NonNull ComponentName assistant) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.isNotificationAssistantAccessGranted(assistant);
         } catch (RemoteException e) {
@@ -1779,7 +1902,7 @@ public class NotificationManager {
      * listeners}.
      */
     public boolean shouldHideSilentStatusBarIcons() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.shouldHideSilentStatusIcons(mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1798,7 +1921,7 @@ public class NotificationManager {
      */
     @SystemApi
     public @NonNull @Adjustment.Keys List<String> getAllowedAssistantAdjustments() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getAllowedAssistantAdjustments(mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1812,7 +1935,7 @@ public class NotificationManager {
     @TestApi
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public void allowAssistantAdjustment(@NonNull String capability) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.allowAssistantAdjustment(capability);
         } catch (RemoteException e) {
@@ -1826,7 +1949,7 @@ public class NotificationManager {
     @TestApi
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public void disallowAssistantAdjustment(@NonNull String capability) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.disallowAssistantAdjustment(capability);
         } catch (RemoteException e) {
@@ -1837,7 +1960,7 @@ public class NotificationManager {
     /** @hide */
     @TestApi
     public boolean isNotificationPolicyAccessGrantedForPackage(@NonNull String pkg) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.isNotificationPolicyAccessGrantedForPackage(pkg);
         } catch (RemoteException e) {
@@ -1848,8 +1971,37 @@ public class NotificationManager {
     /**
      * @hide
      */
+    @TestApi
+    @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
+    public void setAssistantAdjustmentKeyTypeState(@Adjustment.Types int type, boolean enabled) {
+        INotificationManager service = service();
+        try {
+            service.setAssistantAdjustmentKeyTypeState(type, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
+    public void setAssistantAdjustmentKeyTypeStateForPackage(@NonNull String pkg,
+                                                             @Adjustment.Types int type,
+                                                             boolean enabled) {
+        INotificationManager service = service();
+        try {
+            service.setAssistantAdjustmentKeyTypeStateForPackage(pkg, type, enabled);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
     public List<String> getEnabledNotificationListenerPackages() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getEnabledNotificationListenerPackages();
         } catch (RemoteException e) {
@@ -1866,7 +2018,7 @@ public class NotificationManager {
      * {@link #setNotificationPolicy(Policy)}.
      */
     public Policy getNotificationPolicy() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getNotificationPolicy(mContext.getOpPackageName());
         } catch (RemoteException e) {
@@ -1896,7 +2048,7 @@ public class NotificationManager {
     /** @hide */
     public void setNotificationPolicy(@NonNull Policy policy, boolean fromUser) {
         checkRequired("policy", policy);
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setNotificationPolicy(mContext.getOpPackageName(), policy, fromUser);
         } catch (RemoteException e) {
@@ -1906,7 +2058,7 @@ public class NotificationManager {
 
     /** @hide */
     public void setNotificationPolicyAccessGranted(String pkg, boolean granted) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setNotificationPolicyAccessGranted(pkg, granted);
         } catch (RemoteException e) {
@@ -1926,7 +2078,7 @@ public class NotificationManager {
     @TestApi
     @FlaggedApi(Flags.FLAG_MODES_API)
     public @NonNull ZenPolicy getDefaultZenPolicy() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getDefaultZenPolicy();
         } catch (RemoteException e) {
@@ -1938,7 +2090,7 @@ public class NotificationManager {
      */
     @FlaggedApi(Flags.FLAG_MODES_UI)
     public void setManualZenRuleDeviceEffects(@NonNull ZenDeviceEffects effects) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setManualZenRuleDeviceEffects(effects);
         } catch (RemoteException e) {
@@ -1975,7 +2127,7 @@ public class NotificationManager {
     @RequiresPermission(android.Manifest.permission.MANAGE_NOTIFICATION_LISTENERS)
     public void setNotificationListenerAccessGranted(
             @NonNull ComponentName listener, boolean granted, boolean userSet) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             if (CompatChanges.isChangeEnabled(SET_LISTENER_ACCESS_GRANTED_IS_USER_AWARE)) {
                 service.setNotificationListenerAccessGrantedForUser(listener, mContext.getUserId(),
@@ -1991,7 +2143,7 @@ public class NotificationManager {
     /** @hide */
     public void setNotificationListenerAccessGrantedForUser(ComponentName listener, int userId,
             boolean granted) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setNotificationListenerAccessGrantedForUser(listener, userId, granted, true);
         } catch (RemoteException e) {
@@ -2012,7 +2164,7 @@ public class NotificationManager {
     @SystemApi
     public void setNotificationAssistantAccessGranted(@Nullable ComponentName assistant,
             boolean granted) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setNotificationAssistantAccessGranted(assistant, granted);
         } catch (RemoteException e) {
@@ -2036,7 +2188,7 @@ public class NotificationManager {
 
     /** @hide */
     public List<ComponentName> getEnabledNotificationListeners(int userId) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getEnabledNotificationListeners(userId);
         } catch (RemoteException e) {
@@ -2047,7 +2199,7 @@ public class NotificationManager {
     /** @hide */
     @SystemApi
     public @Nullable ComponentName getAllowedNotificationAssistant() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.getAllowedNotificationAssistant();
         } catch (RemoteException e) {
@@ -2067,16 +2219,13 @@ public class NotificationManager {
     @SuppressLint("UserHandle")
     public boolean hasEnabledNotificationListener(@NonNull String packageName,
             @NonNull UserHandle userHandle) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return service.hasEnabledNotificationListener(packageName, userHandle.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
     }
-
-    private Context mContext;
-
     private static void checkRequired(String name, Object value) {
         if (value == null) {
             throw new IllegalArgumentException(name + " is required");
@@ -2092,7 +2241,7 @@ public class NotificationManager {
     @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_TOAST_RATE_LIMITING)
     public void setToastRateLimitingEnabled(boolean enable) {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             service.setToastRateLimitingEnabled(enable);
         } catch (RemoteException e) {
@@ -2884,7 +3033,7 @@ public class NotificationManager {
      * @return An array of {@link StatusBarNotification}.
      */
     public StatusBarNotification[] getActiveNotifications() {
-        final INotificationManager service = getService();
+        final INotificationManager service = service();
         final String pkg = mContext.getPackageName();
         try {
             final ParceledListSlice<StatusBarNotification> parceledList
@@ -2907,7 +3056,7 @@ public class NotificationManager {
      * globally.
      */
     public final @InterruptionFilter int getCurrentInterruptionFilter() {
-        final INotificationManager service = getService();
+        final INotificationManager service = service();
         try {
             return zenModeToInterruptionFilter(service.getZenMode());
         } catch (RemoteException e) {
@@ -2939,7 +3088,7 @@ public class NotificationManager {
     /** @hide */
     public final void setInterruptionFilter(@InterruptionFilter int interruptionFilter,
             boolean fromUser) {
-        final INotificationManager service = getService();
+        final INotificationManager service = service();
         try {
             service.setInterruptionFilter(mContext.getOpPackageName(), interruptionFilter,
                     fromUser);
@@ -3097,7 +3246,7 @@ public class NotificationManager {
         checkRequired("userHandle", userHandle);
         checkRequired("executor", executor);
         checkRequired("listener", listener);
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             synchronized (mCallNotificationEventCallbacks) {
                 CallNotificationEventCallbackStub callbackStub =
@@ -3128,7 +3277,7 @@ public class NotificationManager {
     public void unregisterCallNotificationEventListener(
             @NonNull CallNotificationEventListener listener) {
         checkRequired("listener", listener);
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             synchronized (mCallNotificationEventCallbacks) {
                 CallNotificationEventCallbackStub callbackStub =
@@ -3151,7 +3300,7 @@ public class NotificationManager {
     @TestApi
     @FlaggedApi(android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION)
     public @NonNull Set<String> getUnsupportedAdjustmentTypes() {
-        INotificationManager service = getService();
+        INotificationManager service = service();
         try {
             return new HashSet<>(service.getUnsupportedAdjustmentTypes());
         } catch (RemoteException e) {

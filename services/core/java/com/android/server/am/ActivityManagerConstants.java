@@ -16,6 +16,7 @@
 
 package com.android.server.am;
 
+import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RECONFIGURATION;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_CONNECTED_DEVICE;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_HEALTH;
 import static android.content.pm.ServiceInfo.FOREGROUND_SERVICE_TYPE_LOCATION;
@@ -31,6 +32,7 @@ import static com.android.server.am.BroadcastConstants.DEFER_BOOT_COMPLETED_BROA
 import static com.android.server.am.BroadcastConstants.getDeviceConfigBoolean;
 
 import android.annotation.NonNull;
+import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.app.ForegroundServiceTypePolicy;
 import android.content.ComponentName;
@@ -55,6 +57,7 @@ import android.util.SparseBooleanArray;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.LocalServices;
 
 import dalvik.annotation.optimization.NeverCompile;
 
@@ -181,6 +184,12 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION =
             "follow_up_oomadj_update_wait_duration";
 
+    /*
+     * Oom score cutoff beyond which any process that does not have the CPU_TIME capability will be
+     * frozen.
+     */
+    static final String KEY_FREEZER_CUTOFF_ADJ = "freezer_cutoff_adj";
+
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 1024;
     private static final boolean DEFAULT_PRIORITIZE_ALARM_BROADCASTS = true;
     private static final long DEFAULT_FGSERVICE_MIN_SHOWN_TIME = 2*1000;
@@ -266,6 +275,9 @@ final class ActivityManagerConstants extends ContentObserver {
      * The default value to {@link #KEY_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION}.
      */
     private static final long DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION = 1000L;
+
+    /** The default value to {@link #KEY_FREEZER_CUTOFF_ADJ} */
+    private static final int DEFAULT_FREEZER_CUTOFF_ADJ = ProcessList.CACHED_APP_MIN_ADJ;
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
@@ -1171,6 +1183,14 @@ final class ActivityManagerConstants extends ContentObserver {
             DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION;
 
     /**
+     * The cutoff adj for the freezer, app processes with adj greater than this value will be
+     * eligible for the freezer.
+     *
+     * @see #KEY_FREEZER_CUTOFF_ADJ
+     */
+    public int FREEZER_CUTOFF_ADJ = DEFAULT_FREEZER_CUTOFF_ADJ;
+
+    /**
      * Indicates whether PSS profiling in AppProfiler is disabled or not.
      */
     static final String KEY_DISABLE_APP_PROFILER_PSS_PROFILING =
@@ -1194,6 +1214,7 @@ final class ActivityManagerConstants extends ContentObserver {
             new OnPropertiesChangedListener() {
                 @Override
                 public void onPropertiesChanged(Properties properties) {
+                    boolean oomAdjusterConfigUpdated = false;
                     for (String name : properties.getKeyset()) {
                         if (name == null) {
                             return;
@@ -1372,6 +1393,11 @@ final class ActivityManagerConstants extends ContentObserver {
                             case KEY_TIERED_CACHED_ADJ_UI_TIER_SIZE:
                                 updateUseTieredCachedAdj();
                                 break;
+                            case KEY_FREEZER_CUTOFF_ADJ:
+                                FREEZER_CUTOFF_ADJ = properties.getInt(KEY_FREEZER_CUTOFF_ADJ,
+                                        DEFAULT_FREEZER_CUTOFF_ADJ);
+                                oomAdjusterConfigUpdated = true;
+                                break;
                             case KEY_DISABLE_APP_PROFILER_PSS_PROFILING:
                                 updateDisableAppProfilerPssProfiling();
                                 break;
@@ -1387,6 +1413,13 @@ final class ActivityManagerConstants extends ContentObserver {
                             default:
                                 updateFGSPermissionEnforcementFlagsIfNecessary(name);
                                 break;
+                        }
+                    }
+                    if (oomAdjusterConfigUpdated) {
+                        final ActivityManagerInternal ami = LocalServices.getService(
+                                ActivityManagerInternal.class);
+                        if (ami != null) {
+                            ami.updateOomAdj(OOM_ADJ_REASON_RECONFIGURATION);
                         }
                     }
                 }
@@ -2533,6 +2566,9 @@ final class ActivityManagerConstants extends ContentObserver {
 
         pw.print("  "); pw.print(KEY_ENABLE_NEW_OOMADJ);
         pw.print("="); pw.println(ENABLE_NEW_OOMADJ);
+
+        pw.print("  "); pw.print(KEY_FREEZER_CUTOFF_ADJ);
+        pw.print("="); pw.println(FREEZER_CUTOFF_ADJ);
 
         pw.print("  "); pw.print(KEY_DISABLE_APP_PROFILER_PSS_PROFILING);
         pw.print("="); pw.println(APP_PROFILER_PSS_PROFILING_DISABLED);

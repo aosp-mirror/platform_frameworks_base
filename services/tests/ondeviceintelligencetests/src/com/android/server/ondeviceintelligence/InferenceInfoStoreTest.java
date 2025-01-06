@@ -18,10 +18,9 @@ package com.android.server.ondeviceintelligence;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.app.ondeviceintelligence.InferenceInfo;
 import android.os.Bundle;
 import android.os.PersistableBundle;
-import android.service.ondeviceintelligence.OnDeviceSandboxedInferenceService;
-import android.app.ondeviceintelligence.InferenceInfo;
 import android.util.Base64;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -32,12 +31,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.IOException;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 public class InferenceInfoStoreTest {
     InferenceInfoStore inferenceInfoStore;
+
+    public static final String INFERENCE_INFO_BUNDLE_KEY = "inference_info";
 
     @Before
     public void setUp() {
@@ -47,27 +47,27 @@ public class InferenceInfoStoreTest {
     @Test
     public void testInferenceInfoParsesFromBundleSuccessfully() throws Exception {
         Bundle bundle = new Bundle();
-        bundle.putByteArray(OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY,
+        bundle.putByteArray(INFERENCE_INFO_BUNDLE_KEY,
                 getInferenceInfoBytes(1, 1, 100));
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);
         List<InferenceInfo> inferenceInfos = inferenceInfoStore.getLatestInferenceInfo(0);
         assertThat(inferenceInfos).hasSize(1);
         assertThat(inferenceInfos.get(0).getUid()).isEqualTo(1);
-        assertThat(inferenceInfos.get(0).getStartTimeMs()).isEqualTo(1);
-        assertThat(inferenceInfos.get(0).getEndTimeMs()).isEqualTo(100);
+        assertThat(inferenceInfos.get(0).getStartTimeMillis()).isEqualTo(1);
+        assertThat(inferenceInfos.get(0).getEndTimeMillis()).isEqualTo(100);
     }
 
     @Test
     public void testInferenceInfoParsesFromPersistableBundleSuccessfully() throws Exception {
         PersistableBundle bundle = new PersistableBundle();
-        bundle.putString(OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY,
+        bundle.putString(INFERENCE_INFO_BUNDLE_KEY,
                 Base64.encodeToString(getInferenceInfoBytes(1, 1, 100), Base64.DEFAULT));
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);
         List<InferenceInfo> inferenceInfos = inferenceInfoStore.getLatestInferenceInfo(0);
         assertThat(inferenceInfos).hasSize(1);
         assertThat(inferenceInfos.get(0).getUid()).isEqualTo(1);
-        assertThat(inferenceInfos.get(0).getStartTimeMs()).isEqualTo(1);
-        assertThat(inferenceInfos.get(0).getEndTimeMs()).isEqualTo(100);
+        assertThat(inferenceInfos.get(0).getStartTimeMillis()).isEqualTo(1);
+        assertThat(inferenceInfos.get(0).getEndTimeMillis()).isEqualTo(100);
     }
 
 
@@ -75,11 +75,11 @@ public class InferenceInfoStoreTest {
     public void testEvictionAfterMaxAge() throws Exception {
         PersistableBundle bundle = new PersistableBundle();
         long testStartTime = System.currentTimeMillis();
-        bundle.putString(OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY,
+        bundle.putString(INFERENCE_INFO_BUNDLE_KEY,
                 Base64.encodeToString(getInferenceInfoBytes(1,  testStartTime - 10,
                         testStartTime + 100), Base64.DEFAULT));
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);
-        bundle.putString(OnDeviceSandboxedInferenceService.INFERENCE_INFO_BUNDLE_KEY,
+        bundle.putString(INFERENCE_INFO_BUNDLE_KEY,
                 Base64.encodeToString(getInferenceInfoBytes(1, testStartTime - 5,
                         testStartTime + 100), Base64.DEFAULT));
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);
@@ -87,8 +87,8 @@ public class InferenceInfoStoreTest {
         List<InferenceInfo> inferenceInfos = inferenceInfoStore.getLatestInferenceInfo(0);
         assertThat(inferenceInfos).hasSize(2);
         assertThat(inferenceInfos.get(0).getUid()).isEqualTo(1);
-        assertThat(inferenceInfos.get(0).getStartTimeMs()).isEqualTo(testStartTime - 10);
-        assertThat(inferenceInfos.get(0).getEndTimeMs()).isEqualTo(testStartTime + 100);
+        assertThat(inferenceInfos.get(0).getStartTimeMillis()).isEqualTo(testStartTime - 10);
+        assertThat(inferenceInfos.get(0).getEndTimeMillis()).isEqualTo(testStartTime + 100);
         inferenceInfoStore.addInferenceInfoFromBundle(bundle);
         List<InferenceInfo> inferenceInfos2 = inferenceInfoStore.getLatestInferenceInfo(0);
         assertThat(inferenceInfos2).hasSize(1); //previous entries should have been evicted

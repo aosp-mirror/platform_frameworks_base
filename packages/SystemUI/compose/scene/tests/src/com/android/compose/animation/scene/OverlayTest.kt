@@ -19,7 +19,6 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -46,7 +45,6 @@ import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
-import androidx.compose.ui.test.swipeUp
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -56,7 +54,6 @@ import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.setContentAndCreateMainScope
-import com.android.compose.test.subjects.assertThat
 import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
@@ -745,18 +742,7 @@ class OverlayTest {
 
     @Test
     fun overscrollingOverlay_movableElementNotInOverlay() {
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
-                    SceneA,
-                    transitions {
-                        // Make OverlayA overscrollable.
-                        overscroll(OverlayA, orientation = Orientation.Horizontal) {
-                            translate(ElementKey("elementThatDoesNotExist"), x = 10.dp)
-                        }
-                    },
-                )
-            }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA) }
 
         val key = MovableElementKey("Foo", contents = setOf(SceneA))
         val movableElementChildTag = "movableElementChildTag"

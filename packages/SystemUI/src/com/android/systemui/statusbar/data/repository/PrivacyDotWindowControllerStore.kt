@@ -58,15 +58,18 @@ constructor(
         StatusBarConnectedDisplays.assertInNewMode()
     }
 
-    override fun createInstanceForDisplay(displayId: Int): PrivacyDotWindowController {
+    override fun createInstanceForDisplay(displayId: Int): PrivacyDotWindowController? {
         if (displayId == Display.DEFAULT_DISPLAY) {
             throw IllegalArgumentException("This class should only be used for connected displays")
         }
         val displayWindowProperties =
             displayWindowPropertiesRepository.get(displayId, TYPE_NAVIGATION_BAR_PANEL)
+                ?: return null
+        val privacyDotViewController =
+            privacyDotViewControllerStore.forDisplay(displayId) ?: return null
         return windowControllerFactory.create(
             displayId = displayId,
-            privacyDotViewController = privacyDotViewControllerStore.forDisplay(displayId),
+            privacyDotViewController = privacyDotViewController,
             viewCaptureAwareWindowManager =
                 viewCaptureAwareWindowManagerFactory.create(displayWindowProperties.windowManager),
             inflater = displayWindowProperties.layoutInflater,

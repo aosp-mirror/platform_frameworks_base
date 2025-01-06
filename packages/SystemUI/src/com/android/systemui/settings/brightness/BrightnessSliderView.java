@@ -43,12 +43,12 @@ import java.util.Collections;
 public class BrightnessSliderView extends FrameLayout {
 
     @NonNull
-    private ToggleSeekBar mSlider;
+    protected ToggleSeekBar mSlider;
     private DispatchTouchEventListener mListener;
     private Gefingerpoken mOnInterceptListener;
     @Nullable
-    private Drawable mProgressDrawable;
-    private float mScale = 1f;
+    protected Drawable mProgressDrawable;
+    protected float mScale = 1f;
     private final Rect mSystemGestureExclusionRect = new Rect();
 
     public BrightnessSliderView(Context context) {
@@ -65,6 +65,10 @@ public class BrightnessSliderView extends FrameLayout {
         super.onFinishInflate();
         setLayerType(LAYER_TYPE_HARDWARE, null);
 
+        initBrightnessViewComponents();
+    }
+
+    protected void initBrightnessViewComponents() {
         mSlider = requireViewById(R.id.slider);
         mSlider.setAccessibilityLabel(getContentDescription().toString());
         setBoundaryOffset();
@@ -81,7 +85,7 @@ public class BrightnessSliderView extends FrameLayout {
         }
     }
 
-    private void setBoundaryOffset() {
+    protected void setBoundaryOffset() {
          //  BrightnessSliderView uses hardware layer; if the background of its children exceed its
          //  boundary, it'll be cropped. We need to expand its boundary so that the background of
          //  ToggleSeekBar (i.e. the focus state) can be correctly rendered.
@@ -131,7 +135,7 @@ public class BrightnessSliderView extends FrameLayout {
      * @param admin
      * @see ToggleSeekBar#setEnforcedAdmin
      */
-    void setAdminBlocker(ToggleSeekBar.AdminBlocker blocker) {
+    protected void setAdminBlocker(ToggleSeekBar.AdminBlocker blocker) {
         mSlider.setAdminBlocker(blocker);
     }
 
@@ -211,7 +215,7 @@ public class BrightnessSliderView extends FrameLayout {
         }
     }
 
-    private void applySliderScale() {
+    protected void applySliderScale() {
         if (mProgressDrawable != null) {
             final Rect r = mProgressDrawable.getBounds();
             int height = (int) (mProgressDrawable.getIntrinsicHeight() * mScale);
@@ -229,7 +233,7 @@ public class BrightnessSliderView extends FrameLayout {
      * Interface to attach a listener for {@link View#dispatchTouchEvent}.
      */
     @FunctionalInterface
-    interface DispatchTouchEventListener {
+    public interface DispatchTouchEventListener {
         boolean onDispatchTouchEvent(MotionEvent ev);
     }
 }

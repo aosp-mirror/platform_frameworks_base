@@ -16,38 +16,64 @@
 
 package com.android.systemui.communal.ui.viewmodel
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
+import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.compose.animation.scene.SceneKey
+import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.repository.fakeCommunalSceneRepository
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.scene.domain.interactor.sceneInteractor
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
-@RunWith(AndroidJUnit4::class)
-class CommunalTransitionViewModelTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class CommunalTransitionViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+        }
+    }
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
     private val keyguardTransitionRepository = kosmos.fakeKeyguardTransitionRepository
     private val communalSceneRepository = kosmos.fakeCommunalSceneRepository
+    private val sceneInteractor = kosmos.sceneInteractor
 
     private val underTest: CommunalTransitionViewModel by lazy {
         kosmos.communalTransitionViewModel
     }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun testIsUmoOnCommunalDuringTransitionBetweenLockscreenAndGlanceableHub() =
         testScope.runTest {
@@ -61,6 +87,7 @@ class CommunalTransitionViewModelTest : SysuiTestCase() {
             assertThat(isUmoOnCommunal).isFalse()
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun testIsUmoOnCommunalDuringTransitionBetweenDreamingAndGlanceableHub() =
         testScope.runTest {
@@ -74,6 +101,7 @@ class CommunalTransitionViewModelTest : SysuiTestCase() {
             assertThat(isUmoOnCommunal).isFalse()
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun testIsUmoOnCommunalDuringTransitionBetweenOccludedAndGlanceableHub() =
         testScope.runTest {
@@ -87,6 +115,7 @@ class CommunalTransitionViewModelTest : SysuiTestCase() {
             assertThat(isUmoOnCommunal).isFalse()
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun isUmoOnCommunal_noLongerVisible_returnsFalse() =
         testScope.runTest {
@@ -103,6 +132,7 @@ class CommunalTransitionViewModelTest : SysuiTestCase() {
             assertThat(isUmoOnCommunal).isFalse()
         }
 
+    @DisableFlags(FLAG_SCENE_CONTAINER)
     @Test
     fun isUmoOnCommunal_idleOnCommunal_returnsTrue() =
         testScope.runTest {
@@ -116,11 +146,25 @@ class CommunalTransitionViewModelTest : SysuiTestCase() {
             assertThat(isUmoOnCommunal).isTrue()
         }
 
+    @EnableFlags(FLAG_SCENE_CONTAINER)
+    @Test
+    fun isUmoOnCommunal_sceneContainerEnabled_idleOnCommunal_returnsTrue() =
+        testScope.runTest {
+            val isUmoOnCommunal by collectLastValue(underTest.isUmoOnCommunal)
+            assertThat(isUmoOnCommunal).isFalse()
+
+            // Change to communal scene.
+            setIdleScene(Scenes.Communal)
+
+            // isUmoOnCommunal returns true, even without any keyguard transition.
+            assertThat(isUmoOnCommunal).isTrue()
+        }
+
     private suspend fun TestScope.enterCommunal(from: KeyguardState) {
         keyguardTransitionRepository.sendTransitionSteps(
             from = from,
             to = KeyguardState.GLANCEABLE_HUB,
-            testScope
+            testScope,
         )
         communalSceneRepository.changeScene(CommunalScenes.Communal)
         runCurrent()
@@ -130,9 +174,17 @@ class CommunalTransitionViewModelTest : SysuiTestCase() {
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.GLANCEABLE_HUB,
             to = to,
-            testScope
+            testScope,
         )
         communalSceneRepository.changeScene(CommunalScenes.Blank)
         runCurrent()
+    }
+
+    private fun setIdleScene(scene: SceneKey) {
+        sceneInteractor.changeScene(scene, "test")
+        val transitionState =
+            MutableStateFlow<ObservableTransitionState>(ObservableTransitionState.Idle(scene))
+        sceneInteractor.setTransitionState(transitionState)
+        testScope.runCurrent()
     }
 }

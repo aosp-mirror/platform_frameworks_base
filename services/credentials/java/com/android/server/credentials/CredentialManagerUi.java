@@ -22,6 +22,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.credentials.CredentialManager;
 import android.credentials.CredentialProviderInfo;
+import android.credentials.flags.Flags;
 import android.credentials.selection.DisabledProviderData;
 import android.credentials.selection.IntentCreationResult;
 import android.credentials.selection.IntentFactory;
@@ -46,6 +47,12 @@ import java.util.UUID;
 
 /** Initiates the Credential Manager UI and receives results. */
 public class CredentialManagerUi {
+
+    private static final String SESSION_ID_TRACK_ONE =
+            "com.android.server.credentials.CredentialManagerUi.SESSION_ID_TRACK_ONE";
+    private static final String SESSION_ID_TRACK_TWO =
+            "com.android.server.credentials.CredentialManagerUi.SESSION_ID_TRACK_TWO";
+
     @NonNull
     private final CredentialManagerUiCallback mCallbacks;
     @NonNull
@@ -107,7 +114,7 @@ public class CredentialManagerUi {
     /** Creates intent that is ot be invoked to cancel an in-progress UI session. */
     public Intent createCancelIntent(IBinder requestId, String packageName) {
         return IntentFactory.createCancelUiIntent(mContext, requestId,
-                /*shouldShowCancellationUi=*/ true, packageName);
+                /*shouldShowCancellationUi=*/ true, packageName, mUserId);
     }
 
     /**
@@ -148,8 +155,8 @@ public class CredentialManagerUi {
      * by the calling app process. The bottom-sheet navigates to the default page when the intent
      * is invoked.
      *
-     * @param requestInfo            the information about the request
-     * @param providerDataList       the list of provider data from remote providers
+     * @param requestInfo      the information about the request
+     * @param providerDataList the list of provider data from remote providers
      */
     public PendingIntent createPendingIntent(
             RequestInfo requestInfo, ArrayList<ProviderData> providerDataList,
@@ -170,11 +177,16 @@ public class CredentialManagerUi {
 
         IntentCreationResult intentCreationResult = IntentFactory
                 .createCredentialSelectorIntentForCredMan(mContext, requestInfo, providerDataList,
-                        new ArrayList<>(disabledProviderDataList), mResultReceiver);
+                        new ArrayList<>(disabledProviderDataList), mResultReceiver, mUserId);
         requestSessionMetric.collectUiConfigurationResults(
                 mContext, intentCreationResult, mUserId);
         Intent intent = intentCreationResult.getIntent();
         intent.setAction(UUID.randomUUID().toString());
+        if (Flags.frameworkSessionIdMetricBundle()) {
+            intent.putExtra(SESSION_ID_TRACK_ONE,
+                    requestSessionMetric.getInitialPhaseMetric().getSessionIdCaller());
+            intent.putExtra(SESSION_ID_TRACK_TWO, requestSessionMetric.getSessionIdTrackTwo());
+        }
         //TODO: Create unique pending intent using request code and cancel any pre-existing pending
         // intents
         return PendingIntent.getActivityAsUser(
@@ -192,14 +204,14 @@ public class CredentialManagerUi {
      * each autofill id and passed in as extras in the pending intent set as authentication
      * of the pinned entry.
      *
-     * @param requestInfo            the information about the request
-     * @param requestSessionMetric   the metric object for logging
+     * @param requestInfo          the information about the request
+     * @param requestSessionMetric the metric object for logging
      */
     public Intent createIntentForAutofill(RequestInfo requestInfo,
             RequestSessionMetric requestSessionMetric) {
         IntentCreationResult intentCreationResult = IntentFactory
                 .createCredentialSelectorIntentForAutofill(mContext, requestInfo, new ArrayList<>(),
-                        mResultReceiver);
+                        mResultReceiver, mUserId);
         requestSessionMetric.collectUiConfigurationResults(
                 mContext, intentCreationResult, mUserId);
         return intentCreationResult.getIntent();

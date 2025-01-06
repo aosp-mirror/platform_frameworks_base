@@ -280,21 +280,21 @@ private:
         ~SharedZip();
 
     private:
-        SharedZip(const String8& path, time_t modWhen);
-        SharedZip(int fd, const String8& path);
-        SharedZip(); // <-- not implemented
+     SharedZip(const String8& path, ModDate modWhen);
+     SharedZip(int fd, const String8& path);
+     SharedZip();  // <-- not implemented
 
-        String8 mPath;
-        ZipFileRO* mZipFile;
-        time_t mModWhen;
+     String8 mPath;
+     ZipFileRO* mZipFile;
+     ModDate mModWhen;
 
-        Asset* mResourceTableAsset;
-        ResTable* mResourceTable;
+     Asset* mResourceTableAsset;
+     ResTable* mResourceTable;
 
-        Vector<asset_path> mOverlays;
+     Vector<asset_path> mOverlays;
 
-        static Mutex gLock;
-        static DefaultKeyedVector<String8, wp<SharedZip> > gOpen;
+     static Mutex gLock;
+     static DefaultKeyedVector<String8, wp<SharedZip> > gOpen;
     };
 
     /*

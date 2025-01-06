@@ -117,9 +117,9 @@ class LoadingEffectTest : SysuiTestCase() {
         loadingEffect.play()
 
         // Execute all the animators by advancing each duration with some buffer.
-        animatorTestRule.advanceTimeBy(config.easeInDuration.toLong())
-        animatorTestRule.advanceTimeBy(config.maxDuration.toLong())
-        animatorTestRule.advanceTimeBy(config.easeOutDuration.toLong())
+        animatorTestRule.advanceAnimationDuration(config.easeInDuration.toLong())
+        animatorTestRule.advanceAnimationDuration(config.maxDuration.toLong())
+        animatorTestRule.advanceAnimationDuration(config.easeOutDuration.toLong())
         animatorTestRule.advanceTimeBy(500)
 
         assertThat(states)
@@ -206,12 +206,12 @@ class LoadingEffectTest : SysuiTestCase() {
         assertThat(isFinished).isFalse()
 
         loadingEffect.play()
-        animatorTestRule.advanceTimeBy(config.easeInDuration.toLong() + 500L)
+        animatorTestRule.advanceAnimationDuration(config.easeInDuration.toLong() + 500L)
 
         assertThat(isFinished).isFalse()
 
         loadingEffect.finish()
-        animatorTestRule.advanceTimeBy(config.easeOutDuration.toLong() + 500L)
+        animatorTestRule.advanceAnimationDuration(config.easeOutDuration.toLong() + 500L)
 
         assertThat(isFinished).isTrue()
     }

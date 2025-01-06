@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Actiu (només l\'esquerre)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Actiu (només el dret)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Actiu (esquerre i dret)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"No s\'ha pogut actualitzar l\'entorn"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Actiu (només contingut multimèdia). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Actiu (només contingut multimèdia), E: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de bateria, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de bateria."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Connectat (admet compartició d\'àudio). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de bateria."</string>
@@ -329,7 +330,7 @@
     <string name="wifi_non_persistent_mac_randomization_summary" msgid="2159794543105053930">"Quan aquest mode està activat, és possible que l’adreça MAC d\'aquest dispositiu canviï cada vegada que es connecti a una xarxa amb l\'aleatorització d\'adreces MAC activada"</string>
     <string name="wifi_metered_label" msgid="8737187690304098638">"D\'ús mesurat"</string>
     <string name="wifi_unmetered_label" msgid="6174142840934095093">"D\'ús no mesurat"</string>
-    <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la memòria intermèdia del registre"</string>
+    <string name="select_logd_size_title" msgid="1604578195914595173">"Mides de la memòria cau del registre"</string>
     <string name="select_logd_size_dialog_title" msgid="2105401994681013578">"Selecciona la mida de la memòria intermèdia del registre"</string>
     <string name="dev_logpersist_clear_warning_title" msgid="8631859265777337991">"Vols esborrar l\'emmagatzematge persistent del registrador?"</string>
     <string name="dev_logpersist_clear_warning_message" msgid="6447590867594287413">"Quan deixem de supervisar amb el registrador persistent, hem d\'esborrar les dades del registrador que hi ha al teu dispositiu."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activa l\'aplicació de terminal que ofereix accés al shell local"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Entorn de desenvolupament Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Executa el terminal de Linux a Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimental) Executa el terminal de Linux a Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Si desactives l\'app, les dades del terminal de Linux s\'esborraran"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Comprovació d\'HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Defineix comprovació HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Depuració"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala d\'animació de la transició"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala de durada de l\'animació"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simula pantalles secundàries"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Posició de l\'ombra a la pantalla"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplicacions"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"No desis les activitats"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destrueix activitats quan l\'usuari deixi d\'utilitzar-les"</string>
@@ -579,18 +582,20 @@
     <string name="alarm_template_far" msgid="6382760514842998629">"Data: <xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="zen_mode_duration_settings_title" msgid="1553451650289651489">"Durada"</string>
     <string name="zen_mode_duration_always_prompt_title" msgid="3212996860498119555">"Pregunta sempre"</string>
-    <string name="zen_mode_forever" msgid="3339224497605461291">"Fins que no el desactivis"</string>
+    <string name="zen_mode_forever" msgid="3339224497605461291">"Fins que no ho desactivis"</string>
     <string name="zen_mode_starred_contacts_empty_name" msgid="933552939706125937">"(Sense nom)"</string>
     <string name="time_unit_just_now" msgid="3006134267292728099">"Ara mateix"</string>
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Aquest telèfon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Aquesta tauleta"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Aquest ordinador (intern)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Aquest televisor"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Base d\'altaveu"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositiu extern"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositiu connectat"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Aquest telèfon"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analògic"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"No es pot reproduir en aquest dispositiu"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Actualitza el compte per canviar"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Les baixades no es poden reproduir aquí"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Connectat mitjançant ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Connectat mitjançant eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Televisor predeterminat"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Sortida HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Altaveus interns"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Altaveu integrat"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Àudio de la televisió"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Hi ha hagut un problema amb la connexió. Apaga el dispositiu i torna\'l a encendre."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositiu d\'àudio amb cable"</string>
     <string name="help_label" msgid="3528360748637781274">"Ajuda i suggeriments"</string>

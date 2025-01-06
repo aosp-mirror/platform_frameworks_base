@@ -40,6 +40,7 @@ import android.widget.TextView
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 private const val TAG = "ChannelDialogController"
@@ -58,11 +59,10 @@ private const val TAG = "ChannelDialogController"
  */
 @SysUISingleton
 class ChannelEditorDialogController @Inject constructor(
-    c: Context,
+    @ShadeDisplayAware private val context: Context,
     private val noMan: INotificationManager,
     private val dialogBuilder: ChannelEditorDialog.Builder
 ) {
-    val context: Context = c.applicationContext
 
     private var prepared = false
     private lateinit var dialog: ChannelEditorDialog

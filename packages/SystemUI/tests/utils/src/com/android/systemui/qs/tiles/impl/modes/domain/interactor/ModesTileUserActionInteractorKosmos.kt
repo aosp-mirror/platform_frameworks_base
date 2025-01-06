@@ -18,6 +18,7 @@ package com.android.systemui.qs.tiles.impl.modes.domain.interactor
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.tiles.base.actions.qsTileIntentUserInputHandler
+import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.modesDialogDelegate
 import javax.inject.Provider
 
@@ -26,5 +27,6 @@ val Kosmos.modesTileUserActionInteractor: ModesTileUserActionInteractor by
         ModesTileUserActionInteractor(
             qsTileIntentUserInputHandler,
             Provider { modesDialogDelegate }.get(),
+            zenModeInteractor,
         )
     }

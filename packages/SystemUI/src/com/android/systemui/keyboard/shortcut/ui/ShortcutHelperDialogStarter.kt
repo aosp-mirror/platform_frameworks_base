@@ -24,8 +24,10 @@ import android.os.UserHandle
 import android.provider.Settings
 import androidx.annotation.VisibleForTesting
 import androidx.compose.foundation.layout.width
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.SysUISingleton
@@ -35,6 +37,7 @@ import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutHelperBottom
 import com.android.systemui.keyboard.shortcut.ui.composable.getWidth
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutHelperViewModel
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.statusbar.phone.createBottomSheet
 import javax.inject.Inject
@@ -47,15 +50,18 @@ class ShortcutHelperDialogStarter
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    private val viewModel: ShortcutHelperViewModel,
+    private val shortcutHelperViewModel: ShortcutHelperViewModel,
+    shortcutCustomizationDialogStarterFactory: ShortcutCustomizationDialogStarter.Factory,
     private val dialogFactory: SystemUIDialogFactory,
     private val activityStarter: ActivityStarter,
 ) : CoreStartable {
 
     @VisibleForTesting var dialog: Dialog? = null
+    private val shortcutCustomizationDialogStarter =
+        shortcutCustomizationDialogStarterFactory.create()
 
     override fun start() {
-        viewModel.shouldShow
+        shortcutHelperViewModel.shouldShow
             .map { shouldShow ->
                 if (shouldShow) {
                     dialog = createShortcutHelperDialog().also { it.show() }
@@ -69,16 +75,22 @@ constructor(
     private fun createShortcutHelperDialog(): Dialog {
         return dialogFactory.createBottomSheet(
             content = { dialog ->
-                val shortcutsUiState by viewModel.shortcutsUiState.collectAsStateWithLifecycle()
+                val shortcutsUiState by
+                    shortcutHelperViewModel.shortcutsUiState.collectAsStateWithLifecycle()
+                LaunchedEffect(Unit) { shortcutCustomizationDialogStarter.activate() }
                 ShortcutHelper(
                     modifier = Modifier.width(getWidth()),
                     shortcutsUiState = shortcutsUiState,
                     onKeyboardSettingsClicked = { onKeyboardSettingsClicked(dialog) },
-                    onSearchQueryChanged = { viewModel.onSearchQueryChanged(it) },
+                    onSearchQueryChanged = { shortcutHelperViewModel.onSearchQueryChanged(it) },
+                    onCustomizationRequested = {
+                        shortcutCustomizationDialogStarter.onShortcutCustomizationRequested(it)
+                    },
                 )
-                dialog.setOnDismissListener { viewModel.onViewClosed() }
+                dialog.setOnDismissListener { shortcutHelperViewModel.onViewClosed() }
+                dialog.setTitle(stringResource(R.string.shortcut_helper_title))
             },
-            maxWidth = ShortcutHelperBottomSheet.LargeScreenWidthLandscape
+            maxWidth = ShortcutHelperBottomSheet.LargeScreenWidthLandscape,
         )
     }
 

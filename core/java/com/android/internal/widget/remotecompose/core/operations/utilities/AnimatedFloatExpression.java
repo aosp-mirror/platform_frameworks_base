@@ -15,68 +15,178 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities;
 
-/**
- * high performance floating point expression evaluator used in animation
- */
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
+import com.android.internal.widget.remotecompose.core.operations.utilities.easing.MonotonicSpline;
+
+import java.util.Random;
+
+/** high performance floating point expression evaluator used in animation */
 public class AnimatedFloatExpression {
-    static IntMap<String> sNames = new IntMap<>();
+    @NonNull static IntMap<String> sNames = new IntMap<>();
+
+    /** The START POINT in the float NaN space for operators */
     public static final int OFFSET = 0x310_000;
+
+    /** ADD operator */
     public static final float ADD = asNan(OFFSET + 1);
+
+    /** SUB operator */
     public static final float SUB = asNan(OFFSET + 2);
+
+    /** MUL operator */
     public static final float MUL = asNan(OFFSET + 3);
+
+    /** DIV operator */
     public static final float DIV = asNan(OFFSET + 4);
+
+    /** MOD operator */
     public static final float MOD = asNan(OFFSET + 5);
+
+    /** MIN operator */
     public static final float MIN = asNan(OFFSET + 6);
+
+    /** MAX operator */
     public static final float MAX = asNan(OFFSET + 7);
+
+    /** POW operator */
     public static final float POW = asNan(OFFSET + 8);
+
+    /** SQRT operator */
     public static final float SQRT = asNan(OFFSET + 9);
+
+    /** ABS operator */
     public static final float ABS = asNan(OFFSET + 10);
+
+    /** SIGN operator */
     public static final float SIGN = asNan(OFFSET + 11);
+
+    /** COPY_SIGN operator */
     public static final float COPY_SIGN = asNan(OFFSET + 12);
+
+    /** EXP operator */
     public static final float EXP = asNan(OFFSET + 13);
+
+    /** FLOOR operator */
     public static final float FLOOR = asNan(OFFSET + 14);
+
+    /** LOG operator */
     public static final float LOG = asNan(OFFSET + 15);
+
+    /** LN operator */
     public static final float LN = asNan(OFFSET + 16);
+
+    /** ROUND operator */
     public static final float ROUND = asNan(OFFSET + 17);
+
+    /** SIN operator */
     public static final float SIN = asNan(OFFSET + 18);
+
+    /** COS operator */
     public static final float COS = asNan(OFFSET + 19);
+
+    /** TAN operator */
     public static final float TAN = asNan(OFFSET + 20);
+
+    /** ASIN operator */
     public static final float ASIN = asNan(OFFSET + 21);
+
+    /** ACOS operator */
     public static final float ACOS = asNan(OFFSET + 22);
 
+    /** ATAN operator */
     public static final float ATAN = asNan(OFFSET + 23);
 
+    /** ATAN2 operator */
     public static final float ATAN2 = asNan(OFFSET + 24);
+
+    /** MAD operator */
     public static final float MAD = asNan(OFFSET + 25);
+
+    /** IFELSE operator */
     public static final float IFELSE = asNan(OFFSET + 26);
 
+    /** CLAMP operator */
     public static final float CLAMP = asNan(OFFSET + 27);
+
+    /** CBRT operator */
     public static final float CBRT = asNan(OFFSET + 28);
+
+    /** DEG operator */
     public static final float DEG = asNan(OFFSET + 29);
+
+    /** RAD operator */
     public static final float RAD = asNan(OFFSET + 30);
+
+    /** CEIL operator */
     public static final float CEIL = asNan(OFFSET + 31);
 
     // Array ops
+    /** A DEREF operator */
     public static final float A_DEREF = asNan(OFFSET + 32);
+
+    /** Array MAX operator */
     public static final float A_MAX = asNan(OFFSET + 33);
+
+    /** Array MIN operator */
     public static final float A_MIN = asNan(OFFSET + 34);
+
+    /** A_SUM operator */
     public static final float A_SUM = asNan(OFFSET + 35);
+
+    /** A_AVG operator */
     public static final float A_AVG = asNan(OFFSET + 36);
+
+    /** A_LEN operator */
     public static final float A_LEN = asNan(OFFSET + 37);
-    public static final int LAST_OP = OFFSET + 37;
 
-    public static final float VAR1 = asNan(OFFSET + 38);
-    public static final float VAR2 = asNan(OFFSET + 39);
+    /** A_SPLINE operator */
+    public static final float A_SPLINE = asNan(OFFSET + 38);
 
-    // TODO CLAMP, CBRT, DEG, RAD, EXPM1, CEIL, FLOOR
+    /** RAND Random number 0..1 */
+    public static final float RAND = asNan(OFFSET + 39);
+
+    /** RAND_SEED operator */
+    public static final float RAND_SEED = asNan(OFFSET + 40);
+
+    /** LAST valid operator */
+    public static final int LAST_OP = OFFSET + 40;
+
+    /** VAR1 operator */
+    public static final float VAR1 = asNan(OFFSET + 41);
+
+    /** VAR2 operator */
+    public static final float VAR2 = asNan(OFFSET + 42);
+
+    /** VAR2 operator */
+    public static final float VAR3 = asNan(OFFSET + 43);
+
+    // TODO SQUARE, DUP, HYPOT, SWAP
     //    private static final float FP_PI = (float) Math.PI;
     private static final float FP_TO_RAD = 57.29578f; // 180/PI
     private static final float FP_TO_DEG = 0.017453292f; // 180/PI
 
-    float[] mStack;
-    float[] mLocalStack = new float[128];
-    float[] mVar;
-    CollectionsAccess mCollectionsAccess;
+    @NonNull float[] mStack = new float[0];
+    @NonNull float[] mLocalStack = new float[128];
+    @NonNull float[] mVar = new float[0];
+    @Nullable CollectionsAccess mCollectionsAccess;
+    IntMap<MonotonicSpline> mSplineMap = new IntMap<>();
+    private static Random sRandom;
+
+    private float getSplineValue(int arrayId, float pos) {
+        MonotonicSpline fit = mSplineMap.get(arrayId);
+        float[] f = mCollectionsAccess.getFloats(arrayId);
+        if (fit != null) {
+            if (fit.getArray() == f) { // the array has not changed.
+                return fit.getPos(pos);
+            }
+        }
+
+        fit = new MonotonicSpline(null, f);
+        mSplineMap.put(arrayId, fit);
+        return fit.getPos(pos);
+    }
 
     /**
      * is float a math operator
@@ -113,14 +223,14 @@ public class AnimatedFloatExpression {
      * @param var
      * @return
      */
-    public float eval(float[] exp, float... var) {
+    public float eval(@NonNull float[] exp, @NonNull float... var) {
         mStack = exp;
         mVar = var;
         int sp = -1;
         for (int i = 0; i < mStack.length; i++) {
             float v = mStack[i];
             if (Float.isNaN(v)) {
-                sp = mOps[fromNaN(v) - OFFSET].eval(sp);
+                sp = opEval(sp, fromNaN(v));
             } else {
                 mStack[++sp] = v;
             }
@@ -131,12 +241,14 @@ public class AnimatedFloatExpression {
     /**
      * Evaluate a float expression
      *
-     * @param ca
-     * @param exp
-     * @param var
-     * @return
+     * @param ca Access to float array collections
+     * @param exp the expressions
+     * @param len the length of the expression array
+     * @param var variables if the expression contains VAR tags
+     * @return the value the expression evaluated to
      */
-    public float eval(CollectionsAccess ca, float[] exp, int len, float... var) {
+    public float eval(
+            @NonNull CollectionsAccess ca, @NonNull float[] exp, int len, @NonNull float... var) {
         System.arraycopy(exp, 0, mLocalStack, 0, len);
         mStack = mLocalStack;
         mVar = var;
@@ -148,7 +260,7 @@ public class AnimatedFloatExpression {
             if (Float.isNaN(v)) {
                 int id = fromNaN(v);
                 if ((id & NanMap.ID_REGION_MASK) != NanMap.ID_REGION_ARRAY) {
-                    sp = mOps[id - OFFSET].eval(sp);
+                    sp = opEval(sp, id);
                 } else {
                     mStack[++sp] = v;
                 }
@@ -162,11 +274,12 @@ public class AnimatedFloatExpression {
     /**
      * Evaluate a float expression
      *
-     * @param ca
-     * @param exp
-     * @return
+     * @param ca The access to float arrays
+     * @param exp the expression
+     * @param len the length of the expression sections
+     * @return the value the expression evaluated to
      */
-    public float eval(CollectionsAccess ca, float[] exp, int len) {
+    public float eval(@NonNull CollectionsAccess ca, @NonNull float[] exp, int len) {
         System.arraycopy(exp, 0, mLocalStack, 0, len);
         mStack = mLocalStack;
         mCollectionsAccess = ca;
@@ -177,7 +290,7 @@ public class AnimatedFloatExpression {
             if (Float.isNaN(v)) {
                 int id = fromNaN(v);
                 if ((id & NanMap.ID_REGION_MASK) != NanMap.ID_REGION_ARRAY) {
-                    sp = mOps[id - OFFSET].eval(sp);
+                    sp = opEval(sp, id);
                 } else {
                     mStack[++sp] = v;
                 }
@@ -188,7 +301,7 @@ public class AnimatedFloatExpression {
         return mStack[sp];
     }
 
-    private int dereference(CollectionsAccess ca, int id, int sp) {
+    private int dereference(@NonNull CollectionsAccess ca, int id, int sp) {
         mStack[sp] = ca.getFloatValue(id, (int) (mStack[sp]));
         return sp;
     }
@@ -201,15 +314,16 @@ public class AnimatedFloatExpression {
      * @param var
      * @return
      */
-    public float eval(float[] exp, int len, float... var) {
+    public float eval(@NonNull float[] exp, int len, @NonNull float... var) {
         System.arraycopy(exp, 0, mLocalStack, 0, len);
         mStack = mLocalStack;
         mVar = var;
         int sp = -1;
+
         for (int i = 0; i < len; i++) {
             float v = mStack[i];
             if (Float.isNaN(v)) {
-                sp = mOps[fromNaN(v) - OFFSET].eval(sp);
+                sp = opEval(sp, fromNaN(v));
             } else {
                 mStack[++sp] = v;
             }
@@ -224,14 +338,14 @@ public class AnimatedFloatExpression {
      * @param var
      * @return
      */
-    public float evalDB(float[] exp, float... var) {
+    public float evalDB(@NonNull float[] exp, @NonNull float... var) {
         mStack = exp;
         mVar = var;
         int sp = -1;
+
         for (float v : exp) {
             if (Float.isNaN(v)) {
-                System.out.print(" " + sNames.get((fromNaN(v) - OFFSET)));
-                sp = mOps[fromNaN(v) - OFFSET].eval(sp);
+                sp = opEval(sp, fromNaN(v));
             } else {
                 System.out.print(" " + v);
                 mStack[++sp] = v;
@@ -239,196 +353,6 @@ public class AnimatedFloatExpression {
         }
         return mStack[sp];
     }
-
-    Op[] mOps = {
-            null,
-            (sp) -> { // ADD
-                mStack[sp - 1] = mStack[sp - 1] + mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // SUB
-                mStack[sp - 1] = mStack[sp - 1] - mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // MUL
-                mStack[sp - 1] = mStack[sp - 1] * mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // DIV
-                mStack[sp - 1] = mStack[sp - 1] / mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // MOD
-                mStack[sp - 1] = mStack[sp - 1] % mStack[sp];
-                return sp - 1;
-            },
-            (sp) -> { // MIN
-                mStack[sp - 1] = (float) Math.min(mStack[sp - 1], mStack[sp]);
-                return sp - 1;
-            },
-            (sp) -> { // MAX
-                mStack[sp - 1] = (float) Math.max(mStack[sp - 1], mStack[sp]);
-                return sp - 1;
-            },
-            (sp) -> { // POW
-                mStack[sp - 1] = (float) Math.pow(mStack[sp - 1], mStack[sp]);
-                return sp - 1;
-            },
-            (sp) -> { // SQRT
-                mStack[sp] = (float) Math.sqrt(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // ABS
-                mStack[sp] = (float) Math.abs(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // SIGN
-                mStack[sp] = (float) Math.signum(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // copySign
-                mStack[sp - 1] = (float) Math.copySign(mStack[sp - 1], mStack[sp]);
-                return sp - 1;
-            },
-            (sp) -> { // EXP
-                mStack[sp] = (float) Math.exp(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // FLOOR
-                mStack[sp] = (float) Math.floor(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // LOG
-                mStack[sp] = (float) Math.log10(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // LN
-                mStack[sp] = (float) Math.log(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // ROUND
-                mStack[sp] = (float) Math.round(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // SIN
-                mStack[sp] = (float) Math.sin(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // COS
-                mStack[sp] = (float) Math.cos(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // TAN
-                mStack[sp] = (float) Math.tan(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // ASIN
-                mStack[sp] = (float) Math.asin(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // ACOS
-                mStack[sp] = (float) Math.acos(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // ATAN
-                mStack[sp] = (float) Math.atan(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // ATAN2
-                mStack[sp - 1] = (float) Math.atan2(mStack[sp - 1], mStack[sp]);
-                return sp - 1;
-            },
-            (sp) -> { // MAD
-                mStack[sp - 2] = mStack[sp] + mStack[sp - 1] * mStack[sp - 2];
-                return sp - 2;
-            },
-            (sp) -> { // Ternary conditional
-                mStack[sp - 2] = (mStack[sp] > 0) ? mStack[sp - 1] : mStack[sp - 2];
-                return sp - 2;
-            },
-            (sp) -> { // CLAMP(min,max, val)
-                mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
-                return sp - 2;
-            },
-            (sp) -> { // CBRT cuberoot
-                mStack[sp] = (float) Math.pow(mStack[sp], 1 / 3.);
-                return sp;
-            },
-            (sp) -> { // DEG
-                mStack[sp] = mStack[sp] * FP_TO_RAD;
-                return sp;
-            },
-            (sp) -> { // RAD
-                mStack[sp] = mStack[sp] * FP_TO_DEG;
-                return sp;
-            },
-            (sp) -> { // CEIL
-                mStack[sp] = (float) Math.ceil(mStack[sp]);
-                return sp;
-            },
-            (sp) -> { // A_DEREF
-                int id = fromNaN(mStack[sp]);
-                mStack[sp] = mCollectionsAccess.getFloatValue(id, (int) mStack[sp - 1]);
-                return sp - 1;
-            },
-            (sp) -> { // A_MAX
-                int id = fromNaN(mStack[sp]);
-                float[] array = mCollectionsAccess.getFloats(id);
-                float max = array[0];
-                for (int i = 1; i < array.length; i++) {
-                    max = Math.max(max, array[i]);
-                }
-                mStack[sp] = max;
-                return sp;
-            },
-            (sp) -> { // A_MIN
-                int id = fromNaN(mStack[sp]);
-                float[] array = mCollectionsAccess.getFloats(id);
-                float max = array[0];
-                for (int i = 1; i < array.length; i++) {
-                    max = Math.max(max, array[i]);
-                }
-                mStack[sp] = max;
-                return sp;
-            },
-            (sp) -> { // A_SUM
-                int id = fromNaN(mStack[sp]);
-                float[] array = mCollectionsAccess.getFloats(id);
-                float sum = 0;
-                for (int i = 0; i < array.length; i++) {
-                    sum += array[i];
-                }
-                mStack[sp] = sum;
-                return sp;
-            },
-            (sp) -> { // A_AVG
-                int id = fromNaN(mStack[sp]);
-                float[] array = mCollectionsAccess.getFloats(id);
-                float sum = 0;
-                for (int i = 0; i < array.length; i++) {
-                    sum += array[i];
-                }
-                mStack[sp] = sum / array.length;
-                return sp;
-            },
-            (sp) -> { // A_LEN
-                int id = fromNaN(mStack[sp]);
-                mStack[sp] = mCollectionsAccess.getListLength(id);
-                return sp;
-            },
-            (sp) -> { // first var =
-                mStack[sp] = mVar[0];
-                return sp;
-            },
-            (sp) -> { // second var y?
-                mStack[sp] = mVar[1];
-                return sp;
-            },
-            (sp) -> { // 3rd var z?
-                mStack[sp] = mVar[2];
-                return sp;
-            },
-    };
 
     static {
         int k = 0;
@@ -471,6 +395,9 @@ public class AnimatedFloatExpression {
         sNames.put(k++, "A_SUM");
         sNames.put(k++, "A_AVG");
         sNames.put(k++, "A_LEN");
+        sNames.put(k++, "A_SPLINE");
+        sNames.put(k++, "RAND");
+        sNames.put(k++, "RAND_SEED");
 
         sNames.put(k++, "a[0]");
         sNames.put(k++, "a[1]");
@@ -483,6 +410,7 @@ public class AnimatedFloatExpression {
      * @param f
      * @return
      */
+    @Nullable
     public static String toMathName(float f) {
         int id = fromNaN(f) - OFFSET;
         return sNames.get(id);
@@ -495,7 +423,8 @@ public class AnimatedFloatExpression {
      * @param labels
      * @return
      */
-    public static String toString(float[] exp, String[] labels) {
+    @NonNull
+    public static String toString(@NonNull float[] exp, @Nullable String[] labels) {
         StringBuilder s = new StringBuilder();
         for (int i = 0; i < exp.length; i++) {
             float v = exp[i];
@@ -525,7 +454,7 @@ public class AnimatedFloatExpression {
         return s.toString();
     }
 
-    static String toString(float[] exp, int sp) {
+    static String toString(@NonNull float[] exp, int sp) {
         //        String[] str = new String[exp.length];
         if (Float.isNaN(exp[sp])) {
             int id = fromNaN(exp[sp]) - OFFSET;
@@ -575,42 +504,42 @@ public class AnimatedFloatExpression {
     }
 
     static final int[] NO_OF_OPS = {
-            -1, // no op
-            2,
-            2,
-            2,
-            2,
-            2, // + - * / %
-            2,
-            2,
-            2, // min max, power
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1, // sqrt,abs,CopySign,exp,floor,log,ln
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            2, // round,sin,cos,tan,asin,acos,atan,atan2
-            3,
-            3,
-            3,
-            1,
-            1,
-            1,
-            1,
-            0,
-            0,
-            0 // mad, ?:,
-            // a[0],a[1],a[2]
+        -1, // no op
+        2,
+        2,
+        2,
+        2,
+        2, // + - * / %
+        2,
+        2,
+        2, // min max, power
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1, // sqrt,abs,CopySign,exp,floor,log,ln
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        1,
+        2, // round,sin,cos,tan,asin,acos,atan,atan2
+        3,
+        3,
+        3,
+        1,
+        1,
+        1,
+        1,
+        0,
+        0,
+        0 // mad, ?:,
+        // a[0],a[1],a[2]
     };
 
     /**
@@ -642,5 +571,272 @@ public class AnimatedFloatExpression {
     public static int fromNaN(float v) {
         int b = Float.floatToRawIntBits(v);
         return b & 0x7FFFFF;
+    }
+
+    // ================= New approach ========
+    private static final int OP_ADD = OFFSET + 1;
+    private static final int OP_SUB = OFFSET + 2;
+    private static final int OP_MUL = OFFSET + 3;
+    private static final int OP_DIV = OFFSET + 4;
+    private static final int OP_MOD = OFFSET + 5;
+    private static final int OP_MIN = OFFSET + 6;
+    private static final int OP_MAX = OFFSET + 7;
+    private static final int OP_POW = OFFSET + 8;
+    private static final int OP_SQRT = OFFSET + 9;
+    private static final int OP_ABS = OFFSET + 10;
+    private static final int OP_SIGN = OFFSET + 11;
+    private static final int OP_COPY_SIGN = OFFSET + 12;
+    private static final int OP_EXP = OFFSET + 13;
+    private static final int OP_FLOOR = OFFSET + 14;
+    private static final int OP_LOG = OFFSET + 15;
+    private static final int OP_LN = OFFSET + 16;
+    private static final int OP_ROUND = OFFSET + 17;
+    private static final int OP_SIN = OFFSET + 18;
+    private static final int OP_COS = OFFSET + 19;
+    private static final int OP_TAN = OFFSET + 20;
+    private static final int OP_ASIN = OFFSET + 21;
+    private static final int OP_ACOS = OFFSET + 22;
+    private static final int OP_ATAN = OFFSET + 23;
+    private static final int OP_ATAN2 = OFFSET + 24;
+    private static final int OP_MAD = OFFSET + 25;
+    private static final int OP_TERNARY_CONDITIONAL = OFFSET + 26;
+    private static final int OP_CLAMP = OFFSET + 27;
+    private static final int OP_CBRT = OFFSET + 28;
+    private static final int OP_DEG = OFFSET + 29;
+    private static final int OP_RAD = OFFSET + 30;
+    private static final int OP_CEIL = OFFSET + 31;
+    private static final int OP_A_DEREF = OFFSET + 32;
+    private static final int OP_A_MAX = OFFSET + 33;
+    private static final int OP_A_MIN = OFFSET + 34;
+    private static final int OP_A_SUM = OFFSET + 35;
+    private static final int OP_A_AVG = OFFSET + 36;
+    private static final int OP_A_LEN = OFFSET + 37;
+    private static final int OP_A_SPLINE = OFFSET + 38;
+    private static final int OP_RAND = OFFSET + 39;
+    private static final int OP_RAND_SEED = OFFSET + 40;
+
+    private static final int OP_FIRST_VAR = OFFSET + 41;
+    private static final int OP_SECOND_VAR = OFFSET + 42;
+    private static final int OP_THIRD_VAR = OFFSET + 43;
+
+    int opEval(int sp, int id) {
+        float[] array;
+
+        switch (id) {
+            case OP_ADD:
+                mStack[sp - 1] = mStack[sp - 1] + mStack[sp];
+                return sp - 1;
+
+            case OP_SUB:
+                mStack[sp - 1] = mStack[sp - 1] - mStack[sp];
+                return sp - 1;
+
+            case OP_MUL:
+                mStack[sp - 1] = mStack[sp - 1] * mStack[sp];
+                return sp - 1;
+
+            case OP_DIV:
+                mStack[sp - 1] = mStack[sp - 1] / mStack[sp];
+                return sp - 1;
+
+            case OP_MOD:
+                mStack[sp - 1] = mStack[sp - 1] % mStack[sp];
+                return sp - 1;
+
+            case OP_MIN:
+                mStack[sp - 1] = (float) Math.min(mStack[sp - 1], mStack[sp]);
+                return sp - 1;
+
+            case OP_MAX:
+                mStack[sp - 1] = (float) Math.max(mStack[sp - 1], mStack[sp]);
+                return sp - 1;
+
+            case OP_POW:
+                mStack[sp - 1] = (float) Math.pow(mStack[sp - 1], mStack[sp]);
+                return sp - 1;
+
+            case OP_SQRT:
+                mStack[sp] = (float) Math.sqrt(mStack[sp]);
+                return sp;
+
+            case OP_ABS:
+                mStack[sp] = (float) Math.abs(mStack[sp]);
+                return sp;
+
+            case OP_SIGN:
+                mStack[sp] = (float) Math.signum(mStack[sp]);
+                return sp;
+
+            case OP_COPY_SIGN:
+                mStack[sp - 1] = (float) Math.copySign(mStack[sp - 1], mStack[sp]);
+                return sp - 1;
+
+            case OP_EXP:
+                mStack[sp] = (float) Math.exp(mStack[sp]);
+                return sp;
+
+            case OP_FLOOR:
+                mStack[sp] = (float) Math.floor(mStack[sp]);
+                return sp;
+
+            case OP_LOG:
+                mStack[sp] = (float) Math.log10(mStack[sp]);
+                return sp;
+
+            case OP_LN:
+                mStack[sp] = (float) Math.log(mStack[sp]);
+                return sp;
+
+            case OP_ROUND:
+                mStack[sp] = (float) Math.round(mStack[sp]);
+                return sp;
+
+            case OP_SIN:
+                mStack[sp] = (float) Math.sin(mStack[sp]);
+                return sp;
+
+            case OP_COS:
+                mStack[sp] = (float) Math.cos(mStack[sp]);
+                return sp;
+
+            case OP_TAN:
+                mStack[sp] = (float) Math.tan(mStack[sp]);
+                return sp;
+
+            case OP_ASIN:
+                mStack[sp] = (float) Math.asin(mStack[sp]);
+                return sp;
+
+            case OP_ACOS:
+                mStack[sp] = (float) Math.acos(mStack[sp]);
+                return sp;
+
+            case OP_ATAN:
+                mStack[sp] = (float) Math.atan(mStack[sp]);
+                return sp;
+
+            case OP_ATAN2:
+                mStack[sp - 1] = (float) Math.atan2(mStack[sp - 1], mStack[sp]);
+                return sp - 1;
+
+            case OP_MAD:
+                mStack[sp - 2] = mStack[sp] + mStack[sp - 1] * mStack[sp - 2];
+                return sp - 2;
+
+            case OP_TERNARY_CONDITIONAL:
+                mStack[sp - 2] = (mStack[sp] > 0) ? mStack[sp - 1] : mStack[sp - 2];
+                return sp - 2;
+
+            case OP_CLAMP:
+                mStack[sp - 2] = Math.min(Math.max(mStack[sp - 2], mStack[sp]), mStack[sp - 1]);
+                return sp - 2;
+
+            case OP_CBRT:
+                mStack[sp] = (float) Math.pow(mStack[sp], 1 / 3.);
+                return sp;
+
+            case OP_DEG:
+                mStack[sp] = mStack[sp] * FP_TO_RAD;
+                return sp;
+
+            case OP_RAD:
+                mStack[sp] = mStack[sp] * FP_TO_DEG;
+                return sp;
+
+            case OP_CEIL:
+                mStack[sp] = (float) Math.ceil(mStack[sp]);
+                return sp;
+
+            case OP_A_DEREF:
+                id = fromNaN(mStack[sp - 1]);
+                mStack[sp - 1] = mCollectionsAccess.getFloatValue(id, (int) mStack[sp]);
+                return sp - 1;
+
+            case OP_A_MAX:
+                id = fromNaN(mStack[sp]);
+                array = mCollectionsAccess.getFloats(id);
+                float max = array[0];
+                for (int i = 1; i < array.length; i++) {
+                    max = Math.max(max, array[i]);
+                }
+                mStack[sp] = max;
+                return sp;
+
+            case OP_A_MIN:
+                id = fromNaN(mStack[sp]);
+                array = mCollectionsAccess.getFloats(id);
+                if (array.length == 0) {
+                    return sp;
+                }
+                float min = array[0];
+                for (int i = 1; i < array.length; i++) {
+                    min = Math.min(min, array[i]);
+                }
+                mStack[sp] = min;
+                return sp;
+
+            case OP_A_SUM:
+                id = fromNaN(mStack[sp]);
+                array = mCollectionsAccess.getFloats(id);
+                float sum = 0;
+                for (int i = 0; i < array.length; i++) {
+                    sum += array[i];
+                }
+                mStack[sp] = sum;
+                return sp;
+
+            case OP_A_AVG:
+                id = fromNaN(mStack[sp]);
+                array = mCollectionsAccess.getFloats(id);
+                sum = 0;
+                for (int i = 0; i < array.length; i++) {
+                    sum += array[i];
+                }
+                mStack[sp] = sum / array.length;
+                return sp;
+
+            case OP_A_LEN:
+                id = fromNaN(mStack[sp]);
+                mStack[sp] = mCollectionsAccess.getListLength(id);
+                return sp;
+
+            case OP_A_SPLINE:
+                id = fromNaN(mStack[sp - 1]);
+                mStack[sp - 1] = getSplineValue(id, mStack[sp]);
+                return sp - 1;
+
+            case OP_RAND:
+                if (sRandom == null) {
+                    sRandom = new Random();
+                }
+                mStack[sp + 1] = sRandom.nextFloat();
+                return sp + 1;
+
+            case OP_RAND_SEED:
+                float seed = mStack[sp];
+                if (seed == 0) {
+                    sRandom = new Random();
+                } else {
+                    if (sRandom == null) {
+                        sRandom = new Random(Float.floatToRawIntBits(seed));
+                    } else {
+                        sRandom.setSeed(Float.floatToRawIntBits(seed));
+                    }
+                }
+                return sp - 1;
+
+            case OP_FIRST_VAR:
+                mStack[sp] = mVar[0];
+                return sp;
+
+            case OP_SECOND_VAR:
+                mStack[sp] = mVar[1];
+                return sp;
+
+            case OP_THIRD_VAR:
+                mStack[sp] = mVar[2];
+                return sp;
+        }
+        return sp;
     }
 }

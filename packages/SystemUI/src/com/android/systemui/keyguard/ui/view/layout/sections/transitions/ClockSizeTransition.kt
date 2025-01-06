@@ -93,18 +93,18 @@ class ClockSizeTransition(
             fromBounds: Rect,
             toBounds: Rect,
             fromSSBounds: Rect?,
-            toSSBounds: Rect?
+            toSSBounds: Rect?,
         ) {}
 
         override fun createAnimator(
             sceenRoot: ViewGroup,
             startValues: TransitionValues?,
-            endValues: TransitionValues?
+            endValues: TransitionValues?,
         ): Animator? {
             if (startValues == null || endValues == null) {
                 Log.w(
                     TAG,
-                    "Couldn't create animator: startValues=$startValues; endValues=$endValues"
+                    "Couldn't create animator: startValues=$startValues; endValues=$endValues",
                 )
                 return null
             }
@@ -137,7 +137,7 @@ class ClockSizeTransition(
                         "Skipping no-op transition: $toView; " +
                             "vis: $fromVis -> $toVis; " +
                             "alpha: $fromAlpha -> $toAlpha; " +
-                            "bounds: $fromBounds -> $toBounds; "
+                            "bounds: $fromBounds -> $toBounds; ",
                     )
                 }
                 return null
@@ -151,7 +151,7 @@ class ClockSizeTransition(
                     lerp(fromBounds.left, toBounds.left, fract),
                     lerp(fromBounds.top, toBounds.top, fract),
                     lerp(fromBounds.right, toBounds.right, fract),
-                    lerp(fromBounds.bottom, toBounds.bottom, fract)
+                    lerp(fromBounds.bottom, toBounds.bottom, fract),
                 )
 
             fun assignAnimValues(src: String, fract: Float, vis: Int? = null) {
@@ -160,7 +160,7 @@ class ClockSizeTransition(
                 if (DEBUG) {
                     Log.i(
                         TAG,
-                        "$src: $toView; fract=$fract; alpha=$alpha; vis=$vis; bounds=$bounds;"
+                        "$src: $toView; fract=$fract; alpha=$alpha; vis=$vis; bounds=$bounds;",
                     )
                 }
                 toView.setVisibility(vis ?: View.VISIBLE)
@@ -174,7 +174,7 @@ class ClockSizeTransition(
                     "transitioning: $toView; " +
                         "vis: $fromVis -> $toVis; " +
                         "alpha: $fromAlpha -> $toAlpha; " +
-                        "bounds: $fromBounds -> $toBounds; "
+                        "bounds: $fromBounds -> $toBounds; ",
                 )
             }
 
@@ -258,7 +258,7 @@ class ClockSizeTransition(
             fromBounds: Rect,
             toBounds: Rect,
             fromSSBounds: Rect?,
-            toSSBounds: Rect?
+            toSSBounds: Rect?,
         ) {
             // Move normally if clock is not changing visibility
             if (fromIsVis == toIsVis) return
@@ -347,12 +347,17 @@ class ClockSizeTransition(
             fromBounds: Rect,
             toBounds: Rect,
             fromSSBounds: Rect?,
-            toSSBounds: Rect?
+            toSSBounds: Rect?,
         ) {
             // If view is changing visibility, hold it in place
             if (fromIsVis == toIsVis) return
             if (DEBUG) Log.i(TAG, "Holding position of ${view.id}")
-            toBounds.set(fromBounds)
+
+            if (fromIsVis) {
+                toBounds.set(fromBounds)
+            } else {
+                fromBounds.set(toBounds)
+            }
         }
 
         companion object {

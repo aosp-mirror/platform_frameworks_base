@@ -24,15 +24,12 @@ import com.android.systemui.dagger.qualifiers.DisplaySpecific;
 import com.android.systemui.dagger.qualifiers.RootView;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.HeadsUpStatusBarView;
-import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
-import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerStore;
 import com.android.systemui.statusbar.phone.PhoneStatusBarTransitions;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.PhoneStatusBarViewController;
 import com.android.systemui.statusbar.phone.StatusBarLocation;
 import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
-import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
 
 import dagger.Module;
 import dagger.Provides;
@@ -147,21 +144,4 @@ public interface HomeStatusBarModule {
     static int displayId(@RootView PhoneStatusBarView view) {
         return view.getContext().getDisplayId();
     }
-
-    /** */
-    @Provides
-    @HomeStatusBarScope
-    static StatusBarConfigurationController configurationController(
-            @DisplaySpecific int displayId, StatusBarConfigurationControllerStore store) {
-        return store.forDisplay(displayId);
-    }
-
-    /** */
-    @Provides
-    @HomeStatusBarScope
-    static StatusBarWindowController provideWindowController(
-            @DisplaySpecific int displayId, StatusBarWindowControllerStore store) {
-        return store.forDisplay(displayId);
-    }
-
 }

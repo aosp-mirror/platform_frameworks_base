@@ -19,6 +19,7 @@ import android.view.View
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.unfold.data.repository.UnfoldTransitionRepository
 import com.android.systemui.unfold.data.repository.UnfoldTransitionStatus.TransitionFinished
 import com.android.systemui.unfold.data.repository.UnfoldTransitionStatus.TransitionInProgress
@@ -41,7 +42,7 @@ class UnfoldTransitionInteractor
 @Inject
 constructor(
     private val repository: UnfoldTransitionRepository,
-    private val configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
 ) {
     /** Returns availability of fold/unfold transitions on the device */
     val isAvailable: Boolean

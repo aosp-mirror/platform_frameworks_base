@@ -27,6 +27,10 @@ class FakeConfigurationController @Inject constructor() :
         listeners.forEach { it.onConfigChanged(newConfiguration) }
     }
 
+    override fun dispatchOnMovedToDisplay(newDisplayId: Int, newConfiguration: Configuration) {
+        listeners.forEach { it.onMovedToDisplay(newDisplayId, newConfiguration) }
+    }
+
     override fun notifyThemeChanged() {
         listeners.forEach { it.onThemeChanged() }
     }

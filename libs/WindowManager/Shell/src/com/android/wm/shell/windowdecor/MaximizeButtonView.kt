@@ -26,6 +26,7 @@ import android.graphics.drawable.RippleDrawable
 import android.util.AttributeSet
 import android.view.LayoutInflater
 import android.view.View
+import android.view.ViewStub
 import android.widget.FrameLayout
 import android.widget.ImageButton
 import android.widget.ProgressBar
@@ -46,13 +47,17 @@ class MaximizeButtonView(
     private val hoverProgressAnimatorSet = AnimatorSet()
     var hoverDisabled = false
 
-    private val progressBar: ProgressBar
+    private lateinit var stubProgressBarContainer: ViewStub
     private val maximizeWindow: ImageButton
+    private val progressBar: ProgressBar by lazy {
+        (stubProgressBarContainer.inflate() as FrameLayout)
+            .requireViewById(R.id.progress_bar)
+    }
 
     init {
         LayoutInflater.from(context).inflate(R.layout.maximize_menu_button, this, true)
 
-        progressBar = requireViewById(R.id.progress_bar)
+        stubProgressBarContainer = requireViewById(R.id.stub_progress_bar_container)
         maximizeWindow = requireViewById(R.id.maximize_window)
     }
 
@@ -115,21 +120,34 @@ class MaximizeButtonView(
             requireNotNull(rippleDrawable) { "Ripple drawable must be non-null" }
             maximizeWindow.imageTintList = iconForegroundColor
             maximizeWindow.background = rippleDrawable
-            progressBar.progressTintList = ColorStateList.valueOf(baseForegroundColor)
-                .withAlpha(OPACITY_15)
-            progressBar.progressBackgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
-        } else {
-            if (darkMode) {
-                progressBar.progressTintList = ColorStateList.valueOf(
-                    resources.getColor(R.color.desktop_mode_maximize_menu_progress_dark))
-                maximizeWindow.background?.setTintList(ContextCompat.getColorStateList(context,
-                    R.color.desktop_mode_caption_button_color_selector_dark))
-            } else {
-                progressBar.progressTintList = ColorStateList.valueOf(
-                    resources.getColor(R.color.desktop_mode_maximize_menu_progress_light))
-                maximizeWindow.background?.setTintList(ContextCompat.getColorStateList(context,
-                    R.color.desktop_mode_caption_button_color_selector_light))
+            stubProgressBarContainer.setOnInflateListener { _, inflated ->
+                val progressBar = (inflated as FrameLayout)
+                    .requireViewById(R.id.progress_bar) as ProgressBar
+                progressBar.progressTintList = ColorStateList.valueOf(baseForegroundColor)
+                    .withAlpha(OPACITY_15)
+                progressBar.progressBackgroundTintList = ColorStateList.valueOf(Color.TRANSPARENT)
             }
+        } else {
+            val progressTint = if (darkMode) {
+                ColorStateList.valueOf(
+                    resources.getColor(R.color.desktop_mode_maximize_menu_progress_dark))
+            } else {
+                ColorStateList.valueOf(
+                    resources.getColor(R.color.desktop_mode_maximize_menu_progress_light))
+            }
+            val backgroundTint = if (darkMode) {
+                ContextCompat.getColorStateList(context,
+                    R.color.desktop_mode_caption_button_color_selector_dark)
+            } else {
+                ContextCompat.getColorStateList(context,
+                    R.color.desktop_mode_caption_button_color_selector_light)
+            }
+            stubProgressBarContainer.setOnInflateListener { _, inflated ->
+                val progressBar = (inflated as FrameLayout)
+                    .requireViewById(R.id.progress_bar) as ProgressBar
+                progressBar.progressTintList = progressTint
+            }
+            maximizeWindow.background?.setTintList(backgroundTint)
         }
     }
 

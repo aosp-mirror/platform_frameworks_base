@@ -28,6 +28,7 @@ import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.NotificationScrollViewModel
 import com.android.systemui.util.kotlin.FlowDumperImpl
@@ -48,7 +49,7 @@ constructor(
     @Main private val mainImmediateDispatcher: CoroutineDispatcher,
     private val view: NotificationScrollView,
     private val viewModelFactory: NotificationScrollViewModel.Factory,
-    private val configuration: ConfigurationState,
+    @ShadeDisplayAware private val configuration: ConfigurationState,
 ) : FlowDumperImpl(dumpManager) {
 
     private val viewLeftOffset = MutableStateFlow(0).dumpValue("viewLeftOffset")
@@ -106,11 +107,6 @@ constructor(
                 viewModel.isPulsing.collectTraced { isPulsing ->
                     view.setPulsing(isPulsing, viewModel.shouldAnimatePulse.value)
                 }
-            }
-            launch {
-                viewModel.shouldResetStackTop
-                    .filter { it }
-                    .collectTraced { view.setStackTop(-(view.getHeadsUpInset().toFloat())) }
             }
             launch {
                 viewModel.shouldCloseGuts

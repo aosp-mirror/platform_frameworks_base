@@ -63,6 +63,7 @@ import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconList;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.wm.shell.shared.ShellTransitions;
 
 import dagger.Binds;
 import dagger.Lazy;
@@ -214,8 +215,8 @@ public interface CentralSurfacesDependenciesModule {
     @Provides
     @SysUISingleton
     static ActivityTransitionAnimator provideActivityTransitionAnimator(
-            @Main Executor mainExecutor) {
-        return new ActivityTransitionAnimator(mainExecutor);
+            @Main Executor mainExecutor, ShellTransitions shellTransitions) {
+        return new ActivityTransitionAnimator(mainExecutor, shellTransitions);
     }
 
     /** */

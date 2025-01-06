@@ -87,6 +87,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
+import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -300,6 +301,31 @@ public class PackageWatchdog {
         sPackageWatchdog = this;
     }
 
+    /**
+     * Creating this temp constructor to match module constructor.
+     * Note: To be only used in tests.
+     * Creates a PackageWatchdog that allows injecting dependencies,
+     * except for connectivity module connector.
+     */
+    @VisibleForTesting
+    PackageWatchdog(Context context, AtomicFile policyFile, Handler shortTaskHandler,
+            Handler longTaskHandler, ExplicitHealthCheckController controller,
+            SystemClock clock) {
+        mContext = context;
+        mPolicyFile = policyFile;
+        mShortTaskHandler = shortTaskHandler;
+        mLongTaskHandler = longTaskHandler;
+        mHealthCheckController = controller;
+        mConnectivityModuleConnector = ConnectivityModuleConnector.getInstance();
+        mSystemClock = clock;
+        mNumberOfNativeCrashPollsRemaining = NUMBER_OF_NATIVE_CRASH_POLLS;
+        mBootThreshold = new BootThreshold(DEFAULT_BOOT_LOOP_TRIGGER_COUNT,
+                DEFAULT_BOOT_LOOP_TRIGGER_WINDOW_MS);
+
+        loadFromFile();
+        sPackageWatchdog = this;
+    }
+
     /** Creates or gets singleton instance of PackageWatchdog. */
     public static  @NonNull PackageWatchdog getInstance(@NonNull Context context) {
         synchronized (sPackageWatchdogLock) {
@@ -337,7 +363,7 @@ public class PackageWatchdog {
      * it will resume observing any packages requested from a previous boot.
      * @hide
      */
-    public void registerHealthObserver(PackageHealthObserver observer) {
+    public void registerHealthObserver(Executor ignoredExecutor, PackageHealthObserver observer) {
         synchronized (mLock) {
             ObserverInternal internalObserver = mAllObservers.get(observer.getUniqueIdentifier());
             if (internalObserver != null) {
@@ -358,7 +384,7 @@ public class PackageWatchdog {
      *
      * <p>If monitoring a package supporting explicit health check, at the end of the monitoring
      * duration if {@link #onHealthCheckPassed} was never called,
-     * {@link PackageHealthObserver#execute} will be called as if the package failed.
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} will be called as if the package failed.
      *
      * <p>If {@code observer} is already monitoring a package in {@code packageNames},
      * the monitoring window of that package will be reset to {@code durationMs} and the health
@@ -371,8 +397,8 @@ public class PackageWatchdog {
      * {@link #DEFAULT_OBSERVING_DURATION_MS} will be used.
      * @hide
      */
-    public void startObservingHealth(PackageHealthObserver observer, List<String> packageNames,
-            long durationMs) {
+    public void startExplicitHealthCheck(List<String> packageNames, long durationMs,
+            PackageHealthObserver observer) {
         if (packageNames.isEmpty()) {
             Slog.wtf(TAG, "No packages to observe, " + observer.getUniqueIdentifier());
             return;
@@ -420,7 +446,7 @@ public class PackageWatchdog {
             }
 
             // Register observer in case not already registered
-            registerHealthObserver(observer);
+            registerHealthObserver(null, observer);
 
             // Sync after we add the new packages to the observers. We may have received packges
             // requiring an earlier schedule than we are currently scheduled for.
@@ -452,7 +478,7 @@ public class PackageWatchdog {
      *
      * <p>This method could be called frequently if there is a severe problem on the device.
      */
-    public void onPackageFailure(@NonNull List<VersionedPackage> packages,
+    public void notifyPackageFailure(@NonNull List<VersionedPackage> packages,
             @FailureReasons int failureReason) {
         if (packages == null) {
             Slog.w(TAG, "Could not resolve a list of failing packages");
@@ -463,7 +489,7 @@ public class PackageWatchdog {
             if (Flags.recoverabilityDetection()) {
                 if (now >= mLastMitigation
                         && (now - mLastMitigation) < getMitigationWindowMs()) {
-                    Slog.i(TAG, "Skipping onPackageFailure mitigation");
+                    Slog.i(TAG, "Skipping notifyPackageFailure mitigation");
                     return;
                 }
             }
@@ -490,7 +516,7 @@ public class PackageWatchdog {
                             ObserverInternal observer = mAllObservers.valueAt(oIndex);
                             PackageHealthObserver registeredObserver = observer.registeredObserver;
                             if (registeredObserver != null
-                                    && observer.onPackageFailureLocked(
+                                    && observer.notifyPackageFailureLocked(
                                     versionedPackage.getPackageName())) {
                                 MonitoredPackage p = observer.getMonitoredPackage(
                                         versionedPackage.getPackageName());
@@ -521,8 +547,8 @@ public class PackageWatchdog {
                                 maybeExecute(currentObserverToNotify, versionedPackage,
                                         failureReason, currentObserverImpact, mitigationCount);
                             } else {
-                                currentObserverToNotify.execute(versionedPackage,
-                                        failureReason, mitigationCount);
+                                currentObserverToNotify.onExecuteHealthCheckMitigation(
+                                        versionedPackage, failureReason, mitigationCount);
                             }
                         }
                     }
@@ -557,7 +583,8 @@ public class PackageWatchdog {
                 maybeExecute(currentObserverToNotify, failingPackage, failureReason,
                         currentObserverImpact, /*mitigationCount=*/ 1);
             } else {
-                currentObserverToNotify.execute(failingPackage,  failureReason, 1);
+                currentObserverToNotify.onExecuteHealthCheckMitigation(failingPackage,
+                        failureReason, 1);
             }
         }
     }
@@ -571,7 +598,8 @@ public class PackageWatchdog {
             synchronized (mLock) {
                 mLastMitigation = mSystemClock.uptimeMillis();
             }
-            currentObserverToNotify.execute(versionedPackage, failureReason, mitigationCount);
+            currentObserverToNotify.onExecuteHealthCheckMitigation(versionedPackage, failureReason,
+                    mitigationCount);
         }
     }
 
@@ -633,12 +661,12 @@ public class PackageWatchdog {
                         currentObserverInternal.setBootMitigationCount(
                                 currentObserverMitigationCount);
                         saveAllObserversBootMitigationCountToMetadata(METADATA_FILE);
-                        currentObserverToNotify.executeBootLoopMitigation(
+                        currentObserverToNotify.onExecuteBootLoopMitigation(
                                 currentObserverMitigationCount);
                     } else {
                         mBootThreshold.setMitigationCount(mitigationCount);
                         mBootThreshold.saveMitigationCountToMetadata();
-                        currentObserverToNotify.executeBootLoopMitigation(mitigationCount);
+                        currentObserverToNotify.onExecuteBootLoopMitigation(mitigationCount);
                     }
                 }
             }
@@ -687,7 +715,7 @@ public class PackageWatchdog {
         // Check if native watchdog reported a crash
         if ("1".equals(SystemProperties.get("sys.init.updatable_crashing"))) {
             // We rollback all available low impact rollbacks when crash is unattributable
-            onPackageFailure(Collections.EMPTY_LIST, FAILURE_REASON_NATIVE_CRASH);
+            notifyPackageFailure(Collections.EMPTY_LIST, FAILURE_REASON_NATIVE_CRASH);
             // we stop polling after an attempt to execute rollback, regardless of whether the
             // attempt succeeds or not
         } else {
@@ -724,7 +752,72 @@ public class PackageWatchdog {
         return mPackagesExemptFromImpactLevelThreshold;
     }
 
-    /** Possible severity values of the user impact of a {@link PackageHealthObserver#execute}.
+    /**
+     * Indicates that the result of a mitigation executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} is unknown.
+     */
+    public static final int MITIGATION_RESULT_UNKNOWN =
+            ObserverMitigationResult.MITIGATION_RESULT_UNKNOWN;
+
+    /**
+     * Indicates that a mitigation was successfully triggered or executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation}.
+     */
+    public static final int MITIGATION_RESULT_SUCCESS =
+            ObserverMitigationResult.MITIGATION_RESULT_SUCCESS;
+
+    /**
+     * Indicates that a mitigation executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} was skipped.
+     */
+    public static final int MITIGATION_RESULT_SKIPPED =
+            ObserverMitigationResult.MITIGATION_RESULT_SKIPPED;
+
+    /**
+     * Indicates that a mitigation executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} failed,
+     * but the failure is potentially retryable.
+     */
+    public static final int MITIGATION_RESULT_FAILURE_RETRYABLE =
+            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_RETRYABLE;
+
+    /**
+     * Indicates that a mitigation executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} or
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation} failed,
+     * and the failure is not retryable.
+     */
+    public static final int MITIGATION_RESULT_FAILURE_NON_RETRYABLE =
+            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_NON_RETRYABLE;
+
+    /**
+     * Possible return values of the for mitigations executed during
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation} and
+     * {@link PackageHealthObserver#onExecuteBootLoopMitigation}.
+     * @hide
+     */
+    @Retention(SOURCE)
+    @IntDef(prefix = "MITIGATION_RESULT_", value = {
+            ObserverMitigationResult.MITIGATION_RESULT_UNKNOWN,
+            ObserverMitigationResult.MITIGATION_RESULT_SUCCESS,
+            ObserverMitigationResult.MITIGATION_RESULT_SKIPPED,
+            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_RETRYABLE,
+            ObserverMitigationResult.MITIGATION_RESULT_FAILURE_NON_RETRYABLE,
+    })
+    public @interface ObserverMitigationResult {
+        int MITIGATION_RESULT_UNKNOWN = 0;
+        int MITIGATION_RESULT_SUCCESS = 1;
+        int MITIGATION_RESULT_SKIPPED = 2;
+        int MITIGATION_RESULT_FAILURE_RETRYABLE = 3;
+        int MITIGATION_RESULT_FAILURE_NON_RETRYABLE = 4;
+    }
+
+    /** Possible severity values of the user impact of a
+     * {@link PackageHealthObserver#onExecuteHealthCheckMitigation}.
      * @hide
      */
     @Retention(SOURCE)
@@ -772,7 +865,7 @@ public class PackageWatchdog {
          *
          *
          * @return any one of {@link PackageHealthObserverImpact} to express the impact
-         * to the user on {@link #execute}
+         * to the user on {@link #onExecuteHealthCheckMitigation}
          */
         @PackageHealthObserverImpact int onHealthCheckFailed(
                 @Nullable VersionedPackage versionedPackage,
@@ -780,16 +873,25 @@ public class PackageWatchdog {
                 int mitigationCount);
 
         /**
-         * Executes mitigation for {@link #onHealthCheckFailed}.
+         * This would be called after {@link #onHealthCheckFailed}.
+         * This is called only if current observer returned least impact mitigation for failed
+         * health check.
          *
          * @param versionedPackage the package that is failing. This may be null if a native
-         *                          service is crashing.
-         * @param failureReason   the type of failure that is occurring.
+         *                         service is crashing.
+         * @param failureReason    the type of failure that is occurring.
          * @param mitigationCount the number of times mitigation has been called for this package
-         *                        (including this time).
-         * @return {@code true} if action was executed successfully, {@code false} otherwise
+         *                         (including this time).
+         * @return {@link #MITIGATION_RESULT_SUCCESS} if the mitigation was successful,
+         *         {@link #MITIGATION_RESULT_FAILURE_RETRYABLE} if the mitigation failed but can be
+         *         retried,
+         *         {@link #MITIGATION_RESULT_FAILURE_NON_RETRYABLE} if the mitigation failed and
+         *         cannot be retried,
+         *         {@link #MITIGATION_RESULT_UNKNOWN} if the result of the mitigation is unknown,
+         *         or {@link #MITIGATION_RESULT_SKIPPED} if the mitigation was skipped.
          */
-        boolean execute(@Nullable VersionedPackage versionedPackage,
+        @ObserverMitigationResult int onExecuteHealthCheckMitigation(
+                @Nullable VersionedPackage versionedPackage,
                 @FailureReasons int failureReason, int mitigationCount);
 
 
@@ -805,12 +907,23 @@ public class PackageWatchdog {
         }
 
         /**
-         * Executes mitigation for {@link #onBootLoop}
+         * This would be called after {@link #onBootLoop}.
+         * This is called only if current observer returned least impact mitigation for fixing
+         * boot loop.
+         *
          * @param mitigationCount the number of times mitigation has been attempted for this
          *                        boot loop (including this time).
+         *
+         * @return {@link #MITIGATION_RESULT_SUCCESS} if the mitigation was successful,
+         *         {@link #MITIGATION_RESULT_FAILURE_RETRYABLE} if the mitigation failed but can be
+         *         retried,
+         *         {@link #MITIGATION_RESULT_FAILURE_NON_RETRYABLE} if the mitigation failed and
+         *         cannot be retried,
+         *         {@link #MITIGATION_RESULT_UNKNOWN} if the result of the mitigation is unknown,
+         *         or {@link #MITIGATION_RESULT_SKIPPED} if the mitigation was skipped.
          */
-        default boolean executeBootLoopMitigation(int mitigationCount) {
-            return false;
+        default @ObserverMitigationResult int onExecuteBootLoopMitigation(int mitigationCount) {
+            return ObserverMitigationResult.MITIGATION_RESULT_SKIPPED;
         }
 
         // TODO(b/120598832): Ensure uniqueness?
@@ -833,7 +946,7 @@ public class PackageWatchdog {
          * otherwise
          *
          * <p> A persistent observer may choose to start observing certain failing packages, even if
-         * it has not explicitly asked to watch the package with {@link #startObservingHealth}.
+         * it has not explicitly asked to watch the package with {@link #startExplicitHealthCheck}.
          */
         default boolean mayObservePackage(@NonNull String packageName) {
             return false;
@@ -898,7 +1011,7 @@ public class PackageWatchdog {
      * effectively behave as if the explicit health check hasn't passed for {@code packageName}.
      *
      * <p> {@code packageName} can still be considered failed if reported by
-     * {@link #onPackageFailureLocked} before the package expires.
+     * {@link #notifyPackageFailureLocked} before the package expires.
      *
      * <p> Triggered by components outside the system server when they are fully functional after an
      * update.
@@ -1090,7 +1203,7 @@ public class PackageWatchdog {
                         if (versionedPkg != null) {
                             Slog.i(TAG,
                                     "Explicit health check failed for package " + versionedPkg);
-                            registeredObserver.execute(versionedPkg,
+                            registeredObserver.onExecuteHealthCheckMitigation(versionedPkg,
                                     PackageWatchdog.FAILURE_REASON_EXPLICIT_HEALTH_CHECK, 1);
                         }
                     }
@@ -1225,7 +1338,7 @@ public class PackageWatchdog {
                         return;
                     }
                     final List<VersionedPackage> pkgList = Collections.singletonList(pkg);
-                    onPackageFailure(pkgList, FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
+                    notifyPackageFailure(pkgList, FAILURE_REASON_EXPLICIT_HEALTH_CHECK);
                 });
     }
 
@@ -1259,8 +1372,6 @@ public class PackageWatchdog {
                 Slog.w(TAG, "Failed to save monitored packages, restoring backup", e);
                 mPolicyFile.failWrite(stream);
                 return false;
-            } finally {
-                IoUtils.closeQuietly(stream);
             }
         }
     }
@@ -1439,7 +1550,7 @@ public class PackageWatchdog {
          * @hide
          */
         @GuardedBy("mLock")
-        public boolean onPackageFailureLocked(String packageName) {
+        public boolean notifyPackageFailureLocked(String packageName) {
             if (getMonitoredPackage(packageName) == null && registeredObserver.isPersistent()
                     && registeredObserver.mayObservePackage(packageName)) {
                 putMonitoredPackage(sPackageWatchdog.newMonitoredPackage(
@@ -1908,15 +2019,19 @@ public class PackageWatchdog {
             bootMitigationCounts.put(observer.name, observer.getBootMitigationCount());
         }
 
+        FileOutputStream fileStream = null;
+        ObjectOutputStream objectStream = null;
         try {
-            FileOutputStream fileStream = new FileOutputStream(new File(filePath));
-            ObjectOutputStream objectStream = new ObjectOutputStream(fileStream);
+            fileStream = new FileOutputStream(new File(filePath));
+            objectStream = new ObjectOutputStream(fileStream);
             objectStream.writeObject(bootMitigationCounts);
             objectStream.flush();
-            objectStream.close();
-            fileStream.close();
         } catch (Exception e) {
             Slog.i(TAG, "Could not save observers metadata to file: " + e);
+            return;
+        } finally {
+            IoUtils.closeQuietly(objectStream);
+            IoUtils.closeQuietly(fileStream);
         }
     }
 
@@ -2067,23 +2182,32 @@ public class PackageWatchdog {
         void readAllObserversBootMitigationCountIfNecessary(String filePath) {
             File metadataFile = new File(filePath);
             if (metadataFile.exists()) {
+                FileInputStream fileStream = null;
+                ObjectInputStream objectStream = null;
+                HashMap<String, Integer> bootMitigationCounts = null;
                 try {
-                    FileInputStream fileStream = new FileInputStream(metadataFile);
-                    ObjectInputStream objectStream = new ObjectInputStream(fileStream);
-                    HashMap<String, Integer> bootMitigationCounts =
+                    fileStream = new FileInputStream(metadataFile);
+                    objectStream = new ObjectInputStream(fileStream);
+                    bootMitigationCounts =
                             (HashMap<String, Integer>) objectStream.readObject();
-                    objectStream.close();
-                    fileStream.close();
-
-                    for (int i = 0; i < mAllObservers.size(); i++) {
-                        final ObserverInternal observer = mAllObservers.valueAt(i);
-                        if (bootMitigationCounts.containsKey(observer.name)) {
-                            observer.setBootMitigationCount(
-                                    bootMitigationCounts.get(observer.name));
-                        }
-                    }
                 } catch (Exception e) {
                     Slog.i(TAG, "Could not read observer metadata file: " + e);
+                    return;
+                } finally {
+                    IoUtils.closeQuietly(objectStream);
+                    IoUtils.closeQuietly(fileStream);
+                }
+
+                if (bootMitigationCounts == null || bootMitigationCounts.isEmpty()) {
+                    Slog.i(TAG, "No observer in metadata file");
+                    return;
+                }
+                for (int i = 0; i < mAllObservers.size(); i++) {
+                    final ObserverInternal observer = mAllObservers.valueAt(i);
+                    if (bootMitigationCounts.containsKey(observer.name)) {
+                        observer.setBootMitigationCount(
+                                bootMitigationCounts.get(observer.name));
+                    }
                 }
             }
         }

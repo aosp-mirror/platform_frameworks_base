@@ -22,6 +22,12 @@ jint JNICALL Java_android_test_embedded_MainActivity_add(JNIEnv*, jclass, jint o
     return op1 + op2;
 }
 
+extern "C" JNIEXPORT
+jint JNICALL Java_android_test_pagesizecompat_MainActivity_add(JNIEnv*, jclass, jint op1, jint op2)
+{
+    return op1 + op2;
+}
+
 // This will be called from extract_native_libs_test_app
 extern "C" JNIEXPORT
 jint JNICALL Java_android_test_extract_MainActivity_subtract(JNIEnv*, jclass, jint op1, jint op2) {

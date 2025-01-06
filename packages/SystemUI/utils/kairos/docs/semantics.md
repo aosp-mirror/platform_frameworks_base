@@ -33,39 +33,39 @@ sealed class Time : Comparable<Time> {
 
 typealias Transactional<T> = (Time) -> T
 
-typealias TFlow<T> = SortedMap<Time, T>
+typealias Events<T> = SortedMap<Time, T>
 
 private fun <T> SortedMap<Time, T>.pairwise(): List<Pair<Pair<Time, T>, Pair<Time<T>>>> =
   // NOTE: pretend evaluation is lazy, so that error() doesn't immediately throw
   (toList() + Pair(Time.Infinity, error("no value"))).zipWithNext()
 
-class TState<T> internal constructor(
+class State<T> internal constructor(
   internal val current: Transactional<T>,
-  val stateChanges: TFlow<T>,
+  val stateChanges: Events<T>,
 )
 
-val emptyTFlow: TFlow<Nothing> = emptyMap()
+val emptyEvents: Events<Nothing> = emptyMap()
 
-fun <A, B> TFlow<A>.map(f: FrpTransactionScope.(A) -> B): TFlow<B> =
-  mapValues { (t, a) -> FrpTransactionScope(t).f(a) }
+fun <A, B> Events<A>.map(f: TransactionScope.(A) -> B): Events<B> =
+  mapValues { (t, a) -> TransactionScope(t).f(a) }
 
-fun <A> TFlow<A>.filter(f: FrpTransactionScope.(A) -> Boolean): TFlow<A> =
-  filter { (t, a) -> FrpTransactionScope(t).f(a) }
+fun <A> Events<A>.filter(f: TransactionScope.(A) -> Boolean): Events<A> =
+  filter { (t, a) -> TransactionScope(t).f(a) }
 
 fun <A> merge(
-  first: TFlow<A>,
-  second: TFlow<A>,
+  first: Events<A>,
+  second: Events<A>,
   onCoincidence: Time.(A, A) -> A,
-): TFlow<A> =
+): Events<A> =
   first.toMutableMap().also { result ->
     second.forEach { (t, a) ->
       result.merge(t, a) { f, s ->
-        FrpTranscationScope(t).onCoincidence(f, a)
+        TransactionScope(t).onCoincidence(f, a)
       }
     }
   }.toSortedMap()
 
-fun <A> TState<TFlow<A>>.switch(): TFlow<A> {
+fun <A> State<Events<A>>.switchEvents(): Events<A> {
   val truncated = listOf(Pair(Time.BigBang, current.invoke(Time.BigBang))) +
     stateChanges.dropWhile { (time, _) -> time < time0 }
   val events =
@@ -77,7 +77,7 @@ fun <A> TState<TFlow<A>>.switch(): TFlow<A> {
   return events.toSortedMap()
 }
 
-fun <A> TState<TFlow<A>>.switchPromptly(): TFlow<A> {
+fun <A> State<Events<A>>.switchEventsPromptly(): Events<A> {
   val truncated = listOf(Pair(Time.BigBang, current.invoke(Time.BigBang))) +
     stateChanges.dropWhile { (time, _) -> time < time0 }
   val events =
@@ -89,24 +89,24 @@ fun <A> TState<TFlow<A>>.switchPromptly(): TFlow<A> {
   return events.toSortedMap()
 }
 
-typealias GroupedTFlow<K, V> = TFlow<Map<K, V>>
+typealias GroupedEvents<K, V> = Events<Map<K, V>>
 
-fun <K, V> TFlow<Map<K, V>>.groupByKey(): GroupedTFlow<K, V> = this
+fun <K, V> Events<Map<K, V>>.groupByKey(): GroupedEvents<K, V> = this
 
-fun <K, V> GroupedTFlow<K, V>.eventsForKey(key: K): TFlow<V> =
+fun <K, V> GroupedEvents<K, V>.eventsForKey(key: K): Events<V> =
   map { m -> m[k] }.filter { it != null }.map { it!! }
 
-fun <A, B> TState<A>.map(f: (A) -> B): TState<B> =
-  TState(
+fun <A, B> State<A>.map(f: (A) -> B): State<B> =
+  State(
     current = { t -> f(current.invoke(t)) },
     stateChanges = stateChanges.map { f(it) },
   )
 
-fun <A, B, C> TState<A>.combineWith(
-  other: TState<B>,
+fun <A, B, C> State<A>.combineWith(
+  other: State<B>,
   f: (A, B) -> C,
-): TState<C> =
-  TState(
+): State<C> =
+  State(
     current = { t -> f(current.invoke(t), other.current.invoke(t)) },
     stateChanges = run {
       val aChanges =
@@ -129,7 +129,7 @@ fun <A, B, C> TState<A>.combineWith(
     },
   )
 
-fun <A> TState<TState<A>>.flatten(): TState<A> {
+fun <A> State<State<A>>.flatten(): State<A> {
   val changes =
     stateChanges
       .pairwise()
@@ -144,55 +144,55 @@ fun <A> TState<TState<A>>.flatten(): TState<A> {
           inWindow
         }
       }
-  return TState(
+  return State(
     current = { t -> current.invoke(t).current.invoke(t) },
     stateChanges = changes.toSortedMap(),
   )
 }
 
-open class FrpTranscationScope internal constructor(
+open class TransactionScope internal constructor(
   internal val currentTime: Time,
 ) {
-  val now: TFlow<Unit> =
+  val now: Events<Unit> =
     sortedMapOf(currentTime to Unit)
 
   fun <A> Transactional<A>.sample(): A =
     invoke(currentTime)
 
-  fun <A> TState<A>.sample(): A =
+  fun <A> State<A>.sample(): A =
     current.sample()
 }
 
-class FrpStateScope internal constructor(
+class StateScope internal constructor(
   time: Time,
   internal val stopTime: Time,
-): FrpTransactionScope(time) {
+): TransactionScope(time) {
 
-  fun <A, B> TFlow<A>.fold(
+  fun <A, B> Events<A>.foldState(
     initialValue: B,
-    f: FrpTransactionScope.(B, A) -> B,
-  ): TState<B> {
+    f: TransactionScope.(B, A) -> B,
+  ): State<B> {
     val truncated =
       dropWhile { (t, _) -> t < currentTime }
         .takeWhile { (t, _) -> t <= stopTime }
-    val folded =
+    val foldStateed =
       truncated
         .scan(Pair(currentTime, initialValue)) { (_, b) (t, a) ->
-          Pair(t, FrpTransactionScope(t).f(a, b))
+          Pair(t, TransactionScope(t).f(a, b))
         }
     val lookup = { t1 ->
-      folded.lastOrNull { (t0, _) -> t0 < t1 }?.value ?: initialValue
+      foldStateed.lastOrNull { (t0, _) -> t0 < t1 }?.value ?: initialValue
     }
-    return TState(lookup, folded.toSortedMap())
+    return State(lookup, foldStateed.toSortedMap())
   }
 
-  fun <A> TFlow<A>.hold(initialValue: A): TState<A> =
-    fold(initialValue) { _, a -> a }
+  fun <A> Events<A>.holdState(initialValue: A): State<A> =
+    foldState(initialValue) { _, a -> a }
 
-  fun <K, V> TFlow<Map<K, Maybe<V>>>.foldMapIncrementally(
+  fun <K, V> Events<Map<K, Maybe<V>>>.foldStateMapIncrementally(
     initialValues: Map<K, V>
-  ): TState<Map<K, V>> =
-    fold(initialValues) { patch, map ->
+  ): State<Map<K, V>> =
+    foldState(initialValues) { patch, map ->
       val eithers = patch.map { (k, v) ->
         if (v is Just) Left(k to v.value) else Right(k)
       }
@@ -203,18 +203,18 @@ class FrpStateScope internal constructor(
       updated
     }
 
-  fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
-    initialTFlows: Map<K, TFlow<V>>,
-  ): TFlow<Map<K, V>> =
-    foldMapIncrementally(initialTFlows).map { it.merge() }.switch()
+  fun <K : Any, V> Events<Map<K, Maybe<Events<V>>>>.mergeIncrementally(
+    initialEventss: Map<K, Events<V>>,
+  ): Events<Map<K, V>> =
+    foldStateMapIncrementally(initialEventss).map { it.merge() }.switchEvents()
 
-  fun <K, A, B> TFlow<Map<K, Maybe<A>>.mapLatestStatefulForKey(
-    transform: suspend FrpStateScope.(A) -> B,
-  ): TFlow<Map<K, Maybe<B>>> =
+  fun <K, A, B> Events<Map<K, Maybe<A>>.mapLatestStatefulForKey(
+    transform: suspend StateScope.(A) -> B,
+  ): Events<Map<K, Maybe<B>>> =
     pairwise().map { ((t0, patch), (t1, _)) ->
       patch.map { (k, ma) ->
         ma.map { a ->
-          FrpStateScope(t0, t1).transform(a)
+          StateScope(t0, t1).transform(a)
         }
       }
     }

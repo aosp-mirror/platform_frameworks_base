@@ -17,22 +17,26 @@
 package com.android.systemui.volume.dialog.sliders.domain.interactor
 
 import com.android.systemui.plugins.VolumeDialogController
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
+import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.stateIn
 
 /** Operates a state of particular slider of the Volume Dialog. */
+@VolumeDialogSliderScope
 class VolumeDialogSliderInteractor
-@AssistedInject
+@Inject
 constructor(
-    @Assisted private val sliderType: VolumeDialogSliderType,
+    private val sliderType: VolumeDialogSliderType,
+    @VolumeDialog private val coroutineScope: CoroutineScope,
     volumeDialogStateInteractor: VolumeDialogStateInteractor,
     private val volumeDialogController: VolumeDialogController,
 ) {
@@ -48,19 +52,13 @@ constructor(
                     }
                 }
             }
-            .distinctUntilChanged()
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .filterNotNull()
 
     fun setStreamVolume(userLevel: Int) {
         with(volumeDialogController) {
             setStreamVolume(sliderType.audioStream, userLevel)
             setActiveStream(sliderType.audioStream)
         }
-    }
-
-    @VolumeDialogScope
-    @AssistedFactory
-    interface Factory {
-
-        fun create(sliderType: VolumeDialogSliderType): VolumeDialogSliderInteractor
     }
 }

@@ -18,9 +18,11 @@ package com.android.systemui.shared.system;
 
 import android.os.RemoteException;
 import android.util.Log;
+import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.window.PictureInPictureSurfaceTransaction;
 import android.window.TaskSnapshot;
+import android.window.WindowAnimationState;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.systemui.shared.recents.model.ThumbnailData;
@@ -103,6 +105,17 @@ public class RecentsAnimationControllerCompat {
             mAnimationController.setWillFinishToHome(willFinishToHome);
         } catch (RemoteException e) {
             Log.e(TAG, "Failed to set overview reached state", e);
+        }
+    }
+
+    /**
+     * @see IRecentsAnimationController#handOffAnimation
+     */
+    public void handOffAnimation(RemoteAnimationTarget[] targets, WindowAnimationState[] states) {
+        try {
+            mAnimationController.handOffAnimation(targets, states);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Failed to hand off animation", e);
         }
     }
 

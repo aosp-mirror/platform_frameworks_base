@@ -16,6 +16,7 @@
 
 package com.android.systemui.accessibility.floatingmenu;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME;
 import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
 
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -25,11 +26,13 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.platform.test.annotations.EnableFlags;
 import android.view.accessibility.AccessibilityManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -45,6 +48,7 @@ import org.mockito.junit.MockitoRule;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.concurrent.Executor;
 
 /** Tests for {@link MenuInfoRepository}. */
 @RunWith(AndroidJUnit4.class)
@@ -55,9 +59,10 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
-
     @Mock
-    private MenuInfoRepository.OnSettingsContentsChanged mMockSettingsContentsChanged;
+    private HearingAidDeviceManager mHearingAidDeviceManager;
+    @Mock
+    private MenuInfoRepository.OnContentsChanged mMockSettingsContentsChanged;
     @Mock
     private SecureSettings mSecureSettings;
 
@@ -72,7 +77,7 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
                 anyInt());
 
         mMenuInfoRepository = new MenuInfoRepository(mContext, mAccessibilityManager,
-                mMockSettingsContentsChanged, mSecureSettings);
+                mMockSettingsContentsChanged, mSecureSettings, mHearingAidDeviceManager);
     }
 
     @After
@@ -102,5 +107,17 @@ public class MenuInfoRepositoryTest extends SysuiTestCase {
         mMenuInfoRepository.mComponentCallbacks.onConfigurationChanged(configuration);
 
         verify(mMockSettingsContentsChanged).onTargetFeaturesChanged(any());
+    }
+
+    @Test
+    @EnableFlags(
+            com.android.settingslib.flags.Flags.FLAG_HEARING_DEVICE_SET_CONNECTION_STATUS_REPORT)
+    public void registerObservers_addHearingDeviceTarget_verifyRegisterConnectionStatusListener() {
+        mShortcutTargets.add(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
+        mMenuInfoRepository.registerObserversAndCallbacks();
+
+        verify(mHearingAidDeviceManager).registerConnectionStatusListener(
+                any(HearingAidDeviceManager.ConnectionStatusListener.class), any(
+                        Executor.class));
     }
 }

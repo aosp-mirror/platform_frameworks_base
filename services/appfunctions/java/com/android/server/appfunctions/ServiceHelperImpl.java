@@ -31,8 +31,6 @@ import java.util.Objects;
 class ServiceHelperImpl implements ServiceHelper {
     private final Context mContext;
 
-    // TODO(b/357551503): Keep track of unlocked users.
-
     ServiceHelperImpl(@NonNull Context context) {
         mContext = Objects.requireNonNull(context);
     }

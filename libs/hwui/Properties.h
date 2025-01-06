@@ -236,6 +236,8 @@ enum DebugLevel {
 
 #define PROPERTY_SKIP_EGLMANAGER_TELEMETRY "debug.hwui.skip_eglmanager_telemetry"
 
+#define PROPERTY_EARLY_PRELOAD_GL_CONTEXT "debug.hwui.early_preload_gl_context"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -345,7 +347,6 @@ public:
     static bool clipSurfaceViews;
     static bool hdr10bitPlus;
     static bool skipTelemetry;
-    static bool resampleGainmapRegions;
     static bool queryGlobalPriority;
 
     static int timeoutMultiplier;
@@ -381,6 +382,8 @@ public:
     static void setDrawingEnabled(bool enable);
 
     static bool initializeGlAlways();
+    static bool resampleGainmapRegions();
+    static bool earlyPreloadGlContext();
 
 private:
     static StretchEffectBehavior stretchEffectBehavior;

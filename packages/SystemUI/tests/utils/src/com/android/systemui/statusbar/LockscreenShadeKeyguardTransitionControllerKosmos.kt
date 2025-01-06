@@ -18,8 +18,14 @@ package com.android.systemui.statusbar
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import org.mockito.kotlin.mock
+
+var Kosmos.lockscreenShadeKeyguardTransitionController by Fixture {
+    mock<LockscreenShadeKeyguardTransitionController>()
+}
 
 var Kosmos.lockscreenShadeKeyguardTransitionControllerFactory by Fixture {
-    mock<LockscreenShadeKeyguardTransitionController.Factory>()
+    LockscreenShadeKeyguardTransitionController.Factory {
+        lockscreenShadeKeyguardTransitionController
+    }
 }

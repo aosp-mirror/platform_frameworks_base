@@ -15,19 +15,50 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 /** Base interface for RemoteCompose operations */
-public interface Operation {
+public abstract class Operation {
+
+    private static final boolean ENABLE_DIRTY_FLAG_OPTIMIZATION = true;
 
     /** add the operation to the buffer */
-    void write(WireBuffer buffer);
+    public abstract void write(@NonNull WireBuffer buffer);
 
     /**
      * paint an operation
      *
      * @param context the paint context used to paint the operation
      */
-    void apply(RemoteContext context);
+    public abstract void apply(@NonNull RemoteContext context);
 
     /** Debug utility to display an operation + indentation */
-    String deepToString(String indent);
+    @NonNull
+    public abstract String deepToString(@NonNull String indent);
+
+    private boolean mDirty = true;
+
+    /** Mark the operation as "dirty" to indicate it will need to be re-executed. */
+    public void markDirty() {
+        mDirty = true;
+    }
+
+    /** Mark the operation as "not dirty" */
+    public void markNotDirty() {
+        if (ENABLE_DIRTY_FLAG_OPTIMIZATION) {
+            mDirty = false;
+        }
+    }
+
+    /**
+     * Returns true if the operation is marked as "dirty"
+     *
+     * @return true if dirty
+     */
+    public boolean isDirty() {
+        if (ENABLE_DIRTY_FLAG_OPTIMIZATION) {
+            return mDirty;
+        }
+        return true;
+    }
 }

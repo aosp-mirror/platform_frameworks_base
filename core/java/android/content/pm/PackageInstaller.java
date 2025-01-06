@@ -62,8 +62,6 @@ import android.content.pm.parsing.PackageLite;
 import android.content.pm.parsing.result.ParseResult;
 import android.content.pm.parsing.result.ParseTypeImpl;
 import android.content.pm.verify.domain.DomainSet;
-import android.content.pm.verify.pkg.VerificationSession;
-import android.content.pm.verify.pkg.VerificationStatus;
 import android.graphics.Bitmap;
 import android.icu.util.ULocale;
 import android.net.Uri;
@@ -218,6 +216,17 @@ public class PackageInstaller {
     @SystemApi
     public static final String ACTION_CONFIRM_PRE_APPROVAL =
             "android.content.pm.action.CONFIRM_PRE_APPROVAL";
+
+    /**
+     * Intent action to be sent to the implementer of
+     * {@link android.content.pm.dependencyinstaller.DependencyInstallerService}.
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+    @SystemApi
+    public static final String ACTION_INSTALL_DEPENDENCY =
+            "android.content.pm.action.INSTALL_DEPENDENCY";
 
     /**
      * An integer session ID that an operation is working with.
@@ -418,21 +427,6 @@ public class PackageInstaller {
      * @hide
      */
     public static final String EXTRA_WARNINGS = "android.content.pm.extra.WARNINGS";
-
-    /**
-     * When verification is blocked as part of the installation, additional reason for the block
-     * will be provided to the installer with a {@link VerificationFailedReason} as part of the
-     * installation result returned via the {@link IntentSender} in
-     * {@link Session#commit(IntentSender)}. This extra is provided only when the installation has
-     * failed. Installers can use this extra to check if the installation failure was caused by a
-     * verification failure.
-     *
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    public static final String EXTRA_VERIFICATION_FAILURE_REASON =
-            "android.content.pm.extra.VERIFICATION_FAILURE_REASON";
 
     /**
      * Streaming installation pending.
@@ -777,90 +771,6 @@ public class PackageInstaller {
     @Retention(RetentionPolicy.SOURCE)
     public @interface UnarchivalStatus {}
 
-    /**
-     * Verification failed because of unknown reasons, such as when the verifier times out or cannot
-     * be connected. It can also corresponds to the status of
-     * {@link VerificationSession#VERIFICATION_INCOMPLETE_UNKNOWN} reported by the verifier via
-     * {@link VerificationSession#reportVerificationIncomplete(int)}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    public static final int VERIFICATION_FAILED_REASON_UNKNOWN = 0;
-
-    /**
-     * Verification failed because the network is unavailable. This corresponds to the status of
-     * {@link VerificationSession#VERIFICATION_INCOMPLETE_NETWORK_UNAVAILABLE} reported by the
-     * verifier via {@link VerificationSession#reportVerificationIncomplete(int)}.
-     *
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    public static final int VERIFICATION_FAILED_REASON_NETWORK_UNAVAILABLE = 1;
-
-    /**
-     * Verification failed because the package is blocked, as reported by the verifier via
-     * {@link VerificationSession#reportVerificationComplete(VerificationStatus)} or
-     * {@link VerificationSession#reportVerificationComplete(VerificationStatus, PersistableBundle)}
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    public static final int VERIFICATION_FAILED_REASON_PACKAGE_BLOCKED = 2;
-
-    /**
-     * @hide
-     */
-    @IntDef(value = {
-            VERIFICATION_FAILED_REASON_UNKNOWN,
-            VERIFICATION_FAILED_REASON_NETWORK_UNAVAILABLE,
-            VERIFICATION_FAILED_REASON_PACKAGE_BLOCKED,
-    })
-    public @interface VerificationFailedReason {
-    }
-
-    /**
-     * Do not block installs, regardless of verification status.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    public static final int VERIFICATION_POLICY_NONE = 0; // platform default
-    /**
-     * Only block installations on {@link #VERIFICATION_FAILED_REASON_PACKAGE_BLOCKED}.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    public static final int VERIFICATION_POLICY_BLOCK_FAIL_OPEN = 1;
-    /**
-     * Only block installations on {@link #VERIFICATION_FAILED_REASON_PACKAGE_BLOCKED} and ask the
-     * user if they'd like to install anyway when the verification is blocked for other reason.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    public static final int VERIFICATION_POLICY_BLOCK_FAIL_WARN = 2;
-    /**
-     * Block installations whose verification status is blocked for any reason.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    public static final int VERIFICATION_POLICY_BLOCK_FAIL_CLOSED = 3;
-    /**
-     * @hide
-     */
-    @IntDef(value = {
-            VERIFICATION_POLICY_NONE,
-            VERIFICATION_POLICY_BLOCK_FAIL_OPEN,
-            VERIFICATION_POLICY_BLOCK_FAIL_WARN,
-            VERIFICATION_POLICY_BLOCK_FAIL_CLOSED,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface VerificationPolicy {
-    }
 
     /** Default set of checksums - includes all available checksums.
      * @see Session#requestChecksums  */
@@ -1600,40 +1510,6 @@ public class PackageInstaller {
                     i.remove();
                 }
             }
-        }
-    }
-
-    /**
-     * Return the current verification enforcement policy. This may only be called by the
-     * package currently set by the system as the verifier agent.
-     * @hide
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
-    public final @VerificationPolicy int getVerificationPolicy() {
-        try {
-            return mInstaller.getVerificationPolicy(mUserId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
-     * Set the current verification enforcement policy which will be applied to all the future
-     * installation sessions. This may only be called by the package currently set by the system as
-     * the verifier agent.
-     * @hide
-     * @return whether the new policy was successfully set.
-     */
-    @FlaggedApi(Flags.FLAG_VERIFICATION_SERVICE)
-    @SystemApi
-    @RequiresPermission(android.Manifest.permission.VERIFICATION_AGENT)
-    public final boolean setVerificationPolicy(@VerificationPolicy int policy) {
-        try {
-            return mInstaller.setVerificationPolicy(policy, mUserId);
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -2935,7 +2811,7 @@ public class PackageInstaller {
         /** {@hide} */
         public @Nullable String dexoptCompilerFilter = null;
         /** {@hide} */
-        public boolean forceVerification;
+        public boolean isAutoInstallDependenciesEnabled = true;
 
         private final ArrayMap<String, Integer> mPermissionStates;
 
@@ -2990,7 +2866,7 @@ public class PackageInstaller {
             developmentInstallFlags = source.readInt();
             unarchiveId = source.readInt();
             dexoptCompilerFilter = source.readString();
-            forceVerification = source.readBoolean();
+            isAutoInstallDependenciesEnabled = source.readBoolean();
         }
 
         /** {@hide} */
@@ -3027,7 +2903,7 @@ public class PackageInstaller {
             ret.developmentInstallFlags = developmentInstallFlags;
             ret.unarchiveId = unarchiveId;
             ret.dexoptCompilerFilter = dexoptCompilerFilter;
-            ret.forceVerification = forceVerification;
+            ret.isAutoInstallDependenciesEnabled = isAutoInstallDependenciesEnabled;
             return ret;
         }
 
@@ -3737,11 +3613,22 @@ public class PackageInstaller {
         }
 
         /**
-         * Used by adb installations to force enable the verification for this install.
-         * {@hide}
+         * Optionally indicate whether missing SDK or static shared library dependencies should be
+         * automatically fetched and installed when installing an app that wants to use these
+         * dependencies.
+         *
+         * <p> This feature is enabled by default. Note that in the case of a multi-package
+         * installation session, no dependencies will be automatically installed even if this field
+         * is set to true.
+         *
+         * @param enableAutoInstallDependencies {@code true} to enable auto-installation of missing
+         *                                      SDK or static shared library dependencies,
+         *                                      {@code false} to disable and fail immediately if
+         *                                      dependencies aren't already installed.
          */
-        public void setForceVerification() {
-            this.forceVerification = true;
+        @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+        public void setAutoInstallDependenciesEnabled(boolean enableAutoInstallDependencies) {
+            isAutoInstallDependenciesEnabled = enableAutoInstallDependencies;
         }
 
         /** {@hide} */
@@ -3779,7 +3666,7 @@ public class PackageInstaller {
             pw.printHexPair("developmentInstallFlags", developmentInstallFlags);
             pw.printPair("unarchiveId", unarchiveId);
             pw.printPair("dexoptCompilerFilter", dexoptCompilerFilter);
-            pw.printPair("forceVerification", forceVerification);
+            pw.printPair("isAutoInstallDependenciesEnabled", isAutoInstallDependenciesEnabled);
             pw.println();
         }
 
@@ -3826,7 +3713,7 @@ public class PackageInstaller {
             dest.writeInt(developmentInstallFlags);
             dest.writeInt(unarchiveId);
             dest.writeString(dexoptCompilerFilter);
-            dest.writeBoolean(forceVerification);
+            dest.writeBoolean(isAutoInstallDependenciesEnabled);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -4005,6 +3892,9 @@ public class PackageInstaller {
         private String mSessionErrorMessage;
 
         /** {@hide} */
+        public boolean isAutoInstallingDependenciesEnabled;
+
+        /** {@hide} */
         public boolean isCommitted;
 
         /** {@hide} */
@@ -4097,6 +3987,7 @@ public class PackageInstaller {
             packageSource = source.readInt();
             applicationEnabledSettingPersistent = source.readBoolean();
             pendingUserActionReason = source.readInt();
+            isAutoInstallingDependenciesEnabled = source.readBoolean();
         }
 
         /**
@@ -4681,6 +4572,19 @@ public class PackageInstaller {
             return (installFlags & PackageManager.INSTALL_UNARCHIVE) != 0;
         }
 
+        /**
+         * Check whether missing SDK or static shared library dependencies should be automatically
+         * fetched and installed when installing an app that wants to use these dependencies.
+         *
+         * <p> Note that in the case of a multi-package installation session, no dependencies will
+         * be automatically installed even if this method returns true.
+         *
+         * @return true if the dependencies will be auto-installed, false otherwise.
+         */
+        @FlaggedApi(Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+        public boolean isAutoInstallDependenciesEnabled() {
+            return isAutoInstallingDependenciesEnabled;
+        }
 
         @Override
         public int describeContents() {
@@ -4735,6 +4639,7 @@ public class PackageInstaller {
             dest.writeInt(packageSource);
             dest.writeBoolean(applicationEnabledSettingPersistent);
             dest.writeInt(pendingUserActionReason);
+            dest.writeBoolean(isAutoInstallingDependenciesEnabled);
         }
 
         public static final Parcelable.Creator<SessionInfo>

@@ -16,7 +16,8 @@
 
 package com.android.server.appfunctions;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
@@ -24,15 +25,26 @@ import java.util.concurrent.TimeUnit;
 /** Executors for App function operations. */
 public final class AppFunctionExecutors {
 
+    static final int sConcurrency = Runtime.getRuntime().availableProcessors();
+
     /** Executor for operations that do not need to block. */
-    public static final Executor THREAD_POOL_EXECUTOR =
+    public static final ThreadPoolExecutor THREAD_POOL_EXECUTOR =
             new ThreadPoolExecutor(
-                    /* corePoolSize= */ Runtime.getRuntime().availableProcessors(),
-                    /* maxConcurrency= */ Runtime.getRuntime().availableProcessors(),
-                    /* keepAliveTime= */ 0L,
+                    /* corePoolSize= */ sConcurrency,
+                    /* maxConcurrency= */ sConcurrency,
+                    /* keepAliveTime= */ 1L,
                     /* unit= */ TimeUnit.SECONDS,
                     /* workQueue= */ new LinkedBlockingQueue<>(),
                     new NamedThreadFactory("AppFunctionExecutors"));
+
+    /** Executor for stats logging. */
+    public static final ExecutorService LOGGING_THREAD_EXECUTOR =
+            Executors.newSingleThreadExecutor(
+                    new NamedThreadFactory("AppFunctionsLoggingExecutors"));
+
+    static {
+        THREAD_POOL_EXECUTOR.allowCoreThreadTimeOut(true);
+    }
 
     private AppFunctionExecutors() {}
 }

@@ -34,7 +34,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.toTriple
+import com.android.systemui.util.kotlin.Utils.Companion.toQuad
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import dagger.Lazy
@@ -112,8 +112,10 @@ constructor(
             }
             .distinctUntilChanged()
 
-    private val isDeviceEntered by lazy { deviceEntryInteractor.get().isDeviceEntered }
-    private val isDeviceNotEntered by lazy { isDeviceEntered.map { !it } }
+    private val isDeviceEnteredDirectly by lazy {
+        deviceEntryInteractor.get().isDeviceEnteredDirectly
+    }
+    private val isDeviceNotEnteredDirectly by lazy { isDeviceEnteredDirectly.map { !it } }
 
     /**
      * Surface visibility, which is either determined by the default visibility when not
@@ -126,14 +128,7 @@ constructor(
                 sceneInteractor.get().transitionState.flatMapLatestConflated { state ->
                     when {
                         state.isTransitioning(from = Scenes.Lockscreen, to = Scenes.Gone) ->
-                            (state as Transition).isUserInputOngoing.flatMapLatestConflated {
-                                isUserInputOngoing ->
-                                if (isUserInputOngoing) {
-                                    isDeviceEntered
-                                } else {
-                                    flowOf(true)
-                                }
-                            }
+                            isDeviceEnteredDirectly
                         state.isTransitioning(from = Scenes.Bouncer, to = Scenes.Gone) ->
                             (state as Transition).progress.map { progress ->
                                 progress >
@@ -209,30 +204,6 @@ constructor(
                 .distinctUntilChanged()
         }
 
-    /**
-     * Scenes that are part of the keyguard and are shown when the device is locked or when the
-     * keyguard still needs to be dismissed.
-     */
-    private val keyguardScenes = setOf(Scenes.Lockscreen, Scenes.Bouncer, Scenes.Communal)
-
-    /**
-     * Scenes that don't belong in the keyguard family and cannot show when the device is locked or
-     * when the keyguard still needs to be dismissed.
-     */
-    private val nonKeyguardScenes = setOf(Scenes.Gone)
-
-    /**
-     * Scenes that can show regardless of device lock or keyguard dismissal states. Other sources of
-     * state need to be consulted to know whether the device has been entered or not.
-     */
-    private val keyguardAgnosticScenes =
-        setOf(
-            Scenes.Shade,
-            Scenes.QuickSettings,
-            Overlays.NotificationsShade,
-            Overlays.QuickSettingsShade,
-        )
-
     private val lockscreenVisibilityWithScenes =
         combine(
                 sceneInteractor.get().transitionState.flatMapLatestConflated {
@@ -241,7 +212,7 @@ constructor(
                             when (it.currentScene) {
                                 in keyguardScenes -> flowOf(true)
                                 in nonKeyguardScenes -> flowOf(false)
-                                in keyguardAgnosticScenes -> isDeviceNotEntered
+                                in keyguardAgnosticScenes -> isDeviceNotEnteredDirectly
                                 else ->
                                     throw IllegalStateException("Unknown scene: ${it.currentScene}")
                             }
@@ -251,7 +222,7 @@ constructor(
                                 it.isTransitioningSets(from = keyguardScenes) -> flowOf(true)
                                 it.isTransitioningSets(from = nonKeyguardScenes) -> flowOf(false)
                                 it.isTransitioningSets(from = keyguardAgnosticScenes) ->
-                                    isDeviceNotEntered
+                                    isDeviceNotEnteredDirectly
                                 else ->
                                     throw IllegalStateException("Unknown scene: ${it.fromContent}")
                             }
@@ -269,10 +240,11 @@ constructor(
         combine(
                 transitionInteractor.currentKeyguardState,
                 wakeToGoneInteractor.canWakeDirectlyToGone,
-                ::Pair,
+                surfaceBehindVisibility,
+                ::Triple,
             )
-            .sample(transitionInteractor.startedStepWithPrecedingStep, ::toTriple)
-            .map { (currentState, canWakeDirectlyToGone, startedWithPrev) ->
+            .sample(transitionInteractor.startedStepWithPrecedingStep, ::toQuad)
+            .map { (currentState, canWakeDirectlyToGone, surfaceBehindVis, startedWithPrev) ->
                 val startedFromStep = startedWithPrev.previousValue
                 val startedStep = startedWithPrev.newValue
                 val returningToGoneAfterCancellation =
@@ -305,7 +277,11 @@ constructor(
                     false
                 } else if (
                     currentState == KeyguardState.DREAMING &&
-                        deviceEntryInteractor.get().isUnlocked.value
+                        if (SceneContainerFlag.isEnabled) {
+                            deviceEntryInteractor.get().isUnlocked.value
+                        } else {
+                            keyguardInteractor.isKeyguardDismissible.value
+                        }
                 ) {
                     // Dreams dismiss keyguard and return to GONE if they can.
                     false
@@ -321,6 +297,11 @@ constructor(
                     // we should simply tell WM that the lockscreen is no longer visible, and
                     // *not* play the going away animation or related animations.
                     false
+                } else if (!surfaceBehindVis) {
+                    // If the surface behind is not visible, then the lockscreen has to be visible
+                    // since there's nothing to show. The surface behind will never be invisible if
+                    // the lockscreen is disabled or suppressed.
+                    true
                 } else {
                     currentState != KeyguardState.GONE
                 }
@@ -362,4 +343,30 @@ constructor(
                     !BiometricUnlockMode.isWakeAndUnlock(biometricUnlockState.mode)
             }
             .distinctUntilChanged()
+
+    companion object {
+        /**
+         * Scenes that are part of the keyguard and are shown when the device is locked or when the
+         * keyguard still needs to be dismissed.
+         */
+        val keyguardScenes = setOf(Scenes.Lockscreen, Scenes.Bouncer, Scenes.Communal, Scenes.Dream)
+
+        /**
+         * Scenes that don't belong in the keyguard family and cannot show when the device is locked
+         * or when the keyguard still needs to be dismissed.
+         */
+        private val nonKeyguardScenes = setOf(Scenes.Gone)
+
+        /**
+         * Scenes that can show regardless of device lock or keyguard dismissal states. Other
+         * sources of state need to be consulted to know whether the device has been entered or not.
+         */
+        private val keyguardAgnosticScenes =
+            setOf(
+                Scenes.Shade,
+                Scenes.QuickSettings,
+                Overlays.NotificationsShade,
+                Overlays.QuickSettingsShade,
+            )
+    }
 }

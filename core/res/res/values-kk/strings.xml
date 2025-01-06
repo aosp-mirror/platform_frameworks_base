@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелген. Келесі қоңырау: Шектелмеген"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелген"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Қоңырау шалушының жеке анықтағышы бастапқы бойынша шектелмеген. Келесі қоңырау: Шектелмеген"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Бұл қолданба 16 КБ көлеміне қолдау көрсетпейді. APK туралау тексерісі орындалмады. Бұл қолданба бет өлшемімен сәйкестік режимінде іске қосылады. Сәйкестікті жақсарту үшін қолданбаны 16 КБ көлемін қолдайтындай етіп қайта құрастырыңыз. Қосымша ақпарат алу үшін &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; сілтемесін қарап шығыңыз."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Бұл қолданба 16 КБ көлеміне қолдау көрсетпейді. ELF туралау тексерісі орындалмады. Бұл қолданба бет өлшемімен сәйкестік режимінде іске қосылады. Сәйкестікті жақсарту үшін қолданбаны 16 КБ көлемін қолдайтындай етіп қайта құрастырыңыз. Қосымша ақпарат алу үшін &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; сілтемесін қарап шығыңыз."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Бұл қолданба 16 КБ көлеміне қолдау көрсетпейді. APK және ELF файлдарының туралау тексерісі орындалмады. Бұл қолданба бет өлшемімен сәйкестік режимінде іске қосылады. Сәйкестікті жақсарту үшін қолданбаны 16 КБ көлемін қолдайтындай етіп қайта құрастырыңыз. Қосымша ақпарат алу үшін &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; сілтемесін қарап шығыңыз."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Қызмет ұсынылмаған."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Қоңырау шалушы идентификаторы параметрін өзгерту мүмкін емес."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Деректер <xliff:g id="CARRIERDISPLAY">%s</xliff:g> операторына ауыстырылды"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобильдік желіге қосылу мүмкін емес"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Таңдаулы желіні өзгертіп көріңіз. Өзгерту үшін түртіңіз."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Жедел қызметке қоңырау шалу мүмкін емес"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Құтқару қызметіне қоңырау шалу үшін мобильдік желі қажет."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Дабылдар"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Қоңырауды басқа нөмірге бағыттау"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Қолданбаға маңайдағы кең жолақты құрылғылардың бір-біріне қатысты орнын анықтауға мүмкіндік береді."</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"маңайдағы Wi-Fi құрылғыларымен байланысу"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Қолданба маңайдағы Wi‑Fi құрылғыларына жарнама беріп, оларға қосылып, шамамен орналасқан жерін анықтай алады."</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"маңайдағы құрылғылардың салыстырмалы орнын анықтау"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Қолданбаның маңайдағы құрылғылардың салыстырмалы орнын анықтауына рұқсат береді."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Таңдаулы NFC төлеу қызметі туралы ақпарат"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Қолданба тіркелген көмектер және баратын жер маршруты сияқты таңдаулы NFC төлеу қызметі туралы ақпаратты ала алатын болады."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFC функциясын басқару"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> сағ кейін"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> күннен кейін"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> жылдан кейін"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> мин бұрын"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> сағ бұрын"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> күн бұрын"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> жыл бұрын"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> мин"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> сағ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> күн"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> жыл"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> минуттан кейін"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> сағаттан кейін"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> күннен кейін"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> жылдан кейін"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> мин бұрын"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> сағ бұрын"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> күн бұрын"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> жыл бұрын"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# минут бұрын}other{# минут бұрын}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# сағат бұрын}other{# сағат бұрын}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# күн бұрын}other{# күн бұрын}}"</string>
@@ -1394,7 +1417,7 @@
     <string name="perm_costs_money" msgid="749054595022779685">"бұған төлем қажет болуы мүмкін"</string>
     <string name="dlg_ok" msgid="5103447663504839312">"Жарайды"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"Құрылғы USB арқылы зарядталып тұр"</string>
-    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Жалғанған құрылғы USB арқылы зарядталуда"</string>
+    <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Жалғанған құрылғы USB арқылы зарядталып жатыр"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"USB арқылы файл жіберу мүмкіндігі қосылды"</string>
     <string name="usb_ptp_notification_title" msgid="5043437571863443281">"PTP режимі USB арқылы қосылды"</string>
     <string name="usb_tether_notification_title" msgid="8828527870612663771">"USB-тетеринг режимі қосылды"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Бір қолмен басқару режимі"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Экранды қарайту"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Есту аппараттары"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Пайдаланушы дыбыс деңгейі пернелерін басып ұстап тұрды. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қосулы."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Дыбыс деңгейі пернелерін басып тұрған соң, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> өшірілді."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Дыбыс деңгейі пернелерін жіберіңіз. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> қызметін қосу үшін дыбыс деңгейі пернесінің екеуін де қайтадан 3 секундқа басып тұрыңыз."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Демалыс күндері"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Іс-шара"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Ұйқы режимі"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Мазаламау (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> басқарады."</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Қосулы"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Өшірулі"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g> <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Кез келген күнтізбе"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> кейбір дыбыстарды өшіруде"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"There\'s an internal problem with your device, and it may be unstable until you factory data reset."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Хабарландыруларды мобильдік желіге немесе Wi-Fi желісіне қосылмай жіберіңіз және алыңыз."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages қолданбасын ашу"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Бұл қалай орындалады?"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"Желіні автоматты түрде таңдау\" опциясын қосу"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Телефоныңыз жерсерікпен жұмыс істейтін желіні таба алуы үшін, \"Параметрлер\" бөлімінен \"Желіні автоматты түрде таңдау\" опциясын қосыңыз."</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Қосу"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Артқа"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Дайын емес…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Satellite SOS функциясы енді қолжетімді"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Мобильдік немесе Wi-Fi желісі жоқ болған жағдайда, құтқару қызметтеріне хабар жіберуге болады. Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Satellite SOS функциясына қолдау көрсетілмейді"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Satellite SOS функциясына бұл құрылғыда қолдау көрсетілмейді."</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Satellite SOS функциясы реттелмеген"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Құрылғыңыздың интернетке қосылғанын тексеріп, қайта реттеп көріңіз."</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Satellite SOS функциясы қолжетімді емес"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Satellite SOS функциясы бұл елде немесе аймақта қолжетімді емес."</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Satellite SOS функциясы реттелмеген"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Жерсерік арқылы хабар алмасу үшін Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Satellite SOS функциясы қолжетімді емес"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Satellite SOS функциясының бұл елде немесе аймақта қолжетімді екенін тексеру үшін локация параметрлерін қосыңыз."</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Жерсерік арқылы хабар алмасу функциясы қолжетімді"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Мобильдік немесе Wi-Fi желісі жоқ болған жағдайда, жерсерік арқылы хабар алмаса аласыз. Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Жерсерік арқылы хабар алмасу функциясына қолдау көрсетілмейді"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Жерсерік арқылы хабар алмасу функциясына бұл құрылғыда қолдау көрсетілмейді."</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Жерсерік арқылы хабар алмасу функциясы реттелмеген"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Құрылғыңыздың интернетке қосылғанын тексеріп, қайта реттеп көріңіз."</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Жерсерік арқылы хабар алмасу функциясы қолжетімді емес"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Жерсерік арқылы хабар алмасу функциясы бұл елде немесе аймақта қолжетімді емес."</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Жерсерік арқылы хабар алмасу функциясы реттелмеген"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Жерсерік арқылы хабар алмасу үшін Google Messages сіздің әдепкі хабар алмасу қолданбаңыз болуы керек."</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Жерсерік арқылы хабар алмасу функциясы қолжетімді емес"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Жерсерік арқылы хабар алмасу функциясының бұл елде немесе аймақта қолжетімді екенін тексеру үшін локация параметрлерін қосыңыз."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Саусақ ізімен ашу функциясын қайта реттеу"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> бұдан былай танылмайды."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> және <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> бұдан былай танылмайды."</string>

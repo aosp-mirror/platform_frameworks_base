@@ -40,7 +40,7 @@ class ChipBackgroundContainerTest : SysuiTestCase() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
             val chipView =
-                LayoutInflater.from(context).inflate(R.layout.ongoing_activity_chip, null)
+                LayoutInflater.from(context).inflate(R.layout.ongoing_activity_chip_primary, null)
             underTest = chipView.requireViewById(R.id.ongoing_activity_chip_background)
         }
     }

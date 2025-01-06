@@ -39,7 +39,8 @@ class AppCompatCameraPolicy {
     @VisibleForTesting
     final CameraStateMonitor mCameraStateMonitor;
     @Nullable
-    private final ActivityRefresher mActivityRefresher;
+    @VisibleForTesting
+    final ActivityRefresher mActivityRefresher;
     @Nullable
     final DisplayRotationCompatPolicy mDisplayRotationCompatPolicy;
     @Nullable
@@ -193,6 +194,17 @@ class AppCompatCameraPolicy {
     }
 
     // TODO(b/369070416): have policies implement the same interface.
+    static boolean isFreeformLetterboxingForCameraAllowed(@NonNull ActivityRecord activity) {
+        final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
+        if (cameraPolicy == null) {
+            return false;
+        }
+        return cameraPolicy.mCameraCompatFreeformPolicy != null
+                        && cameraPolicy.mCameraCompatFreeformPolicy
+                                .isFreeformLetterboxingForCameraAllowed(activity);
+    }
+
+    // TODO(b/369070416): have policies implement the same interface.
     static boolean shouldCameraCompatControlAspectRatio(@NonNull ActivityRecord activity) {
         final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
         if (cameraPolicy == null) {
@@ -234,7 +246,7 @@ class AppCompatCameraPolicy {
     }
 
     // TODO(b/369070416): have policies implement the same interface.
-    static float getCameraCompatAspectRatio(@NonNull ActivityRecord activity) {
+    static float getCameraCompatMinAspectRatio(@NonNull ActivityRecord activity) {
         final AppCompatCameraPolicy cameraPolicy = getAppCompatCameraPolicy(activity);
         if (cameraPolicy == null) {
             return 1.0f;

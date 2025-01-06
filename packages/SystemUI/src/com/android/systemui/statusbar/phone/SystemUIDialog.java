@@ -145,7 +145,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
          */
         public SystemUIDialog create() {
             return create(new DialogDelegate<>() {
-            }, mContext, DEFAULT_THEME);
+            }, mContext, DEFAULT_THEME, true /* shouldAcsdDismissDialog */);
         }
 
         /**
@@ -155,7 +155,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
          */
         public SystemUIDialog create(Context context) {
             return create(new DialogDelegate<>() {
-            }, context, DEFAULT_THEME);
+            }, context, DEFAULT_THEME, true /* shouldAcsdDismissDialog */);
         }
 
         /**
@@ -168,8 +168,21 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             return create(delegate, context, DEFAULT_THEME);
         }
 
+        /**
+         * Creates a new instance of {@link SystemUIDialog} with {@code delegate} as the {@link
+         * Delegate}. When you need to customize the dialog, pass it a delegate.
+         *
+         * This method allows the caller to specify if the dialog should be dismissed in response
+         * to the ACTION_CLOSE_SYSTEM_DIALOGS intent.
+         */
+        public SystemUIDialog create(Delegate delegate, Context context,
+                boolean shouldAcsdDismissDialog) {
+            return create(delegate, context, DEFAULT_THEME, shouldAcsdDismissDialog);
+        }
+
         public SystemUIDialog create(Delegate delegate, Context context, @StyleRes int theme) {
-            return create((DialogDelegate<SystemUIDialog>) delegate, context, theme);
+            return create((DialogDelegate<SystemUIDialog>) delegate, context, theme,
+                    true /* shouldAcsdDismissDialog */);
         }
 
         public SystemUIDialog create(Delegate delegate) {
@@ -177,7 +190,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         }
 
         private SystemUIDialog create(DialogDelegate<SystemUIDialog> dialogDelegate,
-                Context context, @StyleRes int theme) {
+                Context context, @StyleRes int theme, boolean shouldAcsdDismissDialog) {
             return new SystemUIDialog(
                     context,
                     theme,
@@ -186,7 +199,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                     mSysUiState,
                     mBroadcastDispatcher,
                     mDialogTransitionAnimator,
-                    dialogDelegate);
+                    dialogDelegate,
+                    shouldAcsdDismissDialog);
         }
     }
 
@@ -207,7 +221,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 broadcastDispatcher,
                 dialogTransitionAnimator,
                 new DialogDelegate<>() {
-                });
+                },
+                true /* shouldAcsdDismissDialog */);
     }
 
     public SystemUIDialog(
@@ -227,7 +242,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
                 sysUiState,
                 broadcastDispatcher,
                 dialogTransitionAnimator,
-                (DialogDelegate<SystemUIDialog>) delegate);
+                (DialogDelegate<SystemUIDialog>) delegate,
+                true /* shouldAcsdDismissDialog */);
     }
 
     public SystemUIDialog(
@@ -238,7 +254,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
             SysUiState sysUiState,
             BroadcastDispatcher broadcastDispatcher,
             DialogTransitionAnimator dialogTransitionAnimator,
-            DialogDelegate<SystemUIDialog> delegate) {
+            DialogDelegate<SystemUIDialog> delegate,
+            boolean shouldAcsdDismissDialog) {
         super(context, theme);
         mContext = context;
         mDelegate = delegate;
@@ -249,7 +266,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         getWindow().setAttributes(attrs);
 
         mDismissReceiver = dismissOnDeviceLock ? new DismissReceiver(this, broadcastDispatcher,
-                dialogTransitionAnimator) : null;
+                dialogTransitionAnimator, shouldAcsdDismissDialog) : null;
         mDialogManager = dialogManager;
         mSysUiState = sysUiState;
     }
@@ -523,7 +540,8 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         // TODO(b/219008720): Remove those calls to Dependency.get.
         DismissReceiver dismissReceiver = new DismissReceiver(dialog,
                 Dependency.get(BroadcastDispatcher.class),
-                Dependency.get(DialogTransitionAnimator.class));
+                Dependency.get(DialogTransitionAnimator.class),
+                true /* shouldAcsdDismissDialog */);
         dialog.setOnDismissListener(d -> {
             dismissReceiver.unregister();
             if (dismissAction != null) dismissAction.run();
@@ -595,12 +613,7 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
     }
 
     private static class DismissReceiver extends BroadcastReceiver {
-        private static final IntentFilter INTENT_FILTER = new IntentFilter();
-
-        static {
-            INTENT_FILTER.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-            INTENT_FILTER.addAction(Intent.ACTION_SCREEN_OFF);
-        }
+        private final IntentFilter mIntentFilter = new IntentFilter();
 
         private final Dialog mDialog;
         private boolean mRegistered;
@@ -608,14 +621,20 @@ public class SystemUIDialog extends AlertDialog implements ViewRootImpl.ConfigCh
         private final DialogTransitionAnimator mDialogTransitionAnimator;
 
         DismissReceiver(Dialog dialog, BroadcastDispatcher broadcastDispatcher,
-                DialogTransitionAnimator dialogTransitionAnimator) {
+                DialogTransitionAnimator dialogTransitionAnimator,
+                boolean shouldAcsdDismissDialog) {
             mDialog = dialog;
             mBroadcastDispatcher = broadcastDispatcher;
             mDialogTransitionAnimator = dialogTransitionAnimator;
+
+            mIntentFilter.addAction(Intent.ACTION_SCREEN_OFF);
+            if (shouldAcsdDismissDialog) {
+                mIntentFilter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
+            }
         }
 
         void register() {
-            mBroadcastDispatcher.registerReceiver(this, INTENT_FILTER, null, UserHandle.CURRENT);
+            mBroadcastDispatcher.registerReceiver(this, mIntentFilter, null, UserHandle.CURRENT);
             mRegistered = true;
         }
 

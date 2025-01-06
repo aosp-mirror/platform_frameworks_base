@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.pipeline.shared.ui.viewmodel
 
+import android.annotation.ColorInt
+import android.graphics.Rect
 import android.view.View
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
@@ -27,18 +29,29 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
+import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
+import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
+import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.StatusBarPopupChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
+import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
-import com.android.systemui.statusbar.pipeline.shared.domain.interactor.CollapsedStatusBarInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarIconBlockListInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarInteractor
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -46,9 +59,11 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.conflate
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
@@ -84,6 +99,12 @@ interface HomeStatusBarViewModel {
      */
     val ongoingActivityChips: StateFlow<MultipleOngoingActivityChipsModel>
 
+    /** View model for the carrier name that may show in the status bar based on carrier config */
+    val operatorNameViewModel: StatusBarOperatorNameViewModel
+
+    /** The popup chips that should be shown on the right-hand side of the status bar. */
+    val statusBarPopupChips: StateFlow<List<PopupChipModel.Shown>>
+
     /**
      * True if the current scene can show the home status bar (aka this status bar), and false if
      * the current scene should never show the home status bar.
@@ -93,9 +114,19 @@ interface HomeStatusBarViewModel {
      */
     val isHomeStatusBarAllowedByScene: StateFlow<Boolean>
 
+    /** True if the operator name view is not hidden due to HUN or other visibility state */
+    val shouldShowOperatorNameView: Flow<Boolean>
     val isClockVisible: Flow<VisibilityModel>
     val isNotificationIconContainerVisible: Flow<VisibilityModel>
-    val isSystemInfoVisible: Flow<VisibilityModel>
+    /**
+     * Pair of (system info visibility, event animation state). The animation state can be used to
+     * respond to the system event chip animations. In all cases, system info visibility correctly
+     * models the View.visibility for the system info area
+     */
+    val systemInfoCombinedVis: StateFlow<SystemInfoCombinedVisibilityModel>
+
+    /** Which icons to block from the home status bar */
+    val iconBlockList: Flow<List<String>>
 
     /**
      * Apps can request a low profile mode [android.view.View.SYSTEM_UI_FLAG_LOW_PROFILE] where
@@ -108,11 +139,23 @@ interface HomeStatusBarViewModel {
      */
     fun areNotificationsLightsOut(displayId: Int): Flow<Boolean>
 
+    /**
+     * Given a displayId, returns a flow of [StatusBarTintColor], a functional interface that will
+     * allow a view to calculate its correct tint depending on location
+     */
+    fun areaTint(displayId: Int): Flow<StatusBarTintColor>
+
     /** Models the current visibility for a specific child view of status bar. */
     data class VisibilityModel(
         @View.Visibility val visibility: Int,
         /** True if a visibility change should be animated. */
         val shouldAnimateChange: Boolean,
+    )
+
+    /** The combined visibility + animation state for the system info status bar area */
+    data class SystemInfoCombinedVisibilityModel(
+        val baseVisibility: VisibilityModel,
+        val animationState: SystemEventAnimationState,
     )
 }
 
@@ -120,15 +163,21 @@ interface HomeStatusBarViewModel {
 class HomeStatusBarViewModelImpl
 @Inject
 constructor(
-    collapsedStatusBarInteractor: CollapsedStatusBarInteractor,
+    homeStatusBarInteractor: HomeStatusBarInteractor,
+    homeStatusBarIconBlockListInteractor: HomeStatusBarIconBlockListInteractor,
     private val lightsOutInteractor: LightsOutInteractor,
     private val notificationsInteractor: ActiveNotificationsInteractor,
+    private val darkIconInteractor: DarkIconInteractor,
+    headsUpNotificationInteractor: HeadsUpNotificationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     keyguardInteractor: KeyguardInteractor,
+    override val operatorNameViewModel: StatusBarOperatorNameViewModel,
     sceneInteractor: SceneInteractor,
     sceneContainerOcclusionInteractor: SceneContainerOcclusionInteractor,
     shadeInteractor: ShadeInteractor,
     ongoingActivityChipsViewModel: OngoingActivityChipsViewModel,
+    statusBarPopupChipsViewModel: StatusBarPopupChipsViewModel,
+    animations: SystemStatusEventAnimationInteractor,
     @Application coroutineScope: CoroutineScope,
 ) : HomeStatusBarViewModel {
     override val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean> =
@@ -145,6 +194,8 @@ constructor(
     override val primaryOngoingActivityChip = ongoingActivityChipsViewModel.primaryChip
 
     override val ongoingActivityChips = ongoingActivityChipsViewModel.chips
+
+    override val statusBarPopupChips = statusBarPopupChipsViewModel.shownPopupChips
 
     override val isHomeStatusBarAllowedByScene: StateFlow<Boolean> =
         combine(
@@ -166,12 +217,27 @@ constructor(
         } else {
             combine(
                     notificationsInteractor.areAnyNotificationsPresent,
-                    lightsOutInteractor.isLowProfile(displayId),
+                    lightsOutInteractor.isLowProfile(displayId) ?: flowOf(false),
                 ) { hasNotifications, isLowProfile ->
                     hasNotifications && isLowProfile
                 }
                 .distinctUntilChanged()
         }
+
+    override fun areaTint(displayId: Int): Flow<StatusBarTintColor> =
+        darkIconInteractor
+            .darkState(displayId)
+            .map { (areas: Collection<Rect>, tint: Int) ->
+                StatusBarTintColor { viewBounds: Rect ->
+                    if (DarkIconDispatcher.isInAreas(areas, viewBounds)) {
+                        tint
+                    } else {
+                        DarkIconDispatcher.DEFAULT_ICON_TINT
+                    }
+                }
+            }
+            .conflate()
+            .distinctUntilChanged()
 
     /**
      * True if the current SysUI state can show the home status bar (aka this status bar), and false
@@ -207,39 +273,100 @@ constructor(
             isHomeStatusBarAllowed && !isSecureCameraActive
         }
 
+    private val isAnyChipVisible =
+        if (StatusBarNotifChips.isEnabled) {
+            ongoingActivityChips.map { it.primary is OngoingActivityChipModel.Shown }
+        } else {
+            primaryOngoingActivityChip.map { it is OngoingActivityChipModel.Shown }
+        }
+
+    override val shouldShowOperatorNameView: Flow<Boolean> =
+        combine(
+            shouldHomeStatusBarBeVisible,
+            headsUpNotificationInteractor.statusBarHeadsUpState,
+            homeStatusBarInteractor.visibilityViaDisableFlags,
+            homeStatusBarInteractor.shouldShowOperatorName,
+        ) { shouldStatusBarBeVisible, headsUpState, visibilityViaDisableFlags, shouldShowOperator ->
+            val hideForHeadsUp = headsUpState == PinnedStatus.PinnedBySystem
+            shouldStatusBarBeVisible &&
+                !hideForHeadsUp &&
+                visibilityViaDisableFlags.isSystemInfoAllowed &&
+                shouldShowOperator
+        }
+
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,
-            collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
-            val showClock = shouldStatusBarBeVisible && visibilityViaDisableFlags.isClockAllowed
-            // TODO(b/364360986): Take CollapsedStatusBarFragment.clockHiddenMode into account.
-            VisibilityModel(showClock.toVisibilityInt(), visibilityViaDisableFlags.animate)
+            headsUpNotificationInteractor.statusBarHeadsUpState,
+            homeStatusBarInteractor.visibilityViaDisableFlags,
+        ) { shouldStatusBarBeVisible, headsUpState, visibilityViaDisableFlags ->
+            val hideClockForHeadsUp = headsUpState == PinnedStatus.PinnedBySystem
+            val showClock =
+                shouldStatusBarBeVisible &&
+                    visibilityViaDisableFlags.isClockAllowed &&
+                    !hideClockForHeadsUp
+            // Always use View.INVISIBLE here, so that animations work
+            VisibilityModel(showClock.toVisibleOrInvisible(), visibilityViaDisableFlags.animate)
         }
+
     override val isNotificationIconContainerVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,
-            collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
+            isAnyChipVisible,
+            homeStatusBarInteractor.visibilityViaDisableFlags,
+        ) { shouldStatusBarBeVisible, anyChipVisible, visibilityViaDisableFlags ->
             val showNotificationIconContainer =
-                shouldStatusBarBeVisible && visibilityViaDisableFlags.areNotificationIconsAllowed
+                if (anyChipVisible) {
+                    false
+                } else {
+                    shouldStatusBarBeVisible &&
+                        visibilityViaDisableFlags.areNotificationIconsAllowed
+                }
             VisibilityModel(
-                showNotificationIconContainer.toVisibilityInt(),
+                showNotificationIconContainer.toVisibleOrGone(),
                 visibilityViaDisableFlags.animate,
             )
         }
-    override val isSystemInfoVisible: Flow<VisibilityModel> =
-        combine(
-            shouldHomeStatusBarBeVisible,
-            collapsedStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, visibilityViaDisableFlags ->
+
+    private val isSystemInfoVisible =
+        combine(shouldHomeStatusBarBeVisible, homeStatusBarInteractor.visibilityViaDisableFlags) {
+            shouldStatusBarBeVisible,
+            visibilityViaDisableFlags ->
             val showSystemInfo =
                 shouldStatusBarBeVisible && visibilityViaDisableFlags.isSystemInfoAllowed
-            VisibilityModel(showSystemInfo.toVisibilityInt(), visibilityViaDisableFlags.animate)
+            VisibilityModel(showSystemInfo.toVisibleOrGone(), visibilityViaDisableFlags.animate)
         }
 
+    override val systemInfoCombinedVis =
+        combine(isSystemInfoVisible, animations.animationState) { sysInfoVisible, animationState ->
+                HomeStatusBarViewModel.SystemInfoCombinedVisibilityModel(
+                    sysInfoVisible,
+                    animationState,
+                )
+            }
+            .stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(),
+                HomeStatusBarViewModel.SystemInfoCombinedVisibilityModel(
+                    VisibilityModel(View.VISIBLE, false),
+                    Idle,
+                ),
+            )
+
+    override val iconBlockList: Flow<List<String>> =
+        homeStatusBarIconBlockListInteractor.iconBlockList
+
     @View.Visibility
-    private fun Boolean.toVisibilityInt(): Int {
+    private fun Boolean.toVisibleOrGone(): Int {
         return if (this) View.VISIBLE else View.GONE
     }
+
+    // Similar to the above, but uses INVISIBLE in place of GONE
+    @View.Visibility
+    private fun Boolean.toVisibleOrInvisible(): Int = if (this) View.VISIBLE else View.INVISIBLE
+}
+
+/** Lookup the color for a given view in the status bar */
+fun interface StatusBarTintColor {
+    @ColorInt fun tint(viewBounds: Rect): Int
 }

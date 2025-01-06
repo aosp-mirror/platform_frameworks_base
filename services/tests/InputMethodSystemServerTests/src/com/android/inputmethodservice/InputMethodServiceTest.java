@@ -194,7 +194,13 @@ public class InputMethodServiceTest {
                 () -> assertThat(mActivity.hideImeWithWindowInsetsController()).isTrue(),
                 true /* expected */,
                 false /* inputViewStarted */);
-        assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        if (mFlagsValueProvider.getBoolean(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)) {
+            // The IME visibility is only sent at the end of the animation. Therefore, we have to
+            // wait until the visibility was sent to the server and the IME window hidden.
+            eventually(() -> assertThat(mInputMethodService.isInputViewShown()).isFalse());
+        } else {
+            assertThat(mInputMethodService.isInputViewShown()).isFalse();
+        }
     }
 
     /**

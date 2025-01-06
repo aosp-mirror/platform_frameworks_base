@@ -41,6 +41,9 @@ import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT
 import static com.android.wm.shell.draganddrop.SplitDragPolicy.Target.TYPE_SPLIT_TOP;
 import static com.android.wm.shell.shared.draganddrop.DragAndDropConstants.EXTRA_DISALLOW_HIT_REGION;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_0;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_1;
+import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_UNDEFINED;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_TOP_OR_LEFT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_POSITION_UNDEFINED;
@@ -81,6 +84,7 @@ import com.android.wm.shell.draganddrop.anim.HoverAnimProps;
 import com.android.wm.shell.draganddrop.anim.TwoFiftyFiftyTargetAnimator;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.split.SplitScreenConstants;
+import com.android.wm.shell.shared.split.SplitScreenConstants.SplitIndex;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
 import com.android.wm.shell.splitscreen.SplitScreenController;
 
@@ -219,8 +223,10 @@ public class SplitDragPolicy implements DropTarget {
                         displayRegion.splitHorizontally(startHitRegion, endHitRegion);
                     }
 
-                    mTargets.add(new Target(TYPE_SPLIT_LEFT, startHitRegion, startBounds, -1));
-                    mTargets.add(new Target(TYPE_SPLIT_RIGHT, endHitRegion, endBounds, -1));
+                    mTargets.add(new Target(TYPE_SPLIT_LEFT, startHitRegion, startBounds,
+                            SPLIT_INDEX_0));
+                    mTargets.add(new Target(TYPE_SPLIT_RIGHT, endHitRegion, endBounds,
+                            SPLIT_INDEX_1));
                 } else {
                     // TODO(b/349828130), move this into init function and/or the insets updating
                     //  callback
@@ -287,9 +293,10 @@ public class SplitDragPolicy implements DropTarget {
                         displayRegion.splitVertically(leftHitRegion, rightHitRegion);
                     }
 
-                    mTargets.add(new Target(TYPE_SPLIT_LEFT, leftHitRegion, topOrLeftBounds, -1));
+                    mTargets.add(new Target(TYPE_SPLIT_LEFT, leftHitRegion, topOrLeftBounds,
+                            SPLIT_INDEX_UNDEFINED));
                     mTargets.add(new Target(TYPE_SPLIT_RIGHT, rightHitRegion, bottomOrRightBounds,
-                            -1));
+                            SPLIT_INDEX_UNDEFINED));
                 } else {
                     final Rect topHitRegion = new Rect();
                     final Rect bottomHitRegion = new Rect();
@@ -308,9 +315,10 @@ public class SplitDragPolicy implements DropTarget {
                         displayRegion.splitHorizontally(topHitRegion, bottomHitRegion);
                     }
 
-                    mTargets.add(new Target(TYPE_SPLIT_TOP, topHitRegion, topOrLeftBounds, -1));
+                    mTargets.add(new Target(TYPE_SPLIT_TOP, topHitRegion, topOrLeftBounds,
+                            SPLIT_INDEX_UNDEFINED));
                     mTargets.add(new Target(TYPE_SPLIT_BOTTOM, bottomHitRegion, bottomOrRightBounds,
-                            -1));
+                            SPLIT_INDEX_UNDEFINED));
                 }
             }
         } else {
@@ -378,9 +386,9 @@ public class SplitDragPolicy implements DropTarget {
                 ? mFullscreenStarter
                 : mSplitscreenStarter;
         if (mSession.appData != null) {
-            launchApp(mSession, starter, position, hideTaskToken);
+            launchApp(mSession, starter, position, hideTaskToken, target.index);
         } else {
-            launchIntent(mSession, starter, position, hideTaskToken);
+            launchIntent(mSession, starter, position, hideTaskToken, target.index);
         }
 
         if (enableFlexibleSplit()) {
@@ -392,9 +400,10 @@ public class SplitDragPolicy implements DropTarget {
      * Launches an app provided by SysUI.
      */
     private void launchApp(DragSession session, Starter starter, @SplitPosition int position,
-            @Nullable WindowContainerToken hideTaskToken) {
-        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Launching app data at position=%d",
-                position);
+            @Nullable WindowContainerToken hideTaskToken, @SplitIndex int splitIndex) {
+        ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
+                "Launching app data at position=%d index=%d",
+                position, splitIndex);
         final ClipDescription description = session.getClipDescription();
         final boolean isTask = description.hasMimeType(MIMETYPE_APPLICATION_TASK);
         final boolean isShortcut = description.hasMimeType(MIMETYPE_APPLICATION_SHORTCUT);
@@ -429,7 +438,7 @@ public class SplitDragPolicy implements DropTarget {
                 }
             }
             starter.startIntent(launchIntent, user.getIdentifier(), null /* fillIntent */,
-                    position, opts, hideTaskToken);
+                    position, opts, hideTaskToken, splitIndex);
         }
     }
 
@@ -437,7 +446,7 @@ public class SplitDragPolicy implements DropTarget {
      * Launches an intent sender provided by an application.
      */
     private void launchIntent(DragSession session, Starter starter, @SplitPosition int position,
-            @Nullable WindowContainerToken hideTaskToken) {
+            @Nullable WindowContainerToken hideTaskToken, @SplitIndex int index) {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP, "Launching intent at position=%d",
                 position);
         final ActivityOptions baseActivityOpts = ActivityOptions.makeBasic();
@@ -452,7 +461,7 @@ public class SplitDragPolicy implements DropTarget {
         final Bundle opts = baseActivityOpts.toBundle();
         starter.startIntent(session.launchableIntent,
                 session.launchableIntent.getCreatorUserHandle().getIdentifier(),
-                null /* fillIntent */, position, opts, hideTaskToken);
+                null /* fillIntent */, position, opts, hideTaskToken, index);
     }
 
     @Override
@@ -541,7 +550,7 @@ public class SplitDragPolicy implements DropTarget {
                 @Nullable Bundle options, UserHandle user);
         void startIntent(PendingIntent intent, int userId, Intent fillInIntent,
                 @SplitPosition int position, @Nullable Bundle options,
-                @Nullable WindowContainerToken hideTaskToken);
+                @Nullable WindowContainerToken hideTaskToken, @SplitIndex int index);
         void enterSplitScreen(int taskId, boolean leftOrTop);
 
         /**
@@ -592,7 +601,7 @@ public class SplitDragPolicy implements DropTarget {
         @Override
         public void startIntent(PendingIntent intent, int userId, @Nullable Intent fillInIntent,
                 int position, @Nullable Bundle options,
-                @Nullable WindowContainerToken hideTaskToken) {
+                @Nullable WindowContainerToken hideTaskToken, @SplitIndex int index) {
             if (hideTaskToken != null) {
                 ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
                         "Default starter does not support hide task token");
@@ -641,13 +650,13 @@ public class SplitDragPolicy implements DropTarget {
         final Rect hitRegion;
         // The approximate visual region for where the task will start
         final Rect drawRegion;
-        int index;
+        @SplitIndex int index;
 
         /**
          * @param index 0-indexed, represents which position of drop target this object represents,
          *              0 to N for left to right, top to bottom
          */
-        public Target(@Type int t, Rect hit, Rect draw, int index) {
+        public Target(@Type int t, Rect hit, Rect draw, @SplitIndex int index) {
             type = t;
             hitRegion = hit;
             drawRegion = draw;

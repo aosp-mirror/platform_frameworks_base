@@ -469,9 +469,8 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
                     || posture >= mLightSensorOptional.length) {
                 return;
             }
-
-            final Sensor oldSensor = mLightSensorOptional[mDevicePosture].get();
-            final Sensor newSensor = mLightSensorOptional[posture].get();
+            Sensor oldSensor = mLightSensorOptional[mDevicePosture].orElse(null);
+            Sensor newSensor = mLightSensorOptional[posture].orElse(null);
             if (Objects.equals(oldSensor, newSensor)) {
                 mDevicePosture = posture;
                 // uses the same sensor for the new posture

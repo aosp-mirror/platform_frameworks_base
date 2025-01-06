@@ -15,7 +15,6 @@
  */
 package com.android.systemui.flags
 
-import android.provider.DeviceConfig
 import com.android.internal.annotations.Keep
 import com.android.systemui.flags.FlagsFactory.releasedFlag
 import com.android.systemui.flags.FlagsFactory.resourceBooleanFlag
@@ -78,12 +77,6 @@ object Flags {
         resourceBooleanFlag(R.bool.config_enableLockScreenCustomClocks, "lockscreen_custom_clocks")
 
     /**
-     * Whether the clock on a wide lock screen should use the new "stepping" animation for moving
-     * the digits when the clock moves.
-     */
-    @JvmField val STEP_CLOCK_ANIMATION = releasedFlag("step_clock_animation")
-
-    /**
      * Migration from the legacy isDozing/dozeAmount paths to the new KeyguardTransitionRepository
      * will occur in stages. This is one stage of many to come.
      */
@@ -106,10 +99,6 @@ object Flags {
 
     // TODO(b/242908637): Tracking Bug
     @JvmField val WALLPAPER_FULLSCREEN_PREVIEW = releasedFlag("wallpaper_fullscreen_preview")
-
-    /** Whether the long-press gesture to open wallpaper picker is enabled. */
-    // TODO(b/266242192): Tracking Bug
-    @JvmField val LOCK_SCREEN_LONG_PRESS_ENABLED = releasedFlag("lock_screen_long_press_enabled")
 
     /** Inflate and bind views upon emitting a blueprint value . */
     // TODO(b/297365780): Tracking Bug
@@ -220,10 +209,6 @@ object Flags {
     // TODO(b/293380347): Tracking Bug
     @JvmField val COLOR_FIDELITY = unreleasedFlag("color_fidelity")
 
-    // 900 - media
-    // TODO(b/254512697): Tracking Bug
-    val MEDIA_TAP_TO_TRANSFER = releasedFlag("media_tap_to_transfer")
-
     // TODO(b/254512654): Tracking Bug
     @JvmField val DREAM_MEDIA_COMPLICATION = unreleasedFlag("dream_media_complication")
 
@@ -254,15 +239,6 @@ object Flags {
     @JvmField
     val WM_ENABLE_SHELL_TRANSITIONS =
         sysPropBooleanFlag("persist.wm.debug.shell_transit", default = true)
-
-    // TODO(b/254513207): Tracking Bug to delete
-    @Keep
-    @JvmField
-    val WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES =
-        releasedFlag(
-            name = "enable_screen_record_enterprise_policies",
-            namespace = DeviceConfig.NAMESPACE_WINDOW_MANAGER,
-        )
 
     // TODO(b/293252410) : Tracking Bug
     @JvmField val LOCKSCREEN_ENABLE_LANDSCAPE = unreleasedFlag("lockscreen.enable_landscape")
@@ -354,11 +330,6 @@ object Flags {
     @JvmField val USE_NEW_ACTIVITY_STARTER = releasedFlag(name = "use_new_activity_starter")
 
     // 2900 - Zero Jank fixes. Naming convention is: zj_<bug number>_<cuj name>
-
-    // TODO:(b/285623104): Tracking bug
-    @JvmField
-    val ZJ_285570694_LOCKSCREEN_TRANSITION_FROM_AOD =
-        releasedFlag("zj_285570694_lockscreen_transition_from_aod")
 
     // TODO(b/283447257): Tracking bug
     @JvmField

@@ -27,7 +27,10 @@ import kotlinx.coroutines.flow.StateFlow
 interface SystemStatusAnimationScheduler :
     CallbackController<SystemStatusAnimationCallback>, Dumpable {
 
-    /** StateFlow holding the current [SystemEventAnimationState] at any time. */
+    /**
+     * The current state of the animation. This can be used from compose functions to coordinate
+     * their animations with the chip
+     */
     val animationState: StateFlow<SystemEventAnimationState>
 
     fun onStatusEvent(event: StatusEvent)

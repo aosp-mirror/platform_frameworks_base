@@ -27,7 +27,18 @@ import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.touchpad.tutorial.domain.interactor.TouchpadGesturesInteractor
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
+import com.android.systemui.touchpad.tutorial.ui.gesture.VelocityTracker
+import com.android.systemui.touchpad.tutorial.ui.gesture.VerticalVelocityTracker
 import com.android.systemui.touchpad.tutorial.ui.view.TouchpadTutorialActivity
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureRecognizerProvider
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.EasterEggGestureViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.EasterEggRecognizerProvider
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.GestureRecognizerAdapter
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureRecognizerProvider
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.HomeGestureScreenViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureRecognizerProvider
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureScreenViewModel
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -45,8 +56,47 @@ interface TouchpadTutorialModule {
 
     companion object {
         @Provides
-        fun touchpadScreensProvider(): TouchpadTutorialScreensProvider {
-            return ScreensProvider
+        fun touchpadScreensProvider(
+            backGestureScreenViewModel: BackGestureScreenViewModel,
+            homeGestureScreenViewModel: HomeGestureScreenViewModel,
+            easterEggGestureViewModel: EasterEggGestureViewModel,
+        ): TouchpadTutorialScreensProvider {
+            return ScreensProvider(
+                backGestureScreenViewModel,
+                homeGestureScreenViewModel,
+                easterEggGestureViewModel,
+            )
+        }
+
+        @Provides
+        fun recentAppsViewModel(
+            recognizerProvider: RecentAppsGestureRecognizerProvider,
+            adapterFactory: GestureRecognizerAdapter.Factory,
+        ): RecentAppsGestureScreenViewModel {
+            return RecentAppsGestureScreenViewModel(adapterFactory.create(recognizerProvider))
+        }
+
+        @Provides
+        fun backViewModel(
+            recognizerProvider: BackGestureRecognizerProvider,
+            adapterFactory: GestureRecognizerAdapter.Factory,
+        ): BackGestureScreenViewModel {
+            return BackGestureScreenViewModel(adapterFactory.create(recognizerProvider))
+        }
+
+        @Provides
+        fun homeViewModel(
+            recognizerProvider: HomeGestureRecognizerProvider,
+            adapterFactory: GestureRecognizerAdapter.Factory,
+        ): HomeGestureScreenViewModel {
+            return HomeGestureScreenViewModel(adapterFactory.create(recognizerProvider))
+        }
+
+        @Provides
+        fun easterEggViewModel(
+            adapterFactory: GestureRecognizerAdapter.Factory
+        ): EasterEggGestureViewModel {
+            return EasterEggGestureViewModel(adapterFactory.create(EasterEggRecognizerProvider()))
         }
 
         @SysUISingleton
@@ -59,17 +109,33 @@ interface TouchpadTutorialModule {
         ): TouchpadGesturesInteractor {
             return TouchpadGesturesInteractor(sysUiState, displayTracker, backgroundScope, logger)
         }
+
+        @Provides fun velocityTracker(): VelocityTracker = VerticalVelocityTracker()
     }
 }
 
-private object ScreensProvider : TouchpadTutorialScreensProvider {
+private class ScreensProvider(
+    val backGestureScreenViewModel: BackGestureScreenViewModel,
+    val homeGestureScreenViewModel: HomeGestureScreenViewModel,
+    val easterEggGestureViewModel: EasterEggGestureViewModel,
+) : TouchpadTutorialScreensProvider {
     @Composable
     override fun BackGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
-        BackGestureTutorialScreen(onDoneButtonClicked, onBack)
+        BackGestureTutorialScreen(
+            backGestureScreenViewModel,
+            easterEggGestureViewModel,
+            onDoneButtonClicked,
+            onBack,
+        )
     }
 
     @Composable
     override fun HomeGesture(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
-        HomeGestureTutorialScreen(onDoneButtonClicked, onBack)
+        HomeGestureTutorialScreen(
+            homeGestureScreenViewModel,
+            easterEggGestureViewModel,
+            onDoneButtonClicked,
+            onBack,
+        )
     }
 }

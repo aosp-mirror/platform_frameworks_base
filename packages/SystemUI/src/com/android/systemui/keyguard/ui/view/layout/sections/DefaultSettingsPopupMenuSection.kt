@@ -31,7 +31,6 @@ import androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT
 import androidx.core.view.isVisible
 import com.android.systemui.animation.view.LaunchableLinearLayout
 import com.android.systemui.dagger.qualifiers.Main
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.KeyguardSettingsViewBinder
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardRootViewModel
@@ -56,9 +55,6 @@ constructor(
     private var settingsPopupMenuHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!KeyguardBottomAreaRefactor.isEnabled) {
-            return
-        }
         val view =
             LayoutInflater.from(constraintLayout.context)
                 .inflate(R.layout.keyguard_settings_popup_menu, constraintLayout, false)
@@ -71,17 +67,15 @@ constructor(
     }
 
     override fun bindData(constraintLayout: ConstraintLayout) {
-        if (KeyguardBottomAreaRefactor.isEnabled) {
-            settingsPopupMenuHandle =
-                KeyguardSettingsViewBinder.bind(
-                    constraintLayout.requireViewById<View>(R.id.keyguard_settings_button),
-                    keyguardSettingsMenuViewModel,
-                    keyguardTouchHandlingViewModel,
-                    keyguardRootViewModel,
-                    vibratorHelper,
-                    activityStarter,
-                )
-        }
+        settingsPopupMenuHandle =
+            KeyguardSettingsViewBinder.bind(
+                constraintLayout.requireViewById<View>(R.id.keyguard_settings_button),
+                keyguardSettingsMenuViewModel,
+                keyguardTouchHandlingViewModel,
+                keyguardRootViewModel,
+                vibratorHelper,
+                activityStarter,
+            )
     }
 
     override fun applyConstraints(constraintSet: ConstraintSet) {

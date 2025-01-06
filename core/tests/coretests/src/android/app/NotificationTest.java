@@ -105,6 +105,7 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.R;
 import com.android.internal.util.ContrastColorUtil;
+import com.android.internal.widget.NotificationProgressModel;
 
 import junit.framework.Assert;
 
@@ -467,9 +468,21 @@ public class NotificationTest {
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
                 .setColorized(true)
-                .setFlag(FLAG_CAN_COLORIZE, true)
+                .setOngoing(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isTrue();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableCharacteristics_notOngoing() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .build();
+        assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
 
     @Test
@@ -481,7 +494,7 @@ public class NotificationTest {
                 .setContentTitle("TITLE")
                 .setColor(Color.WHITE)
                 .setColorized(true)
-                .setFlag(FLAG_CAN_COLORIZE, true)
+                .setOngoing(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
@@ -493,6 +506,7 @@ public class NotificationTest {
                 .setSmallIcon(android.R.drawable.sym_def_app_icon)
                 .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
                 .setColor(Color.WHITE)
+                .setOngoing(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
@@ -505,7 +519,22 @@ public class NotificationTest {
                 .setStyle(new Notification.BigTextStyle())
                 .setColor(Color.WHITE)
                 .setColorized(true)
-                .setFlag(FLAG_CAN_COLORIZE, true)
+                .setOngoing(true)
+                .build();
+        assertThat(n.hasPromotableCharacteristics()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_UI_RICH_ONGOING)
+    public void testHasPromotableCharacteristics_groupSummary() {
+        Notification n = new Notification.Builder(mContext, "test")
+                .setSmallIcon(android.R.drawable.sym_def_app_icon)
+                .setStyle(new Notification.BigTextStyle().setBigContentTitle("BIG"))
+                .setColor(Color.WHITE)
+                .setColorized(true)
+                .setOngoing(true)
+                .setGroup("someGroup")
+                .setGroupSummary(true)
                 .build();
         assertThat(n.hasPromotableCharacteristics()).isFalse();
     }
@@ -2386,7 +2415,7 @@ public class NotificationTest {
 
     @Test
     @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
-    public void progressStyle_getProgressMax_nooSegments_returnsDefault() {
+    public void progressStyle_getProgressMax_noSegments_returnsDefault() {
         final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
         progressStyle.setProgressSegments(Collections.emptyList());
         assertThat(progressStyle.getProgressMax()).isEqualTo(100);
@@ -2427,6 +2456,211 @@ public class NotificationTest {
                 .addProgressSegment(new Notification.ProgressStyle.Segment(10));
 
         assertThat(progressStyle.getProgressMax()).isEqualTo(100);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_getProgressMax_onSegmentLimitExceeded_returnsSumOfSegmentLength() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        // limit is 10 for ProgressStyle
+        for (int i = 0; i < 30; i++) {
+            progressStyle
+                    .addProgressSegment(new Notification.ProgressStyle.Segment(10));
+        }
+
+        // THEN
+        assertThat(progressStyle.getProgressMax()).isEqualTo(300);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_addProgressSegment_dropsInvalidSegments() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        // Segments should be a positive integer.
+        progressStyle
+                .addProgressSegment(new Notification.ProgressStyle.Segment(0));
+        progressStyle
+                .addProgressSegment(new Notification.ProgressStyle.Segment(-1));
+
+        // THEN
+        assertThat(progressStyle.getProgressSegments()).isEmpty();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_setProgressSegment_dropsInvalidSegments() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        // Segments should be a positive integer.
+        progressStyle
+                .setProgressSegments(List.of(new Notification.ProgressStyle.Segment(0),
+                        new Notification.ProgressStyle.Segment(-1)));
+
+        // THEN
+        assertThat(progressStyle.getProgressSegments()).isEmpty();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_addProgressPoint_dropsNegativePoints() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        // Points should not be a negative integer.
+        progressStyle
+                .addProgressPoint(new Notification.ProgressStyle.Point(-1))
+                .addProgressPoint(new Notification.ProgressStyle.Point(-100));
+
+        // THEN
+        assertThat(progressStyle.getProgressPoints()).isEmpty();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_setProgressPoint_dropsNegativePoints() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        // Points should not be a negative integer.
+        progressStyle
+                .setProgressPoints(List.of(new Notification.ProgressStyle.Point(-1),
+                        new Notification.ProgressStyle.Point(-100)));
+
+        // THEN
+        assertThat(progressStyle.getProgressPoints()).isEmpty();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_createProgressModel_ignoresPointsExceedingMax() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        progressStyle.addProgressSegment(new Notification.ProgressStyle.Segment(100));
+        // Points should not larger than progress maximum.
+        progressStyle
+                .addProgressPoint(new Notification.ProgressStyle.Point(101))
+                .addProgressPoint(new Notification.ProgressStyle.Point(500));
+
+        // THEN
+        assertThat(progressStyle.createProgressModel(Color.BLUE, Color.RED).getPoints()).isEmpty();
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_createProgressModel_ignoresOverLimitPoints() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        progressStyle.addProgressSegment(new Notification.ProgressStyle.Segment(100));
+
+        // maximum 4 points are going to be rendered.
+        progressStyle
+                .addProgressPoint(new Notification.ProgressStyle.Point(0))
+                .addProgressPoint(new Notification.ProgressStyle.Point(20))
+                .addProgressPoint(new Notification.ProgressStyle.Point(150))
+                .addProgressPoint(new Notification.ProgressStyle.Point(50))
+                .addProgressPoint(new Notification.ProgressStyle.Point(70))
+                .addProgressPoint(new Notification.ProgressStyle.Point(80))
+                .addProgressPoint(new Notification.ProgressStyle.Point(90))
+                .addProgressPoint(new Notification.ProgressStyle.Point(95))
+                .addProgressPoint(new Notification.ProgressStyle.Point(100));
+        final int backgroundColor = Color.RED;
+        final int defaultProgressColor = Color.BLUE;
+        final int expectedProgressColor = Notification.ProgressStyle.sanitizeProgressColor(
+                /* color = */Notification.COLOR_DEFAULT,
+                /* bg = */backgroundColor,
+                /* defaultColor = */defaultProgressColor);
+
+        // THEN
+        assertThat(progressStyle.createProgressModel(defaultProgressColor, backgroundColor)
+                .getPoints()).isEqualTo(
+                        List.of(new Notification.ProgressStyle.Point(0)
+                                .setColor(expectedProgressColor),
+                                new Notification.ProgressStyle.Point(20)
+                                .setColor(expectedProgressColor),
+                                new Notification.ProgressStyle.Point(50)
+                                .setColor(expectedProgressColor),
+                                new Notification.ProgressStyle.Point(70)
+                                .setColor(expectedProgressColor)
+                        )
+        );
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_createProgressModel_mergeSegmentsOnOverflow() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+
+        for (int i = 0; i < 15; i++) {
+            progressStyle
+                    .addProgressSegment(new Notification.ProgressStyle.Segment(10));
+        }
+
+        final NotificationProgressModel progressModel = progressStyle.createProgressModel(
+                Color.BLUE, Color.RED);
+
+        // THEN
+        assertThat(progressModel.getSegments().size()).isEqualTo(1);
+        assertThat(progressModel.getProgressMax()).isEqualTo(150);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_createProgressModel_useSegmentColorWhenAllMatch() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        final int segmentColor = Color.YELLOW;
+        final int defaultProgressColor = Color.BLUE;
+        final int backgroundColor = Color.RED;
+        // contrast ensured color for segmentColor.
+        final int expectedSegmentColor = Notification.ProgressStyle.sanitizeProgressColor(
+                /* color = */   segmentColor,
+                /* bg = */  backgroundColor,
+                /* defaultColor = */ defaultProgressColor);
+
+        for (int i = 0; i < 15; i++) {
+            progressStyle
+                    .addProgressSegment(new Notification.ProgressStyle.Segment(10)
+                            .setColor(segmentColor));
+        }
+
+        final NotificationProgressModel progressModel = progressStyle.createProgressModel(
+                defaultProgressColor, backgroundColor);
+
+        // THEN
+        assertThat(progressModel.getSegments())
+                .isEqualTo(List.of(new Notification.ProgressStyle.Segment(150)
+                        .setColor(expectedSegmentColor)));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_API_RICH_ONGOING)
+    public void progressStyle_createProgressModel_useDefaultColorWhenAllNotMatch() {
+        // GIVEN
+        final Notification.ProgressStyle progressStyle = new Notification.ProgressStyle();
+        final int defaultProgressColor = Color.BLUE;
+        final int backgroundColor = Color.RED;
+        // contrast ensured color for default progress color.
+        final int expectedSegmentColor = Notification.ProgressStyle.sanitizeProgressColor(
+                /* color = */  defaultProgressColor,
+                /* bg = */ backgroundColor,
+                /* defaultColor = */ defaultProgressColor);
+
+        for (int i = 0; i < 15; i++) {
+            progressStyle
+                    .addProgressSegment(new Notification.ProgressStyle.Segment(5)
+                            .setColor(Color.BLUE))
+                    .addProgressSegment(new Notification.ProgressStyle.Segment(5)
+                            .setColor(Color.CYAN));
+        }
+
+        final NotificationProgressModel progressModel = progressStyle.createProgressModel(
+                defaultProgressColor, backgroundColor);
+
+        // THEN
+        assertThat(progressModel.getSegments())
+                .isEqualTo(List.of(new Notification.ProgressStyle.Segment(150)
+                        .setColor(expectedSegmentColor)));
     }
 
     @Test

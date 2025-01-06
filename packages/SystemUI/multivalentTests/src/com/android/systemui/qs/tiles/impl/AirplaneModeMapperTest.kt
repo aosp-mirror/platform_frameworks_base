@@ -93,8 +93,7 @@ class AirplaneModeMapperTest : SysuiTestCase() {
     ): QSTileState {
         val label = context.getString(R.string.airplane_mode)
         return QSTileState(
-            Icon.Loaded(context.getDrawable(iconRes)!!, null),
-            iconRes,
+            Icon.Loaded(context.getDrawable(iconRes)!!, null, iconRes),
             label,
             activationState,
             secondaryLabel,

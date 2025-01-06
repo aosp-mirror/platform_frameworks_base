@@ -22,5 +22,5 @@ import dagger.Module
 
 @Module
 interface EventLogModule {
-    @SysUISingleton @Binds fun bindEventLog(eventLogImpl: EventLogImpl?): EventLog?
+    @SysUISingleton @Binds fun bindEventLog(eventLogImpl: EventLogImpl): EventLog
 }

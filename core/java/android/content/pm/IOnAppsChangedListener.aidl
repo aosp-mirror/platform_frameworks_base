@@ -16,6 +16,7 @@
 
 package android.content.pm;
 
+import android.content.pm.LauncherUserInfo;
 import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -34,4 +35,5 @@ oneway interface IOnAppsChangedListener {
     void onPackagesUnsuspended(in UserHandle user, in String[] packageNames);
     void onShortcutChanged(in UserHandle user, String packageName, in ParceledListSlice shortcuts);
     void onPackageLoadingProgressChanged(in UserHandle user, String packageName, float progress);
+    void onUserConfigChanged(in LauncherUserInfo launcherUserInfo);
 }

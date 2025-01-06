@@ -23,6 +23,9 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.data.db.CommunalDatabase
 import com.android.systemui.communal.data.db.CommunalWidgetDao
 import com.android.systemui.communal.nano.CommunalHubState
+import com.android.systemui.communal.shared.model.SpanValue
+import com.android.systemui.communal.shared.model.toFixed
+import com.android.systemui.communal.shared.model.toResponsive
 import com.android.systemui.lifecycle.InstantTaskExecutorRule
 import com.google.common.truth.Correspondence
 import com.google.common.truth.Truth.assertThat
@@ -71,22 +74,25 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
                     componentName = "com.android.fakePackage1/fakeWidget1",
                     rank = 0,
                     userSerialNumber = 0,
+                    spanY = SpanValue.Responsive(1),
                 ),
                 FakeWidgetMetadata(
                     widgetId = 12,
                     componentName = "com.android.fakePackage2/fakeWidget2",
                     rank = 1,
                     userSerialNumber = 0,
+                    spanY = SpanValue.Responsive(2),
                 ),
                 FakeWidgetMetadata(
                     widgetId = 13,
                     componentName = "com.android.fakePackage3/fakeWidget3",
                     rank = 2,
                     userSerialNumber = 10,
+                    spanY = SpanValue.Responsive(3),
                 ),
             )
         expectedWidgets.forEach {
-            dao.addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber)
+            dao.addWidget(it.widgetId, it.componentName, it.rank, it.userSerialNumber, it.spanY)
         }
 
         // Get communal hub state
@@ -150,6 +156,7 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
         val componentName: String,
         val rank: Int,
         val userSerialNumber: Int,
+        val spanY: SpanValue,
     )
 
     companion object {
@@ -163,7 +170,9 @@ class CommunalBackupUtilsTest : SysuiTestCase() {
                     actual?.widgetId == expected?.widgetId &&
                         actual?.componentName == expected?.componentName &&
                         actual?.rank == expected?.rank &&
-                        actual?.userSerialNumber == expected?.userSerialNumber
+                        actual?.userSerialNumber == expected?.userSerialNumber &&
+                        actual?.spanY == expected?.spanY?.toFixed()?.value &&
+                        actual?.spanYNew == expected?.spanY?.toResponsive()?.value
                 },
                 "represents",
             )

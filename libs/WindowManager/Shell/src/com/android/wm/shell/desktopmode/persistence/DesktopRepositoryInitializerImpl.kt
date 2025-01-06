@@ -19,6 +19,7 @@ package com.android.wm.shell.desktopmode.persistence
 import android.content.Context
 import android.window.DesktopModeFlags
 import com.android.wm.shell.desktopmode.DesktopRepository
+import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import kotlinx.coroutines.CoroutineScope
@@ -35,32 +36,50 @@ class DesktopRepositoryInitializerImpl(
     private val persistentRepository: DesktopPersistentRepository,
     @ShellMainThread private val mainCoroutineScope: CoroutineScope,
 ) : DesktopRepositoryInitializer {
-    override fun initialize(repository: DesktopRepository) {
+    override fun initialize(userRepositories: DesktopUserRepositories) {
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_PERSISTENCE.isTrue()) return
         //  TODO: b/365962554 - Handle the case that user moves to desktop before it's initialized
         mainCoroutineScope.launch {
-            val desktop = persistentRepository.readDesktop() ?: return@launch
-
-            val maxTasks =
-                DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
-                    ?: desktop.zOrderedTasksCount
-
-            var visibleTasksCount = 0
-            desktop.zOrderedTasksList
-                // Reverse it so we initialize the repo from bottom to top.
-                .reversed()
-                .mapNotNull { taskId -> desktop.tasksByTaskIdMap[taskId] }
-                .forEach { task ->
-                    if (task.desktopTaskState == DesktopTaskState.VISIBLE
-                        && visibleTasksCount < maxTasks
-                    ) {
-                        visibleTasksCount++
-                        repository.addTask(desktop.displayId, task.taskId, isVisible = false)
-                    } else {
-                        repository.addTask(desktop.displayId, task.taskId, isVisible = false)
-                        repository.minimizeTask(desktop.displayId, task.taskId)
-                    }
+            val desktopUserPersistentRepositoryMap =
+                persistentRepository.getUserDesktopRepositoryMap() ?: return@launch
+            for (userId in desktopUserPersistentRepositoryMap.keys) {
+                val repository = userRepositories.getProfile(userId)
+                val desktopRepositoryState =
+                    persistentRepository.getDesktopRepositoryState(userId) ?: continue
+                val desktopByDesktopIdMap = desktopRepositoryState.desktopMap
+                for (desktopId in desktopByDesktopIdMap.keys) {
+                    val persistentDesktop =
+                        persistentRepository.readDesktop(userId, desktopId) ?: continue
+                    val maxTasks =
+                        DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
+                            ?: persistentDesktop.zOrderedTasksCount
+                    var visibleTasksCount = 0
+                    persistentDesktop.zOrderedTasksList
+                        // Reverse it so we initialize the repo from bottom to top.
+                        .reversed()
+                        .mapNotNull { taskId -> persistentDesktop.tasksByTaskIdMap[taskId] }
+                        .forEach { task ->
+                            if (
+                                task.desktopTaskState == DesktopTaskState.VISIBLE &&
+                                    visibleTasksCount < maxTasks
+                            ) {
+                                visibleTasksCount++
+                                repository.addTask(
+                                    persistentDesktop.displayId,
+                                    task.taskId,
+                                    isVisible = false,
+                                )
+                            } else {
+                                repository.addTask(
+                                    persistentDesktop.displayId,
+                                    task.taskId,
+                                    isVisible = false,
+                                )
+                                repository.minimizeTask(persistentDesktop.displayId, task.taskId)
+                            }
+                        }
                 }
+            }
         }
     }
 }

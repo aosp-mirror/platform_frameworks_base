@@ -17,6 +17,7 @@
 package com.android.wm.shell.bubbles.bar
 
 import android.app.ActivityManager
+import android.content.ComponentName
 import android.content.Context
 import android.content.pm.ShortcutInfo
 import android.graphics.Insets
@@ -24,6 +25,7 @@ import android.graphics.Rect
 import android.view.LayoutInflater
 import android.view.View
 import android.view.WindowManager
+import android.widget.FrameLayout
 import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -31,31 +33,30 @@ import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.internal.logging.testing.UiEventLoggerFake
 import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.R
+import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.Bubble
-import com.android.wm.shell.bubbles.BubbleData
 import com.android.wm.shell.bubbles.BubbleExpandedViewManager
 import com.android.wm.shell.bubbles.BubbleLogger
 import com.android.wm.shell.bubbles.BubblePositioner
 import com.android.wm.shell.bubbles.BubbleTaskView
 import com.android.wm.shell.bubbles.BubbleTaskViewFactory
 import com.android.wm.shell.bubbles.DeviceConfig
+import com.android.wm.shell.bubbles.FakeBubbleExpandedViewManager
 import com.android.wm.shell.bubbles.RegionSamplingProvider
 import com.android.wm.shell.bubbles.UiEventSubject.Companion.assertThat
-import com.android.wm.shell.common.ShellExecutor
-import com.android.wm.shell.shared.bubbles.BubbleBarLocation
 import com.android.wm.shell.shared.handles.RegionSamplingHelper
 import com.android.wm.shell.taskview.TaskView
 import com.android.wm.shell.taskview.TaskViewTaskController
 import com.google.common.truth.Truth.assertThat
+import com.google.common.truth.Truth.assertWithMessage
 import com.google.common.util.concurrent.MoreExecutors.directExecutor
-import java.util.Collections
-import java.util.concurrent.Executor
 import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
+import java.util.concurrent.Executor
 
 /** Tests for [BubbleBarExpandedViewTest] */
 @SmallTest
@@ -69,8 +70,8 @@ class BubbleBarExpandedViewTest {
     private val context = ApplicationProvider.getApplicationContext<Context>()
     private val windowManager = context.getSystemService(WindowManager::class.java)
 
-    private lateinit var mainExecutor: TestExecutor
-    private lateinit var bgExecutor: TestExecutor
+    private lateinit var mainExecutor: TestShellExecutor
+    private lateinit var bgExecutor: TestShellExecutor
 
     private lateinit var expandedViewManager: BubbleExpandedViewManager
     private lateinit var positioner: BubblePositioner
@@ -87,8 +88,8 @@ class BubbleBarExpandedViewTest {
     fun setUp() {
         ProtoLog.REQUIRE_PROTOLOGTOOL = false
         ProtoLog.init()
-        mainExecutor = TestExecutor()
-        bgExecutor = TestExecutor()
+        mainExecutor = TestShellExecutor()
+        bgExecutor = TestShellExecutor()
         positioner = BubblePositioner(context, windowManager)
         positioner.setShowingInBubbleBar(true)
         val deviceConfig =
@@ -102,16 +103,16 @@ class BubbleBarExpandedViewTest {
             )
         positioner.update(deviceConfig)
 
-        expandedViewManager = createExpandedViewManager()
+        expandedViewManager = FakeBubbleExpandedViewManager(bubbleBar = true, expanded = true)
         bubbleTaskView = FakeBubbleTaskViewFactory().create()
 
         val inflater = LayoutInflater.from(context)
 
         regionSamplingProvider = TestRegionSamplingProvider()
 
-        bubbleExpandedView = (inflater.inflate(
+        bubbleExpandedView = inflater.inflate(
             R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */
-        ) as BubbleBarExpandedView)
+        ) as BubbleBarExpandedView
         bubbleExpandedView.initialize(
             expandedViewManager,
             positioner,
@@ -123,11 +124,11 @@ class BubbleBarExpandedViewTest {
             regionSamplingProvider,
         )
 
-        getInstrumentation().runOnMainSync(Runnable {
+        getInstrumentation().runOnMainSync {
             bubbleExpandedView.onAttachedToWindow()
             // Helper should be created once attached to window
             testableRegionSamplingHelper = regionSamplingProvider!!.helper
-        })
+        }
 
         bubble = Bubble(
             "key",
@@ -147,6 +148,7 @@ class BubbleBarExpandedViewTest {
     @After
     fun tearDown() {
         testableRegionSamplingHelper?.stopAndDestroy()
+        getInstrumentation().waitForIdleSync()
     }
 
     @Test
@@ -218,14 +220,137 @@ class BubbleBarExpandedViewTest {
     @Test
     fun testEventLogging_dismissBubbleViaAppMenu() {
         getInstrumentation().runOnMainSync { bubbleExpandedView.handleView.performClick() }
-        val dismissMenuItem =
-            bubbleExpandedView.findViewWithTag<View>(BubbleBarMenuView.DISMISS_ACTION_TAG)
+        val dismissMenuItem = bubbleExpandedView.menuView()
+            .actionViewWithText(context.getString(R.string.bubble_dismiss_text))
         assertThat(dismissMenuItem).isNotNull()
         getInstrumentation().runOnMainSync { dismissMenuItem.performClick() }
         assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
         assertThat(uiEventLoggerFake.logs[0].eventId)
             .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_BUBBLE_DISMISSED_APP_MENU.id)
         assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
+    }
+
+    @Test
+    fun testEventLogging_openAppSettings() {
+        getInstrumentation().runOnMainSync { bubbleExpandedView.handleView.performClick() }
+        val appMenuItem = bubbleExpandedView.menuView()
+            .actionViewWithText(context.getString(R.string.bubbles_app_settings, bubble.appName))
+        getInstrumentation().runOnMainSync { appMenuItem.performClick() }
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.logs[0].eventId)
+            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_APP_MENU_GO_TO_SETTINGS.id)
+        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
+    }
+
+    @Test
+    fun testEventLogging_unBubbleConversation() {
+        getInstrumentation().runOnMainSync { bubbleExpandedView.handleView.performClick() }
+        val menuItem = bubbleExpandedView.menuView()
+            .actionViewWithText(context.getString(R.string.bubbles_dont_bubble_conversation))
+        getInstrumentation().runOnMainSync { menuItem.performClick() }
+        assertThat(uiEventLoggerFake.numLogs()).isEqualTo(1)
+        assertThat(uiEventLoggerFake.logs[0].eventId)
+            .isEqualTo(BubbleLogger.Event.BUBBLE_BAR_APP_MENU_OPT_OUT.id)
+        assertThat(uiEventLoggerFake.logs[0]).hasBubbleInfo(bubble)
+    }
+
+    @Test
+    fun animateExpansion_waitsUntilTaskCreated() {
+        var animated = false
+        bubbleExpandedView.animateExpansionWhenTaskViewVisible { animated = true }
+        assertThat(animated).isFalse()
+        bubbleExpandedView.onTaskCreated()
+        assertThat(animated).isTrue()
+    }
+
+    @Test
+    fun animateExpansion_taskViewAttachedAndVisible() {
+        val inflater = LayoutInflater.from(context)
+        val expandedView = inflater.inflate(
+            R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */
+        ) as BubbleBarExpandedView
+        val taskView = FakeBubbleTaskViewFactory().create()
+        val taskViewParent = FrameLayout(context)
+        taskViewParent.addView(taskView.taskView)
+        taskView.listener.onTaskCreated(666, ComponentName(context, "BubbleBarExpandedViewTest"))
+        assertThat(taskView.isVisible).isTrue()
+
+        expandedView.initialize(
+            expandedViewManager,
+            positioner,
+            BubbleLogger(uiEventLoggerFake),
+            false /* isOverflow */,
+            taskView,
+            mainExecutor,
+            bgExecutor,
+            regionSamplingProvider,
+        )
+
+        // the task view should be removed from its parent
+        assertThat(taskView.taskView.parent).isNull()
+
+        var animated = false
+        expandedView.animateExpansionWhenTaskViewVisible { animated = true }
+        assertThat(animated).isFalse()
+
+        // send an invisible signal to simulate the surface getting destroyed
+        expandedView.onContentVisibilityChanged(false)
+
+        // send a visible signal to simulate a new surface getting created
+        expandedView.onContentVisibilityChanged(true)
+
+        assertThat(taskView.taskView.parent).isEqualTo(expandedView)
+        assertThat(animated).isTrue()
+    }
+
+    @Test
+    fun animateExpansion_taskViewAttachedAndInvisible() {
+        val inflater = LayoutInflater.from(context)
+        val expandedView = inflater.inflate(
+            R.layout.bubble_bar_expanded_view, null, false /* attachToRoot */
+        ) as BubbleBarExpandedView
+        val taskView = FakeBubbleTaskViewFactory().create()
+        val taskViewParent = FrameLayout(context)
+        taskViewParent.addView(taskView.taskView)
+        taskView.listener.onTaskCreated(666, ComponentName(context, "BubbleBarExpandedViewTest"))
+        assertThat(taskView.isVisible).isTrue()
+        taskView.listener.onTaskVisibilityChanged(666, false)
+        assertThat(taskView.isVisible).isFalse()
+
+        expandedView.initialize(
+            expandedViewManager,
+            positioner,
+            BubbleLogger(uiEventLoggerFake),
+            false /* isOverflow */,
+            taskView,
+            mainExecutor,
+            bgExecutor,
+            regionSamplingProvider,
+        )
+
+        // the task view should be added to the expanded view
+        assertThat(taskView.taskView.parent).isEqualTo(expandedView)
+
+        var animated = false
+        expandedView.animateExpansionWhenTaskViewVisible { animated = true }
+        assertThat(animated).isFalse()
+
+        // send a visible signal to simulate a new surface getting created
+        expandedView.onContentVisibilityChanged(true)
+
+        assertThat(animated).isTrue()
+    }
+
+    private fun BubbleBarExpandedView.menuView(): BubbleBarMenuView {
+        return findViewByPredicate { it is BubbleBarMenuView }
+    }
+
+    private fun BubbleBarMenuView.actionViewWithText(text: CharSequence): View {
+        val views = ArrayList<View>()
+        findViewsWithText(views, text, View.FIND_VIEWS_WITH_TEXT)
+        assertWithMessage("Expecting a single action with text '$text'").that(views).hasSize(1)
+        // findViewsWithText returns the TextView, but the click listener is on the parent container
+        return views.first().parent as View
     }
 
     private inner class FakeBubbleTaskViewFactory : BubbleTaskViewFactory {
@@ -298,64 +423,5 @@ class BubbleBarExpandedViewTest {
             setWindowVisible = false
             setWindowInvisible = false
         }
-    }
-
-    private fun createExpandedViewManager(): BubbleExpandedViewManager {
-        return object : BubbleExpandedViewManager {
-            override val overflowBubbles: List<Bubble>
-                get() = Collections.emptyList()
-
-            override fun setOverflowListener(listener: BubbleData.Listener) {
-            }
-
-            override fun collapseStack() {
-            }
-
-            override fun updateWindowFlagsForBackpress(intercept: Boolean) {
-            }
-
-            override fun promoteBubbleFromOverflow(bubble: Bubble) {
-            }
-
-            override fun removeBubble(key: String, reason: Int) {
-            }
-
-            override fun dismissBubble(bubble: Bubble, reason: Int) {
-            }
-
-            override fun setAppBubbleTaskId(key: String, taskId: Int) {
-            }
-
-            override fun isStackExpanded(): Boolean {
-                return true
-            }
-
-            override fun isShowingAsBubbleBar(): Boolean {
-                return true
-            }
-
-            override fun hideCurrentInputMethod() {
-            }
-
-            override fun updateBubbleBarLocation(location: BubbleBarLocation) {
-            }
-        }
-    }
-
-    private class TestExecutor : ShellExecutor {
-
-        private val runnables: MutableList<Runnable> = mutableListOf()
-
-        override fun execute(runnable: Runnable) {
-            runnables.add(runnable)
-        }
-
-        override fun executeDelayed(runnable: Runnable, delayMillis: Long) {
-            execute(runnable)
-        }
-
-        override fun removeCallbacks(runnable: Runnable?) {}
-
-        override fun hasCallback(runnable: Runnable?): Boolean = false
     }
 }

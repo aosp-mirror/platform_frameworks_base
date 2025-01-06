@@ -22,10 +22,12 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalMatchers.aryEq;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
@@ -39,14 +41,18 @@ import android.content.pm.PackageManager;
 import android.hardware.thermal.TemperatureThreshold;
 import android.hardware.thermal.ThrottlingSeverity;
 import android.os.CoolingDevice;
+import android.os.Flags;
 import android.os.IBinder;
 import android.os.IPowerManager;
 import android.os.IThermalEventListener;
+import android.os.IThermalHeadroomListener;
 import android.os.IThermalService;
 import android.os.IThermalStatusListener;
 import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.Temperature;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -56,6 +62,8 @@ import com.android.server.power.ThermalManagerService.TemperatureWatcher;
 import com.android.server.power.ThermalManagerService.ThermalHalWrapper;
 
 import org.junit.Before;
+import org.junit.ClassRule;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -78,6 +86,11 @@ import java.util.Map;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ThermalManagerServiceTest {
+    @ClassRule
+    public static final SetFlagsRule.ClassRule mSetFlagsClassRule = new SetFlagsRule.ClassRule();
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = mSetFlagsClassRule.createSetFlagsRule();
+
     private static final long CALLBACK_TIMEOUT_MILLI_SEC = 5000;
     private ThermalManagerService mService;
     private ThermalHalFake mFakeHal;
@@ -88,6 +101,8 @@ public class ThermalManagerServiceTest {
     private IPowerManager mIPowerManagerMock;
     @Mock
     private IThermalService mIThermalServiceMock;
+    @Mock
+    private IThermalHeadroomListener mHeadroomListener;
     @Mock
     private IThermalEventListener mEventListener1;
     @Mock
@@ -102,22 +117,23 @@ public class ThermalManagerServiceTest {
      */
     private class ThermalHalFake extends ThermalHalWrapper {
         private static final int INIT_STATUS = Temperature.THROTTLING_NONE;
-        private ArrayList<Temperature> mTemperatureList = new ArrayList<>();
-        private ArrayList<CoolingDevice> mCoolingDeviceList = new ArrayList<>();
-        private ArrayList<TemperatureThreshold> mTemperatureThresholdList = initializeThresholds();
+        private List<Temperature> mTemperatureList = new ArrayList<>();
+        private List<Temperature> mOverrideTemperatures = null;
+        private List<CoolingDevice> mCoolingDeviceList = new ArrayList<>();
+        private List<TemperatureThreshold> mTemperatureThresholdList = initializeThresholds();
 
-        private Temperature mSkin1 = new Temperature(0, Temperature.TYPE_SKIN, "skin1",
+        private Temperature mSkin1 = new Temperature(28, Temperature.TYPE_SKIN, "skin1",
                 INIT_STATUS);
-        private Temperature mSkin2 = new Temperature(0, Temperature.TYPE_SKIN, "skin2",
+        private Temperature mSkin2 = new Temperature(31, Temperature.TYPE_SKIN, "skin2",
                 INIT_STATUS);
-        private Temperature mBattery = new Temperature(0, Temperature.TYPE_BATTERY, "batt",
+        private Temperature mBattery = new Temperature(34, Temperature.TYPE_BATTERY, "batt",
                 INIT_STATUS);
-        private Temperature mUsbPort = new Temperature(0, Temperature.TYPE_USB_PORT, "usbport",
+        private Temperature mUsbPort = new Temperature(37, Temperature.TYPE_USB_PORT, "usbport",
                 INIT_STATUS);
-        private CoolingDevice mCpu = new CoolingDevice(0, CoolingDevice.TYPE_BATTERY, "cpu");
-        private CoolingDevice mGpu = new CoolingDevice(0, CoolingDevice.TYPE_BATTERY, "gpu");
+        private CoolingDevice mCpu = new CoolingDevice(40, CoolingDevice.TYPE_BATTERY, "cpu");
+        private CoolingDevice mGpu = new CoolingDevice(43, CoolingDevice.TYPE_BATTERY, "gpu");
 
-        private ArrayList<TemperatureThreshold> initializeThresholds() {
+        private List<TemperatureThreshold> initializeThresholds() {
             ArrayList<TemperatureThreshold> thresholds = new ArrayList<>();
 
             TemperatureThreshold skinThreshold = new TemperatureThreshold();
@@ -155,6 +171,14 @@ public class ThermalManagerServiceTest {
             mTemperatureList.add(mUsbPort);
             mCoolingDeviceList.add(mCpu);
             mCoolingDeviceList.add(mGpu);
+        }
+
+        void setOverrideTemperatures(List<Temperature> temperatures) {
+            mOverrideTemperatures = temperatures;
+        }
+
+        void resetOverrideTemperatures() {
+            mOverrideTemperatures = null;
         }
 
         @Override
@@ -221,22 +245,36 @@ public class ThermalManagerServiceTest {
         when(mContext.getSystemService(PowerManager.class)).thenReturn(mPowerManager);
         resetListenerMock();
         mService = new ThermalManagerService(mContext, mFakeHal);
-        // Register callbacks before AMS ready and no callback sent
+        mService.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
+    }
+
+    private void resetListenerMock() {
+        reset(mEventListener1);
+        reset(mStatusListener1);
+        reset(mEventListener2);
+        reset(mStatusListener2);
+        reset(mHeadroomListener);
+        doReturn(mock(IBinder.class)).when(mEventListener1).asBinder();
+        doReturn(mock(IBinder.class)).when(mStatusListener1).asBinder();
+        doReturn(mock(IBinder.class)).when(mEventListener2).asBinder();
+        doReturn(mock(IBinder.class)).when(mStatusListener2).asBinder();
+        doReturn(mock(IBinder.class)).when(mHeadroomListener).asBinder();
+    }
+
+    @Test
+    public void testRegister() throws Exception {
+        mService = new ThermalManagerService(mContext, mFakeHal);
+        // Register callbacks before AMS ready and verify they are called after AMS is ready
         assertTrue(mService.mService.registerThermalEventListener(mEventListener1));
         assertTrue(mService.mService.registerThermalStatusListener(mStatusListener1));
         assertTrue(mService.mService.registerThermalEventListenerWithType(mEventListener2,
                 Temperature.TYPE_SKIN));
         assertTrue(mService.mService.registerThermalStatusListener(mStatusListener2));
-        verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(0)).notifyThrottling(any(Temperature.class));
-        verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
-        verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(0)).notifyThrottling(any(Temperature.class));
-        verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
-                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
+        Thread.sleep(CALLBACK_TIMEOUT_MILLI_SEC);
         resetListenerMock();
         mService.onBootPhase(SystemService.PHASE_ACTIVITY_MANAGER_READY);
+        assertTrue(mService.mService.registerThermalHeadroomListener(mHeadroomListener));
+
         ArgumentCaptor<Temperature> captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(4)).notifyThrottling(captor.capture());
@@ -251,31 +289,18 @@ public class ThermalManagerServiceTest {
                 captor.getAllValues());
         verify(mStatusListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(0)).onStatusChange(Temperature.THROTTLING_NONE);
-    }
-
-    private void resetListenerMock() {
-        reset(mEventListener1);
-        reset(mStatusListener1);
-        reset(mEventListener2);
-        reset(mStatusListener2);
-        doReturn(mock(IBinder.class)).when(mEventListener1).asBinder();
-        doReturn(mock(IBinder.class)).when(mStatusListener1).asBinder();
-        doReturn(mock(IBinder.class)).when(mEventListener2).asBinder();
-        doReturn(mock(IBinder.class)).when(mStatusListener2).asBinder();
-    }
-
-    @Test
-    public void testRegister() throws RemoteException {
         resetListenerMock();
-        // Register callbacks and verify they are called
+
+        // Register callbacks after AMS ready and verify they are called
         assertTrue(mService.mService.registerThermalEventListener(mEventListener1));
         assertTrue(mService.mService.registerThermalStatusListener(mStatusListener1));
-        ArgumentCaptor<Temperature> captor = ArgumentCaptor.forClass(Temperature.class);
+        captor = ArgumentCaptor.forClass(Temperature.class);
         verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(4)).notifyThrottling(captor.capture());
         assertListEqualsIgnoringOrder(mFakeHal.mTemperatureList, captor.getAllValues());
         verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
                 .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
+
         // Register new callbacks and verify old ones are not called (remained same) while new
         // ones are called
         assertTrue(mService.mService.registerThermalEventListenerWithType(mEventListener2,
@@ -296,7 +321,15 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
-    public void testNotifyThrottling() throws RemoteException {
+    public void testNotifyThrottling() throws Exception {
+        assertTrue(mService.mService.registerThermalEventListener(mEventListener1));
+        assertTrue(mService.mService.registerThermalStatusListener(mStatusListener1));
+        assertTrue(mService.mService.registerThermalEventListenerWithType(mEventListener2,
+                Temperature.TYPE_SKIN));
+        assertTrue(mService.mService.registerThermalStatusListener(mStatusListener2));
+        Thread.sleep(CALLBACK_TIMEOUT_MILLI_SEC);
+        resetListenerMock();
+
         int status = Temperature.THROTTLING_SEVERE;
         // Should only notify event not status
         Temperature newBattery = new Temperature(50, Temperature.TYPE_BATTERY, "batt", status);
@@ -349,6 +382,57 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
+    @EnableFlags({Flags.FLAG_ALLOW_THERMAL_THRESHOLDS_CALLBACK})
+    public void testNotifyThrottling_headroomCallback() throws Exception {
+        assertTrue(mService.mService.registerThermalHeadroomListener(mHeadroomListener));
+        Thread.sleep(CALLBACK_TIMEOUT_MILLI_SEC);
+        resetListenerMock();
+        int status = Temperature.THROTTLING_SEVERE;
+        mFakeHal.setOverrideTemperatures(new ArrayList<>());
+
+        // Should not notify on non-skin type
+        Temperature newBattery = new Temperature(37, Temperature.TYPE_BATTERY, "batt", status);
+        mFakeHal.mCallback.onTemperatureChanged(newBattery);
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(0)).onHeadroomChange(anyFloat(), anyFloat(), anyInt(), any());
+        resetListenerMock();
+
+        // Notify headroom on skin temperature change
+        Temperature newSkin = new Temperature(37, Temperature.TYPE_SKIN, "skin1", status);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onHeadroomChange(eq(0.9f), anyFloat(), anyInt(),
+                eq(new float[]{Float.NaN, 0.6666667f, 0.8333333f, 1.0f, 1.1666666f, 1.3333334f,
+                        1.5f}));
+        resetListenerMock();
+
+        // Same or similar temperature should not trigger in a short period
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
+        newSkin = new Temperature(36.9f, Temperature.TYPE_SKIN, "skin1", status);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
+        newSkin = new Temperature(37.1f, Temperature.TYPE_SKIN, "skin1", status);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(0)).onHeadroomChange(anyFloat(), anyFloat(), anyInt(), any());
+        resetListenerMock();
+
+        // Significant temperature should trigger in a short period
+        newSkin = new Temperature(34f, Temperature.TYPE_SKIN, "skin1", status);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onHeadroomChange(eq(0.8f), anyFloat(), anyInt(),
+                eq(new float[]{Float.NaN, 0.6666667f, 0.8333333f, 1.0f, 1.1666666f, 1.3333334f,
+                        1.5f}));
+        resetListenerMock();
+        newSkin = new Temperature(40f, Temperature.TYPE_SKIN, "skin1", status);
+        mFakeHal.mCallback.onTemperatureChanged(newSkin);
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onHeadroomChange(eq(1.0f), anyFloat(), anyInt(),
+                eq(new float[]{Float.NaN, 0.6666667f, 0.8333333f, 1.0f, 1.1666666f, 1.3333334f,
+                        1.5f}));
+    }
+
+    @Test
     public void testGetCurrentTemperatures() throws RemoteException {
         assertListEqualsIgnoringOrder(mFakeHal.getCurrentTemperatures(false, 0),
                 Arrays.asList(mService.mService.getCurrentTemperatures()));
@@ -388,13 +472,28 @@ public class ThermalManagerServiceTest {
         // Do no call onActivityManagerReady to skip connect HAL
         assertTrue(mService.mService.registerThermalEventListener(mEventListener1));
         assertTrue(mService.mService.registerThermalStatusListener(mStatusListener1));
-        assertTrue(mService.mService.unregisterThermalEventListener(mEventListener1));
-        assertTrue(mService.mService.unregisterThermalStatusListener(mStatusListener1));
+        assertTrue(mService.mService.registerThermalEventListenerWithType(mEventListener2,
+                Temperature.TYPE_SKIN));
+        assertFalse(mService.mService.registerThermalHeadroomListener(mHeadroomListener));
+        verify(mEventListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(0)).notifyThrottling(any(Temperature.class));
+        verify(mStatusListener1, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onStatusChange(Temperature.THROTTLING_NONE);
+        verify(mEventListener2, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(0)).notifyThrottling(any(Temperature.class));
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(0)).onHeadroomChange(anyFloat(), anyFloat(), anyInt(), any());
+
         assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperatures()).size());
         assertEquals(0, Arrays.asList(mService.mService.getCurrentTemperaturesWithType(
-                        Temperature.TYPE_SKIN)).size());
+                Temperature.TYPE_SKIN)).size());
         assertEquals(Temperature.THROTTLING_NONE, mService.mService.getCurrentThermalStatus());
         assertTrue(Float.isNaN(mService.mService.getThermalHeadroom(0)));
+
+        assertTrue(mService.mService.unregisterThermalEventListener(mEventListener1));
+        assertTrue(mService.mService.unregisterThermalEventListener(mEventListener2));
+        assertTrue(mService.mService.unregisterThermalStatusListener(mStatusListener1));
+        assertFalse(mService.mService.unregisterThermalHeadroomListener(mHeadroomListener));
     }
 
     @Test
@@ -419,35 +518,45 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
-    public void testTemperatureWatcherUpdateSevereThresholds() {
+    @EnableFlags({Flags.FLAG_ALLOW_THERMAL_THRESHOLDS_CALLBACK,
+            Flags.FLAG_ALLOW_THERMAL_HEADROOM_THRESHOLDS})
+    public void testTemperatureWatcherUpdateSevereThresholds() throws Exception {
+        assertTrue(mService.mService.registerThermalHeadroomListener(mHeadroomListener));
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onHeadroomChange(eq(0.6f), eq(0.6f), anyInt(),
+                aryEq(new float[]{Float.NaN, 0.6666667f, 0.8333333f, 1.0f, 1.1666666f, 1.3333334f,
+                        1.5f}));
+        resetListenerMock();
         TemperatureWatcher watcher = mService.mTemperatureWatcher;
+        TemperatureThreshold newThreshold = new TemperatureThreshold();
+        newThreshold.name = "skin1";
+        newThreshold.type = Temperature.TYPE_SKIN;
+        // significant change in threshold (> 0.3C) should trigger a callback
+        newThreshold.hotThrottlingThresholds = new float[]{
+                Float.NaN, 43.0f, 46.0f, 49.0f, Float.NaN, Float.NaN, Float.NaN
+        };
+        mFakeHal.mCallback.onThresholdChanged(newThreshold);
         synchronized (watcher.mSamples) {
-            watcher.mSevereThresholds.erase();
-            watcher.getAndUpdateThresholds();
-            assertEquals(1, watcher.mSevereThresholds.size());
-            assertEquals("skin1", watcher.mSevereThresholds.keyAt(0));
             Float threshold = watcher.mSevereThresholds.get("skin1");
             assertNotNull(threshold);
-            assertEquals(40.0f, threshold, 0.0f);
+            assertEquals(49.0f, threshold, 0.0f);
             assertArrayEquals("Got" + Arrays.toString(watcher.mHeadroomThresholds),
-                    new float[]{Float.NaN, 0.6667f, 0.8333f, 1.0f, 1.166f, 1.3333f,
-                            1.5f},
-                    watcher.mHeadroomThresholds, 0.01f);
-
-            TemperatureThreshold newThreshold = new TemperatureThreshold();
-            newThreshold.name = "skin1";
-            newThreshold.hotThrottlingThresholds = new float[] {
-                    Float.NaN, 44.0f, 47.0f, 50.0f, Float.NaN, Float.NaN, Float.NaN
-            };
-            mFakeHal.mCallback.onThresholdChanged(newThreshold);
-            threshold = watcher.mSevereThresholds.get("skin1");
-            assertNotNull(threshold);
-            assertEquals(50.0f, threshold, 0.0f);
-            assertArrayEquals("Got" + Arrays.toString(watcher.mHeadroomThresholds),
-                    new float[]{Float.NaN, 0.8f, 0.9f, 1.0f, Float.NaN, Float.NaN,
-                            Float.NaN},
+                    new float[]{Float.NaN, 0.8f, 0.9f, 1.0f, Float.NaN, Float.NaN, Float.NaN},
                     watcher.mHeadroomThresholds, 0.01f);
         }
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(1)).onHeadroomChange(eq(0.3f), eq(0.3f), anyInt(),
+                aryEq(new float[]{Float.NaN, 0.8f, 0.9f, 1.0f, Float.NaN, Float.NaN, Float.NaN}));
+        resetListenerMock();
+
+        // same or similar threshold callback data within a second should not trigger callback
+        mFakeHal.mCallback.onThresholdChanged(newThreshold);
+        newThreshold.hotThrottlingThresholds = new float[]{
+                Float.NaN, 43.1f, 45.9f, 49.0f, Float.NaN, Float.NaN, Float.NaN
+        };
+        mFakeHal.mCallback.onThresholdChanged(newThreshold);
+        verify(mHeadroomListener, timeout(CALLBACK_TIMEOUT_MILLI_SEC)
+                .times(0)).onHeadroomChange(anyFloat(), anyFloat(), anyInt(), any());
     }
 
     @Test
@@ -475,28 +584,34 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
-    public void testGetThermalHeadroomThresholdsOnlyReadOnce() throws Exception {
+    public void testGetThermalHeadroomThresholds() throws Exception {
         float[] expected = new float[]{Float.NaN, 0.1f, 0.2f, 0.3f, 0.4f, Float.NaN, 0.6f};
         when(mIThermalServiceMock.getThermalHeadroomThresholds()).thenReturn(expected);
         Map<Integer, Float> thresholds1 = mPowerManager.getThermalHeadroomThresholds();
         verify(mIThermalServiceMock, times(1)).getThermalHeadroomThresholds();
+        checkHeadroomThresholds(expected, thresholds1);
+
+        reset(mIThermalServiceMock);
+        expected = new float[]{Float.NaN, 0.2f, 0.3f, 0.4f, 0.4f, Float.NaN, 0.6f};
+        when(mIThermalServiceMock.getThermalHeadroomThresholds()).thenReturn(expected);
+        Map<Integer, Float> thresholds2 = mPowerManager.getThermalHeadroomThresholds();
+        verify(mIThermalServiceMock, times(1)).getThermalHeadroomThresholds();
+        checkHeadroomThresholds(expected, thresholds2);
+    }
+
+    private void checkHeadroomThresholds(float[] expected, Map<Integer, Float> thresholds) {
         for (int status = PowerManager.THERMAL_STATUS_LIGHT;
                 status <= PowerManager.THERMAL_STATUS_SHUTDOWN; status++) {
             if (Float.isNaN(expected[status])) {
-                assertFalse(thresholds1.containsKey(status));
+                assertFalse(thresholds.containsKey(status));
             } else {
-                assertEquals(expected[status], thresholds1.get(status), 0.01f);
+                assertEquals(expected[status], thresholds.get(status), 0.01f);
             }
         }
-        reset(mIThermalServiceMock);
-        Map<Integer, Float> thresholds2 = mPowerManager.getThermalHeadroomThresholds();
-        verify(mIThermalServiceMock, times(0)).getThermalHeadroomThresholds();
-        assertNotSame(thresholds1, thresholds2);
-        assertEquals(thresholds1, thresholds2);
     }
 
     @Test
-    public void testGetThermalHeadroomThresholdsOnDefaultHalResult() throws Exception  {
+    public void testGetThermalHeadroomThresholdsOnDefaultHalResult() throws Exception {
         TemperatureWatcher watcher = mService.mTemperatureWatcher;
         ArrayList<TemperatureThreshold> thresholds = new ArrayList<>();
         mFakeHal.mTemperatureThresholdList = thresholds;
@@ -510,8 +625,8 @@ public class ThermalManagerServiceTest {
         TemperatureThreshold nanThresholds = new TemperatureThreshold();
         nanThresholds.name = "nan";
         nanThresholds.type = Temperature.TYPE_SKIN;
-        nanThresholds.hotThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN  + 1];
-        nanThresholds.coldThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN  + 1];
+        nanThresholds.hotThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN + 1];
+        nanThresholds.coldThrottlingThresholds = new float[ThrottlingSeverity.SHUTDOWN + 1];
         Arrays.fill(nanThresholds.hotThrottlingThresholds, Float.NaN);
         Arrays.fill(nanThresholds.coldThrottlingThresholds, Float.NaN);
         thresholds.add(nanThresholds);
@@ -607,7 +722,13 @@ public class ThermalManagerServiceTest {
     }
 
     @Test
-    public void testDump() {
+    public void testDump() throws Exception {
+        assertTrue(mService.mService.registerThermalEventListener(mEventListener1));
+        assertTrue(mService.mService.registerThermalStatusListener(mStatusListener1));
+        assertTrue(mService.mService.registerThermalEventListenerWithType(mEventListener2,
+                Temperature.TYPE_SKIN));
+        assertTrue(mService.mService.registerThermalStatusListener(mStatusListener2));
+
         when(mContext.checkCallingOrSelfPermission(android.Manifest.permission.DUMP))
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
         final StringWriter out = new StringWriter();
@@ -628,22 +749,22 @@ public class ThermalManagerServiceTest {
         assertThat(dumpStr).contains("Thermal Status: 0");
         assertThat(dumpStr).contains(
                 "Cached temperatures:\n"
-                + "\tTemperature{mValue=0.0, mType=4, mName=usbport, mStatus=0}\n"
-                + "\tTemperature{mValue=0.0, mType=2, mName=batt, mStatus=0}\n"
-                + "\tTemperature{mValue=0.0, mType=3, mName=skin1, mStatus=0}\n"
-                + "\tTemperature{mValue=0.0, mType=3, mName=skin2, mStatus=0}"
+                        + "\tTemperature{mValue=37.0, mType=4, mName=usbport, mStatus=0}\n"
+                        + "\tTemperature{mValue=34.0, mType=2, mName=batt, mStatus=0}\n"
+                        + "\tTemperature{mValue=28.0, mType=3, mName=skin1, mStatus=0}\n"
+                        + "\tTemperature{mValue=31.0, mType=3, mName=skin2, mStatus=0}"
         );
         assertThat(dumpStr).contains("HAL Ready: true\n"
                 + "HAL connection:\n"
                 + "\tThermalHAL AIDL 1  connected: yes");
         assertThat(dumpStr).contains("Current temperatures from HAL:\n"
-                + "\tTemperature{mValue=0.0, mType=3, mName=skin1, mStatus=0}\n"
-                + "\tTemperature{mValue=0.0, mType=3, mName=skin2, mStatus=0}\n"
-                + "\tTemperature{mValue=0.0, mType=2, mName=batt, mStatus=0}\n"
-                + "\tTemperature{mValue=0.0, mType=4, mName=usbport, mStatus=0}\n");
+                + "\tTemperature{mValue=28.0, mType=3, mName=skin1, mStatus=0}\n"
+                + "\tTemperature{mValue=31.0, mType=3, mName=skin2, mStatus=0}\n"
+                + "\tTemperature{mValue=34.0, mType=2, mName=batt, mStatus=0}\n"
+                + "\tTemperature{mValue=37.0, mType=4, mName=usbport, mStatus=0}\n");
         assertThat(dumpStr).contains("Current cooling devices from HAL:\n"
-                + "\tCoolingDevice{mValue=0, mType=1, mName=cpu}\n"
-                + "\tCoolingDevice{mValue=0, mType=1, mName=gpu}\n");
+                + "\tCoolingDevice{mValue=40, mType=1, mName=cpu}\n"
+                + "\tCoolingDevice{mValue=43, mType=1, mName=gpu}\n");
         assertThat(dumpStr).contains("Temperature static thresholds from HAL:\n"
                 + "\tTemperatureThreshold{mType=3, mName=skin1, mHotThrottlingThresholds=[25.0, "
                 + "30.0, 35.0, 40.0, 45.0, 50.0, 55.0], mColdThrottlingThresholds=[0.0, 0.0, 0.0,"

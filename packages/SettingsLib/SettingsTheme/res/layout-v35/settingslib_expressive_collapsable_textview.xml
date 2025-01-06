@@ -40,7 +40,7 @@
         android:longClickable="false"
         android:maxLines="10"
         android:ellipsize="end"
-        android:textAppearance="@style/TextAppearance.TopIntroText"/>
+        android:textAppearance="@style/TextAppearance.SettingsLib.BodyLarge"/>
 
     <com.android.settingslib.widget.LinkableTextView
         android:id="@+id/settingslib_expressive_learn_more"
@@ -57,6 +57,7 @@
         android:id="@+id/collapse_button"
         app:layout_constraintTop_toBottomOf="@id/settingslib_expressive_learn_more"
         app:layout_constraintStart_toStartOf="parent"
+        android:textColor="@color/settingslib_materialColorOnSurface"
         android:text="@string/settingslib_expressive_text_expand"
         app:icon="@drawable/settingslib_expressive_icon_expand"
         style="@style/SettingslibTextButtonStyle.Expressive"/>

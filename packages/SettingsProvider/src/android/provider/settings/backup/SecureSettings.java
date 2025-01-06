@@ -52,6 +52,7 @@ public class SecureSettings {
         Settings.Secure.ACCESSIBILITY_BUTTON_TARGET_COMPONENT,
         Settings.Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN,
         Settings.Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN,
+        Settings.Secure.ACCESSIBILITY_HCT_RECT_PROMPT_STATUS,
         Settings.Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED,
         Settings.Secure.CONTRAST_LEVEL,
         Settings.Secure.ACCESSIBILITY_CAPTIONING_PRESET,
@@ -99,6 +100,7 @@ public class SecureSettings {
         Settings.Secure.RTT_CALLING_MODE,
         Settings.Secure.INCALL_POWER_BUTTON_BEHAVIOR,
         Settings.Secure.MINIMAL_POST_PROCESSING_ALLOWED,
+        Settings.Secure.MIRROR_BUILT_IN_DISPLAY,
         Settings.Secure.MATCH_CONTENT_FRAME_RATE,
         Settings.Secure.NIGHT_DISPLAY_CUSTOM_START_TIME,
         Settings.Secure.NIGHT_DISPLAY_CUSTOM_END_TIME,
@@ -107,6 +109,8 @@ public class SecureSettings {
         Settings.Secure.DISPLAY_WHITE_BALANCE_ENABLED,
         Settings.Secure.SYNC_PARENT_SOUNDS,
         Settings.Secure.CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED,
+        Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED,
+        Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE,
         Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED,
         Settings.Secure.SYSTEM_NAVIGATION_KEYS_ENABLED,
         // ACCESSIBILITY_QS_TARGETS needs to be restored after ENABLED_ACCESSIBILITY_SERVICES
@@ -284,5 +288,7 @@ public class SecureSettings {
         Settings.Secure.MANDATORY_BIOMETRICS,
         Settings.Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
         Settings.Secure.ADVANCED_PROTECTION_MODE,
+        Settings.Secure.ACCESSIBILITY_KEY_GESTURE_TARGETS,
+        Settings.Secure.EM_VALUE,
     };
 }

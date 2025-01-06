@@ -116,6 +116,7 @@ flag {
     description: "Add a SurfaceView composition order control API."
     bug: "341021569"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -124,6 +125,7 @@ flag {
     description: "Add APIs to manage SurfacePackage of the parent SurfaceView."
     bug: "341021569"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -131,5 +133,21 @@ flag {
     namespace: "wear_frameworks"
     description: "Use refactored round scrollbar."
     bug: "333417898"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "buffer_stuffing_recovery"
+    namespace: "window_surfaces"
+    description: "Recover from buffer stuffing when SurfaceFlinger misses a frame"
+    bug: "294922229"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "date_time_view_relative_time_display_configs"
+    namespace: "systemui"
+    description: "Enables DateTimeView to use additional display configurations for relative time"
+    bug: "364653005"
     is_fixed_read_only: true
 }

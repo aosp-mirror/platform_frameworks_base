@@ -21,6 +21,7 @@ import com.android.systemui.Flags
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 
 /** Model representing the display of an ongoing activity as a chip in the status bar. */
 sealed class OngoingActivityChipModel {
@@ -115,7 +116,8 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             // TODO(b/361346412): Enforce a max length requirement?
             val text: String,
-        ) : Shown(icon, colors, onClickListener = null) {
+            override val onClickListener: View.OnClickListener? = null,
+        ) : Shown(icon, colors, onClickListener) {
             override val logName = "Shown.Text"
         }
     }
@@ -132,6 +134,17 @@ sealed class OngoingActivityChipModel {
                     "OngoingActivityChipModel.ChipIcon.StatusBarView created even though " +
                         "Flags.statusBarCallChipNotificationIcon is not enabled"
                 }
+                StatusBarConnectedDisplays.assertInLegacyMode()
+            }
+        }
+
+        /**
+         * The icon is a custom icon, which is set on a notification, and can be looked up using the
+         * provided [notificationKey]. The icon was likely created by an external app.
+         */
+        data class StatusBarNotificationIcon(val notificationKey: String) : ChipIcon {
+            init {
+                StatusBarConnectedDisplays.assertInNewMode()
             }
         }
 
@@ -140,8 +153,5 @@ sealed class OngoingActivityChipModel {
          * UI created internally.
          */
         data class SingleColorIcon(val impl: Icon) : ChipIcon
-
-        /** This icon is an app icon in full color (so it should not get tinted in any way). */
-        data class FullColorAppIcon(val impl: Icon) : ChipIcon
     }
 }

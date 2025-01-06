@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"সক্ৰিয় হৈ আছে (কেৱল বাওঁফালৰটো)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"সক্ৰিয় হৈ আছে (কেৱল সোঁফালৰটো)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"সক্ৰিয় হৈ আছে (বাওঁফালৰটো আৰু সোঁফালৰটো)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"আশ-পাশ আপডে’ট কৰিব পৰা নগ’ল"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"সক্ৰিয় হৈ আছে (কেৱল মিডিয়া)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰী।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"সক্ৰিয় হৈ আছে (কেৱল মিডিয়া)। বাওঁ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, সোঁ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> বেটাৰী।"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"সংযুক্ত হৈ আছে (অডিঅ’ শ্বেয়াৰিং সমৰ্থন কৰে), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> বেটাৰী।"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টাৰ্মিনেল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শ্বেলৰ এক্সেছ দিয়া টাৰ্মিনেল এপ্ সক্ষম কৰক"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux বিকাশৰ পৰিৱেশ"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidত Linux টাৰ্মিনেল চলাওক"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(পৰীক্ষামূলক) Androidত Linux টাৰ্মিনেল চলাওক"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"আপুনি যদি অক্ষম কৰে, Linux টাৰ্মিনেলৰ ডেটা মচি পেলোৱা হ’ব"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পৰীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP পৰীক্ষণ আচৰণ ছেট কৰক"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ট্ৰাঞ্জিশ্বন এনিমেশ্বন স্কেল"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"এনিমেটৰ কালদৈৰ্ঘ্য স্কেল"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"গৌণ প্ৰদৰ্শনৰ নকল বনাওক"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"শ্বেড ডিছপ্লে’ৰ স্থান"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"এপ্‌সমূহ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"কাৰ্যকলাপসমূহ নাৰাখিব"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ব্যৱহাৰকাৰী ওলোৱাৰ লগে লগে আটাইবোৰ কাৰ্যকলাপ মচক"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"এই ফ’নটো"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"এই টেবলেটটো"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"এই কম্পিউটাৰ (অভ্যন্তৰীণ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"এই টিভিটো"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ড’ক স্পীকাৰ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"বাহ্যিক ডিভাইচ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"সংযোগ হৈ থকা ডিভাইচ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফ’নটো"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"এনালগ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"অক্স"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"এই ডিভাইচটো প্লে\' কৰিব নোৱাৰি"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"সলনি কৰিবলৈ একাউণ্ট আপগ্ৰে’ড কৰক"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ইয়াত ডাউনল’ডসমূহ প্লে’ কৰিব নোৱাৰি"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARCৰ জৰিয়তে সংযুক্ত"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARCৰ জৰিয়তে সংযুক্ত"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"টিভি ডিফ’ল্ট"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI আউটপুট"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"অভ্যন্তৰীণ স্পীকাৰ"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"বিল্ট-ইন স্পীকাৰ"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"টিভিৰ অডিঅ’"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"সংযোগ হোৱাত সমস্যা হৈছে। ডিভাইচটো অফ কৰি পুনৰ অন কৰক"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"তাঁৰযুক্ত অডিঅ’ ডিভাইচ"</string>
     <string name="help_label" msgid="3528360748637781274">"সহায় আৰু মতামত"</string>

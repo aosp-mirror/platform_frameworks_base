@@ -17,6 +17,6 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
     android:shape="rectangle" >
     <size android:width="@dimen/volume_dialog_ringer_drawer_button_size" android:height="@dimen/volume_dialog_ringer_drawer_button_size"/>
-    <solid android:color="?androidprv:attr/materialColorSurfaceContainerHighest" />
+    <solid android:color="@androidprv:color/materialColorSurfaceContainerHighest" />
     <corners android:radius="@dimen/volume_dialog_background_square_corner_radius" />
 </shape>

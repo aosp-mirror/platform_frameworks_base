@@ -16,17 +16,17 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.TState
+import com.android.systemui.kairos.State
 import com.android.systemui.kairos.internal.util.HeteroMap
-import com.android.systemui.kairos.util.Just
+import com.android.systemui.kairos.internal.util.logDuration
+import com.android.systemui.kairos.internal.util.logLn
 import com.android.systemui.kairos.util.Maybe
+import com.android.systemui.kairos.util.Maybe.Just
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
-import java.util.concurrent.ConcurrentHashMap
-import java.util.concurrent.ConcurrentLinkedDeque
-import java.util.concurrent.ConcurrentLinkedQueue
 import java.util.concurrent.atomic.AtomicLong
 import kotlin.coroutines.ContinuationInterceptor
+import kotlin.time.measureTime
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -52,38 +52,42 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
     override val network
         get() = this
 
-    override val compactor = SchedulerImpl()
-    override val scheduler = SchedulerImpl()
-    override val transactionStore = HeteroMap()
+    override val compactor = SchedulerImpl {
+        if (it.markedForCompaction) false
+        else {
+            it.markedForCompaction = true
+            true
+        }
+    }
+    override val scheduler = SchedulerImpl {
+        if (it.markedForEvaluation) false
+        else {
+            it.markedForEvaluation = true
+            true
+        }
+    }
+    override val transactionStore = TransactionStore()
 
-    private val stateWrites = ConcurrentLinkedQueue<TStateSource<*>>()
-    private val outputsByDispatcher =
-        ConcurrentHashMap<ContinuationInterceptor, ConcurrentLinkedQueue<Output<*>>>()
-    private val muxMovers = ConcurrentLinkedQueue<MuxDeferredNode<*, *>>()
-    private val deactivations = ConcurrentLinkedDeque<PushNode<*>>()
-    private val outputDeactivations = ConcurrentLinkedQueue<Output<*>>()
+    private val stateWrites = ArrayDeque<StateSource<*>>()
+    private val outputsByDispatcher = HashMap<ContinuationInterceptor, ArrayDeque<Output<*>>>()
+    private val muxMovers = ArrayDeque<MuxDeferredNode<*, *, *>>()
+    private val deactivations = ArrayDeque<PushNode<*>>()
+    private val outputDeactivations = ArrayDeque<Output<*>>()
     private val transactionMutex = Mutex()
     private val inputScheduleChan = Channel<ScheduledAction<*>>()
 
     override fun scheduleOutput(output: Output<*>) {
         val continuationInterceptor =
             output.context[ContinuationInterceptor] ?: Dispatchers.Unconfined
-        outputsByDispatcher
-            .computeIfAbsent(continuationInterceptor) { ConcurrentLinkedQueue() }
-            .add(output)
+        outputsByDispatcher.computeIfAbsent(continuationInterceptor) { ArrayDeque() }.add(output)
     }
 
-    override fun scheduleMuxMover(muxMover: MuxDeferredNode<*, *>) {
+    override fun scheduleMuxMover(muxMover: MuxDeferredNode<*, *, *>) {
         muxMovers.add(muxMover)
     }
 
-    override fun schedule(state: TStateSource<*>) {
+    override fun schedule(state: StateSource<*>) {
         stateWrites.add(state)
-    }
-
-    // TODO: weird that we have this *and* scheduler exposed
-    override suspend fun schedule(node: MuxNode<*, *, *>) {
-        scheduler.schedule(node.depthTracker.dirty_directDepth, node)
     }
 
     override fun scheduleDeactivation(node: PushNode<*>) {
@@ -94,10 +98,8 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
         outputDeactivations.add(output)
     }
 
-    /** Listens for external events and starts FRP transactions. Runs forever. */
-    suspend fun runInputScheduler() = coroutineScope {
-        launch { scheduler.activate() }
-        launch { compactor.activate() }
+    /** Listens for external events and starts Kairos transactions. Runs forever. */
+    suspend fun runInputScheduler() {
         val actions = mutableListOf<ScheduledAction<*>>()
         for (first in inputScheduleChan) {
             // Drain and conflate all transaction requests into a single transaction
@@ -108,61 +110,94 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
                 actions.add(func)
             }
             transactionMutex.withLock {
-                // Run all actions
-                evalScope {
-                    for (action in actions) {
-                        launch { action.started(evalScope = this@evalScope) }
+                val e = epoch
+                val duration = measureTime {
+                    logLn(0, "===starting transaction $e===")
+                    try {
+                        logDuration(1, "init actions") {
+                            // Run all actions
+                            evalScope {
+                                for (action in actions) {
+                                    action.started(evalScope = this@evalScope)
+                                }
+                            }
+                        }
+                        // Step through the network
+                        doTransaction(1)
+                    } catch (e: Exception) {
+                        // Signal failure
+                        while (actions.isNotEmpty()) {
+                            actions.removeLast().fail(e)
+                        }
+                        // re-throw, cancelling this coroutine
+                        throw e
+                    } finally {
+                        logDuration(1, "signal completions") {
+                            // Signal completion
+                            while (actions.isNotEmpty()) {
+                                actions.removeLast().completed()
+                            }
+                        }
                     }
                 }
-                // Step through the network
-                doTransaction()
-                // Signal completion
-                while (actions.isNotEmpty()) {
-                    actions.removeLast().completed()
-                }
+                logLn(0, "===transaction $e took $duration===")
             }
         }
     }
 
     /** Evaluates [block] inside of a new transaction when the network is ready. */
-    fun <R> transaction(block: suspend EvalScope.() -> R): Deferred<R> =
+    fun <R> transaction(reason: String, block: suspend EvalScope.() -> R): Deferred<R> =
         CompletableDeferred<R>(parent = coroutineScope.coroutineContext.job).also { onResult ->
             val job =
                 coroutineScope.launch {
                     inputScheduleChan.send(
-                        ScheduledAction(onStartTransaction = block, onResult = onResult)
+                        ScheduledAction(reason, onStartTransaction = block, onResult = onResult)
                     )
                 }
             onResult.invokeOnCompletion { job.cancel() }
         }
 
-    suspend fun <R> evalScope(block: suspend EvalScope.() -> R): R = deferScope {
+    inline fun <R> evalScope(block: EvalScope.() -> R): R = deferScope {
         block(EvalScopeImpl(this@Network, this))
     }
 
-    /** Performs a transactional update of the FRP network. */
-    private suspend fun doTransaction() {
+    /** Performs a transactional update of the Kairos network. */
+    private suspend fun doTransaction(logIndent: Int) {
         // Traverse network, then run outputs
-        do {
-            scheduler.drainEval(this)
-        } while (evalScope { evalOutputs(this) })
+        logDuration(logIndent, "traverse network") {
+            do {
+                val numNodes =
+                    logDuration("drainEval") { scheduler.drainEval(currentLogIndent, this@Network) }
+                logLn("drained $numNodes nodes")
+            } while (logDuration("evalOutputs") { evalScope { evalOutputs(this) } })
+        }
         // Update states
-        evalScope { evalStateWriters(this) }
-        transactionStore.clear()
-        // Perform deferred switches
-        evalScope { evalMuxMovers(this) }
-        // Compact depths
-        scheduler.drainCompact()
-        compactor.drainCompact()
-        // Deactivate nodes with no downstream
-        evalDeactivations()
+        logDuration(logIndent, "update states") {
+            evalScope { evalStateWriters(currentLogIndent, this) }
+        }
+        // Invalidate caches
+        // Note: this needs to occur before deferred switches
+        logDuration(logIndent, "clear store") { transactionStore.clear() }
         epoch++
+        // Perform deferred switches
+        logDuration(logIndent, "evalMuxMovers") {
+            evalScope { evalMuxMovers(currentLogIndent, this) }
+        }
+        // Compact depths
+        logDuration(logIndent, "compact") {
+            scheduler.drainCompact(currentLogIndent)
+            compactor.drainCompact(currentLogIndent)
+        }
+        // Deactivate nodes with no downstream
+        logDuration(logIndent, "deactivations") { evalDeactivations() }
     }
 
     /** Invokes all [Output]s that have received data within this transaction. */
     private suspend fun evalOutputs(evalScope: EvalScope): Boolean {
+        if (outputsByDispatcher.isEmpty()) {
+            return false
+        }
         // Outputs can enqueue other outputs, so we need two loops
-        if (outputsByDispatcher.isEmpty()) return false
         while (outputsByDispatcher.isNotEmpty()) {
             var launchedAny = false
             coroutineScope {
@@ -171,57 +206,50 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
                         launchedAny = true
                         launch(key) {
                             while (outputs.isNotEmpty()) {
-                                val output = outputs.remove()
+                                val output = outputs.removeFirst()
                                 launch { output.visit(evalScope) }
                             }
                         }
                     }
                 }
             }
-            if (!launchedAny) outputsByDispatcher.clear()
+            if (!launchedAny) {
+                outputsByDispatcher.clear()
+            }
         }
         return true
     }
 
-    private suspend fun evalMuxMovers(evalScope: EvalScope) {
+    private fun evalMuxMovers(logIndent: Int, evalScope: EvalScope) {
         while (muxMovers.isNotEmpty()) {
-            coroutineScope {
-                val toMove = muxMovers.remove()
-                launch { toMove.performMove(evalScope) }
-            }
+            val toMove = muxMovers.removeFirst()
+            toMove.performMove(logIndent, evalScope)
         }
     }
 
-    /** Updates all [TState]es that have changed within this transaction. */
-    private suspend fun evalStateWriters(evalScope: EvalScope) {
-        coroutineScope {
-            while (stateWrites.isNotEmpty()) {
-                val latch = stateWrites.remove()
-                launch { latch.updateState(evalScope) }
-            }
+    /** Updates all [State]es that have changed within this transaction. */
+    private fun evalStateWriters(logIndent: Int, evalScope: EvalScope) {
+        while (stateWrites.isNotEmpty()) {
+            val latch = stateWrites.removeFirst()
+            latch.updateState(logIndent, evalScope)
         }
     }
 
-    private suspend fun evalDeactivations() {
-        coroutineScope {
-            launch {
-                while (deactivations.isNotEmpty()) {
-                    // traverse in reverse order
-                    //   - deactivations are added in depth-order during the node traversal phase
-                    //   - perform deactivations in reverse order, in case later ones propagate to
-                    //     earlier ones
-                    val toDeactivate = deactivations.removeLast()
-                    launch { toDeactivate.deactivateIfNeeded() }
-                }
-            }
-            while (outputDeactivations.isNotEmpty()) {
-                val toDeactivate = outputDeactivations.remove()
-                launch {
-                    toDeactivate.upstream?.removeDownstreamAndDeactivateIfNeeded(
-                        downstream = toDeactivate.schedulable
-                    )
-                }
-            }
+    private fun evalDeactivations() {
+        while (deactivations.isNotEmpty()) {
+            // traverse in reverse order
+            //   - deactivations are added in depth-order during the node traversal phase
+            //   - perform deactivations in reverse order, in case later ones propagate to
+            //     earlier ones
+            val toDeactivate = deactivations.removeLast()
+            toDeactivate.deactivateIfNeeded()
+        }
+
+        while (outputDeactivations.isNotEmpty()) {
+            val toDeactivate = outputDeactivations.removeFirst()
+            toDeactivate.upstream?.removeDownstreamAndDeactivateIfNeeded(
+                downstream = toDeactivate.schedulable
+            )
         }
         check(deactivations.isEmpty()) { "unexpected lingering deactivations" }
         check(outputDeactivations.isEmpty()) { "unexpected lingering output deactivations" }
@@ -229,6 +257,7 @@ internal class Network(val coroutineScope: CoroutineScope) : NetworkScope {
 }
 
 internal class ScheduledAction<T>(
+    val reason: String,
     private val onResult: CompletableDeferred<T>? = null,
     private val onStartTransaction: suspend EvalScope.() -> T,
 ) {
@@ -236,6 +265,11 @@ internal class ScheduledAction<T>(
 
     suspend fun started(evalScope: EvalScope) {
         result = just(onStartTransaction(evalScope))
+    }
+
+    fun fail(ex: Exception) {
+        result = none
+        onResult?.completeExceptionally(ex)
     }
 
     fun completed() {
@@ -249,4 +283,39 @@ internal class ScheduledAction<T>(
     }
 }
 
-internal typealias TransactionStore = HeteroMap
+internal class TransactionStore private constructor(private val storage: HeteroMap) {
+    constructor(capacity: Int) : this(HeteroMap(capacity))
+
+    constructor() : this(HeteroMap())
+
+    operator fun <A> get(key: HeteroMap.Key<A>): A =
+        storage.getOrError(key) { "no value for $key in this transaction" }
+
+    operator fun <A> set(key: HeteroMap.Key<A>, value: A) {
+        storage[key] = value
+    }
+
+    fun clear() = storage.clear()
+}
+
+internal class TransactionCache<A> {
+    private val key = object : HeteroMap.Key<A> {}
+    @Volatile
+    var epoch: Long = Long.MIN_VALUE
+        private set
+
+    fun getOrPut(evalScope: EvalScope, block: () -> A): A =
+        if (epoch < evalScope.epoch) {
+            epoch = evalScope.epoch
+            block().also { evalScope.transactionStore[key] = it }
+        } else {
+            evalScope.transactionStore[key]
+        }
+
+    fun put(evalScope: EvalScope, value: A) {
+        epoch = evalScope.epoch
+        evalScope.transactionStore[key] = value
+    }
+
+    fun getCurrentValue(evalScope: EvalScope): A = evalScope.transactionStore[key]
+}

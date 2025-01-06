@@ -47,6 +47,9 @@ public interface SystemInterface {
     boolean systemIsDebuggable();
     PackageInfo getPackageInfoForProvider(WebViewProviderInfo configInfo)
             throws NameNotFoundException;
+    /** Check if the given package is a compatible WebView implementation for the OS. */
+    boolean isCompatibleImplementationPackage(PackageInfo packageInfo);
+
     /**
      * Get the PackageInfos of all users for the package represented by {@param configInfo}.
      * @return an array of UserPackages for a certain package, each UserPackage being belonging to a

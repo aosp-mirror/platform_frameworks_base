@@ -48,7 +48,7 @@ class ChipChronometerTest : SysuiTestCase() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
             val chipView =
-                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
+                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip_primary, null)
             textView = chipView.findViewById(R.id.ongoing_activity_chip_time)!!
             measureTextView()
             calculateDoesNotFixText()
@@ -161,7 +161,7 @@ class ChipChronometerTest : SysuiTestCase() {
     private fun measureTextView() {
         textView.measure(
             View.MeasureSpec.makeMeasureSpec(TEXT_VIEW_MAX_WIDTH, View.MeasureSpec.AT_MOST),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
         )
     }
 

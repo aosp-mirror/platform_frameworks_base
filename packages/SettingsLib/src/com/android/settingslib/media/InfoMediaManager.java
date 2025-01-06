@@ -15,6 +15,9 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_AUX_LINE;
+import static android.media.MediaRoute2Info.TYPE_LINE_ANALOG;
+import static android.media.MediaRoute2Info.TYPE_LINE_DIGITAL;
 import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
@@ -700,6 +703,9 @@ public abstract class InfoMediaManager {
             case TYPE_HDMI:
             case TYPE_HDMI_ARC:
             case TYPE_HDMI_EARC:
+            case TYPE_LINE_DIGITAL:
+            case TYPE_LINE_ANALOG:
+            case TYPE_AUX_LINE:
             case TYPE_WIRED_HEADSET:
             case TYPE_WIRED_HEADPHONES:
                 mediaDevice =

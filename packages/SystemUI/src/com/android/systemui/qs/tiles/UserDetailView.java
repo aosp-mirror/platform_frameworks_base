@@ -39,6 +39,7 @@ import com.android.systemui.qs.PseudoGridView;
 import com.android.systemui.qs.QSUserSwitcherEvent;
 import com.android.systemui.qs.user.UserSwitchDialogController;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.BaseUserSwitcherAdapter;
 import com.android.systemui.statusbar.policy.UserSwitcherController;
@@ -95,7 +96,7 @@ public class UserDetailView extends PseudoGridView {
         }
 
         @Inject
-        public Adapter(Context context, UserSwitcherController controller,
+        public Adapter(@ShadeDisplayAware Context context, UserSwitcherController controller,
                 UiEventLogger uiEventLogger, FalsingManager falsingManager) {
             super(controller);
             mContext = context;

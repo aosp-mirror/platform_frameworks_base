@@ -70,10 +70,14 @@ class ProximitySensorObserver implements
                 mDozeStateByDisplay.put(d.getDisplayId(), mInjector.isDozeState(d));
             }
         }
+        registerDisplayListener();
+    }
+
+    private void registerDisplayListener() {
         mInjector.registerDisplayListener(this, BackgroundThread.getHandler(),
-                DisplayManager.EVENT_FLAG_DISPLAY_ADDED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
+                DisplayManager.EVENT_TYPE_DISPLAY_ADDED
+                        | DisplayManager.EVENT_TYPE_DISPLAY_CHANGED
+                        | DisplayManager.EVENT_TYPE_DISPLAY_REMOVED);
     }
 
     @GuardedBy("mSensorObserverLock")

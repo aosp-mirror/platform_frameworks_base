@@ -79,6 +79,9 @@
     <!-- The number of columns in the infinite grid QuickSettings -->
     <integer name="quick_settings_infinite_grid_num_columns">4</integer>
 
+    <!-- The maximum width of large tiles in the infinite grid QuickSettings -->
+    <integer name="quick_settings_infinite_grid_tile_max_width">4</integer>
+
     <!-- The number of columns in the Dual Shade QuickSettings -->
     <integer name="quick_settings_dual_shade_num_columns">4</integer>
 
@@ -116,7 +119,7 @@
 
     <!-- Tiles native to System UI. Order should match "quick_settings_tiles_default" -->
     <string name="quick_settings_tiles_stock" translatable="false">
-        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling,record_issue,hearing_devices
+        internet,bt,flashlight,dnd,alarm,airplane,controls,wallet,rotation,battery,cast,screenrecord,mictoggle,cameratoggle,location,hotspot,inversion,saver,dark,work,night,reverse,reduce_brightness,qr_code_scanner,onehanded,color_correction,dream,font_scaling,record_issue,hearing_devices,notes
     </string>
 
     <!-- The tiles to display in QuickSettings -->
@@ -168,6 +171,9 @@
 
     <!-- Minimum display time for a heads up notification, in milliseconds. -->
     <integer name="heads_up_notification_minimum_time">2000</integer>
+
+    <!-- Minimum display time for a heads up notification if throttling is enabled, in milliseconds. -->
+    <integer name="heads_up_notification_minimum_time_with_throttling">500</integer>
 
     <!-- Display time for a sticky heads up notification, in milliseconds. -->
     <integer name="sticky_heads_up_notification_time">60000</integer>
@@ -502,6 +508,12 @@
          screenshot has been saved to a different profile (e.g. work profile). If blank, a default
          icon will be shown. -->
     <string name="config_screenshotFilesApp" translatable="false"></string>
+
+    <!-- Recommends a UI mode for the default note-taking app when launched with
+         android.content.Intent#ACTION_CREATE_NOTE
+         0: No UI recommendation. The note app should use its default mode
+         1: Recommend a UI optimized for stylus input. -->
+    <integer name="config_preferredNotesMode">1</integer>
 
     <!-- The component name of the screenshot editing activity that provides the App Clips flow.
          The App Clips flow includes taking a screenshot, showing user screenshot cropping activity
@@ -1086,4 +1098,13 @@
     enable the desktop specific features.
     -->
     <bool name="config_enableDesktopFeatureSet">false</bool>
+
+    <!--
+    Whether the user switching can only happen by logging out and going through the system user (login screen).
+    -->
+    <bool name="config_userSwitchingMustGoThroughLoginScreen">false</bool>
+
+
+    <!-- The dream component used when the device is low light environment. -->
+    <string translatable="false" name="config_lowLightDreamComponent"/>
 </resources>

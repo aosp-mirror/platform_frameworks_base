@@ -20,18 +20,20 @@ import android.animation.AnimatorRuleRecordingSpec
 import android.animation.AnimatorTestRuleToolkit
 import android.animation.MotionControl
 import android.animation.recordMotion
+import android.graphics.Color
+import android.graphics.PointF
 import android.graphics.drawable.GradientDrawable
 import android.platform.test.annotations.MotionTest
 import android.view.ViewGroup
 import android.widget.FrameLayout
 import androidx.test.ext.junit.rules.ActivityScenarioRule
 import androidx.test.filters.SmallTest
-import androidx.test.platform.app.InstrumentationRegistry.getInstrumentation
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.activity.EmptyTestActivity
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.runOnMainThreadAndWaitForIdleSync
 import kotlin.test.assertTrue
 import org.junit.Rule
 import org.junit.Test
@@ -47,13 +49,25 @@ import platform.test.screenshot.PathConfig
 @SmallTest
 @MotionTest
 @RunWith(ParameterizedAndroidJunit4::class)
-class TransitionAnimatorTest(val useSpring: Boolean) : SysuiTestCase() {
+class TransitionAnimatorTest(
+    private val fadeWindowBackgroundLayer: Boolean,
+    private val isLaunching: Boolean,
+    private val useSpring: Boolean,
+) : SysuiTestCase() {
     companion object {
         private const val GOLDENS_PATH = "frameworks/base/packages/SystemUI/tests/goldens"
 
-        @get:Parameters(name = "{0}")
+        @get:Parameters(name = "fadeBackground={0}, isLaunching={1}, useSpring={2}")
         @JvmStatic
-        val useSpringValues = booleanArrayOf(false, true).toList()
+        val parameterValues = buildList {
+            booleanArrayOf(true, false).forEach { fadeBackground ->
+                booleanArrayOf(true, false).forEach { isLaunching ->
+                    booleanArrayOf(true, false).forEach { useSpring ->
+                        add(arrayOf(fadeBackground, isLaunching, useSpring))
+                    }
+                }
+            }
+        }
     }
 
     private val kosmos = Kosmos()
@@ -66,11 +80,23 @@ class TransitionAnimatorTest(val useSpring: Boolean) : SysuiTestCase() {
             ActivityTransitionAnimator.SPRING_TIMINGS,
             ActivityTransitionAnimator.SPRING_INTERPOLATORS,
         )
-    private val withSpring =
-        if (useSpring) {
-            "_withSpring"
+    private val fade =
+        if (fadeWindowBackgroundLayer) {
+            "withFade"
         } else {
-            ""
+            "withoutFade"
+        }
+    private val direction =
+        if (isLaunching) {
+            "whenLaunching"
+        } else {
+            "whenReturning"
+        }
+    private val mode =
+        if (useSpring) {
+            "withSpring"
+        } else {
+            "withAnimator"
         }
 
     @get:Rule(order = 1) val activityRule = ActivityScenarioRule(EmptyTestActivity::class.java)
@@ -83,113 +109,75 @@ class TransitionAnimatorTest(val useSpring: Boolean) : SysuiTestCase() {
         )
 
     @Test
-    fun backgroundAnimation_whenLaunching() {
-        val backgroundLayer = GradientDrawable().apply { alpha = 0 }
-        val animator =
-            setUpTest(backgroundLayer, isLaunching = true).apply {
-                getInstrumentation().runOnMainSync { start() }
-            }
+    fun backgroundAnimationTimeSeries() {
+        val transitionContainer = createScene()
+        val backgroundLayer = createBackgroundLayer()
+        val animation = createAnimation(transitionContainer, backgroundLayer)
 
-        val recordedMotion = recordMotion(backgroundLayer, animator)
+        val recordedMotion = record(backgroundLayer, animation)
 
         motionRule
             .assertThat(recordedMotion)
-            .timeSeriesMatchesGolden("backgroundAnimation_whenLaunching$withSpring")
+            .timeSeriesMatchesGolden("backgroundAnimationTimeSeries_${fade}_${direction}_$mode")
     }
 
-    @Test
-    fun backgroundAnimation_whenReturning() {
-        val backgroundLayer = GradientDrawable().apply { alpha = 0 }
-        val animator =
-            setUpTest(backgroundLayer, isLaunching = false).apply {
-                getInstrumentation().runOnMainSync { start() }
-            }
-
-        val recordedMotion = recordMotion(backgroundLayer, animator)
-
-        motionRule
-            .assertThat(recordedMotion)
-            .timeSeriesMatchesGolden("backgroundAnimation_whenReturning$withSpring")
-    }
-
-    @Test
-    fun backgroundAnimationWithoutFade_whenLaunching() {
-        val backgroundLayer = GradientDrawable().apply { alpha = 0 }
-        val animator =
-            setUpTest(backgroundLayer, isLaunching = true, fadeWindowBackgroundLayer = false)
-                .apply { getInstrumentation().runOnMainSync { start() } }
-
-        val recordedMotion = recordMotion(backgroundLayer, animator)
-
-        motionRule
-            .assertThat(recordedMotion)
-            .timeSeriesMatchesGolden("backgroundAnimationWithoutFade_whenLaunching$withSpring")
-    }
-
-    @Test
-    fun backgroundAnimationWithoutFade_whenReturning() {
-        val backgroundLayer = GradientDrawable().apply { alpha = 0 }
-        val animator =
-            setUpTest(backgroundLayer, isLaunching = false, fadeWindowBackgroundLayer = false)
-                .apply { getInstrumentation().runOnMainSync { start() } }
-
-        val recordedMotion = recordMotion(backgroundLayer, animator)
-
-        motionRule
-            .assertThat(recordedMotion)
-            .timeSeriesMatchesGolden("backgroundAnimationWithoutFade_whenReturning$withSpring")
-    }
-
-    private fun setUpTest(
-        backgroundLayer: GradientDrawable,
-        isLaunching: Boolean,
-        fadeWindowBackgroundLayer: Boolean = true,
-    ): TransitionAnimator.Animation {
+    private fun createScene(): ViewGroup {
         lateinit var transitionContainer: ViewGroup
         activityRule.scenario.onActivity { activity ->
-            transitionContainer = FrameLayout(activity).apply { setBackgroundColor(0x00FF00) }
+            transitionContainer = FrameLayout(activity)
             activity.setContentView(transitionContainer)
         }
         waitForIdleSync()
+        return transitionContainer
+    }
 
+    private fun createBackgroundLayer() =
+        GradientDrawable().apply {
+            setColor(Color.BLACK)
+            alpha = 0
+        }
+
+    private fun createAnimation(
+        transitionContainer: ViewGroup,
+        backgroundLayer: GradientDrawable,
+    ): TransitionAnimator.Animation {
         val controller = TestController(transitionContainer, isLaunching)
-        return transitionAnimator.createAnimation(
-            controller,
-            controller.createAnimatorState(),
-            createEndState(transitionContainer),
-            backgroundLayer,
-            fadeWindowBackgroundLayer,
-            useSpring = useSpring,
-        )
-    }
 
-    private fun createEndState(container: ViewGroup): TransitionAnimator.State {
         val containerLocation = IntArray(2)
-        container.getLocationOnScreen(containerLocation)
-        return TransitionAnimator.State(
-            left = containerLocation[0],
-            top = containerLocation[1],
-            right = containerLocation[0] + 320,
-            bottom = containerLocation[1] + 690,
-            topCornerRadius = 0f,
-            bottomCornerRadius = 0f,
-        )
+        transitionContainer.getLocationOnScreen(containerLocation)
+        val endState =
+            TransitionAnimator.State(
+                left = containerLocation[0],
+                top = containerLocation[1],
+                right = containerLocation[0] + 320,
+                bottom = containerLocation[1] + 690,
+                topCornerRadius = 0f,
+                bottomCornerRadius = 0f,
+            )
+
+        val startVelocity =
+            if (useSpring) {
+                PointF(2500f, 30000f)
+            } else {
+                null
+            }
+
+        return transitionAnimator
+            .createAnimation(
+                controller,
+                controller.createAnimatorState(),
+                endState,
+                backgroundLayer,
+                fadeWindowBackgroundLayer,
+                startVelocity = startVelocity,
+            )
+            .apply { runOnMainThreadAndWaitForIdleSync { start() } }
     }
 
-    private fun recordMotion(
+    private fun record(
         backgroundLayer: GradientDrawable,
         animation: TransitionAnimator.Animation,
     ): RecordedMotion {
-        fun record(motionControl: MotionControl, sampleIntervalMs: Long): RecordedMotion {
-            return motionRule.recordMotion(
-                AnimatorRuleRecordingSpec(backgroundLayer, motionControl, sampleIntervalMs) {
-                    feature(DrawableFeatureCaptures.bounds, "bounds")
-                    feature(DrawableFeatureCaptures.cornerRadii, "corner_radii")
-                    feature(DrawableFeatureCaptures.alpha, "alpha")
-                }
-            )
-        }
-
         val motionControl: MotionControl
         val sampleIntervalMs: Long
         if (useSpring) {
@@ -204,9 +192,13 @@ class TransitionAnimatorTest(val useSpring: Boolean) : SysuiTestCase() {
             sampleIntervalMs = 20L
         }
 
-        var recording: RecordedMotion? = null
-        getInstrumentation().runOnMainSync { recording = record(motionControl, sampleIntervalMs) }
-        return recording!!
+        return motionRule.recordMotion(
+            AnimatorRuleRecordingSpec(backgroundLayer, motionControl, sampleIntervalMs) {
+                feature(DrawableFeatureCaptures.bounds, "bounds")
+                feature(DrawableFeatureCaptures.cornerRadii, "corner_radii")
+                feature(DrawableFeatureCaptures.alpha, "alpha")
+            }
+        )
     }
 }
 

@@ -32,7 +32,7 @@ import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.disableflags.DisableFlagsLogger
-import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.RemoteInputQuickSettingsDisabler
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController

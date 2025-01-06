@@ -75,6 +75,30 @@ public final class InputRouteManager {
                 @Override
                 public void onAudioDevicesAdded(@NonNull AudioDeviceInfo[] addedDevices) {
                     applyDefaultSelectedTypeToAllPresets();
+
+                    // Activate the last hot plugged valid input device, to match the output device
+                    // behavior.
+                    @AudioDeviceType int deviceTypeToActivate = mSelectedInputDeviceType;
+                    for (AudioDeviceInfo info : addedDevices) {
+                        @AudioDeviceType int type = info.getType();
+                        // Since onAudioDevicesAdded is called not only when new device is hot
+                        // plugged, but also when the switcher dialog is opened, make sure to check
+                        // against existing device list and only activate if the device does not
+                        // exist previously.
+                        if (InputMediaDevice.isSupportedInputDevice(type)
+                                && findDeviceByType(type) == null) {
+                            deviceTypeToActivate = type;
+                        }
+                    }
+
+                    // Only activate if we find a different valid input device. e.g. if none of the
+                    // addedDevices is supported input device, we don't need to activate anything.
+                    if (mSelectedInputDeviceType != deviceTypeToActivate) {
+                        mSelectedInputDeviceType = deviceTypeToActivate;
+                        AudioDeviceAttributes deviceAttributes =
+                                createInputDeviceAttributes(mSelectedInputDeviceType);
+                        setPreferredDeviceForAllPresets(deviceAttributes);
+                    }
                 }
 
                 @Override
@@ -122,14 +146,20 @@ public final class InputRouteManager {
     }
 
     // TODO(b/355684672): handle edge case where there are two devices with the same type. Only
-    // using a single mSelectedInputDeviceType might not be enough to recognize the correct device.
-    public @Nullable MediaDevice getSelectedInputDevice() {
+    // using a single type might not be enough to recognize the correct device.
+    @Nullable
+    private MediaDevice findDeviceByType(@AudioDeviceType int type) {
         for (MediaDevice device : mInputMediaDevices) {
-            if (((InputMediaDevice) device).getAudioDeviceInfoType() == mSelectedInputDeviceType) {
+            if (((InputMediaDevice) device).getAudioDeviceInfoType() == type) {
                 return device;
             }
         }
         return null;
+    }
+
+    @Nullable
+    public MediaDevice getSelectedInputDevice() {
+        return findDeviceByType(mSelectedInputDeviceType);
     }
 
     private void applyDefaultSelectedTypeToAllPresets() {

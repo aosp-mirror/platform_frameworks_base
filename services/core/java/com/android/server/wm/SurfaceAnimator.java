@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
 import static com.android.server.wm.SurfaceAnimatorProto.ANIMATION_ADAPTER;
-import static com.android.server.wm.SurfaceAnimatorProto.ANIMATION_START_DELAYED;
 import static com.android.server.wm.SurfaceAnimatorProto.LEASH;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -89,8 +88,6 @@ public class SurfaceAnimator {
      */
     @Nullable
     private Runnable mAnimationCancelledCallback;
-
-    private boolean mAnimationStartDelayed;
 
     private boolean mAnimationFinished;
 
@@ -188,10 +185,6 @@ public class SurfaceAnimator {
             mAnimatable.onAnimationLeashCreated(t, mLeash);
         }
         mAnimatable.onLeashAnimationStarting(t, mLeash);
-        if (mAnimationStartDelayed) {
-            ProtoLog.i(WM_DEBUG_ANIM, "Animation start delayed for %s", mAnimatable);
-            return;
-        }
         mAnimation.startAnimation(mLeash, t, type, mInnerAnimationFinishedCallback);
         if (ProtoLog.isEnabled(WM_DEBUG_ANIM, LogLevel.DEBUG)) {
             StringWriter sw = new StringWriter();
@@ -207,6 +200,7 @@ public class SurfaceAnimator {
             }
             mSnapshot.startAnimation(t, snapshotAnim, type);
         }
+        setAnimatorPendingState(t);
     }
 
     void startAnimation(Transaction t, AnimationAdapter anim, boolean hidden,
@@ -215,36 +209,15 @@ public class SurfaceAnimator {
                 null /* animationCancelledCallback */, null /* snapshotAnim */, null /* freezer */);
     }
 
-    /**
-     * Begins with delaying all animations to start. Any subsequent call to {@link #startAnimation}
-     * will not start the animation until {@link #endDelayingAnimationStart} is called. When an
-     * animation start is being delayed, the animator is considered animating already.
-     */
-    void startDelayingAnimationStart() {
-
-        // We only allow delaying animation start we are not currently animating
-        if (!isAnimating()) {
-            mAnimationStartDelayed = true;
+    /** Indicates that there are surface operations in the pending transaction. */
+    private void setAnimatorPendingState(Transaction t) {
+        if (mService.mAnimator.mPendingState == WindowAnimator.PENDING_STATE_NONE
+                && t == mAnimatable.getPendingTransaction()) {
+            mService.mAnimator.mPendingState = WindowAnimator.PENDING_STATE_HAS_CHANGES;
         }
     }
 
-    /**
-     * See {@link #startDelayingAnimationStart}.
-     */
-    void endDelayingAnimationStart() {
-        final boolean delayed = mAnimationStartDelayed;
-        mAnimationStartDelayed = false;
-        if (delayed && mAnimation != null) {
-            mAnimation.startAnimation(mLeash, mAnimatable.getSyncTransaction(),
-                    mAnimationType, mInnerAnimationFinishedCallback);
-            mAnimatable.commitPendingTransaction();
-        }
-    }
-
-    /**
-     * @return Whether we are currently running an animation, or we have a pending animation that
-     *         is waiting to be started with {@link #endDelayingAnimationStart}
-     */
+    /** Returns whether it is currently running an animation. */
     boolean isAnimating() {
         return mAnimation != null;
     }
@@ -290,15 +263,6 @@ public class SurfaceAnimator {
     }
 
     /**
-     * Reparents the surface.
-     *
-     * @see #setLayer
-     */
-    void reparent(Transaction t, SurfaceControl newParent) {
-        t.reparent(mLeash != null ? mLeash : mAnimatable.getSurfaceControl(), newParent);
-    }
-
-    /**
      * @return True if the surface is attached to the leash; false otherwise.
      */
     boolean hasLeash() {
@@ -319,7 +283,6 @@ public class SurfaceAnimator {
             Slog.w(TAG, "Unable to transfer animation, because " + from + " animation is finished");
             return;
         }
-        endDelayingAnimationStart();
         final Transaction t = mAnimatable.getSyncTransaction();
         cancelAnimation(t, true /* restarting */, true /* forwardCancel */);
         mLeash = from.mLeash;
@@ -334,10 +297,6 @@ public class SurfaceAnimator {
         t.reparent(mLeash, parent);
         mAnimatable.onAnimationLeashCreated(t, mLeash);
         mService.mAnimationTransferMap.put(mAnimation, this);
-    }
-
-    boolean isAnimationStartDelayed() {
-        return mAnimationStartDelayed;
     }
 
     /**
@@ -361,7 +320,7 @@ public class SurfaceAnimator {
         final SurfaceFreezer.Snapshot snapshot = mSnapshot;
         reset(t, false);
         if (animation != null) {
-            if (!mAnimationStartDelayed && forwardCancel) {
+            if (forwardCancel) {
                 animation.onAnimationCancelled(leash);
                 if (animationCancelledCallback != null) {
                     animationCancelledCallback.run();
@@ -386,10 +345,6 @@ public class SurfaceAnimator {
                 mService.scheduleAnimationLocked();
             }
         }
-
-        if (!restarting) {
-            mAnimationStartDelayed = false;
-        }
     }
 
     private void reset(Transaction t, boolean destroyLeash) {
@@ -411,6 +366,7 @@ public class SurfaceAnimator {
         final boolean scheduleAnim = removeLeash(t, mAnimatable, leash, destroyLeash);
         mAnimationFinished = false;
         if (scheduleAnim) {
+            setAnimatorPendingState(t);
             mService.scheduleAnimationLocked();
         }
     }
@@ -495,14 +451,12 @@ public class SurfaceAnimator {
         if (mLeash != null) {
             mLeash.dumpDebug(proto, LEASH);
         }
-        proto.write(ANIMATION_START_DELAYED, mAnimationStartDelayed);
         proto.end(token);
     }
 
     void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("mLeash="); pw.print(mLeash);
-        pw.print(" mAnimationType=" + animationTypeToString(mAnimationType));
-        pw.println(mAnimationStartDelayed ? " mAnimationStartDelayed=true" : "");
+        pw.print(" mAnimationType="); pw.println(animationTypeToString(mAnimationType));
         pw.print(prefix); pw.print("Animation: "); pw.println(mAnimation);
         if (mAnimation != null) {
             mAnimation.dump(pw, prefix + "  ");

@@ -22,7 +22,8 @@ import android.annotation.TestApi;
 import android.os.VibrationEffect;
 import android.util.Xml;
 
-import com.android.internal.vibrator.persistence.VibrationEffectXmlSerializer;
+import com.android.internal.vibrator.persistence.LegacyVibrationEffectXmlSerializer;
+import com.android.internal.vibrator.persistence.VibrationEffectSerializer;
 import com.android.internal.vibrator.persistence.XmlConstants;
 import com.android.internal.vibrator.persistence.XmlSerializedVibration;
 import com.android.internal.vibrator.persistence.XmlSerializerException;
@@ -123,7 +124,13 @@ public final class VibrationXmlSerializer {
         }
 
         try {
-            serializedVibration = VibrationEffectXmlSerializer.serialize(effect, serializerFlags);
+            if (android.os.vibrator.Flags.normalizedPwleEffects()) {
+                serializedVibration = VibrationEffectSerializer.serialize(effect,
+                        serializerFlags);
+            } else {
+                serializedVibration = LegacyVibrationEffectXmlSerializer.serialize(effect,
+                        serializerFlags);
+            }
             XmlValidator.checkSerializedVibration(serializedVibration, effect);
         } catch (XmlSerializerException e) {
             // Serialization failed or created incomplete representation, fail before writing.

@@ -22,17 +22,15 @@ import android.graphics.Point
 import android.graphics.Rect
 import android.util.DisplayMetrics
 import android.util.Log
-import android.view.View
 import android.view.WindowManager
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.biometrics.AuthController
+import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.flags.Flags
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.keyguard.ui.binder.DeviceEntryIconViewBinder
 import com.android.systemui.keyguard.ui.view.DeviceEntryIconView
@@ -45,6 +43,7 @@ import com.android.systemui.log.dagger.LongPressTouchLog
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.res.R
 import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.VibratorHelper
 import dagger.Lazy
 import javax.inject.Inject
@@ -60,7 +59,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val authController: AuthController,
     private val windowManager: WindowManager,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val notificationPanelView: NotificationPanelView,
     private val featureFlags: FeatureFlags,
     private val deviceEntryIconViewModel: Lazy<DeviceEntryIconViewModel>,
@@ -74,10 +73,6 @@ constructor(
     private var disposableHandle: DisposableHandle? = null
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!KeyguardBottomAreaRefactor.isEnabled && !MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         val view =
             DeviceEntryIconView(
                     context,
@@ -114,7 +109,7 @@ constructor(
 
         val scaleFactor: Float = authController.scaleFactor
         val mBottomPaddingPx =
-            context.resources.getDimensionPixelSize(R.dimen.lock_icon_margin_bottom)
+            context.resources.getDimensionPixelSize(customR.dimen.lock_icon_margin_bottom)
         val bounds = windowManager.currentWindowMetrics.bounds
         var widthPixels = bounds.right.toFloat()
         if (featureFlags.isEnabled(Flags.LOCKSCREEN_ENABLE_LANDSCAPE)) {
@@ -191,38 +186,6 @@ constructor(
                 ConstraintSet.START,
                 sensorRect.left,
             )
-        }
-
-        // This is only intended to be here until the KeyguardBottomAreaRefactor flag is enabled
-        // Without this logic, the lock icon location changes but the KeyguardBottomAreaView is not
-        // updated and visible ui layout jank occurs. This is due to AmbientIndicationContainer
-        // being in NPVC and laying out prior to the KeyguardRootView.
-        // Remove when KeyguardBottomAreaRefactor is enabled.
-        if (!KeyguardBottomAreaRefactor.isEnabled) {
-            with(notificationPanelView) {
-                val isUdfpsSupported = deviceEntryIconViewModel.get().isUdfpsSupported.value
-                val bottomAreaViewRight = findViewById<View>(R.id.keyguard_bottom_area)?.right ?: 0
-                findViewById<View>(R.id.ambient_indication_container)?.let {
-                    val (ambientLeft, ambientTop) = it.locationOnScreen
-                    if (isUdfpsSupported) {
-                        // make top of ambient indication view the bottom of the lock icon
-                        it.layout(
-                            ambientLeft,
-                            sensorRect.bottom,
-                            bottomAreaViewRight - ambientLeft,
-                            ambientTop + it.measuredHeight,
-                        )
-                    } else {
-                        // make bottom of ambient indication view the top of the lock icon
-                        it.layout(
-                            ambientLeft,
-                            sensorRect.top - it.measuredHeight,
-                            bottomAreaViewRight - ambientLeft,
-                            sensorRect.top,
-                        )
-                    }
-                }
-            }
         }
     }
 

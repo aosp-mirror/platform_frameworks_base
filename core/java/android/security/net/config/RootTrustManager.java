@@ -120,7 +120,7 @@ public class RootTrustManager extends X509ExtendedTrustManager {
 
     /**
      * Hostname aware version of {@link #checkServerTrusted(X509Certificate[], String)}.
-     * This interface is used by conscrypt and android.net.http.X509TrustManagerExtensions do not
+     * This interface is used by Conscrypt and android.net.http.X509TrustManagerExtensions do not
      * modify without modifying those callers.
      */
     @UnsupportedAppUsage
@@ -132,6 +132,22 @@ public class RootTrustManager extends X509ExtendedTrustManager {
         }
         NetworkSecurityConfig config = mConfig.getConfigForHostname(hostname);
         return config.getTrustManager().checkServerTrusted(certs, authType, hostname);
+    }
+
+    /**
+     * This interface is used by Conscrypt and android.net.http.X509TrustManagerExtensions do not
+     * modify without modifying those callers.
+     */
+    public List<X509Certificate> checkServerTrusted(X509Certificate[] certs,
+            byte[] ocspData, byte[] tlsSctData, String authType,
+            String hostname) throws CertificateException {
+        if (hostname == null && mConfig.hasPerDomainConfigs()) {
+            throw new CertificateException(
+                    "Domain specific configurations require that the hostname be provided");
+        }
+        NetworkSecurityConfig config = mConfig.getConfigForHostname(hostname);
+        return config.getTrustManager().checkServerTrusted(
+                certs, ocspData, tlsSctData, authType, hostname);
     }
 
     @Override

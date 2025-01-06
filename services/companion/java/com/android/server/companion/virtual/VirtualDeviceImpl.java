@@ -301,14 +301,30 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             // if the secure window is shown on a non-secure virtual display.
             DisplayManager displayManager = mContext.getSystemService(DisplayManager.class);
             Display display = displayManager.getDisplay(displayId);
-            if ((display.getFlags() & Display.FLAG_SECURE) == 0) {
-                showToastWhereUidIsRunning(activityInfo.applicationInfo.uid,
-                        com.android.internal.R.string.vdm_secure_window,
-                        Toast.LENGTH_LONG, mContext.getMainLooper());
+            if (display != null) {
+                if ((display.getFlags() & Display.FLAG_SECURE) == 0) {
+                    showToastWhereUidIsRunning(activityInfo.applicationInfo.uid,
+                            com.android.internal.R.string.vdm_secure_window,
+                            Toast.LENGTH_LONG, mContext.getMainLooper());
 
-                Counter.logIncrementWithUid(
-                        "virtual_devices.value_secure_window_blocked_count",
-                        mAttributionSource.getUid());
+                    Counter.logIncrementWithUid(
+                            "virtual_devices.value_secure_window_blocked_count",
+                            mAttributionSource.getUid());
+                }
+            } else {
+                Slog.e(TAG, "Calling onSecureWindowShown on a non existent/connected display: "
+                        + displayId);
+            }
+        }
+
+        @Override
+        public void onSecureWindowHidden(int displayId) {
+            if (android.companion.virtualdevice.flags.Flags.activityControlApi()) {
+                try {
+                    mActivityListener.onSecureWindowHidden(displayId);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Unable to call mActivityListener for display: " + displayId, e);
+                }
             }
         }
 

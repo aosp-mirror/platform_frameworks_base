@@ -152,11 +152,11 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
 
         /**
          * Sets the package name and unique id of the provider info.
-         * <p>
-         * The unique id is automatically set by
-         * {@link com.android.server.media.MediaRouterService} and used to identify providers.
-         * The id set by {@link MediaRoute2ProviderService} will be ignored.
-         * </p>
+         *
+         * <p>The unique id is automatically set by {@link
+         * com.android.server.media.MediaRouterService} and used to identify providers. The id set
+         * by {@link MediaRoute2ProviderService} will be ignored.
+         *
          * @hide
          */
         @NonNull
@@ -168,10 +168,11 @@ public final class MediaRoute2ProviderInfo implements Parcelable {
 
             final ArrayMap<String, MediaRoute2Info> newRoutes = new ArrayMap<>();
             for (Map.Entry<String, MediaRoute2Info> entry : mRoutes.entrySet()) {
-                MediaRoute2Info routeWithProviderId = new MediaRoute2Info.Builder(entry.getValue())
-                        .setPackageName(packageName)
-                        .setProviderId(mUniqueId)
-                        .build();
+                MediaRoute2Info routeWithProviderId =
+                        new MediaRoute2Info.Builder(entry.getValue())
+                                .setProviderPackageName(packageName)
+                                .setProviderId(mUniqueId)
+                                .build();
                 newRoutes.put(routeWithProviderId.getOriginalId(), routeWithProviderId);
             }
 

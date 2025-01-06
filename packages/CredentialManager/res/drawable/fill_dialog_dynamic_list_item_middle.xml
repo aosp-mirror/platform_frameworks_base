@@ -19,6 +19,6 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
         xmlns:tools="http://schemas.android.com/tools" tools:ignore="NewApi">
         <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/materialColorSurfaceContainer" />
+            <solid android:color="@androidprv:color/materialColorSurfaceContainer" />
         </shape>
 </inset>

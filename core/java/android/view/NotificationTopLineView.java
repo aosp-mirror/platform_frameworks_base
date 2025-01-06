@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.app.Flags.notificationsRedesignTemplates;
+
 import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Resources;
@@ -112,7 +114,9 @@ public class NotificationTopLineView extends ViewGroup {
         final int givenHeight = MeasureSpec.getSize(heightMeasureSpec);
         final boolean wrapHeight = MeasureSpec.getMode(heightMeasureSpec) == MeasureSpec.AT_MOST;
         int wrapContentWidthSpec = MeasureSpec.makeMeasureSpec(givenWidth, MeasureSpec.AT_MOST);
-        int heightSpec = MeasureSpec.makeMeasureSpec(givenHeight, MeasureSpec.AT_MOST);
+        int heightSpec = notificationsRedesignTemplates()
+                ? MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED)
+                : MeasureSpec.makeMeasureSpec(givenHeight, MeasureSpec.AT_MOST);
         int totalWidth = getPaddingStart();
         int maxChildHeight = -1;
         mMaxAscent = -1;

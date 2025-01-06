@@ -18,7 +18,9 @@ package android.view.contentcapture;
 import static android.view.contentcapture.ContentCaptureHelper.getSanitizedString;
 import static android.view.contentcapture.ContentCaptureManager.DEBUG;
 import static android.view.contentcapture.ContentCaptureManager.NO_SESSION_ID;
+import static android.view.contentcapture.flags.Flags.FLAG_CCAPI_BAKLAVA_ENABLED;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -137,6 +139,12 @@ public final class ContentCaptureEvent implements Parcelable {
      */
     public static final int TYPE_WINDOW_BOUNDS_CHANGED = 10;
 
+    /**
+     * Called to flush a semantics meaningful view changes status to Intelligence Service.
+     */
+    @FlaggedApi(FLAG_CCAPI_BAKLAVA_ENABLED)
+    public static final int TYPE_SESSION_FLUSH = 11;
+
     /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_VIEW_APPEARED,
@@ -149,6 +157,7 @@ public final class ContentCaptureEvent implements Parcelable {
             TYPE_SESSION_RESUMED,
             TYPE_VIEW_INSETS_CHANGED,
             TYPE_WINDOW_BOUNDS_CHANGED,
+            TYPE_SESSION_FLUSH,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface EventType{}
@@ -697,6 +706,8 @@ public final class ContentCaptureEvent implements Parcelable {
                 return "VIEW_INSETS_CHANGED";
             case TYPE_WINDOW_BOUNDS_CHANGED:
                 return "TYPE_WINDOW_BOUNDS_CHANGED";
+            case TYPE_SESSION_FLUSH:
+                return "TYPE_SESSION_FLUSH";
             default:
                 return "UKNOWN_TYPE: " + type;
         }

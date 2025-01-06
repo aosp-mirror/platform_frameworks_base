@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"使用中 (僅左側)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"使用中 (僅右側)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"使用中 (左右兩側)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"無法更新環境聲音"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"啟用 (只限媒體)。<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"啟用 (只限媒體)，左側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> 電量，右側：<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> 電量。"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"已連線 (支援音訊分享功能)，<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> 電量。"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"本機終端機"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"啟用可提供本機命令介面存取權的終端機應用程式"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux 開發環境"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"在 Android 上執行 Linux 終端機"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(實驗性質) 在 Android 上執行 Linux 終端機"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"停用將清除 Linux 終端機資料"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP 檢查"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"設定 HDCP 檢查行為"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"除錯"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"轉場動畫比例"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animator 片長比例"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"模擬次要顯示器"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"陰影顯示位置"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"應用程式"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"不要保留活動"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"使用者離開活動後隨即銷毀活動"</string>
@@ -475,7 +478,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"紅色弱視 (紅綠)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"藍色弱視 (藍黃)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"色彩校正"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"「色彩校正」功能適用於以下情況：:&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;你想讓裝置顯示更準確的色彩&lt;/li&gt; &lt;li&gt;&amp;nbsp;你想移除色彩以提高專注力&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"「色彩校正」功能適用於以下情況：&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;你想讓裝置顯示更準確的色彩&lt;/li&gt; &lt;li&gt;&amp;nbsp;你想移除色彩以提高專注力&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"已由「<xliff:g id="TITLE">%1$s</xliff:g>」覆寫"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - 為保護電池，目前暫停充電"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"此手機"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"此平板電腦"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"此電腦 (內置)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"這部電視"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"插座喇叭"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"外部裝置"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"已連接的裝置"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"這部手機"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"類比"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"無法在此裝置上播放"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"請升級要切換的帳戶"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"無法在此播放下載內容"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"已透過 ARC 連接"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"已透過 eARC 連接"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"電視預設的音訊輸出"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI 輸出"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"內置喇叭"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"內置喇叭"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"電視音訊"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"無法連接，請關閉裝置然後重新開機"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"有線音響裝置"</string>
     <string name="help_label" msgid="3528360748637781274">"說明與意見反映"</string>

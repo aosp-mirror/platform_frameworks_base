@@ -44,6 +44,7 @@ import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dialog.ui.composable.AlertDialogContent
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.ComponentSystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
@@ -67,6 +68,7 @@ constructor(
     private val viewModel: Provider<ModesDialogViewModel>,
     private val dialogEventLogger: ModesDialogEventLogger,
     @Main private val mainCoroutineContext: CoroutineContext,
+    private val shadeDisplayContextRepository: ShadeDialogContextInteractor,
 ) : SystemUIDialog.Delegate {
     // NOTE: This should only be accessed/written from the main thread.
     @VisibleForTesting var currentDialog: ComponentSystemUIDialog? = null
@@ -78,7 +80,10 @@ constructor(
             currentDialog?.dismiss()
         }
 
-        currentDialog = sysuiDialogFactory.create { ModesDialogContent(it) }
+        currentDialog =
+            sysuiDialogFactory.create(context = shadeDisplayContextRepository.context) {
+                ModesDialogContent(it)
+            }
         currentDialog
             ?.lifecycle
             ?.addObserver(
@@ -106,9 +111,8 @@ constructor(
                 modifier =
                     Modifier.semantics {
                         testTagsAsResourceId = true
-                        paneTitle = dialog.context.getString(
-                            R.string.accessibility_desc_quick_settings
-                        )
+                        paneTitle =
+                            dialog.context.getString(R.string.accessibility_desc_quick_settings)
                     },
                 title = {
                     Text(

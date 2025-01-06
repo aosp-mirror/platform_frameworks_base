@@ -31,10 +31,12 @@ import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAsleepForTest
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
+import com.android.systemui.qs.composefragment.dagger.usingMediaInComposeFragment
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.testKosmos
@@ -55,7 +57,10 @@ import org.junit.runner.RunWith
 @EnableFlags(DualShade.FLAG_NAME)
 class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
 
-    private val kosmos = testKosmos()
+    private val kosmos =
+        testKosmos().apply {
+            usingMediaInComposeFragment = false // This is not for the compose fragment
+        }
     private val testScope = kosmos.testScope
     private val sceneInteractor = kosmos.sceneInteractor
 
@@ -118,6 +123,24 @@ class QuickSettingsShadeOverlayContentViewModelTest : SysuiTestCase() {
             lockDevice()
             assertThat(isShadeTouchable).isFalse()
             assertThat(currentOverlays).doesNotContain(Overlays.QuickSettingsShade)
+        }
+
+    @Test
+    fun showHeader_showsOnNarrowScreen() =
+        testScope.runTest {
+            kosmos.shadeRepository.setShadeLayoutWide(false)
+            runCurrent()
+
+            assertThat(underTest.showHeader).isTrue()
+        }
+
+    @Test
+    fun showHeader_hidesOnWideScreen() =
+        testScope.runTest {
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+            runCurrent()
+
+            assertThat(underTest.showHeader).isFalse()
         }
 
     private fun TestScope.lockDevice() {

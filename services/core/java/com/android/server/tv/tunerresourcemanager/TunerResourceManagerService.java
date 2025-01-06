@@ -231,10 +231,10 @@ public class TunerResourceManagerService extends SystemService implements IBinde
         }
 
         @Override
-        public void setResourceHolderRetain(int clientId, boolean resourceHolderRetain) {
-            enforceTrmAccessPermission("setResourceHolderRetain");
+        public void setResourceOwnershipRetention(int clientId, boolean enabled) {
+            enforceTrmAccessPermission("setResourceOwnershipRetention");
             synchronized (mLock) {
-                getClientProfile(clientId).setResourceHolderRetain(resourceHolderRetain);
+                getClientProfile(clientId).setResourceOwnershipRetention(enabled);
             }
         }
 
@@ -1079,7 +1079,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             || ((requestClient.getPriority() == currentLowestPriority)
                                     && isRequestFromSameProcess
                                     && !(setResourceHolderRetain()
-                                            && requestClient.shouldResourceHolderRetain())))) {
+                                            && requestClient
+                                                    .resourceOwnershipRetentionEnabled())))) {
                 frontendHandle[0] = inUseLowestPriorityFrontend.getHandle();
                 reclaimOwnerId[0] = inUseLowestPriorityFrontend.getOwnerClientId();
                 return true;
@@ -1265,7 +1266,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             || ((requestClient.getPriority() == currentLowestPriority)
                                     && isRequestFromSameProcess
                                     && !(setResourceHolderRetain()
-                                            && requestClient.shouldResourceHolderRetain())))) {
+                                            && requestClient
+                                                    .resourceOwnershipRetentionEnabled())))) {
                 lnbHandle[0] = inUseLowestPriorityLnb.getHandle();
                 reclaimOwnerId[0] = inUseLowestPriorityLnb.getOwnerClientId();
                 return true;
@@ -1352,7 +1354,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             || ((requestClient.getPriority() == currentLowestPriority)
                                     && isRequestFromSameProcess
                                     && !(setResourceHolderRetain()
-                                            && requestClient.shouldResourceHolderRetain())))) {
+                                            && requestClient
+                                                    .resourceOwnershipRetentionEnabled())))) {
                 casSessionHandle[0] = cas.getHandle();
                 reclaimOwnerId[0] = lowestPriorityOwnerId;
                 return true;
@@ -1439,7 +1442,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             || ((requestClient.getPriority() == currentLowestPriority)
                                     && isRequestFromSameProcess
                                     && !(setResourceHolderRetain()
-                                            && requestClient.shouldResourceHolderRetain())))) {
+                                            && requestClient
+                                                    .resourceOwnershipRetentionEnabled())))) {
                 ciCamHandle[0] = ciCam.getHandle();
                 reclaimOwnerId[0] = lowestPriorityOwnerId;
                 return true;
@@ -1677,7 +1681,8 @@ public class TunerResourceManagerService extends SystemService implements IBinde
                             || ((requestClient.getPriority() == currentLowestPriority)
                                     && isRequestFromSameProcess
                                     && !(setResourceHolderRetain()
-                                            && requestClient.shouldResourceHolderRetain())))) {
+                                            && requestClient
+                                                    .resourceOwnershipRetentionEnabled())))) {
                 demuxHandle[0] = inUseLowestPriorityDemux.getHandle();
                 reclaimOwnerId[0] = inUseLowestPriorityDemux.getOwnerClientId();
                 return true;

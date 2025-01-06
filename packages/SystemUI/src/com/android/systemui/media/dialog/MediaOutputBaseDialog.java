@@ -26,13 +26,9 @@ import android.bluetooth.BluetoothLeBroadcastMetadata;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.res.Configuration;
-import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.ColorFilter;
-import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
-import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
 import android.os.Bundle;
@@ -70,7 +66,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
         implements MediaSwitchingController.Callback, Window.Callback {
 
     private static final String TAG = "MediaOutputDialog";
-    private static final String EMPTY_TITLE = " ";
     private static final String PREF_NAME = "MediaOutputDialog";
     private static final String PREF_IS_LE_BROADCAST_FIRST_LAUNCH = "PrefIsLeBroadcastFirstLaunch";
     private static final boolean DEBUG = true;
@@ -99,11 +94,9 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
     private ImageView mBroadcastIcon;
     private RecyclerView mDevicesRecyclerView;
     private LinearLayout mDeviceListLayout;
-    private LinearLayout mCastAppLayout;
     private LinearLayout mMediaMetadataSectionLayout;
     private Button mDoneButton;
     private Button mStopButton;
-    private Button mAppButton;
     private int mListMaxHeight;
     private int mItemHeight;
     private int mListPaddingTop;
@@ -262,9 +255,7 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
         mDeviceListLayout = mDialogView.requireViewById(R.id.device_list);
         mDoneButton = mDialogView.requireViewById(R.id.done);
         mStopButton = mDialogView.requireViewById(R.id.stop);
-        mAppButton = mDialogView.requireViewById(R.id.launch_app_button);
         mAppResourceIcon = mDialogView.requireViewById(R.id.app_source_icon);
-        mCastAppLayout = mDialogView.requireViewById(R.id.cast_app_section);
         mBroadcastIcon = mDialogView.requireViewById(R.id.broadcast_icon);
 
         mDeviceListLayout.getViewTreeObserver().addOnGlobalLayoutListener(
@@ -277,9 +268,11 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
         // Init bottom buttons
         mDoneButton.setOnClickListener(v -> dismiss());
         mStopButton.setOnClickListener(v -> onStopButtonClick());
-        mAppButton.setOnClickListener(mMediaSwitchingController::tryToLaunchMediaApplication);
-        mMediaMetadataSectionLayout.setOnClickListener(
-                mMediaSwitchingController::tryToLaunchMediaApplication);
+        if (mMediaSwitchingController.getAppLaunchIntent() != null) {
+            // For a11y purposes only add listener if a section is clickable.
+            mMediaMetadataSectionLayout.setOnClickListener(
+                    mMediaSwitchingController::tryToLaunchMediaApplication);
+        }
 
         mDismissing = false;
     }
@@ -333,8 +326,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
         final IconCompat headerIcon = getHeaderIcon();
         final IconCompat appSourceIcon = getAppSourceIcon();
         boolean colorSetUpdated = false;
-        mCastAppLayout.setVisibility(
-                mMediaSwitchingController.shouldShowLaunchSection() ? View.VISIBLE : View.GONE);
         if (iconRes != 0) {
             mHeaderIcon.setVisibility(View.VISIBLE);
             mHeaderIcon.setImageResource(iconRes);
@@ -384,7 +375,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
                     R.dimen.media_output_dialog_header_icon_padding);
             mHeaderIcon.setLayoutParams(new LinearLayout.LayoutParams(size + padding, size));
         }
-        mAppButton.setText(mMediaSwitchingController.getAppSourceName());
 
         if (!mIncludePlaybackAndAppMetadata) {
             mHeaderTitle.setVisibility(View.GONE);
@@ -441,22 +431,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
                 .getBackground()
                 .setTint(mMediaSwitchingController.getColorDialogBackground());
         mDeviceListLayout.setBackgroundColor(mMediaSwitchingController.getColorDialogBackground());
-    }
-
-    private Drawable resizeDrawable(Drawable drawable, int size) {
-        if (drawable == null) {
-            return null;
-        }
-        int width = drawable.getIntrinsicWidth();
-        int height = drawable.getIntrinsicHeight();
-        Bitmap.Config config = drawable.getOpacity() != PixelFormat.OPAQUE ? Bitmap.Config.ARGB_8888
-                : Bitmap.Config.RGB_565;
-        Bitmap bitmap = Bitmap.createBitmap(width, height, config);
-        Canvas canvas = new Canvas(bitmap);
-        drawable.setBounds(0, 0, width, height);
-        drawable.draw(canvas);
-        return new BitmapDrawable(mContext.getResources(),
-                Bitmap.createScaledBitmap(bitmap, size, size, false));
     }
 
     public void handleLeBroadcastStarted() {
@@ -600,9 +574,6 @@ public abstract class MediaOutputBaseDialog extends SystemUIDialog
     @Override
     public void dismissDialog() {
         mBroadcastSender.closeSystemDialogs();
-    }
-
-    void onHeaderIconClick() {
     }
 
     View getDialogView() {

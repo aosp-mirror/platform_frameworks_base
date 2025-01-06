@@ -16,6 +16,9 @@
 
 package android.service.quickaccesswallet;
 
+import static android.service.quickaccesswallet.Flags.launchWalletOptionOnPowerDoubleTap;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -89,6 +92,10 @@ import android.util.Log;
  * All calls should be considered stateless: if the service needs to keep state between calls, it
  * must do its own state management (keeping in mind that the service's process might be killed
  * by the Android System when unbound; for example, if the device is running low in memory).
+ *
+ * <p> The service also provides pending intents to override the system's Quick Access activities
+ * via the {@link #getTargetActivityPendingIntent} and the
+ * {@link #getGestureTargetActivityPendingIntent} method.
  *
  * <p>
  * <a name="ErrorHandling"></a>
@@ -247,6 +254,19 @@ public abstract class QuickAccessWalletService extends Service {
                             callbacks));
         }
 
+        @FlaggedApi(Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+        @Override
+        public void onGestureTargetActivityIntentRequested(
+                @NonNull IQuickAccessWalletServiceCallbacks callbacks) {
+            if (launchWalletOptionOnPowerDoubleTap()) {
+                mHandler.post(
+                        () ->
+                                QuickAccessWalletService.this
+                                        .onGestureTargetActivityIntentRequestedInternal(
+                                                callbacks));
+            }
+        }
+
         public void registerWalletServiceEventListener(
                 @NonNull WalletServiceEventListenerRequest request,
                 @NonNull IQuickAccessWalletServiceCallbacks callback) {
@@ -272,6 +292,20 @@ public abstract class QuickAccessWalletService extends Service {
             callbacks.onTargetActivityPendingIntentReceived(getTargetActivityPendingIntent());
         } catch (RemoteException e) {
             Log.w(TAG, "Error returning wallet cards", e);
+        }
+    }
+
+    private void onGestureTargetActivityIntentRequestedInternal(
+            IQuickAccessWalletServiceCallbacks callbacks) {
+        if (!Flags.launchWalletOptionOnPowerDoubleTap()) {
+            return;
+        }
+
+        try {
+            callbacks.onGestureTargetActivityPendingIntentReceived(
+                    getGestureTargetActivityPendingIntent());
+        } catch (RemoteException e) {
+            Log.w(TAG, "Error", e);
         }
     }
 
@@ -346,6 +380,22 @@ public abstract class QuickAccessWalletService extends Service {
      */
     @Nullable
     public PendingIntent getTargetActivityPendingIntent() {
+        return null;
+    }
+
+    /**
+     * Specify a {@link PendingIntent} to be launched on user gesture.
+     *
+     * <p>The pending intent will be sent when the user performs a gesture to open Wallet.
+     * The pending intent should launch an activity.
+     *
+     * <p> If the gesture is performed and this method returns null, the system will launch the
+     * activity specified by the {@link #getTargetActivityPendingIntent} method. If that method
+     * also returns null, the system will launch the system-provided card switcher activity.
+     */
+    @Nullable
+    @FlaggedApi(Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    public PendingIntent getGestureTargetActivityPendingIntent() {
         return null;
     }
 

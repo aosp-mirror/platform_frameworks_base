@@ -634,7 +634,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
             throws Exception {
         setSettingAndAssertSuccessfulChange(() -> {
             insertStringViaProviderApi(type, name, value, withTableRowUri);
-        }, type, name, value, UserHandle.USER_SYSTEM);
+        }, type, name, value, getContext().getUserId());
     }
 
     private void setSettingAndAssertSuccessfulChange(Runnable setCommand, final int type,

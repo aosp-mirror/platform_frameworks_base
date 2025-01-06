@@ -43,6 +43,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import com.android.cts.input.inputeventmatchers.withDeviceId
 import com.android.cts.input.inputeventmatchers.withMotionAction
 import com.android.cts.input.inputeventmatchers.withSource
+import com.android.cts.input.BlockingQueueEventVerifier
 import com.android.server.LocalServices
 import com.android.server.accessibility.magnification.MagnificationProcessor
 import com.android.server.wm.WindowManagerInternal

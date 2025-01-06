@@ -113,11 +113,11 @@
       "host": true
     },
     {
-      "name": "FrameworksMockingServicesTestsRavenwood",
+      "name": "FrameworksServicesTestsRavenwood_Compat",
       "host": true
     },
     {
-      "name": "FrameworksServicesTestsRavenwood",
+      "name": "FrameworksServicesTestsRavenwood_Uri",
       "host": true
     },
     {

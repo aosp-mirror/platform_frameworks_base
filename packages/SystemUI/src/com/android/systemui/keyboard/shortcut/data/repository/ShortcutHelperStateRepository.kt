@@ -16,73 +16,44 @@
 
 package com.android.systemui.keyboard.shortcut.data.repository
 
-import android.content.BroadcastReceiver
-import android.content.Context
-import android.content.Intent
-import android.content.IntentFilter
 import android.hardware.input.InputManager
-import android.os.UserHandle
 import android.view.KeyCharacterMap.VIRTUAL_KEYBOARD
-import com.android.systemui.CoreStartable
-import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState.Active
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutHelperState.Inactive
 import com.android.systemui.shared.hardware.findInputDevice
-import com.android.systemui.statusbar.CommandQueue
-import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.withContext
+import javax.inject.Inject
 
 @SysUISingleton
 class ShortcutHelperStateRepository
 @Inject
 constructor(
-    private val commandQueue: CommandQueue,
-    private val broadcastDispatcher: BroadcastDispatcher,
     private val inputManager: InputManager,
-    @Background private val backgroundScope: CoroutineScope,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
-) : CoreStartable {
+) {
+    private val _state = MutableStateFlow<ShortcutHelperState>(Inactive)
+    val state = _state.asStateFlow()
 
-    val state = MutableStateFlow<ShortcutHelperState>(Inactive)
+    suspend fun toggle(deviceId: Int? = null) {
+        if (_state.value is Inactive) {
+            show(deviceId)
+        } else {
+            hide()
+        }
+    }
 
-    override fun start() {
-        registerBroadcastReceiver(
-            action = Intent.ACTION_SHOW_KEYBOARD_SHORTCUTS,
-            onReceive = {
-                backgroundScope.launch { state.value = Active(findPhysicalKeyboardId()) }
-            }
-        )
-        registerBroadcastReceiver(
-            action = Intent.ACTION_DISMISS_KEYBOARD_SHORTCUTS,
-            onReceive = { state.value = Inactive }
-        )
-        registerBroadcastReceiver(
-            action = Intent.ACTION_CLOSE_SYSTEM_DIALOGS,
-            onReceive = { state.value = Inactive }
-        )
-        commandQueue.addCallback(
-            object : CommandQueue.Callbacks {
-                override fun dismissKeyboardShortcutsMenu() {
-                    state.value = Inactive
-                }
+    suspend fun show(deviceId: Int? = null) {
+        _state.value = Active(deviceId ?: findPhysicalKeyboardId())
+    }
 
-                override fun toggleKeyboardShortcutsMenu(deviceId: Int) {
-                    state.value =
-                        if (state.value is Inactive) {
-                            Active(deviceId)
-                        } else {
-                            Inactive
-                        }
-                }
-            }
-        )
+    fun hide() {
+        _state.value = Inactive
     }
 
     private suspend fun findPhysicalKeyboardId() =
@@ -92,21 +63,4 @@ constructor(
             return@withContext firstEnabledPhysicalKeyboard?.id ?: VIRTUAL_KEYBOARD
         }
 
-    fun hide() {
-        state.value = Inactive
-    }
-
-    private fun registerBroadcastReceiver(action: String, onReceive: () -> Unit) {
-        broadcastDispatcher.registerReceiver(
-            receiver =
-                object : BroadcastReceiver() {
-                    override fun onReceive(context: Context, intent: Intent) {
-                        onReceive()
-                    }
-                },
-            filter = IntentFilter(action),
-            flags = Context.RECEIVER_EXPORTED or Context.RECEIVER_VISIBLE_TO_INSTANT_APPS,
-            user = UserHandle.ALL,
-        )
-    }
 }

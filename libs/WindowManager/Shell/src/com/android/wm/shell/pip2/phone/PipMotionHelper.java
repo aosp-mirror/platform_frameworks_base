@@ -350,7 +350,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         }
         cancelPhysicsAnimation();
         mMenuController.hideMenu(ANIM_TYPE_DISMISS, false /* resize */);
-        mPipScheduler.removePipAfterAnimation();
+        mPipScheduler.scheduleRemovePip();
     }
 
     /** Sets the movement bounds to use to constrain PIP position animations. */
@@ -785,8 +785,16 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private void handleFlingTransition(SurfaceControl.Transaction startTx,
             SurfaceControl.Transaction finishTx, Rect destinationBounds) {
-        startTx.setPosition(mPipTransitionState.mPinnedTaskLeash,
-                destinationBounds.left, destinationBounds.top);
+        SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
+        int cornerRadius = mContext.getResources().getDimensionPixelSize(R.dimen.pip_corner_radius);
+        int shadowRadius = mContext.getResources().getDimensionPixelSize(R.dimen.pip_shadow_radius);
+
+        // merge transactions so everything is done on startTx
+        startTx.merge(finishTx);
+
+        startTx.setPosition(pipLeash, destinationBounds.left, destinationBounds.top)
+                .setCornerRadius(pipLeash, cornerRadius)
+                .setShadowRadius(pipLeash, shadowRadius);
         startTx.apply();
 
         // All motion operations have actually finished, so make bounds cache updates.
@@ -799,7 +807,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
 
     private void startResizeAnimation(SurfaceControl.Transaction startTx,
             SurfaceControl.Transaction finishTx, Rect destinationBounds, int duration) {
-        SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+        SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
         Preconditions.checkState(pipLeash != null,
                 "No leash cached by mPipTransitionState=" + mPipTransitionState);
 

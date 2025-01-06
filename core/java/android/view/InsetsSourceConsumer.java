@@ -130,7 +130,10 @@ public class InsetsSourceConsumer {
      * @return Whether the control has changed from the server
      */
     public boolean setControl(@Nullable InsetsSourceControl control,
-            @InsetsType int[] showTypes, @InsetsType int[] hideTypes, int[] cancelTypes) {
+            @InsetsType int[] showTypes,
+            @InsetsType int[] hideTypes,
+            @InsetsType int[] cancelTypes,
+            @InsetsType int[] transientTypes) {
         if (Objects.equals(mSourceControl, control)) {
             if (mSourceControl != null && mSourceControl != control) {
                 mSourceControl.release(SurfaceControl::release);
@@ -184,6 +187,9 @@ public class InsetsSourceConsumer {
                     showTypes[0] |= mType;
                 } else {
                     hideTypes[0] |= mType;
+                }
+                if (lastControl != null && lastControl.isFake()) {
+                    transientTypes[0] |= mType;
                 }
             } else {
                 // We are gaining control, but don't need to run an animation.

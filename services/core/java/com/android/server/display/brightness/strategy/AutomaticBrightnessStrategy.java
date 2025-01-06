@@ -525,7 +525,7 @@ public class AutomaticBrightnessStrategy extends AutomaticBrightnessStrategy2
         }
 
         final boolean shouldUseDozeMode =
-                mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()
+                mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)
                         ? (!useNormalBrightnessForDoze && policy == POLICY_DOZE)
                                 || Display.isDozeState(state)
                         : Display.isDozeState(state);

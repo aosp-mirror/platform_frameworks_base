@@ -165,6 +165,7 @@ cc_test {
     ],
     host_supported: true,
     test_suites: ["general-tests"],
+    require_root: true,
     srcs: [
         "tests/BinaryStreamVisitorTests.cpp",
         "tests/CommandLineOptionsTests.cpp",

@@ -18,7 +18,7 @@ package com.android.systemui.statusbar
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
-import com.android.systemui.util.mockito.mock
+import org.mockito.kotlin.mock
 
 var Kosmos.singleShadeLockScreenOverScrollerFactory by Fixture {
     mock<SingleShadeLockScreenOverScroller.Factory>()

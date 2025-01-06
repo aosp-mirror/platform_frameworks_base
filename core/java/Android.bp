@@ -28,6 +28,7 @@ filegroup {
     exclude_srcs: [
         "android/os/*MessageQueue/**/*.java",
         "android/ranging/**/*.java",
+        ":dynamic_instrumentation_manager_aidl_sources",
     ],
     visibility: ["//frameworks/base"],
 }
@@ -120,6 +121,17 @@ filegroup {
 }
 
 filegroup {
+    name: "dynamic_instrumentation_manager_aidl_sources",
+    srcs: ["android/os/instrumentation/*.aidl"],
+}
+
+aidl_interface {
+    name: "dynamic_instrumentation_manager_aidl",
+    srcs: [":dynamic_instrumentation_manager_aidl_sources"],
+    unstable: true,
+}
+
+filegroup {
     name: "framework-internal-display-sources",
     srcs: ["com/android/internal/display/BrightnessSynchronizer.java"],
     visibility: ["//frameworks/base/services/tests/mockingservicestests"],
@@ -206,10 +218,12 @@ filegroup {
         "android/os/Temperature.aidl",
         "android/os/CoolingDevice.aidl",
         "android/os/IThermalEventListener.aidl",
+        "android/os/IThermalHeadroomListener.aidl",
         "android/os/IThermalStatusListener.aidl",
         "android/os/IThermalService.aidl",
         "android/os/IPowerManager.aidl",
         "android/os/IWakeLockCallback.aidl",
+        "android/os/IScreenTimeoutPolicyListener.aidl",
     ],
 }
 
@@ -219,8 +233,11 @@ aidl_interface {
         "android.hardware.power-aidl",
     ],
     srcs: [
+        "android/os/CpuHeadroomParamsInternal.aidl",
+        "android/os/GpuHeadroomParamsInternal.aidl",
         "android/os/IHintManager.aidl",
         "android/os/IHintSession.aidl",
+        "android/os/SessionCreationConfig.aidl",
     ],
     unstable: true,
     backend: {
@@ -674,28 +691,8 @@ java_library {
 
 // protolog end
 
-// Whether to enable read-only system feature codegen.
-gen_readonly_feature_apis = select(release_flag("RELEASE_USE_SYSTEM_FEATURE_BUILD_FLAGS"), {
-    true: "true",
-    false: "false",
-    default: "false",
-})
-
-// Generates com.android.internal.pm.RoSystemFeatures, optionally compiling in
-// details about fixed system features defined by build flags. When disabled,
-// the APIs are simply passthrough stubs with no meaningful side effects.
-genrule {
+java_system_features_srcs {
     name: "systemfeatures-gen-srcs",
-    cmd: "$(location systemfeatures-gen-tool) com.android.internal.pm.RoSystemFeatures " +
-        // --readonly=false (default) makes the codegen an effective no-op passthrough API.
-        " --readonly=" + gen_readonly_feature_apis +
-        // For now, only export "android.hardware.type.*" system features APIs.
-        // TODO(b/203143243): Use an intermediate soong var that aggregates all declared
-        // RELEASE_SYSTEM_FEATURE_* declarations into a single arg.
-        " --feature-apis=AUTOMOTIVE,WATCH,TELEVISION,EMBEDDED,PC" +
-        " > $(out)",
-    out: [
-        "RoSystemFeatures.java",
-    ],
-    tools: ["systemfeatures-gen-tool"],
+    full_class_name: "com.android.internal.pm.RoSystemFeatures",
+    visibility: ["//visibility:private"],
 }

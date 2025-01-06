@@ -676,14 +676,6 @@ public class NetworkControllerBaseTest extends SysuiTestCase {
         }
     }
 
-    protected void verifyLastCallStrength(int icon) {
-        ArgumentCaptor<IconState> iconArg = ArgumentCaptor.forClass(IconState.class);
-        verify(mCallbackHandler, Mockito.atLeastOnce()).setCallIndicator(
-                iconArg.capture(),
-                anyInt());
-        assertEquals("Call strength, in status bar", icon, (int) iconArg.getValue().icon);
-    }
-
     protected void assertNetworkNameEquals(String expected) {
         assertEquals("Network name", expected, mMobileSignalController.getState().networkName);
     }

@@ -16,11 +16,7 @@
 
 package com.android.server.pm;
 
-import static android.content.Intent.EXTRA_LONG_VERSION_CODE;
-import static android.content.Intent.EXTRA_PACKAGE_NAME;
-import static android.content.Intent.EXTRA_VERSION_CODE;
 import static android.content.pm.PackageInstaller.SessionParams.MODE_INHERIT_EXISTING;
-import static android.content.pm.PackageManager.EXTRA_VERIFICATION_ID;
 import static android.content.pm.PackageManager.INSTALL_SUCCEEDED;
 import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V4;
@@ -28,7 +24,6 @@ import static android.os.PowerWhitelistManager.REASON_PACKAGE_VERIFIER;
 import static android.os.PowerWhitelistManager.TEMPORARY_ALLOWLIST_TYPE_FOREGROUND_SERVICE_ALLOWED;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 
-import static com.android.server.pm.PackageManagerService.CHECK_PENDING_INTEGRITY_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.CHECK_PENDING_VERIFICATION;
 import static com.android.server.pm.PackageManagerService.DEBUG_INSTALL;
 import static com.android.server.pm.PackageManagerService.DEBUG_VERIFY;
@@ -41,9 +36,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
-import android.content.BroadcastReceiver;
 import android.content.ComponentName;
-import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.DataLoaderType;
@@ -69,7 +62,6 @@ import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.incremental.IncrementalManager;
 import android.provider.DeviceConfig;
-import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.Slog;
@@ -87,11 +79,6 @@ final class VerifyingSession {
      * Whether verification is enabled by default.
      */
     private static final boolean DEFAULT_VERIFY_ENABLE = true;
-
-    /**
-     * Whether integrity verification is enabled by default.
-     */
-    private static final boolean DEFAULT_INTEGRITY_VERIFY_ENABLE = true;
     /**
      * The default maximum time to wait for the integrity verification to return in
      * milliseconds.
@@ -129,7 +116,6 @@ final class VerifyingSession {
     private final boolean mUserActionRequired;
     private final int mUserActionRequiredType;
     private boolean mWaitForVerificationToComplete;
-    private boolean mWaitForIntegrityVerificationToComplete;
     private boolean mWaitForEnableRollbackToComplete;
     private int mRet = PackageManager.INSTALL_SUCCEEDED;
     private String mErrorMessage = null;
@@ -217,7 +203,6 @@ final class VerifyingSession {
                 new PackageVerificationState(this);
         mPm.mPendingVerification.append(verificationId, verificationState);
 
-        sendIntegrityVerificationRequest(verificationId, pkgLite, verificationState);
         sendPackageVerificationRequest(
                 verificationId, pkgLite, verificationState);
 
@@ -270,89 +255,6 @@ final class VerifyingSession {
         mPm.mHandler.sendMessageDelayed(msg, rollbackTimeout);
     }
 
-    /**
-     * Send a request to check the integrity of the package.
-     */
-    void sendIntegrityVerificationRequest(
-            int verificationId,
-            PackageInfoLite pkgLite,
-            PackageVerificationState verificationState) {
-        if (!isIntegrityVerificationEnabled()) {
-            // Consider the integrity check as passed.
-            verificationState.setIntegrityVerificationResult(
-                    PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-            return;
-        }
-
-        final Intent integrityVerification =
-                new Intent(Intent.ACTION_PACKAGE_NEEDS_INTEGRITY_VERIFICATION);
-
-        integrityVerification.setDataAndType(Uri.fromFile(new File(mOriginInfo.mResolvedPath)),
-                PACKAGE_MIME_TYPE);
-
-        final int flags = Intent.FLAG_GRANT_READ_URI_PERMISSION
-                | Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                | Intent.FLAG_RECEIVER_FOREGROUND;
-        integrityVerification.addFlags(flags);
-
-        integrityVerification.putExtra(EXTRA_VERIFICATION_ID, verificationId);
-        integrityVerification.putExtra(EXTRA_PACKAGE_NAME, pkgLite.packageName);
-        integrityVerification.putExtra(EXTRA_VERSION_CODE, pkgLite.versionCode);
-        integrityVerification.putExtra(EXTRA_LONG_VERSION_CODE, pkgLite.getLongVersionCode());
-        populateInstallerExtras(integrityVerification);
-
-        // send to integrity component only.
-        integrityVerification.setPackage("android");
-
-        final BroadcastOptions options = BroadcastOptions.makeBasic();
-
-        mPm.mContext.sendOrderedBroadcastAsUser(integrityVerification, UserHandle.SYSTEM,
-                /* receiverPermission= */ null,
-                /* appOp= */ AppOpsManager.OP_NONE,
-                /* options= */ options.toBundle(),
-                new BroadcastReceiver() {
-                    @Override
-                    public void onReceive(Context context, Intent intent) {
-                        final Message msg =
-                                mPm.mHandler.obtainMessage(CHECK_PENDING_INTEGRITY_VERIFICATION);
-                        msg.arg1 = verificationId;
-                        mPm.mHandler.sendMessageDelayed(msg, getIntegrityVerificationTimeout());
-                    }
-                }, /* scheduler= */ null,
-                /* initialCode= */ 0,
-                /* initialData= */ null,
-                /* initialExtras= */ null);
-
-        Trace.asyncTraceBegin(
-                TRACE_TAG_PACKAGE_MANAGER, "integrity_verification", verificationId);
-
-        // stop the copy until verification succeeds.
-        mWaitForIntegrityVerificationToComplete = true;
-    }
-
-
-    /**
-     * Get the integrity verification timeout.
-     *
-     * @return verification timeout in milliseconds
-     */
-    private long getIntegrityVerificationTimeout() {
-        long timeout = Settings.Global.getLong(mPm.mContext.getContentResolver(),
-                Settings.Global.APP_INTEGRITY_VERIFICATION_TIMEOUT,
-                DEFAULT_INTEGRITY_VERIFICATION_TIMEOUT);
-        // The setting can be used to increase the timeout but not decrease it, since that is
-        // equivalent to disabling the integrity component.
-        return Math.max(timeout, DEFAULT_INTEGRITY_VERIFICATION_TIMEOUT);
-    }
-
-    /**
-     * Check whether or not integrity verification has been enabled.
-     */
-    private boolean isIntegrityVerificationEnabled() {
-        // We are not exposing this as a user-configurable setting because we don't want to provide
-        // an easy way to get around the integrity check.
-        return DEFAULT_INTEGRITY_VERIFY_ENABLE;
-    }
 
     /**
      * Send a request to verifier(s) to verify the package if necessary.
@@ -827,11 +729,6 @@ final class VerifyingSession {
         handleReturnCode();
     }
 
-    void handleIntegrityVerificationFinished() {
-        mWaitForIntegrityVerificationToComplete = false;
-        handleReturnCode();
-    }
-
     void handleRollbackEnabled() {
         // TODO(b/112431924): Consider halting the install if we
         // couldn't enable rollback.
@@ -840,7 +737,7 @@ final class VerifyingSession {
     }
 
     void handleReturnCode() {
-        if (mWaitForVerificationToComplete || mWaitForIntegrityVerificationToComplete
+        if (mWaitForVerificationToComplete
                 || mWaitForEnableRollbackToComplete) {
             return;
         }

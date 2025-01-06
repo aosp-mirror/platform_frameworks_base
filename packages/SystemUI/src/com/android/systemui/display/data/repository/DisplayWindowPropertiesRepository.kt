@@ -18,6 +18,8 @@ package com.android.systemui.display.data.repository
 
 import android.annotation.SuppressLint
 import android.content.Context
+import android.os.Bundle
+import android.util.Log
 import android.view.Display
 import android.view.LayoutInflater
 import android.view.WindowManager
@@ -27,6 +29,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.android.systemui.res.R
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.google.common.collect.HashBasedTable
 import com.google.common.collect.Table
@@ -38,14 +41,13 @@ import kotlinx.coroutines.CoroutineScope
 interface DisplayWindowPropertiesRepository {
 
     /**
-     * Returns a [DisplayWindowProperties] instance for a given display id and window type.
-     *
-     * @throws IllegalArgumentException if no display with the given display id exists.
+     * Returns a [DisplayWindowProperties] instance for a given display id and window type, or null
+     * if no display with the given display id exists.
      */
     fun get(
         displayId: Int,
         @WindowManager.LayoutParams.WindowType windowType: Int,
-    ): DisplayWindowProperties
+    ): DisplayWindowProperties?
 }
 
 @SysUISingleton
@@ -60,7 +62,10 @@ constructor(
 ) : DisplayWindowPropertiesRepository, CoreStartable {
 
     init {
-        StatusBarConnectedDisplays.assertInNewMode()
+        check(StatusBarConnectedDisplays.isEnabled || ShadeWindowGoesAround.isEnabled) {
+            "This should be instantiated only when wither StatusBarConnectedDisplays or " +
+                "ShadeWindowGoesAround are enabled."
+        }
     }
 
     private val properties: Table<Int, Int, DisplayWindowProperties> = HashBasedTable.create()
@@ -68,12 +73,10 @@ constructor(
     override fun get(
         displayId: Int,
         @WindowManager.LayoutParams.WindowType windowType: Int,
-    ): DisplayWindowProperties {
-        val display =
-            displayRepository.getDisplay(displayId)
-                ?: throw IllegalArgumentException("Display with id $displayId doesn't exist")
+    ): DisplayWindowProperties? {
+        val display = displayRepository.getDisplay(displayId) ?: return null
         return properties.get(displayId, windowType)
-            ?: create(display, windowType).also { properties.put(displayId, windowType, it) }
+            ?: create(display, windowType)?.also { properties.put(displayId, windowType, it) }
     }
 
     override fun start() {
@@ -84,7 +87,7 @@ constructor(
         }
     }
 
-    private fun create(display: Display, windowType: Int): DisplayWindowProperties {
+    private fun create(display: Display, windowType: Int): DisplayWindowProperties? {
         val displayId = display.displayId
         return if (displayId == Display.DEFAULT_DISPLAY) {
             // For the default display, we can just reuse the global/application properties.
@@ -98,6 +101,14 @@ constructor(
             )
         } else {
             val context = createWindowContext(display, windowType)
+            if (context.displayId != display.displayId) {
+                Log.e(
+                    TAG,
+                    "Returning null because the new context doesn't have the desired display id " +
+                        "${display.displayId}. Display was already removed.",
+                )
+                return null
+            }
             @SuppressLint("NonInjectedService") // Need to manually get the service
             val windowManager = context.getSystemService(WindowManager::class.java) as WindowManager
             val layoutInflater = LayoutInflater.from(context)
@@ -106,11 +117,15 @@ constructor(
     }
 
     private fun createWindowContext(display: Display, windowType: Int): Context =
-        globalContext.createWindowContext(display, windowType, /* options= */ null).also {
+        globalContext.createWindowContext(display, windowType, /* options= */ Bundle.EMPTY).also {
             it.setTheme(R.style.Theme_SystemUI)
         }
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.write("perDisplayContexts: $properties")
+    }
+
+    private companion object {
+        const val TAG = "DisplayWindowPropsRepo"
     }
 }

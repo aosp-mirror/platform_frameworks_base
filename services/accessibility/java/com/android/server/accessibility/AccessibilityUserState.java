@@ -29,6 +29,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.KEY_GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.QUICK_SETTINGS;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.TRIPLETAP;
@@ -209,6 +210,7 @@ class AccessibilityUserState {
         mShortcutTargets.put(SOFTWARE, new ArraySet<>());
         mShortcutTargets.put(GESTURE, new ArraySet<>());
         mShortcutTargets.put(QUICK_SETTINGS, new ArraySet<>());
+        mShortcutTargets.put(KEY_GESTURE, new ArraySet<>());
     }
 
     boolean isHandlingAccessibilityEventsLocked() {

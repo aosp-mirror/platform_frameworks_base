@@ -157,6 +157,10 @@
             "file_patterns": ["(/|^)ContextImpl.java"]
         },
         {
+            "name": "BroadcastUnitTests",
+            "file_patterns": ["(/|^)BroadcastStickyCache.java"]
+        },
+        {
             "file_patterns": [
                 "(/|^)Activity.*.java",
                 "(/|^)PendingIntent.java",
@@ -177,10 +181,6 @@
         {
             "file_patterns": ["(/|^)AppOpsManager.java"],
             "name": "CtsAppOpsTestCases"
-        },
-        {
-            "file_patterns": ["(/|^)BroadcastStickyCache.java"],
-            "name": "BroadcastUnitTests"
         }
     ]
 }

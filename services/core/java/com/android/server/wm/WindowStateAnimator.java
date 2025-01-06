@@ -49,7 +49,6 @@ import static com.android.server.wm.WindowStateAnimatorProto.DRAW_STATE;
 import static com.android.server.wm.WindowStateAnimatorProto.SURFACE;
 import static com.android.server.wm.WindowStateAnimatorProto.SYSTEM_DECOR_RECT;
 import static com.android.server.wm.WindowSurfaceControllerProto.SHOWN;
-import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
 
 import android.content.Context;
@@ -309,12 +308,6 @@ class WindowStateAnimator {
 
         int flags = SurfaceControl.HIDDEN;
         final WindowManager.LayoutParams attrs = w.mAttrs;
-
-        if (!secureWindowState()) {
-            if (w.isSecureLocked()) {
-                flags |= SurfaceControl.SECURE;
-            }
-        }
 
         if ((mWin.mAttrs.privateFlags & PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY) != 0) {
             flags |= SurfaceControl.SKIP_SCREENSHOT;

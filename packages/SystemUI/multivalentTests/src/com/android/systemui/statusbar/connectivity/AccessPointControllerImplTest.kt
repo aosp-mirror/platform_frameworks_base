@@ -16,18 +16,23 @@
 
 package com.android.systemui.statusbar.connectivity
 
+import android.content.Context
+import android.os.UserHandle
 import android.os.UserManager
-import androidx.test.ext.junit.runners.AndroidJUnit4
-import androidx.test.filters.SmallTest
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import androidx.lifecycle.Lifecycle
+import androidx.test.ext.junit.runners.AndroidJUnit4
+import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.capture
 import com.android.wifitrackerlib.WifiEntry
 import com.android.wifitrackerlib.WifiPickerTracker
 import com.google.common.truth.Truth.assertThat
+import java.util.concurrent.Executor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -35,36 +40,28 @@ import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyList
 import org.mockito.Captor
 import org.mockito.Mock
-import org.mockito.Mockito.`when`
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
+import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
-import java.util.concurrent.Executor
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper(setAsMainLooper = true)
 class AccessPointControllerImplTest : SysuiTestCase() {
 
-    @Mock
-    private lateinit var userManager: UserManager
-    @Mock
-    private lateinit var userTracker: UserTracker
-    @Mock
-    private lateinit var wifiPickerTrackerFactory:
-            WifiPickerTrackerFactory
-    @Mock
-    private lateinit var wifiPickerTracker: WifiPickerTracker
-    @Mock
-    private lateinit var callback: AccessPointController.AccessPointCallback
-    @Mock
-    private lateinit var otherCallback: AccessPointController.AccessPointCallback
-    @Mock
-    private lateinit var wifiEntryConnected: WifiEntry
-    @Mock
-    private lateinit var wifiEntryOther: WifiEntry
-    @Captor
-    private lateinit var wifiEntryListCaptor: ArgumentCaptor<List<WifiEntry>>
+    @Mock private lateinit var userManager: UserManager
+    @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var wifiPickerTrackerFactory: WifiPickerTrackerFactory
+    @Mock private lateinit var wifiPickerTracker: WifiPickerTracker
+    @Mock private lateinit var callback: AccessPointController.AccessPointCallback
+    @Mock private lateinit var otherCallback: AccessPointController.AccessPointCallback
+    @Mock private lateinit var wifiEntryConnected: WifiEntry
+    @Mock private lateinit var wifiEntryOther: WifiEntry
+    @Captor private lateinit var wifiEntryListCaptor: ArgumentCaptor<List<WifiEntry>>
 
     private val instantExecutor = Executor { it.run() }
     private lateinit var controller: AccessPointControllerImpl
@@ -72,19 +69,21 @@ class AccessPointControllerImplTest : SysuiTestCase() {
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
-        `when`(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(wifiPickerTracker)
+        `when`(wifiPickerTrackerFactory.create(any(), any(), any(), any()))
+            .thenReturn(wifiPickerTracker)
 
         `when`(wifiPickerTracker.connectedWifiEntry).thenReturn(wifiEntryConnected)
-        `when`(wifiPickerTracker.wifiEntries).thenReturn(ArrayList<WifiEntry>().apply {
-            add(wifiEntryOther)
-        })
+        `when`(wifiPickerTracker.wifiEntries)
+            .thenReturn(ArrayList<WifiEntry>().apply { add(wifiEntryOther) })
 
-        controller = AccessPointControllerImpl(
+        controller =
+            AccessPointControllerImpl(
+                mContext,
                 userManager,
                 userTracker,
                 instantExecutor,
-                wifiPickerTrackerFactory
-        )
+                wifiPickerTrackerFactory,
+            )
 
         controller.init()
     }
@@ -183,13 +182,15 @@ class AccessPointControllerImplTest : SysuiTestCase() {
 
     @Test
     fun testReturnEmptyListWhenNoWifiPickerTracker() {
-        `when`(wifiPickerTrackerFactory.create(any(), any(), any())).thenReturn(null)
-        val otherController = AccessPointControllerImpl(
+        `when`(wifiPickerTrackerFactory.create(any(), any(), any(), any())).thenReturn(null)
+        val otherController =
+            AccessPointControllerImpl(
+                mContext,
                 userManager,
                 userTracker,
                 instantExecutor,
-                wifiPickerTrackerFactory
-        )
+                wifiPickerTrackerFactory,
+            )
         otherController.init()
 
         otherController.addAccessPointCallback(callback)
@@ -243,5 +244,36 @@ class AccessPointControllerImplTest : SysuiTestCase() {
 
         verify(wifiEntryOther).connect(any())
         verify(callback, never()).onSettingsActivityTriggered(any())
+    }
+
+    @Test
+    @EnableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
+    fun switchUsers() {
+        val primaryUserMockContext = mock<Context>()
+        mContext.prepareCreateContextAsUser(UserHandle.of(PRIMARY_USER_ID), primaryUserMockContext)
+        controller.onUserSwitched(PRIMARY_USER_ID)
+
+        // Create is expected to be called once when the test starts and a second time when the user
+        // is switched. The first WifiPickerTracker should have its onStop() method called prior to
+        // the new WifiPickerTracker being created.
+        verify(wifiPickerTrackerFactory, times(2)).create(any(), any(), any(), any())
+        verify(wifiPickerTracker).onStop()
+    }
+
+    @Test
+    @DisableFlags(FLAG_MULTIUSER_WIFI_PICKER_TRACKER_SUPPORT)
+    fun switchUsers_flagDisabled() {
+        val primaryUserMockContext = mock<Context>()
+        mContext.prepareCreateContextAsUser(UserHandle.of(PRIMARY_USER_ID), primaryUserMockContext)
+        controller.onUserSwitched(PRIMARY_USER_ID)
+
+        // Create is expected to only be called once when the test starts, switching users should
+        // have no effects.
+        verify(wifiPickerTrackerFactory, times(1)).create(any(), any(), any(), any())
+        verify(wifiPickerTracker, never()).onStop()
+    }
+
+    private companion object {
+        private const val PRIMARY_USER_ID = 1
     }
 }

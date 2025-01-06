@@ -182,10 +182,12 @@ public class BubbleLogger {
     }
 
     /**
+     * Log when a bubble is removed from overflow in stack view
+     *
      * @param b Bubble removed from overflow
      * @param r Reason that bubble was removed
      */
-    public void logOverflowRemove(Bubble b, @Bubbles.DismissReason int r) {
+    public void logStackOverflowRemove(Bubble b, @Bubbles.DismissReason int r) {
         if (r == Bubbles.DISMISS_NOTIF_CANCEL) {
             log(b, BubbleLogger.Event.BUBBLE_OVERFLOW_REMOVE_CANCEL);
         } else if (r == Bubbles.DISMISS_GROUP_CANCELLED) {
@@ -201,13 +203,19 @@ public class BubbleLogger {
      * @param b Bubble added to overflow
      * @param r Reason that bubble was added to overflow
      */
-    public void logOverflowAdd(Bubble b, @Bubbles.DismissReason int r) {
-        if (r == Bubbles.DISMISS_AGED) {
-            log(b, Event.BUBBLE_OVERFLOW_ADD_AGED);
-        } else if (r == Bubbles.DISMISS_USER_GESTURE) {
-            log(b, Event.BUBBLE_OVERFLOW_ADD_USER_GESTURE);
-        } else if (r == Bubbles.DISMISS_RELOAD_FROM_DISK) {
-            log(b, Event.BUBBLE_OVERFLOW_RECOVER);
+    public void logOverflowAdd(Bubble b, boolean bubbleBar, @Bubbles.DismissReason int r) {
+        if (bubbleBar) {
+            if (r == Bubbles.DISMISS_AGED) {
+                log(b, Event.BUBBLE_BAR_OVERFLOW_ADD_AGED);
+            }
+        } else {
+            if (r == Bubbles.DISMISS_AGED) {
+                log(b, Event.BUBBLE_OVERFLOW_ADD_AGED);
+            } else if (r == Bubbles.DISMISS_USER_GESTURE) {
+                log(b, Event.BUBBLE_OVERFLOW_ADD_USER_GESTURE);
+            } else if (r == Bubbles.DISMISS_RELOAD_FROM_DISK) {
+                log(b, Event.BUBBLE_OVERFLOW_RECOVER);
+            }
         }
     }
 

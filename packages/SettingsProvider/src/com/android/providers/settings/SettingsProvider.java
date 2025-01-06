@@ -120,6 +120,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.accessibility.util.AccessibilityUtils;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.display.RefreshRateSettingsUtils;
 import com.android.internal.os.BackgroundThread;
@@ -130,10 +131,12 @@ import com.google.android.collect.Sets;
 
 import libcore.util.HexEncoding;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -379,6 +382,8 @@ public class SettingsProvider extends ContentProvider {
 
     @GuardedBy("mLock")
     private Handler mHandler;
+
+    private static final Set<String> sDeviceConfigAllowlistedNamespaces = new ArraySet<>();
 
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
@@ -2085,7 +2090,33 @@ public class SettingsProvider extends ContentProvider {
                 // setting.
                 return false;
             }
-            final String mimeType = getContext().getContentResolver().getType(audioUri);
+
+            // If the audioUri comes from FileProvider, the security check will fail. Currently, it
+            // should not have too many FileProvider Uri usage, using a workaround fix here.
+            // Only allow for caller is privileged apps
+            ApplicationInfo aInfo = null;
+            try {
+                aInfo = getCallingApplicationInfoOrThrow();
+            } catch (IllegalStateException ignored) {
+                Slog.w(LOG_TAG, "isValidMediaUri: cannot get calling app info for setting: "
+                        + name + " URI: " + audioUri);
+                return false;
+            }
+            final boolean isPrivilegedApp = aInfo != null ? aInfo.isPrivilegedApp() : false;
+            String mimeType = null;
+            if (isPrivilegedApp) {
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    mimeType = getContext().getContentResolver().getType(audioUri);
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
+            } else {
+                mimeType = getContext().getContentResolver().getType(audioUri);
+            }
+            if (DEBUG) {
+                Slog.v(LOG_TAG, "isValidMediaUri mimeType: " + mimeType);
+            }
             if (mimeType == null) {
                 Slog.e(LOG_TAG,
                         "mutateSystemSetting for setting: " + name + " URI: " + audioUri
@@ -2434,28 +2465,44 @@ public class SettingsProvider extends ContentProvider {
                 context.checkCallingOrSelfPermission(
                 Manifest.permission.WRITE_DEVICE_CONFIG)
                 == PackageManager.PERMISSION_GRANTED;
-        boolean isRoot = Binder.getCallingUid() == Process.ROOT_UID;
-
-        if (isRoot) {
-            return;
-        }
+        // Only the shell user and tests request the allowlist permission; this is used to force
+        // the WRITE_ALLOWLISTED_DEVICE_CONFIG path to log any flags that need to be allowlisted.
+        boolean isRestrictedShell = android.security.Flags.protectDeviceConfigFlags()
+                && hasAllowlistPermission;
 
         if (hasWritePermission) {
             assertCallingUserDenyList(flags);
         } else if (hasAllowlistPermission) {
+            Set<String> allowlistedDeviceConfigNamespaces = null;
+            if (isRestrictedShell) {
+                allowlistedDeviceConfigNamespaces = getAllowlistedDeviceConfigNamespaces();
+            }
             for (String flag : flags) {
                 boolean namespaceAllowed = false;
-                for (String allowlistedPrefix : WritableNamespacePrefixes.ALLOWLIST) {
-                    if (flag.startsWith(allowlistedPrefix)) {
+                if (isRestrictedShell) {
+                    int delimiterIndex = flag.indexOf("/");
+                    String flagNamespace;
+                    if (delimiterIndex != -1) {
+                        flagNamespace = flag.substring(0, delimiterIndex);
+                    } else {
+                        flagNamespace = flag;
+                    }
+                    if (allowlistedDeviceConfigNamespaces.contains(flagNamespace)) {
                         namespaceAllowed = true;
-                        break;
+                    }
+                } else {
+                    for (String allowlistedPrefix : WritableNamespacePrefixes.ALLOWLIST) {
+                        if (flag.startsWith(allowlistedPrefix)) {
+                            namespaceAllowed = true;
+                            break;
+                        }
                     }
                 }
 
                 if (!namespaceAllowed && !DeviceConfig.getAdbWritableFlags().contains(flag)) {
-                    throw new SecurityException("Permission denial for flag '"
-                        + flag
-                        + "'; allowlist permission granted, but must add flag to the allowlist.");
+                    throw new SecurityException("Permission denial for flag '" + flag
+                            + "'; allowlist permission granted, but must add flag to the "
+                            + "allowlist");
                 }
             }
             assertCallingUserDenyList(flags);
@@ -2498,6 +2545,60 @@ public class SettingsProvider extends ContentProvider {
                             + "denylist.");
                 }
             }
+        }
+    }
+
+    /**
+     * Returns a Set of DeviceConfig allowlisted namespaces in which all flags can be modified
+     * by a caller with the {@code WRITE_ALLOWLISTED_DEVICE_CONFIG} permission.
+     * <p>
+     * This method also supports mainline modules that introduce their own allowlisted
+     * namespaces within the {@code etc/writable_namespaces} file under their directory.
+     */
+    private Set<String> getAllowlistedDeviceConfigNamespaces() {
+        synchronized (sDeviceConfigAllowlistedNamespaces) {
+            if (!sDeviceConfigAllowlistedNamespaces.isEmpty()) {
+                return sDeviceConfigAllowlistedNamespaces;
+            }
+            if (android.provider.flags.Flags.deviceConfigWritableNamespacesApi()) {
+                sDeviceConfigAllowlistedNamespaces.addAll(DeviceConfig.getAdbWritableNamespaces());
+            } else {
+                sDeviceConfigAllowlistedNamespaces.addAll(WritableNamespaces.ALLOWLIST);
+            }
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                List<String> apexDirectories;
+                try {
+                    apexDirectories = mPackageManager.getAllApexDirectories();
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Caught a RemoteException obtaining APEX directories: ", e);
+                    return sDeviceConfigAllowlistedNamespaces;
+                }
+                for (int i = 0; i < apexDirectories.size(); i++) {
+                    String apexDirectory = apexDirectories.get(i);
+                    File namespaceFile = Environment.buildPath(new File(apexDirectory), "etc",
+                            "writable_namespaces");
+                    if (namespaceFile.exists() && namespaceFile.isFile()) {
+                        try (BufferedReader reader = new BufferedReader(
+                                new FileReader(namespaceFile))) {
+                            String namespace;
+                            while ((namespace = reader.readLine()) != null) {
+                                namespace = namespace.trim();
+                                // Support comments by ignoring any lines that start with '#'.
+                                if (!namespace.isEmpty() && !namespace.startsWith("#")) {
+                                    sDeviceConfigAllowlistedNamespaces.add(namespace);
+                                }
+                            }
+                        } catch (IOException e) {
+                            Slog.e(LOG_TAG, "Caught an exception parsing file: " + namespaceFile,
+                                    e);
+                        }
+                    }
+                }
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+            return sDeviceConfigAllowlistedNamespaces;
         }
     }
 
@@ -2814,6 +2915,14 @@ public class SettingsProvider extends ContentProvider {
         };
     }
 
+    @VisibleForTesting
+    void injectServices(UserManager userManager, IPackageManager packageManager,
+            SystemConfigManager sysConfigManager) {
+        mUserManager = userManager;
+        mPackageManager = packageManager;
+        mSysConfigManager = sysConfigManager;
+    }
+
     private static final class Arguments {
         private static final Pattern WHERE_PATTERN_WITH_PARAM_NO_BRACKETS =
                 Pattern.compile("[\\s]*name[\\s]*=[\\s]*\\?[\\s]*");
@@ -2980,6 +3089,7 @@ public class SettingsProvider extends ContentProvider {
 
         private static final String SSAID_USER_KEY = "userkey";
 
+        @GuardedBy("mLock")
         private final SparseArray<SettingsState> mSettingsStates = new SparseArray<>();
 
         private GenerationRegistry mGenerationRegistry;
@@ -3892,6 +4002,14 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
+        @VisibleForTesting
+        void injectSettings(SettingsState settings, int type, int userId) {
+            int key = makeKey(type, userId);
+            synchronized (mLock) {
+                mSettingsStates.put(key, settings);
+            }
+        }
+
         private final class MyHandler extends Handler {
             private static final int MSG_NOTIFY_URI_CHANGED = 1;
             private static final int MSG_NOTIFY_DATA_CHANGED = 2;
@@ -3923,12 +4041,21 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
-        private final class UpgradeController {
+        @VisibleForTesting
+        final class UpgradeController {
             private static final int SETTINGS_VERSION = 226;
 
             private final int mUserId;
 
+            private final Injector mInjector;
+
             public UpgradeController(int userId) {
+                this(/* injector= */ null, userId);
+            }
+
+            @VisibleForTesting
+            UpgradeController(Injector injector, int userId) {
+                mInjector = injector == null ? new Injector() : injector;
                 mUserId = userId;
             }
 
@@ -6036,8 +6163,8 @@ public class SettingsProvider extends ContentProvider {
                             systemSettings.getSettingLocked(Settings.System.PEAK_REFRESH_RATE);
                     final Setting minRefreshRateSetting =
                             systemSettings.getSettingLocked(Settings.System.MIN_REFRESH_RATE);
-                    float highestRefreshRate = RefreshRateSettingsUtils
-                            .findHighestRefreshRateForDefaultDisplay(getContext());
+                    float highestRefreshRate =
+                            mInjector.findHighestRefreshRateForDefaultDisplay(getContext());
 
                     if (!peakRefreshRateSetting.isNull()) {
                         try {
@@ -6217,6 +6344,14 @@ public class SettingsProvider extends ContentProvider {
 
             private long getBitMask(int capability) {
                 return 1 << (capability - 1);
+            }
+
+            @VisibleForTesting
+            static class Injector {
+                float findHighestRefreshRateForDefaultDisplay(Context context) {
+                    return RefreshRateSettingsUtils.findHighestRefreshRateForDefaultDisplay(
+                            context);
+                }
             }
         }
 

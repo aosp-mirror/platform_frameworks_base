@@ -26,11 +26,9 @@ import androidx.room.PrimaryKey;
 @Entity(tableName = DataServiceUtils.MobileNetworkInfoData.TABLE_NAME)
 public class MobileNetworkInfoEntity {
 
-    public MobileNetworkInfoEntity(@NonNull String subId, boolean isMobileDataEnabled,
-            boolean showToggleForPhysicalSim) {
+    public MobileNetworkInfoEntity(@NonNull String subId, boolean isMobileDataEnabled) {
         this.subId = subId;
         this.isMobileDataEnabled = isMobileDataEnabled;
-        this.showToggleForPhysicalSim = showToggleForPhysicalSim;
     }
 
     @PrimaryKey
@@ -41,15 +39,11 @@ public class MobileNetworkInfoEntity {
     @ColumnInfo(name = DataServiceUtils.MobileNetworkInfoData.COLUMN_IS_MOBILE_DATA_ENABLED)
     public boolean isMobileDataEnabled;
 
-    @ColumnInfo(name = DataServiceUtils.MobileNetworkInfoData.COLUMN_SHOW_TOGGLE_FOR_PHYSICAL_SIM)
-    public boolean showToggleForPhysicalSim;
-
     @Override
     public int hashCode() {
         int result = 17;
         result = 31 * result + subId.hashCode();
         result = 31 * result + Boolean.hashCode(isMobileDataEnabled);
-        result = 31 * result + Boolean.hashCode(showToggleForPhysicalSim);
         return result;
     }
 
@@ -64,8 +58,7 @@ public class MobileNetworkInfoEntity {
 
         MobileNetworkInfoEntity info = (MobileNetworkInfoEntity) obj;
         return  TextUtils.equals(subId, info.subId)
-                && isMobileDataEnabled == info.isMobileDataEnabled
-                && showToggleForPhysicalSim == info.showToggleForPhysicalSim;
+                && isMobileDataEnabled == info.isMobileDataEnabled;
     }
 
     public String toString() {
@@ -74,8 +67,6 @@ public class MobileNetworkInfoEntity {
                 .append(subId)
                 .append(", isMobileDataEnabled = ")
                 .append(isMobileDataEnabled)
-                .append(", activeNetworkIsCellular = ")
-                .append(showToggleForPhysicalSim)
                 .append(")}");
         return builder.toString();
     }

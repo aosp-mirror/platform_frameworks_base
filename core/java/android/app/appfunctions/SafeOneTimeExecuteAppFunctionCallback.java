@@ -23,11 +23,12 @@ import android.util.Log;
 
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.Consumer;
+import java.util.concurrent.atomic.AtomicLong;
 
 /**
  * A wrapper of IExecuteAppFunctionCallback which swallows the {@link RemoteException}. This
- * callback is intended for one-time use only. Subsequent calls to onResult() will be ignored.
+ * callback is intended for one-time use only. Subsequent calls to onResult() or onError() will be
+ * ignored.
  *
  * @hide
  */
@@ -38,46 +39,86 @@ public class SafeOneTimeExecuteAppFunctionCallback {
 
     @NonNull private final IExecuteAppFunctionCallback mCallback;
 
-    @Nullable private final Consumer<ExecuteAppFunctionResponse> mOnDispatchCallback;
+    @Nullable private final CompletionCallback mCompletionCallback;
+
+    private final AtomicLong mExecutionStartTimeAfterBindMillis = new AtomicLong();
 
     public SafeOneTimeExecuteAppFunctionCallback(@NonNull IExecuteAppFunctionCallback callback) {
-        this(callback, /* onDispatchCallback= */ null);
+        this(callback, /* completionCallback= */ null);
     }
 
-    /**
-     * @param callback The callback to wrap.
-     * @param onDispatchCallback An optional callback invoked after the wrapped callback has been
-     *     dispatched with a result. This callback receives the result that has been dispatched.
-     */
     public SafeOneTimeExecuteAppFunctionCallback(
             @NonNull IExecuteAppFunctionCallback callback,
-            @Nullable Consumer<ExecuteAppFunctionResponse> onDispatchCallback) {
+            @Nullable CompletionCallback completionCallback) {
         mCallback = Objects.requireNonNull(callback);
-        mOnDispatchCallback = onDispatchCallback;
+        mCompletionCallback = completionCallback;
     }
 
     /** Invoke wrapped callback with the result. */
     public void onResult(@NonNull ExecuteAppFunctionResponse result) {
         if (!mOnResultCalled.compareAndSet(false, true)) {
-            Log.w(TAG, "Ignore subsequent calls to onResult()");
+            Log.w(TAG, "Ignore subsequent calls to onResult/onError()");
             return;
         }
         try {
-            mCallback.onResult(result);
+            mCallback.onSuccess(result);
+            if (mCompletionCallback != null) {
+                mCompletionCallback.finalizeOnSuccess(
+                        result, mExecutionStartTimeAfterBindMillis.get());
+            }
         } catch (RemoteException ex) {
             // Failed to notify the other end. Ignore.
             Log.w(TAG, "Failed to invoke the callback", ex);
         }
-        if (mOnDispatchCallback != null) {
-            mOnDispatchCallback.accept(result);
+    }
+
+    /** Invoke wrapped callback with the error. */
+    public void onError(@NonNull AppFunctionException error) {
+        if (!mOnResultCalled.compareAndSet(false, true)) {
+            Log.w(TAG, "Ignore subsequent calls to onResult/onError()");
+            return;
+        }
+        try {
+            mCallback.onError(error);
+            if (mCompletionCallback != null) {
+                mCompletionCallback.finalizeOnError(
+                        error, mExecutionStartTimeAfterBindMillis.get());
+            }
+        } catch (RemoteException ex) {
+            // Failed to notify the other end. Ignore.
+            Log.w(TAG, "Failed to invoke the callback", ex);
         }
     }
 
     /**
-     * Disables this callback. Subsequent calls to {@link #onResult(ExecuteAppFunctionResponse)}
-     * will be ignored.
+     * Disables this callback. Subsequent calls to {@link #onResult(ExecuteAppFunctionResponse)} or
+     * {@link #onError(AppFunctionException)} will be ignored.
      */
     public void disable() {
         mOnResultCalled.set(true);
+    }
+
+    /**
+     * Sets the execution start time of the request. Used to calculate the overhead latency of
+     * requests.
+     */
+    public void setExecutionStartTimeAfterBindMillis(long executionStartTimeAfterBindMillis) {
+        if (!mExecutionStartTimeAfterBindMillis.compareAndSet(
+                0, executionStartTimeAfterBindMillis)) {
+            Log.w(TAG, "Ignore subsequent calls to setExecutionStartTimeAfterBindMillis()");
+        }
+    }
+
+    /**
+     * Provides a hook to execute additional actions after the {@link IExecuteAppFunctionCallback}
+     * has been invoked.
+     */
+    public interface CompletionCallback {
+        /** Called after {@link IExecuteAppFunctionCallback#onSuccess}. */
+        void finalizeOnSuccess(
+                @NonNull ExecuteAppFunctionResponse result, long executionStartTimeMillis);
+
+        /** Called after {@link IExecuteAppFunctionCallback#onError}. */
+        void finalizeOnError(@NonNull AppFunctionException error, long executionStartTimeMillis);
     }
 }

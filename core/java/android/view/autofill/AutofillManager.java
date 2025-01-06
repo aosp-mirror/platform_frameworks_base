@@ -25,12 +25,16 @@ import static android.service.autofill.FillRequest.FLAG_SCREEN_HAS_CREDMAN_FIELD
 import static android.service.autofill.FillRequest.FLAG_SUPPORTS_FILL_DIALOG;
 import static android.service.autofill.FillRequest.FLAG_VIEW_NOT_FOCUSED;
 import static android.service.autofill.FillRequest.FLAG_VIEW_REQUESTS_CREDMAN_SERVICE;
+import static android.service.autofill.Flags.FLAG_FILL_DIALOG_IMPROVEMENTS;
+import static android.service.autofill.Flags.improveFillDialogAconfig;
+import static android.service.autofill.Flags.relayoutFix;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.autofill.Helper.sDebug;
 import static android.view.autofill.Helper.sVerbose;
 import static android.view.autofill.Helper.toList;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -784,6 +788,11 @@ public final class AutofillManager {
 
     private AutofillStateFingerprint mAutofillStateFingerprint;
 
+    /**
+     * Whether improveFillDialog feature is enabled or not.
+     */
+    private boolean mImproveFillDialogEnabled;
+
     /** @hide */
     public interface AutofillClient {
         /**
@@ -1011,9 +1020,20 @@ public final class AutofillManager {
                 AutofillFeatureFlags.shouldIncludeInvisibleViewInAssistStructure();
 
         mRelayoutFixDeprecated = AutofillFeatureFlags.shouldIgnoreRelayoutWhenAuthPending();
-        mRelayoutFix = AutofillFeatureFlags.enableRelayoutFixes();
+        mRelayoutFix = relayoutFix() && AutofillFeatureFlags.enableRelayoutFixes();
         mRelativePositionForRelayout = AutofillFeatureFlags.enableRelativeLocationForRelayout();
         mIsCredmanIntegrationEnabled = Flags.autofillCredmanIntegration();
+        mImproveFillDialogEnabled =
+                improveFillDialogAconfig() && AutofillFeatureFlags.isImproveFillDialogEnabled();
+    }
+
+    /**
+     * Whether improvement to fill dialog is enabled.
+     *
+     * @hide
+     */
+    public boolean isImproveFillDialogEnabled() {
+        return mImproveFillDialogEnabled;
     }
 
     /**
@@ -1607,7 +1627,12 @@ public final class AutofillManager {
      *             the virtual view in the host view.
      *
      * @throws IllegalArgumentException if the {@code infos} was empty
+     *
+     * @deprecated This function will not do anything. Showing fill dialog is now fully controlled
+     * by the framework and the autofill provider.
      */
+    @FlaggedApi(FLAG_FILL_DIALOG_IMPROVEMENTS)
+    @Deprecated
     public void notifyVirtualViewsReady(
             @NonNull View view, @NonNull SparseArray<VirtualViewFillInfo> infos) {
         Objects.requireNonNull(infos);
@@ -1671,6 +1696,11 @@ public final class AutofillManager {
 
     private void notifyViewReadyInner(AutofillId id, @Nullable String[] autofillHints,
             boolean isCredmanRequested) {
+        if (isImproveFillDialogEnabled() && !isCredmanRequested) {
+            // We do not want to send pre-trigger request.
+            // TODO(b/377868687): verify if we can remove the flow for isCredmanRequested too.
+            return;
+        }
         if (sDebug) {
             Log.d(TAG, "notifyViewReadyInner:" + id);
         }
@@ -2035,6 +2065,34 @@ public final class AutofillManager {
         }
         id.resetSessionId();
         mEnteredIds.add(id);
+    }
+
+    /**
+     * Notify autofill system that IME animation has started
+     * @param startTimeMs start time as measured by SystemClock.elapsedRealtime()
+     */
+    void notifyImeAnimationStart(long startTimeMs) {
+        try {
+            mService.notifyImeAnimationStart(mSessionId, startTimeMs, mContext.getUserId());
+        } catch (RemoteException e) {
+            // The failure could be a consequence of something going wrong on the
+            // server side. Just log the exception and move-on.
+            Log.w(TAG, "notifyImeAnimationStart(): RemoteException caught but ignored " + e);
+        }
+    }
+
+    /**
+     * Notify autofill system that IME animation has ended
+     * @param endTimeMs end time as measured by SystemClock.elapsedRealtime()
+     */
+    void notifyImeAnimationEnd(long endTimeMs) {
+        try {
+            mService.notifyImeAnimationEnd(mSessionId, endTimeMs, mContext.getUserId());
+        } catch (RemoteException e) {
+            // The failure could be a consequence of something going wrong on the
+            // server side. Just log the exception and move-on.
+            Log.w(TAG, "notifyImeAnimationStart(): RemoteException caught but ignored " + e);
+        }
     }
 
     /**
@@ -4034,9 +4092,18 @@ public final class AutofillManager {
      *             receiving a focus event. The autofill suggestions shown will include content for
      *             related views as well.
      * @return {@code true} if the autofill dialog is being shown
+     *
+     * @deprecated This function will not do anything. Showing fill dialog is now fully controlled
+     * by the framework and the autofill provider.
      */
     // TODO(b/210926084): Consider whether to include the one-time show logic within this method.
+    @FlaggedApi(FLAG_FILL_DIALOG_IMPROVEMENTS)
+    @Deprecated
     public boolean showAutofillDialog(@NonNull View view) {
+        if (isImproveFillDialogEnabled()) {
+            Log.i(TAG, "showAutofillDialog() return false due to improve fill dialog");
+            return false;
+        }
         Objects.requireNonNull(view);
         if (shouldShowAutofillDialog(view, view.getAutofillId())) {
             mShowAutofillDialogCalled = true;
@@ -4073,8 +4140,17 @@ public final class AutofillManager {
      *            suggestions.
      * @param virtualId id identifying the virtual view inside the host view.
      * @return {@code true} if the autofill dialog is being shown
+     *
+     * @deprecated This function will not do anything. Showing fill dialog is now fully controlled
+     * by the framework and the autofill provider.
      */
+    @FlaggedApi(FLAG_FILL_DIALOG_IMPROVEMENTS)
+    @Deprecated
     public boolean showAutofillDialog(@NonNull View view, int virtualId) {
+        if (isImproveFillDialogEnabled()) {
+            Log.i(TAG, "showAutofillDialog() return false due to improve fill dialog");
+            return false;
+        }
         Objects.requireNonNull(view);
         if (shouldShowAutofillDialog(view, getAutofillId(view, virtualId))) {
             mShowAutofillDialogCalled = true;
@@ -4099,7 +4175,7 @@ public final class AutofillManager {
             return false;
         }
 
-        if (getImeStateFlag(view) == FLAG_IME_SHOWING) {
+        if (getImeStateFlag(view) == FLAG_IME_SHOWING && !isImproveFillDialogEnabled()) {
             // IME is showing
             return false;
         }

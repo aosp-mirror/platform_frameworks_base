@@ -27,15 +27,13 @@ import androidx.room.RoomDatabase;
 import java.util.List;
 import java.util.Objects;
 
-@Database(entities = {SubscriptionInfoEntity.class, UiccInfoEntity.class,
+@Database(entities = {SubscriptionInfoEntity.class,
         MobileNetworkInfoEntity.class}, exportSchema = false, version = 1)
 public abstract class MobileNetworkDatabase extends RoomDatabase {
 
     public static final String TAG = "MobileNetworkDatabase";
 
     public abstract SubscriptionInfoDao mSubscriptionInfoDao();
-
-    public abstract UiccInfoDao mUiccInfoDao();
 
     public abstract MobileNetworkInfoDao mMobileNetworkInfoDao();
 
@@ -73,16 +71,6 @@ public abstract class MobileNetworkDatabase extends RoomDatabase {
     }
 
     /**
-     * Insert the UICC info to the UiccInfoEntity table.
-     *
-     * @param uiccInfoEntity The uiccInfoEntity.
-     */
-    public void insertUiccInfo(UiccInfoEntity... uiccInfoEntity) {
-        Log.d(TAG, "insertUiccInfo");
-        mUiccInfoDao().insertUiccInfo(uiccInfoEntity);
-    }
-
-    /**
      * Insert the mobileNetwork info to the MobileNetworkInfoEntity table.
      *
      * @param mobileNetworkInfoEntity The mobileNetworkInfoEntity.
@@ -100,34 +88,11 @@ public abstract class MobileNetworkDatabase extends RoomDatabase {
     }
 
     /**
-     * Query the subscription info by the subscription ID from the SubscriptionInfoEntity
-     * table.
-     */
-    public SubscriptionInfoEntity querySubInfoById(String id) {
-        return mSubscriptionInfoDao().querySubInfoById(id);
-    }
-
-    /**
      * Query all mobileNetwork infos from the MobileNetworkInfoEntity
      * table.
      */
     public LiveData<List<MobileNetworkInfoEntity>> queryAllMobileNetworkInfo() {
         return mMobileNetworkInfoDao().queryAllMobileNetworkInfos();
-    }
-
-    /**
-     * Query the mobileNetwork info by the subscription ID from the MobileNetworkInfoEntity
-     * table.
-     */
-    public MobileNetworkInfoEntity queryMobileNetworkInfoById(String id) {
-        return mMobileNetworkInfoDao().queryMobileNetworkInfoBySubId(id);
-    }
-
-    /**
-     * Query all UICC infos from the UiccInfoEntity table.
-     */
-    public LiveData<List<UiccInfoEntity>> queryAllUiccInfo() {
-        return mUiccInfoDao().queryAllUiccInfos();
     }
 
     /**
@@ -144,12 +109,5 @@ public abstract class MobileNetworkDatabase extends RoomDatabase {
      */
     public void deleteMobileNetworkInfoBySubId(String id) {
         mMobileNetworkInfoDao().deleteBySubId(id);
-    }
-
-    /**
-     * Delete the UICC info by the subscription ID from the UiccInfoEntity table.
-     */
-    public void deleteUiccInfoBySubId(String id) {
-        mUiccInfoDao().deleteBySubId(id);
     }
 }

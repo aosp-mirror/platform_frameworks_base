@@ -34,30 +34,8 @@ class NotificationContentDescriptionTest : SysuiTestCase() {
     private val TICKER = "this is a ticker"
 
     @Test
-    fun notificationWithAllDifferentFields_descriptionIsTitle() {
+    fun notificationWithAllDifferentFields_descriptionIsAppName() {
         val n = createNotification(TITLE, TEXT, TICKER)
-        val description = contentDescForNotification(context, n)
-        assertThat(description).isEqualTo(createDescriptionText(n, TITLE))
-    }
-
-    @Test
-    fun notificationWithAllDifferentFields_titleMatchesAppName_descriptionIsText() {
-        val n = createNotification(getTestAppName(), TEXT, TICKER)
-        val description = contentDescForNotification(context, n)
-        assertThat(description).isEqualTo(createDescriptionText(n, TEXT))
-    }
-
-    @Test
-    fun notificationWithAllDifferentFields_titleMatchesAppNameNoText_descriptionIsTicker() {
-        val n = createNotification(getTestAppName(), null, TICKER)
-        val description = contentDescForNotification(context, n)
-        assertThat(description).isEqualTo(createDescriptionText(n, TICKER))
-    }
-
-    @Test
-    fun notificationWithAllDifferentFields_titleMatchesAppNameNoTextNoTicker_descriptionEmpty() {
-        val appName = getTestAppName()
-        val n = createNotification(appName, null, null)
         val description = contentDescForNotification(context, n)
         assertThat(description).isEqualTo(createDescriptionText(n, ""))
     }

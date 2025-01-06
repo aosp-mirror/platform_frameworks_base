@@ -18,13 +18,19 @@ package com.android.systemui.communal.view.viewmodel
 
 import android.content.ComponentName
 import android.content.pm.UserInfo
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.widget.RemoteViews
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
+import com.android.systemui.Flags.FLAG_BOUNCER_UI_REVAMP
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_COMMUNAL_RESPONSIVE_GRID
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bouncer.data.repository.fakeKeyguardBouncerRepository
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
 import com.android.systemui.communal.data.repository.FakeCommunalMediaRepository
 import com.android.systemui.communal.data.repository.FakeCommunalSceneRepository
@@ -65,10 +71,12 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager
+import com.android.systemui.media.controls.ui.controller.mediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.power.domain.interactor.PowerInteractor.Companion.setAwakeForTest
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -98,6 +106,7 @@ import org.mockito.Mock
 import org.mockito.Mockito
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
 import org.mockito.kotlin.atLeastOnce
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -166,7 +175,6 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.testDispatcher,
             testScope,
             kosmos.testScope.backgroundScope,
-            context.resources,
             kosmos.keyguardTransitionInteractor,
             kosmos.keyguardInteractor,
             mock<KeyguardIndicationController>(),
@@ -178,6 +186,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             mediaHost,
             logcatLogBuffer("CommunalViewModelTest"),
             metricsLogger,
+            kosmos.mediaCarouselController,
+            kosmos.blurConfig,
         )
     }
 
@@ -246,7 +256,9 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
                 .isInstanceOf(CommunalContentModel.CtaTileInViewMode::class.java)
         }
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun ongoingContent_umoAndOneTimer_sizedAppropriately() =
         testScope.runTest {
             // Widgets available.
@@ -278,11 +290,13 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(timer).isInstanceOf(CommunalContentModel.Smartspace::class.java)
             assertThat(umo).isInstanceOf(CommunalContentModel.Umo::class.java)
 
-            assertThat(timer?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(umo?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(timer?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(umo?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
         }
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun ongoingContent_umoAndTwoTimers_sizedAppropriately() =
         testScope.runTest {
             // Widgets available.
@@ -322,9 +336,9 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(umo).isInstanceOf(CommunalContentModel.Umo::class.java)
 
             // One full-sized timer and a half-sized timer and half-sized UMO.
-            assertThat(timer1?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(timer2?.size).isEqualTo(CommunalContentSize.HALF)
-            assertThat(umo?.size).isEqualTo(CommunalContentSize.FULL)
+            assertThat(timer1?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(timer2?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
+            assertThat(umo?.size).isEqualTo(CommunalContentSize.FixedSize.FULL)
         }
 
     @Test
@@ -434,6 +448,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
     fun customizeWidgetButton_showsThenHidesAfterTimeout() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
@@ -447,6 +462,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
     fun customizeWidgetButton_onDismiss_hidesImmediately() =
         testScope.runTest {
             tutorialRepository.setTutorialSettingState(Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED)
@@ -457,6 +473,14 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
 
             underTest.onHidePopup()
             assertThat(currentPopup).isNull()
+        }
+
+    @Test
+    @EnableFlags(FLAG_GLANCEABLE_HUB_DIRECT_EDIT_MODE)
+    fun longClickDirectlyStartsEditMode() =
+        testScope.runTest {
+            underTest.onLongClick()
+            verify(communalInteractor).showWidgetEditor(any())
         }
 
     @Test
@@ -627,10 +651,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Communal),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.DREAMING,
-                        to = KeyguardState.GLANCEABLE_HUB
-                    ),
+                    TransitionStep(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB),
             )
 
             // Then flow is not frozen
@@ -647,10 +668,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.GLANCEABLE_HUB,
-                        to = KeyguardState.OCCLUDED
-                    ),
+                    TransitionStep(from = KeyguardState.GLANCEABLE_HUB, to = KeyguardState.OCCLUDED),
             )
 
             // Then flow is not frozen
@@ -735,10 +753,7 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Communal),
                 stateTransition =
-                    TransitionStep(
-                        from = KeyguardState.DREAMING,
-                        to = KeyguardState.GLANCEABLE_HUB
-                    ),
+                    TransitionStep(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB),
             )
 
             // Widgets available
@@ -882,6 +897,20 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
             assertThat(selectedKey2).isEqualTo(key)
         }
 
+    @Test
+    @EnableFlags(FLAG_BOUNCER_UI_REVAMP)
+    fun uiIsBlurred_whenPrimaryBouncerIsShowing() =
+        testScope.runTest {
+            val viewModel = createViewModel()
+            val isUiBlurred by collectLastValue(viewModel.isUiBlurred)
+
+            kosmos.fakeKeyguardBouncerRepository.setPrimaryShow(true)
+            assertThat(isUiBlurred).isTrue()
+
+            kosmos.fakeKeyguardBouncerRepository.setPrimaryShow(false)
+            assertThat(isUiBlurred).isFalse()
+        }
+
     private suspend fun setIsMainUser(isMainUser: Boolean) {
         val user = if (isMainUser) MAIN_USER_INFO else SECONDARY_USER_INFO
         with(userRepository) {
@@ -898,7 +927,8 @@ class CommunalViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
         @JvmStatic
         @Parameters(name = "{0}")
         fun getParams(): List<FlagsParameterization> {
-            return FlagsParameterization.allCombinationsOf().andSceneContainer()
+            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_RESPONSIVE_GRID)
+                .andSceneContainer()
         }
     }
 }

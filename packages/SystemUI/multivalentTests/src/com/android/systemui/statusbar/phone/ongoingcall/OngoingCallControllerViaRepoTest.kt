@@ -77,6 +77,7 @@ import org.mockito.kotlin.whenever
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP)
+@DisableFlags(StatusBarChipsModernization.FLAG_NAME)
 class OngoingCallControllerViaRepoTest : SysuiTestCase() {
     private val kosmos = Kosmos()
 
@@ -102,7 +103,8 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
     fun setUp() {
         allowTestableLooperAsMainThread()
         TestableLooper.get(this).runWithLooper {
-            chipView = LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
+            chipView =
+                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip_primary, null)
         }
 
         whenever(mockStatusBarWindowControllerStore.defaultDisplay)
@@ -132,12 +134,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
         testScope.runCurrent()
         reset(mockOngoingCallListener)
 
-        whenever(
-                mockIActivityManager.getUidProcessState(
-                    eq(CALL_UID),
-                    any(),
-                )
-            )
+        whenever(mockIActivityManager.getUidProcessState(eq(CALL_UID), any()))
             .thenReturn(PROC_STATE_INVISIBLE)
     }
 
@@ -223,38 +220,18 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
 
     @Test
     fun notifRepoHasOngoingCallNotifThenScreeningNotif_listenerNotifiedTwice() {
-        setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Ongoing,
-            )
-        )
+        setNotifOnRepo(activeNotificationModel(key = "notif", callType = CallType.Ongoing))
 
-        setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Screening,
-            )
-        )
+        setNotifOnRepo(activeNotificationModel(key = "notif", callType = CallType.Screening))
 
         verify(mockOngoingCallListener, times(2)).onOngoingCallStateChanged(any())
     }
 
     @Test
     fun notifRepoHasOngoingCallNotifThenScreeningNotif_repoUpdated() {
-        setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Ongoing,
-            )
-        )
+        setNotifOnRepo(activeNotificationModel(key = "notif", callType = CallType.Ongoing))
 
-        setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Screening,
-            )
-        )
+        setNotifOnRepo(activeNotificationModel(key = "notif", callType = CallType.Screening))
 
         assertThat(ongoingCallRepository.ongoingCallState.value)
             .isInstanceOf(OngoingCallModel.NoCall::class.java)
@@ -287,7 +264,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
 
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
         )
 
         assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
@@ -307,7 +284,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
 
         chipView.measure(
             View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED)
+            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
         )
 
         assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
@@ -321,11 +298,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
             // Re-create the notification each time so that it's considered a different object and
             // will re-trigger the whole flow.
             setNotifOnRepo(
-                activeNotificationModel(
-                    key = "notif$i",
-                    callType = CallType.Ongoing,
-                    whenTime = 44,
-                )
+                activeNotificationModel(key = "notif$i", callType = CallType.Ongoing, whenTime = 44)
             )
         }
 
@@ -335,12 +308,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
     /** Regression test for b/216248574. */
     @Test
     fun repoHasCallNotif_getUidProcessStateThrowsException_noCrash() {
-        whenever(
-                mockIActivityManager.getUidProcessState(
-                    eq(CALL_UID),
-                    any(),
-                )
-            )
+        whenever(mockIActivityManager.getUidProcessState(eq(CALL_UID), any()))
             .thenThrow(SecurityException())
 
         // No assert required, just check no crash
@@ -350,14 +318,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
     /** Regression test for b/216248574. */
     @Test
     fun repoHasCallNotif_registerUidObserverThrowsException_noCrash() {
-        whenever(
-                mockIActivityManager.registerUidObserver(
-                    any(),
-                    any(),
-                    any(),
-                    any(),
-                )
-            )
+        whenever(mockIActivityManager.registerUidObserver(any(), any(), any(), any()))
             .thenThrow(SecurityException())
 
         // No assert required, just check no crash
@@ -414,11 +375,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
     @Test
     fun hasOngoingCall_repoHasUnrelatedNotif_returnsFalse() {
         setNotifOnRepo(
-            activeNotificationModel(
-                key = "unrelated",
-                callType = CallType.None,
-                uid = CALL_UID,
-            )
+            activeNotificationModel(key = "unrelated", callType = CallType.None, uid = CALL_UID)
         )
 
         assertThat(controller.hasOngoingCall()).isFalse()
@@ -439,20 +396,11 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
 
     @Test
     fun hasOngoingCall_repoHasCallNotifAndCallAppNotVisible_returnsTrue() {
-        whenever(
-                mockIActivityManager.getUidProcessState(
-                    eq(CALL_UID),
-                    any(),
-                )
-            )
+        whenever(mockIActivityManager.getUidProcessState(eq(CALL_UID), any()))
             .thenReturn(PROC_STATE_INVISIBLE)
 
         setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Ongoing,
-                uid = CALL_UID,
-            )
+            activeNotificationModel(key = "notif", callType = CallType.Ongoing, uid = CALL_UID)
         )
 
         assertThat(controller.hasOngoingCall()).isTrue()
@@ -464,11 +412,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
             .thenReturn(PROC_STATE_VISIBLE)
 
         setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Ongoing,
-                uid = CALL_UID,
-            )
+            activeNotificationModel(key = "notif", callType = CallType.Ongoing, uid = CALL_UID)
         )
 
         assertThat(controller.hasOngoingCall()).isFalse()
@@ -480,11 +424,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
         controller.setChipView(invalidChipView)
 
         setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Ongoing,
-                uid = CALL_UID,
-            )
+            activeNotificationModel(key = "notif", callType = CallType.Ongoing, uid = CALL_UID)
         )
 
         assertThat(controller.hasOngoingCall()).isFalse()
@@ -530,7 +470,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
         lateinit var newChipView: View
         TestableLooper.get(this).runWithLooper {
             newChipView =
-                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip, null)
+                LayoutInflater.from(mContext).inflate(R.layout.ongoing_activity_chip_primary, null)
         }
 
         // Change the chip view associated with the controller.

@@ -32,10 +32,12 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
+import android.os.PermissionEnforcer;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -65,6 +67,7 @@ import java.util.Map;
 /**
  * System server internal API for gating and reporting compatibility changes.
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PlatformCompat extends IPlatformCompat.Stub {
 
     private static final String TAG = "Compatibility";
@@ -73,8 +76,10 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     private final ChangeReporter mChangeReporter;
     private final CompatConfig mCompatConfig;
     private final AndroidBuildClassifier mBuildClassifier;
+    private Boolean mIsWear;
 
     public PlatformCompat(Context context) {
+        super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mChangeReporter = new ChangeReporter(ChangeReporter.SOURCE_SYSTEM_SERVER);
         mBuildClassifier = new AndroidBuildClassifier();
@@ -85,6 +90,7 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     PlatformCompat(Context context, CompatConfig compatConfig,
             AndroidBuildClassifier buildClassifier,
             ChangeReporter changeReporter) {
+        super(PermissionEnforcer.fromContext(context));
         mContext = context;
         mChangeReporter = changeReporter;
         mCompatConfig = compatConfig;
@@ -507,14 +513,22 @@ public class PlatformCompat extends IPlatformCompat.Stub {
     }
 
     private ApplicationInfo fixTargetSdk(ApplicationInfo appInfo, int uid) {
+
+        // mIsWear doesn't need to be locked, ok if executes twice
+        if (mIsWear == null) {
+            mIsWear = mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_WATCH);
+        }
+
         // b/282922910 - we don't want apps sharing system uid and targeting
         // older target sdk to impact all system uid apps
-        if (Flags.systemUidTargetSystemSdk() && uid == Process.SYSTEM_UID) {
-            appInfo.targetSdkVersion = Build.VERSION.SDK_INT;
+        if (Flags.systemUidTargetSystemSdk() && !mIsWear &&
+                uid == Process.SYSTEM_UID && appInfo != null) {
+            appInfo.targetSdkVersion = mBuildClassifier.platformTargetSdk();
         }
         return appInfo;
     }
 
+    @android.ravenwood.annotation.RavenwoodReplace
     private void killPackage(String packageName) {
         int uid = LocalServices.getService(PackageManagerInternal.class).getPackageUid(packageName,
                 0, UserHandle.myUserId());
@@ -528,6 +542,13 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         killUid(UserHandle.getAppId(uid));
     }
 
+    @SuppressWarnings("unused")
+    private void killPackage$ravenwood(String packageName) {
+        // TODO Maybe crash if the package is the self.
+        Slog.w(TAG, "killPackage() is ignored on Ravenwood: packageName=" + packageName);
+    }
+
+    @android.ravenwood.annotation.RavenwoodReplace
     private void killUid(int appId) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -540,6 +561,12 @@ public class PlatformCompat extends IPlatformCompat.Stub {
         } finally {
             Binder.restoreCallingIdentity(identity);
         }
+    }
+
+    @SuppressWarnings("unused")
+    private void killUid$ravenwood(int appId) {
+        // TODO Maybe crash if the UID is the self.
+        Slog.w(TAG, "killUid() is ignored on Ravenwood: appId=" + appId);
     }
 
     private void checkAllCompatOverridesAreOverridable(Collection<Long> changeIds) {

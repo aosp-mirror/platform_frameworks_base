@@ -14,21 +14,24 @@ package {
 
 android_test {
     name: "FrameworksVcnTests",
+    // For access hidden connectivity methods in tests
+    defaults: ["framework-connectivity-test-defaults"],
     srcs: [
         "java/**/*.java",
         "java/**/*.kt",
     ],
     platform_apis: true,
-    defaults: ["framework-connectivity-test-defaults"],
     test_suites: ["device-tests"],
     certificate: "platform",
     static_libs: [
+        "android.net.vcn.flags-aconfig-java-export",
         "androidx.test.rules",
         "frameworks-base-testutils",
         "framework-protos",
         "mockito-target-minus-junit4",
         "net-tests-utils",
         "platform-test-annotations",
+        "service-connectivity-b-pre-jarjar",
         "services.core",
         "service-connectivity-tiramisu-pre-jarjar",
         "flag-junit",

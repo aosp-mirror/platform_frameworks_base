@@ -17,6 +17,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.flags.Flags.enableSetPreferredTransportForLeAudioDevice;
+import static com.android.settingslib.flags.Flags.ignoreA2dpDisconnectionForAndroidAuto;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.StringRes;
@@ -82,6 +83,8 @@ import java.util.stream.Stream;
  */
 public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> {
     private static final String TAG = "CachedBluetoothDevice";
+    private static final ParcelUuid ANDROID_AUTO_UUID =
+            ParcelUuid.fromString("4de17a00-52cb-11e6-bdf4-0800200c9a66");
 
     // See mConnectAttempted
     private static final long MAX_UUID_DELAY_FOR_AUTO_CONNECT = 5000;
@@ -133,8 +136,9 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      * If an ACTION_UUID intent comes in within
      * MAX_UUID_DELAY_FOR_AUTO_CONNECT milliseconds, we will try auto-connect
      * again with the new UUIDs
+     * The value is reset if a manual disconnection happens.
      */
-    private long mConnectAttempted;
+    private long mConnectAttempted = -1;
 
     // Active device state
     private boolean mIsActiveDeviceA2dp = false;
@@ -259,18 +263,26 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
                         if (mHandler.hasMessages(profile.getProfileId())) {
                             mHandler.removeMessages(profile.getProfileId());
                             if (profile.getConnectionPolicy(mDevice) >
-                                BluetoothProfile.CONNECTION_POLICY_FORBIDDEN) {
-                                /*
-                                 * If we received state DISCONNECTED and previous state was
-                                 * CONNECTING and connection policy is FORBIDDEN or UNKNOWN
-                                 * then it's not really a failure to connect.
-                                 *
-                                 * Connection profile is considered as failed when connection
-                                 * policy indicates that profile should be connected
-                                 * but it got disconnected.
-                                 */
-                                Log.w(TAG, "onProfileStateChanged(): Failed to connect profile");
-                                setProfileConnectedStatus(profile.getProfileId(), true);
+                                    BluetoothProfile.CONNECTION_POLICY_FORBIDDEN) {
+                                if (ignoreA2dpDisconnectionForAndroidAuto()
+                                        && profile instanceof A2dpProfile && isAndroidAuto()) {
+                                    Log.w(TAG,
+                                            "onProfileStateChanged(): Skip setting A2DP "
+                                                    + "connection fail for Android Auto");
+                                } else {
+                                    /*
+                                     * If we received state DISCONNECTED and previous state was
+                                     * CONNECTING and connection policy is FORBIDDEN or UNKNOWN
+                                     * then it's not really a failure to connect.
+                                     *
+                                     * Connection profile is considered as failed when connection
+                                     * policy indicates that profile should be connected
+                                     * but it got disconnected.
+                                     */
+                                    Log.w(TAG,
+                                            "onProfileStateChanged(): Failed to connect profile");
+                                    setProfileConnectedStatus(profile.getProfileId(), true);
+                                }
                             }
                         }
                         break;
@@ -369,6 +381,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     public void disconnect() {
+        mConnectAttempted = -1;
         synchronized (mProfileLock) {
             if (getGroupId() != BluetoothCsipSetCoordinator.GROUP_ID_INVALID) {
                 for (CachedBluetoothDevice member : getMemberDevice()) {
@@ -431,10 +444,21 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * @return {@code true} if {@code cachedBluetoothDevice} is hearing aid device
+     * @return {@code true} if {@code cachedBluetoothDevice} is hearing aid device.
+     * @deprecated use {@link #isHearingDevice() }
+     * // TODO: b/385679160 - Target to deprecate it and replace  with #isHearingDevice()
      */
+    @Deprecated
     public boolean isHearingAidDevice() {
         return mHearingAidInfo != null;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} support any of hearing device profile.
+     */
+    public boolean isHearingDevice() {
+        return getProfiles().stream().anyMatch(
+                p -> (p instanceof HearingAidProfile || p instanceof HapClientProfile));
     }
 
     public int getDeviceSide() {
@@ -897,10 +921,31 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
     }
 
+    /**
+     * Checks if the device is connected to the specified Bluetooth profile.
+     *
+     * @param profile The Bluetooth profile to check.
+     * @return {@code true} if the device is connected to the profile.
+     */
     public boolean isConnectedProfile(LocalBluetoothProfile profile) {
         int status = getProfileConnectionState(profile);
         return status == BluetoothProfile.STATE_CONNECTED;
 
+    }
+
+    /**
+     * Checks if the device is connected to the Bluetooth profile with the given ID.
+     *
+     * @param profileId The ID of the Bluetooth profile to check.
+     * @return {@code true} if the device is connected to the profile.
+     */
+    public boolean isConnectedProfile(int profileId) {
+        for (LocalBluetoothProfile profile : getProfiles()) {
+            if (profile.getProfileId() == profileId) {
+                return isConnectedProfile(profile);
+            }
+        }
+        return false;
     }
 
     public boolean isBusy() {
@@ -983,15 +1028,19 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         }
 
         if (BluetoothUtils.D) {
-            Log.d(TAG, "onUuidChanged: Time since last connect="
-                    + (SystemClock.elapsedRealtime() - mConnectAttempted));
+            long lastConnectAttempted = mConnectAttempted == -1 ? 0 : mConnectAttempted;
+            Log.d(
+                    TAG,
+                    "onUuidChanged: Time since last connect/manual disconnect="
+                            + (SystemClock.elapsedRealtime() - lastConnectAttempted));
         }
 
         /*
          * If a connect was attempted earlier without any UUID, we will do the connect now.
          * Otherwise, allow the connect on UUID change.
          */
-        if ((mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
+        if (mConnectAttempted != -1
+                && (mConnectAttempted + timeout) > SystemClock.elapsedRealtime()) {
             Log.d(TAG, "onUuidChanged: triggering connectDevice");
             connectDevice();
         }
@@ -1245,7 +1294,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
      */
     public String getConnectionSummary(boolean shortSummary) {
         CharSequence summary = null;
-        if (BluetoothUtils.isAudioSharingEnabled()) {
+        if (BluetoothUtils.isAudioSharingUIAvailable(mContext)) {
             if (mBluetoothManager == null) {
                 mBluetoothManager = LocalBluetoothManager.getInstance(mContext, null);
             }
@@ -1574,6 +1623,12 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     private int getHearingDeviceSummaryRes(int leftBattery, int rightBattery,
             boolean shortSummary) {
+        if (getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_MONO
+                || getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT) {
+            return !shortSummary && (getBatteryLevel() > BluetoothDevice.BATTERY_LEVEL_UNKNOWN)
+                    ? R.string.bluetooth_active_battery_level
+                    : R.string.bluetooth_active_no_battery_level;
+        }
         boolean isLeftDeviceConnected = getConnectedHearingAidSide(
                 HearingAidInfo.DeviceSide.SIDE_LEFT).isPresent();
         boolean isRightDeviceConnected = getConnectedHearingAidSide(
@@ -1629,8 +1684,7 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
             @HearingAidInfo.DeviceSide int side) {
         return Stream.concat(Stream.of(this, mSubDevice), mMemberDevices.stream())
                 .filter(Objects::nonNull)
-                .filter(device -> device.getDeviceSide() == side
-                        || device.getDeviceSide() == HearingAidInfo.DeviceSide.SIDE_LEFT_AND_RIGHT)
+                .filter(device -> device.getDeviceSide() == side)
                 .filter(device -> device.getDevice().isConnected())
                 // For hearing aids, we should expect only one device assign to one side, but if
                 // it happens, we don't care which one.
@@ -1869,13 +1923,6 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
-     * @return {@code true} if {@code cachedBluetoothDevice} is LeAudio hearing aid device
-     */
-    public boolean isConnectedLeAudioHearingAidDevice() {
-        return isConnectedHapClientDevice() && isConnectedLeAudioDevice();
-    }
-
-    /**
      * @return {@code true} if {@code cachedBluetoothDevice} is hearing aid device
      *
      * The device may be an ASHA hearing aid that supports {@link HearingAidProfile} or a LeAudio
@@ -1886,12 +1933,38 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     }
 
     /**
+     * @return {@code true} if {@code cachedBluetoothDevice} is LeAudio hearing aid device
+     */
+    public boolean isConnectedLeAudioHearingAidDevice() {
+        return isConnectedHapClientDevice() && isConnectedLeAudioDevice();
+    }
+
+    /**
      * @return {@code true} if {@code cachedBluetoothDevice} is LeAudio device
      */
     public boolean isConnectedLeAudioDevice() {
         LeAudioProfile leAudio = mProfileManager.getLeAudioProfile();
         return leAudio != null && leAudio.getConnectionStatus(mDevice) ==
                 BluetoothProfile.STATE_CONNECTED;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} supports broadcast assistant profile
+     */
+    public boolean isConnectedLeAudioBroadcastAssistantDevice() {
+        LocalBluetoothLeBroadcastAssistant leBroadcastAssistant =
+                mProfileManager.getLeAudioBroadcastAssistantProfile();
+        return leBroadcastAssistant != null && leBroadcastAssistant.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
+    }
+
+    /**
+     * @return {@code true} if {@code cachedBluetoothDevice} supports volume control profile
+     */
+    public boolean isConnectedVolumeControlDevice() {
+        VolumeControlProfile volumeControl = mProfileManager.getVolumeControlProfile();
+        return volumeControl != null && volumeControl.getConnectionStatus(mDevice)
+                == BluetoothProfile.STATE_CONNECTED;
     }
 
     private boolean isConnectedSapDevice() {
@@ -2024,5 +2097,17 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     @VisibleForTesting
     void setLocalBluetoothManager(LocalBluetoothManager bluetoothManager) {
         mBluetoothManager = bluetoothManager;
+    }
+
+    private boolean isAndroidAuto() {
+        try {
+            ParcelUuid[] uuids = mDevice.getUuids();
+            if (ArrayUtils.contains(uuids, ANDROID_AUTO_UUID)) {
+                return true;
+            }
+        } catch (RuntimeException e) {
+            Log.w(TAG, "Fail to check isAndroidAuto for " + this);
+        }
+        return false;
     }
 }

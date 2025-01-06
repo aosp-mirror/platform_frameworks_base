@@ -122,7 +122,7 @@ public class LocationTile extends QSTileImpl<BooleanState> {
         if (state.disabledByPolicy == false) {
             checkIfRestrictionEnforcedByAdminOnly(state, UserManager.DISALLOW_CONFIG_LOCATION);
         }
-        state.icon = ResourceIcon.get(state.value
+        state.icon = maybeLoadResourceIcon(state.value
                 ? R.drawable.qs_location_icon_on : R.drawable.qs_location_icon_off);
         state.label = mContext.getString(R.string.quick_settings_location_label);
         state.contentDescription = state.label;

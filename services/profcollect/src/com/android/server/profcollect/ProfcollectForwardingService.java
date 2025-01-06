@@ -16,6 +16,11 @@
 
 package com.android.server.profcollect;
 
+import static android.content.Intent.ACTION_BATTERY_LOW;
+import static android.content.Intent.ACTION_BATTERY_OKAY;
+import static android.content.Intent.ACTION_SCREEN_OFF;
+import static android.content.Intent.ACTION_SCREEN_ON;
+
 import android.Manifest;
 import android.annotation.RequiresPermission;
 import android.app.job.JobInfo;
@@ -32,6 +37,7 @@ import android.hardware.usb.UsbManager;
 import android.os.Handler;
 import android.os.IBinder.DeathRecipient;
 import android.os.Looper;
+import android.os.PowerManager;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemProperties;
@@ -70,9 +76,12 @@ public final class ProfcollectForwardingService extends SystemService {
     private int mUsageSetting;
     private boolean mUploadEnabled;
 
-    private boolean mAdbActive;
+    static boolean sVerityEnforced;
+    static boolean sIsInteractive;
+    static boolean sAdbActive;
+    static boolean sIsBatteryLow;
 
-    private IProfCollectd mIProfcollect;
+    private static IProfCollectd sIProfcollect;
     private static ProfcollectForwardingService sSelfService;
     private final Handler mHandler = new ProfcollectdHandler(IoThread.getHandler().getLooper());
 
@@ -85,17 +94,28 @@ public final class ProfcollectForwardingService extends SystemService {
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (INTENT_UPLOAD_PROFILES.equals(intent.getAction())) {
+            if (ACTION_BATTERY_LOW.equals(intent.getAction())) {
+                sIsBatteryLow = true;
+            } else if (ACTION_BATTERY_OKAY.equals(intent.getAction())) {
+                sIsBatteryLow = false;
+            } else if (ACTION_SCREEN_ON.equals(intent.getAction())) {
+                Log.d(LOG_TAG, "Received broadcast that the device became interactive, was "
+                        + sIsInteractive);
+                sIsInteractive = true;
+            } else if (ACTION_SCREEN_OFF.equals(intent.getAction())) {
+                Log.d(LOG_TAG, "Received broadcast that the device became noninteractive, was "
+                        + sIsInteractive);
+                sIsInteractive = false;
+            } else if (INTENT_UPLOAD_PROFILES.equals(intent.getAction())) {
                 Log.d(LOG_TAG, "Received broadcast to pack and upload reports");
                 createAndUploadReport(sSelfService);
-            }
-            if (UsbManager.ACTION_USB_STATE.equals(intent.getAction())) {
+            } else if (UsbManager.ACTION_USB_STATE.equals(intent.getAction())) {
                 boolean isADB = intent.getBooleanExtra(UsbManager.USB_FUNCTION_ADB, false);
                 if (isADB) {
                     boolean connected = intent.getBooleanExtra(UsbManager.USB_CONNECTED, false);
                     Log.d(LOG_TAG, "Received broadcast that ADB became " + connected
-                            + ", was " + mAdbActive);
-                    mAdbActive = connected;
+                            + ", was " + sAdbActive);
+                    sAdbActive = connected;
                 }
             }
         }
@@ -117,10 +137,21 @@ public final class ProfcollectForwardingService extends SystemService {
             mUsageSetting = -1;
         }
 
+        // Check verity, disable profile upload if not enforced.
+        final String verityMode = SystemProperties.get("ro.boot.veritymode");
+        sVerityEnforced = verityMode.equals("enforcing");
+        if (!sVerityEnforced) {
+            Log.d(LOG_TAG, "verity is not enforced: " + verityMode);
+        }
+
         mUploadEnabled =
             context.getResources().getBoolean(R.bool.config_profcollectReportUploaderEnabled);
 
         final IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_BATTERY_LOW);
+        filter.addAction(ACTION_BATTERY_OKAY);
+        filter.addAction(ACTION_SCREEN_ON);
+        filter.addAction(ACTION_SCREEN_OFF);
         filter.addAction(INTENT_UPLOAD_PROFILES);
         filter.addAction(UsbManager.ACTION_USB_STATE);
         context.registerReceiver(mBroadcastReceiver, filter, Context.RECEIVER_NOT_EXPORTED);
@@ -144,11 +175,25 @@ public final class ProfcollectForwardingService extends SystemService {
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             UsbManager usbManager = getContext().getSystemService(UsbManager.class);
-            mAdbActive = ((usbManager.getCurrentFunctions() & UsbManager.FUNCTION_ADB) == 1);
-            Log.d(LOG_TAG, "ADB is " + mAdbActive + " on system startup");
+            if (usbManager == null) {
+                sAdbActive = false;
+                Log.d(LOG_TAG, "USBManager is not ready");
+            } else {
+                sAdbActive = ((usbManager.getCurrentFunctions() & UsbManager.FUNCTION_ADB) == 1);
+                Log.d(LOG_TAG, "ADB is " + sAdbActive + " on system startup");
+            }
+
+            PowerManager powerManager = getContext().getSystemService(PowerManager.class);
+            if (powerManager == null) {
+                sIsInteractive = true;
+                Log.d(LOG_TAG, "PowerManager is not ready");
+            } else {
+                sIsInteractive = powerManager.isInteractive();
+                Log.d(LOG_TAG, "Device is interactive " + sIsInteractive + " on system startup");
+            }
         }
         if (phase == PHASE_BOOT_COMPLETED) {
-            if (mIProfcollect == null) {
+            if (sIProfcollect == null) {
                 return;
             }
             BackgroundThread.get().getThreadHandler().post(() -> {
@@ -160,22 +205,22 @@ public final class ProfcollectForwardingService extends SystemService {
     }
 
     private void registerProviderStatusCallback() {
-        if (mIProfcollect == null) {
+        if (sIProfcollect == null) {
             return;
         }
         try {
-            mIProfcollect.registerProviderStatusCallback(mProviderStatusCallback);
+            sIProfcollect.registerProviderStatusCallback(mProviderStatusCallback);
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Failed to register provider status callback: " + e.getMessage());
         }
     }
 
     private boolean serviceHasSupportedTraceProvider() {
-        if (mIProfcollect == null) {
+        if (sIProfcollect == null) {
             return false;
         }
         try {
-            return !mIProfcollect.get_supported_provider().isEmpty();
+            return !sIProfcollect.get_supported_provider().isEmpty();
         } catch (RemoteException e) {
             Log.e(LOG_TAG, "Failed to get supported provider: " + e.getMessage());
             return false;
@@ -197,7 +242,7 @@ public final class ProfcollectForwardingService extends SystemService {
                     IProfCollectd.Stub.asInterface(
                             ServiceManager.getServiceOrThrow("profcollectd"));
             profcollectd.asBinder().linkToDeath(new ProfcollectdDeathRecipient(), /*flags*/0);
-            mIProfcollect = profcollectd;
+            sIProfcollect = profcollectd;
             return true;
         } catch (ServiceManager.ServiceNotFoundException | RemoteException e) {
             Log.w(LOG_TAG, "Failed to connect profcollectd binder service.");
@@ -221,7 +266,8 @@ public final class ProfcollectForwardingService extends SystemService {
                     break;
                 case MESSAGE_REGISTER_SCHEDULERS:
                     registerObservers();
-                    ProfcollectBGJobService.schedule(getContext());
+                    PeriodicTraceJobService.schedule(getContext());
+                    ReportProcessJobService.schedule(getContext());
                     break;
                 default:
                     throw new AssertionError("Unknown message: " + message);
@@ -234,27 +280,66 @@ public final class ProfcollectForwardingService extends SystemService {
         public void binderDied() {
             Log.w(LOG_TAG, "profcollectd has died");
 
-            mIProfcollect = null;
+            sIProfcollect = null;
             tryConnectNativeService();
         }
     }
 
     /**
-     * Background trace process service.
+     * Background report process and upload service.
      */
-    public static class ProfcollectBGJobService extends JobService {
-        // Unique ID in system service
-        private static final int JOB_IDLE_PROCESS = 260817;
+    public static class PeriodicTraceJobService extends JobService {
+        // Unique ID in system server
+        private static final int PERIODIC_TRACE_JOB_ID = 241207;
         private static final ComponentName JOB_SERVICE_NAME = new ComponentName(
                 "android",
-                ProfcollectBGJobService.class.getName());
+                PeriodicTraceJobService.class.getName());
+
+        /**
+         * Attach the service to the system job scheduler.
+         */
+        public static void schedule(Context context) {
+            final int interval = DeviceConfig.getInt(DeviceConfig.NAMESPACE_PROFCOLLECT_NATIVE_BOOT,
+                    "collection_interval", 600);
+            JobScheduler js = context.getSystemService(JobScheduler.class);
+            js.schedule(new JobInfo.Builder(PERIODIC_TRACE_JOB_ID, JOB_SERVICE_NAME)
+                    .setPeriodic(TimeUnit.SECONDS.toMillis(interval))
+                    // PRIORITY_DEFAULT is the highest priority we can request for a periodic job.
+                    .setPriority(JobInfo.PRIORITY_DEFAULT)
+                    .build());
+        }
+
+        @Override
+        public boolean onStartJob(JobParameters params) {
+            if (sIProfcollect != null) {
+                Utils.traceSystem(sIProfcollect, "periodic");
+            }
+            jobFinished(params, false);
+            return true;
+        }
+
+        @Override
+        public boolean onStopJob(JobParameters params) {
+            return false;
+        }
+    }
+
+    /**
+     * Background report process and upload service.
+     */
+    public static class ReportProcessJobService extends JobService {
+        // Unique ID in system server
+        private static final int REPORT_PROCESS_JOB_ID = 260817;
+        private static final ComponentName JOB_SERVICE_NAME = new ComponentName(
+                "android",
+                ReportProcessJobService.class.getName());
 
         /**
          * Attach the service to the system job scheduler.
          */
         public static void schedule(Context context) {
             JobScheduler js = context.getSystemService(JobScheduler.class);
-            js.schedule(new JobInfo.Builder(JOB_IDLE_PROCESS, JOB_SERVICE_NAME)
+            js.schedule(new JobInfo.Builder(REPORT_PROCESS_JOB_ID, JOB_SERVICE_NAME)
                     .setRequiresDeviceIdle(true)
                     .setRequiresCharging(true)
                     .setPeriodic(BG_PROCESS_INTERVAL)
@@ -271,7 +356,6 @@ public final class ProfcollectForwardingService extends SystemService {
 
         @Override
         public boolean onStopJob(JobParameters params) {
-            // TODO: Handle this?
             return false;
         }
     }
@@ -299,14 +383,8 @@ public final class ProfcollectForwardingService extends SystemService {
     private class AppLaunchObserver extends ActivityMetricsLaunchObserver {
         @Override
         public void onIntentStarted(Intent intent, long timestampNanos) {
-            if (mIProfcollect == null) {
-                return;
-            }
-            if (mAdbActive) {
-                return;
-            }
             if (Utils.withFrequency("applaunch_trace_freq", 5)) {
-                Utils.traceSystem(mIProfcollect, "applaunch");
+                Utils.traceSystem(sIProfcollect, "applaunch");
             }
         }
     }
@@ -324,15 +402,9 @@ public final class ProfcollectForwardingService extends SystemService {
     }
 
     private void traceOnDex2oatStart() {
-        if (mIProfcollect == null) {
-            return;
-        }
-        if (mAdbActive) {
-            return;
-        }
         if (Utils.withFrequency("dex2oat_trace_freq", 25)) {
             // Dex2oat could take a while before it starts. Add a short delay before start tracing.
-            Utils.traceSystem(mIProfcollect, "dex2oat", /* delayMs */ 1000);
+            Utils.traceSystem(sIProfcollect, "dex2oat", /* delayMs */ 1000);
         }
     }
 
@@ -355,18 +427,22 @@ public final class ProfcollectForwardingService extends SystemService {
 
     private static void createAndUploadReport(ProfcollectForwardingService pfs) {
         BackgroundThread.get().getThreadHandler().post(() -> {
-            if (pfs.mIProfcollect == null) {
+            if (pfs.sIProfcollect == null) {
                 return;
             }
             String reportName;
             try {
-                reportName = pfs.mIProfcollect.report(pfs.mUsageSetting) + ".zip";
+                reportName = pfs.sIProfcollect.report(pfs.mUsageSetting) + ".zip";
             } catch (RemoteException e) {
                 Log.e(LOG_TAG, "Failed to create report: " + e.getMessage());
                 return;
             }
             if (!pfs.mUploadEnabled) {
                 Log.i(LOG_TAG, "Upload is not enabled.");
+                return;
+            }
+            if (!sVerityEnforced) {
+                Log.i(LOG_TAG, "Verity is not enforced.");
                 return;
             }
             Intent intent = new Intent()
@@ -395,7 +471,7 @@ public final class ProfcollectForwardingService extends SystemService {
                     return;
                 }
                 if (Utils.withFrequency("camera_trace_freq", 10)) {
-                    Utils.traceProcess(mIProfcollect,
+                    Utils.traceProcess(sIProfcollect,
                             "camera",
                             "android.hardware.camera.provider",
                             /* durationMs */ 5000);

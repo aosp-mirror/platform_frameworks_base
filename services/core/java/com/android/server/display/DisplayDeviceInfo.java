@@ -255,6 +255,11 @@ final class DisplayDeviceInfo {
     public static final int DIFF_MODE_ID = 1 << 7;
 
     /**
+     * Diff result: The frame rate override list differs.
+     */
+    public static final int DIFF_FRAME_RATE_OVERRIDE = 1 << 8;
+
+    /**
      * Diff result: Catch-all for "everything changed"
      */
     public static final int DIFF_EVERYTHING = 0XFFFFFFFF;
@@ -305,6 +310,11 @@ final class DisplayDeviceInfo {
      * @see android.view.Display#getSuggestedFrameRate(int) for more details.
      */
     public FrameRateCategoryRate frameRateCategoryRate;
+    /**
+     * All the refresh rates supported for the default display mode.
+     */
+    public float[] supportedRefreshRates = new float[0];
+
     /**
      * The default mode of the display.
      */
@@ -467,6 +477,7 @@ final class DisplayDeviceInfo {
     public float brightnessMinimum;
     public float brightnessMaximum;
     public float brightnessDefault;
+    public float brightnessDim;
 
     // NaN means unsupported
     public float hdrSdrRatio = Float.NaN;
@@ -523,6 +534,9 @@ final class DisplayDeviceInfo {
         if (modeId != other.modeId) {
             diff |= DIFF_MODE_ID;
         }
+        if (!Arrays.equals(frameRateOverrides, other.frameRateOverrides)) {
+            diff |= DIFF_FRAME_RATE_OVERRIDE;
+        }
         if (!Objects.equals(name, other.name)
                 || !Objects.equals(uniqueId, other.uniqueId)
                 || width != other.width
@@ -546,16 +560,16 @@ final class DisplayDeviceInfo {
                 || !Objects.equals(deviceProductInfo, other.deviceProductInfo)
                 || ownerUid != other.ownerUid
                 || !Objects.equals(ownerPackageName, other.ownerPackageName)
-                || !Arrays.equals(frameRateOverrides, other.frameRateOverrides)
                 || !BrightnessSynchronizer.floatEquals(brightnessMinimum, other.brightnessMinimum)
                 || !BrightnessSynchronizer.floatEquals(brightnessMaximum, other.brightnessMaximum)
-                || !BrightnessSynchronizer.floatEquals(brightnessDefault,
-                other.brightnessDefault)
+                || !BrightnessSynchronizer.floatEquals(brightnessDefault, other.brightnessDefault)
+                || !BrightnessSynchronizer.floatEquals(brightnessDim, other.brightnessDim)
                 || !Objects.equals(roundedCorners, other.roundedCorners)
                 || installOrientation != other.installOrientation
                 || !Objects.equals(displayShape, other.displayShape)
                 || hasArrSupport != other.hasArrSupport
-                || !Objects.equals(frameRateCategoryRate, other.frameRateCategoryRate)) {
+                || !Objects.equals(frameRateCategoryRate, other.frameRateCategoryRate)
+                || !Arrays.equals(supportedRefreshRates, other.supportedRefreshRates)) {
             diff |= DIFF_OTHER;
         }
         return diff;
@@ -575,6 +589,7 @@ final class DisplayDeviceInfo {
         renderFrameRate = other.renderFrameRate;
         hasArrSupport = other.hasArrSupport;
         frameRateCategoryRate = other.frameRateCategoryRate;
+        supportedRefreshRates = other.supportedRefreshRates;
         defaultModeId = other.defaultModeId;
         userPreferredModeId = other.userPreferredModeId;
         supportedModes = other.supportedModes;
@@ -604,6 +619,7 @@ final class DisplayDeviceInfo {
         brightnessMinimum = other.brightnessMinimum;
         brightnessMaximum = other.brightnessMaximum;
         brightnessDefault = other.brightnessDefault;
+        brightnessDim = other.brightnessDim;
         hdrSdrRatio = other.hdrSdrRatio;
         roundedCorners = other.roundedCorners;
         installOrientation = other.installOrientation;
@@ -621,6 +637,7 @@ final class DisplayDeviceInfo {
         sb.append(", renderFrameRate ").append(renderFrameRate);
         sb.append(", hasArrSupport ").append(hasArrSupport);
         sb.append(", frameRateCategoryRate ").append(frameRateCategoryRate);
+        sb.append(", supportedRefreshRates ").append(Arrays.toString(supportedRefreshRates));
         sb.append(", defaultModeId ").append(defaultModeId);
         sb.append(", userPreferredModeId ").append(userPreferredModeId);
         sb.append(", supportedModes ").append(Arrays.toString(supportedModes));
@@ -657,6 +674,7 @@ final class DisplayDeviceInfo {
         sb.append(", brightnessMinimum ").append(brightnessMinimum);
         sb.append(", brightnessMaximum ").append(brightnessMaximum);
         sb.append(", brightnessDefault ").append(brightnessDefault);
+        sb.append(", brightnessDim ").append(brightnessDim);
         sb.append(", hdrSdrRatio ").append(hdrSdrRatio);
         if (roundedCorners != null) {
             sb.append(", roundedCorners ").append(roundedCorners);

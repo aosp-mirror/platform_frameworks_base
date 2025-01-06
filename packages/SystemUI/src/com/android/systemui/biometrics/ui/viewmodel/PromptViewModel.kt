@@ -34,6 +34,7 @@ import android.util.Log
 import android.util.RotationUtils
 import android.view.HapticFeedbackConstants
 import android.view.MotionEvent
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.keyguard.AuthInteractionProperties
 import com.android.launcher3.icons.IconProvider
 import com.android.systemui.Flags.msdlFeedback
@@ -71,7 +72,6 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.update
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** ViewModel for BiometricPrompt. */
 class PromptViewModel
@@ -973,7 +973,7 @@ constructor(
 /**
  * The order of getting logo icon/description is:
  * 1. If the app sets customized icon/description, use the passed-in value
- * 2. If shouldShowLogoWithOverrides(), use activityInfo to get icon/description
+ * 2. If shouldUseActivityLogo(), use activityInfo to get icon/description
  * 3. Otherwise, use applicationInfo to get icon/description
  */
 private fun Context.getUserBadgedLogoInfo(
@@ -981,8 +981,10 @@ private fun Context.getUserBadgedLogoInfo(
     iconProvider: IconProvider,
     activityTaskManager: ActivityTaskManager,
 ): Pair<Drawable?, String> {
-    var icon: Drawable? =
-        if (prompt.logoBitmap != null) BitmapDrawable(resources, prompt.logoBitmap) else null
+    // If the app sets customized icon/description, use the passed-in value directly
+    val customizedIcon: Drawable? =
+        prompt.logoBitmap?.let { BitmapDrawable(resources, prompt.logoBitmap) }
+    var icon = customizedIcon
     var label = prompt.logoDescription ?: ""
     if (icon != null && label.isNotEmpty()) {
         return Pair(icon, label)
@@ -993,36 +995,27 @@ private fun Context.getUserBadgedLogoInfo(
     if (componentName != null && shouldUseActivityLogo(componentName)) {
         val activityInfo = getActivityInfo(componentName)
         if (activityInfo != null) {
-            if (icon == null) {
-                icon = iconProvider.getIcon(activityInfo)
-            }
-            if (label.isEmpty()) {
-                label = activityInfo.loadLabel(packageManager).toString()
-            }
+            icon = icon ?: iconProvider.getIcon(activityInfo)
+            label = label.ifEmpty { activityInfo.loadLabel(packageManager).toString() }
         }
     }
-    if (icon != null && label.isNotEmpty()) {
-        return Pair(icon, label)
+    // Use applicationInfo for other cases
+    if (icon == null || label.isEmpty()) {
+        val appInfo = prompt.getApplicationInfo(this, componentName)
+        if (appInfo != null) {
+            icon = icon ?: packageManager.getApplicationIcon(appInfo)
+            label = label.ifEmpty { packageManager.getApplicationLabel(appInfo).toString() }
+        } else {
+            Log.w(PromptViewModel.TAG, "Cannot find app logo for package $opPackageName")
+        }
     }
 
-    // Use applicationInfo for other cases
-    val appInfo = prompt.getApplicationInfo(this, componentName)
-    if (appInfo == null) {
-        Log.w(PromptViewModel.TAG, "Cannot find app logo for package $opPackageName")
-    } else {
-        if (icon == null) {
-            icon = packageManager.getApplicationIcon(appInfo)
-        }
-        if (label.isEmpty()) {
-            label =
-                packageManager
-                    .getUserBadgedLabel(
-                        packageManager.getApplicationLabel(appInfo),
-                        UserHandle.of(userId),
-                    )
-                    .toString()
-        }
+    // Add user badge for non-customized logo icon
+    val userHandle = UserHandle.of(prompt.userInfo.userId)
+    if (icon != null && icon != customizedIcon) {
+        icon = packageManager.getUserBadgedIcon(icon, userHandle)
     }
+
     return Pair(icon, label)
 }
 

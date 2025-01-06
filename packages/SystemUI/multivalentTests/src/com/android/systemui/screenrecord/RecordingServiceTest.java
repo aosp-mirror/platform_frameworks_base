@@ -41,6 +41,7 @@ import android.app.ActivityOptions.LaunchCookie;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Intent;
+import android.media.projection.StopReason;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -199,16 +200,16 @@ public class RecordingServiceTest extends SysuiTestCase {
     public void testOnSystemRequestedStop_recordingInProgress_endsRecording() throws IOException {
         doReturn(true).when(mController).isRecording();
 
-        mRecordingService.onStopped();
+        mRecordingService.onStopped(StopReason.STOP_UNKNOWN);
 
-        verify(mScreenMediaRecorder).end();
+        verify(mScreenMediaRecorder).end(eq(StopReason.STOP_UNKNOWN));
     }
 
     @Test
     public void testOnSystemRequestedStop_recordingInProgress_updatesState() {
         doReturn(true).when(mController).isRecording();
 
-        mRecordingService.onStopped();
+        mRecordingService.onStopped(StopReason.STOP_UNKNOWN);
 
         assertUpdateState(false);
     }
@@ -218,18 +219,18 @@ public class RecordingServiceTest extends SysuiTestCase {
             throws IOException {
         doReturn(false).when(mController).isRecording();
 
-        mRecordingService.onStopped();
+        mRecordingService.onStopped(StopReason.STOP_UNKNOWN);
 
-        verify(mScreenMediaRecorder, never()).end();
+        verify(mScreenMediaRecorder, never()).end(StopReason.STOP_UNKNOWN);
     }
 
     @Test
     public void testOnSystemRequestedStop_recorderEndThrowsRuntimeException_releasesRecording()
             throws IOException {
         doReturn(true).when(mController).isRecording();
-        doThrow(new RuntimeException()).when(mScreenMediaRecorder).end();
+        doThrow(new RuntimeException()).when(mScreenMediaRecorder).end(StopReason.STOP_UNKNOWN);
 
-        mRecordingService.onStopped();
+        mRecordingService.onStopped(StopReason.STOP_UNKNOWN);
 
         verify(mScreenMediaRecorder).release();
     }
@@ -238,7 +239,7 @@ public class RecordingServiceTest extends SysuiTestCase {
     public void testOnSystemRequestedStop_whenRecordingInProgress_showsNotifications() {
         doReturn(true).when(mController).isRecording();
 
-        mRecordingService.onStopped();
+        mRecordingService.onStopped(StopReason.STOP_UNKNOWN);
 
         // Processing notification
         ArgumentCaptor<Notification> notifCaptor = ArgumentCaptor.forClass(Notification.class);
@@ -271,9 +272,9 @@ public class RecordingServiceTest extends SysuiTestCase {
     public void testOnSystemRequestedStop_recorderEndThrowsRuntimeException_showsErrorNotification()
             throws IOException {
         doReturn(true).when(mController).isRecording();
-        doThrow(new RuntimeException()).when(mScreenMediaRecorder).end();
+        doThrow(new RuntimeException()).when(mScreenMediaRecorder).end(anyInt());
 
-        mRecordingService.onStopped();
+        mRecordingService.onStopped(StopReason.STOP_UNKNOWN);
 
         verify(mRecordingService).createErrorSavingNotification(any());
         ArgumentCaptor<Notification> notifCaptor = ArgumentCaptor.forClass(Notification.class);
@@ -289,9 +290,9 @@ public class RecordingServiceTest extends SysuiTestCase {
     public void testOnSystemRequestedStop_recorderEndThrowsOOMError_releasesRecording()
             throws IOException {
         doReturn(true).when(mController).isRecording();
-        doThrow(new OutOfMemoryError()).when(mScreenMediaRecorder).end();
+        doThrow(new OutOfMemoryError()).when(mScreenMediaRecorder).end(anyInt());
 
-        assertThrows(Throwable.class, () -> mRecordingService.onStopped());
+        assertThrows(Throwable.class, () -> mRecordingService.onStopped(StopReason.STOP_UNKNOWN));
 
         verify(mScreenMediaRecorder).release();
     }

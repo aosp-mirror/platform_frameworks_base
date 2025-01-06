@@ -83,7 +83,7 @@ public abstract class LoaderManager {
          * transactions while in this call, since it can happen after an
          * activity's state is saved.  See {@link FragmentManager#beginTransaction()
          * FragmentManager.openTransaction()} for further discussion on this.
-         * 
+         *
          * <p>This function is guaranteed to be called prior to the release of
          * the last data that was supplied for this Loader.  At this point
          * you should remove all use of the old data (since it will be released
@@ -127,7 +127,7 @@ public abstract class LoaderManager {
          */
         public void onLoaderReset(Loader<D> loader);
     }
-    
+
     /**
      * Ensures a loader is initialized and active.  If the loader doesn't
      * already exist, one is created and (if the activity/fragment is currently
@@ -228,7 +228,7 @@ class LoaderManagerImpl extends LoaderManager {
     boolean mStarted;
     boolean mRetaining;
     boolean mRetainingStarted;
-    
+
     boolean mCreatingLoader;
     private FragmentHostCallback mHost;
 
@@ -249,13 +249,13 @@ class LoaderManagerImpl extends LoaderManager {
         boolean mListenerRegistered;
 
         LoaderInfo mPendingLoader;
-        
+
         public LoaderInfo(int id, Bundle args, LoaderManager.LoaderCallbacks<Object> callbacks) {
             mId = id;
             mArgs = args;
             mCallbacks = callbacks;
         }
-        
+
         void start() {
             if (mRetaining && mRetainingStarted) {
                 // Our owner is started, but we were being retained from a
@@ -271,7 +271,7 @@ class LoaderManagerImpl extends LoaderManager {
             }
 
             mStarted = true;
-            
+
             if (DEBUG) Log.v(TAG, "  Starting: " + this);
             if (mLoader == null && mCallbacks != null) {
                mLoader = mCallbacks.onCreateLoader(mId, mArgs);
@@ -291,7 +291,7 @@ class LoaderManagerImpl extends LoaderManager {
                 mLoader.startLoading();
             }
         }
-        
+
         void retain() {
             if (DEBUG) Log.v(TAG, "  Retaining: " + this);
             mRetaining = true;
@@ -299,7 +299,7 @@ class LoaderManagerImpl extends LoaderManager {
             mStarted = false;
             mCallbacks = null;
         }
-        
+
         void finishRetain() {
             if (mRetaining) {
                 if (DEBUG) Log.v(TAG, "  Finished Retaining: " + this);
@@ -324,7 +324,7 @@ class LoaderManagerImpl extends LoaderManager {
                 callOnLoadFinished(mLoader, mData);
             }
         }
-        
+
         void reportStart() {
             if (mStarted) {
                 if (mReportNextStart) {
@@ -430,7 +430,7 @@ class LoaderManagerImpl extends LoaderManager {
         @Override
         public void onLoadComplete(Loader<Object> loader, Object data) {
             if (DEBUG) Log.v(TAG, "onLoadComplete: " + this);
-            
+
             if (mDestroyed) {
                 if (DEBUG) Log.v(TAG, "  Ignoring load complete -- destroyed");
                 return;
@@ -442,7 +442,7 @@ class LoaderManagerImpl extends LoaderManager {
                 if (DEBUG) Log.v(TAG, "  Ignoring load complete -- not active");
                 return;
             }
-            
+
             LoaderInfo pending = mPendingLoader;
             if (pending != null) {
                 // There is a new request pending and we were just
@@ -455,7 +455,7 @@ class LoaderManagerImpl extends LoaderManager {
                 installLoader(pending);
                 return;
             }
-            
+
             // Notify of the new data so the app can switch out the old data before
             // we try to destroy it.
             if (mData != data || !mHaveData) {
@@ -503,7 +503,7 @@ class LoaderManagerImpl extends LoaderManager {
                 mDeliveredData = true;
             }
         }
-        
+
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder(64);
@@ -543,13 +543,13 @@ class LoaderManagerImpl extends LoaderManager {
             }
         }
     }
-    
+
     LoaderManagerImpl(String who, FragmentHostCallback host, boolean started) {
         mWho = who;
         mHost = host;
         mStarted = started;
     }
-    
+
     void updateHostController(FragmentHostCallback host) {
         mHost = host;
     }
@@ -557,7 +557,7 @@ class LoaderManagerImpl extends LoaderManager {
     public FragmentHostCallback getFragmentHostCallback() {
         return mHost;
     }
-    
+
     private LoaderInfo createLoader(int id, Bundle args,
             LoaderManager.LoaderCallbacks<Object> callback) {
         LoaderInfo info = new LoaderInfo(id, args,  (LoaderManager.LoaderCallbacks<Object>)callback);
@@ -565,7 +565,7 @@ class LoaderManagerImpl extends LoaderManager {
         info.mLoader = (Loader<Object>)loader;
         return info;
     }
-    
+
     private LoaderInfo createAndInstallLoader(int id, Bundle args,
             LoaderManager.LoaderCallbacks<Object> callback) {
         try {
@@ -577,7 +577,7 @@ class LoaderManagerImpl extends LoaderManager {
             mCreatingLoader = false;
         }
     }
-    
+
     void installLoader(LoaderInfo info) {
         mLoaders.put(info.mId, info);
         if (mStarted) {
@@ -587,23 +587,23 @@ class LoaderManagerImpl extends LoaderManager {
             info.start();
         }
     }
-    
+
     /**
      * Call to initialize a particular ID with a Loader.  If this ID already
      * has a Loader associated with it, it is left unchanged and any previous
      * callbacks replaced with the newly provided ones.  If there is not currently
      * a Loader for the ID, a new one is created and started.
-     * 
+     *
      * <p>This function should generally be used when a component is initializing,
      * to ensure that a Loader it relies on is created.  This allows it to re-use
      * an existing Loader's data if there already is one, so that for example
      * when an {@link Activity} is re-created after a configuration change it
      * does not need to re-create its loaders.
-     * 
+     *
      * <p>Note that in the case where an existing Loader is re-used, the
      * <var>args</var> given here <em>will be ignored</em> because you will
      * continue using the previous Loader.
-     * 
+     *
      * @param id A unique (to this LoaderManager instance) identifier under
      * which to manage the new Loader.
      * @param args Optional arguments that will be propagated to
@@ -617,9 +617,9 @@ class LoaderManagerImpl extends LoaderManager {
         if (mCreatingLoader) {
             throw new IllegalStateException("Called while creating a loader");
         }
-        
+
         LoaderInfo info = mLoaders.get(id);
-        
+
         if (DEBUG) Log.v(TAG, "initLoader in " + this + ": args=" + args);
 
         if (info == null) {
@@ -630,30 +630,30 @@ class LoaderManagerImpl extends LoaderManager {
             if (DEBUG) Log.v(TAG, "  Re-using existing loader " + info);
             info.mCallbacks = (LoaderManager.LoaderCallbacks<Object>)callback;
         }
-        
+
         if (info.mHaveData && mStarted) {
             // If the loader has already generated its data, report it now.
             info.callOnLoadFinished(info.mLoader, info.mData);
         }
-        
+
         return (Loader<D>)info.mLoader;
     }
-    
+
     /**
      * Call to re-create the Loader associated with a particular ID.  If there
      * is currently a Loader associated with this ID, it will be
      * canceled/stopped/destroyed as appropriate.  A new Loader with the given
      * arguments will be created and its data delivered to you once available.
-     * 
+     *
      * <p>This function does some throttling of Loaders.  If too many Loaders
      * have been created for the given ID but not yet generated their data,
      * new calls to this function will create and return a new Loader but not
      * actually start it until some previous loaders have completed.
-     * 
+     *
      * <p>After calling this function, any previous Loaders associated with
      * this ID will be considered invalid, and you will receive no further
      * data updates from them.
-     * 
+     *
      * @param id A unique (to this LoaderManager instance) identifier under
      * which to manage the new Loader.
      * @param args Optional arguments that will be propagated to
@@ -667,7 +667,7 @@ class LoaderManagerImpl extends LoaderManager {
         if (mCreatingLoader) {
             throw new IllegalStateException("Called while creating a loader");
         }
-        
+
         LoaderInfo info = mLoaders.get(id);
         if (DEBUG) Log.v(TAG, "restartLoader in " + this + ": args=" + args);
         if (info != null) {
@@ -706,7 +706,7 @@ class LoaderManagerImpl extends LoaderManager {
                             info.mPendingLoader = null;
                         }
                         if (DEBUG) Log.v(TAG, "  Enqueuing as new pending loader");
-                        info.mPendingLoader = createLoader(id, args, 
+                        info.mPendingLoader = createLoader(id, args,
                                 (LoaderManager.LoaderCallbacks<Object>)callback);
                         return (Loader<D>)info.mPendingLoader.mLoader;
                     }
@@ -719,11 +719,11 @@ class LoaderManagerImpl extends LoaderManager {
                 mInactiveLoaders.put(id, info);
             }
         }
-        
+
         info = createAndInstallLoader(id, args,  (LoaderManager.LoaderCallbacks<Object>)callback);
         return (Loader<D>)info.mLoader;
     }
-    
+
     /**
      * Rip down, tear apart, shred to pieces a current Loader ID.  After returning
      * from this function, any Loader objects associated with this ID are
@@ -735,7 +735,7 @@ class LoaderManagerImpl extends LoaderManager {
         if (mCreatingLoader) {
             throw new IllegalStateException("Called while creating a loader");
         }
-        
+
         if (DEBUG) Log.v(TAG, "destroyLoader in " + this + " of " + id);
         int idx = mLoaders.indexOfKey(id);
         if (idx >= 0) {
@@ -763,7 +763,7 @@ class LoaderManagerImpl extends LoaderManager {
         if (mCreatingLoader) {
             throw new IllegalStateException("Called while creating a loader");
         }
-        
+
         LoaderInfo loaderInfo = mLoaders.get(id);
         if (loaderInfo != null) {
             if (loaderInfo.mPendingLoader != null) {
@@ -773,16 +773,15 @@ class LoaderManagerImpl extends LoaderManager {
         }
         return null;
     }
- 
+
     void doStart() {
         if (DEBUG) Log.v(TAG, "Starting in " + this);
         if (mStarted) {
             RuntimeException e = new RuntimeException("here");
-            e.fillInStackTrace();
             Log.w(TAG, "Called doStart when already started: " + this, e);
             return;
         }
-        
+
         mStarted = true;
 
         // Call out to sub classes so they can start their loaders
@@ -791,12 +790,11 @@ class LoaderManagerImpl extends LoaderManager {
             mLoaders.valueAt(i).start();
         }
     }
-    
+
     void doStop() {
         if (DEBUG) Log.v(TAG, "Stopping in " + this);
         if (!mStarted) {
             RuntimeException e = new RuntimeException("here");
-            e.fillInStackTrace();
             Log.w(TAG, "Called doStop when not started: " + this, e);
             return;
         }
@@ -806,12 +804,11 @@ class LoaderManagerImpl extends LoaderManager {
         }
         mStarted = false;
     }
-    
+
     void doRetain() {
         if (DEBUG) Log.v(TAG, "Retaining in " + this);
         if (!mStarted) {
             RuntimeException e = new RuntimeException("here");
-            e.fillInStackTrace();
             Log.w(TAG, "Called doRetain when not started: " + this, e);
             return;
         }
@@ -822,7 +819,7 @@ class LoaderManagerImpl extends LoaderManager {
             mLoaders.valueAt(i).retain();
         }
     }
-    
+
     void finishRetain() {
         if (mRetaining) {
             if (DEBUG) Log.v(TAG, "Finished Retaining in " + this);
@@ -833,7 +830,7 @@ class LoaderManagerImpl extends LoaderManager {
             }
         }
     }
-    
+
     void doReportNextStart() {
         for (int i = mLoaders.size()-1; i >= 0; i--) {
             mLoaders.valueAt(i).mReportNextStart = true;
@@ -854,7 +851,7 @@ class LoaderManagerImpl extends LoaderManager {
             }
             mLoaders.clear();
         }
-        
+
         if (DEBUG) Log.v(TAG, "Destroying Inactive in " + this);
         for (int i = mInactiveLoaders.size()-1; i >= 0; i--) {
             mInactiveLoaders.valueAt(i).destroy();

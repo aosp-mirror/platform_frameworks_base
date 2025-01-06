@@ -32,7 +32,6 @@ import android.view.accessibility.AccessibilityManager;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.UiEventLogger;
-import com.android.keyguard.KeyguardStatusView;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
@@ -71,8 +70,8 @@ import com.android.systemui.statusbar.phone.KeyguardStatusBarView;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController;
@@ -125,7 +124,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     @Mock protected LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     @Mock protected NotificationShadeDepthController mNotificationShadeDepthController;
     @Mock protected ShadeHeaderController mShadeHeaderController;
-    @Mock protected StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    @Mock protected ShadeTouchableRegionManager mShadeTouchableRegionManager;
+    @Mock protected StatusBarLongPressGestureDetector mStatusBarLongPressGestureDetector;
     @Mock protected DozeParameters mDozeParameters;
     @Mock protected KeyguardStateController mKeyguardStateController;
     @Mock protected KeyguardBypassController mKeyguardBypassController;
@@ -149,7 +149,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
     @Mock protected LargeScreenHeaderHelper mLargeScreenHeaderHelper;
 
     protected FakeDisableFlagsRepository mDisableFlagsRepository =
-            new FakeDisableFlagsRepository();
+            mKosmos.getFakeDisableFlagsRepository();
     protected FakeKeyguardRepository mKeyguardRepository = new FakeKeyguardRepository();
     protected FakeShadeRepository mShadeRepository = new FakeShadeRepository();
 
@@ -185,7 +185,7 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
         mShadeInteractor = new ShadeInteractorImpl(
                 mTestScope.getBackgroundScope(),
                 mKosmos.getDeviceProvisioningInteractor(),
-                mDisableFlagsRepository,
+                mKosmos.getDisableFlagsInteractor(),
                 mDozeParameters,
                 mKeyguardRepository,
                 keyguardTransitionInteractor,
@@ -198,9 +198,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                         mShadeRepository
                 ),
                 mKosmos.getShadeModeInteractor());
-
-        KeyguardStatusView keyguardStatusView = new KeyguardStatusView(mContext);
-        keyguardStatusView.setId(R.id.keyguard_status_view);
 
         when(mResources.getDimensionPixelSize(
                 R.dimen.lockscreen_shade_qs_transition_distance)).thenReturn(DEFAULT_HEIGHT);
@@ -217,8 +214,6 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
         when(mQs.getHeaderBottom()).thenReturn(QS_FRAME_BOTTOM);
         when(mPanelView.getY()).thenReturn((float) QS_FRAME_TOP);
         when(mPanelView.getHeight()).thenReturn(QS_FRAME_BOTTOM);
-        when(mPanelView.findViewById(R.id.keyguard_status_view))
-                .thenReturn(mock(KeyguardStatusView.class));
         when(mQs.getView()).thenReturn(mPanelView);
         when(mQSFragment.getView()).thenReturn(mPanelView);
 
@@ -249,7 +244,8 @@ public class QuickSettingsControllerImplBaseTest extends SysuiTestCase {
                 mLockscreenShadeTransitionController,
                 mNotificationShadeDepthController,
                 mShadeHeaderController,
-                mStatusBarTouchableRegionManager,
+                mShadeTouchableRegionManager,
+                () -> mStatusBarLongPressGestureDetector,
                 mKeyguardStateController,
                 mKeyguardBypassController,
                 mScrimController,

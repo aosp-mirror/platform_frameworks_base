@@ -521,8 +521,7 @@ class ShortcutRequestPinProcessor {
                 if (DEBUG) {
                     Slog.d(TAG, "Removing " + shortcutId + " as dynamic");
                 }
-                ps.deleteDynamicWithId(shortcutId, /*ignoreInvisible=*/ false,
-                        /*wasPushedOut=*/ false);
+                ps.deleteDynamicWithId(shortcutId, /*ignoreInvisible=*/ false);
             }
 
             ps.adjustRanks(); // Shouldn't be needed, but just in case.

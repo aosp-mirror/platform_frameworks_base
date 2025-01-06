@@ -44,13 +44,11 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
 import com.android.internal.logging.UiEventLogger;
-import com.android.keyguard.KeyguardClockSwitch;
 import com.android.systemui.DejankUtils;
 import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceUnlockedInteractor;
 import com.android.systemui.deviceentry.shared.model.DeviceUnlockStatus;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor;
@@ -136,7 +134,6 @@ public class StatusBarStateControllerImpl implements
     private HistoricalState[] mHistoricalRecords = new HistoricalState[HISTORY_SIZE];
     // These views are used by InteractionJankMonitor to get callback from HWUI.
     private View mView;
-    private KeyguardClockSwitch mClockSwitchView;
 
     /**
      * If any of the system bars is hidden.
@@ -426,7 +423,6 @@ public class StatusBarStateControllerImpl implements
         if ((mView == null || !mView.isAttachedToWindow())
                 && (view != null && view.isAttachedToWindow())) {
             mView = view;
-            mClockSwitchView = view.findViewById(R.id.keyguard_clock_container);
         }
         mDozeAmountTarget = dozeAmount;
         if (animated) {
@@ -511,16 +507,7 @@ public class StatusBarStateControllerImpl implements
 
     /** Returns the id of the currently rendering clock */
     public String getClockId() {
-        if (MigrateClocksToBlueprint.isEnabled()) {
-            return mKeyguardClockInteractorLazy.get().getRenderedClockId();
-        }
-
-        if (mClockSwitchView == null) {
-            Log.e(TAG, "Clock container was missing");
-            return KeyguardClockSwitch.MISSING_CLOCK_ID;
-        }
-
-        return mClockSwitchView.getClockId();
+        return mKeyguardClockInteractorLazy.get().getRenderedClockId();
     }
 
     private void beginInteractionJankMonitor() {
@@ -705,6 +692,7 @@ public class StatusBarStateControllerImpl implements
         final boolean onBouncer = currentScene.equals(Scenes.Bouncer);
         final boolean onCommunal = currentScene.equals(Scenes.Communal);
         final boolean onGone = currentScene.equals(Scenes.Gone);
+        final boolean onDream = currentScene.equals(Scenes.Dream);
         final boolean onLockscreen = currentScene.equals(Scenes.Lockscreen);
         final boolean onQuickSettings = currentScene.equals(Scenes.QuickSettings);
         final boolean onShade = currentScene.equals(Scenes.Shade);
@@ -764,6 +752,8 @@ public class StatusBarStateControllerImpl implements
         } else if (onShade || onQuickSettings) {
             // We get here if deviceUnlockStatus.isUnlocked is false but we are no longer on or over
             // a keyguardish scene; we want to return SHADE_LOCKED until isUnlocked is also true.
+            newState = StatusBarState.SHADE_LOCKED;
+        } else if (onDream) {
             newState = StatusBarState.SHADE_LOCKED;
         } else {
             throw new IllegalArgumentException(

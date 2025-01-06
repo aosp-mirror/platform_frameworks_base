@@ -16,6 +16,7 @@ package com.android.systemui.plugins;
 
 import android.annotation.Nullable;
 import android.app.PendingIntent;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.UserHandle;
@@ -32,6 +33,22 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
 @ProvidesInterface(version = ActivityStarter.VERSION)
 public interface ActivityStarter {
     int VERSION = 2;
+
+    /**
+     * Registers the given {@link ActivityTransitionAnimator.ControllerFactory} for launching and
+     * closing transitions matching the {@link ActivityTransitionAnimator.TransitionCookie} and the
+     * {@link ComponentName} that it contains.
+     */
+    void registerTransition(
+            ActivityTransitionAnimator.TransitionCookie cookie,
+            ActivityTransitionAnimator.ControllerFactory controllerFactory);
+
+    /**
+     * Unregisters the {@link ActivityTransitionAnimator.ControllerFactory} previously registered
+     * containing the given {@link ActivityTransitionAnimator.TransitionCookie}. If no such
+     * registration exists, this is a no-op.
+     */
+    void unregisterTransition(ActivityTransitionAnimator.TransitionCookie cookie);
 
     void startPendingIntentDismissingKeyguard(PendingIntent intent);
 

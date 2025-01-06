@@ -16,7 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
-import com.android.keyguard.LockIconViewController
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -28,7 +28,6 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 class ShadeLockscreenInteractorImpl
@@ -38,7 +37,6 @@ constructor(
     @Background private val backgroundScope: CoroutineScope,
     private val shadeInteractor: ShadeInteractor,
     private val sceneInteractor: SceneInteractor,
-    private val lockIconViewController: LockIconViewController,
     shadeRepository: ShadeRepository,
 ) : ShadeLockscreenInteractor {
 
@@ -55,14 +53,6 @@ constructor(
     @Deprecated("Use ShadeInteractor instead")
     override val isExpanded
         get() = shadeInteractor.isAnyExpanded.value
-
-    override fun startBouncerPreHideAnimation() {
-        // TODO("b/324280998") Implement replacement or delete
-    }
-
-    override fun dozeTimeTick() {
-        lockIconViewController.dozeTimeTick()
-    }
 
     @Deprecated("Not supported by scenes")
     override fun blockExpansionForCurrentTouch() {
@@ -95,11 +85,6 @@ constructor(
 
     @Deprecated("Not supported by scenes")
     override fun resetViewGroupFade() {
-        // Now handled elsewhere. Do nothing.
-    }
-
-    @Deprecated("Not supported by scenes")
-    override fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int) {
         // Now handled elsewhere. Do nothing.
     }
 

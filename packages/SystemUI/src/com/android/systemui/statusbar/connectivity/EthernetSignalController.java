@@ -20,10 +20,12 @@ import android.net.NetworkCapabilities;
 
 import com.android.settingslib.AccessibilityContentDescriptions;
 import com.android.settingslib.SignalIcon.IconGroup;
+import com.android.systemui.statusbar.pipeline.ethernet.domain.EthernetInteractor;
 
 import java.util.BitSet;
 
-/** */
+/** @deprecated use {@link EthernetInteractor} instead. */
+@Deprecated
 public class EthernetSignalController extends
         SignalController<ConnectivityState, IconGroup> {
 

@@ -67,3 +67,13 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "cleanup_dream_settings_on_uninstall"
+    namespace: "systemui"
+    description: "Cleans up dream settings if dream package is uninstalled."
+    bug: "338210427"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

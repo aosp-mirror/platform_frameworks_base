@@ -4,17 +4,28 @@ container: "system"
 # Project link: https://gantry.corp.google.com/projects/android_platform_window_surfaces/changes
 
 flag {
-    name: "limit_manage_media_projection"
-    namespace: "lse_desktop_experience"
-    description: "Limit signature permission manage_media_projection to the SystemUI role"
-    bug: "323008518"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "media_projection_connected_display"
     namespace: "virtual_devices"
     description: "Enable recording connected display"
     bug: "362720120"
     is_exported: true
 }
+
+flag {
+     namespace: "media_projection"
+     name: "stop_media_projection_on_call_end"
+     description: "Stops MediaProjection sessions when a call ends"
+     bug: "368336349"
+}
+
+flag {
+    name: "media_projection_connected_display_no_virtual_device"
+    namespace: "media_projection"
+    description: "Filter out display associated with a virtual device for media projection use case"
+    bug: "362720120"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+    is_exported: true
+}
+

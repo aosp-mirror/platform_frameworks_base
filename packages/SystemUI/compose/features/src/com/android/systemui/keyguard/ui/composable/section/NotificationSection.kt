@@ -29,11 +29,8 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -41,7 +38,6 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.rememberBurnIn
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
@@ -52,7 +48,6 @@ import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.notifications.ui.composable.ConstrainedNotificationStack
 import com.android.systemui.notifications.ui.composable.SnoozeableHeadsUpNotificationSpace
 import com.android.systemui.res.R
-import com.android.systemui.shade.LargeScreenHeaderHelper
 import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDisplayNotificationIconViewStore
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
@@ -94,14 +89,10 @@ constructor(
 ) {
 
     init {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            throw IllegalStateException("this requires MigrateClocksToBlueprint.isEnabled")
-        }
         // This scene container section moves the NSSL to the SharedNotificationContainer.
         // This also requires that SharedNotificationContainer gets moved to the
         // SceneWindowRootView by the SceneWindowRootViewBinder. Prior to Scene Container,
-        // but when the KeyguardShadeMigrationNssl flag is enabled, NSSL is moved into this
-        // container by the NotificationStackScrollLayoutSection.
+        // NSSL is moved into this container by the NotificationStackScrollLayoutSection.
         // Ensure stackScrollLayout is a child of sharedNotificationContainer.
 
         if (stackScrollLayout.parent != sharedNotificationContainer) {
@@ -179,16 +170,13 @@ constructor(
             return
         }
 
-        val splitShadeTopMargin: Dp =
-            LargeScreenHeaderHelper.getLargeScreenHeaderHeight(LocalContext.current).dp
-
         ConstrainedNotificationStack(
             stackScrollView = stackScrollView.get(),
             viewModel = rememberViewModel("Notifications") { viewModelFactory.create() },
             modifier =
                 modifier
                     .fillMaxWidth()
-                    .thenIf(isShadeLayoutWide) { Modifier.padding(top = splitShadeTopMargin) }
+                    .thenIf(isShadeLayoutWide) { Modifier.padding(top = 12.dp) }
                     .let {
                         if (burnInParams == null) {
                             it

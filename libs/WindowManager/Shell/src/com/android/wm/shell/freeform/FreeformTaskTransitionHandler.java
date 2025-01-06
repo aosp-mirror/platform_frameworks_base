@@ -18,6 +18,7 @@ package com.android.wm.shell.freeform;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.view.WindowManager.TRANSIT_PIP;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -99,6 +100,12 @@ public class FreeformTaskTransitionHandler
         return token;
     }
 
+    @Override
+    public IBinder startPipTransition(WindowContainerTransaction wct) {
+        final IBinder token = mTransitions.startTransition(TRANSIT_PIP, wct, null);
+        mPendingTransitionTokens.add(token);
+        return token;
+    }
 
     @Override
     public IBinder startRemoveTransition(WindowContainerTransaction wct) {
@@ -254,8 +261,13 @@ public class FreeformTaskTransitionHandler
         finishT.hide(sc);
         final Rect startBounds = new Rect(change.getStartAbsBounds());
         animator.addUpdateListener(animation -> {
-            t.setPosition(sc, startBounds.left,
-                    startBounds.top + (animation.getAnimatedFraction() * screenHeight));
+            final float newTop = startBounds.top + (animation.getAnimatedFraction() * screenHeight);
+            t.setPosition(sc, startBounds.left, newTop);
+            if (newTop > screenHeight) {
+                // At this point the task surface is off-screen, so hide it to prevent flicker
+                // failures. See b/377651666.
+                t.hide(sc);
+            }
             t.apply();
         });
         animator.addListener(

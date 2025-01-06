@@ -18,7 +18,6 @@ package com.android.systemui.notifications.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
@@ -40,7 +39,7 @@ class NotificationsShadeUserActionsViewModel @AssistedInject constructor() :
             mapOf(
                 Back to SceneFamilies.Home,
                 Swipe.Up to SceneFamilies.Home,
-                Swipe(direction = SwipeDirection.Down, fromSource = SceneContainerEdge.TopRight) to
+                Swipe.Down(fromSource = SceneContainerEdge.TopRight) to
                     ReplaceByOverlay(Overlays.QuickSettingsShade),
             )
         )

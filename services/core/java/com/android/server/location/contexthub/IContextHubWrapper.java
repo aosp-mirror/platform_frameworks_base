@@ -19,6 +19,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.chre.flags.Flags;
 import android.hardware.contexthub.HostEndpointInfo;
+import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.MessageDeliveryStatus;
 import android.hardware.contexthub.NanSessionRequest;
 import android.hardware.contexthub.V1_0.ContextHub;
@@ -30,9 +31,11 @@ import android.hardware.contexthub.V1_2.HubAppInfo;
 import android.hardware.contexthub.V1_2.IContexthubCallback;
 import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubTransaction;
+import android.hardware.location.HubInfo;
 import android.hardware.location.NanoAppBinary;
 import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
+import android.hardware.location.VendorHubInfo;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
@@ -52,13 +55,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * @hide
  */
 public abstract class IContextHubWrapper {
+    private static final boolean DEBUG = false;
     private static final String TAG = "IContextHubWrapper";
 
     /**
@@ -217,10 +221,27 @@ public abstract class IContextHubWrapper {
         return proxy == null ? null : new ContextHubWrapperAidl(proxy);
     }
 
-    /**
-     * Calls the appropriate getHubs function depending on the HAL version.
-     */
-    public abstract Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException;
+    /** Calls the appropriate getHubs function depending on the HAL version. */
+    public abstract Pair<List<ContextHubInfo>, List<String>> getContextHubs()
+            throws RemoteException;
+
+    /** Calls the appropriate getHubs function depending on the HAL version. */
+    public List<HubInfo> getHubs() throws RemoteException {
+        return Collections.emptyList();
+    }
+
+    /** Calls the appropriate getEndpoints function depending on the HAL version. */
+    public List<HubEndpointInfo> getEndpoints() throws RemoteException {
+        return Collections.emptyList();
+    }
+
+    /** Calls the appropriate registerEndpointCallback function depending on the HAL version. */
+    public android.hardware.contexthub.IEndpointCommunication registerEndpointHub(
+            android.hardware.contexthub.IEndpointCallback cb,
+            android.hardware.contexthub.HubInfo hubInfo)
+                    throws RemoteException {
+        throw new UnsupportedOperationException();
+    }
 
     /**
      * @return True if this version of the Contexthub HAL supports Location setting notifications.
@@ -556,7 +577,7 @@ public abstract class IContextHubWrapper {
             mIsTestModeEnabled.set(false);
         }
 
-        public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
+        public Pair<List<ContextHubInfo>, List<String>> getContextHubs() throws RemoteException {
             android.hardware.contexthub.IContextHub hub = getHub();
             if (hub == null) {
                 return new Pair<List<ContextHubInfo>, List<String>>(new ArrayList<ContextHubInfo>(),
@@ -572,6 +593,88 @@ public abstract class IContextHubWrapper {
                 }
             }
             return new Pair(hubInfoList, new ArrayList<String>(supportedPermissions));
+        }
+
+        public List<HubInfo> getHubs() throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return Collections.emptyList();
+            }
+
+            List<HubInfo> retVal = new ArrayList<>();
+            final List<android.hardware.contexthub.HubInfo> halHubs = hub.getHubs();
+
+            for (android.hardware.contexthub.HubInfo halHub : halHubs) {
+                /* HAL -> API Type conversion */
+                final HubInfo hubInfo;
+                switch (halHub.hubDetails.getTag()) {
+                    case android.hardware.contexthub.HubInfo.HubDetails.contextHubInfo:
+                        ContextHubInfo contextHubInfo =
+                                new ContextHubInfo(halHub.hubDetails.getContextHubInfo());
+                        hubInfo = new HubInfo(halHub.hubId, contextHubInfo);
+                        break;
+                    case android.hardware.contexthub.HubInfo.HubDetails.vendorHubInfo:
+                        VendorHubInfo vendorHubInfo =
+                                new VendorHubInfo(halHub.hubDetails.getVendorHubInfo());
+                        hubInfo = new HubInfo(halHub.hubId, vendorHubInfo);
+                        break;
+                    default:
+                        Log.w(TAG, "getHubs: invalid hub: " + halHub);
+                        // Invalid
+                        continue;
+                }
+
+                if (DEBUG) {
+                    Log.i(TAG, "getHubs: hubInfo=" + hubInfo);
+                }
+                retVal.add(hubInfo);
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "getHubs: total count=" + retVal.size());
+            }
+            return retVal;
+        }
+
+        @Override
+        public List<HubEndpointInfo> getEndpoints() throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return Collections.emptyList();
+            }
+
+            List<HubEndpointInfo> retVal = new ArrayList<>();
+            final List<android.hardware.contexthub.EndpointInfo> halEndpointInfos =
+                    hub.getEndpoints();
+            for (android.hardware.contexthub.EndpointInfo halEndpointInfo : halEndpointInfos) {
+                /* HAL -> API Type conversion */
+                final HubEndpointInfo endpointInfo = new HubEndpointInfo(halEndpointInfo);
+                if (DEBUG) {
+                    Log.i(TAG, "getEndpoints: endpointInfo=" + endpointInfo);
+                }
+                retVal.add(endpointInfo);
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "getEndpoints: total count=" + retVal.size());
+            }
+            return retVal;
+        }
+
+        @Override
+        public android.hardware.contexthub.IEndpointCommunication registerEndpointHub(
+                android.hardware.contexthub.IEndpointCallback cb,
+                android.hardware.contexthub.HubInfo hubInfo)
+                        throws RemoteException {
+            android.hardware.contexthub.IContextHub hub = getHub();
+            if (hub == null) {
+                return null;
+            }
+
+            if (DEBUG) {
+                Log.i(TAG, "registerEndpointHub: cb=" + cb);
+            }
+            return hub.registerEndpointHub(cb, hubInfo);
         }
 
         public boolean supportsLocationSettingNotifications() {
@@ -1061,7 +1164,7 @@ public abstract class IContextHubWrapper {
             mHub = hub;
         }
 
-        public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
+        public Pair<List<ContextHubInfo>, List<String>> getContextHubs() throws RemoteException {
             ArrayList<ContextHubInfo> hubInfoList = new ArrayList<>();
             for (ContextHub hub : mHub.getHubs()) {
                 hubInfoList.add(new ContextHubInfo(hub));
@@ -1106,7 +1209,7 @@ public abstract class IContextHubWrapper {
             mHub = hub;
         }
 
-        public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
+        public Pair<List<ContextHubInfo>, List<String>> getContextHubs() throws RemoteException {
             ArrayList<ContextHubInfo> hubInfoList = new ArrayList<>();
             for (ContextHub hub : mHub.getHubs()) {
                 hubInfoList.add(new ContextHubInfo(hub));
@@ -1170,7 +1273,7 @@ public abstract class IContextHubWrapper {
             mHubInfo = new Pair(hubInfoList, supportedPermissions);
         }
 
-        public Pair<List<ContextHubInfo>, List<String>> getHubs() throws RemoteException {
+        public Pair<List<ContextHubInfo>, List<String>> getContextHubs() throws RemoteException {
             mHub.getHubs_1_2(this);
             return mHubInfo;
         }

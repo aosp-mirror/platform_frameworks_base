@@ -16,7 +16,7 @@
 
 package android.widget;
 
-import static android.view.flags.Flags.enableTouchScrollFeedback;
+import static android.view.flags.Flags.enableScrollFeedbackForTouch;
 import static android.view.flags.Flags.scrollFeedbackApi;
 import static android.view.flags.Flags.viewVelocityApi;
 
@@ -3737,7 +3737,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                     atEdge = trackMotionScroll(deltaY, incrementalDeltaY);
 
                     // TODO: b/360198915 - Add unit testing for using ScrollFeedbackProvider
-                    if (enableTouchScrollFeedback()) {
+                    if (vtev != null && enableScrollFeedbackForTouch()) {
                         initHapticScrollFeedbackProviderIfNotExists();
                         mHapticScrollFeedbackProvider.onScrollProgress(
                                 vtev.getDeviceId(), vtev.getSource(), MotionEvent.AXIS_Y,
@@ -3779,7 +3779,7 @@ public abstract class AbsListView extends AdapterView<ListAdapter> implements Te
                                     mTouchMode = TOUCH_MODE_OVERSCROLL;
                                 }
 
-                                if (enableTouchScrollFeedback()) {
+                                if (vtev != null && enableScrollFeedbackForTouch()) {
                                     initHapticScrollFeedbackProviderIfNotExists();
                                     mHapticScrollFeedbackProvider.onScrollLimit(
                                             vtev.getDeviceId(), vtev.getSource(),

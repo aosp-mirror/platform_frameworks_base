@@ -17,7 +17,7 @@
 package com.android.systemui.settings
 
 import android.hardware.display.DisplayManager
-import android.hardware.display.DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
+import android.hardware.display.DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS
 import android.os.Handler
 import android.view.Display
 import androidx.annotation.GuardedBy
@@ -32,7 +32,7 @@ import java.util.concurrent.Executor
 class DisplayTrackerImpl
 internal constructor(
     val displayManager: DisplayManager,
-    @Background val backgroundHandler: Handler
+    @Background val backgroundHandler: Handler,
 ) : DisplayTracker {
     override val defaultDisplayId: Int = Display.DEFAULT_DISPLAY
     override val allDisplays: Array<Display>
@@ -47,27 +47,21 @@ internal constructor(
     val displayChangedListener: DisplayManager.DisplayListener =
         object : DisplayManager.DisplayListener {
             override fun onDisplayAdded(displayId: Int) {
-                traceSection(
-                    "DisplayTrackerImpl.displayChangedDisplayListener#onDisplayAdded",
-                ) {
+                traceSection("DisplayTrackerImpl.displayChangedDisplayListener#onDisplayAdded") {
                     val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
                     onDisplayAdded(displayId, list)
                 }
             }
 
             override fun onDisplayRemoved(displayId: Int) {
-                traceSection(
-                    "DisplayTrackerImpl.displayChangedDisplayListener#onDisplayRemoved",
-                ) {
+                traceSection("DisplayTrackerImpl.displayChangedDisplayListener#onDisplayRemoved") {
                     val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
                     onDisplayRemoved(displayId, list)
                 }
             }
 
             override fun onDisplayChanged(displayId: Int) {
-                traceSection(
-                    "DisplayTrackerImpl.displayChangedDisplayListener#onDisplayChanged",
-                ) {
+                traceSection("DisplayTrackerImpl.displayChangedDisplayListener#onDisplayChanged") {
                     val list = synchronized(displayCallbacks) { displayCallbacks.toList() }
                     onDisplayChanged(displayId, list)
                 }
@@ -83,7 +77,7 @@ internal constructor(
 
             override fun onDisplayChanged(displayId: Int) {
                 traceSection(
-                    "DisplayTrackerImpl.displayBrightnessChangedDisplayListener#onDisplayChanged",
+                    "DisplayTrackerImpl.displayBrightnessChangedDisplayListener#onDisplayChanged"
                 ) {
                     val list = synchronized(brightnessCallbacks) { brightnessCallbacks.toList() }
                     onDisplayChanged(displayId, list)
@@ -102,14 +96,15 @@ internal constructor(
 
     override fun addBrightnessChangeCallback(
         callback: DisplayTracker.Callback,
-        executor: Executor
+        executor: Executor,
     ) {
         synchronized(brightnessCallbacks) {
             if (brightnessCallbacks.isEmpty()) {
                 displayManager.registerDisplayListener(
                     displayBrightnessChangedListener,
                     backgroundHandler,
-                    EVENT_FLAG_DISPLAY_BRIGHTNESS
+                    /* eventFlags */ 0,
+                    PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS,
                 )
             }
             brightnessCallbacks.add(DisplayTrackerDataItem(WeakReference(callback), executor))
@@ -159,7 +154,7 @@ internal constructor(
 
     private inline fun notifySubscribers(
         crossinline action: DisplayTracker.Callback.() -> Unit,
-        list: List<DisplayTrackerDataItem>
+        list: List<DisplayTrackerDataItem>,
     ) {
         list.forEach {
             if (it.callback.get() != null) {
@@ -170,7 +165,7 @@ internal constructor(
 
     private data class DisplayTrackerDataItem(
         val callback: WeakReference<DisplayTracker.Callback>,
-        val executor: Executor
+        val executor: Executor,
     ) {
         fun sameOrEmpty(other: DisplayTracker.Callback): Boolean {
             return callback.get()?.equals(other) ?: true

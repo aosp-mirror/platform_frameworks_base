@@ -26,11 +26,12 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.material3.Divider
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
@@ -46,7 +47,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.theme.colorAttr
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.people.ui.viewmodel.PeopleTileViewModel
 import com.android.systemui.people.ui.viewmodel.PeopleViewModel
@@ -74,13 +74,7 @@ fun PeopleScreen(viewModel: PeopleViewModel, onResult: (PeopleViewModel.Result) 
         }
     }
 
-    // Make sure to use the Android colors and not the default Material3 colors to have the exact
-    // same colors as the View implementation.
-    Surface(
-        color = colorAttr(com.android.internal.R.attr.colorBackground),
-        contentColor = colorAttr(com.android.internal.R.attr.textColorPrimary),
-        modifier = Modifier.fillMaxSize(),
-    ) {
+    Surface(color = MaterialTheme.colorScheme.background, modifier = Modifier.fillMaxSize()) {
         if (priorityTiles.isNotEmpty() || recentTiles.isNotEmpty()) {
             PeopleScreenWithConversations(priorityTiles, recentTiles, viewModel.onTileClicked)
         } else {
@@ -95,7 +89,9 @@ private fun PeopleScreenWithConversations(
     recentTiles: List<PeopleTileViewModel>,
     onTileClicked: (PeopleTileViewModel) -> Unit,
 ) {
-    Column(Modifier.sysuiResTag("top_level_with_conversations")) {
+    Column(
+        Modifier.fillMaxSize().safeDrawingPadding().sysuiResTag("top_level_with_conversations")
+    ) {
         Column(
             Modifier.fillMaxWidth().padding(PeopleSpacePadding),
             horizontalAlignment = Alignment.CenterHorizontally,
@@ -148,17 +144,14 @@ private fun ConversationList(
         stringResource(headerTextResource),
         Modifier.padding(start = 16.dp),
         style = MaterialTheme.typography.labelLarge,
-        color = colorAttr(com.android.internal.R.attr.colorAccentPrimaryVariant),
+        color = MaterialTheme.colorScheme.primary,
     )
 
     Spacer(Modifier.height(10.dp))
 
     tiles.forEachIndexed { index, tile ->
         if (index > 0) {
-            Divider(
-                color = colorAttr(com.android.internal.R.attr.colorBackground),
-                thickness = 2.dp,
-            )
+            HorizontalDivider(color = MaterialTheme.colorScheme.background, thickness = 2.dp)
         }
 
         key(tile.key.toString()) {
@@ -184,8 +177,7 @@ private fun Tile(
     val bottomCornerRadius = if (withBottomCornerRadius) cornerRadius else 0.dp
 
     Surface(
-        color = colorAttr(com.android.internal.R.attr.colorSurface),
-        contentColor = colorAttr(com.android.internal.R.attr.textColorPrimary),
+        color = MaterialTheme.colorScheme.secondaryContainer,
         shape =
             RoundedCornerShape(
                 topStart = topCornerRadius,

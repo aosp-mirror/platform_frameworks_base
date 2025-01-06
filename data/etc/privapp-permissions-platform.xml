@@ -93,6 +93,10 @@ applications that come with the platform
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
     </privapp-permissions>
 
+    <privapp-permissions package="com.android.media.quality">
+        <permission name="android.permission.OBSERVE_PICTURE_PROFILES"/>
+    </privapp-permissions>
+
     <privapp-permissions package="com.android.mtp">
         <permission name="android.permission.ACCESS_MTP"/>
         <permission name="android.permission.MANAGE_USB"/>
@@ -121,6 +125,7 @@ applications that come with the platform
         <permission name="android.permission.SUBSTITUTE_NOTIFICATION_APP_NAME"/>
         <permission name="android.permission.PACKAGE_USAGE_STATS"/>
         <permission name="android.permission.READ_SYSTEM_GRAMMATICAL_GENDER"/>
+        <permission name="android.permission.RESOLVE_COMPONENT_FOR_UID"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.phone">
@@ -262,6 +267,8 @@ applications that come with the platform
         <!-- BLUETOOTH_PRIVILEGED is needed for test only -->
         <permission name="android.permission.BLUETOOTH_PRIVILEGED"/>
         <permission name="android.permission.BIND_APPWIDGET"/>
+        <!-- Needed for CTS tests only -->
+        <permission name="android.permission.OBSERVE_PICTURE_PROFILES"/>
         <permission name="android.permission.CHANGE_APP_IDLE_STATE"/>
         <permission name="android.permission.CHANGE_COMPONENT_ENABLED_STATE"/>
         <permission name="android.permission.CHANGE_CONFIGURATION"/>
@@ -402,6 +409,9 @@ applications that come with the platform
         <permission name="android.permission.SHOW_CUSTOMIZED_RESOLVER"/>
         <!-- Permission required for access VIBRATOR_STATE. -->
         <permission name="android.permission.ACCESS_VIBRATOR_STATE"/>
+        <!-- Permission required for vendor vibration effects and sessions. -->
+        <permission name="android.permission.VIBRATE_VENDOR_EFFECTS"/>
+        <permission name="android.permission.START_VIBRATION_SESSIONS"/>
         <!-- Permission required for UsageStatsTest CTS test. -->
         <permission name="android.permission.MANAGE_NOTIFICATIONS"/>
         <!-- Permission required for CompanionDeviceManager CTS test. -->
@@ -410,6 +420,7 @@ applications that come with the platform
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_APP_STREAMING" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING" />
+        <permission name="android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING" />
         <permission name="android.permission.REQUEST_COMPANION_PROFILE_COMPUTER" />
         <permission name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
         <permission name="android.permission.REQUEST_OBSERVE_DEVICE_UUID_PRESENCE" />
@@ -505,7 +516,6 @@ applications that come with the platform
         <permission name="android.permission.RENOUNCE_PERMISSIONS" />
         <permission name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
         <permission name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
-        <permission name="android.permission.READ_DROPBOX_DATA" />
         <permission name="android.permission.READ_LOGS" />
         <permission name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
         <permission name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
@@ -524,6 +534,8 @@ applications that come with the platform
         <permission name="com.android.cellbroadcastservice.FULL_ACCESS_CELL_BROADCAST_HISTORY" />
         <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
         <permission name="android.permission.LOCK_DEVICE" />
+        <!-- Permission required for AuthenticationPolicyManagerTest -->
+        <permission name="android.permission.MANAGE_SECURE_LOCK_DEVICE" />
         <!-- Permissions required for CTS test - CtsSafetyCenterTestCases -->
         <permission name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
         <permission name="android.permission.READ_SAFETY_CENTER_STATUS" />
@@ -572,7 +584,6 @@ applications that come with the platform
         <permission name="android.permission.READ_BLOCKED_NUMBERS" />
         <!-- Permission required for CTS test - PackageManagerTest -->
         <permission name="android.permission.DOMAIN_VERIFICATION_AGENT"/>
-        <permission name="android.permission.VERIFICATION_AGENT"/>
         <!-- Permission required for CTS test CtsInputTestCases -->
         <permission name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
         <!-- Permission required for CTS test - PackageManagerShellCommandInstallTest -->
@@ -589,8 +600,18 @@ applications that come with the platform
         <!-- Permission required for CTS test - CtsAppTestCases -->
         <permission name="android.permission.KILL_UID" />
         <!-- Permission required for CTS test - AdvancedProtectionManagerTest -->
-        <permission name="android.permission.SET_ADVANCED_PROTECTION_MODE" />
+        <permission name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE" />
         <permission name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
+        <!-- Permissions required for CTS test - SettingsPreferenceServiceClientTest -->
+        <permission name="android.permission.READ_SYSTEM_PREFERENCES" />
+        <permission name="android.permission.WRITE_SYSTEM_PREFERENCES" />
+        <!-- Permission required for CTS test - IntrusionDetectionManagerTest -->
+        <permission name="android.permission.READ_INTRUSION_DETECTION_STATE" />
+        <permission name="android.permission.MANAGE_INTRUSION_DETECTION_STATE" />
+        <!-- Permission required for CTS test - KeyguardLockedStateApiTest -->
+        <permission name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
+        <!-- Permission required for CTS test - CtsContentProviderMultiUserTest -->
+        <permission name="android.permission.RESOLVE_COMPONENT_FOR_UID"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
@@ -662,7 +683,7 @@ applications that come with the platform
         <permission name="android.permission.ENTER_TRADE_IN_MODE"/>
     </privapp-permissions>
 
-    <privapp-permissions package="com.android.multiuser">
-        <permission name="android.permission.MANAGE_USERS"/>
+    <privapp-permissions package="com.android.wm.shell">
+        <permission name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
     </privapp-permissions>
 </permissions>

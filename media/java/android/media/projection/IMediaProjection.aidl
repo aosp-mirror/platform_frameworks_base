@@ -17,13 +17,14 @@
 package android.media.projection;
 
 import android.media.projection.IMediaProjectionCallback;
+import android.media.projection.StopReason;
 import android.os.IBinder;
 import android.app.ActivityOptions.LaunchCookie;
 
 /** {@hide} */
 interface IMediaProjection {
     void start(IMediaProjectionCallback callback);
-    void stop();
+    void stop(StopReason stopReason);
 
     boolean canProjectAudio();
     boolean canProjectVideo();

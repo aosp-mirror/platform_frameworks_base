@@ -25,7 +25,6 @@
 
 namespace android {
 int register_android_server_BatteryStatsService(JNIEnv* env);
-int register_android_server_ConsumerIrService(JNIEnv *env);
 int register_android_server_InputManager(JNIEnv* env);
 int register_android_server_LightsService(JNIEnv* env);
 int register_android_server_PowerManagerService(JNIEnv* env);
@@ -34,11 +33,11 @@ int register_android_server_power_stats_CpuPowerStatsCollector(JNIEnv* env);
 int register_android_server_HintManagerService(JNIEnv* env);
 int register_android_server_storage_AppFuse(JNIEnv* env);
 int register_android_server_SystemServer(JNIEnv* env);
+int register_android_server_UsbAlsaDevice(JNIEnv* env);
 int register_android_server_UsbAlsaJackDetector(JNIEnv* env);
 int register_android_server_UsbAlsaMidiDevice(JNIEnv* env);
 int register_android_server_UsbDeviceManager(JavaVM* vm, JNIEnv* env);
 int register_android_server_UsbHostManager(JNIEnv* env);
-int register_android_server_vr_VrManagerService(JNIEnv* env);
 int register_android_server_vibrator_VibratorController(JavaVM* vm, JNIEnv* env);
 int register_android_server_vibrator_VibratorManagerService(JavaVM* vm, JNIEnv* env);
 int register_android_server_location_GnssLocationProvider(JNIEnv* env);
@@ -51,11 +50,13 @@ int register_android_server_Watchdog(JNIEnv* env);
 int register_android_server_HardwarePropertiesManagerService(JNIEnv* env);
 int register_android_server_SyntheticPasswordManager(JNIEnv* env);
 int register_android_hardware_display_DisplayViewport(JNIEnv* env);
+int register_android_hardware_display_DisplayTopology(JNIEnv* env);
 int register_android_server_am_OomConnection(JNIEnv* env);
 int register_android_server_am_CachedAppOptimizer(JNIEnv* env);
 int register_android_server_am_Freezer(JNIEnv* env);
 int register_android_server_am_LowMemDetector(JNIEnv* env);
 int register_android_server_utils_AnrTimer(JNIEnv *env);
+int register_android_server_utils_LazyJniRegistrar(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(JNIEnv* env);
 int register_com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker(JNIEnv* env);
 int register_android_server_com_android_server_pm_PackageManagerShellCommandDataLoader(JNIEnv* env);
@@ -66,12 +67,15 @@ int register_android_server_stats_pull_StatsPullAtomService(JNIEnv* env);
 int register_android_server_sensor_SensorService(JavaVM* vm, JNIEnv* env);
 int register_android_server_companion_virtual_InputController(JNIEnv* env);
 int register_android_server_companion_virtual_VirtualDeviceImpl(JNIEnv* env);
-int register_android_server_app_GameManagerService(JNIEnv* env);
 int register_com_android_server_wm_TaskFpsCallbackController(JNIEnv* env);
 int register_com_android_server_display_DisplayControl(JNIEnv* env);
 int register_com_android_server_SystemClockTime(JNIEnv* env);
 int register_android_server_display_smallAreaDetectionController(JNIEnv* env);
 int register_com_android_server_accessibility_BrailleDisplayConnection(JNIEnv* env);
+int register_android_server_am_PhantomProcessList(JNIEnv* env);
+
+// Note: Consider adding new JNI entrypoints for optional services to
+// LazyJniRegistrar instead, and relying on lazy registration.
 };
 
 using namespace android;
@@ -96,17 +100,16 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_InputManager(env);
     register_android_server_LightsService(env);
     register_android_server_UsbDeviceManager(vm, env);
+    register_android_server_UsbAlsaDevice(env);
     register_android_server_UsbAlsaJackDetector(env);
     register_android_server_UsbAlsaMidiDevice(env);
     register_android_server_UsbHostManager(env);
-    register_android_server_vr_VrManagerService(env);
     register_android_server_vibrator_VibratorController(vm, env);
     register_android_server_vibrator_VibratorManagerService(vm, env);
     register_android_server_SystemServer(env);
     register_android_server_location_GnssLocationProvider(env);
     register_android_server_connectivity_Vpn(env);
     register_android_server_devicepolicy_CryptoTestHelper(env);
-    register_android_server_ConsumerIrService(env);
     register_android_server_BatteryStatsService(env);
     register_android_server_tv_TvUinputBridge(env);
     register_android_server_tv_TvInputHal(env);
@@ -115,11 +118,13 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_storage_AppFuse(env);
     register_android_server_SyntheticPasswordManager(env);
     register_android_hardware_display_DisplayViewport(env);
+    register_android_hardware_display_DisplayTopology(env);
     register_android_server_am_OomConnection(env);
     register_android_server_am_CachedAppOptimizer(env);
     register_android_server_am_Freezer(env);
     register_android_server_am_LowMemDetector(env);
     register_android_server_utils_AnrTimer(env);
+    register_android_server_utils_LazyJniRegistrar(env);
     register_com_android_server_soundtrigger_middleware_AudioSessionProviderImpl(env);
     register_com_android_server_soundtrigger_middleware_ExternalCaptureStateTracker(env);
     register_android_server_com_android_server_pm_PackageManagerShellCommandDataLoader(env);
@@ -130,11 +135,11 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_android_server_sensor_SensorService(vm, env);
     register_android_server_companion_virtual_InputController(env);
     register_android_server_companion_virtual_VirtualDeviceImpl(env);
-    register_android_server_app_GameManagerService(env);
     register_com_android_server_wm_TaskFpsCallbackController(env);
     register_com_android_server_display_DisplayControl(env);
     register_com_android_server_SystemClockTime(env);
     register_android_server_display_smallAreaDetectionController(env);
     register_com_android_server_accessibility_BrailleDisplayConnection(env);
+    register_android_server_am_PhantomProcessList(env);
     return JNI_VERSION_1_4;
 }

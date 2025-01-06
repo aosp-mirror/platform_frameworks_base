@@ -111,9 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"స్క్రీన్ రికార్డ్ సెషన్ కోసం ఆన్‌గోయింగ్ నోటిఫికేషన్"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"మీ స్క్రీన్‌ను రికార్డ్ చేయాలా?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"ఒక యాప్‌ను రికార్డ్ చేయండి"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"ఫుల్ స్క్రీన్‌ను రికార్డ్ చేయండి"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"ఈ స్క్రీన్‌ను రికార్డ్ చేయండి"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s రికార్డ్ చేయండి"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"మీ ఫుల్ స్క్రీన్‌ను మీరు రికార్డ్ చేసేటప్పుడు, మీ స్క్రీన్‌పై కనిపించేవన్నీ రికార్డ్ అవుతాయి. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"మీరు యాప్‌ను రికార్డ్ చేసేటప్పుడు, సంబంధిత యాప్‌లో కనిపించేవన్నీ లేదా ప్లే అయ్యేవన్నీ రికార్డ్ అవుతాయి. కాబట్టి పాస్‌వర్డ్‌లు, పేమెంట్ వివరాలు, మెసేజ్‌లు, ఫోటోలు, ఆడియో, ఇంకా వీడియో వంటి విషయాల్లో జాగ్రత్త వహించండి."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"స్క్రీన్‌ను రికార్డ్ చేయండి"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"మీరు ప్రస్తుతం <xliff:g id="APP_NAME">%1$s</xliff:g>‌ను రికార్డ్ చేస్తున్నారు"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"రికార్డింగ్‌ను ఆపివేయండి"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"స్క్రీన్‌ను షేర్ చేస్తోంది"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"కంటెంట్‌ను షేర్ చేస్తోంది"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"స్క్రీన్‌ను షేర్ చేయడం ఆపివేయాలా?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"షేర్ చేయడాన్ని ఆపివేయాలా?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"మీరు ప్రస్తుతం మీ మొత్తం స్క్రీన్‌ను <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>‌తో షేర్ చేస్తున్నారు"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"మీరు ప్రస్తుతం మీ మొత్తం స్క్రీన్‌ను యాప్‌తో షేర్ చేస్తున్నారు"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"మీరు ప్రస్తుతం <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>‌ను షేర్ చేస్తున్నారు"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"మీరు ప్రస్తుతం యాప్‌ను షేర్ చేస్తున్నారు"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"మీరు ప్రస్తుతం యాప్‌తో షేర్ చేస్తున్నారు"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"షేర్ చేయడాన్ని ఆపివేయండి"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"స్క్రీన్‌ను ప్రసారం చేస్తోంది"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"ప్రసారం చేయడం ఆపివేయాలా?"</string>
@@ -310,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"బ్లూటూత్ వాడండి"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"కనెక్ట్ అయింది"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"ఆడియో షేరింగ్"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"ఆడియోను మార్చడానికి లేదా షేర్ చేయడానికి ట్యాప్ చేయండి"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"సేవ్ అయ్యింది"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"డిస్‌కనెక్ట్ చేయండి"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"యాక్టివేట్ చేయండి"</string>
@@ -330,6 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"ఇన్‌పుట్"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"వినికిడి పరికరాలు"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ఆన్ చేస్తోంది…"</string>
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"ఇది టాప్ యాప్ ద్వారా\n కంట్రోల్ చేయబడుతున్నందున బ్రైట్‌నెస్‌ను సర్దుబాటు చేయడం సాధ్యం కాదు"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"ఆటో-రొటేట్‌"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"స్క్రీన్ ఆటో-రొటేట్‌"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"లొకేషన్"</string>
@@ -417,7 +414,17 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"కొత్త పరికరాన్ని పెయిర్ చేయడానికి క్లిక్ చేయండి"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"ప్రీసెట్‌ను అప్‌డేట్ చేయడం సాధ్యపడలేదు"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"ప్రీసెట్"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"ఎంచుకోబడింది"</string>
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"పరిసరాలు"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"ఎడమ వైపునకు"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"కుడి వైపునకు"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"ఎడమ, కుడి అని వేరు చేయబడిన కంట్రోల్స్‌కు విస్తరించండి"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"యూనిఫైడ్ కంట్రోల్‌కు కుదించండి"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"పరిసరాలను మ్యూట్ చేయండి"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"పరిసరాలను అన్‌మ్యూట్ చేయండి"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"టూల్స్"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"లైవ్ క్యాప్షన్"</string>
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"గమనిక"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"పరికరం మైక్రోఫోన్‌ను అన్‌బ్లాక్ చేయమంటారా?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"పరికరంలోని కెమెరాను అన్‌బ్లాక్ చేయమంటారా?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"పరికరంలోని కెమెరా, మైక్రోఫోన్‌లను అన్‌బ్లాక్ చేయమంటారా?"</string>
@@ -454,7 +461,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"ఆఫ్‌లో ఉంది"</string>
     <string name="zen_mode_set_up" msgid="8231201163894922821">"సెట్ చేసి లేదు"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"సెట్టింగ్‌లలో మేనేజ్ చేయండి"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{మోడ్స్ ఏవీ యాక్టివ్‌గా లేవు}=1{{mode} యాక్టివ్‌గా ఉంది}other{# మోడ్స్ యాక్టివ్‌గా ఉన్నాయి}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{యాక్టివ్ మోడ్స్ లేవు}=1{{mode} యాక్టివ్‌గా ఉంది}other{# మోడ్స్ యాక్టివ్‌గా ఉన్నాయి}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"మీరు పేర్కొనే అలారాలు, రిమైండర్‌లు, ఈవెంట్‌లు మరియు కాలర్‌ల నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"అలారాలు నుండి మినహా మరే ఇతర ధ్వనులు మరియు వైబ్రేషన్‌లతో మీకు అంతరాయం కలగదు. మీరు ఇప్పటికీ సంగీతం, వీడియోలు మరియు గేమ్‌లతో సహా మీరు ప్లే చేయడానికి ఎంచుకున్నవి ఏవైనా వింటారు."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"అనుకూలంగా మార్చండి"</string>
@@ -523,13 +530,15 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"లాక్ స్క్రీన్ విడ్జెట్‌లు"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"మీ టాబ్లెట్ లాక్ చేసి ఉన్నా, మీ లాక్ స్క్రీన్‌లో విడ్జెట్‌లను ఎవరైనా చూడవచ్చు."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"విడ్జెట్ ఎంపిక రద్దు చేయండి"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"ఎత్తును తగ్గించండి"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"ఎత్తును పెంచండి"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"లాక్ స్క్రీన్ విడ్జెట్‌లు"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"విడ్జెట్‌ను ఉపయోగించి యాప్‌ను తెరవడానికి, ఇది మీరేనని వెరిఫై చేయాల్సి ఉంటుంది. అలాగే, మీ టాబ్లెట్ లాక్ చేసి ఉన్నప్పటికీ, ఎవరైనా వాటిని చూడగలరని గుర్తుంచుకోండి. కొన్ని విడ్జెట్‌లు మీ లాక్ స్క్రీన్‌కు తగినవి కాకపోవచ్చు, వాటిని ఇక్కడ జోడించడం సురక్షితం కాకపోవచ్చు."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"అర్థమైంది"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"విడ్జెట్‌లు"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"\"విడ్జెట్‌ల\" షార్ట్‌కట్‌ను జోడించడానికి, సెట్టింగ్‌లలో \"లాక్ స్క్రీన్‌లో విడ్జెట్‌లను చూపండి\" అనే ఆప్షన్‌ను ఎనేబుల్ చేసినట్లు నిర్ధారించుకోండి."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"సెట్టింగ్‌లు"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"స్క్రీన్ సేవర్ బటన్‌ను చూపండి"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"వినియోగదారుని మార్చు"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"పుల్‌డౌన్ మెనూ"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"ఈ సెషన్‌లోని అన్ని యాప్‌లు మరియు డేటా తొలగించబడతాయి."</string>
@@ -586,16 +595,17 @@
     <string name="notification_settings_button_description" msgid="2441994740884163889">"నోటిఫికేషన్ సెట్టింగ్‌లు"</string>
     <string name="notification_history_button_description" msgid="1578657591405033383">"నోటిఫికేషన్ హిస్టరీ"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"కొత్తవి"</string>
-    <string name="notification_section_header_gentle" msgid="6804099527336337197">"నిశ్శబ్దం"</string>
+    <string name="notification_section_header_gentle" msgid="6804099527336337197">"సైలెంట్ మోడ్"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"నోటిఫికేషన్‌లు"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"సంభాషణలు"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"అన్ని నిశ్శబ్ద నోటిఫికేషన్‌లను క్లియర్ చేస్తుంది"</string>
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"నోటిఫికేషన్‌ల సెట్టింగ్‌లను తెరవండి"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{నోటిఫికేషన్‌లు ఏవీ లేవు}=1{{mode} ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి}=2{నోటిఫికేషన్‌లు, {mode}, మరో ఒక మోడ్ ద్వారా పాజ్ చేయబడ్డాయి}other{నోటిఫికేషన్‌లు, {mode}, మరో # మోడ్‌ల ద్వారా పాజ్ చేయబడ్డాయి}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"ఇప్పుడే ప్రారంభించండి"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"నోటిఫికేషన్‌లు లేవు"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"కొత్త నోటిఫికేషన్‌లు ఏవీ లేవు"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"నోటిఫికేషన్ కూల్‌డౌన్ ఆన్ అయింది"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"నోటిఫికేషన్ కూల్‌డౌన్ ఇప్పుడు ఆన్ అయ్యింది"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"ఒకేసారి పలు నోటిఫికేషన్లు వస్తే, పరికర వాల్యూమ్, అలర్ట్స్ ఆటోమేటిగ్గా 2 నిమిషాలకు తగ్గించబడతాయి."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"ఆఫ్ చేయండి"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"పాత నోటిఫికేషన్‌ల కోసం అన్‌లాక్ చేయండి"</string>
@@ -703,6 +713,8 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"ఫిక్స్‌డ్"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"హెడ్ ట్రాకింగ్"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"రింగర్ మోడ్‌ను మార్చడానికి ట్యాప్ చేయండి"</string>
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"రింగర్ మోడ్"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, రింగర్ మోడ్‌ను మార్చడానికి ట్యాప్ చేయండి"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"అన్‌మ్యూట్ చేయి"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"వైబ్రేట్"</string>
@@ -748,6 +760,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"శాటిలైట్, కనెక్షన్ అందుబాటులో ఉంది"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ఎమర్జెన్సీ శాటిలైట్ సహాయం"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"ఎమర్జెన్సీ కాల్స్ లేదా SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"సిగ్నల్ లేదు"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"సిగ్నల్ ఒక బార్ ఉంది"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"సిగ్నల్ రెండు బార్‌లు ఉన్నాయి"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"సిగ్నల్ మూడు బార్‌లు ఉన్నాయి"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"సిగ్నల్ నాలుగు బార్‌లు ఉన్నాయి"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"సిగ్నల్ పూర్తిగా ఉంది"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"ఆఫీస్ ప్రొఫైల్‌"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"కొందరికి సరదాగా ఉంటుంది కానీ అందరికీ అలాగే ఉండదు"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"సిస్టమ్ UI ట్యూనర్ Android వినియోగదారు ఇంటర్‌ఫేస్‌ను మెరుగుపరచడానికి మరియు అనుకూలంగా మార్చడానికి మీకు మరిన్ని మార్గాలను అందిస్తుంది. ఈ ప్రయోగాత్మక లక్షణాలు భవిష్యత్తు విడుదలల్లో మార్పుకు లోనవ్వచ్చు, తాత్కాలికంగా లేదా పూర్తిగా నిలిపివేయవచ్చు. జాగ్రత్తగా కొనసాగండి."</string>
@@ -866,12 +885,17 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"లాక్ స్క్రీన్"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"నోట్‌ను రాయండి"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"మల్టీ-టాస్కింగ్"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"కుడివైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"ఎడమవైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"స్ప్లిట్ స్క్రీన్‌ను ఫుల్ స్క్రీన్‌కు మార్చండి"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"కుడి వైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"ఎడమ వైపు ప్రస్తుత యాప్‌తో స్ప్లిట్ స్క్రీన్‌ను ఉపయోగించండి"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"ఫుల్ స్క్రీన్‌కు మారండి"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"స్ప్లిట్ స్క్రీన్ ఉపయోగిస్తున్నప్పుడు కుడి లేదా కింద యాప్‌నకు మారండి"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"స్ప్లిట్ స్క్రీన్ ఉపయోగిస్తున్నప్పుడు ఎడమ లేదా పైన యాప్‌నకు మారండి"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"స్ప్లిట్ స్క్రీన్ సమయంలో: ఒక దాన్నుండి మరో దానికి యాప్ రీప్లేస్ చేయండి"</string>
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"యాక్టివ్ విండోను డిస్‌ప్లేల మధ్య తరలించండి"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"విండోను ఎడమ వైపునకు తరలించండి"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"విండోను కుడి వైపునకు తరలించండి"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"విండోను విస్తరించండి"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"విండోను కుదించండి"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"ఇన్‌పుట్"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"తర్వాత భాషకు స్విచ్ అవ్వండి"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"మునుపటి భాషకు స్విచ్ అవ్వండి"</string>
@@ -943,9 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"తక్కువ ప్రాధాన్యత నోటిఫికేషన్ చిహ్నాలను చూపించు"</string>
     <string name="other" msgid="429768510980739978">"ఇతరం"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"టైల్‌ను తీసివేయండి"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"ముగించడానికి టైల్‌ను జోడించండి"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"చివరి పొజిషన్‌కు టైల్‌ను జోడించండి"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"టైల్‌ను తరలించండి"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"టైల్‌ను జోడించండి"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"కావలసిన పొజిషన్‌కు టైల్‌ను జోడించండి"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g>కు తరలించండి"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"<xliff:g id="POSITION">%1$d</xliff:g> స్థానానికి జోడించండి"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"ప్రస్తుత పొజిషన్ చెల్లదు."</string>
@@ -961,11 +985,10 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"యూజర్‌ను ఎంపిక చేయండి"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"ఇంటర్నెట్ లేదు"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> సెట్టింగ్‌లను తెరవండి."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"సెట్టింగ్‌ల క్రమాన్ని ఎడిట్ చేయండి."</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"క్విక్ సెట్టింగ్‌ల క్రమాన్ని ఎడిట్ చేయండి."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"పవర్ మెనూ"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"లాక్ స్క్రీన్"</string>
-    <string name="finder_active" msgid="7907846989716941952">"పవర్ ఆఫ్‌లో ఉన్నప్పుడు కూడా మీరు Find My Deviceతో ఈ ఫోన్‌ను గుర్తించవచ్చు"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"షట్ డౌన్ చేయబడుతోంది…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"తీసుకోవాల్సిన జాగ్రత్తలు ఏమిటో చూడండి"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"తీసుకోవాల్సిన జాగ్రత్తలు ఏమిటో చూడండి"</string>
@@ -1193,7 +1216,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(డిస్కనెక్ట్ అయ్యింది)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"స్విచ్ చేయడం సాధ్యం కాదు. మళ్ళీ ట్రై చేయడానికి ట్యాప్ చేయండి."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"పరికరాన్ని కనెక్ట్ చేయండి"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"ఈ సెషన్‌ను ప్రసారం చేయడానికి, దయచేసి యాప్‌ను తెరవండి."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"తెలియని యాప్"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"ప్రసారాన్ని ఆపివేయండి"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"ఆడియో అవుట్‌పుట్ కోసం అందుబాటులో ఉన్న పరికరాలు."</string>
@@ -1220,6 +1242,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"<xliff:g id="LENGTH">%1$d</xliff:g> కంటే తక్కువ అక్షరాలను ఉపయోగించండి"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"బిల్డ్ నంబర్"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"బిల్డ్ నంబర్, క్లిప్‌బోర్డ్‌కు కాపీ చేయబడింది."</string>
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"క్లిప్‌బోర్డ్‌కు కాపీ చేయండి."</string>
     <string name="basic_status" msgid="2315371112182658176">"సంభాషణను తెరవండి"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"సంభాషణ విడ్జెట్‌లు"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"ఏదైనా సంభాషణను మీ మొదటి స్క్రీన్‌కు జోడించడానికి దానిని ట్యాప్ చేయండి"</string>
@@ -1266,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"పరికరాన్ని ఎంటర్ చేయండి"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"తెరవడానికి వేలిముద్రను ఉపయోగించండి"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"ప్రామాణీకరణ అవసరం. ప్రామాణీకరించడానికి వేలిముద్ర సెన్సార్‌ను తాకండి."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"ఫోన్ కాల్ జరుగుతోంది"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"మొబైల్ డేటా"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"కనెక్ట్ చేయబడింది"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"తాత్కాలికంగా కనెక్ట్ చేయబడింది"</string>
@@ -1355,6 +1379,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"అధిక రిజల్యూషన్ కోసం, ఫోన్‌ను తిప్పండి"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"మడవగల పరికరం విప్పబడుతోంది"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"మడవగల పరికరం చుట్టూ తిప్పబడుతోంది"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"ముందు వైపు స్క్రీన్ ఆన్ అయింది"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"మడిచే సదుపాయం గల పరికరం"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"మడిచే సదుపాయం లేని పరికరం"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s / %2$s"</string>
@@ -1406,59 +1431,79 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"సిస్టమ్ కంట్రోల్స్"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"సిస్టమ్ యాప్‌లు"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"మల్టీ-టాస్కింగ్"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"ఇటీవలి యాప్‌లు"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"స్ప్లిట్ స్క్రీన్"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"ఇన్‌పుట్"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"యాప్ షార్ట్‌కట్‌లు"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"ప్రస్తుత యాప్"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"యాక్సెసిబిలిటీ"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"సెర్చ్ షార్ట్‌కట్‌లు"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"కీబోర్డ్ షార్ట్‌కట్‌లను అనుకూలంగా మార్చండి"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"షార్ట్‌కట్‌ను తీసివేయాలా?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"తిరిగి ఆటోమేటిక్ సెట్టింగ్‌కు రీసెట్ చేయాలా?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"షార్ట్‌కట్‌ను కేటాయించడానికి కీని నొక్కండి"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ఇది మీ అనుకూల షార్ట్‌కట్‌ను శాశ్వతంగా తొలగిస్తుంది."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ఇది మీ అనుకూల షార్ట్‌కట్‌లన్నింటిని శాశ్వతంగా తొలగిస్తుంది."</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"షార్ట్‌కట్‌లను వెతకండి"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"సెర్చ్ ఫలితాలు ఏవీ లేవు"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"కుదించండి చిహ్నం"</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"యాక్షన్ లేదా మెటా కీ చిహ్నం"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"ప్లస్ చిహ్నం"</string>
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"అనుకూలంగా మార్చండి"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"రీసెట్ చేయండి"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"పూర్తయింది"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"విస్తరించండి చిహ్నం"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"లేదా"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"ప్లస్ గుర్తు"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"ఫార్వర్డ్ స్లాష్"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"లాగే హ్యాండిల్"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"కీబోర్డ్ సెట్టింగ్‌లు"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"షార్ట్‌కట్‌ను సెట్ చేయండి"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"తీసివేయండి"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"అవును, రీసెట్ చేయాలి"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"రద్దు చేయండి"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"కీని నొక్కండి"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"కీ కాంబినేషన్ ఇప్పటికే వినియోగంలో ఉంది. వేరొక కీని ట్రై చేయండి."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"షార్ట్‌కట్‌ను సెట్ చేయడం సాధ్యం కాదు."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"మీ కీబోర్డ్ ఉపయోగించి నావిగేట్ చేయండి"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"కీబోర్డ్ షార్ట్‌కట్‌ల గురించి తెలుసుకోండి"</string>
-    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"మీ టచ్‌ప్యాడ్‌ని ఉపయోగించి నావిగేట్ చేయండి"</string>
-    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"టచ్‌ప్యాడ్ సంజ్ఞ గురించి తెలుసుకోండి"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"మీ టచ్‌ప్యాడ్‌ను ఉపయోగించి నావిగేట్ చేయండి"</string>
+    <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"టచ్‌ప్యాడ్ సంజ్ఞల గురించి తెలుసుకోండి"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"మీ కీబోర్డ్, టచ్‌ప్యాడ్‌ను ఉపయోగించి నావిగేట్ చేయండి"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"టచ్‌ప్యాడ్ సంజ్ఞలు, కీబోర్డ్ షార్ట్‌కట్‌లు, అలాగే మరిన్నింటిని గురించి తెలుసుకోండి"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"టచ్‌ప్యాడ్ సంజ్ఞలు, కీబోర్డ్ షార్ట్‌కట్‌లు మొదలైన వాటి గురించి తెలుసుకోండి"</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"వెనుకకు వెళ్లండి"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"మొదటి ట్యాబ్‌కు వెళ్లండి"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ఇటీవలి యాప్‌లను చూడండి"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"పూర్తయింది"</string>
+    <string name="gesture_error_title" msgid="469064941635578511">"మళ్లీ ట్రై చేయండి!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"వెనుకకు"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"మీ టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి ఎడమ వైపునకు లేదా కుడి వైపునకు స్వైప్ చేయండి"</string>
-    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"పనితీరు బాగుంది!"</string>
+    <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"సూపర్!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"తిరిగి వెనుకకు వెళ్ళడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు."</string>
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"మీ టచ్‌ప్యాడ్‌ను ఉపయోగించి తిరిగి వెనక్కి వెళ్లడానికి, మూడు వేళ్లను ఉపయోగించి ఎడమ వైపునకు లేదా కుడి వైపునకు స్వైప్ చేయండి"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"మొదటి ట్యాబ్‌కు వెళ్లండి"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"మీ టచ్‌ప్యాడ్‌పై మూడు వేళ్లతో పైకి స్వైప్ చేయండి"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"చక్కగా పూర్తి చేశారు!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"మీరు మొదటి స్క్రీన్‌కు వెళ్లే సంజ్ఞను పూర్తి చేశారు"</string>
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"మీ మొదటి స్క్రీన్‌కు వెళ్లడానికి మీ టచ్‌ప్యాడ్‌పై మూడు వేళ్లతో పైకి స్వైప్ చేయండి"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"ఇటీవలి యాప్‌లను చూడండి"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"మీ టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి పైకి స్వైప్ చేసి, హోల్డ్ చేయండి"</string>
-    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"పనితీరు అద్భుతంగా ఉంది!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"మీరు ఇటీవలి యాప్‌ల వీక్షణ సంజ్ఞను పూర్తి చేశారు."</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"చక్కగా పూర్తి చేశారు!"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ఇటీవలి యాప్‌లను చూడడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు."</string>
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"ఇటీవలి యాప్‌లను చూడటానికి, మీ టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి పైకి స్వైప్ చేసి, హోల్డ్ చేయండి"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"అన్ని యాప్‌లను చూడండి"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"మీ కీబోర్డ్‌లో యాక్షన్ కీని నొక్కండి"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"చక్కగా చేశారు!"</string>
-    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"మీరు అన్ని యాప్‌ల వీక్షణ సంజ్ఞను పూర్తి చేశారు"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"అన్ని యాప్‌లను చూడడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు"</string>
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"మీ యాప్‌లన్నింటినీ చూడటానికి మీ కీబోర్డ్‌లోని యాక్షన్ కీని నొక్కండి"</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"ట్యుటోరియల్ యానిమేషన్, పాజ్ చేసి, మళ్లీ ప్లే చేయడానికి క్లిక్ చేయండి."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"కీబోర్డ్ బ్యాక్‌లైట్"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%2$dలో %1$dవ స్థాయి"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"హోమ్ కంట్రోల్స్"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"హోమ్ కంట్రోల్స్‌ను స్క్రీన్ సేవర్‌గా చేసి వేగంగా యాక్సెస్ పొందండి"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"చర్య రద్దు చేయండి"</string>
     <string name="back_edu_toast_content" msgid="4530314597378982956">"వెనుకకు వెళ్లడానికి, టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి ఎడమ లేదా కుడి వైపునకు స్వైప్ చేయండి"</string>
-    <string name="home_edu_toast_content" msgid="3381071147871955415">"హోమ్‌కు వెళ్లడానికి, టచ్‌ప్యాడ్‌లో మీ మూడు వెళ్లతో పైకి స్వైప్ చేయండి"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"హోమ్‌కు వెళ్లడానికి, టచ్‌ప్యాడ్‌లో మీ మూడు వేళ్లతో పైకి స్వైప్ చేయండి"</string>
     <string name="overview_edu_toast_content" msgid="5797030644017804518">"ఇటీవలి యాప్‌లను చూడటానికి, టచ్‌ప్యాడ్‌లో మూడు వేళ్లతో పైకి స్వైప్ చేసి, హోల్డ్ చేయండి"</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"మీ యాప్‌లన్నింటినీ చూడటానికి, మీ కీబోర్డ్‌లో యాక్షన్ కీని నొక్కండి"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"దాచిపెట్టినది"</string>
@@ -1483,6 +1528,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"యాప్‌ల ద్వారా అందించబడినవి"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"డిస్‌ప్లే"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"తెలియదు"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"టైల్స్‌ను రీసెట్ చేయండి"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"టైల్స్‌ను వాటి ఒరిజినల్ క్రమానికి, సైజ్‌లకు రీసెట్ చేయాలా?"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"టైల్స్ అన్ని రీసెట్ చేయాలా?"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"అన్ని క్విక్ సెట్టింగ్‌ల టైల్స్, పరికరం తాలూకు ఒరిజినల్ సెట్టింగ్‌లకు రీసెట్ చేయబడతాయి"</string>
 </resources>

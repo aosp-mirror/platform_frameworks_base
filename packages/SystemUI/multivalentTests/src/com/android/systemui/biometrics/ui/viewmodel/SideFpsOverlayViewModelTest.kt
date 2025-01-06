@@ -30,7 +30,6 @@ import android.view.windowManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.airbnb.lottie.model.KeyPath
-import com.android.settingslib.Utils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.FingerprintInteractiveToAuthProvider
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
@@ -77,20 +76,14 @@ class SideFpsOverlayViewModelTest : SysuiTestCase() {
 
     private val contextDisplayInfo = DisplayInfo()
 
-    private val indicatorColor =
-        Utils.getColorAttrDefaultColor(
-            context,
-            com.android.internal.R.attr.materialColorPrimaryFixed,
+    private val indicatorColor = context.getColor(
+            com.android.internal.R.color.materialColorPrimaryFixed,
         )
-    private val outerRimColor =
-        Utils.getColorAttrDefaultColor(
-            context,
-            com.android.internal.R.attr.materialColorPrimaryFixedDim,
+    private val outerRimColor = context.getColor(
+            com.android.internal.R.color.materialColorPrimaryFixedDim,
         )
-    private val chevronFill =
-        Utils.getColorAttrDefaultColor(
-            context,
-            com.android.internal.R.attr.materialColorOnPrimaryFixed,
+    private val chevronFill = context.getColor(
+            com.android.internal.R.color.materialColorOnPrimaryFixed,
         )
     private val color_blue400 =
         context.getColor(com.android.settingslib.color.R.color.settingslib_color_blue400)

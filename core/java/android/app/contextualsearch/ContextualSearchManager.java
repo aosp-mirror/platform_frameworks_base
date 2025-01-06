@@ -48,7 +48,9 @@ public final class ContextualSearchManager {
 
     /**
      * Key to get the entrypoint from the extras of the activity launched by contextual search.
-     * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
+     * Only supposed to be used with ACTION_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * @see #ACTION_LAUNCH_CONTEXTUAL_SEARCH
      */
     public static final String EXTRA_ENTRYPOINT =
             "android.app.contextualsearch.extra.ENTRYPOINT";
@@ -56,14 +58,18 @@ public final class ContextualSearchManager {
     /**
      * Key to get the flag_secure value from the extras of the activity launched by contextual
      * search. The value will be true if flag_secure is found in any of the visible activities.
-     * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
+     * Only supposed to be used with ACTION_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * @see #ACTION_LAUNCH_CONTEXTUAL_SEARCH
      */
     public static final String EXTRA_FLAG_SECURE_FOUND =
             "android.app.contextualsearch.extra.FLAG_SECURE_FOUND";
 
     /**
      * Key to get the screenshot from the extras of the activity launched by contextual search.
-     * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
+     * Only supposed to be used with ACTION_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * @see #ACTION_LAUNCH_CONTEXTUAL_SEARCH
      */
     public static final String EXTRA_SCREENSHOT =
             "android.app.contextualsearch.extra.SCREENSHOT";
@@ -71,7 +77,9 @@ public final class ContextualSearchManager {
     /**
      * Key to check whether managed profile is visible from the extras of the activity launched by
      * contextual search. The value will be true if any one of the visible apps is managed.
-     * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
+     * Only supposed to be used with ACTION_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * @see #ACTION_LAUNCH_CONTEXTUAL_SEARCH
      */
     public static final String EXTRA_IS_MANAGED_PROFILE_VISIBLE =
             "android.app.contextualsearch.extra.IS_MANAGED_PROFILE_VISIBLE";
@@ -79,7 +87,9 @@ public final class ContextualSearchManager {
     /**
      * Key to get the list of visible packages from the extras of the activity launched by
      * contextual search.
-     * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
+     * Only supposed to be used with ACTION_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * @see #ACTION_LAUNCH_CONTEXTUAL_SEARCH
      */
     public static final String EXTRA_VISIBLE_PACKAGE_NAMES =
             "android.app.contextualsearch.extra.VISIBLE_PACKAGE_NAMES";
@@ -87,7 +97,9 @@ public final class ContextualSearchManager {
     /**
      * Key to get the time the user made the invocation request, based on
      * {@link SystemClock#uptimeMillis()}.
-     * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
+     * Only supposed to be used with ACTION_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * @see #ACTION_LAUNCH_CONTEXTUAL_SEARCH
      *
      * TODO: un-hide in W
      *
@@ -99,9 +111,22 @@ public final class ContextualSearchManager {
     /**
      * Key to get the binder token from the extras of the activity launched by contextual search.
      * This token is needed to invoke {@link CallbackToken#getContextualSearchState} method.
-     * Only supposed to be used with ACTON_LAUNCH_CONTEXTUAL_SEARCH.
+     * Only supposed to be used with ACTION_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * @see #ACTION_LAUNCH_CONTEXTUAL_SEARCH
      */
     public static final String EXTRA_TOKEN = "android.app.contextualsearch.extra.TOKEN";
+
+    /**
+     * Key to check whether audio is playing when contextual search is invoked.
+     * Only supposed to be used with ACTION_LAUNCH_CONTEXTUAL_SEARCH.
+     *
+     * @see #ACTION_LAUNCH_CONTEXTUAL_SEARCH
+     *
+     * @hide
+     */
+    public static final String EXTRA_IS_AUDIO_PLAYING =
+            "android.app.contextualsearch.extra.IS_AUDIO_PLAYING";
 
     /**
      * Intent action for contextual search invocation. The app providing the contextual search

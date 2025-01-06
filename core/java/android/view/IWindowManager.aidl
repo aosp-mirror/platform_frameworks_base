@@ -62,6 +62,7 @@ import android.view.MotionEvent;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.IInputFilter;
+import android.view.inputmethod.ImeTracker;
 import android.view.AppTransitionAnimationSpec;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
@@ -69,6 +70,7 @@ import android.view.SurfaceControl;
 import android.view.displayhash.DisplayHash;
 import android.view.displayhash.VerifiedDisplayHash;
 import android.window.AddToSurfaceSyncGroupResult;
+import android.window.ConfigurationChangeSetting;
 import android.window.IGlobalDragListener;
 import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
@@ -135,6 +137,24 @@ interface IWindowManager
     void setForcedDisplayDensityForUser(int displayId, int density, int userId);
     @EnforcePermission("WRITE_SECURE_SETTINGS")
     void clearForcedDisplayDensityForUser(int displayId, int userId);
+
+    /**
+     * Sets settings for a specific user in a batch to minimize configuration updates.
+     *
+     * <p>This method allows for applying multiple settings changes as a batch, which can
+     * help avoid multiple configuration updates.
+     *
+     * @param settings list of {@link android.window.ConfigurationChangeSetting} objects
+     *                 representing the settings to be applied.
+     * @param userId   the ID of the user whose settings should be applied.
+     * @throws SecurityException if the caller does not have the {@link WRITE_SECURE_SETTINGS}
+     *                           permission.
+     * @hide
+     */
+    @EnforcePermission("WRITE_SECURE_SETTINGS")
+    void setConfigurationChangeSettingsForUser(
+            in List<ConfigurationChangeSetting> settings, int userId);
+
     @EnforcePermission("WRITE_SECURE_SETTINGS")
     void setForcedDisplayScalingMode(int displayId, int mode); // 0 = auto, 1 = disable
 
@@ -721,6 +741,9 @@ interface IWindowManager
      */
     void setDisplayImePolicy(int displayId, int imePolicy);
 
+    /** Called when the expanded state of notification shade is changed. */
+    void onNotificationShadeExpanded(IBinder token, boolean expanded);
+
     /**
      * Waits until input information has been sent from WindowManager to native InputManager,
      * optionally waiting for animations to complete.
@@ -765,7 +788,8 @@ interface IWindowManager
      * container.
      */
     @EnforcePermission("MANAGE_APP_TOKENS")
-    void updateDisplayWindowRequestedVisibleTypes(int displayId, int requestedVisibleTypes);
+    void updateDisplayWindowRequestedVisibleTypes(int displayId, int visibleTypes, int mask,
+            in @nullable ImeTracker.Token statsToken);
 
     /**
      * Called to get the expected window insets.
@@ -929,6 +953,27 @@ interface IWindowManager
      * @param clientToken the window context's token
      */
     void detachWindowContext(IBinder clientToken);
+
+    /**
+     * Reparents the {@link android.window.WindowContext} to the
+     * {@link com.android.server.wm.DisplayArea} on another display.
+     * This method also reparent the WindowContext associated WindowToken to another display if
+     * necessary.
+     * <p>
+     * {@code type} and {@code options} must be the same as the previous call of
+     * {@link #attachWindowContextToDisplayArea} on the same Context otherwise this will fail
+     * silently.
+     *
+     * @param appThread the process that the window context is on.
+     * @param clientToken the window context's token
+     * @param type The window type of the WindowContext
+     * @param displayId The new display id this context windows should be parented to
+     * @param options Bundle the context was created with
+     *
+     * @return True if the operation was successful, False otherwise.
+     */
+    boolean reparentWindowContextToDisplayArea(in IApplicationThread appThread,
+                IBinder clientToken, int displayId);
 
     /**
      * Registers a listener, which is to be called whenever cross-window blur is enabled/disabled.

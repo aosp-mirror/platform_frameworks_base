@@ -26,6 +26,7 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.google.common.truth.Truth.assertThat;
+import static com.google.common.truth.Truth.assertWithMessage;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -48,6 +49,7 @@ import android.app.IApplicationThread;
 import android.app.PictureInPictureParams;
 import android.app.PictureInPictureUiState;
 import android.app.ResourcesManager;
+import android.app.WindowConfiguration;
 import android.app.servertransaction.ActivityConfigurationChangeItem;
 import android.app.servertransaction.ActivityRelaunchItem;
 import android.app.servertransaction.ClientTransaction;
@@ -59,6 +61,7 @@ import android.app.servertransaction.ResumeActivityItem;
 import android.app.servertransaction.StopActivityItem;
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.content.res.Resources;
@@ -67,12 +70,17 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.util.MergedConfiguration;
 import android.view.Display;
+import android.view.Surface;
 import android.view.View;
 import android.window.ActivityWindowInfo;
 import android.window.WindowContextInfo;
@@ -128,6 +136,9 @@ public class ActivityThreadTest {
 
     @Rule(order = 1)
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
 
     private ActivityWindowInfoListener mActivityWindowInfoListener;
     private WindowTokenClientController mOriginalWindowTokenClientController;
@@ -293,6 +304,59 @@ public class ActivityThreadTest {
         assertScreenScale(originalScale, app, originalAppConfig, originalAppMetrics);
     }
 
+    @Test
+    public void testOverrideDisplayRotation() throws Exception {
+        final TestActivity activity = mActivityTestRule.launchActivity(new Intent());
+        final Application app = activity.getApplication();
+        final ActivityThread activityThread = activity.getActivityThread();
+        final IApplicationThread appThread = activityThread.getApplicationThread();
+        final Configuration originalAppConfig =
+                new Configuration(app.getResources().getConfiguration());
+        final int originalDisplayRotation = originalAppConfig.windowConfiguration
+                .getDisplayRotation();
+
+        final Configuration newConfig = new Configuration(originalAppConfig);
+        newConfig.seq = BASE_SEQ + 1;
+
+        int sandboxedDisplayRotation = (originalDisplayRotation + 1) % 4;
+        CompatibilityInfo.setOverrideDisplayRotation(sandboxedDisplayRotation);
+        try {
+            // Send process level config change.
+            ClientTransaction transaction = newTransaction(activityThread);
+            transaction.addTransactionItem(
+                    new ConfigurationChangeItem(newConfig, DEVICE_ID_INVALID));
+            appThread.scheduleTransaction(transaction);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+            assertDisplayRotation(sandboxedDisplayRotation, app);
+
+            sandboxedDisplayRotation = (sandboxedDisplayRotation + 1) % 4;
+            CompatibilityInfo.setOverrideDisplayRotation(sandboxedDisplayRotation);
+            // Send activity level config change.
+            newConfig.seq++;
+            transaction = newTransaction(activityThread);
+            transaction.addTransactionItem(new ActivityConfigurationChangeItem(
+                    activity.getActivityToken(), newConfig, new ActivityWindowInfo()));
+            appThread.scheduleTransaction(transaction);
+            InstrumentationRegistry.getInstrumentation().waitForIdleSync();
+
+            assertDisplayRotation(sandboxedDisplayRotation, activity);
+
+            // Execute a local relaunch item with current scaled config (e.g. simulate recreate),
+            // the config should not change again.
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> activityThread.executeTransaction(
+                            newRelaunchResumeTransaction(activity)));
+
+            assertDisplayRotation(sandboxedDisplayRotation, activity);
+        } finally {
+            CompatibilityInfo.setOverrideDisplayRotation(WindowConfiguration.ROTATION_UNDEFINED);
+            InstrumentationRegistry.getInstrumentation().runOnMainSync(
+                    () -> restoreConfig(activityThread, originalAppConfig));
+        }
+        assertDisplayRotation(originalDisplayRotation, app);
+    }
+
     private static void assertScreenScale(float scale, Context context,
             Configuration origConfig, DisplayMetrics origMetrics) {
         final int expectedDpi = (int) (origConfig.densityDpi * scale + .5f);
@@ -315,6 +379,12 @@ public class ActivityThreadTest {
         assertEquals(expectedBounds, currentConfig.windowConfiguration.getBounds());
         assertEquals(expectedAppBounds, currentConfig.windowConfiguration.getAppBounds());
         assertEquals(expectedMaxBounds, currentConfig.windowConfiguration.getMaxBounds());
+    }
+
+    private static void assertDisplayRotation(@Surface.Rotation int expectedRotation,
+            Context context) {
+        final Configuration currentConfig = context.getResources().getConfiguration();
+        assertEquals(expectedRotation, currentConfig.windowConfiguration.getDisplayRotation());
     }
 
     @Test
@@ -909,6 +979,32 @@ public class ActivityThreadTest {
             // The same ActivityWindowInfo won't trigger duplicated callback.
             verify(mActivityWindowInfoListener, never()).accept(any(), any());
         });
+    }
+
+    /**
+     * Verifies that {@link ActivityThread#handleApplicationInfoChanged} does send updates to the
+     * system context, when given the system application info.
+     */
+    @RequiresFlagsEnabled(android.content.res.Flags.FLAG_SYSTEM_CONTEXT_HANDLE_APP_INFO_CHANGED)
+    @Test
+    public void testHandleApplicationInfoChanged_systemContext() {
+        Looper.prepare();
+        final var systemThread = ActivityThread.createSystemActivityThreadForTesting();
+
+        final Context systemContext = systemThread.getSystemContext();
+        final var appInfo = systemContext.getApplicationInfo();
+        // sourceDir must not be null, and contain at least a '/', for handleApplicationInfoChanged.
+        appInfo.sourceDir = "/";
+
+        // Create a copy of the application info.
+        final var newAppInfo = new ApplicationInfo(appInfo);
+        newAppInfo.sourceDir = "/";
+        assertWithMessage("New application info is a separate instance")
+                .that(systemContext.getApplicationInfo()).isNotSameInstanceAs(newAppInfo);
+
+        systemThread.handleApplicationInfoChanged(newAppInfo);
+        assertWithMessage("Application info was updated successfully")
+                .that(systemContext.getApplicationInfo()).isSameInstanceAs(newAppInfo);
     }
 
     /**

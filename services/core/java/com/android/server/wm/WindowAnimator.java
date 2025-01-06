@@ -26,6 +26,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
+import android.annotation.IntDef;
 import android.content.Context;
 import android.os.HandlerExecutor;
 import android.os.Trace;
@@ -38,6 +39,8 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 
 /**
@@ -85,6 +88,25 @@ public class WindowAnimator {
     private ArrayList<Runnable> mAfterPrepareSurfacesRunnables = new ArrayList<>();
 
     private final SurfaceControl.Transaction mTransaction;
+
+    /** The pending transaction is applied. */
+    static final int PENDING_STATE_NONE = 0;
+    /** There are some (significant) operations set to the pending transaction. */
+    static final int PENDING_STATE_HAS_CHANGES = 1;
+    /** The pending transaction needs to be applied before sending sync transaction to shell. */
+    static final int PENDING_STATE_NEED_APPLY = 2;
+
+    @IntDef(prefix = { "PENDING_STATE_" }, value = {
+            PENDING_STATE_NONE,
+            PENDING_STATE_HAS_CHANGES,
+            PENDING_STATE_NEED_APPLY,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface PendingState {}
+
+    /** The global state of pending transaction. */
+    @PendingState
+    int mPendingState;
 
     WindowAnimator(final WindowManagerService service) {
         mService = service;
@@ -217,6 +239,7 @@ public class WindowAnimator {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "applyTransaction");
         mTransaction.apply();
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
+        mPendingState = PENDING_STATE_NONE;
         mService.mWindowTracing.logState("WindowAnimator");
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "<<< CLOSE TRANSACTION animate");
 
@@ -296,8 +319,19 @@ public class WindowAnimator {
         return mAnimationFrameCallbackScheduled;
     }
 
-    Choreographer getChoreographer() {
-        return mChoreographer;
+    void applyPendingTransaction() {
+        Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "applyPendingTransaction");
+        mPendingState = PENDING_STATE_NONE;
+        final int numDisplays = mService.mRoot.getChildCount();
+        if (numDisplays == 1) {
+            mService.mRoot.getChildAt(0).getPendingTransaction().apply();
+        } else {
+            for (int i = 0; i < numDisplays; i++) {
+                mTransaction.merge(mService.mRoot.getChildAt(i).getPendingTransaction());
+            }
+            mTransaction.apply();
+        }
+        Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
     }
 
     /**

@@ -123,7 +123,7 @@ public final class DistractingPackageHelper {
         if (!changedPackagesList.isEmpty()) {
             final String[] changedPackages = changedPackagesList.toArray(
                     new String[changedPackagesList.size()]);
-            mBroadcastHelper.sendDistractingPackagesChanged(mPm.snapshotComputer(),
+            mBroadcastHelper.sendDistractingPackagesChanged(mPm::snapshotComputer,
                     changedPackages, changedUids.toArray(), userId, restrictionFlags);
             mPm.scheduleWritePackageRestrictions(userId);
         }
@@ -198,7 +198,7 @@ public final class DistractingPackageHelper {
         if (!changedPackages.isEmpty()) {
             final String[] packageArray = changedPackages.toArray(
                     new String[changedPackages.size()]);
-            mBroadcastHelper.sendDistractingPackagesChanged(mPm.snapshotComputer(),
+            mBroadcastHelper.sendDistractingPackagesChanged(mPm::snapshotComputer,
                     packageArray, changedUids.toArray(), userId, RESTRICTION_NONE);
             mPm.scheduleWritePackageRestrictions(userId);
         }

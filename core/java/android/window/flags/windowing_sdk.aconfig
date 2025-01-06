@@ -1,7 +1,9 @@
+# proto-file: build/make/tools/aconfig/aconfig_protos/protos/aconfig.proto
+# proto-message: flag_declarations
+# Project link: http://gantry/projects/android_platform_windowing_sdk
+
 package: "com.android.window.flags"
 container: "system"
-
-# Project link: https://gantry.corp.google.com/projects/android_platform_windowing_sdk/changes
 
 flag {
     namespace: "windowing_sdk"
@@ -100,6 +102,14 @@ flag {
     name: "touch_pass_through_opt_in"
     description: "Requires apps to opt-in to overlay pass through touches and provide APIs to opt-in"
     bug: "358129114"
+    is_exported: true
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "activity_embedding_support_for_connected_displays"
+    description: "Enables activity embedding support for connected displays, including enabling AE optimization for Settings."
+    bug: "369438353"
 }
 
 flag {
@@ -114,4 +124,46 @@ flag {
     name: "better_support_non_match_parent_activity"
     description: "Relax the assumption of non-match parent activity"
     bug: "356277166"
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "allow_multiple_adjacent_task_fragments"
+    description: "Refactor to allow more than 2 adjacent TaskFragments"
+    bug: "373709676"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "track_system_ui_context_before_wms"
+    description: "Keep track of SystemUiContext before WMS is initialized"
+    bug: "384428048"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "normalize_home_intent"
+    description: "To ensure home is started in correct intent"
+    bug: "378505461"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    namespace: "windowing_sdk"
+    name: "condense_configuration_change_for_simple_mode"
+    description: "Condense configuration change for simple mode"
+    bug: "356738240"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

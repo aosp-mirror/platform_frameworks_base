@@ -16,12 +16,16 @@
 
 package com.android.systemui.keyboard.shortcut.ui
 
+import android.content.Context
+import android.content.Context.INPUT_SERVICE
+import android.hardware.input.fakeInputManager
 import androidx.test.annotation.UiThreadTest
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.keyboard.shortcut.data.source.FakeKeyboardShortcutGroupsSource
 import com.android.systemui.keyboard.shortcut.data.source.TestShortcuts
+import com.android.systemui.keyboard.shortcut.shortcutCustomizationDialogStarterFactory
 import com.android.systemui.keyboard.shortcut.shortcutHelperAppCategoriesShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperCurrentAppShortcutsSource
 import com.android.systemui.keyboard.shortcut.shortcutHelperInputShortcutsSource
@@ -35,6 +39,8 @@ import com.android.systemui.kosmos.testCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
+import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.settings.userTracker
 import com.android.systemui.statusbar.phone.systemUIDialogFactory
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -43,6 +49,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
@@ -51,7 +59,7 @@ class ShortcutHelperDialogStarterTest : SysuiTestCase() {
 
     private val fakeSystemSource = FakeKeyboardShortcutGroupsSource()
     private val fakeMultiTaskingSource = FakeKeyboardShortcutGroupsSource()
-
+    private val mockUserContext: Context = mock()
     private val kosmos =
         Kosmos().also {
             it.testCase = this
@@ -61,8 +69,10 @@ class ShortcutHelperDialogStarterTest : SysuiTestCase() {
             it.shortcutHelperAppCategoriesShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperInputShortcutsSource = FakeKeyboardShortcutGroupsSource()
             it.shortcutHelperCurrentAppShortcutsSource = FakeKeyboardShortcutGroupsSource()
+            it.userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockUserContext })
         }
 
+    private val inputManager = kosmos.fakeInputManager.inputManager
     private val testScope = kosmos.testScope
     private val testHelper = kosmos.shortcutHelperTestHelper
     private val dialogFactory = kosmos.systemUIDialogFactory
@@ -71,13 +81,20 @@ class ShortcutHelperDialogStarterTest : SysuiTestCase() {
 
     private val starter: ShortcutHelperDialogStarter =
         with(kosmos) {
-            ShortcutHelperDialogStarter(coroutineScope, viewModel, dialogFactory, activityStarter)
+            ShortcutHelperDialogStarter(
+                coroutineScope,
+                viewModel,
+                shortcutCustomizationDialogStarterFactory,
+                dialogFactory,
+                activityStarter,
+            )
         }
 
     @Before
     fun setUp() {
         fakeSystemSource.setGroups(TestShortcuts.systemGroups)
         fakeMultiTaskingSource.setGroups(TestShortcuts.multitaskingGroups)
+        whenever(mockUserContext.getSystemService(INPUT_SERVICE)).thenReturn(inputManager)
     }
 
     @Test

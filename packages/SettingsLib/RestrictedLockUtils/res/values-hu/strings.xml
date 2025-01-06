@@ -18,5 +18,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="enabled_by_admin" msgid="6630472777476410137">"A rendszergazda bekapcsolta"</string>
-    <string name="disabled_by_admin" msgid="4023569940620832713">"A rendszergazda kikapcsolta"</string>
+    <string name="disabled_by_admin" msgid="4023569940620832713">"A rendszergazda letiltotta"</string>
+    <string name="enabled_by_advanced_protection" msgid="6236917660829422499">"Engedélyezte a Speciális védelem"</string>
+    <string name="disabled_by_advanced_protection" msgid="369596009193239632">"Letiltotta a Speciális védelem"</string>
 </resources>

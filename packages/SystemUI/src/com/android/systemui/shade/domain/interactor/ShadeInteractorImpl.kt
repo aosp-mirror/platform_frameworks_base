@@ -25,7 +25,7 @@ import com.android.systemui.keyguard.shared.model.DozeStateModel
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.statusbar.disableflags.data.repository.DisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.domain.interactor.DisableFlagsInteractor
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.policy.data.repository.UserSetupRepository
 import com.android.systemui.statusbar.policy.domain.interactor.DeviceProvisioningInteractor
@@ -47,7 +47,7 @@ class ShadeInteractorImpl
 constructor(
     @Application val scope: CoroutineScope,
     deviceProvisioningInteractor: DeviceProvisioningInteractor,
-    disableFlagsRepository: DisableFlagsRepository,
+    disableFlagsInteractor: DisableFlagsInteractor,
     dozeParams: DozeParameters,
     keyguardRepository: KeyguardRepository,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -61,13 +61,13 @@ constructor(
     BaseShadeInteractor by baseShadeInteractor,
     ShadeModeInteractor by shadeModeInteractor {
     override val isShadeEnabled: StateFlow<Boolean> =
-        disableFlagsRepository.disableFlags
+        disableFlagsInteractor.disableFlags
             .map { it.isShadeEnabled() }
             .flowName("isShadeEnabled")
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
 
     override val isQsEnabled: StateFlow<Boolean> =
-        disableFlagsRepository.disableFlags
+        disableFlagsInteractor.disableFlags
             .map { it.isQuickSettingsEnabled() }
             .flowName("isQsEnabled")
             .stateIn(scope, SharingStarted.Eagerly, initialValue = false)
@@ -114,7 +114,7 @@ constructor(
 
     override val isExpandToQsEnabled: Flow<Boolean> =
         combine(
-            disableFlagsRepository.disableFlags,
+            disableFlagsInteractor.disableFlags,
             isShadeEnabled,
             keyguardRepository.isDozing,
             userSetupRepository.isUserSetUp,

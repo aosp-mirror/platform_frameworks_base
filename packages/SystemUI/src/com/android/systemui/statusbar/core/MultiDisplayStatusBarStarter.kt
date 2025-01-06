@@ -23,8 +23,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.display.data.repository.DisplayRepository
 import com.android.systemui.display.data.repository.DisplayScopeRepository
+import com.android.systemui.statusbar.data.repository.LightBarControllerStore
 import com.android.systemui.statusbar.data.repository.PrivacyDotWindowControllerStore
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
+import com.android.systemui.statusbar.phone.AutoHideControllerStore
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore
 import com.android.systemui.util.kotlin.pairwiseBy
@@ -49,7 +51,9 @@ constructor(
     private val initializerStore: StatusBarInitializerStore,
     private val statusBarWindowControllerStore: StatusBarWindowControllerStore,
     private val statusBarInitializerStore: StatusBarInitializerStore,
+    private val autoHideControllerStore: AutoHideControllerStore,
     private val privacyDotWindowControllerStore: PrivacyDotWindowControllerStore,
+    private val lightBarControllerStore: LightBarControllerStore,
 ) : CoreStartable {
 
     init {
@@ -74,23 +78,37 @@ constructor(
         createAndStartOrchestratorForDisplay(displayId)
         createAndStartInitializerForDisplay(displayId)
         startPrivacyDotForDisplay(displayId)
+        createLightBarControllerForDisplay(displayId)
+    }
+
+    private fun createLightBarControllerForDisplay(displayId: Int) {
+        // Explicitly not calling `start()`, because the store is already calling `start()`.
+        // This is to maintain the legacy behavior with NavigationBar, that was already expecting
+        // LightBarController to start at construction time.
+        lightBarControllerStore.forDisplay(displayId)
     }
 
     private fun createAndStartOrchestratorForDisplay(displayId: Int) {
+        val statusBarModeRepository = statusBarModeRepositoryStore.forDisplay(displayId) ?: return
+        val statusBarInitializer = initializerStore.forDisplay(displayId) ?: return
+        val statusBarWindowController =
+            statusBarWindowControllerStore.forDisplay(displayId) ?: return
+        val autoHideController = autoHideControllerStore.forDisplay(displayId) ?: return
         statusBarOrchestratorFactory
             .create(
                 displayId,
                 displayScopeRepository.scopeForDisplay(displayId),
                 statusBarWindowStateRepositoryStore.forDisplay(displayId),
-                statusBarModeRepositoryStore.forDisplay(displayId),
-                initializerStore.forDisplay(displayId),
-                statusBarWindowControllerStore.forDisplay(displayId),
+                statusBarModeRepository,
+                statusBarInitializer,
+                statusBarWindowController,
+                autoHideController,
             )
             .start()
     }
 
     private fun createAndStartInitializerForDisplay(displayId: Int) {
-        statusBarInitializerStore.forDisplay(displayId).start()
+        statusBarInitializerStore.forDisplay(displayId)?.start()
     }
 
     private fun startPrivacyDotForDisplay(displayId: Int) {
@@ -98,6 +116,6 @@ constructor(
             // For the default display, privacy dot is started via ScreenDecorations
             return
         }
-        privacyDotWindowControllerStore.forDisplay(displayId).start()
+        privacyDotWindowControllerStore.forDisplay(displayId)?.start()
     }
 }

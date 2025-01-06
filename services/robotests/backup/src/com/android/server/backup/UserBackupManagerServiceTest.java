@@ -30,13 +30,10 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
 import static org.testng.Assert.expectThrows;
 
 import android.app.backup.BackupManager;
@@ -90,7 +87,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -110,7 +106,6 @@ public class UserBackupManagerServiceTest {
     private static final String TAG = "BMSTest";
     private static final String PACKAGE_1 = "some.package.1";
     private static final String PACKAGE_2 = "some.package.2";
-    private static final String USER_FACING_PACKAGE = "user.facing.package";
     private static final int USER_ID = 10;
 
     @Mock private TransportManager mTransportManager;
@@ -1211,47 +1206,6 @@ public class UserBackupManagerServiceTest {
         // One call for package changes and one call for sd card events.
         verify(contextSpy, times(2)).registerReceiverAsUser(
                 eq(packageTrackingReceiver), eq(UserHandle.of(USER_ID)), any(), any(), any());
-    }
-
-    @Test
-    public void testFilterUserFacingPackages_shouldSkipUserFacing_filtersUserFacing() {
-        List<PackageInfo> packages = Arrays.asList(getPackageInfo(USER_FACING_PACKAGE),
-                getPackageInfo(PACKAGE_1));
-        UserBackupManagerService backupManagerService = spy(
-                createUserBackupManagerServiceAndRunTasks());
-        when(backupManagerService.shouldSkipUserFacingData()).thenReturn(true);
-        when(backupManagerService.shouldSkipPackage(eq(USER_FACING_PACKAGE))).thenReturn(true);
-
-        List<PackageInfo> filteredPackages = backupManagerService.filterUserFacingPackages(
-                packages);
-
-        assertFalse(containsPackage(filteredPackages, USER_FACING_PACKAGE));
-        assertTrue(containsPackage(filteredPackages, PACKAGE_1));
-    }
-
-    @Test
-    public void testFilterUserFacingPackages_shouldNotSkipUserFacing_doesNotFilterUserFacing() {
-        List<PackageInfo> packages = Arrays.asList(getPackageInfo(USER_FACING_PACKAGE),
-                getPackageInfo(PACKAGE_1));
-        UserBackupManagerService backupManagerService = spy(
-                createUserBackupManagerServiceAndRunTasks());
-        when(backupManagerService.shouldSkipUserFacingData()).thenReturn(false);
-        when(backupManagerService.shouldSkipPackage(eq(USER_FACING_PACKAGE))).thenReturn(true);
-
-        List<PackageInfo> filteredPackages = backupManagerService.filterUserFacingPackages(
-                packages);
-
-        assertTrue(containsPackage(filteredPackages, USER_FACING_PACKAGE));
-        assertTrue(containsPackage(filteredPackages, PACKAGE_1));
-    }
-
-    private static boolean containsPackage(List<PackageInfo> packages, String targetPackage) {
-        for (PackageInfo packageInfo : packages) {
-            if (targetPackage.equals(packageInfo.packageName)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     private UserBackupManagerService createUserBackupManagerServiceAndRunTasks() {

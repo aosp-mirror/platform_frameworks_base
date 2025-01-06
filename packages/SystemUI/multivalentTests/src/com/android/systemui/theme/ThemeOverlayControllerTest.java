@@ -434,13 +434,13 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     @Test
     public void onSettingChanged_honorThemeStyle() {
         when(mDeviceProvisionedController.isUserSetup(anyInt())).thenReturn(true);
-        List<Style> validStyles = Arrays.asList(Style.EXPRESSIVE, Style.SPRITZ, Style.TONAL_SPOT,
-                Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT);
-        for (Style style : validStyles) {
+        @Style.Type List<Integer> validStyles = Arrays.asList(Style.EXPRESSIVE, Style.SPRITZ,
+                Style.TONAL_SPOT, Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT);
+        for (@Style.Type int style : validStyles) {
             reset(mSecureSettings);
 
             String jsonString = "{\"android.theme.customization.system_palette\":\"A16B00\","
-                    + "\"android.theme.customization.theme_style\":\"" + style.name() + "\"}";
+                    + "\"android.theme.customization.theme_style\":\"" + Style.name(style) + "\"}";
 
             when(mSecureSettings.getStringForUser(
                     eq(Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES), anyInt()))
@@ -501,6 +501,7 @@ public class ThemeOverlayControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @DisableFlags(com.android.systemui.shared.Flags.FLAG_NEW_CUSTOMIZATION_PICKER_UI)
     public void onWallpaperColorsChanged_changeLockWallpaper() {
         // Should ask for a new theme when wallpaper colors change
         WallpaperColors mainColors = new WallpaperColors(Color.valueOf(Color.RED),

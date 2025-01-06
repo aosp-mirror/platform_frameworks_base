@@ -19,7 +19,14 @@ package com.android.server.backup.transport;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.argThat;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.verify;
 
+import android.app.backup.BackupAnnotations.OperationType;
 import android.app.backup.BackupTransport;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.RestoreDescription;
@@ -38,14 +45,30 @@ import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.ITransportStatusCallback;
 import com.android.internal.infra.AndroidFuture;
 
+import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.util.List;
+import java.util.Set;
 
 @Presubmit
 @RunWith(AndroidJUnit4.class)
 public class BackupTransportClientTest {
+
+    @Mock
+    IBackupTransport mMockBackupTransport;
+
+    private BackupTransportClient mMockingTransportClient;
+
+    @Before
+    public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
+        mMockingTransportClient = new BackupTransportClient(
+                mMockBackupTransport);
+    }
 
     private static class TestFuturesFakeTransportBinder extends FakeTransportBinderBase {
         public final Object mLock = new Object();
@@ -128,6 +151,70 @@ public class BackupTransportClientTest {
         thread.join();
     }
 
+    @Test
+    public void getPackagesThatShouldNotUseRestrictedMode_passesSetAsListToBinder()
+            throws Exception {
+        mockGetPackagesThatShouldNotUseRestrictedModeReturn(List.of("package1", "package2"));
+
+        mMockingTransportClient.getPackagesThatShouldNotUseRestrictedMode(
+                Set.of("package1", "package2"),
+                OperationType.BACKUP);
+
+        verify(mMockBackupTransport).getPackagesThatShouldNotUseRestrictedMode(
+                argThat(list -> Set.copyOf(list).equals(Set.of("package1", "package2"))),
+                eq(OperationType.BACKUP), any());
+    }
+
+    @Test
+    public void getPackagesThatShouldNotUseRestrictedMode_forRestore_callsBinderForRestore()
+            throws Exception {
+        mockGetPackagesThatShouldNotUseRestrictedModeReturn(null);
+
+        mMockingTransportClient.getPackagesThatShouldNotUseRestrictedMode(
+                Set.of(),
+                OperationType.RESTORE);
+
+        verify(mMockBackupTransport).getPackagesThatShouldNotUseRestrictedMode(any(),
+                eq(OperationType.RESTORE), any());
+    }
+
+    @Test
+    public void getPackagesThatShouldNotUseRestrictedMode_forBackup_callsBinderForBackup()
+            throws Exception {
+        mockGetPackagesThatShouldNotUseRestrictedModeReturn(null);
+
+        mMockingTransportClient.getPackagesThatShouldNotUseRestrictedMode(
+                Set.of(),
+                OperationType.BACKUP);
+
+        verify(mMockBackupTransport).getPackagesThatShouldNotUseRestrictedMode(any(),
+                eq(OperationType.BACKUP), any());
+    }
+
+    @Test
+    public void getPackagesThatShouldNotUseRestrictedMode_nullResult_returnsEmptySet()
+            throws Exception {
+        mockGetPackagesThatShouldNotUseRestrictedModeReturn(null);
+
+        Set<String> result = mMockingTransportClient.getPackagesThatShouldNotUseRestrictedMode(
+                Set.of(),
+                OperationType.BACKUP);
+
+        assertThat(result).isEqualTo(Set.of());
+    }
+
+    @Test
+    public void getPackagesThatShouldNotUseRestrictedMode_returnsResultAsSet()
+            throws Exception {
+        mockGetPackagesThatShouldNotUseRestrictedModeReturn(List.of("package1", "package2"));
+
+        Set<String> result = mMockingTransportClient.getPackagesThatShouldNotUseRestrictedMode(
+                Set.of("package1", "package2"),
+                OperationType.BACKUP);
+
+        assertThat(result).isEqualTo(Set.of("package1", "package2"));
+    }
+
     private static class TestCallbacksFakeTransportBinder extends FakeTransportBinderBase {
         public final Object mLock = new Object();
 
@@ -157,7 +244,6 @@ public class BackupTransportClientTest {
 
         assertThat(status).isEqualTo(123);
     }
-
 
     @Test
     public void testFinishBackup_completesLater_returnsStatus() throws Exception {
@@ -211,6 +297,14 @@ public class BackupTransportClientTest {
         thread.join();
     }
 
+    private void mockGetPackagesThatShouldNotUseRestrictedModeReturn(List<String> returnList)
+            throws Exception {
+        doAnswer(
+                i -> ((AndroidFuture<List<String>>) i.getArguments()[2]).complete(returnList)).when(
+                mMockBackupTransport).getPackagesThatShouldNotUseRestrictedMode(any(), anyInt(),
+                any());
+    }
+
     // Convenience layer so we only need to fake specific methods useful for each test case.
     private static class FakeTransportBinderBase implements IBackupTransport {
         @Override public void name(AndroidFuture<String> f) throws RemoteException {}
@@ -257,6 +351,10 @@ public class BackupTransportClientTest {
         @Override public void getTransportFlags(AndroidFuture<Integer> f) throws RemoteException {}
         @Override
         public void getBackupManagerMonitor(AndroidFuture<IBackupManagerMonitor> resultFuture)
+                throws RemoteException {}
+        @Override
+        public void getPackagesThatShouldNotUseRestrictedMode(List<String> packageNames,
+                int operationType, AndroidFuture<List<String>> resultFuture)
                 throws RemoteException {}
         @Override public IBinder asBinder() {
             return null;

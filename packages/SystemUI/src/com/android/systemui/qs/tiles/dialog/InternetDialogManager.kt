@@ -32,13 +32,13 @@ import kotlinx.coroutines.cancel
 private const val TAG = "InternetDialogFactory"
 private val DEBUG = Log.isLoggable(TAG, Log.DEBUG)
 
-/** Factory to create [InternetDialogDelegate] objects. */
+/** Factory to create [InternetDialogDelegateLegacy] objects. */
 @SysUISingleton
 class InternetDialogManager
 @Inject
 constructor(
     private val dialogTransitionAnimator: DialogTransitionAnimator,
-    private val dialogFactory: InternetDialogDelegate.Factory,
+    private val dialogFactory: InternetDialogDelegateLegacy.Factory,
     @Background private val bgDispatcher: CoroutineDispatcher,
 ) {
     private lateinit var coroutineScope: CoroutineScope
@@ -48,8 +48,8 @@ constructor(
     }
 
     /**
-     * Creates a [InternetDialogDelegate]. The dialog will be animated from [expandable] if it is
-     * not null.
+     * Creates a [InternetDialogDelegateLegacy]. The dialog will be animated from [expandable] if
+     * it is not null.
      */
     fun create(
         aboveStatusBar: Boolean,
@@ -64,6 +64,7 @@ constructor(
             return
         } else {
             coroutineScope = CoroutineScope(bgDispatcher + newTracingContext("InternetDialogScope"))
+            // TODO: b/377388104 check the QsDetailedView flag to use the correct dialogFactory
             dialog =
                 dialogFactory
                     .create(aboveStatusBar, canConfigMobileData, canConfigWifi, coroutineScope)

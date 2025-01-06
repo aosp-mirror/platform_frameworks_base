@@ -30,6 +30,7 @@ android_test {
         "androidx.test.core",
         "platform-test-annotations",
         "flag-junit",
+        "androidx.test.uiautomator_uiautomator",
     ],
     platform_apis: true,
     test_suites: ["device-tests"],

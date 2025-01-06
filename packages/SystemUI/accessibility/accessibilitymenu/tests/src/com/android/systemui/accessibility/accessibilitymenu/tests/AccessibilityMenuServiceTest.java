@@ -46,9 +46,6 @@ import android.hardware.display.DisplayManager;
 import android.media.AudioManager;
 import android.os.PowerManager;
 import android.os.UserManager;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.uiautomator_helpers.WaitUtils;
 import android.provider.Settings;
 import android.util.Log;
@@ -63,7 +60,6 @@ import androidx.test.uiautomator.Configurator;
 import androidx.test.uiautomator.UiDevice;
 
 import com.android.compatibility.common.util.TestUtils;
-import com.android.systemui.accessibility.accessibilitymenu.Flags;
 import com.android.systemui.accessibility.accessibilitymenu.model.A11yMenuShortcut.ShortcutId;
 
 import org.junit.After;
@@ -71,7 +67,6 @@ import org.junit.AfterClass;
 import org.junit.Assume;
 import org.junit.Before;
 import org.junit.BeforeClass;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -82,9 +77,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 @RunWith(AndroidJUnit4.class)
 public class AccessibilityMenuServiceTest {
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
-
     private static final String TAG = "A11yMenuServiceTest";
     private static final int CLICK_ID = AccessibilityNodeInfo.ACTION_CLICK;
 
@@ -499,7 +491,6 @@ public class AccessibilityMenuServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HIDE_RESTRICTED_ACTIONS)
     public void testRestrictedActions_BrightnessNotAvailable() throws Throwable {
         try {
             setUserRestriction(UserManager.DISALLOW_CONFIG_BRIGHTNESS, true);
@@ -519,7 +510,6 @@ public class AccessibilityMenuServiceTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_HIDE_RESTRICTED_ACTIONS)
     public void testRestrictedActions_VolumeNotAvailable() throws Throwable {
         try {
             setUserRestriction(UserManager.DISALLOW_ADJUST_VOLUME, true);

@@ -116,6 +116,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.UserLogoutInteractor;
 import com.android.systemui.util.AlarmTimeout;
 import com.android.systemui.util.concurrency.DelayableExecutor;
 import com.android.systemui.util.wakelock.SettableWakeLock;
@@ -162,6 +163,7 @@ public class KeyguardIndicationController {
     private final KeyguardLogger mKeyguardLogger;
     private final UserTracker mUserTracker;
     private final BouncerMessageInteractor mBouncerMessageInteractor;
+
     private ViewGroup mIndicationArea;
     private KeyguardIndicationTextView mTopIndicationView;
     private KeyguardIndicationTextView mLockScreenIndicationView;
@@ -187,6 +189,7 @@ public class KeyguardIndicationController {
     private final BiometricMessageInteractor mBiometricMessageInteractor;
     private DeviceEntryFingerprintAuthInteractor mDeviceEntryFingerprintAuthInteractor;
     private DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
+    private final UserLogoutInteractor mUserLogoutInteractor;
     private String mPersistentUnlockMessage;
     private String mAlignmentIndication;
     private boolean mForceIsDismissible;
@@ -235,6 +238,13 @@ public class KeyguardIndicationController {
             (Boolean isEngaged) -> {
                 if (!isEngaged) {
                     showTrustAgentErrorMessage(mTrustAgentErrorMessage);
+                }
+            };
+    @VisibleForTesting
+    final Consumer<Boolean> mIsLogoutEnabledCallback =
+            (Boolean isLogoutEnabled) -> {
+                if (mVisible) {
+                    updateDeviceEntryIndication(false);
                 }
             };
     private final ScreenLifecycle.Observer mScreenObserver = new ScreenLifecycle.Observer() {
@@ -299,7 +309,8 @@ public class KeyguardIndicationController {
             KeyguardInteractor keyguardInteractor,
             BiometricMessageInteractor biometricMessageInteractor,
             DeviceEntryFingerprintAuthInteractor deviceEntryFingerprintAuthInteractor,
-            DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor
+            DeviceEntryFaceAuthInteractor deviceEntryFaceAuthInteractor,
+            UserLogoutInteractor userLogoutInteractor
     ) {
         mContext = context;
         mBroadcastDispatcher = broadcastDispatcher;
@@ -331,6 +342,8 @@ public class KeyguardIndicationController {
         mBiometricMessageInteractor = biometricMessageInteractor;
         mDeviceEntryFingerprintAuthInteractor = deviceEntryFingerprintAuthInteractor;
         mDeviceEntryFaceAuthInteractor = deviceEntryFaceAuthInteractor;
+        mUserLogoutInteractor = userLogoutInteractor;
+
 
         mFaceAcquiredMessageDeferral = faceHelpMessageDeferral.create();
 
@@ -418,6 +431,9 @@ public class KeyguardIndicationController {
                 mCoExAcquisitionMsgIdsToShowCallback);
         collectFlow(mIndicationArea, mDeviceEntryFingerprintAuthInteractor.isEngaged(),
                 mIsFingerprintEngagedCallback);
+        collectFlow(mIndicationArea,
+                mUserLogoutInteractor.isLogoutEnabled(),
+                mIsLogoutEnabledCallback);
     }
 
     /**
@@ -619,10 +635,11 @@ public class KeyguardIndicationController {
     }
 
     private void updateLockScreenUserLockedMsg(int userId) {
-        boolean userUnlocked = mKeyguardUpdateMonitor.isUserUnlocked(userId);
+        boolean userStorageUnlocked = mKeyguardUpdateMonitor.isUserUnlocked(userId);
         boolean encryptedOrLockdown = mKeyguardUpdateMonitor.isEncryptedOrLockdown(userId);
-        mKeyguardLogger.logUpdateLockScreenUserLockedMsg(userId, userUnlocked, encryptedOrLockdown);
-        if (!userUnlocked || encryptedOrLockdown) {
+        mKeyguardLogger.logUpdateLockScreenUserLockedMsg(userId, userStorageUnlocked,
+                encryptedOrLockdown);
+        if (!userStorageUnlocked || encryptedOrLockdown) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_USER_LOCKED,
                     new KeyguardIndication.Builder()
@@ -743,9 +760,7 @@ public class KeyguardIndicationController {
     }
 
     private void updateLockScreenLogoutView() {
-        final boolean shouldShowLogout = mKeyguardUpdateMonitor.isLogoutEnabled()
-                && getCurrentUser() != UserHandle.USER_SYSTEM;
-        if (shouldShowLogout) {
+        if (mUserLogoutInteractor.isLogoutEnabled().getValue()) {
             mRotateTextViewController.updateIndication(
                     INDICATION_TYPE_LOGOUT,
                     new KeyguardIndication.Builder()
@@ -759,7 +774,7 @@ public class KeyguardIndicationController {
                                 if (mFalsingManager.isFalseTap(LOW_PENALTY)) {
                                     return;
                                 }
-                                mDevicePolicyManager.logoutUser();
+                                mUserLogoutInteractor.logOut();
                             })
                             .build(),
                     false);
@@ -1508,13 +1523,6 @@ public class KeyguardIndicationController {
 
         @Override
         public void onUserUnlocked() {
-            if (mVisible) {
-                updateDeviceEntryIndication(false);
-            }
-        }
-
-        @Override
-        public void onLogoutEnabledChanged() {
             if (mVisible) {
                 updateDeviceEntryIndication(false);
             }

@@ -22,6 +22,7 @@ import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_PROCESS_END;
 import static android.app.ActivityManagerInternal.OOM_ADJ_REASON_RESTRICTION_CHANGE;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
+import static android.content.pm.Flags.appCompatOption16kb;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
@@ -380,12 +381,6 @@ public final class ProcessList {
 
     // lmkd reconnect delay in msecs
     private static final long LMKD_RECONNECT_DELAY_MS = 1000;
-
-    /**
-     * The cuttoff adj for the freezer, app processes with adj greater than this value will be
-     * eligible for the freezer.
-     */
-    static final int FREEZER_CUTOFF_ADJ = CACHED_APP_MIN_ADJ;
 
     /**
      * Apps have no access to the private data directories of any other app, even if the other
@@ -2025,6 +2020,16 @@ public final class ProcessList {
                 runtimeFlags |= Zygote.USE_APP_IMAGE_STARTUP_CACHE;
             }
 
+            if (appCompatOption16kb()) {
+                boolean is16KbDevice = Os.sysconf(OsConstants._SC_PAGESIZE) == 16384;
+                if (is16KbDevice
+                        && mService.mContext
+                        .getPackageManager()
+                        .isPageSizeCompatEnabled(app.info.packageName)) {
+                    runtimeFlags |= Zygote.ENABLE_PAGE_SIZE_APP_COMPAT;
+                }
+            }
+
             String invokeWith = null;
             if (debuggableFlag) {
                 // Debuggable apps may include a wrapper script with their library directory.
@@ -3207,7 +3212,6 @@ public final class ProcessList {
         if ((pid > 0 && pid != ActivityManagerService.MY_PID)
                 || (pid == 0 && app.isPendingStart())) {
             if (pid > 0) {
-                mService.removePidLocked(pid, app);
                 app.setBindMountPending(false);
                 mService.mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
                 mService.mBatteryStatsService.noteProcessFinish(app.processName, app.info.uid);
@@ -3225,6 +3229,12 @@ public final class ProcessList {
                 }
             }
             app.killLocked(reason, reasonCode, subReason, true, async);
+            if (pid > 0) {
+                // Remove pid record mapping after killing the process, so there won't be a short
+                // period that the app is still alive but its access to system may be illegal due
+                // to no existing record for its pid.
+                mService.removePidLocked(pid, app);
+            }
             mService.handleAppDiedLocked(app, pid, willRestart, allowRestart,
                     false /* fromBinderDied */);
             if (willRestart) {

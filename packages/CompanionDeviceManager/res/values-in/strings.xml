@@ -36,11 +36,14 @@
     <string name="title_nearby_device_streaming" msgid="2727103756701741359">"Izinkan &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; melakukan streaming aplikasi <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ke &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="summary_nearby_device_streaming" msgid="70434958004946884">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> akan memiliki akses ke apa pun yang ditampilkan atau diputar di <xliff:g id="DEVICE_NAME_1">%3$s</xliff:g>, termasuk audio, foto, info pembayaran, sandi, dan pesan.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_2">%1$s</xliff:g> akan dapat melakukan streaming aplikasi ke <xliff:g id="DEVICE_NAME_3">%3$s</xliff:g> hingga Anda menghapus izin ini."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="4712712177819370967">"<xliff:g id="APP_NAME">%1$s</xliff:g> meminta izin atas nama <xliff:g id="DEVICE_NAME">%2$s</xliff:g> untuk melakukan streaming aplikasi dari <xliff:g id="DEVICE_TYPE">%3$s</xliff:g> Anda"</string>
+    <string name="title_sensor_device_streaming" msgid="2395553261097861497">"Izinkan &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; melakukan streaming audio dan fitur sistem antara <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> dan &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="summary_sensor_device_streaming" msgid="3413105061195145547">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> akan memiliki akses ke apa pun yang diputar di <xliff:g id="DEVICE_NAME_1">%3$s</xliff:g> Anda.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_2">%1$s</xliff:g> akan dapat melakukan streaming audio ke <xliff:g id="DEVICE_NAME_3">%3$s</xliff:g> hingga Anda menghapus akses ke izin ini."</string>
+    <string name="helper_summary_sensor_device_streaming" msgid="8860174545653786353">"<xliff:g id="APP_NAME">%1$s</xliff:g> di <xliff:g id="DEVICE_NAME">%2$s</xliff:g> meminta izin untuk melakukan streaming audio dan fitur sistem antar-perangkat Anda."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"perangkat"</string>
     <string name="summary_generic" msgid="1761976003668044801">"Aplikasi ini akan dapat menyinkronkan info, seperti nama penelepon, antara ponsel dan perangkat yang dipilih"</string>
     <string name="consent_yes" msgid="8344487259618762872">"Izinkan"</string>
     <string name="consent_no" msgid="2640796915611404382">"Jangan izinkan"</string>
-    <string name="consent_cancel" msgid="5655005528379285841">"Batalkan"</string>
+    <string name="consent_cancel" msgid="5655005528379285841">"Batal"</string>
     <string name="consent_back" msgid="2560683030046918882">"Kembali"</string>
     <string name="permission_expand" msgid="893185038020887411">"Luaskan <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>
     <string name="permission_collapse" msgid="3320833884220844084">"Ciutkan <xliff:g id="PERMISSION_TYPE">%1$s</xliff:g>"</string>

@@ -111,7 +111,8 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
     private NetworkSecurityConfig getSystemStoreConfig() {
         return new NetworkSecurityConfig.Builder()
                 .addCertificatesEntryRef(
-                        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false))
+                        new CertificatesEntryRef(
+                              SystemCertificateSource.getInstance(), false, false))
                 .build();
     }
 
@@ -141,7 +142,8 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         NetworkSecurityConfig domain = new NetworkSecurityConfig.Builder()
                 .setPinSet(new PinSet(pins, Long.MAX_VALUE))
                 .addCertificatesEntryRef(
-                        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false))
+                        new CertificatesEntryRef(
+                              SystemCertificateSource.getInstance(), false, false))
                 .build();
         ArraySet<Pair<Domain, NetworkSecurityConfig>> domainMap
                 = new ArraySet<Pair<Domain, NetworkSecurityConfig>>();
@@ -159,7 +161,8 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         NetworkSecurityConfig domain = new NetworkSecurityConfig.Builder()
                 .setPinSet(new PinSet(pins, Long.MAX_VALUE))
                 .addCertificatesEntryRef(
-                        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false))
+                        new CertificatesEntryRef(
+                              SystemCertificateSource.getInstance(), false, false))
                 .build();
         ArraySet<Pair<Domain, NetworkSecurityConfig>> domainMap
                 = new ArraySet<Pair<Domain, NetworkSecurityConfig>>();
@@ -178,7 +181,8 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         NetworkSecurityConfig domain = new NetworkSecurityConfig.Builder()
                 .setPinSet(new PinSet(pins, Long.MAX_VALUE))
                 .addCertificatesEntryRef(
-                        new CertificatesEntryRef(SystemCertificateSource.getInstance(), true))
+                        new CertificatesEntryRef(
+                              SystemCertificateSource.getInstance(), true, false))
                 .build();
         ArraySet<Pair<Domain, NetworkSecurityConfig>> domainMap
                 = new ArraySet<Pair<Domain, NetworkSecurityConfig>>();
@@ -245,7 +249,8 @@ public class NetworkSecurityConfigTests extends ActivityUnitTestCase<Activity> {
         NetworkSecurityConfig domain = new NetworkSecurityConfig.Builder()
                 .setPinSet(new PinSet(pins, Long.MAX_VALUE))
                 .addCertificatesEntryRef(
-                        new CertificatesEntryRef(SystemCertificateSource.getInstance(), false))
+                        new CertificatesEntryRef(
+                              SystemCertificateSource.getInstance(), false, false))
                 .build();
         ArraySet<Pair<Domain, NetworkSecurityConfig>> domainMap
                 = new ArraySet<Pair<Domain, NetworkSecurityConfig>>();

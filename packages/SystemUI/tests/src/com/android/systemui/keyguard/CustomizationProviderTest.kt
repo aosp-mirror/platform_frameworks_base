@@ -34,6 +34,7 @@ import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.SystemUIAppComponentFactoryBase
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
 import com.android.systemui.dock.DockManagerFake
 import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.flags.Flags
@@ -133,6 +134,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                             .thenReturn(FakeSharedPreferences())
                     },
                 userTracker = userTracker,
+                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 broadcastDispatcher = fakeBroadcastDispatcher,
             )
         val remoteUserSelectionManager =
@@ -203,6 +205,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
                 appContext = mContext,
+                communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 sceneInteractor = { kosmos.sceneInteractor },
             )
         underTest.previewManager =
@@ -272,6 +275,12 @@ class CustomizationProviderTest : SysuiTestCase() {
                 "vnd.android.cursor.dir/vnd." +
                     "${Contract.AUTHORITY}." +
                     Contract.FlagsTable.TABLE_NAME
+            )
+        assertThat(underTest.getType(Contract.RuntimeValuesTable.URI))
+            .isEqualTo(
+                "vnd.android.cursor.dir/vnd." +
+                    "${Contract.AUTHORITY}." +
+                    Contract.RuntimeValuesTable.TABLE_NAME
             )
     }
 

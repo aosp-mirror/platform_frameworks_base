@@ -203,9 +203,25 @@ public class ResourcesImpl {
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
             @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments) {
-        mAssets = assets;
-        mAppliedSharedLibsHash =
-                ResourcesManager.getInstance().updateResourceImplWithRegisteredLibs(this);
+        // Don't reuse assets by default as we have no control over whether they're already
+        // inside some other ResourcesImpl.
+        this(assets, metrics, config, displayAdjustments, false);
+    }
+
+    public ResourcesImpl(@NonNull ResourcesImpl orig) {
+        // We know for sure that the other assets are in use, so can't reuse the object here.
+        this(orig.getAssets(), orig.getMetrics(), orig.getConfiguration(),
+                orig.getDisplayAdjustments(), false);
+    }
+
+    public ResourcesImpl(@NonNull AssetManager assets, @Nullable DisplayMetrics metrics,
+            @Nullable Configuration config, @NonNull DisplayAdjustments displayAdjustments,
+            boolean reuseAssets) {
+        final var assetsAndHash =
+                ResourcesManager.getInstance().updateResourceImplAssetsWithRegisteredLibs(assets,
+                        reuseAssets);
+        mAssets = assetsAndHash.first;
+        mAppliedSharedLibsHash = assetsAndHash.second;
         mMetrics.setToDefaults();
         mDisplayAdjustments = displayAdjustments;
         mConfiguration.setToDefaults();
@@ -976,15 +992,24 @@ public class ResourcesImpl {
                     } else {
                         dr = loadXmlDrawable(wrapper, value, id, density, file);
                     }
-                } else if (file.startsWith("frro://")) {
+                } else if (file.startsWith("frro:/")) {
                     Uri uri = Uri.parse(file);
+                    long offset = Long.parseLong(uri.getQueryParameter("offset"));
+                    long size = Long.parseLong(uri.getQueryParameter("size"));
+                    if (offset < 0 || size <= 0) {
+                        throw new NotFoundException("invalid frro parameters");
+                    }
                     File f = new File('/' + uri.getHost() + uri.getPath());
+                    if (!f.getCanonicalPath().startsWith(ResourcesManager.RESOURCE_CACHE_DIR)
+                            || !f.getCanonicalPath().endsWith(".frro") || !f.canRead()) {
+                        throw new NotFoundException("invalid frro path");
+                    }
                     ParcelFileDescriptor pfd = ParcelFileDescriptor.open(f,
                             ParcelFileDescriptor.MODE_READ_ONLY);
                     AssetFileDescriptor afd = new AssetFileDescriptor(
                             pfd,
-                            Long.parseLong(uri.getQueryParameter("offset")),
-                            Long.parseLong(uri.getQueryParameter("size")));
+                            offset,
+                            size);
                     FileInputStream is = afd.createInputStream();
                     dr = decodeImageDrawable(is, wrapper);
                 } else {

@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Զանգողի ID-ն լռելյայն սահմանափակված է: Հաջորդ զանգը` չսահմանափակված"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Զանգողի ID-ն լռելյայն չսահմանափակված է: Հաջորդ զանգը` Սահմանափակված"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Զանգողի ID-ն լռելյայն չսահմանափակված է: Հաջորդ զանգը` չսահմանափակված"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ ծավալի համար։ APK-ի հետ համատեղելիության ստուգումը ձախողվել է։ Այս հավելվածը կաշխատի էջի ծավալի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ ծավալն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ ծավալի համար։ ELF-ի հետ համատեղելիության ստուգումը ձախողվել է։ Այս հավելվածը կաշխատի էջի ծավալի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ ծավալն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Այս հավելվածը հարմարեցված չէ 16 ԿԲ ծավալի համար։ APK-ի և ELF-ի հետ համատեղելիության ստուգումը ձախողվել է։ Այս հավելվածը կաշխատի էջի ծավալի հետ համատեղելի ռեժիմում։ Համատեղելիությունն ապահովելու համար նորից կոմպիլացրեք հավելվածը 16 ԿԲ ծավալն աջակցելու համար։ Լրացուցիչ տեղեկություններ ստանալու համար այցելեք &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Ծառայությունը չի տրամադրվում:"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Դուք չեք կարող փոխել զանգողի ID-ի կարգավորումները:"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Օգտագործվում է <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-ի բջջային ինտերնետը"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Չհաջողվեց միանալ բջջային ցանցին"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Փորձեք այլ ցանցի միանալ: Հպեք՝ նախընտրած ցանցը փոխելու համար:"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Շտապ կանչերը հասանելի չեն"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Շտապ կանչերի համար բջջային ցանց է անհրաժեշտ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ծանուցումներ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Զանգի վերահասցեավորում"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Թույլատրել հավելվածին որոշել գերլայնաշերտ կապի տեխնոլոգիան աջակցող մոտակա սարքերի միջև հարաբերական դիրքավորումը"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"փոխներգործել մոտակա Wi‑Fi սարքերի հետ"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Թույլ է տալիս հավելվածին տվյալներ փոխանցել մոտակա Wi‑Fi սարքերին, միանալ դրանց և որոշել դրանց մոտավոր դիրքը։"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"որոշել մոտակա սարքերի միջև հարաբերական դիրքավորումը"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Թույլատրել հավելվածին որոշել մոտակա սարքերի միջև հարաբերական դիրքավորումը"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Տեղեկություններ NFC վճարային ծառայության մասին"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Թույլ է տալիս հավելվածին ստանալ նախընտրելի NFC վճարային ծառայության մասին տեղեկություններ (օր․՝ գրանցված լրացուցիչ սարքերի և երթուղու նպատակակետի մասին տվյալներ)։"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"վերահսկել Մոտ Տարածությամբ Հաղորդակցումը"</string>
@@ -1112,7 +1119,7 @@
     <string name="menu_sym_shortcut_label" msgid="4037566049061218776">"Sym+"</string>
     <string name="menu_function_shortcut_label" msgid="2367112760987662566">"Function+"</string>
     <string name="menu_space_shortcut_label" msgid="5949311515646872071">"բացակ"</string>
-    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"մուտք"</string>
+    <string name="menu_enter_shortcut_label" msgid="6709499510082897320">"enter"</string>
     <string name="menu_delete_shortcut_label" msgid="4365787714477739080">"ջնջել"</string>
     <string name="search_go" msgid="2141477624421347086">"Որոնել"</string>
     <string name="search_hint" msgid="455364685740251925">"Որոնում..."</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> ժամից"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> օրից"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> տարուց"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> ր առաջ"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> ժ առաջ"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> օր առաջ"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> տ առաջ"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> րոպե"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ժ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> օր"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> տ"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> րոպեից"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> ժամից"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> օրից"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> տարուց"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> ր առաջ"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> ժ առաջ"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> օր առաջ"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> տ առաջ"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# րոպե առաջ}one{# րոպե առաջ}other{# րոպե առաջ}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ժամ առաջ}one{# ժամ առաջ}other{# ժամ առաջ}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# օր առաջ}one{# օր առաջ}other{# օր առաջ}}"</string>
@@ -1600,7 +1623,7 @@
     <string name="keyboardview_keycode_done" msgid="2524518019001653851">"Պատրաստ է"</string>
     <string name="keyboardview_keycode_mode_change" msgid="2743735349997999020">"Ռեժիմի փոփոխում"</string>
     <string name="keyboardview_keycode_shift" msgid="3026509237043975573">"Shift"</string>
-    <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Մուտք"</string>
+    <string name="keyboardview_keycode_enter" msgid="168054869339091055">"Enter"</string>
     <string name="activitychooserview_choose_application" msgid="3500574466367891463">"Ընտրել ծրագիր"</string>
     <string name="activitychooserview_choose_application_error" msgid="6937782107559241734">"Չհաջողվեց գործարկել <xliff:g id="APPLICATION_NAME">%s</xliff:g> ծրագիրը"</string>
     <string name="shareactionprovider_share_with" msgid="2753089758467748982">"Կիսվել"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Մեկ ձեռքի ռեժիմ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Հավելյալ խամրեցում"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Լսողական սարքեր"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացավ։"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունն անջատվեց։"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Բաց թողեք ձայնի ուժգնության կոճակները։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացնելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակը։"</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Շաբաթ-կիրակի"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Միջոցառում"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Քնի ժամ"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Չանհանգստացնել (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Կառավարվում է <xliff:g id="APP_NAME">%1$s</xliff:g> հավելվածի կողմից"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Միացված է"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Անջատված է"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Ցանկացած օրացույց"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>-ն անջատում է որոշ ձայներ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Սարքում ներքին խնդիր է առաջացել և այն կարող է կրկնվել, մինչև չվերականգնեք գործարանային կարգավորումները:"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Ուղարկեք և ստացեք հաղորդագրություններ առանց բջջային կամ Wi-Fi ցանցի"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Ինչպես է դա աշխատում"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Միացրեք «Ավտոմատ ընտրել ցանցը»"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Կարգավորումներում միացրեք «Ավտոմատ ընտրել ցանցը», որպեսզի ձեր հեռախոսը կարողանա արբանյակի հետ աշխատող ցանց գտնել"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Միացնել"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Հետ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Առկախ է…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Satellite SOS-ը այժմ հասանելի է"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Դուք կարող եք հաղորդագրություն գրել արտակարգ իրավիճակների ծառայություններին բջջային կամ Wi-Fi ցանցի բացակայության դեպքում։ Google Messages-ը պետք է լինի հաղորդագրման ձեր կանխադրված հավելվածը։"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Satellite SOS-ը չի աջակցվում"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Satellite SOS-ը այս սարքում չի աջակցվում"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Satellite SOS-ը կարգավորված չէ"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Համոզվեք, որ միացած եք ինտերնետին, և նորից փորձեք կարգավորել"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Satellite SOS-ը հասանելի չէ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Satellite SOS-ը հասանելի չէ այս երկրում կամ տարածաշրջանում"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Satellite SOS-ը կարգավորված չէ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Արբանյակային կապով հաղորդագրություններ ուղարկելու համար Google Messages-ը դարձրեք հաղորդագրման ձեր կանխադրված հավելվածը"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Satellite SOS-ը հասանելի չէ"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Միացրեք տեղադրության կարգավորումները, որպեսզի ստուգեք՝ արդյոք Satellite SOS գործառույթը հասանելի է այս երկրում կամ տարածաշրջանում"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Արբանյակային հաղորդագրումը հասանելի է"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Բջջային կամ Wi-Fi ցանցի բացակայության դեպքում դուք կարող եք հաղորդագրություններ ուղարկել արբանյակային կապով։ Google Messages-ը պետք է լինի հաղորդագրման ձեր կանխադրված հավելվածը։"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Արբանյակային հաղորդագրումը չի աջակցվում"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Արբանյակային հաղորդագրումն այս սարքում չի աջակցվում"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Արբանյակային հաղորդագրումը կարգավորված չէ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Համոզվեք, որ միացած եք ինտերնետին, և նորից փորձեք կարգավորել"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Արբանյակային հաղորդագրումը հասանելի չէ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Արբանյակային հաղորդագրումը հասանելի չէ այս երկրում կամ տարածաշրջանում"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Արբանյակային հաղորդագրումը կարգավորված չէ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Արբանյակային կապով հաղորդագրություններ ուղարկելու համար Google Messages-ը դարձրեք հաղորդագրման ձեր կանխադրված հավելվածը"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Արբանյակային հաղորդագրումը հասանելի չէ"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Միացրեք տեղադրության կարգավորումները, որպեսզի ստուգեք՝ արդյոք արբանյակային հաղորդագրումը հասանելի է այս երկրում կամ տարածաշրջանում"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Նորից կարգավորեք մատնահետքով ապակողպումը"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> մատնահետքն այլևս չի կարող ճանաչվել։"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> և <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> մատնահետքերն այլևս չեն կարող ճանաչվել։"</string>

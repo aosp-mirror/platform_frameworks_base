@@ -15,7 +15,7 @@
 package com.android.systemui.statusbar.disableflags.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import dagger.Binds
 import dagger.Module
 import javax.inject.Inject

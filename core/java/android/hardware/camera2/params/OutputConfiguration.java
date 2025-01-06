@@ -29,6 +29,7 @@ import android.annotation.TestApi;
 import android.graphics.ColorSpace;
 import android.graphics.ImageFormat;
 import android.graphics.ImageFormat.Format;
+import android.hardware.DataSpace.NamedDataSpace;
 import android.hardware.HardwareBuffer;
 import android.hardware.HardwareBuffer.Usage;
 import android.hardware.camera2.CameraCaptureSession;
@@ -1726,6 +1727,92 @@ public final class OutputConfiguration implements Parcelable {
      */
     public Size getConfiguredSize() {
         return mConfiguredSize;
+    }
+
+    /**
+     * Get the configured format associated with this {@link OutputConfiguration}.
+     *
+     * @return {@link android.graphics.ImageFormat#Format} associated with this
+     *         {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @Format int getConfiguredFormat() {
+        return mConfiguredFormat;
+    }
+
+    /**
+     * Get the usage flag associated with this {@link OutputConfiguration}.
+     *
+     * @return {@link HardwareBuffer#Usage} associated with this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @Usage long getUsage() {
+        return mUsage;
+    }
+
+    /**
+     * Get the surface type associated with this {@link OutputConfiguration}.
+     *
+     * @return The surface type associated with this {@link OutputConfiguration}.
+     *
+     * @see #SURFACE_TYPE_SURFACE_VIEW
+     * @see #SURFACE_TYPE_SURFACE_TEXTURE
+     * @see #SURFACE_TYPE_MEDIA_RECORDER
+     * @see #SURFACE_TYPE_MEDIA_CODEC
+     * @see #SURFACE_TYPE_IMAGE_READER
+     * @see #SURFACE_TYPE_UNKNOWN
+     * @hide
+     */
+    public int getSurfaceType() {
+        return mSurfaceType;
+    }
+
+    /**
+     * Get the sensor pixel modes associated with this {@link OutputConfiguration}.
+     *
+     * @return List of {@link #SensorPixelMode} associated with this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @NonNull List<Integer> getSensorPixelModes() {
+        return mSensorPixelModesUsed;
+    }
+
+     /**
+     * Get the sharing mode associated with this {@link OutputConfiguration}.
+     *
+     * @return true if surface sharing is enabled with this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public boolean isShared() {
+        return mIsShared;
+    }
+
+    /**
+     * Get the dataspace associated with this {@link OutputConfiguration}.
+     *
+     * @return {@link Dataspace#NamedDataSpace} for this {@link OutputConfiguration}.
+     *
+     * @hide
+     */
+    public @NamedDataSpace int getConfiguredDataspace() {
+        return mConfiguredDataspace;
+    }
+
+    /**
+     * Get the flag indicating if this {@link OutputConfiguration} is for a multi-resolution output
+     * with a MultiResolutionImageReader.
+     *
+     * @return true if this {@link OutputConfiguration} is for a multi-resolution output with a
+     *              MultiResolutionImageReader.
+     *
+     * @hide
+     */
+    public boolean isMultiResolution() {
+        return mIsMultiResolution;
     }
 
     /**

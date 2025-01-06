@@ -65,7 +65,6 @@
     <uses-permission android:name="com.android.voicemail.permission.ADD_VOICEMAIL" />
     <uses-permission android:name="android.permission.WRITE_EMBEDDED_SUBSCRIPTIONS" />
     <uses-permission android:name="android.permission.GET_PROCESS_STATE_AND_OOM_SCORE" />
-    <uses-permission android:name="android.permission.READ_DROPBOX_DATA" />
     <uses-permission android:name="android.permission.READ_LOGS" />
     <uses-permission android:name="android.permission.BRIGHTNESS_SLIDER_USAGE" />
     <uses-permission android:name="android.permission.ACCESS_AMBIENT_LIGHT_STATS" />
@@ -151,7 +150,8 @@
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.LOCATION_BYPASS" />
     <uses-permission android:name="android.permission.READ_DEVICE_CONFIG" />
-    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG" />
+    <uses-permission android:name="android.permission.WRITE_DEVICE_CONFIG"
+        android:featureFlag="!android.security.protect_device_config_flags"/>
     <uses-permission android:name="android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG" />
     <uses-permission android:name="android.permission.READ_WRITE_SYNC_DISABLED_MODE_CONFIG" />
     <uses-permission android:name="android.permission.MONITOR_DEVICE_CONFIG_ACCESS" />
@@ -179,6 +179,7 @@
     <uses-permission android:name="android.permission.SET_ORIENTATION" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGES" />
     <uses-permission android:name="android.permission.INSTALL_PACKAGE_UPDATES" />
+    <uses-permission android:name="android.permission.INSTALL_DEPENDENCY_SHARED_LIBRARIES" />
     <uses-permission android:name="android.permission.ENFORCE_UPDATE_OWNERSHIP" />
     <uses-permission android:name="android.permission.INSTALL_DPC_PACKAGES" />
     <uses-permission android:name="com.android.permission.USE_INSTALLER_V2" />
@@ -242,6 +243,8 @@
     <uses-permission android:name="android.permission.READ_LOWPAN_CREDENTIAL" />
     <uses-permission android:name="android.permission.BLUETOOTH_STACK" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
+    <uses-permission android:name="android.permission.COPY_ACCOUNTS" />
+    <uses-permission android:name="android.permission.REMOVE_ACCOUNTS" />
     <uses-permission android:name="android.permission.RETRIEVE_WINDOW_TOKEN" />
     <uses-permission android:name="android.permission.FRAME_STATS" />
     <uses-permission android:name="android.permission.BIND_APPWIDGET" />
@@ -263,6 +266,8 @@
     <uses-permission android:name="android.permission.MANAGE_APP_OPS_MODES" />
     <uses-permission android:name="android.permission.VIBRATE" />
     <uses-permission android:name="android.permission.ACCESS_VIBRATOR_STATE" />
+    <uses-permission android:name="android.permission.VIBRATE_VENDOR_EFFECTS" />
+    <uses-permission android:name="android.permission.START_VIBRATION_SESSIONS" />
     <uses-permission android:name="android.permission.MANAGE_ACTIVITY_TASKS" />
     <uses-permission android:name="android.permission.START_TASKS_FROM_RECENTS" />
     <uses-permission android:name="android.permission.START_ACTIVITIES_FROM_BACKGROUND" />
@@ -343,6 +348,7 @@
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_COMPUTER" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_AUTOMOTIVE_PROJECTION" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_NEARBY_DEVICE_STREAMING" />
+    <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_SENSOR_DEVICE_STREAMING" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_WATCH" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_PROFILE_GLASSES" />
     <uses-permission android:name="android.permission.REQUEST_COMPANION_SELF_MANAGED" />
@@ -366,6 +372,9 @@
 
     <!-- Permission needed for CTS test - UnsupportedErrorDialogTests -->
     <uses-permission android:name="android.permission.RESET_APP_ERRORS" />
+
+    <!-- Permission needed tests -->
+    <uses-permission android:name="android.permission.OBSERVE_PICTURE_PROFILES" />
 
     <!-- Permission needed for CTS test - CtsSystemUiTestCases:PipNotificationTests -->
     <uses-permission android:name="android.permission.GET_INTENT_SENDER_INTENT" />
@@ -715,6 +724,9 @@
     <uses-permission android:name="android.permission.UWB_PRIVILEGED" />
     <uses-permission android:name="android.permission.UWB_RANGING" />
 
+    <!-- Permission required for CTS test - CtsRangingTestCases -->
+    <uses-permission android:name="android.permission.RANGING" />
+
     <!-- Permission required for CTS test - CtsAlarmManagerTestCases -->
     <uses-permission android:name="android.permission.UPDATE_DEVICE_STATS" />
 
@@ -737,6 +749,9 @@
 
     <!-- Permission required for ATS test - CarDevicePolicyManagerTest -->
     <uses-permission android:name="android.permission.LOCK_DEVICE" />
+
+    <!-- Permission required for AuthenticationPolicyManagerTest -->
+    <uses-permission android:name="android.permission.MANAGE_SECURE_LOCK_DEVICE" />
 
     <!-- Permissions required for CTS test - CtsSafetyCenterTestCases -->
     <uses-permission android:name="android.permission.SEND_SAFETY_CENTER_UPDATE" />
@@ -924,7 +939,6 @@
 
     <!-- Permission required for CTS test - CtsPackageManagerTestCases-->
     <uses-permission android:name="android.permission.DOMAIN_VERIFICATION_AGENT" />
-    <uses-permission android:name="android.permission.VERIFICATION_AGENT" />
 
     <!-- Permission required for Cts test - CtsInputTestCases -->
     <uses-permission
@@ -943,16 +957,45 @@
     <!-- Permission required for CTS test - CtsNfcTestCases -->
     <uses-permission android:name="android.permission.NFC_SET_CONTROLLER_ALWAYS_ON" />
     <!-- Permission required for CTS test - AdvancedProtectionManagerTest -->
-    <uses-permission android:name="android.permission.SET_ADVANCED_PROTECTION_MODE"
+    <uses-permission android:name="android.permission.MANAGE_ADVANCED_PROTECTION_MODE"
         android:featureFlag="android.security.aapm_api"/>
     <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE"
         android:featureFlag="android.security.aapm_api"/>
+
+    <!-- Permission required for CTS test - IntrusionDetectionManagerTest -->
+    <uses-permission android:name="android.permission.READ_INTRUSION_DETECTION_STATE"
+        android:featureFlag="android.security.afl_api"/>
+    <uses-permission android:name="android.permission.MANAGE_INTRUSION_DETECTION_STATE"
+        android:featureFlag="android.security.afl_api"/>
+
 
     <!-- Permission required for CTS test - CtsAppTestCases -->
     <uses-permission android:name="android.permission.KILL_UID" />
 
     <!-- Permission required for CTS test - CtsTelephonyTestCases -->
     <uses-permission android:name="android.permission.READ_BASIC_PHONE_STATE" />
+
+    <!-- Permission required for CTS test - CtsDynamicInstrumentationManagerTest -->
+    <uses-permission android:name="android.permission.DYNAMIC_INSTRUMENTATION" />
+
+    <!-- Permissions required for CTS test - SettingsPreferenceServiceClientTest -->
+    <uses-permission android:name="android.permission.READ_SYSTEM_PREFERENCES" />
+    <uses-permission android:name="android.permission.WRITE_SYSTEM_PREFERENCES" />
+
+    <!-- Permissions required for CTS test - ActivityManagerForegroundServiceTypeTest -->
+    <uses-permission android:name="android.permission.health.READ_HEART_RATE"
+        android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
+    <uses-permission android:name="android.permission.health.READ_OXYGEN_SATURATION"
+        android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
+    <uses-permission android:name="android.permission.health.READ_SKIN_TEMPERATURE"
+        android:featureFlag="android.permission.flags.replace_body_sensor_permission_enabled"/>
+
+    <!-- Permission for TestClassifier tests to get access to classifier by type -->
+    <uses-permission android:name="android.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE"
+        android:featureFlag="android.permission.flags.text_classifier_choice_api_enabled"/>
+
+    <!-- Permission required for CTS test - CtsContentProviderMultiUserTest -->
+    <uses-permission android:name="android.permission.RESOLVE_COMPONENT_FOR_UID" />
 
     <application
         android:label="@string/app_label"

@@ -46,6 +46,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.media.BluetoothRouteController.NoOpBluetoothRouteController;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -378,7 +379,12 @@ import java.util.Objects;
             Slog.e(
                     TAG,
                     "Could not map this selected device attribute type to an available route: "
-                            + selectedDeviceAttributesType);
+                            + selectedDeviceAttributesType
+                            + ". Available types: "
+                            + Arrays.toString(
+                                    Arrays.stream(audioDeviceInfos)
+                                            .map(AudioDeviceInfo::getType)
+                                            .toArray()));
             // We know mRouteIdToAvailableDeviceRoutes is not empty.
             newSelectedRouteHolder = mRouteIdToAvailableDeviceRoutes.values().iterator().next();
         }
@@ -662,8 +668,6 @@ import java.util.Objects;
                         MediaRoute2Info.TYPE_HDMI_EARC,
                         /* defaultRouteId= */ "ROUTE_ID_HDMI_EARC",
                         /* nameResource= */ R.string.default_audio_route_name_external_device));
-        // TODO: b/305199571 - Add a proper type constants and human readable names for AUX_LINE,
-        // LINE_ANALOG, LINE_DIGITAL, BLE_BROADCAST, BLE_SPEAKER, BLE_HEADSET, and HEARING_AID.
         AUDIO_DEVICE_INFO_TYPE_TO_ROUTE_INFO.put(
                 AudioDeviceInfo.TYPE_HEARING_AID,
                 new SystemRouteInfo(
@@ -691,19 +695,22 @@ import java.util.Objects;
         AUDIO_DEVICE_INFO_TYPE_TO_ROUTE_INFO.put(
                 AudioDeviceInfo.TYPE_LINE_DIGITAL,
                 new SystemRouteInfo(
-                        MediaRoute2Info.TYPE_UNKNOWN,
+                        com.android.media.flags.Flags.enableNewWiredMediaRoute2InfoTypes()
+                                ? MediaRoute2Info.TYPE_LINE_DIGITAL : MediaRoute2Info.TYPE_UNKNOWN,
                         /* defaultRouteId= */ "ROUTE_ID_LINE_DIGITAL",
                         /* nameResource= */ R.string.default_audio_route_name_external_device));
         AUDIO_DEVICE_INFO_TYPE_TO_ROUTE_INFO.put(
                 AudioDeviceInfo.TYPE_LINE_ANALOG,
                 new SystemRouteInfo(
-                        MediaRoute2Info.TYPE_UNKNOWN,
+                        com.android.media.flags.Flags.enableNewWiredMediaRoute2InfoTypes()
+                                ? MediaRoute2Info.TYPE_LINE_ANALOG : MediaRoute2Info.TYPE_UNKNOWN,
                         /* defaultRouteId= */ "ROUTE_ID_LINE_ANALOG",
                         /* nameResource= */ R.string.default_audio_route_name_external_device));
         AUDIO_DEVICE_INFO_TYPE_TO_ROUTE_INFO.put(
                 AudioDeviceInfo.TYPE_AUX_LINE,
                 new SystemRouteInfo(
-                        MediaRoute2Info.TYPE_UNKNOWN,
+                        com.android.media.flags.Flags.enableNewWiredMediaRoute2InfoTypes()
+                                ? MediaRoute2Info.TYPE_AUX_LINE : MediaRoute2Info.TYPE_UNKNOWN,
                         /* defaultRouteId= */ "ROUTE_ID_AUX_LINE",
                         /* nameResource= */ R.string.default_audio_route_name_external_device));
         AUDIO_DEVICE_INFO_TYPE_TO_ROUTE_INFO.put(

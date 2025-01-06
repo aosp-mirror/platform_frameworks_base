@@ -417,6 +417,7 @@ public abstract class CameraDevice implements AutoCloseable {
      *                                  or if any of the output configurations sets a stream use
      *                                  case different from {@link
      *                                  android.hardware.camera2.CameraCharacteristics#SCALER_AVAILABLE_STREAM_USE_CASES_DEFAULT}.
+     * @throws UnsupportedOperationException if the camera has been opened in shared mode
      * @see CameraExtensionCharacteristics#getSupportedExtensions
      * @see CameraExtensionCharacteristics#getExtensionSupportedSizes
      */
@@ -446,6 +447,17 @@ public abstract class CameraDevice implements AutoCloseable {
     public static final int SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED =
             1; // ICameraDeviceUser.CONSTRAINED_HIGH_SPEED_MODE;
 
+     /**
+     * Shared camera operation mode.
+     *
+     * @see #CameraSharedCaptureSession
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+    public static final int SESSION_OPERATION_MODE_SHARED =
+            2; // ICameraDeviceUser.SHARED_MODE;
+
     /**
      * First vendor-specific operating mode
      *
@@ -461,6 +473,7 @@ public abstract class CameraDevice implements AutoCloseable {
     @IntDef(prefix = {"SESSION_OPERATION_MODE"}, value =
             {SESSION_OPERATION_MODE_NORMAL,
              SESSION_OPERATION_MODE_CONSTRAINED_HIGH_SPEED,
+             SESSION_OPERATION_MODE_SHARED,
              SESSION_OPERATION_MODE_VENDOR_START})
     public @interface SessionOperatingMode {};
 
@@ -1240,14 +1253,14 @@ public abstract class CameraDevice implements AutoCloseable {
      *
      * </ul>
      *
-     *
      * @param config A session configuration (see {@link SessionConfiguration}).
      *
      * @throws IllegalArgumentException In case the session configuration is invalid; or the output
      *                                  configurations are empty; or the session configuration
      *                                  executor is invalid;
      *                                  or the output dynamic range combination is
-     *                                  invalid/unsupported.
+     *                                  invalid/unsupported; or the session type is not shared when
+     *                                  camera has been opened in shared mode.
      * @throws CameraAccessException In case the camera device is no longer connected or has
      *                               encountered a fatal error.
      * @see #createCaptureSession(List, CameraCaptureSession.StateCallback, Handler)
@@ -1281,6 +1294,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     * @throws UnsupportedOperationException if this is not a primary client of a camera opened in
+     *                                       shared mode
      */
     @NonNull
     public abstract CaptureRequest.Builder createCaptureRequest(@RequestTemplate int templateType)
@@ -1317,6 +1332,8 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     * @throws UnsupportedOperationException if this is not a primary client of a camera opened in
+     *                                       shared mode
      *
      * @see #TEMPLATE_PREVIEW
      * @see #TEMPLATE_RECORD
@@ -1358,6 +1375,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * @throws CameraAccessException if the camera device is no longer connected or has
      *                               encountered a fatal error
      * @throws IllegalStateException if the camera device has been closed
+     * @throws UnsupportedOperationException if the camera has been opened in shared mode
      *
      * @see CaptureRequest.Builder
      * @see TotalCaptureResult
@@ -1557,6 +1575,48 @@ public abstract class CameraDevice implements AutoCloseable {
          * @param camera the camera device that has become opened
          */
         public abstract void onOpened(@NonNull CameraDevice camera); // Must implement
+
+        /**
+         * The method called when a camera device has finished opening in shared mode,
+         * where there can be more than one client accessing the same camera.
+         *
+         * <p>At this point, the camera device is ready to use, and
+         * {@link CameraDevice#createCaptureSession} can be called to set up the shared capture
+         * session.</p>
+         *
+         * @param camera the camera device that has become opened
+         * @param isPrimaryClient true if the client opening the camera is currently the primary
+         *                             client.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+        public void onOpenedInSharedMode(@NonNull CameraDevice camera, boolean isPrimaryClient) {
+          // Default empty implementation
+        }
+
+        /**
+         * The method called when client access priorities have changed for a camera device opened
+         * in shared mode where there can be more than one client accessing the same camera.
+         *
+         * If the client priority changed from secondary to primary, then it can now
+         * create capture request and change the capture request parameters. If client priority
+         * changed from primary to secondary, that implies that a higher priority client has also
+         * opened the camera in shared mode and the new client is now a primary client
+         *
+         * @param camera the camera device whose access priorities have changed.
+         * @param isPrimaryClient true if the client is now the primary client.
+         *                        false if another higher priority client also opened the
+         *                        camera and is now the new primary client and this client is
+         *                        now a secondary client.
+         * @hide
+         */
+        @SystemApi
+        @FlaggedApi(Flags.FLAG_CAMERA_MULTI_CLIENT)
+        public void onClientSharedAccessPriorityChanged(@NonNull CameraDevice camera,
+                boolean isPrimaryClient) {
+          // Default empty implementation
+        }
 
         /**
          * The method called when a camera device has been closed with

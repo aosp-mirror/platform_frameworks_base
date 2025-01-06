@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.internal.widget.lockPatternUtils
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
@@ -33,6 +34,8 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -52,14 +55,21 @@ class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val values by collectValues(underTest.lockWhileAwakeEvents)
 
-            underTest.onKeyguardServiceDoKeyguardTimeout(options = null)
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(true)
+            runCurrent()
+
+            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(
+                options = null
+            )
             runCurrent()
 
             assertThat(values)
                 .containsExactly(LockWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON)
 
             advanceTimeBy(1000)
-            underTest.onKeyguardServiceDoKeyguardTimeout(options = null)
+            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(
+                options = null
+            )
             runCurrent()
 
             assertThat(values)
@@ -69,8 +79,15 @@ class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
                 )
         }
 
+    /**
+     * We re-show keyguard when it's re-enabled, but only if it was originally showing when we
+     * disabled it.
+     *
+     * If it wasn't showing when originally disabled it, re-enabling it should do nothing (the
+     * keyguard will re-show next time we're locked).
+     */
     @Test
-    fun emitsWhenKeyguardEnabled_onlyIfShowingWhenDisabled() =
+    fun emitsWhenKeyguardReenabled_onlyIfShowingWhenDisabled() =
         testScope.runTest {
             val values by collectValues(underTest.lockWhileAwakeEvents)
 
@@ -97,5 +114,50 @@ class KeyguardLockWhileAwakeInteractorTest : SysuiTestCase() {
             runCurrent()
 
             assertThat(values).containsExactly(LockWhileAwakeReason.KEYGUARD_REENABLED)
+        }
+
+    /**
+     * Un-suppressing keyguard should never cause us to re-show. We'll re-show when we're next
+     * locked, even if we were showing when originally suppressed.
+     */
+    @Test
+    fun doesNotEmit_keyguardNoLongerSuppressed() =
+        testScope.runTest {
+            val values by collectValues(underTest.lockWhileAwakeEvents)
+
+            // Enable keyguard and then suppress it.
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(true)
+            whenever(kosmos.lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true)
+            runCurrent()
+
+            assertEquals(0, values.size)
+
+            // Un-suppress keyguard.
+            whenever(kosmos.lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(false)
+            runCurrent()
+
+            assertEquals(0, values.size)
+        }
+
+    /**
+     * Lockdown and lockNow() should not cause us to lock while awake if we are suppressed via adb.
+     */
+    @Test
+    fun doesNotEmit_fromLockdown_orFromLockNow_ifEnabledButSuppressed() =
+        testScope.runTest {
+            val values by collectValues(underTest.lockWhileAwakeEvents)
+
+            // Set keyguard enabled, but then disable lockscreen (suppress it).
+            kosmos.keyguardEnabledInteractor.notifyKeyguardEnabled(true)
+            whenever(kosmos.lockPatternUtils.isLockScreenDisabled(anyInt())).thenReturn(true)
+            runCurrent()
+
+            kosmos.keyguardServiceLockNowInteractor.onKeyguardServiceDoKeyguardTimeout(null)
+            runCurrent()
+
+            kosmos.biometricSettingsRepository.setIsUserInLockdown(true)
+            runCurrent()
+
+            assertEquals(0, values.size)
         }
 }

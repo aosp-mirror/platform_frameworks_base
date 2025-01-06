@@ -43,6 +43,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE
 import com.android.systemui.keyguard.shared.model.StatusBarState.SHADE_LOCKED
 import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToGoneTransitionViewModel
+import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerToPrimaryBouncerTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodBurnInViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToGoneTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.AodToLockscreenTransitionViewModel
@@ -72,6 +73,7 @@ import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.LargeScreenHeaderHelper
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode.Dual
 import com.android.systemui.shade.shared.model.ShadeMode.Single
@@ -115,14 +117,16 @@ constructor(
     private val interactor: SharedNotificationContainerInteractor,
     dumpManager: DumpManager,
     @Application applicationScope: CoroutineScope,
-    private val context: Context,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware private val context: Context,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
     private val shadeInteractor: ShadeInteractor,
     private val notificationStackAppearanceInteractor: NotificationStackAppearanceInteractor,
     private val alternateBouncerToGoneTransitionViewModel:
         AlternateBouncerToGoneTransitionViewModel,
+    private val alternateBouncerToPrimaryBouncerTransitionViewModel:
+        AlternateBouncerToPrimaryBouncerTransitionViewModel,
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
@@ -243,7 +247,7 @@ constructor(
                                 Split -> HorizontalPosition.MiddleToEdge(ratio = 0.5f)
                                 Dual ->
                                     if (isShadeLayoutWide) {
-                                        HorizontalPosition.FloatAtEnd(
+                                        HorizontalPosition.FloatAtStart(
                                             width = getDimensionPixelSize(R.dimen.shade_panel_width)
                                         )
                                     } else {
@@ -559,6 +563,7 @@ constructor(
             lockscreenToGoneTransitionViewModel.notificationAlpha(viewState),
             lockscreenToOccludedTransitionViewModel.lockscreenAlpha,
             lockscreenToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
+            alternateBouncerToPrimaryBouncerTransitionViewModel.notificationAlpha,
             occludedToAodTransitionViewModel.lockscreenAlpha,
             occludedToGoneTransitionViewModel.notificationAlpha(viewState),
             occludedToLockscreenTransitionViewModel.lockscreenAlpha,
@@ -717,9 +722,11 @@ constructor(
      * When expanding or when the user is interacting with the shade, keep the count stable; do not
      * emit a value.
      */
-    fun getMaxNotifications(calculateSpace: (Float, Boolean) -> Int): Flow<Int> {
+    fun getLockscreenDisplayConfig(
+        calculateSpace: (Float, Boolean) -> Int
+    ): Flow<LockscreenDisplayConfig> {
         val showLimitedNotifications = isOnLockscreenWithoutShade
-        val showUnlimitedNotifications =
+        val showUnlimitedNotificationsAndIsOnLockScreen =
             combine(
                 isOnLockscreen,
                 keyguardInteractor.statusBarState,
@@ -729,28 +736,42 @@ constructor(
                     )
                     .onStart { emit(false) },
             ) { isOnLockscreen, statusBarState, showAllNotifications ->
-                statusBarState == SHADE_LOCKED || !isOnLockscreen || showAllNotifications
+                (statusBarState == SHADE_LOCKED || !isOnLockscreen || showAllNotifications) to
+                    isOnLockscreen
             }
 
+        @Suppress("UNCHECKED_CAST")
         return combineTransform(
                 showLimitedNotifications,
-                showUnlimitedNotifications,
+                showUnlimitedNotificationsAndIsOnLockScreen,
                 shadeInteractor.isUserInteracting,
                 availableHeight,
                 interactor.notificationStackChanged,
                 interactor.useExtraShelfSpace,
             ) { flows ->
                 val showLimitedNotifications = flows[0] as Boolean
-                val showUnlimitedNotifications = flows[1] as Boolean
+                val (showUnlimitedNotifications, isOnLockscreen) =
+                    flows[1] as Pair<Boolean, Boolean>
                 val isUserInteracting = flows[2] as Boolean
                 val availableHeight = flows[3] as Float
                 val useExtraShelfSpace = flows[5] as Boolean
 
                 if (!isUserInteracting) {
                     if (showLimitedNotifications) {
-                        emit(calculateSpace(availableHeight, useExtraShelfSpace))
+                        emit(
+                            LockscreenDisplayConfig(
+                                isOnLockscreen = isOnLockscreen,
+                                maxNotifications =
+                                    calculateSpace(availableHeight, useExtraShelfSpace),
+                            )
+                        )
                     } else if (showUnlimitedNotifications) {
-                        emit(-1)
+                        emit(
+                            LockscreenDisplayConfig(
+                                isOnLockscreen = isOnLockscreen,
+                                maxNotifications = -1,
+                            )
+                        )
                     }
                 }
             }
@@ -774,9 +795,9 @@ constructor(
         SceneContainerFlag.assertInLegacyMode()
 
         return combine(
-            getMaxNotifications(calculateMaxNotifications).map {
-                val height = calculateHeight(it)
-                if (it == 0) {
+            getLockscreenDisplayConfig(calculateMaxNotifications).map { (_, maxNotifications) ->
+                val height = calculateHeight(maxNotifications)
+                if (maxNotifications == 0) {
                     height - shelfHeight
                 } else {
                     height
@@ -809,9 +830,18 @@ constructor(
         data class MiddleToEdge(val ratio: Float = 0.5f) : HorizontalPosition
 
         /**
-         * The container has a fixed [width] and is aligned to the end of the screen. In this
-         * layout, the start edge of the container is floating, i.e. unconstrained.
+         * The container has a fixed [width] and is aligned to the start of the screen. In this
+         * layout, the end edge of the container is floating, i.e. unconstrained.
          */
-        data class FloatAtEnd(val width: Int) : HorizontalPosition
+        data class FloatAtStart(val width: Int) : HorizontalPosition
     }
+
+    /**
+     * Data class representing a configuration for displaying Notifications on the Lockscreen.
+     *
+     * @param isOnLockscreen is the user on the lockscreen
+     * @param maxNotifications Limit for the max number of top-level Notifications to be displayed.
+     *   A value of -1 indicates no limit.
+     */
+    data class LockscreenDisplayConfig(val isOnLockscreen: Boolean, val maxNotifications: Int)
 }

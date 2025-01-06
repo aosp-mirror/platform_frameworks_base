@@ -17,8 +17,11 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import android.graphics.Point
+import android.view.Display
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
+import com.android.systemui.power.data.repository.PowerRepository
+import com.android.systemui.power.shared.model.DozeScreenStateModel
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
@@ -30,6 +33,7 @@ class DozeInteractor
 @Inject
 constructor(
     private val keyguardRepository: KeyguardRepository,
+    private val powerRepository: PowerRepository,
     // TODO(b/336364825) Remove Lazy when SceneContainerFlag is released -
     // while the flag is off, creating this object too early results in a crash
     private val sceneInteractor: Lazy<SceneInteractor>,
@@ -39,6 +43,20 @@ constructor(
             return false
         }
         return sceneInteractor.get().currentScene.value == Scenes.Lockscreen
+    }
+
+    fun setDozeScreenState(state: Int) {
+        powerRepository.dozeScreenState.value =
+            when (state) {
+                Display.STATE_UNKNOWN -> DozeScreenStateModel.UNKNOWN
+                Display.STATE_OFF -> DozeScreenStateModel.OFF
+                Display.STATE_ON -> DozeScreenStateModel.ON
+                Display.STATE_DOZE -> DozeScreenStateModel.DOZE
+                Display.STATE_DOZE_SUSPEND -> DozeScreenStateModel.DOZE_SUSPEND
+                Display.STATE_VR -> DozeScreenStateModel.VR
+                Display.STATE_ON_SUSPEND -> DozeScreenStateModel.ON_SUSPEND
+                else -> throw IllegalArgumentException("Invalid DozeScreenState: $state")
+            }
     }
 
     fun setAodAvailable(value: Boolean) {

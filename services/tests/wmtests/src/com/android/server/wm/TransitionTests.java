@@ -433,8 +433,8 @@ public class TransitionTests extends WindowTestsBase {
 
         final WallpaperWindowToken wallpaperWindowToken = spy(new WallpaperWindowToken(mWm,
                 mock(IBinder.class), true, mDisplayContent, true /* ownerCanManageAppTokens */));
-        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
-                "wallpaperWindow");
+        final WindowState wallpaperWindow = newWindowBuilder("wallpaperWindow",
+                TYPE_WALLPAPER).setWindowToken(wallpaperWindowToken).build();
         wallpaperWindowToken.setVisibleRequested(false);
         transition.collect(wallpaperWindowToken);
         wallpaperWindowToken.setVisibleRequested(true);
@@ -630,8 +630,8 @@ public class TransitionTests extends WindowTestsBase {
         // Make DA organized so we can check that they don't get included.
         WindowContainer parent = wallpaperWindowToken.getParent();
         makeDisplayAreaOrganized(parent, mDisplayContent);
-        final WindowState wallpaperWindow = createWindow(null, TYPE_WALLPAPER, wallpaperWindowToken,
-                "wallpaperWindow");
+        final WindowState wallpaperWindow = newWindowBuilder("wallpaperWindow",
+                TYPE_WALLPAPER).setWindowToken(wallpaperWindowToken).build();
         wallpaperWindowToken.setVisibleRequested(false);
         transition.collect(wallpaperWindowToken);
         wallpaperWindowToken.setVisibleRequested(true);
@@ -1114,15 +1114,15 @@ public class TransitionTests extends WindowTestsBase {
         // Simulate gesture navigation (non-movable) so it is not seamless.
         doReturn(false).when(displayPolicy).navigationBarCanMove();
         final Task task = createActivityRecord(mDisplayContent).getTask();
-        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
-        final WindowState navBar = createWindow(null, TYPE_NAVIGATION_BAR, "navBar");
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_STATUS_BAR).build();
+        final WindowState navBar = newWindowBuilder("navBar", TYPE_NAVIGATION_BAR).build();
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).build();
         final WindowToken decorToken = new WindowToken.Builder(mWm, mock(IBinder.class),
                 TYPE_NAVIGATION_BAR_PANEL).setDisplayContent(mDisplayContent)
                 .setRoundedCornerOverlay(true).build();
-        final WindowState screenDecor =
-                createWindow(null, decorToken.windowType, decorToken, "screenDecor");
-        final WindowState[] windows = { statusBar, navBar, ime, screenDecor };
+        final WindowState screenDecor = newWindowBuilder("screenDecor",
+                decorToken.windowType).setWindowToken(decorToken).build();
+        final WindowState[] windows = {statusBar, navBar, ime, screenDecor};
         makeWindowVisible(windows);
         mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
         mDisplayContent.getDisplayPolicy().addWindowLw(navBar, navBar.mAttrs);
@@ -1191,7 +1191,7 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     private void testShellRotationOpen(TestTransitionPlayer player) {
-        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_STATUS_BAR).build();
         makeWindowVisible(statusBar);
         mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
         final ActivityRecord app = createActivityRecord(mDisplayContent);
@@ -1239,7 +1239,7 @@ public class TransitionTests extends WindowTestsBase {
     }
 
     private void testFixedRotationOpen(TestTransitionPlayer player) {
-        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, "statusBar");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_STATUS_BAR).build();
         makeWindowVisible(statusBar);
         mDisplayContent.getDisplayPolicy().addWindowLw(statusBar, statusBar.mAttrs);
         final WindowState navBar = createNavBarWithProvidedInsets(mDisplayContent);
@@ -1333,6 +1333,7 @@ public class TransitionTests extends WindowTestsBase {
 
     @Test
     public void testDeferRotationForTransientLaunch() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TestTransitionPlayer player = registerTestTransitionPlayer();
         assumeFalse(mDisplayContent.mTransitionController.useShellTransitionsRotation());
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
@@ -2271,15 +2272,24 @@ public class TransitionTests extends WindowTestsBase {
             public void cleanUp(SurfaceControl.Transaction t) {
             }
         });
+        assertEquals(WindowAnimator.PENDING_STATE_NONE, mWm.mAnimator.mPendingState);
+        app.startAnimation(app.getPendingTransaction(), mock(AnimationAdapter.class),
+                false /* hidden */, SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
+        assertEquals(WindowAnimator.PENDING_STATE_HAS_CHANGES, mWm.mAnimator.mPendingState);
+
         final Task task = app.getTask();
         transition.collect(task);
+        assertEquals(WindowAnimator.PENDING_STATE_NEED_APPLY, mWm.mAnimator.mPendingState);
         final Rect bounds = new Rect(task.getBounds());
         Configuration c = new Configuration(task.getRequestedOverrideConfiguration());
         bounds.inset(10, 10);
         c.windowConfiguration.setBounds(bounds);
         task.onRequestedOverrideConfigurationChanged(c);
         assertTrue(freezeCalls.contains(task));
-        transition.abort();
+
+        transition.start();
+        mWm.mSyncEngine.abort(transition.getSyncId());
+        assertEquals(WindowAnimator.PENDING_STATE_NONE, mWm.mAnimator.mPendingState);
     }
 
     @Test

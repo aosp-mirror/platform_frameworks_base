@@ -379,7 +379,8 @@ class SingleLineViewInflaterTest : SysuiTestCase() {
             this,
             if (isConversation) messagingStyle else null,
             builder,
-            context
+            context,
+            false
         )
     }
 

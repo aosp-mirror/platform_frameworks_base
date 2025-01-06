@@ -995,12 +995,12 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
 
             kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
             val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
-            sendSteps(sendStep1)
-            kosmos.setSceneTransition(Idle(Scenes.Gone))
             val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
+            sendSteps(sendStep1, sendStep2)
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
             val sendStep3 = TransitionStep(UNDEFINED, AOD, 0f, STARTED)
             val sendStep4 = TransitionStep(AOD, LOCKSCREEN, 0f, STARTED)
-            sendSteps(sendStep2, sendStep3, sendStep4)
+            sendSteps(sendStep3, sendStep4)
 
             assertEquals(listOf<TransitionStep>(), currentStatesMapped)
         }
@@ -1132,6 +1132,63 @@ class KeyguardTransitionInteractorTest : SysuiTestCase() {
                 ),
                 sceneToSceneSteps,
             )
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_filter_on_belongsToInstantReversedTransition_out_of_lockscreen_scene() =
+        testScope.runTest {
+            val currentStatesMapped by
+                collectValues(underTest.transition(Edge.create(LOCKSCREEN, Scenes.Gone)))
+
+            kosmos.setSceneTransition(Transition(Scenes.Gone, Scenes.Lockscreen))
+            val sendStep1 = TransitionStep(UNDEFINED, LOCKSCREEN, 0f, STARTED)
+            kosmos.setSceneTransition(Idle(Scenes.Gone))
+            val sendStep2 = TransitionStep(UNDEFINED, LOCKSCREEN, 0.6f, CANCELED)
+            sendSteps(sendStep1, sendStep2)
+            val sendStep3 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            val sendStep4 = TransitionStep(LOCKSCREEN, UNDEFINED, 1f, FINISHED)
+            sendSteps(sendStep3, sendStep4)
+
+            assertEquals(listOf(sendStep3, sendStep4), currentStatesMapped)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_filter_on_belongsToInstantReversedTransition_into_lockscreen_scene() =
+        testScope.runTest {
+            val currentStatesMapped by
+                collectValues(underTest.transition(Edge.create(Scenes.Gone, LOCKSCREEN)))
+
+            kosmos.setSceneTransition(Transition(Scenes.Lockscreen, Scenes.Gone))
+            val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
+            val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 0.6f, CANCELED)
+            sendSteps(sendStep1, sendStep2)
+            val sendStep3 = TransitionStep(UNDEFINED, LOCKSCREEN, 0f, STARTED)
+            val sendStep4 = TransitionStep(UNDEFINED, LOCKSCREEN, 1f, FINISHED)
+            sendSteps(sendStep3, sendStep4)
+
+            assertEquals(listOf(sendStep3, sendStep4), currentStatesMapped)
+        }
+
+    @Test
+    @EnableSceneContainer
+    fun transition_filter_on_belongsToInstantReversedTransition_out_of_ls_with_wildcard() =
+        testScope.runTest {
+            val currentStatesMapped by
+                collectValues(underTest.transition(Edge.create(to = LOCKSCREEN)))
+
+            kosmos.setSceneTransition(Transition(Scenes.Lockscreen, Scenes.Gone))
+            val sendStep1 = TransitionStep(LOCKSCREEN, UNDEFINED, 0f, STARTED)
+            kosmos.setSceneTransition(Idle(Scenes.Lockscreen))
+            val sendStep2 = TransitionStep(LOCKSCREEN, UNDEFINED, 0.6f, CANCELED)
+            sendSteps(sendStep1, sendStep2)
+            val sendStep3 = TransitionStep(UNDEFINED, LOCKSCREEN, 0f, STARTED)
+            val sendStep4 = TransitionStep(UNDEFINED, LOCKSCREEN, 1f, FINISHED)
+            sendSteps(sendStep3, sendStep4)
+
+            assertEquals(listOf(sendStep3, sendStep4), currentStatesMapped)
         }
 
     private suspend fun sendSteps(vararg steps: TransitionStep) {

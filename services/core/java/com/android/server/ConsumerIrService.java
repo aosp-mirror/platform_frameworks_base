@@ -30,6 +30,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.util.Slog;
 
+import com.android.server.utils.LazyJniRegistrar;
+
 public class ConsumerIrService extends IConsumerIrService.Stub {
     private static final String TAG = "ConsumerIrService";
 
@@ -38,6 +40,10 @@ public class ConsumerIrService extends IConsumerIrService.Stub {
     private static native boolean getHidlHalService();
     private static native int halTransmit(int carrierFrequency, int[] pattern);
     private static native int[] halGetCarrierFrequencies();
+
+    static {
+        LazyJniRegistrar.registerConsumerIrService();
+    }
 
     private final Context mContext;
     private final PowerManager.WakeLock mWakeLock;

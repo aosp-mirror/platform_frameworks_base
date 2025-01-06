@@ -48,10 +48,11 @@ class TextFilePolicyMethodReplaceFilter(
         // Maybe use 'Tri' if we end up having too many replacements.
         spec.forEach {
             if (className == it.fromClass &&
-                methodName == it.fromMethod &&
-                descriptor == it.fromDescriptor
+                methodName == it.fromMethod
                 ) {
-                return MethodReplaceTarget(it.toClass, it.toMethod)
+                if (it.fromDescriptor == "*" || descriptor == it.fromDescriptor) {
+                    return MethodReplaceTarget(it.toClass, it.toMethod)
+                }
             }
         }
         return null

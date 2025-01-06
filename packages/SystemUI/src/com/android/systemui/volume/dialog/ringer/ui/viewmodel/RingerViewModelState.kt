@@ -19,7 +19,8 @@ package com.android.systemui.volume.dialog.ringer.ui.viewmodel
 /** Models ringer view model state. */
 sealed class RingerViewModelState {
 
-    data class Available(val uiModel: RingerViewModel) : RingerViewModelState()
+    data class Available(val uiModel: RingerViewModel, val orientation: Int) :
+        RingerViewModelState()
 
     data object Unavailable : RingerViewModelState()
 }

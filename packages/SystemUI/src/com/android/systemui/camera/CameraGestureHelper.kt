@@ -107,6 +107,7 @@ constructor(
                 activityOptions.setDisallowEnterPictureInPictureWhileLaunching(true)
                 activityOptions.rotationAnimationHint =
                     WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS
+                intent.collectExtraIntentKeys()
                 try {
                     activityTaskManager.startActivityAsUser(
                         null,

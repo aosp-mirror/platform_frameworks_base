@@ -347,6 +347,27 @@
                 <category android:name="android.intent.category.LEANBACK_LAUNCHER"/>
             </intent-filter>
         </activity>
+        <activity android:name=".BottomHalfPipLaunchingActivity"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.BottomHalfPipLaunchingActivity"
+            android:theme="@style/CutoutShortEdges"
+            android:label="BottomHalfPipLaunchingActivity"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <category android:name="android.intent.category.LAUNCHER"/>
+            </intent-filter>
+        </activity>
+        <activity
+            android:name=".BottomHalfPipActivity"
+            android:resizeableActivity="true"
+            android:supportsPictureInPicture="true"
+            android:configChanges="screenSize|smallestScreenSize|screenLayout|orientation"
+            android:taskAffinity="com.android.server.wm.flicker.testapp.BottomHalfPipLaunchingActivity"
+            android:theme="@style/TranslucentTheme"
+            android:label="BottomHalfPipActivity"
+            android:exported="true">
+        </activity>
         <activity android:name=".SplitScreenActivity"
                   android:resizeableActivity="true"
                   android:taskAffinity="com.android.server.wm.flicker.testapp.SplitScreenActivity"

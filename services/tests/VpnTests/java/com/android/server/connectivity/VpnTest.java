@@ -145,6 +145,7 @@ import android.net.ipsec.ike.exceptions.IkeNonProtocolException;
 import android.net.ipsec.ike.exceptions.IkeProtocolException;
 import android.net.ipsec.ike.exceptions.IkeTimeoutException;
 import android.net.vcn.VcnTransportInfo;
+import android.net.vcn.util.PersistableBundleUtils;
 import android.net.wifi.WifiInfo;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -179,7 +180,6 @@ import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.DeviceIdleInternal;
 import com.android.server.IpSecService;
 import com.android.server.VpnTestBase;
-import com.android.server.vcn.util.PersistableBundleUtils;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -915,6 +915,30 @@ public class VpnTest extends VpnTestBase {
 
         // reset to avoid affecting other tests since RESTRICTED_PROFILE_A is static.
         RESTRICTED_PROFILE_A.partial = false;
+    }
+
+    @Test
+    public void testOnUserAddedAndRemoved_nullUserInfo() throws Exception {
+        final Vpn vpn = createVpn(PRIMARY_USER.id);
+        final Set<Range<Integer>> initialRange = rangeSet(PRIMARY_USER_RANGE);
+        // Note since mVpnProfile is a Ikev2VpnProfile, this starts an IkeV2VpnRunner.
+        startLegacyVpn(vpn, mVpnProfile);
+        // Set an initial Uid range and mock the network agent
+        vpn.mNetworkCapabilities.setUids(initialRange);
+        vpn.mNetworkAgent = mMockNetworkAgent;
+
+        // Add the restricted user and then remove it immediately. So the getUserInfo() will return
+        // null for the given restricted user id.
+        setMockedUsers(PRIMARY_USER, RESTRICTED_PROFILE_A);
+        doReturn(null).when(mUserManager).getUserInfo(RESTRICTED_PROFILE_A.id);
+        vpn.onUserAdded(RESTRICTED_PROFILE_A.id);
+        // Expect no range change to the NetworkCapabilities.
+        assertEquals(initialRange, vpn.mNetworkCapabilities.getUids());
+
+        // Remove the restricted user
+        vpn.onUserRemoved(RESTRICTED_PROFILE_A.id);
+        // Expect no range change to the NetworkCapabilities.
+        assertEquals(initialRange, vpn.mNetworkCapabilities.getUids());
     }
 
     @Test
@@ -2380,10 +2404,14 @@ public class VpnTest extends VpnTestBase {
     @Test
     public void doTestMigrateIkeSession_Vcn() throws Exception {
         final int expectedKeepalive = 2097; // Any unlikely number will do
-        final NetworkCapabilities vcnNc = new NetworkCapabilities.Builder()
-                .addTransportType(TRANSPORT_CELLULAR)
-                .setTransportInfo(new VcnTransportInfo(TEST_SUB_ID, expectedKeepalive))
-                .build();
+        final NetworkCapabilities vcnNc =
+                new NetworkCapabilities.Builder()
+                        .addTransportType(TRANSPORT_CELLULAR)
+                        .setTransportInfo(
+                                new VcnTransportInfo.Builder()
+                                        .setMinUdpPort4500NatTimeoutSeconds(expectedKeepalive)
+                                        .build())
+                        .build();
         final Ikev2VpnProfile ikev2VpnProfile = makeIkeV2VpnProfile(
                 true /* isAutomaticIpVersionSelectionEnabled */,
                 true /* isAutomaticNattKeepaliveTimerEnabled */,

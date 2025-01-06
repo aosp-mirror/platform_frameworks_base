@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Activo (só o esquerdo)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Activo (só o dereito)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Activos (o esquerdo e o dereito)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Non se puido actualizar o ambiente"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Activo (só contido multimedia). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Activo (só contido multimedia). Esquerdo: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> de batería. Dereito: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> de batería."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Conectado (compatible con audio compartido). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> de batería."</string>
@@ -239,10 +240,10 @@
     <string name="category_work" msgid="4014193632325996115">"Traballo"</string>
     <string name="category_private" msgid="4244892185452788977">"Privado"</string>
     <string name="category_clone" msgid="1554511758987195974">"Clonar"</string>
-    <string name="development_settings_title" msgid="140296922921597393">"Opcións para programadores"</string>
-    <string name="development_settings_enable" msgid="4285094651288242183">"Activar opcións para programadores"</string>
+    <string name="development_settings_title" msgid="140296922921597393">"Opcións de programación"</string>
+    <string name="development_settings_enable" msgid="4285094651288242183">"Activar opcións de programación"</string>
     <string name="development_settings_summary" msgid="8718917813868735095">"Definir as opcións de desenvolvemento de aplicacións"</string>
-    <string name="development_settings_not_available" msgid="355070198089140951">"As opcións para programadores non están dispoñibles para este usuario"</string>
+    <string name="development_settings_not_available" msgid="355070198089140951">"As opcións de programación non están dispoñibles para este usuario"</string>
     <string name="vpn_settings_not_available" msgid="2894137119965668920">"A configuración da VPN non está dispoñible para este usuario"</string>
     <string name="tethering_settings_not_available" msgid="266821736434699780">"A configuración da conexión compartida non está dispoñible para este usuario"</string>
     <string name="apn_settings_not_available" msgid="1147111671403342300">"A configuración do nome do punto de acceso non está dispoñible para este usuario"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activa a aplicación terminal que ofrece acceso ao shell local"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Contorno de programación Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Executar terminal de Linux en Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimental) Executa o terminal de Linux en Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Se desactivas a opción, borraranse os datos do terminal de Linux"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Comprobación HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Definir comprobación HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Depuración"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Escala animación-transición"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Escala duración animador"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simular pantallas secundarias"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Posición do panel despregable na pantalla"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplicacións"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Non manter actividades"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Destrúe as actividades cando o usuario non as usa"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Este teléfono"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Esta tableta"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Este ordenador (interno)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Esta televisión"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altofalante da base"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Dispositivo externo"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Dispositivo conectado"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Este teléfono"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analóxica"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Non se pode reproducir contido neste dispositivo"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Cambia a conta a un plan superior para facer a modificación"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Non se poden reproducir as descargas neste dispositivo"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Conectado mediante ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Conectado mediante eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Opción predeterminada da televisión"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Saída HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Altofalantes internos"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Altofalante integrado"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Audio da televisión"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Produciuse un problema coa conexión. Apaga e acende o dispositivo."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Dispositivo de audio con cable"</string>
     <string name="help_label" msgid="3528360748637781274">"Axuda e comentarios"</string>

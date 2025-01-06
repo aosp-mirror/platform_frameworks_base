@@ -12,7 +12,7 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
-*/
+ */
 
 package com.android.wm.shell.desktopmode
 
@@ -64,16 +64,22 @@ class DesktopDisplayEventHandler(
 
     private fun refreshDisplayWindowingMode() {
         // TODO: b/375319538 - Replace the check with a DisplayManager API once it's available.
-        val isExtendedDisplayEnabled = 0 != Settings.Global.getInt(
-            context.contentResolver, DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0
-        )
+        val isExtendedDisplayEnabled =
+            0 !=
+                Settings.Global.getInt(
+                    context.contentResolver,
+                    DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
+                    0,
+                )
         if (!isExtendedDisplayEnabled) {
             // No action needed in mirror or projected mode.
             return
         }
 
-        val hasNonDefaultDisplay = rootTaskDisplayAreaOrganizer.getDisplayIds()
-            .any { displayId -> displayId != DEFAULT_DISPLAY }
+        val hasNonDefaultDisplay =
+            rootTaskDisplayAreaOrganizer.getDisplayIds().any { displayId ->
+                displayId != DEFAULT_DISPLAY
+            }
         val targetDisplayWindowingMode =
             if (hasNonDefaultDisplay) {
                 WINDOWING_MODE_FREEFORM

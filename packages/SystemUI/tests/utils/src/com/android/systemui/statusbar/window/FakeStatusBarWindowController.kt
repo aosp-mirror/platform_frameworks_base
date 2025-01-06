@@ -20,6 +20,7 @@ import android.view.View
 import android.view.ViewGroup
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.fragments.FragmentHostManager
+import kotlinx.coroutines.flow.MutableStateFlow
 import java.util.Optional
 
 class FakeStatusBarWindowController : StatusBarWindowController {
@@ -27,12 +28,21 @@ class FakeStatusBarWindowController : StatusBarWindowController {
     var isAttached = false
         private set
 
+    var isStopped = false
+        private set
+
+    val ongoingProcessRequiresStatusBarVisible = MutableStateFlow(false)
+
     override val statusBarHeight: Int = 0
 
     override fun refreshStatusBarHeight() {}
 
     override fun attach() {
         isAttached = true
+    }
+
+    override fun stop() {
+        isStopped = true
     }
 
     override fun addViewToWindow(view: View, layoutParams: ViewGroup.LayoutParams) {}
@@ -50,5 +60,7 @@ class FakeStatusBarWindowController : StatusBarWindowController {
 
     override fun setForceStatusBarVisible(forceStatusBarVisible: Boolean) {}
 
-    override fun setOngoingProcessRequiresStatusBarVisible(visible: Boolean) {}
+    override fun setOngoingProcessRequiresStatusBarVisible(visible: Boolean) {
+        ongoingProcessRequiresStatusBarVisible.value = visible
+    }
 }

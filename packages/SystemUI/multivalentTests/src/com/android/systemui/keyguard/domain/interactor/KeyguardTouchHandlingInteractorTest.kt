@@ -27,7 +27,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.deviceentry.domain.interactor.deviceEntryFaceAuthInteractor
 import com.android.systemui.deviceentry.shared.FaceAuthUiEvent
-import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFaceAuthRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -93,9 +92,7 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isEnabled = collectLastValue(underTest.isLongPressHandlingEnabled)
             KeyguardState.values().forEach { keyguardState ->
-                setUpState(
-                    keyguardState = keyguardState,
-                )
+                setUpState(keyguardState = keyguardState)
 
                 if (keyguardState == KeyguardState.LOCKSCREEN) {
                     assertThat(isEnabled()).isTrue()
@@ -110,10 +107,7 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val isEnabled = collectLastValue(underTest.isLongPressHandlingEnabled)
             KeyguardState.values().forEach { keyguardState ->
-                setUpState(
-                    keyguardState = keyguardState,
-                    isQuickSettingsVisible = true,
-                )
+                setUpState(keyguardState = keyguardState, isQuickSettingsVisible = true)
 
                 assertThat(isEnabled()).isFalse()
             }
@@ -290,35 +284,29 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.LOCKSCREEN,
                 to = KeyguardState.GONE,
-                testScope
+                testScope,
             )
             assertThat(isMenuVisible).isFalse()
 
             keyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GONE,
                 to = KeyguardState.LOCKSCREEN,
-                testScope
+                testScope,
             )
             assertThat(isMenuVisible).isFalse()
         }
 
-    private suspend fun createUnderTest(
-        isLongPressFeatureEnabled: Boolean = true,
-        isRevampedWppFeatureEnabled: Boolean = true,
-    ) {
+    private suspend fun createUnderTest(isRevampedWppFeatureEnabled: Boolean = true) {
         // This needs to be re-created for each test outside of kosmos since the flag values are
         // read during initialization to set up flows. Maybe there is a better way to handle that.
         underTest =
             KeyguardTouchHandlingInteractor(
-                appContext = mContext,
+                context = mContext,
                 scope = testScope.backgroundScope,
                 transitionInteractor = kosmos.keyguardTransitionInteractor,
                 repository = keyguardRepository,
                 logger = logger,
-                featureFlags =
-                    kosmos.fakeFeatureFlagsClassic.apply {
-                        set(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED, isLongPressFeatureEnabled)
-                    },
+                featureFlags = kosmos.fakeFeatureFlagsClassic,
                 broadcastDispatcher = fakeBroadcastDispatcher,
                 accessibilityManager = kosmos.accessibilityManagerWrapper,
                 pulsingGestureListener = kosmos.pulsingGestureListener,
@@ -334,7 +322,7 @@ class KeyguardTouchHandlingInteractorTest : SysuiTestCase() {
         keyguardTransitionRepository.sendTransitionSteps(
             from = KeyguardState.AOD,
             to = keyguardState,
-            testScope = testScope
+            testScope = testScope,
         )
         keyguardRepository.setQuickSettingsVisible(isVisible = isQuickSettingsVisible)
     }

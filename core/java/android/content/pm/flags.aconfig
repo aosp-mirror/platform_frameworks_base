@@ -149,6 +149,13 @@ flag {
 }
 
 flag {
+    name: "cache_sdk_system_features"
+    namespace: "system_performance"
+    description: "Feature flag to enable optimized cache for SDK-defined system feature lookups."
+    bug: "326623529"
+}
+
+flag {
     name: "provide_info_of_apk_in_apex"
     is_exported: true
     namespace: "package_manager_service"
@@ -312,15 +319,8 @@ flag {
 }
 
 flag {
-    name: "verification_service"
-    namespace: "package_manager_service"
-    description: "Feature flag to enable the new verification service."
-    bug: "360129103"
-    is_fixed_read_only: true
-}
-
-flag {
     name: "sdk_dependency_installer"
+    is_exported: true
     namespace: "package_manager_service"
     description: "Feature flag to enable installation of missing sdk dependency of app"
     bug: "370822870"
@@ -348,4 +348,38 @@ flag {
     description: "Feature flag to introduce a new way to change the launcher badging."
     bug: "364760703"
     is_fixed_read_only: true
+    is_exported: true
+}
+
+flag {
+    name: "cloud_compilation_pm"
+    is_exported: true
+    namespace: "art_mainline"
+    description: "Feature flag to enable the Cloud Compilation support on the package manager side."
+    bug: "377474232"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "app_compat_option_16kb"
+    is_exported: true
+    namespace: "devoptions_settings"
+    description: "Feature flag to enable page size app compat mode from manifest, package manager and settings level."
+    bug: "371049373"
+    is_fixed_read_only: true
+}
+
+flag {
+    name: "remove_hidden_module_usage"
+    namespace: "modularization"
+    description: "Feature flag to remove the consumption of the hidden module status (ModuleInfo#IsHidden) in the Android source tree."
+    bug: "363952383"
+}
+
+flag {
+    name: "uid_based_provider_lookup"
+    is_exported: true
+    namespace: "package_manager_service"
+    bug: "334024639"
+    description: "Feature flag to check whether a given UID can access a content provider"
 }

@@ -43,7 +43,10 @@ import org.junit.Test
  */
 @Ignore("Test Base Class")
 abstract class MinimizeAppWindows
-constructor(private val rotation: Rotation = Rotation.ROTATION_0) {
+constructor(
+    private val rotation: Rotation = Rotation.ROTATION_0,
+    private val usingKeyboard: Boolean = false
+) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val tapl = LauncherInstrumentation()
     private val wmHelper = WindowManagerStateHelper(instrumentation)
@@ -58,19 +61,22 @@ constructor(private val rotation: Rotation = Rotation.ROTATION_0) {
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
         Assume.assumeTrue(Flags.enableMinimizeButton())
+        if (usingKeyboard) {
+            Assume.assumeTrue(Flags.enableTaskResizingKeyboardShortcuts())
+        }
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
         ChangeDisplayOrientationRule.setRotation(rotation)
-        testApp1.enterDesktopWithDrag(wmHelper, device)
+        testApp1.enterDesktopMode(wmHelper, device)
         testApp2.launchViaIntent(wmHelper)
         testApp3.launchViaIntent(wmHelper)
     }
 
     @Test
     open fun minimizeAllAppWindows() {
-        testApp3.minimizeDesktopApp(wmHelper, device)
-        testApp2.minimizeDesktopApp(wmHelper, device)
-        testApp1.minimizeDesktopApp(wmHelper, device)
+        testApp3.minimizeDesktopApp(wmHelper, device, usingKeyboard = usingKeyboard)
+        testApp2.minimizeDesktopApp(wmHelper, device, usingKeyboard = usingKeyboard)
+        testApp1.minimizeDesktopApp(wmHelper, device, usingKeyboard = usingKeyboard)
     }
 
     @After

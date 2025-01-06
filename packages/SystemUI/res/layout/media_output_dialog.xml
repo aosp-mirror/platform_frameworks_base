@@ -120,36 +120,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/cast_app_section"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="20dp"
-        android:layout_marginStart="@dimen/dialog_side_padding"
-        android:layout_marginEnd="@dimen/dialog_side_padding"
-        android:layout_marginBottom="@dimen/dialog_bottom_padding"
-        android:orientation="vertical"
-        android:visibility="gone">
-        <TextView
-            android:id="@+id/launch_app_title"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center_vertical|start"
-            android:ellipsize="end"
-            android:textColor="?android:attr/textColorPrimary"
-            android:text="@string/media_output_dialog_launch_app_text"
-            android:maxLines="1"
-            android:fontFamily="@*android:string/config_headlineFontFamilyMedium"
-            android:textSize="16sp"/>
-
-        <Button
-            android:id="@+id/launch_app_button"
-            style="@style/Widget.Dialog.Button.BorderButton"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:drawablePadding="5dp"/>
-    </LinearLayout>
-
-    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="4dp"

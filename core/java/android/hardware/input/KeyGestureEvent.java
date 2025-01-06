@@ -43,6 +43,8 @@ public final class KeyGestureEvent {
     private static final int LOG_EVENT_UNSPECIFIED =
             FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__UNSPECIFIED;
 
+    // These values should not change and values should not be re-used as this data is persisted to
+    // long term storage and must be kept backwards compatible.
     public static final int KEY_GESTURE_TYPE_UNSPECIFIED = 0;
     public static final int KEY_GESTURE_TYPE_HOME = 1;
     public static final int KEY_GESTURE_TYPE_RECENT_APPS = 2;
@@ -115,8 +117,18 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS = 67;
     public static final int KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW = 68;
     public static final int KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW = 69;
-    public static final int KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW = 70;
-    public static final int KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE = 71;
+    public static final int KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW = 70;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW = 71;
+    public static final int KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN = 72;
+    public static final int KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT = 73;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION = 74;
+    public static final int KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK = 75;
+    public static final int KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW = 76;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB = 77;
+    public static final int KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT = 78;
+    public static final int KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT = 79;
+    public static final int KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP = 80;
+    public static final int KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN = 81;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -201,8 +213,18 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS,
             KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW,
             KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW,
+            KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW,
+            KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW,
+            KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN,
+            KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT,
+            KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION,
+            KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK,
             KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW,
-            KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE,
+            KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB,
+            KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT,
+            KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT,
+            KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP,
+            KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -549,14 +571,6 @@ public final class KeyGestureEvent {
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__DESKTOP_MODE;
             case KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION:
                 return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__MULTI_WINDOW_NAVIGATION;
-            case KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW:
-                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SNAP_LEFT_FREEFORM_WINDOW;
-            case KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW:
-                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__SNAP_RIGHT_FREEFORM_WINDOW;
-            case KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW:
-                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__MAXIMIZE_FREEFORM_WINDOW;
-            case KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE:
-                return FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__RESTORE_FREEFORM_WINDOW_SIZE;
             default:
                 return LOG_EVENT_UNSPECIFIED;
         }
@@ -769,10 +783,30 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW";
             case KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW:
                 return "KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW";
+            case KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW:
+                return "KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW";
+            case KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW:
+                return "KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW";
+            case KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN:
+                return "KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN";
+            case KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT:
+                return "KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT";
+            case KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION:
+                return "KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION";
+            case KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK:
+                return "KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK";
             case KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW:
-                return "KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW";
-            case KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE:
-                return "KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE";
+                return "KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW";
+            case KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB:
+                return "KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB";
+            case KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT:
+                return "KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT";
+            case KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT:
+                return "KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT";
+            case KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP:
+                return "KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP";
+            case KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN:
+                return "KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN";
             default:
                 return Integer.toHexString(value);
         }

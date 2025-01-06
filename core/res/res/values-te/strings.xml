@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి ఉంటుంది. తర్వాత కాల్: పరిమితి లేదు"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి లేదు. తర్వాత కాల్: పరిమితి ఉంటుంది"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"కాలర్ ID ఆటోమేటిక్‌లపై పరిమితి లేదు. తర్వాత కాల్: పరిమితి లేదు"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ఈ యాప్ 16 KBకి అనుకూలమైనది కాదు. APK అమరిక చెకింగ్ విఫలమైంది. ఈ యాప్ పేజీ సైజ్ అనుకూల మోడ్‌ను ఉపయోగించి రన్ అవుతుంది. సరైన అనుకూలత కోసం, దయచేసి 16 KB సపోర్ట్‌తో అప్లికేషన్‌ను మళ్లీ కంపైల్ చేయండి. మరింత సమాచారం కోసం, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ను చూడండి"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ఈ యాప్ 16 KBకి అనుకూలమైనది కాదు. ELF అమరిక చెకింగ్ విఫలమైంది. ఈ యాప్ పేజీ సైజ్ అనుకూల మోడ్‌ను ఉపయోగించి రన్ అవుతుంది. సరైన అనుకూలత కోసం, దయచేసి 16 KB సపోర్ట్‌తో అప్లికేషన్‌ను మళ్లీ కంపైల్ చేయండి. మరింత సమాచారం కోసం, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ను చూడండి"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ఈ యాప్ 16 KBకి అనుకూలమైనది కాదు. APK, ELF అమరిక చెకప్ దశలు విఫలమయ్యాయి. ఈ యాప్ పేజీ సైజ్ అనుకూల మోడ్‌ను ఉపయోగించి రన్ అవుతుంది. సరైన అనుకూలత కోసం, దయచేసి 16 KB సపోర్ట్‌తో అప్లికేషన్‌ను మళ్లీ కంపైల్ చేయండి. మరింత సమాచారం కోసం, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; ను చూడండి"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"సేవ కేటాయించబడలేదు."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"మీరు కాలర్ ID సెట్టింగ్‌ను మార్చలేరు."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"డేటాను <xliff:g id="CARRIERDISPLAY">%s</xliff:g>కు స్విచ్ చేశారు"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"మొబైల్ నెట్‌వర్క్ అందుబాటులో లేదు"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ప్రాధాన్య నెట్‌వర్క్‌ను మార్చుకోవడానికి ప్రయత్నించండి. మార్చడానికి నొక్కండి."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ఎమర్జెన్సీ కాల్స్‌కు మొబైల్ నెట్‌వర్క్ అవసరమవుతుంది"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"అలర్ట్‌లు"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"కాల్ ఫార్వార్డింగ్"</string>
@@ -354,7 +359,7 @@
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2772371671541753254">"మీరు టైప్ చేస్తున్న వచనాన్ని పరిశీలిస్తుంది"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="2381315802405773092">"క్రెడిట్ కార్డు నంబర్‌లు మరియు పాస్‌వర్డ్‌ల వంటి వ్యక్తిగత డేటాను కలిగి ఉంటుంది."</string>
     <string name="capability_title_canControlMagnification" msgid="7701572187333415795">"డిస్‌ప్లే మ్యాగ్నిఫికేషన్‌ను నియంత్రించండి"</string>
-    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"డిస్‌ప్లే జూమ్ స్థాయి మరియు స్థానాన్ని నియంత్రిస్తుంది."</string>
+    <string name="capability_desc_canControlMagnification" msgid="2206586716709254805">"డిస్‌ప్లే జూమ్ స్థాయి మరియు లొకేషన్‌ని నియంత్రిస్తుంది."</string>
     <string name="capability_title_canPerformGestures" msgid="9106545062106728987">"సంజ్ఞలను చేయడం"</string>
     <string name="capability_desc_canPerformGestures" msgid="6619457251067929726">"నొక్కగలరు, స్వైప్ చేయగలరు, స్క్రీన్‌పై రెండు వేళ్లను ఉంచి ఆ వేళ్లను దగ్గరకు లేదా దూరానికి లాగగలరు మరియు ఇతర సంజ్ఞలను చేయగలరు."</string>
     <string name="capability_title_canCaptureFingerprintGestures" msgid="1189053104594608091">"వేలిముద్ర సంజ్ఞలు"</string>
@@ -608,10 +613,12 @@
     <string name="permdesc_bluetooth_connect" product="default" msgid="4546016548795544617">"పెయిర్ చేసిన బ్లూటూత్ పరికరాలకు కనెక్ట్ అవ్వడానికి యాప్‌ను అనుమతిస్తుంది"</string>
     <string name="permlab_bluetooth_advertise" msgid="2781147747928853177">"సమీపంలోని బ్లూటూత్ పరికరాలలో అడ్వర్టయిజ్ చేయండి"</string>
     <string name="permdesc_bluetooth_advertise" product="default" msgid="6085174451034210183">"సమీపంలోని బ్లూటూత్ పరికరాలలో అడ్వర్టయిజ్ చేయడానికి యాప్‌కు అనుమతిని ఇస్తుంది"</string>
-    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించండి"</string>
-    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించడానికి యాప్‌ను అనుమతించండి"</string>
+    <string name="permlab_uwb_ranging" msgid="8141915781475770665">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సంబంధిత పొజిషన్‌ను నిర్ణయించండి"</string>
+    <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"సమీపంలోని అల్ట్రా-వైడ్‌బ్యాండ్ పరికరాల మధ్య సంబంధిత పొజిషన్‌ను నిర్ణయించడానికి యాప్‌ను అనుమతించండి"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"సమీపంలోని Wi-Fi పరికరాలతో ఇంటరాక్ట్ చేస్తుంది"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"అడ్వర్టయిజ్, కనెక్ట్ చేయడానికి, సమీపంలోని Wi-Fi పరికరాల సంబంధిత పొజిషన్‌ను నిర్ణయించడానికి యాప్‌ను అనుమతిస్తుంది"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"సమీపంలో పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించండి"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"సమీపంలోని పరికరాల మధ్య సాపేక్ష స్థానాన్ని నిర్ణయించడానికి యాప్‌ను అనుమతించండి"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారం"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ప్రాధాన్యత ఇవ్వబడిన NFC చెల్లింపు సేవల సమాచారాన్ని, అంటే రిజిస్టర్ చేయబడిన సహాయక సాధనాలు, మార్గం, గమ్యస్థానం వంటి వాటిని పొందేందుకు యాప్‌ను అనుమతిస్తుంది."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"సమీప క్షేత్ర కమ్యూనికేషన్‌ను నియంత్రించడం"</string>
@@ -720,7 +727,7 @@
     <string name="face_acquired_too_much_motion" msgid="8199691445085189528">"బాగా కదుపుతున్నారు. ఫోన్‌ను స్థిరంగా పట్టుకోండి"</string>
     <string name="face_acquired_recalibrate" msgid="8724013080976469746">"దయచేసి మీ ముఖాన్ని మళ్లీ నమోదు చేయండి."</string>
     <string name="face_acquired_too_different" msgid="4505278456634706967">"ముఖం గుర్తించబడలేదు. మళ్లీ ట్రై చేయండి."</string>
-    <string name="face_acquired_too_similar" msgid="8882920552674125694">"మీ తల స్థానాన్ని కొద్దిగా మార్చండి"</string>
+    <string name="face_acquired_too_similar" msgid="8882920552674125694">"మీ తల లొకేషన్‌ను కొద్దిగా మార్చండి"</string>
     <string name="face_acquired_pan_too_extreme" msgid="5417928604710621088">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_tilt_too_extreme" msgid="5715715666540716620">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
     <string name="face_acquired_roll_too_extreme" msgid="8261939882838881194">"మీ ఫోన్ వైపు మరింత నేరుగా చూడండి"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g>గంటలో"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>రోజులో"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g>సంవత్సరంలో"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g>నిమిషం క్రితం"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g>గంట క్రితం"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g>రోజు క్రితం"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g>సం క్రితం"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g>నిమిషం"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g>గంట"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g>రోజు"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g>సంవత్సరం"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g>నిమిషాలలో"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g>గంటలో"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g>రోజులో"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g>సంవత్సరంలో"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g>నిమిషాల క్రితం"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g>గంట క్రితం"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g>రోజు క్రితం"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g>సంవత్సరం క్రితం"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# నిమిషం క్రితం}other{# నిమిషాల క్రితం}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# గంట క్రితం}other{# గంటల క్రితం}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# రోజు క్రితం}other{# రోజుల క్రితం}}"</string>
@@ -1252,7 +1275,7 @@
     <string name="aerr_application_repeated" msgid="7804378743218496566">"<xliff:g id="APPLICATION">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
     <string name="aerr_process_repeated" msgid="1153152413537954974">"<xliff:g id="PROCESS">%1$s</xliff:g> పునరావృతంగా ఆపివేయబడుతోంది"</string>
     <string name="aerr_restart" msgid="2789618625210505419">"యాప్‌ను మళ్లీ తెరువు"</string>
-    <string name="aerr_report" msgid="3095644466849299308">"ఫీడ్‌బ్యాక్‌ను పంపు"</string>
+    <string name="aerr_report" msgid="3095644466849299308">"ఫీడ్‌బ్యాక్‌ను పంపండి"</string>
     <string name="aerr_close" msgid="3398336821267021852">"మూసివేయండి"</string>
     <string name="aerr_mute" msgid="2304972923480211376">"పరికరం పునఃప్రారంభమయ్యే వరకు మ్యూట్ చేయి"</string>
     <string name="aerr_wait" msgid="3198677780474548217">"వేచి ఉండండి"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"వన్-హ్యాండెడ్ మోడ్"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ఎక్స్‌ట్రా డిమ్"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"వినికిడి పరికరాలు"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"వాల్యూమ్ కీలను రిలీజ్ చేయండి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>‌ను ఆన్ చేయడానికి, రెండు వాల్యూమ్ కీలను మళ్లీ 3 సెకన్ల పాటు నొక్కి పట్టుకోండి."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"వారాంతం"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ఈవెంట్"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"స్లీప్ మోడ్"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"అంతరాయం కలిగించవద్దు (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ద్వారా మేనేజ్ చేయబడుతోంది"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ఆన్‌లో ఉంది"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ఆఫ్‌లో ఉంది"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> నుండి <xliff:g id="END">%2$s</xliff:g> వరకు"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ఏదైనా క్యాలెండర్"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> కొన్ని ధ్వనులను మ్యూట్ చేస్తోంది"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"మీ పరికరంతో అంతర్గత సమస్య ఏర్పడింది మరియు మీరు ఫ్యాక్టరీ డేటా రీసెట్ చేసే వరకు అస్థిరంగా ఉంటుంది."</string>
@@ -2092,7 +2124,7 @@
     <string name="autofill_save_no" msgid="9212826374207023544">"వద్దు, ధన్యవాదాలు"</string>
     <string name="autofill_save_notnow" msgid="2853932672029024195">"ఇప్పుడు కాదు"</string>
     <string name="autofill_save_never" msgid="6821841919831402526">"ఎప్పుడూ వద్దు"</string>
-    <string name="autofill_update_yes" msgid="4608662968996874445">"అప్‌డేట్ చేయి"</string>
+    <string name="autofill_update_yes" msgid="4608662968996874445">"అప్‌డేట్ చేయండి"</string>
     <string name="autofill_continue_yes" msgid="7914985605534510385">"కొనసాగించండి"</string>
     <string name="autofill_save_type_password" msgid="5624528786144539944">"పాస్‌వర్డ్"</string>
     <string name="autofill_save_type_address" msgid="3111006395818252885">"అడ్రస్‌"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపండి, స్వీకరించండి"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ఇది ఎలా పని చేస్తుంది"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"నెట్‌వర్క్‌ను ఆటోమేటిక్‌గా ఎంచుకోండి\" అనే ఆప్షన్‌ను ఆన్ చేయండి"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"సెట్టింగ్‌లలో \"నెట్‌వర్క్‌ను ఆటోమేటిక్‌గా ఎంచుకోండి\" అనే ఆప్షన్‌ను ఆన్ చేయండి, తద్వారా మీ ఫోన్ శాటిలైట్‌తో పనిచేసే నెట్‌వర్క్‌ను కనుగొనగలదు"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ఆన్ చేయండి"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"వెనుకకు వెళ్లండి"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"పెండింగ్‌లో ఉంది..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ఎమర్జెన్సీ శాటిలైట్ సహాయం ఇప్పుడు అందుబాటులో ఉంది"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ ఏదీ లేనట్లయితే మీరు ఎమర్జెన్సీ సర్వీసులకు మెసేజ్ చేయవచ్చు. Google Messages అనేది తప్పనిసరిగా మీ ఆటోమేటిక్ మెసేజింగ్ యాప్‌గా సెట్ చేసి ఉండాలి."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ఎమర్జెన్సీ శాటిలైట్ సహాయం సపోర్ట్ చేయదు"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"ఈ పరికరంలో ఎమర్జెన్సీ శాటిలైట్ సహాయం సపోర్ట్ చేయదు"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ఎమర్జెన్సీ శాటిలైట్ సహాయం సెటప్ కాలేదు"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"మీరు ఇంటర్నెట్‌కు కనెక్ట్ అయి ఉన్నారని నిర్ధారించుకుని, మళ్లీ సెటప్‌ను ట్రై చేయండి"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"ఈ దేశంలో లేదా ప్రాంతంలో ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ఎమర్జెన్సీ శాటిలైట్ సహాయం సెటప్ చేయలేదు"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"శాటిలైట్ ద్వారా మెసేజ్ చేయడానికి, Google Messagesను మీ ఆటోమేటిక్ మెసేజింగ్ యాప్‌గా సెట్ చేయండి"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో లేదు"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ఈ దేశంలో లేదా ప్రాంతంలో ఎమర్జెన్సీ శాటిలైట్ సహాయం అందుబాటులో ఉందో లేదో చెక్ చేయడానికి, లొకేషన్ సెట్టింగ్‌లను ఆన్ చేయండి"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"శాటిలైట్ మెసేజింగ్ అందుబాటులో ఉంది"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుంటే మీరు శాటిలైట్ ద్వారా మెసేజ్‌ను పంపవచ్చు. Google Messages అనేది తప్పనిసరిగా మీ ఆటోమేటిక్ మెసేజింగ్ యాప్‌గా సెట్ చేసి ఉండాలి."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"శాటిలైట్ మెసేజింగ్ సపోర్ట్ చేయదు"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ఈ పరికరంలో శాటిలైట్ మెసేజింగ్ సపోర్ట్ చేయదు"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"శాటిలైట్ మెసేజింగ్‌ను సెటప్ చేయలేదు"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"మీరు ఇంటర్నెట్‌కు కనెక్ట్ అయి ఉన్నారని నిర్ధారించుకుని, మళ్లీ సెటప్‌ను ట్రై చేయండి"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ఈ దేశంలో లేదా ప్రాంతంలో శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"శాటిలైట్ మెసేజింగ్‌ను సెటప్ చేయలేదు"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"శాటిలైట్ ద్వారా మెసేజ్ చేయడానికి, Google Messagesను మీ ఆటోమేటిక్ మెసేజింగ్ యాప్‌గా సెట్ చేయండి"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"శాటిలైట్ మెసేజింగ్ అందుబాటులో లేదు"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ఈ దేశంలో లేదా ప్రాంతంలో శాటిలైట్ మెసేజింగ్ అందుబాటులో ఉందో లేదో చెక్ చేయడానికి, లొకేషన్ సెట్టింగ్‌లను ఆన్ చేయండి"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"వేలిముద్ర అన్‌లాక్‌ను మళ్లీ సెటప్ చేయండి"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>‌ను ఇకపై గుర్తించడం సాధ్యం కాదు."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>, <xliff:g id="FINGERPRINT_1">%2$s</xliff:g>‌లను ఇకపై గుర్తించడం సాధ్యం కాదు."</string>

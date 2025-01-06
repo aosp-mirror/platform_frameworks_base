@@ -17,10 +17,10 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.android.frameworks.wmtests">
 
-    <!-- Uses API introduced in P (28) -->
+    <!-- Uses API introduced in S (31). Using SDK 31+ avoids Google Play Protect popups. -->
     <uses-sdk
         android:minSdkVersion="1"
-        android:targetSdkVersion="28" />
+        android:targetSdkVersion="31" />
 
     <uses-permission android:name="android.permission.WRITE_SECURE_SETTINGS" />
     <uses-permission android:name="android.permission.INTERACT_ACROSS_USERS_FULL" />

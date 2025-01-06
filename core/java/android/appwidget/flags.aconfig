@@ -76,12 +76,15 @@ flag {
 }
 
 flag {
-  name: "use_smaller_app_widget_radius"
+  name: "use_smaller_app_widget_system_radius"
   namespace: "app_widgets"
   description: "Updates system corner radius for app widgets to 24.dp instead of 28.dp"
   bug: "373351337"
   is_exported: true
   is_fixed_read_only: true
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -91,4 +94,22 @@ flag {
   bug: "365169792"
   is_exported: true
   is_fixed_read_only: true
+}
+
+flag {
+  name: "check_remote_views_uri_permission"
+  namespace: "app_widgets"
+  description: "Check that the widget provider has permissions to access any URIs within its RemoteViews"
+  bug: "369137473"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "engagement_metrics"
+  namespace: "app_widgets"
+  description: "Enable collection of widget engagement metrics"
+  bug: "364655296"
+  is_exported: true
 }

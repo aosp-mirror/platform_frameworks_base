@@ -24,22 +24,33 @@ import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInter
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
+import com.android.systemui.statusbar.events.domain.interactor.systemStatusEventAnimationInteractor
+import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.statusBarPopupChipsViewModel
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
+import com.android.systemui.statusbar.phone.domain.interactor.darkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.lightsOutInteractor
-import com.android.systemui.statusbar.pipeline.shared.domain.interactor.collapsedStatusBarInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.homeStatusBarIconBlockListInteractor
+import com.android.systemui.statusbar.pipeline.shared.domain.interactor.homeStatusBarInteractor
 
-val Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
+var Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
     Kosmos.Fixture {
         HomeStatusBarViewModelImpl(
-            collapsedStatusBarInteractor,
+            homeStatusBarInteractor,
+            homeStatusBarIconBlockListInteractor,
             lightsOutInteractor,
             activeNotificationsInteractor,
+            darkIconInteractor,
+            headsUpNotificationInteractor,
             keyguardTransitionInteractor,
             keyguardInteractor,
+            statusBarOperatorNameViewModel,
             sceneInteractor,
             sceneContainerOcclusionInteractor,
             shadeInteractor,
             ongoingActivityChipsViewModel,
+            statusBarPopupChipsViewModel,
+            systemStatusEventAnimationInteractor,
             applicationCoroutineScope,
         )
     }

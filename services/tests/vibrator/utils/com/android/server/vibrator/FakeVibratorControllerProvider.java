@@ -236,7 +236,7 @@ public final class FakeVibratorControllerProvider {
             infoBuilder.setSupportedEffects(mSupportedEffects);
             if (mSupportedPrimitives != null) {
                 for (int primitive : mSupportedPrimitives) {
-                    infoBuilder.setSupportedPrimitive(primitive, EFFECT_DURATION);
+                    infoBuilder.setSupportedPrimitive(primitive, (int) mPrimitiveDuration);
                 }
             }
             infoBuilder.setCompositionSizeMax(mCompositionSizeMax);

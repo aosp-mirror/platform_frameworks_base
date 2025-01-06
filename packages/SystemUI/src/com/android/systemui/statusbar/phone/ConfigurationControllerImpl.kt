@@ -65,6 +65,13 @@ constructor(@Assisted private val context: Context) :
         listeners.filterForEach({ this.listeners.contains(it) }) { it.onThemeChanged() }
     }
 
+    override fun dispatchOnMovedToDisplay(newDisplayId: Int, newConfiguration: Configuration) {
+        val listeners = synchronized(this.listeners) { ArrayList(this.listeners) }
+        listeners.filterForEach({ this.listeners.contains(it) }) {
+            it.onMovedToDisplay(newDisplayId, newConfiguration)
+        }
+    }
+
     override fun onConfigurationChanged(newConfig: Configuration) {
         // Avoid concurrent modification exception
         val listeners = synchronized(this.listeners) { ArrayList(this.listeners) }

@@ -20,12 +20,12 @@ import android.animation.AnimatorListenerAdapter
 import android.animation.ValueAnimator
 import android.app.ActivityManager.RunningTaskInfo
 import android.content.Context
-import android.graphics.Bitmap
 import android.graphics.Color
 import android.graphics.PixelFormat
 import android.graphics.PointF
 import android.graphics.Rect
 import android.os.Trace
+import android.view.Choreographer
 import android.view.Display
 import android.view.LayoutInflater
 import android.view.SurfaceControl
@@ -38,13 +38,23 @@ import android.window.TaskConstants
 import androidx.compose.material3.dynamicDarkColorScheme
 import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.ui.graphics.toArgb
+import com.android.internal.annotations.VisibleForTesting
 import com.android.wm.shell.R
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayController.OnDisplaysChangedListener
+import com.android.wm.shell.shared.annotations.ShellBackgroundThread
+import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.windowdecor.WindowDecoration.SurfaceControlViewHostFactory
+import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.Theme
 import java.util.function.Supplier
+import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.isActive
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 /**
  * Creates and updates a veil that covers task contents on resize.
@@ -52,7 +62,9 @@ import java.util.function.Supplier
 public class ResizeVeil @JvmOverloads constructor(
         private val context: Context,
         private val displayController: DisplayController,
-        private val appIcon: Bitmap,
+        private val taskResourceLoader: WindowDecorTaskResourceLoader,
+        @ShellMainThread private val mainDispatcher: CoroutineDispatcher,
+        @ShellBackgroundThread private val bgScope: CoroutineScope,
         private var parentSurface: SurfaceControl,
         private val surfaceControlTransactionSupplier: Supplier<SurfaceControl.Transaction>,
         private val surfaceControlBuilderFactory: SurfaceControlBuilderFactory =
@@ -65,7 +77,8 @@ public class ResizeVeil @JvmOverloads constructor(
     private val lightColors = dynamicLightColorScheme(context)
     private val darkColors = dynamicDarkColorScheme(context)
 
-    private lateinit var iconView: ImageView
+    @VisibleForTesting
+    lateinit var iconView: ImageView
     private var iconSize = 0
 
     /** A container surface to host the veil background and icon child surfaces.  */
@@ -77,6 +90,7 @@ public class ResizeVeil @JvmOverloads constructor(
     private var viewHost: SurfaceControlViewHost? = null
     private var display: Display? = null
     private var veilAnimator: ValueAnimator? = null
+    private var loadAppInfoJob: Job? = null
 
     /**
      * Whether the resize veil is currently visible.
@@ -142,7 +156,6 @@ public class ResizeVeil @JvmOverloads constructor(
         val root = LayoutInflater.from(context)
                 .inflate(R.layout.desktop_mode_resize_veil, null /* root */)
         iconView = root.requireViewById(R.id.veil_application_icon)
-        iconView.setImageBitmap(appIcon)
         val lp = WindowManager.LayoutParams(
                 iconSize,
                 iconSize,
@@ -156,6 +169,14 @@ public class ResizeVeil @JvmOverloads constructor(
                 iconSurface, null /* hostInputToken */)
         viewHost = surfaceControlViewHostFactory.create(context, display, wwm, "ResizeVeil")
         viewHost?.setView(root, lp)
+        loadAppInfoJob = bgScope.launch {
+            if (!isActive) return@launch
+            val icon = taskResourceLoader.getVeilIcon(taskInfo)
+            withContext(mainDispatcher) {
+                if (!isActive) return@withContext
+                iconView.setImageBitmap(icon)
+            }
+        }
         Trace.endSection()
     }
 
@@ -311,6 +332,7 @@ public class ResizeVeil @JvmOverloads constructor(
                 .setPosition(icon, iconPosition.x, iconPosition.y)
                 .setPosition(parentSurface, newBounds.left.toFloat(), newBounds.top.toFloat())
                 .setWindowCrop(parentSurface, newBounds.width(), newBounds.height())
+                .setFrameTimeline(Choreographer.getInstance().vsyncId)
     }
 
     /**
@@ -401,6 +423,7 @@ public class ResizeVeil @JvmOverloads constructor(
         cancelAnimation()
         veilAnimator = null
         isVisible = false
+        loadAppInfoJob?.cancel()
 
         viewHost?.release()
         viewHost = null

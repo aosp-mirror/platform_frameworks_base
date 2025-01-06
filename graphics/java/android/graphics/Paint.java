@@ -19,7 +19,7 @@ package android.graphics;
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
 import static com.android.text.flags.Flags.FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API;
-
+import static com.android.text.flags.Flags.FLAG_VERTICAL_TEXT_LAYOUT;
 
 import android.annotation.ColorInt;
 import android.annotation.ColorLong;
@@ -34,7 +34,9 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
+import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
+import android.graphics.text.TextRunShaper;
 import android.os.Build;
 import android.os.LocaleList;
 import android.text.GraphicsOperations;
@@ -70,6 +72,7 @@ public class Paint {
     private long mNativePaint;
     private long mNativeShader;
     private long mNativeColorFilter;
+    private long mNativeXfermode;
 
     // Use a Holder to allow static initialization of Paint in the boot image.
     private static class NoImagePreloadHolder {
@@ -269,7 +272,24 @@ public class Paint {
     public static final int EMBEDDED_BITMAP_TEXT_FLAG = 0x400;
     /** @hide bit mask for the flag forcing freetype's autohinter on for text */
     public static final int AUTO_HINTING_TEXT_FLAG = 0x800;
-    /** @hide bit mask for the flag enabling vertical rendering for text */
+
+    /**
+     * A flat that controls text to be written in vertical orientation
+     *
+     * <p>
+     * This flag is used for telling the underlying text layout engine that the text is for vertical
+     * direction. By enabling this flag, text measurement, drawing and shaping APIs works for
+     * vertical text layout. For example, {@link Canvas#drawText(String, float, float, Paint)} draws
+     * text from top to bottom. {@link Paint#measureText(String)} returns vertical advances instead
+     * of horizontal advances. {@link TextRunShaper} shapes text vertically and report glyph IDs for
+     * vertical layout.
+     *
+     * <p>
+     * Do not set this flag for making {@link android.text.Layout}. The {@link android.text.Layout}
+     * class and its subclasses are designed for horizontal text only and does not work for vertical
+     * text.
+     */
+    @FlaggedApi(FLAG_VERTICAL_TEXT_LAYOUT)
     public static final int VERTICAL_TEXT_FLAG = 0x1000;
 
     /**
@@ -717,6 +737,7 @@ public class Paint {
         mPathEffect = null;
         mShader = null;
         mNativeShader = 0;
+        mNativeXfermode = 0;
         mTypeface = null;
         mXfermode = null;
 
@@ -762,6 +783,7 @@ public class Paint {
         mNativeShader = paint.mNativeShader;
         mTypeface = paint.mTypeface;
         mXfermode = paint.mXfermode;
+        mNativeXfermode = paint.mNativeXfermode;
 
         mHasCompatScaling = paint.mHasCompatScaling;
         mCompatScaling = paint.mCompatScaling;
@@ -797,7 +819,7 @@ public class Paint {
      *
      * Note: Although this method is |synchronized|, this is simply so it
      * is not thread-hostile to multiple threads calling this method. It
-     * is still unsafe to attempt to change the Shader/ColorFilter while
+     * is still unsafe to attempt to change the Shader/ColorFilter/Xfermode while
      * another thread attempts to access the native object.
      *
      * @hide
@@ -814,6 +836,15 @@ public class Paint {
         if (newNativeColorFilter != mNativeColorFilter) {
             mNativeColorFilter = newNativeColorFilter;
             nSetColorFilter(mNativePaint, mNativeColorFilter);
+        }
+        if (com.android.graphics.hwui.flags.Flags.runtimeColorFiltersBlenders()) {
+            if (mXfermode instanceof RuntimeXfermode) {
+                long newNativeXfermode = ((RuntimeXfermode) mXfermode).createNativeInstance();
+                if (newNativeXfermode != mNativeXfermode) {
+                    mNativeXfermode = newNativeXfermode;
+                    nSetXfermode(mNativePaint, mNativeXfermode);
+                }
+            }
         }
         return mNativePaint;
     }
@@ -1409,16 +1440,17 @@ public class Paint {
     }
 
     /**
-     * Get the paint's blend mode object.
+     * Get the paint's blend mode object. Will return null if there is a Xfermode applied that
+     * cannot be represented by a blend mode (i.e. a custom {@code RuntimeXfermode}
      *
      * @return the paint's blend mode (or null)
      */
     @Nullable
     public BlendMode getBlendMode() {
-        if (mXfermode == null) {
+        if (mXfermode == null || !(mXfermode instanceof PorterDuffXfermode)) {
             return null;
         } else {
-            return BlendMode.fromValue(mXfermode.porterDuffMode);
+            return BlendMode.fromValue(((PorterDuffXfermode) mXfermode).porterDuffMode);
         }
     }
 
@@ -1441,8 +1473,17 @@ public class Paint {
 
     @Nullable
     private Xfermode installXfermode(Xfermode xfermode) {
-        int newMode = xfermode != null ? xfermode.porterDuffMode : Xfermode.DEFAULT;
-        int curMode = mXfermode != null ? mXfermode.porterDuffMode : Xfermode.DEFAULT;
+        if (com.android.graphics.hwui.flags.Flags.runtimeColorFiltersBlenders()) {
+            if (xfermode instanceof RuntimeXfermode) {
+                mXfermode = xfermode;
+                nSetXfermode(mNativePaint, ((RuntimeXfermode) xfermode).createNativeInstance());
+                return xfermode;
+            }
+        }
+        int newMode = (xfermode instanceof PorterDuffXfermode)
+                ? ((PorterDuffXfermode) xfermode).porterDuffMode : PorterDuffXfermode.DEFAULT;
+        int curMode = (mXfermode instanceof PorterDuffXfermode)
+                ? ((PorterDuffXfermode) mXfermode).porterDuffMode : PorterDuffXfermode.DEFAULT;
         if (newMode != curMode) {
             nSetXfermode(mNativePaint, newMode);
         }
@@ -1545,6 +1586,18 @@ public class Paint {
      * @return         typeface
      */
     public Typeface setTypeface(Typeface typeface) {
+        if (Flags.typefaceRedesignReadonly() && typeface != null
+                && typeface.isVariationInstance()) {
+            Log.w(TAG, "Attempting to set a Typeface on a Paint object that was previously "
+                    + "configured with setFontVariationSettings(). This is no longer supported as "
+                    + "of Target SDK " + Build.VERSION_CODES.BAKLAVA + ". To apply font"
+                    + " variations, call setFontVariationSettings() directly on the Paint object"
+                    + " instead.");
+        }
+        return setTypefaceWithoutWarning(typeface);
+    }
+
+    private Typeface setTypefaceWithoutWarning(Typeface typeface) {
         final long typefaceNative = typeface == null ? 0 : typeface.native_instance;
         nSetTypeface(mNativePaint, typefaceNative);
         mTypeface = typeface;
@@ -2101,7 +2154,15 @@ public class Paint {
      * @see FontVariationAxis
      */
     public boolean setFontVariationSettings(String fontVariationSettings) {
-        final boolean useFontVariationStore = Flags.typefaceRedesign()
+        return setFontVariationSettings(fontVariationSettings, 0 /* wght adjust */);
+    }
+
+    /**
+     * Set font variation settings with weight adjustment
+     * @hide
+     */
+    public boolean setFontVariationSettings(String fontVariationSettings, int wghtAdjust) {
+        final boolean useFontVariationStore = Flags.typefaceRedesignReadonly()
                 && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
         if (useFontVariationStore) {
             FontVariationAxis[] axes =
@@ -2114,8 +2175,13 @@ public class Paint {
 
             long builderPtr = nCreateFontVariationBuilder(axes.length);
             for (int i = 0; i < axes.length; ++i) {
-                nAddFontVariationToBuilder(builderPtr, axes[i].getOpenTypeTagValue(),
-                        axes[i].getStyleValue());
+                int tag = axes[i].getOpenTypeTagValue();
+                float value = axes[i].getStyleValue();
+                if (tag == 0x77676874 /* wght */) {
+                    value = Math.clamp(value + wghtAdjust,
+                            FontStyle.FONT_WEIGHT_MIN, FontStyle.FONT_WEIGHT_MAX);
+                }
+                nAddFontVariationToBuilder(builderPtr, tag, value);
             }
             nSetFontVariationOverride(mNativePaint, builderPtr);
             mFontVariationSettings = fontVariationSettings;
@@ -2129,7 +2195,7 @@ public class Paint {
 
         if (settings == null || settings.length() == 0) {
             mFontVariationSettings = null;
-            setTypeface(Typeface.createFromTypefaceWithVariation(mTypeface,
+            setTypefaceWithoutWarning(Typeface.createFromTypefaceWithVariation(mTypeface,
                       Collections.emptyList()));
             return true;
         }
@@ -2148,7 +2214,8 @@ public class Paint {
             return false;
         }
         mFontVariationSettings = settings;
-        setTypeface(Typeface.createFromTypefaceWithVariation(targetTypeface, filteredAxes));
+        setTypefaceWithoutWarning(
+                Typeface.createFromTypefaceWithVariation(targetTypeface, filteredAxes));
         return true;
     }
 
@@ -3804,6 +3871,8 @@ public class Paint {
     private static native long nSetColorFilter(long paintPtr, long filter);
     @CriticalNative
     private static native void nSetXfermode(long paintPtr, int xfermode);
+    @CriticalNative
+    private static native void nSetXfermode(long paintPtr, long xfermodePtr);
     @CriticalNative
     private static native long nSetPathEffect(long paintPtr, long effect);
     @CriticalNative

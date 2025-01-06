@@ -36,6 +36,7 @@ import com.android.systemui.SystemUIAppComponentFactoryBase.ContextAvailableCall
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.domain.interactor.KeyguardQuickAffordanceInteractor
 import com.android.systemui.keyguard.ui.preview.KeyguardRemotePreviewManager
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import com.android.systemui.shared.customization.data.content.CustomizationProviderContract as Contract
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -44,6 +45,7 @@ class CustomizationProvider :
     ContentProvider(), SystemUIAppComponentFactoryBase.ContextInitializer {
 
     @Inject lateinit var interactor: KeyguardQuickAffordanceInteractor
+    @Inject lateinit var shadeModeInteractor: ShadeModeInteractor
     @Inject lateinit var previewManager: KeyguardRemotePreviewManager
     @Inject @Main lateinit var mainDispatcher: CoroutineDispatcher
 
@@ -73,6 +75,11 @@ class CustomizationProvider :
                 MATCH_CODE_ALL_SELECTIONS,
             )
             addURI(Contract.AUTHORITY, Contract.FlagsTable.TABLE_NAME, MATCH_CODE_ALL_FLAGS)
+            addURI(
+                Contract.AUTHORITY,
+                Contract.RuntimeValuesTable.TABLE_NAME,
+                MATCH_CODE_ALL_RUNTIME_VALUES,
+            )
         }
 
     override fun onCreate(): Boolean {
@@ -94,7 +101,8 @@ class CustomizationProvider :
                 MATCH_CODE_ALL_SLOTS,
                 MATCH_CODE_ALL_AFFORDANCES,
                 MATCH_CODE_ALL_FLAGS,
-                MATCH_CODE_ALL_SELECTIONS -> "vnd.android.cursor.dir/vnd."
+                MATCH_CODE_ALL_SELECTIONS,
+                MATCH_CODE_ALL_RUNTIME_VALUES -> "vnd.android.cursor.dir/vnd."
                 else -> null
             }
 
@@ -113,6 +121,7 @@ class CustomizationProvider :
                         Contract.LockScreenQuickAffordances.SelectionTable.TABLE_NAME
                     )
                 MATCH_CODE_ALL_FLAGS -> Contract.FlagsTable.TABLE_NAME
+                MATCH_CODE_ALL_RUNTIME_VALUES -> Contract.RuntimeValuesTable.TABLE_NAME
                 else -> null
             }
 
@@ -146,6 +155,7 @@ class CustomizationProvider :
                 MATCH_CODE_ALL_SLOTS -> querySlots()
                 MATCH_CODE_ALL_SELECTIONS -> querySelections()
                 MATCH_CODE_ALL_FLAGS -> queryFlags()
+                MATCH_CODE_ALL_RUNTIME_VALUES -> queryRuntimeValues()
                 else -> null
             }
         }
@@ -334,6 +344,23 @@ class CustomizationProvider :
             }
     }
 
+    private fun queryRuntimeValues(): Cursor {
+        return MatrixCursor(
+                arrayOf(
+                    Contract.RuntimeValuesTable.Columns.NAME,
+                    Contract.RuntimeValuesTable.Columns.VALUE,
+                )
+            )
+            .apply {
+                addRow(
+                    arrayOf(
+                        Contract.RuntimeValuesTable.KEY_IS_SHADE_LAYOUT_WIDE,
+                        if (shadeModeInteractor.isShadeLayoutWide.value) 1 else 0,
+                    )
+                )
+            }
+    }
+
     private suspend fun deleteSelection(uri: Uri, selectionArgs: Array<out String>?): Int {
         if (selectionArgs == null) {
             throw IllegalArgumentException(
@@ -370,5 +397,6 @@ class CustomizationProvider :
         private const val MATCH_CODE_ALL_AFFORDANCES = 2
         private const val MATCH_CODE_ALL_SELECTIONS = 3
         private const val MATCH_CODE_ALL_FLAGS = 4
+        private const val MATCH_CODE_ALL_RUNTIME_VALUES = 5
     }
 }

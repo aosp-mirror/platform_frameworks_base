@@ -1,0 +1,132 @@
+# This is file is generated with `aosp_cf_x86_64_phone-trunk_staging-eng` on 2024-11-06.
+# We have this file here only as a reference. We don't actually use this file anywhere.
+
+####################################
+# from generate_common_build_props
+# These properties identify this partition image.
+####################################
+ro.product.system.brand=Android
+ro.product.system.device=generic
+ro.product.system.manufacturer=Android
+ro.product.system.model=mainline
+ro.product.system.name=mainline
+ro.system.product.cpu.abilist=x86_64,x86,arm64-v8a,armeabi-v7a,armeabi
+ro.system.product.cpu.abilist32=x86,armeabi-v7a,armeabi
+ro.system.product.cpu.abilist64=x86_64,arm64-v8a
+ro.system.build.date=Tue Nov  5 13:25:43 PST 2024
+ro.system.build.date.utc=1730841943
+ro.system.build.fingerprint=generic/aosp_cf_x86_64_phone/vsoc_x86_64:Baklava/MAIN/eng.omakot:eng/test-keys
+ro.system.build.id=MAIN
+ro.system.build.tags=test-keys
+ro.system.build.type=eng
+ro.system.build.version.incremental=eng.omakot
+ro.system.build.version.release=15
+ro.system.build.version.release_or_codename=Baklava
+ro.system.build.version.sdk=35
+####################################
+# from gen_build_prop.py:generate_build_info
+####################################
+# begin build properties
+ro.build.legacy.id=MAIN
+ro.build.display.id=aosp_cf_x86_64_phone-eng Baklava MAIN eng.omakot test-keys
+ro.build.version.incremental=eng.omakot
+ro.build.version.sdk=35
+ro.build.version.preview_sdk=1
+ro.build.version.preview_sdk_fingerprint=2ef06129940d459014cf4dede3950d71
+ro.build.version.codename=Baklava
+ro.build.version.all_codenames=Baklava
+ro.build.version.known_codenames=Base,Base11,Cupcake,Donut,Eclair,Eclair01,EclairMr1,Froyo,Gingerbread,GingerbreadMr1,Honeycomb,HoneycombMr1,HoneycombMr2,IceCreamSandwich,IceCreamSandwichMr1,JellyBean,JellyBeanMr1,JellyBeanMr2,Kitkat,KitkatWatch,Lollipop,LollipopMr1,M,N,NMr1,O,OMr1,P,Q,R,S,Sv2,Tiramisu,UpsideDownCake,VanillaIceCream,Baklava
+ro.build.version.release=15
+ro.build.version.release_or_codename=Baklava
+ro.build.version.release_or_preview_display=Baklava
+ro.build.version.security_patch=2024-08-05
+ro.build.version.base_os=
+ro.build.version.min_supported_target_sdk=28
+ro.build.date=Tue Nov  5 13:25:43 PST 2024
+ro.build.date.utc=1730841943
+ro.build.type=eng
+ro.build.user=omakoto
+ro.build.host=omakoto-ct1.c.googlers.com
+ro.build.tags=test-keys
+ro.build.flavor=aosp_cf_x86_64_phone-eng
+# ro.product.cpu.abi and ro.product.cpu.abi2 are obsolete,
+# use ro.product.cpu.abilist instead.
+ro.product.cpu.abi=x86_64
+ro.product.locale=en-US
+ro.wifi.channels=
+# ro.build.product is obsolete; use ro.product.device
+ro.build.product=vsoc_x86_64
+# Do not try to parse description or thumbprint
+ro.build.description=aosp_cf_x86_64_phone-eng Baklava MAIN eng.omakot test-keys
+# end build properties
+####################################
+# from variable ADDITIONAL_SYSTEM_PROPERTIES
+####################################
+ro.treble.enabled=true
+ro.llndk.api_level=202504
+ro.actionable_compatible_property.enabled=true
+persist.debug.dalvik.vm.core_platform_api_policy=just-warn
+ro.postinstall.fstab.prefix=/system
+ro.kernel.android.checkjni=1
+ro.secure=0
+ro.allow.mock.location=1
+dalvik.vm.lockprof.threshold=500
+ro.debuggable=1
+dalvik.vm.image-dex2oat-filter=extract
+init.svc_debug.no_fatal.zygote=true
+net.bt.name=Android
+ro.force.debuggable=0
+####################################
+# from variable PRODUCT_SYSTEM_PROPERTIES
+####################################
+debug.atrace.tags.enableflags=0
+persist.traced.enable=1
+dalvik.vm.image-dex2oat-Xms=64m
+dalvik.vm.image-dex2oat-Xmx=64m
+dalvik.vm.dex2oat-Xms=64m
+dalvik.vm.dex2oat-Xmx=512m
+dalvik.vm.usejit=true
+dalvik.vm.dexopt.secondary=true
+dalvik.vm.dexopt.thermal-cutoff=2
+dalvik.vm.appimageformat=lz4
+ro.dalvik.vm.native.bridge=0
+pm.dexopt.post-boot=verify
+pm.dexopt.first-boot=verify
+pm.dexopt.boot-after-ota=verify
+pm.dexopt.boot-after-mainline-update=verify
+pm.dexopt.install=speed-profile
+pm.dexopt.install-fast=skip
+pm.dexopt.install-bulk=speed-profile
+pm.dexopt.install-bulk-secondary=verify
+pm.dexopt.install-bulk-downgraded=verify
+pm.dexopt.install-bulk-secondary-downgraded=verify
+pm.dexopt.bg-dexopt=speed-profile
+pm.dexopt.ab-ota=speed-profile
+pm.dexopt.inactive=verify
+pm.dexopt.cmdline=verify
+pm.dexopt.shared=speed
+dalvik.vm.disable-art-service-dexopt=true
+dalvik.vm.disable-odrefresh=true
+dalvik.vm.dex2oat-resolve-startup-strings=true
+dalvik.vm.dex2oat-max-image-block-size=524288
+dalvik.vm.minidebuginfo=true
+dalvik.vm.dex2oat-minidebuginfo=true
+dalvik.vm.madvise.vdexfile.size=104857600
+dalvik.vm.madvise.odexfile.size=104857600
+dalvik.vm.madvise.artfile.size=4294967295
+dalvik.vm.usap_pool_enabled=false
+dalvik.vm.usap_refill_threshold=1
+dalvik.vm.usap_pool_size_max=3
+dalvik.vm.usap_pool_size_min=1
+dalvik.vm.usap_pool_refill_delay_ms=3000
+dalvik.vm.useartservice=true
+dalvik.vm.enable_pr_dexopt=true
+ro.cp_system_other_odex=1
+ro.apex.updatable=true
+ro.launcher.depth.widget=0
+####################################
+# from variable PRODUCT_SYSTEM_DEFAULT_PROPERTIES
+####################################
+# Auto-added by post_process_props.py
+persist.sys.usb.config=adb
+# end of file

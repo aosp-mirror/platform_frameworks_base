@@ -180,6 +180,20 @@ public final class DisplayBrightnessController {
     }
 
     /**
+     * Updates the brightness override from WindowManager.
+     *
+     * @param request The request to override the brightness
+     * @return whether this request will result in a change of the brightness
+     */
+    public boolean updateWindowManagerBrightnessOverride(
+            DisplayManagerInternal.DisplayBrightnessOverrideRequest request) {
+        synchronized (mLock) {
+            return mDisplayBrightnessStrategySelector.getOverrideBrightnessStrategy()
+                    .updateWindowManagerBrightnessOverride(request);
+        }
+    }
+
+    /**
      * Sets the brightness to follow
      */
     public void setBrightnessToFollow(float brightnessToFollow, boolean slowChange) {

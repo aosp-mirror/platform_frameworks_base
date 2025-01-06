@@ -24,18 +24,15 @@ class NotificationWakeUpCoordinatorLogger
 constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
     private var allowThrottle = true
     private var lastSetDozeAmountLogInputWasFractional = false
-    private var lastSetDozeAmountLogDelayWasFractional = false
     private var lastSetDozeAmountLogState = -1
     private var lastSetHardOverride: Float? = null
     private var lastOnDozeAmountChangedLogWasFractional = false
-    private var lastSetDelayDozeAmountOverrideLogWasFractional = false
     private var lastSetVisibilityAmountLogWasFractional = false
     private var lastSetHideAmountLogWasFractional = false
     private var lastSetHideAmount = -1f
 
     fun logUpdateDozeAmount(
         inputLinear: Float,
-        delayLinear: Float,
         hardOverride: Float?,
         outputLinear: Float,
         state: Int,
@@ -43,11 +40,9 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
     ) {
         // Avoid logging on every frame of the animation if important values are not changing
         val isInputFractional = inputLinear != 1f && inputLinear != 0f
-        val isDelayFractional = delayLinear != 1f && delayLinear != 0f
         if (
-            (isInputFractional || isDelayFractional) &&
+            (isInputFractional) &&
                 lastSetDozeAmountLogInputWasFractional == isInputFractional &&
-                lastSetDozeAmountLogDelayWasFractional == isDelayFractional &&
                 lastSetDozeAmountLogState == state &&
                 lastSetHardOverride == hardOverride &&
                 allowThrottle
@@ -55,7 +50,6 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
             return
         }
         lastSetDozeAmountLogInputWasFractional = isInputFractional
-        lastSetDozeAmountLogDelayWasFractional = isDelayFractional
         lastSetDozeAmountLogState = state
         lastSetHardOverride = hardOverride
 
@@ -66,15 +60,14 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
                 double1 = inputLinear.toDouble()
                 str1 = hardOverride.toString()
                 str2 = outputLinear.toString()
-                str3 = delayLinear.toString()
                 int1 = state
                 bool1 = changed
             },
             {
-                "updateDozeAmount() inputLinear=$double1 delayLinear=$str3" +
+                "updateDozeAmount() inputLinear=$double1" +
                     " hardOverride=$str1 outputLinear=$str2" +
                     " state=${StatusBarState.toString(int1)} changed=$bool1"
-            }
+            },
         )
     }
 
@@ -86,7 +79,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
                 bool1 = dozing
                 str1 = source
             },
-            { "setDozeAmountOverride(dozing=$bool1, source=\"$str1\")" }
+            { "setDozeAmountOverride(dozing=$bool1, source=\"$str1\")" },
         )
     }
 
@@ -106,7 +99,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
                     "willRemove=$willRemove onKeyguard=$onKeyguard dozing=$dozing" +
                         " bypass=$bypass animating=$animating idleOnCommunal=$idleOnCommunal"
             },
-            { "maybeClearHardDozeAmountOverrideHidingNotifs() $str1" }
+            { "maybeClearHardDozeAmountOverrideHidingNotifs() $str1" },
         )
     }
 
@@ -122,20 +115,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
                 double1 = linear.toDouble()
                 str2 = eased.toString()
             },
-            { "onDozeAmountChanged(linear=$double1, eased=$str2)" }
-        )
-    }
-
-    fun logSetDelayDozeAmountOverride(linear: Float) {
-        // Avoid logging on every frame of the animation when values are fractional
-        val isFractional = linear != 1f && linear != 0f
-        if (lastSetDelayDozeAmountOverrideLogWasFractional && isFractional && allowThrottle) return
-        lastSetDelayDozeAmountOverrideLogWasFractional = isFractional
-        buffer.log(
-            TAG,
-            DEBUG,
-            { double1 = linear.toDouble() },
-            { "setDelayDozeAmountOverride($double1)" }
+            { "onDozeAmountChanged(linear=$double1, eased=$str2)" },
         )
     }
 
@@ -158,15 +138,6 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
         buffer.log(TAG, DEBUG, { double1 = linear.toDouble() }, { "setHideAmount($double1)" })
     }
 
-    fun logStartDelayedDozeAmountAnimation(alreadyRunning: Boolean) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { bool1 = alreadyRunning },
-            { "startDelayedDozeAmountAnimation() alreadyRunning=$bool1" }
-        )
-    }
-
     fun logOnStateChanged(newState: Int, storedState: Int) {
         buffer.log(
             TAG,
@@ -178,7 +149,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
             {
                 "onStateChanged(newState=${StatusBarState.toString(int1)})" +
                     " stored=${StatusBarState.toString(int2)}"
-            }
+            },
         )
     }
 
@@ -187,7 +158,7 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
         wasCollapsedEnoughToHide: Boolean,
         isCollapsedEnoughToHide: Boolean,
         couldShowPulsingHuns: Boolean,
-        canShowPulsingHuns: Boolean
+        canShowPulsingHuns: Boolean,
     ) {
         buffer.log(
             TAG,
@@ -203,29 +174,12 @@ constructor(@NotificationLockscreenLog private val buffer: LogBuffer) {
                 "onPanelExpansionChanged($double1):" +
                     " collapsedEnoughToHide: $bool1 -> $bool2," +
                     " canShowPulsingHuns: $bool3 -> $bool4"
-            }
-        )
-    }
-
-    fun logSetWakingUp(wakingUp: Boolean, requestDelayedAnimation: Boolean) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            {
-                bool1 = wakingUp
-                bool2 = requestDelayedAnimation
             },
-            { "setWakingUp(wakingUp=$bool1, requestDelayedAnimation=$bool2)" }
         )
     }
 
-    fun logDelayingClockWakeUpAnimation(delayingAnimation: Boolean) {
-        buffer.log(
-            TAG,
-            DEBUG,
-            { bool1 = delayingAnimation },
-            { "logDelayingClockWakeUpAnimation($bool1)" }
-        )
+    fun logSetWakingUp(wakingUp: Boolean) {
+        buffer.log(TAG, DEBUG, { bool1 = wakingUp }, { "setWakingUp(wakingUp=$bool1)" })
     }
 }
 

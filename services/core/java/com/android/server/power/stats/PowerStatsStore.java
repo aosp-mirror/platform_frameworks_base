@@ -36,6 +36,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.channels.Channel;
 import java.nio.channels.FileChannel;
 import java.nio.channels.FileLock;
 import java.nio.charset.StandardCharsets;
@@ -242,8 +243,10 @@ public class PowerStatsStore {
 
         // Lock the directory from access by other JVMs
         try {
-            mLockFile.getParentFile().mkdirs();
-            mLockFile.createNewFile();
+            if (!mLockFile.exists()) {
+                mLockFile.getParentFile().mkdirs();
+                mLockFile.createNewFile();
+            }
             mJvmLock = FileChannel.open(mLockFile.toPath(), StandardOpenOption.WRITE).lock();
         } catch (IOException e) {
             Slog.e(TAG, "Cannot lock snapshot directory", e);
@@ -252,10 +255,13 @@ public class PowerStatsStore {
 
     private void unlockStoreDirectory() {
         try {
-            mJvmLock.close();
+            Channel channel = mJvmLock.acquiredBy();
+            mJvmLock.release();
+            channel.close();
         } catch (IOException e) {
             Slog.e(TAG, "Cannot unlock snapshot directory", e);
         } finally {
+            mJvmLock = null;
             mFileLock.unlock();
         }
     }

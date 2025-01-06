@@ -16,7 +16,11 @@
 
 package android.view;
 
+import static android.view.RoundScrollbarRenderer.BLUECHIP_ENABLED_SYSPROP;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assume.assumeFalse;
+import static org.junit.Assume.assumeTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -30,11 +34,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.os.SystemProperties;
 import android.platform.test.annotations.Presubmit;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.flags.Flags;
 
 import androidx.test.core.app.ApplicationProvider;
@@ -42,7 +43,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -66,9 +66,6 @@ public class RoundScrollbarRendererTest {
     private static final float DEFAULT_ALPHA = 0.5f;
     private static final Rect BOUNDS = new Rect(0, 0, 200, 200);
 
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule();
-
     @Mock private Canvas mCanvas;
     @Captor private ArgumentCaptor<Paint> mPaintCaptor;
     private RoundScrollbarRenderer mScrollbar;
@@ -88,8 +85,8 @@ public class RoundScrollbarRendererTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_USE_REFACTORED_ROUND_SCROLLBAR)
     public void testScrollbarDrawn_legacy() {
+        assumeFalse(usingRefactoredScrollbar());
         mScrollbar.drawRoundScrollbars(mCanvas, DEFAULT_ALPHA, BOUNDS, /* drawToLeft= */ false);
 
         // The arc will be drawn twice, i.e. once for track and once for thumb
@@ -105,8 +102,8 @@ public class RoundScrollbarRendererTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(Flags.FLAG_USE_REFACTORED_ROUND_SCROLLBAR)
     public void testScrollbarDrawn() {
+        assumeTrue(usingRefactoredScrollbar());
         mScrollbar.drawRoundScrollbars(mCanvas, DEFAULT_ALPHA, BOUNDS, /* drawToLeft= */ false);
 
         // The arc will be drawn thrice, i.e. twice for track and once for thumb
@@ -142,5 +139,10 @@ public class RoundScrollbarRendererTest {
         public int computeVerticalScrollExtent() {
             return super.computeVerticalScrollExtent();
         }
+    }
+
+    private static boolean usingRefactoredScrollbar() {
+        return Flags.useRefactoredRoundScrollbar()
+                && SystemProperties.getBoolean(BLUECHIP_ENABLED_SYSPROP, false);
     }
 }

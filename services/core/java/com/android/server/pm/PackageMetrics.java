@@ -32,7 +32,9 @@ import android.app.admin.SecurityLog;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
+import android.content.pm.DataLoaderType;
 import android.content.pm.Flags;
+import android.content.pm.PackageInstaller;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.parsing.ApkLiteParseUtils;
@@ -173,7 +175,10 @@ final class PackageMetrics {
                 mInstallRequest.isInstallInherit() /* is_inherit */,
                 mInstallRequest.isInstallForUsers() /* is_installing_existing_as_user */,
                 mInstallRequest.isInstallMove() /* is_move_install */,
-                false /* is_staged */
+                false /* is_staged */,
+                mInstallRequest
+                        .isDependencyInstallerEnabled() /* is_install_dependencies_enabled */,
+                mInstallRequest.getMissingSharedLibraryCount() /* missing_dependencies_count */
         );
     }
 
@@ -323,7 +328,53 @@ final class PackageMetrics {
                 verifyingSession.isInherit() /* is_inherit */,
                 false /* is_installing_existing_as_user */,
                 false /* is_move_install */,
-                verifyingSession.isStaged() /* is_staged */
+                verifyingSession.isStaged() /* is_staged */,
+                false /* is_install_dependencies_enabled */,
+                0 /* missing_dependencies_count */
+        );
+    }
+
+    static void onDependencyInstallationFailure(
+            int sessionId, String packageName, int errorCode, int installerPackageUid,
+            PackageInstaller.SessionParams params, int missingDependenciesCount) {
+        if (params == null) {
+            return;
+        }
+        int dataLoaderType = DataLoaderType.NONE;
+        if (params.dataLoaderParams != null) {
+            dataLoaderType = params.dataLoaderParams.getType();
+        }
+
+        FrameworkStatsLog.write(FrameworkStatsLog.PACKAGE_INSTALLATION_SESSION_REPORTED,
+                sessionId /* session_id */,
+                packageName /* package_name */,
+                INVALID_UID /* uid */,
+                null /* user_ids */,
+                null /* user_types */,
+                null /* original_user_ids */,
+                null /* original_user_types */,
+                errorCode /* public_return_code */,
+                0 /* internal_error_code */,
+                0 /* apks_size_bytes */,
+                0 /* version_code */,
+                null /* install_steps */,
+                null /* step_duration_millis */,
+                0 /* total_duration_millis */,
+                0 /* install_flags */,
+                installerPackageUid /* installer_package_uid */,
+                INVALID_UID /* original_installer_package_uid */,
+                dataLoaderType /* data_loader_type */,
+                params.requireUserAction /* user_action_required_type */,
+                (params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0 /* is_instant */,
+                false /* is_replace */,
+                false /* is_system */,
+                params.mode
+                        == PackageInstaller.SessionParams.MODE_INHERIT_EXISTING /* is_inherit */,
+                false /* is_installing_existing_as_user */,
+                false /* is_move_install */,
+                params.isStaged /* is_staged */,
+                true /* is_install_dependencies_enabled */,
+                missingDependenciesCount /* missing_dependencies_count */
         );
     }
 

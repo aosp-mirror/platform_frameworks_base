@@ -73,6 +73,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID klicatelja je ponastavljen na omejeno. Naslednji klic: ni omejeno"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID klicatelja je ponastavljen na neomejeno. Naslednji klic: omejeno"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID klicatelja je ponastavljen na neomejeno. Naslednji klic: ni omejeno"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Ta aplikacija ni združljiva s pomnilniško stranjo velikosti 16 KB. Preverjanje usklajenosti oblike zapisa APK ni uspelo. Ta aplikacija bo delovala v načinu, združljivem z velikostjo pomnilniške strani. Za najboljšo združljivost znova prevedite aplikacijo s podporo za pomnilniško stran velikosti 16 KB. Za več informacij si oglejte &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Ta aplikacija ni združljiva s pomnilniško stranjo velikosti 16 KB. Preverjanje usklajenosti oblike zapisa ELF ni uspelo. Ta aplikacija bo delovala v načinu, združljivem z velikostjo pomnilniške strani. Za najboljšo združljivost znova prevedite aplikacijo s podporo za pomnilniško stran velikosti 16 KB. Za več informacij si oglejte &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Ta aplikacija ni združljiva s pomnilniško stranjo velikosti 16 KB. Preverjanja usklajenosti oblik zapisov APK in ELF niso uspela. Ta aplikacija bo delovala v načinu, združljivem z velikostjo pomnilniške strani. Za najboljšo združljivost znova prevedite aplikacijo s podporo za pomnilniško stran velikosti 16 KB. Za več informacij si oglejte &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Storitev ni nastavljena in omogočena."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ne morete spremeniti nastavitve ID-ja klicatelja."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Prenos podatkov je preklopljen na operaterja <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -86,6 +89,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobilnega omrežja ni mogoče doseči"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Poskusite spremeniti prednostno omrežje. Dotaknite se, če ga želite spremeniti."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Klicanje v sili ni na voljo"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Za klice v sili potrebujete mobilno omrežje"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Opozorila"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Preusmerjanje klicev"</string>
@@ -285,7 +290,7 @@
     <string name="global_action_settings" msgid="4671878836947494217">"Nastavitve"</string>
     <string name="global_action_assist" msgid="2517047220311505805">"Pomoč"</string>
     <string name="global_action_voice_assist" msgid="6655788068555086695">"Glas. pomočnik"</string>
-    <string name="global_action_lockdown" msgid="2475471405907902963">"Zakleni"</string>
+    <string name="global_action_lockdown" msgid="2475471405907902963">"Zaklep"</string>
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999 +"</string>
     <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"Odgovori"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"Novo obvestilo"</string>
@@ -614,6 +619,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Aplikaciji dovoli, da določi relativno oddaljenost med napravami UWB v bližini."</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"komunikacija z napravami Wi‑Fi v bližini"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Aplikaciji dovoljuje objavljanje in določanje relativnega položaja naprav Wi‑Fi v bližini ter povezovanje z njimi."</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"določanje relativne oddaljenosti med napravami v bližini"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Aplikaciji dovoli, da določi relativno oddaljenost med napravami v bližini"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Podatki o prednostni storitvi za plačevanje prek povezave NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Aplikaciji omogoča pridobivanje podatkov o prednostni storitvi za plačevanje prek povezave NFC, kot so registrirani pripomočki in cilj preusmeritve."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"nadzor nad komunikacijo s tehnologijo bližnjega polja"</string>
@@ -1155,6 +1162,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"čez <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"čez <xliff:g id="COUNT">%d</xliff:g> d"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"čez <xliff:g id="COUNT">%d</xliff:g> l"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"pred <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"pred <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"pred <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"pred <xliff:g id="COUNT">%d</xliff:g> l"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> l"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"čez <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"čez <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"čez <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"čez <xliff:g id="COUNT">%d</xliff:g> l"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"pred <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"pred <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"pred <xliff:g id="COUNT">%d</xliff:g> d"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"pred <xliff:g id="COUNT">%d</xliff:g> l"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Pred # minuto}one{Pred # minuto}two{Pred # minutama}few{Pred # minutami}other{Pred # minutami}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Pred # uro}one{Pred # uro}two{Pred # urama}few{Pred # urami}other{Pred # urami}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Pred # dnevom}one{Pred # dnevom}two{Pred # dnevoma}few{Pred # dnevi}other{Pred # dnevi}}"</string>
@@ -1759,6 +1782,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enoročni način"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Zelo zatemnjen zaslon"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Slušni pripomočki"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je vklopljena."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tipki za glasnost sta pridržani. Storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g> je izklopljena."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Spustite gumba za glasnost. Če želite vklopiti storitev <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, znova pritisnite in 3 sekunde pridržite oba gumba za glasnost."</string>
@@ -1940,13 +1971,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Konec tedna"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Dogodek"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Spanje"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Ne moti (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Upravlja <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Vklopljeno"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Izklopljeno"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>–<xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> do <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Kateri koli koledar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> izklaplja nekatere zvoke"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Vaša naprava ima notranjo napako in bo morda nestabilna, dokler je ne ponastavite na tovarniške nastavitve."</string>
@@ -2428,15 +2460,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Pošiljanje in prejemanje sporočil brez mobilnega omrežja ali omrežja Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Odpri Sporočila"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Kako deluje"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Vklopite »Samodejno izberi omrežje«"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"V nastavitvah vklopite možnost »Samodejno izberi omrežje«, da bo telefon lahko našel omrežje, ki deluje s satelitsko povezavo"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Vklopi"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Nazaj"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"V teku …"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS prek satelita je zdaj na voljo"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Reševalnim službam lahko pošljete sporočilo, če ni povezave z mobilnim omrežjem ali omrežjem Wi-Fi. Google Sporočila morajo biti privzeta aplikacija za sporočanje."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"SOS prek satelita ni podprt"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"SOS prek satelita ni podprt v tej napravi"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"SOS prek satelita ni nastavljen"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Zagotovite, da imate vzpostavljeno internetno povezavo, in znova poskusite nastaviti"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS prek satelita ni na voljo"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS prek satelita ni na voljo v tej državi ali regiji"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"SOS prek satelita ni nastavljen"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Če želite pošiljati satelitska sporočila, nastavite Google Sporočila kot privzeto aplikacijo za sporočanje"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS prek satelita ni na voljo"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Če želite preveriti, ali je SOS prek satelita na voljo v tej državi ali regiji, vklopite nastavitve lokacije"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Satelitska sporočila so na voljo"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Satelitska sporočila lahko pošljete, če ni povezave z mobilnim omrežjem ali omrežjem Wi-Fi. Google Sporočila morajo biti privzeta aplikacija za sporočanje."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Satelitska sporočila niso podprta"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Satelitska sporočila niso podprta v tej napravi"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Satelitska sporočila niso nastavljena"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Zagotovite, da imate vzpostavljeno internetno povezavo, in znova poskusite nastaviti"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Satelitska sporočila niso na voljo"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Satelitska sporočila niso na voljo v tej državi ali regiji"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Satelitska sporočila niso nastavljena"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Če želite pošiljati satelitska sporočila, nastavite Google Sporočila kot privzeto aplikacijo za sporočanje"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Satelitska sporočila niso na voljo"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Če želite preveriti, ali so satelitska sporočila na voljo v tej državi ali regiji, vklopite nastavitve lokacije"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Vnovična nastavitev odklepanja s prstnim odtisom"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Odtisa »<xliff:g id="FINGERPRINT">%s</xliff:g>« ni več mogoče prepoznati."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Odtisov »<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>« in »<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>« ni več mogoče prepoznati."</string>

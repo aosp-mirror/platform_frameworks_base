@@ -14,7 +14,7 @@ class :r keepclass
 
 # Support APIs not available in standard JRE
 class java.io.FileDescriptor keep
-    method getInt$ ()I @com.android.ravenwood.RavenwoodJdkPatch.getInt$
-    method setInt$ (I)V @com.android.ravenwood.RavenwoodJdkPatch.setInt$
+    method getInt$ @com.android.ravenwood.RavenwoodJdkPatch.getInt$
+    method setInt$ @com.android.ravenwood.RavenwoodJdkPatch.setInt$
 class java.util.LinkedHashMap keep
-    method eldest ()Ljava/util/Map$Entry; @com.android.ravenwood.RavenwoodJdkPatch.eldest
+    method eldest @com.android.ravenwood.RavenwoodJdkPatch.eldest

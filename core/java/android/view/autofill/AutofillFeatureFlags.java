@@ -16,6 +16,8 @@
 
 package android.view.autofill;
 
+import static android.service.autofill.Flags.improveFillDialogAconfig;
+
 import android.annotation.SuppressLint;
 import android.annotation.TestApi;
 import android.provider.DeviceConfig;
@@ -316,6 +318,35 @@ public class AutofillFeatureFlags {
 
     // END AUTOFILL PCC CLASSIFICATION FLAGS
 
+    // START AUTOFILL REMOVE PRE_TRIGGER FLAGS
+
+    /**
+     * Whether pre-trigger flow is disabled.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_IMPROVE_FILL_DIALOG_ENABLED = "improve_fill_dialog";
+
+    /**
+     * Minimum amount of time (in milliseconds) to wait after IME animation finishes, and before
+     * starting fill dialog animation.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_FILL_DIALOG_MIN_WAIT_AFTER_IME_ANIMATION_END_MS =
+            "fill_dialog_min_wait_after_animation_end_ms";
+
+    /**
+     * Sets a value of timeout in milliseconds, measured after animation end, during which fill
+     * dialog can be shown. If we are at time > animation_end_time + this timeout, fill dialog
+     * wouldn't be shown.
+     *
+     * @hide
+     */
+    public static final String DEVICE_CONFIG_FILL_DIALOG_TIMEOUT_MS = "fill_dialog_timeout_ms";
+
+    // END AUTOFILL REMOVE PRE_TRIGGER FLAGS
+
     /**
      * Define the max input length for autofill to show suggesiton UI
      *
@@ -365,6 +396,17 @@ public class AutofillFeatureFlags {
     private static final boolean
             DEFAULT_AFAA_SHOULD_INCLUDE_ALL_AUTOFILL_TYPE_NOT_NONE_VIEWS_IN_ASSIST_STRUCTURE = true;
     // END AUTOFILL FOR ALL APPS DEFAULTS
+
+    // START AUTOFILL REMOVE PRE_TRIGGER FLAGS DEFAULTS
+    // Default for whether the pre trigger removal is enabled.
+    /** @hide */
+    public static final boolean DEFAULT_IMPROVE_FILL_DIALOG_ENABLED = true;
+    // Default for whether the pre trigger removal is enabled.
+    /** @hide */
+    public static final long DEFAULT_FILL_DIALOG_TIMEOUT_MS = 300; // 300 ms
+    /** @hide */
+    public static final long DEFAULT_FILL_DIALOG_MIN_WAIT_AFTER_IME_ANIMATION_END_MS = 0; // 0 ms
+    // END AUTOFILL REMOVE PRE_TRIGGER FLAGS DEFAULTS
 
     /**
      * @hide
@@ -563,7 +605,7 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_ENABLE_RELAYOUT,
-                false);
+                true);
     }
 
     /** @hide */
@@ -571,7 +613,7 @@ public class AutofillFeatureFlags {
         return DeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_AUTOFILL,
                 DEVICE_CONFIG_ENABLE_RELATIVE_LOCATION_FOR_RELAYOUT,
-                false);
+                true);
     }
 
     /** @hide **/
@@ -611,4 +653,48 @@ public class AutofillFeatureFlags {
     }
 
     // END AUTOFILL PCC CLASSIFICATION FUNCTIONS
+
+
+    // START AUTOFILL REMOVE PRE_TRIGGER
+    /**
+     * Whether Autofill Pre Trigger Removal is enabled.
+     *
+     * @hide
+     */
+    public static boolean isImproveFillDialogEnabled() {
+        // TODO(b/266379948): Add condition for checking whether device has PCC first
+
+        return improveFillDialogAconfig() && DeviceConfig.getBoolean(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_IMPROVE_FILL_DIALOG_ENABLED,
+                DEFAULT_IMPROVE_FILL_DIALOG_ENABLED);
+    }
+
+    /**
+     * Whether Autofill Pre Trigger Removal is enabled.
+     *
+     * @hide
+     */
+    public static long getFillDialogTimeoutMs() {
+        // TODO(b/266379948): Add condition for checking whether device has PCC first
+
+        return DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_FILL_DIALOG_TIMEOUT_MS,
+                DEFAULT_FILL_DIALOG_TIMEOUT_MS);
+    }
+
+    /**
+     * Whether Autofill Pre Trigger Removal is enabled.
+     *
+     * @hide
+     */
+    public static long getFillDialogMinWaitAfterImeAnimationtEndMs() {
+        // TODO(b/266379948): Add condition for checking whether device has PCC first
+
+        return DeviceConfig.getLong(
+                DeviceConfig.NAMESPACE_AUTOFILL,
+                DEVICE_CONFIG_FILL_DIALOG_MIN_WAIT_AFTER_IME_ANIMATION_END_MS,
+                DEFAULT_FILL_DIALOG_MIN_WAIT_AFTER_IME_ANIMATION_END_MS);
+    }
 }

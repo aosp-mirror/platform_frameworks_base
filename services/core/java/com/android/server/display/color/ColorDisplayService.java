@@ -168,8 +168,7 @@ public final class ColorDisplayService extends SystemService {
             new NightDisplayTintController();
     private final TintController mGlobalSaturationTintController =
             new GlobalSaturationTintController();
-    private final ReduceBrightColorsTintController mReduceBrightColorsTintController =
-            new ReduceBrightColorsTintController();
+    private final ReduceBrightColorsTintController mReduceBrightColorsTintController;
 
     @VisibleForTesting
     final Handler mHandler;
@@ -201,7 +200,13 @@ public final class ColorDisplayService extends SystemService {
     private boolean mEvenDimmerActivated;
 
     public ColorDisplayService(Context context) {
+        this(context, new ReduceBrightColorsTintController());
+    }
+
+    @VisibleForTesting
+    public ColorDisplayService(Context context, ReduceBrightColorsTintController rbcController) {
         super(context);
+        mReduceBrightColorsTintController = rbcController;
         mHandler = new TintHandler(DisplayThread.get().getLooper());
         mVisibleBackgroundUsersEnabled = isVisibleBackgroundUsersEnabled();
         mUserManager = UserManagerService.getInstance();
@@ -571,27 +576,37 @@ public final class ColorDisplayService extends SystemService {
         return mColorModeCompositionColorSpaces.get(mode, Display.COLOR_MODE_INVALID);
     }
 
-    private void onDisplayColorModeChanged(int mode) {
+    @VisibleForTesting
+    void onDisplayColorModeChanged(int mode) {
         if (mode == NOT_SET) {
             return;
         }
 
+        mReduceBrightColorsTintController.cancelAnimator();
         mNightDisplayTintController.cancelAnimator();
         mDisplayWhiteBalanceTintController.cancelAnimator();
 
+        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
+
         if (mNightDisplayTintController.isAvailable(getContext())) {
-            final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
             mNightDisplayTintController.setUp(getContext(), dtm.needsLinearColorMatrix(mode));
             mNightDisplayTintController
                     .setMatrix(mNightDisplayTintController.getColorTemperatureSetting());
+        }
+
+        if (mReduceBrightColorsTintController.isAvailable(getContext())) {
+            // Different color modes may require different coefficients to be loaded for RBC.
+            // Re-set up RBC so that it can recalculate its transform matrix with new values.
+            mReduceBrightColorsTintController.setUp(getContext(), dtm.needsLinearColorMatrix(mode));
+            onReduceBrightColorsStrengthLevelChanged(); // Trigger matrix recalc + updates
         }
 
         // dtm.setColorMode() needs to be called before
         // updateDisplayWhiteBalanceStatus(), this is because the latter calls
         // DisplayTransformManager.needsLinearColorMatrix(), therefore it is dependent
         // on the state of DisplayTransformManager.
-        final DisplayTransformManager dtm = getLocalService(DisplayTransformManager.class);
         dtm.setColorMode(mode, mNightDisplayTintController.getMatrix(),
+                mReduceBrightColorsTintController.getMatrix(),
                 getCompositionColorSpace(mode));
 
         if (mDisplayWhiteBalanceTintController.isAvailable(getContext())) {

@@ -33,21 +33,27 @@ import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.res.Configuration;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.WindowInsets;
 import android.window.WindowContext;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.window.flags.Flags;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
 
 import java.util.function.BiFunction;
 
@@ -304,14 +310,39 @@ public class WindowTokenTests extends WindowTestsBase {
         // immediately. verify the window will hide without applying exit animation.
         mWm.removeWindowToken(win.mToken.token, false /* removeWindows */, false /* animateExit */,
                 mDisplayContent.mDisplayId);
-        verify(win).onSetAppExiting(Mockito.eq(false) /* animateExit */);
+        verify(win).onSetAppExiting(eq(false) /* animateExit */);
         verify(win).hide(false /* doAnimation */, false /* requestAnim */);
         assertFalse(win.isOnScreen());
-        verify(win.mWinAnimator, Mockito.never()).applyAnimationLocked(TRANSIT_EXIT, false);
+        verify(win.mWinAnimator, never()).applyAnimationLocked(TRANSIT_EXIT, false);
         assertTrue(win.mToken.hasChild());
 
         // Even though the window is being removed afterwards, it won't apply exit animation.
         win.removeIfPossible();
-        verify(win.mWinAnimator, Mockito.never()).applyAnimationLocked(TRANSIT_EXIT, false);
+        verify(win.mWinAnimator, never()).applyAnimationLocked(TRANSIT_EXIT, false);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void onDisplayChanged_differentDisplay_reparented() {
+        final TestWindowToken token = createTestWindowToken(0, mDisplayContent);
+        final DisplayContent dc = mock(DisplayContent.class);
+        when(dc.getWindowToken(any())).thenReturn(null); // dc doesn't have this window token.
+
+        token.onDisplayChanged(dc);
+
+        verify(dc).reParentWindowToken(eq(token));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_REPARENT_WINDOW_TOKEN_API)
+    public void onDisplayChanged_samedisplay_notReparented() {
+
+        final TestWindowToken token = createTestWindowToken(0, mDisplayContent);
+        final DisplayContent dc = mock(DisplayContent.class);
+        when(dc.getWindowToken(any())).thenReturn(mock(WindowToken.class));
+
+        token.onDisplayChanged(dc);
+
+        verify(dc, never()).reParentWindowToken(eq(token));
     }
 }

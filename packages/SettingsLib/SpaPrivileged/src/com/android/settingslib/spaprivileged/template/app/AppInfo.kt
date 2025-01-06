@@ -133,7 +133,7 @@ class AppInfoProvider(private val packageInfo: PackageInfo) {
                 list.joinToString(separator = System.lineSeparator())
             }
         if (footer.isBlank()) return
-        HorizontalDivider()
+        if (!isSpaExpressiveEnabled) HorizontalDivider()
         Column(
             modifier =
                 if (isSpaExpressiveEnabled) Modifier.padding(SettingsDimension.footerItemPadding)

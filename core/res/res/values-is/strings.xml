@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Númerabirting er sjálfgefið með takmörkunum. Næsta símtal: Án takmarkana"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Númerabirting er sjálfgefið án takmarkana. Næsta símtal: Með takmörkunum"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Númerabirting er sjálfgefið án takmarkana. Næsta símtal: Án takmarkana"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Þetta forrit er ekki samhæft 16 KB. Athugun á samræmi við APK mistókst. Þetta forrit verður keyrt með stillingu sem er samhæf blaðsíðufjölda. Þýddu forritið aftur með stuðningi við 16 KB til að tryggja sem best samhæfi. Frekari upplýsingar má finna á &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Þetta forrit er ekki samhæft 16 KB. Athugun á samræmi við ELF mistókst. Þetta forrit verður keyrt með stillingu sem er samhæf blaðsíðufjölda. Þýddu forritið aftur með stuðningi við 16 KB til að tryggja sem best samhæfi. Frekari upplýsingar má finna á &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Þetta forrit er ekki samhæft 16 KB. Athuganir á samræmingu APK og ELF mistókst. Þetta forrit verður keyrt með stillingu sem er samhæf blaðsíðufjölda. Þýddu forritið aftur með stuðningi við 16 KB til að tryggja sem best samhæfi. Frekari upplýsingar má finna á &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Þjónustu ekki útdeilt."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Þú getur ekki breytt stillingu númerabirtingar."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Skipt yfir í farsímagögn hjá <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ekki næst samband við farsímakerfi"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prófaðu að velja annað símkerfi. Ýttu til að breyta."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Neyðarsímtöl eru ekki í boði"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Neyðarsímtöl krefjast farsímakerfis"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Tilkynningar"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Símtalsflutningur"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Leyfa forritinu að ákvarða fjarlægð milli nálægra tækja með ofurbreiðband"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"eiga í samskiptum við nálæg WiFi-tæki"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Leyfir forritinu að auglýsa, tengja og áætla staðsetningu nálægra WiFi-tækja"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"greina áætlaða fjarlægð á milli nálægra tækja"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Leyfðu forritinu að greina áætlaða fjarlægð á milli nálægra tækja"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Upplýsingar um valda NFC-greiðsluþjónustu"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Gerir forritinu kleift að fá valda NFC-greiðsluþjónustu, svo sem skráða aðstoð og áfangastað leiðar."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"stjórna nándarsamskiptum (NFC)"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"eftir <xliff:g id="COUNT">%d</xliff:g> klst."</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"eftir <xliff:g id="COUNT">%d</xliff:g> d."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"eftir <xliff:g id="COUNT">%d</xliff:g> ár"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"fyrir <xliff:g id="COUNT">%d</xliff:g> mín."</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"fyrir <xliff:g id="COUNT">%d</xliff:g> klst."</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"fyrir <xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"fyrir <xliff:g id="COUNT">%d</xliff:g> á."</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> mín."</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> klst."</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> ár"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"eftir <xliff:g id="COUNT">%d</xliff:g> mín."</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"eftir <xliff:g id="COUNT">%d</xliff:g> klst."</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"eftir <xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"eftir <xliff:g id="COUNT">%d</xliff:g> ár"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"fyrir <xliff:g id="COUNT">%d</xliff:g> mín."</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"fyrir <xliff:g id="COUNT">%d</xliff:g> klst."</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"fyrir <xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"fyrir <xliff:g id="COUNT">%d</xliff:g> árum"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Fyrir # mínútu}one{Fyrir # mínútu}other{Fyrir # mínútum}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Fyrir # klukkustund}one{Fyrir # klukkustund}other{Fyrir # klukkustundum}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Fyrir # degi}one{Fyrir # degi}other{Fyrir # dögum}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Einhent stilling"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Mjög dökkt"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Heyrnartæki"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Hljóðstyrkstökkum haldið inni. Kveikt á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Hljóðstyrkstökkum haldið inni. Slökkt á <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Slepptu hljóðstyrkstökkunum. Til að kveikja á <xliff:g id="SERVICE_NAME">%1$s</xliff:g> skaltu halda báðum hljóðstyrkstökkunum aftur inni í 3 sekúndur."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Helgi"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Viðburður"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Svefn"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Ónáðið ekki (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Stýrt af <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Kveikt"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Slökkt"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> til <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Öll dagatöl"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> þaggar í einhverjum hljóðum"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Innra vandamál kom upp í tækinu og það kann að vera óstöðugt þangað til þú núllstillir það."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Senda og fá skilaboð án tengingar við farsímakerfi eða Wi-Fi-net"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Opna Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Svona virkar þetta"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Kveiktu á „Velja net sjálfkrafa“"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Kveiktu á „Velja net sjálfkrafa“ í stillingunum til að gera símanum kleift að finna net sem virkar með gervihnetti"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Kveikja"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Til baka"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Í bið…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Nú er gervihnattar-SOS tiltækt"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Þú getur sent neyðarþjónustu skilaboð, jafnvel þótt farsímakerfi eða WiFi-tenging sé ekki til staðar. Google Messages verður að vera stillt sem sjálfgefið skilaboðaforrit."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Gervihnattar-SOS er ekki stutt"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Gervihnattar-SOS er ekki stutt í þessu tæki"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Gervihnattar-SOS er ekki uppsett"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Gakktu úr skugga um að þú sért með nettengingu og reyndu uppsetningu aftur"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Gervihnattar-SOS er ekki tiltækt"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Gervihnattar-SOS er ekki tiltækt í þessu landi eða landsvæði"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Gervihnattar-SOS er ekki uppsett"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Til að senda skilaboð í gegnum gervihnött skaltu stilla Google Messages sem sjálfgefið skilaboðaforrit"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Gervihnattar-SOS er ekki tiltækt"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Til að athuga hvort gervihnattar-SOS eru tiltæk í þessu landi eða á þessu svæði skaltu kveikja á staðsetningarstillingum"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Skilaboð í gegnum gervihnött eru tiltæk"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Þú getur sent skilaboð um gervihnött ef það er ekkert farsímakerfi eða WiFi-net. Google Messages verður að vera stillt sem sjálfgefið skilaboðaforrit."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Skilaboð í gegnum gervihnött eru ekki studd"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Skilaboð í gegnum gervihnött eru ekki studd í þessu tæki"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Skilaboð í gegnum gervihnött eru ekki uppsett"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Gakktu úr skugga um að þú sért með nettengingu og reyndu uppsetningu aftur"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Skilaboð í gegnum gervihnött eru ekki tiltæk"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Skilaboð í gegnum gervihnött eru ekki tiltæk í þessu landi eða á þessu svæði"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Skilaboð í gegnum gervihnött eru ekki uppsett"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Til að senda skilaboð í gegnum gervihnött skaltu stilla Google Messages sem sjálfgefið skilaboðaforrit"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Skilaboð í gegnum gervihnött eru ekki tiltæk"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Til að athuga hvort skilaboð í gegnum gervihnött eru tiltæk í þessu landi eða á þessu svæði skaltu kveikja á staðsetningarstillingum"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Setja upp fingrafarskenni aftur"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Ekki er hægt að bera kennsl á <xliff:g id="FINGERPRINT">%s</xliff:g> lengur."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Ekki er hægt að bera kennsl á <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> og <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> lengur."</string>
@@ -2444,7 +2496,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Ekki er hægt að bera kennsl á andlitslíkanið þitt lengur. Settu upp andlitskenni aftur."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Setja upp"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Ekki núna"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Viðvörun fyrir: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Viðvörun: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Skipta um notanda"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Þagga"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Ýttu til að þagga hljóð"</string>

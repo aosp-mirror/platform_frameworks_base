@@ -1,7 +1,7 @@
 {
  "shortcut": [
   {
-   "userId": 0,
+   "userId": 10,
    "launchers": [
     {
      "name": "com.android.launcher.1"
@@ -55,7 +55,7 @@
    ]
   },
   {
-   "userId": 10,
+   "userId": 11,
    "launchers": [
     {
      "name": "com.android.launcher.1"

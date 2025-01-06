@@ -67,6 +67,11 @@ public class BubblePositioner {
     private @Surface.Rotation int mRotation = Surface.ROTATION_0;
     private Insets mInsets;
     private boolean mImeVisible;
+    /**
+     * The height of the IME excluding the bottom inset. If the IME is 100 pixels tall and we have
+     * 20 pixels bottom inset, the IME height is adjusted to 80 to represent the overlap with the
+     * Bubbles window.
+     */
     private int mImeHeight;
     private Rect mPositionRect;
     private int mDefaultMaxBubbles;
@@ -101,9 +106,13 @@ public class BubblePositioner {
     private int mBubbleBarTopOnScreen;
 
     public BubblePositioner(Context context, WindowManager windowManager) {
+        this(context, DeviceConfig.create(context, windowManager));
+    }
+
+    public BubblePositioner(Context context, DeviceConfig deviceConfig) {
         mContext = context;
-        mDeviceConfig = DeviceConfig.create(context, windowManager);
-        update(mDeviceConfig);
+        mDeviceConfig = deviceConfig;
+        update(deviceConfig);
     }
 
     /**
@@ -159,8 +168,11 @@ public class BubblePositioner {
             mExpandedViewLargeScreenWidth = (int) (bounds.width()
                     * EXPANDED_VIEW_SMALL_TABLET_WIDTH_PERCENT);
         } else {
-            mExpandedViewLargeScreenWidth =
-                    res.getDimensionPixelSize(R.dimen.bubble_expanded_view_largescreen_width);
+            int expandedViewLargeScreenSpacing = res.getDimensionPixelSize(
+                    R.dimen.bubble_expanded_view_largescreen_landscape_padding);
+            mExpandedViewLargeScreenWidth = Math.min(
+                    res.getDimensionPixelSize(R.dimen.bubble_expanded_view_largescreen_width),
+                    bounds.width() - expandedViewLargeScreenSpacing * 2);
         }
         if (mDeviceConfig.isLargeScreen()) {
             if (mDeviceConfig.isSmallTablet()) {
@@ -329,10 +341,16 @@ public class BubblePositioner {
         return mImeVisible;
     }
 
-    /** Sets whether the IME is visible. **/
+    /**
+     * Sets whether the IME is visible and its height.
+     *
+     * @param visible whether the IME is visible
+     * @param height the total height of the IME from the bottom of the physical screen
+     **/
     public void setImeVisible(boolean visible, int height) {
         mImeVisible = visible;
-        mImeHeight = height;
+        // adjust the IME to account for the height as seen by the Bubbles window
+        mImeHeight = visible ? Math.max(height - getInsets().bottom, 0) : 0;
     }
 
     private int getExpandedViewLargeScreenInsetFurthestEdge(boolean isOverflow) {
@@ -828,6 +846,13 @@ public class BubblePositioner {
      */
     public void setShowingInBubbleBar(boolean showingInBubbleBar) {
         mShowingInBubbleBar = showingInBubbleBar;
+    }
+
+    /**
+     * Whether bubbles ar showing in the bubble bar from launcher.
+     */
+    boolean isShowingInBubbleBar() {
+        return mShowingInBubbleBar;
     }
 
     public void setBubbleBarLocation(BubbleBarLocation location) {

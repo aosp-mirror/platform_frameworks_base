@@ -21,9 +21,9 @@ import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper
 import android.view.View
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_STATUS_BAR_SIMPLE_FRAGMENT
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.AnimatorTestRule
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 import junit.framework.Assert.assertEquals
 import org.junit.Before
 import org.junit.Rule
@@ -38,7 +38,7 @@ private const val INITIAL_ALPHA = 1f
 @RunWith(AndroidTestingRunner::class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
 @SmallTest
-@DisableFlags(FLAG_STATUS_BAR_SIMPLE_FRAGMENT)
+@DisableFlags(StatusBarRootModernization.FLAG_NAME)
 class MultiSourceMinAlphaControllerTest : SysuiTestCase() {
 
     private val view = View(context)

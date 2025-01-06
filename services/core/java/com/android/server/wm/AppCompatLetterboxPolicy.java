@@ -281,7 +281,6 @@ class AppCompatLetterboxPolicy {
                         mActivityRecord.mWmService.mTransactionFactory,
                         reachabilityPolicy, letterboxOverrides,
                         this::getLetterboxParentSurface);
-                mLetterbox.attachInput(w);
                 mActivityRecord.mAppCompatController.getAppCompatReachabilityPolicy()
                         .setLetterboxInnerBoundsSupplier(mLetterbox::getInnerFrame);
             }
@@ -335,7 +334,7 @@ class AppCompatLetterboxPolicy {
             }
             start(winHint);
             if (isRunning() && mLetterbox.needsApplySurfaceChanges()) {
-                mLetterbox.applySurfaceChanges(t, inputT);
+                mLetterbox.applySurfaceChanges(t, inputT, winHint);
             }
         }
 

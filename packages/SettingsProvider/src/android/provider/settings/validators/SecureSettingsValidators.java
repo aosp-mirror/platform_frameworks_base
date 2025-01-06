@@ -88,6 +88,9 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_DIALOG_SHOWN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_SHORTCUT_ON_LOCK_SCREEN, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_HIGH_TEXT_CONTRAST_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(
+                Secure.ACCESSIBILITY_HCT_RECT_PROMPT_STATUS,
+                new DiscreteValueValidator(new String[] {"0", "1", "2"}));
         VALIDATORS.put(Secure.CONTRAST_LEVEL, new InclusiveFloatRangeValidator(-1f, 1f));
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_CAPTIONING_PRESET,
@@ -150,6 +153,7 @@ public class SecureSettingsValidators {
                 Secure.INCALL_POWER_BUTTON_BEHAVIOR,
                 new DiscreteValueValidator(new String[] {"1", "2"}));
         VALIDATORS.put(Secure.MINIMAL_POST_PROCESSING_ALLOWED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.MIRROR_BUILT_IN_DISPLAY, BOOLEAN_VALIDATOR);
         VALIDATORS.put(
                 Secure.MATCH_CONTENT_FRAME_RATE,
                 new DiscreteValueValidator(new String[] {"0", "1", "2"}));
@@ -160,6 +164,9 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.DISPLAY_WHITE_BALANCE_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.SYNC_PARENT_SOUNDS, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.CAMERA_DOUBLE_TWIST_TO_FLIP_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED, BOOLEAN_VALIDATOR);
+        VALIDATORS.put(Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE,
+                new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.SYSTEM_NAVIGATION_KEYS_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.QS_TILES, TILE_LIST_VALIDATOR);
@@ -332,6 +339,9 @@ public class SecureSettingsValidators {
         VALIDATORS.put(
                 Secure.ACCESSIBILITY_QS_TARGETS,
                 ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
+        VALIDATORS.put(
+                Secure.ACCESSIBILITY_KEY_GESTURE_TARGETS,
+                ACCESSIBILITY_SHORTCUT_TARGET_LIST_VALIDATOR);
         VALIDATORS.put(Secure.ACCESSIBILITY_FORCE_INVERT_COLOR_ENABLED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ONE_HANDED_MODE_ACTIVATED, BOOLEAN_VALIDATOR);
         VALIDATORS.put(Secure.ONE_HANDED_MODE_ENABLED, BOOLEAN_VALIDATOR);
@@ -435,6 +445,8 @@ public class SecureSettingsValidators {
                 Secure.RESOLUTION_MODE_UNKNOWN, Secure.RESOLUTION_MODE_FULL));
         VALIDATORS.put(Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_SATURATION_LEVEL,
                 new InclusiveIntegerRangeValidator(0, 10));
+        VALIDATORS.put(Secure.EM_VALUE,
+                new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Secure.CHARGE_OPTIMIZATION_MODE, new InclusiveIntegerRangeValidator(0, 10));
         VALIDATORS.put(Secure.ON_DEVICE_INFERENCE_UNBIND_TIMEOUT_MS, ANY_LONG_VALIDATOR);
         VALIDATORS.put(Secure.ON_DEVICE_INTELLIGENCE_UNBIND_TIMEOUT_MS, ANY_LONG_VALIDATOR);

@@ -34,13 +34,13 @@ public class NfcResolverActivity extends ResolverActivity {
     @Override
     @SuppressWarnings("MissingSuperCall")  // Called indirectly via `super_onCreate()`.
     protected void onCreate(Bundle savedInstanceState) {
-        if (!enableNfcMainline()) {
+        Intent intent = getIntent();
+        if (!enableNfcMainline() || intent.getExtras() == null) {
             super_onCreate(savedInstanceState);
             finish();
             return;
         }
 
-        Intent intent = getIntent();
         Intent target = intent.getParcelableExtra(Intent.EXTRA_INTENT, Intent.class);
         ArrayList<ResolveInfo> rList =
                 intent.getParcelableArrayListExtra(

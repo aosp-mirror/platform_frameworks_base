@@ -128,7 +128,6 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.Activity;
 import android.app.ActivityManager;
-import android.app.ActivityManager.RecentTaskInfo.PersistedTaskSnapshotData;
 import android.app.ActivityManager.TaskDescription;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
@@ -256,9 +255,6 @@ class Task extends TaskFragment {
     private static final String ATTR_MIN_HEIGHT = "min_height";
     private static final String ATTR_PERSIST_TASK_VERSION = "persist_task_version";
     private static final String ATTR_WINDOW_LAYOUT_AFFINITY = "window_layout_affinity";
-    private static final String ATTR_LAST_SNAPSHOT_TASK_SIZE = "last_snapshot_task_size";
-    private static final String ATTR_LAST_SNAPSHOT_CONTENT_INSETS = "last_snapshot_content_insets";
-    private static final String ATTR_LAST_SNAPSHOT_BUFFER_SIZE = "last_snapshot_buffer_size";
 
     // How long to wait for all background Activities to redraw following a call to
     // convertToTranslucent().
@@ -472,10 +468,6 @@ class Task extends TaskFragment {
     // NOTE: This value needs to be persisted with each task
     private TaskDescription mTaskDescription;
 
-    // Information about the last snapshot that should be persisted with the task to allow SystemUI
-    // to layout without loading all the task snapshots
-    final PersistedTaskSnapshotData mLastTaskSnapshotData;
-
     /** @see #setCanAffectSystemUiFlags */
     private boolean mCanAffectSystemUiFlags = true;
 
@@ -635,14 +627,13 @@ class Task extends TaskFragment {
             ComponentName _realActivity, ComponentName _origActivity, boolean _rootWasReset,
             boolean _autoRemoveRecents, int _userId, int _effectiveUid,
             String _lastDescription, long lastTimeMoved, boolean neverRelinquishIdentity,
-            TaskDescription _lastTaskDescription, PersistedTaskSnapshotData _lastSnapshotData,
-            int taskAffiliation, int prevTaskId, int nextTaskId, int callingUid,
-            String callingPackage, @Nullable String callingFeatureId, int resizeMode,
-            boolean supportsPictureInPicture, boolean _realActivitySuspended,
-            boolean userSetupComplete, int minWidth, int minHeight, ActivityInfo info,
-            IVoiceInteractionSession _voiceSession, IVoiceInteractor _voiceInteractor,
-            boolean _createdByOrganizer, IBinder _launchCookie, boolean _deferTaskAppear,
-            boolean _removeWithTaskOrganizer) {
+            TaskDescription _lastTaskDescription, int taskAffiliation, int prevTaskId,
+            int nextTaskId, int callingUid, String callingPackage,
+            @Nullable String callingFeatureId, int resizeMode, boolean supportsPictureInPicture,
+            boolean _realActivitySuspended, boolean userSetupComplete, int minWidth, int minHeight,
+            ActivityInfo info, IVoiceInteractionSession _voiceSession,
+            IVoiceInteractor _voiceInteractor, boolean _createdByOrganizer, IBinder _launchCookie,
+            boolean _deferTaskAppear, boolean _removeWithTaskOrganizer) {
         super(atmService, null /* fragmentToken */, _createdByOrganizer, false /* isEmbedded */);
 
         mTaskId = _taskId;
@@ -652,9 +643,6 @@ class Task extends TaskFragment {
         mTaskDescription = _lastTaskDescription != null
                 ? _lastTaskDescription
                 : new TaskDescription();
-        mLastTaskSnapshotData = _lastSnapshotData != null
-                ? _lastSnapshotData
-                : new PersistedTaskSnapshotData();
         affinityIntent = _affinityIntent;
         affinity = _affinity;
         rootAffinity = _rootAffinity;
@@ -1212,20 +1200,23 @@ class Task extends TaskFragment {
     @Override
     void onResize() {
         super.onResize();
-        updateTaskLayerForFreeform();
+        onTaskBoundsChangedForFreeform();
     }
 
     @Override
     void onMovedByResize() {
         super.onMovedByResize();
-        updateTaskLayerForFreeform();
+        onTaskBoundsChangedForFreeform();
     }
 
-    private void updateTaskLayerForFreeform() {
-        if (!com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()) {
+    private void onTaskBoundsChangedForFreeform() {
+        if (!isVisibleRequested() || !inFreeformWindowingMode()) {
             return;
         }
-        if (!isVisibleRequested() || !inFreeformWindowingMode()) {
+
+        mAtmService.notifyTaskPersisterLocked(this, false /* flush */);
+
+        if (!com.android.window.flags.Flags.processPriorityPolicyForMultiWindowMode()) {
             return;
         }
         mRootWindowContainer.invalidateTaskLayersAndUpdateOomAdjIfNeeded();
@@ -2509,20 +2500,79 @@ class Task extends TaskFragment {
         return parentTask == null ? null : parentTask.getCreatedByOrganizerTask();
     }
 
-    /** @return the first adjacent task of this task or its parent. */
+    /** @deprecated b/373709676 replace with {@link #forOtherAdjacentTasks(Consumer)} ()}. */
+    @Deprecated
     @Nullable
     Task getAdjacentTask() {
-        final TaskFragment adjacentTaskFragment = getAdjacentTaskFragment();
-        if (adjacentTaskFragment != null && adjacentTaskFragment.asTask() != null) {
-            return adjacentTaskFragment.asTask();
+        if (Flags.allowMultipleAdjacentTaskFragments()) {
+            throw new IllegalStateException("allowMultipleAdjacentTaskFragments is enabled. "
+                    + "Use #forOtherAdjacentTasks instead");
         }
+        final Task taskWithAdjacent = getTaskWithAdjacent();
+        if (taskWithAdjacent == null) {
+            return null;
+        }
+        return taskWithAdjacent.getAdjacentTaskFragment().asTask();
+    }
 
+    /** Finds the first Task parent (or itself) that has adjacent. */
+    @Nullable
+    Task getTaskWithAdjacent() {
+        if (hasAdjacentTaskFragment()) {
+            return this;
+        }
         final WindowContainer parent = getParent();
         if (parent == null || parent.asTask() == null) {
             return null;
         }
+        return parent.asTask().getTaskWithAdjacent();
+    }
 
-        return parent.asTask().getAdjacentTask();
+    /** Returns true if this or its parent has adjacent Task. */
+    boolean hasAdjacentTask() {
+        return getTaskWithAdjacent() != null;
+    }
+
+    /**
+     * Finds the first Task parent (or itself) that has adjacent. Runs callback on all the adjacent
+     * Tasks. The invoke order is not guaranteed.
+     */
+    void forOtherAdjacentTasks(@NonNull Consumer<Task> callback) {
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            throw new IllegalStateException("allowMultipleAdjacentTaskFragments is not enabled. "
+                    + "Use #getAdjacentTask instead");
+        }
+
+        final Task taskWithAdjacent = getTaskWithAdjacent();
+        if (taskWithAdjacent == null) {
+            return;
+        }
+        final AdjacentSet adjacentTasks = taskWithAdjacent.getAdjacentTaskFragments();
+        adjacentTasks.forAllTaskFragments(tf -> {
+            // We don't support Task adjacent to non-Task TaskFragment.
+            callback.accept(tf.asTask());
+        }, taskWithAdjacent /* exclude */);
+    }
+
+    /**
+     * Finds the first Task parent (or itself) that has adjacent. Runs callback on all the adjacent
+     * Tasks. Returns early if callback returns true on any of them. The invoke order is not
+     * guaranteed.
+     */
+    boolean forOtherAdjacentTasks(@NonNull Predicate<Task> callback) {
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            throw new IllegalStateException("allowMultipleAdjacentTaskFragments is not enabled. "
+                    + "Use getAdjacentTask instead");
+        }
+        final Task taskWithAdjacent = getTaskWithAdjacent();
+        if (taskWithAdjacent == null) {
+            return false;
+        }
+        final AdjacentSet adjacentTasks = taskWithAdjacent.getAdjacentTaskFragments();
+        return adjacentTasks.forAllTaskFragments(tf -> {
+            // We don't support Task adjacent to non-Task TaskFragment.
+            return callback.test(tf.asTask());
+        }, taskWithAdjacent /* exclude */);
     }
 
     // TODO(task-merge): Figure out what's the right thing to do for places that used it.
@@ -2916,7 +2966,7 @@ class Task extends TaskFragment {
             Rect outSurfaceInsets) {
         // If this task has its adjacent task, it means they should animate together. Use display
         // bounds for them could move same as full screen task.
-        if (getAdjacentTask() != null) {
+        if (hasAdjacentTask()) {
             super.getAnimationFrames(outFrame, outInsets, outStableInsets, outSurfaceInsets);
             return;
         }
@@ -3111,7 +3161,6 @@ class Task extends TaskFragment {
     }
 
     void onSnapshotChanged(TaskSnapshot snapshot) {
-        mLastTaskSnapshotData.set(snapshot);
         mAtmService.getTaskChangeNotificationController().notifyTaskSnapshotChanged(
                 mTaskId, snapshot);
     }
@@ -3423,8 +3472,8 @@ class Task extends TaskFragment {
                 ? top.getLastParentBeforePip().mTaskId : INVALID_TASK_ID;
         info.shouldDockBigOverlays = top != null && top.shouldDockBigOverlays;
         info.mTopActivityLocusId = top != null ? top.getLocusId() : null;
-        info.isTopActivityLimitSystemEducationDialogs = top != null
-              ? top.mShouldLimitSystemEducationDialogs : false;
+        info.topActivityRequestOpenInBrowserEducationTimestamp = top != null
+              ? top.mRequestOpenInBrowserEducationTimestamp : 0;
         final Task parentTask = getParent() != null ? getParent().asTask() : null;
         info.parentTaskId = parentTask != null && parentTask.mCreatedByOrganizer
                 ? parentTask.mTaskId
@@ -3435,8 +3484,10 @@ class Task extends TaskFragment {
         info.isTopActivityNoDisplay = top != null && top.isNoDisplay();
         info.isSleeping = shouldSleepActivities();
         info.isTopActivityTransparent = top != null && !top.fillsParent();
+        info.isActivityStackTransparent = !topTask.forAllActivities(r -> (r.occludesParent()));
         info.lastNonFullscreenBounds = topTask.mLastNonFullscreenBounds;
-        final WindowState windowState = top != null ? top.findMainWindow() : null;
+        final WindowState windowState = top != null
+                ? top.findMainWindow(/* includeStartingApp= */ false) : null;
         info.requestedVisibleTypes = (windowState != null && Flags.enableFullyImmersiveInDesktop())
                 ? windowState.getRequestedVisibleTypes() : WindowInsets.Type.defaultVisible();
         AppCompatUtils.fillAppCompatTaskInfo(this, info, top);
@@ -3522,6 +3573,7 @@ class Task extends TaskFragment {
 
         info.capturedLink = null;
         info.capturedLinkTimestamp = 0;
+        info.topActivityRequestOpenInBrowserEducationTimestamp = 0;
     }
 
     @Nullable PictureInPictureParams getPictureInPictureParams() {
@@ -3600,14 +3652,6 @@ class Task extends TaskFragment {
         // If the developer has persist a different configuration, we need to override it to the
         // starting window because persisted configuration does not effect to Task.
         info.taskInfo.configuration.setTo(activity.getConfiguration());
-        if (!Flags.drawSnapshotAspectRatioMatch()) {
-            final WindowState mainWindow = getTopFullscreenMainWindow();
-            if (mainWindow != null) {
-                info.topOpaqueWindowInsetsState =
-                        mainWindow.getInsetsStateWithVisibilityOverride();
-                info.topOpaqueWindowLayoutParams = mainWindow.getAttrs();
-            }
-        }
         return info;
     }
 
@@ -3663,10 +3707,21 @@ class Task extends TaskFragment {
 
                 // Boost the adjacent TaskFragment for dimmer if needed.
                 final TaskFragment taskFragment = wc.asTaskFragment();
-                if (taskFragment != null && taskFragment.isEmbedded()) {
-                    final TaskFragment adjacentTf = taskFragment.getAdjacentTaskFragment();
-                    if (adjacentTf != null && adjacentTf.shouldBoostDimmer()) {
-                        adjacentTf.assignLayer(t, layer++);
+                if (taskFragment != null && taskFragment.isEmbedded()
+                        && taskFragment.hasAdjacentTaskFragment()) {
+                    if (Flags.allowMultipleAdjacentTaskFragments()) {
+                        final int[] nextLayer = { layer };
+                        taskFragment.forOtherAdjacentTaskFragments(adjacentTf -> {
+                            if (adjacentTf.shouldBoostDimmer()) {
+                                adjacentTf.assignLayer(t, nextLayer[0]++);
+                            }
+                        });
+                        layer = nextLayer[0];
+                    } else {
+                        final TaskFragment adjacentTf = taskFragment.getAdjacentTaskFragment();
+                        if (adjacentTf.shouldBoostDimmer()) {
+                            adjacentTf.assignLayer(t, layer++);
+                        }
                     }
                 }
 
@@ -3871,6 +3926,9 @@ class Task extends TaskFragment {
         if (mLaunchAdjacentDisabled) {
             pw.println(prefix + "mLaunchAdjacentDisabled=true");
         }
+        if (mReparentLeafTaskIfRelaunch) {
+            pw.println(prefix + "mReparentLeafTaskIfRelaunch=true");
+        }
     }
 
     @Override
@@ -3988,19 +4046,6 @@ class Task extends TaskFragment {
         out.attributeInt(null, ATTR_MIN_HEIGHT, mMinHeight);
         out.attributeInt(null, ATTR_PERSIST_TASK_VERSION, PERSIST_TASK_VERSION);
 
-        if (mLastTaskSnapshotData.taskSize != null) {
-            out.attribute(null, ATTR_LAST_SNAPSHOT_TASK_SIZE,
-                    mLastTaskSnapshotData.taskSize.flattenToString());
-        }
-        if (mLastTaskSnapshotData.contentInsets != null) {
-            out.attribute(null, ATTR_LAST_SNAPSHOT_CONTENT_INSETS,
-                    mLastTaskSnapshotData.contentInsets.flattenToString());
-        }
-        if (mLastTaskSnapshotData.bufferSize != null) {
-            out.attribute(null, ATTR_LAST_SNAPSHOT_BUFFER_SIZE,
-                    mLastTaskSnapshotData.bufferSize.flattenToString());
-        }
-
         if (affinityIntent != null) {
             out.startTag(null, TAG_AFFINITYINTENT);
             affinityIntent.saveToXml(out);
@@ -4067,7 +4112,6 @@ class Task extends TaskFragment {
         int taskId = INVALID_TASK_ID;
         final int outerDepth = in.getDepth();
         TaskDescription taskDescription = new TaskDescription();
-        PersistedTaskSnapshotData lastSnapshotData = new PersistedTaskSnapshotData();
         int taskAffiliation = INVALID_TASK_ID;
         int prevTaskId = INVALID_TASK_ID;
         int nextTaskId = INVALID_TASK_ID;
@@ -4174,15 +4218,6 @@ class Task extends TaskFragment {
                 case ATTR_PERSIST_TASK_VERSION:
                     persistTaskVersion = Integer.parseInt(attrValue);
                     break;
-                case ATTR_LAST_SNAPSHOT_TASK_SIZE:
-                    lastSnapshotData.taskSize = Point.unflattenFromString(attrValue);
-                    break;
-                case ATTR_LAST_SNAPSHOT_CONTENT_INSETS:
-                    lastSnapshotData.contentInsets = Rect.unflattenFromString(attrValue);
-                    break;
-                case ATTR_LAST_SNAPSHOT_BUFFER_SIZE:
-                    lastSnapshotData.bufferSize = Point.unflattenFromString(attrValue);
-                    break;
                 default:
                     if (!attrName.startsWith(TaskDescription.ATTR_TASKDESCRIPTION_PREFIX)) {
                         Slog.w(TAG, "Task: Unknown attribute=" + attrName);
@@ -4276,7 +4311,6 @@ class Task extends TaskFragment {
                 .setLastTimeMoved(lastTimeOnTop)
                 .setNeverRelinquishIdentity(neverRelinquishIdentity)
                 .setLastTaskDescription(taskDescription)
-                .setLastSnapshotData(lastSnapshotData)
                 .setTaskAffiliation(taskAffiliation)
                 .setPrevAffiliateTaskId(prevTaskId)
                 .setNextAffiliateTaskId(nextTaskId)
@@ -4520,7 +4554,7 @@ class Task extends TaskFragment {
     }
 
     void onPictureInPictureParamsChanged() {
-        if (inPinnedWindowingMode()) {
+        if (inPinnedWindowingMode() || Flags.enableDesktopWindowingPip()) {
             dispatchTaskInfoChangedIfNeeded(true /* force */);
         }
     }
@@ -6324,12 +6358,6 @@ class Task extends TaskFragment {
         return mAnimatingActivityRegistry;
     }
 
-    @Override
-    void executeAppTransition(ActivityOptions options) {
-        mDisplayContent.executeAppTransition();
-        ActivityOptions.abort(options);
-    }
-
     private Rect getRawBounds() {
         return super.getBounds();
     }
@@ -6442,7 +6470,6 @@ class Task extends TaskFragment {
         private long mLastTimeMoved;
         private boolean mNeverRelinquishIdentity;
         private TaskDescription mLastTaskDescription;
-        private PersistedTaskSnapshotData mLastSnapshotData;
         private int mTaskAffiliation;
         private int mPrevAffiliateTaskId = INVALID_TASK_ID;
         private int mNextAffiliateTaskId = INVALID_TASK_ID;
@@ -6670,11 +6697,6 @@ class Task extends TaskFragment {
             return this;
         }
 
-        private Builder setLastSnapshotData(PersistedTaskSnapshotData lastSnapshotData) {
-            mLastSnapshotData = lastSnapshotData;
-            return this;
-        }
-
         private Builder setOrigActivity(ComponentName origActivity) {
             mOrigActivity = origActivity;
             return this;
@@ -6823,7 +6845,7 @@ class Task extends TaskFragment {
             return new Task(mAtmService, mTaskId, mIntent, mAffinityIntent, mAffinity,
                     mRootAffinity, mRealActivity, mOrigActivity, mRootWasReset, mAutoRemoveRecents,
                     mUserId, mEffectiveUid, mLastDescription, mLastTimeMoved,
-                    mNeverRelinquishIdentity, mLastTaskDescription, mLastSnapshotData,
+                    mNeverRelinquishIdentity, mLastTaskDescription,
                     mTaskAffiliation, mPrevAffiliateTaskId, mNextAffiliateTaskId, mCallingUid,
                     mCallingPackage, mCallingFeatureId, mResizeMode, mSupportsPictureInPicture,
                     mRealActivitySuspended, mUserSetupComplete, mMinWidth, mMinHeight,

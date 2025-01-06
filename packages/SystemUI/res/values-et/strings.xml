@@ -111,13 +111,12 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Pooleli märguanne ekraanikuva salvestamise seansi puhul"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Kas salvestada ekraanikuvast video?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Ühe rakenduse salvestamine"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Kogu ekraanikuva salvestamine"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Ekraanikuva jäädvustamine"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Kuva %s jäädvustamine"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Kui salvestate kogu ekraani, salvestatakse kõik ekraanil kuvatud andmed. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Kui salvestate rakendust, salvestatakse kõik, mida selles rakenduses näidatakse või esitatakse. Seega olge ettevaatlik selliste andmetega nagu paroolid, makseteave, sõnumid, fotod ning heli ja video."</string>
-    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Ekraanikuva jäädvustamine"</string>
-    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Vali salvestamiseks rakendus"</string>
+    <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Salvesta ekraanikuva"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Valige salvestamiseks rakendus"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Salvesta heli"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Seadme heli"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Seadmest pärinev heli, nt muusika, kõned ja helinad"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Salvestate praegu rakendust <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Peata salvestamine"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Ekraani jagamine"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"Sisu jagamine"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Kas lõpetada ekraanikuva jagamine?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"Kas lõpetada jagamine?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Jagate praegu kogu oma ekraanikuva rakendusega <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Jagate praegu kogu oma ekraanikuva rakendusega"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Jagate praegu rakenduse <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g> kuva"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Jagate praegu rakenduse kuva"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"Jagate praegu rakendusega"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Lõpeta jagamine"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Ekraanikuva ülekandmine"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Kas peatada ülekandmine?"</string>
@@ -310,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Kasuta Bluetoothi"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Ühendatud"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Heli jagamine"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Puudutage helile lülitumiseks või selle jagamiseks"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Toetab heli jagamist"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Salvestatud"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"katkesta ühendus"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktiveeri"</string>
@@ -330,6 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Sisend"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Kuuldeaparaadid"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Sisselülitamine …"</string>
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Heledust ei saa reguleerida, kuna seda\n juhib ülemine rakendus"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Autom. pööramine"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Kuva automaatne pööramine"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Asukoht"</string>
@@ -417,7 +414,17 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Uue seadme sidumiseks klõpsake"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Eelseadistust ei saanud värskendada"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Eelseadistus"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Valitud"</string>
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Ümbritsevad helid"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Vasakule"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Paremale"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Vasaku ja parema poole eraldi juhtimine"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Mõlema poole ühtne juhtimine"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Ümbritsevate helide vaigistamine"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Ümbritsevate helide vaigistuse tühistamine"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Tööriistad"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Reaalajas subtiitrid"</string>
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Märkus"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Kas tühistada seadme mikrofoni blokeerimine?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Kas tühistada seadme kaamera blokeerimine?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Kas tühistada seadme kaamera ja mikrofoni blokeerimine?"</string>
@@ -523,13 +530,15 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Lukustuskuva vidinad"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Igaüks saab vaadata luk.kuval olevaid vidinaid, isegi kui tahvelarvuti on lukus."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"tühistage vidina valimine"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"Vähenda kõrgust"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"Suurenda kõrgust"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Lukustuskuva vidinad"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Rakenduse avamiseks vidina abil peate kinnitama, et see olete teie. Samuti pidage meeles, et kõik saavad vidinaid vaadata, isegi kui teie tahvelarvuti on lukus. Mõni vidin ei pruugi olla ette nähtud teie lukustuskuva jaoks ja seda pole turvaline siia lisada."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Selge"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Vidinad"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Otsetee „Vidinad“ lisamiseks veenduge, et seadetes oleks valik „Kuva lukustuskuval vidinad“ lubatud."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Seaded"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Nupp Kuva ekraanisäästja"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Kasutaja vahetamine"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rippmenüü"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Seansi kõik rakendused ja andmed kustutatakse."</string>
@@ -583,21 +592,20 @@
     <string name="clear_all_notifications_text" msgid="348312370303046130">"Tühjenda kõik"</string>
     <string name="manage_notifications_text" msgid="6885645344647733116">"Haldamine"</string>
     <string name="manage_notifications_history_text" msgid="57055985396576230">"Ajalugu"</string>
-    <!-- no translation found for notification_settings_button_description (2441994740884163889) -->
-    <skip />
-    <!-- no translation found for notification_history_button_description (1578657591405033383) -->
-    <skip />
+    <string name="notification_settings_button_description" msgid="2441994740884163889">"Märguandeseaded"</string>
+    <string name="notification_history_button_description" msgid="1578657591405033383">"Märguannete ajalugu"</string>
     <string name="notification_section_header_incoming" msgid="850925217908095197">"Uued"</string>
     <string name="notification_section_header_gentle" msgid="6804099527336337197">"Hääletu"</string>
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Märguanded"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Vestlused"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Kustuta kõik hääletud märguanded"</string>
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Avage märguandeseaded"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Režiim Mitte segada peatas märguanded"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Märguandeid pole}=1{{mode} peatas märguanded}=2{{mode} ja veel üks režiim peatasid märguanded}other{{mode} ja veel # režiimi peatasid märguanded}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Alusta kohe"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Märguandeid pole"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Uusi märguandeid ei ole"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Märguannete summutamine on sees"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"Märguannete summutamine on nüüd sisse lülitatud"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Kui saate korraga liiga palju märguandeid, vähendab seade automaatselt helitugevust ja minimeerib märguanded kuni kaheks minutiks."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Lülita välja"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Vanemate märguannete nägemiseks avage"</string>
@@ -705,6 +713,8 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Fikseeritud"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Pea jälgimine"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Puudutage telefonihelina režiimi muutmiseks"</string>
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"telefonihelina režiim"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, puudutage telefonihelina režiimi muutmiseks"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"vaigistamine"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"vaigistuse tühistamine"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"vibreerimine"</string>
@@ -750,6 +760,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelliit, ühendus on saadaval"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satelliit-SOS"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Hädaabikõned või SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"signaal puudub"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"üks pulk"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"kaks pulka"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"kolm pulka"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"neli pulka"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"tugev signaal"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Tööprofiil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Kõik ei pruugi sellest rõõmu tunda"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Süsteemi kasutajaliidese tuuner pakub täiendavaid võimalusi Androidi kasutajaliidese muutmiseks ja kohandamiseks. Need katselised funktsioonid võivad muutuda, rikki minna või tulevastest versioonidest kaduda. Olge jätkamisel ettevaatlik."</string>
@@ -868,12 +885,17 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Lukustuskuva"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Märkme tegemine"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitegumtöö"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Jagatud ekraanikuva kasutamine, praegune rakendus kuvatakse paremal"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Jagatud ekraanikuva kasutamine, praegune rakendus kuvatakse vasakul"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Jagatud ekraanikuvalt täisekraanile lülitamine"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Jagatud ekraanikuva kasutamine, rakendus kuvatakse paremal"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Jagatud ekraanikuva kasutamine, rakendus kuvatakse vasakul"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Täisekraanile lülitamine"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Paremale või alumisele rakendusele lülitamine jagatud ekraani ajal"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Vasakule või ülemisele rakendusele lülitamine jagatud ekraani ajal"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Ekraanikuva jagamise ajal: ühe rakenduse asendamine teisega"</string>
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Aktiivse akna teisaldamine ekraanide vahel"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"Akna vasakule liigutamine"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"Akna paremale liigutamine"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Akna maksimeerimine"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Akna minimeerimine"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Sisend"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Järgmisele keelele lülitamine"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Eelmisele keelele lülitamine"</string>
@@ -945,9 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Kuva madala prioriteediga märguande ikoonid"</string>
     <string name="other" msgid="429768510980739978">"Muu"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"paani eemaldamiseks"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"paani lõppu lisamiseks"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"lisage paan viimasesse asukohta"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Teisalda paan"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Lisa paan"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Lisage paan soovitud asukohta"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Teisaldamine asendisse <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Lisamine asendisse <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Sobimatu asukoht."</string>
@@ -963,11 +985,10 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"valige kasutaja"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Interneti-ühendus puudub"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Ava teenuse <xliff:g id="ID_1">%s</xliff:g> seaded."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Muuda seadete järjestust."</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Muutke kiirseadete järjekorda"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Toitemenüü"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Leht <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Lukustuskuva"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Saate selle telefoni funktsiooniga Leia mu seade leida ka siis, kui see on välja lülitatud"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Väljalülitamine …"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Vaadake hooldusjuhiseid"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Vaadake hooldusjuhiseid"</string>
@@ -1195,7 +1216,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(ühendus on katkestatud)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Ei saa lülitada. Puudutage uuesti proovimiseks."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Seadme ühendamine"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Selle seansi ülekandmiseks avage rakendus."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Tundmatu rakendus"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Lõpeta ülekanne"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Saadaolevad seadmed heli esitamiseks."</string>
@@ -1222,6 +1242,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Kasutage vähem kui <xliff:g id="LENGTH">%1$d</xliff:g> tähemärki"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Järgunumber"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Järgunumber kopeeriti lõikelauale."</string>
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"lõikelauale kopeerimine."</string>
     <string name="basic_status" msgid="2315371112182658176">"Avage vestlus"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Vestlusvidinad"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Puudutage vestlust, et lisada see oma avakuvale"</string>
@@ -1268,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"seadmesse sisenemiseks"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Kasutage avamiseks sõrmejälge"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Vajalik on autentimine. Puudutage autentimiseks sõrmejäljeandurit."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Käimasolev telefonikõne"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobiilne andmeside"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ühendatud"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Ajutiselt ühendatud"</string>
@@ -1357,6 +1379,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Suurema eraldusvõime saavutamiseks pöörake telefon ümber"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Volditava seadme lahtivoltimine"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Volditava seadme ümberpööramine"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Esiekraan on sisse lülitatud"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"kokku volditud"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"lahti volditud"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1408,60 +1431,80 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Süsteemi juhtelemendid"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Süsteemirakendused"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitegumtöö"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Hiljutised rakendused"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Jagatud ekraanikuva"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Sisend"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Rakenduse otseteed"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Praegune rakendus"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Juurdepääsetavus"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Klaviatuuri otseteed"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Otsingu otseteed"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Klaviatuuri otseteede kohandamine"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Kas soovite otsetee eemaldada?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Kas lähtestada vaikeseadele?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Otsetee lisamiseks vajutage klahvi"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"See kustutab teie kohandatud otsetee jäädavalt."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"See kustutab kõik teie kohandatud otseteed jäädavalt."</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Otsige otseteid"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Otsingutulemused puuduvad"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ahendamisikoon"</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Toiming või metaklahv"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Pluss-ikoon"</string>
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Kohanda"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Lähtesta"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Valmis"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Laiendamisikoon"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"või"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"pluss"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"kaldkriips"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Lohistamispide"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Klaviatuuri seaded"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Määra otsetee"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Eemalda"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Lähtesta"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Tühista"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Vajutage klahvi"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Kombinatsioon on juba kasutusel. Proovige mõnda muud klahvi."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Otseteed ei saa seadistada."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigeerige klaviatuuri abil"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Õppige klaviatuuri otseteid"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigeerige puuteplaadi abil"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Õppige puuteplaadi liigutusi"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Navigeerige klaviatuuri ja puuteplaadi abil"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Õppige puuteplaadi liigutusi, klaviatuuri otseteid ja palju muud"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Õppige puuteplaadi liigutusi, klaviatuuri otseteid ja palju muud."</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Mine tagasi"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Avalehele"</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Avakuvale"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Hiljutiste rakenduste vaatamine"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Valmis"</string>
+    <string name="gesture_error_title" msgid="469064941635578511">"Proovige uuesti!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Tagasi"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Pühkige puuteplaadil kolme sõrmega vasakule või paremale"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Tubli töö!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Tegite tagasiliikumise liigutuse."</string>
-    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Avalehele"</string>
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Puuteplaadi abil tagasi liikumiseks pühkige kolme sõrmega vasakule või paremale"</string>
+    <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Avakuvale"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Pühkige puuteplaadil kolme sõrmega üles"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Väga hea!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Tegite avakuvale minemise liigutuse"</string>
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Avakuvale liikumiseks pühkige puuteplaadil kolme sõrmega üles"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Hiljutiste rakenduste vaatamine"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Pühkige üles ja hoidke kolme sõrme puuteplaadil"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Väga hea!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Lõpetasite hiljutiste rakenduste vaatamise liigutuse."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Tegite hiljutiste rakenduste vaatamise liigutuse."</string>
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Hiljutiste rakenduste kuvamiseks pühkige puuteplaadil kolme sõrmega üles ja hoidke sõrmi puuteplaadil"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Kõigi rakenduste kuvamine"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Vajutage klaviatuuril toiminguklahvi"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Hästi tehtud!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Tegite kõigi rakenduste vaatamise liigutuse"</string>
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Kõigi oma rakenduste kuvamiseks vajutage klaviatuuril toiminguklahvi"</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Õpetlik animatsioon, klõpsake esitamise peatamiseks ja jätkamiseks."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Klaviatuuri taustavalgustus"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Tase %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Kodu juhtelemendid"</string>
     <string name="home_controls_dream_description" msgid="4644150952104035789">"Juurdepääs kodu juhtelementidele ekraanisäästjalt"</string>
     <string name="volume_undo_action" msgid="5815519725211877114">"Võta tagasi"</string>
     <string name="back_edu_toast_content" msgid="4530314597378982956">"Tagasiliikumiseks pühkige puuteplaadil kolme sõrmega vasakule või paremale"</string>
-    <string name="home_edu_toast_content" msgid="3381071147871955415">"Avakuvale liikumiseks pühkige puuteplaadil kolme sõrmega üles"</string>
-    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Hiljutiste rakenduste kuvamiseks pühkige puuteplaadil kolme sõrmega üles ja hoidke sõrmi puuteplaadil"</string>
+    <string name="home_edu_toast_content" msgid="3381071147871955415">"Avakuvale liikumiseks pühkige puuteplaadil kolme sõrmega üles."</string>
+    <string name="overview_edu_toast_content" msgid="5797030644017804518">"Hiljutiste rakenduste kuvamiseks pühkige puuteplaadil kolme sõrmega üles ja hoidke sõrmi puuteplaadil."</string>
     <string name="all_apps_edu_toast_content" msgid="8807496014667211562">"Kõigi oma rakenduste kuvamiseks vajutage klaviatuuril toiminguklahvi"</string>
     <string name="redacted_notification_single_line_title" msgid="212019960919261670">"Peidetud"</string>
     <string name="redacted_notification_single_line_text" msgid="8684166405005242945">"Vaatamiseks avage"</string>
@@ -1485,6 +1528,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Rakendustelt"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Kuva"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Teadmata"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Paanide lähtestamine"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Kas soovite paanid lähtestada nende algsesse järjekorda ja suurusesse?"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"Kas lähtestada kõik paanid?"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"Kõik kiirseadete paanid lähtestatakse seadme algseadetele"</string>
 </resources>

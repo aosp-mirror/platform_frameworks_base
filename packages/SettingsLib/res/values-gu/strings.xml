@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ચાલુ છે (માત્ર ડાબી બાજુ)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ચાલુ છે (માત્ર જમણી બાજુ)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ચાલુ છે (ડાબી અને જમણી બાજુ)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"આસપાસના અવાજો અપડેટ કરી શક્યા નથી"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"સક્રિય (માત્ર મીડિયા માટે). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"સક્રિય (માત્ર મીડિયા માટે). ડાબી બાજુ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, જમણી બાજુ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> બૅટરી."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"કનેક્ટેડ (ઑડિયો શેરિંગને સપોર્ટ કરે છે). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> બૅટરી."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"સ્થાનિક ટર્મિનલ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"સ્થાનિક શેલ અ‍ૅક્સેસની ઑફર કરતી ટર્મિનલ એપ્લિકેશનને સક્ષમ કરો"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ડેવલપમેન્ટ એન્વાયરમેન્ટ"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android પર Linux ટર્મિનલ ચલાવો"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(પ્રાયોગિક) Android પર Linux ટર્મિનલ ચલાવો"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Linux ટર્મિનલ ઍપને બંધ કરવાથી તેનો ડેટા સાફ કરવામાં આવશે"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP તપાસણી"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP તપાસણીની વર્તણૂક બદલો"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ડીબગિંગ"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ટ્રાન્ઝિશન ઍનિમેશન સ્કેલ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ઍનિમેટર અવધિ સ્કેલ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"સેકન્ડરી ડિસ્પ્લેનું અનુકરણ કરો"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"શેડના ડિસ્પ્લેની સ્થિતિ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ઍપ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"પ્રવૃત્તિઓ રાખશો નહીં"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"જેવો વપરાશકર્તા તેને છોડે, તરત જ દરેક પ્રવૃત્તિ નષ્ટ કરો"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"આ ફોન"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"આ ટૅબ્લેટ"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"આ કમ્પ્યૂટર (આંતરિક)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"આ ટીવી"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ડૉક સ્પીકર"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"બહારનું ડિવાઇસ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"કનેક્ટ કરેલું ડિવાઇસ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"આ ફોન"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"એનાલોગ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"ઑગ્ઝિલરી"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"આ ડિવાઇસ પર ચલાવી શકતા નથી"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"સ્વિચ કરવા માટે એકાઉન્ટ અપગ્રેડ કરો"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ડાઉનલોડ કરેલું કન્ટેન્ટ અહીં ચલાવી શકતા નથી"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC મારફતે કનેક્ટેડ"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC મારફતે કનેક્ટેડ"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ડિવાઇસનું ડિફૉલ્ટ ઑડિયો આઉટપુટ, ટીવી"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI આઉટપુટ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"આંતરિક સ્પીકર"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"બિલ્ટ-ઇન સ્પીકર"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"ટીવીનો ઑડિયો"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"કનેક્ટ કરવામાં સમસ્યા આવી રહી છે. ડિવાઇસને બંધ કરીને ફરી ચાલુ કરો"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"વાયરવાળો ઑડિયો ડિવાઇસ"</string>
     <string name="help_label" msgid="3528360748637781274">"સહાય અને પ્રતિસાદ"</string>

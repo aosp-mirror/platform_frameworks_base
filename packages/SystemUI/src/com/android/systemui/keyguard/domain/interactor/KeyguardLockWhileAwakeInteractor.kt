@@ -16,26 +16,15 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
-import android.os.Bundle
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.util.kotlin.sample
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.filter
-import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.merge
-
-/**
- * Emitted when we receive a [KeyguardLockWhileAwakeInteractor.onKeyguardServiceDoKeyguardTimeout]
- * call.
- *
- * Includes a timestamp so it's not conflated by the StateFlow.
- */
-data class KeyguardTimeoutWhileAwakeEvent(val timestamp: Long, val options: Bundle?)
 
 /** The reason we're locking while awake, used for logging. */
 enum class LockWhileAwakeReason(private val logReason: String) {
@@ -71,10 +60,8 @@ class KeyguardLockWhileAwakeInteractor
 constructor(
     biometricSettingsRepository: BiometricSettingsRepository,
     keyguardEnabledInteractor: KeyguardEnabledInteractor,
+    keyguardServiceLockNowInteractor: KeyguardServiceLockNowInteractor,
 ) {
-    /** Emits whenever a timeout event is received by [KeyguardService]. */
-    private val timeoutEvents: MutableStateFlow<KeyguardTimeoutWhileAwakeEvent?> =
-        MutableStateFlow(null)
 
     /** Emits whenever the current user is in lockdown mode. */
     private val inLockdown: Flow<LockWhileAwakeReason> =
@@ -97,25 +84,19 @@ constructor(
     /** Emits whenever we should lock while the screen is on, for any reason. */
     val lockWhileAwakeEvents: Flow<LockWhileAwakeReason> =
         merge(
-            inLockdown,
-            keyguardReenabled,
-            timeoutEvents.filterNotNull().map {
-                LockWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON
-            },
+            // We're in lockdown, and the keyguard is enabled. If the keyguard is disabled, the
+            // lockdown button is hidden in the UI, but it's still possible to trigger lockdown in
+            // tests.
+            inLockdown
+                .filter { keyguardEnabledInteractor.isKeyguardEnabledAndNotSuppressed() }
+                .map { LockWhileAwakeReason.LOCKDOWN },
+            // The keyguard was re-enabled, and it was showing when it was originally disabled.
+            // Tests currently expect that if the keyguard is re-enabled, it will show even if it's
+            // suppressed, so we don't check for isKeyguardEnabledAndNotSuppressed() on this flow.
+            keyguardReenabled.map { LockWhileAwakeReason.KEYGUARD_REENABLED },
+            // KeyguardService says we need to lock now, and the lockscreen is enabled.
+            keyguardServiceLockNowInteractor.lockNowEvents
+                .filter { keyguardEnabledInteractor.isKeyguardEnabledAndNotSuppressed() }
+                .map { LockWhileAwakeReason.KEYGUARD_TIMEOUT_WHILE_SCREEN_ON },
         )
-
-    /**
-     * Called by [KeyguardService] when it receives a doKeyguardTimeout() call. This indicates that
-     * the device locked while the screen was on.
-     *
-     * [options] appears to be no longer used, but we'll keep it in this interactor in case that
-     * turns out not to be true.
-     */
-    fun onKeyguardServiceDoKeyguardTimeout(options: Bundle?) {
-        timeoutEvents.value =
-            KeyguardTimeoutWhileAwakeEvent(
-                timestamp = System.currentTimeMillis(),
-                options = options,
-            )
-    }
 }

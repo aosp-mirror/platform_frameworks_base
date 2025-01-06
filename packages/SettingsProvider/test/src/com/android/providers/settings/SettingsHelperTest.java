@@ -28,11 +28,15 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
+import android.app.backup.BackupAnnotations.OperationType;
+import android.app.backup.BackupRestoreEventLogger;
+import android.app.backup.BackupRestoreEventLogger.DataTypeResult;
 import android.content.ContentProvider;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.AssetFileDescriptor;
+import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.database.Cursor;
 import android.database.MatrixCursor;
@@ -41,6 +45,7 @@ import android.media.Utils;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.LocaleList;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.BaseColumns;
@@ -64,6 +69,8 @@ import org.junit.runner.RunWith;
 import org.junit.runners.MethodSorters;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
 
 /**
  * Tests for the SettingsHelperTest
@@ -83,10 +90,15 @@ public class SettingsHelperTest {
             "content://media/internal/audio/media/30?title=DefaultAlarm&canonical=1";
     private static final String VIBRATION_FILE_NAME = "haptics.xml";
 
+    private static final LocaleList LOCALE_LIST =
+        LocaleList.forLanguageTags("en-US,en-UK");
+
     private SettingsHelper mSettingsHelper;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+    @Rule
+    public MockitoRule mockitoRule = MockitoJUnit.rule();
 
     @Mock private Context mContext;
     @Mock private Resources mResources;
@@ -95,6 +107,8 @@ public class SettingsHelperTest {
 
     @Mock private MockContentResolver mContentResolver;
     private MockSettingsProvider mSettingsProvider;
+
+    private BackupRestoreEventLogger mBackupRestoreEventLogger;
 
     @Before
     public void setUp() {
@@ -111,6 +125,8 @@ public class SettingsHelperTest {
         when(mContext.getContentResolver()).thenReturn(mContentResolver);
         mSettingsProvider = new MockSettingsProvider(mContext);
         mContentResolver.addProvider(Settings.AUTHORITY, mSettingsProvider);
+        mBackupRestoreEventLogger = new BackupRestoreEventLogger(OperationType.RESTORE);
+        mSettingsHelper.setBackupRestoreEventLogger(mBackupRestoreEventLogger);
     }
 
     @After
@@ -778,6 +794,108 @@ public class SettingsHelperTest {
         assertThat(getAutoRotationSettingValue()).isEqualTo(previousValue);
     }
 
+    @Test
+    public void getLocaleList_returnsLocaleList() {
+        Configuration config = new Configuration();
+        config.setLocales(LOCALE_LIST);
+        when(mResources.getConfiguration()).thenReturn(config);
+
+        assertThat(mSettingsHelper.getLocaleList()).isEqualTo(LOCALE_LIST);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+    restoreValue_metricsFlagIsEnabled_restoresSetting_secureUri_logsSuccessWithSecureDatatype()
+    {
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Settings.Secure.CONTENT_URI,
+                SETTING_KEY,
+                SETTING_VALUE,
+                /* restoredFromSdkInt */ 0);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(SettingsBackupRestoreKeys.KEY_SECURE);
+        assertThat(loggingResult).isNotNull();
+        assertThat(loggingResult.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+    restoreValue_metricsFlagIsEnabled_restoresSetting_systemUri_logsSuccessWithSystemDatatype()
+    {
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Settings.System.CONTENT_URI,
+                SETTING_KEY,
+                SETTING_VALUE,
+                /* restoredFromSdkInt */ 0);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(SettingsBackupRestoreKeys.KEY_SYSTEM);
+        assertThat(loggingResult).isNotNull();
+        assertThat(loggingResult.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+    restoreValue_metricsFlagIsEnabled_restoresSetting_globalUri_logsSuccessWithGlobalDatatype()
+    {
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Settings.Global.CONTENT_URI,
+                SETTING_KEY,
+                SETTING_VALUE,
+                /* restoredFromSdkInt */ 0);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(SettingsBackupRestoreKeys.KEY_GLOBAL);
+        assertThat(loggingResult).isNotNull();
+        assertThat(loggingResult.getSuccessCount()).isEqualTo(1);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void restoreValue_metricsFlagIsEnabled_doesNotRestoreSetting_logsFailure() {
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                SETTING_KEY,
+                SETTING_VALUE,
+                /* restoredFromSdkInt */ 0);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(SettingsBackupRestoreKeys.KEY_UNKNOWN);
+        assertThat(loggingResult).isNotNull();
+        assertThat(loggingResult.getFailCount()).isEqualTo(1);
+    }
+
+    @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void restoreValue_metricsFlagIsDisabled_doesNotLogMetrics() {
+        mSettingsHelper.restoreValue(
+                mContext,
+                mContentResolver,
+                new ContentValues(),
+                Uri.EMPTY,
+                SETTING_KEY,
+                SETTING_VALUE,
+                /* restoredFromSdkInt */ 0);
+
+        assertThat(getLoggingResultForDatatype(SettingsBackupRestoreKeys.KEY_UNKNOWN)).isNull();
+    }
+
     private int getAutoRotationSettingValue() {
         return Settings.System.getInt(mContentResolver,
                 Settings.System.ACCELEROMETER_ROTATION,
@@ -837,5 +955,14 @@ public class SettingsHelperTest {
 
         assertThat(Settings.System.getString(mContentResolver, settings))
                 .isEqualTo(testRingtoneSettingsValue);
+    }
+
+    private DataTypeResult getLoggingResultForDatatype(String dataType) {
+        for (DataTypeResult result : mBackupRestoreEventLogger.getLoggingResults()) {
+            if (result.getDataType().equals(dataType)) {
+                return result;
+            }
+        }
+        return null;
     }
 }

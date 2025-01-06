@@ -75,8 +75,7 @@ import java.net.UnknownHostException;
 @android.ravenwood.annotation.RavenwoodClassLoadHook(
         "com.android.platform.test.ravenwood.runtimehelper.ClassLoadHook.onClassLoaded")
 // Uncomment the following annotation to switch to the Java substitution version.
-//@android.ravenwood.annotation.RavenwoodNativeSubstitutionClass(
-//        "com.android.platform.test.ravenwood.nativesubstitution.Log_host")
+@android.ravenwood.annotation.RavenwoodRedirectionClass("Log_ravenwood")
 public final class Log {
     /** @hide */
     @IntDef({ASSERT, ERROR, WARN, INFO, DEBUG, VERBOSE})
@@ -250,6 +249,7 @@ public final class Log {
      *         tag limit of concern after this API level.
      */
     @FastNative
+    @android.ravenwood.annotation.RavenwoodRedirect
     public static native boolean isLoggable(@Nullable String tag, @Level int level);
 
     /**
@@ -425,6 +425,7 @@ public final class Log {
      * @hide
      */
     @UnsupportedAppUsage
+    @android.ravenwood.annotation.RavenwoodRedirect
     public static native int println_native(int bufID, int priority, String tag, String msg);
 
     /**
@@ -452,6 +453,7 @@ public final class Log {
      * Return the maximum payload the log daemon accepts without truncation.
      * @return LOGGER_ENTRY_MAX_PAYLOAD.
      */
+    @android.ravenwood.annotation.RavenwoodRedirect
     private static native int logger_entry_max_payload_native();
 
     /**

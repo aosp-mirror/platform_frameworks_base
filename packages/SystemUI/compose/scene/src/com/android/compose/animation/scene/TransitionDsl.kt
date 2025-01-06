@@ -20,13 +20,11 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.SpringSpec
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.content.state.TransitionState
-import kotlin.math.tanh
+import com.android.compose.animation.scene.transformation.Transformation
 
 /** Define the [transitions][SceneTransitions] to be used with a [SceneTransitionLayout]. */
 fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
@@ -50,12 +48,6 @@ interface SceneTransitionsBuilder {
     var interruptionHandler: InterruptionHandler
 
     /**
-     * Default [ProgressConverter] used during overscroll. It lets you change a linear progress into
-     * a function of your choice. Defaults to [ProgressConverter.Default].
-     */
-    var defaultOverscrollProgressConverter: ProgressConverter
-
-    /**
      * Define the default animation to be played when transitioning [to] the specified content, from
      * any content. For the animation specification to apply only when transitioning between two
      * specific contents, use [from] instead.
@@ -75,7 +67,7 @@ interface SceneTransitionsBuilder {
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
-    ): TransitionSpec
+    )
 
     /**
      * Define the animation to be played when transitioning [from] the specified content. For the
@@ -101,26 +93,7 @@ interface SceneTransitionsBuilder {
         preview: (TransitionBuilder.() -> Unit)? = null,
         reversePreview: (TransitionBuilder.() -> Unit)? = null,
         builder: TransitionBuilder.() -> Unit = {},
-    ): TransitionSpec
-
-    /**
-     * Define the animation to be played when the [content] is overscrolled in the given
-     * [orientation].
-     *
-     * The overscroll animation always starts from a progress of 0f, and reaches 1f when moving the
-     * [distance] down/right, -1f when moving in the opposite direction.
-     */
-    fun overscroll(
-        content: ContentKey,
-        orientation: Orientation,
-        builder: OverscrollBuilder.() -> Unit,
-    ): OverscrollSpec
-
-    /**
-     * Prevents overscroll the [content] in the given [orientation], allowing ancestors to
-     * eventually consume the remaining gesture.
-     */
-    fun overscrollDisabled(content: ContentKey, orientation: Orientation): OverscrollSpec
+    )
 }
 
 interface BaseTransitionBuilder : PropertyTransformationBuilder {
@@ -222,35 +195,6 @@ interface TransitionBuilder : BaseTransitionBuilder {
      * of the transition from scene `Bar` to scene `Foo`.
      */
     fun reversed(builder: TransitionBuilder.() -> Unit)
-}
-
-@TransitionDsl
-interface OverscrollBuilder : BaseTransitionBuilder {
-    /**
-     * Function that takes a linear overscroll progress value ranging from 0 to +/- infinity and
-     * outputs the desired **overscroll progress value**.
-     *
-     * When the progress value is:
-     * - 0, the user is not overscrolling.
-     * - 1, the user overscrolled by exactly the [distance].
-     * - Greater than 1, the user overscrolled more than the [distance].
-     */
-    var progressConverter: ProgressConverter?
-
-    /** Translate the element(s) matching [matcher] by ([x], [y]) pixels. */
-    fun translate(
-        matcher: ElementMatcher,
-        x: OverscrollScope.() -> Float = { 0f },
-        y: OverscrollScope.() -> Float = { 0f },
-    )
-}
-
-interface OverscrollScope : Density {
-    /**
-     * Return the absolute distance between fromScene and toScene, if available, otherwise
-     * [DistanceUnspecified].
-     */
-    val absoluteDistance: Float
 }
 
 /**
@@ -527,36 +471,7 @@ interface PropertyTransformationBuilder {
         anchorWidth: Boolean = true,
         anchorHeight: Boolean = true,
     )
-}
 
-/** This converter lets you change a linear progress into a function of your choice. */
-fun interface ProgressConverter {
-    fun convert(progress: Float): Float
-
-    companion object {
-        /** Starts linearly with some resistance and slowly approaches to 0.2f */
-        val Default = tanh(maxProgress = 0.2f, tilt = 3f)
-
-        /**
-         * The scroll stays linear, with [factor] you can control how much resistance there is.
-         *
-         * @param factor If you choose a value between 0f and 1f, the progress will grow more
-         *   slowly, like there's resistance. A value of 1f means there's no resistance.
-         */
-        fun linear(factor: Float = 1f) = ProgressConverter { it * factor }
-
-        /**
-         * This function starts linear and slowly approaches [maxProgress].
-         *
-         * See a [visual representation](https://www.desmos.com/calculator/usgvvf0z1u) of this
-         * function.
-         *
-         * @param maxProgress is the maximum progress value.
-         * @param tilt behaves similarly to the factor in the [linear] function, and allows you to
-         *   control how quickly you get to the [maxProgress].
-         */
-        fun tanh(maxProgress: Float, tilt: Float = 1f) = ProgressConverter {
-            maxProgress * tanh(x = it / (maxProgress * tilt))
-        }
-    }
+    /** Apply a [transformation] to the element(s) matching [matcher]. */
+    fun transformation(matcher: ElementMatcher, transformation: Transformation.Factory)
 }

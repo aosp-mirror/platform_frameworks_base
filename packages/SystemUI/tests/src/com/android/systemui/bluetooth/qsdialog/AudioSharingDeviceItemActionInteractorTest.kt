@@ -122,9 +122,24 @@ class AudioSharingDeviceItemActionInteractorTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(Flags.FLAG_AUDIO_SHARING_QS_DIALOG_IMPROVEMENT)
+    fun testOnClick_connectedAudioSharingMediaDevice_flagOff_previewOn_createDialog() {
+        with(kosmos) {
+            testScope.runTest {
+                whenever(BluetoothUtils.isAudioSharingPreviewEnabled(any())).thenReturn(true)
+                bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
+                actionInteractorImpl.onClick(connectedAudioSharingMediaDeviceItem, dialog)
+                verify(dialogTransitionAnimator)
+                    .showFromDialog(any(), any(), eq(null), anyBoolean())
+            }
+        }
+    }
+
+    @Test
+    @DisableFlags(Flags.FLAG_AUDIO_SHARING_QS_DIALOG_IMPROVEMENT)
     fun testOnClick_connectedAudioSharingMediaDevice_flagOff_shouldLaunchSettings() {
         with(kosmos) {
             testScope.runTest {
+                whenever(BluetoothUtils.isAudioSharingPreviewEnabled(any())).thenReturn(false)
                 bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 whenever(cachedBluetoothDevice.device).thenReturn(bluetoothDevice)
                 actionInteractorImpl.onClick(connectedAudioSharingMediaDeviceItem, dialog)

@@ -31,6 +31,7 @@ import com.android.systemui.kosmos.mainCoroutineContext
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.runOnMainThreadAndWaitForIdleSync
+import com.android.systemui.shade.data.repository.shadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.systemUIDialogFactory
 import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.modesDialogViewModel
@@ -78,6 +79,7 @@ class ModesDialogDelegateTest : SysuiTestCase() {
                 { kosmos.modesDialogViewModel },
                 mockDialogEventLogger,
                 kosmos.mainCoroutineContext,
+                kosmos.shadeDialogContextInteractor,
             )
     }
 

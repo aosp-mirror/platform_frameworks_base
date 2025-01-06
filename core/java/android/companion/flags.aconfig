@@ -46,6 +46,7 @@ flag {
     namespace: "companion"
     description: "Unpair with an associated bluetooth device"
     bug: "322237619"
+    is_exported: true
 }
 
 flag {

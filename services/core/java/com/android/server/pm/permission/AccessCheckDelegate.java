@@ -40,7 +40,7 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.function.DodecFunction;
 import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.OctFunction;
+import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.TriFunction;
 import com.android.internal.util.function.UndecFunction;
@@ -351,22 +351,22 @@ public interface AccessCheckDelegate extends CheckPermissionDelegate, CheckOpsDe
         @Override
         public SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
                 @Nullable String featureId, int virtualDeviceId, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage,
-                @NonNull OctFunction<Integer, Integer, String, String, Integer, Boolean, String,
-                        Boolean, SyncNotedAppOp> superImpl) {
+                @Nullable String message, boolean shouldCollectMessage, int notedCount,
+                @NonNull NonaFunction<Integer, Integer, String, String, Integer, Boolean, String,
+                                        Boolean, Integer, SyncNotedAppOp> superImpl) {
             if (uid == mDelegateAndOwnerUid && isDelegateOp(code)) {
                 final int shellUid = UserHandle.getUid(UserHandle.getUserId(uid),
                         Process.SHELL_UID);
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code, shellUid, SHELL_PKG, featureId, virtualDeviceId,
-                            shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                            shouldCollectAsyncNotedOp, message, shouldCollectMessage, notedCount);
                 } finally {
                     Binder.restoreCallingIdentity(identity);
                 }
             }
             return superImpl.apply(code, uid, packageName, featureId, virtualDeviceId,
-                    shouldCollectAsyncNotedOp, message, shouldCollectMessage);
+                    shouldCollectAsyncNotedOp, message, shouldCollectMessage, notedCount);
         }
 
         @Override

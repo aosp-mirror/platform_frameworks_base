@@ -619,7 +619,16 @@ namespace PaintGlue {
         // restore the original settings.
         font->setSkewX(saveSkewX);
         font->setEmbolden(savefakeBold);
-        if (paint->getFamilyVariant() == minikin::FamilyVariant::ELEGANT) {
+
+        // Don't use hard coded vertical metrics if target SDK is 35 or later.
+#ifdef __ANDROID__
+        uint32_t isTargetSdk35OrLater = android_get_application_target_sdk_version() >= 35;
+#else
+        uint32_t isTargetSdk35OrLater = true;
+#endif  // __ANDROID
+        bool useHardCodedMetrics = !isTargetSdk35OrLater &&
+                                   (paint->getFamilyVariant() == minikin::FamilyVariant::ELEGANT);
+        if (useHardCodedMetrics) {
             SkScalar size = font->getSize();
             metrics->fTop = -size * kElegantTop / 2048;
             metrics->fBottom = -size * kElegantBottom / 2048;
@@ -904,6 +913,13 @@ namespace PaintGlue {
         SkBlendMode mode = static_cast<SkBlendMode>(xfermodeHandle);
         Paint* paint = reinterpret_cast<Paint*>(paintHandle);
         paint->setBlendMode(mode);
+    }
+
+    static void setRuntimeXfermode(CRITICAL_JNI_PARAMS_COMMA jlong paintHandle,
+                                   jlong xfermodeHandle) {
+        Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+        SkBlender* blender = reinterpret_cast<SkBlender*>(xfermodeHandle);
+        paint->setBlender(sk_ref_sp(blender));
     }
 
     static jlong setPathEffect(CRITICAL_JNI_PARAMS_COMMA jlong objHandle, jlong effectHandle) {
@@ -1233,6 +1249,7 @@ static const JNINativeMethod methods[] = {
         {"nSetShader", "(JJ)J", (void*)PaintGlue::setShader},
         {"nSetColorFilter", "(JJ)J", (void*)PaintGlue::setColorFilter},
         {"nSetXfermode", "(JI)V", (void*)PaintGlue::setXfermode},
+        {"nSetXfermode", "(JJ)V", (void*)PaintGlue::setRuntimeXfermode},
         {"nSetPathEffect", "(JJ)J", (void*)PaintGlue::setPathEffect},
         {"nSetMaskFilter", "(JJ)J", (void*)PaintGlue::setMaskFilter},
         {"nSetTypeface", "(JJ)V", (void*)PaintGlue::setTypeface},

@@ -22,6 +22,7 @@ import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -42,7 +43,7 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-@IgnoreUnderRavenwood(blockedBy = PowerManager.class)
+@IgnoreUnderRavenwood(blockedBy = ActivityManager.class)
 public class BinderProxyTest {
     private static class CountingListener implements Binder.ProxyTransactListener {
         int mStartedCount;
@@ -62,7 +63,7 @@ public class BinderProxyTest {
     public final RavenwoodRule mRavenwood = new RavenwoodRule();
 
     private Context mContext;
-    private PowerManager mPowerManager;
+    private ActivityManager mActivityManager;
 
     /**
      * Setup any common data for the upcoming tests.
@@ -70,7 +71,7 @@ public class BinderProxyTest {
     @Before
     public void setUp() throws Exception {
         mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
-        mPowerManager = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+        mActivityManager = (ActivityManager) mContext.getSystemService(Context.ACTIVITY_SERVICE);
     }
 
     @Test
@@ -80,7 +81,7 @@ public class BinderProxyTest {
         Binder.setProxyTransactListener(listener);
         Binder.setProxyTransactListener(null);
 
-        mPowerManager.isInteractive();
+        mActivityManager.isUserRunning(7); // something which does a binder call
 
         assertEquals(0, listener.mStartedCount);
         assertEquals(0, listener.mEndedCount);
@@ -92,7 +93,7 @@ public class BinderProxyTest {
         CountingListener listener = new CountingListener();
         Binder.setProxyTransactListener(listener);
 
-        mPowerManager.isInteractive();
+        mActivityManager.isUserRunning(27); // something which does a binder call
 
         assertEquals(1, listener.mStartedCount);
         assertEquals(1, listener.mEndedCount);
@@ -112,7 +113,7 @@ public class BinderProxyTest {
         });
 
         // Check it does not throw..
-        mPowerManager.isInteractive();
+        mActivityManager.isUserRunning(47); // something which does a binder call
     }
 
     private IBinder mRemoteBinder = null;
@@ -137,7 +138,7 @@ public class BinderProxyTest {
                     new Intent(mContext, BinderProxyService.class),
                     connection,
                     Context.BIND_AUTO_CREATE);
-            if (!bindLatch.await(500, TimeUnit.MILLISECONDS)) {
+            if (!bindLatch.await(1000, TimeUnit.MILLISECONDS)) {
                 fail(
                         "Timed out while binding service: "
                                 + BinderProxyService.class.getSimpleName());

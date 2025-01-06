@@ -25,6 +25,8 @@ import android.util.Log;
 
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
+
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.Description;
 import org.junit.runner.JUnitCore;
@@ -103,6 +105,7 @@ public abstract class RavenwoodRunnerTestBase {
         var thisClass = this.getClass();
         var ret = Arrays.stream(thisClass.getNestMembers())
                 .filter((c) -> c.getAnnotation(Expected.class) != null)
+                .filter((c) -> c.getAnnotation(Ignore.class) == null)
                 .toArray(Class[]::new);
 
         assertThat(ret.length).isGreaterThan(0);

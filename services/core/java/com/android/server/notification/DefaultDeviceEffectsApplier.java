@@ -39,9 +39,11 @@ import android.service.notification.ZenModeConfig.ConfigOrigin;
 import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.Keep;
 
 /** Default implementation for {@link DeviceEffectsApplier}. */
-class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
+@Keep
+public class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
     private static final String TAG = "DeviceEffectsApplier";
     private static final String SUPPRESS_AMBIENT_DISPLAY_TOKEN =
             "DefaultDeviceEffectsApplier:SuppressAmbientDisplay";
@@ -63,10 +65,10 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
     @GuardedBy("mRegisterReceiverLock")
     private boolean mIsScreenOffReceiverRegistered;
 
-    private ZenDeviceEffects mLastAppliedEffects = new ZenDeviceEffects.Builder().build();
+    protected ZenDeviceEffects mLastAppliedEffects = new ZenDeviceEffects.Builder().build();
     private boolean mPendingNightMode;
 
-    DefaultDeviceEffectsApplier(Context context) {
+    public DefaultDeviceEffectsApplier(Context context) {
         mContext = context;
         mColorDisplayManager = context.getSystemService(ColorDisplayManager.class);
         mKeyguardManager = context.getSystemService(KeyguardManager.class);
@@ -79,56 +81,69 @@ class DefaultDeviceEffectsApplier implements DeviceEffectsApplier {
 
     @Override
     public void apply(ZenDeviceEffects effects, @ConfigOrigin int origin) {
-        Binder.withCleanCallingIdentity(() -> {
-            if (mLastAppliedEffects.shouldSuppressAmbientDisplay()
-                    != effects.shouldSuppressAmbientDisplay()) {
-                try {
-                    traceApplyDeviceEffect("suppressAmbientDisplay",
-                            effects.shouldSuppressAmbientDisplay());
-                    mPowerManager.suppressAmbientDisplay(SUPPRESS_AMBIENT_DISPLAY_TOKEN,
-                            effects.shouldSuppressAmbientDisplay());
-                } catch (Exception e) {
-                    Slog.e(TAG, "Could not change AOD override", e);
-                }
-            }
-
-            if (mLastAppliedEffects.shouldDisplayGrayscale() != effects.shouldDisplayGrayscale()) {
-                if (mColorDisplayManager != null) {
-                    try {
-                        traceApplyDeviceEffect("displayGrayscale",
-                                effects.shouldDisplayGrayscale());
-                        mColorDisplayManager.setSaturationLevel(
-                                effects.shouldDisplayGrayscale() ? SATURATION_LEVEL_GRAYSCALE
-                                        : SATURATION_LEVEL_FULL_COLOR);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Could not change grayscale override", e);
-                    }
-                }
-            }
-
-            if (mLastAppliedEffects.shouldDimWallpaper() != effects.shouldDimWallpaper()) {
-                if (mWallpaperManager != null) {
-                    try {
-                        traceApplyDeviceEffect("dimWallpaper", effects.shouldDimWallpaper());
-                        mWallpaperManager.setWallpaperDimAmount(
-                                effects.shouldDimWallpaper() ? WALLPAPER_DIM_AMOUNT_DIMMED
-                                        : WALLPAPER_DIM_AMOUNT_NORMAL);
-                    } catch (Exception e) {
-                        Slog.e(TAG, "Could not change wallpaper override", e);
-                    }
-                }
-            }
-
-            if (mLastAppliedEffects.shouldUseNightMode() != effects.shouldUseNightMode()) {
-                try {
-                    updateOrScheduleNightMode(effects.shouldUseNightMode(), origin);
-                } catch (Exception e) {
-                    Slog.e(TAG, "Could not change dark theme override", e);
-                }
-            }
-        });
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    maybeSuppressAmbientDisplay(effects.shouldSuppressAmbientDisplay());
+                    maybeDisplayGrayscale(effects.shouldDisplayGrayscale());
+                    maybeDimWallpaper(effects.shouldDimWallpaper());
+                    maybeUseNightMode(effects.shouldUseNightMode(), origin);
+                });
 
         mLastAppliedEffects = effects;
+    }
+
+    protected void maybeSuppressAmbientDisplay(boolean shouldSuppressAmbientDisplay) {
+        if (mLastAppliedEffects.shouldSuppressAmbientDisplay() != shouldSuppressAmbientDisplay) {
+            try {
+                traceApplyDeviceEffect("suppressAmbientDisplay", shouldSuppressAmbientDisplay);
+                mPowerManager.suppressAmbientDisplay(
+                        SUPPRESS_AMBIENT_DISPLAY_TOKEN, shouldSuppressAmbientDisplay);
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not change AOD override", e);
+            }
+        }
+    }
+
+    protected void maybeDisplayGrayscale(boolean shouldDisplayGrayscale) {
+        if (mLastAppliedEffects.shouldDisplayGrayscale() != shouldDisplayGrayscale) {
+            if (mColorDisplayManager != null) {
+                try {
+                    traceApplyDeviceEffect("displayGrayscale", shouldDisplayGrayscale);
+                    mColorDisplayManager.setSaturationLevel(
+                            shouldDisplayGrayscale
+                                    ? SATURATION_LEVEL_GRAYSCALE
+                                    : SATURATION_LEVEL_FULL_COLOR);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Could not change grayscale override", e);
+                }
+            }
+        }
+    }
+
+    protected void maybeDimWallpaper(boolean shouldDimWallpaper) {
+        if (mLastAppliedEffects.shouldDimWallpaper() != shouldDimWallpaper) {
+            if (mWallpaperManager != null) {
+                try {
+                    traceApplyDeviceEffect("dimWallpaper", shouldDimWallpaper);
+                    mWallpaperManager.setWallpaperDimAmount(
+                            shouldDimWallpaper
+                                    ? WALLPAPER_DIM_AMOUNT_DIMMED
+                                    : WALLPAPER_DIM_AMOUNT_NORMAL);
+                } catch (Exception e) {
+                    Slog.e(TAG, "Could not change wallpaper override", e);
+                }
+            }
+        }
+    }
+
+    protected void maybeUseNightMode(boolean shouldUseNightMode, @ConfigOrigin int origin) {
+        if (mLastAppliedEffects.shouldUseNightMode() != shouldUseNightMode) {
+            try {
+                updateOrScheduleNightMode(shouldUseNightMode, origin);
+            } catch (Exception e) {
+                Slog.e(TAG, "Could not change dark theme override", e);
+            }
+        }
     }
 
     private void updateOrScheduleNightMode(boolean useNightMode, @ConfigOrigin int origin) {

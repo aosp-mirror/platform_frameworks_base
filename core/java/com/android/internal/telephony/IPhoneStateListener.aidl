@@ -20,6 +20,7 @@ import android.telephony.BarringInfo;
 import android.telephony.CallState;
 import android.telephony.CellIdentity;
 import android.telephony.CellInfo;
+import android.telephony.CellularIdentifierDisclosure;
 import android.telephony.DataConnectionRealTimeInfo;
 import android.telephony.LinkCapacityEstimate;
 import android.telephony.TelephonyDisplayInfo;
@@ -27,6 +28,8 @@ import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
+import android.telephony.satellite.NtnSignalStrength;
+import android.telephony.SecurityAlgorithmUpdate;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.emergency.EmergencyNumber;
@@ -85,4 +88,7 @@ oneway interface IPhoneStateListener {
     void onCarrierRoamingNtnModeChanged(in boolean active);
     void onCarrierRoamingNtnEligibleStateChanged(in boolean eligible);
     void onCarrierRoamingNtnAvailableServicesChanged(in int[] availableServices);
+    void onCarrierRoamingNtnSignalStrengthChanged(in NtnSignalStrength ntnSignalStrength);
+    void onSecurityAlgorithmsChanged(in SecurityAlgorithmUpdate update);
+    void onCellularIdentifierDisclosedChanged(in CellularIdentifierDisclosure disclosure);
 }

@@ -24,7 +24,9 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -40,23 +42,23 @@ import kotlinx.coroutines.flow.Flow
 class PrimaryBouncerToLockscreenTransitionViewModel
 @Inject
 constructor(
+    private val blurConfig: BlurConfig,
     animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+    shadeDependentFlows: ShadeDependentFlows,
+) : DeviceEntryIconTransition, PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
                 duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
                 edge = Edge.create(from = Scenes.Bouncer, to = LOCKSCREEN),
             )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN),
-            )
+            .setupWithoutSceneContainer(edge = Edge.create(from = PRIMARY_BOUNCER, to = LOCKSCREEN))
 
     val shortcutsAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = 250.milliseconds,
             interpolator = EMPHASIZED_ACCELERATE,
-            onStep = { it }
+            onStep = { it },
         )
 
     fun lockscreenAlpha(viewState: ViewStateAccessor): Flow<Float> {
@@ -72,4 +74,21 @@ constructor(
         transitionAnimation.immediatelyTransitionTo(1f)
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(1f)
+
+    override val windowBlurRadius: Flow<Float> =
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsExpanded =
+                transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = FromPrimaryBouncerTransitionInteractor.TO_LOCKSCREEN_DURATION,
+                    onStep = {
+                        transitionProgressToBlurRadius(
+                            starBlurRadius = blurConfig.maxBlurRadiusPx,
+                            endBlurRadius = blurConfig.minBlurRadiusPx,
+                            transitionProgress = it,
+                        )
+                    },
+                ),
+        )
 }

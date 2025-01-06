@@ -68,9 +68,9 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
             configuration.windowConfiguration.setBounds(PORTRAIT_BOUNDS)
         }
         doReturn(PORTRAIT_BOUNDS).`when`(mockTaskPositioner).onDragPositioningStart(
-            any(), any(), any())
-        doReturn(Rect()).`when`(mockTaskPositioner).onDragPositioningMove(any(), any())
-        doReturn(Rect()).`when`(mockTaskPositioner).onDragPositioningEnd(any(), any())
+            any(), any(), any(), any())
+        doReturn(Rect()).`when`(mockTaskPositioner).onDragPositioningMove(any(), any(), any())
+        doReturn(Rect()).`when`(mockTaskPositioner).onDragPositioningEnd(any(), any(), any())
         decoratedTaskPositioner = spy(
             FixedAspectRatioTaskPositionerDecorator(
             mockDesktopWindowDecoration, mockTaskPositioner)
@@ -87,7 +87,8 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
             isResizeable = testCase.isResizeable
         }
 
-        decoratedTaskPositioner.onDragPositioningStart(testCase.ctrlType, originalX, originalY)
+        decoratedTaskPositioner.onDragPositioningStart(
+            testCase.ctrlType, DISPLAY_ID, originalX, originalY)
 
         val capturedValues = getLatestOnStartArguments()
         assertThat(capturedValues.ctrlType).isEqualTo(testCase.ctrlType)
@@ -102,7 +103,8 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
         val originalX = 0f
         val originalY = 0f
 
-        decoratedTaskPositioner.onDragPositioningStart(testCase.ctrlType, originalX, originalY)
+        decoratedTaskPositioner.onDragPositioningStart(
+            testCase.ctrlType, DISPLAY_ID, originalX, originalY)
 
         val capturedValues = getLatestOnStartArguments()
         assertThat(capturedValues.ctrlType).isEqualTo(testCase.ctrlType)
@@ -119,7 +121,7 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
             testCase.ctrlType, testCase.additionalEdgeCtrlType, startingBounds)
 
         decoratedTaskPositioner.onDragPositioningStart(
-            testCase.ctrlType, startingPoint.x, startingPoint.y)
+            testCase.ctrlType, DISPLAY_ID, startingPoint.x, startingPoint.y)
 
         val adjustedCtrlType = testCase.ctrlType + testCase.additionalEdgeCtrlType
         val capturedValues = getLatestOnStartArguments()
@@ -134,13 +136,14 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
     ) {
         val originalX = 0f
         val originalY = 0f
-        decoratedTaskPositioner.onDragPositioningStart(testCase.ctrlType, originalX, originalX)
+        decoratedTaskPositioner.onDragPositioningStart(
+            testCase.ctrlType, DISPLAY_ID, originalX, originalX)
         mockDesktopWindowDecoration.mTaskInfo = ActivityManager.RunningTaskInfo().apply {
             isResizeable = testCase.isResizeable
         }
 
         decoratedTaskPositioner.onDragPositioningMove(
-            originalX + SMALL_DELTA, originalY + SMALL_DELTA)
+            DISPLAY_ID, originalX + SMALL_DELTA, originalY + SMALL_DELTA)
 
         val capturedValues = getLatestOnMoveArguments()
         assertThat(capturedValues.x).isEqualTo(originalX + SMALL_DELTA)
@@ -156,13 +159,14 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
         val startingPoint = getCornerStartingPoint(testCase.ctrlType, startingBounds)
 
         decoratedTaskPositioner.onDragPositioningStart(
-            testCase.ctrlType, startingPoint.x, startingPoint.y)
+            testCase.ctrlType, DISPLAY_ID, startingPoint.x, startingPoint.y)
 
         val updatedBounds = decoratedTaskPositioner.onDragPositioningMove(
+            DISPLAY_ID,
             startingPoint.x + testCase.dragDelta.x,
             startingPoint.y + testCase.dragDelta.y)
 
-        verify(mockTaskPositioner, never()).onDragPositioningMove(any(), any())
+        verify(mockTaskPositioner, never()).onDragPositioningMove(any(), any(), any())
         assertThat(updatedBounds).isEqualTo(startingBounds)
     }
 
@@ -176,10 +180,12 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
         val startingPoint = getCornerStartingPoint(testCase.ctrlType, startingBounds)
 
         decoratedTaskPositioner.onDragPositioningStart(
-            testCase.ctrlType, startingPoint.x, startingPoint.y)
+            testCase.ctrlType, DISPLAY_ID, startingPoint.x, startingPoint.y)
 
         decoratedTaskPositioner.onDragPositioningMove(
-            startingPoint.x + testCase.dragDelta.x, startingPoint.y + testCase.dragDelta.y)
+            DISPLAY_ID,
+            startingPoint.x + testCase.dragDelta.x,
+            startingPoint.y + testCase.dragDelta.y)
 
         val adjustedDragDelta = calculateAdjustedDelta(
             testCase.ctrlType, testCase.dragDelta, orientation)
@@ -202,9 +208,10 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
             testCase.ctrlType, testCase.additionalEdgeCtrlType, startingBounds)
 
         decoratedTaskPositioner.onDragPositioningStart(
-            testCase.ctrlType, startingPoint.x, startingPoint.y)
+            testCase.ctrlType, DISPLAY_ID, startingPoint.x, startingPoint.y)
 
         decoratedTaskPositioner.onDragPositioningMove(
+            DISPLAY_ID,
             startingPoint.x + testCase.dragDelta.x,
             startingPoint.y + testCase.dragDelta.y)
 
@@ -227,13 +234,14 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
     ) {
         val originalX = 0f
         val originalY = 0f
-        decoratedTaskPositioner.onDragPositioningStart(testCase.ctrlType, originalX, originalX)
+        decoratedTaskPositioner.onDragPositioningStart(testCase.ctrlType, DISPLAY_ID,
+            originalX, originalX)
         mockDesktopWindowDecoration.mTaskInfo = ActivityManager.RunningTaskInfo().apply {
             isResizeable = testCase.isResizeable
         }
 
         decoratedTaskPositioner.onDragPositioningEnd(
-            originalX + SMALL_DELTA, originalY + SMALL_DELTA)
+            DISPLAY_ID, originalX + SMALL_DELTA, originalY + SMALL_DELTA)
 
         val capturedValues = getLatestOnEndArguments()
         assertThat(capturedValues.x).isEqualTo(originalX + SMALL_DELTA)
@@ -249,9 +257,10 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
         val startingPoint = getCornerStartingPoint(testCase.ctrlType, startingBounds)
 
         decoratedTaskPositioner.onDragPositioningStart(
-            testCase.ctrlType, startingPoint.x, startingPoint.y)
+            testCase.ctrlType, DISPLAY_ID, startingPoint.x, startingPoint.y)
 
         decoratedTaskPositioner.onDragPositioningEnd(
+            DISPLAY_ID,
             startingPoint.x + testCase.dragDelta.x,
             startingPoint.y + testCase.dragDelta.y)
 
@@ -269,10 +278,12 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
         val startingPoint = getCornerStartingPoint(testCase.ctrlType, startingBounds)
 
         decoratedTaskPositioner.onDragPositioningStart(
-            testCase.ctrlType, startingPoint.x, startingPoint.y)
+            testCase.ctrlType, DISPLAY_ID, startingPoint.x, startingPoint.y)
 
         decoratedTaskPositioner.onDragPositioningEnd(
-            startingPoint.x + testCase.dragDelta.x, startingPoint.y + testCase.dragDelta.y)
+            DISPLAY_ID,
+            startingPoint.x + testCase.dragDelta.x,
+            startingPoint.y + testCase.dragDelta.y)
 
         val adjustedDragDelta = calculateAdjustedDelta(
             testCase.ctrlType, testCase.dragDelta, orientation)
@@ -295,9 +306,10 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
             testCase.ctrlType, testCase.additionalEdgeCtrlType, startingBounds)
 
         decoratedTaskPositioner.onDragPositioningStart(
-            testCase.ctrlType, startingPoint.x, startingPoint.y)
+            testCase.ctrlType, DISPLAY_ID, startingPoint.x, startingPoint.y)
 
         decoratedTaskPositioner.onDragPositioningEnd(
+            DISPLAY_ID,
             startingPoint.x + testCase.dragDelta.x,
             startingPoint.y + testCase.dragDelta.y)
 
@@ -322,7 +334,7 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
         val captorCtrlType = argumentCaptor<Int>()
         val captorCoordinates = argumentCaptor<Float>()
         verify(mockTaskPositioner).onDragPositioningStart(
-            captorCtrlType.capture(), captorCoordinates.capture(), captorCoordinates.capture())
+            captorCtrlType.capture(), any(), captorCoordinates.capture(), captorCoordinates.capture())
 
         return CtrlCoordinateCapture(captorCtrlType.firstValue, captorCoordinates.firstValue,
             captorCoordinates.secondValue)
@@ -335,7 +347,7 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
     private fun getLatestOnMoveArguments(): PointF {
         val captorCoordinates = argumentCaptor<Float>()
         verify(mockTaskPositioner).onDragPositioningMove(
-            captorCoordinates.capture(), captorCoordinates.capture())
+            any(), captorCoordinates.capture(), captorCoordinates.capture())
 
         return PointF(captorCoordinates.firstValue, captorCoordinates.secondValue)
     }
@@ -347,7 +359,7 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
     private fun getLatestOnEndArguments(): PointF {
         val captorCoordinates = argumentCaptor<Float>()
         verify(mockTaskPositioner).onDragPositioningEnd(
-            captorCoordinates.capture(), captorCoordinates.capture())
+            any(), captorCoordinates.capture(), captorCoordinates.capture())
 
         return PointF(captorCoordinates.firstValue, captorCoordinates.secondValue)
     }
@@ -358,7 +370,7 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
     private fun getAndMockBounds(orientation: Orientation): Rect {
         val mockBounds = if (orientation.isPortrait) PORTRAIT_BOUNDS else LANDSCAPE_BOUNDS
         doReturn(mockBounds).`when`(mockTaskPositioner).onDragPositioningStart(
-            any(), any(), any())
+            any(), any(), any(), any())
         doReturn(mockBounds).`when`(decoratedTaskPositioner).getBounds(any())
         return mockBounds
     }
@@ -458,6 +470,7 @@ class FixedAspectRatioTaskPositionerDecoratorTests : ShellTestCase(){
         private val STARTING_ASPECT_RATIO = PORTRAIT_BOUNDS.height() / PORTRAIT_BOUNDS.width()
         private const val LARGE_DELTA = 50f
         private const val SMALL_DELTA = 30f
+        private const val DISPLAY_ID = 1
 
         enum class Orientation(
             val isPortrait: Boolean

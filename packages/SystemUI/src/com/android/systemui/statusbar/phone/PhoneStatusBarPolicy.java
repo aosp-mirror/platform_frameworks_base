@@ -617,7 +617,8 @@ public class PhoneStatusBarPolicy
         mUiBgExecutor.execute(() -> {
             try {
                 final int userId = ActivityTaskManager.getService().getLastResumedActivityUserId();
-                final int iconResId = mUserManager.getUserStatusBarIconResId(userId);
+                final int iconResId = mUserManager.isProfile(userId) ?
+                        mUserManager.getUserStatusBarIconResId(userId) : Resources.ID_NULL;
                 mMainExecutor.execute(() -> {
                     final boolean showIcon;
                     if (iconResId != Resources.ID_NULL && (!mKeyguardStateController.isShowing()

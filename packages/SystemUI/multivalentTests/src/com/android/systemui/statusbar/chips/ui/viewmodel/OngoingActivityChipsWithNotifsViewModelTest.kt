@@ -27,6 +27,7 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
@@ -36,8 +37,7 @@ import com.android.systemui.screenrecord.data.repository.screenRecordRepository
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
-import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.DemoNotifChipViewModelTest.Companion.addDemoNotifChip
-import com.android.systemui.statusbar.chips.notification.demo.ui.viewmodel.demoNotifChipViewModel
+import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.notification.ui.viewmodel.NotifChipsViewModelTest.Companion.assertIsNotifChip
 import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChipsModel
@@ -51,6 +51,7 @@ import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
@@ -67,6 +68,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
+import org.junit.Ignore
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
@@ -79,7 +81,7 @@ import org.mockito.kotlin.whenever
 @OptIn(ExperimentalCoroutinesApi::class)
 @EnableFlags(StatusBarNotifChips.FLAG_NAME)
 class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
-    private val kosmos = testKosmos()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val systemClock = kosmos.fakeSystemClock
     private val commandRegistry = kosmos.commandRegistry
@@ -103,12 +105,12 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 .thenReturn(chipBackgroundView)
         }
 
-    private val underTest = kosmos.ongoingActivityChipsViewModel
+    private val underTest by lazy { kosmos.ongoingActivityChipsViewModel }
 
     @Before
     fun setUp() {
         setUpPackageManagerForMediaProjection(kosmos)
-        kosmos.demoNotifChipViewModel.start()
+        kosmos.statusBarNotificationChipsInteractor.start()
         val icon =
             BitmapDrawable(
                 context.resources,
@@ -250,20 +252,6 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chips_threeActiveChips_topTwoShown() =
-        testScope.runTest {
-            screenRecordState.value = ScreenRecordModel.Recording
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
-            addDemoNotifChip(commandRegistry, pw)
-
-            val latest by collectLastValue(underTest.chips)
-
-            assertIsScreenRecordChip(latest!!.primary)
-            assertIsCallChip(latest!!.secondary)
-            // Demo notif chip is dropped
-        }
-
-    @Test
     fun primaryChip_onlyCallShown_callShown() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.DoingNothing
@@ -303,7 +291,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif",
                         statusBarChipIcon = icon,
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )
@@ -324,12 +312,14 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = secondIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                 )
             )
@@ -351,17 +341,20 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = secondIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "thirdNotif",
                         statusBarChipIcon = thirdIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("thirdNotif").build(),
                     ),
                 )
             )
@@ -382,12 +375,14 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "firstNotif",
                         statusBarChipIcon = firstIcon,
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("firstNotif").build(),
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
                         statusBarChipIcon = mock<StatusBarIconView>(),
-                        isPromoted = true,
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                 )
             )
@@ -408,7 +403,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     activeNotificationModel(
                         key = "notif",
                         statusBarChipIcon = mock<StatusBarIconView>(),
-                        isPromoted = true,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )
@@ -421,7 +416,16 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     fun primaryChip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
         testScope.runTest {
             // Start with just the lowest priority chip shown
-            addDemoNotifChip(commandRegistry, pw)
+            val notifIcon = mock<StatusBarIconView>()
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = notifIcon,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
+                    )
+                )
+            )
             // And everything else hidden
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
             mediaProjectionState.value = MediaProjectionState.NotProjecting
@@ -429,7 +433,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertIsDemoNotifChip(latest)
+            assertIsNotifChip(latest, notifIcon)
 
             // WHEN the higher priority call chip is added
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
@@ -463,7 +467,16 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
-            addDemoNotifChip(commandRegistry, pw)
+            val notifIcon = mock<StatusBarIconView>()
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = notifIcon,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
+                    )
+                )
+            )
 
             val latest by collectLastValue(underTest.primaryChip)
 
@@ -485,15 +498,24 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             // WHEN the higher priority call is removed
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            // THEN the lower priority demo notif is used
-            assertIsDemoNotifChip(latest)
+            // THEN the lower priority notif is used
+            assertIsNotifChip(latest, notifIcon)
         }
 
     @Test
     fun chips_movesChipsAroundAccordingToPriority() =
         testScope.runTest {
             // Start with just the lowest priority chip shown
-            addDemoNotifChip(commandRegistry, pw)
+            val notifIcon = mock<StatusBarIconView>()
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = notifIcon,
+                        promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
+                    )
+                )
+            )
             // And everything else hidden
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
             mediaProjectionState.value = MediaProjectionState.NotProjecting
@@ -501,16 +523,16 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.chips)
 
-            assertIsDemoNotifChip(latest!!.primary)
+            assertIsNotifChip(latest!!.primary, notifIcon)
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
 
             // WHEN the higher priority call chip is added
             callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
 
-            // THEN the higher priority call chip is used as primary and demo notif is demoted to
+            // THEN the higher priority call chip is used as primary and notif is demoted to
             // secondary
             assertIsCallChip(latest!!.primary)
-            assertIsDemoNotifChip(latest!!.secondary)
+            assertIsNotifChip(latest!!.secondary, notifIcon)
 
             // WHEN the higher priority media projection chip is added
             mediaProjectionState.value =
@@ -521,7 +543,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 )
 
             // THEN the higher priority media projection chip is used as primary and call is demoted
-            // to secondary (and demo notif is dropped altogether)
+            // to secondary (and notif is dropped altogether)
             assertIsShareToAppChip(latest!!.primary)
             assertIsCallChip(latest!!.secondary)
 
@@ -535,15 +557,15 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             screenRecordState.value = ScreenRecordModel.DoingNothing
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
-            // THEN media projection and demo notif remain
+            // THEN media projection and notif remain
             assertIsShareToAppChip(latest!!.primary)
-            assertIsDemoNotifChip(latest!!.secondary)
+            assertIsNotifChip(latest!!.secondary, notifIcon)
 
             // WHEN media projection is dropped
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            // THEN demo notif is promoted to primary
-            assertIsDemoNotifChip(latest!!.primary)
+            // THEN notif is promoted to primary
+            assertIsNotifChip(latest!!.primary, notifIcon)
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
@@ -616,6 +638,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @Ignore("b/364653005") // We'll need to re-do the animation story when we implement RON chips
     fun primaryChip_screenRecordStoppedViaDialog_chipHiddenWithoutAnimation() =
         testScope.runTest {
             screenRecordState.value = ScreenRecordModel.Recording
@@ -655,12 +678,6 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             // THEN the chip is immediately hidden with no animation
             assertThat(latest).isEqualTo(OngoingActivityChipModel.Hidden(shouldAnimate = false))
         }
-
-    private fun assertIsDemoNotifChip(latest: OngoingActivityChipModel?) {
-        assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
-        assertThat((latest as OngoingActivityChipModel.Shown).icon)
-            .isInstanceOf(OngoingActivityChipModel.ChipIcon.FullColorAppIcon::class.java)
-    }
 
     private fun setNotifs(notifs: List<ActiveNotificationModel>) {
         activeNotificationListRepository.activeNotifications.value =

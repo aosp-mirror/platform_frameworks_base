@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"സജീവമാണ് (ഇടതുഭാഗത്ത് മാത്രം)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"സജീവമാണ് (വലതുഭാഗത്ത് മാത്രം)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"സജീവമാണ് (ഇടതുഭാഗത്തും വലതുഭാഗത്തും)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"സറൗണ്ടിംഗ്‌സ് അപ്ഡേറ്റ് ചെയ്യാനായില്ല"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"സജീവം (മീഡിയ മാത്രം). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"സജീവം (മീഡിയ മാത്രം). ഇടതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> ബാറ്ററി, വലതുവശത്ത്: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ബാറ്ററി."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"കണക്റ്റ് ചെയ്തു (ഓഡിയോ പങ്കിടൽ പിന്തുണയ്ക്കുന്നു). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ബാറ്ററി."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"പ്രാദേശിക ടെർമിനൽ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"പ്രാദേശിക ഷെൽ ആക്‌സസ് നൽകുന്ന ടെർമിനൽ അപ്ലിക്കേഷൻ പ്രവർത്തനക്ഷമമാക്കുക"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ഡെവലപ്പ്മെന്റ് എൻവയോൺമെന്റ്"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android-ൽ Linux ടെർമിനൽ പ്രവർത്തിപ്പിക്കുക"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(പരീക്ഷണാത്മകം) Android-ൽ Linux ടെർമിനൽ റൺ ചെയ്യുക"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"പ്രവർത്തനരഹിതമാക്കുകയാണെങ്കിൽ, Linux ടെർമിനൽ ഡാറ്റ മായ്ക്കും"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP പരിശോധന"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP ചെക്കിംഗ്‌രീതി സജ്ജമാക്കുക"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ഡീബഗ്ഗിംഗ്"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ട്രാൻസിഷൻ ആനിമേഷൻ സ്‌കെയിൽ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"ആനിമേറ്റർ ദൈർഘ്യ സ്‌കെയിൽ"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"രണ്ടാം ഡിസ്‌പ്ലേകൾ പ്രവർത്തിപ്പിക്കുക"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ഷെയ്‌ഡ് ഡിസ്പ്ലേ സ്ഥാനം"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ആപ്പുകൾ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"പ്രവർത്തനങ്ങൾ സൂക്ഷിക്കരുത്"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ഉപയോക്താവ് ഉപേക്ഷിക്കുന്നതിനനുസരിച്ച് എല്ലാ പ്രവർത്തനങ്ങളും നശിപ്പിക്കുക"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ഈ ഫോൺ"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ഈ ടാബ്‌ലെറ്റ്"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ഈ കമ്പ്യൂട്ടർ (ഇന്റേണൽ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ഈ ടിവി"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ഡോക്ക് സ്‌പീക്കർ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ബാഹ്യ ഉപകരണം"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"കണക്‌റ്റ് ചെയ്‌ത ഉപകരണം"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ഈ ഫോൺ"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"അനലോഗ്"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ഈ ഉപകരണത്തിൽ പ്ലേ ചെയ്യാൻ കഴിയില്ല"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"അക്കൗണ്ട് മാറാൻ അപ്‌ഗ്രേഡ് ചെയ്യുക"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ഡൗൺലോഡുകൾ പ്ലേ ചെയ്യാനാകില്ല"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC വഴി കണക്റ്റ് ചെയ്തിരിക്കുന്നു"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC വഴി കണക്റ്റ് ചെയ്തിരിക്കുന്നു"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ടിവി ഡിഫോൾട്ട്"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI ഔട്ട്പുട്ട്"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ആന്തരിക സ്‌പീക്കറുകൾ"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"ബിൽട്ട്-ഇൻ സ്പീക്കർ"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"ടിവി ഓഡിയോ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"കണക്‌റ്റ് ചെയ്യുന്നതിൽ പ്രശ്‌നമുണ്ടായി. ഉപകരണം ഓഫാക്കി വീണ്ടും ഓണാക്കുക"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"വയർ മുഖേന ബന്ധിപ്പിച്ച ഓഡിയോ ഉപകരണം"</string>
     <string name="help_label" msgid="3528360748637781274">"സഹായവും ഫീഡ്‌ബാക്കും"</string>

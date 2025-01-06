@@ -75,7 +75,7 @@ class SharedNotificationContainer(context: Context, attrs: AttributeSet?) :
         constraintSet.apply {
             if (SceneContainerFlag.isEnabled) {
                 when (horizontalPosition) {
-                    is HorizontalPosition.FloatAtEnd ->
+                    is HorizontalPosition.FloatAtStart ->
                         constrainWidth(nsslId, horizontalPosition.width)
                     is HorizontalPosition.MiddleToEdge ->
                         setGuidelinePercent(R.id.nssl_guideline, horizontalPosition.ratio)
@@ -83,13 +83,13 @@ class SharedNotificationContainer(context: Context, attrs: AttributeSet?) :
                 }
             }
 
+            connect(nsslId, START, startConstraintId, START, marginStart)
             if (
                 !SceneContainerFlag.isEnabled ||
-                    horizontalPosition !is HorizontalPosition.FloatAtEnd
+                    horizontalPosition !is HorizontalPosition.FloatAtStart
             ) {
-                connect(nsslId, START, startConstraintId, START, marginStart)
+                connect(nsslId, END, PARENT_ID, END, marginEnd)
             }
-            connect(nsslId, END, PARENT_ID, END, marginEnd)
             connect(nsslId, BOTTOM, PARENT_ID, BOTTOM, marginBottom)
             connect(nsslId, TOP, PARENT_ID, TOP, marginTop)
         }

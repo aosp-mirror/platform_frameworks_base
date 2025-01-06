@@ -30,7 +30,7 @@ public class SubscriptionInfoEntity {
     public SubscriptionInfoEntity(@NonNull String subId, int simSlotIndex, boolean isEmbedded,
             boolean isOpportunistic, String uniqueName, boolean isSubscriptionVisible,
             boolean isDefaultSubscriptionSelection, boolean isValidSubscription,
-            boolean isActiveSubscriptionId, boolean isActiveDataSubscriptionId) {
+            boolean isActiveSubscriptionId) {
         this.subId = subId;
         this.simSlotIndex = simSlotIndex;
         this.isEmbedded = isEmbedded;
@@ -40,7 +40,6 @@ public class SubscriptionInfoEntity {
         this.isDefaultSubscriptionSelection = isDefaultSubscriptionSelection;
         this.isValidSubscription = isValidSubscription;
         this.isActiveSubscriptionId = isActiveSubscriptionId;
-        this.isActiveDataSubscriptionId = isActiveDataSubscriptionId;
     }
 
     @PrimaryKey
@@ -73,15 +72,8 @@ public class SubscriptionInfoEntity {
     @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_ACTIVE_SUBSCRIPTION_ID)
     public boolean isActiveSubscriptionId;
 
-    @ColumnInfo(name = DataServiceUtils.SubscriptionInfoData.COLUMN_IS_ACTIVE_DATA_SUBSCRIPTION)
-    public boolean isActiveDataSubscriptionId;
-
     public int getSubId() {
         return Integer.valueOf(subId);
-    }
-
-    public CharSequence getUniqueDisplayName() {
-        return uniqueName;
     }
 
     public boolean isActiveSubscription() {
@@ -103,8 +95,7 @@ public class SubscriptionInfoEntity {
                 isSubscriptionVisible,
                 isDefaultSubscriptionSelection,
                 isValidSubscription,
-                isActiveSubscriptionId,
-                isActiveDataSubscriptionId);
+                isActiveSubscriptionId);
     }
 
     @Override
@@ -125,8 +116,7 @@ public class SubscriptionInfoEntity {
                 && isSubscriptionVisible == info.isSubscriptionVisible
                 && isDefaultSubscriptionSelection == info.isDefaultSubscriptionSelection
                 && isValidSubscription == info.isValidSubscription
-                && isActiveSubscriptionId == info.isActiveSubscriptionId
-                && isActiveDataSubscriptionId == info.isActiveDataSubscriptionId;
+                && isActiveSubscriptionId == info.isActiveSubscriptionId;
     }
 
     public String toString() {
@@ -149,8 +139,6 @@ public class SubscriptionInfoEntity {
                 .append(isValidSubscription)
                 .append(", isActiveSubscriptionId = ")
                 .append(isActiveSubscriptionId)
-                .append(", isActiveDataSubscriptionId = ")
-                .append(isActiveDataSubscriptionId)
                 .append(")}");
         return builder.toString();
     }

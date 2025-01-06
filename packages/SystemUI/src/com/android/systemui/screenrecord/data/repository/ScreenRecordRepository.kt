@@ -16,6 +16,7 @@
 
 package com.android.systemui.screenrecord.data.repository
 
+import android.media.projection.StopReason
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.screenrecord.RecordingController
@@ -41,7 +42,7 @@ interface ScreenRecordRepository {
     val screenRecordState: Flow<ScreenRecordModel>
 
     /** Stops the recording. */
-    suspend fun stopRecording()
+    suspend fun stopRecording(@StopReason stopReason: Int)
 }
 
 @SysUISingleton
@@ -95,7 +96,7 @@ constructor(
         }
     }
 
-    override suspend fun stopRecording() {
-        withContext(bgCoroutineContext) { recordingController.stopRecording() }
+    override suspend fun stopRecording(@StopReason stopReason: Int) {
+        withContext(bgCoroutineContext) { recordingController.stopRecording(stopReason) }
     }
 }

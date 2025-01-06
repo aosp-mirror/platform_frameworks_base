@@ -19,4 +19,15 @@ package com.android.systemui.qs.panels.ui.viewmodel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.qs.panels.domain.interactor.qsColumnsInteractor
 
-val Kosmos.qsColumnsViewModel by Kosmos.Fixture { QSColumnsSizeViewModelImpl(qsColumnsInteractor) }
+val Kosmos.qsColumnsViewModelFactory by
+    Kosmos.Fixture {
+        object : QSColumnsViewModel.Factory {
+            override fun create(mediaLocation: Int?): QSColumnsViewModel {
+                return QSColumnsViewModel(
+                    qsColumnsInteractor,
+                    mediaInRowInLandscapeViewModelFactory,
+                    mediaLocation,
+                )
+            }
+        }
+    }

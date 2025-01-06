@@ -24,7 +24,7 @@ import android.app.StatusBarManager.WINDOW_STATUS_BAR
 import android.app.StatusBarManager.WindowVisibleState
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.CommandQueue
-import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
+import com.android.systemui.statusbar.window.shared.model.StatusBarWindowState
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory

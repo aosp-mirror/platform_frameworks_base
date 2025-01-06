@@ -33,7 +33,6 @@ import android.widget.TextView;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.annotation.RequiresApi;
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
@@ -118,10 +117,7 @@ public class RestrictedPreferenceHelper {
         if (mDisabledSummary) {
             final TextView summaryView = (TextView) holder.findViewById(android.R.id.summary);
             if (summaryView != null) {
-                final CharSequence disabledText =
-                        (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU)
-                                ? getDisabledByAdminUpdatableString()
-                                : mContext.getString(R.string.disabled_by_admin_summary_text);
+                final CharSequence disabledText = getDisabledByAdminSummaryString();
                 if (mDisabledByAdmin) {
                     summaryView.setText(disabledText);
                 } else if (mDisabledByEcm) {
@@ -134,11 +130,23 @@ public class RestrictedPreferenceHelper {
         }
     }
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
-    private String getDisabledByAdminUpdatableString() {
-        return mContext.getSystemService(DevicePolicyManager.class).getResources().getString(
-                CONTROLLED_BY_ADMIN_SUMMARY,
-                () -> mContext.getString(R.string.disabled_by_admin_summary_text));
+    private String getDisabledByAdminSummaryString() {
+        if (isRestrictionEnforcedByAdvancedProtection()) {
+            return mContext.getString(com.android.settingslib.widget.restricted
+                    .R.string.disabled_by_advanced_protection);
+        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            return mContext.getSystemService(DevicePolicyManager.class).getResources().getString(
+                    CONTROLLED_BY_ADMIN_SUMMARY,
+                    () -> mContext.getString(R.string.disabled_by_admin_summary_text));
+        }
+        return mContext.getString(R.string.disabled_by_admin_summary_text);
+    }
+
+    public boolean isRestrictionEnforcedByAdvancedProtection() {
+        return mEnforcedAdmin != null && RestrictedLockUtilsInternal
+                .isPolicyEnforcedByAdvancedProtection(mContext, mEnforcedAdmin.enforcedRestriction,
+                        UserHandle.myUserId());
     }
 
     public void useAdminDisabledSummary(boolean useSummary) {
@@ -226,17 +234,24 @@ public class RestrictedPreferenceHelper {
      */
     public boolean setDisabledByAdmin(EnforcedAdmin admin) {
         boolean disabled = false;
+        boolean changed = false;
+        EnforcedAdmin previousAdmin = mEnforcedAdmin;
         mEnforcedAdmin = null;
         if (admin != null) {
             disabled = true;
             // Copy the received instance to prevent pass be reference being overwritten.
             mEnforcedAdmin = new EnforcedAdmin(admin);
+            if (android.security.Flags.aapmApi()) {
+                changed = previousAdmin == null || !previousAdmin.equals(admin);
+            }
         }
 
-        boolean changed = false;
         if (mDisabledByAdmin != disabled) {
             mDisabledByAdmin = disabled;
             changed = true;
+        }
+
+        if (changed) {
             updateDisabledState();
         }
 
@@ -284,6 +299,10 @@ public class RestrictedPreferenceHelper {
 
         if (mPreference instanceof PrimarySwitchPreference) {
             ((PrimarySwitchPreference) mPreference).setSwitchEnabled(isEnabled);
+        }
+
+        if (android.security.Flags.aapmApi() && !isEnabled && mDisabledByAdmin) {
+            mPreference.setSummary(getDisabledByAdminSummaryString());
         }
 
         if (!isEnabled && mDisabledByEcm) {

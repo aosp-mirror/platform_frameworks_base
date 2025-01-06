@@ -16,6 +16,7 @@
 
 package com.android.server.location.contexthub;
 
+import android.chre.flags.Flags;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.NanoAppState;
 
@@ -46,7 +47,11 @@ abstract class ContextHubServiceTransaction {
     /** The number of times the transaction has been started (start function called). */
     private int mNumCompletedStartCalls;
 
-    private final short mHostEndpointId;
+    /**
+     * A unique identifier for the entity which owns this transaction, scoped by the transaction
+     * type.
+     */
+    private final int mOwnerId;
 
     private boolean mIsComplete = false;
 
@@ -59,7 +64,7 @@ abstract class ContextHubServiceTransaction {
         mNextRetryTime = Long.MAX_VALUE;
         mTimeoutTime = Long.MAX_VALUE;
         mNumCompletedStartCalls = 0;
-        mHostEndpointId = Short.MAX_VALUE;
+        mOwnerId = Integer.MAX_VALUE;
     }
 
     ContextHubServiceTransaction(int id, int type, long nanoAppId,
@@ -72,11 +77,11 @@ abstract class ContextHubServiceTransaction {
         mNextRetryTime = Long.MAX_VALUE;
         mTimeoutTime = Long.MAX_VALUE;
         mNumCompletedStartCalls = 0;
-        mHostEndpointId = Short.MAX_VALUE;
+        mOwnerId = Integer.MAX_VALUE;
     }
 
-    ContextHubServiceTransaction(int id, int type, String packageName,
-            int messageSequenceNumber, short hostEndpointId) {
+    ContextHubServiceTransaction(
+            int id, int type, String packageName, int messageSequenceNumber, int ownerId) {
         mTransactionId = id;
         mTransactionType = type;
         mNanoAppId = Long.MAX_VALUE;
@@ -85,7 +90,7 @@ abstract class ContextHubServiceTransaction {
         mNextRetryTime = Long.MAX_VALUE;
         mTimeoutTime = Long.MAX_VALUE;
         mNumCompletedStartCalls = 0;
-        mHostEndpointId = hostEndpointId;
+        mOwnerId = ownerId;
     }
 
     /**
@@ -147,8 +152,15 @@ abstract class ContextHubServiceTransaction {
         return mNumCompletedStartCalls;
     }
 
-    short getHostEndpointId() {
-        return mHostEndpointId;
+    /**
+     * @return A unique identifier for the entity owning this transaction.
+     */
+    long getOwnerId() {
+        if (Flags.offloadImplementation()) {
+            return ((long) mTransactionType << 32) | (0x00000000FFFFFFFFL & mOwnerId);
+        } else {
+            return mOwnerId;
+        }
     }
 
     /**
@@ -215,15 +227,16 @@ abstract class ContextHubServiceTransaction {
             out.append(", messageSequenceNumber = ");
             out.append(mMessageSequenceNumber);
         }
-        if (mTransactionType == ContextHubTransaction.TYPE_RELIABLE_MESSAGE) {
+        if (mTransactionType == ContextHubTransaction.TYPE_RELIABLE_MESSAGE
+                || mTransactionType == ContextHubTransaction.TYPE_HUB_MESSAGE_REQUIRES_RESPONSE) {
             out.append(", nextRetryTime = ");
             out.append(mNextRetryTime);
             out.append(", timeoutTime = ");
             out.append(mTimeoutTime);
             out.append(", numCompletedStartCalls = ");
             out.append(mNumCompletedStartCalls);
-            out.append(", hostEndpointId = ");
-            out.append(mHostEndpointId);
+            out.append(", ownerId = ");
+            out.append(getOwnerId());
         }
         out.append(")");
 

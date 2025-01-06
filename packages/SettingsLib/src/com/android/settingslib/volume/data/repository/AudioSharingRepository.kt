@@ -221,6 +221,7 @@ class AudioSharingRepositoryImpl(
     override suspend fun audioSharingAvailable(): Boolean {
         return withContext(backgroundCoroutineContext) {
             BluetoothUtils.isAudioSharingEnabled()
+                    || BluetoothUtils.isAudioSharingPreviewEnabled(contentResolver)
         }
     }
 

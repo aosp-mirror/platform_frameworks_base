@@ -85,8 +85,7 @@ class CommunalUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
-            assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Down)).isEqualTo(UserActionResult(Scenes.Shade))
 
             setUpState(
                 isShadeTouchable = false,
@@ -103,8 +102,7 @@ class CommunalUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions).isNotEmpty()
             assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
-            assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, isIrreversible = true))
+            assertThat(actions?.get(Swipe.Down)).isEqualTo(UserActionResult(Scenes.Shade))
         }
 
     @Test
@@ -122,7 +120,7 @@ class CommunalUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade))
 
             setUpState(
                 isShadeTouchable = false,
@@ -140,7 +138,7 @@ class CommunalUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade, isIrreversible = true))
+                .isEqualTo(UserActionResult(Scenes.Shade, ToSplitShade))
         }
 
     @Test
@@ -158,9 +156,7 @@ class CommunalUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Bouncer))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(
-                    UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
-                )
+                .isEqualTo(UserActionResult.ShowOverlay(Overlays.NotificationsShade))
 
             setUpState(
                 isShadeTouchable = false,
@@ -174,9 +170,7 @@ class CommunalUserActionsViewModelTest : SysuiTestCase() {
             assertThat(actions?.get(Swipe.End)).isEqualTo(UserActionResult(SceneFamilies.Home))
             assertThat(actions?.get(Swipe.Up)).isEqualTo(UserActionResult(Scenes.Gone))
             assertThat(actions?.get(Swipe.Down))
-                .isEqualTo(
-                    UserActionResult.ShowOverlay(Overlays.NotificationsShade, isIrreversible = true)
-                )
+                .isEqualTo(UserActionResult.ShowOverlay(Overlays.NotificationsShade))
         }
 
     private fun TestScope.setUpState(

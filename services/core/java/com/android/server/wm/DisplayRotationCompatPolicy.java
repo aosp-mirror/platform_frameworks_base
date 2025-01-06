@@ -71,6 +71,9 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     @NonNull
     private final ActivityRefresher mActivityRefresher;
 
+    // TODO(b/380840084): Consider moving this to the CameraStateMonitor, and keeping track of
+    // all current camera activities, especially when the camera access is switching from one app to
+    // another.
     @Nullable
     private Task mCameraTask;
 
@@ -327,8 +330,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     }
 
     @Override
-    public void onCameraOpened(@NonNull ActivityRecord cameraActivity,
-            @NonNull String cameraId) {
+    public void onCameraOpened(@NonNull ActivityRecord cameraActivity) {
         mCameraTask = cameraActivity.getTask();
         // Checking whether an activity in fullscreen rather than the task as this camera
         // compat treatment doesn't cover activity embedding.
@@ -374,16 +376,9 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     }
 
     @Override
-    public boolean onCameraClosed(@NonNull String cameraId) {
-        final ActivityRecord topActivity;
-        if (Flags.cameraCompatFullscreenPickSameTaskActivity()) {
-            topActivity = mCameraTask != null ? mCameraTask.getTopActivity(
-                    /* includeFinishing= */ true, /* includeOverlays= */ false) : null;
-        } else {
-            topActivity = mDisplayContent.topRunningActivity(/* considerKeyguardState= */ true);
-        }
+    public boolean canCameraBeClosed(@NonNull String cameraId) {
+        final ActivityRecord topActivity = getTopActivity();
 
-        mCameraTask = null;
         if (topActivity == null) {
             return true;
         }
@@ -399,6 +394,23 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 return false;
             }
         }
+        return true;
+    }
+
+    @Override
+    public void onCameraClosed() {
+        final ActivityRecord topActivity = getTopActivity();
+
+        // Only clean up if the camera is not running - this close signal could be from switching
+        // cameras (e.g. back to front camera, and vice versa).
+        if (topActivity == null || !mCameraStateMonitor.isCameraRunningForActivity(topActivity)) {
+            // Call after getTopActivity(), as that method might use the activity from mCameraTask.
+            mCameraTask = null;
+        }
+
+        if (topActivity == null) {
+            return;
+        }
 
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Display id=%d is notified that Camera is closed, updating rotation.",
@@ -406,11 +418,10 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
         // Checking whether an activity in fullscreen rather than the task as this camera compat
         // treatment doesn't cover activity embedding.
         if (topActivity.getWindowingMode() != WINDOWING_MODE_FULLSCREEN) {
-            return true;
+            return;
         }
         recomputeConfigurationForCameraCompatIfNeeded(topActivity);
         mDisplayContent.updateOrientation();
-        return true;
     }
 
     // TODO(b/336474959): Do we need cameraId here?
@@ -427,6 +438,16 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
             @NonNull ActivityRecord activityRecord) {
         if (shouldRecomputeConfigurationForCameraCompat(activityRecord)) {
             activityRecord.recomputeConfiguration();
+        }
+    }
+
+    @Nullable
+    private ActivityRecord getTopActivity() {
+        if (Flags.cameraCompatFullscreenPickSameTaskActivity()) {
+            return mCameraTask != null ? mCameraTask.getTopActivity(
+                    /* includeFinishing= */ true, /* includeOverlays= */ false) : null;
+        } else {
+            return mDisplayContent.topRunningActivity(/* considerKeyguardState= */ true);
         }
     }
 

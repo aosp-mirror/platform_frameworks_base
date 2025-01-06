@@ -21,7 +21,6 @@ import static android.accessibilityservice.MagnificationConfig.MAGNIFICATION_MOD
 import static com.android.server.accessibility.Flags.FLAG_MAGNIFICATION_ENLARGE_POINTER_BUGFIX;
 import static com.android.server.accessibility.magnification.FullScreenMagnificationController.MagnificationInfoChangedCallback;
 import static com.android.server.accessibility.magnification.MockMagnificationConnection.TEST_DISPLAY;
-import static com.android.window.flags.Flags.FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -308,7 +307,6 @@ public class FullScreenMagnificationControllerTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_ALWAYS_DRAW_MAGNIFICATION_FULLSCREEN_BORDER)
     public void testSetScale_noConnection_doNothing() {
         register(TEST_DISPLAY);
 

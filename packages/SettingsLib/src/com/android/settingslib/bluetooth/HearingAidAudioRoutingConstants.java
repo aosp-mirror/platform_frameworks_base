@@ -19,6 +19,7 @@ package com.android.settingslib.bluetooth;
 import android.media.AudioAttributes;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
+import android.media.MediaRecorder;
 
 import androidx.annotation.IntDef;
 
@@ -61,15 +62,20 @@ public final class HearingAidAudioRoutingConstants {
     @IntDef({
             RoutingValue.AUTO,
             RoutingValue.HEARING_DEVICE,
-            RoutingValue.DEVICE_SPEAKER,
+            RoutingValue.BUILTIN_DEVICE,
     })
 
     public @interface RoutingValue {
         int AUTO = 0;
         int HEARING_DEVICE = 1;
-        int DEVICE_SPEAKER = 2;
+        int BUILTIN_DEVICE = 2;
     }
 
-    public static final AudioDeviceAttributes DEVICE_SPEAKER_OUT = new AudioDeviceAttributes(
+    public static final AudioDeviceAttributes BUILTIN_SPEAKER = new AudioDeviceAttributes(
             AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, "");
+    public static final AudioDeviceAttributes BUILTIN_MIC = new AudioDeviceAttributes(
+            AudioDeviceAttributes.ROLE_INPUT, AudioDeviceInfo.TYPE_BUILTIN_MIC, "");
+
+    public static final int MICROPHONE_SOURCE_VOICE_COMMUNICATION =
+            MediaRecorder.AudioSource.VOICE_COMMUNICATION;
 }

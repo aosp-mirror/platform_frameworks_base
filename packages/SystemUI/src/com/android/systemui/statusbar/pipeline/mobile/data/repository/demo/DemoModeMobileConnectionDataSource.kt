@@ -25,7 +25,7 @@ import android.telephony.TelephonyManager.DATA_ACTIVITY_OUT
 import com.android.settingslib.SignalIcon.MobileIconGroup
 import com.android.settingslib.mobile.TelephonyIcons
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.demomode.DemoMode.COMMAND_NETWORK
 import com.android.systemui.demomode.DemoModeController
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.demo.model.FakeNetworkEventModel
@@ -44,10 +44,7 @@ import kotlinx.coroutines.flow.shareIn
 @SysUISingleton
 class DemoModeMobileConnectionDataSource
 @Inject
-constructor(
-    demoModeController: DemoModeController,
-    @Application scope: CoroutineScope,
-) {
+constructor(demoModeController: DemoModeController, @Background scope: CoroutineScope) {
     private val demoCommandStream = demoModeController.demoFlowForCommand(COMMAND_NETWORK)
 
     // If the args contains "mobile", then all of the args are relevant. It's just the way demo mode

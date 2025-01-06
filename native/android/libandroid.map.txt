@@ -4,6 +4,15 @@ LIBANDROID {
     AActivityManager_removeUidImportanceListener; # systemapi introduced=31
     AActivityManager_isUidActive; # systemapi introduced=31
     AActivityManager_getUidImportance; # systemapi introduced=31
+    ADynamicInstrumentationManager_TargetProcess_create; # systemapi
+    ADynamicInstrumentationManager_TargetProcess_destroy; # systemapi
+    ADynamicInstrumentationManager_MethodDescriptor_create; # systemapi
+    ADynamicInstrumentationManager_MethodDescriptor_destroy; # systemapi
+    ADynamicInstrumentationManager_getExecutableMethodFileOffsets; # systemapi
+    ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerPath; # systemapi
+    ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getContainerOffset; # systemapi
+    ADynamicInstrumentationManager_ExecutableMethodFileOffsets_getMethodOffset; # systemapi
+    ADynamicInstrumentationManager_ExecutableMethodFileOffsets_destroy; # systemapi
     AAssetDir_close;
     AAssetDir_getNextFileName;
     AAssetDir_rewind;
@@ -86,6 +95,15 @@ LIBANDROID {
     AConfiguration_setTouchscreen;
     AConfiguration_setUiModeNight;
     AConfiguration_setUiModeType;
+    ADisplayLuts_create; # introduced=36
+    ADisplayLuts_setEntries; # introduced=36
+    ADisplayLuts_destroy; # introduced=36
+    ADisplayLutsEntry_createEntry; # introduced=36
+    ADisplayLutsEntry_getDimension; # introduced=36
+    ADisplayLutsEntry_getSize; # introduced=36
+    ADisplayLutsEntry_getSamplingKey; # introduced=36
+    ADisplayLutsEntry_getBuffer; # introduced=36
+    ADisplayLutsEntry_destroy; # introduced=36
     AInputEvent_getDeviceId;
     AInputEvent_getSource;
     AInputEvent_getType;
@@ -283,7 +301,6 @@ LIBANDROID {
     ASurfaceTransaction_setEnableBackPressure; # introduced=31
     ASurfaceTransaction_setFrameRate; # introduced=30
     ASurfaceTransaction_setFrameRateWithChangeStrategy; # introduced=31
-    ASurfaceTransaction_setFrameRateParams; # introduced=36
     ASurfaceTransaction_clearFrameRate; # introduced=34
     ASurfaceTransaction_setFrameTimeline; # introduced=Tiramisu
     ASurfaceTransaction_setGeometry; # introduced=29
@@ -291,6 +308,7 @@ LIBANDROID {
     ASurfaceTransaction_setHdrMetadata_smpte2086; # introduced=29
     ASurfaceTransaction_setExtendedRangeBrightness; # introduced=UpsideDownCake
     ASurfaceTransaction_setDesiredHdrHeadroom; # introduced=VanillaIceCream
+    ASurfaceTransaction_setLuts; # introduced=36
     ASurfaceTransaction_setOnComplete; # introduced=29
     ASurfaceTransaction_setOnCommit; # introduced=31
     ASurfaceTransaction_setPosition; # introduced=31
@@ -302,6 +320,23 @@ LIBANDROID {
     ASystemFontIterator_open; # introduced=29
     ASystemFontIterator_close; # introduced=29
     ASystemFontIterator_next; # introduced=29
+    ASystemHealth_getCpuHeadroom; # introduced=36
+    ASystemHealth_getGpuHeadroom; # introduced=36
+    ASystemHealth_getCpuHeadroomMinIntervalMillis; # introduced=36
+    ASystemHealth_getGpuHeadroomMinIntervalMillis; # introduced=36
+    ACpuHeadroomParams_create; # introduced=36
+    ACpuHeadroomParams_destroy; # introduced=36
+    ACpuHeadroomParams_setCalculationType; # introduced=36
+    ACpuHeadroomParams_getCalculationType; # introduced=36
+    ACpuHeadroomParams_setCalculationWindowMillis; # introduced=36
+    ACpuHeadroomParams_getCalculationWindowMillis; # introduced=36
+    ACpuHeadroomParams_setTids; # introduced=36
+    AGpuHeadroomParams_create; # introduced=36
+    AGpuHeadroomParams_destroy; # introduced=36
+    AGpuHeadroomParams_setCalculationType; # introduced=36
+    AGpuHeadroomParams_getCalculationType; # introduced=36
+    AGpuHeadroomParams_setCalculationWindowMillis; # introduced=36
+    AGpuHeadroomParams_getCalculationWindowMillis; # introduced=36
     AFont_close; # introduced=29
     AFont_getFontFilePath; # introduced=29
     AFont_getWeight; # introduced=29
@@ -343,21 +378,39 @@ LIBANDROID {
     AThermal_unregisterThermalStatusListener; # introduced=30
     AThermal_getThermalHeadroom; # introduced=31
     AThermal_getThermalHeadroomThresholds; # introduced=VanillaIceCream
+    AThermal_registerThermalHeadroomListener; # introduced=36
+    AThermal_unregisterThermalHeadroomListener; # introduced=36
     APerformanceHint_getManager; # introduced=Tiramisu
     APerformanceHint_createSession; # introduced=Tiramisu
     APerformanceHint_getPreferredUpdateRateNanos; # introduced=Tiramisu
+    APerformanceHint_getMaxGraphicsPipelineThreadsCount; # introduced=36
     APerformanceHint_updateTargetWorkDuration; # introduced=Tiramisu
     APerformanceHint_reportActualWorkDuration; # introduced=Tiramisu
     APerformanceHint_closeSession; # introduced=Tiramisu
     APerformanceHint_setThreads; # introduced=UpsideDownCake
     APerformanceHint_setPreferPowerEfficiency; # introduced=VanillaIceCream
     APerformanceHint_reportActualWorkDuration2; # introduced=VanillaIceCream
+    APerformanceHint_createSessionUsingConfig; # introduced=36
+    APerformanceHint_notifyWorkloadIncrease; # introduced=36
+    APerformanceHint_notifyWorkloadReset; # introduced=36
+    APerformanceHint_notifyWorkloadSpike; # introduced=36
+    APerformanceHint_borrowSessionFromJava; # introduced=36
+    APerformanceHint_setNativeSurfaces; # introduced=36
+    APerformanceHint_isFeatureSupported; # introduced=36
     AWorkDuration_create; # introduced=VanillaIceCream
     AWorkDuration_release; # introduced=VanillaIceCream
     AWorkDuration_setWorkPeriodStartTimestampNanos; # introduced=VanillaIceCream
     AWorkDuration_setActualTotalDurationNanos; # introduced=VanillaIceCream
     AWorkDuration_setActualCpuDurationNanos; # introduced=VanillaIceCream
     AWorkDuration_setActualGpuDurationNanos; # introduced=VanillaIceCream
+    ASessionCreationConfig_create; # introduced=36
+    ASessionCreationConfig_release; # introduced=36
+    ASessionCreationConfig_setTids; # introduced=36
+    ASessionCreationConfig_setTargetWorkDurationNanos; # introduced=36
+    ASessionCreationConfig_setPreferPowerEfficiency; # introduced=36
+    ASessionCreationConfig_setGraphicsPipeline; # introduced=36
+    ASessionCreationConfig_setNativeSurfaces; # introduced=36
+    ASessionCreationConfig_setUseAutoTiming; # introduced=36
   local:
     *;
 };
@@ -369,7 +422,12 @@ LIBANDROID_PLATFORM {
     APerformanceHint_sendHint;
     APerformanceHint_getThreadIds;
     APerformanceHint_createSessionInternal;
+    APerformanceHint_createSessionUsingConfigInternal;
     APerformanceHint_setUseFMQForTesting;
+    APerformanceHint_getRateLimiterPropertiesForTesting;
+    APerformanceHint_setUseNewLoadHintBehaviorForTesting;
+    APerformanceHint_closeSessionFromJava;
+    APerformanceHint_createSessionFromJava;
     extern "C++" {
         ASurfaceControl_registerSurfaceStatsListener*;
         ASurfaceControl_unregisterSurfaceStatsListener*;

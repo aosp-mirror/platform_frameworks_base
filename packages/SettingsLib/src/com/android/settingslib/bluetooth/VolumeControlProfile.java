@@ -21,6 +21,7 @@ import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.IntRange;
+import android.bluetooth.AudioInputControl;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
@@ -34,6 +35,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.RequiresApi;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -168,6 +170,7 @@ public class VolumeControlProfile implements LocalBluetoothProfile {
         }
         mService.setVolumeOffset(device, volumeOffset);
     }
+
     /**
      * Provides information about the possibility to set volume offset on the remote device. If the
      * remote device supports Volume Offset Control Service, it is automatically connected.
@@ -208,6 +211,22 @@ public class VolumeControlProfile implements LocalBluetoothProfile {
             return;
         }
         mService.setDeviceVolume(device, volume, isGroupOp);
+    }
+
+    /**
+     * Returns a list of {@link AudioInputControl} objects associated with a Bluetooth device.
+     *
+     * @param device The remote Bluetooth device.
+     * @return A list of {@link AudioInputControl} objects, or an empty list if no AICS instances
+     *     are found or if an error occurs.
+     * @hide
+     */
+    public @NonNull List<AudioInputControl> getAudioInputControlServices(
+            @NonNull BluetoothDevice device) {
+        if (mService == null) {
+            return Collections.emptyList();
+        }
+        return mService.getAudioInputControlServices(device);
     }
 
     @Override

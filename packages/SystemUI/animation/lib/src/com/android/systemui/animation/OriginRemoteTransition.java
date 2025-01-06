@@ -16,6 +16,8 @@
 
 package com.android.systemui.animation;
 
+import static android.view.WindowManager.TRANSIT_CHANGE;
+
 import android.animation.Animator;
 import android.animation.Animator.AnimatorListener;
 import android.animation.ValueAnimator;
@@ -39,15 +41,19 @@ import com.android.internal.policy.ScreenDecorationsUtils;
 import com.android.wm.shell.shared.TransitionUtil;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * An implementation of {@link IRemoteTransition} that accepts a {@link UIComponent} as the origin
  * and automatically attaches it to the transition leash before the transition starts.
+ *
  * @hide
  */
 public class OriginRemoteTransition extends IRemoteTransition.Stub {
     private static final String TAG = "OriginRemoteTransition";
+    private static final long FINISH_ANIMATION_TIMEOUT_MS = 100;
 
     private final Context mContext;
     private final boolean mIsEntry;
@@ -89,7 +95,7 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
                 () -> {
                     mStartTransaction = t;
                     mFinishCallback = finishCallback;
-                    startAnimationInternal(info);
+                    startAnimationInternal(info, /* states= */ null);
                 });
     }
 
@@ -111,7 +117,13 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
             SurfaceControl.Transaction t,
             IRemoteTransitionFinishedCallback finishCallback,
             WindowAnimationState[] states) {
-        logD("takeOverAnimation - " + info);
+        logD("takeOverAnimation - info=" + info + ", states=" + Arrays.toString(states));
+        mHandler.post(
+                () -> {
+                    mStartTransaction = t;
+                    mFinishCallback = finishCallback;
+                    startAnimationInternal(info, states);
+                });
     }
 
     @Override
@@ -120,14 +132,19 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         mHandler.post(this::cancel);
     }
 
-    private void startAnimationInternal(TransitionInfo info) {
+    private void startAnimationInternal(
+            TransitionInfo info, @Nullable WindowAnimationState[] states) {
         if (!prepareUIs(info)) {
             logE("Unable to prepare UI!");
             finishAnimation(/* finished= */ false);
             return;
         }
         // Notify player that we are starting.
-        mPlayer.onStart(info, mStartTransaction, mOrigin, mOriginTransaction);
+        mPlayer.onStart(info, states, mStartTransaction, mOrigin, mOriginTransaction);
+
+        // Apply the initial transactions in case the player forgot to apply them.
+        mOriginTransaction.commit();
+        mStartTransaction.apply();
 
         // Start the animator.
         mAnimator = ValueAnimator.ofFloat(0.0f, 1.0f);
@@ -180,7 +197,10 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         // Create the origin leash and add to the transition root leash.
         mOriginLeash =
                 new SurfaceControl.Builder().setName("OriginTransition-origin-leash").build();
-        mStartTransaction
+
+        // Create temporary transaction to build
+        final SurfaceControl.Transaction tmpTransaction = new SurfaceControl.Transaction();
+        tmpTransaction
                 .reparent(mOriginLeash, rootLeash)
                 .show(mOriginLeash)
                 .setCornerRadius(mOriginLeash, windowRadius)
@@ -193,55 +213,73 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
             int mode = change.getMode();
             SurfaceControl leash = change.getLeash();
             // Reparent leash to the transition root.
-            mStartTransaction.reparent(leash, rootLeash);
+            tmpTransaction.reparent(leash, rootLeash);
             if (TransitionUtil.isOpeningMode(mode)) {
                 openingSurfaces.add(change.getLeash());
                 // For opening surfaces, ending bounds are base bound. Apply corner radius if
                 // it's full screen.
                 Rect bounds = change.getEndAbsBounds();
                 if (displayBounds.equals(bounds)) {
-                    mStartTransaction
+                    tmpTransaction
                             .setCornerRadius(leash, windowRadius)
                             .setWindowCrop(leash, bounds.width(), bounds.height());
                 }
-            } else if (TransitionUtil.isClosingMode(mode)) {
+            } else if (TransitionUtil.isClosingMode(mode) || mode == TRANSIT_CHANGE) {
+                // TRANSIT_CHANGE refers to the closing window in predictive back animation.
                 closingSurfaces.add(change.getLeash());
                 // For closing surfaces, starting bounds are base bounds. Apply corner radius if
                 // it's full screen.
                 Rect bounds = change.getStartAbsBounds();
                 if (displayBounds.equals(bounds)) {
-                    mStartTransaction
+                    tmpTransaction
                             .setCornerRadius(leash, windowRadius)
                             .setWindowCrop(leash, bounds.width(), bounds.height());
                 }
             }
         }
 
+        if (openingSurfaces.isEmpty() && closingSurfaces.isEmpty()) {
+            logD("prepareUIs: no opening/closing surfaces available, nothing to prepare.");
+            return false;
+        }
+
         // Set relative order:
         // ----  App1  ----
         // ---- origin ----
         // ----  App2  ----
+
         if (mIsEntry) {
-            mStartTransaction
-                    .setRelativeLayer(mOriginLeash, closingSurfaces.get(0), 1)
-                    .setRelativeLayer(
-                            openingSurfaces.get(openingSurfaces.size() - 1), mOriginLeash, 1);
+            if (!closingSurfaces.isEmpty()) {
+                tmpTransaction.setRelativeLayer(mOriginLeash, closingSurfaces.get(0), 1);
+            } else {
+                logW("Missing closing surface is entry transition");
+            }
+            if (!openingSurfaces.isEmpty()) {
+                tmpTransaction.setRelativeLayer(
+                        openingSurfaces.get(openingSurfaces.size() - 1), mOriginLeash, 1);
+            } else {
+                logW("Missing opening surface is entry transition");
+            }
+
         } else {
-            mStartTransaction
-                    .setRelativeLayer(mOriginLeash, openingSurfaces.get(0), 1)
-                    .setRelativeLayer(
-                            closingSurfaces.get(closingSurfaces.size() - 1), mOriginLeash, 1);
+            if (!openingSurfaces.isEmpty()) {
+                tmpTransaction.setRelativeLayer(mOriginLeash, openingSurfaces.get(0), 1);
+            } else {
+                logW("Missing opening surface is exit transition");
+            }
+            if (!closingSurfaces.isEmpty()) {
+                tmpTransaction.setRelativeLayer(
+                        closingSurfaces.get(closingSurfaces.size() - 1), mOriginLeash, 1);
+            } else {
+                logW("Missing closing surface is exit transition");
+            }
         }
+        mStartTransaction.merge(tmpTransaction);
 
         // Attach origin UIComponent to origin leash.
         mOriginTransaction = mOrigin.newTransaction();
-        mOriginTransaction
-                .attachToTransitionLeash(
-                        mOrigin, mOriginLeash, displayBounds.width(), displayBounds.height())
-                .commit();
-
-        // Apply all surface changes.
-        mStartTransaction.apply();
+        mOriginTransaction.attachToTransitionLeash(
+                mOrigin, mOriginLeash, displayBounds.width(), displayBounds.height());
         return true;
     }
 
@@ -254,13 +292,26 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
 
     private void finishAnimation(boolean finished) {
         logD("finishAnimation: finished=" + finished);
+        OneShotRunnable finishInternalRunnable = new OneShotRunnable(this::finishInternal);
+        Runnable timeoutRunnable =
+                () -> {
+                    Log.w(TAG, "Timeout waiting for surface transaction!");
+                    finishInternalRunnable.run();
+                };
+        Runnable committedRunnable =
+                () -> {
+                    // Remove the timeout runnable.
+                    mHandler.removeCallbacks(timeoutRunnable);
+                    finishInternalRunnable.run();
+                };
         if (mAnimator == null) {
             // The transition didn't start. Ensure we apply the start transaction and report
             // finish afterwards.
             mStartTransaction
-                    .addTransactionCommittedListener(
-                            mContext.getMainExecutor(), this::finishInternal)
+                    .addTransactionCommittedListener(mHandler::post, committedRunnable::run)
                     .apply();
+            // Call finishInternal() anyway after the timeout.
+            mHandler.postDelayed(timeoutRunnable, FINISH_ANIMATION_TIMEOUT_MS);
             return;
         }
         mAnimator = null;
@@ -268,9 +319,10 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         mPlayer.onEnd(finished);
         // Detach the origin from the transition leash and report finish after it's done.
         mOriginTransaction
-                .detachFromTransitionLeash(
-                        mOrigin, mContext.getMainExecutor(), this::finishInternal)
+                .detachFromTransitionLeash(mOrigin, mHandler::post, committedRunnable)
                 .commit();
+        // Call finishInternal() anyway after the timeout.
+        mHandler.postDelayed(timeoutRunnable, FINISH_ANIMATION_TIMEOUT_MS);
     }
 
     private void finishInternal() {
@@ -291,6 +343,7 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
     }
 
     private void cancel() {
+        logD("cancel()");
         if (mAnimator != null) {
             mAnimator.cancel();
         }
@@ -300,6 +353,10 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         if (OriginTransitionSession.DEBUG) {
             Log.d(TAG, msg);
         }
+    }
+
+    private static void logW(String msg) {
+        Log.w(TAG, msg);
     }
 
     private static void logE(String msg) {
@@ -329,7 +386,78 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
                 /* baseBounds= */ maxBounds);
     }
 
-    /** An interface that represents an origin transitions.
+    private static void applyWindowAnimationStates(
+            TransitionInfo info,
+            @Nullable WindowAnimationState[] states,
+            UIComponent closingApp,
+            UIComponent openingApp) {
+        if (states == null) {
+            // Nothing to apply.
+            return;
+        }
+        // Calculate bounds.
+        Rect maxClosingBounds = new Rect();
+        Rect maxOpeningBounds = new Rect();
+        for (int i = 0; i < info.getChanges().size(); i++) {
+            Rect bound = getBounds(states[i]);
+            if (bound == null) {
+                continue;
+            }
+            int mode = info.getChanges().get(i).getMode();
+            if (TransitionUtil.isOpeningMode(mode)) {
+                maxOpeningBounds.union(bound);
+            } else if (TransitionUtil.isClosingMode(mode) || mode == TRANSIT_CHANGE) {
+                // TRANSIT_CHANGE refers to the closing window in predictive back animation.
+                maxClosingBounds.union(bound);
+            }
+        }
+
+        // Intentionally use a new transaction instead of reusing the existing transaction since we
+        // want to apply window animation states first without committing any other pending changes
+        // in the existing transaction. The existing transaction is expected to be committed by the
+        // onStart() client callback together with client's custom transformation.
+        UIComponent.Transaction transaction = closingApp.newTransaction();
+        if (!maxClosingBounds.isEmpty()) {
+            logD("Applying closing window bounds: " + maxClosingBounds);
+            transaction.setBounds(closingApp, maxClosingBounds);
+        }
+        if (!maxOpeningBounds.isEmpty()) {
+            logD("Applying opening window bounds: " + maxOpeningBounds);
+            transaction.setBounds(openingApp, maxOpeningBounds);
+        }
+        transaction.commit();
+    }
+
+    @Nullable
+    private static Rect getBounds(@Nullable WindowAnimationState state) {
+        if (state == null || state.bounds == null) {
+            return null;
+        }
+        Rect out = new Rect();
+        state.bounds.roundOut(out);
+        return out;
+    }
+
+    /** A {@link Runnable} that will only run once. */
+    private static class OneShotRunnable implements Runnable {
+        private final AtomicBoolean mDone = new AtomicBoolean();
+        private final Runnable mRunnable;
+
+        OneShotRunnable(Runnable runnable) {
+            this.mRunnable = runnable;
+        }
+
+        @Override
+        public void run() {
+            if (!mDone.getAndSet(true)) {
+                mRunnable.run();
+            }
+        }
+    }
+
+    /**
+     * An interface that represents an origin transitions.
+     *
      * @hide
      */
     public interface TransitionPlayer {
@@ -337,9 +465,14 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
         /**
          * Called when an origin transition starts. This method exposes the raw {@link
          * TransitionInfo} so that clients can extract more information from it.
+         *
+         * <p>Note: if this transition is taking over a predictive back animation, the {@link
+         * WindowAnimationState} will be passed to this method. The concrete implementation is
+         * expected to apply the {@link WindowAnimationState} before continuing the transition.
          */
         default void onStart(
                 TransitionInfo transitionInfo,
+                @Nullable WindowAnimationState[] states,
                 SurfaceControl.Transaction sfTransaction,
                 UIComponent origin,
                 UIComponent.Transaction uiTransaction) {
@@ -350,12 +483,15 @@ public class OriginRemoteTransition extends IRemoteTransition.Stub {
                             .registerTransactionForClass(
                                     SurfaceUIComponent.class,
                                     new SurfaceUIComponent.Transaction(sfTransaction));
-            // Wrap surfaces and start.
-            onStart(
-                    transactions,
-                    origin,
-                    wrapSurfaces(transitionInfo, /* isOpening= */ false),
-                    wrapSurfaces(transitionInfo, /* isOpening= */ true));
+            // Wrap surfaces.
+            UIComponent closingApp = wrapSurfaces(transitionInfo, /* isOpening= */ false);
+            UIComponent openingApp = wrapSurfaces(transitionInfo, /* isOpening= */ true);
+
+            // Restore the pending animation states coming from predictive back transition.
+            applyWindowAnimationStates(transitionInfo, states, closingApp, openingApp);
+
+            // Start.
+            onStart(transactions, origin, closingApp, openingApp);
         }
 
         /**

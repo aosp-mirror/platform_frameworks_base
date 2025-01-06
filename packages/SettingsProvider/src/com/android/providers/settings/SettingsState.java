@@ -107,7 +107,7 @@ import static com.android.aconfig_new_storage.Flags.enableAconfigStorageDaemon;
  * the same lock to grab the current state to write to disk.
  * </p>
  */
-final class SettingsState {
+public class SettingsState {
     private static final boolean DEBUG = false;
     private static final boolean DEBUG_PERSISTENCE = false;
 
@@ -171,17 +171,11 @@ final class SettingsState {
 
     private static final List<String> sAconfigTextProtoFilesOnDevice = List.of(
             "/system/etc/aconfig_flags.pb",
-            "/system_ext/etc/aconfig_flags.pb",
             "/product/etc/aconfig_flags.pb",
             "/vendor/etc/aconfig_flags.pb");
 
     private static final String APEX_DIR = "/apex";
     private static final String APEX_ACONFIG_PATH_SUFFIX = "/etc/aconfig_flags.pb";
-
-    private static final String STORAGE_MIGRATION_FLAG =
-            "core_experiments_team_internal/com.android.providers.settings.storage_test_mission_1";
-    private static final String STORAGE_MIGRATION_MARKER_FILE =
-            "/metadata/aconfig_test_missions/mission_1";
 
     /**
      * This tag is applied to all aconfig default value-loaded flags.
@@ -414,6 +408,11 @@ final class SettingsState {
                         Slog.w(LOG_TAG, "Bulk sync request to acongid failed.");
                     }
                 }
+
+                if (Flags.disableBulkCompare()) {
+                    return;
+                }
+
                 // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
                 if (requests == null) {
                     Map<String, AconfigdFlagInfo> aconfigdFlagMap =
@@ -426,7 +425,7 @@ final class SettingsState {
         }
     }
 
-    // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
+    // TODO(b/312444587): remove the comparison logic after Test Mission 2.
     public int compareFlagValueInNewStorage(
             Map<String, AconfigdFlagInfo> defaultFlagMap,
             Map<String, AconfigdFlagInfo> aconfigdFlagMap) {
@@ -1753,32 +1752,6 @@ final class SettingsState {
                     }
                 }
 
-                if (isConfigSettingsKey(mKey) && name != null
-                        && name.equals(STORAGE_MIGRATION_FLAG)) {
-                    if (value.equals("true")) {
-                        Path path = Paths.get(STORAGE_MIGRATION_MARKER_FILE);
-                        if (!Files.exists(path)) {
-                            Files.createFile(path);
-                        }
-
-                        Set<PosixFilePermission> perms =
-                                Files.readAttributes(path, PosixFileAttributes.class).permissions();
-                        perms.add(PosixFilePermission.OWNER_WRITE);
-                        perms.add(PosixFilePermission.OWNER_READ);
-                        perms.add(PosixFilePermission.GROUP_READ);
-                        perms.add(PosixFilePermission.OTHERS_READ);
-                        try {
-                            Files.setPosixFilePermissions(path, perms);
-                        } catch (Exception e) {
-                            Slog.e(LOG_TAG, "failed to set permissions on migration marker", e);
-                        }
-                    } else {
-                        java.nio.file.Path path = Paths.get(STORAGE_MIGRATION_MARKER_FILE);
-                        if (Files.exists(path)) {
-                            Files.delete(path);
-                        }
-                    }
-                }
                 mSettings.put(name, new Setting(name, value, defaultValue, packageName, tag,
                         fromSystem, Long.valueOf(id), isPreservedInRestore));
 
@@ -1865,7 +1838,7 @@ final class SettingsState {
         }
     }
 
-    class Setting {
+    public class Setting {
         private String name;
         private String value;
         private String defaultValue;

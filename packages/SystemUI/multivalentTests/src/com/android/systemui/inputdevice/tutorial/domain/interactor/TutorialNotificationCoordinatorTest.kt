@@ -26,6 +26,7 @@ import com.android.systemui.inputdevice.tutorial.data.repository.TutorialSchedul
 import com.android.systemui.inputdevice.tutorial.inputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.ui.TutorialNotificationCoordinator
 import com.android.systemui.keyboard.data.repository.FakeKeyboardRepository
+import com.android.systemui.kosmos.backgroundScope
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.res.R
 import com.android.systemui.settings.userTracker
@@ -34,14 +35,9 @@ import com.android.systemui.testKosmos
 import com.android.systemui.touchpad.data.repository.FakeTouchpadRepository
 import com.google.common.truth.Truth.assertThat
 import kotlin.time.Duration.Companion.hours
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.cancel
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runTest
-import org.junit.After
 import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
@@ -65,7 +61,6 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
     private val testScope = kosmos.testScope
     private val keyboardRepository = FakeKeyboardRepository()
     private val touchpadRepository = FakeTouchpadRepository()
-    private lateinit var dataStoreScope: CoroutineScope
     private lateinit var repository: TutorialSchedulerRepository
     @Mock private lateinit var notificationManager: NotificationManager
     @Captor private lateinit var notificationCaptor: ArgumentCaptor<Notification>
@@ -73,11 +68,10 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
 
     @Before
     fun setup() {
-        dataStoreScope = CoroutineScope(Dispatchers.Unconfined)
         repository =
             TutorialSchedulerRepository(
                 context,
-                dataStoreScope,
+                kosmos.backgroundScope,
                 dataStoreName = "TutorialNotificationCoordinatorTest",
             )
         val interactor =
@@ -87,6 +81,7 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
                 repository,
                 kosmos.inputDeviceTutorialLogger,
                 kosmos.commandRegistry,
+                testScope.backgroundScope,
             )
         underTest =
             TutorialNotificationCoordinator(
@@ -100,52 +95,51 @@ class TutorialNotificationCoordinatorTest : SysuiTestCase() {
         underTest.start()
     }
 
-    @After
-    fun clear() {
-        runBlocking { repository.clear() }
-        dataStoreScope.cancel()
+    @Test
+    fun showKeyboardNotification() = runTestAndClear {
+        keyboardRepository.setIsAnyKeyboardConnected(true)
+        testScope.advanceTimeBy(LAUNCH_DELAY)
+        verifyNotification(
+            R.string.launch_keyboard_tutorial_notification_title,
+            R.string.launch_keyboard_tutorial_notification_content,
+        )
     }
 
     @Test
-    fun showKeyboardNotification() =
-        testScope.runTest {
-            keyboardRepository.setIsAnyKeyboardConnected(true)
-            advanceTimeBy(LAUNCH_DELAY)
-            verifyNotification(
-                R.string.launch_keyboard_tutorial_notification_title,
-                R.string.launch_keyboard_tutorial_notification_content,
-            )
-        }
+    fun showTouchpadNotification() = runTestAndClear {
+        touchpadRepository.setIsAnyTouchpadConnected(true)
+        testScope.advanceTimeBy(LAUNCH_DELAY)
+        verifyNotification(
+            R.string.launch_touchpad_tutorial_notification_title,
+            R.string.launch_touchpad_tutorial_notification_content,
+        )
+    }
 
     @Test
-    fun showTouchpadNotification() =
-        testScope.runTest {
-            touchpadRepository.setIsAnyTouchpadConnected(true)
-            advanceTimeBy(LAUNCH_DELAY)
-            verifyNotification(
-                R.string.launch_touchpad_tutorial_notification_title,
-                R.string.launch_touchpad_tutorial_notification_content,
-            )
-        }
+    fun showKeyboardTouchpadNotification() = runTestAndClear {
+        keyboardRepository.setIsAnyKeyboardConnected(true)
+        touchpadRepository.setIsAnyTouchpadConnected(true)
+        testScope.advanceTimeBy(LAUNCH_DELAY)
+        verifyNotification(
+            R.string.launch_keyboard_touchpad_tutorial_notification_title,
+            R.string.launch_keyboard_touchpad_tutorial_notification_content,
+        )
+    }
 
     @Test
-    fun showKeyboardTouchpadNotification() =
-        testScope.runTest {
-            keyboardRepository.setIsAnyKeyboardConnected(true)
-            touchpadRepository.setIsAnyTouchpadConnected(true)
-            advanceTimeBy(LAUNCH_DELAY)
-            verifyNotification(
-                R.string.launch_keyboard_touchpad_tutorial_notification_title,
-                R.string.launch_keyboard_touchpad_tutorial_notification_content,
-            )
-        }
+    fun doNotShowNotification() = runTestAndClear {
+        testScope.advanceTimeBy(LAUNCH_DELAY)
+        verify(notificationManager, never())
+            .notifyAsUser(eq(TAG), eq(NOTIFICATION_ID), any(), any())
+    }
 
-    @Test
-    fun doNotShowNotification() =
+    private fun runTestAndClear(block: suspend () -> Unit) =
         testScope.runTest {
-            advanceTimeBy(LAUNCH_DELAY)
-            verify(notificationManager, never())
-                .notifyAsUser(eq(TAG), eq(NOTIFICATION_ID), any(), any())
+            try {
+                block()
+            } finally {
+                repository.clear()
+            }
         }
 
     private fun verifyNotification(@StringRes titleResId: Int, @StringRes contentResId: Int) {

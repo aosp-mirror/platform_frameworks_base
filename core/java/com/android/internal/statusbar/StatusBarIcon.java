@@ -40,9 +40,6 @@ public class StatusBarIcon implements Parcelable {
     public enum Type {
         // Notification: the sender avatar for important conversations
         PeopleAvatar,
-        // Notification: the monochrome version of the app icon if available; otherwise fall back to
-        // the small icon
-        MaybeMonochromeAppIcon,
         // Notification: the small icon from the notification
         NotifSmallIcon,
         // The wi-fi, cellular or battery icon.

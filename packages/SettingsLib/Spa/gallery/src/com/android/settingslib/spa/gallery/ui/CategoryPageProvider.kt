@@ -17,8 +17,12 @@
 package com.android.settingslib.spa.gallery.ui
 
 import android.os.Bundle
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.height
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import com.android.settingslib.spa.framework.common.SettingsEntry
 import com.android.settingslib.spa.framework.common.SettingsEntryBuilder
 import com.android.settingslib.spa.framework.common.SettingsPageProvider
@@ -30,6 +34,7 @@ import com.android.settingslib.spa.widget.preference.PreferenceModel
 import com.android.settingslib.spa.widget.preference.SimplePreferenceMacro
 import com.android.settingslib.spa.widget.scaffold.RegularScaffold
 import com.android.settingslib.spa.widget.ui.Category
+import com.android.settingslib.spa.widget.ui.LazyCategory
 
 private const val TITLE = "Sample Category"
 
@@ -65,7 +70,7 @@ object CategoryPageProvider : SettingsPageProvider {
         )
         entryList.add(
             SettingsEntryBuilder.create("Preference 3", owner)
-                .setMacro { SimplePreferenceMacro(title = "Preference 2", summary = "Summary 3") }
+                .setMacro { SimplePreferenceMacro(title = "Preference 3", summary = "Summary 3") }
                 .build()
         )
         entryList.add(
@@ -87,6 +92,13 @@ object CategoryPageProvider : SettingsPageProvider {
             Category {
                 entries[2].UiLayout()
                 entries[3].UiLayout()
+            }
+            Column(Modifier.height(200.dp)) {
+                LazyCategory(
+                    list = entries,
+                    entry = { index: Int -> @Composable { entries[index].UiLayout() } },
+                    title = { index: Int -> if (index == 0 || index == 2) "LazyCategory" else null },
+                ) {}
             }
         }
     }

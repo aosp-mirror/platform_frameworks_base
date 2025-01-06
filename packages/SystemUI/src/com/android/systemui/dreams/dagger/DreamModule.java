@@ -17,14 +17,16 @@
 package com.android.systemui.dreams.dagger;
 
 import android.annotation.Nullable;
+import android.app.DreamManager;
 import android.app.Service;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 
-import com.android.dream.lowlight.dagger.LowLightDreamModule;
+import com.android.dream.lowlight.dagger.LowLightDreamComponent;
 import com.android.settingslib.dream.DreamBackend;
+import com.android.systemui.Flags;
 import com.android.systemui.ambient.touch.scrim.dagger.ScrimModule;
 import com.android.systemui.complication.dagger.RegisteredComplicationsModule;
 import com.android.systemui.dagger.SysUISingleton;
@@ -32,7 +34,7 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.dreams.DreamOverlayNotificationCountProvider;
 import com.android.systemui.dreams.DreamOverlayService;
 import com.android.systemui.dreams.SystemDialogsCloser;
-import com.android.systemui.dreams.complication.dagger.ComplicationComponent;
+import com.android.systemui.dreams.complication.dagger.DreamComplicationComponent;
 import com.android.systemui.dreams.homecontrols.HomeControlsDreamService;
 import com.android.systemui.dreams.homecontrols.dagger.HomeControlsDataSourceModule;
 import com.android.systemui.dreams.homecontrols.dagger.HomeControlsRemoteServiceComponent;
@@ -47,12 +49,14 @@ import com.android.systemui.res.R;
 import com.android.systemui.touch.TouchInsetManager;
 
 import dagger.Binds;
+import dagger.BindsOptionalOf;
 import dagger.Module;
 import dagger.Provides;
 import dagger.multibindings.ClassKey;
 import dagger.multibindings.IntoMap;
 import dagger.multibindings.StringKey;
 
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 
@@ -63,14 +67,14 @@ import javax.inject.Named;
  */
 @Module(includes = {
         RegisteredComplicationsModule.class,
-        LowLightDreamModule.class,
         ScrimModule.class,
         HomeControlsDataSourceModule.class,
 },
         subcomponents = {
-                ComplicationComponent.class,
+                DreamComplicationComponent.class,
                 DreamOverlayComponent.class,
                 HomeControlsRemoteServiceComponent.class,
+                LowLightDreamComponent.class,
         })
 public interface DreamModule {
     String DREAM_ONLY_ENABLED_FOR_DOCK_USER = "dream_only_enabled_for_dock_user";
@@ -81,6 +85,9 @@ public interface DreamModule {
     String DREAM_OVERLAY_WINDOW_TITLE = "dream_overlay_window_title";
     String HOME_CONTROL_PANEL_DREAM_COMPONENT = "home_control_panel_dream_component";
     String DREAM_TILE_SPEC = "dream";
+    String LOW_LIGHT_DREAM_SERVICE = "low_light_dream_component";
+
+    String LOW_LIGHT_CLOCK_DREAM = "low_light_clock_dream";
 
     /**
      * Provides the dream component
@@ -213,5 +220,50 @@ public interface DreamModule {
                 tileSpec.getSpec(),
                 QSTilePolicy.NoRestrictions.INSTANCE
                 );
+    }
+
+    /**
+     * Provides dream manager.
+     */
+    @Provides
+    static DreamManager providesDreamManager(Context context) {
+        return Objects.requireNonNull(context.getSystemService(DreamManager.class));
+    }
+
+    /**
+     * Binds a default (unset) clock dream.
+     */
+    @BindsOptionalOf
+    @Named(LOW_LIGHT_CLOCK_DREAM)
+    ComponentName bindsLowLightClockDream();
+
+    /**
+     * Provides the component name of the low light dream, or null if not configured.
+     */
+    @Provides
+    @Nullable
+    @Named(LOW_LIGHT_DREAM_SERVICE)
+    static ComponentName providesLowLightDreamService(Context context,
+            @Named(LOW_LIGHT_CLOCK_DREAM) Optional<ComponentName> clockDream) {
+        if (Flags.lowLightClockDream() && clockDream.isPresent()) {
+            return clockDream.get();
+        }
+
+        String lowLightDreamComponent = context.getResources().getString(
+                R.string.config_lowLightDreamComponent
+        );
+        return lowLightDreamComponent.isEmpty()
+                ? null : ComponentName.unflattenFromString(lowLightDreamComponent);
+    }
+
+    /**
+     * Provides Dagger component for low light dependencies.
+     */
+    @Provides
+    @SysUISingleton
+    static LowLightDreamComponent providesLowLightDreamComponent(
+            LowLightDreamComponent.Factory factory, DreamManager dreamManager,
+            @Named(LOW_LIGHT_DREAM_SERVICE) ComponentName lowLightDreamService) {
+        return factory.create(dreamManager, lowLightDreamService);
     }
 }

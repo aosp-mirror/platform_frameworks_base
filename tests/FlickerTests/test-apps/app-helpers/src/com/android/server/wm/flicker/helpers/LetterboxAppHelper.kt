@@ -21,6 +21,7 @@ import android.graphics.Rect
 import android.graphics.Region
 import android.tools.device.apphelpers.StandardAppHelper
 import android.tools.helpers.FIND_TIMEOUT
+import android.tools.helpers.GestureHelper
 import android.tools.helpers.SYSTEMUI_PACKAGE
 import android.tools.traces.component.ComponentNameMatcher
 import android.tools.traces.parsers.WindowManagerStateHelper
@@ -38,7 +39,8 @@ constructor(
         ActivityOptions.NonResizeableFixedAspectRatioPortraitActivity.COMPONENT.toFlickerComponent()
 ) : StandardAppHelper(instr, launcherName, component) {
 
-    private val gestureHelper: GestureHelper = GestureHelper(instrumentation)
+    private val gestureHelper: GestureHelper =
+        GestureHelper(instrumentation)
 
     fun clickRestart(wmHelper: WindowManagerStateHelper) {
         val restartButton =

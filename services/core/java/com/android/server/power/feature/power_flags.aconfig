@@ -31,7 +31,7 @@ flag {
     name: "framework_wakelock_info"
     namespace: "power"
     description: "Feature flag to enable statsd pulling of FrameworkWakelockInfo atoms"
-    bug: "352602149"
+    bug: "380847722"
 }
 
 flag {
@@ -40,4 +40,11 @@ flag {
     description: "Whether the policy reason is populted in DisplayPowerRequest."
     bug: "364349703"
     is_fixed_read_only: true
+}
+
+flag {
+    name: "move_wsc_logging_to_notifier"
+    namespace: "power"
+    description: "Feature flag to move logging of WakelockStateChanged atoms from BatteryStatsImpl to Notifier."
+    bug: "352602149"
 }

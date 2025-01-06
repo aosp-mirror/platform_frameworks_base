@@ -47,7 +47,7 @@
     <bool name="config_navBarCanMove">false</bool>
 
     <!-- Set to true to enable the user switcher on the keyguard. -->
-    <bool name="config_keyguardUserSwitcher">true</bool>
+    <bool name="config_keyguardUserSwitcher">false</bool>
 
     <!-- If true, show multiuser switcher by default unless the user specifically disables it. -->
     <bool name="config_showUserSwitcherByDefault">true</bool>

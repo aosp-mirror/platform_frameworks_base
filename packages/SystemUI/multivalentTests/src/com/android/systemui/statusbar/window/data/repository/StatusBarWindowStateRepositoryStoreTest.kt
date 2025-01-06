@@ -27,7 +27,7 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.settings.displayTracker
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.commandQueue
-import com.android.systemui.statusbar.window.data.model.StatusBarWindowState
+import com.android.systemui.statusbar.window.shared.model.StatusBarWindowState
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test

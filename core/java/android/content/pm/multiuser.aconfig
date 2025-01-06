@@ -211,6 +211,16 @@ flag {
 }
 
 flag {
+    name: "place_add_user_dialog_within_activity"
+    namespace: "multiuser"
+    description: "Display dialog within activity to make it traversable by Accessibility"
+    bug: "376815882"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "property_invalidated_cache_bypass_mismatched_uids"
     namespace: "multiuser"
     description: "Bypass the cache when the process UID does not match the binder UID."
@@ -324,6 +334,50 @@ flag {
     namespace: "multiuser"
     description: "PIC need to be invalidated at start in order to work properly."
     bug: "356167673"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_info_read_only"
+    namespace: "multiuser"
+    description: "Cache UserInfo to avoid unnecessary binder calls"
+    bug: "161915546"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_start_realtime_read_only"
+    namespace: "multiuser"
+    description: "Cache getUserStartRealtime to avoid unnecessary binder calls"
+    bug: "350416205"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_unlock_realtime_read_only"
+    namespace: "multiuser"
+    description: "Cache getUserUnlockRealtime to avoid unnecessary binder calls"
+    bug: "350421407"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+  }
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "cache_user_restrictions_read_only"
+    namespace: "multiuser"
+    description: "Cache hasUserRestriction to avoid unnecessary binder calls"
+    bug: "350419621"
     metadata {
         purpose: PURPOSE_BUGFIX
   }
@@ -542,4 +596,12 @@ flag {
   metadata {
     purpose: PURPOSE_BUGFIX
   }
+}
+
+flag {
+    name: "add_launcher_user_config"
+    namespace: "profile_experiences"
+    description: "Add support for LauncherUserInfo configs"
+    bug: "346553745"
+    is_exported: true
 }

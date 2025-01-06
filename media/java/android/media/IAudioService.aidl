@@ -87,7 +87,7 @@ interface IAudioService {
 
     oneway void playerAttributes(in int piid, in AudioAttributes attr);
 
-    oneway void playerEvent(in int piid, in int event, in int eventId);
+    oneway void playerEvent(in int piid, in int event, in int[] eventId);
 
     oneway void releasePlayer(in int piid);
 
@@ -639,6 +639,9 @@ interface IAudioService {
     void setSpatializerEnabled(boolean enabled);
 
     boolean canBeSpatialized(in AudioAttributes aa, in AudioFormat af);
+
+    /* Returns a List<Integer> */
+    List getSpatializedChannelMasks();
 
     void registerSpatializerCallback(in ISpatializerCallback cb);
 

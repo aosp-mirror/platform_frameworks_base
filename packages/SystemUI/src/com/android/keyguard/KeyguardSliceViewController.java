@@ -22,7 +22,6 @@ import android.app.PendingIntent;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.Trace;
-import android.provider.Settings;
 import android.util.Log;
 import android.view.Display;
 import android.view.View;
@@ -38,7 +37,6 @@ import androidx.slice.widget.RowContent;
 import androidx.slice.widget.SliceContent;
 import androidx.slice.widget.SliceLiveData;
 
-import com.android.keyguard.dagger.KeyguardStatusViewScope;
 import com.android.systemui.Dumpable;
 import com.android.systemui.Flags;
 import com.android.systemui.dagger.qualifiers.Background;
@@ -48,7 +46,6 @@ import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.tuner.TunerService;
 import com.android.systemui.util.ViewController;
 
 import java.io.PrintWriter;
@@ -59,7 +56,6 @@ import java.util.stream.Collectors;
 import javax.inject.Inject;
 
 /** Controller for a {@link KeyguardSliceView}. */
-@KeyguardStatusViewScope
 public class KeyguardSliceViewController extends ViewController<KeyguardSliceView> implements
         Dumpable {
     private static final String TAG = "KeyguardSliceViewCtrl";
@@ -68,7 +64,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     private final Handler mBgHandler;
     private final ActivityStarter mActivityStarter;
     private final ConfigurationController mConfigurationController;
-    private final TunerService mTunerService;
     private final DumpManager mDumpManager;
     private final DisplayTracker mDisplayTracker;
     private int mDisplayId;
@@ -76,8 +71,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     private Uri mKeyguardSliceUri;
     private Slice mSlice;
     private Map<View, PendingIntent> mClickActions;
-
-    TunerService.Tunable mTunable = (key, newValue) -> setupUri(newValue);
 
     ConfigurationController.ConfigurationListener mConfigurationListener =
             new ConfigurationController.ConfigurationListener() {
@@ -116,7 +109,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
             KeyguardSliceView keyguardSliceView,
             ActivityStarter activityStarter,
             ConfigurationController configurationController,
-            TunerService tunerService,
             DumpManager dumpManager,
             DisplayTracker displayTracker) {
         super(keyguardSliceView);
@@ -124,7 +116,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         mBgHandler = bgHandler;
         mActivityStarter = activityStarter;
         mConfigurationController = configurationController;
-        mTunerService = tunerService;
         mDumpManager = dumpManager;
         mDisplayTracker = displayTracker;
     }
@@ -135,7 +126,6 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
         if (display != null) {
             mDisplayId = display.getDisplayId();
         }
-        mTunerService.addTunable(mTunable, Settings.Secure.KEYGUARD_SLICE_URI);
         // Make sure we always have the most current slice
         if (mDisplayId == mDisplayTracker.getDefaultDisplayId() && mLiveData != null) {
             mLiveData.observeForever(mObserver);
@@ -150,10 +140,9 @@ public class KeyguardSliceViewController extends ViewController<KeyguardSliceVie
     @Override
     protected void onViewDetached() {
         // TODO(b/117344873) Remove below work around after this issue be fixed.
-        if (mDisplayId == mDisplayTracker.getDefaultDisplayId()) {
+        if (mDisplayId == mDisplayTracker.getDefaultDisplayId() && mLiveData != null) {
             mLiveData.removeObserver(mObserver);
         }
-        mTunerService.removeTunable(mTunable);
         mConfigurationController.removeCallback(mConfigurationListener);
         mDumpManager.unregisterDumpable(
                 TAG + "@" + Integer.toHexString(

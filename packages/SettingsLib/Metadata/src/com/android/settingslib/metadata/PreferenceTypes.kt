@@ -16,19 +16,10 @@
 
 package com.android.settingslib.metadata
 
-import android.content.Context
 import androidx.annotation.StringRes
 
-/**
- * Common base class for preferences that have two selectable states, save a boolean value, and may
- * have dependent preferences that are enabled/disabled based on the current state.
- */
-interface TwoStatePreference : PreferenceMetadata, PersistentPreference<Boolean>, BooleanValue {
-
-    override fun shouldDisableDependents(context: Context) =
-        storage(context).getValue(key, Boolean::class.javaObjectType) != true ||
-            super.shouldDisableDependents(context)
-}
+/** Common base class for preferences that have two selectable states and save a boolean value. */
+interface TwoStatePreference : PreferenceMetadata, PersistentPreference<Boolean>, BooleanValue
 
 /** A preference that provides a two-state toggleable option. */
 open class SwitchPreference
@@ -42,7 +33,4 @@ constructor(
 /** A preference that provides a two-state toggleable option that can be used as a main switch. */
 open class MainSwitchPreference
 @JvmOverloads
-constructor(
-    override val key: String,
-    @StringRes override val title: Int = 0,
-) : TwoStatePreference
+constructor(override val key: String, @StringRes override val title: Int = 0) : TwoStatePreference

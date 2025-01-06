@@ -21,7 +21,6 @@ import android.view.ViewGroup
 import android.view.WindowInsets
 import androidx.annotation.VisibleForTesting
 import androidx.constraintlayout.widget.ConstraintSet
-import androidx.constraintlayout.widget.ConstraintSet.BOTTOM
 import androidx.constraintlayout.widget.ConstraintSet.END
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
@@ -31,7 +30,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.fragments.FragmentService
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.navigationbar.NavigationModeController
 import com.android.systemui.plugins.qs.QS
@@ -272,9 +270,7 @@ constructor(
         ensureAllViewsHaveIds(mView)
         val constraintSet = ConstraintSet()
         constraintSet.clone(mView)
-        setKeyguardStatusViewConstraints(constraintSet)
         setQsConstraints(constraintSet)
-        setNotificationsConstraints(constraintSet)
         setLargeScreenShadeHeaderConstraints(constraintSet)
         mView.applyConstraints(constraintSet)
     }
@@ -287,21 +283,6 @@ constructor(
         }
     }
 
-    private fun setNotificationsConstraints(constraintSet: ConstraintSet) {
-        if (MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-        val startConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID
-        val nsslId = R.id.notification_stack_scroller
-        constraintSet.apply {
-            connect(nsslId, START, startConstraintId, START)
-            setMargin(nsslId, START, if (splitShadeEnabled) 0 else panelMarginHorizontal)
-            setMargin(nsslId, END, panelMarginHorizontal)
-            setMargin(nsslId, TOP, topMargin)
-            setMargin(nsslId, BOTTOM, notificationsBottomMargin)
-        }
-    }
-
     private fun setQsConstraints(constraintSet: ConstraintSet) {
         val endConstraintId = if (splitShadeEnabled) R.id.qs_edge_guideline else PARENT_ID
         constraintSet.apply {
@@ -309,15 +290,6 @@ constructor(
             setMargin(R.id.qs_frame, START, if (splitShadeEnabled) 0 else panelMarginHorizontal)
             setMargin(R.id.qs_frame, END, if (splitShadeEnabled) 0 else panelMarginHorizontal)
             setMargin(R.id.qs_frame, TOP, topMargin)
-        }
-    }
-
-    private fun setKeyguardStatusViewConstraints(constraintSet: ConstraintSet) {
-        val statusViewMarginHorizontal =
-            resources.getDimensionPixelSize(R.dimen.status_view_margin_horizontal)
-        constraintSet.apply {
-            setMargin(R.id.keyguard_status_view, START, statusViewMarginHorizontal)
-            setMargin(R.id.keyguard_status_view, END, statusViewMarginHorizontal)
         }
     }
 

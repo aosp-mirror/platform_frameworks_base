@@ -38,6 +38,9 @@ android_test {
     ],
     test_suites: [
         "general-tests",
+        // This is an equivalent of general-tests for automotive.
+        // It helps manage the build time on automotive branches.
+        "automotive-general-tests",
     ],
     sdk_version: "test_current",
 

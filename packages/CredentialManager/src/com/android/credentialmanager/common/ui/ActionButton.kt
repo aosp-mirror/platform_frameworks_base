@@ -65,8 +65,8 @@ fun ToggleVisibilityButton(modifier: Modifier = Modifier, onToggle: (Boolean) ->
             imageVector = if (toggleState.value)
                 Icons.Outlined.Visibility else Icons.Outlined.VisibilityOff,
             contentDescription = if (toggleState.value)
-                stringResource(R.string.content_description_show_password) else
-                stringResource(R.string.content_description_hide_password),
+                stringResource(R.string.content_description_hide_password) else
+                stringResource(R.string.content_description_show_password),
             tint = MaterialTheme.colorScheme.onSurfaceVariant,
         )
     }

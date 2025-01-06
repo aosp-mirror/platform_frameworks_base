@@ -19,7 +19,9 @@ package com.android.server.appfunctions;
 import android.annotation.NonNull;
 import android.app.appfunctions.AppFunctionManagerConfiguration;
 import android.content.Context;
+import android.content.pm.PackageManagerInternal;
 
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 /** Service that manages app functions. */
@@ -28,7 +30,9 @@ public class AppFunctionManagerService extends SystemService {
 
     public AppFunctionManagerService(Context context) {
         super(context);
-        mServiceImpl = new AppFunctionManagerServiceImpl(context);
+        mServiceImpl =
+                new AppFunctionManagerServiceImpl(
+                        context, LocalServices.getService(PackageManagerInternal.class));
     }
 
     @Override

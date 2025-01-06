@@ -423,7 +423,12 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                         + "Error receiving StatusBarNotification");
                 return;
             }
+            onNotificationEnqueuedWithChannelFull(sbn, channel, update);
+        }
 
+        @Override
+        public void onNotificationEnqueuedWithChannelFull(StatusBarNotification sbn,
+                NotificationChannel channel, NotificationRankingUpdate update) {
             applyUpdateLocked(update);
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = sbn;
@@ -447,7 +452,12 @@ public abstract class NotificationAssistantService extends NotificationListenerS
                 Log.w(TAG, "onNotificationSnoozed: Error receiving StatusBarNotification");
                 return;
             }
+            onNotificationSnoozedUntilContextFull(sbn, snoozeCriterionId);
+        }
 
+        @Override
+        public void onNotificationSnoozedUntilContextFull(
+                StatusBarNotification sbn, String snoozeCriterionId) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = sbn;
             args.arg2 = snoozeCriterionId;

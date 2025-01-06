@@ -22,6 +22,21 @@
     <!-- Title of the device association confirmation dialog. -->
     <string name="confirmation_title">Allow the app &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt; to access &lt;strong&gt;<xliff:g id="device_name" example="ASUS ZenWatch 2">%2$s</xliff:g>&lt;/strong&gt;?</string>
 
+    <!-- Description of soft discovery timeout. [CHAR LIMIT= NONE] -->
+    <string name="message_discovery_soft_timeout">Make sure this <xliff:g id="device_type" example="phone">%1$s</xliff:g> has <xliff:g id="discovery_method" example="Bluetooth">%2$s</xliff:g> turned on, and keep your <xliff:g id="profile_name" example="watch">%3$s</xliff:g> nearby.</string>
+
+    <!-- Description of hard discovery timeout. [CHAR LIMIT= NONE] -->
+    <string name="message_discovery_hard_timeout">No devices found. Please try again later.</string>
+
+    <!-- The discovery method name for Bluetooth [CHAR LIMIT=30] -->
+    <string name="discovery_bluetooth">Bluetooth</string>
+
+    <!-- The discovery method name for Wi-Fi [CHAR LIMIT=30] -->
+    <string name="discovery_wifi">Wi-Fi</string>
+
+    <!-- The discovery method name for both Bluetooth and Wi-Fi [CHAR LIMIT=50] -->
+    <string name="discovery_mixed">Bluetooth and Wi-Fi</string>
+
     <!-- ================= DEVICE_PROFILE_WATCH and null profile ================= -->
 
     <!-- The name of the "watch" device type [CHAR LIMIT=30] -->
@@ -30,8 +45,11 @@
     <!-- Title of the device selection dialog. -->
     <string name="chooser_title_non_profile">Choose a device to be managed by &lt;strong&gt;<xliff:g id="app_name" example="Android Wear">%1$s</xliff:g>&lt;/strong&gt;</string>
 
-    <!-- Tile of the multiple devices' dialog. -->
+    <!-- Title of the multiple devices' dialog. -->
     <string name="chooser_title">Choose a <xliff:g id="profile_name" example="watch">%1$s</xliff:g> to set up</string>
+
+    <!-- Title of the single device scan dialog. -->
+    <string name="single_device_title">Looking for a <xliff:g id="profile_name" example="watch">%1$s</xliff:g></string>
 
     <!-- Description of the privileges the application will get if associated with the companion device of WATCH profile [CHAR LIMIT=NONE] -->
     <string name="summary_watch">This app will be allowed to sync info, like the name of someone calling, and access these permissions on your <xliff:g id="device_type" example="phone">%1$s</xliff:g></string>
@@ -87,6 +105,17 @@
 
     <!-- Description of the helper dialog for NEARBY_DEVICE_STREAMING profile. [CHAR LIMIT=NONE] -->
     <string name="helper_summary_nearby_device_streaming"><xliff:g id="app_name" example="Exo">%1$s</xliff:g> is requesting permission on behalf of <xliff:g id="device_name" example="Chromebook">%2$s</xliff:g> to stream apps from your <xliff:g id="device_type" example="phone">%3$s</xliff:g></string>
+
+    <!-- ================= DEVICE_PROFILE_SENSOR_DEVICE_STREAMING ================= -->
+
+    <!-- Confirmation for associating an application with a companion device of SENSOR_DEVICE_STREAMING profile (type) [CHAR LIMIT=NONE] -->
+    <string name="title_sensor_device_streaming">Allow &lt;strong&gt;<xliff:g id="app_name" example="Exo">%1$s</xliff:g>&lt;/strong&gt; to stream audio and system features between your <xliff:g id="device_type" example="phone">%2$s</xliff:g> and &lt;strong&gt;<xliff:g id="device_name" example="Chromebook">%3$s</xliff:g>&lt;/strong&gt;?</string>
+
+    <!-- Summary for associating an application with a companion device of SENSOR_DEVICE_STREAMING profile [CHAR LIMIT=NONE] -->
+    <string name="summary_sensor_device_streaming"><xliff:g id="app_name" example="Exo">%1$s</xliff:g> will have access to anything that’s played on your <xliff:g id="device_name" example="Chromebook">%3$s</xliff:g>.&lt;br/>&lt;br/><xliff:g id="app_name" example="Exo">%1$s</xliff:g> will be able to stream audio to <xliff:g id="device_name" example="Chromebook">%3$s</xliff:g> until you remove access to this permission.</string>
+
+    <!-- Description of the helper dialog for SENSOR_DEVICE_STREAMING profile. [CHAR LIMIT=NONE] -->
+    <string name="helper_summary_sensor_device_streaming"><xliff:g id="app_name" example="Exo">%1$s</xliff:g> is requesting permission on behalf of <xliff:g id="device_name" example="Chromebook">%2$s</xliff:g> to stream audio and system features between your devices.</string>
 
     <!-- ================= null profile ================= -->
 

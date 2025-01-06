@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<network-security-config>
+  <base-config>
+    <trust-anchors>
+      <certificates src="user" />
+    </trust-anchors>
+  </base-config>
+  <domain-config>
+    <domain>android.com</domain>
+  </domain-config>
+  <domain-config>
+    <certificateTransparency enabled="true" />
+    <domain>subdomain.android.com</domain>
+  </domain-config>
+</network-security-config>

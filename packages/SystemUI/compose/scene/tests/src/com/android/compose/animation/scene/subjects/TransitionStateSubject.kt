@@ -16,9 +16,7 @@
 
 package com.android.compose.animation.scene.subjects
 
-import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.OverlayKey
-import com.android.compose.animation.scene.OverscrollSpec
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.google.common.truth.Fact.simpleFact
@@ -155,26 +153,6 @@ abstract class BaseTransitionSubject<T : TransitionState.Transition>(
 
     fun hasIsUserInputOngoing(isUserInputOngoing: Boolean) {
         check("isUserInputOngoing").that(actual.isUserInputOngoing).isEqualTo(isUserInputOngoing)
-    }
-
-    fun hasOverscrollSpec(): OverscrollSpec {
-        check("currentOverscrollSpec").that(actual.currentOverscrollSpec).isNotNull()
-        return actual.currentOverscrollSpec!!
-    }
-
-    fun hasNoOverscrollSpec() {
-        check("currentOverscrollSpec").that(actual.currentOverscrollSpec).isNull()
-    }
-
-    fun hasBouncingContent(content: ContentKey) {
-        val actual = actual
-        if (actual !is TransitionState.HasOverscrollProperties) {
-            failWithActual(simpleFact("expected to be ContentState.HasOverscrollProperties"))
-        }
-
-        check("bouncingContent")
-            .that((actual as TransitionState.HasOverscrollProperties).bouncingContent)
-            .isEqualTo(content)
     }
 }
 

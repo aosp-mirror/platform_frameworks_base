@@ -17,6 +17,9 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
@@ -25,7 +28,7 @@ import com.android.internal.widget.remotecompose.core.documentation.Documentatio
 import java.util.List;
 
 /** Represents the content of a LayoutComponent (i.e. the children components) */
-public class LayoutComponentContent extends Component implements ComponentStartOperation {
+public class LayoutComponentContent extends Component {
 
     public LayoutComponentContent(
             int componentId,
@@ -33,35 +36,64 @@ public class LayoutComponentContent extends Component implements ComponentStartO
             float y,
             float width,
             float height,
-            Component parent,
+            @Nullable Component parent,
             int animationId) {
         super(parent, componentId, animationId, x, y, width, height);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return "LayoutContent";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_CONTENT;
     }
 
+    @NonNull
     @Override
     protected String getSerializedName() {
         return "CONTENT";
     }
 
-    public static void apply(WireBuffer buffer, int componentId) {
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param componentId
+     */
+    public static void apply(@NonNull WireBuffer buffer, int componentId) {
         buffer.start(Operations.LAYOUT_CONTENT);
         buffer.writeInt(componentId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         operations.add(new LayoutComponentContent(componentId, 0, 0, 0, 0, null, -1));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .field(INT, "COMPONENT_ID", "unique id for this component")
                 .description(
@@ -71,7 +103,7 @@ public class LayoutComponentContent extends Component implements ComponentStartO
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mComponentId);
     }
 }

@@ -84,6 +84,7 @@ import android.widget.ImageView;
 import android.widget.Spinner;
 import android.widget.TextView;
 import android.widget.Toast;
+import android.window.OnBackInvokedDispatcher;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
@@ -323,6 +324,8 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
                 });
 
         getLoaderManager().initLoader(LOADER_ID_ENABLED_PRINT_SERVICES, null, this);
+        getWindow().getOnBackInvokedDispatcher().registerOnBackInvokedCallback(
+                OnBackInvokedDispatcher.PRIORITY_DEFAULT, this::onBackInvoked);
     }
 
     private void onConnectedToPrintSpooler(final IBinder documentAdapter) {
@@ -481,15 +484,19 @@ public class PrintActivity extends Activity implements RemotePrintDocument.Updat
 
         if ((keyCode == KeyEvent.KEYCODE_BACK || keyCode == KeyEvent.KEYCODE_ESCAPE)
                 && event.isTracking() && !event.isCanceled()) {
-            if (mPrintPreviewController != null && mPrintPreviewController.isOptionsOpened()
-                    && !hasErrors()) {
-                mPrintPreviewController.closeOptions();
-            } else {
-                cancelPrint();
-            }
+            onBackInvoked();
             return true;
         }
         return super.onKeyUp(keyCode, event);
+    }
+
+    private void onBackInvoked() {
+        if (mPrintPreviewController != null && mPrintPreviewController.isOptionsOpened()
+                && !hasErrors()) {
+            mPrintPreviewController.closeOptions();
+        } else {
+            cancelPrint();
+        }
     }
 
     @Override

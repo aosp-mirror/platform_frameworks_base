@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.collection.coordinator
 import android.annotation.SuppressLint
 import android.app.NotificationManager
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
@@ -50,7 +51,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * If the setting is enabled, this will track seen notifications and ensure that they only show in
@@ -74,7 +74,7 @@ constructor(
 
     private val unseenNotifications = mutableSetOf<NotificationEntry>()
     private var isShadeVisible = false
-    private var unseenFilterEnabled = false
+    private var minimalismEnabled = false
 
     override fun attach(pipeline: NotifPipeline) {
         if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) {
@@ -83,7 +83,7 @@ constructor(
         pipeline.addPromoter(unseenNotifPromoter)
         pipeline.addOnBeforeTransformGroupsListener(::pickOutTopUnseenNotifs)
         pipeline.addCollectionListener(collectionListener)
-        scope.launch { trackUnseenFilterSettingChanges() }
+        scope.launch { trackLockScreenNotificationMinimalismSettingChanges() }
         dumpManager.registerDumpable(this)
     }
 
@@ -136,12 +136,12 @@ constructor(
         return seenNotificationsInteractor.isLockScreenNotificationMinimalismEnabled()
     }
 
-    private suspend fun trackUnseenFilterSettingChanges() {
+    private suspend fun trackLockScreenNotificationMinimalismSettingChanges() {
         // Only filter the seen notifs when the lock screen minimalism feature settings is on.
         minimalismFeatureSettingEnabled().collectLatest { isMinimalismSettingEnabled ->
             // update local field and invalidate if necessary
-            if (isMinimalismSettingEnabled != unseenFilterEnabled) {
-                unseenFilterEnabled = isMinimalismSettingEnabled
+            if (isMinimalismSettingEnabled != minimalismEnabled) {
+                minimalismEnabled = isMinimalismSettingEnabled
                 unseenNotifications.clear()
                 unseenNotifPromoter.invalidateList("unseen setting changed")
             }
@@ -156,21 +156,21 @@ constructor(
     private val collectionListener =
         object : NotifCollectionListener {
             override fun onEntryAdded(entry: NotificationEntry) {
-                if (unseenFilterEnabled && !isShadeVisible) {
+                if (minimalismEnabled && !isShadeVisible) {
                     logger.logUnseenAdded(entry.key)
                     unseenNotifications.add(entry)
                 }
             }
 
             override fun onEntryUpdated(entry: NotificationEntry) {
-                if (unseenFilterEnabled && !isShadeVisible) {
+                if (minimalismEnabled && !isShadeVisible) {
                     logger.logUnseenUpdated(entry.key)
                     unseenNotifications.add(entry)
                 }
             }
 
             override fun onEntryRemoved(entry: NotificationEntry, reason: Int) {
-                if (unseenFilterEnabled && unseenNotifications.remove(entry)) {
+                if (minimalismEnabled && unseenNotifications.remove(entry)) {
                     logger.logUnseenRemoved(entry.key)
                 }
             }
@@ -178,7 +178,7 @@ constructor(
 
     private fun pickOutTopUnseenNotifs(list: List<ListEntry>) {
         if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return
-        if (!unseenFilterEnabled) return
+        if (!minimalismEnabled) return
         // Only ever elevate a top unseen notification on keyguard, not even locked shade
         if (statusBarStateController.state != StatusBarState.KEYGUARD) {
             seenNotificationsInteractor.setTopOngoingNotification(null)
@@ -215,6 +215,7 @@ constructor(
             override fun shouldPromoteToTopLevel(child: NotificationEntry): Boolean =
                 when {
                     NotificationMinimalism.isUnexpectedlyInLegacyMode() -> false
+                    !minimalismEnabled -> false
                     seenNotificationsInteractor.isTopOngoingNotification(child) -> true
                     !NotificationMinimalism.ungroupTopUnseen -> false
                     else -> seenNotificationsInteractor.isTopUnseenNotification(child)
@@ -225,6 +226,7 @@ constructor(
         object : NotifSectioner("TopOngoing", BUCKET_TOP_ONGOING) {
             override fun isInSection(entry: ListEntry): Boolean {
                 if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return false
+                if (!minimalismEnabled) return false
                 return entry.anyEntry { notificationEntry ->
                     seenNotificationsInteractor.isTopOngoingNotification(notificationEntry)
                 }
@@ -235,6 +237,7 @@ constructor(
         object : NotifSectioner("TopUnseen", BUCKET_TOP_UNSEEN) {
             override fun isInSection(entry: ListEntry): Boolean {
                 if (NotificationMinimalism.isUnexpectedlyInLegacyMode()) return false
+                if (!minimalismEnabled) return false
                 return entry.anyEntry { notificationEntry ->
                     seenNotificationsInteractor.isTopUnseenNotification(notificationEntry)
                 }

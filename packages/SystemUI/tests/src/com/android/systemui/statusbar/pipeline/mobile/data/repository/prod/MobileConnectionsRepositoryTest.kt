@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.pipeline.mobile.data.MobileInputLogger
 import com.android.systemui.statusbar.pipeline.mobile.data.model.SubscriptionModel
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.CarrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionRepository
+import com.android.systemui.statusbar.pipeline.mobile.data.repository.carrierConfigRepository
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.prod.FullMobileConnectionRepository.Factory.Companion.tableBufferLogName
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeMobileMappingsProxy
 import com.android.systemui.statusbar.pipeline.mobile.util.FakeSubscriptionManagerProxy
@@ -67,12 +68,11 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.prod.WifiRepositoryImpl
 import com.android.systemui.testKosmos
+import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.util.concurrency.FakeExecutor
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.capture
 import com.android.systemui.util.mockito.eq
-import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.time.FakeSystemClock
 import com.android.wifitrackerlib.MergedCarrierEntry
 import com.android.wifitrackerlib.WifiEntry
@@ -96,6 +96,8 @@ import org.mockito.ArgumentMatchers.anyString
 import org.mockito.Mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.mock
 import org.mockito.kotlin.whenever
 
 @Suppress("EXPERIMENTAL_IS_NOT_ENABLED")
@@ -137,6 +139,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
     private val wifiPickerTrackerCallback =
         argumentCaptor<WifiPickerTracker.WifiPickerTrackerCallback>()
     private val vcnTransportInfo = VcnTransportInfo.Builder().build()
+    private val userRepository = kosmos.fakeUserRepository
 
     private val testDispatcher = StandardTestDispatcher()
     private val testScope = TestScope(testDispatcher)
@@ -159,7 +162,14 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
             logcatTableLogBuffer(kosmos, "test")
         }
 
-        whenever(wifiPickerTrackerFactory.create(any(), capture(wifiPickerTrackerCallback), any()))
+        whenever(
+                wifiPickerTrackerFactory.create(
+                    any(),
+                    any(),
+                    capture(wifiPickerTrackerCallback),
+                    any(),
+                )
+            )
             .thenReturn(wifiPickerTracker)
 
         // For convenience, set up the subscription info callbacks
@@ -188,6 +198,8 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
 
         wifiRepository =
             WifiRepositoryImpl(
+                mContext,
+                userRepository,
                 testScope.backgroundScope,
                 mainExecutor,
                 testDispatcher,
@@ -197,14 +209,7 @@ class MobileConnectionsRepositoryTest : SysuiTestCase() {
                 wifiTableLogBuffer,
             )
 
-        carrierConfigRepository =
-            CarrierConfigRepository(
-                fakeBroadcastDispatcher,
-                mock(),
-                mock(),
-                logger,
-                testScope.backgroundScope,
-            )
+        carrierConfigRepository = kosmos.carrierConfigRepository
 
         connectionFactory =
             MobileConnectionRepositoryImpl.Factory(

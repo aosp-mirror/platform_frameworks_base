@@ -19,42 +19,40 @@ package com.android.systemui.kairos.internal
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.none
-import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 
 /** Performs actions once, when the reactive component is first connected to the network. */
-internal class Init<out A>(val name: String?, private val block: suspend InitScope.() -> A) {
-
-    /** Has the initialization logic been evaluated yet? */
-    private val initialized = AtomicBoolean()
+internal class Init<out A>(val name: String?, private val block: InitScope.() -> A) {
 
     /**
      * Stores the result after initialization, as well as the id of the [Network] it's been
      * initialized with.
      */
-    private val cache = CompletableDeferred<Pair<Any, A>>()
+    private val cache = CompletableLazy<Pair<Any, A>>()
 
-    suspend fun connect(evalScope: InitScope): A =
-        if (initialized.getAndSet(true)) {
+    fun connect(evalScope: InitScope): A =
+        if (cache.isInitialized()) {
             // Read from cache
-            val (networkId, result) = cache.await()
+            val (networkId, result) = cache.value
             check(networkId == evalScope.networkId) { "Network mismatch" }
             result
         } else {
             // Write to cache
-            block(evalScope).also { cache.complete(evalScope.networkId to it) }
+            block(evalScope).also { cache.setValue(evalScope.networkId to it) }
         }
 
     @OptIn(ExperimentalCoroutinesApi::class)
     fun getUnsafe(): Maybe<A> =
-        if (cache.isCompleted) {
-            just(cache.getCompleted().second)
+        if (cache.isInitialized()) {
+            just(cache.value.second)
         } else {
             none
         }
 }
 
-internal fun <A> init(name: String?, block: suspend InitScope.() -> A) = Init(name, block)
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun <A> init(name: String?, noinline block: InitScope.() -> A): Init<A> =
+    Init(name, block)
 
-internal fun <A> constInit(name: String?, value: A) = init(name) { value }
+@Suppress("NOTHING_TO_INLINE")
+internal inline fun <A> constInit(name: String?, value: A): Init<A> = init(name) { value }

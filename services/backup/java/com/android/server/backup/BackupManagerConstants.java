@@ -72,6 +72,9 @@ public class BackupManagerConstants extends KeyValueSettingObserver {
     public static final String BACKUP_FINISHED_NOTIFICATION_RECEIVERS =
             "backup_finished_notification_receivers";
 
+    @VisibleForTesting
+    public static final String WAKELOCK_TIMEOUT_MILLIS = "wakelock_timeout_millis";
+
     // Hard coded default values.
     @VisibleForTesting
     public static final long DEFAULT_KEY_VALUE_BACKUP_INTERVAL_MILLISECONDS =
@@ -97,6 +100,9 @@ public class BackupManagerConstants extends KeyValueSettingObserver {
     @VisibleForTesting
     public static final String DEFAULT_BACKUP_FINISHED_NOTIFICATION_RECEIVERS = "";
 
+    @VisibleForTesting
+    public static final long DEFAULT_WAKELOCK_TIMEOUT_MILLIS = 30 * 60 * 1000; // 30 minutes
+
     // Backup manager constants.
     private long mKeyValueBackupIntervalMilliseconds;
     private long mKeyValueBackupFuzzMilliseconds;
@@ -106,6 +112,7 @@ public class BackupManagerConstants extends KeyValueSettingObserver {
     private boolean mFullBackupRequireCharging;
     private int mFullBackupRequiredNetworkType;
     private String[] mBackupFinishedNotificationReceivers;
+    private long mWakelockTimeoutMillis;
 
     public BackupManagerConstants(Handler handler, ContentResolver resolver) {
         super(handler, resolver, Settings.Secure.getUriFor(SETTING));
@@ -152,6 +159,8 @@ public class BackupManagerConstants extends KeyValueSettingObserver {
         } else {
             mBackupFinishedNotificationReceivers = backupFinishedNotificationReceivers.split(":");
         }
+        mWakelockTimeoutMillis = parser.getLong(WAKELOCK_TIMEOUT_MILLIS,
+                DEFAULT_WAKELOCK_TIMEOUT_MILLIS);
     }
 
     // The following are access methods for the individual parameters.
@@ -234,5 +243,10 @@ public class BackupManagerConstants extends KeyValueSettingObserver {
                             + TextUtils.join(", ", mBackupFinishedNotificationReceivers));
         }
         return mBackupFinishedNotificationReceivers;
+    }
+
+    public synchronized long getWakelockTimeoutMillis() {
+        Slog.v(TAG, "wakelock timeout: " + mWakelockTimeoutMillis);
+        return mWakelockTimeoutMillis;
     }
 }

@@ -31,8 +31,8 @@ import org.junit.runner.RunWith
 @SmallTest
 class FontInterpolatorTest : SysuiTestCase() {
 
-    private val sFont = TextRunShaper.shapeTextRun("A", 0, 1, 0, 1, 0f, 0f, false, Paint())
-            .getFont(0)
+    private val sFont =
+        TextRunShaper.shapeTextRun("A", 0, 1, 0, 1, 0f, 0f, false, Paint()).getFont(0)
 
     private fun assertSameAxes(expect: Font, actual: Font) {
         val expectAxes = expect.axes?.also { it.sortBy { axis -> axis.tag } }
@@ -42,21 +42,20 @@ class FontInterpolatorTest : SysuiTestCase() {
 
     private fun assertSameAxes(expectVarSettings: String, actual: Font) {
 
-        val expectAxes = FontVariationAxis.fromFontVariationSettings(expectVarSettings)?.also {
-            it.sortBy { axis -> axis.tag }
-        }
+        val expectAxes =
+            FontVariationAxis.fromFontVariationSettings(expectVarSettings)?.also {
+                it.sortBy { axis -> axis.tag }
+            }
         val actualAxes = actual.axes?.also { it.sortBy { axis -> axis.tag } }
         assertThat(actualAxes).isEqualTo(expectAxes)
     }
 
     @Test
     fun textInterpolation() {
-        val startFont = Font.Builder(sFont)
-                .setFontVariationSettings("'wght' 100, 'ital' 0, 'GRAD' 200")
-                .build()
-        val endFont = Font.Builder(sFont)
-                .setFontVariationSettings("'wght' 900, 'ital' 1, 'GRAD' 700")
-                .build()
+        val startFont =
+            Font.Builder(sFont).setFontVariationSettings("'wght' 100, 'ital' 0, 'GRAD' 200").build()
+        val endFont =
+            Font.Builder(sFont).setFontVariationSettings("'wght' 900, 'ital' 1, 'GRAD' 700").build()
 
         val interp = FontInterpolator()
         assertSameAxes(startFont, interp.lerp(startFont, endFont, 0f))
@@ -66,12 +65,8 @@ class FontInterpolatorTest : SysuiTestCase() {
 
     @Test
     fun textInterpolation_DefaultValue() {
-        val startFont = Font.Builder(sFont)
-                .setFontVariationSettings("'wght' 100")
-                .build()
-        val endFont = Font.Builder(sFont)
-                .setFontVariationSettings("'ital' 1")
-                .build()
+        val startFont = Font.Builder(sFont).setFontVariationSettings("'wght' 100").build()
+        val endFont = Font.Builder(sFont).setFontVariationSettings("'ital' 1").build()
 
         val interp = FontInterpolator()
         assertSameAxes("'wght' 250, 'ital' 0.5", interp.lerp(startFont, endFont, 0.5f))
@@ -79,12 +74,8 @@ class FontInterpolatorTest : SysuiTestCase() {
 
     @Test
     fun testInterpCache() {
-        val startFont = Font.Builder(sFont)
-                .setFontVariationSettings("'wght' 100")
-                .build()
-        val endFont = Font.Builder(sFont)
-                .setFontVariationSettings("'ital' 1")
-                .build()
+        val startFont = Font.Builder(sFont).setFontVariationSettings("'wght' 100").build()
+        val endFont = Font.Builder(sFont).setFontVariationSettings("'ital' 1").build()
 
         val interp = FontInterpolator()
         val resultFont = interp.lerp(startFont, endFont, 0.5f)
@@ -94,12 +85,8 @@ class FontInterpolatorTest : SysuiTestCase() {
 
     @Test
     fun testAxesCache() {
-        val startFont = Font.Builder(sFont)
-                .setFontVariationSettings("'wght' 100")
-                .build()
-        val endFont = Font.Builder(sFont)
-                .setFontVariationSettings("'ital' 1")
-                .build()
+        val startFont = Font.Builder(sFont).setFontVariationSettings("'wght' 100").build()
+        val endFont = Font.Builder(sFont).setFontVariationSettings("'ital' 1").build()
 
         val interp = FontInterpolator()
         val resultFont = interp.lerp(startFont, endFont, 0.5f)
@@ -111,20 +98,12 @@ class FontInterpolatorTest : SysuiTestCase() {
     fun testCacheMaxSize() {
         val interp = FontInterpolator()
 
-        val startFont = Font.Builder(sFont)
-                .setFontVariationSettings("'wght' 100")
-                .build()
-        val endFont = Font.Builder(sFont)
-                .setFontVariationSettings("'wght' 1")
-                .build()
+        val startFont = Font.Builder(sFont).setFontVariationSettings("'wght' 100").build()
+        val endFont = Font.Builder(sFont).setFontVariationSettings("'wght' 1").build()
         val resultFont = interp.lerp(startFont, endFont, 0.5f)
-        for (i in 0..interp.cacheMaxEntries + 1) {
-            val f1 = Font.Builder(sFont)
-                    .setFontVariationSettings("'wght' ${i * 100}")
-                    .build()
-            val f2 = Font.Builder(sFont)
-                    .setFontVariationSettings("'wght' $i")
-                    .build()
+        for (i in 0..(interp.fontCache as FontCacheImpl).cacheMaxEntries + 1) {
+            val f1 = Font.Builder(sFont).setFontVariationSettings("'wght' ${i * 100}").build()
+            val f2 = Font.Builder(sFont).setFontVariationSettings("'wght' $i").build()
             interp.lerp(f1, f2, 0.5f)
         }
 

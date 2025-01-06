@@ -36,6 +36,7 @@ import com.android.systemui.ActivityIntentHelper
 import com.android.systemui.Flags
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.animation.DelegateTransitionAnimatorController
+import com.android.systemui.animation.TransitionAnimator
 import com.android.systemui.assist.AssistManager
 import com.android.systemui.camera.CameraIntents
 import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
@@ -103,6 +104,44 @@ constructor(
     private val centralSurfaces: CentralSurfaces?
         get() = centralSurfacesOptLazy.get().getOrNull()
 
+    override fun registerTransition(
+        cookie: ActivityTransitionAnimator.TransitionCookie,
+        controllerFactory: ActivityTransitionAnimator.ControllerFactory,
+    ) {
+        check(TransitionAnimator.longLivedReturnAnimationsEnabled())
+
+        val factory =
+            object :
+                ActivityTransitionAnimator.ControllerFactory(
+                    controllerFactory.cookie,
+                    controllerFactory.component,
+                    controllerFactory.launchCujType,
+                    controllerFactory.returnCujType,
+                ) {
+                override fun createController(
+                    forLaunch: Boolean
+                ): ActivityTransitionAnimator.Controller {
+                    val baseController = controllerFactory.createController(forLaunch)
+                    val rootView = baseController.transitionContainer.rootView
+                    val controllerFromStatusBar: Optional<ActivityTransitionAnimator.Controller> =
+                        statusBarWindowControllerStore.defaultDisplay
+                            .wrapAnimationControllerIfInStatusBar(rootView, baseController)
+                    return if (controllerFromStatusBar.isPresent) {
+                        controllerFromStatusBar.get()
+                    } else {
+                        baseController
+                    }
+                }
+            }
+
+        activityTransitionAnimator.register(cookie, factory)
+    }
+
+    override fun unregisterTransition(cookie: ActivityTransitionAnimator.TransitionCookie) {
+        check(TransitionAnimator.longLivedReturnAnimationsEnabled())
+        activityTransitionAnimator.unregister(cookie)
+    }
+
     override fun startPendingIntentDismissingKeyguard(
         intent: PendingIntent,
         dismissShade: Boolean,
@@ -134,7 +173,7 @@ constructor(
                 (skipLockscreenChecks ||
                     activityIntentHelper.wouldPendingShowOverLockscreen(
                         intent,
-                        lockScreenUserManager.currentUserId
+                        lockScreenUserManager.currentUserId,
                     ))
 
         val animate =
@@ -190,7 +229,7 @@ constructor(
                                 null,
                                 null,
                                 null,
-                                options.toBundle()
+                                options.toBundle(),
                             )
                         }
                     },
@@ -239,7 +278,7 @@ constructor(
         animationController: ActivityTransitionAnimator.Controller?,
         customMessage: String?,
         disallowEnterPictureInPictureWhileLaunching: Boolean,
-        userHandle: UserHandle?
+        userHandle: UserHandle?,
     ) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
         val userHandle: UserHandle = userHandle ?: getActivityUserHandle(intent)
@@ -280,7 +319,7 @@ constructor(
             activityTransitionAnimator.startIntentWithAnimation(
                 animController,
                 animate,
-                intent.getPackage()
+                intent.getPackage(),
             ) { adapter: RemoteAnimationAdapter? ->
                 val options =
                     ActivityOptions(CentralSurfaces.getActivityOptions(displayId, adapter))
@@ -313,6 +352,7 @@ constructor(
                     // if it is volume panel.
                     options.setDisallowEnterPictureInPictureWhileLaunching(true)
                 }
+                intent.collectExtraIntentKeys()
                 try {
                     result[0] =
                         ActivityTaskManager.getService()
@@ -358,7 +398,7 @@ constructor(
         dismissShade: Boolean,
         animationController: ActivityTransitionAnimator.Controller?,
         showOverLockscreenWhenLocked: Boolean,
-        userHandle: UserHandle?
+        userHandle: UserHandle?,
     ) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
         val userHandle = userHandle ?: getActivityUserHandle(intent)
@@ -382,7 +422,7 @@ constructor(
             animationController != null &&
                 shouldAnimateLaunch(
                     isActivityIntent = true,
-                    showOverLockscreen = showOverLockscreenWhenLocked
+                    showOverLockscreen = showOverLockscreenWhenLocked,
                 )
 
         var controller: ActivityTransitionAnimator.Controller? = null
@@ -412,7 +452,7 @@ constructor(
             controller,
             animate,
             intent.getPackage(),
-            showOverLockscreenWhenLocked
+            showOverLockscreenWhenLocked,
         ) { adapter: RemoteAnimationAdapter? ->
             TaskStackBuilder.create(context)
                 .addNextIntent(intent)
@@ -424,7 +464,7 @@ constructor(
         action: ActivityStarter.OnDismissAction,
         cancel: Runnable?,
         afterKeyguardGone: Boolean,
-        customMessage: String?
+        customMessage: String?,
     ) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
         Log.i(TAG, "Invoking dismissKeyguardThenExecute, afterKeyguardGone: $afterKeyguardGone")
@@ -452,7 +492,7 @@ constructor(
         afterKeyguardGone: Boolean,
         deferred: Boolean,
         willAnimateOnKeyguard: Boolean,
-        customMessage: String?
+        customMessage: String?,
     ) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return
         val onDismissAction: ActivityStarter.OnDismissAction =
@@ -481,12 +521,7 @@ constructor(
                     return willAnimateOnKeyguard
                 }
             }
-        dismissKeyguardThenExecute(
-            onDismissAction,
-            cancelAction,
-            afterKeyguardGone,
-            customMessage,
-        )
+        dismissKeyguardThenExecute(onDismissAction, cancelAction, afterKeyguardGone, customMessage)
     }
 
     override fun shouldAnimateLaunch(isActivityIntent: Boolean): Boolean {
@@ -564,7 +599,7 @@ constructor(
         val controllerFromStatusBar: Optional<ActivityTransitionAnimator.Controller> =
             statusBarWindowControllerStore.defaultDisplay.wrapAnimationControllerIfInStatusBar(
                 rootView,
-                animationController
+                animationController,
             )
         if (controllerFromStatusBar.isPresent) {
             return controllerFromStatusBar.get()
@@ -581,7 +616,7 @@ constructor(
                     notifShadeWindowControllerLazy.get(),
                     commandQueue,
                     displayId,
-                    isLaunchForActivity
+                    isLaunchForActivity,
                 )
             }
         }
@@ -595,7 +630,7 @@ constructor(
      */
     private fun wrapAnimationControllerForLockscreen(
         dismissShade: Boolean,
-        animationController: ActivityTransitionAnimator.Controller?
+        animationController: ActivityTransitionAnimator.Controller?,
     ): ActivityTransitionAnimator.Controller? {
         return animationController?.let {
             object : DelegateTransitionAnimatorController(it) {
@@ -612,7 +647,7 @@ constructor(
                         communalSceneInteractor.snapToScene(
                             newScene = CommunalScenes.Blank,
                             loggingReason = "ActivityStarterInternalImpl",
-                            delayMillis = ActivityTransitionAnimator.TIMINGS.totalDuration
+                            delayMillis = ActivityTransitionAnimator.TIMINGS.totalDuration,
                         )
                     }
                 }

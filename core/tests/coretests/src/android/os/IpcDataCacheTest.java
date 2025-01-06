@@ -16,13 +16,22 @@
 
 package android.os;
 
+import static android.app.Flags.FLAG_PIC_ISOLATE_CACHE_BY_UID;
+
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.app.PropertyInvalidatedCache;
+import android.app.PropertyInvalidatedCache.Args;
 import android.multiuser.Flags;
 import android.platform.test.annotations.IgnoreUnderRavenwood;
 import android.platform.test.annotations.RequiresFlagsEnabled;
+import android.platform.test.flag.junit.CheckFlagsRule;
+import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.platform.test.ravenwood.RavenwoodRule;
+import android.os.IpcDataCache;
 
 import androidx.test.filters.SmallTest;
 
@@ -42,6 +51,10 @@ import org.junit.Test;
  */
 @SmallTest
 public class IpcDataCacheTest {
+
+    @Rule
+    public final CheckFlagsRule mCheckFlagsRule =
+            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     // Configuration for creating caches
     private static final String MODULE = IpcDataCache.MODULE_TEST;
@@ -184,9 +197,9 @@ public class IpcDataCacheTest {
 
         try {
             testCache.query(9);
-            assertEquals(false, true);          // The code should not reach this point.
+            fail();          // The code should not reach this point.
         } catch (RuntimeException e) {
-            assertEquals(e.getCause() instanceof RemoteException, true);
+            assertTrue(e.getCause() instanceof RemoteException);
         }
         tester.verify(4);
     }
@@ -245,38 +258,38 @@ public class IpcDataCacheTest {
                         new ServerQuery(tester));
 
         // Caches are enabled upon creation.
-        assertEquals(false, cache1.getDisabledState());
-        assertEquals(false, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertFalse(cache1.isDisabled());
+        assertFalse(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Disable the cache1 instance.  Only cache1 is disabled
         cache1.disableInstance();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(false, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertFalse(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Disable cache1.  This will disable cache1 and cache2 because they share the
         // same name.  cache3 has a different name and will not be disabled.
         cache1.disableForCurrentProcess();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(true, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertTrue(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Create a new cache1.  Verify that the new instance is disabled.
         cache1 = new IpcDataCache<>(4, MODULE, API, "cacheA",
                 new ServerQuery(tester));
-        assertEquals(true, cache1.getDisabledState());
+        assertTrue(cache1.isDisabled());
 
         // Remove the record of caches being locally disabled.  This is a clean-up step.
         cache1.forgetDisableLocal();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(true, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertTrue(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Create a new cache1.  Verify that the new instance is not disabled.
         cache1 = new IpcDataCache<>(4, MODULE, API, "cacheA",
                 new ServerQuery(tester));
-        assertEquals(false, cache1.getDisabledState());
+        assertFalse(cache1.isDisabled());
     }
 
     private static class TestQuery
@@ -287,7 +300,12 @@ public class IpcDataCacheTest {
         @Override
         public String apply(Integer qv) {
             mRecomputeCount += 1;
-            return "foo" + qv.toString();
+            // Special case for testing caches of nulls.  Integers in the range 30-40 return null.
+            if (qv >= 30 && qv < 40) {
+                return null;
+            } else {
+                return "foo" + qv.toString();
+            }
         }
 
         int getRecomputeCount() {
@@ -329,7 +347,7 @@ public class IpcDataCacheTest {
     public void testCacheRecompute() {
         TestCache cache = new TestCache();
         cache.invalidateCache();
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
@@ -391,63 +409,49 @@ public class IpcDataCacheTest {
     @Test
     public void testLocalProcessDisable() {
         TestCache cache = new TestCache();
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         cache.invalidateCache();
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         cache.disableForCurrentProcess();
-        assertEquals(cache.isDisabled(), true);
+        assertTrue(cache.isDisabled());
         assertEquals("foo5", cache.query(5));
         assertEquals("foo5", cache.query(5));
         assertEquals(3, cache.getRecomputeCount());
     }
 
     @Test
-    public void testConfig() {
+    public void testConfigDisable() {
+        // Create a set of caches based on a set of chained configs.
         IpcDataCache.Config a = new IpcDataCache.Config(8, MODULE, "apiA");
         TestCache ac = new TestCache(a);
-        assertEquals(8, a.maxEntries());
-        assertEquals(MODULE, a.module());
-        assertEquals("apiA", a.api());
-        assertEquals("apiA", a.name());
         IpcDataCache.Config b = new IpcDataCache.Config(a, "apiB");
         TestCache bc = new TestCache(b);
-        assertEquals(8, b.maxEntries());
-        assertEquals(MODULE, b.module());
-        assertEquals("apiB", b.api());
-        assertEquals("apiB", b.name());
         IpcDataCache.Config c = new IpcDataCache.Config(a, "apiC", "nameC");
         TestCache cc = new TestCache(c);
-        assertEquals(8, c.maxEntries());
-        assertEquals(MODULE, c.module());
-        assertEquals("apiC", c.api());
-        assertEquals("nameC", c.name());
         IpcDataCache.Config d = a.child("nameD");
         TestCache dc = new TestCache(d);
-        assertEquals(8, d.maxEntries());
-        assertEquals(MODULE, d.module());
-        assertEquals("apiA", d.api());
-        assertEquals("nameD", d.name());
 
         a.disableForCurrentProcess();
-        assertEquals(ac.isDisabled(), true);
-        assertEquals(bc.isDisabled(), false);
-        assertEquals(cc.isDisabled(), false);
-        assertEquals(dc.isDisabled(), false);
+        assertTrue(ac.isDisabled());
+        assertFalse(bc.isDisabled());
+        assertFalse(cc.isDisabled());
+        assertFalse(dc.isDisabled());
 
         a.disableAllForCurrentProcess();
-        assertEquals(ac.isDisabled(), true);
-        assertEquals(bc.isDisabled(), false);
-        assertEquals(cc.isDisabled(), false);
-        assertEquals(dc.isDisabled(), true);
+        assertTrue(ac.isDisabled());
+        assertFalse(bc.isDisabled());
+        assertFalse(cc.isDisabled());
+        assertTrue(dc.isDisabled());
 
         IpcDataCache.Config e = a.child("nameE");
         TestCache ec = new TestCache(e);
-        assertEquals(ec.isDisabled(), true);
+        assertTrue(ec.isDisabled());
     }
+
 
     // Verify that invalidating the cache from an app process would fail due to lack of permissions.
     @Test
@@ -506,5 +510,47 @@ public class IpcDataCacheTest {
 
         // Re-enable test mode (so that the cleanup for the test does not throw).
         IpcDataCache.setTestMode(true);
+    }
+
+    @Test
+    public void testCachingNulls() {
+        IpcDataCache.Config c =
+                new IpcDataCache.Config(4, IpcDataCache.MODULE_TEST, "testCachingNulls");
+        TestCache cache;
+        cache = new TestCache(c.cacheNulls(true));
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+
+        cache = new TestCache(c.cacheNulls(false));
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        // The recompute is 4 because nulls were not cached.
+        assertEquals(4, cache.getRecomputeCount());
+
+        // Verify that the default is not to cache nulls.
+        cache = new TestCache(c);
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        // The recompute is 4 because nulls were not cached.
+        assertEquals(4, cache.getRecomputeCount());
     }
 }

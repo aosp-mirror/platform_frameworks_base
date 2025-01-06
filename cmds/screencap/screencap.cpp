@@ -416,7 +416,6 @@ int main(int argc, char** argv)
         format = ANDROID_BITMAP_COMPRESS_FORMAT_PNG;
     } else if (jpeg) {
         format = ANDROID_BITMAP_COMPRESS_FORMAT_JPEG;
-        captureArgs.attachGainmap = true;
     }
 
     // setThreadPoolMaxThreadCount(0) actually tells the kernel it's

@@ -16,9 +16,14 @@
 
 package com.android.settingslib.bluetooth;
 
+import static com.android.settingslib.bluetooth.HearingAidAudioRoutingConstants.BUILTIN_MIC;
+import static com.android.settingslib.bluetooth.HearingAidAudioRoutingConstants.BUILTIN_SPEAKER;
+import static com.android.settingslib.bluetooth.HearingAidAudioRoutingConstants.MICROPHONE_SOURCE_VOICE_COMMUNICATION;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.never;
@@ -35,10 +40,13 @@ import android.media.audiopolicy.AudioProductStrategy;
 
 import androidx.test.core.app.ApplicationProvider;
 
+import com.android.settingslib.bluetooth.HearingAidAudioRoutingConstants.RoutingValue;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.MockitoJUnit;
@@ -67,28 +75,35 @@ public class HearingAidAudioRoutingHelperTest {
     @Spy
     private AudioManager mAudioManager = mContext.getSystemService(AudioManager.class);
     @Mock
-    private AudioDeviceInfo mAudioDeviceInfo;
+    private AudioDeviceInfo mHearingDeviceInfoOutput;
+    @Mock
+    private AudioDeviceInfo mLeHearingDeviceInfoInput;
     @Mock
     private CachedBluetoothDevice mCachedBluetoothDevice;
     @Mock
     private CachedBluetoothDevice mSubCachedBluetoothDevice;
-    private AudioDeviceAttributes mHearingDeviceAttribute;
+    private AudioDeviceAttributes mHearingDeviceAttributeOutput;
     private HearingAidAudioRoutingHelper mHelper;
 
     @Before
     public void setUp() {
         doReturn(mAudioManager).when(mContext).getSystemService(AudioManager.class);
-        when(mAudioDeviceInfo.getType()).thenReturn(AudioDeviceInfo.TYPE_HEARING_AID);
-        when(mAudioDeviceInfo.getAddress()).thenReturn(TEST_DEVICE_ADDRESS);
+        when(mHearingDeviceInfoOutput.getType()).thenReturn(AudioDeviceInfo.TYPE_HEARING_AID);
+        when(mHearingDeviceInfoOutput.getAddress()).thenReturn(TEST_DEVICE_ADDRESS);
+        when(mLeHearingDeviceInfoInput.getType()).thenReturn(AudioDeviceInfo.TYPE_BLE_HEADSET);
+        when(mLeHearingDeviceInfoInput.getAddress()).thenReturn(TEST_DEVICE_ADDRESS);
+        when(mCachedBluetoothDevice.getAddress()).thenReturn(TEST_DEVICE_ADDRESS);
         when(mAudioManager.getDevices(AudioManager.GET_DEVICES_OUTPUTS)).thenReturn(
-                new AudioDeviceInfo[]{mAudioDeviceInfo});
+                new AudioDeviceInfo[]{mHearingDeviceInfoOutput});
+        when(mAudioManager.getDevices(AudioManager.GET_DEVICES_INPUTS)).thenReturn(
+                new AudioDeviceInfo[]{mLeHearingDeviceInfoInput});
         doReturn(Collections.emptyList()).when(mAudioManager).getPreferredDevicesForStrategy(
                 any(AudioProductStrategy.class));
         when(mAudioStrategy.getAudioAttributesForLegacyStreamType(
                 AudioManager.STREAM_MUSIC))
                 .thenReturn((new AudioAttributes.Builder()).build());
 
-        mHearingDeviceAttribute = new AudioDeviceAttributes(
+        mHearingDeviceAttributeOutput = new AudioDeviceAttributes(
                 AudioDeviceAttributes.ROLE_OUTPUT,
                 AudioDeviceInfo.TYPE_HEARING_AID,
                 TEST_DEVICE_ADDRESS);
@@ -99,11 +114,10 @@ public class HearingAidAudioRoutingHelperTest {
     @Test
     public void setPreferredDeviceRoutingStrategies_hadValueThenValueAuto_callRemoveStrategy() {
         when(mAudioManager.getPreferredDeviceForStrategy(mAudioStrategy)).thenReturn(
-                mHearingDeviceAttribute);
+                mHearingDeviceAttributeOutput);
 
         mHelper.setPreferredDeviceRoutingStrategies(List.of(mAudioStrategy),
-                mHearingDeviceAttribute,
-                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                mHearingDeviceAttributeOutput, RoutingValue.AUTO);
 
         verify(mAudioManager, atLeastOnce()).removePreferredDeviceForStrategy(mAudioStrategy);
     }
@@ -113,8 +127,7 @@ public class HearingAidAudioRoutingHelperTest {
         when(mAudioManager.getPreferredDeviceForStrategy(mAudioStrategy)).thenReturn(null);
 
         mHelper.setPreferredDeviceRoutingStrategies(List.of(mAudioStrategy),
-                mHearingDeviceAttribute,
-                HearingAidAudioRoutingConstants.RoutingValue.AUTO);
+                mHearingDeviceAttributeOutput, RoutingValue.AUTO);
 
         verify(mAudioManager, never()).removePreferredDeviceForStrategy(mAudioStrategy);
     }
@@ -122,63 +135,95 @@ public class HearingAidAudioRoutingHelperTest {
     @Test
     public void setPreferredDeviceRoutingStrategies_valueHearingDevice_callSetStrategy() {
         mHelper.setPreferredDeviceRoutingStrategies(List.of(mAudioStrategy),
-                mHearingDeviceAttribute,
-                HearingAidAudioRoutingConstants.RoutingValue.HEARING_DEVICE);
+                mHearingDeviceAttributeOutput, RoutingValue.HEARING_DEVICE);
 
         verify(mAudioManager, atLeastOnce()).setPreferredDeviceForStrategy(mAudioStrategy,
-                mHearingDeviceAttribute);
+                mHearingDeviceAttributeOutput);
     }
 
     @Test
-    public void setPreferredDeviceRoutingStrategies_valueDeviceSpeaker_callSetStrategy() {
-        final AudioDeviceAttributes speakerDevice = new AudioDeviceAttributes(
-                AudioDeviceAttributes.ROLE_OUTPUT, AudioDeviceInfo.TYPE_BUILTIN_SPEAKER, "");
+    public void setPreferredDeviceRoutingStrategies_valueBuiltinDevice_callSetStrategy() {
         mHelper.setPreferredDeviceRoutingStrategies(List.of(mAudioStrategy),
-                mHearingDeviceAttribute,
-                HearingAidAudioRoutingConstants.RoutingValue.DEVICE_SPEAKER);
+                mHearingDeviceAttributeOutput, RoutingValue.BUILTIN_DEVICE);
 
         verify(mAudioManager, atLeastOnce()).setPreferredDeviceForStrategy(mAudioStrategy,
-                speakerDevice);
+                BUILTIN_SPEAKER);
     }
 
     @Test
-    public void getMatchedHearingDeviceAttributes_mainHearingDevice_equalAddress() {
+    public void getMatchedHearingDeviceAttributesForOutput_mainHearingDevice_equalAddress() {
         when(mCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
         when(mCachedBluetoothDevice.getAddress()).thenReturn(TEST_DEVICE_ADDRESS);
 
-        final String targetAddress = mHelper.getMatchedHearingDeviceAttributes(
+        final String targetAddress = mHelper.getMatchedHearingDeviceAttributesForOutput(
                 mCachedBluetoothDevice).getAddress();
 
-        assertThat(targetAddress).isEqualTo(mHearingDeviceAttribute.getAddress());
+        assertThat(targetAddress).isEqualTo(mHearingDeviceAttributeOutput.getAddress());
     }
 
     @Test
-    public void getMatchedHearingDeviceAttributes_subHearingDevice_equalAddress() {
+    public void getMatchedHearingDeviceAttributesForOutput_subHearingDevice_equalAddress() {
         when(mCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
         when(mCachedBluetoothDevice.getAddress()).thenReturn(NOT_EXPECT_DEVICE_ADDRESS);
         when(mCachedBluetoothDevice.getSubDevice()).thenReturn(mSubCachedBluetoothDevice);
         when(mSubCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
         when(mSubCachedBluetoothDevice.getAddress()).thenReturn(TEST_DEVICE_ADDRESS);
 
-        final String targetAddress = mHelper.getMatchedHearingDeviceAttributes(
+        final String targetAddress = mHelper.getMatchedHearingDeviceAttributesForOutput(
                 mCachedBluetoothDevice).getAddress();
 
-        assertThat(targetAddress).isEqualTo(mHearingDeviceAttribute.getAddress());
+        assertThat(targetAddress).isEqualTo(mHearingDeviceAttributeOutput.getAddress());
     }
 
     @Test
-    public void getMatchedHearingDeviceAttributes_memberHearingDevice_equalAddress() {
+    public void getMatchedHearingDeviceAttributesForOutput_memberHearingDevice_equalAddress() {
         when(mSubCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
         when(mSubCachedBluetoothDevice.getAddress()).thenReturn(TEST_DEVICE_ADDRESS);
-        final Set<CachedBluetoothDevice> memberDevices = new HashSet<CachedBluetoothDevice>();
+        final Set<CachedBluetoothDevice> memberDevices = new HashSet<>();
         memberDevices.add(mSubCachedBluetoothDevice);
         when(mCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
         when(mCachedBluetoothDevice.getAddress()).thenReturn(NOT_EXPECT_DEVICE_ADDRESS);
         when(mCachedBluetoothDevice.getMemberDevice()).thenReturn(memberDevices);
 
-        final String targetAddress = mHelper.getMatchedHearingDeviceAttributes(
+        final String targetAddress = mHelper.getMatchedHearingDeviceAttributesForOutput(
                 mCachedBluetoothDevice).getAddress();
 
-        assertThat(targetAddress).isEqualTo(mHearingDeviceAttribute.getAddress());
+        assertThat(targetAddress).isEqualTo(mHearingDeviceAttributeOutput.getAddress());
+    }
+
+    @Test
+    public void setPreferredInputDeviceForCalls_valueAuto_callClearPreset() {
+        when(mCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
+
+        mHelper.setPreferredInputDeviceForCalls(mCachedBluetoothDevice, RoutingValue.AUTO);
+
+        verify(mAudioManager).clearPreferredDevicesForCapturePreset(
+                MICROPHONE_SOURCE_VOICE_COMMUNICATION);
+    }
+
+    @Test
+    public void setPreferredInputDeviceForCalls_valueHearingDevice_callSetPresetToHearingDevice() {
+        final ArgumentCaptor<AudioDeviceAttributes> audioDeviceAttributesCaptor =
+                ArgumentCaptor.forClass(AudioDeviceAttributes.class);
+        when(mCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
+
+        mHelper.setPreferredInputDeviceForCalls(mCachedBluetoothDevice,
+                RoutingValue.HEARING_DEVICE);
+
+        verify(mAudioManager).setPreferredDeviceForCapturePreset(
+                eq(MICROPHONE_SOURCE_VOICE_COMMUNICATION), audioDeviceAttributesCaptor.capture());
+        assertThat(audioDeviceAttributesCaptor.getValue().getAddress()).isEqualTo(
+                TEST_DEVICE_ADDRESS);
+    }
+
+    @Test
+    public void setPreferredInputDeviceForCalls_valueBuiltinDevice_callClearPresetToBuiltinMic() {
+        when(mCachedBluetoothDevice.isHearingAidDevice()).thenReturn(true);
+
+        mHelper.setPreferredInputDeviceForCalls(mCachedBluetoothDevice,
+                RoutingValue.BUILTIN_DEVICE);
+
+        verify(mAudioManager).setPreferredDeviceForCapturePreset(
+                MICROPHONE_SOURCE_VOICE_COMMUNICATION, BUILTIN_MIC);
     }
 }

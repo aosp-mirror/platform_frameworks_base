@@ -31,8 +31,8 @@ import android.widget.FrameLayout
 import androidx.activity.OnBackPressedDispatcher
 import androidx.activity.OnBackPressedDispatcherOwner
 import androidx.activity.setViewTreeOnBackPressedDispatcherOwner
+import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -41,15 +41,16 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Arrangement.spacedBy
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.navigationBars
 import androidx.compose.foundation.layout.offset
-import androidx.compose.foundation.layout.windowInsetsPadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredHeightIn
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
@@ -59,6 +60,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerEventPass
@@ -68,12 +70,14 @@ import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.positionOnScreen
 import androidx.compose.ui.platform.ComposeView
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.customActions
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
@@ -97,8 +101,11 @@ import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.Dumpable
+import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.keyboard.shortcut.ui.composable.InteractionsConfig
+import com.android.systemui.keyboard.shortcut.ui.composable.ProvideShortcutHelperIndication
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.setSnapshotBinding
 import com.android.systemui.media.controls.ui.view.MediaHost
@@ -107,6 +114,7 @@ import com.android.systemui.plugins.qs.QSContainerController
 import com.android.systemui.qs.composefragment.SceneKeys.QuickQuickSettings
 import com.android.systemui.qs.composefragment.SceneKeys.QuickSettings
 import com.android.systemui.qs.composefragment.SceneKeys.toIdleSceneKey
+import com.android.systemui.qs.composefragment.ui.GridAnchor
 import com.android.systemui.qs.composefragment.ui.NotificationScrimClipParams
 import com.android.systemui.qs.composefragment.ui.notificationScrimClip
 import com.android.systemui.qs.composefragment.ui.quickQuickSettingsToQuickSettings
@@ -115,12 +123,13 @@ import com.android.systemui.qs.flags.QSComposeFragment
 import com.android.systemui.qs.footer.ui.compose.FooterActions
 import com.android.systemui.qs.panels.ui.compose.EditMode
 import com.android.systemui.qs.panels.ui.compose.QuickQuickSettings
+import com.android.systemui.qs.panels.ui.compose.TileGrid
 import com.android.systemui.qs.shared.ui.ElementKeys
-import com.android.systemui.qs.ui.composable.QuickSettingsLayout
 import com.android.systemui.qs.ui.composable.QuickSettingsShade
 import com.android.systemui.qs.ui.composable.QuickSettingsTheme
 import com.android.systemui.res.R
 import com.android.systemui.util.LifecycleFragment
+import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.asIndenting
 import com.android.systemui.util.printSection
 import com.android.systemui.util.println
@@ -195,6 +204,7 @@ constructor(
         val context = inflater.context
         val composeView =
             ComposeView(context).apply {
+                id = R.id.quick_settings_container
                 repeatWhenAttached {
                     repeatOnLifecycle(Lifecycle.State.CREATED) {
                         setViewTreeOnBackPressedDispatcherOwner(
@@ -223,6 +233,7 @@ constructor(
                 // Only allow scrolling when we are fully expanded. That way, we don't intercept
                 // swipes in lockscreen (when somehow QS is receiving touches).
                 { (scrollState.canScrollForward && viewModel.isQsFullyExpanded) || isCustomizing },
+                viewModel::emitMotionEventForFalsingSwipeNested,
             )
         frame.addView(
             composeView,
@@ -234,52 +245,60 @@ constructor(
 
     @Composable
     private fun Content() {
-        PlatformTheme {
-            AnimatedVisibility(
-                visible = viewModel.isQsVisible,
-                modifier =
-                    Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
-                        .windowInsetsPadding(WindowInsets.navigationBars)
-                        // Clipping before translation to match QSContainerImpl.onDraw
-                        .offset {
-                            IntOffset(x = 0, y = viewModel.viewTranslationY.fastRoundToInt())
-                        }
-                        .thenIf(notificationScrimClippingParams.isEnabled) {
-                            Modifier.notificationScrimClip {
-                                notificationScrimClippingParams.params
+        PlatformTheme(isDarkTheme = true) {
+            ProvideShortcutHelperIndication(interactionsConfig = interactionsConfig()) {
+                if (viewModel.isQsVisibleAndAnyShadeExpanded) {
+                    Box(
+                        modifier =
+                            Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
+                                // Clipping before translation to match QSContainerImpl.onDraw
+                                .offset {
+                                    IntOffset(
+                                        x = 0,
+                                        y = viewModel.viewTranslationY.fastRoundToInt(),
+                                    )
+                                }
+                                .thenIf(notificationScrimClippingParams.isEnabled) {
+                                    Modifier.notificationScrimClip {
+                                        notificationScrimClippingParams.params
+                                    }
+                                }
+                                // Disable touches in the whole composable while the mirror is
+                                // showing. While the mirror is showing, an ancestor of the
+                                // ComposeView is made alpha 0, but touches are still being captured
+                                // by the composables.
+                                .gesturesDisabled(viewModel.showingMirror)
+                    ) {
+                        val isEditing by
+                            viewModel.containerViewModel.editModeViewModel.isEditing
+                                .collectAsStateWithLifecycle()
+                        val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
+                        AnimatedContent(
+                            targetState = isEditing,
+                            transitionSpec = {
+                                fadeIn(animationSpecEditMode) togetherWith
+                                    fadeOut(animationSpecEditMode)
+                            },
+                            label = "EditModeAnimatedContent",
+                        ) { editing ->
+                            if (editing) {
+                                val qqsPadding = viewModel.qqsHeaderHeight
+                                EditMode(
+                                    viewModel = viewModel.containerViewModel.editModeViewModel,
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .padding(top = { qqsPadding })
+                                            .padding(
+                                                horizontal = {
+                                                    QuickSettingsShade.Dimensions.Padding
+                                                        .roundToPx()
+                                                }
+                                            ),
+                                )
+                            } else {
+                                CollapsableQuickSettingsSTL()
                             }
                         }
-                        // Disable touches in the whole composable while the mirror is showing.
-                        // While the mirror is showing, an ancestor of the ComposeView is made
-                        // alpha 0, but touches are still being captured by the composables.
-                        .gesturesDisabled(viewModel.showingMirror),
-            ) {
-                val isEditing by
-                    viewModel.containerViewModel.editModeViewModel.isEditing
-                        .collectAsStateWithLifecycle()
-                val animationSpecEditMode = tween<Float>(EDIT_MODE_TIME_MILLIS)
-                AnimatedContent(
-                    targetState = isEditing,
-                    transitionSpec = {
-                        fadeIn(animationSpecEditMode) togetherWith fadeOut(animationSpecEditMode)
-                    },
-                    label = "EditModeAnimatedContent",
-                ) { editing ->
-                    if (editing) {
-                        val qqsPadding = viewModel.qqsHeaderHeight
-                        EditMode(
-                            viewModel = viewModel.containerViewModel.editModeViewModel,
-                            modifier =
-                                Modifier.fillMaxWidth()
-                                    .padding(top = { qqsPadding })
-                                    .padding(
-                                        horizontal = {
-                                            QuickSettingsShade.Dimensions.Padding.roundToPx()
-                                        }
-                                    ),
-                        )
-                    } else {
-                        CollapsableQuickSettingsSTL()
                     }
                 }
             }
@@ -299,7 +318,7 @@ constructor(
                 transitions =
                     transitions {
                         from(QuickQuickSettings, QuickSettings) {
-                            quickQuickSettingsToQuickSettings(viewModel::inFirstPage::get)
+                            quickQuickSettingsToQuickSettings(viewModel::animateTilesExpansion::get)
                         }
                     },
             )
@@ -313,9 +332,15 @@ constructor(
         }
 
         SceneTransitionLayout(state = sceneState, modifier = Modifier.fillMaxSize()) {
-            scene(QuickSettings) { QuickSettingsElement() }
+            scene(QuickSettings) {
+                LaunchedEffect(Unit) { viewModel.onQSOpen() }
+                QuickSettingsElement()
+            }
 
-            scene(QuickQuickSettings) { QuickQuickSettingsElement() }
+            scene(QuickQuickSettings) {
+                LaunchedEffect(Unit) { viewModel.onQQSOpen() }
+                QuickQuickSettingsElement()
+            }
         }
     }
 
@@ -444,8 +469,7 @@ constructor(
     }
 
     override fun setShouldUpdateSquishinessOnMedia(shouldUpdate: Boolean) {
-        super.setShouldUpdateSquishinessOnMedia(shouldUpdate)
-        // TODO (b/353253280)
+        viewModel.shouldUpdateSquishinessOnMedia = shouldUpdate
     }
 
     override fun setInSplitShade(isInSplitShade: Boolean) {
@@ -596,28 +620,41 @@ constructor(
                         }
                         .padding(top = { qqsPadding }, bottom = { bottomPadding })
             ) {
+                val Tiles =
+                    @Composable {
+                        QuickQuickSettings(
+                            viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel
+                        )
+                    }
+                val Media =
+                    @Composable {
+                        if (viewModel.qqsMediaVisible) {
+                            MediaObject(
+                                // In order to have stable constraints passed to the AndroidView
+                                // during expansion (available height changing due to squishiness),
+                                // We always allow the media here to be as tall as it wants.
+                                // (b/383085298)
+                                modifier = Modifier.requiredHeightIn(max = Dp.Infinity),
+                                mediaHost = viewModel.qqsMediaHost,
+                            )
+                        }
+                    }
+
                 if (viewModel.isQsEnabled) {
-                    Column(
+                    Box(
                         modifier =
                             Modifier.collapseExpandSemanticAction(
                                     stringResource(
                                         id = R.string.accessibility_quick_settings_expand
                                     )
                                 )
-                                .padding(
-                                    horizontal = {
-                                        QuickSettingsShade.Dimensions.Padding.roundToPx()
-                                    }
-                                ),
-                        verticalArrangement =
-                            spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical)),
+                                .padding(horizontal = qsHorizontalMargin())
                     ) {
-                        QuickQuickSettings(
-                            viewModel = viewModel.containerViewModel.quickQuickSettingsViewModel
+                        QuickQuickSettingsLayout(
+                            tiles = Tiles,
+                            media = Media,
+                            mediaInRow = viewModel.qqsMediaInRow,
                         )
-                        if (viewModel.qqsMediaVisible) {
-                            MediaObject(mediaHost = viewModel.qqsMediaHost)
-                        }
                     }
                 }
             }
@@ -647,7 +684,20 @@ constructor(
 
                     Column(
                         modifier =
-                            Modifier.offset {
+                            Modifier.onPlaced { coordinates ->
+                                    val positionOnScreen = coordinates.positionOnScreen()
+                                    val left = positionOnScreen.x
+                                    val right = left + coordinates.size.width
+                                    val top = positionOnScreen.y
+                                    val bottom = top + coordinates.size.height
+                                    viewModel.applyNewQsScrollerBounds(
+                                        left = left,
+                                        top = top,
+                                        right = right,
+                                        bottom = bottom,
+                                    )
+                                }
+                                .offset {
                                     IntOffset(
                                         x = 0,
                                         y = viewModel.qsScrollTranslationY.fastRoundToInt(),
@@ -657,23 +707,55 @@ constructor(
                                 .verticalScroll(scrollState)
                                 .sysuiResTag(ResIdTags.qsScroll)
                     ) {
+                        val containerViewModel = viewModel.containerViewModel
                         Spacer(
                             modifier = Modifier.height { qqsPadding + qsExtraPadding.roundToPx() }
                         )
-                        QuickSettingsLayout(
-                            viewModel = viewModel.containerViewModel,
-                            modifier = Modifier.sysuiResTag(ResIdTags.quickSettingsPanel),
-                        )
-                        Spacer(modifier = Modifier.height(8.dp))
-                        if (viewModel.qsMediaVisible) {
-                            MediaObject(
-                                mediaHost = viewModel.qsMediaHost,
-                                modifier =
-                                    Modifier.padding(
-                                        horizontal = {
-                                            QuickSettingsShade.Dimensions.Padding.roundToPx()
-                                        }
-                                    ),
+                        val BrightnessSlider =
+                            @Composable {
+                                BrightnessSliderContainer(
+                                    viewModel = containerViewModel.brightnessSliderViewModel,
+                                    modifier =
+                                        Modifier.fillMaxWidth()
+                                            .height(
+                                                QuickSettingsShade.Dimensions.BrightnessSliderHeight
+                                            ),
+                                )
+                            }
+                        val TileGrid =
+                            @Composable {
+                                Box {
+                                    GridAnchor()
+                                    TileGrid(
+                                        viewModel = containerViewModel.tileGridViewModel,
+                                        modifier = Modifier.fillMaxWidth(),
+                                    )
+                                }
+                            }
+                        val Media =
+                            @Composable {
+                                if (viewModel.qsMediaVisible) {
+                                    MediaObject(
+                                        mediaHost = viewModel.qsMediaHost,
+                                        update = { translationY = viewModel.qsMediaTranslationY },
+                                    )
+                                }
+                            }
+                        Box(
+                            modifier =
+                                Modifier.fillMaxWidth()
+                                    .sysuiResTag(ResIdTags.quickSettingsPanel)
+                                    .padding(
+                                        top = QuickSettingsShade.Dimensions.Padding,
+                                        start = qsHorizontalMargin(),
+                                        end = qsHorizontalMargin(),
+                                    )
+                        ) {
+                            QuickSettingsLayout(
+                                brightness = BrightnessSlider,
+                                tiles = TileGrid,
+                                media = Media,
+                                mediaInRow = viewModel.qsMediaInRow,
                             )
                         }
                     }
@@ -879,6 +961,7 @@ private class FrameLayoutTouchPassthrough(
     private val clippingEnabledProvider: () -> Boolean,
     private val clippingTopProvider: () -> Int,
     private val canScrollForwardQs: () -> Boolean,
+    private val emitMotionEventForFalsing: () -> Unit,
 ) : FrameLayout(context) {
     override fun isTransformedTouchPointInView(
         x: Float,
@@ -895,6 +978,32 @@ private class FrameLayoutTouchPassthrough(
 
     val touchSlop = ViewConfiguration.get(context).scaledTouchSlop
     var downY = 0f
+    var preventingIntercept = false
+
+    override fun onTouchEvent(event: MotionEvent): Boolean {
+        val action = event.actionMasked
+        when (action) {
+            MotionEvent.ACTION_DOWN -> {
+                preventingIntercept = false
+                if (canScrollVertically(1)) {
+                    // If we can scroll down, make sure we're not intercepted by the parent
+                    preventingIntercept = true
+                    parent?.requestDisallowInterceptTouchEvent(true)
+                } else if (!canScrollVertically(-1)) {
+                    // Don't pass on the touch to the view, because scrolling will unconditionally
+                    // disallow interception even if we can't scroll.
+                    // if a user can't scroll at all, we should never listen to the touch.
+                    return false
+                }
+            }
+            MotionEvent.ACTION_UP -> {
+                if (preventingIntercept) {
+                    emitMotionEventForFalsing()
+                }
+            }
+        }
+        return super.onTouchEvent(event)
+    }
 
     override fun onInterceptTouchEvent(ev: MotionEvent): Boolean {
         // If there's a touch on this view and we can scroll down, we don't want to be intercepted
@@ -902,8 +1011,10 @@ private class FrameLayoutTouchPassthrough(
 
         when (action) {
             MotionEvent.ACTION_DOWN -> {
+                preventingIntercept = false
                 // If we can scroll down, make sure none of our parents intercepts us.
                 if (canScrollForwardQs()) {
+                    preventingIntercept = true
                     parent?.requestDisallowInterceptTouchEvent(true)
                 }
                 downY = ev.y
@@ -939,7 +1050,11 @@ private fun Modifier.gesturesDisabled(disabled: Boolean) =
     }
 
 @Composable
-private fun MediaObject(mediaHost: MediaHost, modifier: Modifier = Modifier) {
+private fun MediaObject(
+    mediaHost: MediaHost,
+    modifier: Modifier = Modifier,
+    update: UniqueObjectHostView.() -> Unit = {},
+) {
     Box {
         AndroidView(
             modifier = modifier,
@@ -952,8 +1067,66 @@ private fun MediaObject(mediaHost: MediaHost, modifier: Modifier = Modifier) {
                         )
                 }
             },
+            update = { view -> view.update() },
             onReset = {},
         )
+    }
+}
+
+@Composable
+@VisibleForTesting
+fun QuickQuickSettingsLayout(
+    tiles: @Composable () -> Unit,
+    media: @Composable () -> Unit,
+    mediaInRow: Boolean,
+) {
+    if (mediaInRow) {
+        Row(
+            horizontalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical)),
+            verticalAlignment = Alignment.CenterVertically,
+        ) {
+            Box(modifier = Modifier.weight(1f)) { tiles() }
+            Box(modifier = Modifier.weight(1f)) { media() }
+        }
+    } else {
+        Column(verticalArrangement = spacedBy(dimensionResource(R.dimen.qs_tile_margin_vertical))) {
+            tiles()
+            media()
+        }
+    }
+}
+
+@Composable
+@VisibleForTesting
+fun QuickSettingsLayout(
+    brightness: @Composable () -> Unit,
+    tiles: @Composable () -> Unit,
+    media: @Composable () -> Unit,
+    mediaInRow: Boolean,
+) {
+    if (mediaInRow) {
+        Column(
+            verticalArrangement = spacedBy(QuickSettingsShade.Dimensions.Padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            brightness()
+            Row(
+                horizontalArrangement = spacedBy(QuickSettingsShade.Dimensions.Padding),
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Box(modifier = Modifier.weight(1f)) { tiles() }
+                Box(modifier = Modifier.weight(1f)) { media() }
+            }
+        }
+    } else {
+        Column(
+            verticalArrangement = spacedBy(QuickSettingsShade.Dimensions.Padding),
+            horizontalAlignment = Alignment.CenterHorizontally,
+        ) {
+            brightness()
+            tiles()
+            media()
+        }
     }
 }
 
@@ -963,3 +1136,16 @@ private object ResIdTags {
     const val qsScroll = "expanded_qs_scroll_view"
     const val qsFooterActions = "qs_footer_actions"
 }
+
+@Composable private fun qsHorizontalMargin() = dimensionResource(id = R.dimen.qs_horizontal_margin)
+
+@Composable
+private fun interactionsConfig() =
+    InteractionsConfig(
+        hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
+        hoverOverlayAlpha = 0.11f,
+        pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
+        pressedOverlayAlpha = 0.15f,
+        // we are OK using this as our content is clipped and all corner radius are larger than this
+        surfaceCornerRadius = 28.dp,
+    )

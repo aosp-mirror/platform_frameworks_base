@@ -19,39 +19,40 @@ package com.android.systemui.statusbar.pipeline.ethernet.domain
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.AccessibilityContentDescriptions
-import com.android.systemui.res.R
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.statusbar.pipeline.shared.data.repository.FakeConnectivityRepository
+import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.pipeline.shared.data.repository.connectivityRepository
+import com.android.systemui.statusbar.pipeline.shared.data.repository.fake
+import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
-import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class EthernetInteractorTest : SysuiTestCase() {
-    private val connectivityRepository = FakeConnectivityRepository()
-    private val underTest = EthernetInteractor(connectivityRepository)
-
-    private val testScope = TestScope()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
+    private val Kosmos.underTest by Kosmos.Fixture { ethernetInteractor }
 
     @Test
     fun icon_default_validated() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.icon)
 
-            connectivityRepository.setEthernetConnected(default = true, validated = true)
+            connectivityRepository.fake.setEthernetConnected(default = true, validated = true)
 
             val expected =
                 Icon.Resource(
                     R.drawable.stat_sys_ethernet_fully,
                     ContentDescription.Resource(
                         AccessibilityContentDescriptions.ETHERNET_CONNECTION_VALUES[1]
-                    )
+                    ),
                 )
 
             assertThat(latest).isEqualTo(expected)
@@ -59,17 +60,17 @@ class EthernetInteractorTest : SysuiTestCase() {
 
     @Test
     fun icon_default_notValidated() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.icon)
 
-            connectivityRepository.setEthernetConnected(default = true, validated = false)
+            connectivityRepository.fake.setEthernetConnected(default = true, validated = false)
 
             val expected =
                 Icon.Resource(
                     R.drawable.stat_sys_ethernet,
                     ContentDescription.Resource(
                         AccessibilityContentDescriptions.ETHERNET_CONNECTION_VALUES[0]
-                    )
+                    ),
                 )
 
             assertThat(latest).isEqualTo(expected)
@@ -77,20 +78,20 @@ class EthernetInteractorTest : SysuiTestCase() {
 
     @Test
     fun icon_notDefault_validated() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.icon)
 
-            connectivityRepository.setEthernetConnected(default = false, validated = true)
+            connectivityRepository.fake.setEthernetConnected(default = false, validated = true)
 
             assertThat(latest).isNull()
         }
 
     @Test
     fun icon_notDefault_notValidated() =
-        testScope.runTest {
+        kosmos.runTest {
             val latest by collectLastValue(underTest.icon)
 
-            connectivityRepository.setEthernetConnected(default = false, validated = false)
+            connectivityRepository.fake.setEthernetConnected(default = false, validated = false)
 
             assertThat(latest).isNull()
         }

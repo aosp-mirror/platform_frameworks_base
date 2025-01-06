@@ -18,6 +18,7 @@ package android.telephony;
 
 import android.annotation.BytesLong;
 import android.annotation.CurrentTimeMillisLong;
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -28,6 +29,7 @@ import android.telephony.Annotation.NetworkType;
 import android.util.Range;
 import android.util.RecurrenceRule;
 
+import com.android.internal.telephony.flags.Flags;
 import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
@@ -83,6 +85,33 @@ public final class SubscriptionPlan implements Parcelable {
     /** Value indicating a timestamp is unknown. */
     public static final long TIME_UNKNOWN = -1;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "SUBSCRIPTION_STATUS_" }, value = {
+            SUBSCRIPTION_STATUS_UNKNOWN,
+            SUBSCRIPTION_STATUS_ACTIVE,
+            SUBSCRIPTION_STATUS_INACTIVE,
+            SUBSCRIPTION_STATUS_TRIAL,
+            SUBSCRIPTION_STATUS_SUSPENDED
+    })
+    public @interface SubscriptionStatus {}
+
+    /** Subscription status is unknown. */
+    @FlaggedApi(Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    public static final int SUBSCRIPTION_STATUS_UNKNOWN = 0;
+    /** Subscription is active. */
+    @FlaggedApi(Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    public static final int SUBSCRIPTION_STATUS_ACTIVE = 1;
+    /** Subscription is inactive. */
+    @FlaggedApi(Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    public static final int SUBSCRIPTION_STATUS_INACTIVE = 2;
+    /** Subscription is in a trial period. */
+    @FlaggedApi(Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    public static final int SUBSCRIPTION_STATUS_TRIAL = 3;
+    /** Subscription is suspended. */
+    @FlaggedApi(Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    public static final int SUBSCRIPTION_STATUS_SUSPENDED = 4;
+
     private final RecurrenceRule cycleRule;
     private CharSequence title;
     private CharSequence summary;
@@ -91,6 +120,7 @@ public final class SubscriptionPlan implements Parcelable {
     private long dataUsageBytes = BYTES_UNKNOWN;
     private long dataUsageTime = TIME_UNKNOWN;
     private @NetworkType int[] networkTypes;
+    private int mSubscriptionStatus = SUBSCRIPTION_STATUS_UNKNOWN;
 
     private SubscriptionPlan(RecurrenceRule cycleRule) {
         this.cycleRule = Preconditions.checkNotNull(cycleRule);
@@ -107,6 +137,7 @@ public final class SubscriptionPlan implements Parcelable {
         dataUsageBytes = source.readLong();
         dataUsageTime = source.readLong();
         networkTypes = source.createIntArray();
+        mSubscriptionStatus = source.readInt();
     }
 
     @Override
@@ -124,6 +155,7 @@ public final class SubscriptionPlan implements Parcelable {
         dest.writeLong(dataUsageBytes);
         dest.writeLong(dataUsageTime);
         dest.writeIntArray(networkTypes);
+        dest.writeInt(mSubscriptionStatus);
     }
 
     @Override
@@ -137,13 +169,14 @@ public final class SubscriptionPlan implements Parcelable {
                 .append(" dataUsageBytes=").append(dataUsageBytes)
                 .append(" dataUsageTime=").append(dataUsageTime)
                 .append(" networkTypes=").append(Arrays.toString(networkTypes))
+                .append(" subscriptionStatus=").append(mSubscriptionStatus)
                 .append("}").toString();
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(cycleRule, title, summary, dataLimitBytes, dataLimitBehavior,
-                dataUsageBytes, dataUsageTime, Arrays.hashCode(networkTypes));
+                dataUsageBytes, dataUsageTime, Arrays.hashCode(networkTypes), mSubscriptionStatus);
     }
 
     @Override
@@ -157,7 +190,8 @@ public final class SubscriptionPlan implements Parcelable {
                     && dataLimitBehavior == other.dataLimitBehavior
                     && dataUsageBytes == other.dataUsageBytes
                     && dataUsageTime == other.dataUsageTime
-                    && Arrays.equals(networkTypes, other.networkTypes);
+                    && Arrays.equals(networkTypes, other.networkTypes)
+                    && mSubscriptionStatus == other.mSubscriptionStatus;
         }
         return false;
     }
@@ -177,6 +211,13 @@ public final class SubscriptionPlan implements Parcelable {
     /** {@hide} */
     public @NonNull RecurrenceRule getCycleRule() {
         return cycleRule;
+    }
+
+    /** Return the end date of this plan, or null if no end date exists. */
+    @FlaggedApi(Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    public @Nullable ZonedDateTime getPlanEndDate() {
+        // ZonedDateTime is immutable, so no need to create a defensive copy.
+        return cycleRule.end;
     }
 
     /** Return the short title of this plan. */
@@ -235,6 +276,16 @@ public final class SubscriptionPlan implements Parcelable {
      */
     public Iterator<Range<ZonedDateTime>> cycleIterator() {
         return cycleRule.cycleIterator();
+    }
+
+    /**
+     * Returns the status of the subscription plan.
+     *
+     * @return The subscription status, or {@link #SUBSCRIPTION_STATUS_UNKNOWN} if not available.
+     */
+    @FlaggedApi(Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+    public @SubscriptionStatus int getSubscriptionStatus() {
+        return mSubscriptionStatus;
     }
 
     /**
@@ -380,6 +431,22 @@ public final class SubscriptionPlan implements Parcelable {
         public @NonNull Builder resetNetworkTypes() {
             plan.networkTypes = Arrays.copyOf(TelephonyManager.getAllNetworkTypes(),
                     TelephonyManager.getAllNetworkTypes().length);
+            return this;
+        }
+
+        /**
+         * Set the subscription status.
+         *
+         * @param subscriptionStatus the current subscription status
+         */
+        @FlaggedApi(Flags.FLAG_SUBSCRIPTION_PLAN_ALLOW_STATUS_AND_END_DATE)
+        public @NonNull Builder setSubscriptionStatus(@SubscriptionStatus int subscriptionStatus) {
+            if (subscriptionStatus < SUBSCRIPTION_STATUS_UNKNOWN
+                    || subscriptionStatus > SUBSCRIPTION_STATUS_SUSPENDED) {
+                throw new IllegalArgumentException(
+                        "Subscription status must be defined with a valid value");
+            }
+            plan.mSubscriptionStatus = subscriptionStatus;
             return this;
         }
     }

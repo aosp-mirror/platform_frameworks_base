@@ -143,7 +143,7 @@ class DisplayWindowSettings {
         }
         // No record is present so use default windowing mode policy.
         final boolean forceFreeForm = mService.mAtmService.mSupportsFreeformWindowManagement
-                && (mService.mIsPc || dc.forceDesktopMode());
+                && (mService.mIsPc || dc.isPublicSecondaryDisplayWithDesktopModeForceEnabled());
         if (forceFreeForm) {
             return WindowConfiguration.WINDOWING_MODE_FREEFORM;
         }
@@ -374,9 +374,12 @@ class DisplayWindowSettings {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
         final SettingsProvider.SettingsEntry settings = mSettingsProvider.getSettings(displayInfo);
 
-        final boolean ignoreOrientationRequest = settings.mIgnoreOrientationRequest != null
-                ? settings.mIgnoreOrientationRequest : false;
-        dc.setIgnoreOrientationRequest(ignoreOrientationRequest);
+        if (settings.mIgnoreOrientationRequest != null) {
+            dc.setIgnoreOrientationRequest(settings.mIgnoreOrientationRequest);
+        } else if (dc.mHasSetIgnoreOrientationRequest) {
+            // Null entry is default behavior, i.e. do not ignore.
+            dc.setIgnoreOrientationRequest(false);
+        }
 
         dc.getDisplayRotation().resetAllowAllRotations();
     }

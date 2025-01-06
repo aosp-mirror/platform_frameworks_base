@@ -19,6 +19,7 @@ package com.android.systemui.qs.tiles.impl.colorcorrection.domain.interactor
 import android.content.Intent
 import android.provider.Settings
 import com.android.systemui.accessibility.data.repository.ColorCorrectionRepository
+import com.android.systemui.qs.shared.QSSettingsPackageRepository
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.interactor.QSTileInput
 import com.android.systemui.qs.tiles.base.interactor.QSTileUserActionInteractor
@@ -32,21 +33,20 @@ class ColorCorrectionUserActionInteractor
 constructor(
     private val colorCorrectionRepository: ColorCorrectionRepository,
     private val qsTileIntentUserActionHandler: QSTileIntentUserInputHandler,
+    private val settingsPackageRepository: QSSettingsPackageRepository,
 ) : QSTileUserActionInteractor<ColorCorrectionTileModel> {
 
     override suspend fun handleInput(input: QSTileInput<ColorCorrectionTileModel>): Unit =
         with(input) {
             when (action) {
                 is QSTileUserAction.Click -> {
-                    colorCorrectionRepository.setIsEnabled(
-                        !data.isEnabled,
-                        user,
-                    )
+                    colorCorrectionRepository.setIsEnabled(!data.isEnabled, user)
                 }
                 is QSTileUserAction.LongClick -> {
                     qsTileIntentUserActionHandler.handle(
                         action.expandable,
                         Intent(Settings.ACTION_COLOR_CORRECTION_SETTINGS)
+                            .setPackage(settingsPackageRepository.getSettingsPackageName()),
                     )
                 }
                 is QSTileUserAction.ToggleClick -> {}

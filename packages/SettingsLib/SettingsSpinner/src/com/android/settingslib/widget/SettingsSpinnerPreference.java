@@ -25,13 +25,15 @@ import android.widget.Spinner;
 import androidx.preference.Preference;
 import androidx.preference.Preference.OnPreferenceClickListener;
 import androidx.preference.PreferenceViewHolder;
+
 import com.android.settingslib.widget.spinner.R;
 
 /**
  * This preference uses Spinner & SettingsSpinnerAdapter which provide default layouts for
  * both view and drop down view of the Spinner.
  */
-public class SettingsSpinnerPreference extends Preference implements OnPreferenceClickListener {
+public class SettingsSpinnerPreference extends Preference
+        implements OnPreferenceClickListener, GroupSectionDividerMixin {
 
     private SettingsSpinnerAdapter mAdapter;
     private AdapterView.OnItemSelectedListener mListener;

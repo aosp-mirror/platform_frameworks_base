@@ -16,13 +16,20 @@
 
 package android.view.textclassifier;
 
+import static android.Manifest.permission.ACCESS_TEXT_CLASSIFIER_BY_TYPE;
+
+import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.ServiceManager;
+import android.permission.flags.Flags;
 import android.view.textclassifier.TextClassifier.TextClassifierType;
 
 import com.android.internal.annotations.GuardedBy;
@@ -113,6 +120,29 @@ public final class TextClassificationManager {
             default:
                 return getSystemTextClassifier(type);
         }
+    }
+
+    /**
+     * Returns a specific type of text classifier.
+     * If the specified text classifier cannot be found, this returns {@link TextClassifier#NO_OP}.
+     * <p>
+     *
+     * @see TextClassifier#CLASSIFIER_TYPE_SELF_PROVIDED
+     * @see TextClassifier#CLASSIFIER_TYPE_DEVICE_DEFAULT
+     * @see TextClassifier#CLASSIFIER_TYPE_ANDROID_DEFAULT
+     * @hide
+     */
+    @SystemApi
+    @NonNull
+    @FlaggedApi(Flags.FLAG_TEXT_CLASSIFIER_CHOICE_API_ENABLED)
+    @RequiresPermission(ACCESS_TEXT_CLASSIFIER_BY_TYPE)
+    public TextClassifier getClassifier(@TextClassifierType int type) {
+        if (mContext.checkCallingOrSelfPermission(ACCESS_TEXT_CLASSIFIER_BY_TYPE)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "Caller does not have permission " + ACCESS_TEXT_CLASSIFIER_BY_TYPE);
+        }
+        return getTextClassifier(type);
     }
 
     private TextClassificationConstants getSettings() {

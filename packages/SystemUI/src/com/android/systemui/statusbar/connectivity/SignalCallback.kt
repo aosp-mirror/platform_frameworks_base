@@ -22,7 +22,13 @@ import android.telephony.SubscriptionInfo
  * SignalCallback contains all of the connectivity updates from [NetworkController]. Implement this
  * interface to be able to draw iconography for Wi-Fi, mobile data, ethernet, call strength
  * indicators, etc.
+ *
+ * @deprecated
  */
+@Deprecated(
+    "Use Recommended Architecture classes instead: MobileIconsInteractor, WifiInteractor, " +
+        "AirplaneModeInteractor, and EthernetInteractor"
+)
 interface SignalCallback {
     /**
      * Called when the Wi-Fi iconography has been updated. Implement this method to draw Wi-Fi icons
@@ -35,8 +41,8 @@ interface SignalCallback {
      * Called when the mobile iconography has been updated. Implement this method to draw mobile
      * indicators
      *
-     * @param mobileDataIndicators a box type containing enough information to properly draw
-     * mobile data icons
+     * @param mobileDataIndicators a box type containing enough information to properly draw mobile
+     *   data icons
      *
      * NOTE: phones can have multiple subscriptions, so this [mobileDataIndicators] object should be
      * indexed based on its [subId][MobileDataIndicators.subId]
@@ -44,8 +50,8 @@ interface SignalCallback {
     fun setMobileDataIndicators(mobileDataIndicators: MobileDataIndicators) {}
 
     /**
-     * Called when the list of mobile data subscriptions has changed. Use this method as a chance
-     * to remove views that are no longer needed, or to make room for new icons to come in
+     * Called when the list of mobile data subscriptions has changed. Use this method as a chance to
+     * remove views that are no longer needed, or to make room for new icons to come in
      *
      * @param subs a [SubscriptionInfo] for each subscription that we know about
      */
@@ -53,8 +59,7 @@ interface SignalCallback {
 
     /**
      * Called when:
-     * 1. The number of [MobileSignalController]s goes to 0 while mobile data is enabled
-     * OR
+     * 1. The number of [MobileSignalController]s goes to 0 while mobile data is enabled OR
      * 2. The presence of any SIM changes
      *
      * @param show whether or not to show a "no sim" view
@@ -86,6 +91,7 @@ interface SignalCallback {
 
     /**
      * Callback for listeners to be able to update the connectivity status
+     *
      * @param noDefaultNetwork whether there is any default network.
      * @param noValidatedNetwork whether there is any validated network.
      * @param noNetworksAvailable whether there is any WiFi networks available.
@@ -93,15 +99,8 @@ interface SignalCallback {
     fun setConnectivityStatus(
         noDefaultNetwork: Boolean,
         noValidatedNetwork: Boolean,
-        noNetworksAvailable: Boolean
-    ) { }
-
-    /**
-     * Callback for listeners to be able to update the call indicator
-     * @param statusIcon the icon for the call indicator
-     * @param subId subscription ID for which to update the UI
-     */
-    fun setCallIndicator(statusIcon: IconState, subId: Int) {}
+        noNetworksAvailable: Boolean,
+    ) {}
 }
 
 /** Box type for [SignalCallback.setWifiIndicators] */
@@ -113,19 +112,28 @@ data class WifiIndicators(
     @JvmField val activityOut: Boolean,
     @JvmField val description: String?,
     @JvmField val isTransient: Boolean,
-    @JvmField val statusLabel: String?
+    @JvmField val statusLabel: String?,
 ) {
     override fun toString(): String {
         return StringBuilder("WifiIndicators[")
-                .append("enabled=").append(enabled)
-                .append(",statusIcon=").append(statusIcon?.toString() ?: "")
-                .append(",qsIcon=").append(qsIcon?.toString() ?: "")
-                .append(",activityIn=").append(activityIn)
-                .append(",activityOut=").append(activityOut)
-                .append(",qsDescription=").append(description)
-                .append(",isTransient=").append(isTransient)
-                .append(",statusLabel=").append(statusLabel)
-                .append(']').toString()
+            .append("enabled=")
+            .append(enabled)
+            .append(",statusIcon=")
+            .append(statusIcon?.toString() ?: "")
+            .append(",qsIcon=")
+            .append(qsIcon?.toString() ?: "")
+            .append(",activityIn=")
+            .append(activityIn)
+            .append(",activityOut=")
+            .append(activityOut)
+            .append(",qsDescription=")
+            .append(description)
+            .append(",isTransient=")
+            .append(isTransient)
+            .append(",statusLabel=")
+            .append(statusLabel)
+            .append(']')
+            .toString()
     }
 }
 
@@ -142,23 +150,37 @@ data class MobileDataIndicators(
     @JvmField val qsDescription: CharSequence?,
     @JvmField val subId: Int,
     @JvmField val roaming: Boolean,
-    @JvmField val showTriangle: Boolean
+    @JvmField val showTriangle: Boolean,
 ) {
     override fun toString(): String {
-        return java.lang.StringBuilder("MobileDataIndicators[")
-                .append("statusIcon=").append(statusIcon?.toString() ?: "")
-                .append(",qsIcon=").append(qsIcon?.toString() ?: "")
-                .append(",statusType=").append(statusType)
-                .append(",qsType=").append(qsType)
-                .append(",activityIn=").append(activityIn)
-                .append(",activityOut=").append(activityOut)
-                .append(",typeContentDescription=").append(typeContentDescription)
-                .append(",typeContentDescriptionHtml=").append(typeContentDescriptionHtml)
-                .append(",description=").append(qsDescription)
-                .append(",subId=").append(subId)
-                .append(",roaming=").append(roaming)
-                .append(",showTriangle=").append(showTriangle)
-                .append(']').toString()
+        return java.lang
+            .StringBuilder("MobileDataIndicators[")
+            .append("statusIcon=")
+            .append(statusIcon?.toString() ?: "")
+            .append(",qsIcon=")
+            .append(qsIcon?.toString() ?: "")
+            .append(",statusType=")
+            .append(statusType)
+            .append(",qsType=")
+            .append(qsType)
+            .append(",activityIn=")
+            .append(activityIn)
+            .append(",activityOut=")
+            .append(activityOut)
+            .append(",typeContentDescription=")
+            .append(typeContentDescription)
+            .append(",typeContentDescriptionHtml=")
+            .append(typeContentDescriptionHtml)
+            .append(",description=")
+            .append(qsDescription)
+            .append(",subId=")
+            .append(subId)
+            .append(",roaming=")
+            .append(roaming)
+            .append(",showTriangle=")
+            .append(showTriangle)
+            .append(']')
+            .toString()
     }
 }
 
@@ -166,13 +188,20 @@ data class MobileDataIndicators(
 data class IconState(
     @JvmField val visible: Boolean,
     @JvmField val icon: Int,
-    @JvmField val contentDescription: String
+    @JvmField val contentDescription: String,
 ) {
     override fun toString(): String {
         val builder = java.lang.StringBuilder()
-        return builder.append("[visible=").append(visible).append(',')
-                .append("icon=").append(icon).append(',')
-                .append("contentDescription=").append(contentDescription).append(']')
-                .toString()
+        return builder
+            .append("[visible=")
+            .append(visible)
+            .append(',')
+            .append("icon=")
+            .append(icon)
+            .append(',')
+            .append("contentDescription=")
+            .append(contentDescription)
+            .append(']')
+            .toString()
     }
 }

@@ -22,6 +22,7 @@ import androidx.collection.MutableScatterMap
 import com.google.errorprone.annotations.CanIgnoreReturnValue
 import java.util.WeakHashMap
 import java.util.concurrent.Executor
+import java.util.concurrent.atomic.AtomicInteger
 
 /**
  * Callback to be informed of changes in [KeyedObservable] object.
@@ -202,6 +203,70 @@ open class KeyedDataObservable<K> : KeyedObservable<K> {
             entry.value.execute { observer.onKeyChanged(key, reason) }
         }
     }
+
+    open fun hasAnyObserver(): Boolean {
+        synchronized(observers) { if (observers.isNotEmpty()) return true }
+        synchronized(keyedObservers) { if (keyedObservers.isNotEmpty()) return true }
+        return false
+    }
+}
+
+/** [KeyedDataObservable] that maintains a counter for the observers. */
+abstract class AbstractKeyedDataObservable<K> : KeyedDataObservable<K>() {
+    /**
+     * Counter of observers.
+     *
+     * The value is accurate only when [addObserver] and [removeObserver] are invoked in pairs.
+     */
+    private val counter = AtomicInteger()
+
+    override fun addObserver(observer: KeyedObserver<K?>, executor: Executor) =
+        if (super.addObserver(observer, executor)) {
+            onObserverAdded()
+            true
+        } else {
+            false
+        }
+
+    override fun addObserver(key: K, observer: KeyedObserver<K>, executor: Executor) =
+        if (super.addObserver(key, observer, executor)) {
+            onObserverAdded()
+            true
+        } else {
+            false
+        }
+
+    private fun onObserverAdded() {
+        if (counter.getAndIncrement() == 0) onFirstObserverAdded()
+    }
+
+    /** Callbacks when the first observer is just added. */
+    protected abstract fun onFirstObserverAdded()
+
+    override fun removeObserver(observer: KeyedObserver<K?>) =
+        if (super.removeObserver(observer)) {
+            onObserverRemoved()
+            true
+        } else {
+            false
+        }
+
+    override fun removeObserver(key: K, observer: KeyedObserver<K>) =
+        if (super.removeObserver(key, observer)) {
+            onObserverRemoved()
+            true
+        } else {
+            false
+        }
+
+    private fun onObserverRemoved() {
+        if (counter.decrementAndGet() == 0) onLastObserverRemoved()
+    }
+
+    /** Callbacks when the last observer is just removed. */
+    protected abstract fun onLastObserverRemoved()
+
+    override fun hasAnyObserver() = counter.get() > 0
 }
 
 /** [KeyedObservable] with no-op implementations for all interfaces. */

@@ -16,6 +16,7 @@
 
 package com.android.systemui.controls.ui
 
+import android.app.Activity
 import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
@@ -25,36 +26,40 @@ import android.content.res.Configuration
 import android.os.Bundle
 import android.os.RemoteException
 import android.service.dreams.IDreamManager
-import android.view.View
 import android.view.ViewGroup
-import android.view.WindowInsets
-import android.view.WindowInsets.Type
 import android.view.WindowManager
 import androidx.activity.ComponentActivity
-import com.android.systemui.res.R
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.controls.management.ControlsAnimations
+import com.android.systemui.controls.management.ControlsManagementActivity
+import com.android.systemui.controls.management.applyInsets
 import com.android.systemui.controls.settings.ControlsSettingsDialogManager
 import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import javax.inject.Inject
 
 /**
  * Displays Device Controls inside an activity. This activity is available to be displayed over the
  * lockscreen if the user has allowed it via
- * [android.provider.Settings.Secure.LOCKSCREEN_SHOW_CONTROLS]. This activity will be
- * destroyed on SCREEN_OFF events, due to issues with occluded activities over lockscreen as well as
- * user expectations for the activity to not continue running.
+ * [android.provider.Settings.Secure.LOCKSCREEN_SHOW_CONTROLS]. This activity will be destroyed on
+ * SCREEN_OFF events, due to issues with occluded activities over lockscreen as well as user
+ * expectations for the activity to not continue running.
  */
 // Open for testing
-open class ControlsActivity @Inject constructor(
+open class ControlsActivity
+@Inject
+constructor(
     private val uiController: ControlsUiController,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val dreamManager: IDreamManager,
     private val featureFlags: FeatureFlags,
     private val controlsSettingsDialogManager: ControlsSettingsDialogManager,
-    private val keyguardStateController: KeyguardStateController
-) : ComponentActivity() {
+    private val keyguardStateController: KeyguardStateController,
+) : ComponentActivity(), ControlsManagementActivity {
+
+    override val activity: Activity
+        get() = this
 
     private val lastConfiguration = Configuration()
 
@@ -69,38 +74,27 @@ open class ControlsActivity @Inject constructor(
 
         setContentView(R.layout.controls_fullscreen)
 
+        applyInsets(R.id.control_detail_root)
+
         lifecycle.addObserver(
             ControlsAnimations.observerForAnimations(
                 requireViewById(R.id.control_detail_root),
                 window,
                 intent,
-                false
+                false,
             )
         )
-
-        requireViewById<ViewGroup>(R.id.control_detail_root).apply {
-            setOnApplyWindowInsetsListener {
-                v: View, insets: WindowInsets ->
-                    v.apply {
-                        val l = getPaddingLeft()
-                        val t = getPaddingTop()
-                        val r = getPaddingRight()
-                        setPadding(l, t, r, insets.getInsets(Type.systemBars()).bottom)
-                    }
-
-                WindowInsets.CONSUMED
-            }
-        }
 
         initBroadcastReceiver()
     }
 
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
-        val interestingFlags = ActivityInfo.CONFIG_ORIENTATION or
+        val interestingFlags =
+            ActivityInfo.CONFIG_ORIENTATION or
                 ActivityInfo.CONFIG_SCREEN_SIZE or
                 ActivityInfo.CONFIG_SMALLEST_SCREEN_SIZE
-        if (lastConfiguration.diff(newConfig) and interestingFlags != 0 ) {
+        if (lastConfiguration.diff(newConfig) and interestingFlags != 0) {
             uiController.onSizeChange()
         }
         lastConfiguration.setTo(newConfig)
@@ -164,15 +158,18 @@ open class ControlsActivity @Inject constructor(
     }
 
     private fun initBroadcastReceiver() {
-        broadcastReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context, intent: Intent) {
-                val action = intent.getAction()
-                if (action == Intent.ACTION_SCREEN_OFF ||
-                    action == Intent.ACTION_DREAMING_STARTED) {
-                    finish()
+        broadcastReceiver =
+            object : BroadcastReceiver() {
+                override fun onReceive(context: Context, intent: Intent) {
+                    val action = intent.getAction()
+                    if (
+                        action == Intent.ACTION_SCREEN_OFF ||
+                            action == Intent.ACTION_DREAMING_STARTED
+                    ) {
+                        finish()
+                    }
                 }
             }
-        }
 
         val filter = IntentFilter()
         filter.addAction(Intent.ACTION_SCREEN_OFF)

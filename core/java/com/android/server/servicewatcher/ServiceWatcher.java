@@ -214,11 +214,7 @@ public interface ServiceWatcher {
 
         @Override
         public String toString() {
-            if (mComponentName == null) {
-                return "none";
-            } else {
-                return mUid + "/" + mComponentName.flattenToShortString();
-            }
+            return mUid + "/" + mComponentName.flattenToShortString();
         }
     }
 

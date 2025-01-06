@@ -42,8 +42,6 @@ import com.android.settingslib.spaprivileged.framework.compose.getPlaceholder
 import com.android.settingslib.spaprivileged.model.app.AppListModel
 import com.android.settingslib.spaprivileged.model.app.AppRecord
 import com.android.settingslib.spaprivileged.model.app.userId
-import com.android.settingslib.spaprivileged.model.enterprise.EnhancedConfirmation
-import com.android.settingslib.spaprivileged.model.enterprise.Restrictions
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderFactory
 import com.android.settingslib.spaprivileged.model.enterprise.RestrictionsProviderImpl
 import com.android.settingslib.spaprivileged.model.enterprise.rememberRestrictedMode
@@ -151,23 +149,19 @@ internal class TogglePermissionInternalAppListModel<T : AppRecord>(
 
     @Composable
     fun getSummary(record: T): () -> String {
-        val restrictions = remember(record.app.userId, record.app.packageName) {
-            Restrictions(
+        val restrictions =
+            listModel.getRestrictions(
                 userId = record.app.userId,
-                keys = listModel.switchRestrictionKeys,
-                enhancedConfirmation = listModel.enhancedConfirmationKey?.let {
-                    EnhancedConfirmation(
-                        key = it,
-                        packageName = record.app.packageName)
-                })
-        }
+                packageName = record.app.packageName,
+            )
         val restrictedMode by restrictionsProviderFactory.rememberRestrictedMode(restrictions)
         val allowed = listModel.isAllowed(record)
         return RestrictedSwitchPreferenceModel.getSummary(
             context = context,
-            restrictedModeSupplier = { restrictedMode },
             summaryIfNoRestricted = { getSummaryIfNoRestricted(allowed()) },
-            checked = allowed,
+            checkedIfNoRestricted = allowed,
+            checkedIfBlockedByAdmin = listModel.switchifBlockedByAdminOverrideCheckedValueTo,
+            restrictedModeSupplier = { restrictedMode },
         )
     }
 

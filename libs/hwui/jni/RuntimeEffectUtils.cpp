@@ -90,7 +90,7 @@ void UpdateChild(JNIEnv* env, SkRuntimeEffectBuilder* builder, const char* child
                  SkFlattenable* childEffect) {
     SkRuntimeShaderBuilder::BuilderChild builderChild = builder->child(childName);
     if (builderChild.fChild == nullptr) {
-        ThrowIAEFmt(env, "unable to find shader named %s", childName);
+        ThrowIAEFmt(env, "unable to find child named %s", childName);
         return;
     }
 

@@ -101,14 +101,14 @@ object EchoApiImpl : ApiHandler<String?, String?>,
                      ApiDescriptor<String?, String?> by EchoApi {
   override suspend fun invoke(
     application: Application,
-    myUid: Int,
+    callingPid: Int,
     callingUid: Int,
     request: String?,
   ): String? = request
 
   override fun hasPermission(
     application: Application,
-    myUid: Int,
+    callingPid: Int,
     callingUid: Int,
     request: String?,
   ): Boolean = (request?.length ?: 0) <= 5

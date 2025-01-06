@@ -86,6 +86,7 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.scene.ui.view.WindowRootView;
 import com.android.systemui.shade.QSHeaderBoundsProvider;
 import com.android.systemui.shade.ShadeController;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.shade.ShadeViewController;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.LockscreenShadeTransitionController;
@@ -98,9 +99,9 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.DynamicPrivacyController;
-import com.android.systemui.statusbar.notification.HeadsUpNotificationViewControllerEmptyImpl;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper;
-import com.android.systemui.statusbar.notification.HeadsUpTouchHelper.HeadsUpNotificationViewController;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpNotificationViewControllerEmptyImpl;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper.HeadsUpNotificationViewController;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
 import com.android.systemui.statusbar.notification.NotificationActivityStarter;
 import com.android.systemui.statusbar.notification.NotificationWakeUpCoordinator;
@@ -138,8 +139,8 @@ import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController.DeviceProvisionedListener;
-import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener;
 import com.android.systemui.statusbar.policy.SensitiveNotificationProtectionController;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -428,9 +429,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     };
 
     /**
-     * Recalculate sensitiveness without animation; called when waking up while keyguard occluded.
+     * Recalculate sensitiveness without animation; called when waking up while keyguard occluded,
+     * or whenever we update the Lockscreen public mode.
      */
-    public void updateSensitivenessForOccludedWakeup() {
+    public void updateSensitivenessWithoutAnimation() {
         updateSensitivenessWithAnimation(false);
     }
 
@@ -734,7 +736,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             TunerService tunerService,
             DeviceProvisionedController deviceProvisionedController,
             DynamicPrivacyController dynamicPrivacyController,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             SysuiStatusBarStateController statusBarStateController,
             KeyguardMediaController keyguardMediaController,
             KeyguardBypassController keyguardBypassController,
@@ -1222,7 +1224,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     public void goToFullShade(long delay) {
         SceneContainerFlag.assertInLegacyMode();
-        mView.goToFullShade(delay);
+        mView.animateGoToFullShade(delay);
     }
 
     public void setOverScrollAmount(float amount, boolean onTop, boolean animate,
@@ -1601,6 +1603,12 @@ public class NotificationStackScrollLayoutController implements Dumpable {
             default:
                 throw new IllegalStateException("Bad selection: " + selection);
         }
+    }
+
+    /** Sets whether the NSSL is displayed over the unoccluded Lockscreen. */
+    public void setOnLockscreen(boolean isOnLockscreen) {
+        if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
+        mNotificationListContainer.setOnLockscreen(isOnLockscreen);
     }
 
     /**
@@ -2029,6 +2037,11 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         }
 
         @Override
+        public void setOnLockscreen(boolean isOnLockscreen) {
+            mView.setOnLockscreen(isOnLockscreen);
+        }
+
+        @Override
         public void setMaxDisplayedNotifications(int maxNotifications) {
             mView.setMaxDisplayedNotifications(maxNotifications);
         }
@@ -2190,11 +2203,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 expandingNotification = mView.isExpandingNotification();
                 if (mView.getExpandedInThisMotion() && !expandingNotification && wasExpandingBefore
                         && !mView.getDisallowScrollingInThisMotion()) {
-                    // We need to dispatch the overscroll differently when Scene Container is on,
-                    // since NSSL no longer controls its own scroll.
+                    // Finish expansion here, as this gesture will be marked to be sent to
+                    // scene container
                     if (SceneContainerFlag.isEnabled() && !isCancelOrUp) {
-                        mView.startOverscrollAfterExpanding();
-                        return true;
+                        expandHelper.finishExpanding();
                     } else {
                         mView.dispatchDownEventToScroller(ev);
                     }

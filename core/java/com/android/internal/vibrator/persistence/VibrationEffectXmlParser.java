@@ -16,11 +16,14 @@
 
 package com.android.internal.vibrator.persistence;
 
+import static com.android.internal.vibrator.persistence.XmlConstants.TAG_BASIC_ENVELOPE_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_PREDEFINED_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_PRIMITIVE_EFFECT;
+import static com.android.internal.vibrator.persistence.XmlConstants.TAG_REPEATING_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_VENDOR_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_VIBRATION_EFFECT;
 import static com.android.internal.vibrator.persistence.XmlConstants.TAG_WAVEFORM_EFFECT;
+import static com.android.internal.vibrator.persistence.XmlConstants.TAG_WAVEFORM_ENVELOPE_EFFECT;
 
 import android.annotation.NonNull;
 import android.os.VibrationEffect;
@@ -92,6 +95,52 @@ import java.util.List;
  *   }
  * </pre>
  *
+ * * Waveform Envelope effects
+ *
+ * <pre>
+ *     {@code
+ *       <vibration-effect>
+ *         <waveform-envelope-effect initialFrequencyHz="20.0">
+ *           <control-point amplitude="0.2" frequencyHz="80.0" durationMs="50" />
+ *           <control-point amplitude="0.5" frequencyHz="150.0" durationMs="50" />
+ *         </envelope-effect>
+ *       </vibration-effect>
+ *     }
+ * </pre>
+ *
+ * * Basic Envelope effects
+ *
+ * <pre>
+ *     {@code
+ *       <vibration-effect>
+ *         <basic-envelope-effect initialSharpness="0.3">
+ *            <control-point intensity="0.2" sharpness="0.5" durationMs="50" />
+ *            <control-point intensity="0.0" sharpness="1.0" durationMs="50" />
+ *          </envelope-effect>
+ *       </vibration-effect>
+ *     }
+ * </pre>
+ *
+ * * Repeating effects
+ *
+ * <pre>
+ *     {@code
+ *       <vibration-effect>
+ *          <repeating-effect>
+ *            <preamble>
+ *                <primitive-effect name="click" />
+ *            </preamble>
+ *            <repeating>
+ *              <basic-envelope-effect>
+ *                <control-point intensity="0.3" sharpness="0.4" durationMs="25" />
+ *                <control-point intensity="0.0" sharpness="0.5" durationMs="30" />
+ *              </basic-envelope-effect>
+ *            </repeating>
+ *          </repeating-effect>
+ *       </vibration-effect>
+ *     }
+ * </pre>
+ *
  * @hide
  */
 public class VibrationEffectXmlParser {
@@ -151,6 +200,24 @@ public class VibrationEffectXmlParser {
                 serializedVibration = new SerializedComposedEffect(
                         SerializedAmplitudeStepWaveform.Parser.parseNext(parser));
                 break;
+            case TAG_WAVEFORM_ENVELOPE_EFFECT:
+                if (Flags.normalizedPwleEffects()) {
+                    serializedVibration = new SerializedComposedEffect(
+                            SerializedWaveformEnvelopeEffect.Parser.parseNext(parser, flags));
+                    break;
+                } // else fall through
+            case TAG_BASIC_ENVELOPE_EFFECT:
+                if (Flags.normalizedPwleEffects()) {
+                    serializedVibration = new SerializedComposedEffect(
+                            SerializedBasicEnvelopeEffect.Parser.parseNext(parser, flags));
+                    break;
+                } // else fall through
+            case TAG_REPEATING_EFFECT:
+                if (Flags.normalizedPwleEffects()) {
+                    serializedVibration = new SerializedComposedEffect(
+                            SerializedRepeatingEffect.Parser.parseNext(parser, flags));
+                    break;
+                } // else fall through
             default:
                 throw new XmlParserException("Unexpected tag " + parser.getName()
                         + " in vibration tag " + vibrationTagName);

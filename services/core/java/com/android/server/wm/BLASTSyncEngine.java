@@ -95,8 +95,17 @@ class BLASTSyncEngine {
 
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
+        default void onTransactionCommitted() {}
         default void onTransactionCommitTimeout() {}
         default void onReadyTimeout() {}
+
+        default void onReadyTraceStart(String name, int id) {
+            Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, name, id);
+        }
+
+        default void onReadyTraceEnd(String name, int id) {
+            Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, name, id);
+        }
     }
 
     /**
@@ -149,8 +158,8 @@ class BLASTSyncEngine {
                 }
             };
             if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
-                mTraceName = name + "SyncGroupReady";
-                Trace.asyncTraceBegin(TRACE_TAG_WINDOW_MANAGER, mTraceName, id);
+                mTraceName = name + "-SyncReady#" + id;
+                listener.onReadyTraceStart(mTraceName, id);
             }
         }
 
@@ -209,29 +218,26 @@ class BLASTSyncEngine {
 
         private void finishNow() {
             if (mTraceName != null) {
-                Trace.asyncTraceEnd(TRACE_TAG_WINDOW_MANAGER, mTraceName, mSyncId);
+                mListener.onReadyTraceEnd(mTraceName, mSyncId);
             }
             ProtoLog.v(WM_DEBUG_SYNC_ENGINE, "SyncGroup %d: Finished!", mSyncId);
             SurfaceControl.Transaction merged = mWm.mTransactionFactory.get();
             if (mOrphanTransaction != null) {
                 merged.merge(mOrphanTransaction);
             }
-            for (WindowContainer wc : mRootMembers) {
-                wc.finishSync(merged, this, false /* cancel */);
-            }
 
-            final ArraySet<WindowContainer> wcAwaitingCommit = new ArraySet<>();
-            for (WindowContainer wc : mRootMembers) {
-                wc.waitForSyncTransactionCommit(wcAwaitingCommit);
-            }
-
-            final int syncId = mSyncId;
             final long mergedTxId = merged.getId();
-            final String syncName = mSyncName;
             class CommitCallback implements Runnable {
+                final ArraySet<WindowContainer> mWcAwaitingCommit = new ArraySet<>();
+
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
                 public void onCommitted(SurfaceControl.Transaction t) {
+                    mListener.onTransactionCommitted();
+                    if (mTraceName != null) {
+                        Trace.instant(TRACE_TAG_WINDOW_MANAGER,
+                                mSyncName + "#" + mSyncId + "-committed");
+                    }
                     // Don't wait to hold the global lock to remove the timeout runnable
                     mHandler.removeCallbacks(this);
                     synchronized (mWm.mGlobalLock) {
@@ -239,11 +245,11 @@ class BLASTSyncEngine {
                             return;
                         }
                         ran = true;
-                        for (WindowContainer wc : wcAwaitingCommit) {
-                            wc.onSyncTransactionCommitted(t);
+                        for (int i = mWcAwaitingCommit.size() - 1; i >= 0; --i) {
+                            mWcAwaitingCommit.valueAt(i).onSyncTransactionCommitted(t);
                         }
                         t.apply();
-                        wcAwaitingCommit.clear();
+                        mWcAwaitingCommit.clear();
                     }
                 }
 
@@ -254,7 +260,7 @@ class BLASTSyncEngine {
                     // a trace. Since these kind of ANRs can trigger such an issue,
                     // try and ensure we will have some visibility in both cases.
                     Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionCommitTimeout");
-                    Slog.e(TAG, "WM sent Transaction (#" + syncId + ", " + syncName + ", tx="
+                    Slog.e(TAG, "WM sent Transaction (#" + mSyncId + ", " + mSyncName + ", tx="
                             + mergedTxId + ") to organizer, but never received commit callback."
                             + " Application ANR likely to follow.");
                     Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -266,10 +272,21 @@ class BLASTSyncEngine {
                 }
             };
             CommitCallback callback = new CommitCallback();
+            for (int i = mRootMembers.size() - 1; i >= 0; --i) {
+                final WindowContainer<?> wc = mRootMembers.valueAt(i);
+                wc.finishSync(merged, this, false /* cancel */);
+                wc.waitForSyncTransactionCommit(callback.mWcAwaitingCommit);
+            }
+
             merged.addTransactionCommittedListener(Runnable::run,
                     () -> callback.onCommitted(new SurfaceControl.Transaction()));
             mHandler.postDelayed(callback, BLAST_TIMEOUT_DURATION);
 
+            if (mWm.mAnimator.mPendingState == WindowAnimator.PENDING_STATE_NEED_APPLY) {
+                // Applies pending transaction before onTransactionReady to ensure the order with
+                // sync transaction. This is unlikely to happen unless animator thread is slow.
+                mWm.mAnimator.applyPendingTransaction();
+            }
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "onTransactionReady");
             mListener.onTransactionReady(mSyncId, merged);
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -352,6 +369,10 @@ class BLASTSyncEngine {
                 Slog.w(TAG, "addToSync: unset SyncGroup " + wc.mSyncGroup.mSyncId
                         + " for non-sync " + wc);
                 wc.mSyncGroup = null;
+            }
+            if (mWm.mAnimator.mPendingState == WindowAnimator.PENDING_STATE_HAS_CHANGES
+                    && wc.mSyncState != WindowContainer.SYNC_STATE_NONE) {
+                mWm.mAnimator.mPendingState = WindowAnimator.PENDING_STATE_NEED_APPLY;
             }
             if (mReady) {
                 mWm.mWindowPlacerLocked.requestTraversal();

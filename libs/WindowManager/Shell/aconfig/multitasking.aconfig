@@ -1,4 +1,6 @@
 # proto-file: build/make/tools/aconfig/aconfig_protos/protos/aconfig.proto
+# proto-message: flag_declarations
+# Project link: http://gantry/projects/android_platform_multitasking
 
 package: "com.android.wm.shell"
 container: "system"
@@ -132,13 +134,6 @@ flag {
 }
 
 flag {
-    name: "enable_bubble_bar_in_persistent_task_bar"
-    namespace: "multitasking"
-    description: "Enable bubble bar to be shown in the persistent task bar"
-    bug: "346391377"
-}
-
-flag {
     name: "bubble_view_info_executors"
     namespace: "multitasking"
     description: "Use executors to inflate bubble views"
@@ -177,4 +172,18 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "task_view_repository"
+    namespace: "multitasking"
+    description: "Factor task-view state tracking out of taskviewtransitions"
+    bug: "384976265"
+}
+
+flag {
+    name: "enable_non_default_display_split"
+    namespace: "multitasking"
+    description: "Enables split screen on non default displays"
+    bug: "384999213"
 }

@@ -15,8 +15,16 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.operations.utilities.StringSerializer;
 
 public interface SerializableToString {
-    void serializeToString(int indent, StringSerializer serializer);
+    /**
+     * Returns a stable string representation of an operation
+     *
+     * @param indent the indentation for that operation
+     * @param serializer the serializer object
+     */
+    void serializeToString(int indent, @NonNull StringSerializer serializer);
 }

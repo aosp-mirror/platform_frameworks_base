@@ -23,6 +23,8 @@ import android.media.Image.Plane;
 import android.util.Log;
 import android.util.Size;
 
+import com.android.internal.camera.flags.Flags;
+
 import libcore.io.Memory;
 
 import java.nio.ByteBuffer;
@@ -44,11 +46,17 @@ class ImageUtils {
      * are used.
      */
     public static int getNumPlanesForFormat(int format) {
+        if (Flags.cameraHeifGainmap()) {
+            if (format == ImageFormat.HEIC_ULTRAHDR) {
+                return 1;
+            }
+        }
         switch (format) {
             case ImageFormat.YV12:
             case ImageFormat.YUV_420_888:
             case ImageFormat.NV21:
             case ImageFormat.YCBCR_P010:
+            case ImageFormat.YCBCR_P210:
                 return 3;
             case ImageFormat.NV16:
                 return 2;
@@ -88,6 +96,7 @@ class ImageUtils {
         switch(hardwareBufferFormat) {
             case HardwareBuffer.YCBCR_420_888:
             case HardwareBuffer.YCBCR_P010:
+            case HardwareBuffer.YCBCR_P210:
                 return 3;
             case HardwareBuffer.RGBA_8888:
             case HardwareBuffer.RGBX_8888:
@@ -229,6 +238,11 @@ class ImageUtils {
     public static int getEstimatedNativeAllocBytes(int width, int height, int format,
             int numImages) {
         double estimatedBytePerPixel;
+        if (Flags.cameraHeifGainmap()) {
+            if (format == ImageFormat.HEIC_ULTRAHDR) {
+                estimatedBytePerPixel = 0.3;
+            }
+        }
         switch (format) {
             // 10x compression from RGB_888
             case ImageFormat.JPEG:
@@ -269,6 +283,7 @@ class ImageUtils {
             case PixelFormat.RGBA_8888:
             case PixelFormat.RGBX_8888:
             case PixelFormat.RGBA_1010102:
+            case ImageFormat.YCBCR_P210:
                 estimatedBytePerPixel = 4.0;
                 break;
             default:
@@ -283,6 +298,11 @@ class ImageUtils {
     }
 
     private static Size getEffectivePlaneSizeForImage(Image image, int planeIdx) {
+        if (Flags.cameraHeifGainmap()) {
+            if (image.getFormat() == ImageFormat.HEIC_ULTRAHDR){
+                return new Size(image.getWidth(), image.getHeight());
+            }
+        }
         switch (image.getFormat()) {
             case ImageFormat.YCBCR_P010:
             case ImageFormat.YV12:
@@ -318,6 +338,12 @@ class ImageUtils {
                 return new Size(image.getWidth(), image.getHeight());
             case ImageFormat.PRIVATE:
                 return new Size(0, 0);
+            case ImageFormat.YCBCR_P210:
+                if (planeIdx == 0) {
+                    return new Size(image.getWidth(), image.getHeight());
+                } else {
+                    return new Size(image.getWidth() / 2, image.getHeight());
+                }
             default:
                 if (Log.isLoggable(IMAGEUTILS_LOG_TAG, Log.VERBOSE)) {
                     Log.v(IMAGEUTILS_LOG_TAG, "getEffectivePlaneSizeForImage() uses"

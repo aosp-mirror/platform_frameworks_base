@@ -935,7 +935,6 @@ public class KeyEvent extends InputEvent implements Parcelable {
      */
     public static final int KEYCODE_MACRO_4 = 316;
     /** Key code constant: To open emoji picker */
-    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     public static final int KEYCODE_EMOJI_PICKER = 317;
     /**
      * Key code constant: To take a screenshot
@@ -944,15 +943,80 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * unlike {@code KEYCODE_SYSRQ} which is sent to the app first and only if the app
      * doesn't handle it, the framework handles it (to take a screenshot).
      */
-    @FlaggedApi(Flags.FLAG_EMOJI_AND_SCREENSHOT_KEYCODES_AVAILABLE)
     public static final int KEYCODE_SCREENSHOT = 318;
+    /** Key code constant: To start dictate to an input field */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_DICTATE = 319;
+    /**
+     * Key code constant: AC New
+     *
+     * e.g. To create a new instance of a window, open a new tab, etc.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_NEW = 320;
+    /**
+     * Key code constant: AC Close
+     *
+     * e.g. To close current instance of the application window, close the current tab, etc.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_CLOSE = 321;
+    /** Key code constant: To toggle 'Do Not Disturb' mode */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_DO_NOT_DISTURB = 322;
+    /** Key code constant: To Print */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_PRINT = 323;
+    /** Key code constant: To Lock the screen */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_LOCK = 324;
+    /** Key code constant: To toggle fullscreen mode (on the current application) */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_FULLSCREEN = 325;
+    /** Key code constant: F13 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F13 = 326;
+    /** Key code constant: F14 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F14 = 327;
+    /** Key code constant: F15 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F15 = 328;
+    /** Key code constant: F16 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F16 = 329;
+    /** Key code constant: F17 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F17 = 330;
+    /** Key code constant: F18 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F18 = 331;
+    /** Key code constant: F19 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F19 = 332;
+    /** Key code constant: F20 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F20 = 333;
+    /** Key code constant: F21 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F21 = 334;
+    /** Key code constant: F22 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F22 = 335;
+    /** Key code constant: F23 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F23 = 336;
+    /** Key code constant: F24 key. */
+    @FlaggedApi(Flags.FLAG_ENABLE_NEW_25Q2_KEYCODES)
+    public static final int KEYCODE_F24 = 337;
 
     /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_SCREENSHOT;
+    @SuppressWarnings("FlaggedApi")
+    public static final int LAST_KEYCODE = KEYCODE_F24;
 
     /** @hide */
     @IntDef(prefix = {"KEYCODE_"}, value = {
@@ -1275,6 +1339,25 @@ public class KeyEvent extends InputEvent implements Parcelable {
             KEYCODE_MACRO_4,
             KEYCODE_EMOJI_PICKER,
             KEYCODE_SCREENSHOT,
+            KEYCODE_DICTATE,
+            KEYCODE_NEW,
+            KEYCODE_CLOSE,
+            KEYCODE_DO_NOT_DISTURB,
+            KEYCODE_PRINT,
+            KEYCODE_LOCK,
+            KEYCODE_FULLSCREEN,
+            KEYCODE_F13,
+            KEYCODE_F14,
+            KEYCODE_F15,
+            KEYCODE_F16,
+            KEYCODE_F17,
+            KEYCODE_F18,
+            KEYCODE_F19,
+            KEYCODE_F20,
+            KEYCODE_F21,
+            KEYCODE_F22,
+            KEYCODE_F23,
+            KEYCODE_F24,
     })
     @Retention(RetentionPolicy.SOURCE)
     @interface KeyCode {}
@@ -2505,6 +2588,32 @@ public class KeyEvent extends InputEvent implements Parcelable {
     /** @hide */
     public static final boolean isAltKey(int keyCode) {
         return keyCode == KeyEvent.KEYCODE_ALT_LEFT || keyCode == KeyEvent.KEYCODE_ALT_RIGHT;
+    }
+
+    /**
+     * Returns whether the key code passed as argument is allowed for visible background users.
+     * Visible background users are expected to run on secondary displays with certain limitations
+     * on system keys.
+     *
+     * @hide
+     */
+    public static boolean isVisibleBackgroundUserAllowedKey(int keyCode) {
+        switch (keyCode) {
+            case KeyEvent.KEYCODE_POWER:
+            case KeyEvent.KEYCODE_SLEEP:
+            case KeyEvent.KEYCODE_WAKEUP:
+            case KeyEvent.KEYCODE_CALL:
+            case KeyEvent.KEYCODE_ENDCALL:
+            case KeyEvent.KEYCODE_ASSIST:
+            case KeyEvent.KEYCODE_VOICE_ASSIST:
+            case KeyEvent.KEYCODE_MUTE:
+            case KeyEvent.KEYCODE_VOLUME_MUTE:
+            case KeyEvent.KEYCODE_RECENT_APPS:
+            case KeyEvent.KEYCODE_APP_SWITCH:
+            case KeyEvent.KEYCODE_NOTIFICATION:
+                return false;
+        }
+        return true;
     }
 
     /** {@inheritDoc} */

@@ -9,2291 +9,14580 @@ const char SCRIPT_CODES[][4] = {
     /* 5  */ {'A', 'v', 's', 't'},
     /* 6  */ {'B', 'a', 'm', 'u'},
     /* 7  */ {'B', 'a', 's', 's'},
-    /* 8  */ {'B', 'e', 'n', 'g'},
-    /* 9  */ {'B', 'r', 'a', 'h'},
-    /* 10 */ {'C', 'a', 'k', 'm'},
-    /* 11 */ {'C', 'a', 'n', 's'},
-    /* 12 */ {'C', 'a', 'r', 'i'},
-    /* 13 */ {'C', 'h', 'a', 'm'},
-    /* 14 */ {'C', 'h', 'e', 'r'},
-    /* 15 */ {'C', 'h', 'r', 's'},
-    /* 16 */ {'C', 'o', 'p', 't'},
-    /* 17 */ {'C', 'p', 'r', 't'},
-    /* 18 */ {'C', 'y', 'r', 'l'},
-    /* 19 */ {'D', 'e', 'v', 'a'},
-    /* 20 */ {'E', 'g', 'y', 'p'},
-    /* 21 */ {'E', 't', 'h', 'i'},
-    /* 22 */ {'G', 'e', 'o', 'r'},
-    /* 23 */ {'G', 'o', 'n', 'g'},
-    /* 24 */ {'G', 'o', 'n', 'm'},
-    /* 25 */ {'G', 'o', 't', 'h'},
-    /* 26 */ {'G', 'r', 'e', 'k'},
-    /* 27 */ {'G', 'u', 'j', 'r'},
-    /* 28 */ {'G', 'u', 'r', 'u'},
-    /* 29 */ {'H', 'a', 'n', 's'},
-    /* 30 */ {'H', 'a', 'n', 't'},
-    /* 31 */ {'H', 'e', 'b', 'r'},
-    /* 32 */ {'H', 'l', 'u', 'w'},
-    /* 33 */ {'H', 'm', 'n', 'p'},
-    /* 34 */ {'I', 't', 'a', 'l'},
-    /* 35 */ {'J', 'p', 'a', 'n'},
-    /* 36 */ {'K', 'a', 'l', 'i'},
-    /* 37 */ {'K', 'a', 'n', 'a'},
-    /* 38 */ {'K', 'a', 'w', 'i'},
-    /* 39 */ {'K', 'h', 'a', 'r'},
-    /* 40 */ {'K', 'h', 'm', 'r'},
-    /* 41 */ {'K', 'i', 't', 's'},
-    /* 42 */ {'K', 'n', 'd', 'a'},
-    /* 43 */ {'K', 'o', 'r', 'e'},
-    /* 44 */ {'L', 'a', 'n', 'a'},
-    /* 45 */ {'L', 'a', 'o', 'o'},
-    /* 46 */ {'L', 'a', 't', 'n'},
-    /* 47 */ {'L', 'e', 'p', 'c'},
-    /* 48 */ {'L', 'i', 'n', 'a'},
-    /* 49 */ {'L', 'i', 's', 'u'},
-    /* 50 */ {'L', 'y', 'c', 'i'},
-    /* 51 */ {'L', 'y', 'd', 'i'},
-    /* 52 */ {'M', 'a', 'n', 'd'},
-    /* 53 */ {'M', 'a', 'n', 'i'},
-    /* 54 */ {'M', 'e', 'd', 'f'},
-    /* 55 */ {'M', 'e', 'r', 'c'},
-    /* 56 */ {'M', 'l', 'y', 'm'},
-    /* 57 */ {'M', 'o', 'n', 'g'},
-    /* 58 */ {'M', 'r', 'o', 'o'},
-    /* 59 */ {'M', 'y', 'm', 'r'},
-    /* 60 */ {'N', 'a', 'r', 'b'},
-    /* 61 */ {'N', 'k', 'o', 'o'},
-    /* 62 */ {'N', 's', 'h', 'u'},
-    /* 63 */ {'O', 'g', 'a', 'm'},
-    /* 64 */ {'O', 'l', 'c', 'k'},
-    /* 65 */ {'O', 'r', 'k', 'h'},
-    /* 66 */ {'O', 'r', 'y', 'a'},
-    /* 67 */ {'O', 's', 'g', 'e'},
-    /* 68 */ {'O', 'u', 'g', 'r'},
-    /* 69 */ {'P', 'a', 'u', 'c'},
-    /* 70 */ {'P', 'h', 'l', 'i'},
-    /* 71 */ {'P', 'h', 'n', 'x'},
-    /* 72 */ {'P', 'l', 'r', 'd'},
-    /* 73 */ {'P', 'r', 't', 'i'},
-    /* 74 */ {'R', 'o', 'h', 'g'},
-    /* 75 */ {'R', 'u', 'n', 'r'},
-    /* 76 */ {'S', 'a', 'm', 'r'},
-    /* 77 */ {'S', 'a', 'r', 'b'},
-    /* 78 */ {'S', 'a', 'u', 'r'},
-    /* 79 */ {'S', 'g', 'n', 'w'},
-    /* 80 */ {'S', 'i', 'n', 'h'},
-    /* 81 */ {'S', 'o', 'g', 'd'},
-    /* 82 */ {'S', 'o', 'r', 'a'},
-    /* 83 */ {'S', 'o', 'y', 'o'},
-    /* 84 */ {'S', 'y', 'r', 'c'},
-    /* 85 */ {'T', 'a', 'l', 'e'},
-    /* 86 */ {'T', 'a', 'l', 'u'},
-    /* 87 */ {'T', 'a', 'm', 'l'},
-    /* 88 */ {'T', 'a', 'n', 'g'},
-    /* 89 */ {'T', 'a', 'v', 't'},
-    /* 90 */ {'T', 'e', 'l', 'u'},
-    /* 91 */ {'T', 'f', 'n', 'g'},
-    /* 92 */ {'T', 'h', 'a', 'a'},
-    /* 93 */ {'T', 'h', 'a', 'i'},
-    /* 94 */ {'T', 'i', 'b', 't'},
-    /* 95 */ {'T', 'n', 's', 'a'},
-    /* 96 */ {'T', 'o', 't', 'o'},
-    /* 97 */ {'U', 'g', 'a', 'r'},
-    /* 98 */ {'V', 'a', 'i', 'i'},
-    /* 99 */ {'W', 'c', 'h', 'o'},
-    /* 100 */ {'X', 'p', 'e', 'o'},
-    /* 101 */ {'X', 's', 'u', 'x'},
-    /* 102 */ {'Y', 'i', 'i', 'i'},
-    /* 103 */ {'~', '~', '~', 'A'},
-    /* 104 */ {'~', '~', '~', 'B'},
+    /* 8  */ {'B', 'a', 't', 'k'},
+    /* 9  */ {'B', 'e', 'n', 'g'},
+    /* 10 */ {'B', 'o', 'p', 'o'},
+    /* 11 */ {'B', 'r', 'a', 'h'},
+    /* 12 */ {'C', 'a', 'k', 'm'},
+    /* 13 */ {'C', 'a', 'n', 's'},
+    /* 14 */ {'C', 'a', 'r', 'i'},
+    /* 15 */ {'C', 'h', 'a', 'm'},
+    /* 16 */ {'C', 'h', 'e', 'r'},
+    /* 17 */ {'C', 'h', 'r', 's'},
+    /* 18 */ {'C', 'o', 'p', 't'},
+    /* 19 */ {'C', 'p', 'r', 't'},
+    /* 20 */ {'C', 'y', 'r', 'l'},
+    /* 21 */ {'D', 'e', 'v', 'a'},
+    /* 22 */ {'E', 'g', 'y', 'p'},
+    /* 23 */ {'E', 'l', 'y', 'm'},
+    /* 24 */ {'E', 't', 'h', 'i'},
+    /* 25 */ {'G', 'e', 'o', 'r'},
+    /* 26 */ {'G', 'o', 'n', 'g'},
+    /* 27 */ {'G', 'o', 'n', 'm'},
+    /* 28 */ {'G', 'o', 't', 'h'},
+    /* 29 */ {'G', 'r', 'a', 'n'},
+    /* 30 */ {'G', 'r', 'e', 'k'},
+    /* 31 */ {'G', 'u', 'j', 'r'},
+    /* 32 */ {'G', 'u', 'r', 'u'},
+    /* 33 */ {'H', 'a', 'n', 'g'},
+    /* 34 */ {'H', 'a', 'n', 'i'},
+    /* 35 */ {'H', 'a', 'n', 's'},
+    /* 36 */ {'H', 'a', 'n', 't'},
+    /* 37 */ {'H', 'e', 'b', 'r'},
+    /* 38 */ {'H', 'l', 'u', 'w'},
+    /* 39 */ {'H', 'm', 'n', 'p'},
+    /* 40 */ {'I', 't', 'a', 'l'},
+    /* 41 */ {'J', 'a', 'v', 'a'},
+    /* 42 */ {'J', 'p', 'a', 'n'},
+    /* 43 */ {'K', 'a', 'l', 'i'},
+    /* 44 */ {'K', 'a', 'n', 'a'},
+    /* 45 */ {'K', 'a', 'w', 'i'},
+    /* 46 */ {'K', 'h', 'a', 'r'},
+    /* 47 */ {'K', 'h', 'm', 'r'},
+    /* 48 */ {'K', 'i', 't', 's'},
+    /* 49 */ {'K', 'n', 'd', 'a'},
+    /* 50 */ {'K', 'o', 'r', 'e'},
+    /* 51 */ {'L', 'a', 'n', 'a'},
+    /* 52 */ {'L', 'a', 'o', 'o'},
+    /* 53 */ {'L', 'a', 't', 'f'},
+    /* 54 */ {'L', 'a', 't', 'g'},
+    /* 55 */ {'L', 'a', 't', 'n'},
+    /* 56 */ {'L', 'e', 'p', 'c'},
+    /* 57 */ {'L', 'i', 'n', 'a'},
+    /* 58 */ {'L', 'i', 'n', 'b'},
+    /* 59 */ {'L', 'i', 's', 'u'},
+    /* 60 */ {'L', 'y', 'c', 'i'},
+    /* 61 */ {'L', 'y', 'd', 'i'},
+    /* 62 */ {'M', 'a', 'n', 'd'},
+    /* 63 */ {'M', 'a', 'n', 'i'},
+    /* 64 */ {'M', 'a', 'r', 'c'},
+    /* 65 */ {'M', 'e', 'd', 'f'},
+    /* 66 */ {'M', 'e', 'r', 'c'},
+    /* 67 */ {'M', 'l', 'y', 'm'},
+    /* 68 */ {'M', 'o', 'd', 'i'},
+    /* 69 */ {'M', 'o', 'n', 'g'},
+    /* 70 */ {'M', 'r', 'o', 'o'},
+    /* 71 */ {'M', 't', 'e', 'i'},
+    /* 72 */ {'M', 'y', 'm', 'r'},
+    /* 73 */ {'N', 'a', 'r', 'b'},
+    /* 74 */ {'N', 'e', 'w', 'a'},
+    /* 75 */ {'N', 'k', 'o', 'o'},
+    /* 76 */ {'N', 's', 'h', 'u'},
+    /* 77 */ {'O', 'g', 'a', 'm'},
+    /* 78 */ {'O', 'l', 'c', 'k'},
+    /* 79 */ {'O', 'r', 'k', 'h'},
+    /* 80 */ {'O', 'r', 'y', 'a'},
+    /* 81 */ {'O', 's', 'g', 'e'},
+    /* 82 */ {'O', 'u', 'g', 'r'},
+    /* 83 */ {'P', 'a', 'u', 'c'},
+    /* 84 */ {'P', 'h', 'l', 'i'},
+    /* 85 */ {'P', 'h', 'n', 'x'},
+    /* 86 */ {'P', 'l', 'r', 'd'},
+    /* 87 */ {'P', 'r', 't', 'i'},
+    /* 88 */ {'R', 'j', 'n', 'g'},
+    /* 89 */ {'R', 'o', 'h', 'g'},
+    /* 90 */ {'R', 'u', 'n', 'r'},
+    /* 91 */ {'S', 'a', 'm', 'r'},
+    /* 92 */ {'S', 'a', 'r', 'b'},
+    /* 93 */ {'S', 'a', 'u', 'r'},
+    /* 94 */ {'S', 'g', 'n', 'w'},
+    /* 95 */ {'S', 'i', 'n', 'h'},
+    /* 96 */ {'S', 'o', 'g', 'd'},
+    /* 97 */ {'S', 'o', 'r', 'a'},
+    /* 98 */ {'S', 'o', 'y', 'o'},
+    /* 99 */ {'S', 'u', 'n', 'u'},
+    /* 100 */ {'S', 'y', 'r', 'c'},
+    /* 101 */ {'T', 'a', 'g', 'b'},
+    /* 102 */ {'T', 'a', 'k', 'r'},
+    /* 103 */ {'T', 'a', 'l', 'e'},
+    /* 104 */ {'T', 'a', 'l', 'u'},
+    /* 105 */ {'T', 'a', 'm', 'l'},
+    /* 106 */ {'T', 'a', 'n', 'g'},
+    /* 107 */ {'T', 'a', 'v', 't'},
+    /* 108 */ {'T', 'e', 'l', 'u'},
+    /* 109 */ {'T', 'f', 'n', 'g'},
+    /* 110 */ {'T', 'h', 'a', 'a'},
+    /* 111 */ {'T', 'h', 'a', 'i'},
+    /* 112 */ {'T', 'i', 'b', 't'},
+    /* 113 */ {'T', 'n', 's', 'a'},
+    /* 114 */ {'T', 'o', 't', 'o'},
+    /* 115 */ {'U', 'g', 'a', 'r'},
+    /* 116 */ {'V', 'a', 'i', 'i'},
+    /* 117 */ {'W', 'c', 'h', 'o'},
+    /* 118 */ {'X', 'p', 'e', 'o'},
+    /* 119 */ {'X', 's', 'u', 'x'},
+    /* 120 */ {'Y', 'i', 'i', 'i'},
+    /* 121 */ {'~', '~', '~', 'A'},
+    /* 122 */ {'~', '~', '~', 'B'},
 };
 
 
 const std::unordered_map<uint32_t, uint8_t> LIKELY_SCRIPTS({
-    {0x61610000u, 46u}, // aa -> Latn
-    {0xA0000000u, 46u}, // aai -> Latn
-    {0xA8000000u, 46u}, // aak -> Latn
-    {0xD0000000u, 46u}, // aau -> Latn
-    {0x61620000u, 18u}, // ab -> Cyrl
-    {0xA0200000u, 46u}, // abi -> Latn
-    {0xC0200000u, 18u}, // abq -> Cyrl
-    {0xC4200000u, 46u}, // abr -> Latn
-    {0xCC200000u, 46u}, // abt -> Latn
-    {0xE0200000u, 46u}, // aby -> Latn
-    {0x8C400000u, 46u}, // acd -> Latn
-    {0x90400000u, 46u}, // ace -> Latn
-    {0x9C400000u, 46u}, // ach -> Latn
-    {0x80600000u, 46u}, // ada -> Latn
-    {0x90600000u, 46u}, // ade -> Latn
-    {0xA4600000u, 46u}, // adj -> Latn
-    {0xBC600000u, 94u}, // adp -> Tibt
-    {0xE0600000u, 18u}, // ady -> Cyrl
-    {0xE4600000u, 46u}, // adz -> Latn
+    {0x61610000u, 55u}, // aa -> Latn
+    {0x80000000u, 55u}, // aaa -> Latn
+    {0x84000000u, 55u}, // aab -> Latn
+    {0x88000000u, 55u}, // aac -> Latn
+    {0x8C000000u, 55u}, // aad -> Latn
+    {0x90000000u, 55u}, // aae -> Latn
+    {0x94000000u, 67u}, // aaf -> Mlym
+    {0x98000000u, 55u}, // aag -> Latn
+    {0x9C000000u, 55u}, // aah -> Latn
+    {0xA0000000u, 55u}, // aai -> Latn
+    {0xA8000000u, 55u}, // aak -> Latn
+    {0xAC000000u, 55u}, // aal -> Latn
+    {0xB4000000u, 55u}, // aan -> Latn
+    {0xB8000000u,  2u}, // aao -> Arab
+    {0xBC000000u, 55u}, // aap -> Latn
+    {0xC0000000u, 55u}, // aaq -> Latn
+    {0xC8000000u, 55u}, // aas -> Latn
+    {0xCC000000u, 30u}, // aat -> Grek
+    {0xD0000000u, 55u}, // aau -> Latn
+    {0xD8000000u, 55u}, // aaw -> Latn
+    {0xDC000000u, 55u}, // aax -> Latn
+    {0xE4000000u, 55u}, // aaz -> Latn
+    {0x61620000u, 20u}, // ab -> Cyrl
+    {0x80200000u, 55u}, // aba -> Latn
+    {0x84200000u, 55u}, // abb -> Latn
+    {0x88200000u, 55u}, // abc -> Latn
+    {0x8C200000u, 55u}, // abd -> Latn
+    {0x90200000u, 55u}, // abe -> Latn
+    {0x94200000u, 55u}, // abf -> Latn
+    {0x98200000u, 55u}, // abg -> Latn
+    {0x9C200000u,  2u}, // abh -> Arab
+    {0xA0200000u, 55u}, // abi -> Latn
+    {0xAC200000u, 88u}, // abl -> Rjng
+    {0xB0200000u, 55u}, // abm -> Latn
+    {0xB4200000u, 55u}, // abn -> Latn
+    {0xB8200000u, 55u}, // abo -> Latn
+    {0xBC200000u, 55u}, // abp -> Latn
+    {0xC4200000u, 55u}, // abr -> Latn
+    {0xC8200000u, 55u}, // abs -> Latn
+    {0xCC200000u, 55u}, // abt -> Latn
+    {0xD0200000u, 55u}, // abu -> Latn
+    {0xD4200000u,  2u}, // abv -> Arab
+    {0xD8200000u, 55u}, // abw -> Latn
+    {0xDC200000u, 55u}, // abx -> Latn
+    {0xE0200000u, 55u}, // aby -> Latn
+    {0xE4200000u, 55u}, // abz -> Latn
+    {0x80400000u, 55u}, // aca -> Latn
+    {0x84400000u, 55u}, // acb -> Latn
+    {0x8C400000u, 55u}, // acd -> Latn
+    {0x90400000u, 55u}, // ace -> Latn
+    {0x94400000u, 55u}, // acf -> Latn
+    {0x9C400000u, 55u}, // ach -> Latn
+    {0xB0400000u,  2u}, // acm -> Arab
+    {0xB4400000u, 55u}, // acn -> Latn
+    {0xBC400000u, 55u}, // acp -> Latn
+    {0xC0400000u,  2u}, // acq -> Arab
+    {0xC4400000u, 55u}, // acr -> Latn
+    {0xC8400000u, 55u}, // acs -> Latn
+    {0xCC400000u, 55u}, // act -> Latn
+    {0xD0400000u, 55u}, // acu -> Latn
+    {0xD4400000u, 55u}, // acv -> Latn
+    {0xD8400000u,  2u}, // acw -> Arab
+    {0xDC400000u,  2u}, // acx -> Arab
+    {0xE0400000u, 55u}, // acy -> Latn
+    {0xE4400000u, 55u}, // acz -> Latn
+    {0x80600000u, 55u}, // ada -> Latn
+    {0x84600000u, 55u}, // adb -> Latn
+    {0x8C600000u, 55u}, // add -> Latn
+    {0x90600000u, 55u}, // ade -> Latn
+    {0x94600000u,  2u}, // adf -> Arab
+    {0x98600000u, 55u}, // adg -> Latn
+    {0x9C600000u, 55u}, // adh -> Latn
+    {0xA0600000u, 55u}, // adi -> Latn
+    {0xA4600000u, 55u}, // adj -> Latn
+    {0xAC600000u, 55u}, // adl -> Latn
+    {0xB4600000u, 55u}, // adn -> Latn
+    {0xB8600000u, 55u}, // ado -> Latn
+    {0xC0600000u, 55u}, // adq -> Latn
+    {0xC4600000u, 55u}, // adr -> Latn
+    {0xCC600000u, 55u}, // adt -> Latn
+    {0xD0600000u, 55u}, // adu -> Latn
+    {0xD8600000u, 55u}, // adw -> Latn
+    {0xDC600000u, 112u}, // adx -> Tibt
+    {0xE0600000u, 20u}, // ady -> Cyrl
+    {0xE4600000u, 55u}, // adz -> Latn
     {0x61650000u,  5u}, // ae -> Avst
+    {0x80800000u, 55u}, // aea -> Latn
     {0x84800000u,  2u}, // aeb -> Arab
-    {0xE0800000u, 46u}, // aey -> Latn
-    {0x61660000u, 46u}, // af -> Latn
-    {0x88C00000u, 46u}, // agc -> Latn
-    {0x8CC00000u, 46u}, // agd -> Latn
-    {0x98C00000u, 46u}, // agg -> Latn
-    {0xB0C00000u, 46u}, // agm -> Latn
-    {0xB8C00000u, 46u}, // ago -> Latn
-    {0xC0C00000u, 46u}, // agq -> Latn
-    {0x80E00000u, 46u}, // aha -> Latn
-    {0xACE00000u, 46u}, // ahl -> Latn
+    {0x88800000u,  2u}, // aec -> Arab
+    {0x90800000u,  2u}, // aee -> Arab
+    {0xA8800000u, 55u}, // aek -> Latn
+    {0xAC800000u, 55u}, // ael -> Latn
+    {0xB0800000u, 55u}, // aem -> Latn
+    {0xC0800000u,  2u}, // aeq -> Arab
+    {0xC4800000u, 55u}, // aer -> Latn
+    {0xD0800000u, 55u}, // aeu -> Latn
+    {0xD8800000u, 55u}, // aew -> Latn
+    {0xE0800000u, 55u}, // aey -> Latn
+    {0xE4800000u, 55u}, // aez -> Latn
+    {0x61660000u, 55u}, // af -> Latn
+    {0x84A00000u,  2u}, // afb -> Arab
+    {0x8CA00000u, 55u}, // afd -> Latn
+    {0x90A00000u, 55u}, // afe -> Latn
+    {0x9CA00000u, 55u}, // afh -> Latn
+    {0xA0A00000u, 55u}, // afi -> Latn
+    {0xA8A00000u, 55u}, // afk -> Latn
+    {0xB4A00000u, 55u}, // afn -> Latn
+    {0xB8A00000u, 55u}, // afo -> Latn
+    {0xBCA00000u, 55u}, // afp -> Latn
+    {0xC8A00000u, 55u}, // afs -> Latn
+    {0xD0A00000u, 55u}, // afu -> Latn
+    {0xE4A00000u, 55u}, // afz -> Latn
+    {0x80C00000u, 55u}, // aga -> Latn
+    {0x84C00000u, 55u}, // agb -> Latn
+    {0x88C00000u, 55u}, // agc -> Latn
+    {0x8CC00000u, 55u}, // agd -> Latn
+    {0x90C00000u, 55u}, // age -> Latn
+    {0x94C00000u, 55u}, // agf -> Latn
+    {0x98C00000u, 55u}, // agg -> Latn
+    {0x9CC00000u, 55u}, // agh -> Latn
+    {0xA0C00000u, 21u}, // agi -> Deva
+    {0xA4C00000u, 24u}, // agj -> Ethi
+    {0xA8C00000u, 55u}, // agk -> Latn
+    {0xACC00000u, 55u}, // agl -> Latn
+    {0xB0C00000u, 55u}, // agm -> Latn
+    {0xB4C00000u, 55u}, // agn -> Latn
+    {0xB8C00000u, 55u}, // ago -> Latn
+    {0xC0C00000u, 55u}, // agq -> Latn
+    {0xC4C00000u, 55u}, // agr -> Latn
+    {0xC8C00000u, 55u}, // ags -> Latn
+    {0xCCC00000u, 55u}, // agt -> Latn
+    {0xD0C00000u, 55u}, // agu -> Latn
+    {0xD4C00000u, 55u}, // agv -> Latn
+    {0xD8C00000u, 55u}, // agw -> Latn
+    {0xDCC00000u, 20u}, // agx -> Cyrl
+    {0xE0C00000u, 55u}, // agy -> Latn
+    {0xE4C00000u, 55u}, // agz -> Latn
+    {0x80E00000u, 55u}, // aha -> Latn
+    {0x84E00000u, 55u}, // ahb -> Latn
+    {0x98E00000u, 24u}, // ahg -> Ethi
+    {0x9CE00000u, 55u}, // ahh -> Latn
+    {0xA0E00000u, 55u}, // ahi -> Latn
+    {0xA8E00000u, 55u}, // ahk -> Latn
+    {0xACE00000u, 55u}, // ahl -> Latn
+    {0xB0E00000u, 55u}, // ahm -> Latn
+    {0xB4E00000u, 55u}, // ahn -> Latn
     {0xB8E00000u,  1u}, // aho -> Ahom
-    {0x99200000u, 46u}, // ajg -> Latn
-    {0xCD200000u,  2u}, // ajt -> Arab
-    {0x616B0000u, 46u}, // ak -> Latn
-    {0xA9400000u, 101u}, // akk -> Xsux
-    {0x81600000u, 46u}, // ala -> Latn
-    {0xA1600000u, 46u}, // ali -> Latn
-    {0xB5600000u, 46u}, // aln -> Latn
-    {0xCD600000u, 18u}, // alt -> Cyrl
-    {0x616D0000u, 21u}, // am -> Ethi
-    {0xB1800000u, 46u}, // amm -> Latn
-    {0xB5800000u, 46u}, // amn -> Latn
-    {0xB9800000u, 46u}, // amo -> Latn
-    {0xBD800000u, 46u}, // amp -> Latn
-    {0x616E0000u, 46u}, // an -> Latn
-    {0x89A00000u, 46u}, // anc -> Latn
-    {0xA9A00000u, 46u}, // ank -> Latn
-    {0xB5A00000u, 46u}, // ann -> Latn
-    {0xE1A00000u, 46u}, // any -> Latn
-    {0xA5C00000u, 46u}, // aoj -> Latn
-    {0xB1C00000u, 46u}, // aom -> Latn
-    {0xE5C00000u, 46u}, // aoz -> Latn
+    {0xBCE00000u, 55u}, // ahp -> Latn
+    {0xC4E00000u, 21u}, // ahr -> Deva
+    {0xC8E00000u, 55u}, // ahs -> Latn
+    {0xCCE00000u, 55u}, // aht -> Latn
+    {0x81000000u, 55u}, // aia -> Latn
+    {0x85000000u,  2u}, // aib -> Arab
+    {0x89000000u, 55u}, // aic -> Latn
+    {0x8D000000u, 55u}, // aid -> Latn
+    {0x91000000u, 55u}, // aie -> Latn
+    {0x95000000u, 55u}, // aif -> Latn
+    {0x99000000u, 55u}, // aig -> Latn
+    {0xA1000000u, 100u}, // aii -> Syrc
+    {0xA5000000u, 37u}, // aij -> Hebr
+    {0xA9000000u, 55u}, // aik -> Latn
+    {0xAD000000u, 55u}, // ail -> Latn
+    {0xB1000000u, 55u}, // aim -> Latn
+    {0xB5000000u, 44u}, // ain -> Kana
+    {0xB9000000u, 72u}, // aio -> Mymr
+    {0xBD000000u, 55u}, // aip -> Latn
+    {0xC1000000u,  2u}, // aiq -> Arab
+    {0xC5000000u, 55u}, // air -> Latn
+    {0xCD000000u, 55u}, // ait -> Latn
+    {0xD9000000u, 55u}, // aiw -> Latn
+    {0xDD000000u, 55u}, // aix -> Latn
+    {0xE1000000u, 55u}, // aiy -> Latn
+    {0x81200000u, 55u}, // aja -> Latn
+    {0x99200000u, 55u}, // ajg -> Latn
+    {0xA1200000u, 55u}, // aji -> Latn
+    {0xB5200000u, 55u}, // ajn -> Latn
+    {0xD9200000u, 55u}, // ajw -> Latn
+    {0xE5200000u, 55u}, // ajz -> Latn
+    {0x616B0000u, 55u}, // ak -> Latn
+    {0x85400000u, 55u}, // akb -> Latn
+    {0x89400000u, 55u}, // akc -> Latn
+    {0x8D400000u, 55u}, // akd -> Latn
+    {0x91400000u, 55u}, // ake -> Latn
+    {0x95400000u, 55u}, // akf -> Latn
+    {0x99400000u, 55u}, // akg -> Latn
+    {0x9D400000u, 55u}, // akh -> Latn
+    {0xA1400000u, 55u}, // aki -> Latn
+    {0xA9400000u, 119u}, // akk -> Xsux
+    {0xAD400000u, 55u}, // akl -> Latn
+    {0xB9400000u, 55u}, // ako -> Latn
+    {0xBD400000u, 55u}, // akp -> Latn
+    {0xC1400000u, 55u}, // akq -> Latn
+    {0xC5400000u, 55u}, // akr -> Latn
+    {0xC9400000u, 55u}, // aks -> Latn
+    {0xCD400000u, 55u}, // akt -> Latn
+    {0xD1400000u, 55u}, // aku -> Latn
+    {0xD5400000u, 20u}, // akv -> Cyrl
+    {0xD9400000u, 55u}, // akw -> Latn
+    {0xE5400000u, 55u}, // akz -> Latn
+    {0x81600000u, 55u}, // ala -> Latn
+    {0x89600000u, 55u}, // alc -> Latn
+    {0x8D600000u, 55u}, // ald -> Latn
+    {0x91600000u, 55u}, // ale -> Latn
+    {0x95600000u, 55u}, // alf -> Latn
+    {0x9D600000u, 55u}, // alh -> Latn
+    {0xA1600000u, 55u}, // ali -> Latn
+    {0xA5600000u, 55u}, // alj -> Latn
+    {0xA9600000u, 52u}, // alk -> Laoo
+    {0xAD600000u, 67u}, // all -> Mlym
+    {0xB1600000u, 55u}, // alm -> Latn
+    {0xB5600000u, 55u}, // aln -> Latn
+    {0xB9600000u, 55u}, // alo -> Latn
+    {0xBD600000u, 55u}, // alp -> Latn
+    {0xC1600000u, 55u}, // alq -> Latn
+    {0xC5600000u, 20u}, // alr -> Cyrl
+    {0xCD600000u, 20u}, // alt -> Cyrl
+    {0xD1600000u, 55u}, // alu -> Latn
+    {0xD9600000u, 24u}, // alw -> Ethi
+    {0xDD600000u, 55u}, // alx -> Latn
+    {0xE1600000u, 55u}, // aly -> Latn
+    {0xE5600000u, 55u}, // alz -> Latn
+    {0x616D0000u, 24u}, // am -> Ethi
+    {0x81800000u, 55u}, // ama -> Latn
+    {0x85800000u, 55u}, // amb -> Latn
+    {0x89800000u, 55u}, // amc -> Latn
+    {0x91800000u, 55u}, // ame -> Latn
+    {0x95800000u, 55u}, // amf -> Latn
+    {0x99800000u, 55u}, // amg -> Latn
+    {0xA1800000u, 55u}, // ami -> Latn
+    {0xA5800000u, 55u}, // amj -> Latn
+    {0xA9800000u, 55u}, // amk -> Latn
+    {0xB1800000u, 55u}, // amm -> Latn
+    {0xB5800000u, 55u}, // amn -> Latn
+    {0xB9800000u, 55u}, // amo -> Latn
+    {0xBD800000u, 55u}, // amp -> Latn
+    {0xC1800000u, 55u}, // amq -> Latn
+    {0xC5800000u, 55u}, // amr -> Latn
+    {0xC9800000u, 42u}, // ams -> Jpan
+    {0xCD800000u, 55u}, // amt -> Latn
+    {0xD1800000u, 55u}, // amu -> Latn
+    {0xD5800000u, 55u}, // amv -> Latn
+    {0xD9800000u, 100u}, // amw -> Syrc
+    {0xDD800000u, 55u}, // amx -> Latn
+    {0xE1800000u, 55u}, // amy -> Latn
+    {0xE5800000u, 55u}, // amz -> Latn
+    {0x616E0000u, 55u}, // an -> Latn
+    {0x81A00000u, 55u}, // ana -> Latn
+    {0x85A00000u, 55u}, // anb -> Latn
+    {0x89A00000u, 55u}, // anc -> Latn
+    {0x8DA00000u, 55u}, // and -> Latn
+    {0x91A00000u, 55u}, // ane -> Latn
+    {0x95A00000u, 55u}, // anf -> Latn
+    {0x99A00000u, 55u}, // ang -> Latn
+    {0x9DA00000u, 55u}, // anh -> Latn
+    {0xA1A00000u, 20u}, // ani -> Cyrl
+    {0xA5A00000u, 55u}, // anj -> Latn
+    {0xA9A00000u, 55u}, // ank -> Latn
+    {0xADA00000u, 55u}, // anl -> Latn
+    {0xB1A00000u, 55u}, // anm -> Latn
+    {0xB5A00000u, 55u}, // ann -> Latn
+    {0xB9A00000u, 55u}, // ano -> Latn
+    {0xBDA00000u, 21u}, // anp -> Deva
+    {0xC1A00000u, 21u}, // anq -> Deva
+    {0xC5A00000u, 21u}, // anr -> Deva
+    {0xC9A00000u, 55u}, // ans -> Latn
+    {0xCDA00000u, 55u}, // ant -> Latn
+    {0xD1A00000u, 24u}, // anu -> Ethi
+    {0xD5A00000u, 55u}, // anv -> Latn
+    {0xD9A00000u, 55u}, // anw -> Latn
+    {0xDDA00000u, 55u}, // anx -> Latn
+    {0xE1A00000u, 55u}, // any -> Latn
+    {0xE5A00000u, 55u}, // anz -> Latn
+    {0x81C00000u, 55u}, // aoa -> Latn
+    {0x85C00000u, 55u}, // aob -> Latn
+    {0x89C00000u, 55u}, // aoc -> Latn
+    {0x8DC00000u, 55u}, // aod -> Latn
+    {0x91C00000u, 55u}, // aoe -> Latn
+    {0x95C00000u, 55u}, // aof -> Latn
+    {0x99C00000u, 55u}, // aog -> Latn
+    {0xA1C00000u, 55u}, // aoi -> Latn
+    {0xA5C00000u, 55u}, // aoj -> Latn
+    {0xA9C00000u, 55u}, // aok -> Latn
+    {0xADC00000u, 55u}, // aol -> Latn
+    {0xB1C00000u, 55u}, // aom -> Latn
+    {0xB5C00000u, 55u}, // aon -> Latn
+    {0xC5C00000u, 55u}, // aor -> Latn
+    {0xC9C00000u, 55u}, // aos -> Latn
+    {0xCDC00000u,  9u}, // aot -> Beng
+    {0xDDC00000u, 55u}, // aox -> Latn
+    {0xE5C00000u, 55u}, // aoz -> Latn
+    {0x85E00000u, 55u}, // apb -> Latn
     {0x89E00000u,  2u}, // apc -> Arab
     {0x8DE00000u,  2u}, // apd -> Arab
-    {0x91E00000u, 46u}, // ape -> Latn
-    {0xC5E00000u, 46u}, // apr -> Latn
-    {0xC9E00000u, 46u}, // aps -> Latn
-    {0xE5E00000u, 46u}, // apz -> Latn
+    {0x91E00000u, 55u}, // ape -> Latn
+    {0x95E00000u, 55u}, // apf -> Latn
+    {0x99E00000u, 55u}, // apg -> Latn
+    {0x9DE00000u, 21u}, // aph -> Deva
+    {0xA1E00000u, 55u}, // api -> Latn
+    {0xA5E00000u, 55u}, // apj -> Latn
+    {0xA9E00000u, 55u}, // apk -> Latn
+    {0xADE00000u, 55u}, // apl -> Latn
+    {0xB1E00000u, 55u}, // apm -> Latn
+    {0xB5E00000u, 55u}, // apn -> Latn
+    {0xB9E00000u, 55u}, // apo -> Latn
+    {0xBDE00000u, 55u}, // app -> Latn
+    {0xC5E00000u, 55u}, // apr -> Latn
+    {0xC9E00000u, 55u}, // aps -> Latn
+    {0xCDE00000u, 55u}, // apt -> Latn
+    {0xD1E00000u, 55u}, // apu -> Latn
+    {0xD5E00000u, 55u}, // apv -> Latn
+    {0xD9E00000u, 55u}, // apw -> Latn
+    {0xDDE00000u, 55u}, // apx -> Latn
+    {0xE1E00000u, 55u}, // apy -> Latn
+    {0xE5E00000u, 55u}, // apz -> Latn
+    {0x8A000000u, 20u}, // aqc -> Cyrl
+    {0x8E000000u, 55u}, // aqd -> Latn
+    {0x9A000000u, 55u}, // aqg -> Latn
+    {0xAA000000u, 55u}, // aqk -> Latn
+    {0xB2000000u, 55u}, // aqm -> Latn
+    {0xB6000000u, 55u}, // aqn -> Latn
+    {0xC6000000u, 55u}, // aqr -> Latn
+    {0xCE000000u, 55u}, // aqt -> Latn
+    {0xE6000000u, 55u}, // aqz -> Latn
     {0x61720000u,  2u}, // ar -> Arab
-    {0x61725842u, 104u}, // ar-XB -> ~~~B
+    {0x61725842u, 122u}, // ar-XB -> ~~~B
     {0x8A200000u,  3u}, // arc -> Armi
-    {0x9E200000u, 46u}, // arh -> Latn
-    {0xB6200000u, 46u}, // arn -> Latn
-    {0xBA200000u, 46u}, // aro -> Latn
+    {0x8E200000u, 55u}, // ard -> Latn
+    {0x92200000u, 55u}, // are -> Latn
+    {0x9E200000u, 55u}, // arh -> Latn
+    {0xA2200000u, 55u}, // ari -> Latn
+    {0xA6200000u, 55u}, // arj -> Latn
+    {0xAA200000u, 55u}, // ark -> Latn
+    {0xAE200000u, 55u}, // arl -> Latn
+    {0xB6200000u, 55u}, // arn -> Latn
+    {0xBA200000u, 55u}, // aro -> Latn
+    {0xBE200000u, 55u}, // arp -> Latn
     {0xC2200000u,  2u}, // arq -> Arab
+    {0xC6200000u, 55u}, // arr -> Latn
     {0xCA200000u,  2u}, // ars -> Arab
+    {0xD2200000u, 55u}, // aru -> Latn
+    {0xDA200000u, 55u}, // arw -> Latn
+    {0xDE200000u, 55u}, // arx -> Latn
     {0xE2200000u,  2u}, // ary -> Arab
     {0xE6200000u,  2u}, // arz -> Arab
-    {0x61730000u,  8u}, // as -> Beng
-    {0x82400000u, 46u}, // asa -> Latn
-    {0x92400000u, 79u}, // ase -> Sgnw
-    {0x9A400000u, 46u}, // asg -> Latn
-    {0xBA400000u, 46u}, // aso -> Latn
-    {0xCE400000u, 46u}, // ast -> Latn
-    {0x82600000u, 46u}, // ata -> Latn
-    {0x9A600000u, 46u}, // atg -> Latn
-    {0xA6600000u, 46u}, // atj -> Latn
-    {0xE2800000u, 46u}, // auy -> Latn
-    {0x61760000u, 18u}, // av -> Cyrl
+    {0x61730000u,  9u}, // as -> Beng
+    {0x82400000u, 55u}, // asa -> Latn
+    {0x86400000u, 55u}, // asb -> Latn
+    {0x8A400000u, 55u}, // asc -> Latn
+    {0x92400000u, 94u}, // ase -> Sgnw
+    {0x9A400000u, 55u}, // asg -> Latn
+    {0x9E400000u, 55u}, // ash -> Latn
+    {0xA2400000u, 55u}, // asi -> Latn
+    {0xA6400000u, 55u}, // asj -> Latn
+    {0xAA400000u,  2u}, // ask -> Arab
+    {0xAE400000u, 55u}, // asl -> Latn
+    {0xB6400000u, 55u}, // asn -> Latn
+    {0xBA400000u, 55u}, // aso -> Latn
+    {0xC6400000u, 21u}, // asr -> Deva
+    {0xCA400000u, 55u}, // ass -> Latn
+    {0xCE400000u, 55u}, // ast -> Latn
+    {0xD2400000u, 55u}, // asu -> Latn
+    {0xD6400000u, 55u}, // asv -> Latn
+    {0xDE400000u, 55u}, // asx -> Latn
+    {0xE2400000u, 55u}, // asy -> Latn
+    {0xE6400000u, 55u}, // asz -> Latn
+    {0x82600000u, 55u}, // ata -> Latn
+    {0x86600000u, 55u}, // atb -> Latn
+    {0x8A600000u, 55u}, // atc -> Latn
+    {0x8E600000u, 55u}, // atd -> Latn
+    {0x92600000u, 55u}, // ate -> Latn
+    {0x9A600000u, 55u}, // atg -> Latn
+    {0xA2600000u, 55u}, // ati -> Latn
+    {0xA6600000u, 55u}, // atj -> Latn
+    {0xAA600000u, 55u}, // atk -> Latn
+    {0xAE600000u, 55u}, // atl -> Latn
+    {0xB2600000u, 55u}, // atm -> Latn
+    {0xB6600000u,  2u}, // atn -> Arab
+    {0xBA600000u, 55u}, // ato -> Latn
+    {0xBE600000u, 55u}, // atp -> Latn
+    {0xC2600000u, 55u}, // atq -> Latn
+    {0xC6600000u, 55u}, // atr -> Latn
+    {0xCA600000u, 55u}, // ats -> Latn
+    {0xCE600000u, 55u}, // att -> Latn
+    {0xD2600000u, 55u}, // atu -> Latn
+    {0xD6600000u, 20u}, // atv -> Cyrl
+    {0xDA600000u, 55u}, // atw -> Latn
+    {0xDE600000u, 55u}, // atx -> Latn
+    {0xE2600000u, 55u}, // aty -> Latn
+    {0xE6600000u, 55u}, // atz -> Latn
+    {0x82800000u, 55u}, // aua -> Latn
+    {0x8A800000u, 55u}, // auc -> Latn
+    {0x8E800000u, 55u}, // aud -> Latn
+    {0x9A800000u, 55u}, // aug -> Latn
+    {0x9E800000u, 55u}, // auh -> Latn
+    {0xA2800000u, 55u}, // aui -> Latn
+    {0xA6800000u,  2u}, // auj -> Arab
+    {0xAA800000u, 55u}, // auk -> Latn
+    {0xAE800000u, 55u}, // aul -> Latn
+    {0xB2800000u, 55u}, // aum -> Latn
+    {0xB6800000u, 55u}, // aun -> Latn
+    {0xBA800000u, 55u}, // auo -> Latn
+    {0xBE800000u, 55u}, // aup -> Latn
+    {0xC2800000u, 55u}, // auq -> Latn
+    {0xC6800000u, 55u}, // aur -> Latn
+    {0xCE800000u, 55u}, // aut -> Latn
+    {0xD2800000u, 55u}, // auu -> Latn
+    {0xDA800000u, 55u}, // auw -> Latn
+    {0xE2800000u, 55u}, // auy -> Latn
+    {0xE6800000u,  2u}, // auz -> Arab
+    {0x61760000u, 20u}, // av -> Cyrl
+    {0x86A00000u, 55u}, // avb -> Latn
+    {0x8EA00000u,  2u}, // avd -> Arab
+    {0xA2A00000u, 55u}, // avi -> Latn
+    {0xAAA00000u, 55u}, // avk -> Latn
     {0xAEA00000u,  2u}, // avl -> Arab
-    {0xB6A00000u, 46u}, // avn -> Latn
-    {0xCEA00000u, 46u}, // avt -> Latn
-    {0xD2A00000u, 46u}, // avu -> Latn
-    {0x82C00000u, 19u}, // awa -> Deva
-    {0x86C00000u, 46u}, // awb -> Latn
-    {0xBAC00000u, 46u}, // awo -> Latn
-    {0xDEC00000u, 46u}, // awx -> Latn
-    {0x61790000u, 46u}, // ay -> Latn
-    {0x87000000u, 46u}, // ayb -> Latn
-    {0x617A0000u, 46u}, // az -> Latn
+    {0xB2A00000u, 55u}, // avm -> Latn
+    {0xB6A00000u, 55u}, // avn -> Latn
+    {0xBAA00000u, 55u}, // avo -> Latn
+    {0xCAA00000u, 55u}, // avs -> Latn
+    {0xCEA00000u, 55u}, // avt -> Latn
+    {0xD2A00000u, 55u}, // avu -> Latn
+    {0xD6A00000u, 55u}, // avv -> Latn
+    {0x82C00000u, 21u}, // awa -> Deva
+    {0x86C00000u, 55u}, // awb -> Latn
+    {0x8AC00000u, 55u}, // awc -> Latn
+    {0x92C00000u, 55u}, // awe -> Latn
+    {0x9AC00000u, 55u}, // awg -> Latn
+    {0x9EC00000u, 55u}, // awh -> Latn
+    {0xA2C00000u, 55u}, // awi -> Latn
+    {0xAAC00000u, 55u}, // awk -> Latn
+    {0xB2C00000u, 55u}, // awm -> Latn
+    {0xB6C00000u, 24u}, // awn -> Ethi
+    {0xBAC00000u, 55u}, // awo -> Latn
+    {0xC6C00000u, 55u}, // awr -> Latn
+    {0xCAC00000u, 55u}, // aws -> Latn
+    {0xCEC00000u, 55u}, // awt -> Latn
+    {0xD2C00000u, 55u}, // awu -> Latn
+    {0xD6C00000u, 55u}, // awv -> Latn
+    {0xDAC00000u, 55u}, // aww -> Latn
+    {0xDEC00000u, 55u}, // awx -> Latn
+    {0xE2C00000u, 55u}, // awy -> Latn
+    {0x86E00000u, 55u}, // axb -> Latn
+    {0x92E00000u, 55u}, // axe -> Latn
+    {0x9AE00000u, 55u}, // axg -> Latn
+    {0xAAE00000u, 55u}, // axk -> Latn
+    {0xAEE00000u, 55u}, // axl -> Latn
+    {0xB2E00000u,  4u}, // axm -> Armn
+    {0xDEE00000u, 55u}, // axx -> Latn
+    {0x61790000u, 55u}, // ay -> Latn
+    {0x83000000u, 55u}, // aya -> Latn
+    {0x87000000u, 55u}, // ayb -> Latn
+    {0x8B000000u, 55u}, // ayc -> Latn
+    {0x8F000000u, 55u}, // ayd -> Latn
+    {0x93000000u, 55u}, // aye -> Latn
+    {0x9B000000u, 55u}, // ayg -> Latn
+    {0x9F000000u,  2u}, // ayh -> Arab
+    {0xA3000000u, 55u}, // ayi -> Latn
+    {0xAB000000u, 55u}, // ayk -> Latn
+    {0xAF000000u,  2u}, // ayl -> Arab
+    {0xB7000000u,  2u}, // ayn -> Arab
+    {0xBB000000u, 55u}, // ayo -> Latn
+    {0xBF000000u,  2u}, // ayp -> Arab
+    {0xC3000000u, 55u}, // ayq -> Latn
+    {0xCB000000u, 55u}, // ays -> Latn
+    {0xCF000000u, 55u}, // ayt -> Latn
+    {0xD3000000u, 55u}, // ayu -> Latn
+    {0xE7000000u, 55u}, // ayz -> Latn
+    {0x617A0000u, 55u}, // az -> Latn
     {0x617A4951u,  2u}, // az-IQ -> Arab
     {0x617A4952u,  2u}, // az-IR -> Arab
-    {0x617A5255u, 18u}, // az-RU -> Cyrl
-    {0x62610000u, 18u}, // ba -> Cyrl
+    {0x617A5255u, 20u}, // az-RU -> Cyrl
+    {0x87200000u,  2u}, // azb -> Arab
+    {0x8F200000u, 55u}, // azd -> Latn
+    {0x9B200000u, 55u}, // azg -> Latn
+    {0xB3200000u, 55u}, // azm -> Latn
+    {0xB7200000u, 55u}, // azn -> Latn
+    {0xBB200000u, 55u}, // azo -> Latn
+    {0xCF200000u, 55u}, // azt -> Latn
+    {0xE7200000u, 55u}, // azz -> Latn
+    {0x62610000u, 20u}, // ba -> Cyrl
+    {0x80010000u, 55u}, // baa -> Latn
+    {0x84010000u, 55u}, // bab -> Latn
+    {0x88010000u, 55u}, // bac -> Latn
+    {0x90010000u, 55u}, // bae -> Latn
+    {0x94010000u, 55u}, // baf -> Latn
+    {0x98010000u, 55u}, // bag -> Latn
+    {0x9C010000u, 55u}, // bah -> Latn
+    {0xA4010000u, 55u}, // baj -> Latn
     {0xAC010000u,  2u}, // bal -> Arab
-    {0xB4010000u, 46u}, // ban -> Latn
-    {0xBC010000u, 19u}, // bap -> Deva
-    {0xC4010000u, 46u}, // bar -> Latn
-    {0xC8010000u, 46u}, // bas -> Latn
-    {0xD4010000u, 46u}, // bav -> Latn
+    {0xB4010000u, 55u}, // ban -> Latn
+    {0xB8010000u, 55u}, // bao -> Latn
+    {0xBC010000u, 21u}, // bap -> Deva
+    {0xC4010000u, 55u}, // bar -> Latn
+    {0xC8010000u, 55u}, // bas -> Latn
+    {0xD0010000u, 55u}, // bau -> Latn
+    {0xD4010000u, 55u}, // bav -> Latn
+    {0xD8010000u, 55u}, // baw -> Latn
     {0xDC010000u,  6u}, // bax -> Bamu
-    {0x80210000u, 46u}, // bba -> Latn
-    {0x84210000u, 46u}, // bbb -> Latn
-    {0x88210000u, 46u}, // bbc -> Latn
-    {0x8C210000u, 46u}, // bbd -> Latn
-    {0xA4210000u, 46u}, // bbj -> Latn
-    {0xBC210000u, 46u}, // bbp -> Latn
-    {0xC4210000u, 46u}, // bbr -> Latn
-    {0x94410000u, 46u}, // bcf -> Latn
-    {0x9C410000u, 46u}, // bch -> Latn
-    {0xA0410000u, 46u}, // bci -> Latn
-    {0xB0410000u, 46u}, // bcm -> Latn
-    {0xB4410000u, 46u}, // bcn -> Latn
-    {0xB8410000u, 46u}, // bco -> Latn
-    {0xC0410000u, 21u}, // bcq -> Ethi
-    {0xD0410000u, 46u}, // bcu -> Latn
-    {0x8C610000u, 46u}, // bdd -> Latn
-    {0x62650000u, 18u}, // be -> Cyrl
-    {0x94810000u, 46u}, // bef -> Latn
-    {0x9C810000u, 46u}, // beh -> Latn
+    {0xE0010000u, 55u}, // bay -> Latn
+    {0x80210000u, 55u}, // bba -> Latn
+    {0x84210000u, 55u}, // bbb -> Latn
+    {0x88210000u, 55u}, // bbc -> Latn
+    {0x8C210000u, 55u}, // bbd -> Latn
+    {0x90210000u, 55u}, // bbe -> Latn
+    {0x94210000u, 55u}, // bbf -> Latn
+    {0x98210000u, 55u}, // bbg -> Latn
+    {0xA0210000u, 55u}, // bbi -> Latn
+    {0xA4210000u, 55u}, // bbj -> Latn
+    {0xA8210000u, 55u}, // bbk -> Latn
+    {0xAC210000u, 25u}, // bbl -> Geor
+    {0xB0210000u, 55u}, // bbm -> Latn
+    {0xB4210000u, 55u}, // bbn -> Latn
+    {0xB8210000u, 55u}, // bbo -> Latn
+    {0xBC210000u, 55u}, // bbp -> Latn
+    {0xC0210000u, 55u}, // bbq -> Latn
+    {0xC4210000u, 55u}, // bbr -> Latn
+    {0xC8210000u, 55u}, // bbs -> Latn
+    {0xCC210000u, 55u}, // bbt -> Latn
+    {0xD0210000u, 55u}, // bbu -> Latn
+    {0xD4210000u, 55u}, // bbv -> Latn
+    {0xD8210000u, 55u}, // bbw -> Latn
+    {0xDC210000u, 55u}, // bbx -> Latn
+    {0xE0210000u, 55u}, // bby -> Latn
+    {0x80410000u, 55u}, // bca -> Latn
+    {0x84410000u, 55u}, // bcb -> Latn
+    {0x8C410000u, 55u}, // bcd -> Latn
+    {0x90410000u, 55u}, // bce -> Latn
+    {0x94410000u, 55u}, // bcf -> Latn
+    {0x98410000u, 55u}, // bcg -> Latn
+    {0x9C410000u, 55u}, // bch -> Latn
+    {0xA0410000u, 55u}, // bci -> Latn
+    {0xA4410000u, 55u}, // bcj -> Latn
+    {0xA8410000u, 55u}, // bck -> Latn
+    {0xB0410000u, 55u}, // bcm -> Latn
+    {0xB4410000u, 55u}, // bcn -> Latn
+    {0xB8410000u, 55u}, // bco -> Latn
+    {0xBC410000u, 55u}, // bcp -> Latn
+    {0xC0410000u, 24u}, // bcq -> Ethi
+    {0xC4410000u, 55u}, // bcr -> Latn
+    {0xC8410000u, 55u}, // bcs -> Latn
+    {0xCC410000u, 55u}, // bct -> Latn
+    {0xD0410000u, 55u}, // bcu -> Latn
+    {0xD4410000u, 55u}, // bcv -> Latn
+    {0xD8410000u, 55u}, // bcw -> Latn
+    {0xE0410000u, 55u}, // bcy -> Latn
+    {0xE4410000u, 55u}, // bcz -> Latn
+    {0x80610000u, 55u}, // bda -> Latn
+    {0x84610000u, 55u}, // bdb -> Latn
+    {0x88610000u, 55u}, // bdc -> Latn
+    {0x8C610000u, 55u}, // bdd -> Latn
+    {0x90610000u, 55u}, // bde -> Latn
+    {0x94610000u, 55u}, // bdf -> Latn
+    {0x98610000u, 55u}, // bdg -> Latn
+    {0x9C610000u, 55u}, // bdh -> Latn
+    {0xA0610000u, 55u}, // bdi -> Latn
+    {0xA4610000u, 55u}, // bdj -> Latn
+    {0xA8610000u, 55u}, // bdk -> Latn
+    {0xAC610000u, 55u}, // bdl -> Latn
+    {0xB0610000u, 55u}, // bdm -> Latn
+    {0xB4610000u, 55u}, // bdn -> Latn
+    {0xB8610000u, 55u}, // bdo -> Latn
+    {0xBC610000u, 55u}, // bdp -> Latn
+    {0xC0610000u, 55u}, // bdq -> Latn
+    {0xC4610000u, 55u}, // bdr -> Latn
+    {0xC8610000u, 55u}, // bds -> Latn
+    {0xCC610000u, 55u}, // bdt -> Latn
+    {0xD0610000u, 55u}, // bdu -> Latn
+    {0xD4610000u, 80u}, // bdv -> Orya
+    {0xD8610000u, 55u}, // bdw -> Latn
+    {0xDC610000u, 55u}, // bdx -> Latn
+    {0xE0610000u, 55u}, // bdy -> Latn
+    {0xE4610000u,  2u}, // bdz -> Arab
+    {0x62650000u, 20u}, // be -> Cyrl
+    {0x80810000u, 55u}, // bea -> Latn
+    {0x84810000u, 55u}, // beb -> Latn
+    {0x88810000u, 55u}, // bec -> Latn
+    {0x8C810000u, 55u}, // bed -> Latn
+    {0x90810000u, 21u}, // bee -> Deva
+    {0x94810000u, 55u}, // bef -> Latn
+    {0x9C810000u, 55u}, // beh -> Latn
+    {0xA0810000u, 55u}, // bei -> Latn
     {0xA4810000u,  2u}, // bej -> Arab
-    {0xB0810000u, 46u}, // bem -> Latn
-    {0xCC810000u, 46u}, // bet -> Latn
-    {0xD8810000u, 46u}, // bew -> Latn
-    {0xDC810000u, 46u}, // bex -> Latn
-    {0xE4810000u, 46u}, // bez -> Latn
-    {0x8CA10000u, 46u}, // bfd -> Latn
-    {0xC0A10000u, 87u}, // bfq -> Taml
+    {0xA8810000u, 55u}, // bek -> Latn
+    {0xB0810000u, 55u}, // bem -> Latn
+    {0xB8810000u, 55u}, // beo -> Latn
+    {0xBC810000u, 55u}, // bep -> Latn
+    {0xC0810000u, 55u}, // beq -> Latn
+    {0xC8810000u, 55u}, // bes -> Latn
+    {0xCC810000u, 55u}, // bet -> Latn
+    {0xD0810000u, 55u}, // beu -> Latn
+    {0xD4810000u, 55u}, // bev -> Latn
+    {0xD8810000u, 55u}, // bew -> Latn
+    {0xDC810000u, 55u}, // bex -> Latn
+    {0xE0810000u, 55u}, // bey -> Latn
+    {0xE4810000u, 55u}, // bez -> Latn
+    {0x80A10000u, 55u}, // bfa -> Latn
+    {0x84A10000u, 21u}, // bfb -> Deva
+    {0x88A10000u, 55u}, // bfc -> Latn
+    {0x8CA10000u, 55u}, // bfd -> Latn
+    {0x90A10000u, 55u}, // bfe -> Latn
+    {0x94A10000u, 55u}, // bff -> Latn
+    {0x98A10000u, 55u}, // bfg -> Latn
+    {0x9CA10000u, 55u}, // bfh -> Latn
+    {0xA4A10000u, 55u}, // bfj -> Latn
+    {0xACA10000u, 55u}, // bfl -> Latn
+    {0xB0A10000u, 55u}, // bfm -> Latn
+    {0xB4A10000u, 55u}, // bfn -> Latn
+    {0xB8A10000u, 55u}, // bfo -> Latn
+    {0xBCA10000u, 55u}, // bfp -> Latn
+    {0xC0A10000u, 105u}, // bfq -> Taml
+    {0xC8A10000u, 55u}, // bfs -> Latn
     {0xCCA10000u,  2u}, // bft -> Arab
-    {0xE0A10000u, 19u}, // bfy -> Deva
-    {0x62670000u, 18u}, // bg -> Cyrl
-    {0x88C10000u, 19u}, // bgc -> Deva
+    {0xD0A10000u, 112u}, // bfu -> Tibt
+    {0xD8A10000u, 80u}, // bfw -> Orya
+    {0xDCA10000u, 55u}, // bfx -> Latn
+    {0xE0A10000u, 21u}, // bfy -> Deva
+    {0xE4A10000u, 21u}, // bfz -> Deva
+    {0x62670000u, 20u}, // bg -> Cyrl
+    {0x80C10000u, 55u}, // bga -> Latn
+    {0x84C10000u, 55u}, // bgb -> Latn
+    {0x88C10000u, 21u}, // bgc -> Deva
+    {0x8CC10000u, 21u}, // bgd -> Deva
+    {0x94C10000u, 55u}, // bgf -> Latn
+    {0x98C10000u, 55u}, // bgg -> Latn
+    {0xA0C10000u, 55u}, // bgi -> Latn
+    {0xA4C10000u, 55u}, // bgj -> Latn
     {0xB4C10000u,  2u}, // bgn -> Arab
-    {0xDCC10000u, 26u}, // bgx -> Grek
-    {0x84E10000u, 19u}, // bhb -> Deva
-    {0x98E10000u, 46u}, // bhg -> Latn
-    {0xA0E10000u, 19u}, // bhi -> Deva
-    {0xACE10000u, 46u}, // bhl -> Latn
-    {0xB8E10000u, 19u}, // bho -> Deva
-    {0xE0E10000u, 46u}, // bhy -> Latn
-    {0x62690000u, 46u}, // bi -> Latn
-    {0x85010000u, 46u}, // bib -> Latn
-    {0x99010000u, 46u}, // big -> Latn
-    {0xA9010000u, 46u}, // bik -> Latn
-    {0xB1010000u, 46u}, // bim -> Latn
-    {0xB5010000u, 46u}, // bin -> Latn
-    {0xB9010000u, 46u}, // bio -> Latn
-    {0xC1010000u, 46u}, // biq -> Latn
-    {0x9D210000u, 46u}, // bjh -> Latn
-    {0xA1210000u, 21u}, // bji -> Ethi
-    {0xA5210000u, 19u}, // bjj -> Deva
-    {0xB5210000u, 46u}, // bjn -> Latn
-    {0xB9210000u, 46u}, // bjo -> Latn
-    {0xC5210000u, 46u}, // bjr -> Latn
-    {0xCD210000u, 46u}, // bjt -> Latn
-    {0xE5210000u, 46u}, // bjz -> Latn
-    {0x89410000u, 46u}, // bkc -> Latn
-    {0xB1410000u, 46u}, // bkm -> Latn
-    {0xC1410000u, 46u}, // bkq -> Latn
-    {0xD1410000u, 46u}, // bku -> Latn
-    {0xD5410000u, 46u}, // bkv -> Latn
-    {0x81610000u, 46u}, // bla -> Latn
-    {0x99610000u, 46u}, // blg -> Latn
-    {0xCD610000u, 89u}, // blt -> Tavt
-    {0x626D0000u, 46u}, // bm -> Latn
-    {0x9D810000u, 46u}, // bmh -> Latn
-    {0xA9810000u, 46u}, // bmk -> Latn
-    {0xC1810000u, 46u}, // bmq -> Latn
-    {0xD1810000u, 46u}, // bmu -> Latn
-    {0x626E0000u,  8u}, // bn -> Beng
-    {0x99A10000u, 46u}, // bng -> Latn
-    {0xB1A10000u, 46u}, // bnm -> Latn
-    {0xBDA10000u, 46u}, // bnp -> Latn
-    {0x626F0000u, 94u}, // bo -> Tibt
-    {0xA5C10000u, 46u}, // boj -> Latn
-    {0xB1C10000u, 46u}, // bom -> Latn
-    {0xB5C10000u, 46u}, // bon -> Latn
-    {0xE1E10000u,  8u}, // bpy -> Beng
-    {0x8A010000u, 46u}, // bqc -> Latn
+    {0xB8C10000u, 55u}, // bgo -> Latn
+    {0xBCC10000u,  2u}, // bgp -> Arab
+    {0xC0C10000u, 21u}, // bgq -> Deva
+    {0xC4C10000u, 55u}, // bgr -> Latn
+    {0xC8C10000u, 55u}, // bgs -> Latn
+    {0xCCC10000u, 55u}, // bgt -> Latn
+    {0xD0C10000u, 55u}, // bgu -> Latn
+    {0xD4C10000u, 55u}, // bgv -> Latn
+    {0xD8C10000u, 21u}, // bgw -> Deva
+    {0xDCC10000u, 30u}, // bgx -> Grek
+    {0xE0C10000u, 55u}, // bgy -> Latn
+    {0xE4C10000u, 55u}, // bgz -> Latn
+    {0x80E10000u, 21u}, // bha -> Deva
+    {0x84E10000u, 21u}, // bhb -> Deva
+    {0x88E10000u, 55u}, // bhc -> Latn
+    {0x8CE10000u, 21u}, // bhd -> Deva
+    {0x90E10000u,  2u}, // bhe -> Arab
+    {0x94E10000u, 55u}, // bhf -> Latn
+    {0x98E10000u, 55u}, // bhg -> Latn
+    {0x9CE10000u, 20u}, // bhh -> Cyrl
+    {0xA0E10000u, 21u}, // bhi -> Deva
+    {0xA4E10000u, 21u}, // bhj -> Deva
+    {0xACE10000u, 55u}, // bhl -> Latn
+    {0xB0E10000u,  2u}, // bhm -> Arab
+    {0xB4E10000u, 100u}, // bhn -> Syrc
+    {0xB8E10000u, 21u}, // bho -> Deva
+    {0xBCE10000u, 55u}, // bhp -> Latn
+    {0xC0E10000u, 55u}, // bhq -> Latn
+    {0xC4E10000u, 55u}, // bhr -> Latn
+    {0xC8E10000u, 55u}, // bhs -> Latn
+    {0xCCE10000u, 21u}, // bht -> Deva
+    {0xD0E10000u, 21u}, // bhu -> Deva
+    {0xD4E10000u, 55u}, // bhv -> Latn
+    {0xD8E10000u, 55u}, // bhw -> Latn
+    {0xE0E10000u, 55u}, // bhy -> Latn
+    {0xE4E10000u, 55u}, // bhz -> Latn
+    {0x62690000u, 55u}, // bi -> Latn
+    {0x81010000u, 55u}, // bia -> Latn
+    {0x85010000u, 55u}, // bib -> Latn
+    {0x8D010000u, 55u}, // bid -> Latn
+    {0x91010000u, 55u}, // bie -> Latn
+    {0x95010000u, 55u}, // bif -> Latn
+    {0x99010000u, 55u}, // big -> Latn
+    {0xA9010000u, 55u}, // bik -> Latn
+    {0xAD010000u, 55u}, // bil -> Latn
+    {0xB1010000u, 55u}, // bim -> Latn
+    {0xB5010000u, 55u}, // bin -> Latn
+    {0xB9010000u, 55u}, // bio -> Latn
+    {0xBD010000u, 55u}, // bip -> Latn
+    {0xC1010000u, 55u}, // biq -> Latn
+    {0xC5010000u, 55u}, // bir -> Latn
+    {0xCD010000u, 55u}, // bit -> Latn
+    {0xD1010000u, 55u}, // biu -> Latn
+    {0xD5010000u, 55u}, // biv -> Latn
+    {0xD9010000u, 55u}, // biw -> Latn
+    {0xE1010000u, 21u}, // biy -> Deva
+    {0xE5010000u, 55u}, // biz -> Latn
+    {0x81210000u, 55u}, // bja -> Latn
+    {0x85210000u, 55u}, // bjb -> Latn
+    {0x89210000u, 55u}, // bjc -> Latn
+    {0x95210000u, 100u}, // bjf -> Syrc
+    {0x99210000u, 55u}, // bjg -> Latn
+    {0x9D210000u, 55u}, // bjh -> Latn
+    {0xA1210000u, 55u}, // bji -> Latn
+    {0xA5210000u, 21u}, // bjj -> Deva
+    {0xA9210000u, 55u}, // bjk -> Latn
+    {0xAD210000u, 55u}, // bjl -> Latn
+    {0xB1210000u,  2u}, // bjm -> Arab
+    {0xB5210000u, 55u}, // bjn -> Latn
+    {0xB9210000u, 55u}, // bjo -> Latn
+    {0xBD210000u, 55u}, // bjp -> Latn
+    {0xC5210000u, 55u}, // bjr -> Latn
+    {0xC9210000u, 55u}, // bjs -> Latn
+    {0xCD210000u, 55u}, // bjt -> Latn
+    {0xD1210000u, 55u}, // bju -> Latn
+    {0xD5210000u, 55u}, // bjv -> Latn
+    {0xD9210000u, 55u}, // bjw -> Latn
+    {0xDD210000u, 55u}, // bjx -> Latn
+    {0xE1210000u, 55u}, // bjy -> Latn
+    {0xE5210000u, 55u}, // bjz -> Latn
+    {0x81410000u, 55u}, // bka -> Latn
+    {0x89410000u, 55u}, // bkc -> Latn
+    {0x8D410000u, 55u}, // bkd -> Latn
+    {0x95410000u, 55u}, // bkf -> Latn
+    {0x99410000u, 55u}, // bkg -> Latn
+    {0x9D410000u, 55u}, // bkh -> Latn
+    {0xA1410000u, 55u}, // bki -> Latn
+    {0xA5410000u, 55u}, // bkj -> Latn
+    {0xA9410000u, 112u}, // bkk -> Tibt
+    {0xAD410000u, 55u}, // bkl -> Latn
+    {0xB1410000u, 55u}, // bkm -> Latn
+    {0xB5410000u, 55u}, // bkn -> Latn
+    {0xB9410000u, 55u}, // bko -> Latn
+    {0xBD410000u, 55u}, // bkp -> Latn
+    {0xC1410000u, 55u}, // bkq -> Latn
+    {0xC5410000u, 55u}, // bkr -> Latn
+    {0xC9410000u, 55u}, // bks -> Latn
+    {0xCD410000u, 55u}, // bkt -> Latn
+    {0xD1410000u, 55u}, // bku -> Latn
+    {0xD5410000u, 55u}, // bkv -> Latn
+    {0xD9410000u, 55u}, // bkw -> Latn
+    {0xDD410000u, 55u}, // bkx -> Latn
+    {0xE1410000u, 55u}, // bky -> Latn
+    {0xE5410000u, 55u}, // bkz -> Latn
+    {0x81610000u, 55u}, // bla -> Latn
+    {0x85610000u, 55u}, // blb -> Latn
+    {0x89610000u, 55u}, // blc -> Latn
+    {0x8D610000u, 55u}, // bld -> Latn
+    {0x91610000u, 55u}, // ble -> Latn
+    {0x95610000u, 55u}, // blf -> Latn
+    {0x9D610000u, 55u}, // blh -> Latn
+    {0xA1610000u, 55u}, // bli -> Latn
+    {0xA5610000u, 55u}, // blj -> Latn
+    {0xA9610000u, 72u}, // blk -> Mymr
+    {0xB1610000u, 55u}, // blm -> Latn
+    {0xB5610000u, 55u}, // bln -> Latn
+    {0xB9610000u, 55u}, // blo -> Latn
+    {0xBD610000u, 55u}, // blp -> Latn
+    {0xC1610000u, 55u}, // blq -> Latn
+    {0xC5610000u, 55u}, // blr -> Latn
+    {0xC9610000u, 55u}, // bls -> Latn
+    {0xCD610000u, 107u}, // blt -> Tavt
+    {0xD5610000u, 55u}, // blv -> Latn
+    {0xD9610000u, 55u}, // blw -> Latn
+    {0xDD610000u, 55u}, // blx -> Latn
+    {0xE1610000u, 55u}, // bly -> Latn
+    {0xE5610000u, 55u}, // blz -> Latn
+    {0x626D0000u, 55u}, // bm -> Latn
+    {0x81810000u, 55u}, // bma -> Latn
+    {0x85810000u, 55u}, // bmb -> Latn
+    {0x89810000u, 55u}, // bmc -> Latn
+    {0x8D810000u, 55u}, // bmd -> Latn
+    {0x91810000u, 55u}, // bme -> Latn
+    {0x95810000u, 55u}, // bmf -> Latn
+    {0x99810000u, 55u}, // bmg -> Latn
+    {0x9D810000u, 55u}, // bmh -> Latn
+    {0xA1810000u, 55u}, // bmi -> Latn
+    {0xA5810000u, 21u}, // bmj -> Deva
+    {0xA9810000u, 55u}, // bmk -> Latn
+    {0xAD810000u, 55u}, // bml -> Latn
+    {0xB1810000u, 55u}, // bmm -> Latn
+    {0xB5810000u, 55u}, // bmn -> Latn
+    {0xB9810000u, 55u}, // bmo -> Latn
+    {0xBD810000u, 55u}, // bmp -> Latn
+    {0xC1810000u, 55u}, // bmq -> Latn
+    {0xC5810000u, 55u}, // bmr -> Latn
+    {0xC9810000u, 55u}, // bms -> Latn
+    {0xD1810000u, 55u}, // bmu -> Latn
+    {0xD5810000u, 55u}, // bmv -> Latn
+    {0xD9810000u, 55u}, // bmw -> Latn
+    {0xDD810000u, 55u}, // bmx -> Latn
+    {0xE5810000u, 55u}, // bmz -> Latn
+    {0x626E0000u,  9u}, // bn -> Beng
+    {0x81A10000u, 55u}, // bna -> Latn
+    {0x85A10000u, 55u}, // bnb -> Latn
+    {0x89A10000u, 55u}, // bnc -> Latn
+    {0x8DA10000u, 55u}, // bnd -> Latn
+    {0x91A10000u, 55u}, // bne -> Latn
+    {0x95A10000u, 55u}, // bnf -> Latn
+    {0x99A10000u, 55u}, // bng -> Latn
+    {0xA1A10000u, 55u}, // bni -> Latn
+    {0xA5A10000u, 55u}, // bnj -> Latn
+    {0xA9A10000u, 55u}, // bnk -> Latn
+    {0xB1A10000u, 55u}, // bnm -> Latn
+    {0xB5A10000u, 55u}, // bnn -> Latn
+    {0xB9A10000u, 55u}, // bno -> Latn
+    {0xBDA10000u, 55u}, // bnp -> Latn
+    {0xC1A10000u, 55u}, // bnq -> Latn
+    {0xC5A10000u, 55u}, // bnr -> Latn
+    {0xC9A10000u, 21u}, // bns -> Deva
+    {0xD1A10000u, 55u}, // bnu -> Latn
+    {0xD5A10000u, 55u}, // bnv -> Latn
+    {0xD9A10000u, 55u}, // bnw -> Latn
+    {0xDDA10000u, 55u}, // bnx -> Latn
+    {0xE1A10000u, 55u}, // bny -> Latn
+    {0xE5A10000u, 55u}, // bnz -> Latn
+    {0x626F0000u, 112u}, // bo -> Tibt
+    {0x81C10000u, 55u}, // boa -> Latn
+    {0x85C10000u, 55u}, // bob -> Latn
+    {0x91C10000u, 55u}, // boe -> Latn
+    {0x95C10000u, 55u}, // bof -> Latn
+    {0x9DC10000u, 55u}, // boh -> Latn
+    {0xA5C10000u, 55u}, // boj -> Latn
+    {0xA9C10000u, 55u}, // bok -> Latn
+    {0xADC10000u, 55u}, // bol -> Latn
+    {0xB1C10000u, 55u}, // bom -> Latn
+    {0xB5C10000u, 55u}, // bon -> Latn
+    {0xB9C10000u, 55u}, // boo -> Latn
+    {0xBDC10000u, 55u}, // bop -> Latn
+    {0xC1C10000u, 55u}, // boq -> Latn
+    {0xC5C10000u, 55u}, // bor -> Latn
+    {0xCDC10000u, 55u}, // bot -> Latn
+    {0xD1C10000u, 55u}, // bou -> Latn
+    {0xD5C10000u, 55u}, // bov -> Latn
+    {0xD9C10000u, 55u}, // bow -> Latn
+    {0xDDC10000u, 55u}, // box -> Latn
+    {0xE1C10000u, 55u}, // boy -> Latn
+    {0xE5C10000u, 55u}, // boz -> Latn
+    {0x81E10000u, 55u}, // bpa -> Latn
+    {0x89E10000u, 55u}, // bpc -> Latn
+    {0x8DE10000u, 55u}, // bpd -> Latn
+    {0x91E10000u, 55u}, // bpe -> Latn
+    {0x99E10000u, 55u}, // bpg -> Latn
+    {0x9DE10000u, 20u}, // bph -> Cyrl
+    {0xA1E10000u, 55u}, // bpi -> Latn
+    {0xA5E10000u, 55u}, // bpj -> Latn
+    {0xA9E10000u, 55u}, // bpk -> Latn
+    {0xADE10000u, 55u}, // bpl -> Latn
+    {0xB1E10000u, 55u}, // bpm -> Latn
+    {0xB9E10000u, 55u}, // bpo -> Latn
+    {0xBDE10000u, 55u}, // bpp -> Latn
+    {0xC1E10000u, 55u}, // bpq -> Latn
+    {0xC5E10000u, 55u}, // bpr -> Latn
+    {0xC9E10000u, 55u}, // bps -> Latn
+    {0xCDE10000u, 55u}, // bpt -> Latn
+    {0xD1E10000u, 55u}, // bpu -> Latn
+    {0xD5E10000u, 55u}, // bpv -> Latn
+    {0xD9E10000u, 55u}, // bpw -> Latn
+    {0xDDE10000u, 21u}, // bpx -> Deva
+    {0xE1E10000u,  9u}, // bpy -> Beng
+    {0xE5E10000u, 55u}, // bpz -> Latn
+    {0x82010000u, 55u}, // bqa -> Latn
+    {0x86010000u, 55u}, // bqb -> Latn
+    {0x8A010000u, 55u}, // bqc -> Latn
+    {0x8E010000u, 55u}, // bqd -> Latn
+    {0x96010000u, 55u}, // bqf -> Latn
+    {0x9A010000u, 55u}, // bqg -> Latn
     {0xA2010000u,  2u}, // bqi -> Arab
-    {0xBE010000u, 46u}, // bqp -> Latn
-    {0xD6010000u, 46u}, // bqv -> Latn
-    {0x62720000u, 46u}, // br -> Latn
-    {0x82210000u, 19u}, // bra -> Deva
+    {0xA6010000u, 55u}, // bqj -> Latn
+    {0xAA010000u, 55u}, // bqk -> Latn
+    {0xAE010000u, 55u}, // bql -> Latn
+    {0xB2010000u, 55u}, // bqm -> Latn
+    {0xBA010000u, 55u}, // bqo -> Latn
+    {0xBE010000u, 55u}, // bqp -> Latn
+    {0xC2010000u, 55u}, // bqq -> Latn
+    {0xC6010000u, 55u}, // bqr -> Latn
+    {0xCA010000u, 55u}, // bqs -> Latn
+    {0xCE010000u, 55u}, // bqt -> Latn
+    {0xD2010000u, 55u}, // bqu -> Latn
+    {0xD6010000u, 55u}, // bqv -> Latn
+    {0xDA010000u, 55u}, // bqw -> Latn
+    {0xDE010000u, 55u}, // bqx -> Latn
+    {0xE6010000u, 55u}, // bqz -> Latn
+    {0x62720000u, 55u}, // br -> Latn
+    {0x82210000u, 21u}, // bra -> Deva
+    {0x86210000u, 47u}, // brb -> Khmr
+    {0x8A210000u, 55u}, // brc -> Latn
+    {0x8E210000u, 21u}, // brd -> Deva
+    {0x96210000u, 55u}, // brf -> Latn
+    {0x9A210000u, 55u}, // brg -> Latn
     {0x9E210000u,  2u}, // brh -> Arab
-    {0xDE210000u, 19u}, // brx -> Deva
-    {0xE6210000u, 46u}, // brz -> Latn
-    {0x62730000u, 46u}, // bs -> Latn
-    {0xA6410000u, 46u}, // bsj -> Latn
+    {0xA2210000u, 55u}, // bri -> Latn
+    {0xA6210000u, 55u}, // brj -> Latn
+    {0xAA210000u,  2u}, // brk -> Arab
+    {0xAE210000u, 55u}, // brl -> Latn
+    {0xB2210000u, 55u}, // brm -> Latn
+    {0xB6210000u, 55u}, // brn -> Latn
+    {0xBA210000u, 112u}, // bro -> Tibt
+    {0xBE210000u, 55u}, // brp -> Latn
+    {0xC2210000u, 55u}, // brq -> Latn
+    {0xC6210000u, 55u}, // brr -> Latn
+    {0xCA210000u, 55u}, // brs -> Latn
+    {0xCE210000u, 55u}, // brt -> Latn
+    {0xD2210000u, 55u}, // bru -> Latn
+    {0xD6210000u, 52u}, // brv -> Laoo
+    {0xDA210000u, 49u}, // brw -> Knda
+    {0xDE210000u, 21u}, // brx -> Deva
+    {0xE2210000u, 55u}, // bry -> Latn
+    {0xE6210000u, 55u}, // brz -> Latn
+    {0x62730000u, 55u}, // bs -> Latn
+    {0x82410000u, 55u}, // bsa -> Latn
+    {0x86410000u, 55u}, // bsb -> Latn
+    {0x8A410000u, 55u}, // bsc -> Latn
+    {0x92410000u, 55u}, // bse -> Latn
+    {0x96410000u, 55u}, // bsf -> Latn
+    {0x9E410000u,  2u}, // bsh -> Arab
+    {0xA2410000u, 55u}, // bsi -> Latn
+    {0xA6410000u, 55u}, // bsj -> Latn
+    {0xAA410000u,  2u}, // bsk -> Arab
+    {0xAE410000u, 55u}, // bsl -> Latn
+    {0xB2410000u, 55u}, // bsm -> Latn
+    {0xB6410000u, 55u}, // bsn -> Latn
+    {0xBA410000u, 55u}, // bso -> Latn
+    {0xBE410000u, 55u}, // bsp -> Latn
     {0xC2410000u,  7u}, // bsq -> Bass
-    {0xCA410000u, 46u}, // bss -> Latn
-    {0xCE410000u, 21u}, // bst -> Ethi
-    {0xBA610000u, 46u}, // bto -> Latn
-    {0xCE610000u, 46u}, // btt -> Latn
-    {0xD6610000u, 19u}, // btv -> Deva
-    {0x82810000u, 18u}, // bua -> Cyrl
-    {0x8A810000u, 46u}, // buc -> Latn
-    {0x8E810000u, 46u}, // bud -> Latn
-    {0x9A810000u, 46u}, // bug -> Latn
-    {0xAA810000u, 46u}, // buk -> Latn
-    {0xB2810000u, 46u}, // bum -> Latn
-    {0xBA810000u, 46u}, // buo -> Latn
-    {0xCA810000u, 46u}, // bus -> Latn
-    {0xD2810000u, 46u}, // buu -> Latn
-    {0x86A10000u, 46u}, // bvb -> Latn
-    {0x8EC10000u, 46u}, // bwd -> Latn
-    {0xC6C10000u, 46u}, // bwr -> Latn
-    {0x9EE10000u, 46u}, // bxh -> Latn
-    {0x93010000u, 46u}, // bye -> Latn
-    {0xB7010000u, 21u}, // byn -> Ethi
-    {0xC7010000u, 46u}, // byr -> Latn
-    {0xCB010000u, 46u}, // bys -> Latn
-    {0xD7010000u, 46u}, // byv -> Latn
-    {0xDF010000u, 46u}, // byx -> Latn
-    {0x83210000u, 46u}, // bza -> Latn
-    {0x93210000u, 46u}, // bze -> Latn
-    {0x97210000u, 46u}, // bzf -> Latn
-    {0x9F210000u, 46u}, // bzh -> Latn
-    {0xDB210000u, 46u}, // bzw -> Latn
-    {0x63610000u, 46u}, // ca -> Latn
-    {0x8C020000u, 46u}, // cad -> Latn
-    {0xB4020000u, 46u}, // can -> Latn
-    {0xA4220000u, 46u}, // cbj -> Latn
-    {0x9C420000u, 46u}, // cch -> Latn
-    {0xBC420000u, 10u}, // ccp -> Cakm
-    {0x63650000u, 18u}, // ce -> Cyrl
-    {0x84820000u, 46u}, // ceb -> Latn
-    {0x80A20000u, 46u}, // cfa -> Latn
-    {0x98C20000u, 46u}, // cgg -> Latn
-    {0x63680000u, 46u}, // ch -> Latn
-    {0xA8E20000u, 46u}, // chk -> Latn
-    {0xB0E20000u, 18u}, // chm -> Cyrl
-    {0xB8E20000u, 46u}, // cho -> Latn
-    {0xBCE20000u, 46u}, // chp -> Latn
-    {0xC4E20000u, 14u}, // chr -> Cher
-    {0x89020000u, 46u}, // cic -> Latn
+    {0xC6410000u, 55u}, // bsr -> Latn
+    {0xCA410000u, 55u}, // bss -> Latn
+    {0xCE410000u, 24u}, // bst -> Ethi
+    {0xD2410000u, 55u}, // bsu -> Latn
+    {0xD6410000u, 55u}, // bsv -> Latn
+    {0xDA410000u, 55u}, // bsw -> Latn
+    {0xDE410000u, 55u}, // bsx -> Latn
+    {0xE2410000u, 55u}, // bsy -> Latn
+    {0x82610000u, 55u}, // bta -> Latn
+    {0x8A610000u, 55u}, // btc -> Latn
+    {0x8E610000u,  8u}, // btd -> Batk
+    {0x92610000u, 55u}, // bte -> Latn
+    {0x96610000u, 55u}, // btf -> Latn
+    {0x9A610000u, 55u}, // btg -> Latn
+    {0x9E610000u, 55u}, // bth -> Latn
+    {0xA2610000u, 55u}, // bti -> Latn
+    {0xA6610000u, 55u}, // btj -> Latn
+    {0xB2610000u,  8u}, // btm -> Batk
+    {0xB6610000u, 55u}, // btn -> Latn
+    {0xBA610000u, 55u}, // bto -> Latn
+    {0xBE610000u, 55u}, // btp -> Latn
+    {0xC2610000u, 55u}, // btq -> Latn
+    {0xC6610000u, 55u}, // btr -> Latn
+    {0xCA610000u, 55u}, // bts -> Latn
+    {0xCE610000u, 55u}, // btt -> Latn
+    {0xD2610000u, 55u}, // btu -> Latn
+    {0xD6610000u, 21u}, // btv -> Deva
+    {0xDA610000u, 55u}, // btw -> Latn
+    {0xDE610000u, 55u}, // btx -> Latn
+    {0xE2610000u, 55u}, // bty -> Latn
+    {0xE6610000u, 55u}, // btz -> Latn
+    {0x82810000u, 20u}, // bua -> Cyrl
+    {0x86810000u, 55u}, // bub -> Latn
+    {0x8A810000u, 55u}, // buc -> Latn
+    {0x8E810000u, 55u}, // bud -> Latn
+    {0x92810000u, 55u}, // bue -> Latn
+    {0x96810000u, 55u}, // buf -> Latn
+    {0x9A810000u, 55u}, // bug -> Latn
+    {0x9E810000u, 55u}, // buh -> Latn
+    {0xA2810000u, 55u}, // bui -> Latn
+    {0xA6810000u, 55u}, // buj -> Latn
+    {0xAA810000u, 55u}, // buk -> Latn
+    {0xB2810000u, 55u}, // bum -> Latn
+    {0xB6810000u, 55u}, // bun -> Latn
+    {0xBA810000u, 55u}, // buo -> Latn
+    {0xBE810000u, 55u}, // bup -> Latn
+    {0xC2810000u, 55u}, // buq -> Latn
+    {0xCA810000u, 55u}, // bus -> Latn
+    {0xCE810000u, 55u}, // but -> Latn
+    {0xD2810000u, 55u}, // buu -> Latn
+    {0xD6810000u, 55u}, // buv -> Latn
+    {0xDA810000u, 55u}, // buw -> Latn
+    {0xDE810000u, 55u}, // bux -> Latn
+    {0xE2810000u, 55u}, // buy -> Latn
+    {0xE6810000u, 55u}, // buz -> Latn
+    {0x82A10000u, 55u}, // bva -> Latn
+    {0x86A10000u, 55u}, // bvb -> Latn
+    {0x8AA10000u, 55u}, // bvc -> Latn
+    {0x8EA10000u, 55u}, // bvd -> Latn
+    {0x92A10000u, 55u}, // bve -> Latn
+    {0x96A10000u, 55u}, // bvf -> Latn
+    {0x9AA10000u, 55u}, // bvg -> Latn
+    {0x9EA10000u, 55u}, // bvh -> Latn
+    {0xA2A10000u, 55u}, // bvi -> Latn
+    {0xA6A10000u, 55u}, // bvj -> Latn
+    {0xAAA10000u, 55u}, // bvk -> Latn
+    {0xB2A10000u, 55u}, // bvm -> Latn
+    {0xB6A10000u, 55u}, // bvn -> Latn
+    {0xBAA10000u, 55u}, // bvo -> Latn
+    {0xC2A10000u, 55u}, // bvq -> Latn
+    {0xC6A10000u, 55u}, // bvr -> Latn
+    {0xCEA10000u, 55u}, // bvt -> Latn
+    {0xD2A10000u, 55u}, // bvu -> Latn
+    {0xD6A10000u, 55u}, // bvv -> Latn
+    {0xDAA10000u, 55u}, // bvw -> Latn
+    {0xDEA10000u, 55u}, // bvx -> Latn
+    {0xE2A10000u, 55u}, // bvy -> Latn
+    {0xE6A10000u, 55u}, // bvz -> Latn
+    {0x82C10000u, 55u}, // bwa -> Latn
+    {0x86C10000u, 55u}, // bwb -> Latn
+    {0x8AC10000u, 55u}, // bwc -> Latn
+    {0x8EC10000u, 55u}, // bwd -> Latn
+    {0x92C10000u, 72u}, // bwe -> Mymr
+    {0x96C10000u, 55u}, // bwf -> Latn
+    {0x9AC10000u, 55u}, // bwg -> Latn
+    {0x9EC10000u, 55u}, // bwh -> Latn
+    {0xA2C10000u, 55u}, // bwi -> Latn
+    {0xA6C10000u, 55u}, // bwj -> Latn
+    {0xAAC10000u, 55u}, // bwk -> Latn
+    {0xAEC10000u, 55u}, // bwl -> Latn
+    {0xB2C10000u, 55u}, // bwm -> Latn
+    {0xBAC10000u, 55u}, // bwo -> Latn
+    {0xBEC10000u, 55u}, // bwp -> Latn
+    {0xC2C10000u, 55u}, // bwq -> Latn
+    {0xC6C10000u, 55u}, // bwr -> Latn
+    {0xCAC10000u, 55u}, // bws -> Latn
+    {0xCEC10000u, 55u}, // bwt -> Latn
+    {0xD2C10000u, 55u}, // bwu -> Latn
+    {0xDAC10000u, 55u}, // bww -> Latn
+    {0xDEC10000u, 55u}, // bwx -> Latn
+    {0xE2C10000u, 55u}, // bwy -> Latn
+    {0xE6C10000u, 55u}, // bwz -> Latn
+    {0x82E10000u, 55u}, // bxa -> Latn
+    {0x86E10000u, 55u}, // bxb -> Latn
+    {0x8AE10000u, 55u}, // bxc -> Latn
+    {0x96E10000u, 55u}, // bxf -> Latn
+    {0x9AE10000u, 55u}, // bxg -> Latn
+    {0x9EE10000u, 55u}, // bxh -> Latn
+    {0xA2E10000u, 55u}, // bxi -> Latn
+    {0xA6E10000u, 55u}, // bxj -> Latn
+    {0xAEE10000u, 55u}, // bxl -> Latn
+    {0xB2E10000u, 20u}, // bxm -> Cyrl
+    {0xB6E10000u, 55u}, // bxn -> Latn
+    {0xBAE10000u, 55u}, // bxo -> Latn
+    {0xBEE10000u, 55u}, // bxp -> Latn
+    {0xC2E10000u, 55u}, // bxq -> Latn
+    {0xCAE10000u, 55u}, // bxs -> Latn
+    {0xD2E10000u, 69u}, // bxu -> Mong
+    {0xD6E10000u, 55u}, // bxv -> Latn
+    {0xDAE10000u, 55u}, // bxw -> Latn
+    {0xE6E10000u, 55u}, // bxz -> Latn
+    {0x83010000u, 55u}, // bya -> Latn
+    {0x87010000u, 55u}, // byb -> Latn
+    {0x8B010000u, 55u}, // byc -> Latn
+    {0x8F010000u, 55u}, // byd -> Latn
+    {0x93010000u, 55u}, // bye -> Latn
+    {0x97010000u, 55u}, // byf -> Latn
+    {0x9F010000u, 21u}, // byh -> Deva
+    {0xA3010000u, 55u}, // byi -> Latn
+    {0xA7010000u, 55u}, // byj -> Latn
+    {0xAB010000u, 55u}, // byk -> Latn
+    {0xAF010000u, 55u}, // byl -> Latn
+    {0xB3010000u, 55u}, // bym -> Latn
+    {0xB7010000u, 24u}, // byn -> Ethi
+    {0xBF010000u, 55u}, // byp -> Latn
+    {0xC7010000u, 55u}, // byr -> Latn
+    {0xCB010000u, 55u}, // bys -> Latn
+    {0xD7010000u, 55u}, // byv -> Latn
+    {0xDB010000u, 21u}, // byw -> Deva
+    {0xDF010000u, 55u}, // byx -> Latn
+    {0xE7010000u, 55u}, // byz -> Latn
+    {0x83210000u, 55u}, // bza -> Latn
+    {0x87210000u, 55u}, // bzb -> Latn
+    {0x8B210000u, 55u}, // bzc -> Latn
+    {0x8F210000u, 55u}, // bzd -> Latn
+    {0x93210000u, 55u}, // bze -> Latn
+    {0x97210000u, 55u}, // bzf -> Latn
+    {0x9F210000u, 55u}, // bzh -> Latn
+    {0xA3210000u, 111u}, // bzi -> Thai
+    {0xA7210000u, 55u}, // bzj -> Latn
+    {0xAB210000u, 55u}, // bzk -> Latn
+    {0xAF210000u, 55u}, // bzl -> Latn
+    {0xB3210000u, 55u}, // bzm -> Latn
+    {0xB7210000u, 55u}, // bzn -> Latn
+    {0xBB210000u, 55u}, // bzo -> Latn
+    {0xBF210000u, 55u}, // bzp -> Latn
+    {0xC3210000u, 55u}, // bzq -> Latn
+    {0xC7210000u, 55u}, // bzr -> Latn
+    {0xCF210000u, 55u}, // bzt -> Latn
+    {0xD3210000u, 55u}, // bzu -> Latn
+    {0xD7210000u, 55u}, // bzv -> Latn
+    {0xDB210000u, 55u}, // bzw -> Latn
+    {0xDF210000u, 55u}, // bzx -> Latn
+    {0xE3210000u, 55u}, // bzy -> Latn
+    {0xE7210000u, 55u}, // bzz -> Latn
+    {0x63610000u, 55u}, // ca -> Latn
+    {0x80020000u, 55u}, // caa -> Latn
+    {0x84020000u, 55u}, // cab -> Latn
+    {0x88020000u, 55u}, // cac -> Latn
+    {0x8C020000u, 55u}, // cad -> Latn
+    {0x90020000u, 55u}, // cae -> Latn
+    {0x94020000u, 55u}, // caf -> Latn
+    {0x98020000u, 55u}, // cag -> Latn
+    {0x9C020000u, 55u}, // cah -> Latn
+    {0xA4020000u, 55u}, // caj -> Latn
+    {0xA8020000u, 55u}, // cak -> Latn
+    {0xAC020000u, 55u}, // cal -> Latn
+    {0xB0020000u, 55u}, // cam -> Latn
+    {0xB4020000u, 55u}, // can -> Latn
+    {0xB8020000u, 55u}, // cao -> Latn
+    {0xBC020000u, 55u}, // cap -> Latn
+    {0xC0020000u, 55u}, // caq -> Latn
+    {0xC4020000u, 55u}, // car -> Latn
+    {0xC8020000u, 55u}, // cas -> Latn
+    {0xD4020000u, 55u}, // cav -> Latn
+    {0xD8020000u, 55u}, // caw -> Latn
+    {0xDC020000u, 55u}, // cax -> Latn
+    {0xE0020000u, 55u}, // cay -> Latn
+    {0xE4020000u, 55u}, // caz -> Latn
+    {0x84220000u, 55u}, // cbb -> Latn
+    {0x88220000u, 55u}, // cbc -> Latn
+    {0x8C220000u, 55u}, // cbd -> Latn
+    {0x98220000u, 55u}, // cbg -> Latn
+    {0xA0220000u, 55u}, // cbi -> Latn
+    {0xA4220000u, 55u}, // cbj -> Latn
+    {0xA8220000u, 55u}, // cbk -> Latn
+    {0xAC220000u, 55u}, // cbl -> Latn
+    {0xB4220000u, 111u}, // cbn -> Thai
+    {0xB8220000u, 55u}, // cbo -> Latn
+    {0xC0220000u, 55u}, // cbq -> Latn
+    {0xC4220000u, 55u}, // cbr -> Latn
+    {0xC8220000u, 55u}, // cbs -> Latn
+    {0xCC220000u, 55u}, // cbt -> Latn
+    {0xD0220000u, 55u}, // cbu -> Latn
+    {0xD4220000u, 55u}, // cbv -> Latn
+    {0xD8220000u, 55u}, // cbw -> Latn
+    {0xE0220000u, 55u}, // cby -> Latn
+    {0x88420000u, 55u}, // ccc -> Latn
+    {0x8C420000u, 55u}, // ccd -> Latn
+    {0x90420000u, 55u}, // cce -> Latn
+    {0x98420000u, 55u}, // ccg -> Latn
+    {0x9C420000u, 55u}, // cch -> Latn
+    {0xA4420000u, 55u}, // ccj -> Latn
+    {0xAC420000u, 55u}, // ccl -> Latn
+    {0xB0420000u, 55u}, // ccm -> Latn
+    {0xB8420000u, 55u}, // cco -> Latn
+    {0xBC420000u, 12u}, // ccp -> Cakm
+    {0xC4420000u, 55u}, // ccr -> Latn
+    {0x90620000u, 108u}, // cde -> Telu
+    {0x94620000u, 55u}, // cdf -> Latn
+    {0x9C620000u, 21u}, // cdh -> Deva
+    {0xA0620000u, 31u}, // cdi -> Gujr
+    {0xA4620000u, 21u}, // cdj -> Deva
+    {0xB0620000u, 21u}, // cdm -> Deva
+    {0xB8620000u, 35u}, // cdo -> Hans
+    {0xC4620000u, 55u}, // cdr -> Latn
+    {0xE4620000u,  9u}, // cdz -> Beng
+    {0x63650000u, 20u}, // ce -> Cyrl
+    {0x80820000u, 55u}, // cea -> Latn
+    {0x84820000u, 55u}, // ceb -> Latn
+    {0x98820000u, 55u}, // ceg -> Latn
+    {0xA8820000u, 55u}, // cek -> Latn
+    {0xB4820000u, 55u}, // cen -> Latn
+    {0xCC820000u, 55u}, // cet -> Latn
+    {0xE0820000u, 55u}, // cey -> Latn
+    {0x80A20000u, 55u}, // cfa -> Latn
+    {0x8CA20000u, 55u}, // cfd -> Latn
+    {0x98A20000u, 55u}, // cfg -> Latn
+    {0xB0A20000u, 55u}, // cfm -> Latn
+    {0x80C20000u, 55u}, // cga -> Latn
+    {0x88C20000u, 55u}, // cgc -> Latn
+    {0x98C20000u, 55u}, // cgg -> Latn
+    {0xA8C20000u, 112u}, // cgk -> Tibt
+    {0x63680000u, 55u}, // ch -> Latn
+    {0x84E20000u, 55u}, // chb -> Latn
+    {0x8CE20000u, 55u}, // chd -> Latn
+    {0x94E20000u, 55u}, // chf -> Latn
+    {0x98E20000u,  2u}, // chg -> Arab
+    {0x9CE20000u, 55u}, // chh -> Latn
+    {0xA4E20000u, 55u}, // chj -> Latn
+    {0xA8E20000u, 55u}, // chk -> Latn
+    {0xACE20000u, 55u}, // chl -> Latn
+    {0xB0E20000u, 20u}, // chm -> Cyrl
+    {0xB4E20000u, 55u}, // chn -> Latn
+    {0xB8E20000u, 55u}, // cho -> Latn
+    {0xBCE20000u, 55u}, // chp -> Latn
+    {0xC0E20000u, 55u}, // chq -> Latn
+    {0xC4E20000u, 16u}, // chr -> Cher
+    {0xCCE20000u, 55u}, // cht -> Latn
+    {0xD8E20000u, 55u}, // chw -> Latn
+    {0xDCE20000u, 21u}, // chx -> Deva
+    {0xE0E20000u, 55u}, // chy -> Latn
+    {0xE4E20000u, 55u}, // chz -> Latn
+    {0x81020000u, 55u}, // cia -> Latn
+    {0x85020000u, 55u}, // cib -> Latn
+    {0x89020000u, 55u}, // cic -> Latn
+    {0x91020000u, 55u}, // cie -> Latn
+    {0x9D020000u, 21u}, // cih -> Deva
+    {0xB1020000u, 55u}, // cim -> Latn
+    {0xB5020000u, 55u}, // cin -> Latn
+    {0xBD020000u, 55u}, // cip -> Latn
+    {0xC5020000u, 55u}, // cir -> Latn
+    {0xD9020000u, 55u}, // ciw -> Latn
+    {0xE1020000u, 55u}, // ciy -> Latn
     {0x81220000u,  2u}, // cja -> Arab
-    {0xB1220000u, 13u}, // cjm -> Cham
-    {0xD5220000u, 46u}, // cjv -> Latn
+    {0x91220000u, 55u}, // cje -> Latn
+    {0x9D220000u, 55u}, // cjh -> Latn
+    {0xA1220000u, 20u}, // cji -> Cyrl
+    {0xA9220000u, 55u}, // cjk -> Latn
+    {0xB1220000u, 15u}, // cjm -> Cham
+    {0xB5220000u, 55u}, // cjn -> Latn
+    {0xB9220000u, 55u}, // cjo -> Latn
+    {0xBD220000u, 55u}, // cjp -> Latn
+    {0xC9220000u, 55u}, // cjs -> Latn
+    {0xD5220000u, 55u}, // cjv -> Latn
+    {0xE1220000u, 35u}, // cjy -> Hans
     {0x85420000u,  2u}, // ckb -> Arab
-    {0xAD420000u, 46u}, // ckl -> Latn
-    {0xB9420000u, 46u}, // cko -> Latn
-    {0xE1420000u, 46u}, // cky -> Latn
-    {0x81620000u, 46u}, // cla -> Latn
-    {0x89620000u, 46u}, // clc -> Latn
-    {0x91820000u, 46u}, // cme -> Latn
-    {0x99820000u, 83u}, // cmg -> Soyo
-    {0x636F0000u, 46u}, // co -> Latn
-    {0xBDC20000u, 16u}, // cop -> Copt
-    {0xC9E20000u, 46u}, // cps -> Latn
-    {0x63720000u, 11u}, // cr -> Cans
-    {0x9A220000u, 46u}, // crg -> Latn
-    {0x9E220000u, 18u}, // crh -> Cyrl
-    {0xAA220000u, 11u}, // crk -> Cans
-    {0xAE220000u, 11u}, // crl -> Cans
-    {0xCA220000u, 46u}, // crs -> Latn
-    {0x63730000u, 46u}, // cs -> Latn
-    {0x86420000u, 46u}, // csb -> Latn
-    {0xDA420000u, 11u}, // csw -> Cans
-    {0x8E620000u, 69u}, // ctd -> Pauc
-    {0x63750000u, 18u}, // cu -> Cyrl
-    {0x63760000u, 18u}, // cv -> Cyrl
-    {0x63790000u, 46u}, // cy -> Latn
-    {0x64610000u, 46u}, // da -> Latn
-    {0x8C030000u, 46u}, // dad -> Latn
-    {0x94030000u, 46u}, // daf -> Latn
-    {0x98030000u, 46u}, // dag -> Latn
-    {0x9C030000u, 46u}, // dah -> Latn
-    {0xA8030000u, 46u}, // dak -> Latn
-    {0xC4030000u, 18u}, // dar -> Cyrl
-    {0xD4030000u, 46u}, // dav -> Latn
-    {0x8C230000u, 46u}, // dbd -> Latn
-    {0xC0230000u, 46u}, // dbq -> Latn
+    {0xAD420000u, 55u}, // ckl -> Latn
+    {0xB1420000u, 55u}, // ckm -> Latn
+    {0xB5420000u, 55u}, // ckn -> Latn
+    {0xB9420000u, 55u}, // cko -> Latn
+    {0xC1420000u, 55u}, // ckq -> Latn
+    {0xC5420000u, 55u}, // ckr -> Latn
+    {0xC9420000u, 55u}, // cks -> Latn
+    {0xCD420000u, 20u}, // ckt -> Cyrl
+    {0xD1420000u, 55u}, // cku -> Latn
+    {0xD5420000u, 55u}, // ckv -> Latn
+    {0xDD420000u, 55u}, // ckx -> Latn
+    {0xE1420000u, 55u}, // cky -> Latn
+    {0xE5420000u, 55u}, // ckz -> Latn
+    {0x81620000u, 55u}, // cla -> Latn
+    {0x89620000u, 55u}, // clc -> Latn
+    {0x91620000u, 55u}, // cle -> Latn
+    {0x9D620000u,  2u}, // clh -> Arab
+    {0xA1620000u, 55u}, // cli -> Latn
+    {0xA5620000u, 55u}, // clj -> Latn
+    {0xA9620000u, 55u}, // clk -> Latn
+    {0xAD620000u, 55u}, // cll -> Latn
+    {0xB1620000u, 55u}, // clm -> Latn
+    {0xB9620000u, 55u}, // clo -> Latn
+    {0xCD620000u, 55u}, // clt -> Latn
+    {0xD1620000u, 55u}, // clu -> Latn
+    {0xD9620000u, 20u}, // clw -> Cyrl
+    {0xE1620000u, 55u}, // cly -> Latn
+    {0x81820000u, 55u}, // cma -> Latn
+    {0x91820000u, 55u}, // cme -> Latn
+    {0x99820000u, 98u}, // cmg -> Soyo
+    {0xA1820000u, 55u}, // cmi -> Latn
+    {0xAD820000u, 55u}, // cml -> Latn
+    {0xB9820000u, 55u}, // cmo -> Latn
+    {0xC5820000u, 55u}, // cmr -> Latn
+    {0xC9820000u, 55u}, // cms -> Latn
+    {0xCD820000u, 55u}, // cmt -> Latn
+    {0x81A20000u, 112u}, // cna -> Tibt
+    {0x85A20000u, 55u}, // cnb -> Latn
+    {0x89A20000u, 55u}, // cnc -> Latn
+    {0x99A20000u, 55u}, // cng -> Latn
+    {0x9DA20000u, 55u}, // cnh -> Latn
+    {0xA1A20000u, 55u}, // cni -> Latn
+    {0xA9A20000u, 55u}, // cnk -> Latn
+    {0xADA20000u, 55u}, // cnl -> Latn
+    {0xBDA20000u, 35u}, // cnp -> Hans
+    {0xC1A20000u, 55u}, // cnq -> Latn
+    {0xC9A20000u, 55u}, // cns -> Latn
+    {0xCDA20000u, 55u}, // cnt -> Latn
+    {0xD9A20000u, 55u}, // cnw -> Latn
+    {0xDDA20000u, 55u}, // cnx -> Latn
+    {0x636F0000u, 55u}, // co -> Latn
+    {0x81C20000u, 55u}, // coa -> Latn
+    {0x85C20000u, 55u}, // cob -> Latn
+    {0x89C20000u, 55u}, // coc -> Latn
+    {0x8DC20000u, 55u}, // cod -> Latn
+    {0x91C20000u, 55u}, // coe -> Latn
+    {0x95C20000u, 55u}, // cof -> Latn
+    {0x99C20000u, 111u}, // cog -> Thai
+    {0x9DC20000u, 55u}, // coh -> Latn
+    {0xA5C20000u, 55u}, // coj -> Latn
+    {0xA9C20000u, 55u}, // cok -> Latn
+    {0xADC20000u, 55u}, // col -> Latn
+    {0xB1C20000u, 55u}, // com -> Latn
+    {0xB9C20000u, 55u}, // coo -> Latn
+    {0xBDC20000u, 18u}, // cop -> Copt
+    {0xC1C20000u, 55u}, // coq -> Latn
+    {0xCDC20000u, 55u}, // cot -> Latn
+    {0xD1C20000u, 55u}, // cou -> Latn
+    {0xDDC20000u, 55u}, // cox -> Latn
+    {0xE5C20000u, 55u}, // coz -> Latn
+    {0x81E20000u, 55u}, // cpa -> Latn
+    {0x85E20000u, 55u}, // cpb -> Latn
+    {0x89E20000u, 55u}, // cpc -> Latn
+    {0x99E20000u, 30u}, // cpg -> Grek
+    {0xA1E20000u, 55u}, // cpi -> Latn
+    {0xB5E20000u, 55u}, // cpn -> Latn
+    {0xB9E20000u, 55u}, // cpo -> Latn
+    {0xC9E20000u, 55u}, // cps -> Latn
+    {0xD1E20000u, 55u}, // cpu -> Latn
+    {0xDDE20000u, 55u}, // cpx -> Latn
+    {0xE1E20000u, 55u}, // cpy -> Latn
+    {0x8E020000u, 55u}, // cqd -> Latn
+    {0x63720000u, 13u}, // cr -> Cans
+    {0x82220000u, 55u}, // cra -> Latn
+    {0x86220000u, 55u}, // crb -> Latn
+    {0x8A220000u, 55u}, // crc -> Latn
+    {0x8E220000u, 55u}, // crd -> Latn
+    {0x96220000u, 55u}, // crf -> Latn
+    {0x9A220000u, 55u}, // crg -> Latn
+    {0x9E220000u, 20u}, // crh -> Cyrl
+    {0xA2220000u, 55u}, // cri -> Latn
+    {0xA6220000u, 13u}, // crj -> Cans
+    {0xAA220000u, 13u}, // crk -> Cans
+    {0xAE220000u, 13u}, // crl -> Cans
+    {0xB2220000u, 13u}, // crm -> Cans
+    {0xB6220000u, 55u}, // crn -> Latn
+    {0xBA220000u, 55u}, // cro -> Latn
+    {0xC2220000u, 55u}, // crq -> Latn
+    {0xCA220000u, 55u}, // crs -> Latn
+    {0xCE220000u, 55u}, // crt -> Latn
+    {0xD6220000u, 55u}, // crv -> Latn
+    {0xDA220000u, 55u}, // crw -> Latn
+    {0xDE220000u, 55u}, // crx -> Latn
+    {0xE2220000u, 55u}, // cry -> Latn
+    {0xE6220000u, 55u}, // crz -> Latn
+    {0x63730000u, 55u}, // cs -> Latn
+    {0x82420000u, 55u}, // csa -> Latn
+    {0x86420000u, 55u}, // csb -> Latn
+    {0x9E420000u, 72u}, // csh -> Mymr
+    {0xA6420000u, 55u}, // csj -> Latn
+    {0xAA420000u, 55u}, // csk -> Latn
+    {0xB2420000u, 55u}, // csm -> Latn
+    {0xBA420000u, 55u}, // cso -> Latn
+    {0xBE420000u, 35u}, // csp -> Hans
+    {0xCA420000u, 55u}, // css -> Latn
+    {0xCE420000u, 55u}, // cst -> Latn
+    {0xD6420000u, 55u}, // csv -> Latn
+    {0xDA420000u, 13u}, // csw -> Cans
+    {0xE2420000u, 55u}, // csy -> Latn
+    {0xE6420000u, 55u}, // csz -> Latn
+    {0x82620000u, 55u}, // cta -> Latn
+    {0x8A620000u, 55u}, // ctc -> Latn
+    {0x8E620000u, 83u}, // ctd -> Pauc
+    {0x92620000u, 55u}, // cte -> Latn
+    {0x9A620000u,  9u}, // ctg -> Beng
+    {0x9E620000u, 55u}, // cth -> Latn
+    {0xAE620000u, 55u}, // ctl -> Latn
+    {0xB2620000u, 55u}, // ctm -> Latn
+    {0xB6620000u, 21u}, // ctn -> Deva
+    {0xBA620000u, 55u}, // cto -> Latn
+    {0xBE620000u, 55u}, // ctp -> Latn
+    {0xCA620000u, 55u}, // cts -> Latn
+    {0xCE620000u, 105u}, // ctt -> Taml
+    {0xD2620000u, 55u}, // ctu -> Latn
+    {0xE2620000u, 105u}, // cty -> Taml
+    {0xE6620000u, 55u}, // ctz -> Latn
+    {0x63750000u, 20u}, // cu -> Cyrl
+    {0x82820000u, 55u}, // cua -> Latn
+    {0x86820000u, 55u}, // cub -> Latn
+    {0x8A820000u, 55u}, // cuc -> Latn
+    {0x9E820000u, 55u}, // cuh -> Latn
+    {0xA2820000u, 55u}, // cui -> Latn
+    {0xA6820000u, 55u}, // cuj -> Latn
+    {0xAA820000u, 55u}, // cuk -> Latn
+    {0xAE820000u, 55u}, // cul -> Latn
+    {0xBA820000u, 55u}, // cuo -> Latn
+    {0xBE820000u, 55u}, // cup -> Latn
+    {0xCE820000u, 55u}, // cut -> Latn
+    {0xD2820000u, 51u}, // cuu -> Lana
+    {0xD6820000u, 55u}, // cuv -> Latn
+    {0xDE820000u, 55u}, // cux -> Latn
+    {0xE2820000u, 55u}, // cuy -> Latn
+    {0x63760000u, 20u}, // cv -> Cyrl
+    {0x9AA20000u, 55u}, // cvg -> Latn
+    {0xB6A20000u, 55u}, // cvn -> Latn
+    {0x82C20000u, 55u}, // cwa -> Latn
+    {0x86C20000u, 55u}, // cwb -> Latn
+    {0x92C20000u, 55u}, // cwe -> Latn
+    {0x9AC20000u, 55u}, // cwg -> Latn
+    {0xCEC20000u, 55u}, // cwt -> Latn
+    {0x9EE20000u, 55u}, // cxh -> Latn
+    {0x63790000u, 55u}, // cy -> Latn
+    {0x83020000u, 55u}, // cya -> Latn
+    {0x87020000u, 55u}, // cyb -> Latn
+    {0xBB020000u, 55u}, // cyo -> Latn
+    {0x9F220000u, 35u}, // czh -> Hans
+    {0xAB220000u, 37u}, // czk -> Hebr
+    {0xB7220000u, 55u}, // czn -> Latn
+    {0xCF220000u, 55u}, // czt -> Latn
+    {0x64610000u, 55u}, // da -> Latn
+    {0x80030000u, 55u}, // daa -> Latn
+    {0x88030000u, 55u}, // dac -> Latn
+    {0x8C030000u, 55u}, // dad -> Latn
+    {0x90030000u, 55u}, // dae -> Latn
+    {0x98030000u, 55u}, // dag -> Latn
+    {0x9C030000u, 55u}, // dah -> Latn
+    {0xA0030000u, 55u}, // dai -> Latn
+    {0xA4030000u, 55u}, // daj -> Latn
+    {0xA8030000u, 55u}, // dak -> Latn
+    {0xAC030000u, 55u}, // dal -> Latn
+    {0xB0030000u, 55u}, // dam -> Latn
+    {0xB8030000u, 55u}, // dao -> Latn
+    {0xC0030000u, 21u}, // daq -> Deva
+    {0xC4030000u, 20u}, // dar -> Cyrl
+    {0xC8030000u, 55u}, // das -> Latn
+    {0xD0030000u, 55u}, // dau -> Latn
+    {0xD4030000u, 55u}, // dav -> Latn
+    {0xD8030000u, 55u}, // daw -> Latn
+    {0xDC030000u, 55u}, // dax -> Latn
+    {0xE4030000u, 55u}, // daz -> Latn
+    {0x80230000u, 55u}, // dba -> Latn
+    {0x84230000u, 55u}, // dbb -> Latn
+    {0x8C230000u, 55u}, // dbd -> Latn
+    {0x90230000u, 55u}, // dbe -> Latn
+    {0x94230000u, 55u}, // dbf -> Latn
+    {0x98230000u, 55u}, // dbg -> Latn
+    {0xA0230000u, 55u}, // dbi -> Latn
+    {0xA4230000u, 55u}, // dbj -> Latn
+    {0xAC230000u, 55u}, // dbl -> Latn
+    {0xB0230000u, 55u}, // dbm -> Latn
+    {0xB4230000u, 55u}, // dbn -> Latn
+    {0xB8230000u, 55u}, // dbo -> Latn
+    {0xBC230000u, 55u}, // dbp -> Latn
+    {0xC0230000u, 55u}, // dbq -> Latn
+    {0xCC230000u, 55u}, // dbt -> Latn
+    {0xD0230000u, 55u}, // dbu -> Latn
+    {0xD4230000u, 55u}, // dbv -> Latn
+    {0xD8230000u, 55u}, // dbw -> Latn
+    {0xE0230000u, 55u}, // dby -> Latn
     {0x88430000u,  2u}, // dcc -> Arab
-    {0xB4630000u, 46u}, // ddn -> Latn
-    {0x64650000u, 46u}, // de -> Latn
-    {0x8C830000u, 46u}, // ded -> Latn
-    {0xB4830000u, 46u}, // den -> Latn
-    {0x80C30000u, 46u}, // dga -> Latn
-    {0x9CC30000u, 46u}, // dgh -> Latn
-    {0xA0C30000u, 46u}, // dgi -> Latn
+    {0xC4430000u, 55u}, // dcr -> Latn
+    {0x80630000u, 55u}, // dda -> Latn
+    {0x8C630000u, 55u}, // ddd -> Latn
+    {0x90630000u, 55u}, // dde -> Latn
+    {0x98630000u, 55u}, // ddg -> Latn
+    {0xA0630000u, 55u}, // ddi -> Latn
+    {0xA4630000u, 55u}, // ddj -> Latn
+    {0xB4630000u, 55u}, // ddn -> Latn
+    {0xB8630000u, 20u}, // ddo -> Cyrl
+    {0xC4630000u, 55u}, // ddr -> Latn
+    {0xC8630000u, 55u}, // dds -> Latn
+    {0xD8630000u, 55u}, // ddw -> Latn
+    {0x64650000u, 55u}, // de -> Latn
+    {0x88830000u, 55u}, // dec -> Latn
+    {0x8C830000u, 55u}, // ded -> Latn
+    {0x90830000u, 55u}, // dee -> Latn
+    {0x94830000u,  2u}, // def -> Arab
+    {0x98830000u, 55u}, // deg -> Latn
+    {0x9C830000u,  2u}, // deh -> Arab
+    {0xA0830000u, 55u}, // dei -> Latn
+    {0xA8830000u, 55u}, // dek -> Latn
+    {0xAC830000u, 55u}, // del -> Latn
+    {0xB0830000u, 55u}, // dem -> Latn
+    {0xB4830000u, 55u}, // den -> Latn
+    {0xC0830000u, 55u}, // deq -> Latn
+    {0xC4830000u,  9u}, // der -> Beng
+    {0xC8830000u, 55u}, // des -> Latn
+    {0xD4830000u, 55u}, // dev -> Latn
+    {0xE4830000u, 55u}, // dez -> Latn
+    {0x80C30000u, 55u}, // dga -> Latn
+    {0x84C30000u, 55u}, // dgb -> Latn
+    {0x88C30000u, 55u}, // dgc -> Latn
+    {0x8CC30000u, 55u}, // dgd -> Latn
+    {0x90C30000u, 55u}, // dge -> Latn
+    {0x98C30000u, 55u}, // dgg -> Latn
+    {0x9CC30000u, 55u}, // dgh -> Latn
+    {0xA0C30000u, 55u}, // dgi -> Latn
+    {0xA8C30000u, 55u}, // dgk -> Latn
     {0xACC30000u,  2u}, // dgl -> Arab
-    {0xC4C30000u, 46u}, // dgr -> Latn
-    {0xE4C30000u, 46u}, // dgz -> Latn
-    {0x81030000u, 46u}, // dia -> Latn
-    {0x91230000u, 46u}, // dje -> Latn
-    {0x95830000u, 54u}, // dmf -> Medf
-    {0xA5A30000u, 46u}, // dnj -> Latn
-    {0x85C30000u, 46u}, // dob -> Latn
-    {0xA1C30000u, 19u}, // doi -> Deva
-    {0xBDC30000u, 46u}, // dop -> Latn
-    {0xD9C30000u, 46u}, // dow -> Latn
-    {0x9E230000u, 57u}, // drh -> Mong
-    {0xA2230000u, 46u}, // dri -> Latn
-    {0xCA230000u, 21u}, // drs -> Ethi
-    {0x86430000u, 46u}, // dsb -> Latn
-    {0xB2630000u, 46u}, // dtm -> Latn
-    {0xBE630000u, 46u}, // dtp -> Latn
-    {0xCA630000u, 46u}, // dts -> Latn
-    {0xE2630000u, 19u}, // dty -> Deva
-    {0x82830000u, 46u}, // dua -> Latn
-    {0x8A830000u, 46u}, // duc -> Latn
-    {0x8E830000u, 46u}, // dud -> Latn
-    {0x9A830000u, 46u}, // dug -> Latn
-    {0x64760000u, 92u}, // dv -> Thaa
-    {0x82A30000u, 46u}, // dva -> Latn
-    {0xDAC30000u, 46u}, // dww -> Latn
-    {0xBB030000u, 46u}, // dyo -> Latn
-    {0xD3030000u, 46u}, // dyu -> Latn
-    {0x647A0000u, 94u}, // dz -> Tibt
-    {0x9B230000u, 46u}, // dzg -> Latn
-    {0xD0240000u, 46u}, // ebu -> Latn
-    {0x65650000u, 46u}, // ee -> Latn
-    {0xA0A40000u, 46u}, // efi -> Latn
-    {0xACC40000u, 46u}, // egl -> Latn
-    {0xE0C40000u, 20u}, // egy -> Egyp
-    {0x81440000u, 46u}, // eka -> Latn
-    {0xE1440000u, 36u}, // eky -> Kali
-    {0x656C0000u, 26u}, // el -> Grek
-    {0x81840000u, 46u}, // ema -> Latn
-    {0xA1840000u, 46u}, // emi -> Latn
-    {0x656E0000u, 46u}, // en -> Latn
-    {0x656E5841u, 103u}, // en-XA -> ~~~A
-    {0xB5A40000u, 46u}, // enn -> Latn
-    {0xC1A40000u, 46u}, // enq -> Latn
-    {0x656F0000u, 46u}, // eo -> Latn
-    {0xA2240000u, 46u}, // eri -> Latn
-    {0x65730000u, 46u}, // es -> Latn
-    {0x9A440000u, 24u}, // esg -> Gonm
-    {0xD2440000u, 46u}, // esu -> Latn
-    {0x65740000u, 46u}, // et -> Latn
-    {0xC6640000u, 46u}, // etr -> Latn
-    {0xCE640000u, 34u}, // ett -> Ital
-    {0xD2640000u, 46u}, // etu -> Latn
-    {0xDE640000u, 46u}, // etx -> Latn
-    {0x65750000u, 46u}, // eu -> Latn
-    {0xBAC40000u, 46u}, // ewo -> Latn
-    {0xCEE40000u, 46u}, // ext -> Latn
-    {0x83240000u, 46u}, // eza -> Latn
+    {0xB4C30000u, 55u}, // dgn -> Latn
+    {0xC4C30000u, 55u}, // dgr -> Latn
+    {0xC8C30000u, 55u}, // dgs -> Latn
+    {0xCCC30000u, 55u}, // dgt -> Latn
+    {0xD8C30000u, 55u}, // dgw -> Latn
+    {0xDCC30000u, 55u}, // dgx -> Latn
+    {0xE4C30000u, 55u}, // dgz -> Latn
+    {0x98E30000u, 55u}, // dhg -> Latn
+    {0xA0E30000u, 21u}, // dhi -> Deva
+    {0xACE30000u, 55u}, // dhl -> Latn
+    {0xB0E30000u, 55u}, // dhm -> Latn
+    {0xB4E30000u, 31u}, // dhn -> Gujr
+    {0xB8E30000u, 21u}, // dho -> Deva
+    {0xC4E30000u, 55u}, // dhr -> Latn
+    {0xC8E30000u, 55u}, // dhs -> Latn
+    {0xD0E30000u, 55u}, // dhu -> Latn
+    {0xD4E30000u, 55u}, // dhv -> Latn
+    {0xD8E30000u, 21u}, // dhw -> Deva
+    {0xDCE30000u, 55u}, // dhx -> Latn
+    {0x81030000u, 55u}, // dia -> Latn
+    {0x85030000u, 55u}, // dib -> Latn
+    {0x89030000u, 55u}, // dic -> Latn
+    {0x8D030000u, 55u}, // did -> Latn
+    {0x95030000u, 55u}, // dif -> Latn
+    {0x99030000u, 55u}, // dig -> Latn
+    {0x9D030000u, 55u}, // dih -> Latn
+    {0xA1030000u, 55u}, // dii -> Latn
+    {0xA5030000u, 55u}, // dij -> Latn
+    {0xAD030000u, 55u}, // dil -> Latn
+    {0xB5030000u, 55u}, // din -> Latn
+    {0xB9030000u, 55u}, // dio -> Latn
+    {0xBD030000u, 55u}, // dip -> Latn
+    {0xC5030000u, 55u}, // dir -> Latn
+    {0xC9030000u, 55u}, // dis -> Latn
+    {0xD1030000u, 55u}, // diu -> Latn
+    {0xD9030000u, 55u}, // diw -> Latn
+    {0xDD030000u, 55u}, // dix -> Latn
+    {0xE1030000u, 55u}, // diy -> Latn
+    {0xE5030000u, 55u}, // diz -> Latn
+    {0x81230000u, 55u}, // dja -> Latn
+    {0x85230000u, 55u}, // djb -> Latn
+    {0x89230000u, 55u}, // djc -> Latn
+    {0x8D230000u, 55u}, // djd -> Latn
+    {0x91230000u, 55u}, // dje -> Latn
+    {0x95230000u, 55u}, // djf -> Latn
+    {0xA1230000u, 55u}, // dji -> Latn
+    {0xA5230000u, 55u}, // djj -> Latn
+    {0xA9230000u, 55u}, // djk -> Latn
+    {0xB1230000u, 55u}, // djm -> Latn
+    {0xB5230000u, 55u}, // djn -> Latn
+    {0xB9230000u, 55u}, // djo -> Latn
+    {0xC5230000u, 55u}, // djr -> Latn
+    {0xD1230000u, 55u}, // dju -> Latn
+    {0xD9230000u, 55u}, // djw -> Latn
+    {0x81430000u, 112u}, // dka -> Tibt
+    {0x99430000u, 55u}, // dkg -> Latn
+    {0xA9430000u, 55u}, // dkk -> Latn
+    {0xC5430000u, 55u}, // dkr -> Latn
+    {0xC9430000u, 55u}, // dks -> Latn
+    {0xDD430000u, 55u}, // dkx -> Latn
+    {0x99630000u, 20u}, // dlg -> Cyrl
+    {0xB1630000u, 55u}, // dlm -> Latn
+    {0xB5630000u, 55u}, // dln -> Latn
+    {0x81830000u, 55u}, // dma -> Latn
+    {0x85830000u, 55u}, // dmb -> Latn
+    {0x89830000u, 55u}, // dmc -> Latn
+    {0x8D830000u, 55u}, // dmd -> Latn
+    {0x91830000u, 55u}, // dme -> Latn
+    {0x95830000u, 65u}, // dmf -> Medf
+    {0x99830000u, 55u}, // dmg -> Latn
+    {0xA9830000u,  2u}, // dmk -> Arab
+    {0xAD830000u,  2u}, // dml -> Arab
+    {0xB1830000u, 55u}, // dmm -> Latn
+    {0xB9830000u, 55u}, // dmo -> Latn
+    {0xC5830000u, 55u}, // dmr -> Latn
+    {0xC9830000u, 55u}, // dms -> Latn
+    {0xD1830000u, 55u}, // dmu -> Latn
+    {0xD5830000u, 55u}, // dmv -> Latn
+    {0xD9830000u, 55u}, // dmw -> Latn
+    {0xDD830000u, 55u}, // dmx -> Latn
+    {0xE1830000u, 55u}, // dmy -> Latn
+    {0x81A30000u, 55u}, // dna -> Latn
+    {0x8DA30000u, 55u}, // dnd -> Latn
+    {0x91A30000u, 55u}, // dne -> Latn
+    {0x99A30000u, 20u}, // dng -> Cyrl
+    {0xA1A30000u, 55u}, // dni -> Latn
+    {0xA5A30000u, 55u}, // dnj -> Latn
+    {0xA9A30000u, 55u}, // dnk -> Latn
+    {0xB5A30000u, 55u}, // dnn -> Latn
+    {0xB9A30000u, 55u}, // dno -> Latn
+    {0xC5A30000u, 55u}, // dnr -> Latn
+    {0xCDA30000u, 55u}, // dnt -> Latn
+    {0xD1A30000u, 72u}, // dnu -> Mymr
+    {0xD5A30000u, 72u}, // dnv -> Mymr
+    {0xD9A30000u, 55u}, // dnw -> Latn
+    {0xE1A30000u, 55u}, // dny -> Latn
+    {0x81C30000u, 55u}, // doa -> Latn
+    {0x85C30000u, 55u}, // dob -> Latn
+    {0x89C30000u, 55u}, // doc -> Latn
+    {0x91C30000u, 55u}, // doe -> Latn
+    {0x95C30000u, 55u}, // dof -> Latn
+    {0x9DC30000u, 55u}, // doh -> Latn
+    {0xA1C30000u, 21u}, // doi -> Deva
+    {0xA9C30000u, 55u}, // dok -> Latn
+    {0xADC30000u, 55u}, // dol -> Latn
+    {0xB5C30000u, 55u}, // don -> Latn
+    {0xB9C30000u, 55u}, // doo -> Latn
+    {0xBDC30000u, 55u}, // dop -> Latn
+    {0xC5C30000u, 55u}, // dor -> Latn
+    {0xC9C30000u, 55u}, // dos -> Latn
+    {0xCDC30000u, 55u}, // dot -> Latn
+    {0xD5C30000u, 55u}, // dov -> Latn
+    {0xD9C30000u, 55u}, // dow -> Latn
+    {0xDDC30000u, 24u}, // dox -> Ethi
+    {0xE1C30000u, 55u}, // doy -> Latn
+    {0xBDE30000u, 55u}, // dpp -> Latn
+    {0x8A230000u, 55u}, // drc -> Latn
+    {0x92230000u, 112u}, // dre -> Tibt
+    {0x9A230000u, 55u}, // drg -> Latn
+    {0xA2230000u, 55u}, // dri -> Latn
+    {0xAE230000u, 55u}, // drl -> Latn
+    {0xB6230000u, 55u}, // drn -> Latn
+    {0xBA230000u, 55u}, // dro -> Latn
+    {0xC2230000u, 21u}, // drq -> Deva
+    {0xCA230000u, 24u}, // drs -> Ethi
+    {0xCE230000u, 55u}, // drt -> Latn
+    {0xD2230000u, 55u}, // dru -> Latn
+    {0xE2230000u, 21u}, // dry -> Deva
+    {0x86430000u, 55u}, // dsb -> Latn
+    {0x9E430000u, 55u}, // dsh -> Latn
+    {0xA2430000u, 55u}, // dsi -> Latn
+    {0xAA430000u, 55u}, // dsk -> Latn
+    {0xB6430000u, 55u}, // dsn -> Latn
+    {0xBA430000u, 80u}, // dso -> Orya
+    {0xC2430000u, 55u}, // dsq -> Latn
+    {0x82630000u, 55u}, // dta -> Latn
+    {0x86630000u, 55u}, // dtb -> Latn
+    {0x8E630000u, 55u}, // dtd -> Latn
+    {0x9E630000u, 55u}, // dth -> Latn
+    {0xA2630000u, 55u}, // dti -> Latn
+    {0xAA630000u, 55u}, // dtk -> Latn
+    {0xB2630000u, 55u}, // dtm -> Latn
+    {0xBA630000u, 55u}, // dto -> Latn
+    {0xBE630000u, 55u}, // dtp -> Latn
+    {0xC6630000u, 55u}, // dtr -> Latn
+    {0xCA630000u, 55u}, // dts -> Latn
+    {0xCE630000u, 55u}, // dtt -> Latn
+    {0xD2630000u, 55u}, // dtu -> Latn
+    {0xE2630000u, 21u}, // dty -> Deva
+    {0x82830000u, 55u}, // dua -> Latn
+    {0x86830000u, 31u}, // dub -> Gujr
+    {0x8A830000u, 55u}, // duc -> Latn
+    {0x92830000u, 55u}, // due -> Latn
+    {0x96830000u, 55u}, // duf -> Latn
+    {0x9A830000u, 55u}, // dug -> Latn
+    {0x9E830000u, 21u}, // duh -> Deva
+    {0xA2830000u, 55u}, // dui -> Latn
+    {0xAA830000u, 55u}, // duk -> Latn
+    {0xAE830000u, 55u}, // dul -> Latn
+    {0xB2830000u, 55u}, // dum -> Latn
+    {0xB6830000u, 55u}, // dun -> Latn
+    {0xBA830000u, 55u}, // duo -> Latn
+    {0xBE830000u, 55u}, // dup -> Latn
+    {0xC2830000u, 55u}, // duq -> Latn
+    {0xC6830000u, 55u}, // dur -> Latn
+    {0xCA830000u, 21u}, // dus -> Deva
+    {0xD2830000u, 55u}, // duu -> Latn
+    {0xD6830000u, 55u}, // duv -> Latn
+    {0xDA830000u, 55u}, // duw -> Latn
+    {0xDE830000u, 55u}, // dux -> Latn
+    {0xE2830000u, 55u}, // duy -> Latn
+    {0xE6830000u, 55u}, // duz -> Latn
+    {0x64760000u, 110u}, // dv -> Thaa
+    {0x82A30000u, 55u}, // dva -> Latn
+    {0x82C30000u, 55u}, // dwa -> Latn
+    {0xAAC30000u, 80u}, // dwk -> Orya
+    {0xC6C30000u, 55u}, // dwr -> Latn
+    {0xCAC30000u, 55u}, // dws -> Latn
+    {0xD2C30000u, 55u}, // dwu -> Latn
+    {0xDAC30000u, 55u}, // dww -> Latn
+    {0xE2C30000u, 55u}, // dwy -> Latn
+    {0xE6C30000u, 21u}, // dwz -> Deva
+    {0x83030000u, 55u}, // dya -> Latn
+    {0x87030000u, 55u}, // dyb -> Latn
+    {0x8F030000u, 55u}, // dyd -> Latn
+    {0x9B030000u, 55u}, // dyg -> Latn
+    {0xA3030000u, 55u}, // dyi -> Latn
+    {0xB3030000u, 55u}, // dym -> Latn
+    {0xB7030000u, 55u}, // dyn -> Latn
+    {0xBB030000u, 55u}, // dyo -> Latn
+    {0xC7030000u, 55u}, // dyr -> Latn
+    {0xD3030000u, 55u}, // dyu -> Latn
+    {0xE3030000u, 55u}, // dyy -> Latn
+    {0x647A0000u, 112u}, // dz -> Tibt
+    {0x83230000u, 55u}, // dza -> Latn
+    {0x8F230000u, 55u}, // dzd -> Latn
+    {0x93230000u, 55u}, // dze -> Latn
+    {0x9B230000u, 55u}, // dzg -> Latn
+    {0xAF230000u, 112u}, // dzl -> Tibt
+    {0xB7230000u, 55u}, // dzn -> Latn
+    {0x80040000u, 55u}, // eaa -> Latn
+    {0x88240000u, 55u}, // ebc -> Latn
+    {0x98240000u, 55u}, // ebg -> Latn
+    {0xA8240000u, 55u}, // ebk -> Latn
+    {0xB8240000u, 55u}, // ebo -> Latn
+    {0xC4240000u, 55u}, // ebr -> Latn
+    {0xD0240000u, 55u}, // ebu -> Latn
+    {0xC4440000u, 30u}, // ecr -> Grek
+    {0xE0440000u, 19u}, // ecy -> Cprt
+    {0x65650000u, 55u}, // ee -> Latn
+    {0x80A40000u, 55u}, // efa -> Latn
+    {0x90A40000u, 55u}, // efe -> Latn
+    {0xA0A40000u, 55u}, // efi -> Latn
+    {0x80C40000u, 55u}, // ega -> Latn
+    {0xACC40000u, 55u}, // egl -> Latn
+    {0xB0C40000u, 55u}, // egm -> Latn
+    {0xB8C40000u, 55u}, // ego -> Latn
+    {0xE0C40000u, 22u}, // egy -> Egyp
+    {0xD0E40000u, 55u}, // ehu -> Latn
+    {0xBD040000u, 55u}, // eip -> Latn
+    {0xCD040000u, 55u}, // eit -> Latn
+    {0xD5040000u, 55u}, // eiv -> Latn
+    {0x81240000u, 55u}, // eja -> Latn
+    {0x81440000u, 55u}, // eka -> Latn
+    {0x91440000u, 55u}, // eke -> Latn
+    {0x99440000u, 55u}, // ekg -> Latn
+    {0xA1440000u, 55u}, // eki -> Latn
+    {0xAD440000u, 55u}, // ekl -> Latn
+    {0xB1440000u, 55u}, // ekm -> Latn
+    {0xB9440000u, 55u}, // eko -> Latn
+    {0xBD440000u, 55u}, // ekp -> Latn
+    {0xC5440000u, 55u}, // ekr -> Latn
+    {0xE1440000u, 43u}, // eky -> Kali
+    {0x656C0000u, 30u}, // el -> Grek
+    {0x91640000u, 55u}, // ele -> Latn
+    {0xA9640000u, 55u}, // elk -> Latn
+    {0xB1640000u, 55u}, // elm -> Latn
+    {0xB9640000u, 55u}, // elo -> Latn
+    {0xD1640000u, 55u}, // elu -> Latn
+    {0x81840000u, 55u}, // ema -> Latn
+    {0x85840000u, 55u}, // emb -> Latn
+    {0x91840000u, 55u}, // eme -> Latn
+    {0x99840000u, 21u}, // emg -> Deva
+    {0xA1840000u, 55u}, // emi -> Latn
+    {0xB1840000u, 55u}, // emm -> Latn
+    {0xB5840000u, 55u}, // emn -> Latn
+    {0xBD840000u, 55u}, // emp -> Latn
+    {0xC9840000u, 55u}, // ems -> Latn
+    {0xD1840000u, 21u}, // emu -> Deva
+    {0xD9840000u, 55u}, // emw -> Latn
+    {0xDD840000u, 55u}, // emx -> Latn
+    {0xE5840000u, 55u}, // emz -> Latn
+    {0x656E0000u, 55u}, // en -> Latn
+    {0x656E5841u, 121u}, // en-XA -> ~~~A
+    {0x81A40000u, 55u}, // ena -> Latn
+    {0x85A40000u, 55u}, // enb -> Latn
+    {0x89A40000u, 55u}, // enc -> Latn
+    {0x8DA40000u, 55u}, // end -> Latn
+    {0x95A40000u, 20u}, // enf -> Cyrl
+    {0x9DA40000u, 20u}, // enh -> Cyrl
+    {0xADA40000u, 55u}, // enl -> Latn
+    {0xB1A40000u, 55u}, // enm -> Latn
+    {0xB5A40000u, 55u}, // enn -> Latn
+    {0xB9A40000u, 55u}, // eno -> Latn
+    {0xC1A40000u, 55u}, // enq -> Latn
+    {0xC5A40000u, 55u}, // enr -> Latn
+    {0xD5A40000u, 55u}, // env -> Latn
+    {0xD9A40000u, 55u}, // enw -> Latn
+    {0xDDA40000u, 55u}, // enx -> Latn
+    {0x656F0000u, 55u}, // eo -> Latn
+    {0xCDC40000u, 55u}, // eot -> Latn
+    {0xA1E40000u, 55u}, // epi -> Latn
+    {0x82240000u, 105u}, // era -> Taml
+    {0x9A240000u, 55u}, // erg -> Latn
+    {0x9E240000u, 55u}, // erh -> Latn
+    {0xA2240000u, 55u}, // eri -> Latn
+    {0xAA240000u, 55u}, // erk -> Latn
+    {0xC6240000u, 55u}, // err -> Latn
+    {0xCA240000u, 55u}, // ers -> Latn
+    {0xCE240000u, 55u}, // ert -> Latn
+    {0xDA240000u, 55u}, // erw -> Latn
+    {0x65730000u, 55u}, // es -> Latn
+    {0x92440000u, 55u}, // ese -> Latn
+    {0x9A440000u, 27u}, // esg -> Gonm
+    {0x9E440000u,  2u}, // esh -> Arab
+    {0xA2440000u, 55u}, // esi -> Latn
+    {0xB2440000u, 55u}, // esm -> Latn
+    {0xCA440000u, 55u}, // ess -> Latn
+    {0xD2440000u, 55u}, // esu -> Latn
+    {0xE2440000u, 55u}, // esy -> Latn
+    {0x65740000u, 55u}, // et -> Latn
+    {0x86640000u, 55u}, // etb -> Latn
+    {0xB6640000u, 55u}, // etn -> Latn
+    {0xBA640000u, 55u}, // eto -> Latn
+    {0xC6640000u, 55u}, // etr -> Latn
+    {0xCA640000u, 55u}, // ets -> Latn
+    {0xCE640000u, 40u}, // ett -> Ital
+    {0xD2640000u, 55u}, // etu -> Latn
+    {0xDE640000u, 55u}, // etx -> Latn
+    {0xE6640000u, 55u}, // etz -> Latn
+    {0x65750000u, 55u}, // eu -> Latn
+    {0x8E840000u, 55u}, // eud -> Latn
+    {0x92A40000u, 20u}, // eve -> Cyrl
+    {0x9EA40000u, 55u}, // evh -> Latn
+    {0xB6A40000u, 20u}, // evn -> Cyrl
+    {0xBAC40000u, 55u}, // ewo -> Latn
+    {0xCEE40000u, 55u}, // ext -> Latn
+    {0x83040000u, 55u}, // eya -> Latn
+    {0xBB040000u, 55u}, // eyo -> Latn
+    {0x83240000u, 55u}, // eza -> Latn
+    {0x93240000u, 55u}, // eze -> Latn
     {0x66610000u,  2u}, // fa -> Arab
-    {0x80050000u, 46u}, // faa -> Latn
-    {0x84050000u, 46u}, // fab -> Latn
-    {0x98050000u, 46u}, // fag -> Latn
-    {0xA0050000u, 46u}, // fai -> Latn
-    {0xB4050000u, 46u}, // fan -> Latn
-    {0x66660000u, 46u}, // ff -> Latn
-    {0xA0A50000u, 46u}, // ffi -> Latn
-    {0xB0A50000u, 46u}, // ffm -> Latn
-    {0x66690000u, 46u}, // fi -> Latn
+    {0x80050000u, 55u}, // faa -> Latn
+    {0x84050000u, 55u}, // fab -> Latn
+    {0x8C050000u, 55u}, // fad -> Latn
+    {0x94050000u, 55u}, // faf -> Latn
+    {0x98050000u, 55u}, // fag -> Latn
+    {0x9C050000u, 55u}, // fah -> Latn
+    {0xA0050000u, 55u}, // fai -> Latn
+    {0xA4050000u, 55u}, // faj -> Latn
+    {0xA8050000u, 55u}, // fak -> Latn
+    {0xAC050000u, 55u}, // fal -> Latn
+    {0xB0050000u, 55u}, // fam -> Latn
+    {0xB4050000u, 55u}, // fan -> Latn
+    {0xBC050000u, 55u}, // fap -> Latn
+    {0xC4050000u, 55u}, // far -> Latn
+    {0xD0050000u, 55u}, // fau -> Latn
+    {0xDC050000u, 55u}, // fax -> Latn
+    {0xE0050000u,  2u}, // fay -> Arab
+    {0xE4050000u,  2u}, // faz -> Arab
+    {0xAC250000u, 55u}, // fbl -> Latn
+    {0xC4850000u, 55u}, // fer -> Latn
+    {0x66660000u, 55u}, // ff -> Latn
+    {0xA0A50000u, 55u}, // ffi -> Latn
+    {0xB0A50000u, 55u}, // ffm -> Latn
+    {0xC4C50000u, 55u}, // fgr -> Latn
+    {0x66690000u, 55u}, // fi -> Latn
     {0x81050000u,  2u}, // fia -> Arab
-    {0xAD050000u, 46u}, // fil -> Latn
-    {0xCD050000u, 46u}, // fit -> Latn
-    {0x666A0000u, 46u}, // fj -> Latn
-    {0xC5650000u, 46u}, // flr -> Latn
-    {0xBD850000u, 46u}, // fmp -> Latn
-    {0x666F0000u, 46u}, // fo -> Latn
-    {0x8DC50000u, 46u}, // fod -> Latn
-    {0xB5C50000u, 46u}, // fon -> Latn
-    {0xC5C50000u, 46u}, // for -> Latn
-    {0x91E50000u, 46u}, // fpe -> Latn
-    {0xCA050000u, 46u}, // fqs -> Latn
-    {0x66720000u, 46u}, // fr -> Latn
-    {0x8A250000u, 46u}, // frc -> Latn
-    {0xBE250000u, 46u}, // frp -> Latn
-    {0xC6250000u, 46u}, // frr -> Latn
-    {0xCA250000u, 46u}, // frs -> Latn
+    {0x91050000u, 55u}, // fie -> Latn
+    {0x95050000u, 55u}, // fif -> Latn
+    {0xAD050000u, 55u}, // fil -> Latn
+    {0xBD050000u, 55u}, // fip -> Latn
+    {0xC5050000u, 55u}, // fir -> Latn
+    {0xCD050000u, 55u}, // fit -> Latn
+    {0xD9050000u, 55u}, // fiw -> Latn
+    {0x666A0000u, 55u}, // fj -> Latn
+    {0xA9450000u, 55u}, // fkk -> Latn
+    {0xD5450000u, 55u}, // fkv -> Latn
+    {0x81650000u, 55u}, // fla -> Latn
+    {0x9D650000u, 55u}, // flh -> Latn
+    {0xA1650000u, 55u}, // fli -> Latn
+    {0xAD650000u, 55u}, // fll -> Latn
+    {0xB5650000u, 55u}, // fln -> Latn
+    {0xC5650000u, 55u}, // flr -> Latn
+    {0xE1650000u, 55u}, // fly -> Latn
+    {0xBD850000u, 55u}, // fmp -> Latn
+    {0xD1850000u, 21u}, // fmu -> Deva
+    {0x85A50000u, 55u}, // fnb -> Latn
+    {0x99A50000u, 55u}, // fng -> Latn
+    {0xA1A50000u, 55u}, // fni -> Latn
+    {0x666F0000u, 55u}, // fo -> Latn
+    {0x8DC50000u, 55u}, // fod -> Latn
+    {0xA1C50000u, 55u}, // foi -> Latn
+    {0xB1C50000u, 55u}, // fom -> Latn
+    {0xB5C50000u, 55u}, // fon -> Latn
+    {0xC5C50000u, 55u}, // for -> Latn
+    {0xC9C50000u, 55u}, // fos -> Latn
+    {0x91E50000u, 55u}, // fpe -> Latn
+    {0xCA050000u, 55u}, // fqs -> Latn
+    {0x66720000u, 55u}, // fr -> Latn
+    {0x8A250000u, 55u}, // frc -> Latn
+    {0x8E250000u, 55u}, // frd -> Latn
+    {0xAA250000u, 55u}, // frk -> Latn
+    {0xB2250000u, 55u}, // frm -> Latn
+    {0xBA250000u, 55u}, // fro -> Latn
+    {0xBE250000u, 55u}, // frp -> Latn
+    {0xC2250000u, 55u}, // frq -> Latn
+    {0xC6250000u, 55u}, // frr -> Latn
+    {0xCA250000u, 55u}, // frs -> Latn
+    {0xCE250000u, 55u}, // frt -> Latn
     {0x86850000u,  2u}, // fub -> Arab
-    {0x8E850000u, 46u}, // fud -> Latn
-    {0x92850000u, 46u}, // fue -> Latn
-    {0x96850000u, 46u}, // fuf -> Latn
-    {0x9E850000u, 46u}, // fuh -> Latn
-    {0xC2850000u, 46u}, // fuq -> Latn
-    {0xC6850000u, 46u}, // fur -> Latn
-    {0xD6850000u, 46u}, // fuv -> Latn
-    {0xE2850000u, 46u}, // fuy -> Latn
-    {0xC6A50000u, 46u}, // fvr -> Latn
-    {0x66790000u, 46u}, // fy -> Latn
-    {0x67610000u, 46u}, // ga -> Latn
-    {0x80060000u, 46u}, // gaa -> Latn
-    {0x94060000u, 46u}, // gaf -> Latn
-    {0x98060000u, 46u}, // gag -> Latn
-    {0x9C060000u, 46u}, // gah -> Latn
-    {0xA4060000u, 46u}, // gaj -> Latn
-    {0xB0060000u, 46u}, // gam -> Latn
-    {0xB4060000u, 29u}, // gan -> Hans
-    {0xD8060000u, 46u}, // gaw -> Latn
-    {0xE0060000u, 46u}, // gay -> Latn
-    {0x80260000u, 46u}, // gba -> Latn
-    {0x94260000u, 46u}, // gbf -> Latn
-    {0xB0260000u, 19u}, // gbm -> Deva
-    {0xE0260000u, 46u}, // gby -> Latn
+    {0x8E850000u, 55u}, // fud -> Latn
+    {0x92850000u, 55u}, // fue -> Latn
+    {0x96850000u, 55u}, // fuf -> Latn
+    {0x9E850000u, 55u}, // fuh -> Latn
+    {0xA2850000u, 55u}, // fui -> Latn
+    {0xB2850000u, 55u}, // fum -> Latn
+    {0xB6850000u, 55u}, // fun -> Latn
+    {0xC2850000u, 55u}, // fuq -> Latn
+    {0xC6850000u, 55u}, // fur -> Latn
+    {0xCE850000u, 55u}, // fut -> Latn
+    {0xD2850000u, 55u}, // fuu -> Latn
+    {0xD6850000u, 55u}, // fuv -> Latn
+    {0xE2850000u, 55u}, // fuy -> Latn
+    {0xC6A50000u, 55u}, // fvr -> Latn
+    {0x82C50000u, 55u}, // fwa -> Latn
+    {0x92C50000u, 55u}, // fwe -> Latn
+    {0x66790000u, 55u}, // fy -> Latn
+    {0x67610000u, 55u}, // ga -> Latn
+    {0x80060000u, 55u}, // gaa -> Latn
+    {0x84060000u, 55u}, // gab -> Latn
+    {0x88060000u, 55u}, // gac -> Latn
+    {0x8C060000u, 55u}, // gad -> Latn
+    {0x90060000u, 55u}, // gae -> Latn
+    {0x94060000u, 55u}, // gaf -> Latn
+    {0x98060000u, 55u}, // gag -> Latn
+    {0x9C060000u, 55u}, // gah -> Latn
+    {0xA0060000u, 55u}, // gai -> Latn
+    {0xA4060000u, 55u}, // gaj -> Latn
+    {0xA8060000u, 55u}, // gak -> Latn
+    {0xAC060000u, 55u}, // gal -> Latn
+    {0xB0060000u, 55u}, // gam -> Latn
+    {0xB4060000u, 35u}, // gan -> Hans
+    {0xB8060000u, 55u}, // gao -> Latn
+    {0xBC060000u, 55u}, // gap -> Latn
+    {0xC0060000u, 80u}, // gaq -> Orya
+    {0xC4060000u, 55u}, // gar -> Latn
+    {0xC8060000u, 31u}, // gas -> Gujr
+    {0xCC060000u, 55u}, // gat -> Latn
+    {0xD0060000u, 108u}, // gau -> Telu
+    {0xD8060000u, 55u}, // gaw -> Latn
+    {0xDC060000u, 55u}, // gax -> Latn
+    {0xE0060000u, 55u}, // gay -> Latn
+    {0x80260000u, 55u}, // gba -> Latn
+    {0x84260000u, 55u}, // gbb -> Latn
+    {0x8C260000u, 55u}, // gbd -> Latn
+    {0x90260000u, 55u}, // gbe -> Latn
+    {0x94260000u, 55u}, // gbf -> Latn
+    {0x98260000u, 55u}, // gbg -> Latn
+    {0x9C260000u, 55u}, // gbh -> Latn
+    {0xA0260000u, 55u}, // gbi -> Latn
+    {0xA4260000u, 80u}, // gbj -> Orya
+    {0xA8260000u, 21u}, // gbk -> Deva
+    {0xAC260000u, 31u}, // gbl -> Gujr
+    {0xB0260000u, 21u}, // gbm -> Deva
+    {0xB4260000u, 55u}, // gbn -> Latn
+    {0xBC260000u, 55u}, // gbp -> Latn
+    {0xC0260000u, 55u}, // gbq -> Latn
+    {0xC4260000u, 55u}, // gbr -> Latn
+    {0xC8260000u, 55u}, // gbs -> Latn
+    {0xD0260000u, 55u}, // gbu -> Latn
+    {0xD4260000u, 55u}, // gbv -> Latn
+    {0xD8260000u, 55u}, // gbw -> Latn
+    {0xDC260000u, 55u}, // gbx -> Latn
+    {0xE0260000u, 55u}, // gby -> Latn
     {0xE4260000u,  2u}, // gbz -> Arab
-    {0xC4460000u, 46u}, // gcr -> Latn
-    {0x67640000u, 46u}, // gd -> Latn
-    {0x90660000u, 46u}, // gde -> Latn
-    {0xB4660000u, 46u}, // gdn -> Latn
-    {0xC4660000u, 46u}, // gdr -> Latn
-    {0x84860000u, 46u}, // geb -> Latn
-    {0xA4860000u, 46u}, // gej -> Latn
-    {0xAC860000u, 46u}, // gel -> Latn
-    {0xE4860000u, 21u}, // gez -> Ethi
-    {0xA8A60000u, 46u}, // gfk -> Latn
-    {0xB4C60000u, 19u}, // ggn -> Deva
-    {0xC8E60000u, 46u}, // ghs -> Latn
-    {0xAD060000u, 46u}, // gil -> Latn
-    {0xB1060000u, 46u}, // gim -> Latn
+    {0x88460000u, 55u}, // gcc -> Latn
+    {0x8C460000u, 55u}, // gcd -> Latn
+    {0x94460000u, 55u}, // gcf -> Latn
+    {0xAC460000u, 55u}, // gcl -> Latn
+    {0xB4460000u, 55u}, // gcn -> Latn
+    {0xC4460000u, 55u}, // gcr -> Latn
+    {0xCC460000u, 55u}, // gct -> Latn
+    {0x67640000u, 55u}, // gd -> Latn
+    {0x84660000u, 80u}, // gdb -> Orya
+    {0x88660000u, 55u}, // gdc -> Latn
+    {0x8C660000u, 55u}, // gdd -> Latn
+    {0x90660000u, 55u}, // gde -> Latn
+    {0x94660000u, 55u}, // gdf -> Latn
+    {0x98660000u, 55u}, // gdg -> Latn
+    {0x9C660000u, 55u}, // gdh -> Latn
+    {0xA0660000u, 55u}, // gdi -> Latn
+    {0xA4660000u, 55u}, // gdj -> Latn
+    {0xA8660000u, 55u}, // gdk -> Latn
+    {0xAC660000u, 55u}, // gdl -> Latn
+    {0xB0660000u, 55u}, // gdm -> Latn
+    {0xB4660000u, 55u}, // gdn -> Latn
+    {0xB8660000u, 20u}, // gdo -> Cyrl
+    {0xC0660000u, 55u}, // gdq -> Latn
+    {0xC4660000u, 55u}, // gdr -> Latn
+    {0xCC660000u, 55u}, // gdt -> Latn
+    {0xD0660000u, 55u}, // gdu -> Latn
+    {0xDC660000u, 21u}, // gdx -> Deva
+    {0x80860000u, 55u}, // gea -> Latn
+    {0x84860000u, 55u}, // geb -> Latn
+    {0x88860000u, 55u}, // gec -> Latn
+    {0x8C860000u, 55u}, // ged -> Latn
+    {0x94860000u, 55u}, // gef -> Latn
+    {0x98860000u, 55u}, // geg -> Latn
+    {0x9C860000u, 55u}, // geh -> Latn
+    {0xA0860000u, 55u}, // gei -> Latn
+    {0xA4860000u, 55u}, // gej -> Latn
+    {0xA8860000u, 55u}, // gek -> Latn
+    {0xAC860000u, 55u}, // gel -> Latn
+    {0xC0860000u, 55u}, // geq -> Latn
+    {0xC8860000u, 55u}, // ges -> Latn
+    {0xD4860000u, 55u}, // gev -> Latn
+    {0xD8860000u, 55u}, // gew -> Latn
+    {0xDC860000u, 55u}, // gex -> Latn
+    {0xE0860000u, 55u}, // gey -> Latn
+    {0xE4860000u, 24u}, // gez -> Ethi
+    {0xA8A60000u, 55u}, // gfk -> Latn
+    {0x80C60000u, 55u}, // gga -> Latn
+    {0x84C60000u, 55u}, // ggb -> Latn
+    {0x8CC60000u, 55u}, // ggd -> Latn
+    {0x90C60000u, 55u}, // gge -> Latn
+    {0x98C60000u,  2u}, // ggg -> Arab
+    {0xA8C60000u, 55u}, // ggk -> Latn
+    {0xACC60000u, 55u}, // ggl -> Latn
+    {0xCCC60000u, 55u}, // ggt -> Latn
+    {0xD0C60000u, 55u}, // ggu -> Latn
+    {0xD8C60000u, 55u}, // ggw -> Latn
+    {0x80E60000u,  2u}, // gha -> Arab
+    {0x88E60000u, 55u}, // ghc -> Latn
+    {0x90E60000u, 21u}, // ghe -> Deva
+    {0xA8E60000u, 55u}, // ghk -> Latn
+    {0xB4E60000u, 55u}, // ghn -> Latn
+    {0xB8E60000u, 109u}, // gho -> Tfng
+    {0xC4E60000u,  2u}, // ghr -> Arab
+    {0xC8E60000u, 55u}, // ghs -> Latn
+    {0xCCE60000u, 112u}, // ght -> Tibt
+    {0x81060000u, 55u}, // gia -> Latn
+    {0x85060000u, 55u}, // gib -> Latn
+    {0x89060000u, 55u}, // gic -> Latn
+    {0x8D060000u, 55u}, // gid -> Latn
+    {0x91060000u, 55u}, // gie -> Latn
+    {0x99060000u,  2u}, // gig -> Arab
+    {0x9D060000u, 55u}, // gih -> Latn
+    {0xAD060000u, 55u}, // gil -> Latn
+    {0xB1060000u, 55u}, // gim -> Latn
+    {0xB5060000u, 20u}, // gin -> Cyrl
+    {0xBD060000u, 55u}, // gip -> Latn
+    {0xC1060000u, 55u}, // giq -> Latn
+    {0xC5060000u, 55u}, // gir -> Latn
+    {0xC9060000u, 55u}, // gis -> Latn
+    {0xCD060000u, 55u}, // git -> Latn
+    {0xDD060000u, 55u}, // gix -> Latn
+    {0xE1060000u, 55u}, // giy -> Latn
+    {0xE5060000u, 55u}, // giz -> Latn
     {0xA9260000u,  2u}, // gjk -> Arab
-    {0xB5260000u, 46u}, // gjn -> Latn
+    {0xB1260000u, 55u}, // gjm -> Latn
+    {0xB5260000u, 55u}, // gjn -> Latn
+    {0xC5260000u, 55u}, // gjr -> Latn
     {0xD1260000u,  2u}, // gju -> Arab
-    {0xB5460000u, 46u}, // gkn -> Latn
-    {0xBD460000u, 46u}, // gkp -> Latn
-    {0x676C0000u, 46u}, // gl -> Latn
+    {0x81460000u, 55u}, // gka -> Latn
+    {0x8D460000u, 55u}, // gkd -> Latn
+    {0x91460000u, 55u}, // gke -> Latn
+    {0xB5460000u, 55u}, // gkn -> Latn
+    {0xB9460000u, 55u}, // gko -> Latn
+    {0xBD460000u, 55u}, // gkp -> Latn
+    {0xD1460000u, 55u}, // gku -> Latn
+    {0x676C0000u, 55u}, // gl -> Latn
+    {0x85660000u, 55u}, // glb -> Latn
+    {0x89660000u, 55u}, // glc -> Latn
+    {0x8D660000u, 20u}, // gld -> Cyrl
+    {0x9D660000u,  2u}, // glh -> Arab
+    {0xA5660000u, 55u}, // glj -> Latn
     {0xA9660000u,  2u}, // glk -> Arab
-    {0xB1860000u, 46u}, // gmm -> Latn
-    {0xD5860000u, 21u}, // gmv -> Ethi
-    {0x676E0000u, 46u}, // gn -> Latn
-    {0x8DA60000u, 46u}, // gnd -> Latn
-    {0x99A60000u, 46u}, // gng -> Latn
-    {0x8DC60000u, 46u}, // god -> Latn
-    {0x95C60000u, 21u}, // gof -> Ethi
-    {0xA1C60000u, 46u}, // goi -> Latn
-    {0xB1C60000u, 19u}, // gom -> Deva
-    {0xB5C60000u, 90u}, // gon -> Telu
-    {0xC5C60000u, 46u}, // gor -> Latn
-    {0xC9C60000u, 46u}, // gos -> Latn
-    {0xCDC60000u, 25u}, // got -> Goth
-    {0x86260000u, 46u}, // grb -> Latn
-    {0x8A260000u, 17u}, // grc -> Cprt
-    {0xCE260000u,  8u}, // grt -> Beng
-    {0xDA260000u, 46u}, // grw -> Latn
-    {0xDA460000u, 46u}, // gsw -> Latn
-    {0x67750000u, 27u}, // gu -> Gujr
-    {0x86860000u, 46u}, // gub -> Latn
-    {0x8A860000u, 46u}, // guc -> Latn
-    {0x8E860000u, 46u}, // gud -> Latn
-    {0xC6860000u, 46u}, // gur -> Latn
-    {0xDA860000u, 46u}, // guw -> Latn
-    {0xDE860000u, 46u}, // gux -> Latn
-    {0xE6860000u, 46u}, // guz -> Latn
-    {0x67760000u, 46u}, // gv -> Latn
-    {0x96A60000u, 46u}, // gvf -> Latn
-    {0xC6A60000u, 19u}, // gvr -> Deva
-    {0xCAA60000u, 46u}, // gvs -> Latn
+    {0xAD660000u, 55u}, // gll -> Latn
+    {0xB9660000u, 55u}, // glo -> Latn
+    {0xC5660000u, 55u}, // glr -> Latn
+    {0xD1660000u, 55u}, // glu -> Latn
+    {0xD9660000u, 55u}, // glw -> Latn
+    {0x81860000u, 55u}, // gma -> Latn
+    {0x85860000u, 55u}, // gmb -> Latn
+    {0x8D860000u, 55u}, // gmd -> Latn
+    {0x99860000u, 55u}, // gmg -> Latn
+    {0x9D860000u, 55u}, // gmh -> Latn
+    {0xAD860000u, 53u}, // gml -> Latf
+    {0xB1860000u, 55u}, // gmm -> Latn
+    {0xB5860000u, 55u}, // gmn -> Latn
+    {0xC5860000u, 55u}, // gmr -> Latn
+    {0xD1860000u, 55u}, // gmu -> Latn
+    {0xD5860000u, 24u}, // gmv -> Ethi
+    {0xDD860000u, 55u}, // gmx -> Latn
+    {0xE1860000u, 58u}, // gmy -> Linb
+    {0xE5860000u, 55u}, // gmz -> Latn
+    {0x676E0000u, 55u}, // gn -> Latn
+    {0x81A60000u, 55u}, // gna -> Latn
+    {0x85A60000u, 55u}, // gnb -> Latn
+    {0x89A60000u, 55u}, // gnc -> Latn
+    {0x8DA60000u, 55u}, // gnd -> Latn
+    {0x91A60000u, 55u}, // gne -> Latn
+    {0x99A60000u, 55u}, // gng -> Latn
+    {0x9DA60000u, 55u}, // gnh -> Latn
+    {0xA1A60000u, 55u}, // gni -> Latn
+    {0xA5A60000u, 55u}, // gnj -> Latn
+    {0xA9A60000u, 55u}, // gnk -> Latn
+    {0xADA60000u, 55u}, // gnl -> Latn
+    {0xB1A60000u, 55u}, // gnm -> Latn
+    {0xB5A60000u, 55u}, // gnn -> Latn
+    {0xC1A60000u, 55u}, // gnq -> Latn
+    {0xC5A60000u, 55u}, // gnr -> Latn
+    {0xCDA60000u, 55u}, // gnt -> Latn
+    {0xD1A60000u, 55u}, // gnu -> Latn
+    {0xD9A60000u, 55u}, // gnw -> Latn
+    {0xE5A60000u, 55u}, // gnz -> Latn
+    {0x81C60000u, 55u}, // goa -> Latn
+    {0x85C60000u, 55u}, // gob -> Latn
+    {0x89C60000u, 55u}, // goc -> Latn
+    {0x8DC60000u, 55u}, // god -> Latn
+    {0x91C60000u, 112u}, // goe -> Tibt
+    {0x95C60000u, 24u}, // gof -> Ethi
+    {0x99C60000u, 55u}, // gog -> Latn
+    {0x9DC60000u, 55u}, // goh -> Latn
+    {0xA1C60000u, 55u}, // goi -> Latn
+    {0xA5C60000u, 21u}, // goj -> Deva
+    {0xA9C60000u, 21u}, // gok -> Deva
+    {0xADC60000u, 55u}, // gol -> Latn
+    {0xB5C60000u, 21u}, // gon -> Deva
+    {0xB9C60000u, 55u}, // goo -> Latn
+    {0xBDC60000u, 55u}, // gop -> Latn
+    {0xC1C60000u, 55u}, // goq -> Latn
+    {0xC5C60000u, 55u}, // gor -> Latn
+    {0xC9C60000u, 55u}, // gos -> Latn
+    {0xCDC60000u, 28u}, // got -> Goth
+    {0xD1C60000u, 55u}, // gou -> Latn
+    {0xD5C60000u, 55u}, // gov -> Latn
+    {0xD9C60000u, 55u}, // gow -> Latn
+    {0xDDC60000u, 55u}, // gox -> Latn
+    {0xE1C60000u, 55u}, // goy -> Latn
+    {0x81E60000u, 55u}, // gpa -> Latn
+    {0x91E60000u, 55u}, // gpe -> Latn
+    {0xB5E60000u, 55u}, // gpn -> Latn
+    {0x82060000u, 55u}, // gqa -> Latn
+    {0xB6060000u, 55u}, // gqn -> Latn
+    {0xC6060000u, 55u}, // gqr -> Latn
+    {0x82260000u, 21u}, // gra -> Deva
+    {0x86260000u, 55u}, // grb -> Latn
+    {0x8A260000u, 19u}, // grc -> Cprt
+    {0x8E260000u, 55u}, // grd -> Latn
+    {0x9A260000u, 55u}, // grg -> Latn
+    {0x9E260000u, 55u}, // grh -> Latn
+    {0xA2260000u, 55u}, // gri -> Latn
+    {0xA6260000u, 55u}, // grj -> Latn
+    {0xB2260000u, 55u}, // grm -> Latn
+    {0xC2260000u, 55u}, // grq -> Latn
+    {0xCA260000u, 55u}, // grs -> Latn
+    {0xCE260000u,  9u}, // grt -> Beng
+    {0xD2260000u, 24u}, // gru -> Ethi
+    {0xD6260000u, 55u}, // grv -> Latn
+    {0xDA260000u, 55u}, // grw -> Latn
+    {0xDE260000u, 55u}, // grx -> Latn
+    {0xE2260000u, 55u}, // gry -> Latn
+    {0xE6260000u, 55u}, // grz -> Latn
+    {0xAE460000u, 55u}, // gsl -> Latn
+    {0xB6460000u, 55u}, // gsn -> Latn
+    {0xBA460000u, 55u}, // gso -> Latn
+    {0xBE460000u, 55u}, // gsp -> Latn
+    {0xDA460000u, 55u}, // gsw -> Latn
+    {0x82660000u, 55u}, // gta -> Latn
+    {0xD2660000u, 55u}, // gtu -> Latn
+    {0x67750000u, 31u}, // gu -> Gujr
+    {0x82860000u, 55u}, // gua -> Latn
+    {0x86860000u, 55u}, // gub -> Latn
+    {0x8A860000u, 55u}, // guc -> Latn
+    {0x8E860000u, 55u}, // gud -> Latn
+    {0x92860000u, 55u}, // gue -> Latn
+    {0x96860000u, 55u}, // guf -> Latn
+    {0x9E860000u, 55u}, // guh -> Latn
+    {0xA2860000u, 55u}, // gui -> Latn
+    {0xAA860000u, 55u}, // guk -> Latn
+    {0xAE860000u, 55u}, // gul -> Latn
+    {0xB2860000u, 55u}, // gum -> Latn
+    {0xB6860000u, 55u}, // gun -> Latn
+    {0xBA860000u, 55u}, // guo -> Latn
+    {0xBE860000u, 55u}, // gup -> Latn
+    {0xC2860000u, 55u}, // guq -> Latn
+    {0xC6860000u, 55u}, // gur -> Latn
+    {0xCE860000u, 55u}, // gut -> Latn
+    {0xD2860000u, 55u}, // guu -> Latn
+    {0xDA860000u, 55u}, // guw -> Latn
+    {0xDE860000u, 55u}, // gux -> Latn
+    {0xE6860000u, 55u}, // guz -> Latn
+    {0x67760000u, 55u}, // gv -> Latn
+    {0x82A60000u, 55u}, // gva -> Latn
+    {0x8AA60000u, 55u}, // gvc -> Latn
+    {0x92A60000u, 55u}, // gve -> Latn
+    {0x96A60000u, 55u}, // gvf -> Latn
+    {0xA6A60000u, 55u}, // gvj -> Latn
+    {0xAEA60000u, 55u}, // gvl -> Latn
+    {0xB2A60000u, 55u}, // gvm -> Latn
+    {0xB6A60000u, 55u}, // gvn -> Latn
+    {0xBAA60000u, 55u}, // gvo -> Latn
+    {0xBEA60000u, 55u}, // gvp -> Latn
+    {0xC6A60000u, 21u}, // gvr -> Deva
+    {0xCAA60000u, 55u}, // gvs -> Latn
+    {0xE2A60000u, 55u}, // gvy -> Latn
+    {0x82C60000u, 55u}, // gwa -> Latn
+    {0x86C60000u, 55u}, // gwb -> Latn
     {0x8AC60000u,  2u}, // gwc -> Arab
-    {0xA2C60000u, 46u}, // gwi -> Latn
+    {0x8EC60000u, 55u}, // gwd -> Latn
+    {0x92C60000u, 55u}, // gwe -> Latn
+    {0x96C60000u,  2u}, // gwf -> Arab
+    {0x9AC60000u, 55u}, // gwg -> Latn
+    {0xA2C60000u, 55u}, // gwi -> Latn
+    {0xA6C60000u, 55u}, // gwj -> Latn
+    {0xB2C60000u, 55u}, // gwm -> Latn
+    {0xB6C60000u, 55u}, // gwn -> Latn
+    {0xC6C60000u, 55u}, // gwr -> Latn
     {0xCEC60000u,  2u}, // gwt -> Arab
-    {0xA3060000u, 46u}, // gyi -> Latn
-    {0x68610000u, 46u}, // ha -> Latn
+    {0xD2C60000u, 55u}, // gwu -> Latn
+    {0xDAC60000u, 55u}, // gww -> Latn
+    {0xDEC60000u, 55u}, // gwx -> Latn
+    {0xDEE60000u, 55u}, // gxx -> Latn
+    {0x87060000u, 55u}, // gyb -> Latn
+    {0x8F060000u, 55u}, // gyd -> Latn
+    {0x93060000u, 55u}, // gye -> Latn
+    {0x97060000u, 55u}, // gyf -> Latn
+    {0x9B060000u, 55u}, // gyg -> Latn
+    {0xA3060000u, 55u}, // gyi -> Latn
+    {0xAF060000u, 55u}, // gyl -> Latn
+    {0xB3060000u, 55u}, // gym -> Latn
+    {0xB7060000u, 55u}, // gyn -> Latn
+    {0xBB060000u, 21u}, // gyo -> Deva
+    {0xC7060000u, 55u}, // gyr -> Latn
+    {0xE3060000u, 55u}, // gyy -> Latn
+    {0xE7060000u, 55u}, // gyz -> Latn
+    {0x83260000u, 55u}, // gza -> Latn
+    {0xA3260000u,  2u}, // gzi -> Arab
+    {0xB7260000u, 55u}, // gzn -> Latn
+    {0x68610000u, 55u}, // ha -> Latn
     {0x6861434Du,  2u}, // ha-CM -> Arab
     {0x68615344u,  2u}, // ha-SD -> Arab
-    {0x98070000u, 46u}, // hag -> Latn
-    {0xA8070000u, 29u}, // hak -> Hans
-    {0xB0070000u, 46u}, // ham -> Latn
-    {0xD8070000u, 46u}, // haw -> Latn
+    {0x80070000u, 55u}, // haa -> Latn
+    {0x88070000u,  2u}, // hac -> Arab
+    {0x8C070000u, 55u}, // had -> Latn
+    {0x90070000u, 55u}, // hae -> Latn
+    {0x98070000u, 55u}, // hag -> Latn
+    {0x9C070000u, 55u}, // hah -> Latn
+    {0xA0070000u, 55u}, // hai -> Latn
+    {0xA4070000u, 55u}, // haj -> Latn
+    {0xA8070000u, 35u}, // hak -> Hans
+    {0xAC070000u, 55u}, // hal -> Latn
+    {0xB0070000u, 55u}, // ham -> Latn
+    {0xB4070000u, 55u}, // han -> Latn
+    {0xB8070000u, 55u}, // hao -> Latn
+    {0xBC070000u, 55u}, // hap -> Latn
+    {0xC0070000u, 55u}, // haq -> Latn
+    {0xC4070000u, 24u}, // har -> Ethi
+    {0xC8070000u, 55u}, // has -> Latn
+    {0xD4070000u, 55u}, // hav -> Latn
+    {0xD8070000u, 55u}, // haw -> Latn
+    {0xDC070000u, 55u}, // hax -> Latn
+    {0xE0070000u, 55u}, // hay -> Latn
     {0xE4070000u,  2u}, // haz -> Arab
-    {0x84270000u, 46u}, // hbb -> Latn
-    {0xE0670000u, 21u}, // hdy -> Ethi
-    {0x68650000u, 31u}, // he -> Hebr
-    {0xE0E70000u, 46u}, // hhy -> Latn
-    {0x68690000u, 19u}, // hi -> Deva
-    {0x81070000u, 46u}, // hia -> Latn
-    {0x95070000u, 46u}, // hif -> Latn
-    {0x99070000u, 46u}, // hig -> Latn
-    {0x9D070000u, 46u}, // hih -> Latn
-    {0xAD070000u, 46u}, // hil -> Latn
-    {0x81670000u, 46u}, // hla -> Latn
-    {0xD1670000u, 32u}, // hlu -> Hluw
-    {0x8D870000u, 72u}, // hmd -> Plrd
-    {0xCD870000u, 46u}, // hmt -> Latn
+    {0x80270000u, 55u}, // hba -> Latn
+    {0x84270000u, 55u}, // hbb -> Latn
+    {0xB4270000u, 55u}, // hbn -> Latn
+    {0xB8270000u, 37u}, // hbo -> Hebr
+    {0xD0270000u, 55u}, // hbu -> Latn
+    {0x9C470000u, 55u}, // hch -> Latn
+    {0xE0670000u, 24u}, // hdy -> Ethi
+    {0x68650000u, 37u}, // he -> Hebr
+    {0x8C870000u, 55u}, // hed -> Latn
+    {0x98870000u, 55u}, // heg -> Latn
+    {0x9C870000u, 55u}, // heh -> Latn
+    {0xA0870000u, 55u}, // hei -> Latn
+    {0xB0870000u, 55u}, // hem -> Latn
+    {0xB0C70000u, 55u}, // hgm -> Latn
+    {0xD8C70000u, 55u}, // hgw -> Latn
+    {0xA0E70000u, 55u}, // hhi -> Latn
+    {0xC4E70000u, 55u}, // hhr -> Latn
+    {0xE0E70000u, 55u}, // hhy -> Latn
+    {0x68690000u, 21u}, // hi -> Deva
+    {0x81070000u, 55u}, // hia -> Latn
+    {0x85070000u, 55u}, // hib -> Latn
+    {0x8D070000u, 55u}, // hid -> Latn
+    {0x95070000u, 21u}, // hif -> Deva
+    {0x99070000u, 55u}, // hig -> Latn
+    {0x9D070000u, 55u}, // hih -> Latn
+    {0xA1070000u, 102u}, // hii -> Takr
+    {0xA5070000u, 55u}, // hij -> Latn
+    {0xA9070000u, 55u}, // hik -> Latn
+    {0xAD070000u, 55u}, // hil -> Latn
+    {0xB9070000u, 55u}, // hio -> Latn
+    {0xC5070000u, 55u}, // hir -> Latn
+    {0xCD070000u, 119u}, // hit -> Xsux
+    {0xD9070000u, 55u}, // hiw -> Latn
+    {0xDD070000u, 55u}, // hix -> Latn
+    {0xA1270000u, 55u}, // hji -> Latn
+    {0x81470000u, 55u}, // hka -> Latn
+    {0x91470000u, 55u}, // hke -> Latn
+    {0x9D470000u,  2u}, // hkh -> Arab
+    {0xA9470000u, 55u}, // hkk -> Latn
+    {0x81670000u, 55u}, // hla -> Latn
+    {0x85670000u, 21u}, // hlb -> Deva
+    {0x8D670000u, 55u}, // hld -> Latn
+    {0xCD670000u, 55u}, // hlt -> Latn
+    {0xD1670000u, 38u}, // hlu -> Hluw
+    {0x81870000u, 55u}, // hma -> Latn
+    {0x85870000u, 55u}, // hmb -> Latn
+    {0x8D870000u, 86u}, // hmd -> Plrd
+    {0x95870000u, 55u}, // hmf -> Latn
+    {0xA5870000u, 10u}, // hmj -> Bopo
+    {0xB1870000u, 55u}, // hmm -> Latn
+    {0xB5870000u, 55u}, // hmn -> Latn
+    {0xBD870000u, 55u}, // hmp -> Latn
+    {0xC1870000u, 10u}, // hmq -> Bopo
+    {0xC5870000u, 55u}, // hmr -> Latn
+    {0xC9870000u, 55u}, // hms -> Latn
+    {0xCD870000u, 55u}, // hmt -> Latn
+    {0xD1870000u, 55u}, // hmu -> Latn
+    {0xD5870000u, 55u}, // hmv -> Latn
+    {0xD9870000u, 55u}, // hmw -> Latn
+    {0xE1870000u, 55u}, // hmy -> Latn
+    {0xE5870000u, 55u}, // hmz -> Latn
+    {0x81A70000u, 55u}, // hna -> Latn
     {0x8DA70000u,  2u}, // hnd -> Arab
-    {0x91A70000u, 19u}, // hne -> Deva
-    {0xA5A70000u, 33u}, // hnj -> Hmnp
-    {0xB5A70000u, 46u}, // hnn -> Latn
+    {0x91A70000u, 21u}, // hne -> Deva
+    {0x99A70000u, 55u}, // hng -> Latn
+    {0x9DA70000u, 55u}, // hnh -> Latn
+    {0xA1A70000u, 55u}, // hni -> Latn
+    {0xA5A70000u, 39u}, // hnj -> Hmnp
+    {0xB5A70000u, 55u}, // hnn -> Latn
     {0xB9A70000u,  2u}, // hno -> Arab
-    {0x686F0000u, 46u}, // ho -> Latn
-    {0x89C70000u, 19u}, // hoc -> Deva
-    {0xA5C70000u, 19u}, // hoj -> Deva
-    {0xCDC70000u, 46u}, // hot -> Latn
-    {0x68720000u, 46u}, // hr -> Latn
-    {0x86470000u, 46u}, // hsb -> Latn
-    {0xB6470000u, 29u}, // hsn -> Hans
-    {0x68740000u, 46u}, // ht -> Latn
-    {0x68750000u, 46u}, // hu -> Latn
-    {0xA2870000u, 46u}, // hui -> Latn
-    {0xC6870000u, 46u}, // hur -> Latn
+    {0xC9A70000u, 55u}, // hns -> Latn
+    {0x686F0000u, 55u}, // ho -> Latn
+    {0x81C70000u, 55u}, // hoa -> Latn
+    {0x85C70000u, 55u}, // hob -> Latn
+    {0x89C70000u, 21u}, // hoc -> Deva
+    {0x8DC70000u, 55u}, // hod -> Latn
+    {0x91C70000u, 55u}, // hoe -> Latn
+    {0x9DC70000u,  2u}, // hoh -> Arab
+    {0xA1C70000u, 55u}, // hoi -> Latn
+    {0xA5C70000u, 21u}, // hoj -> Deva
+    {0xADC70000u, 55u}, // hol -> Latn
+    {0xB1C70000u, 55u}, // hom -> Latn
+    {0xB9C70000u, 55u}, // hoo -> Latn
+    {0xBDC70000u, 55u}, // hop -> Latn
+    {0xC5C70000u, 55u}, // hor -> Latn
+    {0xCDC70000u, 55u}, // hot -> Latn
+    {0xD5C70000u, 55u}, // hov -> Latn
+    {0xD9C70000u, 34u}, // how -> Hani
+    {0xE1C70000u, 21u}, // hoy -> Deva
+    {0xB9E70000u, 72u}, // hpo -> Mymr
+    {0x68720000u, 55u}, // hr -> Latn
+    {0x82270000u, 55u}, // hra -> Latn
+    {0x8A270000u, 55u}, // hrc -> Latn
+    {0x92270000u, 55u}, // hre -> Latn
+    {0xAA270000u, 55u}, // hrk -> Latn
+    {0xB2270000u, 55u}, // hrm -> Latn
+    {0xBA270000u, 55u}, // hro -> Latn
+    {0xBE270000u, 55u}, // hrp -> Latn
+    {0xCE270000u, 100u}, // hrt -> Syrc
+    {0xD2270000u, 55u}, // hru -> Latn
+    {0xDA270000u, 55u}, // hrw -> Latn
+    {0xDE270000u, 55u}, // hrx -> Latn
+    {0xE6270000u,  2u}, // hrz -> Arab
+    {0x86470000u, 55u}, // hsb -> Latn
+    {0xB6470000u, 35u}, // hsn -> Hans
+    {0xCA470000u,  2u}, // hss -> Arab
+    {0x68740000u, 55u}, // ht -> Latn
+    {0xA2670000u, 55u}, // hti -> Latn
+    {0xBA670000u, 55u}, // hto -> Latn
+    {0xCA670000u, 55u}, // hts -> Latn
+    {0xD2670000u, 55u}, // htu -> Latn
+    {0xDE670000u, 119u}, // htx -> Xsux
+    {0x68750000u, 55u}, // hu -> Latn
+    {0x86870000u, 55u}, // hub -> Latn
+    {0x8A870000u, 55u}, // huc -> Latn
+    {0x8E870000u, 55u}, // hud -> Latn
+    {0x92870000u, 55u}, // hue -> Latn
+    {0x96870000u, 55u}, // huf -> Latn
+    {0x9A870000u, 55u}, // hug -> Latn
+    {0x9E870000u, 55u}, // huh -> Latn
+    {0xA2870000u, 55u}, // hui -> Latn
+    {0xAA870000u, 55u}, // huk -> Latn
+    {0xAE870000u, 55u}, // hul -> Latn
+    {0xB2870000u, 55u}, // hum -> Latn
+    {0xBE870000u, 55u}, // hup -> Latn
+    {0xC6870000u, 55u}, // hur -> Latn
+    {0xCA870000u, 55u}, // hus -> Latn
+    {0xCE870000u, 21u}, // hut -> Deva
+    {0xD2870000u, 55u}, // huu -> Latn
+    {0xD6870000u, 55u}, // huv -> Latn
+    {0xDA870000u, 55u}, // huw -> Latn
+    {0xDE870000u, 55u}, // hux -> Latn
+    {0xE2870000u, 37u}, // huy -> Hebr
+    {0xE6870000u, 20u}, // huz -> Cyrl
+    {0x8AA70000u, 55u}, // hvc -> Latn
+    {0x92A70000u, 55u}, // hve -> Latn
+    {0xAAA70000u, 55u}, // hvk -> Latn
+    {0xB6A70000u, 55u}, // hvn -> Latn
+    {0xD6A70000u, 55u}, // hvv -> Latn
+    {0x82C70000u, 55u}, // hwa -> Latn
+    {0x8AC70000u, 55u}, // hwc -> Latn
+    {0xBAC70000u, 55u}, // hwo -> Latn
     {0x68790000u,  4u}, // hy -> Armn
-    {0x687A0000u, 46u}, // hz -> Latn
-    {0x69610000u, 46u}, // ia -> Latn
-    {0xB4080000u, 46u}, // ian -> Latn
-    {0xC4080000u, 46u}, // iar -> Latn
-    {0x80280000u, 46u}, // iba -> Latn
-    {0x84280000u, 46u}, // ibb -> Latn
-    {0xE0280000u, 46u}, // iby -> Latn
-    {0x80480000u, 46u}, // ica -> Latn
-    {0x9C480000u, 46u}, // ich -> Latn
-    {0x69640000u, 46u}, // id -> Latn
-    {0x8C680000u, 46u}, // idd -> Latn
-    {0xA0680000u, 46u}, // idi -> Latn
-    {0xD0680000u, 46u}, // idu -> Latn
-    {0x90A80000u, 46u}, // ife -> Latn
-    {0x69670000u, 46u}, // ig -> Latn
-    {0x84C80000u, 46u}, // igb -> Latn
-    {0x90C80000u, 46u}, // ige -> Latn
-    {0x69690000u, 102u}, // ii -> Yiii
-    {0xA5280000u, 46u}, // ijj -> Latn
-    {0x696B0000u, 46u}, // ik -> Latn
-    {0xA9480000u, 46u}, // ikk -> Latn
-    {0xD9480000u, 46u}, // ikw -> Latn
-    {0xDD480000u, 46u}, // ikx -> Latn
-    {0xB9680000u, 46u}, // ilo -> Latn
-    {0xB9880000u, 46u}, // imo -> Latn
-    {0x696E0000u, 46u}, // in -> Latn
-    {0x9DA80000u, 18u}, // inh -> Cyrl
-    {0x696F0000u, 46u}, // io -> Latn
-    {0xD1C80000u, 46u}, // iou -> Latn
-    {0xA2280000u, 46u}, // iri -> Latn
-    {0x69730000u, 46u}, // is -> Latn
-    {0x69740000u, 46u}, // it -> Latn
-    {0x69750000u, 11u}, // iu -> Cans
-    {0x69770000u, 31u}, // iw -> Hebr
-    {0xB2C80000u, 46u}, // iwm -> Latn
-    {0xCAC80000u, 46u}, // iws -> Latn
-    {0x9F280000u, 46u}, // izh -> Latn
-    {0xA3280000u, 46u}, // izi -> Latn
-    {0x6A610000u, 35u}, // ja -> Jpan
-    {0x84090000u, 46u}, // jab -> Latn
-    {0xB0090000u, 46u}, // jam -> Latn
-    {0xC4090000u, 46u}, // jar -> Latn
-    {0xB8290000u, 46u}, // jbo -> Latn
-    {0xD0290000u, 46u}, // jbu -> Latn
-    {0xB4890000u, 46u}, // jen -> Latn
-    {0xA8C90000u, 46u}, // jgk -> Latn
-    {0xB8C90000u, 46u}, // jgo -> Latn
-    {0x6A690000u, 31u}, // ji -> Hebr
-    {0x85090000u, 46u}, // jib -> Latn
-    {0x89890000u, 46u}, // jmc -> Latn
-    {0xAD890000u, 19u}, // jml -> Deva
-    {0x82290000u, 46u}, // jra -> Latn
-    {0xCE890000u, 46u}, // jut -> Latn
-    {0x6A760000u, 46u}, // jv -> Latn
-    {0x6A770000u, 46u}, // jw -> Latn
-    {0x6B610000u, 22u}, // ka -> Geor
-    {0x800A0000u, 18u}, // kaa -> Cyrl
-    {0x840A0000u, 46u}, // kab -> Latn
-    {0x880A0000u, 46u}, // kac -> Latn
-    {0x8C0A0000u, 46u}, // kad -> Latn
-    {0xA00A0000u, 46u}, // kai -> Latn
-    {0xA40A0000u, 46u}, // kaj -> Latn
-    {0xB00A0000u, 46u}, // kam -> Latn
-    {0xB80A0000u, 46u}, // kao -> Latn
-    {0xD80A0000u, 38u}, // kaw -> Kawi
-    {0x8C2A0000u, 18u}, // kbd -> Cyrl
-    {0xB02A0000u, 46u}, // kbm -> Latn
-    {0xBC2A0000u, 46u}, // kbp -> Latn
-    {0xC02A0000u, 46u}, // kbq -> Latn
-    {0xDC2A0000u, 46u}, // kbx -> Latn
+    {0x83070000u, 55u}, // hya -> Latn
+    {0xDB070000u,  4u}, // hyw -> Armn
+    {0x687A0000u, 55u}, // hz -> Latn
+    {0x69610000u, 55u}, // ia -> Latn
+    {0xA0080000u, 55u}, // iai -> Latn
+    {0xB4080000u, 55u}, // ian -> Latn
+    {0xC4080000u, 55u}, // iar -> Latn
+    {0x80280000u, 55u}, // iba -> Latn
+    {0x84280000u, 55u}, // ibb -> Latn
+    {0x8C280000u, 55u}, // ibd -> Latn
+    {0x90280000u, 55u}, // ibe -> Latn
+    {0x98280000u, 55u}, // ibg -> Latn
+    {0x9C280000u, 55u}, // ibh -> Latn
+    {0xAC280000u, 55u}, // ibl -> Latn
+    {0xB0280000u, 55u}, // ibm -> Latn
+    {0xB4280000u, 55u}, // ibn -> Latn
+    {0xC4280000u, 55u}, // ibr -> Latn
+    {0xD0280000u, 55u}, // ibu -> Latn
+    {0xE0280000u, 55u}, // iby -> Latn
+    {0x80480000u, 55u}, // ica -> Latn
+    {0x9C480000u, 55u}, // ich -> Latn
+    {0xC4480000u, 55u}, // icr -> Latn
+    {0x69640000u, 55u}, // id -> Latn
+    {0x80680000u, 55u}, // ida -> Latn
+    {0x84680000u, 55u}, // idb -> Latn
+    {0x88680000u, 55u}, // idc -> Latn
+    {0x8C680000u, 55u}, // idd -> Latn
+    {0x90680000u, 55u}, // ide -> Latn
+    {0xA0680000u, 55u}, // idi -> Latn
+    {0xC4680000u, 55u}, // idr -> Latn
+    {0xC8680000u, 55u}, // ids -> Latn
+    {0xCC680000u, 55u}, // idt -> Latn
+    {0xD0680000u, 55u}, // idu -> Latn
+    {0x69650000u, 55u}, // ie -> Latn
+    {0x80A80000u, 55u}, // ifa -> Latn
+    {0x84A80000u, 55u}, // ifb -> Latn
+    {0x90A80000u, 55u}, // ife -> Latn
+    {0x94A80000u, 55u}, // iff -> Latn
+    {0xA8A80000u, 55u}, // ifk -> Latn
+    {0xB0A80000u, 55u}, // ifm -> Latn
+    {0xD0A80000u, 55u}, // ifu -> Latn
+    {0xE0A80000u, 55u}, // ify -> Latn
+    {0x69670000u, 55u}, // ig -> Latn
+    {0x84C80000u, 55u}, // igb -> Latn
+    {0x90C80000u, 55u}, // ige -> Latn
+    {0x98C80000u, 55u}, // igg -> Latn
+    {0xACC80000u, 55u}, // igl -> Latn
+    {0xB0C80000u, 55u}, // igm -> Latn
+    {0xB4C80000u, 55u}, // ign -> Latn
+    {0xB8C80000u, 55u}, // igo -> Latn
+    {0xC8C80000u, 55u}, // igs -> Latn
+    {0xD8C80000u, 55u}, // igw -> Latn
+    {0x84E80000u, 55u}, // ihb -> Latn
+    {0xA0E80000u, 55u}, // ihi -> Latn
+    {0xBCE80000u, 55u}, // ihp -> Latn
+    {0xD8E80000u, 55u}, // ihw -> Latn
+    {0x69690000u, 120u}, // ii -> Yiii
+    {0xB5080000u, 55u}, // iin -> Latn
+    {0x89280000u, 55u}, // ijc -> Latn
+    {0x91280000u, 55u}, // ije -> Latn
+    {0xA5280000u, 55u}, // ijj -> Latn
+    {0xB5280000u, 55u}, // ijn -> Latn
+    {0xC9280000u, 55u}, // ijs -> Latn
+    {0x696B0000u, 55u}, // ik -> Latn
+    {0x9D480000u, 55u}, // ikh -> Latn
+    {0xA1480000u, 55u}, // iki -> Latn
+    {0xA9480000u, 55u}, // ikk -> Latn
+    {0xAD480000u, 55u}, // ikl -> Latn
+    {0xB9480000u, 55u}, // iko -> Latn
+    {0xBD480000u, 55u}, // ikp -> Latn
+    {0xC5480000u, 55u}, // ikr -> Latn
+    {0xCD480000u, 55u}, // ikt -> Latn
+    {0xD5480000u, 55u}, // ikv -> Latn
+    {0xD9480000u, 55u}, // ikw -> Latn
+    {0xDD480000u, 55u}, // ikx -> Latn
+    {0xE5480000u, 55u}, // ikz -> Latn
+    {0x81680000u, 55u}, // ila -> Latn
+    {0x85680000u, 55u}, // ilb -> Latn
+    {0x99680000u, 55u}, // ilg -> Latn
+    {0xA1680000u, 55u}, // ili -> Latn
+    {0xA9680000u, 55u}, // ilk -> Latn
+    {0xB1680000u, 55u}, // ilm -> Latn
+    {0xB9680000u, 55u}, // ilo -> Latn
+    {0xBD680000u, 55u}, // ilp -> Latn
+    {0xD1680000u, 55u}, // ilu -> Latn
+    {0xD5680000u, 55u}, // ilv -> Latn
+    {0xA1880000u, 55u}, // imi -> Latn
+    {0xAD880000u, 55u}, // iml -> Latn
+    {0xB5880000u, 55u}, // imn -> Latn
+    {0xB9880000u, 55u}, // imo -> Latn
+    {0xC5880000u, 55u}, // imr -> Latn
+    {0xC9880000u, 55u}, // ims -> Latn
+    {0xCD880000u, 55u}, // imt -> Latn
+    {0xE1880000u, 60u}, // imy -> Lyci
+    {0x696E0000u, 55u}, // in -> Latn
+    {0x85A80000u, 55u}, // inb -> Latn
+    {0x99A80000u, 55u}, // ing -> Latn
+    {0x9DA80000u, 20u}, // inh -> Cyrl
+    {0xA5A80000u, 55u}, // inj -> Latn
+    {0xB5A80000u, 55u}, // inn -> Latn
+    {0xB9A80000u, 55u}, // ino -> Latn
+    {0xBDA80000u, 55u}, // inp -> Latn
+    {0xCDA80000u, 72u}, // int -> Mymr
+    {0x696F0000u, 55u}, // io -> Latn
+    {0xC5C80000u, 24u}, // ior -> Ethi
+    {0xD1C80000u, 55u}, // iou -> Latn
+    {0xD9C80000u, 55u}, // iow -> Latn
+    {0xA1E80000u, 55u}, // ipi -> Latn
+    {0xB9E80000u, 55u}, // ipo -> Latn
+    {0xD2080000u, 55u}, // iqu -> Latn
+    {0xDA080000u, 55u}, // iqw -> Latn
+    {0x92280000u, 55u}, // ire -> Latn
+    {0x9E280000u, 55u}, // irh -> Latn
+    {0xA2280000u, 55u}, // iri -> Latn
+    {0xAA280000u, 55u}, // irk -> Latn
+    {0xB6280000u, 55u}, // irn -> Latn
+    {0xD2280000u, 105u}, // iru -> Taml
+    {0xDE280000u, 55u}, // irx -> Latn
+    {0xE2280000u, 55u}, // iry -> Latn
+    {0x69730000u, 55u}, // is -> Latn
+    {0x82480000u, 55u}, // isa -> Latn
+    {0x8A480000u, 55u}, // isc -> Latn
+    {0x8E480000u, 55u}, // isd -> Latn
+    {0x9E480000u, 55u}, // ish -> Latn
+    {0xA2480000u, 55u}, // isi -> Latn
+    {0xAA480000u,  2u}, // isk -> Arab
+    {0xB2480000u, 55u}, // ism -> Latn
+    {0xB6480000u, 55u}, // isn -> Latn
+    {0xBA480000u, 55u}, // iso -> Latn
+    {0xCE480000u, 55u}, // ist -> Latn
+    {0xD2480000u, 55u}, // isu -> Latn
+    {0x69740000u, 55u}, // it -> Latn
+    {0x86680000u, 55u}, // itb -> Latn
+    {0x8E680000u, 55u}, // itd -> Latn
+    {0x92680000u, 55u}, // ite -> Latn
+    {0xA2680000u, 55u}, // iti -> Latn
+    {0xAA680000u, 37u}, // itk -> Hebr
+    {0xAE680000u, 20u}, // itl -> Cyrl
+    {0xB2680000u, 55u}, // itm -> Latn
+    {0xBA680000u, 55u}, // ito -> Latn
+    {0xC6680000u, 55u}, // itr -> Latn
+    {0xCA680000u, 55u}, // its -> Latn
+    {0xCE680000u, 55u}, // itt -> Latn
+    {0xD6680000u, 55u}, // itv -> Latn
+    {0xDA680000u, 55u}, // itw -> Latn
+    {0xDE680000u, 55u}, // itx -> Latn
+    {0xE2680000u, 55u}, // ity -> Latn
+    {0xE6680000u, 55u}, // itz -> Latn
+    {0x69750000u, 13u}, // iu -> Cans
+    {0xB2880000u, 55u}, // ium -> Latn
+    {0x86A80000u, 55u}, // ivb -> Latn
+    {0xD6A80000u, 55u}, // ivv -> Latn
+    {0x69770000u, 37u}, // iw -> Hebr
+    {0xAAC80000u, 55u}, // iwk -> Latn
+    {0xB2C80000u, 55u}, // iwm -> Latn
+    {0xBAC80000u, 55u}, // iwo -> Latn
+    {0xCAC80000u, 55u}, // iws -> Latn
+    {0x8AE80000u, 55u}, // ixc -> Latn
+    {0xAEE80000u, 55u}, // ixl -> Latn
+    {0x83080000u, 55u}, // iya -> Latn
+    {0xBB080000u, 55u}, // iyo -> Latn
+    {0xDF080000u, 55u}, // iyx -> Latn
+    {0x9F280000u, 55u}, // izh -> Latn
+    {0xB3280000u, 55u}, // izm -> Latn
+    {0xC7280000u, 55u}, // izr -> Latn
+    {0xE7280000u, 55u}, // izz -> Latn
+    {0x6A610000u, 42u}, // ja -> Jpan
+    {0x80090000u, 55u}, // jaa -> Latn
+    {0x84090000u, 55u}, // jab -> Latn
+    {0x88090000u, 55u}, // jac -> Latn
+    {0x8C090000u,  2u}, // jad -> Arab
+    {0x90090000u, 55u}, // jae -> Latn
+    {0x94090000u, 55u}, // jaf -> Latn
+    {0x9C090000u, 55u}, // jah -> Latn
+    {0xA4090000u, 55u}, // jaj -> Latn
+    {0xA8090000u, 55u}, // jak -> Latn
+    {0xAC090000u, 55u}, // jal -> Latn
+    {0xB0090000u, 55u}, // jam -> Latn
+    {0xB4090000u, 55u}, // jan -> Latn
+    {0xB8090000u, 55u}, // jao -> Latn
+    {0xC0090000u, 55u}, // jaq -> Latn
+    {0xC8090000u, 55u}, // jas -> Latn
+    {0xCC090000u,  2u}, // jat -> Arab
+    {0xD0090000u, 55u}, // jau -> Latn
+    {0xDC090000u, 55u}, // jax -> Latn
+    {0xE0090000u, 55u}, // jay -> Latn
+    {0xE4090000u, 55u}, // jaz -> Latn
+    {0x90290000u, 37u}, // jbe -> Hebr
+    {0xA0290000u, 55u}, // jbi -> Latn
+    {0xA4290000u, 55u}, // jbj -> Latn
+    {0xA8290000u, 55u}, // jbk -> Latn
+    {0xB0290000u, 55u}, // jbm -> Latn
+    {0xB4290000u,  2u}, // jbn -> Arab
+    {0xB8290000u, 55u}, // jbo -> Latn
+    {0xC4290000u, 55u}, // jbr -> Latn
+    {0xCC290000u, 55u}, // jbt -> Latn
+    {0xD0290000u, 55u}, // jbu -> Latn
+    {0xD8290000u, 55u}, // jbw -> Latn
+    {0xCC490000u, 20u}, // jct -> Cyrl
+    {0x80690000u, 112u}, // jda -> Tibt
+    {0x98690000u,  2u}, // jdg -> Arab
+    {0xCC690000u, 20u}, // jdt -> Cyrl
+    {0x84890000u, 55u}, // jeb -> Latn
+    {0x90890000u, 21u}, // jee -> Deva
+    {0x9C890000u, 55u}, // jeh -> Latn
+    {0xA0890000u, 55u}, // jei -> Latn
+    {0xA8890000u, 55u}, // jek -> Latn
+    {0xAC890000u, 55u}, // jel -> Latn
+    {0xB4890000u, 55u}, // jen -> Latn
+    {0xC4890000u, 55u}, // jer -> Latn
+    {0xCC890000u, 55u}, // jet -> Latn
+    {0xD0890000u, 55u}, // jeu -> Latn
+    {0x84C90000u, 55u}, // jgb -> Latn
+    {0x90C90000u, 25u}, // jge -> Geor
+    {0xA8C90000u, 55u}, // jgk -> Latn
+    {0xB8C90000u, 55u}, // jgo -> Latn
+    {0xA0E90000u, 55u}, // jhi -> Latn
+    {0x6A690000u, 37u}, // ji -> Hebr
+    {0x81090000u, 55u}, // jia -> Latn
+    {0x85090000u, 55u}, // jib -> Latn
+    {0x89090000u, 55u}, // jic -> Latn
+    {0x8D090000u, 55u}, // jid -> Latn
+    {0x91090000u, 55u}, // jie -> Latn
+    {0x99090000u, 55u}, // jig -> Latn
+    {0xAD090000u, 55u}, // jil -> Latn
+    {0xB1090000u, 55u}, // jim -> Latn
+    {0xCD090000u, 55u}, // jit -> Latn
+    {0xD1090000u, 55u}, // jiu -> Latn
+    {0xD5090000u, 55u}, // jiv -> Latn
+    {0xE1090000u, 55u}, // jiy -> Latn
+    {0x91290000u, 33u}, // jje -> Hang
+    {0xC5290000u, 55u}, // jjr -> Latn
+    {0x81490000u, 55u}, // jka -> Latn
+    {0xB1490000u, 72u}, // jkm -> Mymr
+    {0xB9490000u, 55u}, // jko -> Latn
+    {0xD1490000u, 55u}, // jku -> Latn
+    {0x91690000u, 55u}, // jle -> Latn
+    {0x81890000u, 55u}, // jma -> Latn
+    {0x85890000u, 55u}, // jmb -> Latn
+    {0x89890000u, 55u}, // jmc -> Latn
+    {0x8D890000u, 55u}, // jmd -> Latn
+    {0xA1890000u, 55u}, // jmi -> Latn
+    {0xAD890000u, 21u}, // jml -> Deva
+    {0xB5890000u, 55u}, // jmn -> Latn
+    {0xC5890000u, 55u}, // jmr -> Latn
+    {0xC9890000u, 55u}, // jms -> Latn
+    {0xD9890000u, 55u}, // jmw -> Latn
+    {0xDD890000u, 55u}, // jmx -> Latn
+    {0x81A90000u, 102u}, // jna -> Takr
+    {0x8DA90000u,  2u}, // jnd -> Arab
+    {0x99A90000u, 55u}, // jng -> Latn
+    {0xA1A90000u, 55u}, // jni -> Latn
+    {0xA5A90000u, 55u}, // jnj -> Latn
+    {0xADA90000u, 21u}, // jnl -> Deva
+    {0xC9A90000u, 21u}, // jns -> Deva
+    {0x85C90000u, 55u}, // job -> Latn
+    {0x8DC90000u, 55u}, // jod -> Latn
+    {0x99C90000u,  2u}, // jog -> Arab
+    {0xC5C90000u, 55u}, // jor -> Latn
+    {0xD9C90000u, 55u}, // jow -> Latn
+    {0x81E90000u, 37u}, // jpa -> Hebr
+    {0xC5E90000u, 37u}, // jpr -> Hebr
+    {0xC6090000u, 55u}, // jqr -> Latn
+    {0x82290000u, 55u}, // jra -> Latn
+    {0x86290000u, 37u}, // jrb -> Hebr
+    {0xC6290000u, 55u}, // jrr -> Latn
+    {0xCE290000u, 55u}, // jrt -> Latn
+    {0xD2290000u, 55u}, // jru -> Latn
+    {0x82890000u, 55u}, // jua -> Latn
+    {0x86890000u, 55u}, // jub -> Latn
+    {0x8E890000u, 55u}, // jud -> Latn
+    {0x9E890000u, 55u}, // juh -> Latn
+    {0xA2890000u, 55u}, // jui -> Latn
+    {0xAA890000u, 55u}, // juk -> Latn
+    {0xAE890000u, 21u}, // jul -> Deva
+    {0xB2890000u, 55u}, // jum -> Latn
+    {0xB6890000u, 80u}, // jun -> Orya
+    {0xBA890000u, 55u}, // juo -> Latn
+    {0xBE890000u, 55u}, // jup -> Latn
+    {0xC6890000u, 55u}, // jur -> Latn
+    {0xCE890000u, 55u}, // jut -> Latn
+    {0xD2890000u, 55u}, // juu -> Latn
+    {0xDA890000u, 55u}, // juw -> Latn
+    {0xE2890000u, 80u}, // juy -> Orya
+    {0x6A760000u, 55u}, // jv -> Latn
+    {0x8EA90000u, 55u}, // jvd -> Latn
+    {0xB6A90000u, 55u}, // jvn -> Latn
+    {0x6A770000u, 55u}, // jw -> Latn
+    {0xA2C90000u, 55u}, // jwi -> Latn
+    {0x83090000u, 112u}, // jya -> Tibt
+    {0x93090000u, 37u}, // jye -> Hebr
+    {0xE3090000u, 55u}, // jyy -> Latn
+    {0x6B610000u, 25u}, // ka -> Geor
+    {0x800A0000u, 20u}, // kaa -> Cyrl
+    {0x840A0000u, 55u}, // kab -> Latn
+    {0x880A0000u, 55u}, // kac -> Latn
+    {0x8C0A0000u, 55u}, // kad -> Latn
+    {0x980A0000u, 55u}, // kag -> Latn
+    {0x9C0A0000u, 55u}, // kah -> Latn
+    {0xA00A0000u, 55u}, // kai -> Latn
+    {0xA40A0000u, 55u}, // kaj -> Latn
+    {0xA80A0000u, 55u}, // kak -> Latn
+    {0xB00A0000u, 55u}, // kam -> Latn
+    {0xB80A0000u, 55u}, // kao -> Latn
+    {0xBC0A0000u, 20u}, // kap -> Cyrl
+    {0xC00A0000u, 55u}, // kaq -> Latn
+    {0xD40A0000u, 55u}, // kav -> Latn
+    {0xD80A0000u, 45u}, // kaw -> Kawi
+    {0xDC0A0000u, 55u}, // kax -> Latn
+    {0xE00A0000u, 55u}, // kay -> Latn
+    {0x802A0000u, 55u}, // kba -> Latn
+    {0x842A0000u, 55u}, // kbb -> Latn
+    {0x882A0000u, 55u}, // kbc -> Latn
+    {0x8C2A0000u, 20u}, // kbd -> Cyrl
+    {0x902A0000u, 55u}, // kbe -> Latn
+    {0x982A0000u, 112u}, // kbg -> Tibt
+    {0x9C2A0000u, 55u}, // kbh -> Latn
+    {0xA02A0000u, 55u}, // kbi -> Latn
+    {0xA42A0000u, 55u}, // kbj -> Latn
+    {0xA82A0000u, 55u}, // kbk -> Latn
+    {0xAC2A0000u, 55u}, // kbl -> Latn
+    {0xB02A0000u, 55u}, // kbm -> Latn
+    {0xB42A0000u, 55u}, // kbn -> Latn
+    {0xB82A0000u, 55u}, // kbo -> Latn
+    {0xBC2A0000u, 55u}, // kbp -> Latn
+    {0xC02A0000u, 55u}, // kbq -> Latn
+    {0xC42A0000u, 55u}, // kbr -> Latn
+    {0xC82A0000u, 55u}, // kbs -> Latn
+    {0xCC2A0000u, 55u}, // kbt -> Latn
+    {0xD02A0000u,  2u}, // kbu -> Arab
+    {0xD42A0000u, 55u}, // kbv -> Latn
+    {0xD82A0000u, 55u}, // kbw -> Latn
+    {0xDC2A0000u, 55u}, // kbx -> Latn
     {0xE02A0000u,  2u}, // kby -> Arab
-    {0x984A0000u, 46u}, // kcg -> Latn
-    {0xA84A0000u, 46u}, // kck -> Latn
-    {0xAC4A0000u, 46u}, // kcl -> Latn
-    {0xCC4A0000u, 46u}, // kct -> Latn
-    {0x906A0000u, 46u}, // kde -> Latn
-    {0x9C6A0000u, 46u}, // kdh -> Latn
-    {0xAC6A0000u, 46u}, // kdl -> Latn
-    {0xCC6A0000u, 93u}, // kdt -> Thai
-    {0x808A0000u, 46u}, // kea -> Latn
-    {0xB48A0000u, 46u}, // ken -> Latn
-    {0xE48A0000u, 46u}, // kez -> Latn
-    {0xB8AA0000u, 46u}, // kfo -> Latn
-    {0xC4AA0000u, 19u}, // kfr -> Deva
-    {0xE0AA0000u, 19u}, // kfy -> Deva
-    {0x6B670000u, 46u}, // kg -> Latn
-    {0x90CA0000u, 46u}, // kge -> Latn
-    {0x94CA0000u, 46u}, // kgf -> Latn
-    {0xBCCA0000u, 46u}, // kgp -> Latn
-    {0x80EA0000u, 46u}, // kha -> Latn
-    {0x84EA0000u, 86u}, // khb -> Talu
-    {0xB4EA0000u, 19u}, // khn -> Deva
-    {0xC0EA0000u, 46u}, // khq -> Latn
-    {0xC8EA0000u, 46u}, // khs -> Latn
-    {0xCCEA0000u, 59u}, // kht -> Mymr
+    {0xE42A0000u, 55u}, // kbz -> Latn
+    {0x804A0000u, 20u}, // kca -> Cyrl
+    {0x844A0000u, 55u}, // kcb -> Latn
+    {0x884A0000u, 55u}, // kcc -> Latn
+    {0x8C4A0000u, 55u}, // kcd -> Latn
+    {0x904A0000u, 55u}, // kce -> Latn
+    {0x944A0000u, 55u}, // kcf -> Latn
+    {0x984A0000u, 55u}, // kcg -> Latn
+    {0x9C4A0000u, 55u}, // kch -> Latn
+    {0xA04A0000u, 55u}, // kci -> Latn
+    {0xA44A0000u, 55u}, // kcj -> Latn
+    {0xA84A0000u, 55u}, // kck -> Latn
+    {0xAC4A0000u, 55u}, // kcl -> Latn
+    {0xB04A0000u, 55u}, // kcm -> Latn
+    {0xB44A0000u, 55u}, // kcn -> Latn
+    {0xB84A0000u, 55u}, // kco -> Latn
+    {0xBC4A0000u, 55u}, // kcp -> Latn
+    {0xC04A0000u, 55u}, // kcq -> Latn
+    {0xC84A0000u, 55u}, // kcs -> Latn
+    {0xCC4A0000u, 55u}, // kct -> Latn
+    {0xD04A0000u, 55u}, // kcu -> Latn
+    {0xD44A0000u, 55u}, // kcv -> Latn
+    {0xD84A0000u, 55u}, // kcw -> Latn
+    {0xE04A0000u,  2u}, // kcy -> Arab
+    {0xE44A0000u, 55u}, // kcz -> Latn
+    {0x806A0000u, 55u}, // kda -> Latn
+    {0x886A0000u, 55u}, // kdc -> Latn
+    {0x8C6A0000u, 55u}, // kdd -> Latn
+    {0x906A0000u, 55u}, // kde -> Latn
+    {0x946A0000u, 55u}, // kdf -> Latn
+    {0x986A0000u, 55u}, // kdg -> Latn
+    {0x9C6A0000u, 55u}, // kdh -> Latn
+    {0xA06A0000u, 55u}, // kdi -> Latn
+    {0xA46A0000u, 55u}, // kdj -> Latn
+    {0xA86A0000u, 55u}, // kdk -> Latn
+    {0xAC6A0000u, 55u}, // kdl -> Latn
+    {0xB06A0000u, 55u}, // kdm -> Latn
+    {0xB46A0000u, 55u}, // kdn -> Latn
+    {0xBC6A0000u, 55u}, // kdp -> Latn
+    {0xC06A0000u,  9u}, // kdq -> Beng
+    {0xC46A0000u, 55u}, // kdr -> Latn
+    {0xCC6A0000u, 111u}, // kdt -> Thai
+    {0xD86A0000u, 55u}, // kdw -> Latn
+    {0xDC6A0000u, 55u}, // kdx -> Latn
+    {0xE06A0000u, 55u}, // kdy -> Latn
+    {0xE46A0000u, 55u}, // kdz -> Latn
+    {0x808A0000u, 55u}, // kea -> Latn
+    {0x848A0000u, 55u}, // keb -> Latn
+    {0x888A0000u, 55u}, // kec -> Latn
+    {0x8C8A0000u, 55u}, // ked -> Latn
+    {0x908A0000u, 55u}, // kee -> Latn
+    {0x948A0000u, 55u}, // kef -> Latn
+    {0x988A0000u, 55u}, // keg -> Latn
+    {0x9C8A0000u, 55u}, // keh -> Latn
+    {0xA08A0000u, 55u}, // kei -> Latn
+    {0xA88A0000u, 55u}, // kek -> Latn
+    {0xAC8A0000u, 55u}, // kel -> Latn
+    {0xB08A0000u, 55u}, // kem -> Latn
+    {0xB48A0000u, 55u}, // ken -> Latn
+    {0xB88A0000u, 55u}, // keo -> Latn
+    {0xC48A0000u, 55u}, // ker -> Latn
+    {0xC88A0000u, 55u}, // kes -> Latn
+    {0xCC8A0000u, 20u}, // ket -> Cyrl
+    {0xD08A0000u, 55u}, // keu -> Latn
+    {0xD48A0000u, 67u}, // kev -> Mlym
+    {0xD88A0000u, 55u}, // kew -> Latn
+    {0xDC8A0000u, 21u}, // kex -> Deva
+    {0xE08A0000u, 108u}, // key -> Telu
+    {0xE48A0000u, 55u}, // kez -> Latn
+    {0x80AA0000u, 49u}, // kfa -> Knda
+    {0x84AA0000u, 21u}, // kfb -> Deva
+    {0x88AA0000u, 108u}, // kfc -> Telu
+    {0x8CAA0000u, 49u}, // kfd -> Knda
+    {0x90AA0000u, 105u}, // kfe -> Taml
+    {0x94AA0000u, 55u}, // kff -> Latn
+    {0x98AA0000u, 49u}, // kfg -> Knda
+    {0x9CAA0000u, 67u}, // kfh -> Mlym
+    {0xA0AA0000u, 105u}, // kfi -> Taml
+    {0xA8AA0000u, 21u}, // kfk -> Deva
+    {0xACAA0000u, 55u}, // kfl -> Latn
+    {0xB0AA0000u,  2u}, // kfm -> Arab
+    {0xB4AA0000u, 55u}, // kfn -> Latn
+    {0xB8AA0000u, 55u}, // kfo -> Latn
+    {0xBCAA0000u, 21u}, // kfp -> Deva
+    {0xC0AA0000u, 21u}, // kfq -> Deva
+    {0xC4AA0000u, 21u}, // kfr -> Deva
+    {0xC8AA0000u, 21u}, // kfs -> Deva
+    {0xD0AA0000u, 21u}, // kfu -> Deva
+    {0xD4AA0000u, 55u}, // kfv -> Latn
+    {0xD8AA0000u, 55u}, // kfw -> Latn
+    {0xDCAA0000u, 21u}, // kfx -> Deva
+    {0xE0AA0000u, 21u}, // kfy -> Deva
+    {0xE4AA0000u, 55u}, // kfz -> Latn
+    {0x6B670000u, 55u}, // kg -> Latn
+    {0x80CA0000u, 55u}, // kga -> Latn
+    {0x84CA0000u, 55u}, // kgb -> Latn
+    {0x90CA0000u, 55u}, // kge -> Latn
+    {0x94CA0000u, 55u}, // kgf -> Latn
+    {0xA4CA0000u, 21u}, // kgj -> Deva
+    {0xA8CA0000u, 55u}, // kgk -> Latn
+    {0xACCA0000u, 55u}, // kgl -> Latn
+    {0xB8CA0000u, 55u}, // kgo -> Latn
+    {0xBCCA0000u, 55u}, // kgp -> Latn
+    {0xC0CA0000u, 55u}, // kgq -> Latn
+    {0xC4CA0000u, 55u}, // kgr -> Latn
+    {0xC8CA0000u, 55u}, // kgs -> Latn
+    {0xCCCA0000u, 55u}, // kgt -> Latn
+    {0xD0CA0000u, 55u}, // kgu -> Latn
+    {0xD4CA0000u, 55u}, // kgv -> Latn
+    {0xD8CA0000u, 55u}, // kgw -> Latn
+    {0xDCCA0000u, 55u}, // kgx -> Latn
+    {0xE0CA0000u, 21u}, // kgy -> Deva
+    {0x80EA0000u, 55u}, // kha -> Latn
+    {0x84EA0000u, 104u}, // khb -> Talu
+    {0x88EA0000u, 55u}, // khc -> Latn
+    {0x8CEA0000u, 55u}, // khd -> Latn
+    {0x90EA0000u, 55u}, // khe -> Latn
+    {0x94EA0000u, 111u}, // khf -> Thai
+    {0x98EA0000u, 112u}, // khg -> Tibt
+    {0x9CEA0000u, 55u}, // khh -> Latn
+    {0xA4EA0000u, 55u}, // khj -> Latn
+    {0xACEA0000u, 55u}, // khl -> Latn
+    {0xB4EA0000u, 21u}, // khn -> Deva
+    {0xB8EA0000u, 11u}, // kho -> Brah
+    {0xBCEA0000u, 55u}, // khp -> Latn
+    {0xC0EA0000u, 55u}, // khq -> Latn
+    {0xC4EA0000u, 55u}, // khr -> Latn
+    {0xC8EA0000u, 55u}, // khs -> Latn
+    {0xCCEA0000u, 72u}, // kht -> Mymr
+    {0xD0EA0000u, 55u}, // khu -> Latn
+    {0xD4EA0000u, 20u}, // khv -> Cyrl
     {0xD8EA0000u,  2u}, // khw -> Arab
-    {0xE4EA0000u, 46u}, // khz -> Latn
-    {0x6B690000u, 46u}, // ki -> Latn
-    {0xA50A0000u, 46u}, // kij -> Latn
-    {0xD10A0000u, 46u}, // kiu -> Latn
-    {0xD90A0000u, 46u}, // kiw -> Latn
-    {0x6B6A0000u, 46u}, // kj -> Latn
-    {0x8D2A0000u, 46u}, // kjd -> Latn
-    {0x992A0000u, 45u}, // kjg -> Laoo
-    {0xC92A0000u, 46u}, // kjs -> Latn
-    {0xE12A0000u, 46u}, // kjy -> Latn
-    {0x6B6B0000u, 18u}, // kk -> Cyrl
+    {0xDCEA0000u, 55u}, // khx -> Latn
+    {0xE0EA0000u, 55u}, // khy -> Latn
+    {0xE4EA0000u, 55u}, // khz -> Latn
+    {0x6B690000u, 55u}, // ki -> Latn
+    {0x810A0000u, 55u}, // kia -> Latn
+    {0x850A0000u, 55u}, // kib -> Latn
+    {0x890A0000u, 55u}, // kic -> Latn
+    {0x8D0A0000u, 55u}, // kid -> Latn
+    {0x910A0000u, 55u}, // kie -> Latn
+    {0x950A0000u, 21u}, // kif -> Deva
+    {0x990A0000u, 55u}, // kig -> Latn
+    {0x9D0A0000u, 55u}, // kih -> Latn
+    {0xA50A0000u, 55u}, // kij -> Latn
+    {0xAD0A0000u, 55u}, // kil -> Latn
+    {0xB10A0000u, 20u}, // kim -> Cyrl
+    {0xB90A0000u, 55u}, // kio -> Latn
+    {0xBD0A0000u, 21u}, // kip -> Deva
+    {0xC10A0000u, 55u}, // kiq -> Latn
+    {0xC90A0000u, 55u}, // kis -> Latn
+    {0xCD0A0000u, 55u}, // kit -> Latn
+    {0xD10A0000u, 55u}, // kiu -> Latn
+    {0xD50A0000u, 55u}, // kiv -> Latn
+    {0xD90A0000u, 55u}, // kiw -> Latn
+    {0xDD0A0000u, 55u}, // kix -> Latn
+    {0xE10A0000u, 55u}, // kiy -> Latn
+    {0xE50A0000u, 55u}, // kiz -> Latn
+    {0x6B6A0000u, 55u}, // kj -> Latn
+    {0x812A0000u, 55u}, // kja -> Latn
+    {0x852A0000u, 55u}, // kjb -> Latn
+    {0x892A0000u, 55u}, // kjc -> Latn
+    {0x8D2A0000u, 55u}, // kjd -> Latn
+    {0x912A0000u, 55u}, // kje -> Latn
+    {0x992A0000u, 52u}, // kjg -> Laoo
+    {0x9D2A0000u, 20u}, // kjh -> Cyrl
+    {0xA12A0000u, 55u}, // kji -> Latn
+    {0xA52A0000u, 55u}, // kjj -> Latn
+    {0xA92A0000u, 55u}, // kjk -> Latn
+    {0xAD2A0000u, 21u}, // kjl -> Deva
+    {0xB12A0000u, 55u}, // kjm -> Latn
+    {0xB52A0000u, 55u}, // kjn -> Latn
+    {0xB92A0000u, 21u}, // kjo -> Deva
+    {0xBD2A0000u, 72u}, // kjp -> Mymr
+    {0xC12A0000u, 55u}, // kjq -> Latn
+    {0xC52A0000u, 55u}, // kjr -> Latn
+    {0xC92A0000u, 55u}, // kjs -> Latn
+    {0xCD2A0000u, 111u}, // kjt -> Thai
+    {0xD12A0000u, 55u}, // kju -> Latn
+    {0xDD2A0000u, 55u}, // kjx -> Latn
+    {0xE12A0000u, 55u}, // kjy -> Latn
+    {0xE52A0000u, 112u}, // kjz -> Tibt
+    {0x6B6B0000u, 20u}, // kk -> Cyrl
     {0x6B6B4146u,  2u}, // kk-AF -> Arab
     {0x6B6B434Eu,  2u}, // kk-CN -> Arab
     {0x6B6B4952u,  2u}, // kk-IR -> Arab
     {0x6B6B4D4Eu,  2u}, // kk-MN -> Arab
-    {0x894A0000u, 46u}, // kkc -> Latn
-    {0xA54A0000u, 46u}, // kkj -> Latn
-    {0x6B6C0000u, 46u}, // kl -> Latn
-    {0xB56A0000u, 46u}, // kln -> Latn
-    {0xC16A0000u, 46u}, // klq -> Latn
-    {0xCD6A0000u, 46u}, // klt -> Latn
-    {0xDD6A0000u, 46u}, // klx -> Latn
-    {0x6B6D0000u, 40u}, // km -> Khmr
-    {0x858A0000u, 46u}, // kmb -> Latn
-    {0x9D8A0000u, 46u}, // kmh -> Latn
-    {0xB98A0000u, 46u}, // kmo -> Latn
-    {0xC98A0000u, 46u}, // kms -> Latn
-    {0xD18A0000u, 46u}, // kmu -> Latn
-    {0xD98A0000u, 46u}, // kmw -> Latn
-    {0x6B6E0000u, 42u}, // kn -> Knda
-    {0x95AA0000u, 46u}, // knf -> Latn
-    {0xBDAA0000u, 46u}, // knp -> Latn
-    {0x6B6F0000u, 43u}, // ko -> Kore
-    {0xA1CA0000u, 18u}, // koi -> Cyrl
-    {0xA9CA0000u, 19u}, // kok -> Deva
-    {0xADCA0000u, 46u}, // kol -> Latn
-    {0xC9CA0000u, 46u}, // kos -> Latn
-    {0xE5CA0000u, 46u}, // koz -> Latn
-    {0x91EA0000u, 46u}, // kpe -> Latn
-    {0x95EA0000u, 46u}, // kpf -> Latn
-    {0xB9EA0000u, 46u}, // kpo -> Latn
-    {0xC5EA0000u, 46u}, // kpr -> Latn
-    {0xDDEA0000u, 46u}, // kpx -> Latn
-    {0x860A0000u, 46u}, // kqb -> Latn
-    {0x960A0000u, 46u}, // kqf -> Latn
-    {0xCA0A0000u, 46u}, // kqs -> Latn
-    {0xE20A0000u, 21u}, // kqy -> Ethi
-    {0x6B720000u, 46u}, // kr -> Latn
-    {0x8A2A0000u, 18u}, // krc -> Cyrl
-    {0xA22A0000u, 46u}, // kri -> Latn
-    {0xA62A0000u, 46u}, // krj -> Latn
-    {0xAE2A0000u, 46u}, // krl -> Latn
-    {0xCA2A0000u, 46u}, // krs -> Latn
-    {0xD22A0000u, 19u}, // kru -> Deva
+    {0x814A0000u, 55u}, // kka -> Latn
+    {0x854A0000u, 55u}, // kkb -> Latn
+    {0x894A0000u, 55u}, // kkc -> Latn
+    {0x8D4A0000u, 55u}, // kkd -> Latn
+    {0x914A0000u, 55u}, // kke -> Latn
+    {0x954A0000u, 112u}, // kkf -> Tibt
+    {0x994A0000u, 55u}, // kkg -> Latn
+    {0x9D4A0000u, 51u}, // kkh -> Lana
+    {0xA14A0000u, 55u}, // kki -> Latn
+    {0xA54A0000u, 55u}, // kkj -> Latn
+    {0xA94A0000u, 55u}, // kkk -> Latn
+    {0xAD4A0000u, 55u}, // kkl -> Latn
+    {0xB14A0000u, 55u}, // kkm -> Latn
+    {0xB94A0000u, 55u}, // kko -> Latn
+    {0xBD4A0000u, 55u}, // kkp -> Latn
+    {0xC14A0000u, 55u}, // kkq -> Latn
+    {0xC54A0000u, 55u}, // kkr -> Latn
+    {0xC94A0000u, 55u}, // kks -> Latn
+    {0xCD4A0000u, 21u}, // kkt -> Deva
+    {0xD14A0000u, 55u}, // kku -> Latn
+    {0xD54A0000u, 55u}, // kkv -> Latn
+    {0xD94A0000u, 55u}, // kkw -> Latn
+    {0xDD4A0000u, 55u}, // kkx -> Latn
+    {0xE14A0000u, 55u}, // kky -> Latn
+    {0xE54A0000u, 55u}, // kkz -> Latn
+    {0x6B6C0000u, 55u}, // kl -> Latn
+    {0x816A0000u, 55u}, // kla -> Latn
+    {0x856A0000u, 55u}, // klb -> Latn
+    {0x896A0000u, 55u}, // klc -> Latn
+    {0x8D6A0000u, 55u}, // kld -> Latn
+    {0x916A0000u, 21u}, // kle -> Deva
+    {0x956A0000u, 55u}, // klf -> Latn
+    {0x996A0000u, 55u}, // klg -> Latn
+    {0x9D6A0000u, 55u}, // klh -> Latn
+    {0xA16A0000u, 55u}, // kli -> Latn
+    {0xA56A0000u,  2u}, // klj -> Arab
+    {0xA96A0000u, 55u}, // klk -> Latn
+    {0xAD6A0000u, 55u}, // kll -> Latn
+    {0xB16A0000u, 55u}, // klm -> Latn
+    {0xB56A0000u, 55u}, // kln -> Latn
+    {0xB96A0000u, 55u}, // klo -> Latn
+    {0xBD6A0000u, 55u}, // klp -> Latn
+    {0xC16A0000u, 55u}, // klq -> Latn
+    {0xC56A0000u, 21u}, // klr -> Deva
+    {0xC96A0000u, 55u}, // kls -> Latn
+    {0xCD6A0000u, 55u}, // klt -> Latn
+    {0xD16A0000u, 55u}, // klu -> Latn
+    {0xD56A0000u, 55u}, // klv -> Latn
+    {0xD96A0000u, 55u}, // klw -> Latn
+    {0xDD6A0000u, 55u}, // klx -> Latn
+    {0xE16A0000u, 55u}, // kly -> Latn
+    {0xE56A0000u, 55u}, // klz -> Latn
+    {0x6B6D0000u, 47u}, // km -> Khmr
+    {0x818A0000u, 55u}, // kma -> Latn
+    {0x858A0000u, 55u}, // kmb -> Latn
+    {0x898A0000u, 55u}, // kmc -> Latn
+    {0x8D8A0000u, 55u}, // kmd -> Latn
+    {0x918A0000u, 55u}, // kme -> Latn
+    {0x958A0000u, 55u}, // kmf -> Latn
+    {0x998A0000u, 55u}, // kmg -> Latn
+    {0x9D8A0000u, 55u}, // kmh -> Latn
+    {0xA18A0000u, 55u}, // kmi -> Latn
+    {0xA58A0000u, 21u}, // kmj -> Deva
+    {0xA98A0000u, 55u}, // kmk -> Latn
+    {0xAD8A0000u, 55u}, // kml -> Latn
+    {0xB18A0000u, 55u}, // kmm -> Latn
+    {0xB58A0000u, 55u}, // kmn -> Latn
+    {0xB98A0000u, 55u}, // kmo -> Latn
+    {0xBD8A0000u, 55u}, // kmp -> Latn
+    {0xC18A0000u, 55u}, // kmq -> Latn
+    {0xC98A0000u, 55u}, // kms -> Latn
+    {0xCD8A0000u, 55u}, // kmt -> Latn
+    {0xD18A0000u, 55u}, // kmu -> Latn
+    {0xD58A0000u, 55u}, // kmv -> Latn
+    {0xD98A0000u, 55u}, // kmw -> Latn
+    {0xDD8A0000u, 55u}, // kmx -> Latn
+    {0xE18A0000u, 55u}, // kmy -> Latn
+    {0xE58A0000u,  2u}, // kmz -> Arab
+    {0x6B6E0000u, 49u}, // kn -> Knda
+    {0x81AA0000u, 55u}, // kna -> Latn
+    {0x85AA0000u, 55u}, // knb -> Latn
+    {0x8DAA0000u, 55u}, // knd -> Latn
+    {0x91AA0000u, 55u}, // kne -> Latn
+    {0x95AA0000u, 55u}, // knf -> Latn
+    {0xA1AA0000u, 55u}, // kni -> Latn
+    {0xA5AA0000u, 55u}, // knj -> Latn
+    {0xA9AA0000u, 55u}, // knk -> Latn
+    {0xADAA0000u, 55u}, // knl -> Latn
+    {0xB1AA0000u, 55u}, // knm -> Latn
+    {0xB5AA0000u, 21u}, // knn -> Deva
+    {0xB9AA0000u, 55u}, // kno -> Latn
+    {0xBDAA0000u, 55u}, // knp -> Latn
+    {0xC1AA0000u, 55u}, // knq -> Latn
+    {0xC5AA0000u, 55u}, // knr -> Latn
+    {0xC9AA0000u, 55u}, // kns -> Latn
+    {0xCDAA0000u, 55u}, // knt -> Latn
+    {0xD1AA0000u, 55u}, // knu -> Latn
+    {0xD5AA0000u, 55u}, // knv -> Latn
+    {0xD9AA0000u, 55u}, // knw -> Latn
+    {0xDDAA0000u, 55u}, // knx -> Latn
+    {0xE1AA0000u, 55u}, // kny -> Latn
+    {0xE5AA0000u, 55u}, // knz -> Latn
+    {0x6B6F0000u, 50u}, // ko -> Kore
+    {0x81CA0000u, 55u}, // koa -> Latn
+    {0x89CA0000u, 55u}, // koc -> Latn
+    {0x8DCA0000u, 55u}, // kod -> Latn
+    {0x91CA0000u, 55u}, // koe -> Latn
+    {0x95CA0000u, 55u}, // kof -> Latn
+    {0x99CA0000u, 55u}, // kog -> Latn
+    {0x9DCA0000u, 55u}, // koh -> Latn
+    {0xA1CA0000u, 20u}, // koi -> Cyrl
+    {0xA9CA0000u, 21u}, // kok -> Deva
+    {0xADCA0000u, 55u}, // kol -> Latn
+    {0xB9CA0000u, 55u}, // koo -> Latn
+    {0xBDCA0000u, 55u}, // kop -> Latn
+    {0xC1CA0000u, 55u}, // koq -> Latn
+    {0xC9CA0000u, 55u}, // kos -> Latn
+    {0xCDCA0000u, 55u}, // kot -> Latn
+    {0xD1CA0000u, 55u}, // kou -> Latn
+    {0xD5CA0000u, 55u}, // kov -> Latn
+    {0xD9CA0000u, 55u}, // kow -> Latn
+    {0xE1CA0000u, 55u}, // koy -> Latn
+    {0xE5CA0000u, 55u}, // koz -> Latn
+    {0x81EA0000u, 55u}, // kpa -> Latn
+    {0x89EA0000u, 55u}, // kpc -> Latn
+    {0x8DEA0000u, 55u}, // kpd -> Latn
+    {0x91EA0000u, 55u}, // kpe -> Latn
+    {0x95EA0000u, 55u}, // kpf -> Latn
+    {0x99EA0000u, 55u}, // kpg -> Latn
+    {0x9DEA0000u, 55u}, // kph -> Latn
+    {0xA1EA0000u, 55u}, // kpi -> Latn
+    {0xA5EA0000u, 55u}, // kpj -> Latn
+    {0xA9EA0000u, 55u}, // kpk -> Latn
+    {0xADEA0000u, 55u}, // kpl -> Latn
+    {0xB1EA0000u, 55u}, // kpm -> Latn
+    {0xB5EA0000u, 55u}, // kpn -> Latn
+    {0xB9EA0000u, 55u}, // kpo -> Latn
+    {0xC1EA0000u, 55u}, // kpq -> Latn
+    {0xC5EA0000u, 55u}, // kpr -> Latn
+    {0xC9EA0000u, 55u}, // kps -> Latn
+    {0xCDEA0000u, 20u}, // kpt -> Cyrl
+    {0xD1EA0000u, 55u}, // kpu -> Latn
+    {0xD9EA0000u, 55u}, // kpw -> Latn
+    {0xDDEA0000u, 55u}, // kpx -> Latn
+    {0xE1EA0000u, 20u}, // kpy -> Cyrl
+    {0xE5EA0000u, 55u}, // kpz -> Latn
+    {0x820A0000u, 55u}, // kqa -> Latn
+    {0x860A0000u, 55u}, // kqb -> Latn
+    {0x8A0A0000u, 55u}, // kqc -> Latn
+    {0x8E0A0000u, 100u}, // kqd -> Syrc
+    {0x920A0000u, 55u}, // kqe -> Latn
+    {0x960A0000u, 55u}, // kqf -> Latn
+    {0x9A0A0000u, 55u}, // kqg -> Latn
+    {0x9E0A0000u, 55u}, // kqh -> Latn
+    {0xA20A0000u, 55u}, // kqi -> Latn
+    {0xA60A0000u, 55u}, // kqj -> Latn
+    {0xAA0A0000u, 55u}, // kqk -> Latn
+    {0xAE0A0000u, 55u}, // kql -> Latn
+    {0xB20A0000u, 55u}, // kqm -> Latn
+    {0xB60A0000u, 55u}, // kqn -> Latn
+    {0xBA0A0000u, 55u}, // kqo -> Latn
+    {0xBE0A0000u, 55u}, // kqp -> Latn
+    {0xC20A0000u, 55u}, // kqq -> Latn
+    {0xC60A0000u, 55u}, // kqr -> Latn
+    {0xCA0A0000u, 55u}, // kqs -> Latn
+    {0xCE0A0000u, 55u}, // kqt -> Latn
+    {0xD20A0000u, 55u}, // kqu -> Latn
+    {0xD60A0000u, 55u}, // kqv -> Latn
+    {0xDA0A0000u, 55u}, // kqw -> Latn
+    {0xDE0A0000u, 55u}, // kqx -> Latn
+    {0xE20A0000u, 24u}, // kqy -> Ethi
+    {0xE60A0000u, 55u}, // kqz -> Latn
+    {0x6B720000u, 55u}, // kr -> Latn
+    {0x822A0000u, 21u}, // kra -> Deva
+    {0x862A0000u, 55u}, // krb -> Latn
+    {0x8A2A0000u, 20u}, // krc -> Cyrl
+    {0x8E2A0000u, 55u}, // krd -> Latn
+    {0x922A0000u, 55u}, // kre -> Latn
+    {0x962A0000u, 55u}, // krf -> Latn
+    {0x9E2A0000u, 55u}, // krh -> Latn
+    {0xA22A0000u, 55u}, // kri -> Latn
+    {0xA62A0000u, 55u}, // krj -> Latn
+    {0xAA2A0000u, 20u}, // krk -> Cyrl
+    {0xAE2A0000u, 55u}, // krl -> Latn
+    {0xB62A0000u, 55u}, // krn -> Latn
+    {0xBE2A0000u, 55u}, // krp -> Latn
+    {0xC62A0000u, 47u}, // krr -> Khmr
+    {0xCA2A0000u, 55u}, // krs -> Latn
+    {0xCE2A0000u, 55u}, // krt -> Latn
+    {0xD22A0000u, 21u}, // kru -> Deva
+    {0xD62A0000u, 47u}, // krv -> Khmr
+    {0xDA2A0000u, 55u}, // krw -> Latn
+    {0xDE2A0000u, 55u}, // krx -> Latn
+    {0xE22A0000u, 55u}, // kry -> Latn
+    {0xE62A0000u, 55u}, // krz -> Latn
     {0x6B730000u,  2u}, // ks -> Arab
-    {0x864A0000u, 46u}, // ksb -> Latn
-    {0x8E4A0000u, 46u}, // ksd -> Latn
-    {0x964A0000u, 46u}, // ksf -> Latn
-    {0x9E4A0000u, 46u}, // ksh -> Latn
-    {0xA64A0000u, 46u}, // ksj -> Latn
-    {0xC64A0000u, 46u}, // ksr -> Latn
-    {0x866A0000u, 21u}, // ktb -> Ethi
-    {0xB26A0000u, 46u}, // ktm -> Latn
-    {0xBA6A0000u, 46u}, // kto -> Latn
-    {0xC66A0000u, 46u}, // ktr -> Latn
-    {0x6B750000u, 46u}, // ku -> Latn
-    {0x6B754952u,  2u}, // ku-IR -> Arab
+    {0x864A0000u, 55u}, // ksb -> Latn
+    {0x8A4A0000u, 55u}, // ksc -> Latn
+    {0x8E4A0000u, 55u}, // ksd -> Latn
+    {0x924A0000u, 55u}, // kse -> Latn
+    {0x964A0000u, 55u}, // ksf -> Latn
+    {0x9A4A0000u, 55u}, // ksg -> Latn
+    {0x9E4A0000u, 55u}, // ksh -> Latn
+    {0xA24A0000u, 55u}, // ksi -> Latn
+    {0xA64A0000u, 55u}, // ksj -> Latn
+    {0xAA4A0000u, 55u}, // ksk -> Latn
+    {0xAE4A0000u, 55u}, // ksl -> Latn
+    {0xB24A0000u, 55u}, // ksm -> Latn
+    {0xB64A0000u, 55u}, // ksn -> Latn
+    {0xBA4A0000u, 55u}, // kso -> Latn
+    {0xBE4A0000u, 55u}, // ksp -> Latn
+    {0xC24A0000u, 55u}, // ksq -> Latn
+    {0xC64A0000u, 55u}, // ksr -> Latn
+    {0xCA4A0000u, 55u}, // kss -> Latn
+    {0xCE4A0000u, 55u}, // kst -> Latn
+    {0xD24A0000u, 72u}, // ksu -> Mymr
+    {0xD64A0000u, 55u}, // ksv -> Latn
+    {0xDA4A0000u, 72u}, // ksw -> Mymr
+    {0xDE4A0000u, 55u}, // ksx -> Latn
+    {0xE64A0000u, 21u}, // ksz -> Deva
+    {0x826A0000u, 55u}, // kta -> Latn
+    {0x866A0000u, 24u}, // ktb -> Ethi
+    {0x8A6A0000u, 55u}, // ktc -> Latn
+    {0x8E6A0000u, 55u}, // ktd -> Latn
+    {0x926A0000u, 21u}, // kte -> Deva
+    {0x966A0000u, 55u}, // ktf -> Latn
+    {0x9A6A0000u, 55u}, // ktg -> Latn
+    {0x9E6A0000u, 55u}, // kth -> Latn
+    {0xA26A0000u, 55u}, // kti -> Latn
+    {0xA66A0000u, 55u}, // ktj -> Latn
+    {0xAA6A0000u, 55u}, // ktk -> Latn
+    {0xAE6A0000u,  2u}, // ktl -> Arab
+    {0xB26A0000u, 55u}, // ktm -> Latn
+    {0xB66A0000u, 55u}, // ktn -> Latn
+    {0xBA6A0000u, 55u}, // kto -> Latn
+    {0xBE6A0000u, 86u}, // ktp -> Plrd
+    {0xC26A0000u, 55u}, // ktq -> Latn
+    {0xCA6A0000u, 55u}, // kts -> Latn
+    {0xCE6A0000u, 55u}, // ktt -> Latn
+    {0xD26A0000u, 55u}, // ktu -> Latn
+    {0xD66A0000u, 55u}, // ktv -> Latn
+    {0xDA6A0000u, 55u}, // ktw -> Latn
+    {0xDE6A0000u, 55u}, // ktx -> Latn
+    {0xE26A0000u, 55u}, // kty -> Latn
+    {0xE66A0000u, 55u}, // ktz -> Latn
+    {0x6B750000u, 55u}, // ku -> Latn
     {0x6B754C42u,  2u}, // ku-LB -> Arab
-    {0x868A0000u, 46u}, // kub -> Latn
-    {0x8E8A0000u, 46u}, // kud -> Latn
-    {0x928A0000u, 46u}, // kue -> Latn
-    {0xA68A0000u, 46u}, // kuj -> Latn
-    {0xB28A0000u, 18u}, // kum -> Cyrl
-    {0xB68A0000u, 46u}, // kun -> Latn
-    {0xBE8A0000u, 46u}, // kup -> Latn
-    {0xCA8A0000u, 46u}, // kus -> Latn
-    {0x6B760000u, 18u}, // kv -> Cyrl
-    {0x9AAA0000u, 46u}, // kvg -> Latn
-    {0xC6AA0000u, 46u}, // kvr -> Latn
+    {0x868A0000u, 55u}, // kub -> Latn
+    {0x8A8A0000u, 55u}, // kuc -> Latn
+    {0x8E8A0000u, 55u}, // kud -> Latn
+    {0x928A0000u, 55u}, // kue -> Latn
+    {0x968A0000u, 52u}, // kuf -> Laoo
+    {0x9A8A0000u, 55u}, // kug -> Latn
+    {0x9E8A0000u, 55u}, // kuh -> Latn
+    {0xA28A0000u, 55u}, // kui -> Latn
+    {0xA68A0000u, 55u}, // kuj -> Latn
+    {0xAA8A0000u, 55u}, // kuk -> Latn
+    {0xAE8A0000u, 55u}, // kul -> Latn
+    {0xB28A0000u, 20u}, // kum -> Cyrl
+    {0xB68A0000u, 55u}, // kun -> Latn
+    {0xBA8A0000u, 55u}, // kuo -> Latn
+    {0xBE8A0000u, 55u}, // kup -> Latn
+    {0xC28A0000u, 55u}, // kuq -> Latn
+    {0xCA8A0000u, 55u}, // kus -> Latn
+    {0xCE8A0000u, 55u}, // kut -> Latn
+    {0xD28A0000u, 55u}, // kuu -> Latn
+    {0xD68A0000u, 55u}, // kuv -> Latn
+    {0xDA8A0000u, 55u}, // kuw -> Latn
+    {0xDE8A0000u, 55u}, // kux -> Latn
+    {0xE28A0000u, 55u}, // kuy -> Latn
+    {0xE68A0000u, 55u}, // kuz -> Latn
+    {0x6B760000u, 20u}, // kv -> Cyrl
+    {0x82AA0000u, 20u}, // kva -> Cyrl
+    {0x86AA0000u, 55u}, // kvb -> Latn
+    {0x8AAA0000u, 55u}, // kvc -> Latn
+    {0x8EAA0000u, 55u}, // kvd -> Latn
+    {0x92AA0000u, 55u}, // kve -> Latn
+    {0x96AA0000u, 55u}, // kvf -> Latn
+    {0x9AAA0000u, 55u}, // kvg -> Latn
+    {0x9EAA0000u, 55u}, // kvh -> Latn
+    {0xA2AA0000u, 55u}, // kvi -> Latn
+    {0xA6AA0000u, 55u}, // kvj -> Latn
+    {0xAEAA0000u, 55u}, // kvl -> Latn
+    {0xB2AA0000u, 55u}, // kvm -> Latn
+    {0xB6AA0000u, 55u}, // kvn -> Latn
+    {0xBAAA0000u, 55u}, // kvo -> Latn
+    {0xBEAA0000u, 55u}, // kvp -> Latn
+    {0xC2AA0000u, 72u}, // kvq -> Mymr
+    {0xC6AA0000u, 55u}, // kvr -> Latn
+    {0xCEAA0000u, 72u}, // kvt -> Mymr
+    {0xD6AA0000u, 55u}, // kvv -> Latn
+    {0xDAAA0000u, 55u}, // kvw -> Latn
     {0xDEAA0000u,  2u}, // kvx -> Arab
-    {0x6B770000u, 46u}, // kw -> Latn
-    {0xA6CA0000u, 46u}, // kwj -> Latn
-    {0xAACA0000u, 46u}, // kwk -> Latn
-    {0xBACA0000u, 46u}, // kwo -> Latn
-    {0xC2CA0000u, 46u}, // kwq -> Latn
-    {0x82EA0000u, 46u}, // kxa -> Latn
-    {0x8AEA0000u, 21u}, // kxc -> Ethi
-    {0x92EA0000u, 46u}, // kxe -> Latn
-    {0xAEEA0000u, 19u}, // kxl -> Deva
-    {0xB2EA0000u, 93u}, // kxm -> Thai
+    {0xE2AA0000u, 43u}, // kvy -> Kali
+    {0xE6AA0000u, 55u}, // kvz -> Latn
+    {0x6B770000u, 55u}, // kw -> Latn
+    {0x82CA0000u, 55u}, // kwa -> Latn
+    {0x86CA0000u, 55u}, // kwb -> Latn
+    {0x8ACA0000u, 55u}, // kwc -> Latn
+    {0x8ECA0000u, 55u}, // kwd -> Latn
+    {0x92CA0000u, 55u}, // kwe -> Latn
+    {0x96CA0000u, 55u}, // kwf -> Latn
+    {0x9ACA0000u, 55u}, // kwg -> Latn
+    {0x9ECA0000u, 55u}, // kwh -> Latn
+    {0xA2CA0000u, 55u}, // kwi -> Latn
+    {0xA6CA0000u, 55u}, // kwj -> Latn
+    {0xAACA0000u, 55u}, // kwk -> Latn
+    {0xAECA0000u, 55u}, // kwl -> Latn
+    {0xB2CA0000u, 55u}, // kwm -> Latn
+    {0xB6CA0000u, 55u}, // kwn -> Latn
+    {0xBACA0000u, 55u}, // kwo -> Latn
+    {0xBECA0000u, 55u}, // kwp -> Latn
+    {0xC6CA0000u, 55u}, // kwr -> Latn
+    {0xCACA0000u, 55u}, // kws -> Latn
+    {0xCECA0000u, 55u}, // kwt -> Latn
+    {0xD2CA0000u, 55u}, // kwu -> Latn
+    {0xD6CA0000u, 55u}, // kwv -> Latn
+    {0xDACA0000u, 55u}, // kww -> Latn
+    {0xE2CA0000u, 55u}, // kwy -> Latn
+    {0xE6CA0000u, 55u}, // kwz -> Latn
+    {0x82EA0000u, 55u}, // kxa -> Latn
+    {0x86EA0000u, 55u}, // kxb -> Latn
+    {0x8AEA0000u, 55u}, // kxc -> Latn
+    {0x8EEA0000u, 55u}, // kxd -> Latn
+    {0x96EA0000u, 72u}, // kxf -> Mymr
+    {0xA2EA0000u, 55u}, // kxi -> Latn
+    {0xA6EA0000u, 55u}, // kxj -> Latn
+    {0xAAEA0000u, 72u}, // kxk -> Mymr
+    {0xB2EA0000u, 111u}, // kxm -> Thai
+    {0xB6EA0000u, 55u}, // kxn -> Latn
+    {0xBAEA0000u, 55u}, // kxo -> Latn
     {0xBEEA0000u,  2u}, // kxp -> Arab
-    {0xDAEA0000u, 46u}, // kxw -> Latn
-    {0xE6EA0000u, 46u}, // kxz -> Latn
-    {0x6B790000u, 18u}, // ky -> Cyrl
+    {0xC2EA0000u, 55u}, // kxq -> Latn
+    {0xC6EA0000u, 55u}, // kxr -> Latn
+    {0xCEEA0000u, 55u}, // kxt -> Latn
+    {0xD6EA0000u, 55u}, // kxv -> Latn
+    {0xDAEA0000u, 55u}, // kxw -> Latn
+    {0xDEEA0000u, 55u}, // kxx -> Latn
+    {0xE2EA0000u, 55u}, // kxy -> Latn
+    {0xE6EA0000u, 55u}, // kxz -> Latn
+    {0x6B790000u, 20u}, // ky -> Cyrl
     {0x6B79434Eu,  2u}, // ky-CN -> Arab
-    {0x6B795452u, 46u}, // ky-TR -> Latn
-    {0x930A0000u, 46u}, // kye -> Latn
-    {0xDF0A0000u, 46u}, // kyx -> Latn
-    {0x9F2A0000u,  2u}, // kzh -> Arab
-    {0xA72A0000u, 46u}, // kzj -> Latn
-    {0xC72A0000u, 46u}, // kzr -> Latn
-    {0xCF2A0000u, 46u}, // kzt -> Latn
-    {0x6C610000u, 46u}, // la -> Latn
-    {0x840B0000u, 48u}, // lab -> Lina
-    {0x8C0B0000u, 31u}, // lad -> Hebr
-    {0x980B0000u, 46u}, // lag -> Latn
+    {0x6B795452u, 55u}, // ky-TR -> Latn
+    {0x830A0000u, 55u}, // kya -> Latn
+    {0x870A0000u, 55u}, // kyb -> Latn
+    {0x8B0A0000u, 55u}, // kyc -> Latn
+    {0x8F0A0000u, 55u}, // kyd -> Latn
+    {0x930A0000u, 55u}, // kye -> Latn
+    {0x970A0000u, 55u}, // kyf -> Latn
+    {0x9B0A0000u, 55u}, // kyg -> Latn
+    {0x9F0A0000u, 55u}, // kyh -> Latn
+    {0xA30A0000u, 55u}, // kyi -> Latn
+    {0xA70A0000u, 55u}, // kyj -> Latn
+    {0xAB0A0000u, 55u}, // kyk -> Latn
+    {0xAF0A0000u, 55u}, // kyl -> Latn
+    {0xB30A0000u, 55u}, // kym -> Latn
+    {0xB70A0000u, 55u}, // kyn -> Latn
+    {0xBB0A0000u, 55u}, // kyo -> Latn
+    {0xC30A0000u, 55u}, // kyq -> Latn
+    {0xC70A0000u, 55u}, // kyr -> Latn
+    {0xCB0A0000u, 55u}, // kys -> Latn
+    {0xCF0A0000u, 55u}, // kyt -> Latn
+    {0xD30A0000u, 43u}, // kyu -> Kali
+    {0xD70A0000u, 21u}, // kyv -> Deva
+    {0xDB0A0000u, 21u}, // kyw -> Deva
+    {0xDF0A0000u, 55u}, // kyx -> Latn
+    {0xE30A0000u, 55u}, // kyy -> Latn
+    {0xE70A0000u, 55u}, // kyz -> Latn
+    {0x832A0000u, 55u}, // kza -> Latn
+    {0x872A0000u, 55u}, // kzb -> Latn
+    {0x8B2A0000u, 55u}, // kzc -> Latn
+    {0x8F2A0000u, 55u}, // kzd -> Latn
+    {0x932A0000u, 55u}, // kze -> Latn
+    {0x972A0000u, 55u}, // kzf -> Latn
+    {0xA32A0000u, 55u}, // kzi -> Latn
+    {0xAB2A0000u, 55u}, // kzk -> Latn
+    {0xAF2A0000u, 55u}, // kzl -> Latn
+    {0xB32A0000u, 55u}, // kzm -> Latn
+    {0xB72A0000u, 55u}, // kzn -> Latn
+    {0xBB2A0000u, 55u}, // kzo -> Latn
+    {0xBF2A0000u, 55u}, // kzp -> Latn
+    {0xC72A0000u, 55u}, // kzr -> Latn
+    {0xCB2A0000u, 55u}, // kzs -> Latn
+    {0xD32A0000u, 55u}, // kzu -> Latn
+    {0xD72A0000u, 55u}, // kzv -> Latn
+    {0xDB2A0000u, 55u}, // kzw -> Latn
+    {0xDF2A0000u, 55u}, // kzx -> Latn
+    {0xE32A0000u, 55u}, // kzy -> Latn
+    {0xE72A0000u, 55u}, // kzz -> Latn
+    {0x6C610000u, 55u}, // la -> Latn
+    {0x800B0000u, 55u}, // laa -> Latn
+    {0x840B0000u, 57u}, // lab -> Lina
+    {0x880B0000u, 55u}, // lac -> Latn
+    {0x8C0B0000u, 37u}, // lad -> Hebr
+    {0x900B0000u, 21u}, // lae -> Deva
+    {0x980B0000u, 55u}, // lag -> Latn
     {0x9C0B0000u,  2u}, // lah -> Arab
-    {0xA40B0000u, 46u}, // laj -> Latn
-    {0xC80B0000u, 46u}, // las -> Latn
-    {0x6C620000u, 46u}, // lb -> Latn
-    {0x902B0000u, 18u}, // lbe -> Cyrl
-    {0xD02B0000u, 46u}, // lbu -> Latn
-    {0xD82B0000u, 46u}, // lbw -> Latn
-    {0xB04B0000u, 46u}, // lcm -> Latn
-    {0xBC4B0000u, 93u}, // lcp -> Thai
-    {0x846B0000u, 46u}, // ldb -> Latn
-    {0x8C8B0000u, 46u}, // led -> Latn
-    {0x908B0000u, 46u}, // lee -> Latn
-    {0xB08B0000u, 46u}, // lem -> Latn
-    {0xBC8B0000u, 47u}, // lep -> Lepc
-    {0xC08B0000u, 46u}, // leq -> Latn
-    {0xD08B0000u, 46u}, // leu -> Latn
-    {0xE48B0000u, 18u}, // lez -> Cyrl
-    {0x6C670000u, 46u}, // lg -> Latn
-    {0x98CB0000u, 46u}, // lgg -> Latn
-    {0x6C690000u, 46u}, // li -> Latn
-    {0x810B0000u, 46u}, // lia -> Latn
-    {0x8D0B0000u, 46u}, // lid -> Latn
-    {0x950B0000u, 19u}, // lif -> Deva
-    {0x990B0000u, 46u}, // lig -> Latn
-    {0x9D0B0000u, 46u}, // lih -> Latn
-    {0xA50B0000u, 46u}, // lij -> Latn
-    {0xAD0B0000u, 46u}, // lil -> Latn
-    {0xC90B0000u, 49u}, // lis -> Lisu
-    {0xBD2B0000u, 46u}, // ljp -> Latn
+    {0xA00B0000u, 55u}, // lai -> Latn
+    {0xA40B0000u, 55u}, // laj -> Latn
+    {0xAC0B0000u, 55u}, // lal -> Latn
+    {0xB00B0000u, 55u}, // lam -> Latn
+    {0xB40B0000u, 55u}, // lan -> Latn
+    {0xBC0B0000u, 55u}, // lap -> Latn
+    {0xC00B0000u, 55u}, // laq -> Latn
+    {0xC40B0000u, 55u}, // lar -> Latn
+    {0xC80B0000u, 55u}, // las -> Latn
+    {0xD00B0000u, 55u}, // lau -> Latn
+    {0xD80B0000u, 55u}, // law -> Latn
+    {0xDC0B0000u, 55u}, // lax -> Latn
+    {0xE40B0000u, 55u}, // laz -> Latn
+    {0x6C620000u, 55u}, // lb -> Latn
+    {0x842B0000u, 55u}, // lbb -> Latn
+    {0x902B0000u, 20u}, // lbe -> Cyrl
+    {0x942B0000u, 21u}, // lbf -> Deva
+    {0xA02B0000u, 55u}, // lbi -> Latn
+    {0xA42B0000u, 112u}, // lbj -> Tibt
+    {0xAC2B0000u, 55u}, // lbl -> Latn
+    {0xB02B0000u, 21u}, // lbm -> Deva
+    {0xB42B0000u, 55u}, // lbn -> Latn
+    {0xB82B0000u, 52u}, // lbo -> Laoo
+    {0xC02B0000u, 55u}, // lbq -> Latn
+    {0xC42B0000u, 21u}, // lbr -> Deva
+    {0xCC2B0000u, 55u}, // lbt -> Latn
+    {0xD02B0000u, 55u}, // lbu -> Latn
+    {0xD42B0000u, 55u}, // lbv -> Latn
+    {0xD82B0000u, 55u}, // lbw -> Latn
+    {0xDC2B0000u, 55u}, // lbx -> Latn
+    {0xE02B0000u, 55u}, // lby -> Latn
+    {0xE42B0000u, 55u}, // lbz -> Latn
+    {0x884B0000u, 55u}, // lcc -> Latn
+    {0x8C4B0000u, 55u}, // lcd -> Latn
+    {0x904B0000u, 55u}, // lce -> Latn
+    {0x944B0000u, 55u}, // lcf -> Latn
+    {0x9C4B0000u, 55u}, // lch -> Latn
+    {0xAC4B0000u, 55u}, // lcl -> Latn
+    {0xB04B0000u, 55u}, // lcm -> Latn
+    {0xBC4B0000u, 111u}, // lcp -> Thai
+    {0xC04B0000u, 55u}, // lcq -> Latn
+    {0xC84B0000u, 55u}, // lcs -> Latn
+    {0x806B0000u, 55u}, // lda -> Latn
+    {0x846B0000u, 55u}, // ldb -> Latn
+    {0x8C6B0000u, 55u}, // ldd -> Latn
+    {0x986B0000u, 55u}, // ldg -> Latn
+    {0x9C6B0000u, 55u}, // ldh -> Latn
+    {0xA06B0000u, 55u}, // ldi -> Latn
+    {0xA46B0000u, 55u}, // ldj -> Latn
+    {0xA86B0000u, 55u}, // ldk -> Latn
+    {0xAC6B0000u, 55u}, // ldl -> Latn
+    {0xB06B0000u, 55u}, // ldm -> Latn
+    {0xB46B0000u, 55u}, // ldn -> Latn
+    {0xB86B0000u, 55u}, // ldo -> Latn
+    {0xBC6B0000u, 55u}, // ldp -> Latn
+    {0xC06B0000u, 55u}, // ldq -> Latn
+    {0x808B0000u, 55u}, // lea -> Latn
+    {0x848B0000u, 55u}, // leb -> Latn
+    {0x888B0000u, 55u}, // lec -> Latn
+    {0x8C8B0000u, 55u}, // led -> Latn
+    {0x908B0000u, 55u}, // lee -> Latn
+    {0x948B0000u, 55u}, // lef -> Latn
+    {0x9C8B0000u, 55u}, // leh -> Latn
+    {0xA08B0000u, 55u}, // lei -> Latn
+    {0xA48B0000u, 55u}, // lej -> Latn
+    {0xA88B0000u, 55u}, // lek -> Latn
+    {0xAC8B0000u, 55u}, // lel -> Latn
+    {0xB08B0000u, 55u}, // lem -> Latn
+    {0xB48B0000u, 55u}, // len -> Latn
+    {0xB88B0000u, 55u}, // leo -> Latn
+    {0xBC8B0000u, 56u}, // lep -> Lepc
+    {0xC08B0000u, 55u}, // leq -> Latn
+    {0xC48B0000u, 55u}, // ler -> Latn
+    {0xC88B0000u, 55u}, // les -> Latn
+    {0xCC8B0000u, 55u}, // let -> Latn
+    {0xD08B0000u, 55u}, // leu -> Latn
+    {0xD48B0000u, 55u}, // lev -> Latn
+    {0xD88B0000u, 55u}, // lew -> Latn
+    {0xDC8B0000u, 55u}, // lex -> Latn
+    {0xE08B0000u, 55u}, // ley -> Latn
+    {0xE48B0000u, 20u}, // lez -> Cyrl
+    {0x80AB0000u, 55u}, // lfa -> Latn
+    {0xB4AB0000u, 55u}, // lfn -> Latn
+    {0x6C670000u, 55u}, // lg -> Latn
+    {0x80CB0000u, 55u}, // lga -> Latn
+    {0x84CB0000u, 55u}, // lgb -> Latn
+    {0x98CB0000u, 55u}, // lgg -> Latn
+    {0x9CCB0000u, 55u}, // lgh -> Latn
+    {0xA0CB0000u, 55u}, // lgi -> Latn
+    {0xA8CB0000u, 55u}, // lgk -> Latn
+    {0xACCB0000u, 55u}, // lgl -> Latn
+    {0xB0CB0000u, 55u}, // lgm -> Latn
+    {0xB4CB0000u, 55u}, // lgn -> Latn
+    {0xB8CB0000u, 55u}, // lgo -> Latn
+    {0xC0CB0000u, 55u}, // lgq -> Latn
+    {0xC4CB0000u, 55u}, // lgr -> Latn
+    {0xCCCB0000u, 55u}, // lgt -> Latn
+    {0xD0CB0000u, 55u}, // lgu -> Latn
+    {0xE4CB0000u, 55u}, // lgz -> Latn
+    {0x80EB0000u, 55u}, // lha -> Latn
+    {0x9CEB0000u, 55u}, // lhh -> Latn
+    {0xA0EB0000u, 55u}, // lhi -> Latn
+    {0xB0EB0000u, 21u}, // lhm -> Deva
+    {0xB4EB0000u, 55u}, // lhn -> Latn
+    {0xC8EB0000u, 100u}, // lhs -> Syrc
+    {0xCCEB0000u, 55u}, // lht -> Latn
+    {0xD0EB0000u, 55u}, // lhu -> Latn
+    {0x6C690000u, 55u}, // li -> Latn
+    {0x810B0000u, 55u}, // lia -> Latn
+    {0x850B0000u, 55u}, // lib -> Latn
+    {0x890B0000u, 55u}, // lic -> Latn
+    {0x8D0B0000u, 55u}, // lid -> Latn
+    {0x910B0000u, 55u}, // lie -> Latn
+    {0x950B0000u, 21u}, // lif -> Deva
+    {0x990B0000u, 55u}, // lig -> Latn
+    {0x9D0B0000u, 55u}, // lih -> Latn
+    {0xA50B0000u, 55u}, // lij -> Latn
+    {0xA90B0000u, 55u}, // lik -> Latn
+    {0xAD0B0000u, 55u}, // lil -> Latn
+    {0xB90B0000u, 55u}, // lio -> Latn
+    {0xBD0B0000u, 55u}, // lip -> Latn
+    {0xC10B0000u, 55u}, // liq -> Latn
+    {0xC50B0000u, 55u}, // lir -> Latn
+    {0xC90B0000u, 59u}, // lis -> Lisu
+    {0xD10B0000u, 55u}, // liu -> Latn
+    {0xD50B0000u, 55u}, // liv -> Latn
+    {0xD90B0000u, 55u}, // liw -> Latn
+    {0xDD0B0000u, 55u}, // lix -> Latn
+    {0xE10B0000u, 55u}, // liy -> Latn
+    {0xE50B0000u, 55u}, // liz -> Latn
+    {0x812B0000u, 55u}, // lja -> Latn
+    {0x912B0000u, 55u}, // lje -> Latn
+    {0xA12B0000u, 55u}, // lji -> Latn
+    {0xAD2B0000u, 55u}, // ljl -> Latn
+    {0xBD2B0000u, 55u}, // ljp -> Latn
+    {0xD92B0000u, 55u}, // ljw -> Latn
+    {0xDD2B0000u, 55u}, // ljx -> Latn
+    {0x814B0000u, 55u}, // lka -> Latn
+    {0x854B0000u, 55u}, // lkb -> Latn
+    {0x894B0000u, 55u}, // lkc -> Latn
+    {0x8D4B0000u, 55u}, // lkd -> Latn
+    {0x914B0000u, 55u}, // lke -> Latn
+    {0x9D4B0000u, 112u}, // lkh -> Tibt
     {0xA14B0000u,  2u}, // lki -> Arab
-    {0xCD4B0000u, 46u}, // lkt -> Latn
-    {0x916B0000u, 46u}, // lle -> Latn
-    {0xB56B0000u, 46u}, // lln -> Latn
-    {0xB58B0000u, 90u}, // lmn -> Telu
-    {0xB98B0000u, 46u}, // lmo -> Latn
-    {0xBD8B0000u, 46u}, // lmp -> Latn
-    {0x6C6E0000u, 46u}, // ln -> Latn
-    {0xC9AB0000u, 46u}, // lns -> Latn
-    {0xD1AB0000u, 46u}, // lnu -> Latn
-    {0x6C6F0000u, 45u}, // lo -> Laoo
-    {0xA5CB0000u, 46u}, // loj -> Latn
-    {0xA9CB0000u, 46u}, // lok -> Latn
-    {0xADCB0000u, 46u}, // lol -> Latn
-    {0xC5CB0000u, 46u}, // lor -> Latn
-    {0xC9CB0000u, 46u}, // los -> Latn
-    {0xE5CB0000u, 46u}, // loz -> Latn
+    {0xA54B0000u, 55u}, // lkj -> Latn
+    {0xAD4B0000u, 55u}, // lkl -> Latn
+    {0xB14B0000u, 55u}, // lkm -> Latn
+    {0xB54B0000u, 55u}, // lkn -> Latn
+    {0xB94B0000u, 55u}, // lko -> Latn
+    {0xC54B0000u, 55u}, // lkr -> Latn
+    {0xC94B0000u, 55u}, // lks -> Latn
+    {0xCD4B0000u, 55u}, // lkt -> Latn
+    {0xD14B0000u, 55u}, // lku -> Latn
+    {0xE14B0000u, 55u}, // lky -> Latn
+    {0x816B0000u, 55u}, // lla -> Latn
+    {0x856B0000u, 55u}, // llb -> Latn
+    {0x896B0000u, 55u}, // llc -> Latn
+    {0x8D6B0000u, 55u}, // lld -> Latn
+    {0x916B0000u, 55u}, // lle -> Latn
+    {0x956B0000u, 55u}, // llf -> Latn
+    {0x996B0000u, 55u}, // llg -> Latn
+    {0xA16B0000u, 55u}, // lli -> Latn
+    {0xA56B0000u, 55u}, // llj -> Latn
+    {0xA96B0000u, 55u}, // llk -> Latn
+    {0xAD6B0000u, 55u}, // lll -> Latn
+    {0xB16B0000u, 55u}, // llm -> Latn
+    {0xB56B0000u, 55u}, // lln -> Latn
+    {0xBD6B0000u, 55u}, // llp -> Latn
+    {0xC16B0000u, 55u}, // llq -> Latn
+    {0xD16B0000u, 55u}, // llu -> Latn
+    {0xDD6B0000u, 55u}, // llx -> Latn
+    {0x818B0000u, 55u}, // lma -> Latn
+    {0x858B0000u, 55u}, // lmb -> Latn
+    {0x898B0000u, 55u}, // lmc -> Latn
+    {0x8D8B0000u, 55u}, // lmd -> Latn
+    {0x918B0000u, 55u}, // lme -> Latn
+    {0x958B0000u, 55u}, // lmf -> Latn
+    {0x998B0000u, 55u}, // lmg -> Latn
+    {0x9D8B0000u, 21u}, // lmh -> Deva
+    {0xA18B0000u, 55u}, // lmi -> Latn
+    {0xA58B0000u, 55u}, // lmj -> Latn
+    {0xA98B0000u, 55u}, // lmk -> Latn
+    {0xAD8B0000u, 55u}, // lml -> Latn
+    {0xB58B0000u, 108u}, // lmn -> Telu
+    {0xB98B0000u, 55u}, // lmo -> Latn
+    {0xBD8B0000u, 55u}, // lmp -> Latn
+    {0xC18B0000u, 55u}, // lmq -> Latn
+    {0xC58B0000u, 55u}, // lmr -> Latn
+    {0xD18B0000u, 55u}, // lmu -> Latn
+    {0xD58B0000u, 55u}, // lmv -> Latn
+    {0xD98B0000u, 55u}, // lmw -> Latn
+    {0xDD8B0000u, 55u}, // lmx -> Latn
+    {0xE18B0000u, 55u}, // lmy -> Latn
+    {0x6C6E0000u, 55u}, // ln -> Latn
+    {0x81AB0000u, 55u}, // lna -> Latn
+    {0x85AB0000u, 55u}, // lnb -> Latn
+    {0x8DAB0000u, 55u}, // lnd -> Latn
+    {0x99AB0000u, 55u}, // lng -> Latn
+    {0x9DAB0000u, 55u}, // lnh -> Latn
+    {0xA1AB0000u, 55u}, // lni -> Latn
+    {0xA5AB0000u, 55u}, // lnj -> Latn
+    {0xADAB0000u, 55u}, // lnl -> Latn
+    {0xB1AB0000u, 55u}, // lnm -> Latn
+    {0xB5AB0000u, 55u}, // lnn -> Latn
+    {0xC9AB0000u, 55u}, // lns -> Latn
+    {0xD1AB0000u, 55u}, // lnu -> Latn
+    {0xD9AB0000u, 55u}, // lnw -> Latn
+    {0xE5AB0000u, 55u}, // lnz -> Latn
+    {0x6C6F0000u, 52u}, // lo -> Laoo
+    {0x81CB0000u, 55u}, // loa -> Latn
+    {0x85CB0000u, 55u}, // lob -> Latn
+    {0x89CB0000u, 55u}, // loc -> Latn
+    {0x91CB0000u, 55u}, // loe -> Latn
+    {0x99CB0000u, 55u}, // log -> Latn
+    {0x9DCB0000u, 55u}, // loh -> Latn
+    {0xA1CB0000u, 55u}, // loi -> Latn
+    {0xA5CB0000u, 55u}, // loj -> Latn
+    {0xA9CB0000u, 55u}, // lok -> Latn
+    {0xADCB0000u, 55u}, // lol -> Latn
+    {0xB1CB0000u, 55u}, // lom -> Latn
+    {0xB5CB0000u, 55u}, // lon -> Latn
+    {0xB9CB0000u, 55u}, // loo -> Latn
+    {0xBDCB0000u, 55u}, // lop -> Latn
+    {0xC1CB0000u, 55u}, // loq -> Latn
+    {0xC5CB0000u, 55u}, // lor -> Latn
+    {0xC9CB0000u, 55u}, // los -> Latn
+    {0xCDCB0000u, 55u}, // lot -> Latn
+    {0xD1CB0000u, 55u}, // lou -> Latn
+    {0xD9CB0000u, 55u}, // low -> Latn
+    {0xDDCB0000u, 55u}, // lox -> Latn
+    {0xE1CB0000u, 21u}, // loy -> Deva
+    {0xE5CB0000u, 55u}, // loz -> Latn
+    {0x81EB0000u, 55u}, // lpa -> Latn
+    {0x91EB0000u, 55u}, // lpe -> Latn
+    {0xB5EB0000u, 55u}, // lpn -> Latn
+    {0xB9EB0000u, 86u}, // lpo -> Plrd
+    {0xDDEB0000u, 55u}, // lpx -> Latn
+    {0xC60B0000u, 55u}, // lqr -> Latn
+    {0x822B0000u, 55u}, // lra -> Latn
     {0x8A2B0000u,  2u}, // lrc -> Arab
-    {0x6C740000u, 46u}, // lt -> Latn
-    {0x9A6B0000u, 46u}, // ltg -> Latn
-    {0x6C750000u, 46u}, // lu -> Latn
-    {0x828B0000u, 46u}, // lua -> Latn
-    {0xBA8B0000u, 46u}, // luo -> Latn
-    {0xE28B0000u, 46u}, // luy -> Latn
+    {0x9A2B0000u, 55u}, // lrg -> Latn
+    {0xA22B0000u, 55u}, // lri -> Latn
+    {0xAA2B0000u,  2u}, // lrk -> Arab
+    {0xAE2B0000u,  2u}, // lrl -> Arab
+    {0xB22B0000u, 55u}, // lrm -> Latn
+    {0xB62B0000u, 55u}, // lrn -> Latn
+    {0xBA2B0000u, 55u}, // lro -> Latn
+    {0xCE2B0000u, 55u}, // lrt -> Latn
+    {0xD62B0000u, 55u}, // lrv -> Latn
+    {0xE62B0000u, 55u}, // lrz -> Latn
+    {0x824B0000u,  2u}, // lsa -> Arab
+    {0x8E4B0000u, 37u}, // lsd -> Hebr
+    {0x924B0000u, 55u}, // lse -> Latn
+    {0xA24B0000u, 55u}, // lsi -> Latn
+    {0xB24B0000u, 55u}, // lsm -> Latn
+    {0xC64B0000u, 55u}, // lsr -> Latn
+    {0xCA4B0000u,  2u}, // lss -> Arab
+    {0x6C740000u, 55u}, // lt -> Latn
+    {0x8A6B0000u, 36u}, // ltc -> Hant
+    {0x9A6B0000u, 55u}, // ltg -> Latn
+    {0x9E6B0000u, 55u}, // lth -> Latn
+    {0xA26B0000u, 55u}, // lti -> Latn
+    {0xB66B0000u, 55u}, // ltn -> Latn
+    {0xBA6B0000u, 55u}, // lto -> Latn
+    {0xCA6B0000u, 55u}, // lts -> Latn
+    {0xD26B0000u, 55u}, // ltu -> Latn
+    {0x6C750000u, 55u}, // lu -> Latn
+    {0x828B0000u, 55u}, // lua -> Latn
+    {0x8A8B0000u, 55u}, // luc -> Latn
+    {0x8E8B0000u, 55u}, // lud -> Latn
+    {0x928B0000u, 55u}, // lue -> Latn
+    {0x968B0000u, 55u}, // luf -> Latn
+    {0xA28B0000u, 55u}, // lui -> Latn
+    {0xA68B0000u, 55u}, // luj -> Latn
+    {0xAA8B0000u, 112u}, // luk -> Tibt
+    {0xAE8B0000u, 55u}, // lul -> Latn
+    {0xB28B0000u, 55u}, // lum -> Latn
+    {0xB68B0000u, 55u}, // lun -> Latn
+    {0xBA8B0000u, 55u}, // luo -> Latn
+    {0xBE8B0000u, 55u}, // lup -> Latn
+    {0xC28B0000u, 55u}, // luq -> Latn
+    {0xC68B0000u, 55u}, // lur -> Latn
+    {0xCA8B0000u, 55u}, // lus -> Latn
+    {0xCE8B0000u, 55u}, // lut -> Latn
+    {0xD28B0000u, 21u}, // luu -> Deva
+    {0xD68B0000u,  2u}, // luv -> Arab
+    {0xDA8B0000u, 55u}, // luw -> Latn
+    {0xE28B0000u, 55u}, // luy -> Latn
     {0xE68B0000u,  2u}, // luz -> Arab
-    {0x6C760000u, 46u}, // lv -> Latn
-    {0xAECB0000u, 93u}, // lwl -> Thai
-    {0x9F2B0000u, 29u}, // lzh -> Hans
-    {0xE72B0000u, 46u}, // lzz -> Latn
-    {0x8C0C0000u, 46u}, // mad -> Latn
-    {0x940C0000u, 46u}, // maf -> Latn
-    {0x980C0000u, 19u}, // mag -> Deva
-    {0xA00C0000u, 19u}, // mai -> Deva
-    {0xA80C0000u, 46u}, // mak -> Latn
-    {0xB40C0000u, 46u}, // man -> Latn
-    {0xB40C474Eu, 61u}, // man-GN -> Nkoo
-    {0xC80C0000u, 46u}, // mas -> Latn
-    {0xD80C0000u, 46u}, // maw -> Latn
-    {0xE40C0000u, 46u}, // maz -> Latn
-    {0x9C2C0000u, 46u}, // mbh -> Latn
-    {0xB82C0000u, 46u}, // mbo -> Latn
-    {0xC02C0000u, 46u}, // mbq -> Latn
-    {0xD02C0000u, 46u}, // mbu -> Latn
-    {0xD82C0000u, 46u}, // mbw -> Latn
-    {0xA04C0000u, 46u}, // mci -> Latn
-    {0xBC4C0000u, 46u}, // mcp -> Latn
-    {0xC04C0000u, 46u}, // mcq -> Latn
-    {0xC44C0000u, 46u}, // mcr -> Latn
-    {0xD04C0000u, 46u}, // mcu -> Latn
-    {0x806C0000u, 46u}, // mda -> Latn
+    {0x6C760000u, 55u}, // lv -> Latn
+    {0x82AB0000u, 55u}, // lva -> Latn
+    {0xA2AB0000u, 55u}, // lvi -> Latn
+    {0xAAAB0000u, 55u}, // lvk -> Latn
+    {0xAEAB0000u, 55u}, // lvl -> Latn
+    {0xD2AB0000u, 55u}, // lvu -> Latn
+    {0x82CB0000u, 55u}, // lwa -> Latn
+    {0x92CB0000u, 55u}, // lwe -> Latn
+    {0x9ACB0000u, 55u}, // lwg -> Latn
+    {0x9ECB0000u, 55u}, // lwh -> Latn
+    {0xAECB0000u, 111u}, // lwl -> Thai
+    {0xB2CB0000u, 111u}, // lwm -> Thai
+    {0xBACB0000u, 55u}, // lwo -> Latn
+    {0xCECB0000u, 55u}, // lwt -> Latn
+    {0xDACB0000u, 55u}, // lww -> Latn
+    {0xB2EB0000u, 55u}, // lxm -> Latn
+    {0x830B0000u, 112u}, // lya -> Tibt
+    {0xB70B0000u, 55u}, // lyn -> Latn
+    {0x9F2B0000u, 35u}, // lzh -> Hans
+    {0xAF2B0000u, 55u}, // lzl -> Latn
+    {0xB72B0000u, 55u}, // lzn -> Latn
+    {0xE72B0000u, 55u}, // lzz -> Latn
+    {0x800C0000u, 55u}, // maa -> Latn
+    {0x840C0000u, 55u}, // mab -> Latn
+    {0x8C0C0000u, 55u}, // mad -> Latn
+    {0x900C0000u, 55u}, // mae -> Latn
+    {0x940C0000u, 55u}, // maf -> Latn
+    {0x980C0000u, 21u}, // mag -> Deva
+    {0xA00C0000u, 21u}, // mai -> Deva
+    {0xA40C0000u, 55u}, // maj -> Latn
+    {0xA80C0000u, 55u}, // mak -> Latn
+    {0xB00C0000u, 55u}, // mam -> Latn
+    {0xB40C0000u, 55u}, // man -> Latn
+    {0xB40C474Eu, 75u}, // man-GN -> Nkoo
+    {0xC00C0000u, 55u}, // maq -> Latn
+    {0xC80C0000u, 55u}, // mas -> Latn
+    {0xCC0C0000u, 55u}, // mat -> Latn
+    {0xD00C0000u, 55u}, // mau -> Latn
+    {0xD40C0000u, 55u}, // mav -> Latn
+    {0xD80C0000u, 55u}, // maw -> Latn
+    {0xDC0C0000u, 55u}, // max -> Latn
+    {0xE40C0000u, 55u}, // maz -> Latn
+    {0x802C0000u, 55u}, // mba -> Latn
+    {0x842C0000u, 55u}, // mbb -> Latn
+    {0x882C0000u, 55u}, // mbc -> Latn
+    {0x8C2C0000u, 55u}, // mbd -> Latn
+    {0x942C0000u, 55u}, // mbf -> Latn
+    {0x9C2C0000u, 55u}, // mbh -> Latn
+    {0xA02C0000u, 55u}, // mbi -> Latn
+    {0xA42C0000u, 55u}, // mbj -> Latn
+    {0xA82C0000u, 55u}, // mbk -> Latn
+    {0xAC2C0000u, 55u}, // mbl -> Latn
+    {0xB02C0000u, 55u}, // mbm -> Latn
+    {0xB42C0000u, 55u}, // mbn -> Latn
+    {0xB82C0000u, 55u}, // mbo -> Latn
+    {0xBC2C0000u, 55u}, // mbp -> Latn
+    {0xC02C0000u, 55u}, // mbq -> Latn
+    {0xC42C0000u, 55u}, // mbr -> Latn
+    {0xC82C0000u, 55u}, // mbs -> Latn
+    {0xCC2C0000u, 55u}, // mbt -> Latn
+    {0xD02C0000u, 55u}, // mbu -> Latn
+    {0xD42C0000u, 55u}, // mbv -> Latn
+    {0xD82C0000u, 55u}, // mbw -> Latn
+    {0xDC2C0000u, 55u}, // mbx -> Latn
+    {0xE02C0000u,  2u}, // mby -> Arab
+    {0xE42C0000u, 55u}, // mbz -> Latn
+    {0x804C0000u, 55u}, // mca -> Latn
+    {0x844C0000u, 55u}, // mcb -> Latn
+    {0x884C0000u, 55u}, // mcc -> Latn
+    {0x8C4C0000u, 55u}, // mcd -> Latn
+    {0x904C0000u, 55u}, // mce -> Latn
+    {0x944C0000u, 55u}, // mcf -> Latn
+    {0x984C0000u, 55u}, // mcg -> Latn
+    {0x9C4C0000u, 55u}, // mch -> Latn
+    {0xA04C0000u, 55u}, // mci -> Latn
+    {0xA44C0000u, 55u}, // mcj -> Latn
+    {0xA84C0000u, 55u}, // mck -> Latn
+    {0xAC4C0000u, 55u}, // mcl -> Latn
+    {0xB04C0000u, 55u}, // mcm -> Latn
+    {0xB44C0000u, 55u}, // mcn -> Latn
+    {0xB84C0000u, 55u}, // mco -> Latn
+    {0xBC4C0000u, 55u}, // mcp -> Latn
+    {0xC04C0000u, 55u}, // mcq -> Latn
+    {0xC44C0000u, 55u}, // mcr -> Latn
+    {0xC84C0000u, 55u}, // mcs -> Latn
+    {0xCC4C0000u, 55u}, // mct -> Latn
+    {0xD04C0000u, 55u}, // mcu -> Latn
+    {0xD44C0000u, 55u}, // mcv -> Latn
+    {0xD84C0000u, 55u}, // mcw -> Latn
+    {0xDC4C0000u, 55u}, // mcx -> Latn
+    {0xE04C0000u, 55u}, // mcy -> Latn
+    {0xE44C0000u, 55u}, // mcz -> Latn
+    {0x806C0000u, 55u}, // mda -> Latn
+    {0x846C0000u, 55u}, // mdb -> Latn
+    {0x886C0000u, 55u}, // mdc -> Latn
+    {0x8C6C0000u, 55u}, // mdd -> Latn
     {0x906C0000u,  2u}, // mde -> Arab
-    {0x946C0000u, 18u}, // mdf -> Cyrl
-    {0x9C6C0000u, 46u}, // mdh -> Latn
-    {0xA46C0000u, 46u}, // mdj -> Latn
-    {0xC46C0000u, 46u}, // mdr -> Latn
-    {0xDC6C0000u, 21u}, // mdx -> Ethi
-    {0x8C8C0000u, 46u}, // med -> Latn
-    {0x908C0000u, 46u}, // mee -> Latn
-    {0xA88C0000u, 46u}, // mek -> Latn
-    {0xB48C0000u, 46u}, // men -> Latn
-    {0xC48C0000u, 46u}, // mer -> Latn
-    {0xCC8C0000u, 46u}, // met -> Latn
-    {0xD08C0000u, 46u}, // meu -> Latn
+    {0x946C0000u, 20u}, // mdf -> Cyrl
+    {0x986C0000u, 55u}, // mdg -> Latn
+    {0x9C6C0000u, 55u}, // mdh -> Latn
+    {0xA06C0000u, 55u}, // mdi -> Latn
+    {0xA46C0000u, 55u}, // mdj -> Latn
+    {0xA86C0000u, 55u}, // mdk -> Latn
+    {0xB06C0000u, 55u}, // mdm -> Latn
+    {0xB46C0000u, 55u}, // mdn -> Latn
+    {0xBC6C0000u, 55u}, // mdp -> Latn
+    {0xC06C0000u, 55u}, // mdq -> Latn
+    {0xC46C0000u, 55u}, // mdr -> Latn
+    {0xC86C0000u, 55u}, // mds -> Latn
+    {0xCC6C0000u, 55u}, // mdt -> Latn
+    {0xD06C0000u, 55u}, // mdu -> Latn
+    {0xD46C0000u, 55u}, // mdv -> Latn
+    {0xD86C0000u, 55u}, // mdw -> Latn
+    {0xDC6C0000u, 24u}, // mdx -> Ethi
+    {0xE06C0000u, 24u}, // mdy -> Ethi
+    {0xE46C0000u, 55u}, // mdz -> Latn
+    {0x808C0000u, 55u}, // mea -> Latn
+    {0x848C0000u, 55u}, // meb -> Latn
+    {0x888C0000u, 55u}, // mec -> Latn
+    {0x8C8C0000u, 55u}, // med -> Latn
+    {0x908C0000u, 55u}, // mee -> Latn
+    {0x9C8C0000u, 55u}, // meh -> Latn
+    {0xA48C0000u, 55u}, // mej -> Latn
+    {0xA88C0000u, 55u}, // mek -> Latn
+    {0xAC8C0000u, 55u}, // mel -> Latn
+    {0xB08C0000u, 55u}, // mem -> Latn
+    {0xB48C0000u, 55u}, // men -> Latn
+    {0xB88C0000u, 55u}, // meo -> Latn
+    {0xBC8C0000u, 55u}, // mep -> Latn
+    {0xC08C0000u, 55u}, // meq -> Latn
+    {0xC48C0000u, 55u}, // mer -> Latn
+    {0xC88C0000u, 55u}, // mes -> Latn
+    {0xCC8C0000u, 55u}, // met -> Latn
+    {0xD08C0000u, 55u}, // meu -> Latn
+    {0xD48C0000u, 55u}, // mev -> Latn
+    {0xD88C0000u, 55u}, // mew -> Latn
+    {0xE08C0000u, 55u}, // mey -> Latn
+    {0xE48C0000u, 55u}, // mez -> Latn
     {0x80AC0000u,  2u}, // mfa -> Arab
-    {0x90AC0000u, 46u}, // mfe -> Latn
-    {0xB4AC0000u, 46u}, // mfn -> Latn
-    {0xB8AC0000u, 46u}, // mfo -> Latn
-    {0xC0AC0000u, 46u}, // mfq -> Latn
-    {0x6D670000u, 46u}, // mg -> Latn
-    {0x9CCC0000u, 46u}, // mgh -> Latn
-    {0xACCC0000u, 46u}, // mgl -> Latn
-    {0xB8CC0000u, 46u}, // mgo -> Latn
-    {0xBCCC0000u, 19u}, // mgp -> Deva
-    {0xE0CC0000u, 46u}, // mgy -> Latn
-    {0x6D680000u, 46u}, // mh -> Latn
-    {0xA0EC0000u, 46u}, // mhi -> Latn
-    {0xACEC0000u, 46u}, // mhl -> Latn
-    {0x6D690000u, 46u}, // mi -> Latn
-    {0x890C0000u, 46u}, // mic -> Latn
-    {0x950C0000u, 46u}, // mif -> Latn
-    {0xB50C0000u, 46u}, // min -> Latn
-    {0xD90C0000u, 46u}, // miw -> Latn
-    {0x6D6B0000u, 18u}, // mk -> Cyrl
+    {0x84AC0000u, 55u}, // mfb -> Latn
+    {0x88AC0000u, 55u}, // mfc -> Latn
+    {0x8CAC0000u, 55u}, // mfd -> Latn
+    {0x90AC0000u, 55u}, // mfe -> Latn
+    {0x94AC0000u, 55u}, // mff -> Latn
+    {0x98AC0000u, 55u}, // mfg -> Latn
+    {0x9CAC0000u, 55u}, // mfh -> Latn
+    {0xA0AC0000u,  2u}, // mfi -> Arab
+    {0xA4AC0000u, 55u}, // mfj -> Latn
+    {0xA8AC0000u, 55u}, // mfk -> Latn
+    {0xACAC0000u, 55u}, // mfl -> Latn
+    {0xB0AC0000u, 55u}, // mfm -> Latn
+    {0xB4AC0000u, 55u}, // mfn -> Latn
+    {0xB8AC0000u, 55u}, // mfo -> Latn
+    {0xBCAC0000u, 55u}, // mfp -> Latn
+    {0xC0AC0000u, 55u}, // mfq -> Latn
+    {0xC4AC0000u, 55u}, // mfr -> Latn
+    {0xCCAC0000u, 55u}, // mft -> Latn
+    {0xD0AC0000u, 55u}, // mfu -> Latn
+    {0xD4AC0000u, 55u}, // mfv -> Latn
+    {0xD8AC0000u, 55u}, // mfw -> Latn
+    {0xDCAC0000u, 55u}, // mfx -> Latn
+    {0xE0AC0000u, 55u}, // mfy -> Latn
+    {0xE4AC0000u, 55u}, // mfz -> Latn
+    {0x6D670000u, 55u}, // mg -> Latn
+    {0x80CC0000u, 54u}, // mga -> Latg
+    {0x84CC0000u, 55u}, // mgb -> Latn
+    {0x88CC0000u, 55u}, // mgc -> Latn
+    {0x8CCC0000u, 55u}, // mgd -> Latn
+    {0x90CC0000u, 55u}, // mge -> Latn
+    {0x94CC0000u, 55u}, // mgf -> Latn
+    {0x98CC0000u, 55u}, // mgg -> Latn
+    {0x9CCC0000u, 55u}, // mgh -> Latn
+    {0xA0CC0000u, 55u}, // mgi -> Latn
+    {0xA4CC0000u, 55u}, // mgj -> Latn
+    {0xA8CC0000u, 55u}, // mgk -> Latn
+    {0xACCC0000u, 55u}, // mgl -> Latn
+    {0xB0CC0000u, 55u}, // mgm -> Latn
+    {0xB4CC0000u, 55u}, // mgn -> Latn
+    {0xB8CC0000u, 55u}, // mgo -> Latn
+    {0xBCCC0000u, 21u}, // mgp -> Deva
+    {0xC0CC0000u, 55u}, // mgq -> Latn
+    {0xC4CC0000u, 55u}, // mgr -> Latn
+    {0xC8CC0000u, 55u}, // mgs -> Latn
+    {0xCCCC0000u, 55u}, // mgt -> Latn
+    {0xD0CC0000u, 55u}, // mgu -> Latn
+    {0xD4CC0000u, 55u}, // mgv -> Latn
+    {0xD8CC0000u, 55u}, // mgw -> Latn
+    {0xE0CC0000u, 55u}, // mgy -> Latn
+    {0xE4CC0000u, 55u}, // mgz -> Latn
+    {0x6D680000u, 55u}, // mh -> Latn
+    {0x84EC0000u, 55u}, // mhb -> Latn
+    {0x88EC0000u, 55u}, // mhc -> Latn
+    {0x8CEC0000u, 55u}, // mhd -> Latn
+    {0x90EC0000u, 55u}, // mhe -> Latn
+    {0x94EC0000u, 55u}, // mhf -> Latn
+    {0x98EC0000u, 55u}, // mhg -> Latn
+    {0xA0EC0000u, 55u}, // mhi -> Latn
+    {0xA4EC0000u,  2u}, // mhj -> Arab
+    {0xA8EC0000u, 55u}, // mhk -> Latn
+    {0xACEC0000u, 55u}, // mhl -> Latn
+    {0xB0EC0000u, 55u}, // mhm -> Latn
+    {0xB4EC0000u, 55u}, // mhn -> Latn
+    {0xB8EC0000u, 55u}, // mho -> Latn
+    {0xBCEC0000u, 55u}, // mhp -> Latn
+    {0xC0EC0000u, 55u}, // mhq -> Latn
+    {0xC8EC0000u, 55u}, // mhs -> Latn
+    {0xCCEC0000u, 55u}, // mht -> Latn
+    {0xD0EC0000u, 55u}, // mhu -> Latn
+    {0xD8EC0000u, 55u}, // mhw -> Latn
+    {0xDCEC0000u, 55u}, // mhx -> Latn
+    {0xE0EC0000u, 55u}, // mhy -> Latn
+    {0xE4EC0000u, 55u}, // mhz -> Latn
+    {0x6D690000u, 55u}, // mi -> Latn
+    {0x810C0000u, 55u}, // mia -> Latn
+    {0x850C0000u, 55u}, // mib -> Latn
+    {0x890C0000u, 55u}, // mic -> Latn
+    {0x8D0C0000u, 62u}, // mid -> Mand
+    {0x910C0000u, 55u}, // mie -> Latn
+    {0x950C0000u, 55u}, // mif -> Latn
+    {0x990C0000u, 55u}, // mig -> Latn
+    {0x9D0C0000u, 55u}, // mih -> Latn
+    {0xA10C0000u, 55u}, // mii -> Latn
+    {0xA50C0000u, 55u}, // mij -> Latn
+    {0xA90C0000u, 55u}, // mik -> Latn
+    {0xAD0C0000u, 55u}, // mil -> Latn
+    {0xB10C0000u, 55u}, // mim -> Latn
+    {0xB50C0000u, 55u}, // min -> Latn
+    {0xB90C0000u, 55u}, // mio -> Latn
+    {0xBD0C0000u, 55u}, // mip -> Latn
+    {0xC10C0000u, 55u}, // miq -> Latn
+    {0xC50C0000u, 55u}, // mir -> Latn
+    {0xCD0C0000u, 55u}, // mit -> Latn
+    {0xD10C0000u, 55u}, // miu -> Latn
+    {0xD90C0000u, 55u}, // miw -> Latn
+    {0xDD0C0000u, 55u}, // mix -> Latn
+    {0xE10C0000u, 55u}, // miy -> Latn
+    {0xE50C0000u, 55u}, // miz -> Latn
+    {0x852C0000u, 55u}, // mjb -> Latn
+    {0x892C0000u, 55u}, // mjc -> Latn
+    {0x8D2C0000u, 55u}, // mjd -> Latn
+    {0x912C0000u, 55u}, // mje -> Latn
+    {0x992C0000u, 55u}, // mjg -> Latn
+    {0x9D2C0000u, 55u}, // mjh -> Latn
+    {0xA12C0000u, 55u}, // mji -> Latn
+    {0xA52C0000u, 55u}, // mjj -> Latn
+    {0xA92C0000u, 55u}, // mjk -> Latn
+    {0xAD2C0000u, 21u}, // mjl -> Deva
+    {0xB12C0000u, 55u}, // mjm -> Latn
+    {0xB52C0000u, 55u}, // mjn -> Latn
+    {0xC12C0000u, 67u}, // mjq -> Mlym
+    {0xC52C0000u, 67u}, // mjr -> Mlym
+    {0xC92C0000u, 55u}, // mjs -> Latn
+    {0xCD2C0000u, 21u}, // mjt -> Deva
+    {0xD12C0000u, 108u}, // mju -> Telu
+    {0xD52C0000u, 67u}, // mjv -> Mlym
+    {0xD92C0000u, 55u}, // mjw -> Latn
+    {0xDD2C0000u, 55u}, // mjx -> Latn
+    {0xE12C0000u, 55u}, // mjy -> Latn
+    {0xE52C0000u, 21u}, // mjz -> Deva
+    {0x6D6B0000u, 20u}, // mk -> Cyrl
+    {0x814C0000u, 55u}, // mka -> Latn
+    {0x854C0000u, 21u}, // mkb -> Deva
+    {0x894C0000u, 55u}, // mkc -> Latn
+    {0x914C0000u, 21u}, // mke -> Deva
+    {0x954C0000u, 55u}, // mkf -> Latn
     {0xA14C0000u,  2u}, // mki -> Arab
-    {0xAD4C0000u, 46u}, // mkl -> Latn
-    {0xBD4C0000u, 46u}, // mkp -> Latn
-    {0xD94C0000u, 46u}, // mkw -> Latn
-    {0x6D6C0000u, 56u}, // ml -> Mlym
-    {0x916C0000u, 46u}, // mle -> Latn
-    {0xBD6C0000u, 46u}, // mlp -> Latn
-    {0xC96C0000u, 46u}, // mls -> Latn
-    {0xB98C0000u, 46u}, // mmo -> Latn
-    {0xD18C0000u, 46u}, // mmu -> Latn
-    {0xDD8C0000u, 46u}, // mmx -> Latn
-    {0x6D6E0000u, 18u}, // mn -> Cyrl
-    {0x6D6E434Eu, 57u}, // mn-CN -> Mong
-    {0x81AC0000u, 46u}, // mna -> Latn
-    {0x95AC0000u, 46u}, // mnf -> Latn
-    {0xA1AC0000u,  8u}, // mni -> Beng
-    {0xD9AC0000u, 59u}, // mnw -> Mymr
-    {0x6D6F0000u, 46u}, // mo -> Latn
-    {0x81CC0000u, 46u}, // moa -> Latn
-    {0x91CC0000u, 46u}, // moe -> Latn
-    {0x9DCC0000u, 46u}, // moh -> Latn
-    {0xC9CC0000u, 46u}, // mos -> Latn
-    {0xDDCC0000u, 46u}, // mox -> Latn
-    {0xBDEC0000u, 46u}, // mpp -> Latn
-    {0xC9EC0000u, 46u}, // mps -> Latn
-    {0xCDEC0000u, 46u}, // mpt -> Latn
-    {0xDDEC0000u, 46u}, // mpx -> Latn
-    {0xAE0C0000u, 46u}, // mql -> Latn
-    {0x6D720000u, 19u}, // mr -> Deva
-    {0x8E2C0000u, 19u}, // mrd -> Deva
-    {0xA62C0000u, 18u}, // mrj -> Cyrl
-    {0xBA2C0000u, 58u}, // mro -> Mroo
-    {0x6D730000u, 46u}, // ms -> Latn
+    {0xA54C0000u, 55u}, // mkj -> Latn
+    {0xA94C0000u, 55u}, // mkk -> Latn
+    {0xAD4C0000u, 55u}, // mkl -> Latn
+    {0xB14C0000u, 111u}, // mkm -> Thai
+    {0xB54C0000u, 55u}, // mkn -> Latn
+    {0xB94C0000u, 55u}, // mko -> Latn
+    {0xBD4C0000u, 55u}, // mkp -> Latn
+    {0xC54C0000u, 55u}, // mkr -> Latn
+    {0xC94C0000u, 55u}, // mks -> Latn
+    {0xCD4C0000u, 55u}, // mkt -> Latn
+    {0xD14C0000u, 55u}, // mku -> Latn
+    {0xD54C0000u, 55u}, // mkv -> Latn
+    {0xD94C0000u, 55u}, // mkw -> Latn
+    {0xDD4C0000u, 55u}, // mkx -> Latn
+    {0xE14C0000u, 55u}, // mky -> Latn
+    {0xE54C0000u, 55u}, // mkz -> Latn
+    {0x6D6C0000u, 67u}, // ml -> Mlym
+    {0x816C0000u, 55u}, // mla -> Latn
+    {0x856C0000u, 55u}, // mlb -> Latn
+    {0x896C0000u, 55u}, // mlc -> Latn
+    {0x916C0000u, 55u}, // mle -> Latn
+    {0x956C0000u, 111u}, // mlf -> Thai
+    {0x9D6C0000u, 55u}, // mlh -> Latn
+    {0xA16C0000u, 55u}, // mli -> Latn
+    {0xA56C0000u, 55u}, // mlj -> Latn
+    {0xA96C0000u, 55u}, // mlk -> Latn
+    {0xAD6C0000u, 55u}, // mll -> Latn
+    {0xB56C0000u, 55u}, // mln -> Latn
+    {0xB96C0000u, 55u}, // mlo -> Latn
+    {0xBD6C0000u, 55u}, // mlp -> Latn
+    {0xC16C0000u, 55u}, // mlq -> Latn
+    {0xC56C0000u, 55u}, // mlr -> Latn
+    {0xC96C0000u, 55u}, // mls -> Latn
+    {0xD16C0000u, 55u}, // mlu -> Latn
+    {0xD56C0000u, 55u}, // mlv -> Latn
+    {0xD96C0000u, 55u}, // mlw -> Latn
+    {0xDD6C0000u, 55u}, // mlx -> Latn
+    {0xE56C0000u, 55u}, // mlz -> Latn
+    {0x818C0000u, 55u}, // mma -> Latn
+    {0x858C0000u, 55u}, // mmb -> Latn
+    {0x898C0000u, 55u}, // mmc -> Latn
+    {0x8D8C0000u, 55u}, // mmd -> Latn
+    {0x918C0000u, 55u}, // mme -> Latn
+    {0x958C0000u, 55u}, // mmf -> Latn
+    {0x998C0000u, 55u}, // mmg -> Latn
+    {0x9D8C0000u, 55u}, // mmh -> Latn
+    {0xA18C0000u, 55u}, // mmi -> Latn
+    {0xB18C0000u, 55u}, // mmm -> Latn
+    {0xB58C0000u, 55u}, // mmn -> Latn
+    {0xB98C0000u, 55u}, // mmo -> Latn
+    {0xBD8C0000u, 55u}, // mmp -> Latn
+    {0xC18C0000u, 55u}, // mmq -> Latn
+    {0xC58C0000u, 55u}, // mmr -> Latn
+    {0xCD8C0000u, 55u}, // mmt -> Latn
+    {0xD18C0000u, 55u}, // mmu -> Latn
+    {0xD58C0000u, 55u}, // mmv -> Latn
+    {0xD98C0000u, 55u}, // mmw -> Latn
+    {0xDD8C0000u, 55u}, // mmx -> Latn
+    {0xE18C0000u, 55u}, // mmy -> Latn
+    {0xE58C0000u, 55u}, // mmz -> Latn
+    {0x6D6E0000u, 20u}, // mn -> Cyrl
+    {0x6D6E434Eu, 69u}, // mn-CN -> Mong
+    {0x81AC0000u, 55u}, // mna -> Latn
+    {0x85AC0000u, 55u}, // mnb -> Latn
+    {0x89AC0000u, 69u}, // mnc -> Mong
+    {0x8DAC0000u, 55u}, // mnd -> Latn
+    {0x91AC0000u, 55u}, // mne -> Latn
+    {0x95AC0000u, 55u}, // mnf -> Latn
+    {0x99AC0000u, 55u}, // mng -> Latn
+    {0x9DAC0000u, 55u}, // mnh -> Latn
+    {0xA1AC0000u,  9u}, // mni -> Beng
+    {0xA5AC0000u,  2u}, // mnj -> Arab
+    {0xADAC0000u, 55u}, // mnl -> Latn
+    {0xB1AC0000u, 55u}, // mnm -> Latn
+    {0xB5AC0000u, 55u}, // mnn -> Latn
+    {0xBDAC0000u, 55u}, // mnp -> Latn
+    {0xC1AC0000u, 55u}, // mnq -> Latn
+    {0xC5AC0000u, 55u}, // mnr -> Latn
+    {0xC9AC0000u, 20u}, // mns -> Cyrl
+    {0xD1AC0000u, 55u}, // mnu -> Latn
+    {0xD5AC0000u, 55u}, // mnv -> Latn
+    {0xD9AC0000u, 72u}, // mnw -> Mymr
+    {0xDDAC0000u, 55u}, // mnx -> Latn
+    {0xE1AC0000u, 55u}, // mny -> Latn
+    {0xE5AC0000u, 55u}, // mnz -> Latn
+    {0x6D6F0000u, 55u}, // mo -> Latn
+    {0x81CC0000u, 55u}, // moa -> Latn
+    {0x89CC0000u, 55u}, // moc -> Latn
+    {0x8DCC0000u, 55u}, // mod -> Latn
+    {0x91CC0000u, 55u}, // moe -> Latn
+    {0x99CC0000u, 55u}, // mog -> Latn
+    {0x9DCC0000u, 55u}, // moh -> Latn
+    {0xA1CC0000u, 55u}, // moi -> Latn
+    {0xA5CC0000u, 55u}, // moj -> Latn
+    {0xA9CC0000u, 55u}, // mok -> Latn
+    {0xB1CC0000u, 55u}, // mom -> Latn
+    {0xB9CC0000u, 55u}, // moo -> Latn
+    {0xBDCC0000u, 55u}, // mop -> Latn
+    {0xC1CC0000u, 55u}, // moq -> Latn
+    {0xC5CC0000u, 55u}, // mor -> Latn
+    {0xC9CC0000u, 55u}, // mos -> Latn
+    {0xCDCC0000u, 55u}, // mot -> Latn
+    {0xD1CC0000u, 55u}, // mou -> Latn
+    {0xD5CC0000u, 55u}, // mov -> Latn
+    {0xD9CC0000u, 55u}, // mow -> Latn
+    {0xDDCC0000u, 55u}, // mox -> Latn
+    {0xE1CC0000u, 55u}, // moy -> Latn
+    {0xE5CC0000u, 55u}, // moz -> Latn
+    {0x81EC0000u, 55u}, // mpa -> Latn
+    {0x85EC0000u, 55u}, // mpb -> Latn
+    {0x89EC0000u, 55u}, // mpc -> Latn
+    {0x8DEC0000u, 55u}, // mpd -> Latn
+    {0x91EC0000u, 55u}, // mpe -> Latn
+    {0x99EC0000u, 55u}, // mpg -> Latn
+    {0x9DEC0000u, 55u}, // mph -> Latn
+    {0xA1EC0000u, 55u}, // mpi -> Latn
+    {0xA5EC0000u, 55u}, // mpj -> Latn
+    {0xA9EC0000u, 55u}, // mpk -> Latn
+    {0xADEC0000u, 55u}, // mpl -> Latn
+    {0xB1EC0000u, 55u}, // mpm -> Latn
+    {0xB5EC0000u, 55u}, // mpn -> Latn
+    {0xB9EC0000u, 55u}, // mpo -> Latn
+    {0xBDEC0000u, 55u}, // mpp -> Latn
+    {0xC1EC0000u, 55u}, // mpq -> Latn
+    {0xC5EC0000u, 55u}, // mpr -> Latn
+    {0xC9EC0000u, 55u}, // mps -> Latn
+    {0xCDEC0000u, 55u}, // mpt -> Latn
+    {0xD1EC0000u, 55u}, // mpu -> Latn
+    {0xD5EC0000u, 55u}, // mpv -> Latn
+    {0xD9EC0000u, 55u}, // mpw -> Latn
+    {0xDDEC0000u, 55u}, // mpx -> Latn
+    {0xE1EC0000u, 55u}, // mpy -> Latn
+    {0xE5EC0000u, 111u}, // mpz -> Thai
+    {0x820C0000u, 55u}, // mqa -> Latn
+    {0x860C0000u, 55u}, // mqb -> Latn
+    {0x8A0C0000u, 55u}, // mqc -> Latn
+    {0x920C0000u, 55u}, // mqe -> Latn
+    {0x960C0000u, 55u}, // mqf -> Latn
+    {0x9A0C0000u, 55u}, // mqg -> Latn
+    {0x9E0C0000u, 55u}, // mqh -> Latn
+    {0xA20C0000u, 55u}, // mqi -> Latn
+    {0xA60C0000u, 55u}, // mqj -> Latn
+    {0xAA0C0000u, 55u}, // mqk -> Latn
+    {0xAE0C0000u, 55u}, // mql -> Latn
+    {0xB20C0000u, 55u}, // mqm -> Latn
+    {0xB60C0000u, 55u}, // mqn -> Latn
+    {0xBA0C0000u, 55u}, // mqo -> Latn
+    {0xBE0C0000u, 55u}, // mqp -> Latn
+    {0xC20C0000u, 55u}, // mqq -> Latn
+    {0xC60C0000u, 55u}, // mqr -> Latn
+    {0xCA0C0000u, 55u}, // mqs -> Latn
+    {0xD20C0000u, 55u}, // mqu -> Latn
+    {0xD60C0000u, 55u}, // mqv -> Latn
+    {0xDA0C0000u, 55u}, // mqw -> Latn
+    {0xDE0C0000u, 55u}, // mqx -> Latn
+    {0xE20C0000u, 55u}, // mqy -> Latn
+    {0xE60C0000u, 55u}, // mqz -> Latn
+    {0x6D720000u, 21u}, // mr -> Deva
+    {0x822C0000u, 111u}, // mra -> Thai
+    {0x862C0000u, 55u}, // mrb -> Latn
+    {0x8A2C0000u, 55u}, // mrc -> Latn
+    {0x8E2C0000u, 21u}, // mrd -> Deva
+    {0x962C0000u, 55u}, // mrf -> Latn
+    {0x9A2C0000u, 55u}, // mrg -> Latn
+    {0x9E2C0000u, 55u}, // mrh -> Latn
+    {0xA62C0000u, 20u}, // mrj -> Cyrl
+    {0xAA2C0000u, 55u}, // mrk -> Latn
+    {0xAE2C0000u, 55u}, // mrl -> Latn
+    {0xB22C0000u, 55u}, // mrm -> Latn
+    {0xB62C0000u, 55u}, // mrn -> Latn
+    {0xBA2C0000u, 70u}, // mro -> Mroo
+    {0xBE2C0000u, 55u}, // mrp -> Latn
+    {0xC22C0000u, 55u}, // mrq -> Latn
+    {0xC62C0000u, 21u}, // mrr -> Deva
+    {0xCA2C0000u, 55u}, // mrs -> Latn
+    {0xCE2C0000u, 55u}, // mrt -> Latn
+    {0xD22C0000u, 55u}, // mru -> Latn
+    {0xD62C0000u, 55u}, // mrv -> Latn
+    {0xDA2C0000u, 55u}, // mrw -> Latn
+    {0xDE2C0000u, 55u}, // mrx -> Latn
+    {0xE22C0000u, 55u}, // mry -> Latn
+    {0xE62C0000u, 55u}, // mrz -> Latn
+    {0x6D730000u, 55u}, // ms -> Latn
     {0x6D734343u,  2u}, // ms-CC -> Arab
-    {0x6D740000u, 46u}, // mt -> Latn
-    {0x8A6C0000u, 46u}, // mtc -> Latn
-    {0x966C0000u, 46u}, // mtf -> Latn
-    {0xA26C0000u, 46u}, // mti -> Latn
-    {0xC66C0000u, 19u}, // mtr -> Deva
-    {0x828C0000u, 46u}, // mua -> Latn
-    {0xC68C0000u, 46u}, // mur -> Latn
-    {0xCA8C0000u, 46u}, // mus -> Latn
-    {0x82AC0000u, 46u}, // mva -> Latn
-    {0xB6AC0000u, 46u}, // mvn -> Latn
+    {0x864C0000u, 55u}, // msb -> Latn
+    {0x8A4C0000u, 55u}, // msc -> Latn
+    {0x924C0000u, 55u}, // mse -> Latn
+    {0x964C0000u, 55u}, // msf -> Latn
+    {0x9A4C0000u, 55u}, // msg -> Latn
+    {0x9E4C0000u, 55u}, // msh -> Latn
+    {0xA24C0000u, 55u}, // msi -> Latn
+    {0xA64C0000u, 55u}, // msj -> Latn
+    {0xAA4C0000u, 55u}, // msk -> Latn
+    {0xAE4C0000u, 55u}, // msl -> Latn
+    {0xB24C0000u, 55u}, // msm -> Latn
+    {0xB64C0000u, 55u}, // msn -> Latn
+    {0xBA4C0000u, 55u}, // mso -> Latn
+    {0xBE4C0000u, 55u}, // msp -> Latn
+    {0xC24C0000u, 55u}, // msq -> Latn
+    {0xCA4C0000u, 55u}, // mss -> Latn
+    {0xD24C0000u, 55u}, // msu -> Latn
+    {0xD64C0000u, 55u}, // msv -> Latn
+    {0xDA4C0000u, 55u}, // msw -> Latn
+    {0xDE4C0000u, 55u}, // msx -> Latn
+    {0xE24C0000u, 55u}, // msy -> Latn
+    {0xE64C0000u, 55u}, // msz -> Latn
+    {0x6D740000u, 55u}, // mt -> Latn
+    {0x826C0000u, 55u}, // mta -> Latn
+    {0x866C0000u, 55u}, // mtb -> Latn
+    {0x8A6C0000u, 55u}, // mtc -> Latn
+    {0x8E6C0000u, 55u}, // mtd -> Latn
+    {0x926C0000u, 55u}, // mte -> Latn
+    {0x966C0000u, 55u}, // mtf -> Latn
+    {0x9A6C0000u, 55u}, // mtg -> Latn
+    {0x9E6C0000u, 55u}, // mth -> Latn
+    {0xA26C0000u, 55u}, // mti -> Latn
+    {0xA66C0000u, 55u}, // mtj -> Latn
+    {0xAA6C0000u, 55u}, // mtk -> Latn
+    {0xAE6C0000u, 55u}, // mtl -> Latn
+    {0xB26C0000u, 20u}, // mtm -> Cyrl
+    {0xB66C0000u, 55u}, // mtn -> Latn
+    {0xBA6C0000u, 55u}, // mto -> Latn
+    {0xBE6C0000u, 55u}, // mtp -> Latn
+    {0xC26C0000u, 55u}, // mtq -> Latn
+    {0xC66C0000u, 21u}, // mtr -> Deva
+    {0xCA6C0000u, 55u}, // mts -> Latn
+    {0xCE6C0000u, 55u}, // mtt -> Latn
+    {0xD26C0000u, 55u}, // mtu -> Latn
+    {0xD66C0000u, 55u}, // mtv -> Latn
+    {0xDA6C0000u, 55u}, // mtw -> Latn
+    {0xDE6C0000u, 55u}, // mtx -> Latn
+    {0xE26C0000u, 55u}, // mty -> Latn
+    {0x828C0000u, 55u}, // mua -> Latn
+    {0x868C0000u, 55u}, // mub -> Latn
+    {0x8A8C0000u, 55u}, // muc -> Latn
+    {0x8E8C0000u, 20u}, // mud -> Cyrl
+    {0x928C0000u, 55u}, // mue -> Latn
+    {0x9A8C0000u, 55u}, // mug -> Latn
+    {0x9E8C0000u, 55u}, // muh -> Latn
+    {0xA28C0000u, 55u}, // mui -> Latn
+    {0xA68C0000u, 55u}, // muj -> Latn
+    {0xAA8C0000u, 112u}, // muk -> Tibt
+    {0xB28C0000u, 55u}, // mum -> Latn
+    {0xBA8C0000u, 55u}, // muo -> Latn
+    {0xC28C0000u, 55u}, // muq -> Latn
+    {0xC68C0000u, 55u}, // mur -> Latn
+    {0xCA8C0000u, 55u}, // mus -> Latn
+    {0xCE8C0000u, 21u}, // mut -> Deva
+    {0xD28C0000u, 55u}, // muu -> Latn
+    {0xD68C0000u, 105u}, // muv -> Taml
+    {0xDE8C0000u, 55u}, // mux -> Latn
+    {0xE28C0000u, 55u}, // muy -> Latn
+    {0xE68C0000u, 24u}, // muz -> Ethi
+    {0x82AC0000u, 55u}, // mva -> Latn
+    {0x8EAC0000u, 55u}, // mvd -> Latn
+    {0x92AC0000u,  2u}, // mve -> Arab
+    {0x96AC0000u, 69u}, // mvf -> Mong
+    {0x9AAC0000u, 55u}, // mvg -> Latn
+    {0x9EAC0000u, 55u}, // mvh -> Latn
+    {0xAAAC0000u, 55u}, // mvk -> Latn
+    {0xAEAC0000u, 55u}, // mvl -> Latn
+    {0xB6AC0000u, 55u}, // mvn -> Latn
+    {0xBAAC0000u, 55u}, // mvo -> Latn
+    {0xBEAC0000u, 55u}, // mvp -> Latn
+    {0xC2AC0000u, 55u}, // mvq -> Latn
+    {0xC6AC0000u, 55u}, // mvr -> Latn
+    {0xCAAC0000u, 55u}, // mvs -> Latn
+    {0xCEAC0000u, 55u}, // mvt -> Latn
+    {0xD2AC0000u, 55u}, // mvu -> Latn
+    {0xD6AC0000u, 55u}, // mvv -> Latn
+    {0xDAAC0000u, 55u}, // mvw -> Latn
+    {0xDEAC0000u, 55u}, // mvx -> Latn
     {0xE2AC0000u,  2u}, // mvy -> Arab
-    {0xAACC0000u, 46u}, // mwk -> Latn
-    {0xC6CC0000u, 19u}, // mwr -> Deva
-    {0xD6CC0000u, 46u}, // mwv -> Latn
-    {0xDACC0000u, 33u}, // mww -> Hmnp
-    {0x8AEC0000u, 46u}, // mxc -> Latn
-    {0xB2EC0000u, 46u}, // mxm -> Latn
-    {0x6D790000u, 59u}, // my -> Mymr
-    {0xAB0C0000u, 46u}, // myk -> Latn
-    {0xB30C0000u, 21u}, // mym -> Ethi
-    {0xD70C0000u, 18u}, // myv -> Cyrl
-    {0xDB0C0000u, 46u}, // myw -> Latn
-    {0xDF0C0000u, 46u}, // myx -> Latn
-    {0xE70C0000u, 52u}, // myz -> Mand
-    {0xAB2C0000u, 46u}, // mzk -> Latn
-    {0xB32C0000u, 46u}, // mzm -> Latn
+    {0xE6AC0000u, 24u}, // mvz -> Ethi
+    {0x82CC0000u, 55u}, // mwa -> Latn
+    {0x86CC0000u, 55u}, // mwb -> Latn
+    {0x8ACC0000u, 55u}, // mwc -> Latn
+    {0x92CC0000u, 55u}, // mwe -> Latn
+    {0x96CC0000u, 55u}, // mwf -> Latn
+    {0x9ACC0000u, 55u}, // mwg -> Latn
+    {0x9ECC0000u, 55u}, // mwh -> Latn
+    {0xA2CC0000u, 55u}, // mwi -> Latn
+    {0xAACC0000u, 55u}, // mwk -> Latn
+    {0xAECC0000u, 55u}, // mwl -> Latn
+    {0xB2CC0000u, 55u}, // mwm -> Latn
+    {0xB6CC0000u, 55u}, // mwn -> Latn
+    {0xBACC0000u, 55u}, // mwo -> Latn
+    {0xBECC0000u, 55u}, // mwp -> Latn
+    {0xC2CC0000u, 55u}, // mwq -> Latn
+    {0xC6CC0000u, 21u}, // mwr -> Deva
+    {0xCACC0000u, 55u}, // mws -> Latn
+    {0xCECC0000u, 72u}, // mwt -> Mymr
+    {0xD2CC0000u, 55u}, // mwu -> Latn
+    {0xD6CC0000u, 55u}, // mwv -> Latn
+    {0xDACC0000u, 39u}, // mww -> Hmnp
+    {0xE6CC0000u, 55u}, // mwz -> Latn
+    {0x82EC0000u, 55u}, // mxa -> Latn
+    {0x86EC0000u, 55u}, // mxb -> Latn
+    {0x8AEC0000u, 55u}, // mxc -> Latn
+    {0x8EEC0000u, 55u}, // mxd -> Latn
+    {0x92EC0000u, 55u}, // mxe -> Latn
+    {0x96EC0000u, 55u}, // mxf -> Latn
+    {0x9AEC0000u, 55u}, // mxg -> Latn
+    {0x9EEC0000u, 55u}, // mxh -> Latn
+    {0xA2EC0000u, 55u}, // mxi -> Latn
+    {0xA6EC0000u, 55u}, // mxj -> Latn
+    {0xAAEC0000u, 55u}, // mxk -> Latn
+    {0xAEEC0000u, 55u}, // mxl -> Latn
+    {0xB2EC0000u, 55u}, // mxm -> Latn
+    {0xB6EC0000u, 55u}, // mxn -> Latn
+    {0xBAEC0000u, 55u}, // mxo -> Latn
+    {0xBEEC0000u, 55u}, // mxp -> Latn
+    {0xC2EC0000u, 55u}, // mxq -> Latn
+    {0xC6EC0000u, 55u}, // mxr -> Latn
+    {0xCAEC0000u, 55u}, // mxs -> Latn
+    {0xCEEC0000u, 55u}, // mxt -> Latn
+    {0xD2EC0000u, 55u}, // mxu -> Latn
+    {0xD6EC0000u, 55u}, // mxv -> Latn
+    {0xDAEC0000u, 55u}, // mxw -> Latn
+    {0xDEEC0000u, 55u}, // mxx -> Latn
+    {0xE2EC0000u, 55u}, // mxy -> Latn
+    {0xE6EC0000u, 55u}, // mxz -> Latn
+    {0x6D790000u, 72u}, // my -> Mymr
+    {0x870C0000u, 55u}, // myb -> Latn
+    {0x8B0C0000u, 55u}, // myc -> Latn
+    {0x930C0000u, 55u}, // mye -> Latn
+    {0x970C0000u, 55u}, // myf -> Latn
+    {0x9B0C0000u, 55u}, // myg -> Latn
+    {0x9F0C0000u, 55u}, // myh -> Latn
+    {0xA70C0000u, 55u}, // myj -> Latn
+    {0xAB0C0000u, 55u}, // myk -> Latn
+    {0xAF0C0000u, 55u}, // myl -> Latn
+    {0xB30C0000u, 24u}, // mym -> Ethi
+    {0xBF0C0000u, 55u}, // myp -> Latn
+    {0xC70C0000u, 55u}, // myr -> Latn
+    {0xD30C0000u, 55u}, // myu -> Latn
+    {0xD70C0000u, 20u}, // myv -> Cyrl
+    {0xDB0C0000u, 55u}, // myw -> Latn
+    {0xDF0C0000u, 55u}, // myx -> Latn
+    {0xE30C0000u, 55u}, // myy -> Latn
+    {0xE70C0000u, 62u}, // myz -> Mand
+    {0x832C0000u, 55u}, // mza -> Latn
+    {0x8F2C0000u, 55u}, // mzd -> Latn
+    {0x932C0000u, 55u}, // mze -> Latn
+    {0x9F2C0000u, 55u}, // mzh -> Latn
+    {0xA32C0000u, 55u}, // mzi -> Latn
+    {0xA72C0000u, 55u}, // mzj -> Latn
+    {0xAB2C0000u, 55u}, // mzk -> Latn
+    {0xAF2C0000u, 55u}, // mzl -> Latn
+    {0xB32C0000u, 55u}, // mzm -> Latn
     {0xB72C0000u,  2u}, // mzn -> Arab
-    {0xBF2C0000u, 46u}, // mzp -> Latn
-    {0xDB2C0000u, 46u}, // mzw -> Latn
-    {0xE72C0000u, 46u}, // mzz -> Latn
-    {0x6E610000u, 46u}, // na -> Latn
-    {0x880D0000u, 46u}, // nac -> Latn
-    {0x940D0000u, 46u}, // naf -> Latn
-    {0xA80D0000u, 46u}, // nak -> Latn
-    {0xB40D0000u, 29u}, // nan -> Hans
-    {0xBC0D0000u, 46u}, // nap -> Latn
-    {0xC00D0000u, 46u}, // naq -> Latn
-    {0xC80D0000u, 46u}, // nas -> Latn
-    {0x6E620000u, 46u}, // nb -> Latn
-    {0x804D0000u, 46u}, // nca -> Latn
-    {0x904D0000u, 46u}, // nce -> Latn
-    {0x944D0000u, 46u}, // ncf -> Latn
-    {0x9C4D0000u, 46u}, // nch -> Latn
-    {0xB84D0000u, 46u}, // nco -> Latn
-    {0xD04D0000u, 46u}, // ncu -> Latn
-    {0x6E640000u, 46u}, // nd -> Latn
-    {0x886D0000u, 46u}, // ndc -> Latn
-    {0xC86D0000u, 46u}, // nds -> Latn
-    {0x6E650000u, 19u}, // ne -> Deva
-    {0x848D0000u, 46u}, // neb -> Latn
-    {0xD88D0000u, 19u}, // new -> Deva
-    {0xDC8D0000u, 46u}, // nex -> Latn
-    {0xC4AD0000u, 46u}, // nfr -> Latn
-    {0x6E670000u, 46u}, // ng -> Latn
-    {0x80CD0000u, 46u}, // nga -> Latn
-    {0x84CD0000u, 46u}, // ngb -> Latn
-    {0xACCD0000u, 46u}, // ngl -> Latn
-    {0x84ED0000u, 46u}, // nhb -> Latn
-    {0x90ED0000u, 46u}, // nhe -> Latn
-    {0xD8ED0000u, 46u}, // nhw -> Latn
-    {0x950D0000u, 46u}, // nif -> Latn
-    {0xA10D0000u, 46u}, // nii -> Latn
-    {0xA50D0000u, 46u}, // nij -> Latn
-    {0xB50D0000u, 46u}, // nin -> Latn
-    {0xD10D0000u, 46u}, // niu -> Latn
-    {0xE10D0000u, 46u}, // niy -> Latn
-    {0xE50D0000u, 46u}, // niz -> Latn
-    {0xB92D0000u, 46u}, // njo -> Latn
-    {0x994D0000u, 46u}, // nkg -> Latn
-    {0xB94D0000u, 46u}, // nko -> Latn
-    {0x6E6C0000u, 46u}, // nl -> Latn
-    {0x998D0000u, 46u}, // nmg -> Latn
-    {0xE58D0000u, 46u}, // nmz -> Latn
-    {0x6E6E0000u, 46u}, // nn -> Latn
-    {0x95AD0000u, 46u}, // nnf -> Latn
-    {0x9DAD0000u, 46u}, // nnh -> Latn
-    {0xA9AD0000u, 46u}, // nnk -> Latn
-    {0xB1AD0000u, 46u}, // nnm -> Latn
-    {0xBDAD0000u, 99u}, // nnp -> Wcho
-    {0x6E6F0000u, 46u}, // no -> Latn
-    {0x8DCD0000u, 44u}, // nod -> Lana
-    {0x91CD0000u, 19u}, // noe -> Deva
-    {0xB5CD0000u, 75u}, // non -> Runr
-    {0xBDCD0000u, 46u}, // nop -> Latn
-    {0xD1CD0000u, 46u}, // nou -> Latn
-    {0xBA0D0000u, 61u}, // nqo -> Nkoo
-    {0x6E720000u, 46u}, // nr -> Latn
-    {0x862D0000u, 46u}, // nrb -> Latn
-    {0xAA4D0000u, 11u}, // nsk -> Cans
-    {0xB64D0000u, 46u}, // nsn -> Latn
-    {0xBA4D0000u, 46u}, // nso -> Latn
-    {0xCA4D0000u, 46u}, // nss -> Latn
-    {0xCE4D0000u, 95u}, // nst -> Tnsa
-    {0xB26D0000u, 46u}, // ntm -> Latn
-    {0xC66D0000u, 46u}, // ntr -> Latn
-    {0xA28D0000u, 46u}, // nui -> Latn
-    {0xBE8D0000u, 46u}, // nup -> Latn
-    {0xCA8D0000u, 46u}, // nus -> Latn
-    {0xD68D0000u, 46u}, // nuv -> Latn
-    {0xDE8D0000u, 46u}, // nux -> Latn
-    {0x6E760000u, 46u}, // nv -> Latn
-    {0x86CD0000u, 46u}, // nwb -> Latn
-    {0xC2ED0000u, 46u}, // nxq -> Latn
-    {0xC6ED0000u, 46u}, // nxr -> Latn
-    {0x6E790000u, 46u}, // ny -> Latn
-    {0xB30D0000u, 46u}, // nym -> Latn
-    {0xB70D0000u, 46u}, // nyn -> Latn
-    {0xA32D0000u, 46u}, // nzi -> Latn
-    {0x6F630000u, 46u}, // oc -> Latn
-    {0x6F634553u, 46u}, // oc-ES -> Latn
-    {0x88CE0000u, 46u}, // ogc -> Latn
-    {0x6F6A0000u, 11u}, // oj -> Cans
-    {0xC92E0000u, 11u}, // ojs -> Cans
-    {0x814E0000u, 46u}, // oka -> Latn
-    {0xC54E0000u, 46u}, // okr -> Latn
-    {0xD54E0000u, 46u}, // okv -> Latn
-    {0x6F6D0000u, 46u}, // om -> Latn
-    {0x99AE0000u, 46u}, // ong -> Latn
-    {0xB5AE0000u, 46u}, // onn -> Latn
-    {0xC9AE0000u, 46u}, // ons -> Latn
-    {0xB1EE0000u, 46u}, // opm -> Latn
-    {0x6F720000u, 66u}, // or -> Orya
-    {0xBA2E0000u, 46u}, // oro -> Latn
+    {0xBB2C0000u, 55u}, // mzo -> Latn
+    {0xBF2C0000u, 55u}, // mzp -> Latn
+    {0xC32C0000u, 55u}, // mzq -> Latn
+    {0xC72C0000u, 55u}, // mzr -> Latn
+    {0xCF2C0000u, 55u}, // mzt -> Latn
+    {0xD32C0000u, 55u}, // mzu -> Latn
+    {0xD72C0000u, 55u}, // mzv -> Latn
+    {0xDB2C0000u, 55u}, // mzw -> Latn
+    {0xDF2C0000u, 55u}, // mzx -> Latn
+    {0xE72C0000u, 55u}, // mzz -> Latn
+    {0x6E610000u, 55u}, // na -> Latn
+    {0x800D0000u, 55u}, // naa -> Latn
+    {0x840D0000u, 55u}, // nab -> Latn
+    {0x880D0000u, 55u}, // nac -> Latn
+    {0x900D0000u, 55u}, // nae -> Latn
+    {0x940D0000u, 55u}, // naf -> Latn
+    {0x980D0000u, 55u}, // nag -> Latn
+    {0xA40D0000u, 55u}, // naj -> Latn
+    {0xA80D0000u, 55u}, // nak -> Latn
+    {0xAC0D0000u, 55u}, // nal -> Latn
+    {0xB00D0000u, 55u}, // nam -> Latn
+    {0xB40D0000u, 35u}, // nan -> Hans
+    {0xB80D0000u, 21u}, // nao -> Deva
+    {0xBC0D0000u, 55u}, // nap -> Latn
+    {0xC00D0000u, 55u}, // naq -> Latn
+    {0xC40D0000u, 55u}, // nar -> Latn
+    {0xC80D0000u, 55u}, // nas -> Latn
+    {0xCC0D0000u, 55u}, // nat -> Latn
+    {0xD80D0000u, 55u}, // naw -> Latn
+    {0xDC0D0000u, 55u}, // nax -> Latn
+    {0xE00D0000u, 55u}, // nay -> Latn
+    {0xE40D0000u, 55u}, // naz -> Latn
+    {0x6E620000u, 55u}, // nb -> Latn
+    {0x802D0000u, 55u}, // nba -> Latn
+    {0x842D0000u, 55u}, // nbb -> Latn
+    {0x882D0000u, 55u}, // nbc -> Latn
+    {0x8C2D0000u, 55u}, // nbd -> Latn
+    {0x902D0000u, 55u}, // nbe -> Latn
+    {0x9C2D0000u, 55u}, // nbh -> Latn
+    {0xA02D0000u, 55u}, // nbi -> Latn
+    {0xA42D0000u, 55u}, // nbj -> Latn
+    {0xA82D0000u, 55u}, // nbk -> Latn
+    {0xB02D0000u, 55u}, // nbm -> Latn
+    {0xB42D0000u, 55u}, // nbn -> Latn
+    {0xB82D0000u, 55u}, // nbo -> Latn
+    {0xBC2D0000u, 55u}, // nbp -> Latn
+    {0xC02D0000u, 55u}, // nbq -> Latn
+    {0xC42D0000u, 55u}, // nbr -> Latn
+    {0xCC2D0000u, 55u}, // nbt -> Latn
+    {0xD02D0000u, 55u}, // nbu -> Latn
+    {0xD42D0000u, 55u}, // nbv -> Latn
+    {0xD82D0000u, 55u}, // nbw -> Latn
+    {0xE02D0000u, 55u}, // nby -> Latn
+    {0x804D0000u, 55u}, // nca -> Latn
+    {0x844D0000u, 55u}, // ncb -> Latn
+    {0x884D0000u, 55u}, // ncc -> Latn
+    {0x8C4D0000u, 21u}, // ncd -> Deva
+    {0x904D0000u, 55u}, // nce -> Latn
+    {0x944D0000u, 55u}, // ncf -> Latn
+    {0x984D0000u, 55u}, // ncg -> Latn
+    {0x9C4D0000u, 55u}, // nch -> Latn
+    {0xA04D0000u, 55u}, // nci -> Latn
+    {0xA44D0000u, 55u}, // ncj -> Latn
+    {0xA84D0000u, 55u}, // nck -> Latn
+    {0xAC4D0000u, 55u}, // ncl -> Latn
+    {0xB04D0000u, 55u}, // ncm -> Latn
+    {0xB44D0000u, 55u}, // ncn -> Latn
+    {0xB84D0000u, 55u}, // nco -> Latn
+    {0xC04D0000u, 52u}, // ncq -> Laoo
+    {0xC44D0000u, 55u}, // ncr -> Latn
+    {0xCC4D0000u, 55u}, // nct -> Latn
+    {0xD04D0000u, 55u}, // ncu -> Latn
+    {0xDC4D0000u, 55u}, // ncx -> Latn
+    {0xE44D0000u, 55u}, // ncz -> Latn
+    {0x6E640000u, 55u}, // nd -> Latn
+    {0x806D0000u, 55u}, // nda -> Latn
+    {0x846D0000u, 55u}, // ndb -> Latn
+    {0x886D0000u, 55u}, // ndc -> Latn
+    {0x8C6D0000u, 55u}, // ndd -> Latn
+    {0x946D0000u, 20u}, // ndf -> Cyrl
+    {0x986D0000u, 55u}, // ndg -> Latn
+    {0x9C6D0000u, 55u}, // ndh -> Latn
+    {0xA06D0000u, 55u}, // ndi -> Latn
+    {0xA46D0000u, 55u}, // ndj -> Latn
+    {0xA86D0000u, 55u}, // ndk -> Latn
+    {0xAC6D0000u, 55u}, // ndl -> Latn
+    {0xB06D0000u, 55u}, // ndm -> Latn
+    {0xB46D0000u, 55u}, // ndn -> Latn
+    {0xBC6D0000u, 55u}, // ndp -> Latn
+    {0xC06D0000u, 55u}, // ndq -> Latn
+    {0xC46D0000u, 55u}, // ndr -> Latn
+    {0xC86D0000u, 55u}, // nds -> Latn
+    {0xCC6D0000u, 55u}, // ndt -> Latn
+    {0xD06D0000u, 55u}, // ndu -> Latn
+    {0xD46D0000u, 55u}, // ndv -> Latn
+    {0xD86D0000u, 55u}, // ndw -> Latn
+    {0xDC6D0000u, 55u}, // ndx -> Latn
+    {0xE06D0000u, 55u}, // ndy -> Latn
+    {0xE46D0000u, 55u}, // ndz -> Latn
+    {0x6E650000u, 21u}, // ne -> Deva
+    {0x808D0000u, 55u}, // nea -> Latn
+    {0x848D0000u, 55u}, // neb -> Latn
+    {0x888D0000u, 55u}, // nec -> Latn
+    {0x8C8D0000u, 55u}, // ned -> Latn
+    {0x908D0000u, 55u}, // nee -> Latn
+    {0x988D0000u, 20u}, // neg -> Cyrl
+    {0x9C8D0000u, 112u}, // neh -> Tibt
+    {0xA08D0000u, 119u}, // nei -> Xsux
+    {0xA48D0000u, 55u}, // nej -> Latn
+    {0xA88D0000u, 55u}, // nek -> Latn
+    {0xB08D0000u, 55u}, // nem -> Latn
+    {0xB48D0000u, 55u}, // nen -> Latn
+    {0xB88D0000u, 55u}, // neo -> Latn
+    {0xC08D0000u, 55u}, // neq -> Latn
+    {0xC48D0000u, 55u}, // ner -> Latn
+    {0xCC8D0000u, 55u}, // net -> Latn
+    {0xD08D0000u, 55u}, // neu -> Latn
+    {0xD88D0000u, 21u}, // new -> Deva
+    {0xDC8D0000u, 55u}, // nex -> Latn
+    {0xE08D0000u, 55u}, // ney -> Latn
+    {0xE48D0000u, 55u}, // nez -> Latn
+    {0x80AD0000u, 55u}, // nfa -> Latn
+    {0x8CAD0000u, 55u}, // nfd -> Latn
+    {0xACAD0000u, 55u}, // nfl -> Latn
+    {0xC4AD0000u, 55u}, // nfr -> Latn
+    {0xD0AD0000u, 55u}, // nfu -> Latn
+    {0x6E670000u, 55u}, // ng -> Latn
+    {0x80CD0000u, 55u}, // nga -> Latn
+    {0x84CD0000u, 55u}, // ngb -> Latn
+    {0x88CD0000u, 55u}, // ngc -> Latn
+    {0x8CCD0000u, 55u}, // ngd -> Latn
+    {0x90CD0000u, 55u}, // nge -> Latn
+    {0x98CD0000u, 55u}, // ngg -> Latn
+    {0x9CCD0000u, 55u}, // ngh -> Latn
+    {0xA0CD0000u, 55u}, // ngi -> Latn
+    {0xA4CD0000u, 55u}, // ngj -> Latn
+    {0xA8CD0000u, 55u}, // ngk -> Latn
+    {0xACCD0000u, 55u}, // ngl -> Latn
+    {0xB0CD0000u, 55u}, // ngm -> Latn
+    {0xB4CD0000u, 55u}, // ngn -> Latn
+    {0xBCCD0000u, 55u}, // ngp -> Latn
+    {0xC0CD0000u, 55u}, // ngq -> Latn
+    {0xC4CD0000u, 55u}, // ngr -> Latn
+    {0xC8CD0000u, 55u}, // ngs -> Latn
+    {0xCCCD0000u, 52u}, // ngt -> Laoo
+    {0xD0CD0000u, 55u}, // ngu -> Latn
+    {0xD4CD0000u, 55u}, // ngv -> Latn
+    {0xD8CD0000u, 55u}, // ngw -> Latn
+    {0xDCCD0000u, 55u}, // ngx -> Latn
+    {0xE0CD0000u, 55u}, // ngy -> Latn
+    {0xE4CD0000u, 55u}, // ngz -> Latn
+    {0x80ED0000u, 55u}, // nha -> Latn
+    {0x84ED0000u, 55u}, // nhb -> Latn
+    {0x88ED0000u, 55u}, // nhc -> Latn
+    {0x8CED0000u, 55u}, // nhd -> Latn
+    {0x90ED0000u, 55u}, // nhe -> Latn
+    {0x94ED0000u, 55u}, // nhf -> Latn
+    {0x98ED0000u, 55u}, // nhg -> Latn
+    {0xA0ED0000u, 55u}, // nhi -> Latn
+    {0xA8ED0000u, 55u}, // nhk -> Latn
+    {0xB0ED0000u, 55u}, // nhm -> Latn
+    {0xB4ED0000u, 55u}, // nhn -> Latn
+    {0xB8ED0000u, 55u}, // nho -> Latn
+    {0xBCED0000u, 55u}, // nhp -> Latn
+    {0xC0ED0000u, 55u}, // nhq -> Latn
+    {0xC4ED0000u, 55u}, // nhr -> Latn
+    {0xCCED0000u, 55u}, // nht -> Latn
+    {0xD0ED0000u, 55u}, // nhu -> Latn
+    {0xD4ED0000u, 55u}, // nhv -> Latn
+    {0xD8ED0000u, 55u}, // nhw -> Latn
+    {0xDCED0000u, 55u}, // nhx -> Latn
+    {0xE0ED0000u, 55u}, // nhy -> Latn
+    {0xE4ED0000u, 55u}, // nhz -> Latn
+    {0x810D0000u, 55u}, // nia -> Latn
+    {0x850D0000u, 55u}, // nib -> Latn
+    {0x8D0D0000u, 55u}, // nid -> Latn
+    {0x910D0000u, 55u}, // nie -> Latn
+    {0x950D0000u, 55u}, // nif -> Latn
+    {0x990D0000u, 55u}, // nig -> Latn
+    {0x9D0D0000u, 55u}, // nih -> Latn
+    {0xA10D0000u, 55u}, // nii -> Latn
+    {0xA50D0000u, 55u}, // nij -> Latn
+    {0xAD0D0000u, 55u}, // nil -> Latn
+    {0xB10D0000u, 55u}, // nim -> Latn
+    {0xB50D0000u, 55u}, // nin -> Latn
+    {0xB90D0000u, 20u}, // nio -> Cyrl
+    {0xC10D0000u, 55u}, // niq -> Latn
+    {0xC50D0000u, 55u}, // nir -> Latn
+    {0xC90D0000u, 55u}, // nis -> Latn
+    {0xCD0D0000u, 108u}, // nit -> Telu
+    {0xD10D0000u, 55u}, // niu -> Latn
+    {0xD50D0000u, 20u}, // niv -> Cyrl
+    {0xD90D0000u, 55u}, // niw -> Latn
+    {0xDD0D0000u, 55u}, // nix -> Latn
+    {0xE10D0000u, 55u}, // niy -> Latn
+    {0xE50D0000u, 55u}, // niz -> Latn
+    {0x812D0000u, 55u}, // nja -> Latn
+    {0x852D0000u, 55u}, // njb -> Latn
+    {0x8D2D0000u, 55u}, // njd -> Latn
+    {0x9D2D0000u, 55u}, // njh -> Latn
+    {0xA12D0000u, 55u}, // nji -> Latn
+    {0xA52D0000u, 55u}, // njj -> Latn
+    {0xAD2D0000u, 55u}, // njl -> Latn
+    {0xB12D0000u, 55u}, // njm -> Latn
+    {0xB52D0000u, 55u}, // njn -> Latn
+    {0xB92D0000u, 55u}, // njo -> Latn
+    {0xC52D0000u, 55u}, // njr -> Latn
+    {0xC92D0000u, 55u}, // njs -> Latn
+    {0xCD2D0000u, 55u}, // njt -> Latn
+    {0xD12D0000u, 55u}, // nju -> Latn
+    {0xDD2D0000u, 55u}, // njx -> Latn
+    {0xE12D0000u, 55u}, // njy -> Latn
+    {0xE52D0000u, 55u}, // njz -> Latn
+    {0x814D0000u, 55u}, // nka -> Latn
+    {0x854D0000u, 55u}, // nkb -> Latn
+    {0x894D0000u, 55u}, // nkc -> Latn
+    {0x8D4D0000u, 55u}, // nkd -> Latn
+    {0x914D0000u, 55u}, // nke -> Latn
+    {0x954D0000u, 55u}, // nkf -> Latn
+    {0x994D0000u, 55u}, // nkg -> Latn
+    {0x9D4D0000u, 55u}, // nkh -> Latn
+    {0xA14D0000u, 55u}, // nki -> Latn
+    {0xA54D0000u, 55u}, // nkj -> Latn
+    {0xA94D0000u, 55u}, // nkk -> Latn
+    {0xB14D0000u, 55u}, // nkm -> Latn
+    {0xB54D0000u, 55u}, // nkn -> Latn
+    {0xB94D0000u, 55u}, // nko -> Latn
+    {0xC14D0000u, 55u}, // nkq -> Latn
+    {0xC54D0000u, 55u}, // nkr -> Latn
+    {0xC94D0000u, 55u}, // nks -> Latn
+    {0xCD4D0000u, 55u}, // nkt -> Latn
+    {0xD14D0000u, 55u}, // nku -> Latn
+    {0xD54D0000u, 55u}, // nkv -> Latn
+    {0xD94D0000u, 55u}, // nkw -> Latn
+    {0xDD4D0000u, 55u}, // nkx -> Latn
+    {0xE54D0000u, 55u}, // nkz -> Latn
+    {0x6E6C0000u, 55u}, // nl -> Latn
+    {0x816D0000u, 55u}, // nla -> Latn
+    {0x896D0000u, 55u}, // nlc -> Latn
+    {0x916D0000u, 55u}, // nle -> Latn
+    {0x996D0000u, 55u}, // nlg -> Latn
+    {0xA16D0000u,  2u}, // nli -> Arab
+    {0xA56D0000u, 55u}, // nlj -> Latn
+    {0xA96D0000u, 55u}, // nlk -> Latn
+    {0xB16D0000u,  2u}, // nlm -> Arab
+    {0xB96D0000u, 55u}, // nlo -> Latn
+    {0xC16D0000u, 55u}, // nlq -> Latn
+    {0xD16D0000u, 55u}, // nlu -> Latn
+    {0xD56D0000u, 55u}, // nlv -> Latn
+    {0xD96D0000u, 55u}, // nlw -> Latn
+    {0xDD6D0000u, 21u}, // nlx -> Deva
+    {0xE16D0000u, 55u}, // nly -> Latn
+    {0xE56D0000u, 55u}, // nlz -> Latn
+    {0x818D0000u, 55u}, // nma -> Latn
+    {0x858D0000u, 55u}, // nmb -> Latn
+    {0x898D0000u, 55u}, // nmc -> Latn
+    {0x8D8D0000u, 55u}, // nmd -> Latn
+    {0x918D0000u, 55u}, // nme -> Latn
+    {0x958D0000u, 55u}, // nmf -> Latn
+    {0x998D0000u, 55u}, // nmg -> Latn
+    {0x9D8D0000u, 55u}, // nmh -> Latn
+    {0xA18D0000u, 55u}, // nmi -> Latn
+    {0xA58D0000u, 55u}, // nmj -> Latn
+    {0xA98D0000u, 55u}, // nmk -> Latn
+    {0xAD8D0000u, 55u}, // nml -> Latn
+    {0xB18D0000u, 21u}, // nmm -> Deva
+    {0xB58D0000u, 55u}, // nmn -> Latn
+    {0xB98D0000u, 55u}, // nmo -> Latn
+    {0xBD8D0000u, 55u}, // nmp -> Latn
+    {0xC18D0000u, 55u}, // nmq -> Latn
+    {0xC58D0000u, 55u}, // nmr -> Latn
+    {0xC98D0000u, 55u}, // nms -> Latn
+    {0xCD8D0000u, 55u}, // nmt -> Latn
+    {0xD18D0000u, 55u}, // nmu -> Latn
+    {0xD58D0000u, 55u}, // nmv -> Latn
+    {0xD98D0000u, 55u}, // nmw -> Latn
+    {0xDD8D0000u, 55u}, // nmx -> Latn
+    {0xE58D0000u, 55u}, // nmz -> Latn
+    {0x6E6E0000u, 55u}, // nn -> Latn
+    {0x81AD0000u, 55u}, // nna -> Latn
+    {0x85AD0000u, 55u}, // nnb -> Latn
+    {0x89AD0000u, 55u}, // nnc -> Latn
+    {0x8DAD0000u, 55u}, // nnd -> Latn
+    {0x91AD0000u, 55u}, // nne -> Latn
+    {0x95AD0000u, 55u}, // nnf -> Latn
+    {0x99AD0000u, 55u}, // nng -> Latn
+    {0x9DAD0000u, 55u}, // nnh -> Latn
+    {0xA1AD0000u, 55u}, // nni -> Latn
+    {0xA5AD0000u, 55u}, // nnj -> Latn
+    {0xA9AD0000u, 55u}, // nnk -> Latn
+    {0xADAD0000u, 55u}, // nnl -> Latn
+    {0xB1AD0000u, 55u}, // nnm -> Latn
+    {0xB5AD0000u, 55u}, // nnn -> Latn
+    {0xBDAD0000u, 117u}, // nnp -> Wcho
+    {0xC1AD0000u, 55u}, // nnq -> Latn
+    {0xC5AD0000u, 55u}, // nnr -> Latn
+    {0xCDAD0000u, 55u}, // nnt -> Latn
+    {0xD1AD0000u, 55u}, // nnu -> Latn
+    {0xD5AD0000u, 55u}, // nnv -> Latn
+    {0xD9AD0000u, 55u}, // nnw -> Latn
+    {0xE1AD0000u, 55u}, // nny -> Latn
+    {0xE5AD0000u, 55u}, // nnz -> Latn
+    {0x6E6F0000u, 55u}, // no -> Latn
+    {0x81CD0000u, 55u}, // noa -> Latn
+    {0x89CD0000u, 55u}, // noc -> Latn
+    {0x8DCD0000u, 51u}, // nod -> Lana
+    {0x91CD0000u, 21u}, // noe -> Deva
+    {0x95CD0000u, 55u}, // nof -> Latn
+    {0x99CD0000u, 20u}, // nog -> Cyrl
+    {0x9DCD0000u, 55u}, // noh -> Latn
+    {0xA1CD0000u, 21u}, // noi -> Deva
+    {0xA5CD0000u, 55u}, // noj -> Latn
+    {0xA9CD0000u, 55u}, // nok -> Latn
+    {0xB5CD0000u, 90u}, // non -> Runr
+    {0xBDCD0000u, 55u}, // nop -> Latn
+    {0xC1CD0000u, 55u}, // noq -> Latn
+    {0xC9CD0000u, 120u}, // nos -> Yiii
+    {0xCDCD0000u, 55u}, // not -> Latn
+    {0xD1CD0000u, 55u}, // nou -> Latn
+    {0xD5CD0000u, 55u}, // nov -> Latn
+    {0xD9CD0000u, 55u}, // now -> Latn
+    {0xE1CD0000u, 55u}, // noy -> Latn
+    {0x85ED0000u, 112u}, // npb -> Tibt
+    {0x99ED0000u, 55u}, // npg -> Latn
+    {0x9DED0000u, 55u}, // nph -> Latn
+    {0xADED0000u, 55u}, // npl -> Latn
+    {0xB5ED0000u, 55u}, // npn -> Latn
+    {0xB9ED0000u, 55u}, // npo -> Latn
+    {0xC9ED0000u, 55u}, // nps -> Latn
+    {0xD1ED0000u, 55u}, // npu -> Latn
+    {0xDDED0000u, 55u}, // npx -> Latn
+    {0xE1ED0000u, 55u}, // npy -> Latn
+    {0x9A0D0000u, 55u}, // nqg -> Latn
+    {0xAA0D0000u, 55u}, // nqk -> Latn
+    {0xAE0D0000u, 55u}, // nql -> Latn
+    {0xB20D0000u, 55u}, // nqm -> Latn
+    {0xB60D0000u, 55u}, // nqn -> Latn
+    {0xBA0D0000u, 75u}, // nqo -> Nkoo
+    {0xC20D0000u, 55u}, // nqq -> Latn
+    {0xCE0D0000u, 55u}, // nqt -> Latn
+    {0xE20D0000u, 55u}, // nqy -> Latn
+    {0x6E720000u, 55u}, // nr -> Latn
+    {0x822D0000u, 55u}, // nra -> Latn
+    {0x862D0000u, 55u}, // nrb -> Latn
+    {0x922D0000u, 55u}, // nre -> Latn
+    {0x962D0000u, 55u}, // nrf -> Latn
+    {0x9A2D0000u, 55u}, // nrg -> Latn
+    {0xA22D0000u, 55u}, // nri -> Latn
+    {0xAA2D0000u, 55u}, // nrk -> Latn
+    {0xAE2D0000u, 55u}, // nrl -> Latn
+    {0xB22D0000u, 55u}, // nrm -> Latn
+    {0xB62D0000u, 90u}, // nrn -> Runr
+    {0xBE2D0000u, 55u}, // nrp -> Latn
+    {0xD22D0000u, 55u}, // nru -> Latn
+    {0xDE2D0000u, 55u}, // nrx -> Latn
+    {0xE62D0000u, 55u}, // nrz -> Latn
+    {0x824D0000u, 55u}, // nsa -> Latn
+    {0x864D0000u, 55u}, // nsb -> Latn
+    {0x8A4D0000u, 55u}, // nsc -> Latn
+    {0x8E4D0000u, 120u}, // nsd -> Yiii
+    {0x924D0000u, 55u}, // nse -> Latn
+    {0x964D0000u, 120u}, // nsf -> Yiii
+    {0x9A4D0000u, 55u}, // nsg -> Latn
+    {0x9E4D0000u, 55u}, // nsh -> Latn
+    {0xAA4D0000u, 13u}, // nsk -> Cans
+    {0xB24D0000u, 55u}, // nsm -> Latn
+    {0xB64D0000u, 55u}, // nsn -> Latn
+    {0xBA4D0000u, 55u}, // nso -> Latn
+    {0xC24D0000u, 55u}, // nsq -> Latn
+    {0xCA4D0000u, 55u}, // nss -> Latn
+    {0xCE4D0000u, 113u}, // nst -> Tnsa
+    {0xD24D0000u, 55u}, // nsu -> Latn
+    {0xD64D0000u, 120u}, // nsv -> Yiii
+    {0xDA4D0000u, 55u}, // nsw -> Latn
+    {0xDE4D0000u, 55u}, // nsx -> Latn
+    {0xE24D0000u, 55u}, // nsy -> Latn
+    {0xE64D0000u, 55u}, // nsz -> Latn
+    {0x8E6D0000u, 55u}, // ntd -> Latn
+    {0x926D0000u, 55u}, // nte -> Latn
+    {0x9A6D0000u, 55u}, // ntg -> Latn
+    {0xA26D0000u, 55u}, // nti -> Latn
+    {0xA66D0000u, 55u}, // ntj -> Latn
+    {0xAA6D0000u, 55u}, // ntk -> Latn
+    {0xB26D0000u, 55u}, // ntm -> Latn
+    {0xBA6D0000u, 55u}, // nto -> Latn
+    {0xBE6D0000u, 55u}, // ntp -> Latn
+    {0xC66D0000u, 55u}, // ntr -> Latn
+    {0xD26D0000u, 55u}, // ntu -> Latn
+    {0xDE6D0000u, 55u}, // ntx -> Latn
+    {0xE26D0000u, 120u}, // nty -> Yiii
+    {0xE66D0000u,  2u}, // ntz -> Arab
+    {0x828D0000u, 55u}, // nua -> Latn
+    {0x8A8D0000u, 55u}, // nuc -> Latn
+    {0x8E8D0000u, 55u}, // nud -> Latn
+    {0x928D0000u, 55u}, // nue -> Latn
+    {0x968D0000u, 55u}, // nuf -> Latn
+    {0x9A8D0000u, 55u}, // nug -> Latn
+    {0x9E8D0000u, 55u}, // nuh -> Latn
+    {0xA28D0000u, 55u}, // nui -> Latn
+    {0xA68D0000u, 55u}, // nuj -> Latn
+    {0xAA8D0000u, 55u}, // nuk -> Latn
+    {0xB28D0000u, 55u}, // num -> Latn
+    {0xB68D0000u, 55u}, // nun -> Latn
+    {0xBA8D0000u, 55u}, // nuo -> Latn
+    {0xBE8D0000u, 55u}, // nup -> Latn
+    {0xC28D0000u, 55u}, // nuq -> Latn
+    {0xC68D0000u, 55u}, // nur -> Latn
+    {0xCA8D0000u, 55u}, // nus -> Latn
+    {0xCE8D0000u, 55u}, // nut -> Latn
+    {0xD28D0000u, 55u}, // nuu -> Latn
+    {0xD68D0000u, 55u}, // nuv -> Latn
+    {0xDA8D0000u, 55u}, // nuw -> Latn
+    {0xDE8D0000u, 55u}, // nux -> Latn
+    {0xE28D0000u, 55u}, // nuy -> Latn
+    {0xE68D0000u, 55u}, // nuz -> Latn
+    {0x6E760000u, 55u}, // nv -> Latn
+    {0x9EAD0000u, 55u}, // nvh -> Latn
+    {0xB2AD0000u, 55u}, // nvm -> Latn
+    {0xBAAD0000u, 55u}, // nvo -> Latn
+    {0x86CD0000u, 55u}, // nwb -> Latn
+    {0x8ACD0000u, 74u}, // nwc -> Newa
+    {0x92CD0000u, 55u}, // nwe -> Latn
+    {0x9ACD0000u, 55u}, // nwg -> Latn
+    {0xA2CD0000u, 55u}, // nwi -> Latn
+    {0xB2CD0000u, 55u}, // nwm -> Latn
+    {0xBACD0000u, 55u}, // nwo -> Latn
+    {0xC6CD0000u, 55u}, // nwr -> Latn
+    {0xDACD0000u, 55u}, // nww -> Latn
+    {0xDECD0000u, 21u}, // nwx -> Deva
+    {0x82ED0000u, 55u}, // nxa -> Latn
+    {0x8EED0000u, 55u}, // nxd -> Latn
+    {0x92ED0000u, 55u}, // nxe -> Latn
+    {0x9AED0000u, 55u}, // nxg -> Latn
+    {0xA2ED0000u, 55u}, // nxi -> Latn
+    {0xAEED0000u, 55u}, // nxl -> Latn
+    {0xB6ED0000u, 55u}, // nxn -> Latn
+    {0xBAED0000u, 55u}, // nxo -> Latn
+    {0xC2ED0000u, 55u}, // nxq -> Latn
+    {0xC6ED0000u, 55u}, // nxr -> Latn
+    {0xDEED0000u, 55u}, // nxx -> Latn
+    {0x6E790000u, 55u}, // ny -> Latn
+    {0x870D0000u, 55u}, // nyb -> Latn
+    {0x8B0D0000u, 55u}, // nyc -> Latn
+    {0x8F0D0000u, 55u}, // nyd -> Latn
+    {0x930D0000u, 55u}, // nye -> Latn
+    {0x970D0000u, 55u}, // nyf -> Latn
+    {0x9B0D0000u, 55u}, // nyg -> Latn
+    {0x9F0D0000u, 55u}, // nyh -> Latn
+    {0xA30D0000u, 55u}, // nyi -> Latn
+    {0xA70D0000u, 55u}, // nyj -> Latn
+    {0xAB0D0000u, 55u}, // nyk -> Latn
+    {0xAF0D0000u, 111u}, // nyl -> Thai
+    {0xB30D0000u, 55u}, // nym -> Latn
+    {0xB70D0000u, 55u}, // nyn -> Latn
+    {0xBB0D0000u, 55u}, // nyo -> Latn
+    {0xBF0D0000u, 55u}, // nyp -> Latn
+    {0xC30D0000u,  2u}, // nyq -> Arab
+    {0xC70D0000u, 55u}, // nyr -> Latn
+    {0xCB0D0000u, 55u}, // nys -> Latn
+    {0xCF0D0000u, 55u}, // nyt -> Latn
+    {0xD30D0000u, 55u}, // nyu -> Latn
+    {0xD70D0000u, 55u}, // nyv -> Latn
+    {0xDB0D0000u, 111u}, // nyw -> Thai
+    {0xDF0D0000u, 55u}, // nyx -> Latn
+    {0xE30D0000u, 55u}, // nyy -> Latn
+    {0x832D0000u, 55u}, // nza -> Latn
+    {0x872D0000u, 55u}, // nzb -> Latn
+    {0x8F2D0000u, 55u}, // nzd -> Latn
+    {0xA32D0000u, 55u}, // nzi -> Latn
+    {0xAB2D0000u, 55u}, // nzk -> Latn
+    {0xB32D0000u, 55u}, // nzm -> Latn
+    {0xC72D0000u, 55u}, // nzr -> Latn
+    {0xD32D0000u, 55u}, // nzu -> Latn
+    {0xE32D0000u, 55u}, // nzy -> Latn
+    {0xE72D0000u, 55u}, // nzz -> Latn
+    {0x800E0000u, 20u}, // oaa -> Cyrl
+    {0x880E0000u, 20u}, // oac -> Cyrl
+    {0xC40E0000u, 100u}, // oar -> Syrc
+    {0xD40E0000u, 25u}, // oav -> Geor
+    {0xA02E0000u, 55u}, // obi -> Latn
+    {0xA82E0000u, 55u}, // obk -> Latn
+    {0xAC2E0000u, 55u}, // obl -> Latn
+    {0xB02E0000u, 85u}, // obm -> Phnx
+    {0xB82E0000u, 55u}, // obo -> Latn
+    {0xC42E0000u, 72u}, // obr -> Mymr
+    {0xCC2E0000u, 55u}, // obt -> Latn
+    {0xD02E0000u, 55u}, // obu -> Latn
+    {0x6F630000u, 55u}, // oc -> Latn
+    {0x804E0000u, 55u}, // oca -> Latn
+    {0xB84E0000u, 55u}, // oco -> Latn
+    {0xD04E0000u, 55u}, // ocu -> Latn
+    {0x806E0000u, 55u}, // oda -> Latn
+    {0xA86E0000u,  2u}, // odk -> Arab
+    {0xCC6E0000u, 55u}, // odt -> Latn
+    {0xD06E0000u, 55u}, // odu -> Latn
+    {0xC8AE0000u, 55u}, // ofs -> Latn
+    {0xD0AE0000u, 55u}, // ofu -> Latn
+    {0x84CE0000u, 55u}, // ogb -> Latn
+    {0x88CE0000u, 55u}, // ogc -> Latn
+    {0x98CE0000u, 55u}, // ogg -> Latn
+    {0xB8CE0000u, 55u}, // ogo -> Latn
+    {0xD0CE0000u, 55u}, // ogu -> Latn
+    {0xCCEE0000u, 119u}, // oht -> Xsux
+    {0xD0EE0000u, 55u}, // ohu -> Latn
+    {0x810E0000u, 55u}, // oia -> Latn
+    {0x910E0000u, 55u}, // oie -> Latn
+    {0xB50E0000u, 55u}, // oin -> Latn
+    {0x6F6A0000u, 13u}, // oj -> Cans
+    {0x852E0000u, 55u}, // ojb -> Latn
+    {0x892E0000u, 55u}, // ojc -> Latn
+    {0xC92E0000u, 13u}, // ojs -> Cans
+    {0xD52E0000u, 55u}, // ojv -> Latn
+    {0xD92E0000u, 55u}, // ojw -> Latn
+    {0x814E0000u, 55u}, // oka -> Latn
+    {0x854E0000u, 55u}, // okb -> Latn
+    {0x894E0000u, 55u}, // okc -> Latn
+    {0x8D4E0000u, 55u}, // okd -> Latn
+    {0x914E0000u, 55u}, // oke -> Latn
+    {0x994E0000u, 55u}, // okg -> Latn
+    {0xA14E0000u, 55u}, // oki -> Latn
+    {0xA94E0000u, 55u}, // okk -> Latn
+    {0xB14E0000u, 33u}, // okm -> Hang
+    {0xB94E0000u, 34u}, // oko -> Hani
+    {0xC54E0000u, 55u}, // okr -> Latn
+    {0xC94E0000u, 55u}, // oks -> Latn
+    {0xD14E0000u, 55u}, // oku -> Latn
+    {0xD54E0000u, 55u}, // okv -> Latn
+    {0xDD4E0000u, 55u}, // okx -> Latn
+    {0xE54E0000u, 47u}, // okz -> Khmr
+    {0x816E0000u, 21u}, // ola -> Deva
+    {0x8D6E0000u, 55u}, // old -> Latn
+    {0x916E0000u, 112u}, // ole -> Tibt
+    {0xA96E0000u, 55u}, // olk -> Latn
+    {0xB16E0000u, 55u}, // olm -> Latn
+    {0xB96E0000u, 55u}, // olo -> Latn
+    {0xC56E0000u, 55u}, // olr -> Latn
+    {0xCD6E0000u, 55u}, // olt -> Latn
+    {0xD16E0000u, 55u}, // olu -> Latn
+    {0x6F6D0000u, 55u}, // om -> Latn
+    {0x818E0000u, 55u}, // oma -> Latn
+    {0x858E0000u, 55u}, // omb -> Latn
+    {0x898E0000u, 55u}, // omc -> Latn
+    {0x998E0000u, 55u}, // omg -> Latn
+    {0xA18E0000u, 55u}, // omi -> Latn
+    {0xA98E0000u, 20u}, // omk -> Cyrl
+    {0xAD8E0000u, 55u}, // oml -> Latn
+    {0xB98E0000u, 55u}, // omo -> Latn
+    {0xBD8E0000u, 71u}, // omp -> Mtei
+    {0xC58E0000u, 68u}, // omr -> Modi
+    {0xCD8E0000u, 55u}, // omt -> Latn
+    {0xD18E0000u, 55u}, // omu -> Latn
+    {0xD98E0000u, 55u}, // omw -> Latn
+    {0xDD8E0000u, 72u}, // omx -> Mymr
+    {0x81AE0000u, 55u}, // ona -> Latn
+    {0x91AE0000u, 55u}, // one -> Latn
+    {0x99AE0000u, 55u}, // ong -> Latn
+    {0xA1AE0000u, 55u}, // oni -> Latn
+    {0xA5AE0000u, 55u}, // onj -> Latn
+    {0xA9AE0000u, 55u}, // onk -> Latn
+    {0xB5AE0000u, 55u}, // onn -> Latn
+    {0xB9AE0000u, 55u}, // ono -> Latn
+    {0xBDAE0000u, 55u}, // onp -> Latn
+    {0xC5AE0000u, 55u}, // onr -> Latn
+    {0xC9AE0000u, 55u}, // ons -> Latn
+    {0xCDAE0000u, 55u}, // ont -> Latn
+    {0xD1AE0000u, 55u}, // onu -> Latn
+    {0xDDAE0000u, 55u}, // onx -> Latn
+    {0x8DCE0000u, 55u}, // ood -> Latn
+    {0xB5CE0000u, 21u}, // oon -> Deva
+    {0xC5CE0000u, 55u}, // oor -> Latn
+    {0x81EE0000u, 55u}, // opa -> Latn
+    {0xA9EE0000u, 55u}, // opk -> Latn
+    {0xB1EE0000u, 55u}, // opm -> Latn
+    {0xB9EE0000u, 55u}, // opo -> Latn
+    {0xCDEE0000u, 55u}, // opt -> Latn
+    {0xE1EE0000u, 55u}, // opy -> Latn
+    {0x6F720000u, 80u}, // or -> Orya
+    {0x822E0000u, 55u}, // ora -> Latn
+    {0x8A2E0000u, 55u}, // orc -> Latn
+    {0x922E0000u, 55u}, // ore -> Latn
+    {0x9A2E0000u, 55u}, // org -> Latn
+    {0xB62E0000u, 55u}, // orn -> Latn
+    {0xBA2E0000u, 55u}, // oro -> Latn
+    {0xC62E0000u, 55u}, // orr -> Latn
+    {0xCA2E0000u, 55u}, // ors -> Latn
+    {0xCE2E0000u, 108u}, // ort -> Telu
     {0xD22E0000u,  2u}, // oru -> Arab
-    {0x6F730000u, 18u}, // os -> Cyrl
-    {0x824E0000u, 67u}, // osa -> Osge
+    {0xD62E0000u, 20u}, // orv -> Cyrl
+    {0xDA2E0000u, 55u}, // orw -> Latn
+    {0xDE2E0000u, 55u}, // orx -> Latn
+    {0xE62E0000u, 55u}, // orz -> Latn
+    {0x6F730000u, 20u}, // os -> Cyrl
+    {0x824E0000u, 81u}, // osa -> Osge
+    {0x8A4E0000u, 40u}, // osc -> Ital
+    {0xA24E0000u, 41u}, // osi -> Java
+    {0xBA4E0000u, 55u}, // oso -> Latn
+    {0xBE4E0000u, 55u}, // osp -> Latn
+    {0xCE4E0000u, 55u}, // ost -> Latn
+    {0xD24E0000u, 55u}, // osu -> Latn
+    {0xDE4E0000u, 55u}, // osx -> Latn
     {0x826E0000u,  2u}, // ota -> Arab
-    {0xAA6E0000u, 65u}, // otk -> Orkh
-    {0xA28E0000u, 68u}, // oui -> Ougr
-    {0xB32E0000u, 46u}, // ozm -> Latn
-    {0x70610000u, 28u}, // pa -> Guru
+    {0x866E0000u, 112u}, // otb -> Tibt
+    {0x8E6E0000u, 55u}, // otd -> Latn
+    {0x926E0000u, 55u}, // ote -> Latn
+    {0xA26E0000u, 55u}, // oti -> Latn
+    {0xAA6E0000u, 79u}, // otk -> Orkh
+    {0xAE6E0000u, 55u}, // otl -> Latn
+    {0xB26E0000u, 55u}, // otm -> Latn
+    {0xB66E0000u, 55u}, // otn -> Latn
+    {0xC26E0000u, 55u}, // otq -> Latn
+    {0xC66E0000u, 55u}, // otr -> Latn
+    {0xCA6E0000u, 55u}, // ots -> Latn
+    {0xCE6E0000u, 55u}, // ott -> Latn
+    {0xD26E0000u, 55u}, // otu -> Latn
+    {0xDA6E0000u, 55u}, // otw -> Latn
+    {0xDE6E0000u, 55u}, // otx -> Latn
+    {0xE26E0000u, 29u}, // oty -> Gran
+    {0xE66E0000u, 55u}, // otz -> Latn
+    {0x868E0000u, 55u}, // oub -> Latn
+    {0x928E0000u, 55u}, // oue -> Latn
+    {0xA28E0000u, 82u}, // oui -> Ougr
+    {0xB28E0000u, 55u}, // oum -> Latn
+    {0x8EAE0000u, 55u}, // ovd -> Latn
+    {0xA2CE0000u, 55u}, // owi -> Latn
+    {0xAECE0000u, 55u}, // owl -> Latn
+    {0x8F0E0000u, 55u}, // oyd -> Latn
+    {0xB30E0000u, 55u}, // oym -> Latn
+    {0xE30E0000u, 55u}, // oyy -> Latn
+    {0xB32E0000u, 55u}, // ozm -> Latn
+    {0x70610000u, 32u}, // pa -> Guru
     {0x7061504Bu,  2u}, // pa-PK -> Arab
-    {0x980F0000u, 46u}, // pag -> Latn
-    {0xAC0F0000u, 70u}, // pal -> Phli
-    {0xB00F0000u, 46u}, // pam -> Latn
-    {0xBC0F0000u, 46u}, // pap -> Latn
-    {0xD00F0000u, 46u}, // pau -> Latn
-    {0xA02F0000u, 46u}, // pbi -> Latn
-    {0x8C4F0000u, 46u}, // pcd -> Latn
-    {0xB04F0000u, 46u}, // pcm -> Latn
-    {0x886F0000u, 46u}, // pdc -> Latn
-    {0xCC6F0000u, 46u}, // pdt -> Latn
-    {0x8C8F0000u, 46u}, // ped -> Latn
-    {0xB88F0000u, 100u}, // peo -> Xpeo
-    {0xDC8F0000u, 46u}, // pex -> Latn
-    {0xACAF0000u, 46u}, // pfl -> Latn
+    {0x840F0000u, 55u}, // pab -> Latn
+    {0x880F0000u, 55u}, // pac -> Latn
+    {0x8C0F0000u, 55u}, // pad -> Latn
+    {0x900F0000u, 55u}, // pae -> Latn
+    {0x940F0000u, 55u}, // paf -> Latn
+    {0x980F0000u, 55u}, // pag -> Latn
+    {0x9C0F0000u, 55u}, // pah -> Latn
+    {0xA00F0000u, 55u}, // pai -> Latn
+    {0xA80F0000u, 55u}, // pak -> Latn
+    {0xAC0F0000u, 84u}, // pal -> Phli
+    {0xB00F0000u, 55u}, // pam -> Latn
+    {0xB80F0000u, 55u}, // pao -> Latn
+    {0xBC0F0000u, 55u}, // pap -> Latn
+    {0xC00F0000u, 20u}, // paq -> Cyrl
+    {0xC40F0000u, 55u}, // par -> Latn
+    {0xC80F0000u, 55u}, // pas -> Latn
+    {0xD00F0000u, 55u}, // pau -> Latn
+    {0xD40F0000u, 55u}, // pav -> Latn
+    {0xD80F0000u, 55u}, // paw -> Latn
+    {0xDC0F0000u, 55u}, // pax -> Latn
+    {0xE00F0000u, 55u}, // pay -> Latn
+    {0xE40F0000u, 55u}, // paz -> Latn
+    {0x842F0000u, 55u}, // pbb -> Latn
+    {0x882F0000u, 55u}, // pbc -> Latn
+    {0x902F0000u, 55u}, // pbe -> Latn
+    {0x942F0000u, 55u}, // pbf -> Latn
+    {0x982F0000u, 55u}, // pbg -> Latn
+    {0x9C2F0000u, 55u}, // pbh -> Latn
+    {0xA02F0000u, 55u}, // pbi -> Latn
+    {0xAC2F0000u, 55u}, // pbl -> Latn
+    {0xB02F0000u, 55u}, // pbm -> Latn
+    {0xB42F0000u, 55u}, // pbn -> Latn
+    {0xB82F0000u, 55u}, // pbo -> Latn
+    {0xBC2F0000u, 55u}, // pbp -> Latn
+    {0xC42F0000u, 55u}, // pbr -> Latn
+    {0xC82F0000u, 55u}, // pbs -> Latn
+    {0xCC2F0000u,  2u}, // pbt -> Arab
+    {0xD42F0000u, 55u}, // pbv -> Latn
+    {0xE02F0000u, 55u}, // pby -> Latn
+    {0x804F0000u, 55u}, // pca -> Latn
+    {0x844F0000u, 47u}, // pcb -> Khmr
+    {0x884F0000u, 55u}, // pcc -> Latn
+    {0x8C4F0000u, 55u}, // pcd -> Latn
+    {0x904F0000u, 72u}, // pce -> Mymr
+    {0x944F0000u, 67u}, // pcf -> Mlym
+    {0x984F0000u, 67u}, // pcg -> Mlym
+    {0x9C4F0000u, 21u}, // pch -> Deva
+    {0xA04F0000u, 21u}, // pci -> Deva
+    {0xA44F0000u, 108u}, // pcj -> Telu
+    {0xA84F0000u, 55u}, // pck -> Latn
+    {0xB04F0000u, 55u}, // pcm -> Latn
+    {0xB44F0000u, 55u}, // pcn -> Latn
+    {0xBC4F0000u, 55u}, // pcp -> Latn
+    {0xD84F0000u, 55u}, // pcw -> Latn
+    {0x806F0000u, 55u}, // pda -> Latn
+    {0x886F0000u, 55u}, // pdc -> Latn
+    {0xB46F0000u, 55u}, // pdn -> Latn
+    {0xB86F0000u, 55u}, // pdo -> Latn
+    {0xCC6F0000u, 55u}, // pdt -> Latn
+    {0xD06F0000u, 55u}, // pdu -> Latn
+    {0x808F0000u, 55u}, // pea -> Latn
+    {0x848F0000u, 55u}, // peb -> Latn
+    {0x8C8F0000u, 55u}, // ped -> Latn
+    {0x908F0000u, 55u}, // pee -> Latn
+    {0x988F0000u, 80u}, // peg -> Orya
+    {0xA08F0000u, 55u}, // pei -> Latn
+    {0xA88F0000u, 55u}, // pek -> Latn
+    {0xAC8F0000u, 55u}, // pel -> Latn
+    {0xB08F0000u, 55u}, // pem -> Latn
+    {0xB88F0000u, 118u}, // peo -> Xpeo
+    {0xBC8F0000u, 55u}, // pep -> Latn
+    {0xC08F0000u, 55u}, // peq -> Latn
+    {0xD48F0000u, 55u}, // pev -> Latn
+    {0xDC8F0000u, 55u}, // pex -> Latn
+    {0xE08F0000u, 55u}, // pey -> Latn
+    {0xE48F0000u, 55u}, // pez -> Latn
+    {0x80AF0000u, 55u}, // pfa -> Latn
+    {0x90AF0000u, 55u}, // pfe -> Latn
+    {0xACAF0000u, 55u}, // pfl -> Latn
+    {0x80CF0000u, 55u}, // pga -> Latn
+    {0x8CCF0000u, 46u}, // pgd -> Khar
+    {0x98CF0000u, 21u}, // pgg -> Deva
+    {0xA0CF0000u, 55u}, // pgi -> Latn
+    {0xA8CF0000u, 55u}, // pgk -> Latn
+    {0xACCF0000u, 77u}, // pgl -> Ogam
+    {0xB4CF0000u, 40u}, // pgn -> Ital
+    {0xC8CF0000u, 55u}, // pgs -> Latn
+    {0xD0CF0000u, 55u}, // pgu -> Latn
+    {0x8CEF0000u, 21u}, // phd -> Deva
+    {0x98EF0000u, 55u}, // phg -> Latn
+    {0x9CEF0000u, 55u}, // phh -> Latn
+    {0xA8EF0000u, 72u}, // phk -> Mymr
     {0xACEF0000u,  2u}, // phl -> Arab
-    {0xB4EF0000u, 71u}, // phn -> Phnx
-    {0xAD0F0000u, 46u}, // pil -> Latn
-    {0xBD0F0000u, 46u}, // pip -> Latn
-    {0xC90F0000u, 46u}, // pis -> Latn
-    {0x814F0000u,  9u}, // pka -> Brah
-    {0xB94F0000u, 46u}, // pko -> Latn
-    {0x706C0000u, 46u}, // pl -> Latn
-    {0x816F0000u, 46u}, // pla -> Latn
-    {0xC98F0000u, 46u}, // pms -> Latn
-    {0x99AF0000u, 46u}, // png -> Latn
-    {0xB5AF0000u, 46u}, // pnn -> Latn
-    {0xCDAF0000u, 26u}, // pnt -> Grek
-    {0xB5CF0000u, 46u}, // pon -> Latn
-    {0x81EF0000u, 19u}, // ppa -> Deva
-    {0xB9EF0000u, 46u}, // ppo -> Latn
-    {0xB20F0000u, 46u}, // pqm -> Latn
-    {0x822F0000u, 39u}, // pra -> Khar
+    {0xB0EF0000u, 55u}, // phm -> Latn
+    {0xB4EF0000u, 85u}, // phn -> Phnx
+    {0xB8EF0000u, 52u}, // pho -> Laoo
+    {0xC4EF0000u,  2u}, // phr -> Arab
+    {0xCCEF0000u, 111u}, // pht -> Thai
+    {0xD0EF0000u, 111u}, // phu -> Thai
+    {0xD4EF0000u,  2u}, // phv -> Arab
+    {0xD8EF0000u, 21u}, // phw -> Deva
+    {0x70690000u, 95u}, // pi -> Sinh
+    {0x810F0000u, 55u}, // pia -> Latn
+    {0x850F0000u, 55u}, // pib -> Latn
+    {0x890F0000u, 55u}, // pic -> Latn
+    {0x8D0F0000u, 55u}, // pid -> Latn
+    {0x950F0000u, 55u}, // pif -> Latn
+    {0x990F0000u, 55u}, // pig -> Latn
+    {0x9D0F0000u, 55u}, // pih -> Latn
+    {0xA50F0000u, 55u}, // pij -> Latn
+    {0xAD0F0000u, 55u}, // pil -> Latn
+    {0xB10F0000u, 55u}, // pim -> Latn
+    {0xB50F0000u, 55u}, // pin -> Latn
+    {0xB90F0000u, 55u}, // pio -> Latn
+    {0xBD0F0000u, 55u}, // pip -> Latn
+    {0xC50F0000u, 55u}, // pir -> Latn
+    {0xC90F0000u, 55u}, // pis -> Latn
+    {0xCD0F0000u, 55u}, // pit -> Latn
+    {0xD10F0000u, 55u}, // piu -> Latn
+    {0xD50F0000u, 55u}, // piv -> Latn
+    {0xD90F0000u, 55u}, // piw -> Latn
+    {0xDD0F0000u, 55u}, // pix -> Latn
+    {0xE10F0000u, 55u}, // piy -> Latn
+    {0xE50F0000u, 55u}, // piz -> Latn
+    {0xCD2F0000u, 55u}, // pjt -> Latn
+    {0x814F0000u, 11u}, // pka -> Brah
+    {0x854F0000u, 55u}, // pkb -> Latn
+    {0x994F0000u, 55u}, // pkg -> Latn
+    {0x9D4F0000u, 55u}, // pkh -> Latn
+    {0xB54F0000u, 55u}, // pkn -> Latn
+    {0xB94F0000u, 55u}, // pko -> Latn
+    {0xBD4F0000u, 55u}, // pkp -> Latn
+    {0xC54F0000u, 67u}, // pkr -> Mlym
+    {0xD14F0000u, 55u}, // pku -> Latn
+    {0x706C0000u, 55u}, // pl -> Latn
+    {0x816F0000u, 55u}, // pla -> Latn
+    {0x856F0000u, 55u}, // plb -> Latn
+    {0x896F0000u, 55u}, // plc -> Latn
+    {0x8D6F0000u, 55u}, // pld -> Latn
+    {0x916F0000u, 55u}, // ple -> Latn
+    {0x996F0000u, 55u}, // plg -> Latn
+    {0x9D6F0000u, 55u}, // plh -> Latn
+    {0xA96F0000u,  2u}, // plk -> Arab
+    {0xAD6F0000u, 72u}, // pll -> Mymr
+    {0xB56F0000u, 55u}, // pln -> Latn
+    {0xB96F0000u, 55u}, // plo -> Latn
+    {0xC56F0000u, 55u}, // plr -> Latn
+    {0xC96F0000u, 55u}, // pls -> Latn
+    {0xD16F0000u, 55u}, // plu -> Latn
+    {0xD56F0000u, 55u}, // plv -> Latn
+    {0xD96F0000u, 55u}, // plw -> Latn
+    {0xE56F0000u, 55u}, // plz -> Latn
+    {0x818F0000u, 55u}, // pma -> Latn
+    {0x858F0000u, 55u}, // pmb -> Latn
+    {0x8D8F0000u, 55u}, // pmd -> Latn
+    {0x918F0000u, 55u}, // pme -> Latn
+    {0x958F0000u, 55u}, // pmf -> Latn
+    {0x9D8F0000u, 11u}, // pmh -> Brah
+    {0xA18F0000u, 55u}, // pmi -> Latn
+    {0xA58F0000u, 55u}, // pmj -> Latn
+    {0xAD8F0000u, 55u}, // pml -> Latn
+    {0xB18F0000u, 55u}, // pmm -> Latn
+    {0xB58F0000u, 55u}, // pmn -> Latn
+    {0xB98F0000u, 55u}, // pmo -> Latn
+    {0xC18F0000u, 55u}, // pmq -> Latn
+    {0xC58F0000u, 55u}, // pmr -> Latn
+    {0xC98F0000u, 55u}, // pms -> Latn
+    {0xCD8F0000u, 55u}, // pmt -> Latn
+    {0xD98F0000u, 55u}, // pmw -> Latn
+    {0xDD8F0000u, 55u}, // pmx -> Latn
+    {0xE18F0000u, 55u}, // pmy -> Latn
+    {0xE58F0000u, 55u}, // pmz -> Latn
+    {0x81AF0000u, 55u}, // pna -> Latn
+    {0x89AF0000u, 55u}, // pnc -> Latn
+    {0x8DAF0000u, 55u}, // pnd -> Latn
+    {0x91AF0000u, 55u}, // pne -> Latn
+    {0x99AF0000u, 55u}, // png -> Latn
+    {0x9DAF0000u, 55u}, // pnh -> Latn
+    {0xA1AF0000u, 55u}, // pni -> Latn
+    {0xA5AF0000u, 55u}, // pnj -> Latn
+    {0xA9AF0000u, 55u}, // pnk -> Latn
+    {0xADAF0000u, 55u}, // pnl -> Latn
+    {0xB1AF0000u, 55u}, // pnm -> Latn
+    {0xB5AF0000u, 55u}, // pnn -> Latn
+    {0xB9AF0000u, 55u}, // pno -> Latn
+    {0xBDAF0000u, 55u}, // pnp -> Latn
+    {0xC1AF0000u, 55u}, // pnq -> Latn
+    {0xC5AF0000u, 55u}, // pnr -> Latn
+    {0xC9AF0000u, 55u}, // pns -> Latn
+    {0xCDAF0000u, 30u}, // pnt -> Grek
+    {0xD5AF0000u, 55u}, // pnv -> Latn
+    {0xD9AF0000u, 55u}, // pnw -> Latn
+    {0xE1AF0000u, 55u}, // pny -> Latn
+    {0xE5AF0000u, 55u}, // pnz -> Latn
+    {0x89CF0000u, 55u}, // poc -> Latn
+    {0x91CF0000u, 55u}, // poe -> Latn
+    {0x95CF0000u, 55u}, // pof -> Latn
+    {0x99CF0000u, 55u}, // pog -> Latn
+    {0x9DCF0000u, 55u}, // poh -> Latn
+    {0xA1CF0000u, 55u}, // poi -> Latn
+    {0xA9CF0000u, 55u}, // pok -> Latn
+    {0xB1CF0000u, 55u}, // pom -> Latn
+    {0xB5CF0000u, 55u}, // pon -> Latn
+    {0xB9CF0000u, 55u}, // poo -> Latn
+    {0xBDCF0000u, 55u}, // pop -> Latn
+    {0xC1CF0000u, 55u}, // poq -> Latn
+    {0xC9CF0000u, 55u}, // pos -> Latn
+    {0xCDCF0000u, 55u}, // pot -> Latn
+    {0xD5CF0000u, 55u}, // pov -> Latn
+    {0xD9CF0000u, 55u}, // pow -> Latn
+    {0xE1CF0000u, 55u}, // poy -> Latn
+    {0x91EF0000u, 55u}, // ppe -> Latn
+    {0xA1EF0000u, 55u}, // ppi -> Latn
+    {0xA9EF0000u, 55u}, // ppk -> Latn
+    {0xADEF0000u, 55u}, // ppl -> Latn
+    {0xB1EF0000u, 55u}, // ppm -> Latn
+    {0xB5EF0000u, 55u}, // ppn -> Latn
+    {0xB9EF0000u, 55u}, // ppo -> Latn
+    {0xBDEF0000u, 55u}, // ppp -> Latn
+    {0xC1EF0000u, 55u}, // ppq -> Latn
+    {0xC9EF0000u, 55u}, // pps -> Latn
+    {0xCDEF0000u, 55u}, // ppt -> Latn
+    {0x820F0000u, 55u}, // pqa -> Latn
+    {0xB20F0000u, 55u}, // pqm -> Latn
+    {0x822F0000u, 46u}, // pra -> Khar
+    {0x8A2F0000u,  2u}, // prc -> Arab
     {0x8E2F0000u,  2u}, // prd -> Arab
-    {0x9A2F0000u, 46u}, // prg -> Latn
+    {0x922F0000u, 55u}, // pre -> Latn
+    {0x962F0000u, 55u}, // prf -> Latn
+    {0x9A2F0000u, 55u}, // prg -> Latn
+    {0x9E2F0000u, 55u}, // prh -> Latn
+    {0xA22F0000u, 55u}, // pri -> Latn
+    {0xAA2F0000u, 55u}, // prk -> Latn
+    {0xB22F0000u, 55u}, // prm -> Latn
+    {0xBA2F0000u, 55u}, // pro -> Latn
+    {0xC22F0000u, 55u}, // prq -> Latn
+    {0xC62F0000u, 55u}, // prr -> Latn
+    {0xCE2F0000u, 111u}, // prt -> Thai
+    {0xD22F0000u, 55u}, // pru -> Latn
+    {0xDA2F0000u, 55u}, // prw -> Latn
+    {0xDE2F0000u,  2u}, // prx -> Arab
     {0x70730000u,  2u}, // ps -> Arab
-    {0xCA4F0000u, 46u}, // pss -> Latn
-    {0x70740000u, 46u}, // pt -> Latn
-    {0xBE6F0000u, 46u}, // ptp -> Latn
-    {0xD28F0000u, 46u}, // puu -> Latn
-    {0x82CF0000u, 46u}, // pwa -> Latn
-    {0x71750000u, 46u}, // qu -> Latn
-    {0x8A900000u, 46u}, // quc -> Latn
-    {0x9A900000u, 46u}, // qug -> Latn
-    {0xA0110000u, 46u}, // rai -> Latn
-    {0xA4110000u, 19u}, // raj -> Deva
-    {0xB8110000u, 46u}, // rao -> Latn
-    {0x94510000u, 46u}, // rcf -> Latn
-    {0xA4910000u, 46u}, // rej -> Latn
-    {0xAC910000u, 46u}, // rel -> Latn
-    {0xC8910000u, 46u}, // res -> Latn
-    {0xB4D10000u, 46u}, // rgn -> Latn
-    {0x98F10000u, 74u}, // rhg -> Rohg
-    {0x81110000u, 46u}, // ria -> Latn
-    {0x95110000u, 91u}, // rif -> Tfng
-    {0x95114E4Cu, 46u}, // rif-NL -> Latn
-    {0xC9310000u, 19u}, // rjs -> Deva
-    {0xCD510000u,  8u}, // rkt -> Beng
-    {0x726D0000u, 46u}, // rm -> Latn
-    {0x95910000u, 46u}, // rmf -> Latn
-    {0xB9910000u, 46u}, // rmo -> Latn
+    {0x824F0000u, 55u}, // psa -> Latn
+    {0x924F0000u, 55u}, // pse -> Latn
+    {0x9E4F0000u,  2u}, // psh -> Arab
+    {0xA24F0000u,  2u}, // psi -> Arab
+    {0xB24F0000u, 55u}, // psm -> Latn
+    {0xB64F0000u, 55u}, // psn -> Latn
+    {0xC24F0000u, 55u}, // psq -> Latn
+    {0xCA4F0000u, 55u}, // pss -> Latn
+    {0xCE4F0000u,  2u}, // pst -> Arab
+    {0xD24F0000u, 11u}, // psu -> Brah
+    {0xDA4F0000u, 55u}, // psw -> Latn
+    {0x70740000u, 55u}, // pt -> Latn
+    {0x826F0000u, 55u}, // pta -> Latn
+    {0x9E6F0000u, 55u}, // pth -> Latn
+    {0xA26F0000u, 55u}, // pti -> Latn
+    {0xB66F0000u, 55u}, // ptn -> Latn
+    {0xBA6F0000u, 55u}, // pto -> Latn
+    {0xBE6F0000u, 55u}, // ptp -> Latn
+    {0xC66F0000u, 55u}, // ptr -> Latn
+    {0xCE6F0000u, 55u}, // ptt -> Latn
+    {0xD26F0000u, 55u}, // ptu -> Latn
+    {0xD66F0000u, 55u}, // ptv -> Latn
+    {0x828F0000u, 55u}, // pua -> Latn
+    {0x868F0000u, 55u}, // pub -> Latn
+    {0x8A8F0000u, 55u}, // puc -> Latn
+    {0x8E8F0000u, 55u}, // pud -> Latn
+    {0x928F0000u, 55u}, // pue -> Latn
+    {0x968F0000u, 55u}, // puf -> Latn
+    {0x9A8F0000u, 55u}, // pug -> Latn
+    {0xA28F0000u, 55u}, // pui -> Latn
+    {0xA68F0000u, 55u}, // puj -> Latn
+    {0xB28F0000u, 21u}, // pum -> Deva
+    {0xBA8F0000u, 55u}, // puo -> Latn
+    {0xBE8F0000u, 55u}, // pup -> Latn
+    {0xC28F0000u, 55u}, // puq -> Latn
+    {0xC68F0000u, 55u}, // pur -> Latn
+    {0xCE8F0000u, 55u}, // put -> Latn
+    {0xD28F0000u, 55u}, // puu -> Latn
+    {0xDA8F0000u, 55u}, // puw -> Latn
+    {0xDE8F0000u, 55u}, // pux -> Latn
+    {0xE28F0000u, 55u}, // puy -> Latn
+    {0x82CF0000u, 55u}, // pwa -> Latn
+    {0x86CF0000u, 55u}, // pwb -> Latn
+    {0x9ACF0000u, 55u}, // pwg -> Latn
+    {0xB2CF0000u, 55u}, // pwm -> Latn
+    {0xB6CF0000u, 55u}, // pwn -> Latn
+    {0xBACF0000u, 72u}, // pwo -> Mymr
+    {0xC6CF0000u, 21u}, // pwr -> Deva
+    {0xDACF0000u, 111u}, // pww -> Thai
+    {0xB2EF0000u, 55u}, // pxm -> Latn
+    {0x930F0000u, 55u}, // pye -> Latn
+    {0xB30F0000u, 55u}, // pym -> Latn
+    {0xB70F0000u, 55u}, // pyn -> Latn
+    {0xD30F0000u, 55u}, // pyu -> Latn
+    {0xDF0F0000u, 72u}, // pyx -> Mymr
+    {0xE30F0000u, 55u}, // pyy -> Latn
+    {0x932F0000u, 55u}, // pze -> Latn
+    {0x9F2F0000u, 55u}, // pzh -> Latn
+    {0xB72F0000u, 55u}, // pzn -> Latn
+    {0x71750000u, 55u}, // qu -> Latn
+    {0x82900000u, 55u}, // qua -> Latn
+    {0x86900000u, 55u}, // qub -> Latn
+    {0x8A900000u, 55u}, // quc -> Latn
+    {0x8E900000u, 55u}, // qud -> Latn
+    {0x96900000u, 55u}, // quf -> Latn
+    {0x9A900000u, 55u}, // qug -> Latn
+    {0xA2900000u, 55u}, // qui -> Latn
+    {0xAA900000u, 55u}, // quk -> Latn
+    {0xAE900000u, 55u}, // qul -> Latn
+    {0xB2900000u, 55u}, // qum -> Latn
+    {0xB6900000u, 55u}, // qun -> Latn
+    {0xBE900000u, 55u}, // qup -> Latn
+    {0xC2900000u, 55u}, // quq -> Latn
+    {0xC6900000u, 55u}, // qur -> Latn
+    {0xCA900000u, 55u}, // qus -> Latn
+    {0xD6900000u, 55u}, // quv -> Latn
+    {0xDA900000u, 55u}, // quw -> Latn
+    {0xDE900000u, 55u}, // qux -> Latn
+    {0xE2900000u, 55u}, // quy -> Latn
+    {0x82B00000u, 55u}, // qva -> Latn
+    {0x8AB00000u, 55u}, // qvc -> Latn
+    {0x92B00000u, 55u}, // qve -> Latn
+    {0x9EB00000u, 55u}, // qvh -> Latn
+    {0xA2B00000u, 55u}, // qvi -> Latn
+    {0xA6B00000u, 55u}, // qvj -> Latn
+    {0xAEB00000u, 55u}, // qvl -> Latn
+    {0xB2B00000u, 55u}, // qvm -> Latn
+    {0xB6B00000u, 55u}, // qvn -> Latn
+    {0xBAB00000u, 55u}, // qvo -> Latn
+    {0xBEB00000u, 55u}, // qvp -> Latn
+    {0xCAB00000u, 55u}, // qvs -> Latn
+    {0xDAB00000u, 55u}, // qvw -> Latn
+    {0xE6B00000u, 55u}, // qvz -> Latn
+    {0x82D00000u, 55u}, // qwa -> Latn
+    {0x8AD00000u, 55u}, // qwc -> Latn
+    {0x9ED00000u, 55u}, // qwh -> Latn
+    {0xB2D00000u, 55u}, // qwm -> Latn
+    {0xCAD00000u, 55u}, // qws -> Latn
+    {0xCED00000u, 55u}, // qwt -> Latn
+    {0x82F00000u, 55u}, // qxa -> Latn
+    {0x8AF00000u, 55u}, // qxc -> Latn
+    {0x9EF00000u, 55u}, // qxh -> Latn
+    {0xAEF00000u, 55u}, // qxl -> Latn
+    {0xB6F00000u, 55u}, // qxn -> Latn
+    {0xBAF00000u, 55u}, // qxo -> Latn
+    {0xBEF00000u, 55u}, // qxp -> Latn
+    {0xC2F00000u,  2u}, // qxq -> Arab
+    {0xC6F00000u, 55u}, // qxr -> Latn
+    {0xCEF00000u, 55u}, // qxt -> Latn
+    {0xD2F00000u, 55u}, // qxu -> Latn
+    {0xDAF00000u, 55u}, // qxw -> Latn
+    {0x83100000u, 55u}, // qya -> Latn
+    {0xBF100000u, 55u}, // qyp -> Latn
+    {0x80110000u, 21u}, // raa -> Deva
+    {0x84110000u, 21u}, // rab -> Deva
+    {0x88110000u, 55u}, // rac -> Latn
+    {0x8C110000u, 55u}, // rad -> Latn
+    {0x94110000u, 21u}, // raf -> Deva
+    {0x98110000u, 55u}, // rag -> Latn
+    {0x9C110000u,  9u}, // rah -> Beng
+    {0xA0110000u, 55u}, // rai -> Latn
+    {0xA4110000u, 21u}, // raj -> Deva
+    {0xA8110000u, 55u}, // rak -> Latn
+    {0xB0110000u, 55u}, // ram -> Latn
+    {0xB4110000u, 55u}, // ran -> Latn
+    {0xB8110000u, 55u}, // rao -> Latn
+    {0xBC110000u, 55u}, // rap -> Latn
+    {0xC4110000u, 55u}, // rar -> Latn
+    {0xD4110000u, 21u}, // rav -> Deva
+    {0xD8110000u, 55u}, // raw -> Latn
+    {0xDC110000u, 55u}, // rax -> Latn
+    {0xE0110000u, 55u}, // ray -> Latn
+    {0xE4110000u, 55u}, // raz -> Latn
+    {0x84310000u, 72u}, // rbb -> Mymr
+    {0xA8310000u, 55u}, // rbk -> Latn
+    {0xAC310000u, 55u}, // rbl -> Latn
+    {0xBC310000u, 55u}, // rbp -> Latn
+    {0x94510000u, 55u}, // rcf -> Latn
+    {0x84710000u,  2u}, // rdb -> Arab
+    {0x80910000u, 55u}, // rea -> Latn
+    {0x84910000u, 55u}, // reb -> Latn
+    {0x90910000u, 55u}, // ree -> Latn
+    {0x98910000u, 55u}, // reg -> Latn
+    {0xA0910000u, 80u}, // rei -> Orya
+    {0xA4910000u, 55u}, // rej -> Latn
+    {0xAC910000u, 55u}, // rel -> Latn
+    {0xB0910000u, 55u}, // rem -> Latn
+    {0xB4910000u, 55u}, // ren -> Latn
+    {0xC8910000u, 55u}, // res -> Latn
+    {0xCC910000u, 55u}, // ret -> Latn
+    {0xE0910000u, 55u}, // rey -> Latn
+    {0x80D10000u, 55u}, // rga -> Latn
+    {0xB4D10000u, 55u}, // rgn -> Latn
+    {0xC4D10000u, 55u}, // rgr -> Latn
+    {0xC8D10000u, 55u}, // rgs -> Latn
+    {0xD0D10000u, 55u}, // rgu -> Latn
+    {0x98F10000u, 89u}, // rhg -> Rohg
+    {0xBCF10000u, 55u}, // rhp -> Latn
+    {0x81110000u, 55u}, // ria -> Latn
+    {0x95110000u, 55u}, // rif -> Latn
+    {0xAD110000u, 55u}, // ril -> Latn
+    {0xB1110000u, 55u}, // rim -> Latn
+    {0xB5110000u, 55u}, // rin -> Latn
+    {0xC5110000u, 55u}, // rir -> Latn
+    {0xCD110000u, 55u}, // rit -> Latn
+    {0xD1110000u, 55u}, // riu -> Latn
+    {0x99310000u, 55u}, // rjg -> Latn
+    {0xA1310000u, 21u}, // rji -> Deva
+    {0xC9310000u, 21u}, // rjs -> Deva
+    {0x81510000u, 47u}, // rka -> Khmr
+    {0x85510000u, 55u}, // rkb -> Latn
+    {0x9D510000u, 55u}, // rkh -> Latn
+    {0xA1510000u, 72u}, // rki -> Mymr
+    {0xB1510000u, 55u}, // rkm -> Latn
+    {0xCD510000u,  9u}, // rkt -> Beng
+    {0xD9510000u, 55u}, // rkw -> Latn
+    {0x726D0000u, 55u}, // rm -> Latn
+    {0x81910000u, 55u}, // rma -> Latn
+    {0x85910000u, 55u}, // rmb -> Latn
+    {0x89910000u, 55u}, // rmc -> Latn
+    {0x8D910000u, 55u}, // rmd -> Latn
+    {0x91910000u, 55u}, // rme -> Latn
+    {0x95910000u, 55u}, // rmf -> Latn
+    {0x99910000u, 55u}, // rmg -> Latn
+    {0x9D910000u, 55u}, // rmh -> Latn
+    {0xA1910000u,  4u}, // rmi -> Armn
+    {0xA9910000u, 55u}, // rmk -> Latn
+    {0xAD910000u, 55u}, // rml -> Latn
+    {0xB1910000u, 55u}, // rmm -> Latn
+    {0xB5910000u, 55u}, // rmn -> Latn
+    {0xB9910000u, 55u}, // rmo -> Latn
+    {0xBD910000u, 55u}, // rmp -> Latn
+    {0xC1910000u, 55u}, // rmq -> Latn
     {0xCD910000u,  2u}, // rmt -> Arab
-    {0xD1910000u, 46u}, // rmu -> Latn
-    {0x726E0000u, 46u}, // rn -> Latn
-    {0x81B10000u, 46u}, // rna -> Latn
-    {0x99B10000u, 46u}, // rng -> Latn
-    {0x726F0000u, 46u}, // ro -> Latn
-    {0x85D10000u, 46u}, // rob -> Latn
-    {0x95D10000u, 46u}, // rof -> Latn
-    {0xB9D10000u, 46u}, // roo -> Latn
-    {0xBA310000u, 46u}, // rro -> Latn
-    {0xB2710000u, 46u}, // rtm -> Latn
-    {0x72750000u, 18u}, // ru -> Cyrl
-    {0x92910000u, 18u}, // rue -> Cyrl
-    {0x9A910000u, 46u}, // rug -> Latn
-    {0x72770000u, 46u}, // rw -> Latn
-    {0xAAD10000u, 46u}, // rwk -> Latn
-    {0xBAD10000u, 46u}, // rwo -> Latn
-    {0xD3110000u, 37u}, // ryu -> Kana
-    {0x73610000u, 19u}, // sa -> Deva
-    {0x94120000u, 46u}, // saf -> Latn
-    {0x9C120000u, 18u}, // sah -> Cyrl
-    {0xC0120000u, 46u}, // saq -> Latn
-    {0xC8120000u, 46u}, // sas -> Latn
-    {0xCC120000u, 64u}, // sat -> Olck
-    {0xD4120000u, 46u}, // sav -> Latn
-    {0xE4120000u, 78u}, // saz -> Saur
-    {0x80320000u, 46u}, // sba -> Latn
-    {0x90320000u, 46u}, // sbe -> Latn
-    {0xBC320000u, 46u}, // sbp -> Latn
-    {0x73630000u, 46u}, // sc -> Latn
-    {0xA8520000u, 19u}, // sck -> Deva
+    {0xD1910000u, 55u}, // rmu -> Latn
+    {0xD9910000u, 55u}, // rmw -> Latn
+    {0xDD910000u, 55u}, // rmx -> Latn
+    {0xE5910000u, 72u}, // rmz -> Mymr
+    {0x726E0000u, 55u}, // rn -> Latn
+    {0x8DB10000u, 55u}, // rnd -> Latn
+    {0x99B10000u, 55u}, // rng -> Latn
+    {0xADB10000u, 55u}, // rnl -> Latn
+    {0xB5B10000u, 55u}, // rnn -> Latn
+    {0xC5B10000u, 55u}, // rnr -> Latn
+    {0xD9B10000u, 55u}, // rnw -> Latn
+    {0x726F0000u, 55u}, // ro -> Latn
+    {0x85D10000u, 55u}, // rob -> Latn
+    {0x89D10000u, 55u}, // roc -> Latn
+    {0x8DD10000u, 55u}, // rod -> Latn
+    {0x91D10000u, 55u}, // roe -> Latn
+    {0x95D10000u, 55u}, // rof -> Latn
+    {0x99D10000u, 55u}, // rog -> Latn
+    {0xADD10000u, 55u}, // rol -> Latn
+    {0xB1D10000u, 55u}, // rom -> Latn
+    {0xB9D10000u, 55u}, // roo -> Latn
+    {0xBDD10000u, 55u}, // rop -> Latn
+    {0xC5D10000u, 55u}, // ror -> Latn
+    {0xD1D10000u, 55u}, // rou -> Latn
+    {0xD9D10000u, 55u}, // row -> Latn
+    {0xB5F10000u, 55u}, // rpn -> Latn
+    {0xCDF10000u, 55u}, // rpt -> Latn
+    {0xA2310000u, 55u}, // rri -> Latn
+    {0xB2310000u, 55u}, // rrm -> Latn
+    {0xBA310000u, 55u}, // rro -> Latn
+    {0xCE310000u, 55u}, // rrt -> Latn
+    {0xAA510000u, 20u}, // rsk -> Cyrl
+    {0xDA510000u, 55u}, // rsw -> Latn
+    {0x8A710000u, 55u}, // rtc -> Latn
+    {0x9E710000u, 55u}, // rth -> Latn
+    {0xB2710000u, 55u}, // rtm -> Latn
+    {0xDA710000u, 21u}, // rtw -> Deva
+    {0x72750000u, 20u}, // ru -> Cyrl
+    {0x86910000u, 55u}, // rub -> Latn
+    {0x8A910000u, 55u}, // ruc -> Latn
+    {0x92910000u, 20u}, // rue -> Cyrl
+    {0x96910000u, 55u}, // ruf -> Latn
+    {0x9A910000u, 55u}, // rug -> Latn
+    {0xA2910000u, 55u}, // rui -> Latn
+    {0xAA910000u, 55u}, // ruk -> Latn
+    {0xBA910000u, 55u}, // ruo -> Latn
+    {0xBE910000u, 55u}, // rup -> Latn
+    {0xC2910000u, 55u}, // ruq -> Latn
+    {0xCE910000u, 20u}, // rut -> Cyrl
+    {0xD2910000u, 55u}, // ruu -> Latn
+    {0xE2910000u, 55u}, // ruy -> Latn
+    {0xE6910000u, 55u}, // ruz -> Latn
+    {0x72770000u, 55u}, // rw -> Latn
+    {0x82D10000u, 55u}, // rwa -> Latn
+    {0xAAD10000u, 55u}, // rwk -> Latn
+    {0xAED10000u, 55u}, // rwl -> Latn
+    {0xB2D10000u, 55u}, // rwm -> Latn
+    {0xBAD10000u, 55u}, // rwo -> Latn
+    {0xC6D10000u, 21u}, // rwr -> Deva
+    {0x8EF10000u, 55u}, // rxd -> Latn
+    {0xDAF10000u, 55u}, // rxw -> Latn
+    {0xD3110000u, 44u}, // ryu -> Kana
+    {0x73610000u, 21u}, // sa -> Deva
+    {0x80120000u, 55u}, // saa -> Latn
+    {0x84120000u, 55u}, // sab -> Latn
+    {0x88120000u, 55u}, // sac -> Latn
+    {0x8C120000u, 55u}, // sad -> Latn
+    {0x90120000u, 55u}, // sae -> Latn
+    {0x94120000u, 55u}, // saf -> Latn
+    {0x9C120000u, 20u}, // sah -> Cyrl
+    {0xA4120000u, 55u}, // saj -> Latn
+    {0xA8120000u, 55u}, // sak -> Latn
+    {0xB0120000u, 91u}, // sam -> Samr
+    {0xB8120000u, 55u}, // sao -> Latn
+    {0xC0120000u, 55u}, // saq -> Latn
+    {0xC4120000u, 55u}, // sar -> Latn
+    {0xC8120000u, 55u}, // sas -> Latn
+    {0xCC120000u, 78u}, // sat -> Olck
+    {0xD0120000u, 55u}, // sau -> Latn
+    {0xD4120000u, 55u}, // sav -> Latn
+    {0xD8120000u, 55u}, // saw -> Latn
+    {0xDC120000u, 55u}, // sax -> Latn
+    {0xE0120000u, 55u}, // say -> Latn
+    {0xE4120000u, 93u}, // saz -> Saur
+    {0x80320000u, 55u}, // sba -> Latn
+    {0x84320000u, 55u}, // sbb -> Latn
+    {0x88320000u, 55u}, // sbc -> Latn
+    {0x8C320000u, 55u}, // sbd -> Latn
+    {0x90320000u, 55u}, // sbe -> Latn
+    {0x98320000u, 55u}, // sbg -> Latn
+    {0x9C320000u, 55u}, // sbh -> Latn
+    {0xA0320000u, 55u}, // sbi -> Latn
+    {0xA4320000u, 55u}, // sbj -> Latn
+    {0xA8320000u, 55u}, // sbk -> Latn
+    {0xAC320000u, 55u}, // sbl -> Latn
+    {0xB0320000u, 55u}, // sbm -> Latn
+    {0xB4320000u,  2u}, // sbn -> Arab
+    {0xB8320000u, 55u}, // sbo -> Latn
+    {0xBC320000u, 55u}, // sbp -> Latn
+    {0xC0320000u, 55u}, // sbq -> Latn
+    {0xC4320000u, 55u}, // sbr -> Latn
+    {0xC8320000u, 55u}, // sbs -> Latn
+    {0xCC320000u, 55u}, // sbt -> Latn
+    {0xD0320000u, 112u}, // sbu -> Tibt
+    {0xD4320000u, 55u}, // sbv -> Latn
+    {0xD8320000u, 55u}, // sbw -> Latn
+    {0xDC320000u, 55u}, // sbx -> Latn
+    {0xE0320000u, 55u}, // sby -> Latn
+    {0xE4320000u, 55u}, // sbz -> Latn
+    {0x73630000u, 55u}, // sc -> Latn
+    {0x84520000u, 55u}, // scb -> Latn
+    {0x90520000u, 55u}, // sce -> Latn
+    {0x94520000u, 55u}, // scf -> Latn
+    {0x98520000u, 55u}, // scg -> Latn
+    {0x9C520000u, 55u}, // sch -> Latn
+    {0xA0520000u, 55u}, // sci -> Latn
+    {0xA8520000u, 21u}, // sck -> Deva
     {0xAC520000u,  2u}, // scl -> Arab
-    {0xB4520000u, 46u}, // scn -> Latn
-    {0xB8520000u, 46u}, // sco -> Latn
+    {0xB4520000u, 55u}, // scn -> Latn
+    {0xB8520000u, 55u}, // sco -> Latn
+    {0xBC520000u, 21u}, // scp -> Deva
+    {0xC8520000u, 55u}, // scs -> Latn
+    {0xCC520000u, 52u}, // sct -> Laoo
+    {0xD0520000u, 102u}, // scu -> Takr
+    {0xD4520000u, 55u}, // scv -> Latn
+    {0xD8520000u, 55u}, // scw -> Latn
+    {0xDC520000u, 30u}, // scx -> Grek
     {0x73640000u,  2u}, // sd -> Arab
-    {0x7364494Eu, 19u}, // sd-IN -> Deva
-    {0x88720000u, 46u}, // sdc -> Latn
+    {0x7364494Eu, 21u}, // sd-IN -> Deva
+    {0x80720000u, 55u}, // sda -> Latn
+    {0x84720000u,  2u}, // sdb -> Arab
+    {0x88720000u, 55u}, // sdc -> Latn
+    {0x90720000u, 55u}, // sde -> Latn
+    {0x94720000u,  2u}, // sdf -> Arab
+    {0x98720000u,  2u}, // sdg -> Arab
     {0x9C720000u,  2u}, // sdh -> Arab
-    {0x73650000u, 46u}, // se -> Latn
-    {0x94920000u, 46u}, // sef -> Latn
-    {0x9C920000u, 46u}, // seh -> Latn
-    {0xA0920000u, 46u}, // sei -> Latn
-    {0xC8920000u, 46u}, // ses -> Latn
-    {0x73670000u, 46u}, // sg -> Latn
-    {0x80D20000u, 63u}, // sga -> Ogam
-    {0xC8D20000u, 46u}, // sgs -> Latn
-    {0xD8D20000u, 21u}, // sgw -> Ethi
-    {0xE4D20000u, 46u}, // sgz -> Latn
-    {0x73680000u, 46u}, // sh -> Latn
-    {0xA0F20000u, 91u}, // shi -> Tfng
-    {0xA8F20000u, 46u}, // shk -> Latn
-    {0xB4F20000u, 59u}, // shn -> Mymr
+    {0xA4720000u, 55u}, // sdj -> Latn
+    {0xA8720000u, 55u}, // sdk -> Latn
+    {0xB4720000u, 55u}, // sdn -> Latn
+    {0xB8720000u, 55u}, // sdo -> Latn
+    {0xC0720000u, 55u}, // sdq -> Latn
+    {0xC4720000u,  9u}, // sdr -> Beng
+    {0xC8720000u,  2u}, // sds -> Arab
+    {0xD0720000u, 55u}, // sdu -> Latn
+    {0xDC720000u, 55u}, // sdx -> Latn
+    {0x73650000u, 55u}, // se -> Latn
+    {0x80920000u, 55u}, // sea -> Latn
+    {0x84920000u, 55u}, // seb -> Latn
+    {0x88920000u, 55u}, // sec -> Latn
+    {0x8C920000u, 55u}, // sed -> Latn
+    {0x90920000u, 55u}, // see -> Latn
+    {0x94920000u, 55u}, // sef -> Latn
+    {0x98920000u, 55u}, // seg -> Latn
+    {0x9C920000u, 55u}, // seh -> Latn
+    {0xA0920000u, 55u}, // sei -> Latn
+    {0xA4920000u, 55u}, // sej -> Latn
+    {0xA8920000u, 55u}, // sek -> Latn
+    {0xAC920000u, 20u}, // sel -> Cyrl
+    {0xB4920000u, 55u}, // sen -> Latn
+    {0xB8920000u, 55u}, // seo -> Latn
+    {0xBC920000u, 55u}, // sep -> Latn
+    {0xC0920000u, 55u}, // seq -> Latn
+    {0xC4920000u, 55u}, // ser -> Latn
+    {0xC8920000u, 55u}, // ses -> Latn
+    {0xCC920000u, 55u}, // set -> Latn
+    {0xD0920000u, 55u}, // seu -> Latn
+    {0xD4920000u, 55u}, // sev -> Latn
+    {0xD8920000u, 55u}, // sew -> Latn
+    {0xE0920000u, 55u}, // sey -> Latn
+    {0xE4920000u, 55u}, // sez -> Latn
+    {0x90B20000u, 55u}, // sfe -> Latn
+    {0xB0B20000u, 86u}, // sfm -> Plrd
+    {0xD8B20000u, 55u}, // sfw -> Latn
+    {0x73670000u, 55u}, // sg -> Latn
+    {0x80D20000u, 77u}, // sga -> Ogam
+    {0x84D20000u, 55u}, // sgb -> Latn
+    {0x88D20000u, 55u}, // sgc -> Latn
+    {0x8CD20000u, 55u}, // sgd -> Latn
+    {0x90D20000u, 55u}, // sge -> Latn
+    {0x9CD20000u, 20u}, // sgh -> Cyrl
+    {0xA0D20000u, 55u}, // sgi -> Latn
+    {0xA4D20000u, 21u}, // sgj -> Deva
+    {0xB0D20000u, 55u}, // sgm -> Latn
+    {0xBCD20000u, 55u}, // sgp -> Latn
+    {0xC4D20000u,  2u}, // sgr -> Arab
+    {0xC8D20000u, 55u}, // sgs -> Latn
+    {0xCCD20000u, 112u}, // sgt -> Tibt
+    {0xD0D20000u, 55u}, // sgu -> Latn
+    {0xD8D20000u, 24u}, // sgw -> Ethi
+    {0xE0D20000u,  2u}, // sgy -> Arab
+    {0xE4D20000u, 55u}, // sgz -> Latn
+    {0x80F20000u, 55u}, // sha -> Latn
+    {0x84F20000u, 55u}, // shb -> Latn
+    {0x88F20000u, 55u}, // shc -> Latn
+    {0x8CF20000u,  2u}, // shd -> Arab
+    {0x90F20000u, 55u}, // she -> Latn
+    {0x98F20000u, 55u}, // shg -> Latn
+    {0x9CF20000u, 55u}, // shh -> Latn
+    {0xA0F20000u, 109u}, // shi -> Tfng
+    {0xA4F20000u, 55u}, // shj -> Latn
+    {0xA8F20000u, 55u}, // shk -> Latn
+    {0xB0F20000u,  2u}, // shm -> Arab
+    {0xB4F20000u, 72u}, // shn -> Mymr
+    {0xB8F20000u, 55u}, // sho -> Latn
+    {0xBCF20000u, 55u}, // shp -> Latn
+    {0xC0F20000u, 55u}, // shq -> Latn
+    {0xC4F20000u, 55u}, // shr -> Latn
+    {0xC8F20000u, 55u}, // shs -> Latn
+    {0xCCF20000u, 55u}, // sht -> Latn
     {0xD0F20000u,  2u}, // shu -> Arab
-    {0x73690000u, 80u}, // si -> Sinh
-    {0x8D120000u, 46u}, // sid -> Latn
-    {0x99120000u, 46u}, // sig -> Latn
-    {0xAD120000u, 46u}, // sil -> Latn
-    {0xB1120000u, 46u}, // sim -> Latn
-    {0xC5320000u, 46u}, // sjr -> Latn
-    {0x736B0000u, 46u}, // sk -> Latn
-    {0x89520000u, 46u}, // skc -> Latn
+    {0xD4F20000u,  2u}, // shv -> Arab
+    {0xD8F20000u, 55u}, // shw -> Latn
+    {0xE0F20000u, 55u}, // shy -> Latn
+    {0xE4F20000u, 55u}, // shz -> Latn
+    {0x73690000u, 95u}, // si -> Sinh
+    {0x81120000u, 20u}, // sia -> Cyrl
+    {0x85120000u, 55u}, // sib -> Latn
+    {0x8D120000u, 55u}, // sid -> Latn
+    {0x91120000u, 55u}, // sie -> Latn
+    {0x95120000u, 55u}, // sif -> Latn
+    {0x99120000u, 55u}, // sig -> Latn
+    {0x9D120000u, 55u}, // sih -> Latn
+    {0xA1120000u, 55u}, // sii -> Latn
+    {0xA5120000u, 55u}, // sij -> Latn
+    {0xA9120000u, 55u}, // sik -> Latn
+    {0xAD120000u, 55u}, // sil -> Latn
+    {0xB1120000u, 55u}, // sim -> Latn
+    {0xBD120000u, 112u}, // sip -> Tibt
+    {0xC1120000u, 55u}, // siq -> Latn
+    {0xC5120000u, 55u}, // sir -> Latn
+    {0xC9120000u, 55u}, // sis -> Latn
+    {0xD1120000u, 55u}, // siu -> Latn
+    {0xD5120000u, 55u}, // siv -> Latn
+    {0xD9120000u, 55u}, // siw -> Latn
+    {0xDD120000u, 55u}, // six -> Latn
+    {0xE1120000u,  2u}, // siy -> Arab
+    {0xE5120000u,  2u}, // siz -> Arab
+    {0x81320000u, 55u}, // sja -> Latn
+    {0x85320000u, 55u}, // sjb -> Latn
+    {0x8D320000u, 20u}, // sjd -> Cyrl
+    {0x91320000u, 55u}, // sje -> Latn
+    {0x99320000u, 55u}, // sjg -> Latn
+    {0xAD320000u, 55u}, // sjl -> Latn
+    {0xB1320000u, 55u}, // sjm -> Latn
+    {0xBD320000u, 21u}, // sjp -> Deva
+    {0xC5320000u, 55u}, // sjr -> Latn
+    {0xCD320000u, 20u}, // sjt -> Cyrl
+    {0xD1320000u, 55u}, // sju -> Latn
+    {0xD9320000u, 55u}, // sjw -> Latn
+    {0x736B0000u, 55u}, // sk -> Latn
+    {0x81520000u, 55u}, // ska -> Latn
+    {0x85520000u, 111u}, // skb -> Thai
+    {0x89520000u, 55u}, // skc -> Latn
+    {0x8D520000u, 55u}, // skd -> Latn
+    {0x91520000u, 55u}, // ske -> Latn
+    {0x95520000u, 55u}, // skf -> Latn
+    {0x99520000u, 55u}, // skg -> Latn
+    {0x9D520000u, 55u}, // skh -> Latn
+    {0xA1520000u, 55u}, // ski -> Latn
+    {0xA5520000u, 21u}, // skj -> Deva
+    {0xB1520000u, 55u}, // skm -> Latn
+    {0xB5520000u, 55u}, // skn -> Latn
+    {0xB9520000u, 55u}, // sko -> Latn
+    {0xBD520000u, 55u}, // skp -> Latn
+    {0xC1520000u, 55u}, // skq -> Latn
     {0xC5520000u,  2u}, // skr -> Arab
-    {0xC9520000u, 46u}, // sks -> Latn
-    {0x736C0000u, 46u}, // sl -> Latn
-    {0x8D720000u, 46u}, // sld -> Latn
-    {0xA1720000u, 46u}, // sli -> Latn
-    {0xAD720000u, 46u}, // sll -> Latn
-    {0xE1720000u, 46u}, // sly -> Latn
-    {0x736D0000u, 46u}, // sm -> Latn
-    {0x81920000u, 46u}, // sma -> Latn
-    {0x8D920000u, 46u}, // smd -> Latn
-    {0xA5920000u, 46u}, // smj -> Latn
-    {0xB5920000u, 46u}, // smn -> Latn
-    {0xBD920000u, 76u}, // smp -> Samr
-    {0xC1920000u, 46u}, // smq -> Latn
-    {0xC9920000u, 46u}, // sms -> Latn
-    {0x736E0000u, 46u}, // sn -> Latn
-    {0x85B20000u, 46u}, // snb -> Latn
-    {0x89B20000u, 46u}, // snc -> Latn
-    {0xA9B20000u, 46u}, // snk -> Latn
-    {0xBDB20000u, 46u}, // snp -> Latn
-    {0xDDB20000u, 46u}, // snx -> Latn
-    {0xE1B20000u, 46u}, // sny -> Latn
-    {0x736F0000u, 46u}, // so -> Latn
-    {0x99D20000u, 81u}, // sog -> Sogd
-    {0xA9D20000u, 46u}, // sok -> Latn
-    {0xC1D20000u, 46u}, // soq -> Latn
-    {0xD1D20000u, 93u}, // sou -> Thai
-    {0xE1D20000u, 46u}, // soy -> Latn
-    {0x8DF20000u, 46u}, // spd -> Latn
-    {0xADF20000u, 46u}, // spl -> Latn
-    {0xC9F20000u, 46u}, // sps -> Latn
-    {0x73710000u, 46u}, // sq -> Latn
-    {0x73720000u, 18u}, // sr -> Cyrl
-    {0x73724D45u, 46u}, // sr-ME -> Latn
-    {0x7372524Fu, 46u}, // sr-RO -> Latn
-    {0x73725255u, 46u}, // sr-RU -> Latn
-    {0x73725452u, 46u}, // sr-TR -> Latn
-    {0x86320000u, 82u}, // srb -> Sora
-    {0xB6320000u, 46u}, // srn -> Latn
-    {0xC6320000u, 46u}, // srr -> Latn
-    {0xDE320000u, 19u}, // srx -> Deva
-    {0x73730000u, 46u}, // ss -> Latn
-    {0x8E520000u, 46u}, // ssd -> Latn
-    {0x9A520000u, 46u}, // ssg -> Latn
-    {0xE2520000u, 46u}, // ssy -> Latn
-    {0x73740000u, 46u}, // st -> Latn
-    {0xAA720000u, 46u}, // stk -> Latn
-    {0xC2720000u, 46u}, // stq -> Latn
-    {0x73750000u, 46u}, // su -> Latn
-    {0x82920000u, 46u}, // sua -> Latn
-    {0x92920000u, 46u}, // sue -> Latn
-    {0xAA920000u, 46u}, // suk -> Latn
-    {0xC6920000u, 46u}, // sur -> Latn
-    {0xCA920000u, 46u}, // sus -> Latn
-    {0x73760000u, 46u}, // sv -> Latn
-    {0x73770000u, 46u}, // sw -> Latn
+    {0xC9520000u, 55u}, // sks -> Latn
+    {0xCD520000u, 55u}, // skt -> Latn
+    {0xD1520000u, 55u}, // sku -> Latn
+    {0xD5520000u, 55u}, // skv -> Latn
+    {0xD9520000u, 55u}, // skw -> Latn
+    {0xDD520000u, 55u}, // skx -> Latn
+    {0xE1520000u, 55u}, // sky -> Latn
+    {0xE5520000u, 55u}, // skz -> Latn
+    {0x736C0000u, 55u}, // sl -> Latn
+    {0x89720000u, 55u}, // slc -> Latn
+    {0x8D720000u, 55u}, // sld -> Latn
+    {0x99720000u, 55u}, // slg -> Latn
+    {0x9D720000u, 55u}, // slh -> Latn
+    {0xA1720000u, 55u}, // sli -> Latn
+    {0xA5720000u, 55u}, // slj -> Latn
+    {0xAD720000u, 55u}, // sll -> Latn
+    {0xB1720000u, 55u}, // slm -> Latn
+    {0xB5720000u, 55u}, // sln -> Latn
+    {0xBD720000u, 55u}, // slp -> Latn
+    {0xC5720000u, 55u}, // slr -> Latn
+    {0xD1720000u, 55u}, // slu -> Latn
+    {0xD9720000u, 55u}, // slw -> Latn
+    {0xDD720000u, 55u}, // slx -> Latn
+    {0xE1720000u, 55u}, // sly -> Latn
+    {0xE5720000u, 55u}, // slz -> Latn
+    {0x736D0000u, 55u}, // sm -> Latn
+    {0x81920000u, 55u}, // sma -> Latn
+    {0x85920000u, 55u}, // smb -> Latn
+    {0x89920000u, 55u}, // smc -> Latn
+    {0x95920000u, 55u}, // smf -> Latn
+    {0x99920000u, 55u}, // smg -> Latn
+    {0x9D920000u, 120u}, // smh -> Yiii
+    {0xA5920000u, 55u}, // smj -> Latn
+    {0xA9920000u, 55u}, // smk -> Latn
+    {0xAD920000u, 55u}, // sml -> Latn
+    {0xB5920000u, 55u}, // smn -> Latn
+    {0xBD920000u, 91u}, // smp -> Samr
+    {0xC1920000u, 55u}, // smq -> Latn
+    {0xC5920000u, 55u}, // smr -> Latn
+    {0xC9920000u, 55u}, // sms -> Latn
+    {0xCD920000u, 55u}, // smt -> Latn
+    {0xD1920000u, 47u}, // smu -> Khmr
+    {0xD9920000u, 55u}, // smw -> Latn
+    {0xDD920000u, 55u}, // smx -> Latn
+    {0xE1920000u,  2u}, // smy -> Arab
+    {0xE5920000u, 55u}, // smz -> Latn
+    {0x736E0000u, 55u}, // sn -> Latn
+    {0x89B20000u, 55u}, // snc -> Latn
+    {0x91B20000u, 55u}, // sne -> Latn
+    {0x95B20000u, 55u}, // snf -> Latn
+    {0x99B20000u, 55u}, // sng -> Latn
+    {0xA1B20000u, 55u}, // sni -> Latn
+    {0xA5B20000u, 55u}, // snj -> Latn
+    {0xA9B20000u, 55u}, // snk -> Latn
+    {0xADB20000u, 55u}, // snl -> Latn
+    {0xB1B20000u, 55u}, // snm -> Latn
+    {0xB5B20000u, 55u}, // snn -> Latn
+    {0xB9B20000u, 55u}, // sno -> Latn
+    {0xBDB20000u, 55u}, // snp -> Latn
+    {0xC1B20000u, 55u}, // snq -> Latn
+    {0xC5B20000u, 55u}, // snr -> Latn
+    {0xC9B20000u, 55u}, // sns -> Latn
+    {0xD1B20000u, 55u}, // snu -> Latn
+    {0xD5B20000u, 55u}, // snv -> Latn
+    {0xD9B20000u, 55u}, // snw -> Latn
+    {0xDDB20000u, 55u}, // snx -> Latn
+    {0xE1B20000u, 55u}, // sny -> Latn
+    {0xE5B20000u, 55u}, // snz -> Latn
+    {0x736F0000u, 55u}, // so -> Latn
+    {0x81D20000u, 107u}, // soa -> Tavt
+    {0x85D20000u, 55u}, // sob -> Latn
+    {0x89D20000u, 55u}, // soc -> Latn
+    {0x8DD20000u, 55u}, // sod -> Latn
+    {0x91D20000u, 55u}, // soe -> Latn
+    {0x99D20000u, 96u}, // sog -> Sogd
+    {0xA1D20000u, 21u}, // soi -> Deva
+    {0xA9D20000u, 55u}, // sok -> Latn
+    {0xADD20000u, 55u}, // sol -> Latn
+    {0xB9D20000u, 55u}, // soo -> Latn
+    {0xBDD20000u, 55u}, // sop -> Latn
+    {0xC1D20000u, 55u}, // soq -> Latn
+    {0xC5D20000u, 55u}, // sor -> Latn
+    {0xC9D20000u, 55u}, // sos -> Latn
+    {0xD1D20000u, 111u}, // sou -> Thai
+    {0xD5D20000u, 55u}, // sov -> Latn
+    {0xD9D20000u, 55u}, // sow -> Latn
+    {0xDDD20000u, 55u}, // sox -> Latn
+    {0xE1D20000u, 55u}, // soy -> Latn
+    {0xE5D20000u, 55u}, // soz -> Latn
+    {0x85F20000u, 55u}, // spb -> Latn
+    {0x89F20000u, 55u}, // spc -> Latn
+    {0x8DF20000u, 55u}, // spd -> Latn
+    {0x91F20000u, 55u}, // spe -> Latn
+    {0x99F20000u, 55u}, // spg -> Latn
+    {0xA1F20000u, 55u}, // spi -> Latn
+    {0xA9F20000u, 55u}, // spk -> Latn
+    {0xADF20000u, 55u}, // spl -> Latn
+    {0xB1F20000u, 55u}, // spm -> Latn
+    {0xB5F20000u, 55u}, // spn -> Latn
+    {0xB9F20000u, 55u}, // spo -> Latn
+    {0xBDF20000u, 55u}, // spp -> Latn
+    {0xC1F20000u, 55u}, // spq -> Latn
+    {0xC5F20000u, 55u}, // spr -> Latn
+    {0xC9F20000u, 55u}, // sps -> Latn
+    {0xCDF20000u, 112u}, // spt -> Tibt
+    {0xD5F20000u, 80u}, // spv -> Orya
+    {0x73710000u, 55u}, // sq -> Latn
+    {0x82120000u, 55u}, // sqa -> Latn
+    {0x9E120000u, 55u}, // sqh -> Latn
+    {0xB2120000u, 55u}, // sqm -> Latn
+    {0xBA120000u,  2u}, // sqo -> Arab
+    {0xC2120000u, 52u}, // sqq -> Laoo
+    {0xCE120000u,  2u}, // sqt -> Arab
+    {0xD2120000u, 55u}, // squ -> Latn
+    {0x73720000u, 20u}, // sr -> Cyrl
+    {0x73724D45u, 55u}, // sr-ME -> Latn
+    {0x7372524Fu, 55u}, // sr-RO -> Latn
+    {0x73725255u, 55u}, // sr-RU -> Latn
+    {0x73725452u, 55u}, // sr-TR -> Latn
+    {0x82320000u, 55u}, // sra -> Latn
+    {0x86320000u, 97u}, // srb -> Sora
+    {0x92320000u, 55u}, // sre -> Latn
+    {0x96320000u, 55u}, // srf -> Latn
+    {0x9A320000u, 55u}, // srg -> Latn
+    {0x9E320000u,  2u}, // srh -> Arab
+    {0xA2320000u, 55u}, // sri -> Latn
+    {0xAA320000u, 55u}, // srk -> Latn
+    {0xAE320000u, 55u}, // srl -> Latn
+    {0xB2320000u, 55u}, // srm -> Latn
+    {0xB6320000u, 55u}, // srn -> Latn
+    {0xBA320000u, 55u}, // sro -> Latn
+    {0xC2320000u, 55u}, // srq -> Latn
+    {0xC6320000u, 55u}, // srr -> Latn
+    {0xCA320000u, 55u}, // srs -> Latn
+    {0xCE320000u, 55u}, // srt -> Latn
+    {0xD2320000u, 55u}, // sru -> Latn
+    {0xD6320000u, 55u}, // srv -> Latn
+    {0xDA320000u, 55u}, // srw -> Latn
+    {0xDE320000u, 21u}, // srx -> Deva
+    {0xE2320000u, 55u}, // sry -> Latn
+    {0xE6320000u,  2u}, // srz -> Arab
+    {0x73730000u, 55u}, // ss -> Latn
+    {0x86520000u, 55u}, // ssb -> Latn
+    {0x8A520000u, 55u}, // ssc -> Latn
+    {0x8E520000u, 55u}, // ssd -> Latn
+    {0x92520000u, 55u}, // sse -> Latn
+    {0x96520000u, 55u}, // ssf -> Latn
+    {0x9A520000u, 55u}, // ssg -> Latn
+    {0x9E520000u,  2u}, // ssh -> Arab
+    {0xA6520000u, 55u}, // ssj -> Latn
+    {0xAE520000u, 55u}, // ssl -> Latn
+    {0xB2520000u, 55u}, // ssm -> Latn
+    {0xB6520000u, 55u}, // ssn -> Latn
+    {0xBA520000u, 55u}, // sso -> Latn
+    {0xC2520000u, 55u}, // ssq -> Latn
+    {0xCA520000u, 52u}, // sss -> Laoo
+    {0xCE520000u, 55u}, // sst -> Latn
+    {0xD2520000u, 55u}, // ssu -> Latn
+    {0xD6520000u, 55u}, // ssv -> Latn
+    {0xDE520000u, 55u}, // ssx -> Latn
+    {0xE2520000u, 55u}, // ssy -> Latn
+    {0xE6520000u, 55u}, // ssz -> Latn
+    {0x73740000u, 55u}, // st -> Latn
+    {0x82720000u, 55u}, // sta -> Latn
+    {0x86720000u, 55u}, // stb -> Latn
+    {0x92720000u, 55u}, // ste -> Latn
+    {0x96720000u, 55u}, // stf -> Latn
+    {0x9A720000u, 55u}, // stg -> Latn
+    {0x9E720000u, 55u}, // sth -> Latn
+    {0xA2720000u, 55u}, // sti -> Latn
+    {0xA6720000u, 55u}, // stj -> Latn
+    {0xAA720000u, 55u}, // stk -> Latn
+    {0xAE720000u, 55u}, // stl -> Latn
+    {0xB2720000u, 55u}, // stm -> Latn
+    {0xB6720000u, 55u}, // stn -> Latn
+    {0xBA720000u, 55u}, // sto -> Latn
+    {0xBE720000u, 55u}, // stp -> Latn
+    {0xC2720000u, 55u}, // stq -> Latn
+    {0xC6720000u, 55u}, // str -> Latn
+    {0xCA720000u,  2u}, // sts -> Arab
+    {0xCE720000u, 55u}, // stt -> Latn
+    {0xD6720000u, 24u}, // stv -> Ethi
+    {0xDA720000u, 55u}, // stw -> Latn
+    {0xE2720000u, 20u}, // sty -> Cyrl
+    {0x73750000u, 55u}, // su -> Latn
+    {0x82920000u, 55u}, // sua -> Latn
+    {0x86920000u, 55u}, // sub -> Latn
+    {0x8A920000u, 55u}, // suc -> Latn
+    {0x92920000u, 55u}, // sue -> Latn
+    {0x9A920000u, 55u}, // sug -> Latn
+    {0xA2920000u, 55u}, // sui -> Latn
+    {0xA6920000u, 55u}, // suj -> Latn
+    {0xAA920000u, 55u}, // suk -> Latn
+    {0xBA920000u, 55u}, // suo -> Latn
+    {0xC2920000u, 55u}, // suq -> Latn
+    {0xC6920000u, 55u}, // sur -> Latn
+    {0xCA920000u, 55u}, // sus -> Latn
+    {0xCE920000u, 55u}, // sut -> Latn
+    {0xD6920000u, 55u}, // suv -> Latn
+    {0xDA920000u, 55u}, // suw -> Latn
+    {0xE2920000u, 55u}, // suy -> Latn
+    {0xE6920000u, 99u}, // suz -> Sunu
+    {0x73760000u, 55u}, // sv -> Latn
+    {0x82B20000u, 25u}, // sva -> Geor
+    {0x86B20000u, 55u}, // svb -> Latn
+    {0x8AB20000u, 55u}, // svc -> Latn
+    {0x92B20000u, 55u}, // sve -> Latn
+    {0xB2B20000u, 55u}, // svm -> Latn
+    {0xCAB20000u, 55u}, // svs -> Latn
+    {0x73770000u, 55u}, // sw -> Latn
     {0x86D20000u,  2u}, // swb -> Arab
-    {0x8AD20000u, 46u}, // swc -> Latn
-    {0x9AD20000u, 46u}, // swg -> Latn
-    {0xBED20000u, 46u}, // swp -> Latn
-    {0xD6D20000u, 19u}, // swv -> Deva
-    {0xB6F20000u, 46u}, // sxn -> Latn
-    {0xDAF20000u, 46u}, // sxw -> Latn
-    {0xAF120000u,  8u}, // syl -> Beng
-    {0xC7120000u, 84u}, // syr -> Syrc
-    {0xAF320000u, 46u}, // szl -> Latn
-    {0x74610000u, 87u}, // ta -> Taml
-    {0xA4130000u, 19u}, // taj -> Deva
-    {0xAC130000u, 46u}, // tal -> Latn
-    {0xB4130000u, 46u}, // tan -> Latn
-    {0xC0130000u, 46u}, // taq -> Latn
-    {0x88330000u, 46u}, // tbc -> Latn
-    {0x8C330000u, 46u}, // tbd -> Latn
-    {0x94330000u, 46u}, // tbf -> Latn
-    {0x98330000u, 46u}, // tbg -> Latn
-    {0xB8330000u, 46u}, // tbo -> Latn
-    {0xD8330000u, 46u}, // tbw -> Latn
-    {0xE4330000u, 46u}, // tbz -> Latn
-    {0xA0530000u, 46u}, // tci -> Latn
-    {0xE0530000u, 42u}, // tcy -> Knda
-    {0x8C730000u, 85u}, // tdd -> Tale
-    {0x98730000u, 19u}, // tdg -> Deva
-    {0x9C730000u, 19u}, // tdh -> Deva
-    {0xD0730000u, 46u}, // tdu -> Latn
-    {0x74650000u, 90u}, // te -> Telu
-    {0x8C930000u, 46u}, // ted -> Latn
-    {0xB0930000u, 46u}, // tem -> Latn
-    {0xB8930000u, 46u}, // teo -> Latn
-    {0xCC930000u, 46u}, // tet -> Latn
-    {0xA0B30000u, 46u}, // tfi -> Latn
-    {0x74670000u, 18u}, // tg -> Cyrl
+    {0x96D20000u, 55u}, // swf -> Latn
+    {0x9AD20000u, 55u}, // swg -> Latn
+    {0xA2D20000u, 34u}, // swi -> Hani
+    {0xA6D20000u, 55u}, // swj -> Latn
+    {0xAAD20000u, 55u}, // swk -> Latn
+    {0xB2D20000u, 55u}, // swm -> Latn
+    {0xBAD20000u, 55u}, // swo -> Latn
+    {0xBED20000u, 55u}, // swp -> Latn
+    {0xC2D20000u, 55u}, // swq -> Latn
+    {0xC6D20000u, 55u}, // swr -> Latn
+    {0xCAD20000u, 55u}, // sws -> Latn
+    {0xCED20000u, 55u}, // swt -> Latn
+    {0xD2D20000u, 55u}, // swu -> Latn
+    {0xD6D20000u, 21u}, // swv -> Deva
+    {0xDAD20000u, 55u}, // sww -> Latn
+    {0xDED20000u, 55u}, // swx -> Latn
+    {0xE2D20000u, 55u}, // swy -> Latn
+    {0x86F20000u, 55u}, // sxb -> Latn
+    {0x92F20000u, 55u}, // sxe -> Latn
+    {0xB6F20000u, 55u}, // sxn -> Latn
+    {0xC6F20000u, 55u}, // sxr -> Latn
+    {0xCAF20000u, 55u}, // sxs -> Latn
+    {0xD2F20000u, 90u}, // sxu -> Runr
+    {0xDAF20000u, 55u}, // sxw -> Latn
+    {0x83120000u, 55u}, // sya -> Latn
+    {0x87120000u, 55u}, // syb -> Latn
+    {0x8B120000u, 100u}, // syc -> Syrc
+    {0xA3120000u, 55u}, // syi -> Latn
+    {0xAB120000u, 55u}, // syk -> Latn
+    {0xAF120000u,  9u}, // syl -> Beng
+    {0xB3120000u, 55u}, // sym -> Latn
+    {0xB7120000u, 100u}, // syn -> Syrc
+    {0xBB120000u, 55u}, // syo -> Latn
+    {0xC7120000u, 100u}, // syr -> Syrc
+    {0xCB120000u, 55u}, // sys -> Latn
+    {0xDB120000u, 21u}, // syw -> Deva
+    {0xDF120000u, 55u}, // syx -> Latn
+    {0x83320000u, 55u}, // sza -> Latn
+    {0x87320000u, 55u}, // szb -> Latn
+    {0x8B320000u, 55u}, // szc -> Latn
+    {0x9B320000u, 55u}, // szg -> Latn
+    {0xAF320000u, 55u}, // szl -> Latn
+    {0xB7320000u, 55u}, // szn -> Latn
+    {0xBF320000u, 55u}, // szp -> Latn
+    {0xD7320000u, 55u}, // szv -> Latn
+    {0xDB320000u, 55u}, // szw -> Latn
+    {0xE3320000u, 55u}, // szy -> Latn
+    {0x74610000u, 105u}, // ta -> Taml
+    {0x80130000u, 55u}, // taa -> Latn
+    {0x84130000u, 20u}, // tab -> Cyrl
+    {0x88130000u, 55u}, // tac -> Latn
+    {0x8C130000u, 55u}, // tad -> Latn
+    {0x90130000u, 55u}, // tae -> Latn
+    {0x94130000u, 55u}, // taf -> Latn
+    {0x98130000u, 55u}, // tag -> Latn
+    {0xA4130000u, 21u}, // taj -> Deva
+    {0xA8130000u, 55u}, // tak -> Latn
+    {0xAC130000u, 55u}, // tal -> Latn
+    {0xB4130000u, 55u}, // tan -> Latn
+    {0xB8130000u, 55u}, // tao -> Latn
+    {0xBC130000u, 55u}, // tap -> Latn
+    {0xC0130000u, 55u}, // taq -> Latn
+    {0xC4130000u, 55u}, // tar -> Latn
+    {0xC8130000u, 55u}, // tas -> Latn
+    {0xD0130000u, 55u}, // tau -> Latn
+    {0xD4130000u, 55u}, // tav -> Latn
+    {0xD8130000u, 55u}, // taw -> Latn
+    {0xDC130000u, 55u}, // tax -> Latn
+    {0xE0130000u, 55u}, // tay -> Latn
+    {0xE4130000u, 55u}, // taz -> Latn
+    {0x80330000u, 55u}, // tba -> Latn
+    {0x88330000u, 55u}, // tbc -> Latn
+    {0x8C330000u, 55u}, // tbd -> Latn
+    {0x90330000u, 55u}, // tbe -> Latn
+    {0x94330000u, 55u}, // tbf -> Latn
+    {0x98330000u, 55u}, // tbg -> Latn
+    {0x9C330000u, 55u}, // tbh -> Latn
+    {0xA0330000u, 55u}, // tbi -> Latn
+    {0xA4330000u, 55u}, // tbj -> Latn
+    {0xA8330000u, 101u}, // tbk -> Tagb
+    {0xAC330000u, 55u}, // tbl -> Latn
+    {0xB0330000u, 55u}, // tbm -> Latn
+    {0xB4330000u, 55u}, // tbn -> Latn
+    {0xB8330000u, 55u}, // tbo -> Latn
+    {0xBC330000u, 55u}, // tbp -> Latn
+    {0xC8330000u, 55u}, // tbs -> Latn
+    {0xCC330000u, 55u}, // tbt -> Latn
+    {0xD0330000u, 55u}, // tbu -> Latn
+    {0xD4330000u, 55u}, // tbv -> Latn
+    {0xD8330000u, 55u}, // tbw -> Latn
+    {0xDC330000u, 55u}, // tbx -> Latn
+    {0xE0330000u, 55u}, // tby -> Latn
+    {0xE4330000u, 55u}, // tbz -> Latn
+    {0x80530000u, 55u}, // tca -> Latn
+    {0x84530000u, 55u}, // tcb -> Latn
+    {0x88530000u, 55u}, // tcc -> Latn
+    {0x8C530000u, 55u}, // tcd -> Latn
+    {0x90530000u, 55u}, // tce -> Latn
+    {0x94530000u, 55u}, // tcf -> Latn
+    {0x98530000u, 55u}, // tcg -> Latn
+    {0x9C530000u, 55u}, // tch -> Latn
+    {0xA0530000u, 55u}, // tci -> Latn
+    {0xA8530000u, 55u}, // tck -> Latn
+    {0xB0530000u, 55u}, // tcm -> Latn
+    {0xB4530000u, 112u}, // tcn -> Tibt
+    {0xB8530000u, 72u}, // tco -> Mymr
+    {0xBC530000u, 55u}, // tcp -> Latn
+    {0xC0530000u, 55u}, // tcq -> Latn
+    {0xC8530000u, 55u}, // tcs -> Latn
+    {0xD0530000u, 55u}, // tcu -> Latn
+    {0xD8530000u, 55u}, // tcw -> Latn
+    {0xDC530000u, 105u}, // tcx -> Taml
+    {0xE0530000u, 49u}, // tcy -> Knda
+    {0xE4530000u, 55u}, // tcz -> Latn
+    {0x80730000u, 109u}, // tda -> Tfng
+    {0x84730000u, 21u}, // tdb -> Deva
+    {0x88730000u, 55u}, // tdc -> Latn
+    {0x8C730000u, 103u}, // tdd -> Tale
+    {0x90730000u, 55u}, // tde -> Latn
+    {0x98730000u, 21u}, // tdg -> Deva
+    {0x9C730000u, 21u}, // tdh -> Deva
+    {0xA0730000u, 55u}, // tdi -> Latn
+    {0xA4730000u, 55u}, // tdj -> Latn
+    {0xA8730000u, 55u}, // tdk -> Latn
+    {0xAC730000u, 55u}, // tdl -> Latn
+    {0xB0730000u, 55u}, // tdm -> Latn
+    {0xB4730000u, 55u}, // tdn -> Latn
+    {0xB8730000u, 55u}, // tdo -> Latn
+    {0xC0730000u, 55u}, // tdq -> Latn
+    {0xC4730000u, 55u}, // tdr -> Latn
+    {0xC8730000u, 55u}, // tds -> Latn
+    {0xCC730000u, 55u}, // tdt -> Latn
+    {0xD4730000u, 55u}, // tdv -> Latn
+    {0xDC730000u, 55u}, // tdx -> Latn
+    {0xE0730000u, 55u}, // tdy -> Latn
+    {0x74650000u, 108u}, // te -> Telu
+    {0x80930000u, 55u}, // tea -> Latn
+    {0x84930000u, 55u}, // teb -> Latn
+    {0x88930000u, 55u}, // tec -> Latn
+    {0x8C930000u, 55u}, // ted -> Latn
+    {0x90930000u, 55u}, // tee -> Latn
+    {0x98930000u, 55u}, // teg -> Latn
+    {0x9C930000u, 55u}, // teh -> Latn
+    {0xA0930000u, 55u}, // tei -> Latn
+    {0xA8930000u, 55u}, // tek -> Latn
+    {0xB0930000u, 55u}, // tem -> Latn
+    {0xB4930000u, 55u}, // ten -> Latn
+    {0xB8930000u, 55u}, // teo -> Latn
+    {0xBC930000u, 55u}, // tep -> Latn
+    {0xC0930000u, 55u}, // teq -> Latn
+    {0xC4930000u, 55u}, // ter -> Latn
+    {0xC8930000u, 41u}, // tes -> Java
+    {0xCC930000u, 55u}, // tet -> Latn
+    {0xD0930000u, 55u}, // teu -> Latn
+    {0xD4930000u, 55u}, // tev -> Latn
+    {0xD8930000u, 55u}, // tew -> Latn
+    {0xDC930000u, 55u}, // tex -> Latn
+    {0xE0930000u, 55u}, // tey -> Latn
+    {0xE4930000u, 55u}, // tez -> Latn
+    {0xA0B30000u, 55u}, // tfi -> Latn
+    {0xB4B30000u, 55u}, // tfn -> Latn
+    {0xB8B30000u, 55u}, // tfo -> Latn
+    {0xC4B30000u, 55u}, // tfr -> Latn
+    {0xCCB30000u, 55u}, // tft -> Latn
+    {0x74670000u, 20u}, // tg -> Cyrl
     {0x7467504Bu,  2u}, // tg-PK -> Arab
-    {0x88D30000u, 46u}, // tgc -> Latn
-    {0xB8D30000u, 46u}, // tgo -> Latn
-    {0xD0D30000u, 46u}, // tgu -> Latn
-    {0x74680000u, 93u}, // th -> Thai
-    {0xACF30000u, 19u}, // thl -> Deva
-    {0xC0F30000u, 19u}, // thq -> Deva
-    {0xC4F30000u, 19u}, // thr -> Deva
-    {0x74690000u, 21u}, // ti -> Ethi
-    {0x95130000u, 46u}, // tif -> Latn
-    {0x99130000u, 21u}, // tig -> Ethi
-    {0xA9130000u, 46u}, // tik -> Latn
-    {0xB1130000u, 46u}, // tim -> Latn
-    {0xB9130000u, 46u}, // tio -> Latn
-    {0xD5130000u, 46u}, // tiv -> Latn
-    {0x746B0000u, 46u}, // tk -> Latn
-    {0xAD530000u, 46u}, // tkl -> Latn
-    {0xC5530000u, 46u}, // tkr -> Latn
-    {0xCD530000u, 19u}, // tkt -> Deva
-    {0x746C0000u, 46u}, // tl -> Latn
-    {0x95730000u, 46u}, // tlf -> Latn
-    {0xDD730000u, 46u}, // tlx -> Latn
-    {0xE1730000u, 46u}, // tly -> Latn
-    {0x9D930000u, 46u}, // tmh -> Latn
-    {0xE1930000u, 46u}, // tmy -> Latn
-    {0x746E0000u, 46u}, // tn -> Latn
-    {0x9DB30000u, 46u}, // tnh -> Latn
-    {0x746F0000u, 46u}, // to -> Latn
-    {0x95D30000u, 46u}, // tof -> Latn
-    {0x99D30000u, 46u}, // tog -> Latn
-    {0xA9D30000u, 46u}, // tok -> Latn
-    {0xC1D30000u, 46u}, // toq -> Latn
-    {0xA1F30000u, 46u}, // tpi -> Latn
-    {0xB1F30000u, 46u}, // tpm -> Latn
-    {0xE5F30000u, 46u}, // tpz -> Latn
-    {0xBA130000u, 46u}, // tqo -> Latn
-    {0x74720000u, 46u}, // tr -> Latn
-    {0xD2330000u, 46u}, // tru -> Latn
-    {0xD6330000u, 46u}, // trv -> Latn
+    {0x80D30000u, 55u}, // tga -> Latn
+    {0x84D30000u, 55u}, // tgb -> Latn
+    {0x88D30000u, 55u}, // tgc -> Latn
+    {0x8CD30000u, 55u}, // tgd -> Latn
+    {0x90D30000u, 21u}, // tge -> Deva
+    {0x94D30000u, 112u}, // tgf -> Tibt
+    {0x9CD30000u, 55u}, // tgh -> Latn
+    {0xA0D30000u, 55u}, // tgi -> Latn
+    {0xA4D30000u, 55u}, // tgj -> Latn
+    {0xB4D30000u, 55u}, // tgn -> Latn
+    {0xB8D30000u, 55u}, // tgo -> Latn
+    {0xBCD30000u, 55u}, // tgp -> Latn
+    {0xC0D30000u, 55u}, // tgq -> Latn
+    {0xC8D30000u, 55u}, // tgs -> Latn
+    {0xCCD30000u, 55u}, // tgt -> Latn
+    {0xD0D30000u, 55u}, // tgu -> Latn
+    {0xD4D30000u, 55u}, // tgv -> Latn
+    {0xD8D30000u, 55u}, // tgw -> Latn
+    {0xDCD30000u, 55u}, // tgx -> Latn
+    {0xE0D30000u, 55u}, // tgy -> Latn
+    {0xE4D30000u, 55u}, // tgz -> Latn
+    {0x74680000u, 111u}, // th -> Thai
+    {0x8CF30000u, 55u}, // thd -> Latn
+    {0x90F30000u, 21u}, // the -> Deva
+    {0x94F30000u, 21u}, // thf -> Deva
+    {0x9CF30000u, 55u}, // thh -> Latn
+    {0xA0F30000u, 103u}, // thi -> Tale
+    {0xA8F30000u, 55u}, // thk -> Latn
+    {0xACF30000u, 21u}, // thl -> Deva
+    {0xB0F30000u, 111u}, // thm -> Thai
+    {0xBCF30000u, 55u}, // thp -> Latn
+    {0xC0F30000u, 21u}, // thq -> Deva
+    {0xC4F30000u, 21u}, // thr -> Deva
+    {0xC8F30000u, 21u}, // ths -> Deva
+    {0xCCF30000u, 55u}, // tht -> Latn
+    {0xD0F30000u, 55u}, // thu -> Latn
+    {0xD4F30000u, 55u}, // thv -> Latn
+    {0xE0F30000u, 55u}, // thy -> Latn
+    {0xE4F30000u, 55u}, // thz -> Latn
+    {0x74690000u, 24u}, // ti -> Ethi
+    {0x89130000u, 55u}, // tic -> Latn
+    {0x95130000u, 55u}, // tif -> Latn
+    {0x99130000u, 24u}, // tig -> Ethi
+    {0x9D130000u, 55u}, // tih -> Latn
+    {0xA1130000u, 55u}, // tii -> Latn
+    {0xA5130000u, 21u}, // tij -> Deva
+    {0xA9130000u, 55u}, // tik -> Latn
+    {0xAD130000u, 55u}, // til -> Latn
+    {0xB1130000u, 55u}, // tim -> Latn
+    {0xB5130000u, 20u}, // tin -> Cyrl
+    {0xB9130000u, 55u}, // tio -> Latn
+    {0xBD130000u, 55u}, // tip -> Latn
+    {0xC1130000u, 55u}, // tiq -> Latn
+    {0xC9130000u, 55u}, // tis -> Latn
+    {0xCD130000u, 55u}, // tit -> Latn
+    {0xD1130000u, 55u}, // tiu -> Latn
+    {0xD5130000u, 55u}, // tiv -> Latn
+    {0xD9130000u, 55u}, // tiw -> Latn
+    {0xDD130000u, 55u}, // tix -> Latn
+    {0xE1130000u, 55u}, // tiy -> Latn
+    {0x81330000u, 55u}, // tja -> Latn
+    {0x99330000u, 55u}, // tjg -> Latn
+    {0xA1330000u, 55u}, // tji -> Latn
+    {0xA5330000u, 55u}, // tjj -> Latn
+    {0xAD330000u, 72u}, // tjl -> Mymr
+    {0xB5330000u, 55u}, // tjn -> Latn
+    {0xB9330000u,  2u}, // tjo -> Arab
+    {0xBD330000u, 55u}, // tjp -> Latn
+    {0xC9330000u, 55u}, // tjs -> Latn
+    {0xD1330000u, 55u}, // tju -> Latn
+    {0xD9330000u, 55u}, // tjw -> Latn
+    {0x746B0000u, 55u}, // tk -> Latn
+    {0x81530000u, 55u}, // tka -> Latn
+    {0x85530000u, 21u}, // tkb -> Deva
+    {0x8D530000u, 55u}, // tkd -> Latn
+    {0x91530000u, 55u}, // tke -> Latn
+    {0x95530000u, 55u}, // tkf -> Latn
+    {0x99530000u, 55u}, // tkg -> Latn
+    {0xAD530000u, 55u}, // tkl -> Latn
+    {0xBD530000u, 55u}, // tkp -> Latn
+    {0xC1530000u, 55u}, // tkq -> Latn
+    {0xC5530000u, 55u}, // tkr -> Latn
+    {0xC9530000u,  2u}, // tks -> Arab
+    {0xCD530000u, 21u}, // tkt -> Deva
+    {0xD1530000u, 55u}, // tku -> Latn
+    {0xD5530000u, 55u}, // tkv -> Latn
+    {0xD9530000u, 55u}, // tkw -> Latn
+    {0xDD530000u, 55u}, // tkx -> Latn
+    {0xE5530000u, 55u}, // tkz -> Latn
+    {0x746C0000u, 55u}, // tl -> Latn
+    {0x81730000u, 55u}, // tla -> Latn
+    {0x85730000u, 55u}, // tlb -> Latn
+    {0x89730000u, 55u}, // tlc -> Latn
+    {0x8D730000u, 55u}, // tld -> Latn
+    {0x95730000u, 55u}, // tlf -> Latn
+    {0x99730000u, 55u}, // tlg -> Latn
+    {0xA1730000u, 55u}, // tli -> Latn
+    {0xA5730000u, 55u}, // tlj -> Latn
+    {0xA9730000u, 55u}, // tlk -> Latn
+    {0xAD730000u, 55u}, // tll -> Latn
+    {0xB1730000u, 55u}, // tlm -> Latn
+    {0xB5730000u, 55u}, // tln -> Latn
+    {0xBD730000u, 55u}, // tlp -> Latn
+    {0xC1730000u, 55u}, // tlq -> Latn
+    {0xC5730000u, 55u}, // tlr -> Latn
+    {0xC9730000u, 55u}, // tls -> Latn
+    {0xCD730000u, 55u}, // tlt -> Latn
+    {0xD1730000u, 55u}, // tlu -> Latn
+    {0xD5730000u, 55u}, // tlv -> Latn
+    {0xDD730000u, 55u}, // tlx -> Latn
+    {0xE1730000u, 55u}, // tly -> Latn
+    {0x81930000u, 55u}, // tma -> Latn
+    {0x85930000u, 55u}, // tmb -> Latn
+    {0x89930000u, 55u}, // tmc -> Latn
+    {0x8D930000u, 55u}, // tmd -> Latn
+    {0x91930000u, 55u}, // tme -> Latn
+    {0x95930000u, 55u}, // tmf -> Latn
+    {0x99930000u, 55u}, // tmg -> Latn
+    {0x9D930000u, 55u}, // tmh -> Latn
+    {0xA1930000u, 55u}, // tmi -> Latn
+    {0xA5930000u, 55u}, // tmj -> Latn
+    {0xAD930000u, 55u}, // tml -> Latn
+    {0xB1930000u, 55u}, // tmm -> Latn
+    {0xB5930000u, 55u}, // tmn -> Latn
+    {0xB9930000u, 55u}, // tmo -> Latn
+    {0xC1930000u, 55u}, // tmq -> Latn
+    {0xC5930000u, 100u}, // tmr -> Syrc
+    {0xCD930000u, 55u}, // tmt -> Latn
+    {0xD1930000u, 55u}, // tmu -> Latn
+    {0xD5930000u, 55u}, // tmv -> Latn
+    {0xD9930000u, 55u}, // tmw -> Latn
+    {0xE1930000u, 55u}, // tmy -> Latn
+    {0xE5930000u, 55u}, // tmz -> Latn
+    {0x746E0000u, 55u}, // tn -> Latn
+    {0x81B30000u, 55u}, // tna -> Latn
+    {0x85B30000u, 55u}, // tnb -> Latn
+    {0x89B30000u, 55u}, // tnc -> Latn
+    {0x8DB30000u, 55u}, // tnd -> Latn
+    {0x99B30000u, 55u}, // tng -> Latn
+    {0x9DB30000u, 55u}, // tnh -> Latn
+    {0xA1B30000u, 55u}, // tni -> Latn
+    {0xA9B30000u, 55u}, // tnk -> Latn
+    {0xADB30000u, 55u}, // tnl -> Latn
+    {0xB1B30000u, 55u}, // tnm -> Latn
+    {0xB5B30000u, 55u}, // tnn -> Latn
+    {0xB9B30000u, 55u}, // tno -> Latn
+    {0xBDB30000u, 55u}, // tnp -> Latn
+    {0xC1B30000u, 55u}, // tnq -> Latn
+    {0xC5B30000u, 55u}, // tnr -> Latn
+    {0xC9B30000u, 55u}, // tns -> Latn
+    {0xCDB30000u, 55u}, // tnt -> Latn
+    {0xD5B30000u, 12u}, // tnv -> Cakm
+    {0xD9B30000u, 55u}, // tnw -> Latn
+    {0xDDB30000u, 55u}, // tnx -> Latn
+    {0xE1B30000u, 55u}, // tny -> Latn
+    {0x746F0000u, 55u}, // to -> Latn
+    {0x85D30000u, 55u}, // tob -> Latn
+    {0x89D30000u, 55u}, // toc -> Latn
+    {0x8DD30000u, 55u}, // tod -> Latn
+    {0x95D30000u, 55u}, // tof -> Latn
+    {0x99D30000u, 55u}, // tog -> Latn
+    {0x9DD30000u, 55u}, // toh -> Latn
+    {0xA1D30000u, 55u}, // toi -> Latn
+    {0xA5D30000u, 55u}, // toj -> Latn
+    {0xA9D30000u, 55u}, // tok -> Latn
+    {0xADD30000u, 55u}, // tol -> Latn
+    {0xB1D30000u, 55u}, // tom -> Latn
+    {0xB9D30000u, 55u}, // too -> Latn
+    {0xBDD30000u, 55u}, // top -> Latn
+    {0xC1D30000u, 55u}, // toq -> Latn
+    {0xC5D30000u, 55u}, // tor -> Latn
+    {0xC9D30000u, 55u}, // tos -> Latn
+    {0xD1D30000u, 55u}, // tou -> Latn
+    {0xD5D30000u,  2u}, // tov -> Arab
+    {0xD9D30000u, 55u}, // tow -> Latn
+    {0xDDD30000u, 55u}, // tox -> Latn
+    {0xE1D30000u, 55u}, // toy -> Latn
+    {0xE5D30000u, 55u}, // toz -> Latn
+    {0x81F30000u, 55u}, // tpa -> Latn
+    {0x89F30000u, 55u}, // tpc -> Latn
+    {0x91F30000u, 55u}, // tpe -> Latn
+    {0x95F30000u, 55u}, // tpf -> Latn
+    {0x99F30000u, 55u}, // tpg -> Latn
+    {0xA1F30000u, 55u}, // tpi -> Latn
+    {0xA5F30000u, 55u}, // tpj -> Latn
+    {0xA9F30000u, 55u}, // tpk -> Latn
+    {0xADF30000u, 55u}, // tpl -> Latn
+    {0xB1F30000u, 55u}, // tpm -> Latn
+    {0xB5F30000u, 55u}, // tpn -> Latn
+    {0xBDF30000u, 55u}, // tpp -> Latn
+    {0xC5F30000u, 55u}, // tpr -> Latn
+    {0xCDF30000u, 55u}, // tpt -> Latn
+    {0xD1F30000u, 47u}, // tpu -> Khmr
+    {0xD5F30000u, 55u}, // tpv -> Latn
+    {0xDDF30000u, 55u}, // tpx -> Latn
+    {0xE1F30000u, 55u}, // tpy -> Latn
+    {0xE5F30000u, 55u}, // tpz -> Latn
+    {0x86130000u, 55u}, // tqb -> Latn
+    {0xAE130000u, 55u}, // tql -> Latn
+    {0xB2130000u, 55u}, // tqm -> Latn
+    {0xB6130000u, 55u}, // tqn -> Latn
+    {0xBA130000u, 55u}, // tqo -> Latn
+    {0xBE130000u, 55u}, // tqp -> Latn
+    {0xCE130000u, 55u}, // tqt -> Latn
+    {0xD2130000u, 55u}, // tqu -> Latn
+    {0xDA130000u, 55u}, // tqw -> Latn
+    {0x74720000u, 55u}, // tr -> Latn
+    {0x82330000u,  2u}, // tra -> Arab
+    {0x86330000u, 55u}, // trb -> Latn
+    {0x8A330000u, 55u}, // trc -> Latn
+    {0x92330000u, 55u}, // tre -> Latn
+    {0x96330000u, 55u}, // trf -> Latn
+    {0x9A330000u, 37u}, // trg -> Hebr
+    {0x9E330000u, 55u}, // trh -> Latn
+    {0xA2330000u, 55u}, // tri -> Latn
+    {0xA6330000u, 55u}, // trj -> Latn
+    {0xAE330000u, 55u}, // trl -> Latn
+    {0xB2330000u,  2u}, // trm -> Arab
+    {0xB6330000u, 55u}, // trn -> Latn
+    {0xBA330000u, 55u}, // tro -> Latn
+    {0xBE330000u, 55u}, // trp -> Latn
+    {0xC2330000u, 55u}, // trq -> Latn
+    {0xC6330000u, 55u}, // trr -> Latn
+    {0xCA330000u, 55u}, // trs -> Latn
+    {0xCE330000u, 55u}, // trt -> Latn
+    {0xD2330000u, 55u}, // tru -> Latn
+    {0xD6330000u, 55u}, // trv -> Latn
     {0xDA330000u,  2u}, // trw -> Arab
-    {0x74730000u, 46u}, // ts -> Latn
-    {0x8E530000u, 26u}, // tsd -> Grek
-    {0x96530000u, 19u}, // tsf -> Deva
-    {0x9A530000u, 46u}, // tsg -> Latn
-    {0xA6530000u, 94u}, // tsj -> Tibt
-    {0xDA530000u, 46u}, // tsw -> Latn
-    {0x74740000u, 18u}, // tt -> Cyrl
-    {0x8E730000u, 46u}, // ttd -> Latn
-    {0x92730000u, 46u}, // tte -> Latn
-    {0xA6730000u, 46u}, // ttj -> Latn
-    {0xC6730000u, 46u}, // ttr -> Latn
-    {0xCA730000u, 93u}, // tts -> Thai
-    {0xCE730000u, 46u}, // ttt -> Latn
-    {0x9E930000u, 46u}, // tuh -> Latn
-    {0xAE930000u, 46u}, // tul -> Latn
-    {0xB2930000u, 46u}, // tum -> Latn
-    {0xC2930000u, 46u}, // tuq -> Latn
-    {0x8EB30000u, 46u}, // tvd -> Latn
-    {0xAEB30000u, 46u}, // tvl -> Latn
-    {0xD2B30000u, 46u}, // tvu -> Latn
-    {0x9ED30000u, 46u}, // twh -> Latn
-    {0xC2D30000u, 46u}, // twq -> Latn
-    {0x9AF30000u, 88u}, // txg -> Tang
-    {0xBAF30000u, 96u}, // txo -> Toto
-    {0x74790000u, 46u}, // ty -> Latn
-    {0x83130000u, 46u}, // tya -> Latn
-    {0xD7130000u, 18u}, // tyv -> Cyrl
-    {0xB3330000u, 46u}, // tzm -> Latn
-    {0xD0340000u, 46u}, // ubu -> Latn
-    {0xA0740000u,  0u}, // udi -> Aghb
-    {0xB0740000u, 18u}, // udm -> Cyrl
+    {0xDE330000u, 55u}, // trx -> Latn
+    {0xE2330000u, 55u}, // try -> Latn
+    {0xE6330000u, 55u}, // trz -> Latn
+    {0x74730000u, 55u}, // ts -> Latn
+    {0x82530000u, 55u}, // tsa -> Latn
+    {0x86530000u, 55u}, // tsb -> Latn
+    {0x8A530000u, 55u}, // tsc -> Latn
+    {0x8E530000u, 30u}, // tsd -> Grek
+    {0x9A530000u, 55u}, // tsg -> Latn
+    {0x9E530000u, 55u}, // tsh -> Latn
+    {0xA2530000u, 55u}, // tsi -> Latn
+    {0xA6530000u, 112u}, // tsj -> Tibt
+    {0xAE530000u, 55u}, // tsl -> Latn
+    {0xBE530000u, 55u}, // tsp -> Latn
+    {0xC6530000u, 55u}, // tsr -> Latn
+    {0xCE530000u, 55u}, // tst -> Latn
+    {0xD2530000u, 55u}, // tsu -> Latn
+    {0xD6530000u, 55u}, // tsv -> Latn
+    {0xDA530000u, 55u}, // tsw -> Latn
+    {0xDE530000u, 55u}, // tsx -> Latn
+    {0xE6530000u, 55u}, // tsz -> Latn
+    {0x74740000u, 20u}, // tt -> Cyrl
+    {0x86730000u, 55u}, // ttb -> Latn
+    {0x8A730000u, 55u}, // ttc -> Latn
+    {0x8E730000u, 55u}, // ttd -> Latn
+    {0x92730000u, 55u}, // tte -> Latn
+    {0x96730000u, 55u}, // ttf -> Latn
+    {0x9E730000u, 52u}, // tth -> Laoo
+    {0xA2730000u, 55u}, // tti -> Latn
+    {0xA6730000u, 55u}, // ttj -> Latn
+    {0xAA730000u, 55u}, // ttk -> Latn
+    {0xAE730000u, 55u}, // ttl -> Latn
+    {0xB2730000u, 55u}, // ttm -> Latn
+    {0xB6730000u, 55u}, // ttn -> Latn
+    {0xBA730000u, 52u}, // tto -> Laoo
+    {0xBE730000u, 55u}, // ttp -> Latn
+    {0xC6730000u, 55u}, // ttr -> Latn
+    {0xCA730000u, 111u}, // tts -> Thai
+    {0xCE730000u, 55u}, // ttt -> Latn
+    {0xD2730000u, 55u}, // ttu -> Latn
+    {0xD6730000u, 55u}, // ttv -> Latn
+    {0xDA730000u, 55u}, // ttw -> Latn
+    {0xE2730000u, 55u}, // tty -> Latn
+    {0xE6730000u, 21u}, // ttz -> Deva
+    {0x82930000u, 55u}, // tua -> Latn
+    {0x86930000u, 55u}, // tub -> Latn
+    {0x8A930000u, 55u}, // tuc -> Latn
+    {0x8E930000u, 55u}, // tud -> Latn
+    {0x92930000u, 55u}, // tue -> Latn
+    {0x96930000u, 55u}, // tuf -> Latn
+    {0x9A930000u, 55u}, // tug -> Latn
+    {0x9E930000u, 55u}, // tuh -> Latn
+    {0xA2930000u, 55u}, // tui -> Latn
+    {0xA6930000u, 55u}, // tuj -> Latn
+    {0xAE930000u, 55u}, // tul -> Latn
+    {0xB2930000u, 55u}, // tum -> Latn
+    {0xB6930000u, 55u}, // tun -> Latn
+    {0xBA930000u, 55u}, // tuo -> Latn
+    {0xC2930000u, 55u}, // tuq -> Latn
+    {0xCA930000u, 55u}, // tus -> Latn
+    {0xD2930000u, 55u}, // tuu -> Latn
+    {0xD6930000u, 55u}, // tuv -> Latn
+    {0xDE930000u, 55u}, // tux -> Latn
+    {0xE2930000u, 55u}, // tuy -> Latn
+    {0xE6930000u, 55u}, // tuz -> Latn
+    {0x82B30000u, 55u}, // tva -> Latn
+    {0x8EB30000u, 55u}, // tvd -> Latn
+    {0x92B30000u, 55u}, // tve -> Latn
+    {0xA2B30000u, 55u}, // tvi -> Latn
+    {0xAAB30000u, 55u}, // tvk -> Latn
+    {0xAEB30000u, 55u}, // tvl -> Latn
+    {0xB2B30000u, 55u}, // tvm -> Latn
+    {0xB6B30000u, 72u}, // tvn -> Mymr
+    {0xBAB30000u, 55u}, // tvo -> Latn
+    {0xCAB30000u, 55u}, // tvs -> Latn
+    {0xCEB30000u, 55u}, // tvt -> Latn
+    {0xD2B30000u, 55u}, // tvu -> Latn
+    {0xDAB30000u, 55u}, // tvw -> Latn
+    {0xDEB30000u, 55u}, // tvx -> Latn
+    {0x82D30000u, 55u}, // twa -> Latn
+    {0x86D30000u, 55u}, // twb -> Latn
+    {0x8ED30000u, 55u}, // twd -> Latn
+    {0x92D30000u, 55u}, // twe -> Latn
+    {0x96D30000u, 55u}, // twf -> Latn
+    {0x9AD30000u, 55u}, // twg -> Latn
+    {0x9ED30000u, 55u}, // twh -> Latn
+    {0xAED30000u, 55u}, // twl -> Latn
+    {0xB2D30000u, 21u}, // twm -> Deva
+    {0xB6D30000u, 55u}, // twn -> Latn
+    {0xBAD30000u, 55u}, // two -> Latn
+    {0xBED30000u, 55u}, // twp -> Latn
+    {0xC2D30000u, 55u}, // twq -> Latn
+    {0xC6D30000u, 55u}, // twr -> Latn
+    {0xCED30000u, 55u}, // twt -> Latn
+    {0xD2D30000u, 55u}, // twu -> Latn
+    {0xDAD30000u, 55u}, // tww -> Latn
+    {0xDED30000u, 55u}, // twx -> Latn
+    {0xE2D30000u, 55u}, // twy -> Latn
+    {0x82F30000u, 55u}, // txa -> Latn
+    {0x92F30000u, 55u}, // txe -> Latn
+    {0x9AF30000u, 106u}, // txg -> Tang
+    {0xA2F30000u, 55u}, // txi -> Latn
+    {0xA6F30000u, 55u}, // txj -> Latn
+    {0xB2F30000u, 55u}, // txm -> Latn
+    {0xB6F30000u, 55u}, // txn -> Latn
+    {0xBAF30000u, 114u}, // txo -> Toto
+    {0xC2F30000u, 55u}, // txq -> Latn
+    {0xCAF30000u, 55u}, // txs -> Latn
+    {0xCEF30000u, 55u}, // txt -> Latn
+    {0xD2F30000u, 55u}, // txu -> Latn
+    {0xDEF30000u, 55u}, // txx -> Latn
+    {0xE2F30000u, 55u}, // txy -> Latn
+    {0x74790000u, 55u}, // ty -> Latn
+    {0x83130000u, 55u}, // tya -> Latn
+    {0x93130000u, 55u}, // tye -> Latn
+    {0x9F130000u, 55u}, // tyh -> Latn
+    {0xA3130000u, 55u}, // tyi -> Latn
+    {0xA7130000u, 55u}, // tyj -> Latn
+    {0xAF130000u, 55u}, // tyl -> Latn
+    {0xB7130000u, 55u}, // tyn -> Latn
+    {0xBF130000u, 55u}, // typ -> Latn
+    {0xC7130000u, 107u}, // tyr -> Tavt
+    {0xCB130000u, 55u}, // tys -> Latn
+    {0xCF130000u, 55u}, // tyt -> Latn
+    {0xD3130000u, 55u}, // tyu -> Latn
+    {0xD7130000u, 20u}, // tyv -> Cyrl
+    {0xDF130000u, 55u}, // tyx -> Latn
+    {0xE3130000u, 55u}, // tyy -> Latn
+    {0xE7130000u, 55u}, // tyz -> Latn
+    {0x9F330000u, 55u}, // tzh -> Latn
+    {0xA7330000u, 55u}, // tzj -> Latn
+    {0xAF330000u, 55u}, // tzl -> Latn
+    {0xB3330000u, 55u}, // tzm -> Latn
+    {0xB7330000u, 55u}, // tzn -> Latn
+    {0xBB330000u, 55u}, // tzo -> Latn
+    {0xDF330000u, 55u}, // tzx -> Latn
+    {0xB0140000u, 55u}, // uam -> Latn
+    {0xC4140000u, 55u}, // uar -> Latn
+    {0x80340000u, 55u}, // uba -> Latn
+    {0xA0340000u, 55u}, // ubi -> Latn
+    {0xAC340000u, 55u}, // ubl -> Latn
+    {0xC4340000u, 55u}, // ubr -> Latn
+    {0xD0340000u, 55u}, // ubu -> Latn
+    {0xE0340000u, 55u}, // uby -> Latn
+    {0x80740000u, 55u}, // uda -> Latn
+    {0x90740000u, 20u}, // ude -> Cyrl
+    {0x98740000u, 67u}, // udg -> Mlym
+    {0xA0740000u, 20u}, // udi -> Cyrl
+    {0xA4740000u, 55u}, // udj -> Latn
+    {0xAC740000u, 55u}, // udl -> Latn
+    {0xB0740000u, 20u}, // udm -> Cyrl
+    {0xD0740000u, 55u}, // udu -> Latn
+    {0xC8940000u, 55u}, // ues -> Latn
+    {0xA0B40000u, 55u}, // ufi -> Latn
     {0x75670000u,  2u}, // ug -> Arab
-    {0x75674B5Au, 18u}, // ug-KZ -> Cyrl
-    {0x75674D4Eu, 18u}, // ug-MN -> Cyrl
-    {0x80D40000u, 97u}, // uga -> Ugar
-    {0x756B0000u, 18u}, // uk -> Cyrl
-    {0xA1740000u, 46u}, // uli -> Latn
-    {0x85940000u, 46u}, // umb -> Latn
-    {0xC5B40000u,  8u}, // unr -> Beng
-    {0xC5B44E50u, 19u}, // unr-NP -> Deva
-    {0xDDB40000u,  8u}, // unx -> Beng
-    {0xA9D40000u, 46u}, // uok -> Latn
+    {0x75674B5Au, 20u}, // ug-KZ -> Cyrl
+    {0x75674D4Eu, 20u}, // ug-MN -> Cyrl
+    {0x80D40000u, 115u}, // uga -> Ugar
+    {0x84D40000u, 55u}, // ugb -> Latn
+    {0x90D40000u, 55u}, // uge -> Latn
+    {0x9CD40000u, 20u}, // ugh -> Cyrl
+    {0xB8D40000u, 111u}, // ugo -> Thai
+    {0x80F40000u, 55u}, // uha -> Latn
+    {0xB4F40000u, 55u}, // uhn -> Latn
+    {0xC9140000u, 55u}, // uis -> Latn
+    {0xD5140000u, 55u}, // uiv -> Latn
+    {0xA1340000u, 55u}, // uji -> Latn
+    {0x756B0000u, 20u}, // uk -> Cyrl
+    {0x81540000u, 55u}, // uka -> Latn
+    {0x99540000u, 55u}, // ukg -> Latn
+    {0x9D540000u, 55u}, // ukh -> Latn
+    {0xA1540000u, 80u}, // uki -> Orya
+    {0xA9540000u, 55u}, // ukk -> Latn
+    {0xBD540000u, 55u}, // ukp -> Latn
+    {0xC1540000u, 55u}, // ukq -> Latn
+    {0xD1540000u, 55u}, // uku -> Latn
+    {0xD5540000u, 55u}, // ukv -> Latn
+    {0xD9540000u, 55u}, // ukw -> Latn
+    {0xE1540000u, 55u}, // uky -> Latn
+    {0x81740000u, 55u}, // ula -> Latn
+    {0x85740000u, 55u}, // ulb -> Latn
+    {0x89740000u, 20u}, // ulc -> Cyrl
+    {0x91740000u, 55u}, // ule -> Latn
+    {0x95740000u, 55u}, // ulf -> Latn
+    {0xA1740000u, 55u}, // uli -> Latn
+    {0xA9740000u, 55u}, // ulk -> Latn
+    {0xB1740000u, 55u}, // ulm -> Latn
+    {0xB5740000u, 55u}, // uln -> Latn
+    {0xD1740000u, 55u}, // ulu -> Latn
+    {0xD9740000u, 55u}, // ulw -> Latn
+    {0xE1740000u, 55u}, // uly -> Latn
+    {0x81940000u, 55u}, // uma -> Latn
+    {0x85940000u, 55u}, // umb -> Latn
+    {0x8D940000u, 55u}, // umd -> Latn
+    {0x99940000u, 55u}, // umg -> Latn
+    {0xA1940000u, 55u}, // umi -> Latn
+    {0xB1940000u, 55u}, // umm -> Latn
+    {0xB5940000u, 55u}, // umn -> Latn
+    {0xB9940000u, 55u}, // umo -> Latn
+    {0xBD940000u, 55u}, // ump -> Latn
+    {0xC5940000u, 55u}, // umr -> Latn
+    {0xC9940000u, 55u}, // ums -> Latn
+    {0x81B40000u, 55u}, // una -> Latn
+    {0x91B40000u, 55u}, // une -> Latn
+    {0x99B40000u, 55u}, // ung -> Latn
+    {0xA1B40000u, 55u}, // uni -> Latn
+    {0xA9B40000u, 55u}, // unk -> Latn
+    {0xB1B40000u, 55u}, // unm -> Latn
+    {0xB5B40000u, 55u}, // unn -> Latn
+    {0xC5B40000u,  9u}, // unr -> Beng
+    {0xC5B44E50u, 21u}, // unr-NP -> Deva
+    {0xD1B40000u, 55u}, // unu -> Latn
+    {0xDDB40000u,  9u}, // unx -> Beng
+    {0xE5B40000u, 55u}, // unz -> Latn
+    {0xB5D40000u, 55u}, // uon -> Latn
+    {0xA1F40000u, 55u}, // upi -> Latn
+    {0xD5F40000u, 55u}, // upv -> Latn
     {0x75720000u,  2u}, // ur -> Arab
-    {0xA2340000u, 46u}, // uri -> Latn
-    {0xCE340000u, 46u}, // urt -> Latn
-    {0xDA340000u, 46u}, // urw -> Latn
-    {0x82540000u, 46u}, // usa -> Latn
-    {0x9E740000u, 46u}, // uth -> Latn
-    {0xC6740000u, 46u}, // utr -> Latn
-    {0x9EB40000u, 46u}, // uvh -> Latn
-    {0xAEB40000u, 46u}, // uvl -> Latn
-    {0x757A0000u, 46u}, // uz -> Latn
+    {0x82340000u, 55u}, // ura -> Latn
+    {0x86340000u, 55u}, // urb -> Latn
+    {0x8A340000u, 55u}, // urc -> Latn
+    {0x92340000u, 55u}, // ure -> Latn
+    {0x96340000u, 55u}, // urf -> Latn
+    {0x9A340000u, 55u}, // urg -> Latn
+    {0x9E340000u, 55u}, // urh -> Latn
+    {0xA2340000u, 55u}, // uri -> Latn
+    {0xAA340000u, 111u}, // urk -> Thai
+    {0xB2340000u, 55u}, // urm -> Latn
+    {0xB6340000u, 55u}, // urn -> Latn
+    {0xBA340000u, 55u}, // uro -> Latn
+    {0xBE340000u, 55u}, // urp -> Latn
+    {0xC6340000u, 55u}, // urr -> Latn
+    {0xCE340000u, 55u}, // urt -> Latn
+    {0xD2340000u, 55u}, // uru -> Latn
+    {0xD6340000u, 55u}, // urv -> Latn
+    {0xDA340000u, 55u}, // urw -> Latn
+    {0xDE340000u, 55u}, // urx -> Latn
+    {0xE2340000u, 55u}, // ury -> Latn
+    {0xE6340000u, 55u}, // urz -> Latn
+    {0x82540000u, 55u}, // usa -> Latn
+    {0x9E540000u,  2u}, // ush -> Arab
+    {0xA2540000u, 55u}, // usi -> Latn
+    {0xAA540000u, 55u}, // usk -> Latn
+    {0xBE540000u, 55u}, // usp -> Latn
+    {0xCA540000u, 55u}, // uss -> Latn
+    {0xD2540000u, 55u}, // usu -> Latn
+    {0x82740000u, 55u}, // uta -> Latn
+    {0x92740000u, 55u}, // ute -> Latn
+    {0x9E740000u, 55u}, // uth -> Latn
+    {0xBE740000u, 55u}, // utp -> Latn
+    {0xC6740000u, 55u}, // utr -> Latn
+    {0xD2740000u, 55u}, // utu -> Latn
+    {0xB2940000u, 30u}, // uum -> Grek
+    {0xC6940000u, 55u}, // uur -> Latn
+    {0x92B40000u, 55u}, // uve -> Latn
+    {0x9EB40000u, 55u}, // uvh -> Latn
+    {0xAEB40000u, 55u}, // uvl -> Latn
+    {0x82D40000u, 55u}, // uwa -> Latn
+    {0x83140000u, 55u}, // uya -> Latn
+    {0x757A0000u, 55u}, // uz -> Latn
     {0x757A4146u,  2u}, // uz-AF -> Arab
-    {0x757A434Eu, 18u}, // uz-CN -> Cyrl
-    {0x98150000u, 46u}, // vag -> Latn
-    {0xA0150000u, 98u}, // vai -> Vaii
-    {0xB4150000u, 46u}, // van -> Latn
-    {0x76650000u, 46u}, // ve -> Latn
-    {0x88950000u, 46u}, // vec -> Latn
-    {0xBC950000u, 46u}, // vep -> Latn
-    {0x76690000u, 46u}, // vi -> Latn
-    {0x89150000u, 46u}, // vic -> Latn
-    {0xD5150000u, 46u}, // viv -> Latn
-    {0xC9750000u, 46u}, // vls -> Latn
-    {0x95950000u, 46u}, // vmf -> Latn
-    {0xD9950000u, 46u}, // vmw -> Latn
-    {0x766F0000u, 46u}, // vo -> Latn
-    {0xCDD50000u, 46u}, // vot -> Latn
-    {0xBA350000u, 46u}, // vro -> Latn
-    {0xB6950000u, 46u}, // vun -> Latn
-    {0xCE950000u, 46u}, // vut -> Latn
-    {0x77610000u, 46u}, // wa -> Latn
-    {0x90160000u, 46u}, // wae -> Latn
-    {0xA4160000u, 46u}, // waj -> Latn
-    {0xAC160000u, 21u}, // wal -> Ethi
-    {0xB4160000u, 46u}, // wan -> Latn
-    {0xC4160000u, 46u}, // war -> Latn
-    {0xBC360000u, 46u}, // wbp -> Latn
-    {0xC0360000u, 90u}, // wbq -> Telu
-    {0xC4360000u, 19u}, // wbr -> Deva
-    {0xA0560000u, 46u}, // wci -> Latn
-    {0xC4960000u, 46u}, // wer -> Latn
-    {0xA0D60000u, 46u}, // wgi -> Latn
-    {0x98F60000u, 46u}, // whg -> Latn
-    {0x85160000u, 46u}, // wib -> Latn
-    {0xD1160000u, 46u}, // wiu -> Latn
-    {0xD5160000u, 46u}, // wiv -> Latn
-    {0x81360000u, 46u}, // wja -> Latn
-    {0xA1360000u, 46u}, // wji -> Latn
-    {0xC9760000u, 46u}, // wls -> Latn
-    {0xB9960000u, 46u}, // wmo -> Latn
-    {0x89B60000u, 46u}, // wnc -> Latn
+    {0x757A434Eu, 20u}, // uz-CN -> Cyrl
+    {0xCB340000u,  2u}, // uzs -> Arab
+    {0x80150000u, 105u}, // vaa -> Taml
+    {0x90150000u, 55u}, // vae -> Latn
+    {0x94150000u,  2u}, // vaf -> Arab
+    {0x98150000u, 55u}, // vag -> Latn
+    {0x9C150000u, 21u}, // vah -> Deva
+    {0xA0150000u, 116u}, // vai -> Vaii
+    {0xA4150000u, 55u}, // vaj -> Latn
+    {0xAC150000u, 55u}, // val -> Latn
+    {0xB0150000u, 55u}, // vam -> Latn
+    {0xB4150000u, 55u}, // van -> Latn
+    {0xB8150000u, 55u}, // vao -> Latn
+    {0xBC150000u, 55u}, // vap -> Latn
+    {0xC4150000u, 55u}, // var -> Latn
+    {0xC8150000u, 21u}, // vas -> Deva
+    {0xD0150000u, 55u}, // vau -> Latn
+    {0xD4150000u, 21u}, // vav -> Deva
+    {0xE0150000u, 21u}, // vay -> Deva
+    {0x84350000u, 55u}, // vbb -> Latn
+    {0xA8350000u, 55u}, // vbk -> Latn
+    {0x76650000u, 55u}, // ve -> Latn
+    {0x88950000u, 55u}, // vec -> Latn
+    {0xB0950000u, 55u}, // vem -> Latn
+    {0xB8950000u, 55u}, // veo -> Latn
+    {0xBC950000u, 55u}, // vep -> Latn
+    {0xC4950000u, 55u}, // ver -> Latn
+    {0xC4D50000u,  2u}, // vgr -> Arab
+    {0x76690000u, 55u}, // vi -> Latn
+    {0x89150000u, 55u}, // vic -> Latn
+    {0x8D150000u, 55u}, // vid -> Latn
+    {0x95150000u, 55u}, // vif -> Latn
+    {0x99150000u, 55u}, // vig -> Latn
+    {0xAD150000u, 55u}, // vil -> Latn
+    {0xB5150000u, 55u}, // vin -> Latn
+    {0xCD150000u, 55u}, // vit -> Latn
+    {0xD5150000u, 55u}, // viv -> Latn
+    {0xA9350000u, 21u}, // vjk -> Deva
+    {0x81550000u, 55u}, // vka -> Latn
+    {0xA5550000u, 55u}, // vkj -> Latn
+    {0xA9550000u, 55u}, // vkk -> Latn
+    {0xAD550000u, 55u}, // vkl -> Latn
+    {0xB1550000u, 55u}, // vkm -> Latn
+    {0xB5550000u, 55u}, // vkn -> Latn
+    {0xB9550000u, 55u}, // vko -> Latn
+    {0xBD550000u, 55u}, // vkp -> Latn
+    {0xCD550000u, 55u}, // vkt -> Latn
+    {0xD1550000u, 55u}, // vku -> Latn
+    {0xE5550000u, 55u}, // vkz -> Latn
+    {0xBD750000u, 55u}, // vlp -> Latn
+    {0xC9750000u, 55u}, // vls -> Latn
+    {0x81950000u, 55u}, // vma -> Latn
+    {0x85950000u, 55u}, // vmb -> Latn
+    {0x89950000u, 55u}, // vmc -> Latn
+    {0x8D950000u, 49u}, // vmd -> Knda
+    {0x91950000u, 55u}, // vme -> Latn
+    {0x95950000u, 55u}, // vmf -> Latn
+    {0x99950000u, 55u}, // vmg -> Latn
+    {0x9D950000u,  2u}, // vmh -> Arab
+    {0xA1950000u, 55u}, // vmi -> Latn
+    {0xA5950000u, 55u}, // vmj -> Latn
+    {0xA9950000u, 55u}, // vmk -> Latn
+    {0xAD950000u, 55u}, // vml -> Latn
+    {0xB1950000u, 55u}, // vmm -> Latn
+    {0xBD950000u, 55u}, // vmp -> Latn
+    {0xC1950000u, 55u}, // vmq -> Latn
+    {0xC5950000u, 55u}, // vmr -> Latn
+    {0xC9950000u, 55u}, // vms -> Latn
+    {0xD1950000u, 55u}, // vmu -> Latn
+    {0xD9950000u, 55u}, // vmw -> Latn
+    {0xDD950000u, 55u}, // vmx -> Latn
+    {0xE1950000u, 55u}, // vmy -> Latn
+    {0xE5950000u, 55u}, // vmz -> Latn
+    {0xA9B50000u, 55u}, // vnk -> Latn
+    {0xB1B50000u, 55u}, // vnm -> Latn
+    {0xBDB50000u, 55u}, // vnp -> Latn
+    {0x766F0000u, 55u}, // vo -> Latn
+    {0xC5D50000u, 55u}, // vor -> Latn
+    {0xCDD50000u, 55u}, // vot -> Latn
+    {0x82350000u, 55u}, // vra -> Latn
+    {0xBA350000u, 55u}, // vro -> Latn
+    {0xCA350000u, 55u}, // vrs -> Latn
+    {0xCE350000u, 55u}, // vrt -> Latn
+    {0xBA750000u, 55u}, // vto -> Latn
+    {0xB2950000u, 55u}, // vum -> Latn
+    {0xB6950000u, 55u}, // vun -> Latn
+    {0xCE950000u, 55u}, // vut -> Latn
+    {0x82D50000u, 55u}, // vwa -> Latn
+    {0x77610000u, 55u}, // wa -> Latn
+    {0x80160000u, 55u}, // waa -> Latn
+    {0x84160000u, 55u}, // wab -> Latn
+    {0x88160000u, 55u}, // wac -> Latn
+    {0x8C160000u, 55u}, // wad -> Latn
+    {0x90160000u, 55u}, // wae -> Latn
+    {0x94160000u, 55u}, // waf -> Latn
+    {0x98160000u, 55u}, // wag -> Latn
+    {0x9C160000u, 55u}, // wah -> Latn
+    {0xA0160000u, 55u}, // wai -> Latn
+    {0xA4160000u, 55u}, // waj -> Latn
+    {0xAC160000u, 24u}, // wal -> Ethi
+    {0xB0160000u, 55u}, // wam -> Latn
+    {0xB4160000u, 55u}, // wan -> Latn
+    {0xBC160000u, 55u}, // wap -> Latn
+    {0xC0160000u, 55u}, // waq -> Latn
+    {0xC4160000u, 55u}, // war -> Latn
+    {0xC8160000u, 55u}, // was -> Latn
+    {0xCC160000u, 55u}, // wat -> Latn
+    {0xD0160000u, 55u}, // wau -> Latn
+    {0xD4160000u, 55u}, // wav -> Latn
+    {0xD8160000u, 55u}, // waw -> Latn
+    {0xDC160000u, 55u}, // wax -> Latn
+    {0xE0160000u, 55u}, // way -> Latn
+    {0xE4160000u, 55u}, // waz -> Latn
+    {0x80360000u, 55u}, // wba -> Latn
+    {0x84360000u, 55u}, // wbb -> Latn
+    {0x90360000u, 55u}, // wbe -> Latn
+    {0x94360000u, 55u}, // wbf -> Latn
+    {0x9C360000u, 55u}, // wbh -> Latn
+    {0xA0360000u, 55u}, // wbi -> Latn
+    {0xA4360000u, 55u}, // wbj -> Latn
+    {0xA8360000u,  2u}, // wbk -> Arab
+    {0xAC360000u, 55u}, // wbl -> Latn
+    {0xB0360000u, 55u}, // wbm -> Latn
+    {0xBC360000u, 55u}, // wbp -> Latn
+    {0xC0360000u, 108u}, // wbq -> Telu
+    {0xC4360000u, 21u}, // wbr -> Deva
+    {0xCC360000u, 55u}, // wbt -> Latn
+    {0xD4360000u, 55u}, // wbv -> Latn
+    {0xD8360000u, 55u}, // wbw -> Latn
+    {0x80560000u, 55u}, // wca -> Latn
+    {0xA0560000u, 55u}, // wci -> Latn
+    {0x8C760000u, 55u}, // wdd -> Latn
+    {0x98760000u, 55u}, // wdg -> Latn
+    {0xA4760000u, 55u}, // wdj -> Latn
+    {0xA8760000u, 55u}, // wdk -> Latn
+    {0xCC760000u, 55u}, // wdt -> Latn
+    {0xD0760000u, 55u}, // wdu -> Latn
+    {0xE0760000u, 55u}, // wdy -> Latn
+    {0x88960000u, 55u}, // wec -> Latn
+    {0x8C960000u, 55u}, // wed -> Latn
+    {0x98960000u, 55u}, // weg -> Latn
+    {0x9C960000u, 55u}, // weh -> Latn
+    {0xA0960000u, 55u}, // wei -> Latn
+    {0xB0960000u, 55u}, // wem -> Latn
+    {0xB8960000u, 55u}, // weo -> Latn
+    {0xBC960000u, 55u}, // wep -> Latn
+    {0xC4960000u, 55u}, // wer -> Latn
+    {0xC8960000u, 55u}, // wes -> Latn
+    {0xCC960000u, 55u}, // wet -> Latn
+    {0xD0960000u, 55u}, // weu -> Latn
+    {0xD8960000u, 55u}, // wew -> Latn
+    {0x98B60000u, 55u}, // wfg -> Latn
+    {0x80D60000u, 55u}, // wga -> Latn
+    {0x84D60000u, 55u}, // wgb -> Latn
+    {0x98D60000u, 55u}, // wgg -> Latn
+    {0xA0D60000u, 55u}, // wgi -> Latn
+    {0xB8D60000u, 55u}, // wgo -> Latn
+    {0xD0D60000u, 55u}, // wgu -> Latn
+    {0xE0D60000u, 55u}, // wgy -> Latn
+    {0x80F60000u, 55u}, // wha -> Latn
+    {0x98F60000u, 55u}, // whg -> Latn
+    {0xA8F60000u, 55u}, // whk -> Latn
+    {0xD0F60000u, 55u}, // whu -> Latn
+    {0x85160000u, 55u}, // wib -> Latn
+    {0x89160000u, 55u}, // wic -> Latn
+    {0x91160000u, 55u}, // wie -> Latn
+    {0x95160000u, 55u}, // wif -> Latn
+    {0x99160000u, 55u}, // wig -> Latn
+    {0x9D160000u, 55u}, // wih -> Latn
+    {0xA1160000u, 55u}, // wii -> Latn
+    {0xA5160000u, 55u}, // wij -> Latn
+    {0xA9160000u, 55u}, // wik -> Latn
+    {0xAD160000u, 55u}, // wil -> Latn
+    {0xB1160000u, 55u}, // wim -> Latn
+    {0xB5160000u, 55u}, // win -> Latn
+    {0xC5160000u, 55u}, // wir -> Latn
+    {0xD1160000u, 55u}, // wiu -> Latn
+    {0xD5160000u, 55u}, // wiv -> Latn
+    {0xE1160000u, 55u}, // wiy -> Latn
+    {0x81360000u, 55u}, // wja -> Latn
+    {0xA1360000u, 55u}, // wji -> Latn
+    {0x81560000u, 55u}, // wka -> Latn
+    {0x8D560000u, 55u}, // wkd -> Latn
+    {0xC5560000u, 55u}, // wkr -> Latn
+    {0xD9560000u, 55u}, // wkw -> Latn
+    {0xE1560000u, 55u}, // wky -> Latn
+    {0x81760000u, 55u}, // wla -> Latn
+    {0x91760000u, 24u}, // wle -> Ethi
+    {0x99760000u, 55u}, // wlg -> Latn
+    {0x9D760000u, 55u}, // wlh -> Latn
+    {0xA1760000u, 55u}, // wli -> Latn
+    {0xB1760000u, 55u}, // wlm -> Latn
+    {0xB9760000u,  2u}, // wlo -> Arab
+    {0xC5760000u, 55u}, // wlr -> Latn
+    {0xC9760000u, 55u}, // wls -> Latn
+    {0xD1760000u, 55u}, // wlu -> Latn
+    {0xD5760000u, 55u}, // wlv -> Latn
+    {0xD9760000u, 55u}, // wlw -> Latn
+    {0xDD760000u, 55u}, // wlx -> Latn
+    {0x81960000u, 55u}, // wma -> Latn
+    {0x85960000u, 55u}, // wmb -> Latn
+    {0x89960000u, 55u}, // wmc -> Latn
+    {0x8D960000u, 55u}, // wmd -> Latn
+    {0x91960000u, 21u}, // wme -> Deva
+    {0x9D960000u, 55u}, // wmh -> Latn
+    {0xA1960000u, 55u}, // wmi -> Latn
+    {0xB1960000u, 55u}, // wmm -> Latn
+    {0xB5960000u, 55u}, // wmn -> Latn
+    {0xB9960000u, 55u}, // wmo -> Latn
+    {0xC9960000u, 55u}, // wms -> Latn
+    {0xCD960000u, 55u}, // wmt -> Latn
+    {0xD9960000u, 55u}, // wmw -> Latn
+    {0xDD960000u, 55u}, // wmx -> Latn
+    {0x85B60000u, 55u}, // wnb -> Latn
+    {0x89B60000u, 55u}, // wnc -> Latn
+    {0x8DB60000u, 55u}, // wnd -> Latn
+    {0x91B60000u,  2u}, // wne -> Arab
+    {0x99B60000u, 55u}, // wng -> Latn
     {0xA1B60000u,  2u}, // wni -> Arab
-    {0xD1B60000u, 46u}, // wnu -> Latn
-    {0x776F0000u, 46u}, // wo -> Latn
-    {0x85D60000u, 46u}, // wob -> Latn
-    {0xC9D60000u, 46u}, // wos -> Latn
-    {0xCA360000u, 46u}, // wrs -> Latn
-    {0x9A560000u, 23u}, // wsg -> Gong
-    {0xAA560000u, 46u}, // wsk -> Latn
-    {0xB2760000u, 19u}, // wtm -> Deva
-    {0xD2960000u, 29u}, // wuu -> Hans
-    {0xD6960000u, 46u}, // wuv -> Latn
-    {0x82D60000u, 46u}, // wwa -> Latn
-    {0xD4170000u, 46u}, // xav -> Latn
-    {0xA0370000u, 46u}, // xbi -> Latn
-    {0xB8570000u, 15u}, // xco -> Chrs
-    {0xC4570000u, 12u}, // xcr -> Cari
-    {0xC8970000u, 46u}, // xes -> Latn
-    {0x78680000u, 46u}, // xh -> Latn
-    {0x81770000u, 46u}, // xla -> Latn
-    {0x89770000u, 50u}, // xlc -> Lyci
-    {0x8D770000u, 51u}, // xld -> Lydi
-    {0x95970000u, 22u}, // xmf -> Geor
-    {0xB5970000u, 53u}, // xmn -> Mani
-    {0xC5970000u, 55u}, // xmr -> Merc
-    {0x81B70000u, 60u}, // xna -> Narb
-    {0xC5B70000u, 19u}, // xnr -> Deva
-    {0x99D70000u, 46u}, // xog -> Latn
-    {0xB5D70000u, 46u}, // xon -> Latn
-    {0xC5F70000u, 73u}, // xpr -> Prti
-    {0x86370000u, 46u}, // xrb -> Latn
-    {0x82570000u, 77u}, // xsa -> Sarb
-    {0xA2570000u, 46u}, // xsi -> Latn
-    {0xB2570000u, 46u}, // xsm -> Latn
-    {0xC6570000u, 19u}, // xsr -> Deva
-    {0x92D70000u, 46u}, // xwe -> Latn
-    {0xB0180000u, 46u}, // yam -> Latn
-    {0xB8180000u, 46u}, // yao -> Latn
-    {0xBC180000u, 46u}, // yap -> Latn
-    {0xC8180000u, 46u}, // yas -> Latn
-    {0xCC180000u, 46u}, // yat -> Latn
-    {0xD4180000u, 46u}, // yav -> Latn
-    {0xE0180000u, 46u}, // yay -> Latn
-    {0xE4180000u, 46u}, // yaz -> Latn
-    {0x80380000u, 46u}, // yba -> Latn
-    {0x84380000u, 46u}, // ybb -> Latn
-    {0xE0380000u, 46u}, // yby -> Latn
-    {0xC4980000u, 46u}, // yer -> Latn
-    {0xC4D80000u, 46u}, // ygr -> Latn
-    {0xD8D80000u, 46u}, // ygw -> Latn
-    {0x79690000u, 31u}, // yi -> Hebr
-    {0xB9580000u, 46u}, // yko -> Latn
-    {0x91780000u, 46u}, // yle -> Latn
-    {0x99780000u, 46u}, // ylg -> Latn
-    {0xAD780000u, 46u}, // yll -> Latn
-    {0xAD980000u, 46u}, // yml -> Latn
-    {0x796F0000u, 46u}, // yo -> Latn
-    {0xB5D80000u, 46u}, // yon -> Latn
-    {0x86380000u, 46u}, // yrb -> Latn
-    {0x92380000u, 46u}, // yre -> Latn
-    {0xAE380000u, 46u}, // yrl -> Latn
-    {0xCA580000u, 46u}, // yss -> Latn
-    {0x82980000u, 46u}, // yua -> Latn
-    {0x92980000u, 30u}, // yue -> Hant
-    {0x9298434Eu, 29u}, // yue-CN -> Hans
-    {0xA6980000u, 46u}, // yuj -> Latn
-    {0xCE980000u, 46u}, // yut -> Latn
-    {0xDA980000u, 46u}, // yuw -> Latn
-    {0x7A610000u, 46u}, // za -> Latn
-    {0x98190000u, 46u}, // zag -> Latn
+    {0xA9B60000u, 55u}, // wnk -> Latn
+    {0xB1B60000u, 55u}, // wnm -> Latn
+    {0xB5B60000u, 55u}, // wnn -> Latn
+    {0xB9B60000u, 55u}, // wno -> Latn
+    {0xBDB60000u, 55u}, // wnp -> Latn
+    {0xD1B60000u, 55u}, // wnu -> Latn
+    {0xD9B60000u, 55u}, // wnw -> Latn
+    {0xE1B60000u, 55u}, // wny -> Latn
+    {0x776F0000u, 55u}, // wo -> Latn
+    {0x81D60000u, 55u}, // woa -> Latn
+    {0x85D60000u, 55u}, // wob -> Latn
+    {0x89D60000u, 55u}, // woc -> Latn
+    {0x8DD60000u, 55u}, // wod -> Latn
+    {0x91D60000u, 55u}, // woe -> Latn
+    {0x95D60000u, 55u}, // wof -> Latn
+    {0x99D60000u, 55u}, // wog -> Latn
+    {0xA1D60000u, 55u}, // woi -> Latn
+    {0xA9D60000u, 55u}, // wok -> Latn
+    {0xB1D60000u, 55u}, // wom -> Latn
+    {0xB5D60000u, 55u}, // won -> Latn
+    {0xB9D60000u, 55u}, // woo -> Latn
+    {0xC5D60000u, 55u}, // wor -> Latn
+    {0xC9D60000u, 55u}, // wos -> Latn
+    {0xD9D60000u, 55u}, // wow -> Latn
+    {0x89F60000u, 55u}, // wpc -> Latn
+    {0x86360000u, 55u}, // wrb -> Latn
+    {0x9A360000u, 55u}, // wrg -> Latn
+    {0x9E360000u, 55u}, // wrh -> Latn
+    {0xA2360000u, 55u}, // wri -> Latn
+    {0xAA360000u, 55u}, // wrk -> Latn
+    {0xAE360000u, 55u}, // wrl -> Latn
+    {0xB2360000u, 55u}, // wrm -> Latn
+    {0xBA360000u, 55u}, // wro -> Latn
+    {0xBE360000u, 55u}, // wrp -> Latn
+    {0xC6360000u, 55u}, // wrr -> Latn
+    {0xCA360000u, 55u}, // wrs -> Latn
+    {0xD2360000u, 55u}, // wru -> Latn
+    {0xD6360000u, 55u}, // wrv -> Latn
+    {0xDA360000u, 55u}, // wrw -> Latn
+    {0xDE360000u, 55u}, // wrx -> Latn
+    {0xE6360000u, 55u}, // wrz -> Latn
+    {0x82560000u, 55u}, // wsa -> Latn
+    {0x9A560000u, 26u}, // wsg -> Gong
+    {0xA2560000u, 55u}, // wsi -> Latn
+    {0xAA560000u, 55u}, // wsk -> Latn
+    {0xC6560000u, 55u}, // wsr -> Latn
+    {0xCA560000u, 55u}, // wss -> Latn
+    {0xD2560000u, 55u}, // wsu -> Latn
+    {0xD6560000u,  2u}, // wsv -> Arab
+    {0x86760000u, 55u}, // wtb -> Latn
+    {0x96760000u, 55u}, // wtf -> Latn
+    {0x9E760000u, 55u}, // wth -> Latn
+    {0xA2760000u, 55u}, // wti -> Latn
+    {0xAA760000u, 55u}, // wtk -> Latn
+    {0xB2760000u, 21u}, // wtm -> Deva
+    {0xDA760000u, 55u}, // wtw -> Latn
+    {0x82960000u, 55u}, // wua -> Latn
+    {0x86960000u, 55u}, // wub -> Latn
+    {0x8E960000u, 55u}, // wud -> Latn
+    {0xAE960000u, 55u}, // wul -> Latn
+    {0xB2960000u, 55u}, // wum -> Latn
+    {0xB6960000u, 55u}, // wun -> Latn
+    {0xC6960000u, 55u}, // wur -> Latn
+    {0xCE960000u, 55u}, // wut -> Latn
+    {0xD2960000u, 35u}, // wuu -> Hans
+    {0xD6960000u, 55u}, // wuv -> Latn
+    {0xDE960000u, 55u}, // wux -> Latn
+    {0xE2960000u, 55u}, // wuy -> Latn
+    {0x82D60000u, 55u}, // wwa -> Latn
+    {0x86D60000u, 55u}, // wwb -> Latn
+    {0xBAD60000u, 55u}, // wwo -> Latn
+    {0xC6D60000u, 55u}, // wwr -> Latn
+    {0xDAD60000u, 55u}, // www -> Latn
+    {0xDAF60000u, 55u}, // wxw -> Latn
+    {0x87160000u, 55u}, // wyb -> Latn
+    {0xA3160000u, 55u}, // wyi -> Latn
+    {0xB3160000u, 55u}, // wym -> Latn
+    {0xB7160000u, 55u}, // wyn -> Latn
+    {0xC7160000u, 55u}, // wyr -> Latn
+    {0xE3160000u, 55u}, // wyy -> Latn
+    {0x80170000u, 55u}, // xaa -> Latn
+    {0x84170000u, 55u}, // xab -> Latn
+    {0x98170000u,  0u}, // xag -> Aghb
+    {0xA0170000u, 55u}, // xai -> Latn
+    {0xA4170000u, 55u}, // xaj -> Latn
+    {0xA8170000u, 55u}, // xak -> Latn
+    {0xAC170000u, 20u}, // xal -> Cyrl
+    {0xB0170000u, 55u}, // xam -> Latn
+    {0xB4170000u, 24u}, // xan -> Ethi
+    {0xB8170000u, 55u}, // xao -> Latn
+    {0xC4170000u, 55u}, // xar -> Latn
+    {0xC8170000u, 20u}, // xas -> Cyrl
+    {0xCC170000u, 55u}, // xat -> Latn
+    {0xD0170000u, 55u}, // xau -> Latn
+    {0xD4170000u, 55u}, // xav -> Latn
+    {0xD8170000u, 55u}, // xaw -> Latn
+    {0xE0170000u, 55u}, // xay -> Latn
+    {0x84370000u, 55u}, // xbb -> Latn
+    {0x8C370000u, 55u}, // xbd -> Latn
+    {0x90370000u, 55u}, // xbe -> Latn
+    {0x98370000u, 55u}, // xbg -> Latn
+    {0xA0370000u, 55u}, // xbi -> Latn
+    {0xA4370000u, 55u}, // xbj -> Latn
+    {0xB0370000u, 55u}, // xbm -> Latn
+    {0xB4370000u, 55u}, // xbn -> Latn
+    {0xBC370000u, 55u}, // xbp -> Latn
+    {0xC4370000u, 55u}, // xbr -> Latn
+    {0xD8370000u, 55u}, // xbw -> Latn
+    {0xE0370000u, 55u}, // xby -> Latn
+    {0x9C570000u, 55u}, // xch -> Latn
+    {0xB8570000u, 17u}, // xco -> Chrs
+    {0xC4570000u, 14u}, // xcr -> Cari
+    {0x80770000u, 55u}, // xda -> Latn
+    {0xA8770000u, 55u}, // xdk -> Latn
+    {0xB8770000u, 55u}, // xdo -> Latn
+    {0xC0770000u, 20u}, // xdq -> Cyrl
+    {0xE0770000u, 55u}, // xdy -> Latn
+    {0x8C970000u, 55u}, // xed -> Latn
+    {0x98970000u, 55u}, // xeg -> Latn
+    {0xB0970000u, 55u}, // xem -> Latn
+    {0xC4970000u, 55u}, // xer -> Latn
+    {0xC8970000u, 55u}, // xes -> Latn
+    {0xCC970000u, 55u}, // xet -> Latn
+    {0xD0970000u, 55u}, // xeu -> Latn
+    {0x84D70000u, 55u}, // xgb -> Latn
+    {0x8CD70000u, 55u}, // xgd -> Latn
+    {0x98D70000u, 55u}, // xgg -> Latn
+    {0xA0D70000u, 55u}, // xgi -> Latn
+    {0xB0D70000u, 55u}, // xgm -> Latn
+    {0xD0D70000u, 55u}, // xgu -> Latn
+    {0xD8D70000u, 55u}, // xgw -> Latn
+    {0x78680000u, 55u}, // xh -> Latn
+    {0x90F70000u,  2u}, // xhe -> Arab
+    {0xB0F70000u, 47u}, // xhm -> Khmr
+    {0xD4F70000u, 55u}, // xhv -> Latn
+    {0xA1170000u, 55u}, // xii -> Latn
+    {0xB5170000u, 55u}, // xin -> Latn
+    {0xC5170000u, 55u}, // xir -> Latn
+    {0xC9170000u, 80u}, // xis -> Orya
+    {0xE1170000u, 55u}, // xiy -> Latn
+    {0x85370000u, 55u}, // xjb -> Latn
+    {0xCD370000u, 55u}, // xjt -> Latn
+    {0x81570000u,  2u}, // xka -> Arab
+    {0x85570000u, 55u}, // xkb -> Latn
+    {0x89570000u,  2u}, // xkc -> Arab
+    {0x8D570000u, 55u}, // xkd -> Latn
+    {0x91570000u, 55u}, // xke -> Latn
+    {0x95570000u, 112u}, // xkf -> Tibt
+    {0x99570000u, 55u}, // xkg -> Latn
+    {0xA5570000u,  2u}, // xkj -> Arab
+    {0xAD570000u, 55u}, // xkl -> Latn
+    {0xB5570000u, 55u}, // xkn -> Latn
+    {0xBD570000u,  2u}, // xkp -> Arab
+    {0xC1570000u, 55u}, // xkq -> Latn
+    {0xC5570000u, 55u}, // xkr -> Latn
+    {0xC9570000u, 55u}, // xks -> Latn
+    {0xCD570000u, 55u}, // xkt -> Latn
+    {0xD1570000u, 55u}, // xku -> Latn
+    {0xD5570000u, 55u}, // xkv -> Latn
+    {0xD9570000u, 55u}, // xkw -> Latn
+    {0xDD570000u, 55u}, // xkx -> Latn
+    {0xE1570000u, 55u}, // xky -> Latn
+    {0xE5570000u, 55u}, // xkz -> Latn
+    {0x81770000u, 55u}, // xla -> Latn
+    {0x89770000u, 60u}, // xlc -> Lyci
+    {0x8D770000u, 61u}, // xld -> Lydi
+    {0xE1770000u, 23u}, // xly -> Elym
+    {0x81970000u, 55u}, // xma -> Latn
+    {0x85970000u, 55u}, // xmb -> Latn
+    {0x89970000u, 55u}, // xmc -> Latn
+    {0x8D970000u, 55u}, // xmd -> Latn
+    {0x95970000u, 25u}, // xmf -> Geor
+    {0x99970000u, 55u}, // xmg -> Latn
+    {0x9D970000u, 55u}, // xmh -> Latn
+    {0xA5970000u, 55u}, // xmj -> Latn
+    {0xB1970000u, 55u}, // xmm -> Latn
+    {0xB5970000u, 63u}, // xmn -> Mani
+    {0xB9970000u, 55u}, // xmo -> Latn
+    {0xBD970000u, 55u}, // xmp -> Latn
+    {0xC1970000u, 55u}, // xmq -> Latn
+    {0xC5970000u, 66u}, // xmr -> Merc
+    {0xCD970000u, 55u}, // xmt -> Latn
+    {0xD1970000u, 55u}, // xmu -> Latn
+    {0xD5970000u, 55u}, // xmv -> Latn
+    {0xD9970000u, 55u}, // xmw -> Latn
+    {0xDD970000u, 55u}, // xmx -> Latn
+    {0xE1970000u, 55u}, // xmy -> Latn
+    {0xE5970000u, 55u}, // xmz -> Latn
+    {0x81B70000u, 73u}, // xna -> Narb
+    {0x85B70000u, 55u}, // xnb -> Latn
+    {0xA1B70000u, 55u}, // xni -> Latn
+    {0xA5B70000u, 55u}, // xnj -> Latn
+    {0xA9B70000u, 55u}, // xnk -> Latn
+    {0xB1B70000u, 55u}, // xnm -> Latn
+    {0xB5B70000u, 55u}, // xnn -> Latn
+    {0xC1B70000u, 55u}, // xnq -> Latn
+    {0xC5B70000u, 21u}, // xnr -> Deva
+    {0xCDB70000u, 55u}, // xnt -> Latn
+    {0xD1B70000u, 55u}, // xnu -> Latn
+    {0xE1B70000u, 55u}, // xny -> Latn
+    {0xE5B70000u, 55u}, // xnz -> Latn
+    {0x89D70000u, 55u}, // xoc -> Latn
+    {0x8DD70000u, 55u}, // xod -> Latn
+    {0x99D70000u, 55u}, // xog -> Latn
+    {0xA1D70000u, 55u}, // xoi -> Latn
+    {0xA9D70000u, 55u}, // xok -> Latn
+    {0xB1D70000u, 55u}, // xom -> Latn
+    {0xB5D70000u, 55u}, // xon -> Latn
+    {0xB9D70000u, 55u}, // xoo -> Latn
+    {0xBDD70000u, 55u}, // xop -> Latn
+    {0xC5D70000u, 55u}, // xor -> Latn
+    {0xD9D70000u, 55u}, // xow -> Latn
+    {0x81F70000u, 55u}, // xpa -> Latn
+    {0x85F70000u, 55u}, // xpb -> Latn
+    {0x8DF70000u, 55u}, // xpd -> Latn
+    {0x95F70000u, 55u}, // xpf -> Latn
+    {0x99F70000u, 30u}, // xpg -> Grek
+    {0x9DF70000u, 55u}, // xph -> Latn
+    {0xA1F70000u, 77u}, // xpi -> Ogam
+    {0xA5F70000u, 55u}, // xpj -> Latn
+    {0xA9F70000u, 55u}, // xpk -> Latn
+    {0xADF70000u, 55u}, // xpl -> Latn
+    {0xB1F70000u, 20u}, // xpm -> Cyrl
+    {0xB5F70000u, 55u}, // xpn -> Latn
+    {0xB9F70000u, 55u}, // xpo -> Latn
+    {0xC1F70000u, 55u}, // xpq -> Latn
+    {0xC5F70000u, 87u}, // xpr -> Prti
+    {0xCDF70000u, 55u}, // xpt -> Latn
+    {0xD5F70000u, 55u}, // xpv -> Latn
+    {0xD9F70000u, 55u}, // xpw -> Latn
+    {0xDDF70000u, 55u}, // xpx -> Latn
+    {0xE5F70000u, 55u}, // xpz -> Latn
+    {0x82370000u, 55u}, // xra -> Latn
+    {0x86370000u, 55u}, // xrb -> Latn
+    {0x8E370000u, 55u}, // xrd -> Latn
+    {0x92370000u, 55u}, // xre -> Latn
+    {0x9A370000u, 55u}, // xrg -> Latn
+    {0xA2370000u, 55u}, // xri -> Latn
+    {0xB2370000u, 20u}, // xrm -> Cyrl
+    {0xB6370000u, 20u}, // xrn -> Cyrl
+    {0xC6370000u, 55u}, // xrr -> Latn
+    {0xD2370000u, 55u}, // xru -> Latn
+    {0xDA370000u, 55u}, // xrw -> Latn
+    {0x82570000u, 92u}, // xsa -> Sarb
+    {0x86570000u, 55u}, // xsb -> Latn
+    {0x92570000u, 55u}, // xse -> Latn
+    {0x9E570000u, 55u}, // xsh -> Latn
+    {0xA2570000u, 55u}, // xsi -> Latn
+    {0xB2570000u, 55u}, // xsm -> Latn
+    {0xB6570000u, 55u}, // xsn -> Latn
+    {0xBE570000u, 55u}, // xsp -> Latn
+    {0xC2570000u, 55u}, // xsq -> Latn
+    {0xC6570000u, 21u}, // xsr -> Deva
+    {0xD2570000u, 55u}, // xsu -> Latn
+    {0xE2570000u, 55u}, // xsy -> Latn
+    {0x82770000u, 55u}, // xta -> Latn
+    {0x86770000u, 55u}, // xtb -> Latn
+    {0x8A770000u, 55u}, // xtc -> Latn
+    {0x8E770000u, 55u}, // xtd -> Latn
+    {0x92770000u, 55u}, // xte -> Latn
+    {0x9E770000u, 55u}, // xth -> Latn
+    {0xA2770000u, 55u}, // xti -> Latn
+    {0xA6770000u, 55u}, // xtj -> Latn
+    {0xAE770000u, 55u}, // xtl -> Latn
+    {0xB2770000u, 55u}, // xtm -> Latn
+    {0xB6770000u, 55u}, // xtn -> Latn
+    {0xBE770000u, 55u}, // xtp -> Latn
+    {0xC2770000u, 11u}, // xtq -> Brah
+    {0xCA770000u, 55u}, // xts -> Latn
+    {0xCE770000u, 55u}, // xtt -> Latn
+    {0xD2770000u, 55u}, // xtu -> Latn
+    {0xD6770000u, 55u}, // xtv -> Latn
+    {0xDA770000u, 55u}, // xtw -> Latn
+    {0xE2770000u, 55u}, // xty -> Latn
+    {0x86970000u, 105u}, // xub -> Taml
+    {0x8E970000u, 55u}, // xud -> Latn
+    {0xA6970000u, 105u}, // xuj -> Taml
+    {0xAE970000u, 55u}, // xul -> Latn
+    {0xB2970000u, 55u}, // xum -> Latn
+    {0xB6970000u, 55u}, // xun -> Latn
+    {0xBA970000u, 55u}, // xuo -> Latn
+    {0xCE970000u, 55u}, // xut -> Latn
+    {0xD2970000u, 55u}, // xuu -> Latn
+    {0x92B70000u, 40u}, // xve -> Ital
+    {0xA2B70000u,  2u}, // xvi -> Arab
+    {0xB6B70000u, 55u}, // xvn -> Latn
+    {0xBAB70000u, 55u}, // xvo -> Latn
+    {0xCAB70000u, 55u}, // xvs -> Latn
+    {0x82D70000u, 55u}, // xwa -> Latn
+    {0x8ED70000u, 55u}, // xwd -> Latn
+    {0x92D70000u, 55u}, // xwe -> Latn
+    {0xA6D70000u, 55u}, // xwj -> Latn
+    {0xAAD70000u, 55u}, // xwk -> Latn
+    {0xAED70000u, 55u}, // xwl -> Latn
+    {0xBAD70000u, 20u}, // xwo -> Cyrl
+    {0xC6D70000u, 55u}, // xwr -> Latn
+    {0xCED70000u, 55u}, // xwt -> Latn
+    {0xDAD70000u, 55u}, // xww -> Latn
+    {0x86F70000u, 55u}, // xxb -> Latn
+    {0xAAF70000u, 55u}, // xxk -> Latn
+    {0xB2F70000u, 55u}, // xxm -> Latn
+    {0xC6F70000u, 55u}, // xxr -> Latn
+    {0xCEF70000u, 55u}, // xxt -> Latn
+    {0x83170000u, 55u}, // xya -> Latn
+    {0x87170000u, 55u}, // xyb -> Latn
+    {0xA7170000u, 55u}, // xyj -> Latn
+    {0xAB170000u, 55u}, // xyk -> Latn
+    {0xAF170000u, 55u}, // xyl -> Latn
+    {0xCF170000u, 55u}, // xyt -> Latn
+    {0xE3170000u, 55u}, // xyy -> Latn
+    {0x9F370000u, 64u}, // xzh -> Marc
+    {0xBF370000u, 55u}, // xzp -> Latn
+    {0x80180000u, 55u}, // yaa -> Latn
+    {0x84180000u, 55u}, // yab -> Latn
+    {0x88180000u, 55u}, // yac -> Latn
+    {0x8C180000u, 55u}, // yad -> Latn
+    {0x90180000u, 55u}, // yae -> Latn
+    {0x94180000u, 55u}, // yaf -> Latn
+    {0x98180000u, 55u}, // yag -> Latn
+    {0x9C180000u, 55u}, // yah -> Latn
+    {0xA0180000u, 20u}, // yai -> Cyrl
+    {0xA4180000u, 55u}, // yaj -> Latn
+    {0xA8180000u, 55u}, // yak -> Latn
+    {0xAC180000u, 55u}, // yal -> Latn
+    {0xB0180000u, 55u}, // yam -> Latn
+    {0xB4180000u, 55u}, // yan -> Latn
+    {0xB8180000u, 55u}, // yao -> Latn
+    {0xBC180000u, 55u}, // yap -> Latn
+    {0xC0180000u, 55u}, // yaq -> Latn
+    {0xC4180000u, 55u}, // yar -> Latn
+    {0xC8180000u, 55u}, // yas -> Latn
+    {0xCC180000u, 55u}, // yat -> Latn
+    {0xD0180000u, 55u}, // yau -> Latn
+    {0xD4180000u, 55u}, // yav -> Latn
+    {0xD8180000u, 55u}, // yaw -> Latn
+    {0xDC180000u, 55u}, // yax -> Latn
+    {0xE0180000u, 55u}, // yay -> Latn
+    {0xE4180000u, 55u}, // yaz -> Latn
+    {0x80380000u, 55u}, // yba -> Latn
+    {0x84380000u, 55u}, // ybb -> Latn
+    {0x90380000u, 55u}, // ybe -> Latn
+    {0x9C380000u, 21u}, // ybh -> Deva
+    {0xA0380000u, 21u}, // ybi -> Deva
+    {0xA4380000u, 55u}, // ybj -> Latn
+    {0xAC380000u, 55u}, // ybl -> Latn
+    {0xB0380000u, 55u}, // ybm -> Latn
+    {0xB4380000u, 55u}, // ybn -> Latn
+    {0xB8380000u, 55u}, // ybo -> Latn
+    {0xDC380000u, 55u}, // ybx -> Latn
+    {0xE0380000u, 55u}, // yby -> Latn
+    {0xAC580000u, 55u}, // ycl -> Latn
+    {0xB4580000u, 55u}, // ycn -> Latn
+    {0xC4580000u, 55u}, // ycr -> Latn
+    {0x80780000u, 55u}, // yda -> Latn
+    {0x90780000u, 55u}, // yde -> Latn
+    {0x98780000u,  2u}, // ydg -> Arab
+    {0xA8780000u, 55u}, // ydk -> Latn
+    {0x80980000u, 67u}, // yea -> Mlym
+    {0x88980000u, 55u}, // yec -> Latn
+    {0x90980000u, 55u}, // yee -> Latn
+    {0xA0980000u, 55u}, // yei -> Latn
+    {0xA4980000u, 30u}, // yej -> Grek
+    {0xAC980000u, 55u}, // yel -> Latn
+    {0xC4980000u, 55u}, // yer -> Latn
+    {0xC8980000u, 55u}, // yes -> Latn
+    {0xCC980000u, 55u}, // yet -> Latn
+    {0xD0980000u, 108u}, // yeu -> Telu
+    {0xD4980000u, 55u}, // yev -> Latn
+    {0xE0980000u, 55u}, // yey -> Latn
+    {0x80D80000u, 55u}, // yga -> Latn
+    {0xA0D80000u, 55u}, // ygi -> Latn
+    {0xACD80000u, 55u}, // ygl -> Latn
+    {0xB0D80000u, 55u}, // ygm -> Latn
+    {0xBCD80000u, 86u}, // ygp -> Plrd
+    {0xC4D80000u, 55u}, // ygr -> Latn
+    {0xD0D80000u, 55u}, // ygu -> Latn
+    {0xD8D80000u, 55u}, // ygw -> Latn
+    {0x8CF80000u, 37u}, // yhd -> Hebr
+    {0x79690000u, 37u}, // yi -> Hebr
+    {0x81180000u, 55u}, // yia -> Latn
+    {0x99180000u, 120u}, // yig -> Yiii
+    {0x9D180000u, 37u}, // yih -> Hebr
+    {0xA1180000u, 55u}, // yii -> Latn
+    {0xA5180000u, 55u}, // yij -> Latn
+    {0xAD180000u, 55u}, // yil -> Latn
+    {0xB1180000u, 55u}, // yim -> Latn
+    {0xC5180000u, 55u}, // yir -> Latn
+    {0xC9180000u, 55u}, // yis -> Latn
+    {0xD5180000u, 120u}, // yiv -> Yiii
+    {0x81580000u, 55u}, // yka -> Latn
+    {0x99580000u, 20u}, // ykg -> Cyrl
+    {0x9D580000u, 20u}, // ykh -> Cyrl
+    {0xA1580000u, 55u}, // yki -> Latn
+    {0xA9580000u, 55u}, // ykk -> Latn
+    {0xB1580000u, 55u}, // ykm -> Latn
+    {0xB9580000u, 55u}, // yko -> Latn
+    {0xC5580000u, 55u}, // ykr -> Latn
+    {0xE1580000u, 55u}, // yky -> Latn
+    {0x81780000u, 55u}, // yla -> Latn
+    {0x85780000u, 55u}, // ylb -> Latn
+    {0x91780000u, 55u}, // yle -> Latn
+    {0x99780000u, 55u}, // ylg -> Latn
+    {0xA1780000u, 55u}, // yli -> Latn
+    {0xAD780000u, 55u}, // yll -> Latn
+    {0xC5780000u, 55u}, // ylr -> Latn
+    {0xD1780000u, 55u}, // ylu -> Latn
+    {0xE1780000u, 55u}, // yly -> Latn
+    {0x85980000u, 55u}, // ymb -> Latn
+    {0x91980000u, 55u}, // yme -> Latn
+    {0x99980000u, 55u}, // ymg -> Latn
+    {0xA9980000u, 55u}, // ymk -> Latn
+    {0xAD980000u, 55u}, // yml -> Latn
+    {0xB1980000u, 55u}, // ymm -> Latn
+    {0xB5980000u, 55u}, // ymn -> Latn
+    {0xB9980000u, 55u}, // ymo -> Latn
+    {0xBD980000u, 55u}, // ymp -> Latn
+    {0x81B80000u, 86u}, // yna -> Plrd
+    {0x8DB80000u, 55u}, // ynd -> Latn
+    {0x99B80000u, 55u}, // yng -> Latn
+    {0xA9B80000u, 20u}, // ynk -> Cyrl
+    {0xADB80000u, 55u}, // ynl -> Latn
+    {0xC1B80000u, 55u}, // ynq -> Latn
+    {0xC9B80000u, 55u}, // yns -> Latn
+    {0xD1B80000u, 55u}, // ynu -> Latn
+    {0x796F0000u, 55u}, // yo -> Latn
+    {0x85D80000u, 55u}, // yob -> Latn
+    {0x99D80000u, 55u}, // yog -> Latn
+    {0xA1D80000u, 42u}, // yoi -> Jpan
+    {0xA9D80000u, 55u}, // yok -> Latn
+    {0xADD80000u, 55u}, // yol -> Latn
+    {0xB1D80000u, 55u}, // yom -> Latn
+    {0xB5D80000u, 55u}, // yon -> Latn
+    {0xCDD80000u, 55u}, // yot -> Latn
+    {0xE1D80000u, 111u}, // yoy -> Thai
+    {0x82380000u, 55u}, // yra -> Latn
+    {0x86380000u, 55u}, // yrb -> Latn
+    {0x92380000u, 55u}, // yre -> Latn
+    {0xAA380000u, 20u}, // yrk -> Cyrl
+    {0xAE380000u, 55u}, // yrl -> Latn
+    {0xB2380000u, 55u}, // yrm -> Latn
+    {0xBA380000u, 55u}, // yro -> Latn
+    {0xCA380000u, 55u}, // yrs -> Latn
+    {0xDA380000u, 55u}, // yrw -> Latn
+    {0xE2380000u, 55u}, // yry -> Latn
+    {0x8E580000u, 120u}, // ysd -> Yiii
+    {0xB6580000u, 120u}, // ysn -> Yiii
+    {0xBE580000u, 120u}, // ysp -> Yiii
+    {0xC6580000u, 20u}, // ysr -> Cyrl
+    {0xCA580000u, 55u}, // yss -> Latn
+    {0xE2580000u, 86u}, // ysy -> Plrd
+    {0xDA780000u, 55u}, // ytw -> Latn
+    {0xE2780000u, 55u}, // yty -> Latn
+    {0x82980000u, 55u}, // yua -> Latn
+    {0x86980000u, 55u}, // yub -> Latn
+    {0x8A980000u, 55u}, // yuc -> Latn
+    {0x8E980000u, 37u}, // yud -> Hebr
+    {0x92980000u, 36u}, // yue -> Hant
+    {0x9298434Eu, 35u}, // yue-CN -> Hans
+    {0x96980000u, 55u}, // yuf -> Latn
+    {0x9A980000u, 20u}, // yug -> Cyrl
+    {0xA2980000u, 55u}, // yui -> Latn
+    {0xA6980000u, 55u}, // yuj -> Latn
+    {0xAE980000u, 55u}, // yul -> Latn
+    {0xB2980000u, 55u}, // yum -> Latn
+    {0xB6980000u, 55u}, // yun -> Latn
+    {0xBE980000u, 55u}, // yup -> Latn
+    {0xC2980000u, 55u}, // yuq -> Latn
+    {0xC6980000u, 55u}, // yur -> Latn
+    {0xCE980000u, 55u}, // yut -> Latn
+    {0xDA980000u, 55u}, // yuw -> Latn
+    {0xDE980000u, 20u}, // yux -> Cyrl
+    {0xE6980000u, 55u}, // yuz -> Latn
+    {0x82B80000u, 55u}, // yva -> Latn
+    {0xCEB80000u, 55u}, // yvt -> Latn
+    {0x82D80000u, 55u}, // ywa -> Latn
+    {0x9AD80000u, 55u}, // ywg -> Latn
+    {0xB6D80000u, 55u}, // ywn -> Latn
+    {0xC2D80000u, 86u}, // ywq -> Plrd
+    {0xC6D80000u, 55u}, // ywr -> Latn
+    {0xD2D80000u, 86u}, // ywu -> Plrd
+    {0xDAD80000u, 55u}, // yww -> Latn
+    {0x82F80000u, 55u}, // yxa -> Latn
+    {0x9AF80000u, 55u}, // yxg -> Latn
+    {0xAEF80000u, 55u}, // yxl -> Latn
+    {0xB2F80000u, 55u}, // yxm -> Latn
+    {0xD2F80000u, 55u}, // yxu -> Latn
+    {0xE2F80000u, 55u}, // yxy -> Latn
+    {0xC7180000u, 55u}, // yyr -> Latn
+    {0xD3180000u, 55u}, // yyu -> Latn
+    {0x7A610000u, 55u}, // za -> Latn
+    {0x80190000u, 55u}, // zaa -> Latn
+    {0x84190000u, 55u}, // zab -> Latn
+    {0x88190000u, 55u}, // zac -> Latn
+    {0x8C190000u, 55u}, // zad -> Latn
+    {0x90190000u, 55u}, // zae -> Latn
+    {0x94190000u, 55u}, // zaf -> Latn
+    {0x98190000u, 55u}, // zag -> Latn
+    {0x9C190000u, 55u}, // zah -> Latn
+    {0xA4190000u, 55u}, // zaj -> Latn
+    {0xA8190000u, 55u}, // zak -> Latn
+    {0xB0190000u, 55u}, // zam -> Latn
+    {0xB8190000u, 55u}, // zao -> Latn
+    {0xBC190000u, 55u}, // zap -> Latn
+    {0xC0190000u, 55u}, // zaq -> Latn
+    {0xC4190000u, 55u}, // zar -> Latn
+    {0xC8190000u, 55u}, // zas -> Latn
+    {0xCC190000u, 55u}, // zat -> Latn
+    {0xD0190000u, 112u}, // zau -> Tibt
+    {0xD4190000u, 55u}, // zav -> Latn
+    {0xD8190000u, 55u}, // zaw -> Latn
+    {0xDC190000u, 55u}, // zax -> Latn
+    {0xE0190000u, 55u}, // zay -> Latn
+    {0xE4190000u, 55u}, // zaz -> Latn
+    {0x80390000u,  2u}, // zba -> Arab
+    {0x88390000u, 55u}, // zbc -> Latn
+    {0x90390000u, 55u}, // zbe -> Latn
+    {0xCC390000u, 55u}, // zbt -> Latn
+    {0xD0390000u, 55u}, // zbu -> Latn
+    {0xD8390000u, 55u}, // zbw -> Latn
+    {0x80590000u, 55u}, // zca -> Latn
+    {0x9C590000u, 34u}, // zch -> Hani
     {0xA4790000u,  2u}, // zdj -> Arab
-    {0x80990000u, 46u}, // zea -> Latn
-    {0x9CD90000u, 91u}, // zgh -> Tfng
-    {0x7A680000u, 29u}, // zh -> Hans
-    {0x7A684155u, 30u}, // zh-AU -> Hant
-    {0x7A68424Eu, 30u}, // zh-BN -> Hant
-    {0x7A684742u, 30u}, // zh-GB -> Hant
-    {0x7A684746u, 30u}, // zh-GF -> Hant
-    {0x7A68484Bu, 30u}, // zh-HK -> Hant
-    {0x7A684944u, 30u}, // zh-ID -> Hant
-    {0x7A684D4Fu, 30u}, // zh-MO -> Hant
-    {0x7A685041u, 30u}, // zh-PA -> Hant
-    {0x7A685046u, 30u}, // zh-PF -> Hant
-    {0x7A685048u, 30u}, // zh-PH -> Hant
-    {0x7A685352u, 30u}, // zh-SR -> Hant
-    {0x7A685448u, 30u}, // zh-TH -> Hant
-    {0x7A685457u, 30u}, // zh-TW -> Hant
-    {0x7A685553u, 30u}, // zh-US -> Hant
-    {0x7A68564Eu, 30u}, // zh-VN -> Hant
-    {0xDCF90000u, 62u}, // zhx -> Nshu
-    {0x81190000u, 46u}, // zia -> Latn
-    {0xCD590000u, 41u}, // zkt -> Kits
-    {0xB1790000u, 46u}, // zlm -> Latn
-    {0xA1990000u, 46u}, // zmi -> Latn
-    {0x91B90000u, 46u}, // zne -> Latn
-    {0x7A750000u, 46u}, // zu -> Latn
-    {0x83390000u, 46u}, // zza -> Latn
+    {0x80990000u, 55u}, // zea -> Latn
+    {0x98990000u, 55u}, // zeg -> Latn
+    {0x9C990000u, 34u}, // zeh -> Hani
+    {0xB0990000u, 55u}, // zem -> Latn
+    {0xB4990000u, 109u}, // zen -> Tfng
+    {0x80D90000u, 55u}, // zga -> Latn
+    {0x84D90000u, 34u}, // zgb -> Hani
+    {0x9CD90000u, 109u}, // zgh -> Tfng
+    {0xB0D90000u, 34u}, // zgm -> Hani
+    {0xB4D90000u, 34u}, // zgn -> Hani
+    {0xC4D90000u, 55u}, // zgr -> Latn
+    {0x7A680000u, 35u}, // zh -> Hans
+    {0x7A684155u, 36u}, // zh-AU -> Hant
+    {0x7A68424Eu, 36u}, // zh-BN -> Hant
+    {0x7A684742u, 36u}, // zh-GB -> Hant
+    {0x7A684746u, 36u}, // zh-GF -> Hant
+    {0x7A68484Bu, 36u}, // zh-HK -> Hant
+    {0x7A684944u, 36u}, // zh-ID -> Hant
+    {0x7A684D4Fu, 36u}, // zh-MO -> Hant
+    {0x7A685041u, 36u}, // zh-PA -> Hant
+    {0x7A685046u, 36u}, // zh-PF -> Hant
+    {0x7A685048u, 36u}, // zh-PH -> Hant
+    {0x7A685352u, 36u}, // zh-SR -> Hant
+    {0x7A685448u, 36u}, // zh-TH -> Hant
+    {0x7A685457u, 36u}, // zh-TW -> Hant
+    {0x7A685553u, 36u}, // zh-US -> Hant
+    {0x7A68564Eu, 36u}, // zh-VN -> Hant
+    {0x8CF90000u, 34u}, // zhd -> Hani
+    {0xA0F90000u, 55u}, // zhi -> Latn
+    {0xB4F90000u, 55u}, // zhn -> Latn
+    {0xD8F90000u, 55u}, // zhw -> Latn
+    {0xDCF90000u, 76u}, // zhx -> Nshu
+    {0x81190000u, 55u}, // zia -> Latn
+    {0xA9190000u, 55u}, // zik -> Latn
+    {0xAD190000u, 55u}, // zil -> Latn
+    {0xB1190000u, 55u}, // zim -> Latn
+    {0xB5190000u, 55u}, // zin -> Latn
+    {0xD9190000u, 55u}, // ziw -> Latn
+    {0xE5190000u, 55u}, // ziz -> Latn
+    {0x81590000u, 55u}, // zka -> Latn
+    {0x8D590000u, 55u}, // zkd -> Latn
+    {0xB9590000u, 20u}, // zko -> Cyrl
+    {0xBD590000u, 55u}, // zkp -> Latn
+    {0xCD590000u, 48u}, // zkt -> Kits
+    {0xD1590000u, 55u}, // zku -> Latn
+    {0xE5590000u, 20u}, // zkz -> Cyrl
+    {0x81790000u, 55u}, // zla -> Latn
+    {0xA5790000u, 34u}, // zlj -> Hani
+    {0xB1790000u, 55u}, // zlm -> Latn
+    {0xB5790000u, 34u}, // zln -> Hani
+    {0xC1790000u, 34u}, // zlq -> Hani
+    {0xD1790000u, 55u}, // zlu -> Latn
+    {0x81990000u, 55u}, // zma -> Latn
+    {0x85990000u, 55u}, // zmb -> Latn
+    {0x89990000u, 55u}, // zmc -> Latn
+    {0x8D990000u, 55u}, // zmd -> Latn
+    {0x91990000u, 55u}, // zme -> Latn
+    {0x95990000u, 55u}, // zmf -> Latn
+    {0x99990000u, 55u}, // zmg -> Latn
+    {0x9D990000u, 55u}, // zmh -> Latn
+    {0xA1990000u, 55u}, // zmi -> Latn
+    {0xA5990000u, 55u}, // zmj -> Latn
+    {0xA9990000u, 55u}, // zmk -> Latn
+    {0xAD990000u, 55u}, // zml -> Latn
+    {0xB1990000u, 55u}, // zmm -> Latn
+    {0xB5990000u, 55u}, // zmn -> Latn
+    {0xB9990000u, 55u}, // zmo -> Latn
+    {0xBD990000u, 55u}, // zmp -> Latn
+    {0xC1990000u, 55u}, // zmq -> Latn
+    {0xC5990000u, 55u}, // zmr -> Latn
+    {0xC9990000u, 55u}, // zms -> Latn
+    {0xCD990000u, 55u}, // zmt -> Latn
+    {0xD1990000u, 55u}, // zmu -> Latn
+    {0xD5990000u, 55u}, // zmv -> Latn
+    {0xD9990000u, 55u}, // zmw -> Latn
+    {0xDD990000u, 55u}, // zmx -> Latn
+    {0xE1990000u, 55u}, // zmy -> Latn
+    {0xE5990000u, 55u}, // zmz -> Latn
+    {0x81B90000u, 55u}, // zna -> Latn
+    {0x91B90000u, 55u}, // zne -> Latn
+    {0x99B90000u, 55u}, // zng -> Latn
+    {0xA9B90000u, 55u}, // znk -> Latn
+    {0xC9B90000u, 55u}, // zns -> Latn
+    {0x89D90000u, 55u}, // zoc -> Latn
+    {0x9DD90000u, 55u}, // zoh -> Latn
+    {0xB1D90000u, 55u}, // zom -> Latn
+    {0xB9D90000u, 55u}, // zoo -> Latn
+    {0xC1D90000u, 55u}, // zoq -> Latn
+    {0xC5D90000u, 55u}, // zor -> Latn
+    {0xC9D90000u, 55u}, // zos -> Latn
+    {0x81F90000u, 55u}, // zpa -> Latn
+    {0x85F90000u, 55u}, // zpb -> Latn
+    {0x89F90000u, 55u}, // zpc -> Latn
+    {0x8DF90000u, 55u}, // zpd -> Latn
+    {0x91F90000u, 55u}, // zpe -> Latn
+    {0x95F90000u, 55u}, // zpf -> Latn
+    {0x99F90000u, 55u}, // zpg -> Latn
+    {0x9DF90000u, 55u}, // zph -> Latn
+    {0xA1F90000u, 55u}, // zpi -> Latn
+    {0xA5F90000u, 55u}, // zpj -> Latn
+    {0xA9F90000u, 55u}, // zpk -> Latn
+    {0xADF90000u, 55u}, // zpl -> Latn
+    {0xB1F90000u, 55u}, // zpm -> Latn
+    {0xB5F90000u, 55u}, // zpn -> Latn
+    {0xB9F90000u, 55u}, // zpo -> Latn
+    {0xBDF90000u, 55u}, // zpp -> Latn
+    {0xC1F90000u, 55u}, // zpq -> Latn
+    {0xC5F90000u, 55u}, // zpr -> Latn
+    {0xC9F90000u, 55u}, // zps -> Latn
+    {0xCDF90000u, 55u}, // zpt -> Latn
+    {0xD1F90000u, 55u}, // zpu -> Latn
+    {0xD5F90000u, 55u}, // zpv -> Latn
+    {0xD9F90000u, 55u}, // zpw -> Latn
+    {0xDDF90000u, 55u}, // zpx -> Latn
+    {0xE1F90000u, 55u}, // zpy -> Latn
+    {0xE5F90000u, 55u}, // zpz -> Latn
+    {0x92190000u, 34u}, // zqe -> Hani
+    {0x9A390000u, 80u}, // zrg -> Orya
+    {0xB6390000u, 55u}, // zrn -> Latn
+    {0xBA390000u, 55u}, // zro -> Latn
+    {0xBE390000u, 37u}, // zrp -> Hebr
+    {0xCA390000u, 55u}, // zrs -> Latn
+    {0x82590000u, 55u}, // zsa -> Latn
+    {0xC6590000u, 55u}, // zsr -> Latn
+    {0xD2590000u, 55u}, // zsu -> Latn
+    {0x92790000u, 55u}, // zte -> Latn
+    {0x9A790000u, 55u}, // ztg -> Latn
+    {0xAE790000u, 55u}, // ztl -> Latn
+    {0xB2790000u, 55u}, // ztm -> Latn
+    {0xB6790000u, 55u}, // ztn -> Latn
+    {0xBE790000u, 55u}, // ztp -> Latn
+    {0xC2790000u, 55u}, // ztq -> Latn
+    {0xCA790000u, 55u}, // zts -> Latn
+    {0xCE790000u, 55u}, // ztt -> Latn
+    {0xD2790000u, 55u}, // ztu -> Latn
+    {0xDE790000u, 55u}, // ztx -> Latn
+    {0xE2790000u, 55u}, // zty -> Latn
+    {0x7A750000u, 55u}, // zu -> Latn
+    {0x9E990000u, 55u}, // zuh -> Latn
+    {0xB2990000u,  2u}, // zum -> Arab
+    {0xB6990000u, 55u}, // zun -> Latn
+    {0xE2990000u, 55u}, // zuy -> Latn
+    {0x82D90000u, 24u}, // zwa -> Ethi
+    {0x9B190000u, 34u}, // zyg -> Hani
+    {0xA7190000u, 55u}, // zyj -> Latn
+    {0xB7190000u, 34u}, // zyn -> Hani
+    {0xBF190000u, 55u}, // zyp -> Latn
+    {0x83390000u, 55u}, // zza -> Latn
+    {0xA7390000u, 34u}, // zzj -> Hani
 });
 
 std::unordered_set<uint64_t> REPRESENTATIVE_LOCALES({
     0x616145544C61746ELLU, // aa_Latn_ET
+    0x80004E474C61746ELLU, // aaa_Latn_NG
+    0x84004E474C61746ELLU, // aab_Latn_NG
+    0x880050474C61746ELLU, // aac_Latn_PG
+    0x8C0050474C61746ELLU, // aad_Latn_PG
+    0x900049544C61746ELLU, // aae_Latn_IT
+    0x9400494E4D6C796DLLU, // aaf_Mlym_IN
+    0x980050474C61746ELLU, // aag_Latn_PG
+    0x9C0050474C61746ELLU, // aah_Latn_PG
+    0xA00050474C61746ELLU, // aai_Latn_PG
+    0xA80050474C61746ELLU, // aak_Latn_PG
+    0xAC00434D4C61746ELLU, // aal_Latn_CM
+    0xB40042524C61746ELLU, // aan_Latn_BR
+    0xB800445A41726162LLU, // aao_Arab_DZ
+    0xBC0042524C61746ELLU, // aap_Latn_BR
+    0xC00055534C61746ELLU, // aaq_Latn_US
+    0xC800545A4C61746ELLU, // aas_Latn_TZ
+    0xCC0047524772656BLLU, // aat_Grek_GR
+    0xD00050474C61746ELLU, // aau_Latn_PG
+    0xD80050474C61746ELLU, // aaw_Latn_PG
+    0xDC0049444C61746ELLU, // aax_Latn_ID
+    0xE40049444C61746ELLU, // aaz_Latn_ID
     0x616247454379726CLLU, // ab_Cyrl_GE
+    0x802043494C61746ELLU, // aba_Latn_CI
+    0x8420434D4C61746ELLU, // abb_Latn_CM
+    0x882050484C61746ELLU, // abc_Latn_PH
+    0x8C2050484C61746ELLU, // abd_Latn_PH
+    0x902043414C61746ELLU, // abe_Latn_CA
+    0x94204D594C61746ELLU, // abf_Latn_MY
+    0x982050474C61746ELLU, // abg_Latn_PG
+    0x9C20544A41726162LLU, // abh_Arab_TJ
+    0xA02043494C61746ELLU, // abi_Latn_CI
+    0xAC204944526A6E67LLU, // abl_Rjng_ID
+    0xB0204E474C61746ELLU, // abm_Latn_NG
+    0xB4204E474C61746ELLU, // abn_Latn_NG
+    0xB8204E474C61746ELLU, // abo_Latn_NG
+    0xBC2050484C61746ELLU, // abp_Latn_PH
     0xC42047484C61746ELLU, // abr_Latn_GH
+    0xC82049444C61746ELLU, // abs_Latn_ID
+    0xCC2050474C61746ELLU, // abt_Latn_PG
+    0xD02043494C61746ELLU, // abu_Latn_CI
+    0xD420424841726162LLU, // abv_Arab_BH
+    0xD82050474C61746ELLU, // abw_Latn_PG
+    0xDC2050484C61746ELLU, // abx_Latn_PH
+    0xE02050474C61746ELLU, // aby_Latn_PG
+    0xE42049444C61746ELLU, // abz_Latn_ID
+    0x8040434F4C61746ELLU, // aca_Latn_CO
+    0x84404E474C61746ELLU, // acb_Latn_NG
+    0x8C4047484C61746ELLU, // acd_Latn_GH
     0x904049444C61746ELLU, // ace_Latn_ID
+    0x94404C434C61746ELLU, // acf_Latn_LC
     0x9C4055474C61746ELLU, // ach_Latn_UG
+    0xB040495141726162LLU, // acm_Arab_IQ
+    0xB440434E4C61746ELLU, // acn_Latn_CN
+    0xBC404E474C61746ELLU, // acp_Latn_NG
+    0xC040594541726162LLU, // acq_Arab_YE
+    0xC44047544C61746ELLU, // acr_Latn_GT
+    0xC84042524C61746ELLU, // acs_Latn_BR
+    0xCC404E4C4C61746ELLU, // act_Latn_NL
+    0xD04045434C61746ELLU, // acu_Latn_EC
+    0xD44055534C61746ELLU, // acv_Latn_US
+    0xD840534141726162LLU, // acw_Arab_SA
+    0xDC404F4D41726162LLU, // acx_Arab_OM
+    0xE04043594C61746ELLU, // acy_Latn_CY
+    0xE44053444C61746ELLU, // acz_Latn_SD
     0x806047484C61746ELLU, // ada_Latn_GH
-    0xBC60425454696274LLU, // adp_Tibt_BT
+    0x8460544C4C61746ELLU, // adb_Latn_TL
+    0x8C60434D4C61746ELLU, // add_Latn_CM
+    0x906054474C61746ELLU, // ade_Latn_TG
+    0x94604F4D41726162LLU, // adf_Arab_OM
+    0x986041554C61746ELLU, // adg_Latn_AU
+    0x9C6055474C61746ELLU, // adh_Latn_UG
+    0xA060494E4C61746ELLU, // adi_Latn_IN
+    0xA46043494C61746ELLU, // adj_Latn_CI
+    0xAC60494E4C61746ELLU, // adl_Latn_IN
+    0xB46049444C61746ELLU, // adn_Latn_ID
+    0xB86050474C61746ELLU, // ado_Latn_PG
+    0xC06047484C61746ELLU, // adq_Latn_GH
+    0xC46049444C61746ELLU, // adr_Latn_ID
+    0xCC6041554C61746ELLU, // adt_Latn_AU
+    0xD0604E474C61746ELLU, // adu_Latn_NG
+    0xD86042524C61746ELLU, // adw_Latn_BR
+    0xDC60434E54696274LLU, // adx_Tibt_CN
     0xE06052554379726CLLU, // ady_Cyrl_RU
+    0xE46050474C61746ELLU, // adz_Latn_PG
     0x6165495241767374LLU, // ae_Avst_IR
+    0x808041554C61746ELLU, // aea_Latn_AU
     0x8480544E41726162LLU, // aeb_Arab_TN
+    0x8880454741726162LLU, // aec_Arab_EG
+    0x9080414641726162LLU, // aee_Arab_AF
+    0xA8804E434C61746ELLU, // aek_Latn_NC
+    0xAC80434D4C61746ELLU, // ael_Latn_CM
+    0xB080564E4C61746ELLU, // aem_Latn_VN
+    0xC080504B41726162LLU, // aeq_Arab_PK
+    0xC48041554C61746ELLU, // aer_Latn_AU
+    0xD080434E4C61746ELLU, // aeu_Latn_CN
+    0xD88050474C61746ELLU, // aew_Latn_PG
+    0xE08050474C61746ELLU, // aey_Latn_PG
+    0xE48050474C61746ELLU, // aez_Latn_PG
     0x61665A414C61746ELLU, // af_Latn_ZA
+    0x84A04B5741726162LLU, // afb_Arab_KW
+    0x8CA050474C61746ELLU, // afd_Latn_PG
+    0x90A04E474C61746ELLU, // afe_Latn_NG
+    0x9CA047484C61746ELLU, // afh_Latn_GH
+    0xA0A050474C61746ELLU, // afi_Latn_PG
+    0xA8A050474C61746ELLU, // afk_Latn_PG
+    0xB4A04E474C61746ELLU, // afn_Latn_NG
+    0xB8A04E474C61746ELLU, // afo_Latn_NG
+    0xBCA050474C61746ELLU, // afp_Latn_PG
+    0xC8A04D584C61746ELLU, // afs_Latn_MX
+    0xD0A047484C61746ELLU, // afu_Latn_GH
+    0xE4A049444C61746ELLU, // afz_Latn_ID
+    0x80C050454C61746ELLU, // aga_Latn_PE
+    0x84C04E474C61746ELLU, // agb_Latn_NG
+    0x88C04E474C61746ELLU, // agc_Latn_NG
+    0x8CC050474C61746ELLU, // agd_Latn_PG
+    0x90C050474C61746ELLU, // age_Latn_PG
+    0x94C049444C61746ELLU, // agf_Latn_ID
+    0x98C050474C61746ELLU, // agg_Latn_PG
+    0x9CC043444C61746ELLU, // agh_Latn_CD
+    0xA0C0494E44657661LLU, // agi_Deva_IN
+    0xA4C0455445746869LLU, // agj_Ethi_ET
+    0xA8C050484C61746ELLU, // agk_Latn_PH
+    0xACC050474C61746ELLU, // agl_Latn_PG
+    0xB0C050474C61746ELLU, // agm_Latn_PG
+    0xB4C050484C61746ELLU, // agn_Latn_PH
+    0xB8C050474C61746ELLU, // ago_Latn_PG
     0xC0C0434D4C61746ELLU, // agq_Latn_CM
+    0xC4C050454C61746ELLU, // agr_Latn_PE
+    0xC8C0434D4C61746ELLU, // ags_Latn_CM
+    0xCCC050484C61746ELLU, // agt_Latn_PH
+    0xD0C047544C61746ELLU, // agu_Latn_GT
+    0xD4C050484C61746ELLU, // agv_Latn_PH
+    0xD8C053424C61746ELLU, // agw_Latn_SB
+    0xDCC052554379726CLLU, // agx_Cyrl_RU
+    0xE0C050484C61746ELLU, // agy_Latn_PH
+    0xE4C050484C61746ELLU, // agz_Latn_PH
+    0x80E047484C61746ELLU, // aha_Latn_GH
+    0x84E056554C61746ELLU, // ahb_Latn_VU
+    0x98E0455445746869LLU, // ahg_Ethi_ET
+    0x9CE049444C61746ELLU, // ahh_Latn_ID
+    0xA0E043494C61746ELLU, // ahi_Latn_CI
+    0xA8E04D4D4C61746ELLU, // ahk_Latn_MM
+    0xACE054474C61746ELLU, // ahl_Latn_TG
+    0xB0E043494C61746ELLU, // ahm_Latn_CI
+    0xB4E04E474C61746ELLU, // ahn_Latn_NG
     0xB8E0494E41686F6DLLU, // aho_Ahom_IN
-    0xCD20544E41726162LLU, // ajt_Arab_TN
+    0xBCE043494C61746ELLU, // ahp_Latn_CI
+    0xC4E0494E44657661LLU, // ahr_Deva_IN
+    0xC8E04E474C61746ELLU, // ahs_Latn_NG
+    0xCCE055534C61746ELLU, // aht_Latn_US
+    0x810053424C61746ELLU, // aia_Latn_SB
+    0x8500434E41726162LLU, // aib_Arab_CN
+    0x890050474C61746ELLU, // aic_Latn_PG
+    0x8D0041554C61746ELLU, // aid_Latn_AU
+    0x910050474C61746ELLU, // aie_Latn_PG
+    0x950050474C61746ELLU, // aif_Latn_PG
+    0x990041474C61746ELLU, // aig_Latn_AG
+    0xA100495153797263LLU, // aii_Syrc_IQ
+    0xA500494C48656272LLU, // aij_Hebr_IL
+    0xA9004E474C61746ELLU, // aik_Latn_NG
+    0xAD0050474C61746ELLU, // ail_Latn_PG
+    0xB100494E4C61746ELLU, // aim_Latn_IN
+    0xB5004A504B616E61LLU, // ain_Kana_JP
+    0xB900494E4D796D72LLU, // aio_Mymr_IN
+    0xBD0049444C61746ELLU, // aip_Latn_ID
+    0xC100414641726162LLU, // aiq_Arab_AF
+    0xC50049444C61746ELLU, // air_Latn_ID
+    0xCD0042524C61746ELLU, // ait_Latn_BR
+    0xD90045544C61746ELLU, // aiw_Latn_ET
+    0xDD0050474C61746ELLU, // aix_Latn_PG
+    0xE10043464C61746ELLU, // aiy_Latn_CF
+    0x812053534C61746ELLU, // aja_Latn_SS
+    0x9920424A4C61746ELLU, // ajg_Latn_BJ
+    0xA1204E434C61746ELLU, // aji_Latn_NC
+    0xB52041554C61746ELLU, // ajn_Latn_AU
+    0xD9204E474C61746ELLU, // ajw_Latn_NG
+    0xE520494E4C61746ELLU, // ajz_Latn_IN
     0x616B47484C61746ELLU, // ak_Latn_GH
+    0x854049444C61746ELLU, // akb_Latn_ID
+    0x894049444C61746ELLU, // akc_Latn_ID
+    0x8D404E474C61746ELLU, // akd_Latn_NG
+    0x914047594C61746ELLU, // ake_Latn_GY
+    0x95404E474C61746ELLU, // akf_Latn_NG
+    0x994049444C61746ELLU, // akg_Latn_ID
+    0x9D4050474C61746ELLU, // akh_Latn_PG
+    0xA14050474C61746ELLU, // aki_Latn_PG
     0xA940495158737578LLU, // akk_Xsux_IQ
+    0xAD4050484C61746ELLU, // akl_Latn_PH
+    0xB94053524C61746ELLU, // ako_Latn_SR
+    0xBD4047484C61746ELLU, // akp_Latn_GH
+    0xC14050474C61746ELLU, // akq_Latn_PG
+    0xC54056554C61746ELLU, // akr_Latn_VU
+    0xC94054474C61746ELLU, // aks_Latn_TG
+    0xCD4050474C61746ELLU, // akt_Latn_PG
+    0xD140434D4C61746ELLU, // aku_Latn_CM
+    0xD54052554379726CLLU, // akv_Cyrl_RU
+    0xD94043474C61746ELLU, // akw_Latn_CG
+    0xE54055534C61746ELLU, // akz_Latn_US
+    0x81604E474C61746ELLU, // ala_Latn_NG
+    0x8960434C4C61746ELLU, // alc_Latn_CL
+    0x8D6043494C61746ELLU, // ald_Latn_CI
+    0x916055534C61746ELLU, // ale_Latn_US
+    0x95604E474C61746ELLU, // alf_Latn_NG
+    0x9D6041554C61746ELLU, // alh_Latn_AU
+    0xA16050474C61746ELLU, // ali_Latn_PG
+    0xA56050484C61746ELLU, // alj_Latn_PH
+    0xA9604C414C616F6FLLU, // alk_Laoo_LA
+    0xAD60494E4D6C796DLLU, // all_Mlym_IN
+    0xB16056554C61746ELLU, // alm_Latn_VU
     0xB560584B4C61746ELLU, // aln_Latn_XK
+    0xB96049444C61746ELLU, // alo_Latn_ID
+    0xBD6049444C61746ELLU, // alp_Latn_ID
+    0xC16043414C61746ELLU, // alq_Latn_CA
+    0xC56052554379726CLLU, // alr_Cyrl_RU
     0xCD6052554379726CLLU, // alt_Cyrl_RU
+    0xD16053424C61746ELLU, // alu_Latn_SB
+    0xD960455445746869LLU, // alw_Ethi_ET
+    0xDD6050474C61746ELLU, // alx_Latn_PG
+    0xE16041554C61746ELLU, // aly_Latn_AU
+    0xE56043444C61746ELLU, // alz_Latn_CD
     0x616D455445746869LLU, // am_Ethi_ET
+    0x818042524C61746ELLU, // ama_Latn_BR
+    0x85804E474C61746ELLU, // amb_Latn_NG
+    0x898050454C61746ELLU, // amc_Latn_PE
+    0x918050454C61746ELLU, // ame_Latn_PE
+    0x958045544C61746ELLU, // amf_Latn_ET
+    0x998041554C61746ELLU, // amg_Latn_AU
+    0xA18054574C61746ELLU, // ami_Latn_TW
+    0xA58054444C61746ELLU, // amj_Latn_TD
+    0xA98049444C61746ELLU, // amk_Latn_ID
+    0xB18050474C61746ELLU, // amm_Latn_PG
+    0xB58050474C61746ELLU, // amn_Latn_PG
     0xB9804E474C61746ELLU, // amo_Latn_NG
+    0xBD8050474C61746ELLU, // amp_Latn_PG
+    0xC18049444C61746ELLU, // amq_Latn_ID
+    0xC58050454C61746ELLU, // amr_Latn_PE
+    0xC9804A504A70616ELLU, // ams_Jpan_JP
+    0xCD8050474C61746ELLU, // amt_Latn_PG
+    0xD1804D584C61746ELLU, // amu_Latn_MX
+    0xD58049444C61746ELLU, // amv_Latn_ID
+    0xD980535953797263LLU, // amw_Syrc_SY
+    0xDD8041554C61746ELLU, // amx_Latn_AU
+    0xE18041554C61746ELLU, // amy_Latn_AU
+    0xE58041554C61746ELLU, // amz_Latn_AU
     0x616E45534C61746ELLU, // an_Latn_ES
+    0x81A0434F4C61746ELLU, // ana_Latn_CO
+    0x85A050454C61746ELLU, // anb_Latn_PE
+    0x89A04E474C61746ELLU, // anc_Latn_NG
+    0x8DA049444C61746ELLU, // and_Latn_ID
+    0x91A04E434C61746ELLU, // ane_Latn_NC
+    0x95A047484C61746ELLU, // anf_Latn_GH
+    0x99A047424C61746ELLU, // ang_Latn_GB
+    0x9DA050474C61746ELLU, // anh_Latn_PG
+    0xA1A052554379726CLLU, // ani_Cyrl_RU
+    0xA5A050474C61746ELLU, // anj_Latn_PG
+    0xA9A04E474C61746ELLU, // ank_Latn_NG
+    0xADA04D4D4C61746ELLU, // anl_Latn_MM
+    0xB1A0494E4C61746ELLU, // anm_Latn_IN
     0xB5A04E474C61746ELLU, // ann_Latn_NG
+    0xB9A0434F4C61746ELLU, // ano_Latn_CO
+    0xBDA0494E44657661LLU, // anp_Deva_IN
+    0xC1A0494E44657661LLU, // anq_Deva_IN
+    0xC5A0494E44657661LLU, // anr_Deva_IN
+    0xC9A0434F4C61746ELLU, // ans_Latn_CO
+    0xCDA041554C61746ELLU, // ant_Latn_AU
+    0xD1A0455445746869LLU, // anu_Ethi_ET
+    0xD5A0434D4C61746ELLU, // anv_Latn_CM
+    0xD9A04E474C61746ELLU, // anw_Latn_NG
+    0xDDA050474C61746ELLU, // anx_Latn_PG
+    0xE1A043494C61746ELLU, // any_Latn_CI
+    0xE5A050474C61746ELLU, // anz_Latn_PG
+    0x81C053544C61746ELLU, // aoa_Latn_ST
+    0x85C050474C61746ELLU, // aob_Latn_PG
+    0x89C056454C61746ELLU, // aoc_Latn_VE
+    0x8DC050474C61746ELLU, // aod_Latn_PG
+    0x91C050474C61746ELLU, // aoe_Latn_PG
+    0x95C050474C61746ELLU, // aof_Latn_PG
+    0x99C050474C61746ELLU, // aog_Latn_PG
+    0xA1C041554C61746ELLU, // aoi_Latn_AU
+    0xA5C050474C61746ELLU, // aoj_Latn_PG
+    0xA9C04E434C61746ELLU, // aok_Latn_NC
+    0xADC049444C61746ELLU, // aol_Latn_ID
+    0xB1C050474C61746ELLU, // aom_Latn_PG
+    0xB5C050474C61746ELLU, // aon_Latn_PG
+    0xC5C056554C61746ELLU, // aor_Latn_VU
+    0xC9C049444C61746ELLU, // aos_Latn_ID
+    0xCDC0424442656E67LLU, // aot_Beng_BD
+    0xDDC047594C61746ELLU, // aox_Latn_GY
     0xE5C049444C61746ELLU, // aoz_Latn_ID
+    0x85E053424C61746ELLU, // apb_Latn_SB
+    0x89E0535941726162LLU, // apc_Arab_SY
     0x8DE0544741726162LLU, // apd_Arab_TG
+    0x91E050474C61746ELLU, // ape_Latn_PG
+    0x95E050484C61746ELLU, // apf_Latn_PH
+    0x99E049444C61746ELLU, // apg_Latn_ID
+    0x9DE04E5044657661LLU, // aph_Deva_NP
+    0xA1E042524C61746ELLU, // api_Latn_BR
+    0xA5E055534C61746ELLU, // apj_Latn_US
+    0xA9E055534C61746ELLU, // apk_Latn_US
+    0xADE055534C61746ELLU, // apl_Latn_US
+    0xB1E055534C61746ELLU, // apm_Latn_US
+    0xB5E042524C61746ELLU, // apn_Latn_BR
+    0xB9E050474C61746ELLU, // apo_Latn_PG
+    0xBDE056554C61746ELLU, // app_Latn_VU
+    0xC5E050474C61746ELLU, // apr_Latn_PG
+    0xC9E050474C61746ELLU, // aps_Latn_PG
+    0xCDE0494E4C61746ELLU, // apt_Latn_IN
+    0xD1E042524C61746ELLU, // apu_Latn_BR
+    0xD5E042524C61746ELLU, // apv_Latn_BR
+    0xD9E055534C61746ELLU, // apw_Latn_US
+    0xDDE049444C61746ELLU, // apx_Latn_ID
+    0xE1E042524C61746ELLU, // apy_Latn_BR
+    0xE5E050474C61746ELLU, // apz_Latn_PG
+    0x8A0052554379726CLLU, // aqc_Cyrl_RU
+    0x8E004D4C4C61746ELLU, // aqd_Latn_ML
+    0x9A004E474C61746ELLU, // aqg_Latn_NG
+    0xAA004E474C61746ELLU, // aqk_Latn_NG
+    0xB20049444C61746ELLU, // aqm_Latn_ID
+    0xB60050484C61746ELLU, // aqn_Latn_PH
+    0xC6004E434C61746ELLU, // aqr_Latn_NC
+    0xCE0050594C61746ELLU, // aqt_Latn_PY
+    0xE60042524C61746ELLU, // aqz_Latn_BR
     0x6172454741726162LLU, // ar_Arab_EG
     0x8A20495241726D69LLU, // arc_Armi_IR
+    0x8A20495148617472LLU, // arc_Hatr_IQ
     0x8A204A4F4E626174LLU, // arc_Nbat_JO
     0x8A20535950616C6DLLU, // arc_Palm_SY
+    0x8E2041554C61746ELLU, // ard_Latn_AU
+    0x922041554C61746ELLU, // are_Latn_AU
+    0x9E20434F4C61746ELLU, // arh_Latn_CO
+    0xA22055534C61746ELLU, // ari_Latn_US
+    0xA62042524C61746ELLU, // arj_Latn_BR
+    0xAA2042524C61746ELLU, // ark_Latn_BR
+    0xAE2050454C61746ELLU, // arl_Latn_PE
     0xB620434C4C61746ELLU, // arn_Latn_CL
     0xBA20424F4C61746ELLU, // aro_Latn_BO
+    0xBE2055534C61746ELLU, // arp_Latn_US
     0xC220445A41726162LLU, // arq_Arab_DZ
+    0xC62042524C61746ELLU, // arr_Latn_BR
     0xCA20534141726162LLU, // ars_Arab_SA
+    0xD22042524C61746ELLU, // aru_Latn_BR
+    0xDA2053524C61746ELLU, // arw_Latn_SR
+    0xDE2042524C61746ELLU, // arx_Latn_BR
     0xE2204D4141726162LLU, // ary_Arab_MA
     0xE620454741726162LLU, // arz_Arab_EG
     0x6173494E42656E67LLU, // as_Beng_IN
     0x8240545A4C61746ELLU, // asa_Latn_TZ
+    0x864043414C61746ELLU, // asb_Latn_CA
+    0x8A4049444C61746ELLU, // asc_Latn_ID
     0x9240555353676E77LLU, // ase_Sgnw_US
+    0x9A404E474C61746ELLU, // asg_Latn_NG
+    0x9E4050454C61746ELLU, // ash_Latn_PE
+    0xA24049444C61746ELLU, // asi_Latn_ID
+    0xA640434D4C61746ELLU, // asj_Latn_CM
+    0xAA40414641726162LLU, // ask_Arab_AF
+    0xAE4049444C61746ELLU, // asl_Latn_ID
+    0xB64042524C61746ELLU, // asn_Latn_BR
+    0xBA4050474C61746ELLU, // aso_Latn_PG
+    0xC640494E44657661LLU, // asr_Deva_IN
+    0xCA40434D4C61746ELLU, // ass_Latn_CM
     0xCE4045534C61746ELLU, // ast_Latn_ES
+    0xD24042524C61746ELLU, // asu_Latn_BR
+    0xD64043444C61746ELLU, // asv_Latn_CD
+    0xDE4050474C61746ELLU, // asx_Latn_PG
+    0xE24049444C61746ELLU, // asy_Latn_ID
+    0xE64049444C61746ELLU, // asz_Latn_ID
+    0x826050474C61746ELLU, // ata_Latn_PG
+    0x8660434E4C61746ELLU, // atb_Latn_CN
+    0x8A6050454C61746ELLU, // atc_Latn_PE
+    0x8E6050484C61746ELLU, // atd_Latn_PH
+    0x926050474C61746ELLU, // ate_Latn_PG
+    0x9A604E474C61746ELLU, // atg_Latn_NG
+    0xA26043494C61746ELLU, // ati_Latn_CI
     0xA66043414C61746ELLU, // atj_Latn_CA
+    0xAA6050484C61746ELLU, // atk_Latn_PH
+    0xAE6050484C61746ELLU, // atl_Latn_PH
+    0xB26050484C61746ELLU, // atm_Latn_PH
+    0xB660495241726162LLU, // atn_Arab_IR
+    0xBA60434D4C61746ELLU, // ato_Latn_CM
+    0xBE6050484C61746ELLU, // atp_Latn_PH
+    0xC26049444C61746ELLU, // atq_Latn_ID
+    0xC66042524C61746ELLU, // atr_Latn_BR
+    0xCA6055534C61746ELLU, // ats_Latn_US
+    0xCE6050484C61746ELLU, // att_Latn_PH
+    0xD26053534C61746ELLU, // atu_Latn_SS
+    0xD66052554379726CLLU, // atv_Cyrl_RU
+    0xDA6055534C61746ELLU, // atw_Latn_US
+    0xDE6042524C61746ELLU, // atx_Latn_BR
+    0xE26056554C61746ELLU, // aty_Latn_VU
+    0xE66050484C61746ELLU, // atz_Latn_PH
+    0x828053424C61746ELLU, // aua_Latn_SB
+    0x8A8045434C61746ELLU, // auc_Latn_EC
+    0x8E8053424C61746ELLU, // aud_Latn_SB
+    0x9A80424A4C61746ELLU, // aug_Latn_BJ
+    0x9E805A4D4C61746ELLU, // auh_Latn_ZM
+    0xA28050474C61746ELLU, // aui_Latn_PG
+    0xA6804C5941726162LLU, // auj_Arab_LY
+    0xAA8050474C61746ELLU, // auk_Latn_PG
+    0xAE8056554C61746ELLU, // aul_Latn_VU
+    0xB2804E474C61746ELLU, // aum_Latn_NG
+    0xB68050474C61746ELLU, // aun_Latn_PG
+    0xBA804E474C61746ELLU, // auo_Latn_NG
+    0xBE8050474C61746ELLU, // aup_Latn_PG
+    0xC28049444C61746ELLU, // auq_Latn_ID
+    0xC68050474C61746ELLU, // aur_Latn_PG
+    0xCE8050464C61746ELLU, // aut_Latn_PF
+    0xD28049444C61746ELLU, // auu_Latn_ID
+    0xDA8049444C61746ELLU, // auw_Latn_ID
+    0xE28050474C61746ELLU, // auy_Latn_PG
+    0xE680555A41726162LLU, // auz_Arab_UZ
     0x617652554379726CLLU, // av_Cyrl_RU
+    0x86A050474C61746ELLU, // avb_Latn_PG
+    0x8EA0495241726162LLU, // avd_Arab_IR
+    0xA2A043494C61746ELLU, // avi_Latn_CI
+    0xAEA0454741726162LLU, // avl_Arab_EG
+    0xB2A041554C61746ELLU, // avm_Latn_AU
+    0xB6A047484C61746ELLU, // avn_Latn_GH
+    0xBAA042524C61746ELLU, // avo_Latn_BR
+    0xCAA050454C61746ELLU, // avs_Latn_PE
+    0xCEA050474C61746ELLU, // avt_Latn_PG
+    0xD2A053534C61746ELLU, // avu_Latn_SS
+    0xD6A042524C61746ELLU, // avv_Latn_BR
     0x82C0494E44657661LLU, // awa_Deva_IN
+    0x86C050474C61746ELLU, // awb_Latn_PG
+    0x8AC04E474C61746ELLU, // awc_Latn_NG
+    0x92C042524C61746ELLU, // awe_Latn_BR
+    0x9AC041554C61746ELLU, // awg_Latn_AU
+    0x9EC049444C61746ELLU, // awh_Latn_ID
+    0xA2C050474C61746ELLU, // awi_Latn_PG
+    0xAAC041554C61746ELLU, // awk_Latn_AU
+    0xB2C050474C61746ELLU, // awm_Latn_PG
+    0xB6C0455445746869LLU, // awn_Ethi_ET
+    0xBAC04E474C61746ELLU, // awo_Latn_NG
+    0xC6C049444C61746ELLU, // awr_Latn_ID
+    0xCAC049444C61746ELLU, // aws_Latn_ID
+    0xCEC042524C61746ELLU, // awt_Latn_BR
+    0xD2C049444C61746ELLU, // awu_Latn_ID
+    0xD6C049444C61746ELLU, // awv_Latn_ID
+    0xDAC050474C61746ELLU, // aww_Latn_PG
+    0xDEC050474C61746ELLU, // awx_Latn_PG
+    0xE2C049444C61746ELLU, // awy_Latn_ID
+    0x86E041524C61746ELLU, // axb_Latn_AR
+    0x92E041554C61746ELLU, // axe_Latn_AU
+    0x9AE042524C61746ELLU, // axg_Latn_BR
+    0xAAE043464C61746ELLU, // axk_Latn_CF
+    0xAEE041554C61746ELLU, // axl_Latn_AU
+    0xB2E0414D41726D6ELLU, // axm_Armn_AM
+    0xDEE04E434C61746ELLU, // axx_Latn_NC
     0x6179424F4C61746ELLU, // ay_Latn_BO
+    0x830050474C61746ELLU, // aya_Latn_PG
+    0x8700424A4C61746ELLU, // ayb_Latn_BJ
+    0x8B0050454C61746ELLU, // ayc_Latn_PE
+    0x8F0041554C61746ELLU, // ayd_Latn_AU
+    0x93004E474C61746ELLU, // aye_Latn_NG
+    0x9B0054474C61746ELLU, // ayg_Latn_TG
+    0x9F00594541726162LLU, // ayh_Arab_YE
+    0xA3004E474C61746ELLU, // ayi_Latn_NG
+    0xAB004E474C61746ELLU, // ayk_Latn_NG
+    0xAF004C5941726162LLU, // ayl_Arab_LY
+    0xB700594541726162LLU, // ayn_Arab_YE
+    0xBB0050594C61746ELLU, // ayo_Latn_PY
+    0xBF00495141726162LLU, // ayp_Arab_IQ
+    0xC30050474C61746ELLU, // ayq_Latn_PG
+    0xCB0050484C61746ELLU, // ays_Latn_PH
+    0xCF0050484C61746ELLU, // ayt_Latn_PH
+    0xD3004E474C61746ELLU, // ayu_Latn_NG
+    0xE70049444C61746ELLU, // ayz_Latn_ID
     0x617A495241726162LLU, // az_Arab_IR
     0x617A415A4C61746ELLU, // az_Latn_AZ
+    0x8720495241726162LLU, // azb_Arab_IR
+    0x8F204D584C61746ELLU, // azd_Latn_MX
+    0x9B204D584C61746ELLU, // azg_Latn_MX
+    0xB3204D584C61746ELLU, // azm_Latn_MX
+    0xB7204D584C61746ELLU, // azn_Latn_MX
+    0xBB20434D4C61746ELLU, // azo_Latn_CM
+    0xCF2050484C61746ELLU, // azt_Latn_PH
+    0xE7204D584C61746ELLU, // azz_Latn_MX
     0x626152554379726CLLU, // ba_Cyrl_RU
+    0x800153424C61746ELLU, // baa_Latn_SB
+    0x840147574C61746ELLU, // bab_Latn_GW
+    0x880149444C61746ELLU, // bac_Latn_ID
+    0x900156454C61746ELLU, // bae_Latn_VE
+    0x9401434D4C61746ELLU, // baf_Latn_CM
+    0x9801434D4C61746ELLU, // bag_Latn_CM
+    0x9C0142534C61746ELLU, // bah_Latn_BS
+    0xA40149444C61746ELLU, // baj_Latn_ID
     0xAC01504B41726162LLU, // bal_Arab_PK
     0xB40149444C61746ELLU, // ban_Latn_ID
+    0xB801434F4C61746ELLU, // bao_Latn_CO
     0xBC014E5044657661LLU, // bap_Deva_NP
+    0xBC01494E4B726169LLU, // bap_Krai_IN
     0xC40141544C61746ELLU, // bar_Latn_AT
     0xC801434D4C61746ELLU, // bas_Latn_CM
+    0xD0014E474C61746ELLU, // bau_Latn_NG
+    0xD401434D4C61746ELLU, // bav_Latn_CM
+    0xD801434D4C61746ELLU, // baw_Latn_CM
     0xDC01434D42616D75LLU, // bax_Bamu_CM
+    0xE00149444C61746ELLU, // bay_Latn_ID
+    0x8021424A4C61746ELLU, // bba_Latn_BJ
+    0x842150474C61746ELLU, // bbb_Latn_PG
     0x882149444C61746ELLU, // bbc_Latn_ID
+    0x8C2150474C61746ELLU, // bbd_Latn_PG
+    0x902143444C61746ELLU, // bbe_Latn_CD
+    0x942150474C61746ELLU, // bbf_Latn_PG
+    0x982147414C61746ELLU, // bbg_Latn_GA
+    0xA021434D4C61746ELLU, // bbi_Latn_CM
     0xA421434D4C61746ELLU, // bbj_Latn_CM
+    0xA821434D4C61746ELLU, // bbk_Latn_CM
+    0xAC21474547656F72LLU, // bbl_Geor_GE
+    0xB02143444C61746ELLU, // bbm_Latn_CD
+    0xB42150474C61746ELLU, // bbn_Latn_PG
+    0xB82142464C61746ELLU, // bbo_Latn_BF
+    0xBC2143464C61746ELLU, // bbp_Latn_CF
+    0xC021434D4C61746ELLU, // bbq_Latn_CM
+    0xC42150474C61746ELLU, // bbr_Latn_PG
+    0xC8214E474C61746ELLU, // bbs_Latn_NG
+    0xCC214E474C61746ELLU, // bbt_Latn_NG
+    0xD0214E474C61746ELLU, // bbu_Latn_NG
+    0xD42150474C61746ELLU, // bbv_Latn_PG
+    0xD821434D4C61746ELLU, // bbw_Latn_CM
+    0xDC21434D4C61746ELLU, // bbx_Latn_CM
+    0xE021434D4C61746ELLU, // bby_Latn_CM
+    0x8041434E4C61746ELLU, // bca_Latn_CN
+    0x8441534E4C61746ELLU, // bcb_Latn_SN
+    0x8C4149444C61746ELLU, // bcd_Latn_ID
+    0x9041434D4C61746ELLU, // bce_Latn_CM
+    0x944150474C61746ELLU, // bcf_Latn_PG
+    0x9841474E4C61746ELLU, // bcg_Latn_GN
+    0x9C4150474C61746ELLU, // bch_Latn_PG
     0xA04143494C61746ELLU, // bci_Latn_CI
+    0xA44141554C61746ELLU, // bcj_Latn_AU
+    0xA84141554C61746ELLU, // bck_Latn_AU
+    0xB04150474C61746ELLU, // bcm_Latn_PG
+    0xB4414E474C61746ELLU, // bcn_Latn_NG
+    0xB84150474C61746ELLU, // bco_Latn_PG
+    0xBC4143444C61746ELLU, // bcp_Latn_CD
+    0xC041455445746869LLU, // bcq_Ethi_ET
+    0xC44143414C61746ELLU, // bcr_Latn_CA
+    0xC8414E474C61746ELLU, // bcs_Latn_NG
+    0xCC4143444C61746ELLU, // bct_Latn_CD
+    0xD04150474C61746ELLU, // bcu_Latn_PG
+    0xD4414E474C61746ELLU, // bcv_Latn_NG
+    0xD841434D4C61746ELLU, // bcw_Latn_CM
+    0xE0414E474C61746ELLU, // bcy_Latn_NG
+    0xE441534E4C61746ELLU, // bcz_Latn_SN
+    0x8061534E4C61746ELLU, // bda_Latn_SN
+    0x846149444C61746ELLU, // bdb_Latn_ID
+    0x8861434F4C61746ELLU, // bdc_Latn_CO
+    0x8C6150474C61746ELLU, // bdd_Latn_PG
+    0x90614E474C61746ELLU, // bde_Latn_NG
+    0x946150474C61746ELLU, // bdf_Latn_PG
+    0x98614D594C61746ELLU, // bdg_Latn_MY
+    0x9C6153534C61746ELLU, // bdh_Latn_SS
+    0xA06153444C61746ELLU, // bdi_Latn_SD
+    0xA46153534C61746ELLU, // bdj_Latn_SS
+    0xA861415A4C61746ELLU, // bdk_Latn_AZ
+    0xAC6149444C61746ELLU, // bdl_Latn_ID
+    0xB06154444C61746ELLU, // bdm_Latn_TD
+    0xB461434D4C61746ELLU, // bdn_Latn_CM
+    0xB86154444C61746ELLU, // bdo_Latn_TD
+    0xBC61545A4C61746ELLU, // bdp_Latn_TZ
+    0xC061564E4C61746ELLU, // bdq_Latn_VN
+    0xC4614D594C61746ELLU, // bdr_Latn_MY
+    0xC861545A4C61746ELLU, // bds_Latn_TZ
+    0xCC6143464C61746ELLU, // bdt_Latn_CF
+    0xD061434D4C61746ELLU, // bdu_Latn_CM
+    0xD461494E4F727961LLU, // bdv_Orya_IN
+    0xD86149444C61746ELLU, // bdw_Latn_ID
+    0xDC6149444C61746ELLU, // bdx_Latn_ID
+    0xE06141554C61746ELLU, // bdy_Latn_AU
+    0xE461504B41726162LLU, // bdz_Arab_PK
     0x626542594379726CLLU, // be_Cyrl_BY
+    0x808143414C61746ELLU, // bea_Latn_CA
+    0x8481434D4C61746ELLU, // beb_Latn_CM
+    0x8881434D4C61746ELLU, // bec_Latn_CM
+    0x8C8149444C61746ELLU, // bed_Latn_ID
+    0x9081494E44657661LLU, // bee_Deva_IN
+    0x948150474C61746ELLU, // bef_Latn_PG
+    0x9C81424A4C61746ELLU, // beh_Latn_BJ
+    0xA08149444C61746ELLU, // bei_Latn_ID
     0xA481534441726162LLU, // bej_Arab_SD
+    0xA88150474C61746ELLU, // bek_Latn_PG
     0xB0815A4D4C61746ELLU, // bem_Latn_ZM
+    0xB88150474C61746ELLU, // beo_Latn_PG
+    0xBC8149444C61746ELLU, // bep_Latn_ID
+    0xC08143474C61746ELLU, // beq_Latn_CG
+    0xC88154444C61746ELLU, // bes_Latn_TD
+    0xCC8143494C61746ELLU, // bet_Latn_CI
+    0xD08149444C61746ELLU, // beu_Latn_ID
+    0xD48143494C61746ELLU, // bev_Latn_CI
     0xD88149444C61746ELLU, // bew_Latn_ID
+    0xDC8153534C61746ELLU, // bex_Latn_SS
+    0xE08150474C61746ELLU, // bey_Latn_PG
     0xE481545A4C61746ELLU, // bez_Latn_TZ
+    0x80A153534C61746ELLU, // bfa_Latn_SS
+    0x84A1494E44657661LLU, // bfb_Deva_IN
+    0x88A1434E4C61746ELLU, // bfc_Latn_CN
     0x8CA1434D4C61746ELLU, // bfd_Latn_CM
+    0x90A149444C61746ELLU, // bfe_Latn_ID
+    0x94A143464C61746ELLU, // bff_Latn_CF
+    0x98A149444C61746ELLU, // bfg_Latn_ID
+    0x9CA150474C61746ELLU, // bfh_Latn_PG
+    0xA4A1434D4C61746ELLU, // bfj_Latn_CM
+    0xACA143464C61746ELLU, // bfl_Latn_CF
+    0xB0A1434D4C61746ELLU, // bfm_Latn_CM
+    0xB4A1544C4C61746ELLU, // bfn_Latn_TL
+    0xB8A142464C61746ELLU, // bfo_Latn_BF
+    0xBCA1434D4C61746ELLU, // bfp_Latn_CM
     0xC0A1494E54616D6CLLU, // bfq_Taml_IN
+    0xC8A1434E4C61746ELLU, // bfs_Latn_CN
     0xCCA1504B41726162LLU, // bft_Arab_PK
+    0xD0A1494E54696274LLU, // bfu_Tibt_IN
+    0xD8A1494E4F727961LLU, // bfw_Orya_IN
+    0xDCA150484C61746ELLU, // bfx_Latn_PH
     0xE0A1494E44657661LLU, // bfy_Deva_IN
+    0xE4A1494E44657661LLU, // bfz_Deva_IN
     0x626742474379726CLLU, // bg_Cyrl_BG
+    0x80C14E474C61746ELLU, // bga_Latn_NG
+    0x84C149444C61746ELLU, // bgb_Latn_ID
     0x88C1494E44657661LLU, // bgc_Deva_IN
+    0x8CC1494E44657661LLU, // bgd_Deva_IN
+    0x94C1434D4C61746ELLU, // bgf_Latn_CM
+    0x98C1494E4C61746ELLU, // bgg_Latn_IN
+    0xA0C150484C61746ELLU, // bgi_Latn_PH
+    0xA4C1434D4C61746ELLU, // bgj_Latn_CM
     0xB4C1504B41726162LLU, // bgn_Arab_PK
+    0xB8C1474E4C61746ELLU, // bgo_Latn_GN
+    0xBCC1504B41726162LLU, // bgp_Arab_PK
+    0xC0C1494E44657661LLU, // bgq_Deva_IN
+    0xC4C1494E4C61746ELLU, // bgr_Latn_IN
+    0xC8C150484C61746ELLU, // bgs_Latn_PH
+    0xCCC153424C61746ELLU, // bgt_Latn_SB
+    0xD0C14E474C61746ELLU, // bgu_Latn_NG
+    0xD4C149444C61746ELLU, // bgv_Latn_ID
+    0xD8C1494E44657661LLU, // bgw_Deva_IN
     0xDCC154524772656BLLU, // bgx_Grek_TR
+    0xE0C149444C61746ELLU, // bgy_Latn_ID
+    0xE4C149444C61746ELLU, // bgz_Latn_ID
+    0x80E1494E44657661LLU, // bha_Deva_IN
     0x84E1494E44657661LLU, // bhb_Deva_IN
+    0x88E149444C61746ELLU, // bhc_Latn_ID
+    0x8CE1494E44657661LLU, // bhd_Deva_IN
+    0x90E1504B41726162LLU, // bhe_Arab_PK
+    0x94E150474C61746ELLU, // bhf_Latn_PG
+    0x98E150474C61746ELLU, // bhg_Latn_PG
+    0x9CE1494C4379726CLLU, // bhh_Cyrl_IL
     0xA0E1494E44657661LLU, // bhi_Deva_IN
+    0xA4E14E5044657661LLU, // bhj_Deva_NP
+    0xACE150474C61746ELLU, // bhl_Latn_PG
+    0xB0E14F4D41726162LLU, // bhm_Arab_OM
+    0xB4E1474553797263LLU, // bhn_Syrc_GE
     0xB8E1494E44657661LLU, // bho_Deva_IN
+    0xBCE149444C61746ELLU, // bhp_Latn_ID
+    0xC0E149444C61746ELLU, // bhq_Latn_ID
+    0xC4E14D474C61746ELLU, // bhr_Latn_MG
+    0xC8E1434D4C61746ELLU, // bhs_Latn_CM
+    0xCCE1494E44657661LLU, // bht_Deva_IN
+    0xD0E1494E44657661LLU, // bhu_Deva_IN
+    0xD4E149444C61746ELLU, // bhv_Latn_ID
+    0xD8E149444C61746ELLU, // bhw_Latn_ID
+    0xE0E143444C61746ELLU, // bhy_Latn_CD
+    0xE4E149444C61746ELLU, // bhz_Latn_ID
     0x626956554C61746ELLU, // bi_Latn_VU
+    0x810141554C61746ELLU, // bia_Latn_AU
+    0x850142464C61746ELLU, // bib_Latn_BF
+    0x8D0154444C61746ELLU, // bid_Latn_TD
+    0x910150474C61746ELLU, // bie_Latn_PG
+    0x950147574C61746ELLU, // bif_Latn_GW
+    0x990150474C61746ELLU, // big_Latn_PG
     0xA90150484C61746ELLU, // bik_Latn_PH
+    0xAD014E474C61746ELLU, // bil_Latn_NG
+    0xB10147484C61746ELLU, // bim_Latn_GH
     0xB5014E474C61746ELLU, // bin_Latn_NG
+    0xB90150474C61746ELLU, // bio_Latn_PG
+    0xBD0143444C61746ELLU, // bip_Latn_CD
+    0xC10150474C61746ELLU, // biq_Latn_PG
+    0xC50150474C61746ELLU, // bir_Latn_PG
+    0xCD0150474C61746ELLU, // bit_Latn_PG
+    0xD101494E4C61746ELLU, // biu_Latn_IN
+    0xD50147484C61746ELLU, // biv_Latn_GH
+    0xD901434D4C61746ELLU, // biw_Latn_CM
+    0xE101494E44657661LLU, // biy_Deva_IN
+    0xE50143444C61746ELLU, // biz_Latn_CD
+    0x812143444C61746ELLU, // bja_Latn_CD
+    0x852141554C61746ELLU, // bjb_Latn_AU
+    0x892150474C61746ELLU, // bjc_Latn_PG
+    0x9521494C53797263LLU, // bjf_Syrc_IL
+    0x992147574C61746ELLU, // bjg_Latn_GW
+    0x9D2150474C61746ELLU, // bjh_Latn_PG
+    0xA12145544C61746ELLU, // bji_Latn_ET
     0xA521494E44657661LLU, // bjj_Deva_IN
+    0xA92150474C61746ELLU, // bjk_Latn_PG
+    0xAD2150474C61746ELLU, // bjl_Latn_PG
+    0xB121495141726162LLU, // bjm_Arab_IQ
     0xB52149444C61746ELLU, // bjn_Latn_ID
+    0xB92143464C61746ELLU, // bjo_Latn_CF
+    0xBD2150474C61746ELLU, // bjp_Latn_PG
+    0xC52150474C61746ELLU, // bjr_Latn_PG
+    0xC92142424C61746ELLU, // bjs_Latn_BB
     0xCD21534E4C61746ELLU, // bjt_Latn_SN
+    0xD121434D4C61746ELLU, // bju_Latn_CM
+    0xD52154444C61746ELLU, // bjv_Latn_TD
+    0xD92143494C61746ELLU, // bjw_Latn_CI
+    0xDD2150484C61746ELLU, // bjx_Latn_PH
+    0xE12141554C61746ELLU, // bjy_Latn_AU
+    0xE52150474C61746ELLU, // bjz_Latn_PG
+    0x81414E474C61746ELLU, // bka_Latn_NG
+    0x8941434D4C61746ELLU, // bkc_Latn_CM
+    0x8D4150484C61746ELLU, // bkd_Latn_PH
+    0x954143444C61746ELLU, // bkf_Latn_CD
+    0x994143464C61746ELLU, // bkg_Latn_CF
+    0x9D41434D4C61746ELLU, // bkh_Latn_CM
+    0xA14156554C61746ELLU, // bki_Latn_VU
+    0xA54143464C61746ELLU, // bkj_Latn_CF
+    0xA941494E54696274LLU, // bkk_Tibt_IN
+    0xAD4149444C61746ELLU, // bkl_Latn_ID
     0xB141434D4C61746ELLU, // bkm_Latn_CM
+    0xB54149444C61746ELLU, // bkn_Latn_ID
+    0xB941434D4C61746ELLU, // bko_Latn_CM
+    0xBD4143444C61746ELLU, // bkp_Latn_CD
+    0xC14142524C61746ELLU, // bkq_Latn_BR
+    0xC54149444C61746ELLU, // bkr_Latn_ID
+    0xC94150484C61746ELLU, // bks_Latn_PH
+    0xCD4143444C61746ELLU, // bkt_Latn_CD
     0xD14150484C61746ELLU, // bku_Latn_PH
+    0xD5414E474C61746ELLU, // bkv_Latn_NG
+    0xD94143474C61746ELLU, // bkw_Latn_CG
+    0xDD41544C4C61746ELLU, // bkx_Latn_TL
+    0xE1414E474C61746ELLU, // bky_Latn_NG
+    0xE54149444C61746ELLU, // bkz_Latn_ID
     0x816143414C61746ELLU, // bla_Latn_CA
-    0x99614D594C61746ELLU, // blg_Latn_MY
+    0x856153424C61746ELLU, // blb_Latn_SB
+    0x896143414C61746ELLU, // blc_Latn_CA
+    0x8D6149444C61746ELLU, // bld_Latn_ID
+    0x916147574C61746ELLU, // ble_Latn_GW
+    0x956149444C61746ELLU, // blf_Latn_ID
+    0x9D614C524C61746ELLU, // blh_Latn_LR
+    0xA16143444C61746ELLU, // bli_Latn_CD
+    0xA56149444C61746ELLU, // blj_Latn_ID
+    0xA9614D4D4D796D72LLU, // blk_Mymr_MM
+    0xB16153534C61746ELLU, // blm_Latn_SS
+    0xB56150484C61746ELLU, // bln_Latn_PH
+    0xB961424A4C61746ELLU, // blo_Latn_BJ
+    0xBD6153424C61746ELLU, // blp_Latn_SB
+    0xC16150474C61746ELLU, // blq_Latn_PG
+    0xC561434E4C61746ELLU, // blr_Latn_CN
+    0xC96149444C61746ELLU, // bls_Latn_ID
     0xCD61564E54617674LLU, // blt_Tavt_VN
+    0xD561414F4C61746ELLU, // blv_Latn_AO
+    0xD96150484C61746ELLU, // blw_Latn_PH
+    0xDD6150484C61746ELLU, // blx_Latn_PH
+    0xE161424A4C61746ELLU, // bly_Latn_BJ
+    0xE56149444C61746ELLU, // blz_Latn_ID
     0x626D4D4C4C61746ELLU, // bm_Latn_ML
+    0x81814E474C61746ELLU, // bma_Latn_NG
+    0x858143444C61746ELLU, // bmb_Latn_CD
+    0x898150474C61746ELLU, // bmc_Latn_PG
+    0x8D81474E4C61746ELLU, // bmd_Latn_GN
+    0x918143464C61746ELLU, // bme_Latn_CF
+    0x9581534C4C61746ELLU, // bmf_Latn_SL
+    0x998143444C61746ELLU, // bmg_Latn_CD
+    0x9D8150474C61746ELLU, // bmh_Latn_PG
+    0xA18154444C61746ELLU, // bmi_Latn_TD
+    0xA5814E5044657661LLU, // bmj_Deva_NP
+    0xA98150474C61746ELLU, // bmk_Latn_PG
+    0xAD8143444C61746ELLU, // bml_Latn_CD
+    0xB1814D474C61746ELLU, // bmm_Latn_MG
+    0xB58150474C61746ELLU, // bmn_Latn_PG
+    0xB981434D4C61746ELLU, // bmo_Latn_CM
+    0xBD8150474C61746ELLU, // bmp_Latn_PG
     0xC1814D4C4C61746ELLU, // bmq_Latn_ML
+    0xC581434F4C61746ELLU, // bmr_Latn_CO
+    0xC9814E454C61746ELLU, // bms_Latn_NE
+    0xD18150474C61746ELLU, // bmu_Latn_PG
+    0xD581434D4C61746ELLU, // bmv_Latn_CM
+    0xD98143474C61746ELLU, // bmw_Latn_CG
+    0xDD8150474C61746ELLU, // bmx_Latn_PG
+    0xE58150474C61746ELLU, // bmz_Latn_PG
     0x626E424442656E67LLU, // bn_Beng_BD
+    0x81A149444C61746ELLU, // bna_Latn_ID
+    0x85A14D594C61746ELLU, // bnb_Latn_MY
+    0x89A150484C61746ELLU, // bnc_Latn_PH
+    0x8DA149444C61746ELLU, // bnd_Latn_ID
+    0x91A149444C61746ELLU, // bne_Latn_ID
+    0x95A149444C61746ELLU, // bnf_Latn_ID
+    0x99A147514C61746ELLU, // bng_Latn_GQ
+    0xA1A143444C61746ELLU, // bni_Latn_CD
+    0xA5A150484C61746ELLU, // bnj_Latn_PH
+    0xA9A156554C61746ELLU, // bnk_Latn_VU
+    0xB1A147514C61746ELLU, // bnm_Latn_GQ
+    0xB5A154574C61746ELLU, // bnn_Latn_TW
+    0xB9A150484C61746ELLU, // bno_Latn_PH
+    0xBDA150474C61746ELLU, // bnp_Latn_PG
+    0xC1A149444C61746ELLU, // bnq_Latn_ID
+    0xC5A156554C61746ELLU, // bnr_Latn_VU
+    0xC9A1494E44657661LLU, // bns_Deva_IN
+    0xD1A149444C61746ELLU, // bnu_Latn_ID
+    0xD5A149444C61746ELLU, // bnv_Latn_ID
+    0xD9A150474C61746ELLU, // bnw_Latn_PG
+    0xDDA143444C61746ELLU, // bnx_Latn_CD
+    0xE1A14D594C61746ELLU, // bny_Latn_MY
+    0xE5A1434D4C61746ELLU, // bnz_Latn_CM
     0x626F434E54696274LLU, // bo_Tibt_CN
+    0x81C150454C61746ELLU, // boa_Latn_PE
+    0x85C14B454C61746ELLU, // bob_Latn_KE
+    0x91C1434D4C61746ELLU, // boe_Latn_CM
+    0x95C142464C61746ELLU, // bof_Latn_BF
+    0x9DC143444C61746ELLU, // boh_Latn_CD
+    0xA5C150474C61746ELLU, // boj_Latn_PG
+    0xA9C143474C61746ELLU, // bok_Latn_CG
+    0xADC14E474C61746ELLU, // bol_Latn_NG
+    0xB1C14E474C61746ELLU, // bom_Latn_NG
+    0xB5C150474C61746ELLU, // bon_Latn_PG
+    0xB9C14D4C4C61746ELLU, // boo_Latn_ML
+    0xBDC150474C61746ELLU, // bop_Latn_PG
+    0xC1C150474C61746ELLU, // boq_Latn_PG
+    0xC5C142524C61746ELLU, // bor_Latn_BR
+    0xCDC153534C61746ELLU, // bot_Latn_SS
+    0xD1C1545A4C61746ELLU, // bou_Latn_TZ
+    0xD5C147484C61746ELLU, // bov_Latn_GH
+    0xD9C150474C61746ELLU, // bow_Latn_PG
+    0xDDC142464C61746ELLU, // box_Latn_BF
+    0xE1C143464C61746ELLU, // boy_Latn_CF
+    0xE5C14D4C4C61746ELLU, // boz_Latn_ML
+    0x81E156554C61746ELLU, // bpa_Latn_VU
+    0x89E1434D4C61746ELLU, // bpc_Latn_CM
+    0x8DE143464C61746ELLU, // bpd_Latn_CF
+    0x91E150474C61746ELLU, // bpe_Latn_PG
+    0x99E149444C61746ELLU, // bpg_Latn_ID
+    0x9DE152554379726CLLU, // bph_Cyrl_RU
+    0xA1E150474C61746ELLU, // bpi_Latn_PG
+    0xA5E143444C61746ELLU, // bpj_Latn_CD
+    0xA9E14E434C61746ELLU, // bpk_Latn_NC
+    0xADE141554C61746ELLU, // bpl_Latn_AU
+    0xB1E150474C61746ELLU, // bpm_Latn_PG
+    0xB9E149444C61746ELLU, // bpo_Latn_ID
+    0xBDE149444C61746ELLU, // bpp_Latn_ID
+    0xC1E149444C61746ELLU, // bpq_Latn_ID
+    0xC5E150484C61746ELLU, // bpr_Latn_PH
+    0xC9E150484C61746ELLU, // bps_Latn_PH
+    0xCDE141554C61746ELLU, // bpt_Latn_AU
+    0xD1E150474C61746ELLU, // bpu_Latn_PG
+    0xD5E149444C61746ELLU, // bpv_Latn_ID
+    0xD9E150474C61746ELLU, // bpw_Latn_PG
+    0xDDE1494E44657661LLU, // bpx_Deva_IN
     0xE1E1494E42656E67LLU, // bpy_Beng_IN
+    0xE5E149444C61746ELLU, // bpz_Latn_ID
+    0x8201424A4C61746ELLU, // bqa_Latn_BJ
+    0x860149444C61746ELLU, // bqb_Latn_ID
+    0x8A01424A4C61746ELLU, // bqc_Latn_BJ
+    0x8E01434D4C61746ELLU, // bqd_Latn_CM
+    0x9601474E4C61746ELLU, // bqf_Latn_GN
+    0x9A0154474C61746ELLU, // bqg_Latn_TG
     0xA201495241726162LLU, // bqi_Arab_IR
+    0xA601534E4C61746ELLU, // bqj_Latn_SN
+    0xAA0143464C61746ELLU, // bqk_Latn_CF
+    0xAE0150474C61746ELLU, // bql_Latn_PG
+    0xB201434D4C61746ELLU, // bqm_Latn_CM
+    0xBA01434D4C61746ELLU, // bqo_Latn_CM
+    0xBE014E474C61746ELLU, // bqp_Latn_NG
+    0xC20149444C61746ELLU, // bqq_Latn_ID
+    0xC60149444C61746ELLU, // bqr_Latn_ID
+    0xCA0150474C61746ELLU, // bqs_Latn_PG
+    0xCE01434D4C61746ELLU, // bqt_Latn_CM
+    0xD20143444C61746ELLU, // bqu_Latn_CD
     0xD60143494C61746ELLU, // bqv_Latn_CI
+    0xDA014E474C61746ELLU, // bqw_Latn_NG
+    0xDE014E474C61746ELLU, // bqx_Latn_NG
+    0xE601434D4C61746ELLU, // bqz_Latn_CM
     0x627246524C61746ELLU, // br_Latn_FR
     0x8221494E44657661LLU, // bra_Deva_IN
+    0x86214B484B686D72LLU, // brb_Khmr_KH
+    0x8A2147594C61746ELLU, // brc_Latn_GY
+    0x8E214E5044657661LLU, // brd_Deva_NP
+    0x962143444C61746ELLU, // brf_Latn_CD
+    0x9A21424F4C61746ELLU, // brg_Latn_BO
     0x9E21504B41726162LLU, // brh_Arab_PK
+    0xA221434D4C61746ELLU, // bri_Latn_CM
+    0xA62156554C61746ELLU, // brj_Latn_VU
+    0xAA21534441726162LLU, // brk_Arab_SD
+    0xAE2142574C61746ELLU, // brl_Latn_BW
+    0xB22143444C61746ELLU, // brm_Latn_CD
+    0xB62143524C61746ELLU, // brn_Latn_CR
+    0xBA21425454696274LLU, // bro_Tibt_BT
+    0xBE2149444C61746ELLU, // brp_Latn_ID
+    0xC22150474C61746ELLU, // brq_Latn_PG
+    0xC62153424C61746ELLU, // brr_Latn_SB
+    0xCA2149444C61746ELLU, // brs_Latn_ID
+    0xCE214E474C61746ELLU, // brt_Latn_NG
+    0xD221564E4C61746ELLU, // bru_Latn_VN
+    0xD6214C414C616F6FLLU, // brv_Laoo_LA
+    0xDA21494E4B6E6461LLU, // brw_Knda_IN
     0xDE21494E44657661LLU, // brx_Deva_IN
+    0xE22150474C61746ELLU, // bry_Latn_PG
+    0xE62150474C61746ELLU, // brz_Latn_PG
     0x627342414C61746ELLU, // bs_Latn_BA
+    0x824149444C61746ELLU, // bsa_Latn_ID
+    0x8641424E4C61746ELLU, // bsb_Latn_BN
+    0x8A41534E4C61746ELLU, // bsc_Latn_SN
+    0x9241434D4C61746ELLU, // bse_Latn_CM
+    0x96414E474C61746ELLU, // bsf_Latn_NG
+    0x9E41414641726162LLU, // bsh_Arab_AF
+    0xA241434D4C61746ELLU, // bsi_Latn_CM
+    0xA6414E474C61746ELLU, // bsj_Latn_NG
+    0xAA41504B41726162LLU, // bsk_Arab_PK
+    0xAE414E474C61746ELLU, // bsl_Latn_NG
+    0xB24149444C61746ELLU, // bsm_Latn_ID
+    0xB641434F4C61746ELLU, // bsn_Latn_CO
+    0xBA4154444C61746ELLU, // bso_Latn_TD
+    0xBE41474E4C61746ELLU, // bsp_Latn_GN
     0xC2414C5242617373LLU, // bsq_Bass_LR
+    0xC6414E474C61746ELLU, // bsr_Latn_NG
     0xCA41434D4C61746ELLU, // bss_Latn_CM
+    0xCE41455445746869LLU, // bst_Ethi_ET
+    0xD24149444C61746ELLU, // bsu_Latn_ID
+    0xD641474E4C61746ELLU, // bsv_Latn_GN
+    0xDA4145544C61746ELLU, // bsw_Latn_ET
+    0xDE414E474C61746ELLU, // bsx_Latn_NG
+    0xE2414D594C61746ELLU, // bsy_Latn_MY
+    0x82614E474C61746ELLU, // bta_Latn_NG
+    0x8A61434D4C61746ELLU, // btc_Latn_CM
+    0x8E6149444261746BLLU, // btd_Batk_ID
+    0x92614E474C61746ELLU, // bte_Latn_NG
+    0x966154444C61746ELLU, // btf_Latn_TD
+    0x9A6143494C61746ELLU, // btg_Latn_CI
+    0x9E614D594C61746ELLU, // bth_Latn_MY
+    0xA26149444C61746ELLU, // bti_Latn_ID
+    0xA66149444C61746ELLU, // btj_Latn_ID
+    0xB26149444261746BLLU, // btm_Batk_ID
+    0xB66150484C61746ELLU, // btn_Latn_PH
     0xBA6150484C61746ELLU, // bto_Latn_PH
+    0xBE6150474C61746ELLU, // btp_Latn_PG
+    0xC2614D594C61746ELLU, // btq_Latn_MY
+    0xC66156554C61746ELLU, // btr_Latn_VU
+    0xCA6149444C61746ELLU, // bts_Latn_ID
+    0xCE614E474C61746ELLU, // btt_Latn_NG
+    0xD2614E474C61746ELLU, // btu_Latn_NG
     0xD661504B44657661LLU, // btv_Deva_PK
+    0xDA6150484C61746ELLU, // btw_Latn_PH
+    0xDE6149444C61746ELLU, // btx_Latn_ID
+    0xE26149444C61746ELLU, // bty_Latn_ID
+    0xE66149444C61746ELLU, // btz_Latn_ID
     0x828152554379726CLLU, // bua_Cyrl_RU
+    0x868154444C61746ELLU, // bub_Latn_TD
     0x8A8159544C61746ELLU, // buc_Latn_YT
+    0x8E8154474C61746ELLU, // bud_Latn_TG
+    0x928143414C61746ELLU, // bue_Latn_CA
+    0x968143444C61746ELLU, // buf_Latn_CD
     0x9A8149444C61746ELLU, // bug_Latn_ID
+    0x9E81434E4C61746ELLU, // buh_Latn_CN
+    0xA28143474C61746ELLU, // bui_Latn_CG
+    0xA6814E474C61746ELLU, // buj_Latn_NG
+    0xAA8150474C61746ELLU, // buk_Latn_PG
     0xB281434D4C61746ELLU, // bum_Latn_CM
+    0xB681534C4C61746ELLU, // bun_Latn_SL
+    0xBA8150474C61746ELLU, // buo_Latn_PG
+    0xBE8149444C61746ELLU, // bup_Latn_ID
+    0xC28150474C61746ELLU, // buq_Latn_PG
+    0xCA814E474C61746ELLU, // bus_Latn_NG
+    0xCE8150474C61746ELLU, // but_Latn_PG
+    0xD28143444C61746ELLU, // buu_Latn_CD
+    0xD68150474C61746ELLU, // buv_Latn_PG
+    0xDA8147414C61746ELLU, // buw_Latn_GA
+    0xDE814E474C61746ELLU, // bux_Latn_NG
+    0xE281534C4C61746ELLU, // buy_Latn_SL
+    0xE6814E474C61746ELLU, // buz_Latn_NG
+    0x82A154444C61746ELLU, // bva_Latn_TD
     0x86A147514C61746ELLU, // bvb_Latn_GQ
+    0x8AA153424C61746ELLU, // bvc_Latn_SB
+    0x8EA153424C61746ELLU, // bvd_Latn_SB
+    0x92A149444C61746ELLU, // bve_Latn_ID
+    0x96A154444C61746ELLU, // bvf_Latn_TD
+    0x9AA1434D4C61746ELLU, // bvg_Latn_CM
+    0x9EA14E474C61746ELLU, // bvh_Latn_NG
+    0xA2A153534C61746ELLU, // bvi_Latn_SS
+    0xA6A14E474C61746ELLU, // bvj_Latn_NG
+    0xAAA149444C61746ELLU, // bvk_Latn_ID
+    0xB2A1434D4C61746ELLU, // bvm_Latn_CM
+    0xB6A150474C61746ELLU, // bvn_Latn_PG
+    0xBAA154444C61746ELLU, // bvo_Latn_TD
+    0xC2A143464C61746ELLU, // bvq_Latn_CF
+    0xC6A141554C61746ELLU, // bvr_Latn_AU
+    0xCEA149444C61746ELLU, // bvt_Latn_ID
+    0xD2A149444C61746ELLU, // bvu_Latn_ID
+    0xD6A156454C61746ELLU, // bvv_Latn_VE
+    0xDAA14E474C61746ELLU, // bvw_Latn_NG
+    0xDEA143474C61746ELLU, // bvx_Latn_CG
+    0xE2A150484C61746ELLU, // bvy_Latn_PH
+    0xE6A149444C61746ELLU, // bvz_Latn_ID
+    0x82C14E434C61746ELLU, // bwa_Latn_NC
+    0x86C1464A4C61746ELLU, // bwb_Latn_FJ
+    0x8AC15A4D4C61746ELLU, // bwc_Latn_ZM
+    0x8EC150474C61746ELLU, // bwd_Latn_PG
+    0x92C14D4D4D796D72LLU, // bwe_Mymr_MM
+    0x96C150474C61746ELLU, // bwf_Latn_PG
+    0x9AC14D5A4C61746ELLU, // bwg_Latn_MZ
+    0x9EC1434D4C61746ELLU, // bwh_Latn_CM
+    0xA2C156454C61746ELLU, // bwi_Latn_VE
+    0xA6C142464C61746ELLU, // bwj_Latn_BF
+    0xAAC150474C61746ELLU, // bwk_Latn_PG
+    0xAEC143444C61746ELLU, // bwl_Latn_CD
+    0xB2C150474C61746ELLU, // bwm_Latn_PG
+    0xBAC145544C61746ELLU, // bwo_Latn_ET
+    0xBEC149444C61746ELLU, // bwp_Latn_ID
+    0xC2C142464C61746ELLU, // bwq_Latn_BF
+    0xC6C14E474C61746ELLU, // bwr_Latn_NG
+    0xCAC143444C61746ELLU, // bws_Latn_CD
+    0xCEC1434D4C61746ELLU, // bwt_Latn_CM
+    0xD2C147484C61746ELLU, // bwu_Latn_GH
+    0xDAC143444C61746ELLU, // bww_Latn_CD
+    0xDEC1434E4C61746ELLU, // bwx_Latn_CN
+    0xE2C142464C61746ELLU, // bwy_Latn_BF
+    0xE6C143474C61746ELLU, // bwz_Latn_CG
+    0x82E153424C61746ELLU, // bxa_Latn_SB
+    0x86E153534C61746ELLU, // bxb_Latn_SS
+    0x8AE147514C61746ELLU, // bxc_Latn_GQ
+    0x96E150474C61746ELLU, // bxf_Latn_PG
+    0x9AE143444C61746ELLU, // bxg_Latn_CD
+    0x9EE150474C61746ELLU, // bxh_Latn_PG
+    0xA2E141554C61746ELLU, // bxi_Latn_AU
+    0xA6E141554C61746ELLU, // bxj_Latn_AU
+    0xAEE142464C61746ELLU, // bxl_Latn_BF
+    0xB2E14D4E4379726CLLU, // bxm_Cyrl_MN
+    0xB6E141554C61746ELLU, // bxn_Latn_AU
+    0xBAE14E474C61746ELLU, // bxo_Latn_NG
+    0xBEE1434D4C61746ELLU, // bxp_Latn_CM
+    0xC2E14E474C61746ELLU, // bxq_Latn_NG
+    0xCAE1434D4C61746ELLU, // bxs_Latn_CM
+    0xD2E1434E4D6F6E67LLU, // bxu_Mong_CN
+    0xD6E154444C61746ELLU, // bxv_Latn_TD
+    0xDAE14D4C4C61746ELLU, // bxw_Latn_ML
+    0xE6E150474C61746ELLU, // bxz_Latn_PG
+    0x830150484C61746ELLU, // bya_Latn_PH
+    0x8701434D4C61746ELLU, // byb_Latn_CM
+    0x8B014E474C61746ELLU, // byc_Latn_NG
+    0x8F0149444C61746ELLU, // byd_Latn_ID
+    0x930150474C61746ELLU, // bye_Latn_PG
+    0x97014E474C61746ELLU, // byf_Latn_NG
+    0x9F014E5044657661LLU, // byh_Deva_NP
+    0xA30143444C61746ELLU, // byi_Latn_CD
+    0xA7014E474C61746ELLU, // byj_Latn_NG
+    0xAB01434E4C61746ELLU, // byk_Latn_CN
+    0xAF0149444C61746ELLU, // byl_Latn_ID
+    0xB30141554C61746ELLU, // bym_Latn_AU
     0xB701455245746869LLU, // byn_Ethi_ER
+    0xBF014E474C61746ELLU, // byp_Latn_NG
+    0xC70150474C61746ELLU, // byr_Latn_PG
+    0xCB014E474C61746ELLU, // bys_Latn_NG
     0xD701434D4C61746ELLU, // byv_Latn_CM
+    0xDB014E5044657661LLU, // byw_Deva_NP
+    0xDF0150474C61746ELLU, // byx_Latn_PG
+    0xE70150474C61746ELLU, // byz_Latn_PG
+    0x83214C524C61746ELLU, // bza_Latn_LR
+    0x872149444C61746ELLU, // bzb_Latn_ID
+    0x8B214D474C61746ELLU, // bzc_Latn_MG
+    0x8F2143524C61746ELLU, // bzd_Latn_CR
     0x93214D4C4C61746ELLU, // bze_Latn_ML
+    0x972150474C61746ELLU, // bzf_Latn_PG
+    0x9F2150474C61746ELLU, // bzh_Latn_PG
+    0xA321544854686169LLU, // bzi_Thai_TH
+    0xA721425A4C61746ELLU, // bzj_Latn_BZ
+    0xAB214E494C61746ELLU, // bzk_Latn_NI
+    0xAF2149444C61746ELLU, // bzl_Latn_ID
+    0xB32143444C61746ELLU, // bzm_Latn_CD
+    0xB72149444C61746ELLU, // bzn_Latn_ID
+    0xBB2143444C61746ELLU, // bzo_Latn_CD
+    0xBF2149444C61746ELLU, // bzp_Latn_ID
+    0xC32149444C61746ELLU, // bzq_Latn_ID
+    0xC72141554C61746ELLU, // bzr_Latn_AU
+    0xD32149444C61746ELLU, // bzu_Latn_ID
+    0xD721434D4C61746ELLU, // bzv_Latn_CM
+    0xDB214E474C61746ELLU, // bzw_Latn_NG
+    0xDF214D4C4C61746ELLU, // bzx_Latn_ML
+    0xE3214E474C61746ELLU, // bzy_Latn_NG
+    0xE7214E474C61746ELLU, // bzz_Latn_NG
     0x636145534C61746ELLU, // ca_Latn_ES
+    0x800247544C61746ELLU, // caa_Latn_GT
+    0x8402484E4C61746ELLU, // cab_Latn_HN
+    0x880247544C61746ELLU, // cac_Latn_GT
     0x8C0255534C61746ELLU, // cad_Latn_US
+    0x9002534E4C61746ELLU, // cae_Latn_SN
+    0x940243414C61746ELLU, // caf_Latn_CA
+    0x980250594C61746ELLU, // cag_Latn_PY
+    0x9C0250454C61746ELLU, // cah_Latn_PE
+    0xA402424F4C61746ELLU, // caj_Latn_BO
+    0xA80247544C61746ELLU, // cak_Latn_GT
+    0xAC024D504C61746ELLU, // cal_Latn_MP
+    0xB0024E434C61746ELLU, // cam_Latn_NC
+    0xB40250474C61746ELLU, // can_Latn_PG
+    0xB802424F4C61746ELLU, // cao_Latn_BO
+    0xBC02424F4C61746ELLU, // cap_Latn_BO
+    0xC002494E4C61746ELLU, // caq_Latn_IN
+    0xC40256454C61746ELLU, // car_Latn_VE
+    0xC802424F4C61746ELLU, // cas_Latn_BO
+    0xD402424F4C61746ELLU, // cav_Latn_BO
+    0xD802424F4C61746ELLU, // caw_Latn_BO
+    0xDC02424F4C61746ELLU, // cax_Latn_BO
+    0xE00243414C61746ELLU, // cay_Latn_CA
+    0xE402424F4C61746ELLU, // caz_Latn_BO
+    0x8422434F4C61746ELLU, // cbb_Latn_CO
+    0x8822434F4C61746ELLU, // cbc_Latn_CO
+    0x8C22434F4C61746ELLU, // cbd_Latn_CO
+    0x9822434F4C61746ELLU, // cbg_Latn_CO
+    0xA02245434C61746ELLU, // cbi_Latn_EC
+    0xA422424A4C61746ELLU, // cbj_Latn_BJ
+    0xA82250484C61746ELLU, // cbk_Latn_PH
+    0xAC224D4D4C61746ELLU, // cbl_Latn_MM
+    0xB422544854686169LLU, // cbn_Thai_TH
+    0xB8224E474C61746ELLU, // cbo_Latn_NG
+    0xC0224E474C61746ELLU, // cbq_Latn_NG
+    0xC42250454C61746ELLU, // cbr_Latn_PE
+    0xC82250454C61746ELLU, // cbs_Latn_PE
+    0xCC2250454C61746ELLU, // cbt_Latn_PE
+    0xD02250454C61746ELLU, // cbu_Latn_PE
+    0xD422434F4C61746ELLU, // cbv_Latn_CO
+    0xD82250484C61746ELLU, // cbw_Latn_PH
+    0xE022434F4C61746ELLU, // cby_Latn_CO
+    0x884250454C61746ELLU, // ccc_Latn_PE
+    0x8C4242524C61746ELLU, // ccd_Latn_BR
+    0x90424D5A4C61746ELLU, // cce_Latn_MZ
+    0x98424E474C61746ELLU, // ccg_Latn_NG
     0x9C424E474C61746ELLU, // cch_Latn_NG
+    0xA44247574C61746ELLU, // ccj_Latn_GW
+    0xAC42545A4C61746ELLU, // ccl_Latn_TZ
+    0xB0424D594C61746ELLU, // ccm_Latn_MY
+    0xB8424D584C61746ELLU, // cco_Latn_MX
     0xBC42424443616B6DLLU, // ccp_Cakm_BD
+    0xC44253564C61746ELLU, // ccr_Latn_SV
+    0x9062494E54656C75LLU, // cde_Telu_IN
+    0x9462494E4C61746ELLU, // cdf_Latn_IN
+    0x9C62494E44657661LLU, // cdh_Deva_IN
+    0xA062494E47756A72LLU, // cdi_Gujr_IN
+    0xA462494E44657661LLU, // cdj_Deva_IN
+    0xB0624E5044657661LLU, // cdm_Deva_NP
+    0xB862434E48616E73LLU, // cdo_Hans_CN
+    0xC4624E474C61746ELLU, // cdr_Latn_NG
+    0xE462494E42656E67LLU, // cdz_Beng_IN
     0x636552554379726CLLU, // ce_Cyrl_RU
+    0x808255534C61746ELLU, // cea_Latn_US
     0x848250484C61746ELLU, // ceb_Latn_PH
+    0x988250594C61746ELLU, // ceg_Latn_PY
+    0xA8824D4D4C61746ELLU, // cek_Latn_MM
+    0xB4824E474C61746ELLU, // cen_Latn_NG
+    0xCC824E474C61746ELLU, // cet_Latn_NG
+    0xE0824D4D4C61746ELLU, // cey_Latn_MM
+    0x80A24E474C61746ELLU, // cfa_Latn_NG
+    0x8CA24E474C61746ELLU, // cfd_Latn_NG
+    0x98A24E474C61746ELLU, // cfg_Latn_NG
+    0xB0A24D4D4C61746ELLU, // cfm_Latn_MM
+    0x80C250474C61746ELLU, // cga_Latn_PG
+    0x88C250484C61746ELLU, // cgc_Latn_PH
     0x98C255474C61746ELLU, // cgg_Latn_UG
+    0xA8C2425454696274LLU, // cgk_Tibt_BT
     0x636847554C61746ELLU, // ch_Latn_GU
+    0x84E2434F4C61746ELLU, // chb_Latn_CO
+    0x8CE24D584C61746ELLU, // chd_Latn_MX
+    0x94E24D584C61746ELLU, // chf_Latn_MX
+    0x98E2544D41726162LLU, // chg_Arab_TM
+    0x9CE255534C61746ELLU, // chh_Latn_US
+    0xA4E24D584C61746ELLU, // chj_Latn_MX
     0xA8E2464D4C61746ELLU, // chk_Latn_FM
+    0xACE255534C61746ELLU, // chl_Latn_US
     0xB0E252554379726CLLU, // chm_Cyrl_RU
+    0xB4E255534C61746ELLU, // chn_Latn_US
     0xB8E255534C61746ELLU, // cho_Latn_US
     0xBCE243414C61746ELLU, // chp_Latn_CA
+    0xC0E24D584C61746ELLU, // chq_Latn_MX
     0xC4E2555343686572LLU, // chr_Cher_US
+    0xCCE250454C61746ELLU, // cht_Latn_PE
+    0xD8E24D5A4C61746ELLU, // chw_Latn_MZ
+    0xDCE24E5044657661LLU, // chx_Deva_NP
+    0xE0E255534C61746ELLU, // chy_Latn_US
+    0xE4E24D584C61746ELLU, // chz_Latn_MX
+    0x810249444C61746ELLU, // cia_Latn_ID
+    0x8502424A4C61746ELLU, // cib_Latn_BJ
     0x890255534C61746ELLU, // cic_Latn_US
+    0x91024E474C61746ELLU, // cie_Latn_NG
+    0x9D02494E44657661LLU, // cih_Deva_IN
+    0xB10249544C61746ELLU, // cim_Latn_IT
+    0xB50242524C61746ELLU, // cin_Latn_BR
+    0xBD024D584C61746ELLU, // cip_Latn_MX
+    0xC5024E434C61746ELLU, // cir_Latn_NC
+    0xD90255534C61746ELLU, // ciw_Latn_US
+    0xE10256454C61746ELLU, // ciy_Latn_VE
     0x81224B4841726162LLU, // cja_Arab_KH
+    0x9122564E4C61746ELLU, // cje_Latn_VN
+    0x9D2255534C61746ELLU, // cjh_Latn_US
+    0xA12252554379726CLLU, // cji_Cyrl_RU
+    0xA922414F4C61746ELLU, // cjk_Latn_AO
     0xB122564E4368616DLLU, // cjm_Cham_VN
+    0xB52250474C61746ELLU, // cjn_Latn_PG
+    0xB92250454C61746ELLU, // cjo_Latn_PE
+    0xBD2243524C61746ELLU, // cjp_Latn_CR
+    0xC92252554C61746ELLU, // cjs_Latn_RU
+    0xD52250474C61746ELLU, // cjv_Latn_PG
+    0xE122434E48616E73LLU, // cjy_Hans_CN
     0x8542495141726162LLU, // ckb_Arab_IQ
+    0xAD424E474C61746ELLU, // ckl_Latn_NG
+    0xB14248524C61746ELLU, // ckm_Latn_HR
+    0xB5424D4D4C61746ELLU, // ckn_Latn_MM
+    0xB94247484C61746ELLU, // cko_Latn_GH
+    0xC14254444C61746ELLU, // ckq_Latn_TD
+    0xC54250474C61746ELLU, // ckr_Latn_PG
+    0xC9424E434C61746ELLU, // cks_Latn_NC
+    0xCD4252554379726CLLU, // ckt_Cyrl_RU
+    0xD14255534C61746ELLU, // cku_Latn_US
+    0xD54254574C61746ELLU, // ckv_Latn_TW
+    0xDD42434D4C61746ELLU, // ckx_Latn_CM
+    0xE1424E474C61746ELLU, // cky_Latn_NG
+    0xE54247544C61746ELLU, // ckz_Latn_GT
+    0x81624E474C61746ELLU, // cla_Latn_NG
     0x896243414C61746ELLU, // clc_Latn_CA
+    0x91624D584C61746ELLU, // cle_Latn_MX
+    0x9D62504B41726162LLU, // clh_Arab_PK
+    0xA16247484C61746ELLU, // cli_Latn_GH
+    0xA5624D4D4C61746ELLU, // clj_Latn_MM
+    0xA962494E4C61746ELLU, // clk_Latn_IN
+    0xAD6247484C61746ELLU, // cll_Latn_GH
+    0xB16255534C61746ELLU, // clm_Latn_US
+    0xB9624D584C61746ELLU, // clo_Latn_MX
+    0xCD624D4D4C61746ELLU, // clt_Latn_MM
+    0xD16250484C61746ELLU, // clu_Latn_PH
+    0xD96252554379726CLLU, // clw_Cyrl_RU
+    0xE1624D584C61746ELLU, // cly_Latn_MX
+    0x8182564E4C61746ELLU, // cma_Latn_VN
+    0x918242464C61746ELLU, // cme_Latn_BF
     0x99824D4E536F796FLLU, // cmg_Soyo_MN
+    0xA182434F4C61746ELLU, // cmi_Latn_CO
+    0xAD8249444C61746ELLU, // cml_Latn_ID
+    0xB982564E4C61746ELLU, // cmo_Latn_VN
+    0xC5824D4D4C61746ELLU, // cmr_Latn_MM
+    0xC98249544C61746ELLU, // cms_Latn_IT
+    0xCD825A414C61746ELLU, // cmt_Latn_ZA
+    0x81A2494E54696274LLU, // cna_Tibt_IN
+    0x85A24D4D4C61746ELLU, // cnb_Latn_MM
+    0x89A2564E4C61746ELLU, // cnc_Latn_VN
+    0x99A2434E4C61746ELLU, // cng_Latn_CN
+    0x9DA24D4D4C61746ELLU, // cnh_Latn_MM
+    0xA1A250454C61746ELLU, // cni_Latn_PE
+    0xA9A24D4D4C61746ELLU, // cnk_Latn_MM
+    0xADA24D584C61746ELLU, // cnl_Latn_MX
+    0xBDA2434E48616E73LLU, // cnp_Hans_CN
+    0xC1A2434D4C61746ELLU, // cnq_Latn_CM
+    0xC9A249444C61746ELLU, // cns_Latn_ID
+    0xCDA24D584C61746ELLU, // cnt_Latn_MX
+    0xD9A24D4D4C61746ELLU, // cnw_Latn_MM
+    0xDDA247424C61746ELLU, // cnx_Latn_GB
     0x636F46524C61746ELLU, // co_Latn_FR
+    0x81C241554C61746ELLU, // coa_Latn_AU
+    0x85C24D584C61746ELLU, // cob_Latn_MX
+    0x89C24D584C61746ELLU, // coc_Latn_MX
+    0x8DC250454C61746ELLU, // cod_Latn_PE
+    0x91C2434F4C61746ELLU, // coe_Latn_CO
+    0x95C245434C61746ELLU, // cof_Latn_EC
+    0x99C2544854686169LLU, // cog_Thai_TH
+    0x9DC24B454C61746ELLU, // coh_Latn_KE
+    0xA5C24D584C61746ELLU, // coj_Latn_MX
+    0xA9C24D584C61746ELLU, // cok_Latn_MX
+    0xADC255534C61746ELLU, // col_Latn_US
+    0xB1C255534C61746ELLU, // com_Latn_US
+    0xB9C243414C61746ELLU, // coo_Latn_CA
     0xBDC24547436F7074LLU, // cop_Copt_EG
+    0xC1C255534C61746ELLU, // coq_Latn_US
+    0xCDC250454C61746ELLU, // cot_Latn_PE
+    0xD1C2534E4C61746ELLU, // cou_Latn_SN
+    0xDDC250454C61746ELLU, // cox_Latn_PE
+    0xE5C24D584C61746ELLU, // coz_Latn_MX
+    0x81E24D584C61746ELLU, // cpa_Latn_MX
+    0x85E250454C61746ELLU, // cpb_Latn_PE
+    0x89E250454C61746ELLU, // cpc_Latn_PE
+    0x99E247524772656BLLU, // cpg_Grek_GR
+    0xA1E24E524C61746ELLU, // cpi_Latn_NR
+    0xB5E247484C61746ELLU, // cpn_Latn_GH
+    0xB9E242464C61746ELLU, // cpo_Latn_BF
     0xC9E250484C61746ELLU, // cps_Latn_PH
+    0xD1E250454C61746ELLU, // cpu_Latn_PE
+    0xDDE2434E4C61746ELLU, // cpx_Latn_CN
+    0xE1E250454C61746ELLU, // cpy_Latn_PE
+    0x8E02434E4C61746ELLU, // cqd_Latn_CN
     0x6372434143616E73LLU, // cr_Cans_CA
+    0x822245544C61746ELLU, // cra_Latn_ET
+    0x862256434C61746ELLU, // crb_Latn_VC
+    0x8A2256554C61746ELLU, // crc_Latn_VU
+    0x8E2255534C61746ELLU, // crd_Latn_US
+    0x9622434F4C61746ELLU, // crf_Latn_CO
     0x9A2243414C61746ELLU, // crg_Latn_CA
     0x9E2255414379726CLLU, // crh_Cyrl_UA
+    0xA22253544C61746ELLU, // cri_Latn_ST
+    0xA622434143616E73LLU, // crj_Cans_CA
     0xAA22434143616E73LLU, // crk_Cans_CA
     0xAE22434143616E73LLU, // crl_Cans_CA
+    0xB222434143616E73LLU, // crm_Cans_CA
+    0xB6224D584C61746ELLU, // crn_Latn_MX
+    0xBA2255534C61746ELLU, // cro_Latn_US
+    0xC22241524C61746ELLU, // crq_Latn_AR
     0xCA2253434C61746ELLU, // crs_Latn_SC
+    0xCE2241524C61746ELLU, // crt_Latn_AR
+    0xD622494E4C61746ELLU, // crv_Latn_IN
+    0xDA22564E4C61746ELLU, // crw_Latn_VN
+    0xDE2243414C61746ELLU, // crx_Latn_CA
+    0xE2224E474C61746ELLU, // cry_Latn_NG
+    0xE62255534C61746ELLU, // crz_Latn_US
     0x6373435A4C61746ELLU, // cs_Latn_CZ
+    0x82424D584C61746ELLU, // csa_Latn_MX
     0x8642504C4C61746ELLU, // csb_Latn_PL
+    0x9E424D4D4D796D72LLU, // csh_Mymr_MM
+    0xA6424D4D4C61746ELLU, // csj_Latn_MM
+    0xAA42534E4C61746ELLU, // csk_Latn_SN
+    0xB24255534C61746ELLU, // csm_Latn_US
+    0xBA424D584C61746ELLU, // cso_Latn_MX
+    0xBE42434E48616E73LLU, // csp_Hans_CN
+    0xCA4255534C61746ELLU, // css_Latn_US
+    0xCE4255534C61746ELLU, // cst_Latn_US
+    0xD6424D4D4C61746ELLU, // csv_Latn_MM
     0xDA42434143616E73LLU, // csw_Cans_CA
+    0xE2424D4D4C61746ELLU, // csy_Latn_MM
+    0xE64255534C61746ELLU, // csz_Latn_US
+    0x82624D584C61746ELLU, // cta_Latn_MX
+    0x8A6255534C61746ELLU, // ctc_Latn_US
     0x8E624D4D50617563LLU, // ctd_Pauc_MM
+    0x92624D584C61746ELLU, // cte_Latn_MX
+    0x9A62424442656E67LLU, // ctg_Beng_BD
+    0x9E624D4D4C61746ELLU, // cth_Latn_MM
+    0xAE624D584C61746ELLU, // ctl_Latn_MX
+    0xB26255534C61746ELLU, // ctm_Latn_US
+    0xB6624E5044657661LLU, // ctn_Deva_NP
+    0xBA62434F4C61746ELLU, // cto_Latn_CO
+    0xBE624D584C61746ELLU, // ctp_Latn_MX
+    0xCA6250484C61746ELLU, // cts_Latn_PH
+    0xCE62494E54616D6CLLU, // ctt_Taml_IN
+    0xD2624D584C61746ELLU, // ctu_Latn_MX
+    0xE262494E54616D6CLLU, // cty_Taml_IN
+    0xE6624D584C61746ELLU, // ctz_Latn_MX
     0x637552554379726CLLU, // cu_Cyrl_RU
     0x63754247476C6167LLU, // cu_Glag_BG
+    0x8282564E4C61746ELLU, // cua_Latn_VN
+    0x8682434F4C61746ELLU, // cub_Latn_CO
+    0x8A824D584C61746ELLU, // cuc_Latn_MX
+    0x9E824B454C61746ELLU, // cuh_Latn_KE
+    0xA282434F4C61746ELLU, // cui_Latn_CO
+    0xA68250454C61746ELLU, // cuj_Latn_PE
+    0xAA8250414C61746ELLU, // cuk_Latn_PA
+    0xAE8242524C61746ELLU, // cul_Latn_BR
+    0xBA8256454C61746ELLU, // cuo_Latn_VE
+    0xBE8255534C61746ELLU, // cup_Latn_US
+    0xCE824D584C61746ELLU, // cut_Latn_MX
+    0xD282434E4C616E61LLU, // cuu_Lana_CN
+    0xD682434D4C61746ELLU, // cuv_Latn_CM
+    0xDE824D584C61746ELLU, // cux_Latn_MX
+    0xE2824D584C61746ELLU, // cuy_Latn_MX
     0x637652554379726CLLU, // cv_Cyrl_RU
+    0x9AA2494E4C61746ELLU, // cvg_Latn_IN
+    0xB6A24D584C61746ELLU, // cvn_Latn_MX
+    0x82C2545A4C61746ELLU, // cwa_Latn_TZ
+    0x86C24D5A4C61746ELLU, // cwb_Latn_MZ
+    0x92C2545A4C61746ELLU, // cwe_Latn_TZ
+    0x9AC24D594C61746ELLU, // cwg_Latn_MY
+    0xCEC2534E4C61746ELLU, // cwt_Latn_SN
+    0x9EE24E474C61746ELLU, // cxh_Latn_NG
     0x637947424C61746ELLU, // cy_Latn_GB
+    0x83024D584C61746ELLU, // cya_Latn_MX
+    0x8702424F4C61746ELLU, // cyb_Latn_BO
+    0xBB0250484C61746ELLU, // cyo_Latn_PH
+    0x9F22434E48616E73LLU, // czh_Hans_CN
+    0xAB22435A48656272LLU, // czk_Hebr_CZ
+    0xB7224D584C61746ELLU, // czn_Latn_MX
+    0xCF224D4D4C61746ELLU, // czt_Latn_MM
     0x6461444B4C61746ELLU, // da_Latn_DK
-    0x940343494C61746ELLU, // daf_Latn_CI
+    0x800354444C61746ELLU, // daa_Latn_TD
+    0x880350474C61746ELLU, // dac_Latn_PG
+    0x8C0350474C61746ELLU, // dad_Latn_PG
+    0x9003434D4C61746ELLU, // dae_Latn_CM
+    0x980347484C61746ELLU, // dag_Latn_GH
+    0x9C0350474C61746ELLU, // dah_Latn_PG
+    0xA00354444C61746ELLU, // dai_Latn_TD
+    0xA40353444C61746ELLU, // daj_Latn_SD
     0xA80355534C61746ELLU, // dak_Latn_US
+    0xAC034B454C61746ELLU, // dal_Latn_KE
+    0xB0034E474C61746ELLU, // dam_Latn_NG
+    0xB8034D4D4C61746ELLU, // dao_Latn_MM
+    0xC003494E44657661LLU, // daq_Deva_IN
     0xC40352554379726CLLU, // dar_Cyrl_RU
+    0xC80343494C61746ELLU, // das_Latn_CI
+    0xD00354444C61746ELLU, // dau_Latn_TD
     0xD4034B454C61746ELLU, // dav_Latn_KE
+    0xD80350484C61746ELLU, // daw_Latn_PH
+    0xDC0341554C61746ELLU, // dax_Latn_AU
+    0xE40349444C61746ELLU, // daz_Latn_ID
+    0x80234D4C4C61746ELLU, // dba_Latn_ML
+    0x84234E474C61746ELLU, // dbb_Latn_NG
+    0x8C234E474C61746ELLU, // dbd_Latn_NG
+    0x902349444C61746ELLU, // dbe_Latn_ID
+    0x942349444C61746ELLU, // dbf_Latn_ID
+    0x98234D4C4C61746ELLU, // dbg_Latn_ML
+    0xA0234E474C61746ELLU, // dbi_Latn_NG
+    0xA4234D594C61746ELLU, // dbj_Latn_MY
+    0xAC2341554C61746ELLU, // dbl_Latn_AU
+    0xB0234E474C61746ELLU, // dbm_Latn_NG
+    0xB42349444C61746ELLU, // dbn_Latn_ID
+    0xB8234E474C61746ELLU, // dbo_Latn_NG
+    0xBC234E474C61746ELLU, // dbp_Latn_NG
+    0xC023434D4C61746ELLU, // dbq_Latn_CM
+    0xCC234D4C4C61746ELLU, // dbt_Latn_ML
+    0xD0234D4C4C61746ELLU, // dbu_Latn_ML
+    0xD4234E474C61746ELLU, // dbv_Latn_NG
+    0xD8234D4C4C61746ELLU, // dbw_Latn_ML
+    0xE02350474C61746ELLU, // dby_Latn_PG
     0x8843494E41726162LLU, // dcc_Arab_IN
+    0xC44356494C61746ELLU, // dcr_Latn_VI
+    0x806341554C61746ELLU, // dda_Latn_AU
+    0x8C6353534C61746ELLU, // ddd_Latn_SS
+    0x906343474C61746ELLU, // dde_Latn_CG
+    0x9863544C4C61746ELLU, // ddg_Latn_TL
+    0xA06350474C61746ELLU, // ddi_Latn_PG
+    0xA46341554C61746ELLU, // ddj_Latn_AU
+    0xB463424A4C61746ELLU, // ddn_Latn_BJ
+    0xB86352554379726CLLU, // ddo_Cyrl_RU
+    0xC46341554C61746ELLU, // ddr_Latn_AU
+    0xC8634D4C4C61746ELLU, // dds_Latn_ML
+    0xD86349444C61746ELLU, // ddw_Latn_ID
     0x646544454C61746ELLU, // de_Latn_DE
+    0x888353444C61746ELLU, // dec_Latn_SD
+    0x8C8350474C61746ELLU, // ded_Latn_PG
+    0x90834C524C61746ELLU, // dee_Latn_LR
+    0x9483495241726162LLU, // def_Arab_IR
+    0x98834E474C61746ELLU, // deg_Latn_NG
+    0x9C83504B41726162LLU, // deh_Arab_PK
+    0xA08349444C61746ELLU, // dei_Latn_ID
+    0xA883434D4C61746ELLU, // dek_Latn_CM
+    0xAC8355534C61746ELLU, // del_Latn_US
+    0xB08349444C61746ELLU, // dem_Latn_ID
     0xB48343414C61746ELLU, // den_Latn_CA
+    0xC08343464C61746ELLU, // deq_Latn_CF
+    0xC483494E42656E67LLU, // der_Beng_IN
+    0xC88342524C61746ELLU, // des_Latn_BR
+    0xD48350474C61746ELLU, // dev_Latn_PG
+    0xE48343444C61746ELLU, // dez_Latn_CD
+    0x80C347484C61746ELLU, // dga_Latn_GH
+    0x84C34D4C4C61746ELLU, // dgb_Latn_ML
+    0x88C350484C61746ELLU, // dgc_Latn_PH
+    0x8CC342464C61746ELLU, // dgd_Latn_BF
+    0x90C350474C61746ELLU, // dge_Latn_PG
+    0x98C350474C61746ELLU, // dgg_Latn_PG
+    0x9CC34E474C61746ELLU, // dgh_Latn_NG
+    0xA0C342464C61746ELLU, // dgi_Latn_BF
+    0xA8C343464C61746ELLU, // dgk_Latn_CF
+    0xACC3534441726162LLU, // dgl_Arab_SD
+    0xB4C341554C61746ELLU, // dgn_Latn_AU
     0xC4C343414C61746ELLU, // dgr_Latn_CA
+    0xC8C342464C61746ELLU, // dgs_Latn_BF
+    0xCCC341554C61746ELLU, // dgt_Latn_AU
+    0xD8C341554C61746ELLU, // dgw_Latn_AU
+    0xDCC350474C61746ELLU, // dgx_Latn_PG
+    0xE4C350474C61746ELLU, // dgz_Latn_PG
+    0x98E341554C61746ELLU, // dhg_Latn_AU
+    0xA0E34E5044657661LLU, // dhi_Deva_NP
+    0xACE341554C61746ELLU, // dhl_Latn_AU
+    0xB0E3414F4C61746ELLU, // dhm_Latn_AO
+    0xB4E3494E47756A72LLU, // dhn_Gujr_IN
+    0xB8E3494E44657661LLU, // dho_Deva_IN
+    0xC4E341554C61746ELLU, // dhr_Latn_AU
+    0xC8E3545A4C61746ELLU, // dhs_Latn_TZ
+    0xD0E341554C61746ELLU, // dhu_Latn_AU
+    0xD4E34E434C61746ELLU, // dhv_Latn_NC
+    0xD8E34E5044657661LLU, // dhw_Deva_NP
+    0xDCE341554C61746ELLU, // dhx_Latn_AU
+    0x810350474C61746ELLU, // dia_Latn_PG
+    0x850353534C61746ELLU, // dib_Latn_SS
+    0x890343494C61746ELLU, // dic_Latn_CI
+    0x8D0353534C61746ELLU, // did_Latn_SS
+    0x950341554C61746ELLU, // dif_Latn_AU
+    0x99034B454C61746ELLU, // dig_Latn_KE
+    0x9D034D584C61746ELLU, // dih_Latn_MX
+    0xA103434D4C61746ELLU, // dii_Latn_CM
+    0xA50349444C61746ELLU, // dij_Latn_ID
+    0xAD0353444C61746ELLU, // dil_Latn_SD
+    0xB50353534C61746ELLU, // din_Latn_SS
+    0xB9034E474C61746ELLU, // dio_Latn_NG
+    0xBD0353534C61746ELLU, // dip_Latn_SS
+    0xC5034E474C61746ELLU, // dir_Latn_NG
+    0xC903494E4C61746ELLU, // dis_Latn_IN
+    0xD1034E414C61746ELLU, // diu_Latn_NA
+    0xD90353534C61746ELLU, // diw_Latn_SS
+    0xDD0356554C61746ELLU, // dix_Latn_VU
+    0xE10349444C61746ELLU, // diy_Latn_ID
+    0xE50343444C61746ELLU, // diz_Latn_CD
+    0x812341554C61746ELLU, // dja_Latn_AU
+    0x852341554C61746ELLU, // djb_Latn_AU
+    0x892354444C61746ELLU, // djc_Latn_TD
+    0x8D2341554C61746ELLU, // djd_Latn_AU
     0x91234E454C61746ELLU, // dje_Latn_NE
+    0x952341554C61746ELLU, // djf_Latn_AU
+    0xA12341554C61746ELLU, // dji_Latn_AU
+    0xA52341554C61746ELLU, // djj_Latn_AU
+    0xA92353524C61746ELLU, // djk_Latn_SR
+    0xB1234D4C4C61746ELLU, // djm_Latn_ML
+    0xB52341554C61746ELLU, // djn_Latn_AU
+    0xB92349444C61746ELLU, // djo_Latn_ID
+    0xC52341554C61746ELLU, // djr_Latn_AU
+    0xD12350474C61746ELLU, // dju_Latn_PG
+    0xD92341554C61746ELLU, // djw_Latn_AU
+    0x8143425454696274LLU, // dka_Tibt_BT
+    0x99434E474C61746ELLU, // dkg_Latn_NG
+    0xA94349444C61746ELLU, // dkk_Latn_ID
+    0xC5434D594C61746ELLU, // dkr_Latn_MY
+    0xC94353534C61746ELLU, // dks_Latn_SS
+    0xDD43434D4C61746ELLU, // dkx_Latn_CM
+    0x996352554379726CLLU, // dlg_Cyrl_RU
+    0xB16348524C61746ELLU, // dlm_Latn_HR
+    0xB563494E4C61746ELLU, // dln_Latn_IN
+    0x818347414C61746ELLU, // dma_Latn_GA
+    0x85834D4C4C61746ELLU, // dmb_Latn_ML
+    0x898350474C61746ELLU, // dmc_Latn_PG
+    0x8D8341554C61746ELLU, // dmd_Latn_AU
+    0x9183434D4C61746ELLU, // dme_Latn_CM
     0x95834E474D656466LLU, // dmf_Medf_NG
+    0x99834D594C61746ELLU, // dmg_Latn_MY
+    0xA983504B41726162LLU, // dmk_Arab_PK
+    0xAD83504B41726162LLU, // dml_Arab_PK
+    0xB183434D4C61746ELLU, // dmm_Latn_CM
+    0xB983434D4C61746ELLU, // dmo_Latn_CM
+    0xC58349444C61746ELLU, // dmr_Latn_ID
+    0xC98349444C61746ELLU, // dms_Latn_ID
+    0xD18349444C61746ELLU, // dmu_Latn_ID
+    0xD5834D594C61746ELLU, // dmv_Latn_MY
+    0xD98341554C61746ELLU, // dmw_Latn_AU
+    0xDD834D5A4C61746ELLU, // dmx_Latn_MZ
+    0xE18349444C61746ELLU, // dmy_Latn_ID
+    0x81A349444C61746ELLU, // dna_Latn_ID
+    0x8DA350474C61746ELLU, // dnd_Latn_PG
+    0x91A3545A4C61746ELLU, // dne_Latn_TZ
+    0x99A34B474379726CLLU, // dng_Cyrl_KG
+    0xA1A349444C61746ELLU, // dni_Latn_ID
     0xA5A343494C61746ELLU, // dnj_Latn_CI
+    0xA9A349444C61746ELLU, // dnk_Latn_ID
+    0xB5A342464C61746ELLU, // dnn_Latn_BF
+    0xB9A343444C61746ELLU, // dno_Latn_CD
+    0xC5A350474C61746ELLU, // dnr_Latn_PG
+    0xCDA349444C61746ELLU, // dnt_Latn_ID
+    0xD1A34D4D4D796D72LLU, // dnu_Mymr_MM
+    0xD5A34D4D4D796D72LLU, // dnv_Mymr_MM
+    0xD9A349444C61746ELLU, // dnw_Latn_ID
+    0xE1A342524C61746ELLU, // dny_Latn_BR
+    0x81C350474C61746ELLU, // doa_Latn_PG
+    0x85C350474C61746ELLU, // dob_Latn_PG
+    0x89C3434E4C61746ELLU, // doc_Latn_CN
+    0x91C3545A4C61746ELLU, // doe_Latn_TZ
+    0x95C350474C61746ELLU, // dof_Latn_PG
+    0x9DC34E474C61746ELLU, // doh_Latn_NG
     0xA1C3494E44657661LLU, // doi_Deva_IN
-    0x9E23434E4D6F6E67LLU, // drh_Mong_CN
+    0xA9C349444C61746ELLU, // dok_Latn_ID
+    0xADC350474C61746ELLU, // dol_Latn_PG
+    0xB5C350474C61746ELLU, // don_Latn_PG
+    0xB9C343444C61746ELLU, // doo_Latn_CD
+    0xBDC3424A4C61746ELLU, // dop_Latn_BJ
+    0xC5C353424C61746ELLU, // dor_Latn_SB
+    0xC9C342464C61746ELLU, // dos_Latn_BF
+    0xCDC34E474C61746ELLU, // dot_Latn_NG
+    0xD5C35A574C61746ELLU, // dov_Latn_ZW
+    0xD9C3434D4C61746ELLU, // dow_Latn_CM
+    0xDDC3455445746869LLU, // dox_Ethi_ET
+    0xE1C347484C61746ELLU, // doy_Latn_GH
+    0xBDE34D594C61746ELLU, // dpp_Latn_MY
+    0x8A2350544C61746ELLU, // drc_Latn_PT
+    0x92234E5054696274LLU, // dre_Tibt_NP
+    0x9A234D594C61746ELLU, // drg_Latn_MY
+    0xA2234E474C61746ELLU, // dri_Latn_NG
+    0xAE2341554C61746ELLU, // drl_Latn_AU
+    0xB62349444C61746ELLU, // drn_Latn_ID
+    0xBA234D594C61746ELLU, // dro_Latn_MY
+    0xC2234E5044657661LLU, // drq_Deva_NP
+    0xCA23455445746869LLU, // drs_Ethi_ET
+    0xCE234E4C4C61746ELLU, // drt_Latn_NL
+    0xD22354574C61746ELLU, // dru_Latn_TW
+    0xE2234E5044657661LLU, // dry_Deva_NP
     0x864344454C61746ELLU, // dsb_Latn_DE
+    0x9E434B454C61746ELLU, // dsh_Latn_KE
+    0xA24354444C61746ELLU, // dsi_Latn_TD
+    0xAA434E474C61746ELLU, // dsk_Latn_NG
+    0xB64349444C61746ELLU, // dsn_Latn_ID
+    0xBA43494E4F727961LLU, // dso_Orya_IN
+    0xC2434D4C4C61746ELLU, // dsq_Latn_ML
+    0x8263434E4C61746ELLU, // dta_Latn_CN
+    0x86634D594C61746ELLU, // dtb_Latn_MY
+    0x8E6343414C61746ELLU, // dtd_Latn_CA
+    0x9E6341554C61746ELLU, // dth_Latn_AU
+    0xA2634D4C4C61746ELLU, // dti_Latn_ML
+    0xAA634D4C4C61746ELLU, // dtk_Latn_ML
     0xB2634D4C4C61746ELLU, // dtm_Latn_ML
+    0xBA634D4C4C61746ELLU, // dto_Latn_ML
     0xBE634D594C61746ELLU, // dtp_Latn_MY
+    0xC6634D594C61746ELLU, // dtr_Latn_MY
+    0xCA634D4C4C61746ELLU, // dts_Latn_ML
+    0xCE634D4C4C61746ELLU, // dtt_Latn_ML
+    0xD2634D4C4C61746ELLU, // dtu_Latn_ML
     0xE2634E5044657661LLU, // dty_Deva_NP
     0x8283434D4C61746ELLU, // dua_Latn_CM
+    0x8683494E47756A72LLU, // dub_Gujr_IN
+    0x8A8350474C61746ELLU, // duc_Latn_PG
+    0x928350484C61746ELLU, // due_Latn_PH
+    0x96834E434C61746ELLU, // duf_Latn_NC
+    0x9A834B454C61746ELLU, // dug_Latn_KE
+    0x9E83494E44657661LLU, // duh_Deva_IN
+    0xA28350474C61746ELLU, // dui_Latn_PG
+    0xAA8350474C61746ELLU, // duk_Latn_PG
+    0xAE8350484C61746ELLU, // dul_Latn_PH
+    0xB2834E4C4C61746ELLU, // dum_Latn_NL
+    0xB68349444C61746ELLU, // dun_Latn_ID
+    0xBA8350484C61746ELLU, // duo_Latn_PH
+    0xBE8349444C61746ELLU, // dup_Latn_ID
+    0xC28349444C61746ELLU, // duq_Latn_ID
+    0xC683434D4C61746ELLU, // dur_Latn_CM
+    0xCA834E5044657661LLU, // dus_Deva_NP
+    0xD283434E4C61746ELLU, // duu_Latn_CN
+    0xD68349444C61746ELLU, // duv_Latn_ID
+    0xDA8349444C61746ELLU, // duw_Latn_ID
+    0xDE834D4C4C61746ELLU, // dux_Latn_ML
+    0xE28350484C61746ELLU, // duy_Latn_PH
+    0xE683434D4C61746ELLU, // duz_Latn_CM
     0x64764D5654686161LLU, // dv_Thaa_MV
+    0x82A350474C61746ELLU, // dva_Latn_PG
+    0x82C34E474C61746ELLU, // dwa_Latn_NG
+    0xAAC3494E4F727961LLU, // dwk_Orya_IN
+    0xC6C345544C61746ELLU, // dwr_Latn_ET
+    0xD2C341554C61746ELLU, // dwu_Latn_AU
+    0xDAC350474C61746ELLU, // dww_Latn_PG
+    0xE2C341554C61746ELLU, // dwy_Latn_AU
+    0xE6C34E5044657661LLU, // dwz_Deva_NP
+    0x830342464C61746ELLU, // dya_Latn_BF
+    0x870341554C61746ELLU, // dyb_Latn_AU
+    0x8F0341554C61746ELLU, // dyd_Latn_AU
+    0x9B0350484C61746ELLU, // dyg_Latn_PH
+    0xA30343494C61746ELLU, // dyi_Latn_CI
+    0xB3034D4C4C61746ELLU, // dym_Latn_ML
+    0xB70341554C61746ELLU, // dyn_Latn_AU
     0xBB03534E4C61746ELLU, // dyo_Latn_SN
+    0xC7034E474C61746ELLU, // dyr_Latn_NG
     0xD30342464C61746ELLU, // dyu_Latn_BF
+    0xE30341554C61746ELLU, // dyy_Latn_AU
     0x647A425454696274LLU, // dz_Tibt_BT
+    0x83234E474C61746ELLU, // dza_Latn_NG
+    0x8F234E474C61746ELLU, // dzd_Latn_NG
+    0x932341554C61746ELLU, // dze_Latn_AU
+    0x9B2354444C61746ELLU, // dzg_Latn_TD
+    0xAF23425454696274LLU, // dzl_Tibt_BT
+    0xB72343444C61746ELLU, // dzn_Latn_CD
+    0x800441554C61746ELLU, // eaa_Latn_AU
+    0x882449444C61746ELLU, // ebc_Latn_ID
+    0x98244E474C61746ELLU, // ebg_Latn_NG
+    0xA82450484C61746ELLU, // ebk_Latn_PH
+    0xB82443474C61746ELLU, // ebo_Latn_CG
+    0xC42443494C61746ELLU, // ebr_Latn_CI
     0xD0244B454C61746ELLU, // ebu_Latn_KE
+    0xC44447524772656BLLU, // ecr_Grek_GR
+    0xE044435943707274LLU, // ecy_Cprt_CY
     0x656547484C61746ELLU, // ee_Latn_GH
+    0x80A44E474C61746ELLU, // efa_Latn_NG
+    0x90A443444C61746ELLU, // efe_Latn_CD
     0xA0A44E474C61746ELLU, // efi_Latn_NG
+    0x80C443494C61746ELLU, // ega_Latn_CI
     0xACC449544C61746ELLU, // egl_Latn_IT
+    0xB0C4545A4C61746ELLU, // egm_Latn_TZ
+    0xB8C44E474C61746ELLU, // ego_Latn_NG
     0xE0C4454745677970LLU, // egy_Egyp_EG
+    0xD0E44E474C61746ELLU, // ehu_Latn_NG
+    0xBD0449444C61746ELLU, // eip_Latn_ID
+    0xCD0450474C61746ELLU, // eit_Latn_PG
+    0xD50450474C61746ELLU, // eiv_Latn_PG
+    0x812447574C61746ELLU, // eja_Latn_GW
+    0x81444E474C61746ELLU, // eka_Latn_NG
+    0x91444E474C61746ELLU, // eke_Latn_NG
+    0x994449444C61746ELLU, // ekg_Latn_ID
+    0xA1444E474C61746ELLU, // eki_Latn_NG
+    0xAD4442444C61746ELLU, // ekl_Latn_BD
+    0xB144434D4C61746ELLU, // ekm_Latn_CM
+    0xB9444D5A4C61746ELLU, // eko_Latn_MZ
+    0xBD444E474C61746ELLU, // ekp_Latn_NG
+    0xC5444E474C61746ELLU, // ekr_Latn_NG
     0xE1444D4D4B616C69LLU, // eky_Kali_MM
     0x656C47524772656BLLU, // el_Grek_GR
+    0x916450474C61746ELLU, // ele_Latn_PG
+    0xA96450474C61746ELLU, // elk_Latn_PG
+    0xB1644E474C61746ELLU, // elm_Latn_NG
+    0xB9644B454C61746ELLU, // elo_Latn_KE
+    0xD16450474C61746ELLU, // elu_Latn_PG
+    0x81844E474C61746ELLU, // ema_Latn_NG
+    0x858449444C61746ELLU, // emb_Latn_ID
+    0x918447464C61746ELLU, // eme_Latn_GF
+    0x99844E5044657661LLU, // emg_Deva_NP
+    0xA18450474C61746ELLU, // emi_Latn_PG
+    0xB1844D584C61746ELLU, // emm_Latn_MX
+    0xB584434D4C61746ELLU, // emn_Latn_CM
+    0xBD8450414C61746ELLU, // emp_Latn_PA
+    0xC98455534C61746ELLU, // ems_Latn_US
+    0xD184494E44657661LLU, // emu_Deva_IN
+    0xD98449444C61746ELLU, // emw_Latn_ID
+    0xDD8446524C61746ELLU, // emx_Latn_FR
+    0xE584434D4C61746ELLU, // emz_Latn_CM
     0x656E47424C61746ELLU, // en_Latn_GB
     0x656E55534C61746ELLU, // en_Latn_US
     0x656E474253686177LLU, // en_Shaw_GB
+    0x81A450474C61746ELLU, // ena_Latn_PG
+    0x85A44B454C61746ELLU, // enb_Latn_KE
+    0x89A4564E4C61746ELLU, // enc_Latn_VN
+    0x8DA449444C61746ELLU, // end_Latn_ID
+    0x95A452554379726CLLU, // enf_Cyrl_RU
+    0x9DA452554379726CLLU, // enh_Cyrl_RU
+    0xADA450594C61746ELLU, // enl_Latn_PY
+    0xB1A447424C61746ELLU, // enm_Latn_GB
+    0xB5A44E474C61746ELLU, // enn_Latn_NG
+    0xB9A449444C61746ELLU, // eno_Latn_ID
+    0xC1A450474C61746ELLU, // enq_Latn_PG
+    0xC5A449444C61746ELLU, // enr_Latn_ID
+    0xD5A44E474C61746ELLU, // env_Latn_NG
+    0xD9A44E474C61746ELLU, // enw_Latn_NG
+    0xDDA450594C61746ELLU, // enx_Latn_PY
+    0xCDC443494C61746ELLU, // eot_Latn_CI
+    0xA1E44E474C61746ELLU, // epi_Latn_NG
+    0x8224494E54616D6CLLU, // era_Taml_IN
+    0x9A2456554C61746ELLU, // erg_Latn_VU
+    0x9E244E474C61746ELLU, // erh_Latn_NG
+    0xA22450474C61746ELLU, // eri_Latn_PG
+    0xAA2456554C61746ELLU, // erk_Latn_VU
+    0xC62441554C61746ELLU, // err_Latn_AU
+    0xCA24434E4C61746ELLU, // ers_Latn_CN
+    0xCE2449444C61746ELLU, // ert_Latn_ID
+    0xDA2449444C61746ELLU, // erw_Latn_ID
     0x657345534C61746ELLU, // es_Latn_ES
     0x65734D584C61746ELLU, // es_Latn_MX
     0x657355534C61746ELLU, // es_Latn_US
+    0x9244424F4C61746ELLU, // ese_Latn_BO
     0x9A44494E476F6E6DLLU, // esg_Gonm_IN
+    0x9E44495241726162LLU, // esh_Arab_IR
+    0xA24455534C61746ELLU, // esi_Latn_US
+    0xB24443494C61746ELLU, // esm_Latn_CI
+    0xCA4455534C61746ELLU, // ess_Latn_US
     0xD24455534C61746ELLU, // esu_Latn_US
+    0xE24450484C61746ELLU, // esy_Latn_PH
     0x657445454C61746ELLU, // et_Latn_EE
+    0x86644E474C61746ELLU, // etb_Latn_NG
+    0xB66456554C61746ELLU, // etn_Latn_VU
+    0xBA64434D4C61746ELLU, // eto_Latn_CM
+    0xC66450474C61746ELLU, // etr_Latn_PG
+    0xCA644E474C61746ELLU, // ets_Latn_NG
     0xCE6449544974616CLLU, // ett_Ital_IT
+    0xD2644E474C61746ELLU, // etu_Latn_NG
+    0xDE644E474C61746ELLU, // etx_Latn_NG
+    0xE66449444C61746ELLU, // etz_Latn_ID
     0x657545534C61746ELLU, // eu_Latn_ES
+    0x8E844D584C61746ELLU, // eud_Latn_MX
+    0x92A452554379726CLLU, // eve_Cyrl_RU
+    0x9EA44E474C61746ELLU, // evh_Latn_NG
+    0xB6A452554379726CLLU, // evn_Cyrl_RU
     0xBAC4434D4C61746ELLU, // ewo_Latn_CM
     0xCEE445534C61746ELLU, // ext_Latn_ES
+    0x830455534C61746ELLU, // eya_Latn_US
+    0xBB044B454C61746ELLU, // eyo_Latn_KE
+    0x83244E474C61746ELLU, // eza_Latn_NG
+    0x93244E474C61746ELLU, // eze_Latn_NG
     0x6661495241726162LLU, // fa_Arab_IR
+    0x800550474C61746ELLU, // faa_Latn_PG
+    0x840547514C61746ELLU, // fab_Latn_GQ
+    0x8C0550474C61746ELLU, // fad_Latn_PG
+    0x940553424C61746ELLU, // faf_Latn_SB
+    0x980550474C61746ELLU, // fag_Latn_PG
+    0x9C054E474C61746ELLU, // fah_Latn_NG
+    0xA00550474C61746ELLU, // fai_Latn_PG
+    0xA40550474C61746ELLU, // faj_Latn_PG
+    0xA805434D4C61746ELLU, // fak_Latn_CM
+    0xAC05434D4C61746ELLU, // fal_Latn_CM
+    0xB0054E474C61746ELLU, // fam_Latn_NG
     0xB40547514C61746ELLU, // fan_Latn_GQ
+    0xBC05534E4C61746ELLU, // fap_Latn_SN
+    0xC40553424C61746ELLU, // far_Latn_SB
+    0xD00549444C61746ELLU, // fau_Latn_ID
+    0xDC0545534C61746ELLU, // fax_Latn_ES
+    0xE005495241726162LLU, // fay_Arab_IR
+    0xE405495241726162LLU, // faz_Arab_IR
+    0xAC2550484C61746ELLU, // fbl_Latn_PH
+    0xC48553534C61746ELLU, // fer_Latn_SS
     0x6666474E41646C6DLLU, // ff_Adlm_GN
     0x6666534E4C61746ELLU, // ff_Latn_SN
+    0xA0A550474C61746ELLU, // ffi_Latn_PG
     0xB0A54D4C4C61746ELLU, // ffm_Latn_ML
+    0xC4C554444C61746ELLU, // fgr_Latn_TD
     0x666946494C61746ELLU, // fi_Latn_FI
     0x8105534441726162LLU, // fia_Arab_SD
+    0x91054E474C61746ELLU, // fie_Latn_NG
+    0x950553414C61746ELLU, // fif_Latn_SA
     0xAD0550484C61746ELLU, // fil_Latn_PH
+    0xBD05545A4C61746ELLU, // fip_Latn_TZ
+    0xC5054E474C61746ELLU, // fir_Latn_NG
     0xCD0553454C61746ELLU, // fit_Latn_SE
+    0xD90550474C61746ELLU, // fiw_Latn_PG
     0x666A464A4C61746ELLU, // fj_Latn_FJ
+    0xA9454E474C61746ELLU, // fkk_Latn_NG
+    0xD5454E4F4C61746ELLU, // fkv_Latn_NO
+    0x816555534C61746ELLU, // fla_Latn_US
+    0x9D6549444C61746ELLU, // flh_Latn_ID
+    0xA1654E474C61746ELLU, // fli_Latn_NG
+    0xAD65434D4C61746ELLU, // fll_Latn_CM
+    0xB56541554C61746ELLU, // fln_Latn_AU
+    0xC56543444C61746ELLU, // flr_Latn_CD
+    0xE1655A414C61746ELLU, // fly_Latn_ZA
+    0xBD85434D4C61746ELLU, // fmp_Latn_CM
+    0xD185494E44657661LLU, // fmu_Deva_IN
+    0x85A556554C61746ELLU, // fnb_Latn_VU
+    0x99A55A414C61746ELLU, // fng_Latn_ZA
+    0xA1A554444C61746ELLU, // fni_Latn_TD
     0x666F464F4C61746ELLU, // fo_Latn_FO
+    0x8DC5424A4C61746ELLU, // fod_Latn_BJ
+    0xA1C550474C61746ELLU, // foi_Latn_PG
+    0xB1C543444C61746ELLU, // fom_Latn_CD
     0xB5C5424A4C61746ELLU, // fon_Latn_BJ
+    0xC5C550474C61746ELLU, // for_Latn_PG
+    0xC9C554574C61746ELLU, // fos_Latn_TW
+    0x91E547514C61746ELLU, // fpe_Latn_GQ
+    0xCA0550474C61746ELLU, // fqs_Latn_PG
     0x667246524C61746ELLU, // fr_Latn_FR
     0x8A2555534C61746ELLU, // frc_Latn_US
+    0x8E2549444C61746ELLU, // frd_Latn_ID
+    0xAA2544454C61746ELLU, // frk_Latn_DE
+    0xB22546524C61746ELLU, // frm_Latn_FR
+    0xBA2546524C61746ELLU, // fro_Latn_FR
     0xBE2546524C61746ELLU, // frp_Latn_FR
+    0xC22550474C61746ELLU, // frq_Latn_PG
     0xC62544454C61746ELLU, // frr_Latn_DE
     0xCA2544454C61746ELLU, // frs_Latn_DE
+    0xCE2556554C61746ELLU, // frt_Latn_VU
     0x8685434D41726162LLU, // fub_Arab_CM
     0x8E8557464C61746ELLU, // fud_Latn_WF
+    0x9285424A4C61746ELLU, // fue_Latn_BJ
     0x9685474E4C61746ELLU, // fuf_Latn_GN
+    0x9E854E454C61746ELLU, // fuh_Latn_NE
+    0xA28554444C61746ELLU, // fui_Latn_TD
+    0xB2854E474C61746ELLU, // fum_Latn_NG
+    0xB68542524C61746ELLU, // fun_Latn_BR
     0xC2854E454C61746ELLU, // fuq_Latn_NE
     0xC68549544C61746ELLU, // fur_Latn_IT
+    0xCE8556554C61746ELLU, // fut_Latn_VU
+    0xD28543444C61746ELLU, // fuu_Latn_CD
     0xD6854E474C61746ELLU, // fuv_Latn_NG
+    0xE28550474C61746ELLU, // fuy_Latn_PG
     0xC6A553444C61746ELLU, // fvr_Latn_SD
+    0x82C54E434C61746ELLU, // fwa_Latn_NC
+    0x92C54E414C61746ELLU, // fwe_Latn_NA
     0x66794E4C4C61746ELLU, // fy_Latn_NL
     0x676149454C61746ELLU, // ga_Latn_IE
     0x800647484C61746ELLU, // gaa_Latn_GH
+    0x840654444C61746ELLU, // gab_Latn_TD
+    0x8806494E4C61746ELLU, // gac_Latn_IN
+    0x8C0650484C61746ELLU, // gad_Latn_PH
+    0x900656454C61746ELLU, // gae_Latn_VE
+    0x940650474C61746ELLU, // gaf_Latn_PG
     0x98064D444C61746ELLU, // gag_Latn_MD
+    0x9C0650474C61746ELLU, // gah_Latn_PG
+    0xA00650474C61746ELLU, // gai_Latn_PG
+    0xA40650474C61746ELLU, // gaj_Latn_PG
+    0xA80649444C61746ELLU, // gak_Latn_ID
+    0xAC06544C4C61746ELLU, // gal_Latn_TL
+    0xB00650474C61746ELLU, // gam_Latn_PG
     0xB406434E48616E73LLU, // gan_Hans_CN
+    0xB80650474C61746ELLU, // gao_Latn_PG
+    0xBC0650474C61746ELLU, // gap_Latn_PG
+    0xC006494E4F727961LLU, // gaq_Orya_IN
+    0xC40650474C61746ELLU, // gar_Latn_PG
+    0xC806494E47756A72LLU, // gas_Gujr_IN
+    0xCC0650474C61746ELLU, // gat_Latn_PG
+    0xD006494E54656C75LLU, // gau_Telu_IN
+    0xD80650474C61746ELLU, // gaw_Latn_PG
+    0xDC0645544C61746ELLU, // gax_Latn_ET
     0xE00649444C61746ELLU, // gay_Latn_ID
+    0x802643464C61746ELLU, // gba_Latn_CF
+    0x842641554C61746ELLU, // gbb_Latn_AU
+    0x8C2641554C61746ELLU, // gbd_Latn_AU
+    0x902650474C61746ELLU, // gbe_Latn_PG
+    0x942650474C61746ELLU, // gbf_Latn_PG
+    0x982643464C61746ELLU, // gbg_Latn_CF
+    0x9C26424A4C61746ELLU, // gbh_Latn_BJ
+    0xA02649444C61746ELLU, // gbi_Latn_ID
+    0xA426494E4F727961LLU, // gbj_Orya_IN
+    0xA826494E44657661LLU, // gbk_Deva_IN
+    0xAC26494E47756A72LLU, // gbl_Gujr_IN
     0xB026494E44657661LLU, // gbm_Deva_IN
+    0xB42653534C61746ELLU, // gbn_Latn_SS
+    0xBC2643464C61746ELLU, // gbp_Latn_CF
+    0xC02643464C61746ELLU, // gbq_Latn_CF
+    0xC4264E474C61746ELLU, // gbr_Latn_NG
+    0xC826424A4C61746ELLU, // gbs_Latn_BJ
+    0xD02641554C61746ELLU, // gbu_Latn_AU
+    0xD42643464C61746ELLU, // gbv_Latn_CF
+    0xD82641554C61746ELLU, // gbw_Latn_AU
+    0xDC26424A4C61746ELLU, // gbx_Latn_BJ
+    0xE0264E474C61746ELLU, // gby_Latn_NG
     0xE426495241726162LLU, // gbz_Arab_IR
+    0x884650474C61746ELLU, // gcc_Latn_PG
+    0x8C4641554C61746ELLU, // gcd_Latn_AU
+    0x944647504C61746ELLU, // gcf_Latn_GP
+    0xAC4647444C61746ELLU, // gcl_Latn_GD
+    0xB44650474C61746ELLU, // gcn_Latn_PG
     0xC44647464C61746ELLU, // gcr_Latn_GF
+    0xCC4656454C61746ELLU, // gct_Latn_VE
     0x676447424C61746ELLU, // gd_Latn_GB
+    0x8466494E4F727961LLU, // gdb_Orya_IN
+    0x886641554C61746ELLU, // gdc_Latn_AU
+    0x8C6650474C61746ELLU, // gdd_Latn_PG
+    0x90664E474C61746ELLU, // gde_Latn_NG
+    0x94664E474C61746ELLU, // gdf_Latn_NG
+    0x986650484C61746ELLU, // gdg_Latn_PH
+    0x9C6641554C61746ELLU, // gdh_Latn_AU
+    0xA06643464C61746ELLU, // gdi_Latn_CF
+    0xA46641554C61746ELLU, // gdj_Latn_AU
+    0xA86654444C61746ELLU, // gdk_Latn_TD
+    0xAC6645544C61746ELLU, // gdl_Latn_ET
+    0xB06654444C61746ELLU, // gdm_Latn_TD
+    0xB46650474C61746ELLU, // gdn_Latn_PG
+    0xB86652554379726CLLU, // gdo_Cyrl_RU
+    0xC06659454C61746ELLU, // gdq_Latn_YE
+    0xC46650474C61746ELLU, // gdr_Latn_PG
+    0xCC6641554C61746ELLU, // gdt_Latn_AU
+    0xD0664E474C61746ELLU, // gdu_Latn_NG
+    0xDC66494E44657661LLU, // gdx_Deva_IN
+    0x80864E474C61746ELLU, // gea_Latn_NG
+    0x848650474C61746ELLU, // geb_Latn_PG
+    0x88864C524C61746ELLU, // gec_Latn_LR
+    0x8C864E474C61746ELLU, // ged_Latn_NG
+    0x948649444C61746ELLU, // gef_Latn_ID
+    0x98864E474C61746ELLU, // geg_Latn_NG
+    0x9C8643414C61746ELLU, // geh_Latn_CA
+    0xA08649444C61746ELLU, // gei_Latn_ID
+    0xA48654474C61746ELLU, // gej_Latn_TG
+    0xA8864E474C61746ELLU, // gek_Latn_NG
+    0xAC864E474C61746ELLU, // gel_Latn_NG
+    0xC08643464C61746ELLU, // geq_Latn_CF
+    0xC88649444C61746ELLU, // ges_Latn_ID
+    0xD48647414C61746ELLU, // gev_Latn_GA
+    0xD8864E474C61746ELLU, // gew_Latn_NG
+    0xDC86534F4C61746ELLU, // gex_Latn_SO
+    0xE08643444C61746ELLU, // gey_Latn_CD
     0xE486455445746869LLU, // gez_Ethi_ET
-    0xB4C64E5044657661LLU, // ggn_Deva_NP
+    0xA8A650474C61746ELLU, // gfk_Latn_PG
+    0x80C653424C61746ELLU, // gga_Latn_SB
+    0x84C64C524C61746ELLU, // ggb_Latn_LR
+    0x8CC641554C61746ELLU, // ggd_Latn_AU
+    0x90C641554C61746ELLU, // gge_Latn_AU
+    0x98C6504B41726162LLU, // ggg_Arab_PK
+    0xA8C641554C61746ELLU, // ggk_Latn_AU
+    0xACC650474C61746ELLU, // ggl_Latn_PG
+    0xCCC650474C61746ELLU, // ggt_Latn_PG
+    0xD0C643494C61746ELLU, // ggu_Latn_CI
+    0xD8C650474C61746ELLU, // ggw_Latn_PG
+    0x80E64C5941726162LLU, // gha_Arab_LY
+    0x88E647424C61746ELLU, // ghc_Latn_GB
+    0x90E64E5044657661LLU, // ghe_Deva_NP
+    0xA8E64D4D4C61746ELLU, // ghk_Latn_MM
+    0xB4E653424C61746ELLU, // ghn_Latn_SB
+    0xB8E64D4154666E67LLU, // gho_Tfng_MA
+    0xC4E6504B41726162LLU, // ghr_Arab_PK
+    0xC8E650474C61746ELLU, // ghs_Latn_PG
+    0xCCE64E5054696274LLU, // ght_Tibt_NP
+    0x810641554C61746ELLU, // gia_Latn_AU
+    0x85064E474C61746ELLU, // gib_Latn_NG
+    0x89065A414C61746ELLU, // gic_Latn_ZA
+    0x8D06434D4C61746ELLU, // gid_Latn_CM
+    0x910643494C61746ELLU, // gie_Latn_CI
+    0x9906504B41726162LLU, // gig_Arab_PK
+    0x9D0641554C61746ELLU, // gih_Latn_AU
     0xAD064B494C61746ELLU, // gil_Latn_KI
+    0xB10650474C61746ELLU, // gim_Latn_PG
+    0xB50652554379726CLLU, // gin_Cyrl_RU
+    0xBD0650474C61746ELLU, // gip_Latn_PG
+    0xC106564E4C61746ELLU, // giq_Latn_VN
+    0xC506564E4C61746ELLU, // gir_Latn_VN
+    0xC906434D4C61746ELLU, // gis_Latn_CM
+    0xCD0643414C61746ELLU, // git_Latn_CA
+    0xDD0643444C61746ELLU, // gix_Latn_CD
+    0xE10641554C61746ELLU, // giy_Latn_AU
+    0xE506434D4C61746ELLU, // giz_Latn_CM
     0xA926504B41726162LLU, // gjk_Arab_PK
+    0xB12641554C61746ELLU, // gjm_Latn_AU
+    0xB52647484C61746ELLU, // gjn_Latn_GH
+    0xC52641554C61746ELLU, // gjr_Latn_AU
     0xD126504B41726162LLU, // gju_Arab_PK
+    0x814650474C61746ELLU, // gka_Latn_PG
+    0x8D4650474C61746ELLU, // gkd_Latn_PG
+    0x9146434D4C61746ELLU, // gke_Latn_CM
+    0xB5464E474C61746ELLU, // gkn_Latn_NG
+    0xB94641554C61746ELLU, // gko_Latn_AU
+    0xBD46474E4C61746ELLU, // gkp_Latn_GN
+    0xD1465A414C61746ELLU, // gku_Latn_ZA
     0x676C45534C61746ELLU, // gl_Latn_ES
+    0x85664E474C61746ELLU, // glb_Latn_NG
+    0x896654444C61746ELLU, // glc_Latn_TD
+    0x8D6652554379726CLLU, // gld_Cyrl_RU
+    0x9D66414641726162LLU, // glh_Arab_AF
+    0xA56654444C61746ELLU, // glj_Latn_TD
     0xA966495241726162LLU, // glk_Arab_IR
+    0xAD6641554C61746ELLU, // gll_Latn_AU
+    0xB9664E474C61746ELLU, // glo_Latn_NG
+    0xC5664C524C61746ELLU, // glr_Latn_LR
+    0xD16654444C61746ELLU, // glu_Latn_TD
+    0xD9664E474C61746ELLU, // glw_Latn_NG
+    0x818641554C61746ELLU, // gma_Latn_AU
+    0x858653424C61746ELLU, // gmb_Latn_SB
+    0x8D864E474C61746ELLU, // gmd_Latn_NG
+    0x998650474C61746ELLU, // gmg_Latn_PG
+    0x9D8644454C61746ELLU, // gmh_Latn_DE
+    0xAD8644454C617466LLU, // gml_Latf_DE
+    0xB186434D4C61746ELLU, // gmm_Latn_CM
+    0xB586434D4C61746ELLU, // gmn_Latn_CM
+    0xC58641554C61746ELLU, // gmr_Latn_AU
+    0xD18650474C61746ELLU, // gmu_Latn_PG
+    0xD586455445746869LLU, // gmv_Ethi_ET
+    0xDD86545A4C61746ELLU, // gmx_Latn_TZ
+    0xE18647524C696E62LLU, // gmy_Linb_GR
+    0xE5864E474C61746ELLU, // gmz_Latn_NG
     0x676E50594C61746ELLU, // gn_Latn_PY
-    0xB1C6494E44657661LLU, // gom_Deva_IN
-    0xB5C6494E54656C75LLU, // gon_Telu_IN
+    0x81A642464C61746ELLU, // gna_Latn_BF
+    0x85A6494E4C61746ELLU, // gnb_Latn_IN
+    0x89A645534C61746ELLU, // gnc_Latn_ES
+    0x8DA6434D4C61746ELLU, // gnd_Latn_CM
+    0x91A64E474C61746ELLU, // gne_Latn_NG
+    0x99A654474C61746ELLU, // gng_Latn_TG
+    0x9DA64E474C61746ELLU, // gnh_Latn_NG
+    0xA1A641554C61746ELLU, // gni_Latn_AU
+    0xA5A643494C61746ELLU, // gnj_Latn_CI
+    0xA9A642574C61746ELLU, // gnk_Latn_BW
+    0xADA641554C61746ELLU, // gnl_Latn_AU
+    0xB1A650474C61746ELLU, // gnm_Latn_PG
+    0xB5A641554C61746ELLU, // gnn_Latn_AU
+    0xC1A64D594C61746ELLU, // gnq_Latn_MY
+    0xC5A641554C61746ELLU, // gnr_Latn_AU
+    0xCDA650474C61746ELLU, // gnt_Latn_PG
+    0xD1A650474C61746ELLU, // gnu_Latn_PG
+    0xD9A6424F4C61746ELLU, // gnw_Latn_BO
+    0xE5A643464C61746ELLU, // gnz_Latn_CF
+    0x81C643494C61746ELLU, // goa_Latn_CI
+    0x85C6434F4C61746ELLU, // gob_Latn_CO
+    0x89C650474C61746ELLU, // goc_Latn_PG
+    0x8DC643494C61746ELLU, // god_Latn_CI
+    0x91C6425454696274LLU, // goe_Tibt_BT
+    0x95C6455445746869LLU, // gof_Ethi_ET
+    0x99C6545A4C61746ELLU, // gog_Latn_TZ
+    0x9DC644454C61746ELLU, // goh_Latn_DE
+    0xA1C650474C61746ELLU, // goi_Latn_PG
+    0xA5C6494E44657661LLU, // goj_Deva_IN
+    0xA9C6494E44657661LLU, // gok_Deva_IN
+    0xADC64C524C61746ELLU, // gol_Latn_LR
+    0xB5C6494E44657661LLU, // gon_Deva_IN
+    0xB9C6464A4C61746ELLU, // goo_Latn_FJ
+    0xBDC649444C61746ELLU, // gop_Latn_ID
+    0xC1C649444C61746ELLU, // goq_Latn_ID
     0xC5C649444C61746ELLU, // gor_Latn_ID
     0xC9C64E4C4C61746ELLU, // gos_Latn_NL
     0xCDC65541476F7468LLU, // got_Goth_UA
+    0xD1C6434D4C61746ELLU, // gou_Latn_CM
+    0xD5C643494C61746ELLU, // gov_Latn_CI
+    0xD9C6545A4C61746ELLU, // gow_Latn_TZ
+    0xDDC643444C61746ELLU, // gox_Latn_CD
+    0xE1C654444C61746ELLU, // goy_Latn_TD
+    0x81E64E474C61746ELLU, // gpa_Latn_NG
+    0x91E647484C61746ELLU, // gpe_Latn_GH
+    0xB5E650474C61746ELLU, // gpn_Latn_PG
+    0x82064E474C61746ELLU, // gqa_Latn_NG
+    0xB60642524C61746ELLU, // gqn_Latn_BR
+    0xC60654444C61746ELLU, // gqr_Latn_TD
+    0x8226494E44657661LLU, // gra_Deva_IN
+    0x86264C524C61746ELLU, // grb_Latn_LR
     0x8A26435943707274LLU, // grc_Cprt_CY
     0x8A2647524C696E62LLU, // grc_Linb_GR
+    0x8E264E474C61746ELLU, // grd_Latn_NG
+    0x9A2650474C61746ELLU, // grg_Latn_PG
+    0x9E264E474C61746ELLU, // grh_Latn_NG
+    0xA22653424C61746ELLU, // gri_Latn_SB
+    0xA6264C524C61746ELLU, // grj_Latn_LR
+    0xB2264D594C61746ELLU, // grm_Latn_MY
+    0xC22650474C61746ELLU, // grq_Latn_PG
+    0xCA2649444C61746ELLU, // grs_Latn_ID
     0xCE26494E42656E67LLU, // grt_Beng_IN
+    0xD226455445746869LLU, // gru_Ethi_ET
+    0xD6264C524C61746ELLU, // grv_Latn_LR
+    0xDA2650474C61746ELLU, // grw_Latn_PG
+    0xDE2650474C61746ELLU, // grx_Latn_PG
+    0xE2264C524C61746ELLU, // gry_Latn_LR
+    0xE62650474C61746ELLU, // grz_Latn_PG
+    0xAE46534E4C61746ELLU, // gsl_Latn_SN
+    0xB64650474C61746ELLU, // gsn_Latn_PG
+    0xBA4643464C61746ELLU, // gso_Latn_CF
+    0xBE4650474C61746ELLU, // gsp_Latn_PG
     0xDA4643484C61746ELLU, // gsw_Latn_CH
+    0x826642524C61746ELLU, // gta_Latn_BR
+    0xD26641554C61746ELLU, // gtu_Latn_AU
     0x6775494E47756A72LLU, // gu_Gujr_IN
+    0x82864E474C61746ELLU, // gua_Latn_NG
     0x868642524C61746ELLU, // gub_Latn_BR
     0x8A86434F4C61746ELLU, // guc_Latn_CO
+    0x8E8643494C61746ELLU, // gud_Latn_CI
+    0x928641554C61746ELLU, // gue_Latn_AU
+    0x968641554C61746ELLU, // guf_Latn_AU
+    0x9E86434F4C61746ELLU, // guh_Latn_CO
+    0xA286424F4C61746ELLU, // gui_Latn_BO
+    0xAA8645544C61746ELLU, // guk_Latn_ET
+    0xAE8655534C61746ELLU, // gul_Latn_US
+    0xB286434F4C61746ELLU, // gum_Latn_CO
+    0xB68642524C61746ELLU, // gun_Latn_BR
+    0xBA86434F4C61746ELLU, // guo_Latn_CO
+    0xBE8641554C61746ELLU, // gup_Latn_AU
+    0xC28650594C61746ELLU, // guq_Latn_PY
     0xC68647484C61746ELLU, // gur_Latn_GH
+    0xCE8643524C61746ELLU, // gut_Latn_CR
+    0xD28656454C61746ELLU, // guu_Latn_VE
+    0xDA86424A4C61746ELLU, // guw_Latn_BJ
+    0xDE8642464C61746ELLU, // gux_Latn_BF
     0xE6864B454C61746ELLU, // guz_Latn_KE
     0x6776494D4C61746ELLU, // gv_Latn_IM
+    0x82A650594C61746ELLU, // gva_Latn_PY
+    0x8AA642524C61746ELLU, // gvc_Latn_BR
+    0x92A650474C61746ELLU, // gve_Latn_PG
+    0x96A650474C61746ELLU, // gvf_Latn_PG
+    0xA6A642524C61746ELLU, // gvj_Latn_BR
+    0xAEA654444C61746ELLU, // gvl_Latn_TD
+    0xB2A64E474C61746ELLU, // gvm_Latn_NG
+    0xB6A641554C61746ELLU, // gvn_Latn_AU
+    0xBAA642524C61746ELLU, // gvo_Latn_BR
+    0xBEA642524C61746ELLU, // gvp_Latn_BR
     0xC6A64E5044657661LLU, // gvr_Deva_NP
+    0xCAA650474C61746ELLU, // gvs_Latn_PG
+    0xE2A641554C61746ELLU, // gvy_Latn_AU
+    0x82C643494C61746ELLU, // gwa_Latn_CI
+    0x86C64E474C61746ELLU, // gwb_Latn_NG
+    0x8AC6504B41726162LLU, // gwc_Arab_PK
+    0x8EC645544C61746ELLU, // gwd_Latn_ET
+    0x92C6545A4C61746ELLU, // gwe_Latn_TZ
+    0x96C6504B41726162LLU, // gwf_Arab_PK
+    0x9AC64E474C61746ELLU, // gwg_Latn_NG
     0xA2C643414C61746ELLU, // gwi_Latn_CA
+    0xA6C642574C61746ELLU, // gwj_Latn_BW
+    0xB2C641554C61746ELLU, // gwm_Latn_AU
+    0xB6C64E474C61746ELLU, // gwn_Latn_NG
+    0xC6C655474C61746ELLU, // gwr_Latn_UG
+    0xCEC6414641726162LLU, // gwt_Arab_AF
+    0xD2C641554C61746ELLU, // gwu_Latn_AU
+    0xDAC641554C61746ELLU, // gww_Latn_AU
+    0xDEC647484C61746ELLU, // gwx_Latn_GH
+    0xDEE643494C61746ELLU, // gxx_Latn_CI
+    0x870650474C61746ELLU, // gyb_Latn_PG
+    0x8F0641554C61746ELLU, // gyd_Latn_AU
+    0x93064E474C61746ELLU, // gye_Latn_NG
+    0x970641554C61746ELLU, // gyf_Latn_AU
+    0x9B0643464C61746ELLU, // gyg_Latn_CF
+    0xA306434D4C61746ELLU, // gyi_Latn_CM
+    0xAF0645544C61746ELLU, // gyl_Latn_ET
+    0xB30650414C61746ELLU, // gym_Latn_PA
+    0xB70647594C61746ELLU, // gyn_Latn_GY
+    0xBB064E5044657661LLU, // gyo_Deva_NP
+    0xC706424F4C61746ELLU, // gyr_Latn_BO
+    0xE30641554C61746ELLU, // gyy_Latn_AU
+    0xE7064E474C61746ELLU, // gyz_Latn_NG
+    0x832653444C61746ELLU, // gza_Latn_SD
+    0xA326495241726162LLU, // gzi_Arab_IR
+    0xB72649444C61746ELLU, // gzn_Latn_ID
     0x68614E474C61746ELLU, // ha_Latn_NG
+    0x800755534C61746ELLU, // haa_Latn_US
+    0x8807495241726162LLU, // hac_Arab_IR
+    0x8C0749444C61746ELLU, // had_Latn_ID
+    0x900745544C61746ELLU, // hae_Latn_ET
+    0x980747484C61746ELLU, // hag_Latn_GH
+    0x9C0750474C61746ELLU, // hah_Latn_PG
+    0xA00743414C61746ELLU, // hai_Latn_CA
+    0xA407494E4C61746ELLU, // haj_Latn_IN
     0xA807434E48616E73LLU, // hak_Hans_CN
+    0xAC07564E4C61746ELLU, // hal_Latn_VN
+    0xB00750474C61746ELLU, // ham_Latn_PG
+    0xB407545A4C61746ELLU, // han_Latn_TZ
+    0xB80750474C61746ELLU, // hao_Latn_PG
+    0xBC0749444C61746ELLU, // hap_Latn_ID
+    0xC007545A4C61746ELLU, // haq_Latn_TZ
+    0xC407455445746869LLU, // har_Ethi_ET
+    0xC80743414C61746ELLU, // has_Latn_CA
+    0xD40743444C61746ELLU, // hav_Latn_CD
     0xD80755534C61746ELLU, // haw_Latn_US
+    0xDC0743414C61746ELLU, // hax_Latn_CA
+    0xE007545A4C61746ELLU, // hay_Latn_TZ
     0xE407414641726162LLU, // haz_Arab_AF
+    0x802743444C61746ELLU, // hba_Latn_CD
+    0x84274E474C61746ELLU, // hbb_Latn_NG
+    0xB42753444C61746ELLU, // hbn_Latn_SD
+    0xB827494C48656272LLU, // hbo_Hebr_IL
+    0xD027544C4C61746ELLU, // hbu_Latn_TL
+    0x9C474D584C61746ELLU, // hch_Latn_MX
+    0xE067455445746869LLU, // hdy_Ethi_ET
     0x6865494C48656272LLU, // he_Hebr_IL
+    0x8C8754444C61746ELLU, // hed_Latn_TD
+    0x988749444C61746ELLU, // heg_Latn_ID
+    0x9C87545A4C61746ELLU, // heh_Latn_TZ
+    0xA08743414C61746ELLU, // hei_Latn_CA
+    0xB08743444C61746ELLU, // hem_Latn_CD
+    0xB0C74E414C61746ELLU, // hgm_Latn_NA
+    0xD8C750474C61746ELLU, // hgw_Latn_PG
+    0xA0E750474C61746ELLU, // hhi_Latn_PG
+    0xC4E7534E4C61746ELLU, // hhr_Latn_SN
+    0xE0E750474C61746ELLU, // hhy_Latn_PG
     0x6869494E44657661LLU, // hi_Deva_IN
-    0x6869494E4C61746ELLU, // hi_Latn_IN
-    0x9507464A4C61746ELLU, // hif_Latn_FJ
+    0x81074E474C61746ELLU, // hia_Latn_NG
+    0x850750454C61746ELLU, // hib_Latn_PE
+    0x8D0755534C61746ELLU, // hid_Latn_US
+    0x9507464A44657661LLU, // hif_Deva_FJ
+    0x99074E474C61746ELLU, // hig_Latn_NG
+    0x9D0750474C61746ELLU, // hih_Latn_PG
+    0xA107494E54616B72LLU, // hii_Takr_IN
+    0xA507434D4C61746ELLU, // hij_Latn_CM
+    0xA90749444C61746ELLU, // hik_Latn_ID
     0xAD0750484C61746ELLU, // hil_Latn_PH
+    0xB90742574C61746ELLU, // hio_Latn_BW
+    0xC50742524C61746ELLU, // hir_Latn_BR
+    0xCD07545258737578LLU, // hit_Xsux_TR
+    0xD90756554C61746ELLU, // hiw_Latn_VU
+    0xDD0742524C61746ELLU, // hix_Latn_BR
+    0xA12749444C61746ELLU, // hji_Latn_ID
+    0x8147545A4C61746ELLU, // hka_Latn_TZ
+    0x914743444C61746ELLU, // hke_Latn_CD
+    0x9D47494E41726162LLU, // hkh_Arab_IN
+    0xA94750474C61746ELLU, // hkk_Latn_PG
+    0x816750474C61746ELLU, // hla_Latn_PG
+    0x8567494E44657661LLU, // hlb_Deva_IN
+    0x8D67564E4C61746ELLU, // hld_Latn_VN
+    0xCD674D4D4C61746ELLU, // hlt_Latn_MM
     0xD1675452486C7577LLU, // hlu_Hluw_TR
+    0x8187434E4C61746ELLU, // hma_Latn_CN
+    0x85874D4C4C61746ELLU, // hmb_Latn_ML
     0x8D87434E506C7264LLU, // hmd_Plrd_CN
+    0x9587564E4C61746ELLU, // hmf_Latn_VN
+    0xA587434E426F706FLLU, // hmj_Bopo_CN
+    0xB187434E4C61746ELLU, // hmm_Latn_CN
+    0xB587434E4C61746ELLU, // hmn_Latn_CN
+    0xBD87434E4C61746ELLU, // hmp_Latn_CN
+    0xC187434E426F706FLLU, // hmq_Bopo_CN
+    0xC587494E4C61746ELLU, // hmr_Latn_IN
+    0xC987434E4C61746ELLU, // hms_Latn_CN
+    0xCD8750474C61746ELLU, // hmt_Latn_PG
+    0xD18749444C61746ELLU, // hmu_Latn_ID
+    0xD587564E4C61746ELLU, // hmv_Latn_VN
+    0xD987434E4C61746ELLU, // hmw_Latn_CN
+    0xE187434E4C61746ELLU, // hmy_Latn_CN
+    0xE587434E4C61746ELLU, // hmz_Latn_CN
+    0x81A7434D4C61746ELLU, // hna_Latn_CM
     0x8DA7504B41726162LLU, // hnd_Arab_PK
     0x91A7494E44657661LLU, // hne_Deva_IN
+    0x99A7414F4C61746ELLU, // hng_Latn_AO
+    0x9DA742574C61746ELLU, // hnh_Latn_BW
+    0xA1A7434E4C61746ELLU, // hni_Latn_CN
+    0xA5A74C41486D6E67LLU, // hnj_Hmng_LA
     0xA5A75553486D6E70LLU, // hnj_Hmnp_US
     0xB5A750484C61746ELLU, // hnn_Latn_PH
     0xB9A7504B41726162LLU, // hno_Arab_PK
+    0xC9A753524C61746ELLU, // hns_Latn_SR
     0x686F50474C61746ELLU, // ho_Latn_PG
+    0x81C753424C61746ELLU, // hoa_Latn_SB
+    0x85C750474C61746ELLU, // hob_Latn_PG
     0x89C7494E44657661LLU, // hoc_Deva_IN
+    0x8DC74E474C61746ELLU, // hod_Latn_NG
+    0x91C74E474C61746ELLU, // hoe_Latn_NG
+    0x9DC74F4D41726162LLU, // hoh_Arab_OM
+    0xA1C755534C61746ELLU, // hoi_Latn_US
     0xA5C7494E44657661LLU, // hoj_Deva_IN
+    0xADC7414F4C61746ELLU, // hol_Latn_AO
+    0xB1C753534C61746ELLU, // hom_Latn_SS
+    0xB9C743444C61746ELLU, // hoo_Latn_CD
+    0xBDC755534C61746ELLU, // hop_Latn_US
+    0xC5C754444C61746ELLU, // hor_Latn_TD
+    0xCDC750474C61746ELLU, // hot_Latn_PG
+    0xD5C749444C61746ELLU, // hov_Latn_ID
+    0xD9C7434E48616E69LLU, // how_Hani_CN
+    0xE1C7494E44657661LLU, // hoy_Deva_IN
+    0xB9E74D4D4D796D72LLU, // hpo_Mymr_MM
     0x687248524C61746ELLU, // hr_Latn_HR
+    0x8227494E4C61746ELLU, // hra_Latn_IN
+    0x8A2750474C61746ELLU, // hrc_Latn_PG
+    0x9227564E4C61746ELLU, // hre_Latn_VN
+    0xAA2749444C61746ELLU, // hrk_Latn_ID
+    0xB227434E4C61746ELLU, // hrm_Latn_CN
+    0xBA27564E4C61746ELLU, // hro_Latn_VN
+    0xBE2741554C61746ELLU, // hrp_Latn_AU
+    0xCE27545253797263LLU, // hrt_Syrc_TR
+    0xD227494E4C61746ELLU, // hru_Latn_IN
+    0xDA2750474C61746ELLU, // hrw_Latn_PG
+    0xDE2742524C61746ELLU, // hrx_Latn_BR
+    0xE627495241726162LLU, // hrz_Arab_IR
     0x864744454C61746ELLU, // hsb_Latn_DE
     0xB647434E48616E73LLU, // hsn_Hans_CN
+    0xCA474F4D41726162LLU, // hss_Arab_OM
     0x687448544C61746ELLU, // ht_Latn_HT
+    0xA26749444C61746ELLU, // hti_Latn_ID
+    0xBA67434F4C61746ELLU, // hto_Latn_CO
+    0xCA67545A4C61746ELLU, // hts_Latn_TZ
+    0xD26749444C61746ELLU, // htu_Latn_ID
+    0xDE67545258737578LLU, // htx_Xsux_TR
     0x687548554C61746ELLU, // hu_Latn_HU
+    0x868750454C61746ELLU, // hub_Latn_PE
+    0x8A8742574C61746ELLU, // huc_Latn_BW
+    0x8E8749444C61746ELLU, // hud_Latn_ID
+    0x92874D584C61746ELLU, // hue_Latn_MX
+    0x968750474C61746ELLU, // huf_Latn_PG
+    0x9A8750454C61746ELLU, // hug_Latn_PE
+    0x9E87434C4C61746ELLU, // huh_Latn_CL
+    0xA28750474C61746ELLU, // hui_Latn_PG
+    0xAA8749444C61746ELLU, // huk_Latn_ID
+    0xAE8750474C61746ELLU, // hul_Latn_PG
+    0xB28743444C61746ELLU, // hum_Latn_CD
+    0xBE8755534C61746ELLU, // hup_Latn_US
     0xC68743414C61746ELLU, // hur_Latn_CA
+    0xCA874D584C61746ELLU, // hus_Latn_MX
+    0xCE874E5044657661LLU, // hut_Deva_NP
+    0xD28750454C61746ELLU, // huu_Latn_PE
+    0xD6874D584C61746ELLU, // huv_Latn_MX
+    0xDA8749444C61746ELLU, // huw_Latn_ID
+    0xDE8750454C61746ELLU, // hux_Latn_PE
+    0xE287494C48656272LLU, // huy_Hebr_IL
+    0xE68752554379726CLLU, // huz_Cyrl_RU
+    0x8AA748544C61746ELLU, // hvc_Latn_HT
+    0x92A74D584C61746ELLU, // hve_Latn_MX
+    0xAAA74E434C61746ELLU, // hvk_Latn_NC
+    0xB6A749444C61746ELLU, // hvn_Latn_ID
+    0xD6A74D584C61746ELLU, // hvv_Latn_MX
+    0x82C743494C61746ELLU, // hwa_Latn_CI
+    0x8AC755534C61746ELLU, // hwc_Latn_US
+    0xBAC74E474C61746ELLU, // hwo_Latn_NG
     0x6879414D41726D6ELLU, // hy_Armn_AM
+    0x8307434D4C61746ELLU, // hya_Latn_CM
+    0xDB07414D41726D6ELLU, // hyw_Armn_AM
     0x687A4E414C61746ELLU, // hz_Latn_NA
+    0xA0084E434C61746ELLU, // iai_Latn_NC
+    0xB40850474C61746ELLU, // ian_Latn_PG
+    0xC40850474C61746ELLU, // iar_Latn_PG
     0x80284D594C61746ELLU, // iba_Latn_MY
     0x84284E474C61746ELLU, // ibb_Latn_NG
+    0x8C2841554C61746ELLU, // ibd_Latn_AU
+    0x90284E474C61746ELLU, // ibe_Latn_NG
+    0x982850484C61746ELLU, // ibg_Latn_PH
+    0x9C28564E4C61746ELLU, // ibh_Latn_VN
+    0xAC2850484C61746ELLU, // ibl_Latn_PH
+    0xB0284E474C61746ELLU, // ibm_Latn_NG
+    0xB4284E474C61746ELLU, // ibn_Latn_NG
+    0xC4284E474C61746ELLU, // ibr_Latn_NG
+    0xD02849444C61746ELLU, // ibu_Latn_ID
+    0xE0284E474C61746ELLU, // iby_Latn_NG
+    0x8048424A4C61746ELLU, // ica_Latn_BJ
+    0x9C484E474C61746ELLU, // ich_Latn_NG
+    0xC448434F4C61746ELLU, // icr_Latn_CO
     0x696449444C61746ELLU, // id_Latn_ID
+    0x80684B454C61746ELLU, // ida_Latn_KE
+    0x8468494E4C61746ELLU, // idb_Latn_IN
+    0x88684E474C61746ELLU, // idc_Latn_NG
+    0x8C68424A4C61746ELLU, // idd_Latn_BJ
+    0x90684E474C61746ELLU, // ide_Latn_NG
+    0xA06850474C61746ELLU, // idi_Latn_PG
+    0xC46853534C61746ELLU, // idr_Latn_SS
+    0xC8684E474C61746ELLU, // ids_Latn_NG
+    0xCC68544C4C61746ELLU, // idt_Latn_TL
+    0xD0684E474C61746ELLU, // idu_Latn_NG
+    0x696545454C61746ELLU, // ie_Latn_EE
+    0x80A850484C61746ELLU, // ifa_Latn_PH
+    0x84A850484C61746ELLU, // ifb_Latn_PH
     0x90A854474C61746ELLU, // ife_Latn_TG
+    0x94A856554C61746ELLU, // iff_Latn_VU
+    0xA8A850484C61746ELLU, // ifk_Latn_PH
+    0xB0A843474C61746ELLU, // ifm_Latn_CG
+    0xD0A850484C61746ELLU, // ifu_Latn_PH
+    0xE0A850484C61746ELLU, // ify_Latn_PH
     0x69674E474C61746ELLU, // ig_Latn_NG
+    0x84C84E474C61746ELLU, // igb_Latn_NG
+    0x90C84E474C61746ELLU, // ige_Latn_NG
+    0x98C850474C61746ELLU, // igg_Latn_PG
+    0xACC84E474C61746ELLU, // igl_Latn_NG
+    0xB0C850474C61746ELLU, // igm_Latn_PG
+    0xB4C8424F4C61746ELLU, // ign_Latn_BO
+    0xB8C850474C61746ELLU, // igo_Latn_PG
+    0xD8C84E474C61746ELLU, // igw_Latn_NG
+    0x84E849444C61746ELLU, // ihb_Latn_ID
+    0xA0E84E474C61746ELLU, // ihi_Latn_NG
+    0xBCE849444C61746ELLU, // ihp_Latn_ID
+    0xD8E841554C61746ELLU, // ihw_Latn_AU
     0x6969434E59696969LLU, // ii_Yiii_CN
+    0xB50841554C61746ELLU, // iin_Latn_AU
+    0x89284E474C61746ELLU, // ijc_Latn_NG
+    0x91284E474C61746ELLU, // ije_Latn_NG
+    0xA528424A4C61746ELLU, // ijj_Latn_BJ
+    0xB5284E474C61746ELLU, // ijn_Latn_NG
+    0xC9284E474C61746ELLU, // ijs_Latn_NG
     0x696B55534C61746ELLU, // ik_Latn_US
+    0x9D484E474C61746ELLU, // ikh_Latn_NG
+    0xA1484E474C61746ELLU, // iki_Latn_NG
+    0xA9484E474C61746ELLU, // ikk_Latn_NG
+    0xAD484E474C61746ELLU, // ikl_Latn_NG
+    0xB9484E474C61746ELLU, // iko_Latn_NG
+    0xBD484E474C61746ELLU, // ikp_Latn_NG
+    0xC54841554C61746ELLU, // ikr_Latn_AU
+    0xCD4843414C61746ELLU, // ikt_Latn_CA
+    0xD5484E474C61746ELLU, // ikv_Latn_NG
+    0xD9484E474C61746ELLU, // ikw_Latn_NG
+    0xDD4855474C61746ELLU, // ikx_Latn_UG
+    0xE548545A4C61746ELLU, // ikz_Latn_TZ
+    0x816849444C61746ELLU, // ila_Latn_ID
+    0x85685A4D4C61746ELLU, // ilb_Latn_ZM
+    0x996841554C61746ELLU, // ilg_Latn_AU
+    0xA168434E4C61746ELLU, // ili_Latn_CN
+    0xA96850484C61746ELLU, // ilk_Latn_PH
+    0xB1684D594C61746ELLU, // ilm_Latn_MY
     0xB96850484C61746ELLU, // ilo_Latn_PH
+    0xBD6850484C61746ELLU, // ilp_Latn_PH
+    0xD16849444C61746ELLU, // ilu_Latn_ID
+    0xD5684E474C61746ELLU, // ilv_Latn_NG
+    0xA18850474C61746ELLU, // imi_Latn_PG
+    0xAD8855534C61746ELLU, // iml_Latn_US
+    0xB58850474C61746ELLU, // imn_Latn_PG
+    0xB98850474C61746ELLU, // imo_Latn_PG
+    0xC58849444C61746ELLU, // imr_Latn_ID
+    0xC98849544C61746ELLU, // ims_Latn_IT
+    0xCD8853534C61746ELLU, // imt_Latn_SS
+    0xE18854524C796369LLU, // imy_Lyci_TR
     0x696E49444C61746ELLU, // in_Latn_ID
+    0x85A8434F4C61746ELLU, // inb_Latn_CO
+    0x99A855534C61746ELLU, // ing_Latn_US
     0x9DA852554379726CLLU, // inh_Cyrl_RU
+    0xA5A8434F4C61746ELLU, // inj_Latn_CO
+    0xB5A850484C61746ELLU, // inn_Latn_PH
+    0xB9A850474C61746ELLU, // ino_Latn_PG
+    0xBDA850454C61746ELLU, // inp_Latn_PE
+    0xCDA84D4D4D796D72LLU, // int_Mymr_MM
+    0xC5C8455445746869LLU, // ior_Ethi_ET
+    0xD1C850474C61746ELLU, // iou_Latn_PG
+    0xD9C855534C61746ELLU, // iow_Latn_US
+    0xA1E850474C61746ELLU, // ipi_Latn_PG
+    0xB9E850474C61746ELLU, // ipo_Latn_PG
+    0xD20850454C61746ELLU, // iqu_Latn_PE
+    0xDA084E474C61746ELLU, // iqw_Latn_NG
+    0x922849444C61746ELLU, // ire_Latn_ID
+    0x9E2849444C61746ELLU, // irh_Latn_ID
+    0xA2284E474C61746ELLU, // iri_Latn_NG
+    0xAA28545A4C61746ELLU, // irk_Latn_TZ
+    0xB62842524C61746ELLU, // irn_Latn_BR
+    0xD228494E54616D6CLLU, // iru_Taml_IN
+    0xDE2849444C61746ELLU, // irx_Latn_ID
+    0xE22850484C61746ELLU, // iry_Latn_PH
     0x697349534C61746ELLU, // is_Latn_IS
+    0x824850474C61746ELLU, // isa_Latn_PG
+    0x8A4850454C61746ELLU, // isc_Latn_PE
+    0x8E4850484C61746ELLU, // isd_Latn_PH
+    0x9E484E474C61746ELLU, // ish_Latn_NG
+    0xA2484E474C61746ELLU, // isi_Latn_NG
+    0xAA48414641726162LLU, // isk_Arab_AF
+    0xB24849444C61746ELLU, // ism_Latn_ID
+    0xB648545A4C61746ELLU, // isn_Latn_TZ
+    0xBA484E474C61746ELLU, // iso_Latn_NG
+    0xCE4848524C61746ELLU, // ist_Latn_HR
+    0xD248434D4C61746ELLU, // isu_Latn_CM
     0x697449544C61746ELLU, // it_Latn_IT
+    0x866850484C61746ELLU, // itb_Latn_PH
+    0x8E6849444C61746ELLU, // itd_Latn_ID
+    0x9268424F4C61746ELLU, // ite_Latn_BO
+    0xA26850484C61746ELLU, // iti_Latn_PH
+    0xAA68495448656272LLU, // itk_Hebr_IT
+    0xAE6852554379726CLLU, // itl_Cyrl_RU
+    0xB2684E474C61746ELLU, // itm_Latn_NG
+    0xBA68424F4C61746ELLU, // ito_Latn_BO
+    0xC66850474C61746ELLU, // itr_Latn_PG
+    0xCA684E474C61746ELLU, // its_Latn_NG
+    0xCE6850484C61746ELLU, // itt_Latn_PH
+    0xD66850484C61746ELLU, // itv_Latn_PH
+    0xDA684E474C61746ELLU, // itw_Latn_NG
+    0xDE6849444C61746ELLU, // itx_Latn_ID
+    0xE26850484C61746ELLU, // ity_Latn_PH
+    0xE66847544C61746ELLU, // itz_Latn_GT
     0x6975434143616E73LLU, // iu_Cans_CA
+    0xB288434E4C61746ELLU, // ium_Latn_CN
+    0x86A850484C61746ELLU, // ivb_Latn_PH
+    0xD6A850484C61746ELLU, // ivv_Latn_PH
     0x6977494C48656272LLU, // iw_Hebr_IL
+    0xAAC850484C61746ELLU, // iwk_Latn_PH
+    0xB2C850474C61746ELLU, // iwm_Latn_PG
+    0xBAC849444C61746ELLU, // iwo_Latn_ID
+    0xCAC850474C61746ELLU, // iws_Latn_PG
+    0x8AE84D584C61746ELLU, // ixc_Latn_MX
+    0xAEE847544C61746ELLU, // ixl_Latn_GT
+    0x83084E474C61746ELLU, // iya_Latn_NG
+    0xBB08434D4C61746ELLU, // iyo_Latn_CM
+    0xDF0843474C61746ELLU, // iyx_Latn_CG
     0x9F2852554C61746ELLU, // izh_Latn_RU
+    0xB3284E474C61746ELLU, // izm_Latn_NG
+    0xC7284E474C61746ELLU, // izr_Latn_NG
+    0xE7284E474C61746ELLU, // izz_Latn_NG
     0x6A614A504A70616ELLU, // ja_Jpan_JP
+    0x800942524C61746ELLU, // jaa_Latn_BR
+    0x84094E474C61746ELLU, // jab_Latn_NG
+    0x880947544C61746ELLU, // jac_Latn_GT
+    0x8C09474E41726162LLU, // jad_Arab_GN
+    0x900950474C61746ELLU, // jae_Latn_PG
+    0x94094E474C61746ELLU, // jaf_Latn_NG
+    0x9C094D594C61746ELLU, // jah_Latn_MY
+    0xA40953424C61746ELLU, // jaj_Latn_SB
+    0xA8094D594C61746ELLU, // jak_Latn_MY
+    0xAC0949444C61746ELLU, // jal_Latn_ID
     0xB0094A4D4C61746ELLU, // jam_Latn_JM
+    0xB40941554C61746ELLU, // jan_Latn_AU
+    0xB80941554C61746ELLU, // jao_Latn_AU
+    0xC00949444C61746ELLU, // jaq_Latn_ID
+    0xC8094E434C61746ELLU, // jas_Latn_NC
+    0xCC09414641726162LLU, // jat_Arab_AF
+    0xD00949444C61746ELLU, // jau_Latn_ID
+    0xDC0949444C61746ELLU, // jax_Latn_ID
+    0xE00941554C61746ELLU, // jay_Latn_AU
+    0xE4094E434C61746ELLU, // jaz_Latn_NC
+    0x9029494C48656272LLU, // jbe_Hebr_IL
+    0xA02941554C61746ELLU, // jbi_Latn_AU
+    0xA42949444C61746ELLU, // jbj_Latn_ID
+    0xA82950474C61746ELLU, // jbk_Latn_PG
+    0xB0294E474C61746ELLU, // jbm_Latn_NG
+    0xB4294C5941726162LLU, // jbn_Arab_LY
+    0xC42949444C61746ELLU, // jbr_Latn_ID
+    0xCC2942524C61746ELLU, // jbt_Latn_BR
+    0xD029434D4C61746ELLU, // jbu_Latn_CM
+    0xD82941554C61746ELLU, // jbw_Latn_AU
+    0xCC4955414379726CLLU, // jct_Cyrl_UA
+    0x8069494E54696274LLU, // jda_Tibt_IN
+    0x9869504B41726162LLU, // jdg_Arab_PK
+    0xCC6952554379726CLLU, // jdt_Cyrl_RU
+    0x848950454C61746ELLU, // jeb_Latn_PE
+    0x90894E5044657661LLU, // jee_Deva_NP
+    0x9C89564E4C61746ELLU, // jeh_Latn_VN
+    0xA08949444C61746ELLU, // jei_Latn_ID
+    0xA88943494C61746ELLU, // jek_Latn_CI
+    0xAC8949444C61746ELLU, // jel_Latn_ID
+    0xB4894E474C61746ELLU, // jen_Latn_NG
+    0xC4894E474C61746ELLU, // jer_Latn_NG
+    0xCC8950474C61746ELLU, // jet_Latn_PG
+    0xD08954444C61746ELLU, // jeu_Latn_TD
+    0x84C943444C61746ELLU, // jgb_Latn_CD
+    0x90C9474547656F72LLU, // jge_Geor_GE
+    0xA8C94E474C61746ELLU, // jgk_Latn_NG
     0xB8C9434D4C61746ELLU, // jgo_Latn_CM
+    0xA0E94D594C61746ELLU, // jhi_Latn_MY
+    0x6A69554148656272LLU, // ji_Hebr_UA
+    0x8109434D4C61746ELLU, // jia_Latn_CM
+    0x85094E474C61746ELLU, // jib_Latn_NG
+    0x8909484E4C61746ELLU, // jic_Latn_HN
+    0x8D094E474C61746ELLU, // jid_Latn_NG
+    0x91094E474C61746ELLU, // jie_Latn_NG
+    0x990941554C61746ELLU, // jig_Latn_AU
+    0xAD0950474C61746ELLU, // jil_Latn_PG
+    0xB109434D4C61746ELLU, // jim_Latn_CM
+    0xCD09545A4C61746ELLU, // jit_Latn_TZ
+    0xD109434E4C61746ELLU, // jiu_Latn_CN
+    0xD50945434C61746ELLU, // jiv_Latn_EC
+    0xE109434E4C61746ELLU, // jiy_Latn_CN
+    0x91294B5248616E67LLU, // jje_Hang_KR
+    0xC5294E474C61746ELLU, // jjr_Latn_NG
+    0x814949444C61746ELLU, // jka_Latn_ID
+    0xB1494D4D4D796D72LLU, // jkm_Mymr_MM
+    0xB94950474C61746ELLU, // jko_Latn_PG
+    0xD1494E474C61746ELLU, // jku_Latn_NG
+    0x916953444C61746ELLU, // jle_Latn_SD
+    0x818950474C61746ELLU, // jma_Latn_PG
+    0x85894E474C61746ELLU, // jmb_Latn_NG
     0x8989545A4C61746ELLU, // jmc_Latn_TZ
+    0x8D8949444C61746ELLU, // jmd_Latn_ID
+    0xA1894E474C61746ELLU, // jmi_Latn_NG
     0xAD894E5044657661LLU, // jml_Deva_NP
+    0xB5894D4D4C61746ELLU, // jmn_Latn_MM
+    0xC58947484C61746ELLU, // jmr_Latn_GH
+    0xC9894E474C61746ELLU, // jms_Latn_NG
+    0xD98950474C61746ELLU, // jmw_Latn_PG
+    0xDD894D584C61746ELLU, // jmx_Latn_MX
+    0x81A9494E54616B72LLU, // jna_Takr_IN
+    0x8DA9504B41726162LLU, // jnd_Arab_PK
+    0x99A941554C61746ELLU, // jng_Latn_AU
+    0xA1A94E474C61746ELLU, // jni_Latn_NG
+    0xA5A945544C61746ELLU, // jnj_Latn_ET
+    0xADA9494E44657661LLU, // jnl_Deva_IN
+    0xC9A9494E44657661LLU, // jns_Deva_IN
+    0x85C943444C61746ELLU, // job_Latn_CD
+    0x8DC943494C61746ELLU, // jod_Latn_CI
+    0x99C9504B41726162LLU, // jog_Arab_PK
+    0xC5C9424F4C61746ELLU, // jor_Latn_BO
+    0xD9C94D4C4C61746ELLU, // jow_Latn_ML
+    0x81E9505348656272LLU, // jpa_Hebr_PS
+    0xC5E9494C48656272LLU, // jpr_Hebr_IL
+    0xC60950454C61746ELLU, // jqr_Latn_PE
+    0x8229564E4C61746ELLU, // jra_Latn_VN
+    0x8629494C48656272LLU, // jrb_Hebr_IL
+    0xC6294E474C61746ELLU, // jrr_Latn_NG
+    0xCE294E474C61746ELLU, // jrt_Latn_NG
+    0xD22956454C61746ELLU, // jru_Latn_VE
+    0x828942524C61746ELLU, // jua_Latn_BR
+    0x86894E474C61746ELLU, // jub_Latn_NG
+    0x8E8943494C61746ELLU, // jud_Latn_CI
+    0x9E894E474C61746ELLU, // juh_Latn_NG
+    0xA28941554C61746ELLU, // jui_Latn_AU
+    0xAA894E474C61746ELLU, // juk_Latn_NG
+    0xAE894E5044657661LLU, // jul_Deva_NP
+    0xB28953444C61746ELLU, // jum_Latn_SD
+    0xB689494E4F727961LLU, // jun_Orya_IN
+    0xBA894E474C61746ELLU, // juo_Latn_NG
+    0xBE8942524C61746ELLU, // jup_Latn_BR
+    0xC68942524C61746ELLU, // jur_Latn_BR
     0xCE89444B4C61746ELLU, // jut_Latn_DK
+    0xD2894E474C61746ELLU, // juu_Latn_NG
+    0xDA894E474C61746ELLU, // juw_Latn_NG
+    0xE289494E4F727961LLU, // juy_Orya_IN
     0x6A7649444C61746ELLU, // jv_Latn_ID
+    0x8EA949444C61746ELLU, // jvd_Latn_ID
+    0xB6A953524C61746ELLU, // jvn_Latn_SR
     0x6A7749444C61746ELLU, // jw_Latn_ID
+    0xA2C947484C61746ELLU, // jwi_Latn_GH
+    0x8309434E54696274LLU, // jya_Tibt_CN
+    0x9309494C48656272LLU, // jye_Hebr_IL
+    0xE30954444C61746ELLU, // jyy_Latn_TD
     0x6B61474547656F72LLU, // ka_Geor_GE
     0x800A555A4379726CLLU, // kaa_Cyrl_UZ
     0x840A445A4C61746ELLU, // kab_Latn_DZ
     0x880A4D4D4C61746ELLU, // kac_Latn_MM
+    0x8C0A4E474C61746ELLU, // kad_Latn_NG
+    0x980A4D594C61746ELLU, // kag_Latn_MY
+    0x9C0A43464C61746ELLU, // kah_Latn_CF
+    0xA00A4E474C61746ELLU, // kai_Latn_NG
     0xA40A4E474C61746ELLU, // kaj_Latn_NG
+    0xA80A50484C61746ELLU, // kak_Latn_PH
     0xB00A4B454C61746ELLU, // kam_Latn_KE
     0xB80A4D4C4C61746ELLU, // kao_Latn_ML
+    0xBC0A52554379726CLLU, // kap_Cyrl_RU
+    0xC00A50454C61746ELLU, // kaq_Latn_PE
+    0xD40A42524C61746ELLU, // kav_Latn_BR
     0xD80A49444B617769LLU, // kaw_Kawi_ID
+    0xDC0A49444C61746ELLU, // kax_Latn_ID
+    0xE00A42524C61746ELLU, // kay_Latn_BR
+    0x802A41554C61746ELLU, // kba_Latn_AU
+    0x842A42524C61746ELLU, // kbb_Latn_BR
+    0x882A42524C61746ELLU, // kbc_Latn_BR
     0x8C2A52554379726CLLU, // kbd_Cyrl_RU
+    0x902A41554C61746ELLU, // kbe_Latn_AU
+    0x982A494E54696274LLU, // kbg_Tibt_IN
+    0x9C2A434F4C61746ELLU, // kbh_Latn_CO
+    0xA02A49444C61746ELLU, // kbi_Latn_ID
+    0xA42A43444C61746ELLU, // kbj_Latn_CD
+    0xA82A50474C61746ELLU, // kbk_Latn_PG
+    0xAC2A54444C61746ELLU, // kbl_Latn_TD
+    0xB02A50474C61746ELLU, // kbm_Latn_PG
+    0xB42A43464C61746ELLU, // kbn_Latn_CF
+    0xB82A53534C61746ELLU, // kbo_Latn_SS
+    0xBC2A54474C61746ELLU, // kbp_Latn_TG
+    0xC02A50474C61746ELLU, // kbq_Latn_PG
+    0xC42A45544C61746ELLU, // kbr_Latn_ET
+    0xC82A47414C61746ELLU, // kbs_Latn_GA
+    0xCC2A50474C61746ELLU, // kbt_Latn_PG
+    0xD02A504B41726162LLU, // kbu_Arab_PK
+    0xD42A49444C61746ELLU, // kbv_Latn_ID
+    0xD82A50474C61746ELLU, // kbw_Latn_PG
+    0xDC2A50474C61746ELLU, // kbx_Latn_PG
     0xE02A4E4541726162LLU, // kby_Arab_NE
+    0xE42A4E474C61746ELLU, // kbz_Latn_NG
+    0x804A52554379726CLLU, // kca_Cyrl_RU
+    0x844A50474C61746ELLU, // kcb_Latn_PG
+    0x884A4E474C61746ELLU, // kcc_Latn_NG
+    0x8C4A49444C61746ELLU, // kcd_Latn_ID
+    0x904A4E474C61746ELLU, // kce_Latn_NG
+    0x944A4E474C61746ELLU, // kcf_Latn_NG
     0x984A4E474C61746ELLU, // kcg_Latn_NG
+    0x9C4A4E474C61746ELLU, // kch_Latn_NG
+    0xA04A4E474C61746ELLU, // kci_Latn_NG
+    0xA44A47574C61746ELLU, // kcj_Latn_GW
     0xA84A5A574C61746ELLU, // kck_Latn_ZW
+    0xAC4A50474C61746ELLU, // kcl_Latn_PG
+    0xB04A43464C61746ELLU, // kcm_Latn_CF
+    0xB44A55474C61746ELLU, // kcn_Latn_UG
+    0xB84A50474C61746ELLU, // kco_Latn_PG
+    0xBC4A53444C61746ELLU, // kcp_Latn_SD
+    0xC04A4E474C61746ELLU, // kcq_Latn_NG
+    0xC84A4E474C61746ELLU, // kcs_Latn_NG
+    0xCC4A50474C61746ELLU, // kct_Latn_PG
+    0xD04A545A4C61746ELLU, // kcu_Latn_TZ
+    0xD44A43444C61746ELLU, // kcv_Latn_CD
+    0xD84A43444C61746ELLU, // kcw_Latn_CD
+    0xE04A445A41726162LLU, // kcy_Arab_DZ
+    0xE44A545A4C61746ELLU, // kcz_Latn_TZ
+    0x806A41554C61746ELLU, // kda_Latn_AU
+    0x886A545A4C61746ELLU, // kdc_Latn_TZ
+    0x8C6A41554C61746ELLU, // kdd_Latn_AU
     0x906A545A4C61746ELLU, // kde_Latn_TZ
+    0x946A50474C61746ELLU, // kdf_Latn_PG
+    0x986A43444C61746ELLU, // kdg_Latn_CD
     0x9C6A54474C61746ELLU, // kdh_Latn_TG
+    0xA06A55474C61746ELLU, // kdi_Latn_UG
+    0xA46A55474C61746ELLU, // kdj_Latn_UG
+    0xA86A4E434C61746ELLU, // kdk_Latn_NC
+    0xAC6A4E474C61746ELLU, // kdl_Latn_NG
+    0xB06A4E474C61746ELLU, // kdm_Latn_NG
+    0xB46A5A574C61746ELLU, // kdn_Latn_ZW
+    0xBC6A4E474C61746ELLU, // kdp_Latn_NG
+    0xC06A494E42656E67LLU, // kdq_Beng_IN
+    0xC46A4C544C61746ELLU, // kdr_Latn_LT
     0xCC6A544854686169LLU, // kdt_Thai_TH
+    0xD86A49444C61746ELLU, // kdw_Latn_ID
+    0xDC6A4E474C61746ELLU, // kdx_Latn_NG
+    0xE06A49444C61746ELLU, // kdy_Latn_ID
+    0xE46A434D4C61746ELLU, // kdz_Latn_CM
     0x808A43564C61746ELLU, // kea_Latn_CV
+    0x848A47414C61746ELLU, // keb_Latn_GA
+    0x888A53444C61746ELLU, // kec_Latn_SD
+    0x8C8A545A4C61746ELLU, // ked_Latn_TZ
+    0x908A55534C61746ELLU, // kee_Latn_US
+    0x948A54474C61746ELLU, // kef_Latn_TG
+    0x988A53444C61746ELLU, // keg_Latn_SD
+    0x9C8A50474C61746ELLU, // keh_Latn_PG
+    0xA08A49444C61746ELLU, // kei_Latn_ID
+    0xA88A47544C61746ELLU, // kek_Latn_GT
+    0xAC8A43444C61746ELLU, // kel_Latn_CD
+    0xB08A544C4C61746ELLU, // kem_Latn_TL
     0xB48A434D4C61746ELLU, // ken_Latn_CM
+    0xB88A55474C61746ELLU, // keo_Latn_UG
+    0xC48A54444C61746ELLU, // ker_Latn_TD
+    0xC88A4E474C61746ELLU, // kes_Latn_NG
+    0xCC8A52554379726CLLU, // ket_Cyrl_RU
+    0xD08A54474C61746ELLU, // keu_Latn_TG
+    0xD48A494E4D6C796DLLU, // kev_Mlym_IN
+    0xD88A50474C61746ELLU, // kew_Latn_PG
+    0xDC8A494E44657661LLU, // kex_Deva_IN
+    0xE08A494E54656C75LLU, // key_Telu_IN
+    0xE48A4E474C61746ELLU, // kez_Latn_NG
+    0x80AA494E4B6E6461LLU, // kfa_Knda_IN
+    0x84AA494E44657661LLU, // kfb_Deva_IN
+    0x88AA494E54656C75LLU, // kfc_Telu_IN
+    0x8CAA494E4B6E6461LLU, // kfd_Knda_IN
+    0x90AA494E54616D6CLLU, // kfe_Taml_IN
+    0x94AA494E4C61746ELLU, // kff_Latn_IN
+    0x98AA494E4B6E6461LLU, // kfg_Knda_IN
+    0x9CAA494E4D6C796DLLU, // kfh_Mlym_IN
+    0xA0AA494E54616D6CLLU, // kfi_Taml_IN
+    0xA8AA494E44657661LLU, // kfk_Deva_IN
+    0xACAA434D4C61746ELLU, // kfl_Latn_CM
+    0xB0AA495241726162LLU, // kfm_Arab_IR
+    0xB4AA434D4C61746ELLU, // kfn_Latn_CM
     0xB8AA43494C61746ELLU, // kfo_Latn_CI
+    0xBCAA494E44657661LLU, // kfp_Deva_IN
+    0xC0AA494E44657661LLU, // kfq_Deva_IN
     0xC4AA494E44657661LLU, // kfr_Deva_IN
+    0xC8AA494E44657661LLU, // kfs_Deva_IN
+    0xD0AA494E44657661LLU, // kfu_Deva_IN
+    0xD4AA494E4C61746ELLU, // kfv_Latn_IN
+    0xD8AA494E4C61746ELLU, // kfw_Latn_IN
+    0xDCAA494E44657661LLU, // kfx_Deva_IN
     0xE0AA494E44657661LLU, // kfy_Deva_IN
+    0xE4AA42464C61746ELLU, // kfz_Latn_BF
     0x6B6743444C61746ELLU, // kg_Latn_CD
+    0x80CA43494C61746ELLU, // kga_Latn_CI
+    0x84CA49444C61746ELLU, // kgb_Latn_ID
     0x90CA49444C61746ELLU, // kge_Latn_ID
+    0x94CA50474C61746ELLU, // kgf_Latn_PG
+    0xA4CA4E5044657661LLU, // kgj_Deva_NP
+    0xA8CA42524C61746ELLU, // kgk_Latn_BR
+    0xACCA41554C61746ELLU, // kgl_Latn_AU
+    0xB8CA53444C61746ELLU, // kgo_Latn_SD
     0xBCCA42524C61746ELLU, // kgp_Latn_BR
+    0xC0CA49444C61746ELLU, // kgq_Latn_ID
+    0xC4CA49444C61746ELLU, // kgr_Latn_ID
+    0xC8CA41554C61746ELLU, // kgs_Latn_AU
+    0xCCCA4E474C61746ELLU, // kgt_Latn_NG
+    0xD0CA50474C61746ELLU, // kgu_Latn_PG
+    0xD4CA49444C61746ELLU, // kgv_Latn_ID
+    0xD8CA49444C61746ELLU, // kgw_Latn_ID
+    0xDCCA49444C61746ELLU, // kgx_Latn_ID
+    0xE0CA4E5044657661LLU, // kgy_Deva_NP
     0x80EA494E4C61746ELLU, // kha_Latn_IN
     0x84EA434E54616C75LLU, // khb_Talu_CN
+    0x88EA49444C61746ELLU, // khc_Latn_ID
+    0x8CEA49444C61746ELLU, // khd_Latn_ID
+    0x90EA49444C61746ELLU, // khe_Latn_ID
+    0x94EA4C4154686169LLU, // khf_Thai_LA
+    0x98EA434E54696274LLU, // khg_Tibt_CN
+    0x9CEA49444C61746ELLU, // khh_Latn_ID
+    0xA4EA4E474C61746ELLU, // khj_Latn_NG
+    0xACEA50474C61746ELLU, // khl_Latn_PG
     0xB4EA494E44657661LLU, // khn_Deva_IN
+    0xB8EA495242726168LLU, // kho_Brah_IR
+    0xBCEA49444C61746ELLU, // khp_Latn_ID
     0xC0EA4D4C4C61746ELLU, // khq_Latn_ML
+    0xC4EA494E4C61746ELLU, // khr_Latn_IN
+    0xC8EA50474C61746ELLU, // khs_Latn_PG
     0xCCEA494E4D796D72LLU, // kht_Mymr_IN
+    0xD0EA414F4C61746ELLU, // khu_Latn_AO
+    0xD4EA52554379726CLLU, // khv_Cyrl_RU
     0xD8EA504B41726162LLU, // khw_Arab_PK
+    0xDCEA43444C61746ELLU, // khx_Latn_CD
+    0xE0EA43444C61746ELLU, // khy_Latn_CD
+    0xE4EA50474C61746ELLU, // khz_Latn_PG
     0x6B694B454C61746ELLU, // ki_Latn_KE
+    0x810A54444C61746ELLU, // kia_Latn_TD
+    0x850A53444C61746ELLU, // kib_Latn_SD
+    0x890A55534C61746ELLU, // kic_Latn_US
+    0x8D0A434D4C61746ELLU, // kid_Latn_CM
+    0x910A54444C61746ELLU, // kie_Latn_TD
+    0x950A4E5044657661LLU, // kif_Deva_NP
+    0x990A49444C61746ELLU, // kig_Latn_ID
+    0x9D0A50474C61746ELLU, // kih_Latn_PG
+    0xA50A50474C61746ELLU, // kij_Latn_PG
+    0xAD0A4E474C61746ELLU, // kil_Latn_NG
+    0xB10A52554379726CLLU, // kim_Cyrl_RU
+    0xB90A55534C61746ELLU, // kio_Latn_US
+    0xBD0A4E5044657661LLU, // kip_Deva_NP
+    0xC10A49444C61746ELLU, // kiq_Latn_ID
+    0xC90A50474C61746ELLU, // kis_Latn_PG
+    0xCD0A50474C61746ELLU, // kit_Latn_PG
     0xD10A54524C61746ELLU, // kiu_Latn_TR
+    0xD50A545A4C61746ELLU, // kiv_Latn_TZ
+    0xD90A50474C61746ELLU, // kiw_Latn_PG
+    0xDD0A494E4C61746ELLU, // kix_Latn_IN
+    0xE10A49444C61746ELLU, // kiy_Latn_ID
+    0xE50A545A4C61746ELLU, // kiz_Latn_TZ
     0x6B6A4E414C61746ELLU, // kj_Latn_NA
+    0x812A49444C61746ELLU, // kja_Latn_ID
+    0x852A47544C61746ELLU, // kjb_Latn_GT
+    0x892A49444C61746ELLU, // kjc_Latn_ID
+    0x8D2A50474C61746ELLU, // kjd_Latn_PG
+    0x912A49444C61746ELLU, // kje_Latn_ID
     0x992A4C414C616F6FLLU, // kjg_Laoo_LA
+    0x9D2A52554379726CLLU, // kjh_Cyrl_RU
+    0xA12A53424C61746ELLU, // kji_Latn_SB
+    0xA52A415A4C61746ELLU, // kjj_Latn_AZ
+    0xA92A49444C61746ELLU, // kjk_Latn_ID
+    0xAD2A4E5044657661LLU, // kjl_Deva_NP
+    0xB12A564E4C61746ELLU, // kjm_Latn_VN
+    0xB52A41554C61746ELLU, // kjn_Latn_AU
+    0xB92A494E44657661LLU, // kjo_Deva_IN
+    0xBD2A4D4D4D796D72LLU, // kjp_Mymr_MM
+    0xC12A55534C61746ELLU, // kjq_Latn_US
+    0xC52A49444C61746ELLU, // kjr_Latn_ID
+    0xC92A50474C61746ELLU, // kjs_Latn_PG
+    0xCD2A544854686169LLU, // kjt_Thai_TH
+    0xD12A55534C61746ELLU, // kju_Latn_US
+    0xDD2A50474C61746ELLU, // kjx_Latn_PG
+    0xE12A50474C61746ELLU, // kjy_Latn_PG
+    0xE52A425454696274LLU, // kjz_Tibt_BT
     0x6B6B434E41726162LLU, // kk_Arab_CN
     0x6B6B4B5A4379726CLLU, // kk_Cyrl_KZ
+    0x814A4E474C61746ELLU, // kka_Latn_NG
+    0x854A49444C61746ELLU, // kkb_Latn_ID
+    0x894A50474C61746ELLU, // kkc_Latn_PG
+    0x8D4A4E474C61746ELLU, // kkd_Latn_NG
+    0x914A474E4C61746ELLU, // kke_Latn_GN
+    0x954A494E54696274LLU, // kkf_Tibt_IN
+    0x994A50484C61746ELLU, // kkg_Latn_PH
+    0x9D4A4D4D4C616E61LLU, // kkh_Lana_MM
+    0xA14A545A4C61746ELLU, // kki_Latn_TZ
     0xA54A434D4C61746ELLU, // kkj_Latn_CM
+    0xA94A53424C61746ELLU, // kkk_Latn_SB
+    0xAD4A49444C61746ELLU, // kkl_Latn_ID
+    0xB14A4E474C61746ELLU, // kkm_Latn_NG
+    0xB94A53444C61746ELLU, // kko_Latn_SD
+    0xBD4A41554C61746ELLU, // kkp_Latn_AU
+    0xC14A43444C61746ELLU, // kkq_Latn_CD
+    0xC54A4E474C61746ELLU, // kkr_Latn_NG
+    0xC94A4E474C61746ELLU, // kks_Latn_NG
+    0xCD4A4E5044657661LLU, // kkt_Deva_NP
+    0xD14A4E474C61746ELLU, // kku_Latn_NG
+    0xD54A49444C61746ELLU, // kkv_Latn_ID
+    0xD94A43474C61746ELLU, // kkw_Latn_CG
+    0xDD4A49444C61746ELLU, // kkx_Latn_ID
+    0xE14A41554C61746ELLU, // kky_Latn_AU
+    0xE54A43414C61746ELLU, // kkz_Latn_CA
     0x6B6C474C4C61746ELLU, // kl_Latn_GL
+    0x816A55534C61746ELLU, // kla_Latn_US
+    0x856A4D584C61746ELLU, // klb_Latn_MX
+    0x896A434D4C61746ELLU, // klc_Latn_CM
+    0x8D6A41554C61746ELLU, // kld_Latn_AU
+    0x916A4E5044657661LLU, // kle_Deva_NP
+    0x956A54444C61746ELLU, // klf_Latn_TD
+    0x996A50484C61746ELLU, // klg_Latn_PH
+    0x9D6A50474C61746ELLU, // klh_Latn_PG
+    0xA16A49444C61746ELLU, // kli_Latn_ID
+    0xA56A495241726162LLU, // klj_Arab_IR
+    0xA96A4E474C61746ELLU, // klk_Latn_NG
+    0xAD6A50484C61746ELLU, // kll_Latn_PH
+    0xB16A50474C61746ELLU, // klm_Latn_PG
     0xB56A4B454C61746ELLU, // kln_Latn_KE
+    0xB96A4E474C61746ELLU, // klo_Latn_NG
+    0xBD6A50474C61746ELLU, // klp_Latn_PG
+    0xC16A50474C61746ELLU, // klq_Latn_PG
+    0xC56A4E5044657661LLU, // klr_Deva_NP
+    0xC96A504B4C61746ELLU, // kls_Latn_PK
+    0xCD6A50474C61746ELLU, // klt_Latn_PG
+    0xD16A4C524C61746ELLU, // klu_Latn_LR
+    0xD56A56554C61746ELLU, // klv_Latn_VU
+    0xD96A49444C61746ELLU, // klw_Latn_ID
+    0xDD6A50474C61746ELLU, // klx_Latn_PG
+    0xE16A49444C61746ELLU, // kly_Latn_ID
+    0xE56A49444C61746ELLU, // klz_Latn_ID
     0x6B6D4B484B686D72LLU, // km_Khmr_KH
+    0x818A47484C61746ELLU, // kma_Latn_GH
     0x858A414F4C61746ELLU, // kmb_Latn_AO
+    0x898A434E4C61746ELLU, // kmc_Latn_CN
+    0x8D8A50484C61746ELLU, // kmd_Latn_PH
+    0x918A434D4C61746ELLU, // kme_Latn_CM
+    0x958A50474C61746ELLU, // kmf_Latn_PG
+    0x998A50474C61746ELLU, // kmg_Latn_PG
+    0x9D8A50474C61746ELLU, // kmh_Latn_PG
+    0xA18A4E474C61746ELLU, // kmi_Latn_NG
+    0xA58A494E44657661LLU, // kmj_Deva_IN
+    0xA98A50484C61746ELLU, // kmk_Latn_PH
+    0xAD8A50484C61746ELLU, // kml_Latn_PH
+    0xB18A494E4C61746ELLU, // kmm_Latn_IN
+    0xB58A50474C61746ELLU, // kmn_Latn_PG
+    0xB98A50474C61746ELLU, // kmo_Latn_PG
+    0xBD8A434D4C61746ELLU, // kmp_Latn_CM
+    0xC18A45544C61746ELLU, // kmq_Latn_ET
+    0xC98A50474C61746ELLU, // kms_Latn_PG
+    0xCD8A49444C61746ELLU, // kmt_Latn_ID
+    0xD18A50474C61746ELLU, // kmu_Latn_PG
+    0xD58A42524C61746ELLU, // kmv_Latn_BR
+    0xD98A43444C61746ELLU, // kmw_Latn_CD
+    0xDD8A50474C61746ELLU, // kmx_Latn_PG
+    0xE18A4E474C61746ELLU, // kmy_Latn_NG
+    0xE58A495241726162LLU, // kmz_Arab_IR
     0x6B6E494E4B6E6461LLU, // kn_Knda_IN
+    0x81AA4E474C61746ELLU, // kna_Latn_NG
+    0x85AA50484C61746ELLU, // knb_Latn_PH
+    0x8DAA49444C61746ELLU, // knd_Latn_ID
+    0x91AA50484C61746ELLU, // kne_Latn_PH
     0x95AA47574C61746ELLU, // knf_Latn_GW
+    0xA1AA4E474C61746ELLU, // kni_Latn_NG
+    0xA5AA47544C61746ELLU, // knj_Latn_GT
+    0xA9AA534C4C61746ELLU, // knk_Latn_SL
+    0xADAA49444C61746ELLU, // knl_Latn_ID
+    0xB1AA42524C61746ELLU, // knm_Latn_BR
+    0xB5AA494E44657661LLU, // knn_Deva_IN
+    0xB9AA534C4C61746ELLU, // kno_Latn_SL
+    0xBDAA434D4C61746ELLU, // knp_Latn_CM
+    0xC1AA4D594C61746ELLU, // knq_Latn_MY
+    0xC5AA50474C61746ELLU, // knr_Latn_PG
+    0xC9AA4D594C61746ELLU, // kns_Latn_MY
+    0xCDAA42524C61746ELLU, // knt_Latn_BR
+    0xD1AA474E4C61746ELLU, // knu_Latn_GN
+    0xD5AA50474C61746ELLU, // knv_Latn_PG
+    0xD9AA4E414C61746ELLU, // knw_Latn_NA
+    0xDDAA49444C61746ELLU, // knx_Latn_ID
+    0xE1AA43444C61746ELLU, // kny_Latn_CD
+    0xE5AA42464C61746ELLU, // knz_Latn_BF
     0x6B6F4B524B6F7265LLU, // ko_Kore_KR
+    0x81CA50474C61746ELLU, // koa_Latn_PG
+    0x89CA4E474C61746ELLU, // koc_Latn_NG
+    0x8DCA49444C61746ELLU, // kod_Latn_ID
+    0x91CA53534C61746ELLU, // koe_Latn_SS
+    0x95CA4E474C61746ELLU, // kof_Latn_NG
+    0x99CA434F4C61746ELLU, // kog_Latn_CO
+    0x9DCA43474C61746ELLU, // koh_Latn_CG
     0xA1CA52554379726CLLU, // koi_Cyrl_RU
     0xA9CA494E44657661LLU, // kok_Deva_IN
+    0xADCA50474C61746ELLU, // kol_Latn_PG
+    0xB9CA55474C61746ELLU, // koo_Latn_UG
+    0xBDCA50474C61746ELLU, // kop_Latn_PG
+    0xC1CA47414C61746ELLU, // koq_Latn_GA
     0xC9CA464D4C61746ELLU, // kos_Latn_FM
+    0xCDCA434D4C61746ELLU, // kot_Latn_CM
+    0xD1CA54444C61746ELLU, // kou_Latn_TD
+    0xD5CA4E474C61746ELLU, // kov_Latn_NG
+    0xD9CA4E474C61746ELLU, // kow_Latn_NG
+    0xE1CA55534C61746ELLU, // koy_Latn_US
+    0xE5CA50474C61746ELLU, // koz_Latn_PG
+    0x81EA4E474C61746ELLU, // kpa_Latn_NG
+    0x89EA434F4C61746ELLU, // kpc_Latn_CO
+    0x8DEA49444C61746ELLU, // kpd_Latn_ID
     0x91EA4C524C61746ELLU, // kpe_Latn_LR
+    0x95EA50474C61746ELLU, // kpf_Latn_PG
+    0x99EA464D4C61746ELLU, // kpg_Latn_FM
+    0x9DEA47484C61746ELLU, // kph_Latn_GH
+    0xA1EA49444C61746ELLU, // kpi_Latn_ID
+    0xA5EA42524C61746ELLU, // kpj_Latn_BR
+    0xA9EA4E474C61746ELLU, // kpk_Latn_NG
+    0xADEA43444C61746ELLU, // kpl_Latn_CD
+    0xB1EA564E4C61746ELLU, // kpm_Latn_VN
+    0xB5EA42524C61746ELLU, // kpn_Latn_BR
+    0xB9EA54474C61746ELLU, // kpo_Latn_TG
+    0xC1EA49444C61746ELLU, // kpq_Latn_ID
+    0xC5EA50474C61746ELLU, // kpr_Latn_PG
+    0xC9EA49444C61746ELLU, // kps_Latn_ID
+    0xCDEA52554379726CLLU, // kpt_Cyrl_RU
+    0xD1EA49444C61746ELLU, // kpu_Latn_ID
+    0xD9EA50474C61746ELLU, // kpw_Latn_PG
+    0xDDEA50474C61746ELLU, // kpx_Latn_PG
+    0xE1EA52554379726CLLU, // kpy_Cyrl_RU
+    0xE5EA55474C61746ELLU, // kpz_Latn_UG
+    0x820A50474C61746ELLU, // kqa_Latn_PG
+    0x860A50474C61746ELLU, // kqb_Latn_PG
+    0x8A0A50474C61746ELLU, // kqc_Latn_PG
+    0x8E0A495153797263LLU, // kqd_Syrc_IQ
+    0x920A50484C61746ELLU, // kqe_Latn_PH
+    0x960A50474C61746ELLU, // kqf_Latn_PG
+    0x9A0A42464C61746ELLU, // kqg_Latn_BF
+    0x9E0A545A4C61746ELLU, // kqh_Latn_TZ
+    0xA20A50474C61746ELLU, // kqi_Latn_PG
+    0xA60A50474C61746ELLU, // kqj_Latn_PG
+    0xAA0A424A4C61746ELLU, // kqk_Latn_BJ
+    0xAE0A50474C61746ELLU, // kql_Latn_PG
+    0xB20A43494C61746ELLU, // kqm_Latn_CI
+    0xB60A5A4D4C61746ELLU, // kqn_Latn_ZM
+    0xBA0A4C524C61746ELLU, // kqo_Latn_LR
+    0xBE0A54444C61746ELLU, // kqp_Latn_TD
+    0xC20A42524C61746ELLU, // kqq_Latn_BR
+    0xC60A4D594C61746ELLU, // kqr_Latn_MY
+    0xCA0A474E4C61746ELLU, // kqs_Latn_GN
+    0xCE0A4D594C61746ELLU, // kqt_Latn_MY
+    0xD20A5A414C61746ELLU, // kqu_Latn_ZA
+    0xD60A49444C61746ELLU, // kqv_Latn_ID
+    0xDA0A50474C61746ELLU, // kqw_Latn_PG
+    0xDE0A434D4C61746ELLU, // kqx_Latn_CM
+    0xE20A455445746869LLU, // kqy_Ethi_ET
+    0xE60A5A414C61746ELLU, // kqz_Latn_ZA
+    0x6B724E474C61746ELLU, // kr_Latn_NG
+    0x822A4E5044657661LLU, // kra_Deva_NP
+    0x862A55534C61746ELLU, // krb_Latn_US
     0x8A2A52554379726CLLU, // krc_Cyrl_RU
+    0x8E2A544C4C61746ELLU, // krd_Latn_TL
+    0x922A42524C61746ELLU, // kre_Latn_BR
+    0x962A56554C61746ELLU, // krf_Latn_VU
+    0x9E2A4E474C61746ELLU, // krh_Latn_NG
     0xA22A534C4C61746ELLU, // kri_Latn_SL
     0xA62A50484C61746ELLU, // krj_Latn_PH
+    0xAA2A52554379726CLLU, // krk_Cyrl_RU
     0xAE2A52554C61746ELLU, // krl_Latn_RU
+    0xB62A4C524C61746ELLU, // krn_Latn_LR
+    0xBE2A4E474C61746ELLU, // krp_Latn_NG
+    0xC62A4B484B686D72LLU, // krr_Khmr_KH
+    0xCA2A53534C61746ELLU, // krs_Latn_SS
+    0xCE2A4E454C61746ELLU, // krt_Latn_NE
     0xD22A494E44657661LLU, // kru_Deva_IN
+    0xD62A4B484B686D72LLU, // krv_Khmr_KH
+    0xDA2A4C524C61746ELLU, // krw_Latn_LR
+    0xDE2A534E4C61746ELLU, // krx_Latn_SN
+    0xE22A415A4C61746ELLU, // kry_Latn_AZ
+    0xE62A49444C61746ELLU, // krz_Latn_ID
     0x6B73494E41726162LLU, // ks_Arab_IN
     0x864A545A4C61746ELLU, // ksb_Latn_TZ
+    0x8A4A50484C61746ELLU, // ksc_Latn_PH
+    0x8E4A50474C61746ELLU, // ksd_Latn_PG
+    0x924A50474C61746ELLU, // kse_Latn_PG
     0x964A434D4C61746ELLU, // ksf_Latn_CM
+    0x9A4A53424C61746ELLU, // ksg_Latn_SB
     0x9E4A44454C61746ELLU, // ksh_Latn_DE
-    0xC66A4D594C61746ELLU, // ktr_Latn_MY
+    0xA24A50474C61746ELLU, // ksi_Latn_PG
+    0xA64A50474C61746ELLU, // ksj_Latn_PG
+    0xAA4A55534C61746ELLU, // ksk_Latn_US
+    0xAE4A50474C61746ELLU, // ksl_Latn_PG
+    0xB24A4E474C61746ELLU, // ksm_Latn_NG
+    0xB64A50484C61746ELLU, // ksn_Latn_PH
+    0xBA4A4E474C61746ELLU, // kso_Latn_NG
+    0xBE4A43464C61746ELLU, // ksp_Latn_CF
+    0xC24A4E474C61746ELLU, // ksq_Latn_NG
+    0xC64A50474C61746ELLU, // ksr_Latn_PG
+    0xCA4A4C524C61746ELLU, // kss_Latn_LR
+    0xCE4A42464C61746ELLU, // kst_Latn_BF
+    0xD24A494E4D796D72LLU, // ksu_Mymr_IN
+    0xD64A43444C61746ELLU, // ksv_Latn_CD
+    0xDA4A4D4D4D796D72LLU, // ksw_Mymr_MM
+    0xDE4A49444C61746ELLU, // ksx_Latn_ID
+    0xE64A494E44657661LLU, // ksz_Deva_IN
+    0x826A564E4C61746ELLU, // kta_Latn_VN
+    0x866A455445746869LLU, // ktb_Ethi_ET
+    0x8A6A4E474C61746ELLU, // ktc_Latn_NG
+    0x8E6A41554C61746ELLU, // ktd_Latn_AU
+    0x926A4E5044657661LLU, // kte_Deva_NP
+    0x966A43444C61746ELLU, // ktf_Latn_CD
+    0x9A6A41554C61746ELLU, // ktg_Latn_AU
+    0x9E6A54444C61746ELLU, // kth_Latn_TD
+    0xA26A49444C61746ELLU, // kti_Latn_ID
+    0xA66A43494C61746ELLU, // ktj_Latn_CI
+    0xAA6A50474C61746ELLU, // ktk_Latn_PG
+    0xAE6A495241726162LLU, // ktl_Arab_IR
+    0xB26A50474C61746ELLU, // ktm_Latn_PG
+    0xB66A42524C61746ELLU, // ktn_Latn_BR
+    0xBA6A50474C61746ELLU, // kto_Latn_PG
+    0xBE6A434E506C7264LLU, // ktp_Plrd_CN
+    0xC26A50484C61746ELLU, // ktq_Latn_PH
+    0xCA6A49444C61746ELLU, // kts_Latn_ID
+    0xCE6A49444C61746ELLU, // ktt_Latn_ID
+    0xD26A43444C61746ELLU, // ktu_Latn_CD
+    0xD66A564E4C61746ELLU, // ktv_Latn_VN
+    0xDA6A55534C61746ELLU, // ktw_Latn_US
+    0xDE6A42524C61746ELLU, // ktx_Latn_BR
+    0xE26A43444C61746ELLU, // kty_Latn_CD
+    0xE66A4E414C61746ELLU, // ktz_Latn_NA
     0x6B75495141726162LLU, // ku_Arab_IQ
     0x6B7554524C61746ELLU, // ku_Latn_TR
     0x6B75474559657A69LLU, // ku_Yezi_GE
+    0x868A4E474C61746ELLU, // kub_Latn_NG
+    0x8A8A49444C61746ELLU, // kuc_Latn_ID
+    0x8E8A50474C61746ELLU, // kud_Latn_PG
+    0x928A50474C61746ELLU, // kue_Latn_PG
+    0x968A4C414C616F6FLLU, // kuf_Laoo_LA
+    0x9A8A4E474C61746ELLU, // kug_Latn_NG
+    0x9E8A4E474C61746ELLU, // kuh_Latn_NG
+    0xA28A42524C61746ELLU, // kui_Latn_BR
+    0xA68A545A4C61746ELLU, // kuj_Latn_TZ
+    0xAA8A49444C61746ELLU, // kuk_Latn_ID
+    0xAE8A4E474C61746ELLU, // kul_Latn_NG
     0xB28A52554379726CLLU, // kum_Cyrl_RU
+    0xB68A45524C61746ELLU, // kun_Latn_ER
+    0xBA8A50474C61746ELLU, // kuo_Latn_PG
+    0xBE8A50474C61746ELLU, // kup_Latn_PG
+    0xC28A42524C61746ELLU, // kuq_Latn_BR
+    0xCA8A47484C61746ELLU, // kus_Latn_GH
+    0xCE8A43414C61746ELLU, // kut_Latn_CA
+    0xD28A55534C61746ELLU, // kuu_Latn_US
+    0xD68A49444C61746ELLU, // kuv_Latn_ID
+    0xDA8A43464C61746ELLU, // kuw_Latn_CF
+    0xDE8A41554C61746ELLU, // kux_Latn_AU
+    0xE28A41554C61746ELLU, // kuy_Latn_AU
+    0xE68A434C4C61746ELLU, // kuz_Latn_CL
     0x6B7652554379726CLLU, // kv_Cyrl_RU
+    0x82AA52554379726CLLU, // kva_Cyrl_RU
+    0x86AA49444C61746ELLU, // kvb_Latn_ID
+    0x8AAA50474C61746ELLU, // kvc_Latn_PG
+    0x8EAA49444C61746ELLU, // kvd_Latn_ID
+    0x92AA4D594C61746ELLU, // kve_Latn_MY
+    0x96AA54444C61746ELLU, // kvf_Latn_TD
+    0x9AAA50474C61746ELLU, // kvg_Latn_PG
+    0x9EAA49444C61746ELLU, // kvh_Latn_ID
+    0xA2AA54444C61746ELLU, // kvi_Latn_TD
+    0xA6AA434D4C61746ELLU, // kvj_Latn_CM
+    0xAEAA4D4D4C61746ELLU, // kvl_Latn_MM
+    0xB2AA434D4C61746ELLU, // kvm_Latn_CM
+    0xB6AA434F4C61746ELLU, // kvn_Latn_CO
+    0xBAAA49444C61746ELLU, // kvo_Latn_ID
+    0xBEAA49444C61746ELLU, // kvp_Latn_ID
+    0xC2AA4D4D4D796D72LLU, // kvq_Mymr_MM
     0xC6AA49444C61746ELLU, // kvr_Latn_ID
+    0xCEAA4D4D4D796D72LLU, // kvt_Mymr_MM
+    0xD6AA49444C61746ELLU, // kvv_Latn_ID
+    0xDAAA49444C61746ELLU, // kvw_Latn_ID
     0xDEAA504B41726162LLU, // kvx_Arab_PK
+    0xE2AA4D4D4B616C69LLU, // kvy_Kali_MM
+    0xE6AA49444C61746ELLU, // kvz_Latn_ID
     0x6B7747424C61746ELLU, // kw_Latn_GB
+    0x82CA42524C61746ELLU, // kwa_Latn_BR
+    0x86CA4E474C61746ELLU, // kwb_Latn_NG
+    0x8ACA43474C61746ELLU, // kwc_Latn_CG
+    0x8ECA53424C61746ELLU, // kwd_Latn_SB
+    0x92CA49444C61746ELLU, // kwe_Latn_ID
+    0x96CA53424C61746ELLU, // kwf_Latn_SB
+    0x9ACA54444C61746ELLU, // kwg_Latn_TD
+    0x9ECA49444C61746ELLU, // kwh_Latn_ID
+    0xA2CA434F4C61746ELLU, // kwi_Latn_CO
+    0xA6CA50474C61746ELLU, // kwj_Latn_PG
     0xAACA43414C61746ELLU, // kwk_Latn_CA
-    0xAEEA494E44657661LLU, // kxl_Deva_IN
+    0xAECA4E474C61746ELLU, // kwl_Latn_NG
+    0xB2CA4E414C61746ELLU, // kwm_Latn_NA
+    0xB6CA4E414C61746ELLU, // kwn_Latn_NA
+    0xBACA50474C61746ELLU, // kwo_Latn_PG
+    0xBECA43494C61746ELLU, // kwp_Latn_CI
+    0xC6CA49444C61746ELLU, // kwr_Latn_ID
+    0xCACA43444C61746ELLU, // kws_Latn_CD
+    0xCECA49444C61746ELLU, // kwt_Latn_ID
+    0xD2CA434D4C61746ELLU, // kwu_Latn_CM
+    0xD6CA54444C61746ELLU, // kwv_Latn_TD
+    0xDACA53524C61746ELLU, // kww_Latn_SR
+    0xE2CA414F4C61746ELLU, // kwy_Latn_AO
+    0xE6CA414F4C61746ELLU, // kwz_Latn_AO
+    0x82EA50474C61746ELLU, // kxa_Latn_PG
+    0x86EA43494C61746ELLU, // kxb_Latn_CI
+    0x8AEA45544C61746ELLU, // kxc_Latn_ET
+    0x8EEA424E4C61746ELLU, // kxd_Latn_BN
+    0x96EA4D4D4D796D72LLU, // kxf_Mymr_MM
+    0xA2EA4D594C61746ELLU, // kxi_Latn_MY
+    0xA6EA54444C61746ELLU, // kxj_Latn_TD
+    0xAAEA4D4D4D796D72LLU, // kxk_Mymr_MM
     0xB2EA544854686169LLU, // kxm_Thai_TH
+    0xB6EA4D594C61746ELLU, // kxn_Latn_MY
+    0xBAEA42524C61746ELLU, // kxo_Latn_BR
     0xBEEA504B41726162LLU, // kxp_Arab_PK
+    0xC2EA49444C61746ELLU, // kxq_Latn_ID
+    0xC6EA50474C61746ELLU, // kxr_Latn_PG
+    0xCEEA50474C61746ELLU, // kxt_Latn_PG
+    0xD6EA494E4C61746ELLU, // kxv_Latn_IN
+    0xDAEA50474C61746ELLU, // kxw_Latn_PG
+    0xDEEA43474C61746ELLU, // kxx_Latn_CG
+    0xE2EA564E4C61746ELLU, // kxy_Latn_VN
+    0xE6EA50474C61746ELLU, // kxz_Latn_PG
     0x6B79434E41726162LLU, // ky_Arab_CN
     0x6B794B474379726CLLU, // ky_Cyrl_KG
     0x6B7954524C61746ELLU, // ky_Latn_TR
-    0xA72A4D594C61746ELLU, // kzj_Latn_MY
-    0xCF2A4D594C61746ELLU, // kzt_Latn_MY
+    0x830A545A4C61746ELLU, // kya_Latn_TZ
+    0x870A50484C61746ELLU, // kyb_Latn_PH
+    0x8B0A50474C61746ELLU, // kyc_Latn_PG
+    0x8F0A49444C61746ELLU, // kyd_Latn_ID
+    0x930A47484C61746ELLU, // kye_Latn_GH
+    0x970A43494C61746ELLU, // kyf_Latn_CI
+    0x9B0A50474C61746ELLU, // kyg_Latn_PG
+    0x9F0A55534C61746ELLU, // kyh_Latn_US
+    0xA30A4D594C61746ELLU, // kyi_Latn_MY
+    0xA70A50484C61746ELLU, // kyj_Latn_PH
+    0xAB0A50484C61746ELLU, // kyk_Latn_PH
+    0xAF0A55534C61746ELLU, // kyl_Latn_US
+    0xB30A43464C61746ELLU, // kym_Latn_CF
+    0xB70A50484C61746ELLU, // kyn_Latn_PH
+    0xBB0A49444C61746ELLU, // kyo_Latn_ID
+    0xC30A54444C61746ELLU, // kyq_Latn_TD
+    0xC70A42524C61746ELLU, // kyr_Latn_BR
+    0xCB0A4D594C61746ELLU, // kys_Latn_MY
+    0xCF0A49444C61746ELLU, // kyt_Latn_ID
+    0xD30A4D4D4B616C69LLU, // kyu_Kali_MM
+    0xD70A4E5044657661LLU, // kyv_Deva_NP
+    0xDB0A494E44657661LLU, // kyw_Deva_IN
+    0xDF0A50474C61746ELLU, // kyx_Latn_PG
+    0xE30A50474C61746ELLU, // kyy_Latn_PG
+    0xE70A42524C61746ELLU, // kyz_Latn_BR
+    0x832A42464C61746ELLU, // kza_Latn_BF
+    0x872A49444C61746ELLU, // kzb_Latn_ID
+    0x8B2A43494C61746ELLU, // kzc_Latn_CI
+    0x8F2A49444C61746ELLU, // kzd_Latn_ID
+    0x932A50474C61746ELLU, // kze_Latn_PG
+    0x972A49444C61746ELLU, // kzf_Latn_ID
+    0xA32A4D594C61746ELLU, // kzi_Latn_MY
+    0xAB2A53424C61746ELLU, // kzk_Latn_SB
+    0xAF2A49444C61746ELLU, // kzl_Latn_ID
+    0xB32A49444C61746ELLU, // kzm_Latn_ID
+    0xB72A4D574C61746ELLU, // kzn_Latn_MW
+    0xBB2A47414C61746ELLU, // kzo_Latn_GA
+    0xBF2A49444C61746ELLU, // kzp_Latn_ID
+    0xC72A434D4C61746ELLU, // kzr_Latn_CM
+    0xCB2A4D594C61746ELLU, // kzs_Latn_MY
+    0xD32A49444C61746ELLU, // kzu_Latn_ID
+    0xD72A49444C61746ELLU, // kzv_Latn_ID
+    0xDB2A42524C61746ELLU, // kzw_Latn_BR
+    0xDF2A49444C61746ELLU, // kzx_Latn_ID
+    0xE32A43444C61746ELLU, // kzy_Latn_CD
+    0xE72A49444C61746ELLU, // kzz_Latn_ID
     0x6C6156414C61746ELLU, // la_Latn_VA
+    0x800B50484C61746ELLU, // laa_Latn_PH
     0x840B47524C696E61LLU, // lab_Lina_GR
+    0x880B4D584C61746ELLU, // lac_Latn_MX
     0x8C0B494C48656272LLU, // lad_Hebr_IL
+    0x900B494E44657661LLU, // lae_Deva_IN
     0x980B545A4C61746ELLU, // lag_Latn_TZ
     0x9C0B504B41726162LLU, // lah_Arab_PK
+    0xA00B4D574C61746ELLU, // lai_Latn_MW
     0xA40B55474C61746ELLU, // laj_Latn_UG
+    0xAC0B43444C61746ELLU, // lal_Latn_CD
+    0xB00B5A4D4C61746ELLU, // lam_Latn_ZM
+    0xB40B4E474C61746ELLU, // lan_Latn_NG
+    0xBC0B54444C61746ELLU, // lap_Latn_TD
+    0xC00B564E4C61746ELLU, // laq_Latn_VN
+    0xC40B47484C61746ELLU, // lar_Latn_GH
+    0xC80B54474C61746ELLU, // las_Latn_TG
+    0xD00B49444C61746ELLU, // lau_Latn_ID
+    0xD80B49444C61746ELLU, // law_Latn_ID
+    0xDC0B494E4C61746ELLU, // lax_Latn_IN
+    0xE40B50474C61746ELLU, // laz_Latn_PG
     0x6C624C554C61746ELLU, // lb_Latn_LU
+    0x842B50474C61746ELLU, // lbb_Latn_PG
     0x902B52554379726CLLU, // lbe_Cyrl_RU
+    0x942B494E44657661LLU, // lbf_Deva_IN
+    0xA02B434D4C61746ELLU, // lbi_Latn_CM
+    0xA42B494E54696274LLU, // lbj_Tibt_IN
+    0xAC2B50484C61746ELLU, // lbl_Latn_PH
+    0xB02B494E44657661LLU, // lbm_Deva_IN
+    0xB42B4C414C61746ELLU, // lbn_Latn_LA
+    0xB82B4C414C616F6FLLU, // lbo_Laoo_LA
+    0xC02B50474C61746ELLU, // lbq_Latn_PG
+    0xC42B4E5044657661LLU, // lbr_Deva_NP
+    0xCC2B564E4C61746ELLU, // lbt_Latn_VN
+    0xD02B50474C61746ELLU, // lbu_Latn_PG
+    0xD42B50474C61746ELLU, // lbv_Latn_PG
     0xD82B49444C61746ELLU, // lbw_Latn_ID
+    0xDC2B49444C61746ELLU, // lbx_Latn_ID
+    0xE02B41554C61746ELLU, // lby_Latn_AU
+    0xE42B41554C61746ELLU, // lbz_Latn_AU
+    0x884B49444C61746ELLU, // lcc_Latn_ID
+    0x8C4B49444C61746ELLU, // lcd_Latn_ID
+    0x904B49444C61746ELLU, // lce_Latn_ID
+    0x944B49444C61746ELLU, // lcf_Latn_ID
+    0x9C4B414F4C61746ELLU, // lch_Latn_AO
+    0xAC4B49444C61746ELLU, // lcl_Latn_ID
+    0xB04B50474C61746ELLU, // lcm_Latn_PG
     0xBC4B434E54686169LLU, // lcp_Thai_CN
+    0xC04B49444C61746ELLU, // lcq_Latn_ID
+    0xC84B49444C61746ELLU, // lcs_Latn_ID
+    0x806B43494C61746ELLU, // lda_Latn_CI
+    0x846B4E474C61746ELLU, // ldb_Latn_NG
+    0x8C6B4E474C61746ELLU, // ldd_Latn_NG
+    0x986B4E474C61746ELLU, // ldg_Latn_NG
+    0x9C6B4E474C61746ELLU, // ldh_Latn_NG
+    0xA06B43474C61746ELLU, // ldi_Latn_CG
+    0xA46B4E474C61746ELLU, // ldj_Latn_NG
+    0xA86B4E474C61746ELLU, // ldk_Latn_NG
+    0xAC6B4E474C61746ELLU, // ldl_Latn_NG
+    0xB06B474E4C61746ELLU, // ldm_Latn_GN
+    0xB86B4E474C61746ELLU, // ldo_Latn_NG
+    0xBC6B4E474C61746ELLU, // ldp_Latn_NG
+    0xC06B4E474C61746ELLU, // ldq_Latn_NG
+    0x808B43444C61746ELLU, // lea_Latn_CD
+    0x848B5A4D4C61746ELLU, // leb_Latn_ZM
+    0x888B424F4C61746ELLU, // lec_Latn_BO
+    0x8C8B43444C61746ELLU, // led_Latn_CD
+    0x908B42464C61746ELLU, // lee_Latn_BF
+    0x948B47484C61746ELLU, // lef_Latn_GH
+    0x9C8B5A4D4C61746ELLU, // leh_Latn_ZM
+    0xA08B50474C61746ELLU, // lei_Latn_PG
+    0xA48B43444C61746ELLU, // lej_Latn_CD
+    0xA88B50474C61746ELLU, // lek_Latn_PG
+    0xAC8B43444C61746ELLU, // lel_Latn_CD
+    0xB08B434D4C61746ELLU, // lem_Latn_CM
+    0xB48B484E4C61746ELLU, // len_Latn_HN
+    0xB88B434D4C61746ELLU, // leo_Latn_CM
     0xBC8B494E4C657063LLU, // lep_Lepc_IN
+    0xC08B50474C61746ELLU, // leq_Latn_PG
+    0xC48B50474C61746ELLU, // ler_Latn_PG
+    0xC88B43444C61746ELLU, // les_Latn_CD
+    0xCC8B50474C61746ELLU, // let_Latn_PG
+    0xD08B50474C61746ELLU, // leu_Latn_PG
+    0xD48B49444C61746ELLU, // lev_Latn_ID
+    0xD88B49444C61746ELLU, // lew_Latn_ID
+    0xDC8B49444C61746ELLU, // lex_Latn_ID
+    0xE08B49444C61746ELLU, // ley_Latn_ID
     0xE48B52554379726CLLU, // lez_Cyrl_RU
+    0x80AB434D4C61746ELLU, // lfa_Latn_CM
     0x6C6755474C61746ELLU, // lg_Latn_UG
+    0x80CB53424C61746ELLU, // lga_Latn_SB
+    0x84CB53424C61746ELLU, // lgb_Latn_SB
+    0x98CB55474C61746ELLU, // lgg_Latn_UG
+    0x9CCB564E4C61746ELLU, // lgh_Latn_VN
+    0xA0CB49444C61746ELLU, // lgi_Latn_ID
+    0xA8CB56554C61746ELLU, // lgk_Latn_VU
+    0xACCB53424C61746ELLU, // lgl_Latn_SB
+    0xB0CB43444C61746ELLU, // lgm_Latn_CD
+    0xB4CB45544C61746ELLU, // lgn_Latn_ET
+    0xB8CB53534C61746ELLU, // lgo_Latn_SS
+    0xC0CB47484C61746ELLU, // lgq_Latn_GH
+    0xC4CB53424C61746ELLU, // lgr_Latn_SB
+    0xCCCB50474C61746ELLU, // lgt_Latn_PG
+    0xD0CB53424C61746ELLU, // lgu_Latn_SB
+    0xE4CB43444C61746ELLU, // lgz_Latn_CD
+    0x80EB564E4C61746ELLU, // lha_Latn_VN
+    0x9CEB49444C61746ELLU, // lhh_Latn_ID
+    0xA0EB434E4C61746ELLU, // lhi_Latn_CN
+    0xB0EB4E5044657661LLU, // lhm_Deva_NP
+    0xB4EB4D594C61746ELLU, // lhn_Latn_MY
+    0xC8EB535953797263LLU, // lhs_Syrc_SY
+    0xCCEB56554C61746ELLU, // lht_Latn_VU
+    0xD0EB434E4C61746ELLU, // lhu_Latn_CN
     0x6C694E4C4C61746ELLU, // li_Latn_NL
+    0x810B534C4C61746ELLU, // lia_Latn_SL
+    0x850B50474C61746ELLU, // lib_Latn_PG
+    0x890B434E4C61746ELLU, // lic_Latn_CN
+    0x8D0B50474C61746ELLU, // lid_Latn_PG
+    0x910B43444C61746ELLU, // lie_Latn_CD
     0x950B4E5044657661LLU, // lif_Deva_NP
     0x950B494E4C696D62LLU, // lif_Limb_IN
+    0x990B47484C61746ELLU, // lig_Latn_GH
+    0x9D0B50474C61746ELLU, // lih_Latn_PG
     0xA50B49544C61746ELLU, // lij_Latn_IT
+    0xA90B43444C61746ELLU, // lik_Latn_CD
     0xAD0B43414C61746ELLU, // lil_Latn_CA
+    0xB90B49444C61746ELLU, // lio_Latn_ID
+    0xBD0B47484C61746ELLU, // lip_Latn_GH
+    0xC10B45544C61746ELLU, // liq_Latn_ET
+    0xC50B4C524C61746ELLU, // lir_Latn_LR
     0xC90B434E4C697375LLU, // lis_Lisu_CN
+    0xD10B53444C61746ELLU, // liu_Latn_SD
+    0xD50B4C564C61746ELLU, // liv_Latn_LV
+    0xD90B49444C61746ELLU, // liw_Latn_ID
+    0xDD0B49444C61746ELLU, // lix_Latn_ID
+    0xE10B43464C61746ELLU, // liy_Latn_CF
+    0xE50B43444C61746ELLU, // liz_Latn_CD
+    0x812B41554C61746ELLU, // lja_Latn_AU
+    0x912B49444C61746ELLU, // lje_Latn_ID
+    0xA12B49444C61746ELLU, // lji_Latn_ID
+    0xAD2B49444C61746ELLU, // ljl_Latn_ID
     0xBD2B49444C61746ELLU, // ljp_Latn_ID
+    0xD92B41554C61746ELLU, // ljw_Latn_AU
+    0xDD2B41554C61746ELLU, // ljx_Latn_AU
+    0x814B544C4C61746ELLU, // lka_Latn_TL
+    0x854B4B454C61746ELLU, // lkb_Latn_KE
+    0x894B564E4C61746ELLU, // lkc_Latn_VN
+    0x8D4B42524C61746ELLU, // lkd_Latn_BR
+    0x914B55474C61746ELLU, // lke_Latn_UG
+    0x9D4B425454696274LLU, // lkh_Tibt_BT
     0xA14B495241726162LLU, // lki_Arab_IR
+    0xA54B4D594C61746ELLU, // lkj_Latn_MY
+    0xAD4B50474C61746ELLU, // lkl_Latn_PG
+    0xB14B41554C61746ELLU, // lkm_Latn_AU
+    0xB54B56554C61746ELLU, // lkn_Latn_VU
+    0xB94B4B454C61746ELLU, // lko_Latn_KE
+    0xC54B53534C61746ELLU, // lkr_Latn_SS
+    0xC94B4B454C61746ELLU, // lks_Latn_KE
     0xCD4B55534C61746ELLU, // lkt_Latn_US
+    0xD14B41554C61746ELLU, // lku_Latn_AU
+    0xE14B53534C61746ELLU, // lky_Latn_SS
+    0x816B4E474C61746ELLU, // lla_Latn_NG
+    0x856B4D5A4C61746ELLU, // llb_Latn_MZ
+    0x896B474E4C61746ELLU, // llc_Latn_GN
+    0x8D6B49544C61746ELLU, // lld_Latn_IT
+    0x916B50474C61746ELLU, // lle_Latn_PG
+    0x956B50474C61746ELLU, // llf_Latn_PG
+    0x996B49444C61746ELLU, // llg_Latn_ID
+    0xA16B43474C61746ELLU, // lli_Latn_CG
+    0xA56B41554C61746ELLU, // llj_Latn_AU
+    0xA96B4D594C61746ELLU, // llk_Latn_MY
+    0xAD6B50474C61746ELLU, // lll_Latn_PG
+    0xB16B49444C61746ELLU, // llm_Latn_ID
+    0xB56B54444C61746ELLU, // lln_Latn_TD
+    0xBD6B56554C61746ELLU, // llp_Latn_VU
+    0xC16B49444C61746ELLU, // llq_Latn_ID
+    0xD16B53424C61746ELLU, // llu_Latn_SB
+    0xDD6B464A4C61746ELLU, // llx_Latn_FJ
+    0x818B474E4C61746ELLU, // lma_Latn_GN
+    0x858B56554C61746ELLU, // lmb_Latn_VU
+    0x898B41554C61746ELLU, // lmc_Latn_AU
+    0x8D8B53444C61746ELLU, // lmd_Latn_SD
+    0x918B54444C61746ELLU, // lme_Latn_TD
+    0x958B49444C61746ELLU, // lmf_Latn_ID
+    0x998B50474C61746ELLU, // lmg_Latn_PG
+    0x9D8B4E5044657661LLU, // lmh_Deva_NP
+    0xA18B43444C61746ELLU, // lmi_Latn_CD
+    0xA58B49444C61746ELLU, // lmj_Latn_ID
+    0xA98B494E4C61746ELLU, // lmk_Latn_IN
+    0xAD8B56554C61746ELLU, // lml_Latn_VU
     0xB58B494E54656C75LLU, // lmn_Telu_IN
     0xB98B49544C61746ELLU, // lmo_Latn_IT
+    0xBD8B434D4C61746ELLU, // lmp_Latn_CM
+    0xC18B49444C61746ELLU, // lmq_Latn_ID
+    0xC58B49444C61746ELLU, // lmr_Latn_ID
+    0xD18B56554C61746ELLU, // lmu_Latn_VU
+    0xD58B464A4C61746ELLU, // lmv_Latn_FJ
+    0xD98B55534C61746ELLU, // lmw_Latn_US
+    0xDD8B434D4C61746ELLU, // lmx_Latn_CM
+    0xE18B49444C61746ELLU, // lmy_Latn_ID
     0x6C6E43444C61746ELLU, // ln_Latn_CD
+    0x81AB43464C61746ELLU, // lna_Latn_CF
+    0x85AB4E414C61746ELLU, // lnb_Latn_NA
+    0x8DAB49444C61746ELLU, // lnd_Latn_ID
+    0x99AB48554C61746ELLU, // lng_Latn_HU
+    0x9DAB4D594C61746ELLU, // lnh_Latn_MY
+    0xA1AB50474C61746ELLU, // lni_Latn_PG
+    0xA5AB41554C61746ELLU, // lnj_Latn_AU
+    0xADAB43464C61746ELLU, // lnl_Latn_CF
+    0xB1AB50474C61746ELLU, // lnm_Latn_PG
+    0xB5AB56554C61746ELLU, // lnn_Latn_VU
+    0xC9AB434D4C61746ELLU, // lns_Latn_CM
+    0xD1AB4E474C61746ELLU, // lnu_Latn_NG
+    0xD9AB41554C61746ELLU, // lnw_Latn_AU
+    0xE5AB43444C61746ELLU, // lnz_Latn_CD
     0x6C6F4C414C616F6FLLU, // lo_Laoo_LA
+    0x81CB49444C61746ELLU, // loa_Latn_ID
+    0x85CB42464C61746ELLU, // lob_Latn_BF
+    0x89CB50484C61746ELLU, // loc_Latn_PH
+    0x91CB49444C61746ELLU, // loe_Latn_ID
+    0x99CB43444C61746ELLU, // log_Latn_CD
+    0x9DCB53534C61746ELLU, // loh_Latn_SS
+    0xA1CB43494C61746ELLU, // loi_Latn_CI
+    0xA5CB50474C61746ELLU, // loj_Latn_PG
+    0xA9CB534C4C61746ELLU, // lok_Latn_SL
     0xADCB43444C61746ELLU, // lol_Latn_CD
+    0xB1CB4C524C61746ELLU, // lom_Latn_LR
+    0xB5CB4D574C61746ELLU, // lon_Latn_MW
+    0xB9CB43444C61746ELLU, // loo_Latn_CD
+    0xBDCB4E474C61746ELLU, // lop_Latn_NG
+    0xC1CB43444C61746ELLU, // loq_Latn_CD
+    0xC5CB43494C61746ELLU, // lor_Latn_CI
+    0xC9CB50474C61746ELLU, // los_Latn_PG
+    0xCDCB53534C61746ELLU, // lot_Latn_SS
+    0xD1CB55534C61746ELLU, // lou_Latn_US
+    0xD9CB4D594C61746ELLU, // low_Latn_MY
+    0xDDCB49444C61746ELLU, // lox_Latn_ID
+    0xE1CB4E5044657661LLU, // loy_Deva_NP
     0xE5CB5A4D4C61746ELLU, // loz_Latn_ZM
+    0x81EB56554C61746ELLU, // lpa_Latn_VU
+    0x91EB49444C61746ELLU, // lpe_Latn_ID
+    0xB5EB4D4D4C61746ELLU, // lpn_Latn_MM
+    0xB9EB434E506C7264LLU, // lpo_Plrd_CN
+    0xDDEB53534C61746ELLU, // lpx_Latn_SS
+    0xC60B53534C61746ELLU, // lqr_Latn_SS
+    0x822B4D594C61746ELLU, // lra_Latn_MY
     0x8A2B495241726162LLU, // lrc_Arab_IR
+    0x9A2B41554C61746ELLU, // lrg_Latn_AU
+    0xA22B4B454C61746ELLU, // lri_Latn_KE
+    0xAA2B504B41726162LLU, // lrk_Arab_PK
+    0xAE2B495241726162LLU, // lrl_Arab_IR
+    0xB22B4B454C61746ELLU, // lrm_Latn_KE
+    0xB62B49444C61746ELLU, // lrn_Latn_ID
+    0xBA2B53444C61746ELLU, // lro_Latn_SD
+    0xCE2B49444C61746ELLU, // lrt_Latn_ID
+    0xD62B56554C61746ELLU, // lrv_Latn_VU
+    0xE62B56554C61746ELLU, // lrz_Latn_VU
+    0x824B495241726162LLU, // lsa_Arab_IR
+    0x8E4B494C48656272LLU, // lsd_Hebr_IL
+    0x924B43444C61746ELLU, // lse_Latn_CD
+    0xA24B4D4D4C61746ELLU, // lsi_Latn_MM
+    0xB24B55474C61746ELLU, // lsm_Latn_UG
+    0xC64B50474C61746ELLU, // lsr_Latn_PG
+    0xCA4B504B41726162LLU, // lss_Arab_PK
     0x6C744C544C61746ELLU, // lt_Latn_LT
+    0x8A6B434E48616E74LLU, // ltc_Hant_CN
     0x9A6B4C564C61746ELLU, // ltg_Latn_LV
+    0x9E6B55474C61746ELLU, // lth_Latn_UG
+    0xA26B49444C61746ELLU, // lti_Latn_ID
+    0xB66B42524C61746ELLU, // ltn_Latn_BR
+    0xBA6B4B454C61746ELLU, // lto_Latn_KE
+    0xCA6B4B454C61746ELLU, // lts_Latn_KE
+    0xD26B49444C61746ELLU, // ltu_Latn_ID
     0x6C7543444C61746ELLU, // lu_Latn_CD
     0x828B43444C61746ELLU, // lua_Latn_CD
+    0x8A8B55474C61746ELLU, // luc_Latn_UG
+    0x8E8B52554C61746ELLU, // lud_Latn_RU
+    0x928B5A4D4C61746ELLU, // lue_Latn_ZM
+    0x968B50474C61746ELLU, // luf_Latn_PG
+    0xA28B55534C61746ELLU, // lui_Latn_US
+    0xA68B43444C61746ELLU, // luj_Latn_CD
+    0xAA8B425454696274LLU, // luk_Tibt_BT
+    0xAE8B53534C61746ELLU, // lul_Latn_SS
+    0xB28B414F4C61746ELLU, // lum_Latn_AO
+    0xB68B5A4D4C61746ELLU, // lun_Latn_ZM
     0xBA8B4B454C61746ELLU, // luo_Latn_KE
+    0xBE8B47414C61746ELLU, // lup_Latn_GA
+    0xC28B43554C61746ELLU, // luq_Latn_CU
+    0xC68B49444C61746ELLU, // lur_Latn_ID
+    0xCA8B494E4C61746ELLU, // lus_Latn_IN
+    0xCE8B55534C61746ELLU, // lut_Latn_US
+    0xD28B4E5044657661LLU, // luu_Deva_NP
+    0xD68B4F4D41726162LLU, // luv_Arab_OM
+    0xDA8B434D4C61746ELLU, // luw_Latn_CM
     0xE28B4B454C61746ELLU, // luy_Latn_KE
     0xE68B495241726162LLU, // luz_Arab_IR
     0x6C764C564C61746ELLU, // lv_Latn_LV
+    0x82AB544C4C61746ELLU, // lva_Latn_TL
+    0xA2AB4C414C61746ELLU, // lvi_Latn_LA
+    0xAAAB53424C61746ELLU, // lvk_Latn_SB
+    0xAEAB43444C61746ELLU, // lvl_Latn_CD
+    0xD2AB49444C61746ELLU, // lvu_Latn_ID
+    0x82CB43444C61746ELLU, // lwa_Latn_CD
+    0x92CB49444C61746ELLU, // lwe_Latn_ID
+    0x9ACB4B454C61746ELLU, // lwg_Latn_KE
+    0x9ECB564E4C61746ELLU, // lwh_Latn_VN
     0xAECB544854686169LLU, // lwl_Thai_TH
+    0xB2CB434E54686169LLU, // lwm_Thai_CN
+    0xBACB53534C61746ELLU, // lwo_Latn_SS
+    0xCECB49444C61746ELLU, // lwt_Latn_ID
+    0xDACB56554C61746ELLU, // lww_Latn_VU
+    0xB2EB50474C61746ELLU, // lxm_Latn_PG
+    0x830B425454696274LLU, // lya_Tibt_BT
+    0xB70B5A4D4C61746ELLU, // lyn_Latn_ZM
     0x9F2B434E48616E73LLU, // lzh_Hans_CN
+    0xAF2B56554C61746ELLU, // lzl_Latn_VU
+    0xB72B4D4D4C61746ELLU, // lzn_Latn_MM
     0xE72B54524C61746ELLU, // lzz_Latn_TR
+    0x800C4D584C61746ELLU, // maa_Latn_MX
+    0x840C4D584C61746ELLU, // mab_Latn_MX
     0x8C0C49444C61746ELLU, // mad_Latn_ID
+    0x900C4E474C61746ELLU, // mae_Latn_NG
     0x940C434D4C61746ELLU, // maf_Latn_CM
     0x980C494E44657661LLU, // mag_Deva_IN
     0xA00C494E44657661LLU, // mai_Deva_IN
+    0xA40C4D584C61746ELLU, // maj_Latn_MX
     0xA80C49444C61746ELLU, // mak_Latn_ID
+    0xB00C47544C61746ELLU, // mam_Latn_GT
     0xB40C474D4C61746ELLU, // man_Latn_GM
     0xB40C474E4E6B6F6FLLU, // man_Nkoo_GN
+    0xC00C4D584C61746ELLU, // maq_Latn_MX
     0xC80C4B454C61746ELLU, // mas_Latn_KE
+    0xCC0C4D584C61746ELLU, // mat_Latn_MX
+    0xD00C4D584C61746ELLU, // mau_Latn_MX
+    0xD40C42524C61746ELLU, // mav_Latn_BR
+    0xD80C47484C61746ELLU, // maw_Latn_GH
+    0xDC0C49444C61746ELLU, // max_Latn_ID
     0xE40C4D584C61746ELLU, // maz_Latn_MX
+    0x802C50484C61746ELLU, // mba_Latn_PH
+    0x842C50484C61746ELLU, // mbb_Latn_PH
+    0x882C42524C61746ELLU, // mbc_Latn_BR
+    0x8C2C50484C61746ELLU, // mbd_Latn_PH
+    0x942C53474C61746ELLU, // mbf_Latn_SG
+    0x9C2C50474C61746ELLU, // mbh_Latn_PG
+    0xA02C50484C61746ELLU, // mbi_Latn_PH
+    0xA42C42524C61746ELLU, // mbj_Latn_BR
+    0xA82C50474C61746ELLU, // mbk_Latn_PG
+    0xAC2C42524C61746ELLU, // mbl_Latn_BR
+    0xB02C43474C61746ELLU, // mbm_Latn_CG
+    0xB42C434F4C61746ELLU, // mbn_Latn_CO
+    0xB82C434D4C61746ELLU, // mbo_Latn_CM
+    0xBC2C434F4C61746ELLU, // mbp_Latn_CO
+    0xC02C50474C61746ELLU, // mbq_Latn_PG
+    0xC42C434F4C61746ELLU, // mbr_Latn_CO
+    0xC82C50484C61746ELLU, // mbs_Latn_PH
+    0xCC2C50484C61746ELLU, // mbt_Latn_PH
+    0xD02C4E474C61746ELLU, // mbu_Latn_NG
+    0xD42C474E4C61746ELLU, // mbv_Latn_GN
+    0xD82C50474C61746ELLU, // mbw_Latn_PG
+    0xDC2C50474C61746ELLU, // mbx_Latn_PG
+    0xE02C504B41726162LLU, // mby_Arab_PK
+    0xE42C4D584C61746ELLU, // mbz_Latn_MX
+    0x804C50594C61746ELLU, // mca_Latn_PY
+    0x844C50454C61746ELLU, // mcb_Latn_PE
+    0x884C50474C61746ELLU, // mcc_Latn_PG
+    0x8C4C50454C61746ELLU, // mcd_Latn_PE
+    0x904C4D584C61746ELLU, // mce_Latn_MX
+    0x944C50454C61746ELLU, // mcf_Latn_PE
+    0x984C56454C61746ELLU, // mcg_Latn_VE
+    0x9C4C56454C61746ELLU, // mch_Latn_VE
+    0xA04C50474C61746ELLU, // mci_Latn_PG
+    0xA44C4E474C61746ELLU, // mcj_Latn_NG
+    0xA84C414F4C61746ELLU, // mck_Latn_AO
+    0xAC4C434F4C61746ELLU, // mcl_Latn_CO
+    0xB04C4D594C61746ELLU, // mcm_Latn_MY
+    0xB44C54444C61746ELLU, // mcn_Latn_TD
+    0xB84C4D584C61746ELLU, // mco_Latn_MX
+    0xBC4C434D4C61746ELLU, // mcp_Latn_CM
+    0xC04C50474C61746ELLU, // mcq_Latn_PG
+    0xC44C50474C61746ELLU, // mcr_Latn_PG
+    0xC84C434D4C61746ELLU, // mcs_Latn_CM
+    0xCC4C434D4C61746ELLU, // mct_Latn_CM
+    0xD04C434D4C61746ELLU, // mcu_Latn_CM
+    0xD44C50474C61746ELLU, // mcv_Latn_PG
+    0xD84C54444C61746ELLU, // mcw_Latn_TD
+    0xDC4C43464C61746ELLU, // mcx_Latn_CF
+    0xE04C50474C61746ELLU, // mcy_Latn_PG
+    0xE44C50474C61746ELLU, // mcz_Latn_PG
+    0x806C4E474C61746ELLU, // mda_Latn_NG
+    0x846C50474C61746ELLU, // mdb_Latn_PG
+    0x886C50474C61746ELLU, // mdc_Latn_PG
+    0x8C6C434D4C61746ELLU, // mdd_Latn_CM
+    0x906C544441726162LLU, // mde_Arab_TD
     0x946C52554379726CLLU, // mdf_Cyrl_RU
+    0x986C54444C61746ELLU, // mdg_Latn_TD
     0x9C6C50484C61746ELLU, // mdh_Latn_PH
+    0xA06C43444C61746ELLU, // mdi_Latn_CD
+    0xA46C43444C61746ELLU, // mdj_Latn_CD
+    0xA86C43444C61746ELLU, // mdk_Latn_CD
+    0xB06C43444C61746ELLU, // mdm_Latn_CD
+    0xB46C43464C61746ELLU, // mdn_Latn_CF
+    0xBC6C43444C61746ELLU, // mdp_Latn_CD
+    0xC06C43444C61746ELLU, // mdq_Latn_CD
     0xC46C49444C61746ELLU, // mdr_Latn_ID
+    0xC86C50474C61746ELLU, // mds_Latn_PG
+    0xCC6C43474C61746ELLU, // mdt_Latn_CG
+    0xD06C43474C61746ELLU, // mdu_Latn_CG
+    0xD46C4D584C61746ELLU, // mdv_Latn_MX
+    0xD86C43474C61746ELLU, // mdw_Latn_CG
+    0xDC6C455445746869LLU, // mdx_Ethi_ET
+    0xE06C455445746869LLU, // mdy_Ethi_ET
+    0xE46C42524C61746ELLU, // mdz_Latn_BR
+    0x808C434D4C61746ELLU, // mea_Latn_CM
+    0x848C50474C61746ELLU, // meb_Latn_PG
+    0x888C41554C61746ELLU, // mec_Latn_AU
+    0x8C8C50474C61746ELLU, // med_Latn_PG
+    0x908C50474C61746ELLU, // mee_Latn_PG
+    0x9C8C4D584C61746ELLU, // meh_Latn_MX
+    0xA48C49444C61746ELLU, // mej_Latn_ID
+    0xA88C50474C61746ELLU, // mek_Latn_PG
+    0xAC8C4D594C61746ELLU, // mel_Latn_MY
+    0xB08C41554C61746ELLU, // mem_Latn_AU
     0xB48C534C4C61746ELLU, // men_Latn_SL
+    0xB88C4D594C61746ELLU, // meo_Latn_MY
+    0xBC8C41554C61746ELLU, // mep_Latn_AU
+    0xC08C434D4C61746ELLU, // meq_Latn_CM
     0xC48C4B454C61746ELLU, // mer_Latn_KE
+    0xC88C54444C61746ELLU, // mes_Latn_TD
+    0xCC8C50474C61746ELLU, // met_Latn_PG
+    0xD08C50474C61746ELLU, // meu_Latn_PG
+    0xD48C4C524C61746ELLU, // mev_Latn_LR
+    0xD88C4E474C61746ELLU, // mew_Latn_NG
+    0xE08C534E4C61746ELLU, // mey_Latn_SN
+    0xE48C55534C61746ELLU, // mez_Latn_US
     0x80AC544841726162LLU, // mfa_Arab_TH
+    0x84AC49444C61746ELLU, // mfb_Latn_ID
+    0x88AC43444C61746ELLU, // mfc_Latn_CD
+    0x8CAC434D4C61746ELLU, // mfd_Latn_CM
     0x90AC4D554C61746ELLU, // mfe_Latn_MU
+    0x94AC434D4C61746ELLU, // mff_Latn_CM
+    0x98AC474E4C61746ELLU, // mfg_Latn_GN
+    0x9CAC434D4C61746ELLU, // mfh_Latn_CM
+    0xA0AC434D41726162LLU, // mfi_Arab_CM
+    0xA4AC434D4C61746ELLU, // mfj_Latn_CM
+    0xA8AC434D4C61746ELLU, // mfk_Latn_CM
+    0xACAC4E474C61746ELLU, // mfl_Latn_NG
+    0xB0AC4E474C61746ELLU, // mfm_Latn_NG
+    0xB4AC4E474C61746ELLU, // mfn_Latn_NG
+    0xB8AC4E474C61746ELLU, // mfo_Latn_NG
+    0xBCAC49444C61746ELLU, // mfp_Latn_ID
+    0xC0AC54474C61746ELLU, // mfq_Latn_TG
+    0xC4AC41554C61746ELLU, // mfr_Latn_AU
+    0xCCAC50474C61746ELLU, // mft_Latn_PG
+    0xD0AC414F4C61746ELLU, // mfu_Latn_AO
+    0xD4AC534E4C61746ELLU, // mfv_Latn_SN
+    0xD8AC50474C61746ELLU, // mfw_Latn_PG
+    0xDCAC45544C61746ELLU, // mfx_Latn_ET
+    0xE0AC4D584C61746ELLU, // mfy_Latn_MX
+    0xE4AC53534C61746ELLU, // mfz_Latn_SS
     0x6D674D474C61746ELLU, // mg_Latn_MG
+    0x80CC49454C617467LLU, // mga_Latg_IE
+    0x84CC54444C61746ELLU, // mgb_Latn_TD
+    0x88CC53534C61746ELLU, // mgc_Latn_SS
+    0x8CCC53534C61746ELLU, // mgd_Latn_SS
+    0x90CC54444C61746ELLU, // mge_Latn_TD
+    0x94CC49444C61746ELLU, // mgf_Latn_ID
+    0x98CC434D4C61746ELLU, // mgg_Latn_CM
     0x9CCC4D5A4C61746ELLU, // mgh_Latn_MZ
+    0xA0CC4E474C61746ELLU, // mgi_Latn_NG
+    0xA4CC4E474C61746ELLU, // mgj_Latn_NG
+    0xA8CC49444C61746ELLU, // mgk_Latn_ID
+    0xACCC50474C61746ELLU, // mgl_Latn_PG
+    0xB0CC544C4C61746ELLU, // mgm_Latn_TL
+    0xB4CC43464C61746ELLU, // mgn_Latn_CF
     0xB8CC434D4C61746ELLU, // mgo_Latn_CM
     0xBCCC4E5044657661LLU, // mgp_Deva_NP
+    0xC0CC545A4C61746ELLU, // mgq_Latn_TZ
+    0xC4CC5A4D4C61746ELLU, // mgr_Latn_ZM
+    0xC8CC545A4C61746ELLU, // mgs_Latn_TZ
+    0xCCCC50474C61746ELLU, // mgt_Latn_PG
+    0xD0CC50474C61746ELLU, // mgu_Latn_PG
+    0xD4CC545A4C61746ELLU, // mgv_Latn_TZ
+    0xD8CC545A4C61746ELLU, // mgw_Latn_TZ
     0xE0CC545A4C61746ELLU, // mgy_Latn_TZ
+    0xE4CC545A4C61746ELLU, // mgz_Latn_TZ
     0x6D684D484C61746ELLU, // mh_Latn_MH
+    0x84EC47414C61746ELLU, // mhb_Latn_GA
+    0x88EC4D584C61746ELLU, // mhc_Latn_MX
+    0x8CEC545A4C61746ELLU, // mhd_Latn_TZ
+    0x90EC4D594C61746ELLU, // mhe_Latn_MY
+    0x94EC50474C61746ELLU, // mhf_Latn_PG
+    0x98EC41554C61746ELLU, // mhg_Latn_AU
+    0xA0EC55474C61746ELLU, // mhi_Latn_UG
+    0xA4EC414641726162LLU, // mhj_Arab_AF
+    0xA8EC434D4C61746ELLU, // mhk_Latn_CM
+    0xACEC50474C61746ELLU, // mhl_Latn_PG
+    0xB0EC4D5A4C61746ELLU, // mhm_Latn_MZ
+    0xB4EC49544C61746ELLU, // mhn_Latn_IT
+    0xB8EC5A4D4C61746ELLU, // mho_Latn_ZM
+    0xBCEC49444C61746ELLU, // mhp_Latn_ID
+    0xC0EC55534C61746ELLU, // mhq_Latn_US
+    0xC8EC49444C61746ELLU, // mhs_Latn_ID
+    0xCCEC56454C61746ELLU, // mht_Latn_VE
+    0xD0EC494E4C61746ELLU, // mhu_Latn_IN
+    0xD8EC42574C61746ELLU, // mhw_Latn_BW
+    0xDCEC4D4D4C61746ELLU, // mhx_Latn_MM
+    0xE0EC49444C61746ELLU, // mhy_Latn_ID
+    0xE4EC49444C61746ELLU, // mhz_Latn_ID
     0x6D694E5A4C61746ELLU, // mi_Latn_NZ
+    0x810C55534C61746ELLU, // mia_Latn_US
+    0x850C4D584C61746ELLU, // mib_Latn_MX
     0x890C43414C61746ELLU, // mic_Latn_CA
+    0x8D0C49514D616E64LLU, // mid_Mand_IQ
+    0x910C4D584C61746ELLU, // mie_Latn_MX
+    0x950C434D4C61746ELLU, // mif_Latn_CM
+    0x990C4D584C61746ELLU, // mig_Latn_MX
+    0x9D0C4D584C61746ELLU, // mih_Latn_MX
+    0xA10C4D584C61746ELLU, // mii_Latn_MX
+    0xA50C434D4C61746ELLU, // mij_Latn_CM
+    0xA90C55534C61746ELLU, // mik_Latn_US
+    0xAD0C4D584C61746ELLU, // mil_Latn_MX
+    0xB10C4D584C61746ELLU, // mim_Latn_MX
     0xB50C49444C61746ELLU, // min_Latn_ID
+    0xB90C4D584C61746ELLU, // mio_Latn_MX
+    0xBD0C4D584C61746ELLU, // mip_Latn_MX
+    0xC10C4E494C61746ELLU, // miq_Latn_NI
+    0xC50C4D584C61746ELLU, // mir_Latn_MX
+    0xCD0C4D584C61746ELLU, // mit_Latn_MX
+    0xD10C4D584C61746ELLU, // miu_Latn_MX
+    0xD90C50474C61746ELLU, // miw_Latn_PG
+    0xDD0C4D584C61746ELLU, // mix_Latn_MX
+    0xE10C4D584C61746ELLU, // miy_Latn_MX
+    0xE50C4D584C61746ELLU, // miz_Latn_MX
+    0x852C544C4C61746ELLU, // mjb_Latn_TL
+    0x892C4D584C61746ELLU, // mjc_Latn_MX
+    0x8D2C55534C61746ELLU, // mjd_Latn_US
+    0x912C54444C61746ELLU, // mje_Latn_TD
+    0x992C434E4C61746ELLU, // mjg_Latn_CN
+    0x9D2C545A4C61746ELLU, // mjh_Latn_TZ
+    0xA12C434E4C61746ELLU, // mji_Latn_CN
+    0xA52C50474C61746ELLU, // mjj_Latn_PG
+    0xA92C50474C61746ELLU, // mjk_Latn_PG
+    0xAD2C494E44657661LLU, // mjl_Deva_IN
+    0xB12C50474C61746ELLU, // mjm_Latn_PG
+    0xB52C50474C61746ELLU, // mjn_Latn_PG
+    0xC12C494E4D6C796DLLU, // mjq_Mlym_IN
+    0xC52C494E4D6C796DLLU, // mjr_Mlym_IN
+    0xC92C4E474C61746ELLU, // mjs_Latn_NG
+    0xCD2C494E44657661LLU, // mjt_Deva_IN
+    0xD12C494E54656C75LLU, // mju_Telu_IN
+    0xD52C494E4D6C796DLLU, // mjv_Mlym_IN
+    0xD92C494E4C61746ELLU, // mjw_Latn_IN
+    0xDD2C42444C61746ELLU, // mjx_Latn_BD
+    0xE12C55534C61746ELLU, // mjy_Latn_US
+    0xE52C4E5044657661LLU, // mjz_Deva_NP
     0x6D6B4D4B4379726CLLU, // mk_Cyrl_MK
+    0x814C43494C61746ELLU, // mka_Latn_CI
+    0x854C494E44657661LLU, // mkb_Deva_IN
+    0x894C50474C61746ELLU, // mkc_Latn_PG
+    0x914C494E44657661LLU, // mke_Deva_IN
+    0x954C4E474C61746ELLU, // mkf_Latn_NG
+    0xA14C504B41726162LLU, // mki_Arab_PK
+    0xA54C464D4C61746ELLU, // mkj_Latn_FM
+    0xA94C434D4C61746ELLU, // mkk_Latn_CM
+    0xAD4C424A4C61746ELLU, // mkl_Latn_BJ
+    0xB14C544854686169LLU, // mkm_Thai_TH
+    0xB54C49444C61746ELLU, // mkn_Latn_ID
+    0xB94C4E474C61746ELLU, // mko_Latn_NG
+    0xBD4C50474C61746ELLU, // mkp_Latn_PG
+    0xC54C50474C61746ELLU, // mkr_Latn_PG
+    0xC94C4D584C61746ELLU, // mks_Latn_MX
+    0xCD4C4E434C61746ELLU, // mkt_Latn_NC
+    0xD14C474E4C61746ELLU, // mku_Latn_GN
+    0xD54C56554C61746ELLU, // mkv_Latn_VU
+    0xD94C43474C61746ELLU, // mkw_Latn_CG
+    0xDD4C50484C61746ELLU, // mkx_Latn_PH
+    0xE14C49444C61746ELLU, // mky_Latn_ID
+    0xE54C544C4C61746ELLU, // mkz_Latn_TL
     0x6D6C494E4D6C796DLLU, // ml_Mlym_IN
+    0x816C56554C61746ELLU, // mla_Latn_VU
+    0x856C434D4C61746ELLU, // mlb_Latn_CM
+    0x896C564E4C61746ELLU, // mlc_Latn_VN
+    0x916C50474C61746ELLU, // mle_Latn_PG
+    0x956C4C4154686169LLU, // mlf_Thai_LA
+    0x9D6C50474C61746ELLU, // mlh_Latn_PG
+    0xA16C49444C61746ELLU, // mli_Latn_ID
+    0xA56C54444C61746ELLU, // mlj_Latn_TD
+    0xA96C4B454C61746ELLU, // mlk_Latn_KE
+    0xAD6C56554C61746ELLU, // mll_Latn_VU
+    0xB56C53424C61746ELLU, // mln_Latn_SB
+    0xB96C534E4C61746ELLU, // mlo_Latn_SN
+    0xBD6C50474C61746ELLU, // mlp_Latn_PG
+    0xC16C534E4C61746ELLU, // mlq_Latn_SN
+    0xC56C434D4C61746ELLU, // mlr_Latn_CM
     0xC96C53444C61746ELLU, // mls_Latn_SD
+    0xD16C53424C61746ELLU, // mlu_Latn_SB
+    0xD56C56554C61746ELLU, // mlv_Latn_VU
+    0xD96C434D4C61746ELLU, // mlw_Latn_CM
+    0xDD6C56554C61746ELLU, // mlx_Latn_VU
+    0xE56C50484C61746ELLU, // mlz_Latn_PH
+    0x818C4E474C61746ELLU, // mma_Latn_NG
+    0x858C49444C61746ELLU, // mmb_Latn_ID
+    0x898C4D584C61746ELLU, // mmc_Latn_MX
+    0x8D8C434E4C61746ELLU, // mmd_Latn_CN
+    0x918C56554C61746ELLU, // mme_Latn_VU
+    0x958C4E474C61746ELLU, // mmf_Latn_NG
+    0x998C56554C61746ELLU, // mmg_Latn_VU
+    0x9D8C42524C61746ELLU, // mmh_Latn_BR
+    0xA18C50474C61746ELLU, // mmi_Latn_PG
+    0xB18C56554C61746ELLU, // mmm_Latn_VU
+    0xB58C50484C61746ELLU, // mmn_Latn_PH
+    0xB98C50474C61746ELLU, // mmo_Latn_PG
+    0xBD8C50474C61746ELLU, // mmp_Latn_PG
+    0xC18C50474C61746ELLU, // mmq_Latn_PG
+    0xC58C434E4C61746ELLU, // mmr_Latn_CN
+    0xCD8C50474C61746ELLU, // mmt_Latn_PG
+    0xD18C434D4C61746ELLU, // mmu_Latn_CM
+    0xD58C42524C61746ELLU, // mmv_Latn_BR
+    0xD98C56554C61746ELLU, // mmw_Latn_VU
+    0xDD8C50474C61746ELLU, // mmx_Latn_PG
+    0xE18C54444C61746ELLU, // mmy_Latn_TD
+    0xE58C43444C61746ELLU, // mmz_Latn_CD
     0x6D6E4D4E4379726CLLU, // mn_Cyrl_MN
     0x6D6E434E4D6F6E67LLU, // mn_Mong_CN
+    0x81AC50474C61746ELLU, // mna_Latn_PG
+    0x85AC49444C61746ELLU, // mnb_Latn_ID
+    0x89AC434E4D6F6E67LLU, // mnc_Mong_CN
+    0x8DAC42524C61746ELLU, // mnd_Latn_BR
+    0x91AC54444C61746ELLU, // mne_Latn_TD
+    0x95AC434D4C61746ELLU, // mnf_Latn_CM
+    0x99AC564E4C61746ELLU, // mng_Latn_VN
+    0x9DAC43444C61746ELLU, // mnh_Latn_CD
     0xA1AC494E42656E67LLU, // mni_Beng_IN
+    0xA5AC414641726162LLU, // mnj_Arab_AF
+    0xADAC56554C61746ELLU, // mnl_Latn_VU
+    0xB1AC50474C61746ELLU, // mnm_Latn_PG
+    0xB5AC564E4C61746ELLU, // mnn_Latn_VN
+    0xBDAC434E4C61746ELLU, // mnp_Latn_CN
+    0xC1AC4D594C61746ELLU, // mnq_Latn_MY
+    0xC5AC55534C61746ELLU, // mnr_Latn_US
+    0xC9AC52554379726CLLU, // mns_Cyrl_RU
+    0xD1AC49444C61746ELLU, // mnu_Latn_ID
+    0xD5AC53424C61746ELLU, // mnv_Latn_SB
     0xD9AC4D4D4D796D72LLU, // mnw_Mymr_MM
+    0xDDAC49444C61746ELLU, // mnx_Latn_ID
+    0xE1AC4D5A4C61746ELLU, // mny_Latn_MZ
+    0xE5AC49444C61746ELLU, // mnz_Latn_ID
     0x6D6F524F4C61746ELLU, // mo_Latn_RO
+    0x81CC43494C61746ELLU, // moa_Latn_CI
+    0x89CC41524C61746ELLU, // moc_Latn_AR
+    0x8DCC55534C61746ELLU, // mod_Latn_US
     0x91CC43414C61746ELLU, // moe_Latn_CA
+    0x99CC49444C61746ELLU, // mog_Latn_ID
     0x9DCC43414C61746ELLU, // moh_Latn_CA
+    0xA1CC4E474C61746ELLU, // moi_Latn_NG
+    0xA5CC43474C61746ELLU, // moj_Latn_CG
+    0xA9CC49444C61746ELLU, // mok_Latn_ID
+    0xB1CC4E494C61746ELLU, // mom_Latn_NI
+    0xB9CC564E4C61746ELLU, // moo_Latn_VN
+    0xBDCC425A4C61746ELLU, // mop_Latn_BZ
+    0xC1CC49444C61746ELLU, // moq_Latn_ID
+    0xC5CC53444C61746ELLU, // mor_Latn_SD
     0xC9CC42464C61746ELLU, // mos_Latn_BF
+    0xCDCC434F4C61746ELLU, // mot_Latn_CO
+    0xD1CC54444C61746ELLU, // mou_Latn_TD
+    0xD5CC55534C61746ELLU, // mov_Latn_US
+    0xD9CC43474C61746ELLU, // mow_Latn_CG
+    0xDDCC50474C61746ELLU, // mox_Latn_PG
+    0xE1CC45544C61746ELLU, // moy_Latn_ET
+    0xE5CC54444C61746ELLU, // moz_Latn_TD
+    0x81EC545A4C61746ELLU, // mpa_Latn_TZ
+    0x85EC41554C61746ELLU, // mpb_Latn_AU
+    0x89EC41554C61746ELLU, // mpc_Latn_AU
+    0x8DEC42524C61746ELLU, // mpd_Latn_BR
+    0x91EC45544C61746ELLU, // mpe_Latn_ET
+    0x99EC54444C61746ELLU, // mpg_Latn_TD
+    0x9DEC41554C61746ELLU, // mph_Latn_AU
+    0xA1EC434D4C61746ELLU, // mpi_Latn_CM
+    0xA5EC41554C61746ELLU, // mpj_Latn_AU
+    0xA9EC54444C61746ELLU, // mpk_Latn_TD
+    0xADEC50474C61746ELLU, // mpl_Latn_PG
+    0xB1EC4D584C61746ELLU, // mpm_Latn_MX
+    0xB5EC50474C61746ELLU, // mpn_Latn_PG
+    0xB9EC50474C61746ELLU, // mpo_Latn_PG
+    0xBDEC50474C61746ELLU, // mpp_Latn_PG
+    0xC1EC42524C61746ELLU, // mpq_Latn_BR
+    0xC5EC53424C61746ELLU, // mpr_Latn_SB
+    0xC9EC50474C61746ELLU, // mps_Latn_PG
+    0xCDEC50474C61746ELLU, // mpt_Latn_PG
+    0xD1EC42524C61746ELLU, // mpu_Latn_BR
+    0xD5EC50474C61746ELLU, // mpv_Latn_PG
+    0xD9EC42524C61746ELLU, // mpw_Latn_BR
+    0xDDEC50474C61746ELLU, // mpx_Latn_PG
+    0xE1EC49444C61746ELLU, // mpy_Latn_ID
+    0xE5EC544854686169LLU, // mpz_Thai_TH
+    0x820C49444C61746ELLU, // mqa_Latn_ID
+    0x860C434D4C61746ELLU, // mqb_Latn_CM
+    0x8A0C49444C61746ELLU, // mqc_Latn_ID
+    0x920C50474C61746ELLU, // mqe_Latn_PG
+    0x960C49444C61746ELLU, // mqf_Latn_ID
+    0x9A0C49444C61746ELLU, // mqg_Latn_ID
+    0x9E0C4D584C61746ELLU, // mqh_Latn_MX
+    0xA20C49444C61746ELLU, // mqi_Latn_ID
+    0xA60C49444C61746ELLU, // mqj_Latn_ID
+    0xAA0C50484C61746ELLU, // mqk_Latn_PH
+    0xAE0C424A4C61746ELLU, // mql_Latn_BJ
+    0xB20C50464C61746ELLU, // mqm_Latn_PF
+    0xB60C49444C61746ELLU, // mqn_Latn_ID
+    0xBA0C49444C61746ELLU, // mqo_Latn_ID
+    0xBE0C49444C61746ELLU, // mqp_Latn_ID
+    0xC20C4D594C61746ELLU, // mqq_Latn_MY
+    0xC60C49444C61746ELLU, // mqr_Latn_ID
+    0xCA0C49444C61746ELLU, // mqs_Latn_ID
+    0xD20C53534C61746ELLU, // mqu_Latn_SS
+    0xD60C50474C61746ELLU, // mqv_Latn_PG
+    0xDA0C50474C61746ELLU, // mqw_Latn_PG
+    0xDE0C49444C61746ELLU, // mqx_Latn_ID
+    0xE20C49444C61746ELLU, // mqy_Latn_ID
+    0xE60C50474C61746ELLU, // mqz_Latn_PG
     0x6D72494E44657661LLU, // mr_Deva_IN
+    0x822C544854686169LLU, // mra_Thai_TH
+    0x862C56554C61746ELLU, // mrb_Latn_VU
+    0x8A2C55534C61746ELLU, // mrc_Latn_US
     0x8E2C4E5044657661LLU, // mrd_Deva_NP
+    0x962C49444C61746ELLU, // mrf_Latn_ID
+    0x9A2C494E4C61746ELLU, // mrg_Latn_IN
+    0x9E2C494E4C61746ELLU, // mrh_Latn_IN
     0xA62C52554379726CLLU, // mrj_Cyrl_RU
+    0xAA2C4E434C61746ELLU, // mrk_Latn_NC
+    0xAE2C464D4C61746ELLU, // mrl_Latn_FM
+    0xB22C56554C61746ELLU, // mrm_Latn_VU
+    0xB62C53424C61746ELLU, // mrn_Latn_SB
     0xBA2C42444D726F6FLLU, // mro_Mroo_BD
+    0xBE2C56554C61746ELLU, // mrp_Latn_VU
+    0xC22C50464C61746ELLU, // mrq_Latn_PF
+    0xC62C494E44657661LLU, // mrr_Deva_IN
+    0xCA2C56554C61746ELLU, // mrs_Latn_VU
+    0xCE2C4E474C61746ELLU, // mrt_Latn_NG
+    0xD22C434D4C61746ELLU, // mru_Latn_CM
+    0xD62C50464C61746ELLU, // mrv_Latn_PF
+    0xDA2C50484C61746ELLU, // mrw_Latn_PH
+    0xDE2C49444C61746ELLU, // mrx_Latn_ID
+    0xE22C50484C61746ELLU, // mry_Latn_PH
+    0xE62C49444C61746ELLU, // mrz_Latn_ID
     0x6D734D594C61746ELLU, // ms_Latn_MY
+    0x864C50484C61746ELLU, // msb_Latn_PH
+    0x8A4C474E4C61746ELLU, // msc_Latn_GN
+    0x924C54444C61746ELLU, // mse_Latn_TD
+    0x964C49444C61746ELLU, // msf_Latn_ID
+    0x9A4C49444C61746ELLU, // msg_Latn_ID
+    0x9E4C4D474C61746ELLU, // msh_Latn_MG
+    0xA24C4D594C61746ELLU, // msi_Latn_MY
+    0xA64C43444C61746ELLU, // msj_Latn_CD
+    0xAA4C50484C61746ELLU, // msk_Latn_PH
+    0xAE4C49444C61746ELLU, // msl_Latn_ID
+    0xB24C50484C61746ELLU, // msm_Latn_PH
+    0xB64C56554C61746ELLU, // msn_Latn_VU
+    0xBA4C49444C61746ELLU, // mso_Latn_ID
+    0xBE4C42524C61746ELLU, // msp_Latn_BR
+    0xC24C4E434C61746ELLU, // msq_Latn_NC
+    0xCA4C49444C61746ELLU, // mss_Latn_ID
+    0xD24C50474C61746ELLU, // msu_Latn_PG
+    0xD64C434D4C61746ELLU, // msv_Latn_CM
+    0xDA4C47574C61746ELLU, // msw_Latn_GW
+    0xDE4C50474C61746ELLU, // msx_Latn_PG
+    0xE24C50474C61746ELLU, // msy_Latn_PG
+    0xE64C50474C61746ELLU, // msz_Latn_PG
     0x6D744D544C61746ELLU, // mt_Latn_MT
+    0x826C50484C61746ELLU, // mta_Latn_PH
+    0x866C43494C61746ELLU, // mtb_Latn_CI
+    0x8A6C50474C61746ELLU, // mtc_Latn_PG
+    0x8E6C49444C61746ELLU, // mtd_Latn_ID
+    0x926C53424C61746ELLU, // mte_Latn_SB
+    0x966C50474C61746ELLU, // mtf_Latn_PG
+    0x9A6C49444C61746ELLU, // mtg_Latn_ID
+    0x9E6C49444C61746ELLU, // mth_Latn_ID
+    0xA26C50474C61746ELLU, // mti_Latn_PG
+    0xA66C49444C61746ELLU, // mtj_Latn_ID
+    0xAA6C434D4C61746ELLU, // mtk_Latn_CM
+    0xAE6C4E474C61746ELLU, // mtl_Latn_NG
+    0xB26C52554379726CLLU, // mtm_Cyrl_RU
+    0xB66C4E494C61746ELLU, // mtn_Latn_NI
+    0xBA6C4D584C61746ELLU, // mto_Latn_MX
+    0xBE6C424F4C61746ELLU, // mtp_Latn_BO
+    0xC26C564E4C61746ELLU, // mtq_Latn_VN
     0xC66C494E44657661LLU, // mtr_Deva_IN
+    0xCA6C50454C61746ELLU, // mts_Latn_PE
+    0xCE6C56554C61746ELLU, // mtt_Latn_VU
+    0xD26C4D584C61746ELLU, // mtu_Latn_MX
+    0xD66C50474C61746ELLU, // mtv_Latn_PG
+    0xDA6C50484C61746ELLU, // mtw_Latn_PH
+    0xDE6C4D584C61746ELLU, // mtx_Latn_MX
+    0xE26C50474C61746ELLU, // mty_Latn_PG
     0x828C434D4C61746ELLU, // mua_Latn_CM
+    0x868C54444C61746ELLU, // mub_Latn_TD
+    0x8A8C434D4C61746ELLU, // muc_Latn_CM
+    0x8E8C52554379726CLLU, // mud_Cyrl_RU
+    0x928C45434C61746ELLU, // mue_Latn_EC
+    0x9A8C434D4C61746ELLU, // mug_Latn_CM
+    0x9E8C53534C61746ELLU, // muh_Latn_SS
+    0xA28C49444C61746ELLU, // mui_Latn_ID
+    0xA68C54444C61746ELLU, // muj_Latn_TD
+    0xAA8C4E5054696274LLU, // muk_Tibt_NP
+    0xB28C50474C61746ELLU, // mum_Latn_PG
+    0xBA8C434D4C61746ELLU, // muo_Latn_CM
+    0xC28C434E4C61746ELLU, // muq_Latn_CN
+    0xC68C53534C61746ELLU, // mur_Latn_SS
     0xCA8C55534C61746ELLU, // mus_Latn_US
+    0xCE8C494E44657661LLU, // mut_Deva_IN
+    0xD28C4B454C61746ELLU, // muu_Latn_KE
+    0xD68C494E54616D6CLLU, // muv_Taml_IN
+    0xDE8C50474C61746ELLU, // mux_Latn_PG
+    0xE28C434D4C61746ELLU, // muy_Latn_CM
+    0xE68C455445746869LLU, // muz_Ethi_ET
+    0x82AC50474C61746ELLU, // mva_Latn_PG
+    0x8EAC49444C61746ELLU, // mvd_Latn_ID
+    0x92AC504B41726162LLU, // mve_Arab_PK
+    0x96AC434E4D6F6E67LLU, // mvf_Mong_CN
+    0x9AAC4D584C61746ELLU, // mvg_Latn_MX
+    0x9EAC54444C61746ELLU, // mvh_Latn_TD
+    0xAAAC50474C61746ELLU, // mvk_Latn_PG
+    0xAEAC41554C61746ELLU, // mvl_Latn_AU
+    0xB6AC50474C61746ELLU, // mvn_Latn_PG
+    0xBAAC53424C61746ELLU, // mvo_Latn_SB
+    0xBEAC49444C61746ELLU, // mvp_Latn_ID
+    0xC2AC50474C61746ELLU, // mvq_Latn_PG
+    0xC6AC49444C61746ELLU, // mvr_Latn_ID
+    0xCAAC49444C61746ELLU, // mvs_Latn_ID
+    0xCEAC56554C61746ELLU, // mvt_Latn_VU
+    0xD2AC54444C61746ELLU, // mvu_Latn_TD
+    0xD6AC4D594C61746ELLU, // mvv_Latn_MY
+    0xDAAC545A4C61746ELLU, // mvw_Latn_TZ
+    0xDEAC49444C61746ELLU, // mvx_Latn_ID
     0xE2AC504B41726162LLU, // mvy_Arab_PK
+    0xE6AC455445746869LLU, // mvz_Ethi_ET
+    0x82CC50474C61746ELLU, // mwa_Latn_PG
+    0x86CC50474C61746ELLU, // mwb_Latn_PG
+    0x8ACC50474C61746ELLU, // mwc_Latn_PG
+    0x92CC545A4C61746ELLU, // mwe_Latn_TZ
+    0x96CC41554C61746ELLU, // mwf_Latn_AU
+    0x9ACC50474C61746ELLU, // mwg_Latn_PG
+    0x9ECC50474C61746ELLU, // mwh_Latn_PG
+    0xA2CC56554C61746ELLU, // mwi_Latn_VU
     0xAACC4D4C4C61746ELLU, // mwk_Latn_ML
+    0xAECC50544C61746ELLU, // mwl_Latn_PT
+    0xB2CC54444C61746ELLU, // mwm_Latn_TD
+    0xB6CC5A4D4C61746ELLU, // mwn_Latn_ZM
+    0xBACC56554C61746ELLU, // mwo_Latn_VU
+    0xBECC41554C61746ELLU, // mwp_Latn_AU
+    0xC2CC4D4D4C61746ELLU, // mwq_Latn_MM
     0xC6CC494E44657661LLU, // mwr_Deva_IN
+    0xCACC4B454C61746ELLU, // mws_Latn_KE
+    0xCECC4D4D4D796D72LLU, // mwt_Mymr_MM
+    0xD2CC53534C61746ELLU, // mwu_Latn_SS
     0xD6CC49444C61746ELLU, // mwv_Latn_ID
     0xDACC5553486D6E70LLU, // mww_Hmnp_US
+    0xE6CC43444C61746ELLU, // mwz_Latn_CD
+    0x82EC4D584C61746ELLU, // mxa_Latn_MX
+    0x86EC4D584C61746ELLU, // mxb_Latn_MX
     0x8AEC5A574C61746ELLU, // mxc_Latn_ZW
+    0x8EEC49444C61746ELLU, // mxd_Latn_ID
+    0x92EC56554C61746ELLU, // mxe_Latn_VU
+    0x96EC434D4C61746ELLU, // mxf_Latn_CM
+    0x9AEC414F4C61746ELLU, // mxg_Latn_AO
+    0x9EEC43444C61746ELLU, // mxh_Latn_CD
+    0xA2EC45534C61746ELLU, // mxi_Latn_ES
+    0xA6EC494E4C61746ELLU, // mxj_Latn_IN
+    0xAAEC50474C61746ELLU, // mxk_Latn_PG
+    0xAEEC424A4C61746ELLU, // mxl_Latn_BJ
+    0xB2EC50474C61746ELLU, // mxm_Latn_PG
+    0xB6EC49444C61746ELLU, // mxn_Latn_ID
+    0xBAEC5A4D4C61746ELLU, // mxo_Latn_ZM
+    0xBEEC4D584C61746ELLU, // mxp_Latn_MX
+    0xC2EC4D584C61746ELLU, // mxq_Latn_MX
+    0xC6EC4D594C61746ELLU, // mxr_Latn_MY
+    0xCAEC4D584C61746ELLU, // mxs_Latn_MX
+    0xCEEC4D584C61746ELLU, // mxt_Latn_MX
+    0xD2EC434D4C61746ELLU, // mxu_Latn_CM
+    0xD6EC4D584C61746ELLU, // mxv_Latn_MX
+    0xDAEC50474C61746ELLU, // mxw_Latn_PG
+    0xDEEC43494C61746ELLU, // mxx_Latn_CI
+    0xE2EC4D584C61746ELLU, // mxy_Latn_MX
+    0xE6EC49444C61746ELLU, // mxz_Latn_ID
     0x6D794D4D4D796D72LLU, // my_Mymr_MM
+    0x870C54444C61746ELLU, // myb_Latn_TD
+    0x8B0C43444C61746ELLU, // myc_Latn_CD
+    0x930C47414C61746ELLU, // mye_Latn_GA
+    0x970C45544C61746ELLU, // myf_Latn_ET
+    0x9B0C434D4C61746ELLU, // myg_Latn_CM
+    0x9F0C55534C61746ELLU, // myh_Latn_US
+    0xA70C53534C61746ELLU, // myj_Latn_SS
+    0xAB0C4D4C4C61746ELLU, // myk_Latn_ML
+    0xAF0C49444C61746ELLU, // myl_Latn_ID
+    0xB30C455445746869LLU, // mym_Ethi_ET
+    0xBF0C42524C61746ELLU, // myp_Latn_BR
+    0xC70C50454C61746ELLU, // myr_Latn_PE
+    0xD30C42524C61746ELLU, // myu_Latn_BR
     0xD70C52554379726CLLU, // myv_Cyrl_RU
+    0xDB0C50474C61746ELLU, // myw_Latn_PG
     0xDF0C55474C61746ELLU, // myx_Latn_UG
+    0xE30C434F4C61746ELLU, // myy_Latn_CO
     0xE70C49524D616E64LLU, // myz_Mand_IR
+    0x832C4D584C61746ELLU, // mza_Latn_MX
+    0x8F2C434D4C61746ELLU, // mzd_Latn_CM
+    0x932C50474C61746ELLU, // mze_Latn_PG
+    0x9F2C41524C61746ELLU, // mzh_Latn_AR
+    0xA32C4D584C61746ELLU, // mzi_Latn_MX
+    0xA72C4C524C61746ELLU, // mzj_Latn_LR
+    0xAB2C4E474C61746ELLU, // mzk_Latn_NG
+    0xAF2C4D584C61746ELLU, // mzl_Latn_MX
+    0xB32C4E474C61746ELLU, // mzm_Latn_NG
     0xB72C495241726162LLU, // mzn_Arab_IR
+    0xBB2C42524C61746ELLU, // mzo_Latn_BR
+    0xBF2C424F4C61746ELLU, // mzp_Latn_BO
+    0xC32C49444C61746ELLU, // mzq_Latn_ID
+    0xC72C42524C61746ELLU, // mzr_Latn_BR
+    0xCF2C4D594C61746ELLU, // mzt_Latn_MY
+    0xD32C50474C61746ELLU, // mzu_Latn_PG
+    0xD72C43464C61746ELLU, // mzv_Latn_CF
+    0xDB2C47484C61746ELLU, // mzw_Latn_GH
+    0xDF2C47594C61746ELLU, // mzx_Latn_GY
+    0xE72C50474C61746ELLU, // mzz_Latn_PG
     0x6E614E524C61746ELLU, // na_Latn_NR
+    0x800D49444C61746ELLU, // naa_Latn_ID
+    0x840D42524C61746ELLU, // nab_Latn_BR
+    0x880D50474C61746ELLU, // nac_Latn_PG
+    0x900D49444C61746ELLU, // nae_Latn_ID
+    0x940D50474C61746ELLU, // naf_Latn_PG
+    0x980D494E4C61746ELLU, // nag_Latn_IN
+    0xA40D474E4C61746ELLU, // naj_Latn_GN
+    0xA80D50474C61746ELLU, // nak_Latn_PG
+    0xAC0D50474C61746ELLU, // nal_Latn_PG
+    0xB00D41554C61746ELLU, // nam_Latn_AU
     0xB40D434E48616E73LLU, // nan_Hans_CN
+    0xB80D4E5044657661LLU, // nao_Deva_NP
     0xBC0D49544C61746ELLU, // nap_Latn_IT
     0xC00D4E414C61746ELLU, // naq_Latn_NA
+    0xC40D4E474C61746ELLU, // nar_Latn_NG
+    0xC80D50474C61746ELLU, // nas_Latn_PG
+    0xCC0D4E474C61746ELLU, // nat_Latn_NG
+    0xD80D47484C61746ELLU, // naw_Latn_GH
+    0xDC0D50474C61746ELLU, // nax_Latn_PG
+    0xE00D41554C61746ELLU, // nay_Latn_AU
+    0xE40D4D584C61746ELLU, // naz_Latn_MX
     0x6E624E4F4C61746ELLU, // nb_Latn_NO
+    0x802D414F4C61746ELLU, // nba_Latn_AO
+    0x842D4E474C61746ELLU, // nbb_Latn_NG
+    0x882D494E4C61746ELLU, // nbc_Latn_IN
+    0x8C2D43444C61746ELLU, // nbd_Latn_CD
+    0x902D494E4C61746ELLU, // nbe_Latn_IN
+    0x9C2D4E474C61746ELLU, // nbh_Latn_NG
+    0xA02D494E4C61746ELLU, // nbi_Latn_IN
+    0xA42D41554C61746ELLU, // nbj_Latn_AU
+    0xA82D50474C61746ELLU, // nbk_Latn_PG
+    0xB02D43464C61746ELLU, // nbm_Latn_CF
+    0xB42D49444C61746ELLU, // nbn_Latn_ID
+    0xB82D4E474C61746ELLU, // nbo_Latn_NG
+    0xBC2D4E474C61746ELLU, // nbp_Latn_NG
+    0xC02D49444C61746ELLU, // nbq_Latn_ID
+    0xC42D4E474C61746ELLU, // nbr_Latn_NG
+    0xCC2D494E4C61746ELLU, // nbt_Latn_IN
+    0xD02D494E4C61746ELLU, // nbu_Latn_IN
+    0xD42D434D4C61746ELLU, // nbv_Latn_CM
+    0xD82D43444C61746ELLU, // nbw_Latn_CD
+    0xE02D50474C61746ELLU, // nby_Latn_PG
+    0x804D50474C61746ELLU, // nca_Latn_PG
+    0x844D494E4C61746ELLU, // ncb_Latn_IN
+    0x884D50474C61746ELLU, // ncc_Latn_PG
+    0x8C4D4E5044657661LLU, // ncd_Deva_NP
+    0x904D50474C61746ELLU, // nce_Latn_PG
+    0x944D50474C61746ELLU, // ncf_Latn_PG
+    0x984D43414C61746ELLU, // ncg_Latn_CA
     0x9C4D4D584C61746ELLU, // nch_Latn_MX
+    0xA04D4D584C61746ELLU, // nci_Latn_MX
+    0xA44D4D584C61746ELLU, // ncj_Latn_MX
+    0xA84D41554C61746ELLU, // nck_Latn_AU
+    0xAC4D4D584C61746ELLU, // ncl_Latn_MX
+    0xB04D50474C61746ELLU, // ncm_Latn_PG
+    0xB44D50474C61746ELLU, // ncn_Latn_PG
+    0xB84D50474C61746ELLU, // nco_Latn_PG
+    0xC04D4C414C616F6FLLU, // ncq_Laoo_LA
+    0xC44D434D4C61746ELLU, // ncr_Latn_CM
+    0xCC4D494E4C61746ELLU, // nct_Latn_IN
+    0xD04D47484C61746ELLU, // ncu_Latn_GH
+    0xDC4D4D584C61746ELLU, // ncx_Latn_MX
+    0xE44D55534C61746ELLU, // ncz_Latn_US
     0x6E645A574C61746ELLU, // nd_Latn_ZW
+    0x806D43474C61746ELLU, // nda_Latn_CG
+    0x846D434D4C61746ELLU, // ndb_Latn_CM
     0x886D4D5A4C61746ELLU, // ndc_Latn_MZ
+    0x8C6D4E474C61746ELLU, // ndd_Latn_NG
+    0x946D52554379726CLLU, // ndf_Cyrl_RU
+    0x986D545A4C61746ELLU, // ndg_Latn_TZ
+    0x9C6D545A4C61746ELLU, // ndh_Latn_TZ
+    0xA06D4E474C61746ELLU, // ndi_Latn_NG
+    0xA46D545A4C61746ELLU, // ndj_Latn_TZ
+    0xA86D43444C61746ELLU, // ndk_Latn_CD
+    0xAC6D43444C61746ELLU, // ndl_Latn_CD
+    0xB06D54444C61746ELLU, // ndm_Latn_TD
+    0xB46D43474C61746ELLU, // ndn_Latn_CG
+    0xBC6D55474C61746ELLU, // ndp_Latn_UG
+    0xC06D414F4C61746ELLU, // ndq_Latn_AO
+    0xC46D4E474C61746ELLU, // ndr_Latn_NG
     0xC86D44454C61746ELLU, // nds_Latn_DE
+    0xCC6D43444C61746ELLU, // ndt_Latn_CD
+    0xD06D434D4C61746ELLU, // ndu_Latn_CM
+    0xD46D534E4C61746ELLU, // ndv_Latn_SN
+    0xD86D43444C61746ELLU, // ndw_Latn_CD
+    0xDC6D49444C61746ELLU, // ndx_Latn_ID
+    0xE06D43464C61746ELLU, // ndy_Latn_CF
+    0xE46D53534C61746ELLU, // ndz_Latn_SS
     0x6E654E5044657661LLU, // ne_Deva_NP
+    0x808D49444C61746ELLU, // nea_Latn_ID
+    0x848D43494C61746ELLU, // neb_Latn_CI
+    0x888D49444C61746ELLU, // nec_Latn_ID
+    0x8C8D4E474C61746ELLU, // ned_Latn_NG
+    0x908D4E434C61746ELLU, // nee_Latn_NC
+    0x988D52554379726CLLU, // neg_Cyrl_RU
+    0x9C8D425454696274LLU, // neh_Tibt_BT
+    0xA08D545258737578LLU, // nei_Xsux_TR
+    0xA48D50474C61746ELLU, // nej_Latn_PG
+    0xA88D4E434C61746ELLU, // nek_Latn_NC
+    0xB08D4E434C61746ELLU, // nem_Latn_NC
+    0xB48D4E434C61746ELLU, // nen_Latn_NC
+    0xB88D564E4C61746ELLU, // neo_Latn_VN
+    0xC08D4D584C61746ELLU, // neq_Latn_MX
+    0xC48D49444C61746ELLU, // ner_Latn_ID
+    0xCC8D50474C61746ELLU, // net_Latn_PG
     0xD88D4E5044657661LLU, // new_Deva_NP
+    0xDC8D50474C61746ELLU, // nex_Latn_PG
+    0xE08D43494C61746ELLU, // ney_Latn_CI
+    0xE48D55534C61746ELLU, // nez_Latn_US
+    0x80AD49444C61746ELLU, // nfa_Latn_ID
+    0x8CAD4E474C61746ELLU, // nfd_Latn_NG
+    0xACAD53424C61746ELLU, // nfl_Latn_SB
+    0xC4AD47484C61746ELLU, // nfr_Latn_GH
+    0xD0AD434D4C61746ELLU, // nfu_Latn_CM
     0x6E674E414C61746ELLU, // ng_Latn_NA
+    0x80CD43444C61746ELLU, // nga_Latn_CD
+    0x84CD43444C61746ELLU, // ngb_Latn_CD
+    0x88CD43444C61746ELLU, // ngc_Latn_CD
+    0x8CCD43464C61746ELLU, // ngd_Latn_CF
+    0x90CD434D4C61746ELLU, // nge_Latn_CM
+    0x98CD43464C61746ELLU, // ngg_Latn_CF
+    0x9CCD5A414C61746ELLU, // ngh_Latn_ZA
+    0xA0CD4E474C61746ELLU, // ngi_Latn_NG
+    0xA4CD434D4C61746ELLU, // ngj_Latn_CM
+    0xA8CD41554C61746ELLU, // ngk_Latn_AU
     0xACCD4D5A4C61746ELLU, // ngl_Latn_MZ
+    0xB0CD464D4C61746ELLU, // ngm_Latn_FM
+    0xB4CD434D4C61746ELLU, // ngn_Latn_CM
+    0xBCCD545A4C61746ELLU, // ngp_Latn_TZ
+    0xC0CD545A4C61746ELLU, // ngq_Latn_TZ
+    0xC4CD53424C61746ELLU, // ngr_Latn_SB
+    0xC8CD4E474C61746ELLU, // ngs_Latn_NG
+    0xCCCD4C414C616F6FLLU, // ngt_Laoo_LA
+    0xD0CD4D584C61746ELLU, // ngu_Latn_MX
+    0xD4CD434D4C61746ELLU, // ngv_Latn_CM
+    0xD8CD4E474C61746ELLU, // ngw_Latn_NG
+    0xDCCD4E474C61746ELLU, // ngx_Latn_NG
+    0xE0CD434D4C61746ELLU, // ngy_Latn_CM
+    0xE4CD43474C61746ELLU, // ngz_Latn_CG
+    0x80ED41554C61746ELLU, // nha_Latn_AU
+    0x84ED43494C61746ELLU, // nhb_Latn_CI
+    0x88ED4D584C61746ELLU, // nhc_Latn_MX
+    0x8CED50594C61746ELLU, // nhd_Latn_PY
     0x90ED4D584C61746ELLU, // nhe_Latn_MX
+    0x94ED41554C61746ELLU, // nhf_Latn_AU
+    0x98ED4D584C61746ELLU, // nhg_Latn_MX
+    0xA0ED4D584C61746ELLU, // nhi_Latn_MX
+    0xA8ED4D584C61746ELLU, // nhk_Latn_MX
+    0xB0ED4D584C61746ELLU, // nhm_Latn_MX
+    0xB4ED4D584C61746ELLU, // nhn_Latn_MX
+    0xB8ED50474C61746ELLU, // nho_Latn_PG
+    0xBCED4D584C61746ELLU, // nhp_Latn_MX
+    0xC0ED4D584C61746ELLU, // nhq_Latn_MX
+    0xC4ED42574C61746ELLU, // nhr_Latn_BW
+    0xCCED4D584C61746ELLU, // nht_Latn_MX
+    0xD0ED434D4C61746ELLU, // nhu_Latn_CM
+    0xD4ED4D584C61746ELLU, // nhv_Latn_MX
     0xD8ED4D584C61746ELLU, // nhw_Latn_MX
+    0xDCED4D584C61746ELLU, // nhx_Latn_MX
+    0xE0ED4D584C61746ELLU, // nhy_Latn_MX
+    0xE4ED4D584C61746ELLU, // nhz_Latn_MX
+    0x810D49444C61746ELLU, // nia_Latn_ID
+    0x850D50474C61746ELLU, // nib_Latn_PG
+    0x8D0D41554C61746ELLU, // nid_Latn_AU
+    0x910D54444C61746ELLU, // nie_Latn_TD
+    0x950D50474C61746ELLU, // nif_Latn_PG
+    0x990D41554C61746ELLU, // nig_Latn_AU
+    0x9D0D545A4C61746ELLU, // nih_Latn_TZ
+    0xA10D50474C61746ELLU, // nii_Latn_PG
     0xA50D49444C61746ELLU, // nij_Latn_ID
+    0xAD0D49444C61746ELLU, // nil_Latn_ID
+    0xB10D545A4C61746ELLU, // nim_Latn_TZ
+    0xB50D4E474C61746ELLU, // nin_Latn_NG
+    0xB90D52554379726CLLU, // nio_Cyrl_RU
+    0xC10D4B454C61746ELLU, // niq_Latn_KE
+    0xC50D49444C61746ELLU, // nir_Latn_ID
+    0xC90D50474C61746ELLU, // nis_Latn_PG
+    0xCD0D494E54656C75LLU, // nit_Telu_IN
     0xD10D4E554C61746ELLU, // niu_Latn_NU
+    0xD50D52554379726CLLU, // niv_Cyrl_RU
+    0xD90D50474C61746ELLU, // niw_Latn_PG
+    0xDD0D43444C61746ELLU, // nix_Latn_CD
+    0xE10D43444C61746ELLU, // niy_Latn_CD
+    0xE50D50474C61746ELLU, // niz_Latn_PG
+    0x812D4E474C61746ELLU, // nja_Latn_NG
+    0x852D494E4C61746ELLU, // njb_Latn_IN
+    0x8D2D545A4C61746ELLU, // njd_Latn_TZ
+    0x9D2D494E4C61746ELLU, // njh_Latn_IN
+    0xA12D41554C61746ELLU, // nji_Latn_AU
+    0xA52D434D4C61746ELLU, // njj_Latn_CM
+    0xAD2D53534C61746ELLU, // njl_Latn_SS
+    0xB12D494E4C61746ELLU, // njm_Latn_IN
+    0xB52D494E4C61746ELLU, // njn_Latn_IN
     0xB92D494E4C61746ELLU, // njo_Latn_IN
+    0xC52D4E474C61746ELLU, // njr_Latn_NG
+    0xC92D49444C61746ELLU, // njs_Latn_ID
+    0xCD2D53524C61746ELLU, // njt_Latn_SR
+    0xD12D41554C61746ELLU, // nju_Latn_AU
+    0xDD2D43474C61746ELLU, // njx_Latn_CG
+    0xE12D434D4C61746ELLU, // njy_Latn_CM
+    0xE52D494E4C61746ELLU, // njz_Latn_IN
+    0x814D5A4D4C61746ELLU, // nka_Latn_ZM
+    0x854D494E4C61746ELLU, // nkb_Latn_IN
+    0x894D434D4C61746ELLU, // nkc_Latn_CM
+    0x8D4D494E4C61746ELLU, // nkd_Latn_IN
+    0x914D53424C61746ELLU, // nke_Latn_SB
+    0x954D494E4C61746ELLU, // nkf_Latn_IN
+    0x994D50474C61746ELLU, // nkg_Latn_PG
+    0x9D4D494E4C61746ELLU, // nkh_Latn_IN
+    0xA14D494E4C61746ELLU, // nki_Latn_IN
+    0xA54D49444C61746ELLU, // nkj_Latn_ID
+    0xA94D56554C61746ELLU, // nkk_Latn_VU
+    0xB14D50474C61746ELLU, // nkm_Latn_PG
+    0xB54D414F4C61746ELLU, // nkn_Latn_AO
+    0xB94D47484C61746ELLU, // nko_Latn_GH
+    0xC14D47484C61746ELLU, // nkq_Latn_GH
+    0xC54D464D4C61746ELLU, // nkr_Latn_FM
+    0xC94D49444C61746ELLU, // nks_Latn_ID
+    0xCD4D545A4C61746ELLU, // nkt_Latn_TZ
+    0xD14D43494C61746ELLU, // nku_Latn_CI
+    0xD54D4D574C61746ELLU, // nkv_Latn_MW
+    0xD94D43444C61746ELLU, // nkw_Latn_CD
+    0xDD4D4E474C61746ELLU, // nkx_Latn_NG
+    0xE54D4E474C61746ELLU, // nkz_Latn_NG
     0x6E6C4E4C4C61746ELLU, // nl_Latn_NL
+    0x816D434D4C61746ELLU, // nla_Latn_CM
+    0x896D49444C61746ELLU, // nlc_Latn_ID
+    0x916D4B454C61746ELLU, // nle_Latn_KE
+    0x996D53424C61746ELLU, // nlg_Latn_SB
+    0xA16D414641726162LLU, // nli_Arab_AF
+    0xA56D43444C61746ELLU, // nlj_Latn_CD
+    0xA96D49444C61746ELLU, // nlk_Latn_ID
+    0xB16D504B41726162LLU, // nlm_Arab_PK
+    0xB96D43444C61746ELLU, // nlo_Latn_CD
+    0xC16D4D4D4C61746ELLU, // nlq_Latn_MM
+    0xD16D47484C61746ELLU, // nlu_Latn_GH
+    0xD56D4D584C61746ELLU, // nlv_Latn_MX
+    0xD96D41554C61746ELLU, // nlw_Latn_AU
+    0xDD6D494E44657661LLU, // nlx_Deva_IN
+    0xE16D41554C61746ELLU, // nly_Latn_AU
+    0xE56D53424C61746ELLU, // nlz_Latn_SB
+    0x818D494E4C61746ELLU, // nma_Latn_IN
+    0x858D56554C61746ELLU, // nmb_Latn_VU
+    0x898D54444C61746ELLU, // nmc_Latn_TD
+    0x8D8D47414C61746ELLU, // nmd_Latn_GA
+    0x918D494E4C61746ELLU, // nme_Latn_IN
+    0x958D494E4C61746ELLU, // nmf_Latn_IN
     0x998D434D4C61746ELLU, // nmg_Latn_CM
+    0x9D8D494E4C61746ELLU, // nmh_Latn_IN
+    0xA18D4E474C61746ELLU, // nmi_Latn_NG
+    0xA58D43464C61746ELLU, // nmj_Latn_CF
+    0xA98D56554C61746ELLU, // nmk_Latn_VU
+    0xAD8D434D4C61746ELLU, // nml_Latn_CM
+    0xB18D4E5044657661LLU, // nmm_Deva_NP
+    0xB58D42574C61746ELLU, // nmn_Latn_BW
+    0xB98D494E4C61746ELLU, // nmo_Latn_IN
+    0xBD8D41554C61746ELLU, // nmp_Latn_AU
+    0xC18D5A574C61746ELLU, // nmq_Latn_ZW
+    0xC58D434D4C61746ELLU, // nmr_Latn_CM
+    0xC98D56554C61746ELLU, // nms_Latn_VU
+    0xCD8D464D4C61746ELLU, // nmt_Latn_FM
+    0xD18D55534C61746ELLU, // nmu_Latn_US
+    0xD58D41554C61746ELLU, // nmv_Latn_AU
+    0xD98D50474C61746ELLU, // nmw_Latn_PG
+    0xDD8D50474C61746ELLU, // nmx_Latn_PG
+    0xE58D54474C61746ELLU, // nmz_Latn_TG
     0x6E6E4E4F4C61746ELLU, // nn_Latn_NO
+    0x81AD41554C61746ELLU, // nna_Latn_AU
+    0x85AD43444C61746ELLU, // nnb_Latn_CD
+    0x89AD54444C61746ELLU, // nnc_Latn_TD
+    0x8DAD56554C61746ELLU, // nnd_Latn_VU
+    0x91AD414F4C61746ELLU, // nne_Latn_AO
+    0x95AD50474C61746ELLU, // nnf_Latn_PG
+    0x99AD494E4C61746ELLU, // nng_Latn_IN
     0x9DAD434D4C61746ELLU, // nnh_Latn_CM
+    0xA1AD49444C61746ELLU, // nni_Latn_ID
+    0xA5AD45544C61746ELLU, // nnj_Latn_ET
+    0xA9AD50474C61746ELLU, // nnk_Latn_PG
+    0xADAD494E4C61746ELLU, // nnl_Latn_IN
+    0xB1AD50474C61746ELLU, // nnm_Latn_PG
+    0xB5AD54444C61746ELLU, // nnn_Latn_TD
     0xBDAD494E5763686FLLU, // nnp_Wcho_IN
+    0xC1AD545A4C61746ELLU, // nnq_Latn_TZ
+    0xC5AD41554C61746ELLU, // nnr_Latn_AU
+    0xCDAD55534C61746ELLU, // nnt_Latn_US
+    0xD1AD47484C61746ELLU, // nnu_Latn_GH
+    0xD5AD41554C61746ELLU, // nnv_Latn_AU
+    0xD9AD42464C61746ELLU, // nnw_Latn_BF
+    0xE1AD41554C61746ELLU, // nny_Latn_AU
+    0xE5AD434D4C61746ELLU, // nnz_Latn_CM
     0x6E6F4E4F4C61746ELLU, // no_Latn_NO
+    0x81CD434F4C61746ELLU, // noa_Latn_CO
+    0x89CD50474C61746ELLU, // noc_Latn_PG
     0x8DCD54484C616E61LLU, // nod_Lana_TH
     0x91CD494E44657661LLU, // noe_Deva_IN
+    0x95CD50474C61746ELLU, // nof_Latn_PG
+    0x99CD52554379726CLLU, // nog_Cyrl_RU
+    0x9DCD50474C61746ELLU, // noh_Latn_PG
+    0xA1CD494E44657661LLU, // noi_Deva_IN
+    0xA5CD434F4C61746ELLU, // noj_Latn_CO
+    0xA9CD55534C61746ELLU, // nok_Latn_US
     0xB5CD534552756E72LLU, // non_Runr_SE
+    0xBDCD50474C61746ELLU, // nop_Latn_PG
+    0xC1CD43444C61746ELLU, // noq_Latn_CD
+    0xC9CD434E59696969LLU, // nos_Yiii_CN
+    0xCDCD50454C61746ELLU, // not_Latn_PE
+    0xD1CD50474C61746ELLU, // nou_Latn_PG
+    0xD9CD545A4C61746ELLU, // now_Latn_TZ
+    0xE1CD54444C61746ELLU, // noy_Latn_TD
+    0x85ED425454696274LLU, // npb_Tibt_BT
+    0x99ED4D4D4C61746ELLU, // npg_Latn_MM
+    0x9DED494E4C61746ELLU, // nph_Latn_IN
+    0xADED4D584C61746ELLU, // npl_Latn_MX
+    0xB5ED50474C61746ELLU, // npn_Latn_PG
+    0xB9ED494E4C61746ELLU, // npo_Latn_IN
+    0xC9ED49444C61746ELLU, // nps_Latn_ID
+    0xD1ED494E4C61746ELLU, // npu_Latn_IN
+    0xDDED53424C61746ELLU, // npx_Latn_SB
+    0xE1ED49444C61746ELLU, // npy_Latn_ID
+    0x9A0D424A4C61746ELLU, // nqg_Latn_BJ
+    0xAA0D424A4C61746ELLU, // nqk_Latn_BJ
+    0xAE0D414F4C61746ELLU, // nql_Latn_AO
+    0xB20D49444C61746ELLU, // nqm_Latn_ID
+    0xB60D50474C61746ELLU, // nqn_Latn_PG
     0xBA0D474E4E6B6F6FLLU, // nqo_Nkoo_GN
+    0xC20D4D4D4C61746ELLU, // nqq_Latn_MM
+    0xCE0D4E474C61746ELLU, // nqt_Latn_NG
+    0xE20D4D4D4C61746ELLU, // nqy_Latn_MM
     0x6E725A414C61746ELLU, // nr_Latn_ZA
+    0x822D47414C61746ELLU, // nra_Latn_GA
+    0x862D45524C61746ELLU, // nrb_Latn_ER
+    0x922D494E4C61746ELLU, // nre_Latn_IN
+    0x962D4A454C61746ELLU, // nrf_Latn_JE
+    0x9A2D56554C61746ELLU, // nrg_Latn_VU
+    0xA22D494E4C61746ELLU, // nri_Latn_IN
+    0xAA2D41554C61746ELLU, // nrk_Latn_AU
+    0xAE2D41554C61746ELLU, // nrl_Latn_AU
+    0xB22D4D594C61746ELLU, // nrm_Latn_MY
+    0xB62D474252756E72LLU, // nrn_Runr_GB
+    0xBE2D49544C61746ELLU, // nrp_Latn_IT
+    0xD22D434E4C61746ELLU, // nru_Latn_CN
+    0xDE2D41554C61746ELLU, // nrx_Latn_AU
+    0xE62D50474C61746ELLU, // nrz_Latn_PG
+    0x824D494E4C61746ELLU, // nsa_Latn_IN
+    0x864D5A414C61746ELLU, // nsb_Latn_ZA
+    0x8A4D4E474C61746ELLU, // nsc_Latn_NG
+    0x8E4D434E59696969LLU, // nsd_Yiii_CN
+    0x924D5A4D4C61746ELLU, // nse_Latn_ZM
+    0x964D434E59696969LLU, // nsf_Yiii_CN
+    0x9A4D545A4C61746ELLU, // nsg_Latn_TZ
+    0x9E4D434D4C61746ELLU, // nsh_Latn_CM
     0xAA4D434143616E73LLU, // nsk_Cans_CA
+    0xB24D494E4C61746ELLU, // nsm_Latn_IN
+    0xB64D50474C61746ELLU, // nsn_Latn_PG
     0xBA4D5A414C61746ELLU, // nso_Latn_ZA
+    0xC24D55534C61746ELLU, // nsq_Latn_US
+    0xCA4D50474C61746ELLU, // nss_Latn_PG
     0xCE4D494E546E7361LLU, // nst_Tnsa_IN
+    0xD24D4D584C61746ELLU, // nsu_Latn_MX
+    0xD64D434E59696969LLU, // nsv_Yiii_CN
+    0xDA4D56554C61746ELLU, // nsw_Latn_VU
+    0xDE4D414F4C61746ELLU, // nsx_Latn_AO
+    0xE24D49444C61746ELLU, // nsy_Latn_ID
+    0xE64D55534C61746ELLU, // nsz_Latn_US
+    0x8E6D4D594C61746ELLU, // ntd_Latn_MY
+    0x926D4D5A4C61746ELLU, // nte_Latn_MZ
+    0x9A6D41554C61746ELLU, // ntg_Latn_AU
+    0xA26D42464C61746ELLU, // nti_Latn_BF
+    0xA66D41554C61746ELLU, // ntj_Latn_AU
+    0xAA6D545A4C61746ELLU, // ntk_Latn_TZ
+    0xB26D424A4C61746ELLU, // ntm_Latn_BJ
+    0xBA6D43444C61746ELLU, // nto_Latn_CD
+    0xBE6D4D584C61746ELLU, // ntp_Latn_MX
+    0xC66D47484C61746ELLU, // ntr_Latn_GH
+    0xD26D53424C61746ELLU, // ntu_Latn_SB
+    0xDE6D4D4D4C61746ELLU, // ntx_Latn_MM
+    0xE26D564E59696969LLU, // nty_Yiii_VN
+    0xE66D495241726162LLU, // ntz_Arab_IR
+    0x828D4E434C61746ELLU, // nua_Latn_NC
+    0x8A8D42524C61746ELLU, // nuc_Latn_BR
+    0x8E8D50474C61746ELLU, // nud_Latn_PG
+    0x928D43444C61746ELLU, // nue_Latn_CD
+    0x968D434E4C61746ELLU, // nuf_Latn_CN
+    0x9A8D41554C61746ELLU, // nug_Latn_AU
+    0x9E8D4E474C61746ELLU, // nuh_Latn_NG
+    0xA28D47514C61746ELLU, // nui_Latn_GQ
+    0xA68D55474C61746ELLU, // nuj_Latn_UG
+    0xAA8D43414C61746ELLU, // nuk_Latn_CA
+    0xB28D544F4C61746ELLU, // num_Latn_TO
+    0xB68D4D4D4C61746ELLU, // nun_Latn_MM
+    0xBA8D564E4C61746ELLU, // nuo_Latn_VN
+    0xBE8D4E474C61746ELLU, // nup_Latn_NG
+    0xC28D50474C61746ELLU, // nuq_Latn_PG
+    0xC68D50474C61746ELLU, // nur_Latn_PG
     0xCA8D53534C61746ELLU, // nus_Latn_SS
+    0xCE8D564E4C61746ELLU, // nut_Latn_VN
+    0xD28D43444C61746ELLU, // nuu_Latn_CD
+    0xD68D42464C61746ELLU, // nuv_Latn_BF
+    0xDA8D464D4C61746ELLU, // nuw_Latn_FM
+    0xDE8D50474C61746ELLU, // nux_Latn_PG
+    0xE28D41554C61746ELLU, // nuy_Latn_AU
+    0xE68D4D584C61746ELLU, // nuz_Latn_MX
     0x6E7655534C61746ELLU, // nv_Latn_US
+    0x9EAD56554C61746ELLU, // nvh_Latn_VU
+    0xB2AD50474C61746ELLU, // nvm_Latn_PG
+    0xBAAD434D4C61746ELLU, // nvo_Latn_CM
+    0x86CD43494C61746ELLU, // nwb_Latn_CI
+    0x8ACD4E504E657761LLU, // nwc_Newa_NP
+    0x92CD434D4C61746ELLU, // nwe_Latn_CM
+    0x9ACD41554C61746ELLU, // nwg_Latn_AU
+    0xA2CD56554C61746ELLU, // nwi_Latn_VU
+    0xB2CD53534C61746ELLU, // nwm_Latn_SS
+    0xBACD41554C61746ELLU, // nwo_Latn_AU
+    0xC6CD50474C61746ELLU, // nwr_Latn_PG
+    0xDACD545A4C61746ELLU, // nww_Latn_TZ
+    0xDECD4E5044657661LLU, // nwx_Deva_NP
+    0x82ED544C4C61746ELLU, // nxa_Latn_TL
+    0x8EED43444C61746ELLU, // nxd_Latn_CD
+    0x92ED49444C61746ELLU, // nxe_Latn_ID
+    0x9AED49444C61746ELLU, // nxg_Latn_ID
+    0xA2ED545A4C61746ELLU, // nxi_Latn_TZ
+    0xAEED49444C61746ELLU, // nxl_Latn_ID
+    0xB6ED41554C61746ELLU, // nxn_Latn_AU
+    0xBAED47414C61746ELLU, // nxo_Latn_GA
     0xC2ED434E4C61746ELLU, // nxq_Latn_CN
+    0xC6ED50474C61746ELLU, // nxr_Latn_PG
+    0xDEED49444C61746ELLU, // nxx_Latn_ID
     0x6E794D574C61746ELLU, // ny_Latn_MW
+    0x870D47484C61746ELLU, // nyb_Latn_GH
+    0x8B0D43444C61746ELLU, // nyc_Latn_CD
+    0x8F0D4B454C61746ELLU, // nyd_Latn_KE
+    0x930D414F4C61746ELLU, // nye_Latn_AO
+    0x970D4B454C61746ELLU, // nyf_Latn_KE
+    0x9B0D43444C61746ELLU, // nyg_Latn_CD
+    0x9F0D41554C61746ELLU, // nyh_Latn_AU
+    0xA30D53444C61746ELLU, // nyi_Latn_SD
+    0xA70D43444C61746ELLU, // nyj_Latn_CD
+    0xAB0D414F4C61746ELLU, // nyk_Latn_AO
+    0xAF0D544854686169LLU, // nyl_Thai_TH
     0xB30D545A4C61746ELLU, // nym_Latn_TZ
     0xB70D55474C61746ELLU, // nyn_Latn_UG
+    0xBB0D55474C61746ELLU, // nyo_Latn_UG
+    0xBF0D55474C61746ELLU, // nyp_Latn_UG
+    0xC30D495241726162LLU, // nyq_Arab_IR
+    0xC70D4D574C61746ELLU, // nyr_Latn_MW
+    0xCB0D41554C61746ELLU, // nys_Latn_AU
+    0xCF0D41554C61746ELLU, // nyt_Latn_AU
+    0xD30D4D5A4C61746ELLU, // nyu_Latn_MZ
+    0xD70D41554C61746ELLU, // nyv_Latn_AU
+    0xDB0D544854686169LLU, // nyw_Thai_TH
+    0xDF0D41554C61746ELLU, // nyx_Latn_AU
+    0xE30D545A4C61746ELLU, // nyy_Latn_TZ
+    0x832D434D4C61746ELLU, // nza_Latn_CM
+    0x872D47414C61746ELLU, // nzb_Latn_GA
+    0x8F2D43444C61746ELLU, // nzd_Latn_CD
     0xA32D47484C61746ELLU, // nzi_Latn_GH
+    0xAB2D43464C61746ELLU, // nzk_Latn_CF
+    0xB32D494E4C61746ELLU, // nzm_Latn_IN
+    0xC72D4E474C61746ELLU, // nzr_Latn_NG
+    0xD32D43474C61746ELLU, // nzu_Latn_CG
+    0xE32D54444C61746ELLU, // nzy_Latn_TD
+    0xE72D4D4C4C61746ELLU, // nzz_Latn_ML
+    0x800E52554379726CLLU, // oaa_Cyrl_RU
+    0x880E52554379726CLLU, // oac_Cyrl_RU
+    0xC40E535953797263LLU, // oar_Syrc_SY
+    0xD40E474547656F72LLU, // oav_Geor_GE
+    0xA02E55534C61746ELLU, // obi_Latn_US
+    0xA82E50484C61746ELLU, // obk_Latn_PH
+    0xAC2E434D4C61746ELLU, // obl_Latn_CM
+    0xB02E4A4F50686E78LLU, // obm_Phnx_JO
+    0xB82E50484C61746ELLU, // obo_Latn_PH
+    0xC42E4D4D4D796D72LLU, // obr_Mymr_MM
+    0xCC2E46524C61746ELLU, // obt_Latn_FR
+    0xD02E4E474C61746ELLU, // obu_Latn_NG
     0x6F6346524C61746ELLU, // oc_Latn_FR
+    0x804E50454C61746ELLU, // oca_Latn_PE
+    0xB84E47424C61746ELLU, // oco_Latn_GB
+    0xD04E4D584C61746ELLU, // ocu_Latn_MX
+    0x806E4E474C61746ELLU, // oda_Latn_NG
+    0xA86E504B41726162LLU, // odk_Arab_PK
+    0xCC6E4E4C4C61746ELLU, // odt_Latn_NL
+    0xD06E4E474C61746ELLU, // odu_Latn_NG
+    0xC8AE4E4C4C61746ELLU, // ofs_Latn_NL
+    0xD0AE4E474C61746ELLU, // ofu_Latn_NG
+    0x84CE4E474C61746ELLU, // ogb_Latn_NG
+    0x88CE4E474C61746ELLU, // ogc_Latn_NG
+    0x98CE4E474C61746ELLU, // ogg_Latn_NG
+    0xB8CE4E474C61746ELLU, // ogo_Latn_NG
+    0xD0CE4E474C61746ELLU, // ogu_Latn_NG
+    0xCCEE545258737578LLU, // oht_Xsux_TR
+    0xD0EE48554C61746ELLU, // ohu_Latn_HU
+    0x810E49444C61746ELLU, // oia_Latn_ID
+    0x910E53534C61746ELLU, // oie_Latn_SS
+    0xB50E50474C61746ELLU, // oin_Latn_PG
     0x6F6A434143616E73LLU, // oj_Cans_CA
+    0x852E43414C61746ELLU, // ojb_Latn_CA
+    0x892E43414C61746ELLU, // ojc_Latn_CA
     0xC92E434143616E73LLU, // ojs_Cans_CA
+    0xD52E53424C61746ELLU, // ojv_Latn_SB
+    0xD92E43414C61746ELLU, // ojw_Latn_CA
     0x814E43414C61746ELLU, // oka_Latn_CA
+    0x854E4E474C61746ELLU, // okb_Latn_NG
+    0x894E43444C61746ELLU, // okc_Latn_CD
+    0x8D4E4E474C61746ELLU, // okd_Latn_NG
+    0x914E4E474C61746ELLU, // oke_Latn_NG
+    0x994E41554C61746ELLU, // okg_Latn_AU
+    0xA14E4B454C61746ELLU, // oki_Latn_KE
+    0xA94E50474C61746ELLU, // okk_Latn_PG
+    0xB14E4B5248616E67LLU, // okm_Hang_KR
+    0xB94E4B5248616E69LLU, // oko_Hani_KR
+    0xC54E4E474C61746ELLU, // okr_Latn_NG
+    0xC94E4E474C61746ELLU, // oks_Latn_NG
+    0xD14E434D4C61746ELLU, // oku_Latn_CM
+    0xD54E50474C61746ELLU, // okv_Latn_PG
+    0xDD4E4E474C61746ELLU, // okx_Latn_NG
+    0xE54E4B484B686D72LLU, // okz_Khmr_KH
+    0x816E4E5044657661LLU, // ola_Deva_NP
+    0x8D6E545A4C61746ELLU, // old_Latn_TZ
+    0x916E425454696274LLU, // ole_Tibt_BT
+    0xA96E41554C61746ELLU, // olk_Latn_AU
+    0xB16E4E474C61746ELLU, // olm_Latn_NG
+    0xB96E52554C61746ELLU, // olo_Latn_RU
+    0xC56E56554C61746ELLU, // olr_Latn_VU
+    0xCD6E4C544C61746ELLU, // olt_Latn_LT
+    0xD16E414F4C61746ELLU, // olu_Latn_AO
     0x6F6D45544C61746ELLU, // om_Latn_ET
+    0x818E55534C61746ELLU, // oma_Latn_US
+    0x858E56554C61746ELLU, // omb_Latn_VU
+    0x898E50454C61746ELLU, // omc_Latn_PE
+    0x998E50454C61746ELLU, // omg_Latn_PE
+    0xA18E43444C61746ELLU, // omi_Latn_CD
+    0xA98E52554379726CLLU, // omk_Cyrl_RU
+    0xAD8E43444C61746ELLU, // oml_Latn_CD
+    0xB98E50474C61746ELLU, // omo_Latn_PG
+    0xBD8E494E4D746569LLU, // omp_Mtei_IN
+    0xC58E494E4D6F6469LLU, // omr_Modi_IN
+    0xCD8E4B454C61746ELLU, // omt_Latn_KE
+    0xD18E50454C61746ELLU, // omu_Latn_PE
+    0xD98E50474C61746ELLU, // omw_Latn_PG
+    0xDD8E4D4D4D796D72LLU, // omx_Mymr_MM
+    0x81AE41524C61746ELLU, // ona_Latn_AR
+    0x91AE43414C61746ELLU, // one_Latn_CA
+    0x99AE50474C61746ELLU, // ong_Latn_PG
+    0xA1AE49444C61746ELLU, // oni_Latn_ID
+    0xA5AE50474C61746ELLU, // onj_Latn_PG
+    0xA9AE50474C61746ELLU, // onk_Latn_PG
+    0xB5AE50474C61746ELLU, // onn_Latn_PG
+    0xB9AE43414C61746ELLU, // ono_Latn_CA
+    0xBDAE494E4C61746ELLU, // onp_Latn_IN
+    0xC5AE50474C61746ELLU, // onr_Latn_PG
+    0xC9AE50474C61746ELLU, // ons_Latn_PG
+    0xCDAE50474C61746ELLU, // ont_Latn_PG
+    0xD1AE56554C61746ELLU, // onu_Latn_VU
+    0xDDAE49444C61746ELLU, // onx_Latn_ID
+    0x8DCE55534C61746ELLU, // ood_Latn_US
+    0xB5CE494E44657661LLU, // oon_Deva_IN
+    0xC5CE5A414C61746ELLU, // oor_Latn_ZA
+    0x81EE4E474C61746ELLU, // opa_Latn_NG
+    0xA9EE49444C61746ELLU, // opk_Latn_ID
+    0xB1EE50474C61746ELLU, // opm_Latn_PG
+    0xB9EE50474C61746ELLU, // opo_Latn_PG
+    0xCDEE4D584C61746ELLU, // opt_Latn_MX
+    0xE1EE42524C61746ELLU, // opy_Latn_BR
     0x6F72494E4F727961LLU, // or_Orya_IN
+    0x822E53424C61746ELLU, // ora_Latn_SB
+    0x8A2E4B454C61746ELLU, // orc_Latn_KE
+    0x922E50454C61746ELLU, // ore_Latn_PE
+    0x9A2E4E474C61746ELLU, // org_Latn_NG
+    0xB62E4D594C61746ELLU, // orn_Latn_MY
+    0xBA2E50474C61746ELLU, // oro_Latn_PG
+    0xC62E4E474C61746ELLU, // orr_Latn_NG
+    0xCA2E4D594C61746ELLU, // ors_Latn_MY
+    0xCE2E494E54656C75LLU, // ort_Telu_IN
+    0xD22E504B41726162LLU, // oru_Arab_PK
+    0xD62E52554379726CLLU, // orv_Cyrl_RU
+    0xDA2E42524C61746ELLU, // orw_Latn_BR
+    0xDE2E4E474C61746ELLU, // orx_Latn_NG
+    0xE62E49444C61746ELLU, // orz_Latn_ID
     0x6F7347454379726CLLU, // os_Cyrl_GE
     0x824E55534F736765LLU, // osa_Osge_US
+    0x8A4E49544974616CLLU, // osc_Ital_IT
+    0xA24E49444A617661LLU, // osi_Java_ID
+    0xBA4E4E474C61746ELLU, // oso_Latn_NG
+    0xBE4E45534C61746ELLU, // osp_Latn_ES
+    0xCE4E434D4C61746ELLU, // ost_Latn_CM
+    0xD24E50474C61746ELLU, // osu_Latn_PG
+    0xDE4E44454C61746ELLU, // osx_Latn_DE
+    0x826E545241726162LLU, // ota_Arab_TR
+    0x866E434E54696274LLU, // otb_Tibt_CN
+    0x8E6E49444C61746ELLU, // otd_Latn_ID
+    0x926E4D584C61746ELLU, // ote_Latn_MX
+    0xA26E42524C61746ELLU, // oti_Latn_BR
     0xAA6E4D4E4F726B68LLU, // otk_Orkh_MN
-    0xA28E8C814F756772LLU, // oui_Ougr_143
+    0xAE6E4D584C61746ELLU, // otl_Latn_MX
+    0xB26E4D584C61746ELLU, // otm_Latn_MX
+    0xB66E4D584C61746ELLU, // otn_Latn_MX
+    0xC26E4D584C61746ELLU, // otq_Latn_MX
+    0xC66E53444C61746ELLU, // otr_Latn_SD
+    0xCA6E4D584C61746ELLU, // ots_Latn_MX
+    0xCE6E4D584C61746ELLU, // ott_Latn_MX
+    0xD26E42524C61746ELLU, // otu_Latn_BR
+    0xDA6E43414C61746ELLU, // otw_Latn_CA
+    0xDE6E4D584C61746ELLU, // otx_Latn_MX
+    0xE26E494E4772616ELLU, // oty_Gran_IN
+    0xE66E4D584C61746ELLU, // otz_Latn_MX
+    0x868E4C524C61746ELLU, // oub_Latn_LR
+    0x928E50474C61746ELLU, // oue_Latn_PG
+    0xA28E434E4F756772LLU, // oui_Ougr_CN
+    0xB28E50474C61746ELLU, // oum_Latn_PG
+    0x8EAE53454C61746ELLU, // ovd_Latn_SE
+    0xA2CE50474C61746ELLU, // owi_Latn_PG
+    0xAECE47424C61746ELLU, // owl_Latn_GB
+    0x8F0E45544C61746ELLU, // oyd_Latn_ET
+    0xB30E42524C61746ELLU, // oym_Latn_BR
+    0xE30E50474C61746ELLU, // oyy_Latn_PG
+    0xB32E434D4C61746ELLU, // ozm_Latn_CM
     0x7061504B41726162LLU, // pa_Arab_PK
     0x7061494E47757275LLU, // pa_Guru_IN
+    0x840F42524C61746ELLU, // pab_Latn_BR
+    0x880F564E4C61746ELLU, // pac_Latn_VN
+    0x8C0F42524C61746ELLU, // pad_Latn_BR
+    0x900F43444C61746ELLU, // pae_Latn_CD
+    0x940F42524C61746ELLU, // paf_Latn_BR
     0x980F50484C61746ELLU, // pag_Latn_PH
+    0x9C0F42524C61746ELLU, // pah_Latn_BR
+    0xA00F4E474C61746ELLU, // pai_Latn_NG
+    0xA80F42524C61746ELLU, // pak_Latn_BR
     0xAC0F495250686C69LLU, // pal_Phli_IR
     0xAC0F434E50686C70LLU, // pal_Phlp_CN
     0xB00F50484C61746ELLU, // pam_Latn_PH
-    0xBC0F41574C61746ELLU, // pap_Latn_AW
+    0xB80F55534C61746ELLU, // pao_Latn_US
+    0xBC0F43574C61746ELLU, // pap_Latn_CW
+    0xC00F544A4379726CLLU, // paq_Cyrl_TJ
+    0xC40F55534C61746ELLU, // par_Latn_US
+    0xC80F49444C61746ELLU, // pas_Latn_ID
     0xD00F50574C61746ELLU, // pau_Latn_PW
+    0xD40F42524C61746ELLU, // pav_Latn_BR
+    0xD80F55534C61746ELLU, // paw_Latn_US
+    0xDC0F42524C61746ELLU, // pax_Latn_BR
+    0xE00F484E4C61746ELLU, // pay_Latn_HN
+    0xE40F42524C61746ELLU, // paz_Latn_BR
+    0x842F434F4C61746ELLU, // pbb_Latn_CO
+    0x882F47594C61746ELLU, // pbc_Latn_GY
+    0x902F4D584C61746ELLU, // pbe_Latn_MX
+    0x942F4D584C61746ELLU, // pbf_Latn_MX
+    0x982F56454C61746ELLU, // pbg_Latn_VE
+    0x9C2F56454C61746ELLU, // pbh_Latn_VE
+    0xA02F434D4C61746ELLU, // pbi_Latn_CM
+    0xAC2F4E474C61746ELLU, // pbl_Latn_NG
+    0xB02F4D584C61746ELLU, // pbm_Latn_MX
+    0xB42F4E474C61746ELLU, // pbn_Latn_NG
+    0xB82F47574C61746ELLU, // pbo_Latn_GW
+    0xBC2F474E4C61746ELLU, // pbp_Latn_GN
+    0xC42F545A4C61746ELLU, // pbr_Latn_TZ
+    0xC82F4D584C61746ELLU, // pbs_Latn_MX
+    0xCC2F414641726162LLU, // pbt_Arab_AF
+    0xD42F494E4C61746ELLU, // pbv_Latn_IN
+    0xE02F50474C61746ELLU, // pby_Latn_PG
+    0x804F4D584C61746ELLU, // pca_Latn_MX
+    0x844F4B484B686D72LLU, // pcb_Khmr_KH
+    0x884F434E4C61746ELLU, // pcc_Latn_CN
     0x8C4F46524C61746ELLU, // pcd_Latn_FR
+    0x904F4D4D4D796D72LLU, // pce_Mymr_MM
+    0x944F494E4D6C796DLLU, // pcf_Mlym_IN
+    0x984F494E4D6C796DLLU, // pcg_Mlym_IN
+    0x9C4F494E44657661LLU, // pch_Deva_IN
+    0xA04F494E44657661LLU, // pci_Deva_IN
+    0xA44F494E54656C75LLU, // pcj_Telu_IN
+    0xA84F494E4C61746ELLU, // pck_Latn_IN
     0xB04F4E474C61746ELLU, // pcm_Latn_NG
+    0xB44F4E474C61746ELLU, // pcn_Latn_NG
+    0xBC4F424F4C61746ELLU, // pcp_Latn_BO
+    0xD84F4E474C61746ELLU, // pcw_Latn_NG
+    0x806F50474C61746ELLU, // pda_Latn_PG
     0x886F55534C61746ELLU, // pdc_Latn_US
+    0xB46F49444C61746ELLU, // pdn_Latn_ID
+    0xB86F49444C61746ELLU, // pdo_Latn_ID
     0xCC6F43414C61746ELLU, // pdt_Latn_CA
+    0xD06F4D4D4C61746ELLU, // pdu_Latn_MM
+    0x808F49444C61746ELLU, // pea_Latn_ID
+    0x848F55534C61746ELLU, // peb_Latn_US
+    0x8C8F50474C61746ELLU, // ped_Latn_PG
+    0x908F49444C61746ELLU, // pee_Latn_ID
+    0x988F494E4F727961LLU, // peg_Orya_IN
+    0xA08F4D584C61746ELLU, // pei_Latn_MX
+    0xA88F50474C61746ELLU, // pek_Latn_PG
+    0xAC8F49444C61746ELLU, // pel_Latn_ID
+    0xB08F43444C61746ELLU, // pem_Latn_CD
     0xB88F49525870656FLLU, // peo_Xpeo_IR
+    0xBC8F50474C61746ELLU, // pep_Latn_PG
+    0xC08F55534C61746ELLU, // peq_Latn_US
+    0xD48F56454C61746ELLU, // pev_Latn_VE
+    0xDC8F50474C61746ELLU, // pex_Latn_PG
+    0xE08F49444C61746ELLU, // pey_Latn_ID
+    0xE48F4D594C61746ELLU, // pez_Latn_MY
+    0x80AF464D4C61746ELLU, // pfa_Latn_FM
+    0x90AF434D4C61746ELLU, // pfe_Latn_CM
     0xACAF44454C61746ELLU, // pfl_Latn_DE
+    0x80CF53534C61746ELLU, // pga_Latn_SS
+    0x8CCF504B4B686172LLU, // pgd_Khar_PK
+    0x98CF494E44657661LLU, // pgg_Deva_IN
+    0xA0CF50474C61746ELLU, // pgi_Latn_PG
+    0xA8CF56554C61746ELLU, // pgk_Latn_VU
+    0xACCF49454F67616DLLU, // pgl_Ogam_IE
+    0xB4CF49544974616CLLU, // pgn_Ital_IT
+    0xC8CF4E474C61746ELLU, // pgs_Latn_NG
+    0xD0CF49444C61746ELLU, // pgu_Latn_ID
+    0x8CEF494E44657661LLU, // phd_Deva_IN
+    0x98EF564E4C61746ELLU, // phg_Latn_VN
+    0x9CEF564E4C61746ELLU, // phh_Latn_VN
+    0xA8EF494E4D796D72LLU, // phk_Mymr_IN
+    0xACEF504B41726162LLU, // phl_Arab_PK
+    0xB0EF4D5A4C61746ELLU, // phm_Latn_MZ
     0xB4EF4C4250686E78LLU, // phn_Phnx_LB
+    0xB8EF4C414C616F6FLLU, // pho_Laoo_LA
+    0xC4EF504B41726162LLU, // phr_Arab_PK
+    0xCCEF544854686169LLU, // pht_Thai_TH
+    0xD0EF544854686169LLU, // phu_Thai_TH
+    0xD4EF414641726162LLU, // phv_Arab_AF
+    0xD8EF4E5044657661LLU, // phw_Deva_NP
+    0x7069494E53696E68LLU, // pi_Sinh_IN
+    0x810F4D584C61746ELLU, // pia_Latn_MX
+    0x850F50454C61746ELLU, // pib_Latn_PE
+    0x890F47414C61746ELLU, // pic_Latn_GA
+    0x8D0F56454C61746ELLU, // pid_Latn_VE
+    0x950F464D4C61746ELLU, // pif_Latn_FM
+    0x990F50454C61746ELLU, // pig_Latn_PE
+    0x9D0F4E464C61746ELLU, // pih_Latn_NF
+    0xA50F434F4C61746ELLU, // pij_Latn_CO
+    0xAD0F424A4C61746ELLU, // pil_Latn_BJ
+    0xB10F55534C61746ELLU, // pim_Latn_US
+    0xB50F50474C61746ELLU, // pin_Latn_PG
+    0xB90F434F4C61746ELLU, // pio_Latn_CO
+    0xBD0F4E474C61746ELLU, // pip_Latn_NG
+    0xC50F42524C61746ELLU, // pir_Latn_BR
     0xC90F53424C61746ELLU, // pis_Latn_SB
+    0xCD0F41554C61746ELLU, // pit_Latn_AU
+    0xD10F41554C61746ELLU, // piu_Latn_AU
+    0xD50F53424C61746ELLU, // piv_Latn_SB
+    0xD90F545A4C61746ELLU, // piw_Latn_TZ
+    0xDD0F50474C61746ELLU, // pix_Latn_PG
+    0xE10F4E474C61746ELLU, // piy_Latn_NG
+    0xE50F4E434C61746ELLU, // piz_Latn_NC
+    0xCD2F41554C61746ELLU, // pjt_Latn_AU
     0x814F494E42726168LLU, // pka_Brah_IN
+    0x854F4B454C61746ELLU, // pkb_Latn_KE
+    0x994F50474C61746ELLU, // pkg_Latn_PG
+    0x9D4F42444C61746ELLU, // pkh_Latn_BD
+    0xB54F41554C61746ELLU, // pkn_Latn_AU
     0xB94F4B454C61746ELLU, // pko_Latn_KE
+    0xBD4F434B4C61746ELLU, // pkp_Latn_CK
+    0xC54F494E4D6C796DLLU, // pkr_Mlym_IN
+    0xD14F49444C61746ELLU, // pku_Latn_ID
     0x706C504C4C61746ELLU, // pl_Latn_PL
+    0x816F50474C61746ELLU, // pla_Latn_PG
+    0x856F56554C61746ELLU, // plb_Latn_VU
+    0x896F50484C61746ELLU, // plc_Latn_PH
+    0x8D6F47424C61746ELLU, // pld_Latn_GB
+    0x916F49444C61746ELLU, // ple_Latn_ID
+    0x996F41524C61746ELLU, // plg_Latn_AR
+    0x9D6F49444C61746ELLU, // plh_Latn_ID
+    0xA96F504B41726162LLU, // plk_Arab_PK
+    0xAD6F4D4D4D796D72LLU, // pll_Mymr_MM
+    0xB56F434F4C61746ELLU, // pln_Latn_CO
+    0xB96F4D584C61746ELLU, // plo_Latn_MX
+    0xC56F43494C61746ELLU, // plr_Latn_CI
+    0xC96F4D584C61746ELLU, // pls_Latn_MX
+    0xD16F42524C61746ELLU, // plu_Latn_BR
+    0xD56F50484C61746ELLU, // plv_Latn_PH
+    0xD96F50484C61746ELLU, // plw_Latn_PH
+    0xE56F4D594C61746ELLU, // plz_Latn_MY
+    0x818F56554C61746ELLU, // pma_Latn_VU
+    0x858F43444C61746ELLU, // pmb_Latn_CD
+    0x8D8F41554C61746ELLU, // pmd_Latn_AU
+    0x918F4E434C61746ELLU, // pme_Latn_NC
+    0x958F49444C61746ELLU, // pmf_Latn_ID
+    0x9D8F494E42726168LLU, // pmh_Brah_IN
+    0xA18F434E4C61746ELLU, // pmi_Latn_CN
+    0xA58F434E4C61746ELLU, // pmj_Latn_CN
+    0xAD8F544E4C61746ELLU, // pml_Latn_TN
+    0xB18F434D4C61746ELLU, // pmm_Latn_CM
+    0xB58F434D4C61746ELLU, // pmn_Latn_CM
+    0xB98F49444C61746ELLU, // pmo_Latn_ID
+    0xC18F4D584C61746ELLU, // pmq_Latn_MX
+    0xC58F50474C61746ELLU, // pmr_Latn_PG
     0xC98F49544C61746ELLU, // pms_Latn_IT
+    0xCD8F50464C61746ELLU, // pmt_Latn_PF
+    0xD98F55534C61746ELLU, // pmw_Latn_US
+    0xDD8F494E4C61746ELLU, // pmx_Latn_IN
+    0xE18F49444C61746ELLU, // pmy_Latn_ID
+    0xE58F4D584C61746ELLU, // pmz_Latn_MX
+    0x81AF4D594C61746ELLU, // pna_Latn_MY
+    0x89AF49444C61746ELLU, // pnc_Latn_ID
+    0x8DAF414F4C61746ELLU, // pnd_Latn_AO
+    0x91AF4D594C61746ELLU, // pne_Latn_MY
+    0x99AF4E474C61746ELLU, // png_Latn_NG
+    0x9DAF434B4C61746ELLU, // pnh_Latn_CK
+    0xA1AF49444C61746ELLU, // pni_Latn_ID
+    0xA5AF41554C61746ELLU, // pnj_Latn_AU
+    0xA9AF424F4C61746ELLU, // pnk_Latn_BO
+    0xADAF42464C61746ELLU, // pnl_Latn_BF
+    0xB1AF4D594C61746ELLU, // pnm_Latn_MY
+    0xB5AF50474C61746ELLU, // pnn_Latn_PG
+    0xB9AF50454C61746ELLU, // pno_Latn_PE
+    0xBDAF49444C61746ELLU, // pnp_Latn_ID
+    0xC1AF42464C61746ELLU, // pnq_Latn_BF
+    0xC5AF50474C61746ELLU, // pnr_Latn_PG
+    0xC9AF49444C61746ELLU, // pns_Latn_ID
     0xCDAF47524772656BLLU, // pnt_Grek_GR
+    0xD5AF41554C61746ELLU, // pnv_Latn_AU
+    0xD9AF41554C61746ELLU, // pnw_Latn_AU
+    0xE1AF434D4C61746ELLU, // pny_Latn_CM
+    0xE5AF43464C61746ELLU, // pnz_Latn_CF
+    0x89CF47544C61746ELLU, // poc_Latn_GT
+    0x91CF4D584C61746ELLU, // poe_Latn_MX
+    0x95CF43444C61746ELLU, // pof_Latn_CD
+    0x99CF42524C61746ELLU, // pog_Latn_BR
+    0x9DCF47544C61746ELLU, // poh_Latn_GT
+    0xA1CF4D584C61746ELLU, // poi_Latn_MX
+    0xA9CF42524C61746ELLU, // pok_Latn_BR
+    0xB1CF55534C61746ELLU, // pom_Latn_US
     0xB5CF464D4C61746ELLU, // pon_Latn_FM
-    0x81EF494E44657661LLU, // ppa_Deva_IN
+    0xB9CF55534C61746ELLU, // poo_Latn_US
+    0xBDCF4E434C61746ELLU, // pop_Latn_NC
+    0xC1CF4D584C61746ELLU, // poq_Latn_MX
+    0xC9CF4D584C61746ELLU, // pos_Latn_MX
+    0xCDCF55534C61746ELLU, // pot_Latn_US
+    0xD5CF47574C61746ELLU, // pov_Latn_GW
+    0xD9CF4D584C61746ELLU, // pow_Latn_MX
+    0xE1CF545A4C61746ELLU, // poy_Latn_TZ
+    0x91EF50474C61746ELLU, // ppe_Latn_PG
+    0xA1EF4D584C61746ELLU, // ppi_Latn_MX
+    0xA9EF49444C61746ELLU, // ppk_Latn_ID
+    0xADEF53564C61746ELLU, // ppl_Latn_SV
+    0xB1EF49444C61746ELLU, // ppm_Latn_ID
+    0xB5EF50474C61746ELLU, // ppn_Latn_PG
+    0xB9EF50474C61746ELLU, // ppo_Latn_PG
+    0xBDEF43444C61746ELLU, // ppp_Latn_CD
+    0xC1EF50474C61746ELLU, // ppq_Latn_PG
+    0xC9EF4D584C61746ELLU, // pps_Latn_MX
+    0xCDEF50474C61746ELLU, // ppt_Latn_PG
+    0x820F4E474C61746ELLU, // pqa_Latn_NG
     0xB20F43414C61746ELLU, // pqm_Latn_CA
     0x822F504B4B686172LLU, // pra_Khar_PK
+    0x8A2F414641726162LLU, // prc_Arab_AF
     0x8E2F495241726162LLU, // prd_Arab_IR
+    0x922F53544C61746ELLU, // pre_Latn_ST
+    0x962F50484C61746ELLU, // prf_Latn_PH
+    0x9A2F504C4C61746ELLU, // prg_Latn_PL
+    0x9E2F50484C61746ELLU, // prh_Latn_PH
+    0xA22F4E434C61746ELLU, // pri_Latn_NC
+    0xAA2F4D4D4C61746ELLU, // prk_Latn_MM
+    0xB22F50474C61746ELLU, // prm_Latn_PG
+    0xBA2F46524C61746ELLU, // pro_Latn_FR
+    0xC22F50454C61746ELLU, // prq_Latn_PE
+    0xC62F42524C61746ELLU, // prr_Latn_BR
+    0xCE2F544854686169LLU, // prt_Thai_TH
+    0xD22F49444C61746ELLU, // pru_Latn_ID
+    0xDA2F50474C61746ELLU, // prw_Latn_PG
+    0xDE2F494E41726162LLU, // prx_Arab_IN
     0x7073414641726162LLU, // ps_Arab_AF
+    0x824F49444C61746ELLU, // psa_Latn_ID
+    0x924F49444C61746ELLU, // pse_Latn_ID
+    0x9E4F414641726162LLU, // psh_Arab_AF
+    0xA24F414641726162LLU, // psi_Arab_AF
+    0xB24F424F4C61746ELLU, // psm_Latn_BO
+    0xB64F49444C61746ELLU, // psn_Latn_ID
+    0xC24F50474C61746ELLU, // psq_Latn_PG
+    0xCA4F50474C61746ELLU, // pss_Latn_PG
+    0xCE4F504B41726162LLU, // pst_Arab_PK
+    0xD24F494E42726168LLU, // psu_Brah_IN
+    0xDA4F56554C61746ELLU, // psw_Latn_VU
     0x707442524C61746ELLU, // pt_Latn_BR
+    0x826F50594C61746ELLU, // pta_Latn_PY
+    0x9E6F42524C61746ELLU, // pth_Latn_BR
+    0xA26F41554C61746ELLU, // pti_Latn_AU
+    0xB66F49444C61746ELLU, // ptn_Latn_ID
+    0xBA6F42524C61746ELLU, // pto_Latn_BR
+    0xBE6F50474C61746ELLU, // ptp_Latn_PG
+    0xC66F56554C61746ELLU, // ptr_Latn_VU
+    0xCE6F49444C61746ELLU, // ptt_Latn_ID
+    0xD26F49444C61746ELLU, // ptu_Latn_ID
+    0xD66F56554C61746ELLU, // ptv_Latn_VU
+    0x828F4D584C61746ELLU, // pua_Latn_MX
+    0x868F494E4C61746ELLU, // pub_Latn_IN
+    0x8A8F49444C61746ELLU, // puc_Latn_ID
+    0x8E8F49444C61746ELLU, // pud_Latn_ID
+    0x928F41524C61746ELLU, // pue_Latn_AR
+    0x968F49444C61746ELLU, // puf_Latn_ID
+    0x9A8F42464C61746ELLU, // pug_Latn_BF
+    0xA28F434F4C61746ELLU, // pui_Latn_CO
+    0xA68F49444C61746ELLU, // puj_Latn_ID
+    0xB28F4E5044657661LLU, // pum_Deva_NP
+    0xBA8F564E4C61746ELLU, // puo_Latn_VN
+    0xBE8F50474C61746ELLU, // pup_Latn_PG
+    0xC28F424F4C61746ELLU, // puq_Latn_BO
+    0xC68F42524C61746ELLU, // pur_Latn_BR
+    0xCE8F49444C61746ELLU, // put_Latn_ID
     0xD28F47414C61746ELLU, // puu_Latn_GA
+    0xDA8F464D4C61746ELLU, // puw_Latn_FM
+    0xDE8F50474C61746ELLU, // pux_Latn_PG
+    0xE28F55534C61746ELLU, // puy_Latn_US
+    0x82CF50474C61746ELLU, // pwa_Latn_PG
+    0x86CF4E474C61746ELLU, // pwb_Latn_NG
+    0x9ACF50474C61746ELLU, // pwg_Latn_PG
+    0xB2CF50484C61746ELLU, // pwm_Latn_PH
+    0xB6CF54574C61746ELLU, // pwn_Latn_TW
+    0xBACF4D4D4D796D72LLU, // pwo_Mymr_MM
+    0xC6CF494E44657661LLU, // pwr_Deva_IN
+    0xDACF544854686169LLU, // pww_Thai_TH
+    0xB2EF4D584C61746ELLU, // pxm_Latn_MX
+    0x930F43494C61746ELLU, // pye_Latn_CI
+    0xB30F4E474C61746ELLU, // pym_Latn_NG
+    0xB70F42524C61746ELLU, // pyn_Latn_BR
+    0xD30F54574C61746ELLU, // pyu_Latn_TW
+    0xDF0F4D4D4D796D72LLU, // pyx_Mymr_MM
+    0xE30F4D4D4C61746ELLU, // pyy_Latn_MM
+    0x932F4E474C61746ELLU, // pze_Latn_NG
+    0x9F2F54574C61746ELLU, // pzh_Latn_TW
+    0xB72F4D4D4C61746ELLU, // pzn_Latn_MM
     0x717550454C61746ELLU, // qu_Latn_PE
+    0x829055534C61746ELLU, // qua_Latn_US
+    0x869050454C61746ELLU, // qub_Latn_PE
     0x8A9047544C61746ELLU, // quc_Latn_GT
+    0x8E9045434C61746ELLU, // qud_Latn_EC
+    0x969050454C61746ELLU, // quf_Latn_PE
     0x9A9045434C61746ELLU, // qug_Latn_EC
+    0xA29055534C61746ELLU, // qui_Latn_US
+    0xAA9050454C61746ELLU, // quk_Latn_PE
+    0xAE90424F4C61746ELLU, // qul_Latn_BO
+    0xB29047544C61746ELLU, // qum_Latn_GT
+    0xB69055534C61746ELLU, // qun_Latn_US
+    0xBE9050454C61746ELLU, // qup_Latn_PE
+    0xC29045534C61746ELLU, // quq_Latn_ES
+    0xC69050454C61746ELLU, // qur_Latn_PE
+    0xCA9041524C61746ELLU, // qus_Latn_AR
+    0xD69047544C61746ELLU, // quv_Latn_GT
+    0xDA9045434C61746ELLU, // quw_Latn_EC
+    0xDE9050454C61746ELLU, // qux_Latn_PE
+    0xE29050454C61746ELLU, // quy_Latn_PE
+    0x82B050454C61746ELLU, // qva_Latn_PE
+    0x8AB050454C61746ELLU, // qvc_Latn_PE
+    0x92B050454C61746ELLU, // qve_Latn_PE
+    0x9EB050454C61746ELLU, // qvh_Latn_PE
+    0xA2B045434C61746ELLU, // qvi_Latn_EC
+    0xA6B045434C61746ELLU, // qvj_Latn_EC
+    0xAEB050454C61746ELLU, // qvl_Latn_PE
+    0xB2B050454C61746ELLU, // qvm_Latn_PE
+    0xB6B050454C61746ELLU, // qvn_Latn_PE
+    0xBAB050454C61746ELLU, // qvo_Latn_PE
+    0xBEB050454C61746ELLU, // qvp_Latn_PE
+    0xCAB050454C61746ELLU, // qvs_Latn_PE
+    0xDAB050454C61746ELLU, // qvw_Latn_PE
+    0xE6B045434C61746ELLU, // qvz_Latn_EC
+    0x82D050454C61746ELLU, // qwa_Latn_PE
+    0x8AD050454C61746ELLU, // qwc_Latn_PE
+    0x9ED050454C61746ELLU, // qwh_Latn_PE
+    0xB2D048554C61746ELLU, // qwm_Latn_HU
+    0xCAD050454C61746ELLU, // qws_Latn_PE
+    0xCED055534C61746ELLU, // qwt_Latn_US
+    0x82F050454C61746ELLU, // qxa_Latn_PE
+    0x8AF050454C61746ELLU, // qxc_Latn_PE
+    0x9EF050454C61746ELLU, // qxh_Latn_PE
+    0xAEF045434C61746ELLU, // qxl_Latn_EC
+    0xB6F050454C61746ELLU, // qxn_Latn_PE
+    0xBAF050454C61746ELLU, // qxo_Latn_PE
+    0xBEF050454C61746ELLU, // qxp_Latn_PE
+    0xC2F0495241726162LLU, // qxq_Arab_IR
+    0xC6F045434C61746ELLU, // qxr_Latn_EC
+    0xCEF050454C61746ELLU, // qxt_Latn_PE
+    0xD2F050454C61746ELLU, // qxu_Latn_PE
+    0xDAF050454C61746ELLU, // qxw_Latn_PE
+    0xBF1055534C61746ELLU, // qyp_Latn_US
+    0x80114E5044657661LLU, // raa_Deva_NP
+    0x84114E5044657661LLU, // rab_Deva_NP
+    0x881149444C61746ELLU, // rac_Latn_ID
+    0x8C11564E4C61746ELLU, // rad_Latn_VN
+    0x94114E5044657661LLU, // raf_Deva_NP
+    0x98114B454C61746ELLU, // rag_Latn_KE
+    0x9C11494E42656E67LLU, // rah_Beng_IN
+    0xA01150474C61746ELLU, // rai_Latn_PG
     0xA411494E44657661LLU, // raj_Deva_IN
+    0xA81150474C61746ELLU, // rak_Latn_PG
+    0xB01142524C61746ELLU, // ram_Latn_BR
+    0xB41149444C61746ELLU, // ran_Latn_ID
+    0xB81150474C61746ELLU, // rao_Latn_PG
+    0xBC11434C4C61746ELLU, // rap_Latn_CL
+    0xC411434B4C61746ELLU, // rar_Latn_CK
+    0xD4114E5044657661LLU, // rav_Deva_NP
+    0xD8114D4D4C61746ELLU, // raw_Latn_MM
+    0xDC114E474C61746ELLU, // rax_Latn_NG
+    0xE01150464C61746ELLU, // ray_Latn_PF
+    0xE41149444C61746ELLU, // raz_Latn_ID
+    0x84314D4D4D796D72LLU, // rbb_Mymr_MM
+    0xA83150484C61746ELLU, // rbk_Latn_PH
+    0xAC3150484C61746ELLU, // rbl_Latn_PH
+    0xBC3141554C61746ELLU, // rbp_Latn_AU
     0x945152454C61746ELLU, // rcf_Latn_RE
+    0x8471495241726162LLU, // rdb_Arab_IR
+    0x809150474C61746ELLU, // rea_Latn_PG
+    0x849149444C61746ELLU, // reb_Latn_ID
+    0x90914D594C61746ELLU, // ree_Latn_MY
+    0x9891545A4C61746ELLU, // reg_Latn_TZ
+    0xA091494E4F727961LLU, // rei_Orya_IN
     0xA49149444C61746ELLU, // rej_Latn_ID
+    0xAC914B454C61746ELLU, // rel_Latn_KE
+    0xB09150454C61746ELLU, // rem_Latn_PE
+    0xB491564E4C61746ELLU, // ren_Latn_VN
+    0xC8914E474C61746ELLU, // res_Latn_NG
+    0xCC9149444C61746ELLU, // ret_Latn_ID
+    0xE091424F4C61746ELLU, // rey_Latn_BO
+    0x80D156554C61746ELLU, // rga_Latn_VU
     0xB4D149544C61746ELLU, // rgn_Latn_IT
+    0xC4D150454C61746ELLU, // rgr_Latn_PE
+    0xC8D1564E4C61746ELLU, // rgs_Latn_VN
+    0xD0D149444C61746ELLU, // rgu_Latn_ID
     0x98F14D4D526F6867LLU, // rhg_Rohg_MM
+    0xBCF150474C61746ELLU, // rhp_Latn_PG
     0x8111494E4C61746ELLU, // ria_Latn_IN
-    0x95114D4154666E67LLU, // rif_Tfng_MA
+    0x95114D414C61746ELLU, // rif_Latn_MA
+    0xAD114D4D4C61746ELLU, // ril_Latn_MM
+    0xB111545A4C61746ELLU, // rim_Latn_TZ
+    0xB5114E474C61746ELLU, // rin_Latn_NG
+    0xC51149444C61746ELLU, // rir_Latn_ID
+    0xCD1141554C61746ELLU, // rit_Latn_AU
+    0xD11149444C61746ELLU, // riu_Latn_ID
+    0x993149444C61746ELLU, // rjg_Latn_ID
+    0xA1314E5044657661LLU, // rji_Deva_NP
     0xC9314E5044657661LLU, // rjs_Deva_NP
+    0x81514B484B686D72LLU, // rka_Khmr_KH
+    0x855142524C61746ELLU, // rkb_Latn_BR
+    0x9D51434B4C61746ELLU, // rkh_Latn_CK
+    0xA1514D4D4D796D72LLU, // rki_Mymr_MM
+    0xB15142464C61746ELLU, // rkm_Latn_BF
     0xCD51424442656E67LLU, // rkt_Beng_BD
+    0xD95141554C61746ELLU, // rkw_Latn_AU
     0x726D43484C61746ELLU, // rm_Latn_CH
+    0x81914E494C61746ELLU, // rma_Latn_NI
+    0x859141554C61746ELLU, // rmb_Latn_AU
+    0x8991534B4C61746ELLU, // rmc_Latn_SK
+    0x8D91444B4C61746ELLU, // rmd_Latn_DK
+    0x919147424C61746ELLU, // rme_Latn_GB
     0x959146494C61746ELLU, // rmf_Latn_FI
+    0x99914E4F4C61746ELLU, // rmg_Latn_NO
+    0x9D9149444C61746ELLU, // rmh_Latn_ID
+    0xA191414D41726D6ELLU, // rmi_Armn_AM
+    0xA99150474C61746ELLU, // rmk_Latn_PG
+    0xAD91504C4C61746ELLU, // rml_Latn_PL
+    0xB19149444C61746ELLU, // rmm_Latn_ID
+    0xB59152534C61746ELLU, // rmn_Latn_RS
     0xB99143484C61746ELLU, // rmo_Latn_CH
+    0xBD9150474C61746ELLU, // rmp_Latn_PG
+    0xC19145534C61746ELLU, // rmq_Latn_ES
     0xCD91495241726162LLU, // rmt_Arab_IR
     0xD19153454C61746ELLU, // rmu_Latn_SE
+    0xD99147424C61746ELLU, // rmw_Latn_GB
+    0xDD91564E4C61746ELLU, // rmx_Latn_VN
+    0xE591494E4D796D72LLU, // rmz_Mymr_IN
     0x726E42494C61746ELLU, // rn_Latn_BI
+    0x8DB143444C61746ELLU, // rnd_Latn_CD
     0x99B14D5A4C61746ELLU, // rng_Latn_MZ
+    0xADB1494E4C61746ELLU, // rnl_Latn_IN
+    0xB5B149444C61746ELLU, // rnn_Latn_ID
+    0xC5B141554C61746ELLU, // rnr_Latn_AU
+    0xD9B1545A4C61746ELLU, // rnw_Latn_TZ
     0x726F524F4C61746ELLU, // ro_Latn_RO
     0x85D149444C61746ELLU, // rob_Latn_ID
+    0x89D1564E4C61746ELLU, // roc_Latn_VN
+    0x8DD14E474C61746ELLU, // rod_Latn_NG
+    0x91D150474C61746ELLU, // roe_Latn_PG
     0x95D1545A4C61746ELLU, // rof_Latn_TZ
+    0x99D1564E4C61746ELLU, // rog_Latn_VN
+    0xADD150484C61746ELLU, // rol_Latn_PH
+    0xB1D1524F4C61746ELLU, // rom_Latn_RO
+    0xB9D150474C61746ELLU, // roo_Latn_PG
+    0xBDD141554C61746ELLU, // rop_Latn_AU
+    0xC5D149444C61746ELLU, // ror_Latn_ID
+    0xD1D154444C61746ELLU, // rou_Latn_TD
+    0xD9D149444C61746ELLU, // row_Latn_ID
+    0xB5F156554C61746ELLU, // rpn_Latn_VU
+    0xCDF150474C61746ELLU, // rpt_Latn_PG
+    0xA23153424C61746ELLU, // rri_Latn_SB
+    0xB2314E5A4C61746ELLU, // rrm_Latn_NZ
+    0xBA3150474C61746ELLU, // rro_Latn_PG
+    0xCE3141554C61746ELLU, // rrt_Latn_AU
+    0xAA5152534379726CLLU, // rsk_Cyrl_RS
+    0xDA514E474C61746ELLU, // rsw_Latn_NG
+    0x8A714D4D4C61746ELLU, // rtc_Latn_MM
+    0x9E7149444C61746ELLU, // rth_Latn_ID
     0xB271464A4C61746ELLU, // rtm_Latn_FJ
+    0xDA71494E44657661LLU, // rtw_Deva_IN
     0x727552554379726CLLU, // ru_Cyrl_RU
+    0x869155474C61746ELLU, // rub_Latn_UG
+    0x8A9155474C61746ELLU, // ruc_Latn_UG
     0x929155414379726CLLU, // rue_Cyrl_UA
+    0x9691545A4C61746ELLU, // ruf_Latn_TZ
     0x9A9153424C61746ELLU, // rug_Latn_SB
+    0xA291545A4C61746ELLU, // rui_Latn_TZ
+    0xAA914E474C61746ELLU, // ruk_Latn_NG
+    0xBA9148524C61746ELLU, // ruo_Latn_HR
+    0xBE91524F4C61746ELLU, // rup_Latn_RO
+    0xC29147524C61746ELLU, // ruq_Latn_GR
+    0xCE9152554379726CLLU, // rut_Cyrl_RU
+    0xD2914D594C61746ELLU, // ruu_Latn_MY
+    0xE2914E474C61746ELLU, // ruy_Latn_NG
+    0xE6914E474C61746ELLU, // ruz_Latn_NG
     0x727752574C61746ELLU, // rw_Latn_RW
+    0x82D150474C61746ELLU, // rwa_Latn_PG
     0xAAD1545A4C61746ELLU, // rwk_Latn_TZ
+    0xAED1545A4C61746ELLU, // rwl_Latn_TZ
+    0xB2D155474C61746ELLU, // rwm_Latn_UG
+    0xBAD150474C61746ELLU, // rwo_Latn_PG
+    0xC6D1494E44657661LLU, // rwr_Deva_IN
+    0x8EF141554C61746ELLU, // rxd_Latn_AU
+    0xDAF141554C61746ELLU, // rxw_Latn_AU
     0xD3114A504B616E61LLU, // ryu_Kana_JP
     0x7361494E44657661LLU, // sa_Deva_IN
+    0x801254444C61746ELLU, // saa_Latn_TD
+    0x841250414C61746ELLU, // sab_Latn_PA
+    0x881255534C61746ELLU, // sac_Latn_US
+    0x8C12545A4C61746ELLU, // sad_Latn_TZ
+    0x901242524C61746ELLU, // sae_Latn_BR
     0x941247484C61746ELLU, // saf_Latn_GH
     0x9C1252554379726CLLU, // sah_Cyrl_RU
+    0xA41249444C61746ELLU, // saj_Latn_ID
+    0xA81247414C61746ELLU, // sak_Latn_GA
+    0xB012505353616D72LLU, // sam_Samr_PS
+    0xB81249444C61746ELLU, // sao_Latn_ID
     0xC0124B454C61746ELLU, // saq_Latn_KE
+    0xC412424F4C61746ELLU, // sar_Latn_BO
     0xC81249444C61746ELLU, // sas_Latn_ID
     0xCC12494E4F6C636BLLU, // sat_Olck_IN
+    0xD01249444C61746ELLU, // sau_Latn_ID
     0xD412534E4C61746ELLU, // sav_Latn_SN
+    0xD81249444C61746ELLU, // saw_Latn_ID
+    0xDC1256554C61746ELLU, // sax_Latn_VU
+    0xE0124E474C61746ELLU, // say_Latn_NG
     0xE412494E53617572LLU, // saz_Saur_IN
+    0x803254444C61746ELLU, // sba_Latn_TD
+    0x843253424C61746ELLU, // sbb_Latn_SB
+    0x883250474C61746ELLU, // sbc_Latn_PG
+    0x8C3242464C61746ELLU, // sbd_Latn_BF
+    0x903250474C61746ELLU, // sbe_Latn_PG
+    0x983249444C61746ELLU, // sbg_Latn_ID
+    0x9C3250474C61746ELLU, // sbh_Latn_PG
+    0xA03250474C61746ELLU, // sbi_Latn_PG
+    0xA43254444C61746ELLU, // sbj_Latn_TD
+    0xA832545A4C61746ELLU, // sbk_Latn_TZ
+    0xAC3250484C61746ELLU, // sbl_Latn_PH
+    0xB032545A4C61746ELLU, // sbm_Latn_TZ
+    0xB432504B41726162LLU, // sbn_Arab_PK
+    0xB8324D594C61746ELLU, // sbo_Latn_MY
     0xBC32545A4C61746ELLU, // sbp_Latn_TZ
+    0xC03250474C61746ELLU, // sbq_Latn_PG
+    0xC43249444C61746ELLU, // sbr_Latn_ID
+    0xC8324E414C61746ELLU, // sbs_Latn_NA
+    0xCC3249444C61746ELLU, // sbt_Latn_ID
+    0xD032494E54696274LLU, // sbu_Tibt_IN
+    0xD43249544C61746ELLU, // sbv_Latn_IT
+    0xD83247414C61746ELLU, // sbw_Latn_GA
+    0xDC3249444C61746ELLU, // sbx_Latn_ID
+    0xE0325A4D4C61746ELLU, // sby_Latn_ZM
+    0xE43243464C61746ELLU, // sbz_Latn_CF
     0x736349544C61746ELLU, // sc_Latn_IT
+    0x8452564E4C61746ELLU, // scb_Latn_VN
+    0x9052434E4C61746ELLU, // sce_Latn_CN
+    0x945250414C61746ELLU, // scf_Latn_PA
+    0x985249444C61746ELLU, // scg_Latn_ID
+    0x9C52494E4C61746ELLU, // sch_Latn_IN
+    0xA0524C4B4C61746ELLU, // sci_Latn_LK
     0xA852494E44657661LLU, // sck_Deva_IN
+    0xAC52504B41726162LLU, // scl_Arab_PK
     0xB45249544C61746ELLU, // scn_Latn_IT
     0xB85247424C61746ELLU, // sco_Latn_GB
+    0xBC524E5044657661LLU, // scp_Deva_NP
+    0xC85243414C61746ELLU, // scs_Latn_CA
+    0xCC524C414C616F6FLLU, // sct_Laoo_LA
+    0xD052494E54616B72LLU, // scu_Takr_IN
+    0xD4524E474C61746ELLU, // scv_Latn_NG
+    0xD8524E474C61746ELLU, // scw_Latn_NG
+    0xDC5249544772656BLLU, // scx_Grek_IT
     0x7364504B41726162LLU, // sd_Arab_PK
     0x7364494E44657661LLU, // sd_Deva_IN
     0x7364494E4B686F6ALLU, // sd_Khoj_IN
     0x7364494E53696E64LLU, // sd_Sind_IN
+    0x807249444C61746ELLU, // sda_Latn_ID
+    0x8472495141726162LLU, // sdb_Arab_IQ
     0x887249544C61746ELLU, // sdc_Latn_IT
+    0x90724E474C61746ELLU, // sde_Latn_NG
+    0x9472495141726162LLU, // sdf_Arab_IQ
+    0x9872414641726162LLU, // sdg_Arab_AF
     0x9C72495241726162LLU, // sdh_Arab_IR
+    0xA47243474C61746ELLU, // sdj_Latn_CG
+    0xA87250474C61746ELLU, // sdk_Latn_PG
+    0xB47249544C61746ELLU, // sdn_Latn_IT
+    0xB8724D594C61746ELLU, // sdo_Latn_MY
+    0xC07249444C61746ELLU, // sdq_Latn_ID
+    0xC472424442656E67LLU, // sdr_Beng_BD
+    0xC872544E41726162LLU, // sds_Arab_TN
+    0xD07249444C61746ELLU, // sdu_Latn_ID
+    0xDC724D594C61746ELLU, // sdx_Latn_MY
     0x73654E4F4C61746ELLU, // se_Latn_NO
+    0x80924D594C61746ELLU, // sea_Latn_MY
+    0x849243494C61746ELLU, // seb_Latn_CI
+    0x889243414C61746ELLU, // sec_Latn_CA
+    0x8C92564E4C61746ELLU, // sed_Latn_VN
+    0x909255534C61746ELLU, // see_Latn_US
     0x949243494C61746ELLU, // sef_Latn_CI
+    0x9892545A4C61746ELLU, // seg_Latn_TZ
     0x9C924D5A4C61746ELLU, // seh_Latn_MZ
     0xA0924D584C61746ELLU, // sei_Latn_MX
+    0xA49250474C61746ELLU, // sej_Latn_PG
+    0xA89243414C61746ELLU, // sek_Latn_CA
+    0xAC9252554379726CLLU, // sel_Cyrl_RU
+    0xB49242464C61746ELLU, // sen_Latn_BF
+    0xB89250474C61746ELLU, // seo_Latn_PG
+    0xBC9242464C61746ELLU, // sep_Latn_BF
+    0xC09242464C61746ELLU, // seq_Latn_BF
+    0xC49255534C61746ELLU, // ser_Latn_US
     0xC8924D4C4C61746ELLU, // ses_Latn_ML
+    0xCC9249444C61746ELLU, // set_Latn_ID
+    0xD09249444C61746ELLU, // seu_Latn_ID
+    0xD49243494C61746ELLU, // sev_Latn_CI
+    0xD89250474C61746ELLU, // sew_Latn_PG
+    0xE09245434C61746ELLU, // sey_Latn_EC
+    0xE4924D4D4C61746ELLU, // sez_Latn_MM
+    0x90B250484C61746ELLU, // sfe_Latn_PH
+    0xB0B2434E506C7264LLU, // sfm_Plrd_CN
+    0xD8B247484C61746ELLU, // sfw_Latn_GH
     0x736743464C61746ELLU, // sg_Latn_CF
     0x80D249454F67616DLLU, // sga_Ogam_IE
+    0x84D250484C61746ELLU, // sgb_Latn_PH
+    0x88D24B454C61746ELLU, // sgc_Latn_KE
+    0x8CD250484C61746ELLU, // sgd_Latn_PH
+    0x90D249444C61746ELLU, // sge_Latn_ID
+    0x9CD2544A4379726CLLU, // sgh_Cyrl_TJ
+    0xA0D2434D4C61746ELLU, // sgi_Latn_CM
+    0xA4D2494E44657661LLU, // sgj_Deva_IN
+    0xB0D24B454C61746ELLU, // sgm_Latn_KE
+    0xBCD2494E4C61746ELLU, // sgp_Latn_IN
+    0xC4D2495241726162LLU, // sgr_Arab_IR
     0xC8D24C544C61746ELLU, // sgs_Latn_LT
+    0xCCD2425454696274LLU, // sgt_Tibt_BT
+    0xD0D249444C61746ELLU, // sgu_Latn_ID
+    0xD8D2455445746869LLU, // sgw_Ethi_ET
+    0xE0D2414641726162LLU, // sgy_Arab_AF
+    0xE4D250474C61746ELLU, // sgz_Latn_PG
+    0x80F24E474C61746ELLU, // sha_Latn_NG
+    0x84F242524C61746ELLU, // shb_Latn_BR
+    0x88F243444C61746ELLU, // shc_Latn_CD
+    0x8CF2504B41726162LLU, // shd_Arab_PK
+    0x90F245544C61746ELLU, // she_Latn_ET
+    0x98F242574C61746ELLU, // shg_Latn_BW
+    0x9CF255534C61746ELLU, // shh_Latn_US
     0xA0F24D4154666E67LLU, // shi_Tfng_MA
+    0xA4F253444C61746ELLU, // shj_Latn_SD
+    0xA8F253534C61746ELLU, // shk_Latn_SS
+    0xB0F2495241726162LLU, // shm_Arab_IR
     0xB4F24D4D4D796D72LLU, // shn_Mymr_MM
+    0xB8F24E474C61746ELLU, // sho_Latn_NG
+    0xBCF250454C61746ELLU, // shp_Latn_PE
+    0xC0F25A4D4C61746ELLU, // shq_Latn_ZM
+    0xC4F243444C61746ELLU, // shr_Latn_CD
+    0xC8F243414C61746ELLU, // shs_Latn_CA
+    0xCCF255534C61746ELLU, // sht_Latn_US
+    0xD0F2544441726162LLU, // shu_Arab_TD
+    0xD4F24F4D41726162LLU, // shv_Arab_OM
+    0xD8F253444C61746ELLU, // shw_Latn_SD
+    0xE0F2445A4C61746ELLU, // shy_Latn_DZ
+    0xE4F24D4C4C61746ELLU, // shz_Latn_ML
     0x73694C4B53696E68LLU, // si_Sinh_LK
+    0x811252554379726CLLU, // sia_Cyrl_RU
+    0x85124D594C61746ELLU, // sib_Latn_MY
     0x8D1245544C61746ELLU, // sid_Latn_ET
+    0x91125A4D4C61746ELLU, // sie_Latn_ZM
+    0x951242464C61746ELLU, // sif_Latn_BF
+    0x991247484C61746ELLU, // sig_Latn_GH
+    0x9D124E434C61746ELLU, // sih_Latn_NC
+    0xA112494E4C61746ELLU, // sii_Latn_IN
+    0xA51250474C61746ELLU, // sij_Latn_PG
+    0xA91242524C61746ELLU, // sik_Latn_BR
+    0xAD1247484C61746ELLU, // sil_Latn_GH
+    0xB11250474C61746ELLU, // sim_Latn_PG
+    0xBD12494E54696274LLU, // sip_Tibt_IN
+    0xC11250474C61746ELLU, // siq_Latn_PG
+    0xC5124E474C61746ELLU, // sir_Latn_NG
+    0xC91255534C61746ELLU, // sis_Latn_US
+    0xD11250474C61746ELLU, // siu_Latn_PG
+    0xD51250474C61746ELLU, // siv_Latn_PG
+    0xD91250474C61746ELLU, // siw_Latn_PG
+    0xDD1250474C61746ELLU, // six_Latn_PG
+    0xE112495241726162LLU, // siy_Arab_IR
+    0xE512454741726162LLU, // siz_Arab_EG
+    0x8132434F4C61746ELLU, // sja_Latn_CO
+    0x853249444C61746ELLU, // sjb_Latn_ID
+    0x8D3252554379726CLLU, // sjd_Cyrl_RU
+    0x913253454C61746ELLU, // sje_Latn_SE
+    0x993254444C61746ELLU, // sjg_Latn_TD
+    0xAD32494E4C61746ELLU, // sjl_Latn_IN
+    0xB13250484C61746ELLU, // sjm_Latn_PH
+    0xBD32494E44657661LLU, // sjp_Deva_IN
+    0xC53250474C61746ELLU, // sjr_Latn_PG
+    0xCD3252554379726CLLU, // sjt_Cyrl_RU
+    0xD13253454C61746ELLU, // sju_Latn_SE
+    0xD93255534C61746ELLU, // sjw_Latn_US
     0x736B534B4C61746ELLU, // sk_Latn_SK
+    0x815255534C61746ELLU, // ska_Latn_US
+    0x8552544854686169LLU, // skb_Thai_TH
+    0x895250474C61746ELLU, // skc_Latn_PG
+    0x8D5255534C61746ELLU, // skd_Latn_US
+    0x915256554C61746ELLU, // ske_Latn_VU
+    0x955242524C61746ELLU, // skf_Latn_BR
+    0x99524D474C61746ELLU, // skg_Latn_MG
+    0x9D5249444C61746ELLU, // skh_Latn_ID
+    0xA15249444C61746ELLU, // ski_Latn_ID
+    0xA5524E5044657661LLU, // skj_Deva_NP
+    0xB15250474C61746ELLU, // skm_Latn_PG
+    0xB55250484C61746ELLU, // skn_Latn_PH
+    0xB95249444C61746ELLU, // sko_Latn_ID
+    0xBD524D594C61746ELLU, // skp_Latn_MY
+    0xC15242464C61746ELLU, // skq_Latn_BF
     0xC552504B41726162LLU, // skr_Arab_PK
+    0xC95250474C61746ELLU, // sks_Latn_PG
+    0xCD5243444C61746ELLU, // skt_Latn_CD
+    0xD15256554C61746ELLU, // sku_Latn_VU
+    0xD55249444C61746ELLU, // skv_Latn_ID
+    0xD95247594C61746ELLU, // skw_Latn_GY
+    0xDD5249444C61746ELLU, // skx_Latn_ID
+    0xE15253424C61746ELLU, // sky_Latn_SB
+    0xE55249444C61746ELLU, // skz_Latn_ID
     0x736C53494C61746ELLU, // sl_Latn_SI
+    0x8972434F4C61746ELLU, // slc_Latn_CO
+    0x8D7242464C61746ELLU, // sld_Latn_BF
+    0x997249444C61746ELLU, // slg_Latn_ID
+    0x9D7255534C61746ELLU, // slh_Latn_US
     0xA172504C4C61746ELLU, // sli_Latn_PL
+    0xA57242524C61746ELLU, // slj_Latn_BR
+    0xAD7250474C61746ELLU, // sll_Latn_PG
+    0xB17250484C61746ELLU, // slm_Latn_PH
+    0xB57255534C61746ELLU, // sln_Latn_US
+    0xBD7249444C61746ELLU, // slp_Latn_ID
+    0xC572434E4C61746ELLU, // slr_Latn_CN
+    0xD17249444C61746ELLU, // slu_Latn_ID
+    0xD97250474C61746ELLU, // slw_Latn_PG
+    0xDD7243444C61746ELLU, // slx_Latn_CD
     0xE17249444C61746ELLU, // sly_Latn_ID
+    0xE57249444C61746ELLU, // slz_Latn_ID
     0x736D57534C61746ELLU, // sm_Latn_WS
     0x819253454C61746ELLU, // sma_Latn_SE
-    0x8D92414F4C61746ELLU, // smd_Latn_AO
+    0x859250474C61746ELLU, // smb_Latn_PG
+    0x899250474C61746ELLU, // smc_Latn_PG
+    0x959250474C61746ELLU, // smf_Latn_PG
+    0x999250474C61746ELLU, // smg_Latn_PG
+    0x9D92434E59696969LLU, // smh_Yiii_CN
     0xA59253454C61746ELLU, // smj_Latn_SE
+    0xA99250484C61746ELLU, // smk_Latn_PH
+    0xAD9250484C61746ELLU, // sml_Latn_PH
     0xB59246494C61746ELLU, // smn_Latn_FI
     0xBD92494C53616D72LLU, // smp_Samr_IL
+    0xC19250474C61746ELLU, // smq_Latn_PG
+    0xC59249444C61746ELLU, // smr_Latn_ID
     0xC99246494C61746ELLU, // sms_Latn_FI
+    0xCD92494E4C61746ELLU, // smt_Latn_IN
+    0xD1924B484B686D72LLU, // smu_Khmr_KH
+    0xD99249444C61746ELLU, // smw_Latn_ID
+    0xDD9243444C61746ELLU, // smx_Latn_CD
+    0xE192495241726162LLU, // smy_Arab_IR
+    0xE59250474C61746ELLU, // smz_Latn_PG
     0x736E5A574C61746ELLU, // sn_Latn_ZW
-    0x85B24D594C61746ELLU, // snb_Latn_MY
+    0x89B250474C61746ELLU, // snc_Latn_PG
+    0x91B24D594C61746ELLU, // sne_Latn_MY
+    0x95B2534E4C61746ELLU, // snf_Latn_SN
+    0x99B243444C61746ELLU, // sng_Latn_CD
+    0xA1B250454C61746ELLU, // sni_Latn_PE
+    0xA5B243464C61746ELLU, // snj_Latn_CF
     0xA9B24D4C4C61746ELLU, // snk_Latn_ML
+    0xADB250484C61746ELLU, // snl_Latn_PH
+    0xB1B255474C61746ELLU, // snm_Latn_UG
+    0xB5B2434F4C61746ELLU, // snn_Latn_CO
+    0xB9B255534C61746ELLU, // sno_Latn_US
+    0xBDB250474C61746ELLU, // snp_Latn_PG
+    0xC1B247414C61746ELLU, // snq_Latn_GA
+    0xC5B250474C61746ELLU, // snr_Latn_PG
+    0xC9B256554C61746ELLU, // sns_Latn_VU
+    0xD1B249444C61746ELLU, // snu_Latn_ID
+    0xD5B24D594C61746ELLU, // snv_Latn_MY
+    0xD9B247484C61746ELLU, // snw_Latn_GH
+    0xDDB250474C61746ELLU, // snx_Latn_PG
+    0xE1B250474C61746ELLU, // sny_Latn_PG
+    0xE5B250474C61746ELLU, // snz_Latn_PG
     0x736F534F4C61746ELLU, // so_Latn_SO
+    0x81D2544854617674LLU, // soa_Tavt_TH
+    0x85D249444C61746ELLU, // sob_Latn_ID
+    0x89D243444C61746ELLU, // soc_Latn_CD
+    0x8DD243444C61746ELLU, // sod_Latn_CD
+    0x91D243444C61746ELLU, // soe_Latn_CD
     0x99D2555A536F6764LLU, // sog_Sogd_UZ
+    0xA1D24E5044657661LLU, // soi_Deva_NP
+    0xA9D254444C61746ELLU, // sok_Latn_TD
+    0xADD250474C61746ELLU, // sol_Latn_PG
+    0xB9D243444C61746ELLU, // soo_Latn_CD
+    0xBDD243444C61746ELLU, // sop_Latn_CD
+    0xC1D250474C61746ELLU, // soq_Latn_PG
+    0xC5D254444C61746ELLU, // sor_Latn_TD
+    0xC9D242464C61746ELLU, // sos_Latn_BF
     0xD1D2544854686169LLU, // sou_Thai_TH
+    0xD5D250574C61746ELLU, // sov_Latn_PW
+    0xD9D250474C61746ELLU, // sow_Latn_PG
+    0xDDD2434D4C61746ELLU, // sox_Latn_CM
+    0xE1D2424A4C61746ELLU, // soy_Latn_BJ
+    0xE5D2545A4C61746ELLU, // soz_Latn_TZ
+    0x85F249444C61746ELLU, // spb_Latn_ID
+    0x89F256454C61746ELLU, // spc_Latn_VE
+    0x8DF250474C61746ELLU, // spd_Latn_PG
+    0x91F250474C61746ELLU, // spe_Latn_PG
+    0x99F24D594C61746ELLU, // spg_Latn_MY
+    0xA1F249444C61746ELLU, // spi_Latn_ID
+    0xA9F250474C61746ELLU, // spk_Latn_PG
+    0xADF250474C61746ELLU, // spl_Latn_PG
+    0xB1F250474C61746ELLU, // spm_Latn_PG
+    0xB5F250594C61746ELLU, // spn_Latn_PY
+    0xB9F255534C61746ELLU, // spo_Latn_US
+    0xBDF24D4C4C61746ELLU, // spp_Latn_ML
+    0xC1F250454C61746ELLU, // spq_Latn_PE
+    0xC5F249444C61746ELLU, // spr_Latn_ID
+    0xC9F250474C61746ELLU, // sps_Latn_PG
+    0xCDF2494E54696274LLU, // spt_Tibt_IN
+    0xD5F2494E4F727961LLU, // spv_Orya_IN
     0x7371414C4C61746ELLU, // sq_Latn_AL
+    0x82124E474C61746ELLU, // sqa_Latn_NG
+    0x9E124E474C61746ELLU, // sqh_Latn_NG
+    0xB21243464C61746ELLU, // sqm_Latn_CF
+    0xBA12495241726162LLU, // sqo_Arab_IR
+    0xC2124C414C616F6FLLU, // sqq_Laoo_LA
+    0xCE12594541726162LLU, // sqt_Arab_YE
+    0xD21243414C61746ELLU, // squ_Latn_CA
     0x737252534379726CLLU, // sr_Cyrl_RS
-    0x737252534C61746ELLU, // sr_Latn_RS
+    0x823250474C61746ELLU, // sra_Latn_PG
     0x8632494E536F7261LLU, // srb_Sora_IN
+    0x923249444C61746ELLU, // sre_Latn_ID
+    0x963250474C61746ELLU, // srf_Latn_PG
+    0x9A3250484C61746ELLU, // srg_Latn_PH
+    0x9E32434E41726162LLU, // srh_Arab_CN
+    0xA232434F4C61746ELLU, // sri_Latn_CO
+    0xAA324D594C61746ELLU, // srk_Latn_MY
+    0xAE3249444C61746ELLU, // srl_Latn_ID
+    0xB23253524C61746ELLU, // srm_Latn_SR
     0xB63253524C61746ELLU, // srn_Latn_SR
+    0xBA3249544C61746ELLU, // sro_Latn_IT
+    0xC232424F4C61746ELLU, // srq_Latn_BO
     0xC632534E4C61746ELLU, // srr_Latn_SN
+    0xCA3243414C61746ELLU, // srs_Latn_CA
+    0xCE3249444C61746ELLU, // srt_Latn_ID
+    0xD23242524C61746ELLU, // sru_Latn_BR
+    0xD63250484C61746ELLU, // srv_Latn_PH
+    0xDA3249444C61746ELLU, // srw_Latn_ID
     0xDE32494E44657661LLU, // srx_Deva_IN
+    0xE23250474C61746ELLU, // sry_Latn_PG
+    0xE632495241726162LLU, // srz_Arab_IR
     0x73735A414C61746ELLU, // ss_Latn_ZA
+    0x865250484C61746ELLU, // ssb_Latn_PH
+    0x8A52545A4C61746ELLU, // ssc_Latn_TZ
+    0x8E5250474C61746ELLU, // ssd_Latn_PG
+    0x925250484C61746ELLU, // sse_Latn_PH
+    0x965254574C61746ELLU, // ssf_Latn_TW
+    0x9A5250474C61746ELLU, // ssg_Latn_PG
+    0x9E52414541726162LLU, // ssh_Arab_AE
+    0xA65250474C61746ELLU, // ssj_Latn_PG
+    0xAE5247484C61746ELLU, // ssl_Latn_GH
+    0xB2524D594C61746ELLU, // ssm_Latn_MY
+    0xB6524B454C61746ELLU, // ssn_Latn_KE
+    0xBA5250474C61746ELLU, // sso_Latn_PG
+    0xC25249444C61746ELLU, // ssq_Latn_ID
+    0xCA524C414C616F6FLLU, // sss_Laoo_LA
+    0xCE5250474C61746ELLU, // sst_Latn_PG
+    0xD25250474C61746ELLU, // ssu_Latn_PG
+    0xD65256554C61746ELLU, // ssv_Latn_VU
+    0xDE5250474C61746ELLU, // ssx_Latn_PG
     0xE25245524C61746ELLU, // ssy_Latn_ER
+    0xE65250474C61746ELLU, // ssz_Latn_PG
     0x73745A414C61746ELLU, // st_Latn_ZA
+    0x82725A4D4C61746ELLU, // sta_Latn_ZM
+    0x867250484C61746ELLU, // stb_Latn_PH
+    0x927249444C61746ELLU, // ste_Latn_ID
+    0x967250474C61746ELLU, // stf_Latn_PG
+    0x9A72564E4C61746ELLU, // stg_Latn_VN
+    0x9E7249454C61746ELLU, // sth_Latn_IE
+    0xA272564E4C61746ELLU, // sti_Latn_VN
+    0xA67242464C61746ELLU, // stj_Latn_BF
+    0xAA7250474C61746ELLU, // stk_Latn_PG
+    0xAE724E4C4C61746ELLU, // stl_Latn_NL
+    0xB27250474C61746ELLU, // stm_Latn_PG
+    0xB67253424C61746ELLU, // stn_Latn_SB
+    0xBA7243414C61746ELLU, // sto_Latn_CA
+    0xBE724D584C61746ELLU, // stp_Latn_MX
     0xC27244454C61746ELLU, // stq_Latn_DE
+    0xC67243414C61746ELLU, // str_Latn_CA
+    0xCA72414641726162LLU, // sts_Arab_AF
+    0xCE72564E4C61746ELLU, // stt_Latn_VN
+    0xD672455445746869LLU, // stv_Ethi_ET
+    0xDA72464D4C61746ELLU, // stw_Latn_FM
+    0xE27252554379726CLLU, // sty_Cyrl_RU
     0x737549444C61746ELLU, // su_Latn_ID
+    0x829250474C61746ELLU, // sua_Latn_PG
+    0x869243444C61746ELLU, // sub_Latn_CD
+    0x8A9250484C61746ELLU, // suc_Latn_PH
+    0x929250474C61746ELLU, // sue_Latn_PG
+    0x9A9250474C61746ELLU, // sug_Latn_PG
+    0xA29250474C61746ELLU, // sui_Latn_PG
+    0xA692545A4C61746ELLU, // suj_Latn_TZ
     0xAA92545A4C61746ELLU, // suk_Latn_TZ
+    0xBA9250474C61746ELLU, // suo_Latn_PG
+    0xC29245544C61746ELLU, // suq_Latn_ET
+    0xC6924E474C61746ELLU, // sur_Latn_NG
     0xCA92474E4C61746ELLU, // sus_Latn_GN
+    0xCE924E494C61746ELLU, // sut_Latn_NI
+    0xD692494E4C61746ELLU, // suv_Latn_IN
+    0xDA92545A4C61746ELLU, // suw_Latn_TZ
+    0xE29242524C61746ELLU, // suy_Latn_BR
+    0xE6924E5053756E75LLU, // suz_Sunu_NP
     0x737653454C61746ELLU, // sv_Latn_SE
+    0x82B2474547656F72LLU, // sva_Geor_GE
+    0x86B250474C61746ELLU, // svb_Latn_PG
+    0x8AB256434C61746ELLU, // svc_Latn_VC
+    0x92B249444C61746ELLU, // sve_Latn_ID
+    0xB2B249544C61746ELLU, // svm_Latn_IT
+    0xCAB253424C61746ELLU, // svs_Latn_SB
     0x7377545A4C61746ELLU, // sw_Latn_TZ
     0x86D2595441726162LLU, // swb_Arab_YT
-    0x8AD243444C61746ELLU, // swc_Latn_CD
+    0x96D243444C61746ELLU, // swf_Latn_CD
     0x9AD244454C61746ELLU, // swg_Latn_DE
+    0xA2D2434E48616E69LLU, // swi_Hani_CN
+    0xA6D247414C61746ELLU, // swj_Latn_GA
+    0xAAD24D574C61746ELLU, // swk_Latn_MW
+    0xB2D250474C61746ELLU, // swm_Latn_PG
+    0xBAD242524C61746ELLU, // swo_Latn_BR
+    0xBED250474C61746ELLU, // swp_Latn_PG
+    0xC2D2434D4C61746ELLU, // swq_Latn_CM
+    0xC6D249444C61746ELLU, // swr_Latn_ID
+    0xCAD249444C61746ELLU, // sws_Latn_ID
+    0xCED249444C61746ELLU, // swt_Latn_ID
+    0xD2D249444C61746ELLU, // swu_Latn_ID
     0xD6D2494E44657661LLU, // swv_Deva_IN
+    0xDAD256554C61746ELLU, // sww_Latn_VU
+    0xDED242524C61746ELLU, // swx_Latn_BR
+    0xE2D254444C61746ELLU, // swy_Latn_TD
+    0x86F24B454C61746ELLU, // sxb_Latn_KE
+    0x92F247414C61746ELLU, // sxe_Latn_GA
     0xB6F249444C61746ELLU, // sxn_Latn_ID
+    0xC6F254574C61746ELLU, // sxr_Latn_TW
+    0xCAF24E474C61746ELLU, // sxs_Latn_NG
+    0xD2F2444552756E72LLU, // sxu_Runr_DE
+    0xDAF2424A4C61746ELLU, // sxw_Latn_BJ
+    0x831249444C61746ELLU, // sya_Latn_ID
+    0x871250484C61746ELLU, // syb_Latn_PH
+    0x8B12545253797263LLU, // syc_Syrc_TR
+    0xA31247414C61746ELLU, // syi_Latn_GA
+    0xAB124E474C61746ELLU, // syk_Latn_NG
     0xAF12424442656E67LLU, // syl_Beng_BD
+    0xB31242464C61746ELLU, // sym_Latn_BF
+    0xB712495253797263LLU, // syn_Syrc_IR
+    0xBB124B484C61746ELLU, // syo_Latn_KH
     0xC712495153797263LLU, // syr_Syrc_IQ
+    0xCB1254444C61746ELLU, // sys_Latn_TD
+    0xDB124E5044657661LLU, // syw_Deva_NP
+    0xDF1247414C61746ELLU, // syx_Latn_GA
+    0x83324D594C61746ELLU, // sza_Latn_MY
+    0x873249444C61746ELLU, // szb_Latn_ID
+    0x8B324D594C61746ELLU, // szc_Latn_MY
+    0x9B3243444C61746ELLU, // szg_Latn_CD
     0xAF32504C4C61746ELLU, // szl_Latn_PL
+    0xB73249444C61746ELLU, // szn_Latn_ID
+    0xBF3249444C61746ELLU, // szp_Latn_ID
+    0xD732434D4C61746ELLU, // szv_Latn_CM
+    0xDB3249444C61746ELLU, // szw_Latn_ID
+    0xE33254574C61746ELLU, // szy_Latn_TW
     0x7461494E54616D6CLLU, // ta_Taml_IN
+    0x801355534C61746ELLU, // taa_Latn_US
+    0x841352554379726CLLU, // tab_Cyrl_RU
+    0x88134D584C61746ELLU, // tac_Latn_MX
+    0x8C1349444C61746ELLU, // tad_Latn_ID
+    0x901342524C61746ELLU, // tae_Latn_BR
+    0x941342524C61746ELLU, // taf_Latn_BR
+    0x981353444C61746ELLU, // tag_Latn_SD
     0xA4134E5044657661LLU, // taj_Deva_NP
+    0xA8134E474C61746ELLU, // tak_Latn_NG
+    0xAC134E474C61746ELLU, // tal_Latn_NG
+    0xB4134E474C61746ELLU, // tan_Latn_NG
+    0xB81354574C61746ELLU, // tao_Latn_TW
+    0xBC1343444C61746ELLU, // tap_Latn_CD
+    0xC0134D4C4C61746ELLU, // taq_Latn_ML
+    0xC4134D584C61746ELLU, // tar_Latn_MX
+    0xC813564E4C61746ELLU, // tas_Latn_VN
+    0xD01355534C61746ELLU, // tau_Latn_US
+    0xD413434F4C61746ELLU, // tav_Latn_CO
+    0xD81350474C61746ELLU, // taw_Latn_PG
+    0xDC1354444C61746ELLU, // tax_Latn_TD
+    0xE01354574C61746ELLU, // tay_Latn_TW
+    0xE41353444C61746ELLU, // taz_Latn_SD
+    0x803342524C61746ELLU, // tba_Latn_BR
+    0x883350474C61746ELLU, // tbc_Latn_PG
+    0x8C3350474C61746ELLU, // tbd_Latn_PG
+    0x903353424C61746ELLU, // tbe_Latn_SB
+    0x943350474C61746ELLU, // tbf_Latn_PG
+    0x983350474C61746ELLU, // tbg_Latn_PG
+    0x9C3341554C61746ELLU, // tbh_Latn_AU
+    0xA03353444C61746ELLU, // tbi_Latn_SD
+    0xA43350474C61746ELLU, // tbj_Latn_PG
+    0xA833504854616762LLU, // tbk_Tagb_PH
+    0xAC3350484C61746ELLU, // tbl_Latn_PH
+    0xB03343444C61746ELLU, // tbm_Latn_CD
+    0xB433434F4C61746ELLU, // tbn_Latn_CO
+    0xB83350474C61746ELLU, // tbo_Latn_PG
+    0xBC3349444C61746ELLU, // tbp_Latn_ID
+    0xC83350474C61746ELLU, // tbs_Latn_PG
+    0xCC3343444C61746ELLU, // tbt_Latn_CD
+    0xD0334D584C61746ELLU, // tbu_Latn_MX
+    0xD43350474C61746ELLU, // tbv_Latn_PG
     0xD83350484C61746ELLU, // tbw_Latn_PH
+    0xDC3350474C61746ELLU, // tbx_Latn_PG
+    0xE03349444C61746ELLU, // tby_Latn_ID
+    0xE433424A4C61746ELLU, // tbz_Latn_BJ
+    0x805342524C61746ELLU, // tca_Latn_BR
+    0x845355534C61746ELLU, // tcb_Latn_US
+    0x8853545A4C61746ELLU, // tcc_Latn_TZ
+    0x8C5347484C61746ELLU, // tcd_Latn_GH
+    0x905343414C61746ELLU, // tce_Latn_CA
+    0x94534D584C61746ELLU, // tcf_Latn_MX
+    0x985349444C61746ELLU, // tcg_Latn_ID
+    0x9C5354434C61746ELLU, // tch_Latn_TC
+    0xA05350474C61746ELLU, // tci_Latn_PG
+    0xA85347414C61746ELLU, // tck_Latn_GA
+    0xB05349444C61746ELLU, // tcm_Latn_ID
+    0xB4534E5054696274LLU, // tcn_Tibt_NP
+    0xB8534D4D4D796D72LLU, // tco_Mymr_MM
+    0xBC534D4D4C61746ELLU, // tcp_Latn_MM
+    0xC05349444C61746ELLU, // tcq_Latn_ID
+    0xC85341554C61746ELLU, // tcs_Latn_AU
+    0xD0534D584C61746ELLU, // tcu_Latn_MX
+    0xD8534D584C61746ELLU, // tcw_Latn_MX
+    0xDC53494E54616D6CLLU, // tcx_Taml_IN
     0xE053494E4B6E6461LLU, // tcy_Knda_IN
+    0xE453494E4C61746ELLU, // tcz_Latn_IN
+    0x80734E4554666E67LLU, // tda_Tfng_NE
+    0x8473494E44657661LLU, // tdb_Deva_IN
+    0x8873434F4C61746ELLU, // tdc_Latn_CO
     0x8C73434E54616C65LLU, // tdd_Tale_CN
+    0x90734D4C4C61746ELLU, // tde_Latn_ML
     0x98734E5044657661LLU, // tdg_Deva_NP
     0x9C734E5044657661LLU, // tdh_Deva_NP
-    0xD0734D594C61746ELLU, // tdu_Latn_MY
+    0xA07349444C61746ELLU, // tdi_Latn_ID
+    0xA47349444C61746ELLU, // tdj_Latn_ID
+    0xA8734E474C61746ELLU, // tdk_Latn_NG
+    0xAC734E474C61746ELLU, // tdl_Latn_NG
+    0xB07347594C61746ELLU, // tdm_Latn_GY
+    0xB47349444C61746ELLU, // tdn_Latn_ID
+    0xB8734E474C61746ELLU, // tdo_Latn_NG
+    0xC0734E474C61746ELLU, // tdq_Latn_NG
+    0xC473564E4C61746ELLU, // tdr_Latn_VN
+    0xC87349444C61746ELLU, // tds_Latn_ID
+    0xCC73544C4C61746ELLU, // tdt_Latn_TL
+    0xD4734E474C61746ELLU, // tdv_Latn_NG
+    0xDC734D474C61746ELLU, // tdx_Latn_MG
+    0xE07350484C61746ELLU, // tdy_Latn_PH
     0x7465494E54656C75LLU, // te_Telu_IN
+    0x80934D594C61746ELLU, // tea_Latn_MY
+    0x849345434C61746ELLU, // teb_Latn_EC
+    0x88934B454C61746ELLU, // tec_Latn_KE
+    0x8C9343494C61746ELLU, // ted_Latn_CI
+    0x90934D584C61746ELLU, // tee_Latn_MX
+    0x989347414C61746ELLU, // teg_Latn_GA
+    0x9C9341524C61746ELLU, // teh_Latn_AR
+    0xA09350474C61746ELLU, // tei_Latn_PG
+    0xA89343444C61746ELLU, // tek_Latn_CD
     0xB093534C4C61746ELLU, // tem_Latn_SL
+    0xB493434F4C61746ELLU, // ten_Latn_CO
     0xB89355474C61746ELLU, // teo_Latn_UG
+    0xBC934D584C61746ELLU, // tep_Latn_MX
+    0xC09353444C61746ELLU, // teq_Latn_SD
+    0xC49342524C61746ELLU, // ter_Latn_BR
+    0xC89349444A617661LLU, // tes_Java_ID
     0xCC93544C4C61746ELLU, // tet_Latn_TL
+    0xD09355474C61746ELLU, // teu_Latn_UG
+    0xD49349444C61746ELLU, // tev_Latn_ID
+    0xD89355534C61746ELLU, // tew_Latn_US
+    0xDC9353534C61746ELLU, // tex_Latn_SS
+    0xE09353444C61746ELLU, // tey_Latn_SD
+    0xE4934E454C61746ELLU, // tez_Latn_NE
+    0xA0B3424A4C61746ELLU, // tfi_Latn_BJ
+    0xB4B355534C61746ELLU, // tfn_Latn_US
+    0xB8B349444C61746ELLU, // tfo_Latn_ID
+    0xC4B350414C61746ELLU, // tfr_Latn_PA
+    0xCCB349444C61746ELLU, // tft_Latn_ID
     0x7467504B41726162LLU, // tg_Arab_PK
     0x7467544A4379726CLLU, // tg_Cyrl_TJ
+    0x80D34B454C61746ELLU, // tga_Latn_KE
+    0x84D34D594C61746ELLU, // tgb_Latn_MY
+    0x88D350474C61746ELLU, // tgc_Latn_PG
+    0x8CD34E474C61746ELLU, // tgd_Latn_NG
+    0x90D34E5044657661LLU, // tge_Deva_NP
+    0x94D3425454696274LLU, // tgf_Tibt_BT
+    0x9CD354544C61746ELLU, // tgh_Latn_TT
+    0xA0D350474C61746ELLU, // tgi_Latn_PG
+    0xA4D3494E4C61746ELLU, // tgj_Latn_IN
+    0xB4D350484C61746ELLU, // tgn_Latn_PH
+    0xB8D350474C61746ELLU, // tgo_Latn_PG
+    0xBCD356554C61746ELLU, // tgp_Latn_VU
+    0xC0D34D594C61746ELLU, // tgq_Latn_MY
+    0xC8D356554C61746ELLU, // tgs_Latn_VU
+    0xCCD350484C61746ELLU, // tgt_Latn_PH
+    0xD0D350474C61746ELLU, // tgu_Latn_PG
+    0xD4D342524C61746ELLU, // tgv_Latn_BR
+    0xD8D343494C61746ELLU, // tgw_Latn_CI
+    0xDCD343414C61746ELLU, // tgx_Latn_CA
+    0xE0D353534C61746ELLU, // tgy_Latn_SS
+    0xE4D341554C61746ELLU, // tgz_Latn_AU
     0x7468544854686169LLU, // th_Thai_TH
+    0x8CF341554C61746ELLU, // thd_Latn_AU
+    0x90F34E5044657661LLU, // the_Deva_NP
+    0x94F34E5044657661LLU, // thf_Deva_NP
+    0x9CF34D584C61746ELLU, // thh_Latn_MX
+    0xA0F34C4154616C65LLU, // thi_Tale_LA
+    0xA8F34B454C61746ELLU, // thk_Latn_KE
     0xACF34E5044657661LLU, // thl_Deva_NP
+    0xB0F3544854686169LLU, // thm_Thai_TH
+    0xBCF343414C61746ELLU, // thp_Latn_CA
     0xC0F34E5044657661LLU, // thq_Deva_NP
     0xC4F34E5044657661LLU, // thr_Deva_NP
+    0xC8F34E5044657661LLU, // ths_Deva_NP
+    0xCCF343414C61746ELLU, // tht_Latn_CA
+    0xD0F353534C61746ELLU, // thu_Latn_SS
+    0xD4F3445A4C61746ELLU, // thv_Latn_DZ
+    0xE0F34E474C61746ELLU, // thy_Latn_NG
+    0xE4F34E454C61746ELLU, // thz_Latn_NE
     0x7469455445746869LLU, // ti_Ethi_ET
+    0x891353444C61746ELLU, // tic_Latn_SD
+    0x951350474C61746ELLU, // tif_Latn_PG
     0x9913455245746869LLU, // tig_Ethi_ER
+    0x9D134D594C61746ELLU, // tih_Latn_MY
+    0xA11343444C61746ELLU, // tii_Latn_CD
+    0xA5134E5044657661LLU, // tij_Deva_NP
+    0xA913434D4C61746ELLU, // tik_Latn_CM
+    0xAD1355534C61746ELLU, // til_Latn_US
+    0xB11350474C61746ELLU, // tim_Latn_PG
+    0xB51352554379726CLLU, // tin_Cyrl_RU
+    0xB91350474C61746ELLU, // tio_Latn_PG
+    0xBD1349444C61746ELLU, // tip_Latn_ID
+    0xC11342464C61746ELLU, // tiq_Latn_BF
+    0xC91350484C61746ELLU, // tis_Latn_PH
+    0xCD13434F4C61746ELLU, // tit_Latn_CO
+    0xD11350484C61746ELLU, // tiu_Latn_PH
     0xD5134E474C61746ELLU, // tiv_Latn_NG
+    0xD91341554C61746ELLU, // tiw_Latn_AU
+    0xDD1355534C61746ELLU, // tix_Latn_US
+    0xE11350484C61746ELLU, // tiy_Latn_PH
+    0x81334C524C61746ELLU, // tja_Latn_LR
+    0x993349444C61746ELLU, // tjg_Latn_ID
+    0xA133434E4C61746ELLU, // tji_Latn_CN
+    0xA53341554C61746ELLU, // tjj_Latn_AU
+    0xAD334D4D4D796D72LLU, // tjl_Mymr_MM
+    0xB53343494C61746ELLU, // tjn_Latn_CI
+    0xB933445A41726162LLU, // tjo_Arab_DZ
+    0xBD3341554C61746ELLU, // tjp_Latn_AU
+    0xC933434E4C61746ELLU, // tjs_Latn_CN
+    0xD13341554C61746ELLU, // tju_Latn_AU
+    0xD93341554C61746ELLU, // tjw_Latn_AU
     0x746B544D4C61746ELLU, // tk_Latn_TM
+    0x815342524C61746ELLU, // tka_Latn_BR
+    0x8553494E44657661LLU, // tkb_Deva_IN
+    0x8D53544C4C61746ELLU, // tkd_Latn_TL
+    0x91534D5A4C61746ELLU, // tke_Latn_MZ
+    0x955342524C61746ELLU, // tkf_Latn_BR
+    0x99534D474C61746ELLU, // tkg_Latn_MG
     0xAD53544B4C61746ELLU, // tkl_Latn_TK
+    0xBD5353424C61746ELLU, // tkp_Latn_SB
+    0xC1534E474C61746ELLU, // tkq_Latn_NG
     0xC553415A4C61746ELLU, // tkr_Latn_AZ
+    0xC953495241726162LLU, // tks_Arab_IR
     0xCD534E5044657661LLU, // tkt_Deva_NP
+    0xD1534D584C61746ELLU, // tku_Latn_MX
+    0xD55350474C61746ELLU, // tkv_Latn_PG
+    0xD95353424C61746ELLU, // tkw_Latn_SB
+    0xDD5349444C61746ELLU, // tkx_Latn_ID
+    0xE553564E4C61746ELLU, // tkz_Latn_VN
     0x746C50484C61746ELLU, // tl_Latn_PH
+    0x81734D584C61746ELLU, // tla_Latn_MX
+    0x857349444C61746ELLU, // tlb_Latn_ID
+    0x89734D584C61746ELLU, // tlc_Latn_MX
+    0x8D7349444C61746ELLU, // tld_Latn_ID
+    0x957350474C61746ELLU, // tlf_Latn_PG
+    0x997349444C61746ELLU, // tlg_Latn_ID
+    0xA17355534C61746ELLU, // tli_Latn_US
+    0xA57355474C61746ELLU, // tlj_Latn_UG
+    0xA97349444C61746ELLU, // tlk_Latn_ID
+    0xAD7343444C61746ELLU, // tll_Latn_CD
+    0xB17356554C61746ELLU, // tlm_Latn_VU
+    0xB57349444C61746ELLU, // tln_Latn_ID
+    0xBD734D584C61746ELLU, // tlp_Latn_MX
+    0xC1734D4D4C61746ELLU, // tlq_Latn_MM
+    0xC57353424C61746ELLU, // tlr_Latn_SB
+    0xC97356554C61746ELLU, // tls_Latn_VU
+    0xCD7349444C61746ELLU, // tlt_Latn_ID
+    0xD17349444C61746ELLU, // tlu_Latn_ID
+    0xD57349444C61746ELLU, // tlv_Latn_ID
+    0xDD7350474C61746ELLU, // tlx_Latn_PG
     0xE173415A4C61746ELLU, // tly_Latn_AZ
+    0x819354444C61746ELLU, // tma_Latn_TD
+    0x859356554C61746ELLU, // tmb_Latn_VU
+    0x899354444C61746ELLU, // tmc_Latn_TD
+    0x8D9350474C61746ELLU, // tmd_Latn_PG
+    0x919342524C61746ELLU, // tme_Latn_BR
+    0x959350594C61746ELLU, // tmf_Latn_PY
+    0x999349444C61746ELLU, // tmg_Latn_ID
     0x9D934E454C61746ELLU, // tmh_Latn_NE
+    0xA19356554C61746ELLU, // tmi_Latn_VU
+    0xA59349444C61746ELLU, // tmj_Latn_ID
+    0xAD9349444C61746ELLU, // tml_Latn_ID
+    0xB193564E4C61746ELLU, // tmm_Latn_VN
+    0xB59349444C61746ELLU, // tmn_Latn_ID
+    0xB9934D594C61746ELLU, // tmo_Latn_MY
+    0xC19350474C61746ELLU, // tmq_Latn_PG
+    0xC593494C53797263LLU, // tmr_Syrc_IL
+    0xCD9356554C61746ELLU, // tmt_Latn_VU
+    0xD19349444C61746ELLU, // tmu_Latn_ID
+    0xD59343444C61746ELLU, // tmv_Latn_CD
+    0xD9934D594C61746ELLU, // tmw_Latn_MY
+    0xE19350474C61746ELLU, // tmy_Latn_PG
+    0xE59356454C61746ELLU, // tmz_Latn_VE
     0x746E5A414C61746ELLU, // tn_Latn_ZA
+    0x81B3424F4C61746ELLU, // tna_Latn_BO
+    0x85B3434F4C61746ELLU, // tnb_Latn_CO
+    0x89B3434F4C61746ELLU, // tnc_Latn_CO
+    0x8DB3434F4C61746ELLU, // tnd_Latn_CO
+    0x99B354444C61746ELLU, // tng_Latn_TD
+    0x9DB350474C61746ELLU, // tnh_Latn_PG
+    0xA1B349444C61746ELLU, // tni_Latn_ID
+    0xA9B356554C61746ELLU, // tnk_Latn_VU
+    0xADB356554C61746ELLU, // tnl_Latn_VU
+    0xB1B349444C61746ELLU, // tnm_Latn_ID
+    0xB5B356554C61746ELLU, // tnn_Latn_VU
+    0xB9B3424F4C61746ELLU, // tno_Latn_BO
+    0xBDB356554C61746ELLU, // tnp_Latn_VU
+    0xC1B350524C61746ELLU, // tnq_Latn_PR
+    0xC5B3534E4C61746ELLU, // tnr_Latn_SN
+    0xC9B350474C61746ELLU, // tns_Latn_PG
+    0xCDB349444C61746ELLU, // tnt_Latn_ID
+    0xD5B3424443616B6DLLU, // tnv_Cakm_BD
+    0xD9B349444C61746ELLU, // tnw_Latn_ID
+    0xDDB353424C61746ELLU, // tnx_Latn_SB
+    0xE1B3545A4C61746ELLU, // tny_Latn_TZ
     0x746F544F4C61746ELLU, // to_Latn_TO
+    0x85D341524C61746ELLU, // tob_Latn_AR
+    0x89D34D584C61746ELLU, // toc_Latn_MX
+    0x8DD3474E4C61746ELLU, // tod_Latn_GN
+    0x95D350474C61746ELLU, // tof_Latn_PG
     0x99D34D574C61746ELLU, // tog_Latn_MW
+    0x9DD34D5A4C61746ELLU, // toh_Latn_MZ
+    0xA1D35A4D4C61746ELLU, // toi_Latn_ZM
+    0xA5D34D584C61746ELLU, // toj_Latn_MX
+    0xADD355534C61746ELLU, // tol_Latn_US
+    0xB1D349444C61746ELLU, // tom_Latn_ID
+    0xB9D34D584C61746ELLU, // too_Latn_MX
+    0xBDD34D584C61746ELLU, // top_Latn_MX
+    0xC1D353534C61746ELLU, // toq_Latn_SS
+    0xC5D343444C61746ELLU, // tor_Latn_CD
+    0xC9D34D584C61746ELLU, // tos_Latn_MX
+    0xD1D3564E4C61746ELLU, // tou_Latn_VN
+    0xD5D3495241726162LLU, // tov_Arab_IR
+    0xD9D355534C61746ELLU, // tow_Latn_US
+    0xDDD350574C61746ELLU, // tox_Latn_PW
+    0xE1D349444C61746ELLU, // toy_Latn_ID
+    0xE5D3434D4C61746ELLU, // toz_Latn_CM
+    0x81F350474C61746ELLU, // tpa_Latn_PG
+    0x89F34D584C61746ELLU, // tpc_Latn_MX
+    0x91F342444C61746ELLU, // tpe_Latn_BD
+    0x95F349444C61746ELLU, // tpf_Latn_ID
+    0x99F349444C61746ELLU, // tpg_Latn_ID
     0xA1F350474C61746ELLU, // tpi_Latn_PG
+    0xA5F350594C61746ELLU, // tpj_Latn_PY
+    0xA9F342524C61746ELLU, // tpk_Latn_BR
+    0xADF34D584C61746ELLU, // tpl_Latn_MX
+    0xB1F347484C61746ELLU, // tpm_Latn_GH
+    0xB5F342524C61746ELLU, // tpn_Latn_BR
+    0xBDF34D584C61746ELLU, // tpp_Latn_MX
+    0xC5F342524C61746ELLU, // tpr_Latn_BR
+    0xCDF34D584C61746ELLU, // tpt_Latn_MX
+    0xD1F34B484B686D72LLU, // tpu_Khmr_KH
+    0xD5F34D504C61746ELLU, // tpv_Latn_MP
+    0xDDF34D584C61746ELLU, // tpx_Latn_MX
+    0xE1F342524C61746ELLU, // tpy_Latn_BR
+    0xE5F350474C61746ELLU, // tpz_Latn_PG
+    0x861342524C61746ELLU, // tqb_Latn_BR
+    0xAE1356554C61746ELLU, // tql_Latn_VU
+    0xB21350474C61746ELLU, // tqm_Latn_PG
+    0xB61355534C61746ELLU, // tqn_Latn_US
+    0xBA1350474C61746ELLU, // tqo_Latn_PG
+    0xBE1350474C61746ELLU, // tqp_Latn_PG
+    0xCE134D584C61746ELLU, // tqt_Latn_MX
+    0xD21353424C61746ELLU, // tqu_Latn_SB
+    0xDA1355534C61746ELLU, // tqw_Latn_US
     0x747254524C61746ELLU, // tr_Latn_TR
+    0x8233414641726162LLU, // tra_Arab_AF
+    0x863350474C61746ELLU, // trb_Latn_PG
+    0x8A334D584C61746ELLU, // trc_Latn_MX
+    0x923349444C61746ELLU, // tre_Latn_ID
+    0x963354544C61746ELLU, // trf_Latn_TT
+    0x9A33494C48656272LLU, // trg_Hebr_IL
+    0x9E3350474C61746ELLU, // trh_Latn_PG
+    0xA23353524C61746ELLU, // tri_Latn_SR
+    0xA63354444C61746ELLU, // trj_Latn_TD
+    0xAE3347424C61746ELLU, // trl_Latn_GB
+    0xB233414641726162LLU, // trm_Arab_AF
+    0xB633424F4C61746ELLU, // trn_Latn_BO
+    0xBA33494E4C61746ELLU, // tro_Latn_IN
+    0xBE33494E4C61746ELLU, // trp_Latn_IN
+    0xC2334D584C61746ELLU, // trq_Latn_MX
+    0xC63350454C61746ELLU, // trr_Latn_PE
+    0xCA334D584C61746ELLU, // trs_Latn_MX
+    0xCE3349444C61746ELLU, // trt_Latn_ID
     0xD23354524C61746ELLU, // tru_Latn_TR
     0xD63354574C61746ELLU, // trv_Latn_TW
     0xDA33504B41726162LLU, // trw_Arab_PK
+    0xDE334D594C61746ELLU, // trx_Latn_MY
+    0xE233494E4C61746ELLU, // try_Latn_IN
+    0xE63342524C61746ELLU, // trz_Latn_BR
     0x74735A414C61746ELLU, // ts_Latn_ZA
+    0x825343474C61746ELLU, // tsa_Latn_CG
+    0x865345544C61746ELLU, // tsb_Latn_ET
+    0x8A534D5A4C61746ELLU, // tsc_Latn_MZ
     0x8E5347524772656BLLU, // tsd_Grek_GR
-    0x96534E5044657661LLU, // tsf_Deva_NP
     0x9A5350484C61746ELLU, // tsg_Latn_PH
+    0x9E53434D4C61746ELLU, // tsh_Latn_CM
+    0xA25343414C61746ELLU, // tsi_Latn_CA
     0xA653425454696274LLU, // tsj_Tibt_BT
+    0xAE53564E4C61746ELLU, // tsl_Latn_VN
+    0xBE5342464C61746ELLU, // tsp_Latn_BF
+    0xC65356554C61746ELLU, // tsr_Latn_VU
+    0xCE534D4C4C61746ELLU, // tst_Latn_ML
+    0xD25354574C61746ELLU, // tsu_Latn_TW
+    0xD65347414C61746ELLU, // tsv_Latn_GA
+    0xDA534E474C61746ELLU, // tsw_Latn_NG
+    0xDE5350474C61746ELLU, // tsx_Latn_PG
+    0xE6534D584C61746ELLU, // tsz_Latn_MX
     0x747452554379726CLLU, // tt_Cyrl_RU
+    0x86734E474C61746ELLU, // ttb_Latn_NG
+    0x8A7347544C61746ELLU, // ttc_Latn_GT
+    0x8E7350474C61746ELLU, // ttd_Latn_PG
+    0x927350474C61746ELLU, // tte_Latn_PG
+    0x9673434D4C61746ELLU, // ttf_Latn_CM
+    0x9E734C414C616F6FLLU, // tth_Laoo_LA
+    0xA27349444C61746ELLU, // tti_Latn_ID
     0xA67355474C61746ELLU, // ttj_Latn_UG
+    0xAA73434F4C61746ELLU, // ttk_Latn_CO
+    0xAE735A4D4C61746ELLU, // ttl_Latn_ZM
+    0xB27343414C61746ELLU, // ttm_Latn_CA
+    0xB67349444C61746ELLU, // ttn_Latn_ID
+    0xBA734C414C616F6FLLU, // tto_Laoo_LA
+    0xBE7349444C61746ELLU, // ttp_Latn_ID
+    0xC6734E474C61746ELLU, // ttr_Latn_NG
     0xCA73544854686169LLU, // tts_Thai_TH
     0xCE73415A4C61746ELLU, // ttt_Latn_AZ
+    0xD27350474C61746ELLU, // ttu_Latn_PG
+    0xD67350474C61746ELLU, // ttv_Latn_PG
+    0xDA734D594C61746ELLU, // ttw_Latn_MY
+    0xE27349444C61746ELLU, // tty_Latn_ID
+    0xE6734E5044657661LLU, // ttz_Deva_NP
+    0x829350474C61746ELLU, // tua_Latn_PG
+    0x869355534C61746ELLU, // tub_Latn_US
+    0x8A9350474C61746ELLU, // tuc_Latn_PG
+    0x8E9342524C61746ELLU, // tud_Latn_BR
+    0x9293434F4C61746ELLU, // tue_Latn_CO
+    0x9693434F4C61746ELLU, // tuf_Latn_CO
+    0x9A9354444C61746ELLU, // tug_Latn_TD
+    0x9E9350474C61746ELLU, // tuh_Latn_PG
+    0xA293434D4C61746ELLU, // tui_Latn_CM
+    0xA69349444C61746ELLU, // tuj_Latn_ID
+    0xAE934E474C61746ELLU, // tul_Latn_NG
     0xB2934D574C61746ELLU, // tum_Latn_MW
+    0xB69355534C61746ELLU, // tun_Latn_US
+    0xBA9342524C61746ELLU, // tuo_Latn_BR
+    0xC29354444C61746ELLU, // tuq_Latn_TD
+    0xCA9343414C61746ELLU, // tus_Latn_CA
+    0xD29355534C61746ELLU, // tuu_Latn_US
+    0xD6934B454C61746ELLU, // tuv_Latn_KE
+    0xDE9342524C61746ELLU, // tux_Latn_BR
+    0xE2934B454C61746ELLU, // tuy_Latn_KE
+    0xE69342464C61746ELLU, // tuz_Latn_BF
+    0x82B353424C61746ELLU, // tva_Latn_SB
+    0x8EB34E474C61746ELLU, // tvd_Latn_NG
+    0x92B349444C61746ELLU, // tve_Latn_ID
+    0xA2B34E474C61746ELLU, // tvi_Latn_NG
+    0xAAB356554C61746ELLU, // tvk_Latn_VU
     0xAEB354564C61746ELLU, // tvl_Latn_TV
+    0xB2B349444C61746ELLU, // tvm_Latn_ID
+    0xB6B34D4D4D796D72LLU, // tvn_Mymr_MM
+    0xBAB349444C61746ELLU, // tvo_Latn_ID
+    0xCAB34B454C61746ELLU, // tvs_Latn_KE
+    0xCEB3494E4C61746ELLU, // tvt_Latn_IN
+    0xD2B3434D4C61746ELLU, // tvu_Latn_CM
+    0xDAB349444C61746ELLU, // tvw_Latn_ID
+    0xDEB354574C61746ELLU, // tvx_Latn_TW
+    0x82D355534C61746ELLU, // twa_Latn_US
+    0x86D350484C61746ELLU, // twb_Latn_PH
+    0x8ED34E4C4C61746ELLU, // twd_Latn_NL
+    0x92D349444C61746ELLU, // twe_Latn_ID
+    0x96D355534C61746ELLU, // twf_Latn_US
+    0x9AD349444C61746ELLU, // twg_Latn_ID
+    0x9ED3564E4C61746ELLU, // twh_Latn_VN
+    0xAED34D5A4C61746ELLU, // twl_Latn_MZ
+    0xB2D3494E44657661LLU, // twm_Deva_IN
+    0xB6D3434D4C61746ELLU, // twn_Latn_CM
+    0xBAD342574C61746ELLU, // two_Latn_BW
+    0xBED350474C61746ELLU, // twp_Latn_PG
     0xC2D34E454C61746ELLU, // twq_Latn_NE
+    0xC6D34D584C61746ELLU, // twr_Latn_MX
+    0xCED342524C61746ELLU, // twt_Latn_BR
+    0xD2D349444C61746ELLU, // twu_Latn_ID
+    0xDAD350474C61746ELLU, // tww_Latn_PG
+    0xDED34D5A4C61746ELLU, // twx_Latn_MZ
+    0xE2D349444C61746ELLU, // twy_Latn_ID
+    0x82F34D594C61746ELLU, // txa_Latn_MY
+    0x92F349444C61746ELLU, // txe_Latn_ID
     0x9AF3434E54616E67LLU, // txg_Tang_CN
+    0xA2F342524C61746ELLU, // txi_Latn_BR
+    0xA6F34E474C61746ELLU, // txj_Latn_NG
+    0xB2F349444C61746ELLU, // txm_Latn_ID
+    0xB6F349444C61746ELLU, // txn_Latn_ID
     0xBAF3494E546F746FLLU, // txo_Toto_IN
+    0xC2F349444C61746ELLU, // txq_Latn_ID
+    0xCAF349444C61746ELLU, // txs_Latn_ID
+    0xCEF349444C61746ELLU, // txt_Latn_ID
+    0xD2F342524C61746ELLU, // txu_Latn_BR
+    0xDEF34D594C61746ELLU, // txx_Latn_MY
+    0xE2F34D474C61746ELLU, // txy_Latn_MG
     0x747950464C61746ELLU, // ty_Latn_PF
+    0x831350474C61746ELLU, // tya_Latn_PG
+    0x93134E474C61746ELLU, // tye_Latn_NG
+    0x9F13564E4C61746ELLU, // tyh_Latn_VN
+    0xA31343474C61746ELLU, // tyi_Latn_CG
+    0xA713564E4C61746ELLU, // tyj_Latn_VN
+    0xAF13564E4C61746ELLU, // tyl_Latn_VN
+    0xB71349444C61746ELLU, // tyn_Latn_ID
+    0xBF1341554C61746ELLU, // typ_Latn_AU
+    0xC713564E54617674LLU, // tyr_Tavt_VN
+    0xCB13564E4C61746ELLU, // tys_Latn_VN
+    0xCF13564E4C61746ELLU, // tyt_Latn_VN
+    0xD31342574C61746ELLU, // tyu_Latn_BW
     0xD71352554379726CLLU, // tyv_Cyrl_RU
+    0xDF1343474C61746ELLU, // tyx_Latn_CG
+    0xE3134E474C61746ELLU, // tyy_Latn_NG
+    0xE713564E4C61746ELLU, // tyz_Latn_VN
+    0x9F334D584C61746ELLU, // tzh_Latn_MX
+    0xA73347544C61746ELLU, // tzj_Latn_GT
     0xB3334D414C61746ELLU, // tzm_Latn_MA
-    0xA074525541676862LLU, // udi_Aghb_RU
+    0xB73349444C61746ELLU, // tzn_Latn_ID
+    0xBB334D584C61746ELLU, // tzo_Latn_MX
+    0xDF3350474C61746ELLU, // tzx_Latn_PG
+    0xB01442524C61746ELLU, // uam_Latn_BR
+    0xC41450474C61746ELLU, // uar_Latn_PG
+    0x80344E474C61746ELLU, // uba_Latn_NG
+    0xA03454444C61746ELLU, // ubi_Latn_TD
+    0xAC3450484C61746ELLU, // ubl_Latn_PH
+    0xC43450474C61746ELLU, // ubr_Latn_PG
+    0xD03450474C61746ELLU, // ubu_Latn_PG
+    0xE03454524C61746ELLU, // uby_Latn_TR
+    0x80744E474C61746ELLU, // uda_Latn_NG
+    0x907452554379726CLLU, // ude_Cyrl_RU
+    0x9874494E4D6C796DLLU, // udg_Mlym_IN
+    0xA07452554379726CLLU, // udi_Cyrl_RU
+    0xA47449444C61746ELLU, // udj_Latn_ID
+    0xAC74434D4C61746ELLU, // udl_Latn_CM
     0xB07452554379726CLLU, // udm_Cyrl_RU
+    0xD07453444C61746ELLU, // udu_Latn_SD
+    0xC89449444C61746ELLU, // ues_Latn_ID
+    0xA0B450474C61746ELLU, // ufi_Latn_PG
     0x7567434E41726162LLU, // ug_Arab_CN
     0x75674B5A4379726CLLU, // ug_Cyrl_KZ
     0x80D4535955676172LLU, // uga_Ugar_SY
+    0x84D441554C61746ELLU, // ugb_Latn_AU
+    0x90D453424C61746ELLU, // uge_Latn_SB
+    0x9CD452554379726CLLU, // ugh_Cyrl_RU
+    0xB8D4544854686169LLU, // ugo_Thai_TH
+    0x80F44E474C61746ELLU, // uha_Latn_NG
+    0xB4F449444C61746ELLU, // uhn_Latn_ID
+    0xC91450474C61746ELLU, // uis_Latn_PG
+    0xD514434D4C61746ELLU, // uiv_Latn_CM
+    0xA1344E474C61746ELLU, // uji_Latn_NG
     0x756B55414379726CLLU, // uk_Cyrl_UA
+    0x815449444C61746ELLU, // uka_Latn_ID
+    0x995450474C61746ELLU, // ukg_Latn_PG
+    0x9D5443464C61746ELLU, // ukh_Latn_CF
+    0xA154494E4F727961LLU, // uki_Orya_IN
+    0xA9544D4D4C61746ELLU, // ukk_Latn_MM
+    0xBD544E474C61746ELLU, // ukp_Latn_NG
+    0xC1544E474C61746ELLU, // ukq_Latn_NG
+    0xD1544E474C61746ELLU, // uku_Latn_NG
+    0xD55453534C61746ELLU, // ukv_Latn_SS
+    0xD9544E474C61746ELLU, // ukw_Latn_NG
+    0xE15441554C61746ELLU, // uky_Latn_AU
+    0x81744E474C61746ELLU, // ula_Latn_NG
+    0x85744E474C61746ELLU, // ulb_Latn_NG
+    0x897452554379726CLLU, // ulc_Cyrl_RU
+    0x917441524C61746ELLU, // ule_Latn_AR
+    0x957449444C61746ELLU, // ulf_Latn_ID
     0xA174464D4C61746ELLU, // uli_Latn_FM
+    0xA97441554C61746ELLU, // ulk_Latn_AU
+    0xB17449444C61746ELLU, // ulm_Latn_ID
+    0xB57450474C61746ELLU, // uln_Latn_PG
+    0xD17449444C61746ELLU, // ulu_Latn_ID
+    0xD9744E494C61746ELLU, // ulw_Latn_NI
+    0xE1744E474C61746ELLU, // uly_Latn_NG
+    0x819455534C61746ELLU, // uma_Latn_US
     0x8594414F4C61746ELLU, // umb_Latn_AO
+    0x8D9441554C61746ELLU, // umd_Latn_AU
+    0x999441554C61746ELLU, // umg_Latn_AU
+    0xA1944D594C61746ELLU, // umi_Latn_MY
+    0xB1944E474C61746ELLU, // umm_Latn_NG
+    0xB5944D4D4C61746ELLU, // umn_Latn_MM
+    0xB99442524C61746ELLU, // umo_Latn_BR
+    0xBD9441554C61746ELLU, // ump_Latn_AU
+    0xC59441554C61746ELLU, // umr_Latn_AU
+    0xC99449444C61746ELLU, // ums_Latn_ID
+    0x81B450474C61746ELLU, // una_Latn_PG
+    0x91B44E474C61746ELLU, // une_Latn_NG
+    0x99B441554C61746ELLU, // ung_Latn_AU
+    0xA1B450474C61746ELLU, // uni_Latn_PG
+    0xA9B442524C61746ELLU, // unk_Latn_BR
+    0xB1B455534C61746ELLU, // unm_Latn_US
+    0xB5B441554C61746ELLU, // unn_Latn_AU
     0xC5B4494E42656E67LLU, // unr_Beng_IN
     0xC5B44E5044657661LLU, // unr_Deva_NP
+    0xD1B450474C61746ELLU, // unu_Latn_PG
     0xDDB4494E42656E67LLU, // unx_Beng_IN
+    0xE5B449444C61746ELLU, // unz_Latn_ID
+    0xB5D454574C61746ELLU, // uon_Latn_TW
+    0xA1F450474C61746ELLU, // upi_Latn_PG
+    0xD5F456554C61746ELLU, // upv_Latn_VU
     0x7572504B41726162LLU, // ur_Arab_PK
+    0x823450454C61746ELLU, // ura_Latn_PE
+    0x863442524C61746ELLU, // urb_Latn_BR
+    0x8A3441554C61746ELLU, // urc_Latn_AU
+    0x9234424F4C61746ELLU, // ure_Latn_BO
+    0x963441554C61746ELLU, // urf_Latn_AU
+    0x9A3450474C61746ELLU, // urg_Latn_PG
+    0x9E344E474C61746ELLU, // urh_Latn_NG
+    0xA23450474C61746ELLU, // uri_Latn_PG
+    0xAA34544854686169LLU, // urk_Thai_TH
+    0xB23450474C61746ELLU, // urm_Latn_PG
+    0xB63449444C61746ELLU, // urn_Latn_ID
+    0xBA3450474C61746ELLU, // uro_Latn_PG
+    0xBE3442524C61746ELLU, // urp_Latn_BR
+    0xC63456554C61746ELLU, // urr_Latn_VU
+    0xCE3450474C61746ELLU, // urt_Latn_PG
+    0xD23442524C61746ELLU, // uru_Latn_BR
+    0xD63450474C61746ELLU, // urv_Latn_PG
+    0xDA3450474C61746ELLU, // urw_Latn_PG
+    0xDE3450474C61746ELLU, // urx_Latn_PG
+    0xE23449444C61746ELLU, // ury_Latn_ID
+    0xE63442524C61746ELLU, // urz_Latn_BR
+    0x825450474C61746ELLU, // usa_Latn_PG
+    0x9E54504B41726162LLU, // ush_Arab_PK
+    0xA25442444C61746ELLU, // usi_Latn_BD
+    0xAA54434D4C61746ELLU, // usk_Latn_CM
+    0xBE5447544C61746ELLU, // usp_Latn_GT
+    0xCA544E474C61746ELLU, // uss_Latn_NG
+    0xD25450474C61746ELLU, // usu_Latn_PG
+    0x82744E474C61746ELLU, // uta_Latn_NG
+    0x927455534C61746ELLU, // ute_Latn_US
+    0x9E744E474C61746ELLU, // uth_Latn_NG
+    0xBE7453424C61746ELLU, // utp_Latn_SB
+    0xC6744E474C61746ELLU, // utr_Latn_NG
+    0xD27450474C61746ELLU, // utu_Latn_PG
+    0xB29447454772656BLLU, // uum_Grek_GE
+    0xC69456554C61746ELLU, // uur_Latn_VU
+    0x92B44E434C61746ELLU, // uve_Latn_NC
+    0x9EB450474C61746ELLU, // uvh_Latn_PG
+    0xAEB450474C61746ELLU, // uvl_Latn_PG
+    0x82D441554C61746ELLU, // uwa_Latn_AU
+    0x83144E474C61746ELLU, // uya_Latn_NG
     0x757A414641726162LLU, // uz_Arab_AF
     0x757A555A4C61746ELLU, // uz_Latn_UZ
+    0xCB34414641726162LLU, // uzs_Arab_AF
+    0x8015494E54616D6CLLU, // vaa_Taml_IN
+    0x901543464C61746ELLU, // vae_Latn_CF
+    0x9415495241726162LLU, // vaf_Arab_IR
+    0x981547484C61746ELLU, // vag_Latn_GH
+    0x9C15494E44657661LLU, // vah_Deva_IN
     0xA0154C5256616969LLU, // vai_Vaii_LR
+    0xA4154E414C61746ELLU, // vaj_Latn_NA
+    0xAC1550474C61746ELLU, // val_Latn_PG
+    0xB01550474C61746ELLU, // vam_Latn_PG
+    0xB41550474C61746ELLU, // van_Latn_PG
+    0xB81556554C61746ELLU, // vao_Latn_VU
+    0xBC15494E4C61746ELLU, // vap_Latn_IN
+    0xC4154D584C61746ELLU, // var_Latn_MX
+    0xC815494E44657661LLU, // vas_Deva_IN
+    0xD01543444C61746ELLU, // vau_Latn_CD
+    0xD415494E44657661LLU, // vav_Deva_IN
+    0xE0154E5044657661LLU, // vay_Deva_NP
+    0x843549444C61746ELLU, // vbb_Latn_ID
+    0xA83550484C61746ELLU, // vbk_Latn_PH
     0x76655A414C61746ELLU, // ve_Latn_ZA
     0x889549544C61746ELLU, // vec_Latn_IT
+    0xB0954E474C61746ELLU, // vem_Latn_NG
+    0xB89555534C61746ELLU, // veo_Latn_US
     0xBC9552554C61746ELLU, // vep_Latn_RU
+    0xC4954E474C61746ELLU, // ver_Latn_NG
+    0xC4D5504B41726162LLU, // vgr_Arab_PK
     0x7669564E4C61746ELLU, // vi_Latn_VN
     0x891553584C61746ELLU, // vic_Latn_SX
+    0x8D15545A4C61746ELLU, // vid_Latn_TZ
+    0x951543474C61746ELLU, // vif_Latn_CG
+    0x991542464C61746ELLU, // vig_Latn_BF
+    0xAD1541524C61746ELLU, // vil_Latn_AR
+    0xB515545A4C61746ELLU, // vin_Latn_TZ
+    0xCD154E474C61746ELLU, // vit_Latn_NG
+    0xD51550474C61746ELLU, // viv_Latn_PG
+    0xA935494E44657661LLU, // vjk_Deva_IN
+    0x815541554C61746ELLU, // vka_Latn_AU
+    0xA55554444C61746ELLU, // vkj_Latn_TD
+    0xA95549444C61746ELLU, // vkk_Latn_ID
+    0xAD5549444C61746ELLU, // vkl_Latn_ID
+    0xB15542524C61746ELLU, // vkm_Latn_BR
+    0xB5554E474C61746ELLU, // vkn_Latn_NG
+    0xB95549444C61746ELLU, // vko_Latn_ID
+    0xBD55494E4C61746ELLU, // vkp_Latn_IN
+    0xCD5549444C61746ELLU, // vkt_Latn_ID
+    0xD15541554C61746ELLU, // vku_Latn_AU
+    0xE5554E474C61746ELLU, // vkz_Latn_NG
+    0xBD7556554C61746ELLU, // vlp_Latn_VU
     0xC97542454C61746ELLU, // vls_Latn_BE
+    0x819541554C61746ELLU, // vma_Latn_AU
+    0x859541554C61746ELLU, // vmb_Latn_AU
+    0x89954D584C61746ELLU, // vmc_Latn_MX
+    0x8D95494E4B6E6461LLU, // vmd_Knda_IN
+    0x919549444C61746ELLU, // vme_Latn_ID
     0x959544454C61746ELLU, // vmf_Latn_DE
+    0x999550474C61746ELLU, // vmg_Latn_PG
+    0x9D95495241726162LLU, // vmh_Arab_IR
+    0xA19541554C61746ELLU, // vmi_Latn_AU
+    0xA5954D584C61746ELLU, // vmj_Latn_MX
+    0xA9954D5A4C61746ELLU, // vmk_Latn_MZ
+    0xAD9541554C61746ELLU, // vml_Latn_AU
+    0xB1954D584C61746ELLU, // vmm_Latn_MX
+    0xBD954D584C61746ELLU, // vmp_Latn_MX
+    0xC1954D584C61746ELLU, // vmq_Latn_MX
+    0xC5954D5A4C61746ELLU, // vmr_Latn_MZ
+    0xC99549444C61746ELLU, // vms_Latn_ID
+    0xD19541554C61746ELLU, // vmu_Latn_AU
     0xD9954D5A4C61746ELLU, // vmw_Latn_MZ
+    0xDD954D584C61746ELLU, // vmx_Latn_MX
+    0xE1954D584C61746ELLU, // vmy_Latn_MX
+    0xE5954D584C61746ELLU, // vmz_Latn_MX
+    0xA9B553424C61746ELLU, // vnk_Latn_SB
+    0xB1B556554C61746ELLU, // vnm_Latn_VU
+    0xBDB556554C61746ELLU, // vnp_Latn_VU
+    0xC5D54E474C61746ELLU, // vor_Latn_NG
     0xCDD552554C61746ELLU, // vot_Latn_RU
+    0x823556554C61746ELLU, // vra_Latn_VU
     0xBA3545454C61746ELLU, // vro_Latn_EE
+    0xCA3553424C61746ELLU, // vrs_Latn_SB
+    0xCE3556554C61746ELLU, // vrt_Latn_VU
+    0xBA7549444C61746ELLU, // vto_Latn_ID
+    0xB29547414C61746ELLU, // vum_Latn_GA
     0xB695545A4C61746ELLU, // vun_Latn_TZ
+    0xCE95434D4C61746ELLU, // vut_Latn_CM
+    0x82D5434E4C61746ELLU, // vwa_Latn_CN
     0x776142454C61746ELLU, // wa_Latn_BE
+    0x801655534C61746ELLU, // waa_Latn_US
+    0x841650474C61746ELLU, // wab_Latn_PG
+    0x881655534C61746ELLU, // wac_Latn_US
+    0x8C1649444C61746ELLU, // wad_Latn_ID
     0x901643484C61746ELLU, // wae_Latn_CH
+    0x941642524C61746ELLU, // waf_Latn_BR
+    0x981650474C61746ELLU, // wag_Latn_PG
+    0x9C1649444C61746ELLU, // wah_Latn_ID
+    0xA01649444C61746ELLU, // wai_Latn_ID
+    0xA41650474C61746ELLU, // waj_Latn_PG
     0xAC16455445746869LLU, // wal_Ethi_ET
+    0xB01655534C61746ELLU, // wam_Latn_US
+    0xB41643494C61746ELLU, // wan_Latn_CI
+    0xBC1647594C61746ELLU, // wap_Latn_GY
+    0xC01641554C61746ELLU, // waq_Latn_AU
     0xC41650484C61746ELLU, // war_Latn_PH
+    0xC81655534C61746ELLU, // was_Latn_US
+    0xCC1650474C61746ELLU, // wat_Latn_PG
+    0xD01642524C61746ELLU, // wau_Latn_BR
+    0xD4164E474C61746ELLU, // wav_Latn_NG
+    0xD81642524C61746ELLU, // waw_Latn_BR
+    0xDC1650474C61746ELLU, // wax_Latn_PG
+    0xE01653524C61746ELLU, // way_Latn_SR
+    0xE41650474C61746ELLU, // waz_Latn_PG
+    0x803656454C61746ELLU, // wba_Latn_VE
+    0x843649444C61746ELLU, // wbb_Latn_ID
+    0x903649444C61746ELLU, // wbe_Latn_ID
+    0x943642464C61746ELLU, // wbf_Latn_BF
+    0x9C36545A4C61746ELLU, // wbh_Latn_TZ
+    0xA036545A4C61746ELLU, // wbi_Latn_TZ
+    0xA436545A4C61746ELLU, // wbj_Latn_TZ
+    0xA836414641726162LLU, // wbk_Arab_AF
+    0xAC36504B4C61746ELLU, // wbl_Latn_PK
+    0xB036434E4C61746ELLU, // wbm_Latn_CN
     0xBC3641554C61746ELLU, // wbp_Latn_AU
     0xC036494E54656C75LLU, // wbq_Telu_IN
     0xC436494E44657661LLU, // wbr_Deva_IN
+    0xCC3641554C61746ELLU, // wbt_Latn_AU
+    0xD43641554C61746ELLU, // wbv_Latn_AU
+    0xD83649444C61746ELLU, // wbw_Latn_ID
+    0x805642524C61746ELLU, // wca_Latn_BR
+    0xA05654474C61746ELLU, // wci_Latn_TG
+    0x8C7647414C61746ELLU, // wdd_Latn_GA
+    0x987650474C61746ELLU, // wdg_Latn_PG
+    0xA47641554C61746ELLU, // wdj_Latn_AU
+    0xA87641554C61746ELLU, // wdk_Latn_AU
+    0xCC7643414C61746ELLU, // wdt_Latn_CA
+    0xD07641554C61746ELLU, // wdu_Latn_AU
+    0xE07641554C61746ELLU, // wdy_Latn_AU
+    0x889643494C61746ELLU, // wec_Latn_CI
+    0x8C9650474C61746ELLU, // wed_Latn_PG
+    0x989641554C61746ELLU, // weg_Latn_AU
+    0x9C96434D4C61746ELLU, // weh_Latn_CM
+    0xA09650474C61746ELLU, // wei_Latn_PG
+    0xB096424A4C61746ELLU, // wem_Latn_BJ
+    0xB89649444C61746ELLU, // weo_Latn_ID
+    0xBC9644454C61746ELLU, // wep_Latn_DE
+    0xC49650474C61746ELLU, // wer_Latn_PG
+    0xC896434D4C61746ELLU, // wes_Latn_CM
+    0xCC9649444C61746ELLU, // wet_Latn_ID
+    0xD0964D4D4C61746ELLU, // weu_Latn_MM
+    0xD89649444C61746ELLU, // wew_Latn_ID
+    0x98B649444C61746ELLU, // wfg_Latn_ID
+    0x80D641554C61746ELLU, // wga_Latn_AU
+    0x84D650474C61746ELLU, // wgb_Latn_PG
+    0x98D641554C61746ELLU, // wgg_Latn_AU
+    0xA0D650474C61746ELLU, // wgi_Latn_PG
+    0xB8D649444C61746ELLU, // wgo_Latn_ID
+    0xD0D641554C61746ELLU, // wgu_Latn_AU
+    0xE0D641554C61746ELLU, // wgy_Latn_AU
+    0x80F649444C61746ELLU, // wha_Latn_ID
+    0x98F650474C61746ELLU, // whg_Latn_PG
+    0xA8F649444C61746ELLU, // whk_Latn_ID
+    0xD0F649444C61746ELLU, // whu_Latn_ID
+    0x851642464C61746ELLU, // wib_Latn_BF
+    0x891655534C61746ELLU, // wic_Latn_US
+    0x911641554C61746ELLU, // wie_Latn_AU
+    0x951641554C61746ELLU, // wif_Latn_AU
+    0x991641554C61746ELLU, // wig_Latn_AU
+    0x9D1641554C61746ELLU, // wih_Latn_AU
+    0xA11650474C61746ELLU, // wii_Latn_PG
+    0xA51641554C61746ELLU, // wij_Latn_AU
+    0xA91641554C61746ELLU, // wik_Latn_AU
+    0xAD1641554C61746ELLU, // wil_Latn_AU
+    0xB11641554C61746ELLU, // wim_Latn_AU
+    0xB51655534C61746ELLU, // win_Latn_US
+    0xC51642524C61746ELLU, // wir_Latn_BR
+    0xD11650474C61746ELLU, // wiu_Latn_PG
+    0xD51650474C61746ELLU, // wiv_Latn_PG
+    0xE11655534C61746ELLU, // wiy_Latn_US
+    0x81364E474C61746ELLU, // wja_Latn_NG
+    0xA1364E474C61746ELLU, // wji_Latn_NG
+    0x8156545A4C61746ELLU, // wka_Latn_TZ
+    0x8D5649444C61746ELLU, // wkd_Latn_ID
+    0xC55641554C61746ELLU, // wkr_Latn_AU
+    0xD95641554C61746ELLU, // wkw_Latn_AU
+    0xE15641554C61746ELLU, // wky_Latn_AU
+    0x817650474C61746ELLU, // wla_Latn_PG
+    0x9176455445746869LLU, // wle_Ethi_ET
+    0x997641554C61746ELLU, // wlg_Latn_AU
+    0x9D76544C4C61746ELLU, // wlh_Latn_TL
+    0xA17649444C61746ELLU, // wli_Latn_ID
+    0xB17647424C61746ELLU, // wlm_Latn_GB
+    0xB976494441726162LLU, // wlo_Arab_ID
+    0xC57656554C61746ELLU, // wlr_Latn_VU
     0xC97657464C61746ELLU, // wls_Latn_WF
+    0xD17641554C61746ELLU, // wlu_Latn_AU
+    0xD57641524C61746ELLU, // wlv_Latn_AR
+    0xD97649444C61746ELLU, // wlw_Latn_ID
+    0xDD7647484C61746ELLU, // wlx_Latn_GH
+    0x81964E474C61746ELLU, // wma_Latn_NG
+    0x859641554C61746ELLU, // wmb_Latn_AU
+    0x899650474C61746ELLU, // wmc_Latn_PG
+    0x8D9642524C61746ELLU, // wmd_Latn_BR
+    0x91964E5044657661LLU, // wme_Deva_NP
+    0x9D96544C4C61746ELLU, // wmh_Latn_TL
+    0xA19641554C61746ELLU, // wmi_Latn_AU
+    0xB19649444C61746ELLU, // wmm_Latn_ID
+    0xB5964E434C61746ELLU, // wmn_Latn_NC
+    0xB99650474C61746ELLU, // wmo_Latn_PG
+    0xC99649444C61746ELLU, // wms_Latn_ID
+    0xCD9641554C61746ELLU, // wmt_Latn_AU
+    0xD9964D5A4C61746ELLU, // wmw_Latn_MZ
+    0xDD9650474C61746ELLU, // wmx_Latn_PG
+    0x85B650474C61746ELLU, // wnb_Latn_PG
+    0x89B650474C61746ELLU, // wnc_Latn_PG
+    0x8DB641554C61746ELLU, // wnd_Latn_AU
+    0x91B6504B41726162LLU, // wne_Arab_PK
+    0x99B649444C61746ELLU, // wng_Latn_ID
     0xA1B64B4D41726162LLU, // wni_Arab_KM
+    0xA9B649444C61746ELLU, // wnk_Latn_ID
+    0xB1B641554C61746ELLU, // wnm_Latn_AU
+    0xB5B641554C61746ELLU, // wnn_Latn_AU
+    0xB9B649444C61746ELLU, // wno_Latn_ID
+    0xBDB650474C61746ELLU, // wnp_Latn_PG
+    0xD1B650474C61746ELLU, // wnu_Latn_PG
+    0xD9B655534C61746ELLU, // wnw_Latn_US
+    0xE1B641554C61746ELLU, // wny_Latn_AU
     0x776F534E4C61746ELLU, // wo_Latn_SN
+    0x81D641554C61746ELLU, // woa_Latn_AU
+    0x85D643494C61746ELLU, // wob_Latn_CI
+    0x89D650474C61746ELLU, // woc_Latn_PG
+    0x8DD649444C61746ELLU, // wod_Latn_ID
+    0x91D6464D4C61746ELLU, // woe_Latn_FM
+    0x95D6474D4C61746ELLU, // wof_Latn_GM
+    0x99D650474C61746ELLU, // wog_Latn_PG
+    0xA1D649444C61746ELLU, // woi_Latn_ID
+    0xA9D6434D4C61746ELLU, // wok_Latn_CM
+    0xB1D64E474C61746ELLU, // wom_Latn_NG
+    0xB5D643444C61746ELLU, // won_Latn_CD
+    0xB9D649444C61746ELLU, // woo_Latn_ID
+    0xC5D649444C61746ELLU, // wor_Latn_ID
+    0xC9D650474C61746ELLU, // wos_Latn_PG
+    0xD9D649444C61746ELLU, // wow_Latn_ID
+    0x89F656454C61746ELLU, // wpc_Latn_VE
+    0x863641554C61746ELLU, // wrb_Latn_AU
+    0x9A3641554C61746ELLU, // wrg_Latn_AU
+    0x9E3641554C61746ELLU, // wrh_Latn_AU
+    0xA23641554C61746ELLU, // wri_Latn_AU
+    0xAA3641554C61746ELLU, // wrk_Latn_AU
+    0xAE3641554C61746ELLU, // wrl_Latn_AU
+    0xB23641554C61746ELLU, // wrm_Latn_AU
+    0xBA3641554C61746ELLU, // wro_Latn_AU
+    0xBE3649444C61746ELLU, // wrp_Latn_ID
+    0xC63641554C61746ELLU, // wrr_Latn_AU
+    0xCA3650474C61746ELLU, // wrs_Latn_PG
+    0xD23649444C61746ELLU, // wru_Latn_ID
+    0xD63650474C61746ELLU, // wrv_Latn_PG
+    0xDA3641554C61746ELLU, // wrw_Latn_AU
+    0xDE3649444C61746ELLU, // wrx_Latn_ID
+    0xE63641554C61746ELLU, // wrz_Latn_AU
+    0x825649444C61746ELLU, // wsa_Latn_ID
     0x9A56494E476F6E67LLU, // wsg_Gong_IN
+    0xA25656554C61746ELLU, // wsi_Latn_VU
+    0xAA5650474C61746ELLU, // wsk_Latn_PG
+    0xC65650474C61746ELLU, // wsr_Latn_PG
+    0xCA5647484C61746ELLU, // wss_Latn_GH
+    0xD25642524C61746ELLU, // wsu_Latn_BR
+    0xD656414641726162LLU, // wsv_Arab_AF
+    0x8676545A4C61746ELLU, // wtb_Latn_TZ
+    0x967650474C61746ELLU, // wtf_Latn_PG
+    0x9E7641554C61746ELLU, // wth_Latn_AU
+    0xA27645544C61746ELLU, // wti_Latn_ET
+    0xAA7650474C61746ELLU, // wtk_Latn_PG
     0xB276494E44657661LLU, // wtm_Deva_IN
+    0xDA7649444C61746ELLU, // wtw_Latn_ID
+    0x829641554C61746ELLU, // wua_Latn_AU
+    0x869641554C61746ELLU, // wub_Latn_AU
+    0x8E9654474C61746ELLU, // wud_Latn_TG
+    0xAE9649444C61746ELLU, // wul_Latn_ID
+    0xB29647414C61746ELLU, // wum_Latn_GA
+    0xB696545A4C61746ELLU, // wun_Latn_TZ
+    0xC69641554C61746ELLU, // wur_Latn_AU
+    0xCE9650474C61746ELLU, // wut_Latn_PG
     0xD296434E48616E73LLU, // wuu_Hans_CN
+    0xD69650474C61746ELLU, // wuv_Latn_PG
+    0xDE9641554C61746ELLU, // wux_Latn_AU
+    0xE29649444C61746ELLU, // wuy_Latn_ID
+    0x82D6424A4C61746ELLU, // wwa_Latn_BJ
+    0x86D641554C61746ELLU, // wwb_Latn_AU
+    0xBAD656554C61746ELLU, // wwo_Latn_VU
+    0xC6D641554C61746ELLU, // wwr_Latn_AU
+    0xDAD6434D4C61746ELLU, // www_Latn_CM
+    0xDAF641554C61746ELLU, // wxw_Latn_AU
+    0x871641554C61746ELLU, // wyb_Latn_AU
+    0xA31641554C61746ELLU, // wyi_Latn_AU
+    0xB316504C4C61746ELLU, // wym_Latn_PL
+    0xB71655534C61746ELLU, // wyn_Latn_US
+    0xC71642524C61746ELLU, // wyr_Latn_BR
+    0xE316464A4C61746ELLU, // wyy_Latn_FJ
+    0x801745534C61746ELLU, // xaa_Latn_ES
+    0x84174E474C61746ELLU, // xab_Latn_NG
+    0x9817415A41676862LLU, // xag_Aghb_AZ
+    0xA01742524C61746ELLU, // xai_Latn_BR
+    0xA41742524C61746ELLU, // xaj_Latn_BR
+    0xA81756454C61746ELLU, // xak_Latn_VE
+    0xAC1752554379726CLLU, // xal_Cyrl_RU
+    0xB0175A414C61746ELLU, // xam_Latn_ZA
+    0xB417455445746869LLU, // xan_Ethi_ET
+    0xB817564E4C61746ELLU, // xao_Latn_VN
+    0xC41750474C61746ELLU, // xar_Latn_PG
+    0xC81752554379726CLLU, // xas_Cyrl_RU
+    0xCC1742524C61746ELLU, // xat_Latn_BR
+    0xD01749444C61746ELLU, // xau_Latn_ID
     0xD41742524C61746ELLU, // xav_Latn_BR
+    0xD81755534C61746ELLU, // xaw_Latn_US
+    0xE01749444C61746ELLU, // xay_Latn_ID
+    0x843741554C61746ELLU, // xbb_Latn_AU
+    0x8C3741554C61746ELLU, // xbd_Latn_AU
+    0x903741554C61746ELLU, // xbe_Latn_AU
+    0x983741554C61746ELLU, // xbg_Latn_AU
+    0xA03750474C61746ELLU, // xbi_Latn_PG
+    0xA43741554C61746ELLU, // xbj_Latn_AU
+    0xB03746524C61746ELLU, // xbm_Latn_FR
+    0xB4374D594C61746ELLU, // xbn_Latn_MY
+    0xBC3741554C61746ELLU, // xbp_Latn_AU
+    0xC43749444C61746ELLU, // xbr_Latn_ID
+    0xD83742524C61746ELLU, // xbw_Latn_BR
+    0xE03741554C61746ELLU, // xby_Latn_AU
+    0x9C5755534C61746ELLU, // xch_Latn_US
     0xB857555A43687273LLU, // xco_Chrs_UZ
     0xC457545243617269LLU, // xcr_Cari_TR
+    0x807741554C61746ELLU, // xda_Latn_AU
+    0xA87741554C61746ELLU, // xdk_Latn_AU
+    0xB877414F4C61746ELLU, // xdo_Latn_AO
+    0xC07752554379726CLLU, // xdq_Cyrl_RU
+    0xE07749444C61746ELLU, // xdy_Latn_ID
+    0x8C97434D4C61746ELLU, // xed_Latn_CM
+    0x98975A414C61746ELLU, // xeg_Latn_ZA
+    0xB09749444C61746ELLU, // xem_Latn_ID
+    0xC49742524C61746ELLU, // xer_Latn_BR
+    0xC89750474C61746ELLU, // xes_Latn_PG
+    0xCC9742524C61746ELLU, // xet_Latn_BR
+    0xD09750474C61746ELLU, // xeu_Latn_PG
+    0x84D743494C61746ELLU, // xgb_Latn_CI
+    0x8CD741554C61746ELLU, // xgd_Latn_AU
+    0x98D741554C61746ELLU, // xgg_Latn_AU
+    0xA0D741554C61746ELLU, // xgi_Latn_AU
+    0xB0D741554C61746ELLU, // xgm_Latn_AU
+    0xD0D741554C61746ELLU, // xgu_Latn_AU
+    0xD8D741554C61746ELLU, // xgw_Latn_AU
     0x78685A414C61746ELLU, // xh_Latn_ZA
+    0x90F7504B41726162LLU, // xhe_Arab_PK
+    0xB0F74B484B686D72LLU, // xhm_Khmr_KH
+    0xD4F7564E4C61746ELLU, // xhv_Latn_VN
+    0xA1175A414C61746ELLU, // xii_Latn_ZA
+    0xB51747544C61746ELLU, // xin_Latn_GT
+    0xC51742524C61746ELLU, // xir_Latn_BR
+    0xC917494E4F727961LLU, // xis_Orya_IN
+    0xE11742524C61746ELLU, // xiy_Latn_BR
+    0x853741554C61746ELLU, // xjb_Latn_AU
+    0xCD3741554C61746ELLU, // xjt_Latn_AU
+    0x8157504B41726162LLU, // xka_Arab_PK
+    0x8557424A4C61746ELLU, // xkb_Latn_BJ
+    0x8957495241726162LLU, // xkc_Arab_IR
+    0x8D5749444C61746ELLU, // xkd_Latn_ID
+    0x915749444C61746ELLU, // xke_Latn_ID
+    0x9557425454696274LLU, // xkf_Tibt_BT
+    0x99574D4C4C61746ELLU, // xkg_Latn_ML
+    0xA557495241726162LLU, // xkj_Arab_IR
+    0xAD5749444C61746ELLU, // xkl_Latn_ID
+    0xB55749444C61746ELLU, // xkn_Latn_ID
+    0xBD57495241726162LLU, // xkp_Arab_IR
+    0xC15749444C61746ELLU, // xkq_Latn_ID
+    0xC55742524C61746ELLU, // xkr_Latn_BR
+    0xC95749444C61746ELLU, // xks_Latn_ID
+    0xCD5747484C61746ELLU, // xkt_Latn_GH
+    0xD15743474C61746ELLU, // xku_Latn_CG
+    0xD55742574C61746ELLU, // xkv_Latn_BW
+    0xD95749444C61746ELLU, // xkw_Latn_ID
+    0xDD5750474C61746ELLU, // xkx_Latn_PG
+    0xE1574D594C61746ELLU, // xky_Latn_MY
+    0xE55742544C61746ELLU, // xkz_Latn_BT
+    0x817750474C61746ELLU, // xla_Latn_PG
     0x897754524C796369LLU, // xlc_Lyci_TR
     0x8D7754524C796469LLU, // xld_Lydi_TR
+    0xE1774952456C796DLLU, // xly_Elym_IR
+    0x8197534F4C61746ELLU, // xma_Latn_SO
+    0x8597434D4C61746ELLU, // xmb_Latn_CM
+    0x89974D5A4C61746ELLU, // xmc_Latn_MZ
+    0x8D97434D4C61746ELLU, // xmd_Latn_CM
     0x9597474547656F72LLU, // xmf_Geor_GE
+    0x9997434D4C61746ELLU, // xmg_Latn_CM
+    0x9D9741554C61746ELLU, // xmh_Latn_AU
+    0xA597434D4C61746ELLU, // xmj_Latn_CM
+    0xB19749444C61746ELLU, // xmm_Latn_ID
     0xB597434E4D616E69LLU, // xmn_Mani_CN
+    0xB99742524C61746ELLU, // xmo_Latn_BR
+    0xBD9741554C61746ELLU, // xmp_Latn_AU
+    0xC19741554C61746ELLU, // xmq_Latn_AU
     0xC59753444D657263LLU, // xmr_Merc_SD
+    0xCD9749444C61746ELLU, // xmt_Latn_ID
+    0xD19741554C61746ELLU, // xmu_Latn_AU
+    0xD5974D474C61746ELLU, // xmv_Latn_MG
+    0xD9974D474C61746ELLU, // xmw_Latn_MG
+    0xDD9749444C61746ELLU, // xmx_Latn_ID
+    0xE19741554C61746ELLU, // xmy_Latn_AU
+    0xE59749444C61746ELLU, // xmz_Latn_ID
     0x81B753414E617262LLU, // xna_Narb_SA
+    0x85B754574C61746ELLU, // xnb_Latn_TW
+    0xA1B741554C61746ELLU, // xni_Latn_AU
+    0xA5B7545A4C61746ELLU, // xnj_Latn_TZ
+    0xA9B741554C61746ELLU, // xnk_Latn_AU
+    0xB1B741554C61746ELLU, // xnm_Latn_AU
+    0xB5B750484C61746ELLU, // xnn_Latn_PH
+    0xC1B74D5A4C61746ELLU, // xnq_Latn_MZ
     0xC5B7494E44657661LLU, // xnr_Deva_IN
+    0xCDB755534C61746ELLU, // xnt_Latn_US
+    0xD1B741554C61746ELLU, // xnu_Latn_AU
+    0xE1B741554C61746ELLU, // xny_Latn_AU
+    0xE5B745474C61746ELLU, // xnz_Latn_EG
+    0x89D74E474C61746ELLU, // xoc_Latn_NG
+    0x8DD749444C61746ELLU, // xod_Latn_ID
     0x99D755474C61746ELLU, // xog_Latn_UG
+    0xA1D750474C61746ELLU, // xoi_Latn_PG
+    0xA9D742524C61746ELLU, // xok_Latn_BR
+    0xB1D753444C61746ELLU, // xom_Latn_SD
+    0xB5D747484C61746ELLU, // xon_Latn_GH
+    0xB9D742524C61746ELLU, // xoo_Latn_BR
+    0xBDD750474C61746ELLU, // xop_Latn_PG
+    0xC5D742524C61746ELLU, // xor_Latn_BR
+    0xD9D750474C61746ELLU, // xow_Latn_PG
+    0x81F741554C61746ELLU, // xpa_Latn_AU
+    0x85F741554C61746ELLU, // xpb_Latn_AU
+    0x8DF741554C61746ELLU, // xpd_Latn_AU
+    0x95F741554C61746ELLU, // xpf_Latn_AU
+    0x99F754524772656BLLU, // xpg_Grek_TR
+    0x9DF741554C61746ELLU, // xph_Latn_AU
+    0xA1F747424F67616DLLU, // xpi_Ogam_GB
+    0xA5F741554C61746ELLU, // xpj_Latn_AU
+    0xA9F742524C61746ELLU, // xpk_Latn_BR
+    0xADF741554C61746ELLU, // xpl_Latn_AU
+    0xB1F752554379726CLLU, // xpm_Cyrl_RU
+    0xB5F742524C61746ELLU, // xpn_Latn_BR
+    0xB9F74D584C61746ELLU, // xpo_Latn_MX
+    0xC1F755534C61746ELLU, // xpq_Latn_US
     0xC5F7495250727469LLU, // xpr_Prti_IR
+    0xCDF741554C61746ELLU, // xpt_Latn_AU
+    0xD5F741554C61746ELLU, // xpv_Latn_AU
+    0xD9F741554C61746ELLU, // xpw_Latn_AU
+    0xDDF741554C61746ELLU, // xpx_Latn_AU
+    0xE5F741554C61746ELLU, // xpz_Latn_AU
+    0x823742524C61746ELLU, // xra_Latn_BR
+    0x863742464C61746ELLU, // xrb_Latn_BF
+    0x8E3741554C61746ELLU, // xrd_Latn_AU
+    0x923742524C61746ELLU, // xre_Latn_BR
+    0x9A3741554C61746ELLU, // xrg_Latn_AU
+    0xA23742524C61746ELLU, // xri_Latn_BR
+    0xB23752554379726CLLU, // xrm_Cyrl_RU
+    0xB63752554379726CLLU, // xrn_Cyrl_RU
+    0xC63749544C61746ELLU, // xrr_Latn_IT
+    0xD23741554C61746ELLU, // xru_Latn_AU
+    0xDA3750474C61746ELLU, // xrw_Latn_PG
     0x8257594553617262LLU, // xsa_Sarb_YE
+    0x865750484C61746ELLU, // xsb_Latn_PH
+    0x925749444C61746ELLU, // xse_Latn_ID
+    0x9E574E474C61746ELLU, // xsh_Latn_NG
+    0xA25750474C61746ELLU, // xsi_Latn_PG
+    0xB25747484C61746ELLU, // xsm_Latn_GH
+    0xB6574E474C61746ELLU, // xsn_Latn_NG
+    0xBE5750474C61746ELLU, // xsp_Latn_PG
+    0xC2574D5A4C61746ELLU, // xsq_Latn_MZ
     0xC6574E5044657661LLU, // xsr_Deva_NP
+    0xD25756454C61746ELLU, // xsu_Latn_VE
+    0xE25754574C61746ELLU, // xsy_Latn_TW
+    0x82774D584C61746ELLU, // xta_Latn_MX
+    0x86774D584C61746ELLU, // xtb_Latn_MX
+    0x8A7753444C61746ELLU, // xtc_Latn_SD
+    0x8E774D584C61746ELLU, // xtd_Latn_MX
+    0x927749444C61746ELLU, // xte_Latn_ID
+    0x9E7741554C61746ELLU, // xth_Latn_AU
+    0xA2774D584C61746ELLU, // xti_Latn_MX
+    0xA6774D584C61746ELLU, // xtj_Latn_MX
+    0xAE774D584C61746ELLU, // xtl_Latn_MX
+    0xB2774D584C61746ELLU, // xtm_Latn_MX
+    0xB6774D584C61746ELLU, // xtn_Latn_MX
+    0xBE774D584C61746ELLU, // xtp_Latn_MX
+    0xC277495242726168LLU, // xtq_Brah_IR
+    0xCA774D584C61746ELLU, // xts_Latn_MX
+    0xCE774D584C61746ELLU, // xtt_Latn_MX
+    0xD2774D584C61746ELLU, // xtu_Latn_MX
+    0xD67741554C61746ELLU, // xtv_Latn_AU
+    0xDA7742524C61746ELLU, // xtw_Latn_BR
+    0xE2774D584C61746ELLU, // xty_Latn_MX
+    0x8697494E54616D6CLLU, // xub_Taml_IN
+    0x8E9741554C61746ELLU, // xud_Latn_AU
+    0xA697494E54616D6CLLU, // xuj_Taml_IN
+    0xAE9741554C61746ELLU, // xul_Latn_AU
+    0xB29749544C61746ELLU, // xum_Latn_IT
+    0xB69741554C61746ELLU, // xun_Latn_AU
+    0xBA9754444C61746ELLU, // xuo_Latn_TD
+    0xCE9741554C61746ELLU, // xut_Latn_AU
+    0xD2974E414C61746ELLU, // xuu_Latn_NA
+    0x92B749544974616CLLU, // xve_Ital_IT
+    0xA2B7414641726162LLU, // xvi_Arab_AF
+    0xB6B745534C61746ELLU, // xvn_Latn_ES
+    0xBAB749544C61746ELLU, // xvo_Latn_IT
+    0xCAB749544C61746ELLU, // xvs_Latn_IT
+    0x82D742524C61746ELLU, // xwa_Latn_BR
+    0x8ED741554C61746ELLU, // xwd_Latn_AU
+    0x92D7424A4C61746ELLU, // xwe_Latn_BJ
+    0xA6D741554C61746ELLU, // xwj_Latn_AU
+    0xAAD741554C61746ELLU, // xwk_Latn_AU
+    0xAED7424A4C61746ELLU, // xwl_Latn_BJ
+    0xBAD752554379726CLLU, // xwo_Cyrl_RU
+    0xC6D749444C61746ELLU, // xwr_Latn_ID
+    0xCED741554C61746ELLU, // xwt_Latn_AU
+    0xDAD741554C61746ELLU, // xww_Latn_AU
+    0x86F747484C61746ELLU, // xxb_Latn_GH
+    0xAAF749444C61746ELLU, // xxk_Latn_ID
+    0xB2F741554C61746ELLU, // xxm_Latn_AU
+    0xC6F742524C61746ELLU, // xxr_Latn_BR
+    0xCEF749444C61746ELLU, // xxt_Latn_ID
+    0x831741554C61746ELLU, // xya_Latn_AU
+    0x871741554C61746ELLU, // xyb_Latn_AU
+    0xA71741554C61746ELLU, // xyj_Latn_AU
+    0xAB1741554C61746ELLU, // xyk_Latn_AU
+    0xAF1742524C61746ELLU, // xyl_Latn_BR
+    0xCF1741554C61746ELLU, // xyt_Latn_AU
+    0xE31741554C61746ELLU, // xyy_Latn_AU
+    0x9F37434E4D617263LLU, // xzh_Marc_CN
+    0xBF374D584C61746ELLU, // xzp_Latn_MX
+    0x801850454C61746ELLU, // yaa_Latn_PE
+    0x841842524C61746ELLU, // yab_Latn_BR
+    0x881849444C61746ELLU, // yac_Latn_ID
+    0x8C1850454C61746ELLU, // yad_Latn_PE
+    0x901856454C61746ELLU, // yae_Latn_VE
+    0x941843444C61746ELLU, // yaf_Latn_CD
+    0x9818434C4C61746ELLU, // yag_Latn_CL
+    0x9C18544A4C61746ELLU, // yah_Latn_TJ
+    0xA018544A4379726CLLU, // yai_Cyrl_TJ
+    0xA41843464C61746ELLU, // yaj_Latn_CF
+    0xA81855534C61746ELLU, // yak_Latn_US
+    0xAC18474E4C61746ELLU, // yal_Latn_GN
+    0xB018434D4C61746ELLU, // yam_Latn_CM
+    0xB4184E494C61746ELLU, // yan_Latn_NI
     0xB8184D5A4C61746ELLU, // yao_Latn_MZ
     0xBC18464D4C61746ELLU, // yap_Latn_FM
+    0xC0184D584C61746ELLU, // yaq_Latn_MX
+    0xC41856454C61746ELLU, // yar_Latn_VE
+    0xC818434D4C61746ELLU, // yas_Latn_CM
+    0xCC18434D4C61746ELLU, // yat_Latn_CM
+    0xD01856454C61746ELLU, // yau_Latn_VE
     0xD418434D4C61746ELLU, // yav_Latn_CM
+    0xD81842524C61746ELLU, // yaw_Latn_BR
+    0xDC18414F4C61746ELLU, // yax_Latn_AO
+    0xE0184E474C61746ELLU, // yay_Latn_NG
+    0xE4184E474C61746ELLU, // yaz_Latn_NG
+    0x80384E474C61746ELLU, // yba_Latn_NG
     0x8438434D4C61746ELLU, // ybb_Latn_CM
+    0x9038434E4C61746ELLU, // ybe_Latn_CN
+    0x9C384E5044657661LLU, // ybh_Deva_NP
+    0xA0384E5044657661LLU, // ybi_Deva_NP
+    0xA4384E474C61746ELLU, // ybj_Latn_NG
+    0xAC384E474C61746ELLU, // ybl_Latn_NG
+    0xB03850474C61746ELLU, // ybm_Latn_PG
+    0xB43842524C61746ELLU, // ybn_Latn_BR
+    0xB83850474C61746ELLU, // ybo_Latn_PG
+    0xDC3850474C61746ELLU, // ybx_Latn_PG
+    0xE03850474C61746ELLU, // yby_Latn_PG
+    0xAC58434E4C61746ELLU, // ycl_Latn_CN
+    0xB458434F4C61746ELLU, // ycn_Latn_CO
+    0xC45854574C61746ELLU, // ycr_Latn_TW
+    0x807841554C61746ELLU, // yda_Latn_AU
+    0x907850474C61746ELLU, // yde_Latn_PG
+    0x9878504B41726162LLU, // ydg_Arab_PK
+    0xA87850474C61746ELLU, // ydk_Latn_PG
+    0x8098494E4D6C796DLLU, // yea_Mlym_IN
+    0x889844454C61746ELLU, // yec_Latn_DE
+    0x909850474C61746ELLU, // yee_Latn_PG
+    0xA098434D4C61746ELLU, // yei_Latn_CM
+    0xA49847524772656BLLU, // yej_Grek_GR
+    0xAC9843444C61746ELLU, // yel_Latn_CD
+    0xC4984E474C61746ELLU, // yer_Latn_NG
+    0xC8984E474C61746ELLU, // yes_Latn_NG
+    0xCC9849444C61746ELLU, // yet_Latn_ID
+    0xD098494E54656C75LLU, // yeu_Telu_IN
+    0xD49850474C61746ELLU, // yev_Latn_PG
+    0xE09842574C61746ELLU, // yey_Latn_BW
+    0x80D841554C61746ELLU, // yga_Latn_AU
+    0xA0D841554C61746ELLU, // ygi_Latn_AU
+    0xACD850474C61746ELLU, // ygl_Latn_PG
+    0xB0D850474C61746ELLU, // ygm_Latn_PG
+    0xBCD8434E506C7264LLU, // ygp_Plrd_CN
+    0xC4D850474C61746ELLU, // ygr_Latn_PG
+    0xD0D841554C61746ELLU, // ygu_Latn_AU
+    0xD8D850474C61746ELLU, // ygw_Latn_PG
+    0x8CF8494C48656272LLU, // yhd_Hebr_IL
+    0x7969554148656272LLU, // yi_Hebr_UA
+    0x811841554C61746ELLU, // yia_Latn_AU
+    0x9918434E59696969LLU, // yig_Yiii_CN
+    0x9D18444548656272LLU, // yih_Hebr_DE
+    0xA11841554C61746ELLU, // yii_Latn_AU
+    0xA51841554C61746ELLU, // yij_Latn_AU
+    0xAD1841554C61746ELLU, // yil_Latn_AU
+    0xB118494E4C61746ELLU, // yim_Latn_IN
+    0xC51849444C61746ELLU, // yir_Latn_ID
+    0xC91850474C61746ELLU, // yis_Latn_PG
+    0xD518434E59696969LLU, // yiv_Yiii_CN
+    0x815850484C61746ELLU, // yka_Latn_PH
+    0x995852554379726CLLU, // ykg_Cyrl_RU
+    0x9D584D4E4379726CLLU, // ykh_Cyrl_MN
+    0xA15849444C61746ELLU, // yki_Latn_ID
+    0xA95850474C61746ELLU, // ykk_Latn_PG
+    0xB15850474C61746ELLU, // ykm_Latn_PG
+    0xB958434D4C61746ELLU, // yko_Latn_CM
+    0xC55850474C61746ELLU, // ykr_Latn_PG
+    0xE15843464C61746ELLU, // yky_Latn_CF
+    0x817850474C61746ELLU, // yla_Latn_PG
+    0x857850474C61746ELLU, // ylb_Latn_PG
+    0x917850474C61746ELLU, // yle_Latn_PG
+    0x997850474C61746ELLU, // ylg_Latn_PG
+    0xA17849444C61746ELLU, // yli_Latn_ID
+    0xAD7850474C61746ELLU, // yll_Latn_PG
+    0xC57841554C61746ELLU, // ylr_Latn_AU
+    0xD17850474C61746ELLU, // ylu_Latn_PG
+    0xE1784E434C61746ELLU, // yly_Latn_NC
+    0x859850474C61746ELLU, // ymb_Latn_PG
+    0x919850454C61746ELLU, // yme_Latn_PE
+    0x999843444C61746ELLU, // ymg_Latn_CD
+    0xA9984D5A4C61746ELLU, // ymk_Latn_MZ
+    0xAD9850474C61746ELLU, // yml_Latn_PG
+    0xB198534F4C61746ELLU, // ymm_Latn_SO
+    0xB59849444C61746ELLU, // ymn_Latn_ID
+    0xB99850474C61746ELLU, // ymo_Latn_PG
+    0xBD9850474C61746ELLU, // ymp_Latn_PG
+    0x81B8434E506C7264LLU, // yna_Plrd_CN
+    0x8DB841554C61746ELLU, // ynd_Latn_AU
+    0x99B843444C61746ELLU, // yng_Latn_CD
+    0xA9B852554379726CLLU, // ynk_Cyrl_RU
+    0xADB850474C61746ELLU, // ynl_Latn_PG
+    0xC1B84E474C61746ELLU, // ynq_Latn_NG
+    0xC9B843444C61746ELLU, // yns_Latn_CD
+    0xD1B8434F4C61746ELLU, // ynu_Latn_CO
     0x796F4E474C61746ELLU, // yo_Latn_NG
+    0x85D850474C61746ELLU, // yob_Latn_PG
+    0x99D850484C61746ELLU, // yog_Latn_PH
+    0xA1D84A504A70616ELLU, // yoi_Jpan_JP
+    0xA9D855534C61746ELLU, // yok_Latn_US
+    0xADD849454C61746ELLU, // yol_Latn_IE
+    0xB1D843444C61746ELLU, // yom_Latn_CD
+    0xB5D850474C61746ELLU, // yon_Latn_PG
+    0xCDD84E474C61746ELLU, // yot_Latn_NG
+    0xE1D8544854686169LLU, // yoy_Thai_TH
+    0x823850474C61746ELLU, // yra_Latn_PG
+    0x863850474C61746ELLU, // yrb_Latn_PG
+    0x923843494C61746ELLU, // yre_Latn_CI
+    0xAA3852554379726CLLU, // yrk_Cyrl_RU
     0xAE3842524C61746ELLU, // yrl_Latn_BR
+    0xB23841554C61746ELLU, // yrm_Latn_AU
+    0xBA3842524C61746ELLU, // yro_Latn_BR
+    0xCA3849444C61746ELLU, // yrs_Latn_ID
+    0xDA3850474C61746ELLU, // yrw_Latn_PG
+    0xE23841554C61746ELLU, // yry_Latn_AU
+    0x8E58434E59696969LLU, // ysd_Yiii_CN
+    0xB658434E59696969LLU, // ysn_Yiii_CN
+    0xBE58434E59696969LLU, // ysp_Yiii_CN
+    0xC65852554379726CLLU, // ysr_Cyrl_RU
+    0xCA5850474C61746ELLU, // yss_Latn_PG
+    0xE258434E506C7264LLU, // ysy_Plrd_CN
+    0xDA7850474C61746ELLU, // ytw_Latn_PG
+    0xE27841554C61746ELLU, // yty_Latn_AU
     0x82984D584C61746ELLU, // yua_Latn_MX
+    0x869841554C61746ELLU, // yub_Latn_AU
+    0x8A9855534C61746ELLU, // yuc_Latn_US
+    0x8E98494C48656272LLU, // yud_Hebr_IL
     0x9298434E48616E73LLU, // yue_Hans_CN
     0x9298484B48616E74LLU, // yue_Hant_HK
+    0x969855534C61746ELLU, // yuf_Latn_US
+    0x9A9852554379726CLLU, // yug_Cyrl_RU
+    0xA298434F4C61746ELLU, // yui_Latn_CO
+    0xA69850474C61746ELLU, // yuj_Latn_PG
+    0xAE9843464C61746ELLU, // yul_Latn_CF
+    0xB29855534C61746ELLU, // yum_Latn_US
+    0xB6984E474C61746ELLU, // yun_Latn_NG
+    0xBE98434F4C61746ELLU, // yup_Latn_CO
+    0xC298424F4C61746ELLU, // yuq_Latn_BO
+    0xC69855534C61746ELLU, // yur_Latn_US
+    0xCE9850474C61746ELLU, // yut_Latn_PG
+    0xDA9850474C61746ELLU, // yuw_Latn_PG
+    0xDE9852554379726CLLU, // yux_Cyrl_RU
+    0xE698424F4C61746ELLU, // yuz_Latn_BO
+    0x82B849444C61746ELLU, // yva_Latn_ID
+    0xCEB856454C61746ELLU, // yvt_Latn_VE
+    0x82D850474C61746ELLU, // ywa_Latn_PG
+    0x9AD841554C61746ELLU, // ywg_Latn_AU
+    0xB6D842524C61746ELLU, // ywn_Latn_BR
+    0xC2D8434E506C7264LLU, // ywq_Plrd_CN
+    0xC6D841554C61746ELLU, // ywr_Latn_AU
+    0xD2D8434E506C7264LLU, // ywu_Plrd_CN
+    0xDAD841554C61746ELLU, // yww_Latn_AU
+    0x82F841554C61746ELLU, // yxa_Latn_AU
+    0x9AF841554C61746ELLU, // yxg_Latn_AU
+    0xAEF841554C61746ELLU, // yxl_Latn_AU
+    0xB2F841554C61746ELLU, // yxm_Latn_AU
+    0xD2F841554C61746ELLU, // yxu_Latn_AU
+    0xE2F841554C61746ELLU, // yxy_Latn_AU
+    0xC71841554C61746ELLU, // yyr_Latn_AU
+    0xD31850474C61746ELLU, // yyu_Latn_PG
     0x7A61434E4C61746ELLU, // za_Latn_CN
+    0x80194D584C61746ELLU, // zaa_Latn_MX
+    0x84194D584C61746ELLU, // zab_Latn_MX
+    0x88194D584C61746ELLU, // zac_Latn_MX
+    0x8C194D584C61746ELLU, // zad_Latn_MX
+    0x90194D584C61746ELLU, // zae_Latn_MX
+    0x94194D584C61746ELLU, // zaf_Latn_MX
     0x981953444C61746ELLU, // zag_Latn_SD
+    0x9C194E474C61746ELLU, // zah_Latn_NG
+    0xA419545A4C61746ELLU, // zaj_Latn_TZ
+    0xA819545A4C61746ELLU, // zak_Latn_TZ
+    0xB0194D584C61746ELLU, // zam_Latn_MX
+    0xB8194D584C61746ELLU, // zao_Latn_MX
+    0xBC194D584C61746ELLU, // zap_Latn_MX
+    0xC0194D584C61746ELLU, // zaq_Latn_MX
+    0xC4194D584C61746ELLU, // zar_Latn_MX
+    0xC8194D584C61746ELLU, // zas_Latn_MX
+    0xCC194D584C61746ELLU, // zat_Latn_MX
+    0xD019494E54696274LLU, // zau_Tibt_IN
+    0xD4194D584C61746ELLU, // zav_Latn_MX
+    0xD8194D584C61746ELLU, // zaw_Latn_MX
+    0xDC194D584C61746ELLU, // zax_Latn_MX
+    0xE01945544C61746ELLU, // zay_Latn_ET
+    0xE4194E474C61746ELLU, // zaz_Latn_NG
+    0x88394D594C61746ELLU, // zbc_Latn_MY
+    0x90394D594C61746ELLU, // zbe_Latn_MY
+    0xCC3949444C61746ELLU, // zbt_Latn_ID
+    0xD0394E474C61746ELLU, // zbu_Latn_NG
+    0xD8394D594C61746ELLU, // zbw_Latn_MY
+    0x80594D584C61746ELLU, // zca_Latn_MX
+    0x9C59434E48616E69LLU, // zch_Hani_CN
     0xA4794B4D41726162LLU, // zdj_Arab_KM
     0x80994E4C4C61746ELLU, // zea_Latn_NL
+    0x989950474C61746ELLU, // zeg_Latn_PG
+    0x9C99434E48616E69LLU, // zeh_Hani_CN
+    0xB0994E474C61746ELLU, // zem_Latn_NG
+    0xB4994D5254666E67LLU, // zen_Tfng_MR
+    0x80D9545A4C61746ELLU, // zga_Latn_TZ
+    0x84D9434E48616E69LLU, // zgb_Hani_CN
     0x9CD94D4154666E67LLU, // zgh_Tfng_MA
+    0xB0D9434E48616E69LLU, // zgm_Hani_CN
+    0xB4D9434E48616E69LLU, // zgn_Hani_CN
+    0xC4D950474C61746ELLU, // zgr_Latn_PG
     0x7A685457426F706FLLU, // zh_Bopo_TW
     0x7A68545748616E62LLU, // zh_Hanb_TW
     0x7A68434E48616E73LLU, // zh_Hans_CN
     0x7A68545748616E74LLU, // zh_Hant_TW
+    0x8CF9434E48616E69LLU, // zhd_Hani_CN
+    0xA0F94E474C61746ELLU, // zhi_Latn_NG
+    0xB4F9434E4C61746ELLU, // zhn_Latn_CN
+    0xD8F9434D4C61746ELLU, // zhw_Latn_CM
     0xDCF9434E4E736875LLU, // zhx_Nshu_CN
+    0x811950474C61746ELLU, // zia_Latn_PG
+    0xA91950474C61746ELLU, // zik_Latn_PG
+    0xAD19474E4C61746ELLU, // zil_Latn_GN
+    0xB11954444C61746ELLU, // zim_Latn_TD
+    0xB519545A4C61746ELLU, // zin_Latn_TZ
+    0xD919545A4C61746ELLU, // ziw_Latn_TZ
+    0xE5194E474C61746ELLU, // ziz_Latn_NG
+    0x815949444C61746ELLU, // zka_Latn_ID
+    0x8D594D4D4C61746ELLU, // zkd_Latn_MM
+    0xB95952554379726CLLU, // zko_Cyrl_RU
+    0xBD5942524C61746ELLU, // zkp_Latn_BR
     0xCD59434E4B697473LLU, // zkt_Kits_CN
+    0xD15941554C61746ELLU, // zku_Latn_AU
+    0xE55952554379726CLLU, // zkz_Cyrl_RU
+    0x817943444C61746ELLU, // zla_Latn_CD
+    0xA579434E48616E69LLU, // zlj_Hani_CN
     0xB17954474C61746ELLU, // zlm_Latn_TG
+    0xB579434E48616E69LLU, // zln_Hani_CN
+    0xC179434E48616E69LLU, // zlq_Hani_CN
+    0xD1794E474C61746ELLU, // zlu_Latn_NG
+    0x819941554C61746ELLU, // zma_Latn_AU
+    0x859943444C61746ELLU, // zmb_Latn_CD
+    0x899941554C61746ELLU, // zmc_Latn_AU
+    0x8D9941554C61746ELLU, // zmd_Latn_AU
+    0x919941554C61746ELLU, // zme_Latn_AU
+    0x959943444C61746ELLU, // zmf_Latn_CD
+    0x999941554C61746ELLU, // zmg_Latn_AU
+    0x9D9950474C61746ELLU, // zmh_Latn_PG
     0xA1994D594C61746ELLU, // zmi_Latn_MY
+    0xA59941554C61746ELLU, // zmj_Latn_AU
+    0xA99941554C61746ELLU, // zmk_Latn_AU
+    0xAD9941554C61746ELLU, // zml_Latn_AU
+    0xB19941554C61746ELLU, // zmm_Latn_AU
+    0xB59947414C61746ELLU, // zmn_Latn_GA
+    0xB99953444C61746ELLU, // zmo_Latn_SD
+    0xBD9943444C61746ELLU, // zmp_Latn_CD
+    0xC19943444C61746ELLU, // zmq_Latn_CD
+    0xC59941554C61746ELLU, // zmr_Latn_AU
+    0xC99943444C61746ELLU, // zms_Latn_CD
+    0xCD9941554C61746ELLU, // zmt_Latn_AU
+    0xD19941554C61746ELLU, // zmu_Latn_AU
+    0xD59941554C61746ELLU, // zmv_Latn_AU
+    0xD99943444C61746ELLU, // zmw_Latn_CD
+    0xDD9943474C61746ELLU, // zmx_Latn_CG
+    0xE19941554C61746ELLU, // zmy_Latn_AU
+    0xE59943444C61746ELLU, // zmz_Latn_CD
+    0x81B954444C61746ELLU, // zna_Latn_TD
+    0x91B943444C61746ELLU, // zne_Latn_CD
+    0x99B9564E4C61746ELLU, // zng_Latn_VN
+    0xA9B941554C61746ELLU, // znk_Latn_AU
+    0xC9B94E474C61746ELLU, // zns_Latn_NG
+    0x89D94D584C61746ELLU, // zoc_Latn_MX
+    0x9DD94D584C61746ELLU, // zoh_Latn_MX
+    0xB1D9494E4C61746ELLU, // zom_Latn_IN
+    0xB9D94D584C61746ELLU, // zoo_Latn_MX
+    0xC1D94D584C61746ELLU, // zoq_Latn_MX
+    0xC5D94D584C61746ELLU, // zor_Latn_MX
+    0xC9D94D584C61746ELLU, // zos_Latn_MX
+    0x81F94D584C61746ELLU, // zpa_Latn_MX
+    0x85F94D584C61746ELLU, // zpb_Latn_MX
+    0x89F94D584C61746ELLU, // zpc_Latn_MX
+    0x8DF94D584C61746ELLU, // zpd_Latn_MX
+    0x91F94D584C61746ELLU, // zpe_Latn_MX
+    0x95F94D584C61746ELLU, // zpf_Latn_MX
+    0x99F94D584C61746ELLU, // zpg_Latn_MX
+    0x9DF94D584C61746ELLU, // zph_Latn_MX
+    0xA1F94D584C61746ELLU, // zpi_Latn_MX
+    0xA5F94D584C61746ELLU, // zpj_Latn_MX
+    0xA9F94D584C61746ELLU, // zpk_Latn_MX
+    0xADF94D584C61746ELLU, // zpl_Latn_MX
+    0xB1F94D584C61746ELLU, // zpm_Latn_MX
+    0xB5F94D584C61746ELLU, // zpn_Latn_MX
+    0xB9F94D584C61746ELLU, // zpo_Latn_MX
+    0xBDF94D584C61746ELLU, // zpp_Latn_MX
+    0xC1F94D584C61746ELLU, // zpq_Latn_MX
+    0xC5F94D584C61746ELLU, // zpr_Latn_MX
+    0xC9F94D584C61746ELLU, // zps_Latn_MX
+    0xCDF94D584C61746ELLU, // zpt_Latn_MX
+    0xD1F94D584C61746ELLU, // zpu_Latn_MX
+    0xD5F94D584C61746ELLU, // zpv_Latn_MX
+    0xD9F94D584C61746ELLU, // zpw_Latn_MX
+    0xDDF94D584C61746ELLU, // zpx_Latn_MX
+    0xE1F94D584C61746ELLU, // zpy_Latn_MX
+    0xE5F94D584C61746ELLU, // zpz_Latn_MX
+    0x9219434E48616E69LLU, // zqe_Hani_CN
+    0x9A39494E4F727961LLU, // zrg_Orya_IN
+    0xB63954444C61746ELLU, // zrn_Latn_TD
+    0xBA3945434C61746ELLU, // zro_Latn_EC
+    0xBE39465248656272LLU, // zrp_Hebr_FR
+    0xCA3949444C61746ELLU, // zrs_Latn_ID
+    0x825950474C61746ELLU, // zsa_Latn_PG
+    0xC6594D584C61746ELLU, // zsr_Latn_MX
+    0xD25950474C61746ELLU, // zsu_Latn_PG
+    0x92794D584C61746ELLU, // zte_Latn_MX
+    0x9A794D584C61746ELLU, // ztg_Latn_MX
+    0xAE794D584C61746ELLU, // ztl_Latn_MX
+    0xB2794D584C61746ELLU, // ztm_Latn_MX
+    0xB6794D584C61746ELLU, // ztn_Latn_MX
+    0xBE794D584C61746ELLU, // ztp_Latn_MX
+    0xC2794D584C61746ELLU, // ztq_Latn_MX
+    0xCA794D584C61746ELLU, // zts_Latn_MX
+    0xCE794D584C61746ELLU, // ztt_Latn_MX
+    0xD2794D584C61746ELLU, // ztu_Latn_MX
+    0xDE794D584C61746ELLU, // ztx_Latn_MX
+    0xE2794D584C61746ELLU, // zty_Latn_MX
     0x7A755A414C61746ELLU, // zu_Latn_ZA
+    0x9E9950474C61746ELLU, // zuh_Latn_PG
+    0xB2994F4D41726162LLU, // zum_Arab_OM
+    0xB69955534C61746ELLU, // zun_Latn_US
+    0xE299434D4C61746ELLU, // zuy_Latn_CM
+    0x82D9455445746869LLU, // zwa_Ethi_ET
+    0x9B19434E48616E69LLU, // zyg_Hani_CN
+    0xA719434E4C61746ELLU, // zyj_Latn_CN
+    0xB719434E48616E69LLU, // zyn_Hani_CN
+    0xBF194D4D4C61746ELLU, // zyp_Latn_MM
     0x833954524C61746ELLU, // zza_Latn_TR
+    0xA739434E48616E69LLU, // zzj_Hani_CN
 });
 
 const std::unordered_map<uint32_t, uint32_t> ARAB_PARENTS({
@@ -2348,6 +14637,7 @@ const std::unordered_map<uint32_t, uint32_t> LATN_PARENTS({
     {0x656E474Du, 0x656E8400u}, // en-GM -> en-001
     {0x656E4759u, 0x656E8400u}, // en-GY -> en-001
     {0x656E484Bu, 0x656E8400u}, // en-HK -> en-001
+    {0x656E4944u, 0x656E8400u}, // en-ID -> en-001
     {0x656E4945u, 0x656E8400u}, // en-IE -> en-001
     {0x656E494Cu, 0x656E8400u}, // en-IL -> en-001
     {0x656E494Du, 0x656E8400u}, // en-IM -> en-001
@@ -2451,10 +14741,10 @@ const struct {
     const char script[4];
     const std::unordered_map<uint32_t, uint32_t>* map;
 } SCRIPT_PARENTS[] = {
-    {{'L', 'a', 't', 'n'}, &LATN_PARENTS},
     {{'A', 'r', 'a', 'b'}, &ARAB_PARENTS},
     {{'D', 'e', 'v', 'a'}, &DEVA_PARENTS},
     {{'H', 'a', 'n', 't'}, &HANT_PARENTS},
+    {{'L', 'a', 't', 'n'}, &LATN_PARENTS},
     {{'~', '~', '~', 'B'}, &___B_PARENTS},
 };
 

@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Deitzailearen identitatea adierazteko zerbitzuaren balio lehenetsiak murriztapenak ezartzen ditu. Hurrengo deia: murriztapenik gabe."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Deitzailearen identitatea zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenekin."</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Deitzailearen identitatea zerbitzuaren balio lehenetsiak ez du murriztapenik ezartzen. Hurrengo deia: murriztapenik gabe."</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Aplikazio hau ez da bateragarria 16 KBko bertsioarekin. Ezin izan da egiaztatu APKren lerrokatzea. Orriaren tamainarekin bateragarria den modua erabilita exekutatuko da aplikazioa. Emaitza onenak lortzeko, konpilatu aplikazioa berriro 16 KBko bertsioarekin bateragarria izan dadin. Informazio gehiago lortzeko, joan hona: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Aplikazio hau ez da bateragarria 16 KBko bertsioarekin. Ezin izan da egiaztatu ELFaren lerrokatzea. Orriaren tamainarekin bateragarria den modua erabilita exekutatuko da aplikazioa. Emaitza onenak lortzeko, konpilatu aplikazioa berriro 16 KBko bertsioarekin bateragarria izan dadin. Informazio gehiago lortzeko, joan hona: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Aplikazio hau ez da bateragarria 16 KB-ko bertsioarekin. Ezin izan da egiaztatu APK eta ELF arteko lerrokatzea. Orriaren tamainarekin bateragarria den modua erabilita exekutatuko da aplikazioa. Emaitza onenak lortzeko, konpilatu aplikazioa berriro 16 KB-ko bertsioarekin bateragarria izan dadin. Informazio gehiago lortzeko, joan hona: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Zerbitzua ez da hornitu."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ezin duzu aldatu deitzailearen identitatearen ezarpena."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g> operadorearen datu-konexiora aldatu zara"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ezin da konektatu sare mugikorrera"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Aldatu sare hobetsia. Sakatu aldatzeko."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Ezin da egin larrialdi-deirik"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Sare mugikorrera konektatuta egon behar duzu larrialdi-deiak egin ahal izateko"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alertak"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Dei-desbideratzea"</string>
@@ -418,11 +423,11 @@
     <string name="permlab_runInBackground" msgid="541863968571682785">"exekutatu atzeko planoan"</string>
     <string name="permdesc_runInBackground" msgid="4344539472115495141">"Atzeko planoan exekuta liteke aplikazioa eta horrek bizkorrago agor lezake bateria."</string>
     <string name="permlab_useDataInBackground" msgid="783415807623038947">"erabili datuak atzeko planoan"</string>
-    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Aplikazioak datuak erabil litzake atzeko planoan eta horrek datu-erabilera areago lezake."</string>
+    <string name="permdesc_useDataInBackground" msgid="1230753883865891987">"Datuak atzeko planoan erabil ditzake aplikazioak, eta baliteke horrek datu-erabilera handitzea."</string>
     <string name="permlab_schedule_exact_alarm" msgid="6683283918033029730">"antolatu ekintzak une zehatzetan gerta daitezen"</string>
     <string name="permdesc_schedule_exact_alarm" msgid="8198009212013211497">"Aplikazio honek ekintzak programa ditzake etorkizunean egin daitezen. Horrek esan nahi du gailua aktiboki erabiltzen ari ez zarenean ere exekuta daitekeela aplikazioa."</string>
-    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"antolatu alarmak edo gertaera-abisuak"</string>
-    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Aplikazioak hainbat ekintza programa ditzake; adibidez, alarmak eta abisuak, etorkizuneko une batean jakinarazpen bat jaso dezazun."</string>
+    <string name="permlab_use_exact_alarm" msgid="348045139777131552">"antolatu alarmak edo gertaera-gogorarazpenak"</string>
+    <string name="permdesc_use_exact_alarm" msgid="7033761461886938912">"Aplikazioak hainbat ekintza programa ditzake; adibidez, alarmak eta gogorarazpenak, etorkizuneko une batean jakinarazpen bat jaso dezazun."</string>
     <string name="permlab_persistentActivity" msgid="464970041740567970">"izan aplikazioa beti abian"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="6055271149187369916">"Bere zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen dio aplikazioari. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
     <string name="permdesc_persistentActivity" product="tv" msgid="6800526387664131321">"Bere zati batzuk memorian modu iraunkorrean ezartzeko baimena ematen dio aplikazioari. Ondorioz, beste aplikazioek memoria gutxiago izan lezakete erabilgarri, eta Android TV gailuak motelago funtziona lezake."</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Banda ultrazabala darabilten inguruko gailuen arteko distantzia erlatiboa zehazteko baimena ematen dio aplikazioari"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"inguruko wifi-gailuekin interakzioan jardun"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Inguruko wifi-gailuetan iragartzeko, haiekin konektatzeko eta haien kokapena zehazteko baimena ematen dio aplikazioari"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"zehaztu inguruko gailuen arteko distantzia erlatiboa"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Inguruko gailuen arteko distantzia erlatiboa zehazteko baimena ematen dio aplikazioari"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"NFC bidezko ordainketa-zerbitzu lehenetsiari buruzko informazioa jasotzeko baimena ematen dio aplikazioari, hala nola erregistratutako laguntzaileak eta ibilbidearen helmuga."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrolatu Near Field Communication komunikazioa"</string>
@@ -693,7 +700,7 @@
     <string name="fingerprint_or_screen_lock_dialog_default_subtitle" msgid="5195808203117992200">"Aurrera egiteko, erabili hatz-marka edo pantailaren blokeoa"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Arazo bat izan da. Saiatu berriro."</string>
+    <string name="fingerprint_error_vendor_unknown" msgid="4170002184907291065">"Arazoren bat izan da. Saiatu berriro."</string>
     <string name="fingerprint_icon_content_description" msgid="4741068463175388817">"Hatz-markaren ikonoa"</string>
     <string name="device_unlock_notification_name" msgid="2632928999862915709">"Gailua desblokeatzea"</string>
     <string name="alternative_unlock_setup_notification_title" msgid="6241508547901933544">"Probatu gailua desblokeatzeko beste modu bat"</string>
@@ -754,7 +761,7 @@
     <string name="face_or_screen_lock_dialog_default_subtitle" msgid="5006381531158341844">"Aurrera egiteko, erabili aurpegia edo pantailaren blokeoa"</string>
   <string-array name="face_error_vendor">
   </string-array>
-    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Arazo bat izan da. Saiatu berriro."</string>
+    <string name="face_error_vendor_unknown" msgid="7387005932083302070">"Arazoren bat izan da. Saiatu berriro."</string>
     <string name="face_icon_content_description" msgid="465030547475916280">"Aurpegiaren ikonoa"</string>
     <string name="permlab_readSyncSettings" msgid="6250532864893156277">"irakurri sinkronizazio-ezarpenak"</string>
     <string name="permdesc_readSyncSettings" msgid="1325658466358779298">"Kontu baten sinkronizazio-ezarpenak irakurtzeko baimena ematen dio aplikazioari. Adibidez, Jendea aplikazioa konturen batekin sinkronizatuta dagoen zehatz dezake."</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> h barru"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> eg. barru"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> ur. barru"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"Duela <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"Duela <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"Duela <xliff:g id="COUNT">%d</xliff:g> egun"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"Duela <xliff:g id="COUNT">%d</xliff:g> urte"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> egun"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> urte"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> min barru"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> h barru"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> egun barru"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> urte barru"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"Duela <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"Duela <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"Duela <xliff:g id="COUNT">%d</xliff:g> egun"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"Duela <xliff:g id="COUNT">%d</xliff:g> urte"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Duela # minutu}other{Duela # minutu}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Duela # ordu}other{Duela # ordu}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Duela # egun}other{Duela # egun}}"</string>
@@ -1532,7 +1555,7 @@
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Horma-papera"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Aldatu horma-papera"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Jakinarazpen-hautemailea"</string>
-    <string name="vr_listener_binding_label" msgid="8013112996671206429">"Errealitate birtualeko hautemailea"</string>
+    <string name="vr_listener_binding_label" msgid="8013112996671206429">"EBko hautemailea"</string>
     <string name="condition_provider_service_binding_label" msgid="8490641013951857673">"Baldintza-hornitzailea"</string>
     <string name="notification_ranker_binding_label" msgid="432708245635563763">"Jakinarazpenen sailkapen-zerbitzua"</string>
     <string name="vpn_title" msgid="5906991595291514182">"VPN eginbidea aktibatuta"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Esku bakarreko modua"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Are ilunago"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Entzumen-gailuak"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatu egin da."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bolumen-botoiak sakatuta eduki direnez, <xliff:g id="SERVICE_NAME">%1$s</xliff:g> desaktibatu egin da."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Askatu bolumen-botoiak. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> aktibatzeko, eduki sakatuta berriro bi bolumen-botoiak hiru segundoz."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Asteburua"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Gertaera"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Lo egiteko"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Ez molestatzeko modua (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Kudeatzailea: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aktibatuta"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Desaktibatuta"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g> (<xliff:g id="TIMES">%2$s</xliff:g>)"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Edozein egutegi"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> soinu batzuk isilarazten ari da"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Barneko arazo bat dago zure gailuan eta agian ezegonkor egongo da jatorrizko datuak berrezartzen dituzun arte."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Bidali eta jaso mezuak sare mugikorrik edo wifi-sarerik gabe"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ireki Mezuak"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Nola funtzionatzen du?"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Aktibatu \"Hautatu sarea automatikoki\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Aktibatu \"Hautatu sarea automatikoki\" ezarpenetan, telefonoak satelitearekin bateragarria den sare bat bilatu ahal izan dezan"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Aktibatu"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Egin atzera"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Zain…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Satelite bidezko SOS komunikazioa erabilgarri dago orain"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Larrialdi-zerbitzuekin mezuak trukatu ahal izango dituzu sare mugikorrik edo wifi-sarerik ez badago. Google-ren Mezuak aplikazioak izan behar du mezularitza-aplikazio lehenetsia."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Satelite bidezko SOS komunikazioa ez da bateragarria"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Satelite bidezko SOS komunikazioa ez da bateragarria gailu honekin"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Satelite bidezko SOS komunikazioa ez dago konfiguratuta"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Ziurtatu Internetera konektatuta zaudela eta saiatu berriro konfiguratzen"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Satelite bidezko SOS komunikazioa ez dago erabilgarri"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Satelite bidezko SOS komunikazioa ez dago erabilgarri herrialde edo lurralde honetan"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Satelite bidezko SOS komunikazioa ez dago konfiguratuta"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Satelite bidez mezuak trukatzeko, ezarri Google-ren Mezuak mezularitza-aplikazio lehenetsi gisa"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Satelite bidezko SOS komunikazioa ez dago erabilgarri"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Herrialde edo lurralde honetan satelite bidezko SOS komunikazioa erabilgarri dagoen egiaztatzeko, aktibatu kokapen-ezarpenak"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Satelite bidezko mezularitza erabilgarri dago"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Satelite bidez trukatu ahal izango dituzu mezuak sare mugikorrik edo wifi-sarerik ez badago. Google-ren Mezuak aplikazioak izan behar du mezularitza-aplikazio lehenetsia."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Satelite bidezko mezularitza ez da bateragarria"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Satelite bidezko mezularitza ez da bateragarria gailu honekin"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Satelite bidezko mezularitza ez dago konfiguratuta"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Ziurtatu Internetera konektatuta zaudela eta saiatu berriro konfiguratzen"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Satelite bidezko mezularitza ez dago erabilgarri"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Satelite bidezko mezularitza ez dago erabilgarri herrialde edo lurralde honetan"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Satelite bidezko mezularitza ez dago konfiguratuta"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Satelite bidez mezuak trukatzeko, ezarri Google-ren Mezuak mezularitza-aplikazio lehenetsi gisa"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Satelite bidezko mezularitza ez dago erabilgarri"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Herrialde edo lurralde honetan satelite bidezko mezularitza erabilgarri dagoen egiaztatzeko, aktibatu kokapen-ezarpenak"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfiguratu berriro hatz-marka bidez desblokeatzeko eginbidea"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> ez da ezagutzen jada."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> eta <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ez dira ezagutzen jada."</string>

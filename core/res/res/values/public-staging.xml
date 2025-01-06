@@ -125,21 +125,114 @@
     <public name="supplementalDescription"/>
     <!-- @FlaggedApi("android.security.enable_intent_matching_flags") -->
     <public name="intentMatchingFlags"/>
+    <!-- @FlaggedApi(android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API) -->
+    <public name="layoutLabel"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
+    <public name="alternateLauncherIcons"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_CHANGE_LAUNCHER_BADGING) -->
+    <public name="alternateLauncherLabels"/>
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_APP_COMPAT_OPTION_16KB) -->
+    <public name="pageSizeCompat" />
+    <!-- @FlaggedApi(android.nfc.Flags.FLAG_NFC_ASSOCIATED_ROLE_SERVICES) -->
+    <public name="wantsRoleHolderPriority"/>
+    <!-- @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
+    <public name="minSdkVersionFull"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
+    <!-- @FlaggedApi(android.appwidget.flags.Flags.FLAG_ENGAGEMENT_METRICS) -->
+    <public name="remoteViewsMetricsId"/>
   </staging-public-group>
 
   <staging-public-group type="style" first-id="0x01b50000">
   </staging-public-group>
 
   <staging-public-group type="string" first-id="0x01b40000">
+    <!-- @FlaggedApi(android.content.pm.Flags.FLAG_SDK_DEPENDENCY_INSTALLER)
+         @hide @SystemApi -->
+    <public name="config_systemDependencyInstaller" />
+    <!-- @hide @SystemApi -->
+    <public name="removed_config_defaultReservedForTestingProfileGroupExclusivity" />
+    <!-- @FlaggedApi(android.permission.flags.Flags.FLAG_SYSTEM_VENDOR_INTELLIGENCE_ROLE_ENABLED)
+         @hide @SystemApi -->
+    <public name="config_systemVendorIntelligence" />
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceIntelligenceService"></public>
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceSandboxedInferenceService"></public>
+
+    <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
+     @hide @SystemApi -->
+    <public name="config_defaultOnDeviceIntelligenceDeviceConfigNamespace"></public>
+
   </staging-public-group>
 
   <staging-public-group type="dimen" first-id="0x01b30000">
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardFastSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardFastEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardDefaultSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardDefaultEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardSlowSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardSlowEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveFastSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveFastEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveDefaultSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveDefaultEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveSlowSpatialDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveSlowEffectDamping"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusXsmall"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusSmall"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusMedium"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusLarge"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_SHAPE_TOKENS)-->
+    <public name="config_shapeCornerRadiusXlarge"/>
   </staging-public-group>
 
   <staging-public-group type="color" first-id="0x01b20000">
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_on_surface_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_primary_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_surface_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_scrim_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_shadow_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_surface_tint_light"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_on_surface_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_primary_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_inverse_surface_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_scrim_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_shadow_dark"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_COLORS_10_2024)-->
+    <public name="system_surface_tint_dark"/>
   </staging-public-group>
 
   <staging-public-group type="array" first-id="0x01b10000">
@@ -164,6 +257,30 @@
   </staging-public-group>
 
   <staging-public-group type="integer" first-id="0x01aa0000">
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardFastSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardFastEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardDefaultSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardDefaultEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardSlowSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionStandardSlowEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveFastSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveFastEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveDefaultSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveDefaultEffectStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveSlowSpatialStiffness"/>
+    <!-- @FlaggedApi(android.os.Flags.FLAG_MATERIAL_MOTION_TOKENS)-->
+    <public name="config_motionExpressiveSlowEffectStiffness"/>
   </staging-public-group>
 
   <staging-public-group type="transition" first-id="0x01a90000">

@@ -9,6 +9,7 @@ import com.android.systemui.model.SysUiState
 import com.android.systemui.navigationbar.gestural.EdgeBackGestureHandler
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.recents.OverviewProxyService
+import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.QuickStepContract
 import com.android.systemui.shared.system.TaskStackChangeListeners
 import com.android.systemui.statusbar.CommandQueue
@@ -59,6 +60,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
     @Mock lateinit var mCurrentSysUiState: NavBarHelper.CurrentSysuiState
     @Mock lateinit var mStatusBarKeyguardViewManager: StatusBarKeyguardViewManager
     @Mock lateinit var mStatusBarStateController: StatusBarStateController
+    @Mock lateinit var mDisplayTracker: DisplayTracker
 
     @Before
     fun setup() {
@@ -87,6 +89,7 @@ class TaskbarDelegateTest : SysuiTestCase() {
             mOptionalPip,
             mBackAnimation,
             mTaskStackChangeListeners,
+            mDisplayTracker,
         )
     }
 

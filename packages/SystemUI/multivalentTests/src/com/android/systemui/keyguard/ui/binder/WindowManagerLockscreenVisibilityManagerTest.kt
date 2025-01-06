@@ -17,6 +17,10 @@
 package com.android.systemui.keyguard.ui.binder
 
 import android.app.IActivityTaskManager
+import android.platform.test.annotations.RequiresFlagsDisabled
+import android.platform.test.annotations.RequiresFlagsEnabled
+import android.platform.test.flag.junit.CheckFlagsRule
+import android.platform.test.flag.junit.DeviceFlagsValueProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -25,8 +29,10 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardDismissTransition
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.time.FakeSystemClock
+import com.android.window.flags.Flags
 import com.android.wm.shell.keyguard.KeyguardTransitions
 import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.eq
@@ -41,6 +47,9 @@ import org.mockito.kotlin.any
 @RunWith(AndroidJUnit4::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
 class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
+
+    @get:Rule val checkFlagsRule: CheckFlagsRule = DeviceFlagsValueProvider.createCheckFlagsRule()
+
     private lateinit var underTest: WindowManagerLockscreenVisibilityManager
     private lateinit var executor: FakeExecutor
 
@@ -68,32 +77,62 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testLockscreenVisible_andAodVisible() {
+    @RequiresFlagsDisabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun testLockscreenVisible_andAodVisible_without_keyguard_shell_transitions() {
         underTest.setLockscreenShown(true)
-        underTest.setAodVisible(true)
-
         verify(activityTaskManagerService).setLockScreenShown(true, false)
+        underTest.setAodVisible(true)
         verify(activityTaskManagerService).setLockScreenShown(true, true)
+
         verifyNoMoreInteractions(activityTaskManagerService)
     }
 
     @Test
-    fun testGoingAway_whenLockscreenVisible_thenSurfaceMadeVisible() {
+    @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun testLockscreenVisible_andAodVisible_with_keyguard_shell_transitions() {
         underTest.setLockscreenShown(true)
+        verify(keyguardTransitions).startKeyguardTransition(true, false)
         underTest.setAodVisible(true)
+        verify(keyguardTransitions).startKeyguardTransition(true, true)
 
+        verifyNoMoreInteractions(keyguardTransitions)
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun testGoingAway_whenLockscreenVisible_thenSurfaceMadeVisible_without_keyguard_shell_transitions() {
+        underTest.setLockscreenShown(true)
         verify(activityTaskManagerService).setLockScreenShown(true, false)
+        underTest.setAodVisible(true)
         verify(activityTaskManagerService).setLockScreenShown(true, true)
+
         verifyNoMoreInteractions(activityTaskManagerService)
 
         underTest.setSurfaceBehindVisibility(true)
-
         verify(activityTaskManagerService).keyguardGoingAway(anyInt())
+
         verifyNoMoreInteractions(activityTaskManagerService)
     }
 
     @Test
-    fun testSurfaceVisible_whenLockscreenNotShowing_doesNotTriggerGoingAway() {
+    @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun testGoingAway_whenLockscreenVisible_thenSurfaceMadeVisible_with_keyguard_shell_transitions() {
+        underTest.setLockscreenShown(true)
+        verify(keyguardTransitions).startKeyguardTransition(true, false)
+        underTest.setAodVisible(true)
+        verify(keyguardTransitions).startKeyguardTransition(true, true)
+
+        verifyNoMoreInteractions(keyguardTransitions)
+
+        underTest.setSurfaceBehindVisibility(true)
+        verify(keyguardTransitions).startKeyguardTransition(false, false)
+
+        verifyNoMoreInteractions(keyguardTransitions)
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun testSurfaceVisible_whenLockscreenNotShowing_doesNotTriggerGoingAway_without_keyguard_shell_transitions() {
         underTest.setLockscreenShown(false)
         underTest.setAodVisible(false)
 
@@ -106,7 +145,22 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun testAodVisible_noLockscreenShownCallYet_doesNotShowLockscreenUntilLater() {
+    @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun testSurfaceVisible_whenLockscreenNotShowing_doesNotTriggerGoingAway_with_keyguard_shell_transitions() {
+        underTest.setLockscreenShown(false)
+        underTest.setAodVisible(false)
+
+        verify(keyguardTransitions).startKeyguardTransition(false, false)
+        verifyNoMoreInteractions(keyguardTransitions)
+
+        underTest.setSurfaceBehindVisibility(true)
+
+        verifyNoMoreInteractions(keyguardTransitions)
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun testAodVisible_noLockscreenShownCallYet_doesNotShowLockscreenUntilLater_without_keyguard_shell_transitions() {
         underTest.setAodVisible(false)
         verifyNoMoreInteractions(activityTaskManagerService)
 
@@ -116,7 +170,19 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun setSurfaceBehindVisibility_goesAwayFirst_andIgnoresSecondCall() {
+    @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun testAodVisible_noLockscreenShownCallYet_doesNotShowLockscreenUntilLater_with_keyguard_shell_transitions() {
+        underTest.setAodVisible(false)
+        verifyNoMoreInteractions(keyguardTransitions)
+
+        underTest.setLockscreenShown(true)
+        verify(keyguardTransitions).startKeyguardTransition(true, false)
+        verifyNoMoreInteractions(activityTaskManagerService)
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun setSurfaceBehindVisibility_goesAwayFirst_andIgnoresSecondCall_without_keyguard_shell_transitions() {
         underTest.setLockscreenShown(true)
         underTest.setSurfaceBehindVisibility(true)
         verify(activityTaskManagerService).keyguardGoingAway(0)
@@ -126,8 +192,34 @@ class WindowManagerLockscreenVisibilityManagerTest : SysuiTestCase() {
     }
 
     @Test
-    fun setSurfaceBehindVisibility_falseSetsLockscreenVisibility() {
+    @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun setSurfaceBehindVisibility_goesAwayFirst_andIgnoresSecondCall_with_keyguard_shell_transitions() {
+        underTest.setLockscreenShown(true)
+        verify(keyguardTransitions).startKeyguardTransition(true, false)
+        underTest.setSurfaceBehindVisibility(true)
+        verify(keyguardTransitions).startKeyguardTransition(false, false)
+
+        underTest.setSurfaceBehindVisibility(true)
+        verifyNoMoreInteractions(keyguardTransitions)
+    }
+
+    @Test
+    @RequiresFlagsDisabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun setSurfaceBehindVisibility_falseSetsLockscreenVisibility_without_keyguard_shell_transitions() {
+        // Show the surface behind, then hide it.
+        underTest.setLockscreenShown(true)
+        underTest.setSurfaceBehindVisibility(true)
         underTest.setSurfaceBehindVisibility(false)
         verify(activityTaskManagerService).setLockScreenShown(eq(true), any())
+    }
+
+    @Test
+    @RequiresFlagsEnabled(Flags.FLAG_ENSURE_KEYGUARD_DOES_TRANSITION_STARTING)
+    fun setSurfaceBehindVisibility_falseSetsLockscreenVisibility_with_keyguard_shell_transitions() {
+        // Show the surface behind, then hide it.
+        underTest.setLockscreenShown(true)
+        underTest.setSurfaceBehindVisibility(true)
+        underTest.setSurfaceBehindVisibility(false)
+        verify(keyguardTransitions).startKeyguardTransition(eq(true), any())
     }
 }

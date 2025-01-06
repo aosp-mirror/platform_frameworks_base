@@ -30,6 +30,7 @@ import static com.android.systemui.accessibility.floatingmenu.MenuViewAppearance
 
 import android.annotation.FloatRange;
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.content.ComponentCallbacks;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -49,6 +50,8 @@ import androidx.annotation.NonNull;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
+import com.android.settingslib.utils.ThreadUtils;
 import com.android.systemui.Prefs;
 import com.android.systemui.util.settings.SecureSettings;
 
@@ -80,8 +83,11 @@ class MenuInfoRepository {
     private final AccessibilityManager mAccessibilityManager;
     private final AccessibilityManager.AccessibilityServicesStateChangeListener
             mA11yServicesStateChangeListener = manager -> onTargetFeaturesChanged();
+    private final HearingAidDeviceManager mHearingAidDeviceManager;
+    private final HearingAidDeviceManager.ConnectionStatusListener
+            mHearingDeviceStatusListener = this::onDevicesConnectionStatusChanged;
     private final Handler mHandler = new Handler(Looper.getMainLooper());
-    private final OnSettingsContentsChanged mSettingsContentsCallback;
+    private final OnContentsChanged mSettingsContentsCallback;
     private final SecureSettings mSecureSettings;
     private Position mPercentagePosition;
 
@@ -148,12 +154,14 @@ class MenuInfoRepository {
     };
 
     MenuInfoRepository(Context context, AccessibilityManager accessibilityManager,
-            OnSettingsContentsChanged settingsContentsChanged, SecureSettings secureSettings) {
+            OnContentsChanged settingsContentsChanged, SecureSettings secureSettings,
+            @Nullable HearingAidDeviceManager hearingAidDeviceManager) {
         mContext = context;
         mAccessibilityManager = accessibilityManager;
         mConfiguration = new Configuration(context.getResources().getConfiguration());
         mSettingsContentsCallback = settingsContentsChanged;
         mSecureSettings = secureSettings;
+        mHearingAidDeviceManager = hearingAidDeviceManager;
 
         mPercentagePosition = getStartPosition();
     }
@@ -183,6 +191,14 @@ class MenuInfoRepository {
 
     void loadMenuTargetFeatures(OnInfoReady<List<AccessibilityTarget>> callback) {
         callback.onReady(getTargets(mContext, SOFTWARE));
+    }
+
+    void loadHearingDeviceStatus(OnInfoReady<Integer> callback) {
+        if (mHearingAidDeviceManager != null) {
+            callback.onReady(mHearingAidDeviceManager.getDevicesConnectionStatus());
+        } else {
+            callback.onReady(HearingAidDeviceManager.ConnectionStatus.NO_DEVICE_BONDED);
+        }
     }
 
     void loadMenuSizeType(OnInfoReady<Integer> callback) {
@@ -222,8 +238,8 @@ class MenuInfoRepository {
     }
 
     private void onTargetFeaturesChanged() {
-        mSettingsContentsCallback.onTargetFeaturesChanged(
-                getTargets(mContext, SOFTWARE));
+        List<AccessibilityTarget> targets = getTargets(mContext, SOFTWARE);
+        mSettingsContentsCallback.onTargetFeaturesChanged(targets);
     }
 
     private Position getStartPosition() {
@@ -269,6 +285,24 @@ class MenuInfoRepository {
             mAccessibilityManager.addAccessibilityServicesStateChangeListener(
                     mA11yServicesStateChangeListener);
         }
+
+        if (com.android.settingslib.flags.Flags.hearingDeviceSetConnectionStatusReport()) {
+            registerConnectionStatusListener();
+        }
+    }
+
+    private void registerConnectionStatusListener() {
+        if (mHearingAidDeviceManager != null) {
+            mHearingAidDeviceManager.registerConnectionStatusListener(
+                    mHearingDeviceStatusListener, ThreadUtils.getBackgroundExecutor());
+        }
+    }
+
+    private void unregisterConnectionStatusListener() {
+        if (mHearingAidDeviceManager != null) {
+            mHearingAidDeviceManager.unregisterConnectionStatusListener(
+                    mHearingDeviceStatusListener);
+        }
     }
 
     void unregisterObserversAndCallbacks() {
@@ -281,14 +315,18 @@ class MenuInfoRepository {
             mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
                     mA11yServicesStateChangeListener);
         }
+
+        unregisterConnectionStatusListener();
     }
 
-    interface OnSettingsContentsChanged {
+    interface OnContentsChanged {
         void onTargetFeaturesChanged(List<AccessibilityTarget> newTargetFeatures);
 
         void onSizeTypeChanged(int newSizeType);
 
         void onFadeEffectInfoChanged(MenuFadeEffectInfo fadeEffectInfo);
+
+        void onDevicesConnectionStatusChanged(@HearingAidDeviceManager.ConnectionStatus int status);
     }
 
     interface OnInfoReady<T> {
@@ -310,5 +348,10 @@ class MenuInfoRepository {
         return mSecureSettings.getFloatForUser(
                 ACCESSIBILITY_FLOATING_MENU_OPACITY, DEFAULT_OPACITY_VALUE,
                 UserHandle.USER_CURRENT);
+    }
+
+    private void onDevicesConnectionStatusChanged(
+            @HearingAidDeviceManager.ConnectionStatus int status) {
+        mSettingsContentsCallback.onDevicesConnectionStatusChanged(status);
     }
 }

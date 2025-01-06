@@ -102,7 +102,8 @@ class HighBrightnessModeController {
         BrightnessInfo.BRIGHTNESS_MAX_REASON_NONE;
 
     private int mHbmMode = BrightnessInfo.HIGH_BRIGHTNESS_MODE_OFF;
-    private boolean mIsHdrLayerPresent = false;
+    @VisibleForTesting
+    boolean mIsHdrLayerPresent = false;
     // mMaxDesiredHdrSdrRatio should only be applied when there is a valid backlight->nits mapping
     private float mMaxDesiredHdrSdrRatio = DEFAULT_MAX_DESIRED_HDR_SDR_RATIO;
     private boolean mForceHbmChangeCallback = false;
@@ -386,6 +387,18 @@ class HighBrightnessModeController {
     void disableHdrBoost() {
         mHdrBoostDisabled = true;
         unregisterHdrListener();
+    }
+    /**
+     * Hdr boost can be applied by
+     * {@link com.android.server.display.brightness.clamper.HdrBrightnessModifier}, in this case
+     * HBMController should not consume HBM time budget
+     */
+    void onHdrBoostApplied(boolean applied) {
+        // We need to update mIsHdrLayerPresent flag only if HDR boost is controlled  by other
+        // component and disabled here
+        if (mHdrBoostDisabled) {
+            mIsHdrLayerPresent = applied;
+        }
     }
 
     private long calculateRemainingTime(long currentTime) {

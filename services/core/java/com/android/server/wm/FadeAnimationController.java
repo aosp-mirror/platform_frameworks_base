@@ -20,14 +20,13 @@ import static com.android.server.wm.AnimationSpecProto.WINDOW;
 import static com.android.server.wm.WindowAnimationSpecProto.ANIMATION;
 
 import android.annotation.NonNull;
-import android.content.Context;
 import android.util.proto.ProtoOutputStream;
 import android.view.SurfaceControl;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.AlphaAnimation;
 import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Transformation;
-
-import com.android.internal.R;
 
 import java.io.PrintWriter;
 
@@ -35,26 +34,37 @@ import java.io.PrintWriter;
  * An animation controller to fade-in/out for a window token.
  */
 public class FadeAnimationController {
+    static final int SHORT_DURATION_MS = 200;
+    static final int MEDIUM_DURATION_MS = 350;
+
     protected final DisplayContent mDisplayContent;
-    protected final Context mContext;
 
     public FadeAnimationController(DisplayContent displayContent) {
         mDisplayContent = displayContent;
-        mContext = displayContent.mWmService.mContext;
     }
 
     /**
      * @return a fade-in Animation.
      */
     public Animation getFadeInAnimation() {
-        return AnimationUtils.loadAnimation(mContext, R.anim.fade_in);
+        final AlphaAnimation anim = new AlphaAnimation(0f, 1f);
+        anim.setDuration(getScaledDuration(MEDIUM_DURATION_MS));
+        anim.setInterpolator(new DecelerateInterpolator());
+        return anim;
     }
 
     /**
      * @return a fade-out Animation.
      */
     public Animation getFadeOutAnimation() {
-        return AnimationUtils.loadAnimation(mContext, R.anim.fade_out);
+        final AlphaAnimation anim = new AlphaAnimation(1f, 0f);
+        anim.setDuration(getScaledDuration(SHORT_DURATION_MS));
+        anim.setInterpolator(new AccelerateInterpolator());
+        return anim;
+    }
+
+    long getScaledDuration(int durationMs) {
+        return (long) (durationMs * mDisplayContent.mWmService.getWindowAnimationScaleLocked());
     }
 
     /** Run the fade in/out animation for a window token. */

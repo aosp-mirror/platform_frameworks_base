@@ -15,18 +15,22 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.widget.remotecompose.core.operations.ComponentValue;
+import com.android.internal.widget.remotecompose.core.operations.FloatExpression;
+import com.android.internal.widget.remotecompose.core.operations.Header;
 import com.android.internal.widget.remotecompose.core.operations.IntegerExpression;
 import com.android.internal.widget.remotecompose.core.operations.NamedVariable;
 import com.android.internal.widget.remotecompose.core.operations.RootContentBehavior;
+import com.android.internal.widget.remotecompose.core.operations.ShaderData;
+import com.android.internal.widget.remotecompose.core.operations.TextData;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
-import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierEnd;
-import com.android.internal.widget.remotecompose.core.operations.layout.ClickModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentEnd;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
-import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
-import com.android.internal.widget.remotecompose.core.operations.layout.LoopEnd;
+import com.android.internal.widget.remotecompose.core.operations.layout.Container;
+import com.android.internal.widget.remotecompose.core.operations.layout.ContainerEnd;
 import com.android.internal.widget.remotecompose.core.operations.layout.LoopOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentModifiers;
@@ -37,6 +41,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -47,15 +52,29 @@ public class CoreDocument {
 
     private static final boolean DEBUG = false;
 
-    ArrayList<Operation> mOperations;
+    // Semantic version
+    public static final int MAJOR_VERSION = 0;
+    public static final int MINOR_VERSION = 3;
+    public static final int PATCH_VERSION = 0;
 
-    RootLayoutComponent mRootLayoutComponent = null;
+    // Internal version level
+    public static final int DOCUMENT_API_LEVEL = 3;
 
-    RemoteComposeState mRemoteComposeState = new RemoteComposeState();
-    TimeVariables mTimeVariables = new TimeVariables();
+    // We also keep a more fine-grained BUILD number, exposed as
+    // ID_API_LEVEL = DOCUMENT_API_LEVEL + BUILD
+    static final float BUILD = 0.2f;
+
+    @NonNull ArrayList<Operation> mOperations = new ArrayList<>();
+
+    @Nullable RootLayoutComponent mRootLayoutComponent = null;
+
+    @NonNull RemoteComposeState mRemoteComposeState = new RemoteComposeState();
+    @VisibleForTesting @NonNull public TimeVariables mTimeVariables = new TimeVariables();
+
     // Semantic version of the document
-    Version mVersion = new Version(0, 1, 0);
+    @NonNull Version mVersion = new Version(MAJOR_VERSION, MINOR_VERSION, PATCH_VERSION);
 
+    @Nullable
     String mContentDescription; // text description of the document (used for accessibility)
 
     long mRequiredCapabilities = 0L; // bitmask indicating needed capabilities of the player(unused)
@@ -68,17 +87,27 @@ public class CoreDocument {
 
     int mContentAlignment = RootContentBehavior.ALIGNMENT_CENTER;
 
-    RemoteComposeBuffer mBuffer = new RemoteComposeBuffer(mRemoteComposeState);
+    @NonNull RemoteComposeBuffer mBuffer = new RemoteComposeBuffer(mRemoteComposeState);
 
     private final HashMap<Long, IntegerExpression> mIntegerExpressions = new HashMap<>();
 
+    private final HashMap<Integer, FloatExpression> mFloatExpressions = new HashMap<>();
+
+    private HashSet<Component> mAppliedTouchOperations = new HashSet<>();
+
     private int mLastId = 1; // last component id when inflating the file
 
+    /** Returns a version number that is monotonically increasing. */
+    public static int getDocumentApiLevel() {
+        return DOCUMENT_API_LEVEL;
+    }
+
+    @Nullable
     public String getContentDescription() {
         return mContentDescription;
     }
 
-    public void setContentDescription(String contentDescription) {
+    public void setContentDescription(@Nullable String contentDescription) {
         this.mContentDescription = contentDescription;
     }
 
@@ -94,6 +123,11 @@ public class CoreDocument {
         return mWidth;
     }
 
+    /**
+     * Set the viewport width of the document
+     *
+     * @param width document width
+     */
     public void setWidth(int width) {
         this.mWidth = width;
         mRemoteComposeState.setWindowWidth(width);
@@ -103,24 +137,31 @@ public class CoreDocument {
         return mHeight;
     }
 
+    /**
+     * Set the viewport height of the document
+     *
+     * @param height document height
+     */
     public void setHeight(int height) {
         this.mHeight = height;
         mRemoteComposeState.setWindowHeight(height);
     }
 
+    @NonNull
     public RemoteComposeBuffer getBuffer() {
         return mBuffer;
     }
 
-    public void setBuffer(RemoteComposeBuffer buffer) {
+    public void setBuffer(@NonNull RemoteComposeBuffer buffer) {
         this.mBuffer = buffer;
     }
 
+    @NonNull
     public RemoteComposeState getRemoteComposeState() {
         return mRemoteComposeState;
     }
 
-    public void setRemoteComposeState(RemoteComposeState remoteComposeState) {
+    public void setRemoteComposeState(@NonNull RemoteComposeState remoteComposeState) {
         this.mRemoteComposeState = remoteComposeState;
     }
 
@@ -163,7 +204,7 @@ public class CoreDocument {
      * @param h vertical dimension of the rendering area
      * @param scaleOutput will contain the computed scale factor
      */
-    public void computeScale(float w, float h, float[] scaleOutput) {
+    public void computeScale(float w, float h, @NonNull float[] scaleOutput) {
         float contentScaleX = 1f;
         float contentScaleY = 1f;
         if (mContentSizing == RootContentBehavior.SIZING_SCALE) {
@@ -228,7 +269,11 @@ public class CoreDocument {
      * @param translateOutput will contain the computed translation
      */
     private void computeTranslate(
-            float w, float h, float contentScaleX, float contentScaleY, float[] translateOutput) {
+            float w,
+            float h,
+            float contentScaleX,
+            float contentScaleY,
+            @NonNull float[] translateOutput) {
         int horizontalContentAlignment = mContentAlignment & 0xF0;
         int verticalContentAlignment = mContentAlignment & 0xF;
         float translateX = 0f;
@@ -272,6 +317,7 @@ public class CoreDocument {
      *
      * @return list of click areas in document coordinates
      */
+    @NonNull
     public Set<ClickAreaRepresentation> getClickAreas() {
         return mClickAreas;
     }
@@ -281,6 +327,7 @@ public class CoreDocument {
      *
      * @return returns the root component if it exists, null otherwise
      */
+    @Nullable
     public RootLayoutComponent getRootLayoutComponent() {
         return mRootLayoutComponent;
     }
@@ -298,6 +345,7 @@ public class CoreDocument {
      * @param id component id
      * @return the component if it exists, null otherwise
      */
+    @Nullable
     public Component getComponent(int id) {
         if (mRootLayoutComponent != null) {
             return mRootLayoutComponent.getComponent(id);
@@ -310,6 +358,7 @@ public class CoreDocument {
      *
      * @return a standardized string representation of the component hierarchy
      */
+    @NonNull
     public String displayHierarchy() {
         StringSerializer serializer = new StringSerializer();
         for (Operation op : mOperations) {
@@ -329,7 +378,8 @@ public class CoreDocument {
      * @param targetId the id of the value to update with the expression
      * @param context the current context
      */
-    public void evaluateIntExpression(long expressionId, int targetId, RemoteContext context) {
+    public void evaluateIntExpression(
+            long expressionId, int targetId, @NonNull RemoteContext context) {
         IntegerExpression expression = mIntegerExpressions.get(expressionId);
         if (expression != null) {
             int v = expression.evaluate(context);
@@ -337,22 +387,83 @@ public class CoreDocument {
         }
     }
 
-    /** Callback interface for host actions */
-    public interface ActionCallback {
-        // TODO: add payload support
-        void onAction(String name);
+    /**
+     * Execute an integer expression with the given id and put its value on the targetId
+     *
+     * @param expressionId the id of the integer expression
+     * @param targetId the id of the value to update with the expression
+     * @param context the current context
+     */
+    public void evaluateFloatExpression(
+            int expressionId, int targetId, @NonNull RemoteContext context) {
+        FloatExpression expression = mFloatExpressions.get(expressionId);
+        if (expression != null) {
+            float v = expression.evaluate(context);
+            context.overrideFloat(targetId, v);
+        }
     }
 
-    HashSet<ActionCallback> mActionListeners = new HashSet<ActionCallback>();
+    // ============== Haptic support ==================
+    public interface HapticEngine {
+        /**
+         * Implements a haptic effect
+         *
+         * @param type the type of effect
+         */
+        void haptic(int type);
+    }
+
+    HapticEngine mHapticEngine;
+
+    public void setHapticEngine(HapticEngine engine) {
+        mHapticEngine = engine;
+    }
+
+    /**
+     * Execute an haptic command
+     *
+     * @param type the type of haptic pre-defined effect
+     */
+    public void haptic(int type) {
+        if (mHapticEngine != null) {
+            mHapticEngine.haptic(type);
+        }
+    }
+
+    // ============== Haptic support ==================
+
+    /**
+     * To signal that the given component will apply the touch operation
+     *
+     * @param component the component applying the touch
+     */
+    public void appliedTouchOperation(Component component) {
+        mAppliedTouchOperations.add(component);
+    }
+
+    /** Callback interface for host actions */
+    public interface ActionCallback {
+        /**
+         * Callback for actions
+         *
+         * @param name the action name
+         * @param value the payload of the action
+         */
+        void onAction(@NonNull String name, Object value);
+    }
+
+    @NonNull HashSet<ActionCallback> mActionListeners = new HashSet<ActionCallback>();
 
     /**
      * Warn action listeners for the given named action
      *
      * @param name the action name
+     * @param value a parameter to the action
      */
-    public void runNamedAction(String name) {
+    public void runNamedAction(@NonNull String name, Object value) {
+        // TODO: we might add an interface to group all valid parameter types
         for (ActionCallback callback : mActionListeners) {
-            callback.onAction(name);
+            callback.onAction(name, value);
         }
     }
 
@@ -361,7 +472,7 @@ public class CoreDocument {
      *
      * @param callback
      */
-    public void addActionCallback(ActionCallback callback) {
+    public void addActionCallback(@NonNull ActionCallback callback) {
         mActionListeners.add(callback);
     }
 
@@ -370,12 +481,20 @@ public class CoreDocument {
         mActionListeners.clear();
     }
 
-    public interface ClickCallbacks {
-        void click(int id, String metadata);
+    /** Id Actions */
+    public interface IdActionCallback {
+        /**
+         * Callback on Id Actions
+         *
+         * @param id the actio id triggered
+         * @param metadata optional metadata
+         */
+        void onAction(int id, @Nullable String metadata);
     }
 
-    HashSet<ClickCallbacks> mClickListeners = new HashSet<>();
-    HashSet<ClickAreaRepresentation> mClickAreas = new HashSet<>();
+    @NonNull HashSet<IdActionCallback> mIdActionListeners = new HashSet<>();
+    @NonNull HashSet<TouchListener> mTouchListeners = new HashSet<>();
+    @NonNull HashSet<ClickAreaRepresentation> mClickAreas = new HashSet<>();
 
     static class Version {
         public final int major;
@@ -391,21 +510,36 @@ public class CoreDocument {
 
     public static class ClickAreaRepresentation {
         int mId;
-        String mContentDescription;
+        @Nullable final String mContentDescription;
         float mLeft;
         float mTop;
         float mRight;
         float mBottom;
-        String mMetadata;
+        @Nullable final String mMetadata;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (!(o instanceof ClickAreaRepresentation)) return false;
+            ClickAreaRepresentation that = (ClickAreaRepresentation) o;
+            return mId == that.mId
+                    && Objects.equals(mContentDescription, that.mContentDescription)
+                    && Objects.equals(mMetadata, that.mMetadata);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mId, mContentDescription, mMetadata);
+        }
 
         public ClickAreaRepresentation(
                 int id,
-                String contentDescription,
+                @Nullable String contentDescription,
                 float left,
                 float top,
                 float right,
                 float bottom,
-                String metadata) {
+                @Nullable String metadata) {
             this.mId = id;
             this.mContentDescription = contentDescription;
             this.mLeft = left;
@@ -434,10 +568,20 @@ public class CoreDocument {
             return mTop;
         }
 
+        /**
+         * Returns the width of the click area
+         *
+         * @return the width of the click area
+         */
         public float width() {
             return Math.max(0, mRight - mLeft);
         }
 
+        /**
+         * Returns the height of the click area
+         *
+         * @return the height of the click area
+         */
         public float height() {
             return Math.max(0, mBottom - mTop);
         }
@@ -446,23 +590,33 @@ public class CoreDocument {
             return mId;
         }
 
-        public String getContentDescription() {
+        public @Nullable String getContentDescription() {
             return mContentDescription;
         }
 
+        @Nullable
         public String getMetadata() {
             return mMetadata;
         }
     }
 
     /** Load operations from the given buffer */
-    public void initFromBuffer(RemoteComposeBuffer buffer) {
+    public void initFromBuffer(@NonNull RemoteComposeBuffer buffer) {
         mOperations = new ArrayList<Operation>();
         buffer.inflateFromBuffer(mOperations);
         for (Operation op : mOperations) {
+            if (op instanceof Header) {
+                // Make sure we parse the version at init time...
+                Header header = (Header) op;
+                header.setVersion(this);
+            }
             if (op instanceof IntegerExpression) {
                 IntegerExpression expression = (IntegerExpression) op;
                 mIntegerExpressions.put((long) expression.mId, expression);
+            }
+            if (op instanceof FloatExpression) {
+                FloatExpression expression = (FloatExpression) op;
+                mFloatExpressions.put(expression.mId, expression);
             }
         }
         mOperations = inflateComponents(mOperations);
@@ -484,56 +638,57 @@ public class CoreDocument {
      * @param operations flat list of operations
      * @return nested list of operations / components
      */
-    private ArrayList<Operation> inflateComponents(ArrayList<Operation> operations) {
-        Component currentComponent = null;
-        ArrayList<Component> components = new ArrayList<>();
+    @NonNull
+    private ArrayList<Operation> inflateComponents(@NonNull ArrayList<Operation> operations) {
         ArrayList<Operation> finalOperationsList = new ArrayList<>();
         ArrayList<Operation> ops = finalOperationsList;
-        ClickModifierOperation currentClickModifier = null;
-        LoopOperation currentLoop = null;
+
+        ArrayList<Container> containers = new ArrayList<>();
 
         mLastId = -1;
         for (Operation o : operations) {
-            if (o instanceof ComponentStartOperation) {
-                Component component = (Component) o;
-                component.setParent(currentComponent);
-                components.add(component);
-                currentComponent = component;
-                ops.add(currentComponent);
-                ops = currentComponent.getList();
-                if (component.getComponentId() < mLastId) {
-                    mLastId = component.getComponentId();
+            if (o instanceof Container) {
+                Container container = (Container) o;
+                if (container instanceof Component) {
+                    Component component = (Component) container;
+                    // Make sure to set the parent when a component is first found, so that
+                    // the inflate when closing the component is in a state where the hierarchy
+                    // is already existing.
+                    if (!containers.isEmpty()) {
+                        Container parentContainer = containers.get(containers.size() - 1);
+                        if (parentContainer instanceof Component) {
+                            component.setParent((Component) parentContainer);
+                        }
+                    }
+                    if (component.getComponentId() < mLastId) {
+                        mLastId = component.getComponentId();
+                    }
                 }
-            } else if (o instanceof ComponentEnd) {
-                if (currentComponent instanceof LayoutComponent) {
-                    ((LayoutComponent) currentComponent).inflate();
+                containers.add(container);
+                ops = container.getList();
+            } else if (o instanceof ContainerEnd) {
+                // check if we have a parent container
+                Container container = null;
+                // pop the container
+                if (!containers.isEmpty()) {
+                    container = containers.remove(containers.size() - 1);
                 }
-                components.remove(components.size() - 1);
-                if (!components.isEmpty()) {
-                    currentComponent = components.get(components.size() - 1);
-                    ops = currentComponent.getList();
+                Container parentContainer = null;
+                if (!containers.isEmpty()) {
+                    parentContainer = containers.get(containers.size() - 1);
+                }
+                if (parentContainer != null) {
+                    ops = parentContainer.getList();
                 } else {
                     ops = finalOperationsList;
                 }
-            } else if (o instanceof ClickModifierOperation) {
-                // TODO: refactor to add container <- component...
-                currentClickModifier = (ClickModifierOperation) o;
-                ops = currentClickModifier.getList();
-            } else if (o instanceof ClickModifierEnd) {
-                ops = currentComponent.getList();
-                ops.add(currentClickModifier);
-                currentClickModifier = null;
-            } else if (o instanceof LoopOperation) {
-                currentLoop = (LoopOperation) o;
-                ops = currentLoop.getList();
-            } else if (o instanceof LoopEnd) {
-                if (currentComponent != null) {
-                    ops = currentComponent.getList();
-                    ops.add(currentLoop);
-                } else {
-                    ops = finalOperationsList;
+                if (container != null) {
+                    if (container instanceof Component) {
+                        Component component = (Component) container;
+                        component.inflate();
+                    }
+                    ops.add((Operation) container);
                 }
-                currentLoop = null;
             } else {
                 ops.add(o);
             }
@@ -541,9 +696,10 @@ public class CoreDocument {
         return ops;
     }
 
-    private HashMap<Integer, Component> mComponentMap = new HashMap<Integer, Component>();
+    @NonNull private HashMap<Integer, Component> mComponentMap = new HashMap<Integer, Component>();
 
-    private void registerVariables(RemoteContext context, ArrayList<Operation> list) {
+    private void registerVariables(
+            @NonNull RemoteContext context, @NonNull ArrayList<Operation> list) {
         for (Operation op : list) {
             if (op instanceof VariableSupport) {
                 ((VariableSupport) op).updateVariables(context);
@@ -570,7 +726,9 @@ public class CoreDocument {
                     }
                 }
             }
+            op.markNotDirty();
             op.apply(context);
+            context.incrementOpCount();
         }
     }
 
@@ -578,7 +736,7 @@ public class CoreDocument {
      * Called when an initialization is needed, allowing the document to eg load resources / cache
      * them.
      */
-    public void initializeContext(RemoteContext context) {
+    public void initializeContext(@NonNull RemoteContext context) {
         mRemoteComposeState.reset();
         mRemoteComposeState.setContext(context);
         mClickAreas.clear();
@@ -615,7 +773,7 @@ public class CoreDocument {
      * @param minorVersion minor version number, increased when adding new features
      * @param patch patch level, increased upon bugfixes
      */
-    void setVersion(int majorVersion, int minorVersion, int patch) {
+    public void setVersion(int majorVersion, int minorVersion, int patch) {
         mVersion = new Version(majorVersion, minorVersion, patch);
     }
 
@@ -639,24 +797,37 @@ public class CoreDocument {
      */
     public void addClickArea(
             int id,
-            String contentDescription,
+            @Nullable String contentDescription,
             float left,
             float top,
             float right,
             float bottom,
-            String metadata) {
-        mClickAreas.add(
+            @Nullable String metadata) {
+
+        ClickAreaRepresentation car =
                 new ClickAreaRepresentation(
-                        id, contentDescription, left, top, right, bottom, metadata));
+                        id, contentDescription, left, top, right, bottom, metadata);
+
+        boolean old = mClickAreas.remove(car);
+        mClickAreas.add(car);
     }
 
     /**
-     * Add a click listener. This will get called when a click is detected on the document
+     * Called by commands to listen to touch events
      *
-     * @param callback called when a click area has been hit, passing the click are id and metadata.
+     * @param listener
      */
-    public void addClickListener(ClickCallbacks callback) {
-        mClickListeners.add(callback);
+    public void addTouchListener(TouchListener listener) {
+        mTouchListeners.add(listener);
+    }
+
+    /**
+     * Add an id action listener. This will get called when e.g. a click is detected on the document
+     *
+     * @param callback called when an action is executed, passing the id and metadata.
+     */
+    public void addIdActionListener(@NonNull IdActionCallback callback) {
+        mIdActionListeners.add(callback);
     }
 
     /**
@@ -664,15 +835,16 @@ public class CoreDocument {
      *
      * @return set of click listeners
      */
-    public HashSet<CoreDocument.ClickCallbacks> getClickListeners() {
-        return mClickListeners;
+    @NonNull
+    public HashSet<IdActionCallback> getIdActionListeners() {
+        return mIdActionListeners;
     }
 
     /**
      * Passing a click event to the document. This will possibly result in calling the click
      * listeners.
      */
-    public void onClick(RemoteContext context, float x, float y) {
+    public void onClick(@NonNull RemoteContext context, float x, float y) {
         for (ClickAreaRepresentation clickArea : mClickAreas) {
             if (clickArea.contains(x, y)) {
                 warnClickListeners(clickArea);
@@ -692,20 +864,115 @@ public class CoreDocument {
         for (ClickAreaRepresentation clickArea : mClickAreas) {
             if (clickArea.mId == id) {
                 warnClickListeners(clickArea);
+                return;
             }
         }
-        for (ClickCallbacks listener : mClickListeners) {
-            listener.click(id, "");
+        for (IdActionCallback listener : mIdActionListeners) {
+            listener.onAction(id, "");
         }
     }
 
     /** Warn click listeners when a click area is activated */
-    private void warnClickListeners(ClickAreaRepresentation clickArea) {
-        for (ClickCallbacks listener : mClickListeners) {
-            listener.click(clickArea.mId, clickArea.mMetadata);
+    private void warnClickListeners(@NonNull ClickAreaRepresentation clickArea) {
+        for (IdActionCallback listener : mIdActionListeners) {
+            listener.onAction(clickArea.mId, clickArea.mMetadata);
         }
     }
 
+    /**
+     * Returns true if the document has touch listeners
+     *
+     * @return true if the document needs to react to touch events
+     */
+    public boolean hasTouchListener() {
+        boolean hasComponentsTouchListeners =
+                mRootLayoutComponent != null && mRootLayoutComponent.hasTouchListeners();
+        return hasComponentsTouchListeners || !mTouchListeners.isEmpty();
+    }
+
+    // TODO support velocity estimate support, support regions
+    /**
+     * Support touch drag events on commands supporting touch
+     *
+     * @param x position of touch
+     * @param y position of touch
+     */
+    public boolean touchDrag(RemoteContext context, float x, float y) {
+        context.loadFloat(RemoteContext.ID_TOUCH_POS_X, x);
+        context.loadFloat(RemoteContext.ID_TOUCH_POS_Y, y);
+        for (TouchListener clickArea : mTouchListeners) {
+            clickArea.touchDrag(context, x, y);
+        }
+        if (mRootLayoutComponent != null) {
+            for (Component component : mAppliedTouchOperations) {
+                component.onTouchDrag(context, this, x, y, true);
+            }
+            if (!mAppliedTouchOperations.isEmpty()) {
+                return true;
+            }
+        }
+        if (!mTouchListeners.isEmpty()) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Support touch down events on commands supporting touch
+     *
+     * @param x position of touch
+     * @param y position of touch
+     */
+    public void touchDown(RemoteContext context, float x, float y) {
+        context.loadFloat(RemoteContext.ID_TOUCH_POS_X, x);
+        context.loadFloat(RemoteContext.ID_TOUCH_POS_Y, y);
+        for (TouchListener clickArea : mTouchListeners) {
+            clickArea.touchDown(context, x, y);
+        }
+        if (mRootLayoutComponent != null) {
+            mRootLayoutComponent.onTouchDown(context, this, x, y);
+        }
+        mRepaintNext = 1;
+    }
+
+    /**
+     * Support touch up events on commands supporting touch
+     *
+     * @param x position of touch
+     * @param y position of touch
+     */
+    public void touchUp(RemoteContext context, float x, float y, float dx, float dy) {
+        context.loadFloat(RemoteContext.ID_TOUCH_POS_X, x);
+        context.loadFloat(RemoteContext.ID_TOUCH_POS_Y, y);
+        for (TouchListener clickArea : mTouchListeners) {
+            clickArea.touchUp(context, x, y, dx, dy);
+        }
+        if (mRootLayoutComponent != null) {
+            for (Component component : mAppliedTouchOperations) {
+                component.onTouchUp(context, this, x, y, dx, dy, true);
+            }
+            mAppliedTouchOperations.clear();
+        }
+        mRepaintNext = 1;
+    }
+
+    /**
+     * Support touch cancel events on commands supporting touch
+     *
+     * @param x position of touch
+     * @param y position of touch
+     */
+    public void touchCancel(RemoteContext context, float x, float y, float dx, float dy) {
+        if (mRootLayoutComponent != null) {
+            for (Component component : mAppliedTouchOperations) {
+                component.onTouchCancel(context, this, x, y, true);
+            }
+            mAppliedTouchOperations.clear();
+        }
+        mRepaintNext = 1;
+    }
+
+    @NonNull
     @Override
     public String toString() {
         StringBuilder builder = new StringBuilder();
@@ -721,12 +988,22 @@ public class CoreDocument {
      *
      * @return array of named colors or null
      */
+    @Nullable
     public String[] getNamedColors() {
+        return getNamedVariables(NamedVariable.COLOR_TYPE);
+    }
+
+    /**
+     * Gets the names of all named Variables.
+     *
+     * @return array of named variables or null
+     */
+    public String[] getNamedVariables(int type) {
         int count = 0;
         for (Operation op : mOperations) {
             if (op instanceof NamedVariable) {
                 NamedVariable n = (NamedVariable) op;
-                if (n.mVarType == NamedVariable.COLOR_TYPE) {
+                if (n.mVarType == type) {
                     count++;
                 }
             }
@@ -739,7 +1016,7 @@ public class CoreDocument {
         for (Operation op : mOperations) {
             if (op instanceof NamedVariable) {
                 NamedVariable n = (NamedVariable) op;
-                if (n.mVarType == NamedVariable.COLOR_TYPE) {
+                if (n.mVarType == type) {
                     ret[i++] = n.mVarName;
                 }
             }
@@ -754,6 +1031,16 @@ public class CoreDocument {
     private final float[] mScaleOutput = new float[2];
     private final float[] mTranslateOutput = new float[2];
     private int mRepaintNext = -1; // delay to next repaint -1 = don't 1 = asap
+    private int mLastOpCount;
+
+    /**
+     * This is the number of ops used to calculate the last frame.
+     *
+     * @return number of ops
+     */
+    public int getOpsPerFrame() {
+        return mLastOpCount;
+    }
 
     /**
      * Returns > 0 if it needs to repaint
@@ -770,10 +1057,11 @@ public class CoreDocument {
      * @param context the provided PaintContext
      * @param theme the theme we want to use for this document.
      */
-    public void paint(RemoteContext context, int theme) {
+    public void paint(@NonNull RemoteContext context, int theme) {
+        context.clearLastOpCount();
         context.getPaintContext().clearNeedsRepaint();
+        context.loadFloat(RemoteContext.ID_DENSITY, context.getDensity());
         context.mMode = RemoteContext.ContextMode.UNSET;
-
         // current theme starts as UNSPECIFIED, until a Theme setter
         // operation gets executed and modify it.
         context.setTheme(Theme.UNSPECIFIED);
@@ -781,21 +1069,24 @@ public class CoreDocument {
         context.mRemoteComposeState = mRemoteComposeState;
         context.mRemoteComposeState.setContext(context);
 
+        // If we have a content sizing set, we are going to take the original document
+        // dimension into account and apply scale+translate according to the RootContentBehavior
+        // rules.
         if (mContentSizing == RootContentBehavior.SIZING_SCALE) {
             // we need to add canvas transforms ops here
             computeScale(context.mWidth, context.mHeight, mScaleOutput);
-            computeTranslate(
-                    context.mWidth,
-                    context.mHeight,
-                    mScaleOutput[0],
-                    mScaleOutput[1],
-                    mTranslateOutput);
+            float sw = mScaleOutput[0];
+            float sh = mScaleOutput[1];
+            computeTranslate(context.mWidth, context.mHeight, sw, sh, mTranslateOutput);
             context.mPaintContext.translate(mTranslateOutput[0], mTranslateOutput[1]);
-            context.mPaintContext.scale(mScaleOutput[0], mScaleOutput[1]);
+            context.mPaintContext.scale(sw, sh);
+        } else {
+            // If not, we set the document width and height to be the current context width and
+            // height.
+            setWidth((int) context.mWidth);
+            setHeight((int) context.mHeight);
         }
         mTimeVariables.updateTime(context);
-        context.loadFloat(RemoteContext.ID_WINDOW_WIDTH, context.mWidth);
-        context.loadFloat(RemoteContext.ID_WINDOW_HEIGHT, context.mHeight);
         mRepaintNext = context.updateOps();
         if (mRootLayoutComponent != null) {
             if (context.mWidth != mRootLayoutComponent.getWidth()
@@ -805,10 +1096,11 @@ public class CoreDocument {
             if (mRootLayoutComponent.needsMeasure()) {
                 mRootLayoutComponent.layout(context);
             }
-            // TODO -- this should be specifically about applying animation, not paint
-            mRootLayoutComponent.paint(context.getPaintContext());
-            // TODO -- should be able to remove this
-            mRootLayoutComponent.updateVariables(context);
+            if (mRootLayoutComponent.needsBoundsAnimation()) {
+                mRepaintNext = 1;
+                mRootLayoutComponent.clearNeedsBoundsAnimation();
+                mRootLayoutComponent.animatingBounds(context);
+            }
             if (DEBUG) {
                 String hierarchy = mRootLayoutComponent.displayHierarchy();
                 System.out.println(hierarchy);
@@ -818,18 +1110,28 @@ public class CoreDocument {
             }
         }
         context.mMode = RemoteContext.ContextMode.PAINT;
-        for (Operation op : mOperations) {
+        for (int i = 0; i < mOperations.size(); i++) {
+            Operation op = mOperations.get(i);
             // operations will only be executed if no theme is set (ie UNSPECIFIED)
             // or the theme is equal as the one passed in argument to paint.
             boolean apply = true;
             if (theme != Theme.UNSPECIFIED) {
+                int currentTheme = context.getTheme();
                 apply =
-                        op instanceof Theme // always apply a theme setter
-                                || context.getTheme() == theme
-                                || context.getTheme() == Theme.UNSPECIFIED;
+                        currentTheme == theme
+                                || currentTheme == Theme.UNSPECIFIED
+                                || op instanceof Theme; // always apply a theme setter
             }
             if (apply) {
-                op.apply(context);
+                boolean opIsDirty = op.isDirty();
+                if (opIsDirty || op instanceof PaintOperation) {
+                    if (opIsDirty && op instanceof VariableSupport) {
+                        op.markNotDirty();
+                        ((VariableSupport) op).updateVariables(context);
+                    }
+                    context.incrementOpCount();
+                    op.apply(context);
+                }
             }
         }
         if (context.getPaintContext().doesNeedsRepaint()
@@ -837,12 +1139,49 @@ public class CoreDocument {
             mRepaintNext = 1;
         }
         context.mMode = RemoteContext.ContextMode.UNSET;
-        // System.out.println(">>   " + (  System.nanoTime() - time)*1E-6f+" ms");
         if (DEBUG && mRootLayoutComponent != null) {
             System.out.println(mRootLayoutComponent.displayHierarchy());
         }
+        mLastOpCount = context.getLastOpCount();
     }
 
+    /**
+     * Get an estimated number of operations executed in a paint
+     *
+     * @return number of operations
+     */
+    public int getNumberOfOps() {
+        int count = mOperations.size();
+
+        for (Operation mOperation : mOperations) {
+            if (mOperation instanceof Component) {
+                count += getChildOps((Component) mOperation);
+            }
+        }
+        return count;
+    }
+
+    private int getChildOps(@NonNull Component base) {
+        int count = base.mList.size();
+        for (Operation mOperation : base.mList) {
+
+            if (mOperation instanceof Component) {
+                int mult = 1;
+                if (mOperation instanceof LoopOperation) {
+                    mult = ((LoopOperation) mOperation).estimateIterations();
+                }
+                count += mult * getChildOps((Component) mOperation);
+            }
+        }
+        return count;
+    }
+
+    /**
+     * Returns a list of useful statistics for the runtime document
+     *
+     * @return
+     */
+    @NonNull
     public String[] getStats() {
         ArrayList<String> ret = new ArrayList<>();
         WireBuffer buffer = new WireBuffer();
@@ -860,8 +1199,11 @@ public class CoreDocument {
 
             values[0] += 1;
             values[1] += sizeOfComponent(mOperation, buffer);
-            if (mOperation instanceof Component) {
-                Component com = (Component) mOperation;
+            if (mOperation instanceof Container) {
+                Container com = (Container) mOperation;
+                count += addChildren(com, map, buffer);
+            } else if (mOperation instanceof LoopOperation) {
+                LoopOperation com = (LoopOperation) mOperation;
                 count += addChildren(com, map, buffer);
             }
         }
@@ -875,7 +1217,7 @@ public class CoreDocument {
         return ret.toArray(new String[0]);
     }
 
-    private int sizeOfComponent(Operation com, WireBuffer tmp) {
+    private int sizeOfComponent(@NonNull Operation com, @NonNull WireBuffer tmp) {
         tmp.reset(100);
         com.write(tmp);
         int size = tmp.getSize();
@@ -883,9 +1225,10 @@ public class CoreDocument {
         return size;
     }
 
-    private int addChildren(Component base, HashMap<String, int[]> map, WireBuffer tmp) {
-        int count = base.mList.size();
-        for (Operation mOperation : base.mList) {
+    private int addChildren(
+            @NonNull Container base, @NonNull HashMap<String, int[]> map, @NonNull WireBuffer tmp) {
+        int count = base.getList().size();
+        for (Operation mOperation : base.getList()) {
             Class<? extends Operation> c = mOperation.getClass();
             int[] values;
             if (map.containsKey(c.getSimpleName())) {
@@ -896,36 +1239,79 @@ public class CoreDocument {
             }
             values[0] += 1;
             values[1] += sizeOfComponent(mOperation, tmp);
-            if (mOperation instanceof Component) {
-                count += addChildren((Component) mOperation, map, tmp);
+            if (mOperation instanceof Container) {
+                count += addChildren((Container) mOperation, map, tmp);
             }
         }
         return count;
     }
 
+    /**
+     * Returns a string representation of the operations, traversing the list of operations &
+     * containers
+     *
+     * @return
+     */
+    @NonNull
     public String toNestedString() {
         StringBuilder ret = new StringBuilder();
         for (Operation mOperation : mOperations) {
             ret.append(mOperation.toString());
             ret.append("\n");
-            if (mOperation instanceof Component) {
-                toNestedString((Component) mOperation, ret, "  ");
+            if (mOperation instanceof Container) {
+                toNestedString((Container) mOperation, ret, "  ");
             }
         }
         return ret.toString();
     }
 
-    private void toNestedString(Component base, StringBuilder ret, String indent) {
-        for (Operation mOperation : base.mList) {
-            ret.append(mOperation.toString());
-            ret.append("\n");
-            if (mOperation instanceof Component) {
-                toNestedString((Component) mOperation, ret, indent + "  ");
+    private void toNestedString(
+            @NonNull Container base, @NonNull StringBuilder ret, String indent) {
+        for (Operation mOperation : base.getList()) {
+            for (String line : mOperation.toString().split("\n")) {
+                ret.append(indent);
+                ret.append(line);
+                ret.append("\n");
+            }
+            if (mOperation instanceof Container) {
+                toNestedString((Container) mOperation, ret, indent + "  ");
             }
         }
     }
 
+    @NonNull
     public List<Operation> getOperations() {
         return mOperations;
+    }
+
+    /** defines if a shader can be run */
+    public interface ShaderControl {
+        /**
+         * validate if a shader can run in the document
+         *
+         * @param shader the source of the shader
+         * @return true if the shader is allowed to run
+         */
+        boolean isShaderValid(String shader);
+    }
+
+    /**
+     * validate the shaders
+     *
+     * @param context the remote context
+     * @param ctl the call back to allow evaluation of shaders
+     */
+    public void checkShaders(RemoteContext context, ShaderControl ctl) {
+        for (Operation op : mOperations) {
+            if (op instanceof TextData) {
+                op.apply(context);
+            }
+            if (op instanceof ShaderData) {
+                ShaderData sd = (ShaderData) op;
+                int id = sd.getShaderTextId();
+                String str = context.getText(id);
+                sd.enable(ctl.isShaderValid(str));
+            }
+        }
     }
 }

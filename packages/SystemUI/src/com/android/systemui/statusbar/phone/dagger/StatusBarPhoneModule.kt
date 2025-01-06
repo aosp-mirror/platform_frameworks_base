@@ -30,12 +30,17 @@ import com.android.systemui.statusbar.core.StatusBarInitializer
 import com.android.systemui.statusbar.core.StatusBarInitializerImpl
 import com.android.systemui.statusbar.core.StatusBarInitializerStore
 import com.android.systemui.statusbar.core.StatusBarOrchestrator
-import com.android.systemui.statusbar.core.StatusBarSimpleFragment
+import com.android.systemui.statusbar.core.StatusBarRootModernization
+import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore
 import com.android.systemui.statusbar.data.repository.PrivacyDotViewControllerStoreModule
 import com.android.systemui.statusbar.data.repository.PrivacyDotWindowControllerStoreModule
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerStore
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore
 import com.android.systemui.statusbar.events.PrivacyDotViewControllerModule
+import com.android.systemui.statusbar.phone.AutoHideControllerStore
 import com.android.systemui.statusbar.phone.CentralSurfacesCommandQueueCallbacks
+import com.android.systemui.statusbar.phone.MultiDisplayAutoHideControllerStore
+import com.android.systemui.statusbar.phone.SingleDisplayAutoHideControllerStore
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStore
 import com.android.systemui.statusbar.window.data.repository.StatusBarWindowStateRepositoryStoreImpl
@@ -87,7 +92,7 @@ interface StatusBarPhoneModule {
             return if (StatusBarConnectedDisplays.isEnabled) {
                 // Will be started through MultiDisplayStatusBarStarter
                 CoreStartable.NOP
-            } else if (StatusBarSimpleFragment.isEnabled) {
+            } else if (StatusBarRootModernization.isEnabled) {
                 defaultInitializerLazy.get()
             } else {
                 // Will be started through CentralSurfaces
@@ -104,10 +109,14 @@ interface StatusBarPhoneModule {
             implFactory: StatusBarInitializerImpl.Factory,
             statusBarWindowControllerStore: StatusBarWindowControllerStore,
             statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
+            statusBarConfigurationControllerStore: StatusBarConfigurationControllerStore,
+            darkIconDispatcherStore: DarkIconDispatcherStore,
         ): StatusBarInitializerImpl {
             return implFactory.create(
                 statusBarWindowControllerStore.defaultDisplay,
                 statusBarModeRepositoryStore.defaultDisplay,
+                statusBarConfigurationControllerStore.defaultDisplay,
+                darkIconDispatcherStore.defaultDisplay,
             )
         }
 
@@ -120,6 +129,7 @@ interface StatusBarPhoneModule {
             statusBarModeRepositoryStore: StatusBarModeRepositoryStore,
             initializerStore: StatusBarInitializerStore,
             statusBarWindowControllerStore: StatusBarWindowControllerStore,
+            autoHideControllerStore: AutoHideControllerStore,
             statusBarOrchestratorFactory: StatusBarOrchestrator.Factory,
         ): StatusBarOrchestrator {
             return statusBarOrchestratorFactory.create(
@@ -129,6 +139,7 @@ interface StatusBarPhoneModule {
                 statusBarModeRepositoryStore.defaultDisplay,
                 initializerStore.defaultDisplay,
                 statusBarWindowControllerStore.defaultDisplay,
+                autoHideControllerStore.defaultDisplay,
             )
         }
 
@@ -184,6 +195,33 @@ interface StatusBarPhoneModule {
                 multiDisplayStoreLazy.get()
             } else {
                 singleDisplayStoreLazy.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        fun autoHideStore(
+            singleDisplayLazy: Lazy<SingleDisplayAutoHideControllerStore>,
+            multiDisplayLazy: Lazy<MultiDisplayAutoHideControllerStore>,
+        ): AutoHideControllerStore {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayLazy.get()
+            } else {
+                singleDisplayLazy.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(AutoHideControllerStore::class)
+        fun storeAsCoreStartable(
+            multiDisplayLazy: Lazy<MultiDisplayAutoHideControllerStore>
+        ): CoreStartable {
+            return if (StatusBarConnectedDisplays.isEnabled) {
+                multiDisplayLazy.get()
+            } else {
+                CoreStartable.NOP
             }
         }
     }

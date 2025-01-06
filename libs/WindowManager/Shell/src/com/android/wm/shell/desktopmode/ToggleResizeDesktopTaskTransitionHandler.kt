@@ -30,8 +30,8 @@ import android.window.WindowContainerTransaction
 import androidx.core.animation.addListener
 import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE
 import com.android.wm.shell.transition.Transitions
-import com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE
 import com.android.wm.shell.windowdecor.OnTaskResizeAnimationListener
 import java.util.function.Supplier
 
@@ -39,7 +39,7 @@ import java.util.function.Supplier
 class ToggleResizeDesktopTaskTransitionHandler(
     private val transitions: Transitions,
     private val transactionSupplier: Supplier<SurfaceControl.Transaction>,
-    private val interactionJankMonitor: InteractionJankMonitor
+    private val interactionJankMonitor: InteractionJankMonitor,
 ) : Transitions.TransitionHandler {
 
     private val rectEvaluator = RectEvaluator(Rect())
@@ -50,16 +50,16 @@ class ToggleResizeDesktopTaskTransitionHandler(
 
     constructor(
         transitions: Transitions,
-        interactionJankMonitor: InteractionJankMonitor
+        interactionJankMonitor: InteractionJankMonitor,
     ) : this(transitions, Supplier { SurfaceControl.Transaction() }, interactionJankMonitor)
 
     /**
      * Starts a quick resize transition.
      *
-     *  @param wct WindowContainerTransaction that will update core about the task changes applied
-     *  @param taskLeashBounds current bounds of the task leash (Note: not guaranteed to be the
-     *                         bounds of the actual task). This is provided so that the animation
-     *                         resizing can begin where the task leash currently is for smoother UX.
+     * @param wct WindowContainerTransaction that will update core about the task changes applied
+     * @param taskLeashBounds current bounds of the task leash (Note: not guaranteed to be the
+     *   bounds of the actual task). This is provided so that the animation resizing can begin where
+     *   the task leash currently is for smoother UX.
      */
     fun startTransition(wct: WindowContainerTransaction, taskLeashBounds: Rect? = null) {
         transitions.startTransition(TRANSIT_DESKTOP_MODE_TOGGLE_RESIZE, wct, this)
@@ -75,7 +75,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
-        finishCallback: Transitions.TransitionFinishCallback
+        finishCallback: Transitions.TransitionFinishCallback,
     ): Boolean {
         val change = findRelevantChange(info)
         val leash = change.leash
@@ -95,7 +95,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                                 .setPosition(
                                     leash,
                                     startBounds.left.toFloat(),
-                                    startBounds.top.toFloat()
+                                    startBounds.top.toFloat(),
                                 )
                                 .setWindowCrop(leash, startBounds.width(), startBounds.height())
                                 .show(leash)
@@ -110,7 +110,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
                                 .setPosition(
                                     leash,
                                     endBounds.left.toFloat(),
-                                    endBounds.top.toFloat()
+                                    endBounds.top.toFloat(),
                                 )
                                 .setWindowCrop(leash, endBounds.width(), endBounds.height())
                                 .show(leash)
@@ -119,8 +119,9 @@ class ToggleResizeDesktopTaskTransitionHandler(
                             initialBounds = null
                             boundsAnimator = null
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_MAXIMIZE_WINDOW)
+                            interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW)
                             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_SNAP_RESIZE)
-                        }
+                        },
                     )
                     addUpdateListener { anim ->
                         val rect = anim.animatedValue as Rect
@@ -137,7 +138,7 @@ class ToggleResizeDesktopTaskTransitionHandler(
 
     override fun handleRequest(
         transition: IBinder,
-        request: TransitionRequestInfo
+        request: TransitionRequestInfo,
     ): WindowContainerTransaction? {
         return null
     }

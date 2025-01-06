@@ -73,8 +73,8 @@ constructor(private val userManager: UserManager, dumpManager: DumpManager) :
     private val cache = NotifCollectionCache<Boolean>()
 
     override fun shouldShowAppIcon(notification: StatusBarNotification, context: Context): Boolean {
-        val packageContext = notification.getPackageContext(context)
         return cache.getOrFetch(notification.packageName) {
+            val packageContext = notification.getPackageContext(context)
             !belongsToHeadlessSystemApp(packageContext)
         }
     }

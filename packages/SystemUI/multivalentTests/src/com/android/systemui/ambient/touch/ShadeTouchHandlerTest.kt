@@ -127,6 +127,7 @@ class ShadeTouchHandlerTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Test
     @DisableFlags(
         Flags.FLAG_COMMUNAL_HUB,
+        Flags.FLAG_GLANCEABLE_HUB_V2,
         Flags.FLAG_HUBMODE_FULLSCREEN_VERTICAL_SWIPE_FIX,
         Flags.FLAG_SCENE_CONTAINER,
     )

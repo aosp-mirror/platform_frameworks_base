@@ -109,6 +109,7 @@ static struct {
     // Valid only if an AudioDevicePort
     jfieldID    mType;
     jfieldID    mAddress;
+    jfieldID mSpeakerLayoutChannelMask;
     // other fields unused by JNI
 } gAudioPortFields;
 
@@ -1084,6 +1085,8 @@ static jint convertAudioPortConfigToNativeWithDevicePort(JNIEnv *env,
     strncpy(nAudioPortConfig->ext.device.address,
             nDeviceAddress, AUDIO_DEVICE_MAX_ADDRESS_LEN - 1);
     env->ReleaseStringUTFChars(jDeviceAddress, nDeviceAddress);
+    nAudioPortConfig->ext.device.speaker_layout_channel_mask = outChannelMaskToNative(
+            env->GetIntField(jAudioDevicePort, gAudioPortFields.mSpeakerLayoutChannelMask));
     env->DeleteLocalRef(jDeviceAddress);
     env->DeleteLocalRef(jAudioDevicePort);
     return jStatus;
@@ -1541,10 +1544,12 @@ static jint convertAudioPortFromNative(JNIEnv *env, ScopedLocalRef<jobject> *jAu
                                                            .encapsulation_metadata_types));
         ALOGV("convertAudioPortFromNative is a device %08x", nAudioPort->ext.device.type);
         ScopedLocalRef<jstring> jAddress(env, env->NewStringUTF(nAudioPort->ext.device.address));
+        int speakerLayoutChannelMask = outChannelMaskFromNative(
+                nAudioPort->active_config.ext.device.speaker_layout_channel_mask);
         jAudioPort->reset(env->NewObject(gAudioDevicePortClass, gAudioDevicePortCstor,
                                          jHandle.get(), jDeviceName.get(), jAudioProfiles.get(),
                                          jGains.get(), nAudioPort->ext.device.type, jAddress.get(),
-                                         jEncapsulationModes.get(),
+                                         speakerLayoutChannelMask, jEncapsulationModes.get(),
                                          jEncapsulationMetadataTypes.get(),
                                          jAudioDescriptors.get()));
     } else if (nAudioPort->type == AUDIO_PORT_TYPE_MIX) {
@@ -3705,14 +3710,15 @@ int register_android_media_AudioSystem(JNIEnv *env)
     gAudioDevicePortCstor =
             GetMethodIDOrDie(env, audioDevicePortClass, "<init>",
                              "(Landroid/media/AudioHandle;Ljava/lang/String;Ljava/util/List;"
-                             "[Landroid/media/AudioGain;ILjava/lang/String;[I[I"
+                             "[Landroid/media/AudioGain;ILjava/lang/String;I[I[I"
                              "Ljava/util/List;)V");
 
     // When access AudioPort as AudioDevicePort
     gAudioPortFields.mType = GetFieldIDOrDie(env, audioDevicePortClass, "mType", "I");
     gAudioPortFields.mAddress = GetFieldIDOrDie(env, audioDevicePortClass, "mAddress",
             "Ljava/lang/String;");
-
+    gAudioPortFields.mSpeakerLayoutChannelMask =
+            GetFieldIDOrDie(env, audioDevicePortClass, "mSpeakerLayoutChannelMask", "I");
     jclass audioMixPortClass = FindClassOrDie(env, "android/media/AudioMixPort");
     gAudioMixPortClass = MakeGlobalRefOrDie(env, audioMixPortClass);
     gAudioMixPortCstor =

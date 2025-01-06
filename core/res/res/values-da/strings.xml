@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Standarder for opkalds-id til begrænset. Næste opkald: Ikke begrænset"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Begrænset"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Standarder for opkalds-id til ikke begrænset. Næste opkald: Ikke begrænset"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Denne app er ikke kompatibel med sidestørrelser på 16 kB. Tjek af APK-afstemning mislykkedes. Denne app køres i kompatibilitetstilstand for sidestørrelse. Kompiler appen igen, så den understøtter 16 kB, for at opnå bedst mulig kompatibilitet. Få flere oplysninger på &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Denne app er ikke kompatibel med sidestørrelser på 16 kB. Tjek af ELF-afstemning mislykkedes. Denne app køres i kompatibilitetstilstand for sidestørrelse. Kompiler appen igen, så den understøtter 16 kB, for at opnå bedst mulig kompatibilitet. Få flere oplysninger på &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Denne app er ikke kompatibel med sidestørrelser på 16 kB. Tjek af APK- og ELF-afstemning mislykkedes. Denne app køres i kompatibilitetstilstand for sidestørrelse. Kompiler appen igen, så den understøtter 16 kB, for at opnå bedst mulig kompatibilitet. Få flere oplysninger på &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Tjenesten provisioneres ikke."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Du kan ikke ændre indstillingen for opkalds-id\'et."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Der blev skiftet til <xliff:g id="CARRIERDISPLAY">%s</xliff:g>-data"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Der er ingen forbindelse til mobilnetværket"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prøv at skifte dit foretrukne netværk. Tryk for skifte."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Det er ikke muligt at foretage nødopkald"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Nødopkald kræver adgang til et mobilnetværk"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Underretninger"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Viderestilling af opkald"</string>
@@ -563,7 +568,7 @@
     <string name="permlab_accessHiddenProfile" msgid="8607094418491556823">"Adgang til skjulte profiler"</string>
     <string name="permdesc_accessHiddenProfile" msgid="1543153202481009676">"Giver appen adgang til skjulte profiler."</string>
     <string name="permlab_setWallpaperHints" msgid="1153485176642032714">"ændre størrelsen på din baggrund"</string>
-    <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Tillader, at appen giver tips til systembaggrundens størrelse."</string>
+    <string name="permdesc_setWallpaperHints" msgid="6257053376990044668">"Tillader, at appen giver tip til systembaggrundens størrelse."</string>
     <string name="permlab_setTimeZone" msgid="7922618798611542432">"angive tidszone"</string>
     <string name="permdesc_setTimeZone" product="tablet" msgid="1788868809638682503">"Tillader, at appen kan ændre tidszonen på din tablet."</string>
     <string name="permdesc_setTimeZone" product="tv" msgid="9069045914174455938">"Tillader, at appen kan ændre tidszonen på din Android TV-enhed."</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Tillad, at appen fastlægger den relative position mellem UWB-enheder (Ultra-Wideband) i nærheden"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"interagere med Wi‑Fi-enheder i nærheden"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Giver appen tilladelse til at informere om, oprette forbindelse til og fastslå den relative placering af Wi‑Fi-enheder i nærheden"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"fastlægge relativ position mellem enheder i nærheden"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Tillad, at appen fastlægger den relative position mellem enheder i nærheden"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Foretrukne oplysninger vedrørende NFC-betalingstjeneste"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Tillader, at appen får foretrukne oplysninger vedrørende NFC-betalingstjeneste, f.eks. registrerede hjælpemidler og rutedestinationer."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"administrere Near Field Communication"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"om <xliff:g id="COUNT">%d</xliff:g> t."</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"om <xliff:g id="COUNT">%d</xliff:g> d."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> min. siden"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> t. siden"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> d. siden"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> år siden"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min."</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> t."</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> år"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"om <xliff:g id="COUNT">%d</xliff:g> min."</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"om <xliff:g id="COUNT">%d</xliff:g> t."</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"om <xliff:g id="COUNT">%d</xliff:g> d."</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"om <xliff:g id="COUNT">%d</xliff:g> år"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> min. siden"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> t. siden"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> d. siden"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> år siden"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{For # minut siden}one{For # minut siden}other{For # minutter siden}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# time siden}one{# time siden}other{# timer siden}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{1 dag siden}one{1 dag siden}other{# dag siden}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Enhåndstilstand"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ekstra dæmpet belysning"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Høreapparater"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Lydstyrkeknapperne blev holdt nede. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> er aktiveret."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Lydstyrkeknapperne blev holdt nede. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> er deaktiveret."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Slip lydstyrkeknapperne. Du kan aktivere <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ved at holde begge lydstyrkeknapper nede igen i 3 sekunder."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Weekend"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Begivenhed"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Sover"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Forstyr ikke (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Administreres af <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Til"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Fra"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>-<xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> til <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g> kl. <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Alle kalendere"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> slår nogle lyde fra"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Der er et internt problem med enheden, og den vil muligvis være ustabil, indtil du gendanner fabriksdataene."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Send og modtag beskeder uden et mobil- eller Wi-Fi-netværk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Åbn Beskeder"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Sådan fungerer det"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Aktivér \"Vælg netværk automatisk\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Aktivér \"Vælg netværk automatisk\" under Indstillinger, så din telefon kan finde et netværk, der fungerer sammen med satellit"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Aktivér"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Gå tilbage"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Afventer…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS-meldinger via satellit er nu tilgængelig"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Du kan sende beskeder til nødtjenester, hvis du ikke har forbindelse til et mobil- eller Wi-Fi-netværk. Google Beskeder skal være din standardapp til beskeder."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"SOS-meldinger via satellit understøttes ikke"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"SOS-meldinger via satellit understøttes ikke på denne enhed"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"SOS-meldinger via satellit er ikke konfigureret"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Sørg for, at du har forbindelse til internettet, og prøv at konfigurere igen"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS-meldinger via satellit er ikke tilgængelig"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS-meldinger via satellit er ikke tilgængelig i dette land eller denne region"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"SOS-meldinger via satellit er ikke konfigureret"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Hvis du vil sende beskeder via satellit, skal du angive Google Beskeder som din standardapp til beskeder"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS-meldinger via satellit er ikke tilgængelig"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Hvis du vil tjekke, om SOS-meldinger via satellit er tilgængelig i dette land eller denne region, skal du aktivere lokationsindstillinger"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Satellitbeskeder er tilgængelige"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Du kan sende beskeder via satellit, hvis du ikke har forbindelse til et mobil- eller Wi-Fi-netværk. Google Beskeder skal være din standardapp til beskeder."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Satellitbeskeder understøttes ikke"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Satellitbeskeder understøttes ikke på denne enhed"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Satellitbeskeder er ikke konfigureret"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Sørg for, at du har forbindelse til internettet, og prøv at konfigurere igen"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Satellitbeskeder er ikke tilgængelige"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Satellitbeskeder er ikke tilgængelige i dette land eller denne region"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Satellitbeskeder er ikke konfigureret"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Hvis du vil sende beskeder via satellit, skal du angive Google Beskeder som din standardapp til beskeder"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Satellitbeskeder er ikke tilgængelige"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Hvis du vil tjekke, om satellitbeskeder er tilgængelige i dette land eller denne region, skal du aktivere lokationsindstillinger"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfigurer fingeroplåsning igen"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> kan ikke længere genkendes."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> og <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> kan ikke længere genkendes."</string>
@@ -2454,7 +2506,7 @@
     <string name="keyboard_shortcut_group_applications_sms" msgid="3523799286376321137">"Sms"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="2051507523525651067">"Musik"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="3571770335653387606">"Kalender"</string>
-    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Lommeregner"</string>
+    <string name="keyboard_shortcut_group_applications_calculator" msgid="6753209559716091507">"Lomme­regner"</string>
     <string name="keyboard_shortcut_group_applications_maps" msgid="7950000659522589471">"Kort"</string>
     <string name="keyboard_shortcut_group_applications" msgid="3010389163951364798">"Apps"</string>
     <string name="fingerprint_loe_notification_msg" msgid="3927447270148854546">"Dine fingeraftryk kan ikke længere genkendes. Konfigurer fingeroplåsning igen."</string>

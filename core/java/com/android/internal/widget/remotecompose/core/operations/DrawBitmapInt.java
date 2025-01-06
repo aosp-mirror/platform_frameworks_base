@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -22,11 +24,12 @@ import com.android.internal.widget.remotecompose.core.PaintOperation;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Operation to draw a given cached bitmap */
-public class DrawBitmapInt extends PaintOperation {
+public class DrawBitmapInt extends PaintOperation implements AccessibleComponent {
     private static final int OP_CODE = Operations.DRAW_BITMAP_INT;
     private static final String CLASS_NAME = "DrawBitmapInt";
     int mImageId;
@@ -64,7 +67,7 @@ public class DrawBitmapInt extends PaintOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mImageId,
@@ -79,6 +82,7 @@ public class DrawBitmapInt extends PaintOperation {
                 mContentDescId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DRAW_BITMAP_INT "
@@ -103,16 +107,32 @@ public class DrawBitmapInt extends PaintOperation {
                 + ";";
     }
 
+    @Override
+    public Integer getContentDescriptionId() {
+        return mContentDescId;
+    }
+
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int imageId,
             int srcLeft,
             int srcTop,
@@ -136,7 +156,13 @@ public class DrawBitmapInt extends PaintOperation {
         buffer.writeInt(cdId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int imageId = buffer.readInt();
         int sLeft = buffer.readInt();
         int srcTop = buffer.readInt();
@@ -155,7 +181,12 @@ public class DrawBitmapInt extends PaintOperation {
         operations.add(op);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap using integer coordinates")
                 .field(DocumentedOperation.INT, "id", "id of bitmap")
@@ -171,7 +202,7 @@ public class DrawBitmapInt extends PaintOperation {
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.drawBitmap(
                 mImageId,
                 mSrcLeft,

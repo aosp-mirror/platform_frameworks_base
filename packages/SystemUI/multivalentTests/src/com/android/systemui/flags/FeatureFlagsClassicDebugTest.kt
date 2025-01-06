@@ -28,11 +28,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_SYSUI_TEAMFOOD
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.FakeUserTracker
+import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.GlobalSettings
+import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.io.PrintWriter
 import java.io.Serializable
@@ -68,6 +70,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
     @Mock private lateinit var systemProperties: SystemPropertiesHelper
     @Mock private lateinit var resources: Resources
     @Mock private lateinit var restarter: Restarter
+    private lateinit var fakeExecutor: FakeExecutor
     private lateinit var userTracker: FakeUserTracker
     private val flagMap = mutableMapOf<String, Flag<*>>()
     private lateinit var broadcastReceiver: BroadcastReceiver
@@ -83,6 +86,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
         flagMap.put(teamfoodableFlagA.name, teamfoodableFlagA)
         flagMap.put(releasedFlagB.name, releasedFlagB)
 
+        fakeExecutor = FakeExecutor(FakeSystemClock())
         userTracker = FakeUserTracker(onCreateCurrentUserContext = { mockContext })
 
         mFeatureFlagsClassicDebug =
@@ -95,7 +99,8 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
                 serverFlagReader,
                 flagMap,
                 restarter,
-                userTracker
+                userTracker,
+                fakeExecutor,
             )
         mFeatureFlagsClassicDebug.init()
         verify(flagManager).onSettingsChangedAction = any()
@@ -325,14 +330,14 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
         // trying to erase an id not in the map does nothing
         broadcastReceiver.onReceive(
             mockContext,
-            Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_NAME, "")
+            Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_NAME, ""),
         )
         verifyNoMoreInteractions(flagManager, globalSettings)
 
         // valid id with no value puts empty string in the setting
         broadcastReceiver.onReceive(
             mockContext,
-            Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_NAME, "1")
+            Intent(FlagManager.ACTION_SET_FLAG).putExtra(FlagManager.EXTRA_NAME, "1"),
         )
         verifyPutData("1", "", numReads = 0)
     }
@@ -415,7 +420,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
         serverFlagReader.setFlagValue(
             teamfoodableFlagA.namespace,
             teamfoodableFlagA.name,
-            !teamfoodableFlagA.default
+            !teamfoodableFlagA.default,
         )
         verify(restarter, never()).restartSystemUI(anyString())
     }
@@ -428,7 +433,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
         serverFlagReader.setFlagValue(
             teamfoodableFlagA.namespace,
             teamfoodableFlagA.name,
-            !teamfoodableFlagA.default
+            !teamfoodableFlagA.default,
         )
         verify(restarter).restartSystemUI(anyString())
     }
@@ -441,7 +446,7 @@ class FeatureFlagsClassicDebugTest : SysuiTestCase() {
         serverFlagReader.setFlagValue(
             teamfoodableFlagA.namespace,
             teamfoodableFlagA.name,
-            teamfoodableFlagA.default
+            teamfoodableFlagA.default,
         )
         verify(restarter, never()).restartSystemUI(anyString())
     }

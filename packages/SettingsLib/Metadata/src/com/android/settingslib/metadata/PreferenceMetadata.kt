@@ -22,7 +22,6 @@ import android.os.Bundle
 import androidx.annotation.AnyThread
 import androidx.annotation.DrawableRes
 import androidx.annotation.StringRes
-import androidx.fragment.app.Fragment
 
 /**
  * Interface provides preference metadata (title, summary, icon, etc.).
@@ -107,20 +106,11 @@ interface PreferenceMetadata {
      *
      * UI framework normally does not allow user to interact with the preference widget when it is
      * disabled.
-     *
-     * [dependencyOfEnabledState] is provided to support dependency, the [shouldDisableDependents]
-     * value of dependent preference is used to decide enabled state.
      */
-    fun isEnabled(context: Context): Boolean {
-        val dependency = dependencyOfEnabledState(context) ?: return true
-        return !dependency.shouldDisableDependents(context)
-    }
+    fun isEnabled(context: Context): Boolean = true
 
-    /** Returns the key of depended preference to decide the enabled state. */
-    fun dependencyOfEnabledState(context: Context): PreferenceMetadata? = null
-
-    /** Returns whether this preference's dependents should be disabled. */
-    fun shouldDisableDependents(context: Context): Boolean = !isEnabled(context)
+    /** Returns the keys of depended preferences. */
+    fun dependencies(context: Context): Array<String> = arrayOf()
 
     /** Returns if the preference is persistent in datastore. */
     fun isPersistent(context: Context): Boolean = this is PersistentPreference<*>
@@ -174,49 +164,8 @@ interface PreferenceMetadata {
 }
 
 /** Metadata of preference group. */
+@AnyThread interface PreferenceGroup : PreferenceMetadata
+
+/** Metadata of preference category. */
 @AnyThread
-open class PreferenceGroup(override val key: String, override val title: Int) : PreferenceMetadata
-
-/** Metadata of preference screen. */
-@AnyThread
-interface PreferenceScreenMetadata : PreferenceMetadata {
-
-    /**
-     * The screen title resource, which precedes [getScreenTitle] if provided.
-     *
-     * By default, screen title is same with [title].
-     */
-    val screenTitle: Int
-        get() = title
-
-    /** Returns dynamic screen title, use [screenTitle] whenever possible. */
-    fun getScreenTitle(context: Context): CharSequence? = null
-
-    /** Returns the fragment class to show the preference screen. */
-    fun fragmentClass(): Class<out Fragment>?
-
-    /**
-     * Indicates if [getPreferenceHierarchy] returns a complete hierarchy of the preference screen.
-     *
-     * If `true`, the result of [getPreferenceHierarchy] will be used to inflate preference screen.
-     * Otherwise, it is an intermediate state called hybrid mode, preference hierarchy is
-     * represented by other ways (e.g. XML resource) and [PreferenceMetadata]s in
-     * [getPreferenceHierarchy] will only be used to bind UI widgets.
-     */
-    fun hasCompleteHierarchy(): Boolean = true
-
-    /**
-     * Returns the hierarchy of preference screen.
-     *
-     * The implementation MUST include all preferences into the hierarchy regardless of the runtime
-     * conditions. DO NOT check any condition (except compile time flag) before adding a preference.
-     */
-    fun getPreferenceHierarchy(context: Context): PreferenceHierarchy
-
-    /**
-     * Returns the [Intent] to show current preference screen.
-     *
-     * @param metadata the preference to locate when show the screen
-     */
-    fun getLaunchIntent(context: Context, metadata: PreferenceMetadata?): Intent? = null
-}
+open class PreferenceCategory(override val key: String, override val title: Int) : PreferenceGroup

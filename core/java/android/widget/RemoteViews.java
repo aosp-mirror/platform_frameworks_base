@@ -20,6 +20,8 @@ import static android.appwidget.flags.Flags.FLAG_DRAW_DATA_PARCEL;
 import static android.appwidget.flags.Flags.FLAG_REMOTE_VIEWS_PROTO;
 import static android.appwidget.flags.Flags.drawDataParcel;
 import static android.appwidget.flags.Flags.remoteAdapterConversion;
+import static android.content.res.Flags.FLAG_SELF_TARGETING_ANDROID_RESOURCE_FRRO;
+import static android.util.TypedValue.TYPE_INT_COLOR_ARGB8;
 import static android.util.proto.ProtoInputStream.NO_MORE_FIELDS;
 import static android.view.inputmethod.Flags.FLAG_HOME_SCREEN_HANDWRITING_DELEGATOR;
 
@@ -46,6 +48,7 @@ import android.app.LoadedApk;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.appwidget.AppWidgetHostView;
+import android.appwidget.AppWidgetManager.ServiceCollectionCache;
 import android.appwidget.flags.Flags;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
@@ -53,7 +56,10 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.IntentSender;
-import android.content.ServiceConnection;
+import android.content.om.FabricatedOverlay;
+import android.content.om.OverlayInfo;
+import android.content.om.OverlayManager;
+import android.content.om.OverlayManagerTransaction;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.ColorStateList;
@@ -77,7 +83,6 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.IBinder;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
@@ -122,6 +127,7 @@ import android.widget.CompoundButton.OnCheckedChangeListener;
 import com.android.internal.R;
 import com.android.internal.util.Preconditions;
 import com.android.internal.widget.IRemoteViewsFactory;
+import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.operations.Theme;
 import com.android.internal.widget.remotecompose.player.RemoteComposeDocument;
 import com.android.internal.widget.remotecompose.player.RemoteComposePlayer;
@@ -1293,7 +1299,13 @@ public class RemoteViews implements Parcelable, Filter {
 
         @Override
         public void visitUris(@NonNull Consumer<Uri> visitor) {
-            if (mIntentId != -1 || mItems == null) {
+            if (mItems == null) {
+                // Null item indicates adapter conversion took place, so the URIs in cached items
+                // need to be validated.
+                RemoteCollectionItems cachedItems = mCollectionCache.getItemsForId(mIntentId);
+                if (cachedItems != null) {
+                    cachedItems.visitUris(visitor);
+                }
                 return;
             }
 
@@ -1379,8 +1391,10 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * @hide
      */
-    public CompletableFuture<Void> collectAllIntents(int bitmapSizeLimit) {
-        return mCollectionCache.collectAllIntentsNoComplete(this, bitmapSizeLimit);
+    public CompletableFuture<Void> collectAllIntents(int bitmapSizeLimit,
+            @NonNull ServiceCollectionCache collectionCache) {
+        return mCollectionCache.collectAllIntentsNoComplete(this, bitmapSizeLimit,
+                collectionCache);
     }
 
     private class RemoteCollectionCache {
@@ -1434,7 +1448,8 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         public @NonNull CompletableFuture<Void> collectAllIntentsNoComplete(
-                @NonNull RemoteViews inViews, int bitmapSizeLimit) {
+                @NonNull RemoteViews inViews, int bitmapSizeLimit,
+                @NonNull ServiceCollectionCache collectionCache) {
             SparseArray<Intent> idToIntentMapping = new SparseArray<>();
             // Collect the number of uinque Intent (which is equal to the number of new connections
             // to make) for size allocation and exclude certain collections from being written to
@@ -1466,7 +1481,7 @@ public class RemoteViews implements Parcelable, Filter {
                     / numOfIntents;
 
             return connectAllUniqueIntents(individualSize, individualBitmapSizeLimit,
-                    idToIntentMapping);
+                    idToIntentMapping, collectionCache);
         }
 
         private void collectAllIntentsInternal(@NonNull RemoteViews inViews,
@@ -1532,13 +1547,14 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         private @NonNull CompletableFuture<Void> connectAllUniqueIntents(int individualSize,
-                int individualBitmapSize, @NonNull SparseArray<Intent> idToIntentMapping) {
+                int individualBitmapSize, @NonNull SparseArray<Intent> idToIntentMapping,
+                @NonNull ServiceCollectionCache collectionCache) {
             List<CompletableFuture<Void>> intentFutureList = new ArrayList<>();
             for (int i = 0; i < idToIntentMapping.size(); i++) {
                 String currentIntentUri = mIdToUriMapping.get(idToIntentMapping.keyAt(i));
                 Intent currentIntent = idToIntentMapping.valueAt(i);
                 intentFutureList.add(getItemsFutureFromIntentWithTimeout(currentIntent,
-                        individualSize, individualBitmapSize)
+                        individualSize, individualBitmapSize, collectionCache)
                         .thenAccept(items -> {
                             items.setHierarchyRootData(getHierarchyRootData());
                             mUriToCollectionMapping.put(currentIntentUri, items);
@@ -1549,7 +1565,8 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         private static CompletableFuture<RemoteCollectionItems> getItemsFutureFromIntentWithTimeout(
-                Intent intent, int individualSize, int individualBitmapSize) {
+                Intent intent, int individualSize, int individualBitmapSize,
+                @NonNull ServiceCollectionCache collectionCache) {
             if (intent == null) {
                 Log.e(LOG_TAG, "Null intent received when generating adapter future");
                 return CompletableFuture.completedFuture(new RemoteCollectionItems
@@ -1559,39 +1576,34 @@ public class RemoteViews implements Parcelable, Filter {
             final Context context = ActivityThread.currentApplication();
 
             final CompletableFuture<RemoteCollectionItems> result = new CompletableFuture<>();
-            context.bindService(intent, Context.BindServiceFlags.of(Context.BIND_AUTO_CREATE),
-                    result.defaultExecutor(), new ServiceConnection() {
-                        @Override
-                        public void onServiceConnected(ComponentName componentName,
-                                IBinder iBinder) {
-                            RemoteCollectionItems items;
-                            try {
-                                items = IRemoteViewsFactory.Stub.asInterface(iBinder)
-                                        .getRemoteCollectionItems(individualSize,
-                                                individualBitmapSize);
-                            } catch (RemoteException re) {
-                                items = new RemoteCollectionItems.Builder().build();
-                                Log.e(LOG_TAG, "Error getting collection items from the"
-                                        + " factory", re);
-                            } finally {
-                                context.unbindService(this);
-                            }
+            String contextPackageName = context.getPackageName();
+            ComponentName intentComponent = intent.getComponent();
+            if (contextPackageName != null
+                    && intentComponent != null
+                    && (!contextPackageName.equals(intentComponent.getPackageName()))) {
+                // We shouldn't allow for connections to other packages
+                result.complete(new RemoteCollectionItems.Builder().build());
+                return result;
+            }
 
-                            if (items == null) {
-                                items = new RemoteCollectionItems.Builder().build();
-                            }
+            collectionCache.connectAndConsume(intent, iBinder -> {
+                RemoteCollectionItems items;
+                try {
+                    items = IRemoteViewsFactory.Stub.asInterface(iBinder)
+                            .getRemoteCollectionItems(individualSize,
+                                    individualBitmapSize);
+                } catch (RemoteException re) {
+                    items = new RemoteCollectionItems.Builder().build();
+                    Log.e(LOG_TAG, "Error getting collection items from the"
+                            + " factory", re);
+                }
 
-                            result.complete(items);
-                        }
+                if (items == null) {
+                    items = new RemoteCollectionItems.Builder().build();
+                }
 
-                        @Override
-                        public void onNullBinding(ComponentName name) {
-                            context.unbindService(this);
-                        }
-
-                        @Override
-                        public void onServiceDisconnected(ComponentName componentName) { }
-                    });
+                result.complete(items);
+            }, result.defaultExecutor());
 
             result.completeOnTimeout(
                     new RemoteCollectionItems.Builder().build(),
@@ -5804,12 +5816,17 @@ public class RemoteViews implements Parcelable, Filter {
                 }
                 try (ByteArrayInputStream is = new ByteArrayInputStream(bytes.get(0))) {
                     player.setDocument(new RemoteComposeDocument(is));
-                    player.addClickListener((viewId, metadata) -> {
+                    player.addIdActionListener((viewId, metadata) -> {
                         mActions.forEach(action -> {
                             if (viewId == action.mViewId
                                     && action instanceof SetOnClickResponse setOnClickResponse) {
-                                setOnClickResponse.mResponse.handleViewInteraction(
-                                        player, params.handler);
+                                final RemoteResponse response = setOnClickResponse.mResponse;
+                                if (response.mFillIntent == null) {
+                                    response.mFillIntent = new Intent();
+                                }
+                                response.mFillIntent.putExtra(
+                                        "remotecompose_metadata", metadata);
+                                response.handleViewInteraction(player, params.handler);
                             }
                         });
                     });
@@ -8468,8 +8485,11 @@ public class RemoteViews implements Parcelable, Filter {
             }
             try {
                 LoadedApk.checkAndUpdateApkPaths(mApplication);
-                return context.createApplicationContext(mApplication,
+                Context applicationContext = context.createApplicationContext(mApplication,
                         Context.CONTEXT_RESTRICTED);
+                // Get the correct apk paths while maintaining the current context's configuration.
+                return applicationContext.createConfigurationContext(
+                        context.getResources().getConfiguration());
             } catch (NameNotFoundException e) {
                 Log.e(LOG_TAG, "Package name " + mApplication.packageName + " not found");
             }
@@ -8547,8 +8567,6 @@ public class RemoteViews implements Parcelable, Filter {
     /**
      * Object allowing the modification of a context to overload the system's dynamic colors.
      *
-     * Only colors from {@link android.R.color#system_accent1_0} to
-     * {@link android.R.color#system_neutral2_1000} can be overloaded.
      * @hide
      */
     public static final class ColorResources {
@@ -8558,6 +8576,9 @@ public class RemoteViews implements Parcelable, Filter {
             android.R.color.system_error_1000;
         // Size, in bytes, of an entry in the array of colors in an ARSC file.
         private static final int ARSC_ENTRY_SIZE = 16;
+
+        private static final String OVERLAY_NAME = "remote_views_color_resources";
+        private static final String OVERLAY_TARGET_PACKAGE_NAME = "android";
 
         private final ResourcesLoader mLoader;
         private final SparseIntArray mColorMapping;
@@ -8629,7 +8650,11 @@ public class RemoteViews implements Parcelable, Filter {
         }
 
         /**
-         *  Adds a resource loader for theme colors to the given context.
+         *  Adds a resource loader for theme colors to the given context. The loader is created
+         *  based on resource files created at build time.
+         *
+         * <p>Only colors from {@link android.R.color#system_accent1_0} to
+         * {@link android.R.color#system_error_1000} can be overloaded.</p>
          *
          * @param context Context of the view hosting the widget.
          * @param colorMapping Mapping of resources to color values.
@@ -8664,6 +8689,58 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             } catch (Exception ex) {
                 Log.e(LOG_TAG, "Failed to setup the context for theme colors", ex);
+            }
+            return null;
+        }
+
+        /**
+         *  Adds a resource loader for theme colors to the given context. The loader is created
+         *  using fabricated runtime resource overlay (FRRO).
+         *
+         *  <p>The created class can overlay any color resources, private or public, at runtime.</p>
+         *
+         * @param context Context of the view hosting the widget.
+         * @param colorMapping Mapping of resources to color values.
+         *
+         * @hide
+         */
+        @FlaggedApi(FLAG_SELF_TARGETING_ANDROID_RESOURCE_FRRO)
+        @Nullable
+        public static ColorResources createWithOverlay(Context context,
+                SparseIntArray colorMapping) {
+            try {
+                String owningPackage = context.getPackageName();
+                FabricatedOverlay overlay = new FabricatedOverlay.Builder(owningPackage,
+                        OVERLAY_NAME, OVERLAY_TARGET_PACKAGE_NAME).build();
+
+                for (int i = 0; i < colorMapping.size(); i++) {
+                    overlay.setResourceValue(
+                            context.getResources().getResourceName(colorMapping.keyAt(i)),
+                            TYPE_INT_COLOR_ARGB8, colorMapping.valueAt(i), null);
+                }
+                OverlayManager overlayManager = context.getSystemService(OverlayManager.class);
+                OverlayManagerTransaction.Builder transaction =
+                        new OverlayManagerTransaction.Builder()
+                                .registerFabricatedOverlay(overlay)
+                                .setSelfTargeting(true);
+                overlayManager.commit(transaction.build());
+
+                OverlayInfo overlayInfo =
+                        overlayManager.getOverlayInfosForTarget(OVERLAY_TARGET_PACKAGE_NAME)
+                                .stream()
+                                .filter(info -> TextUtils.equals(info.overlayName, OVERLAY_NAME)
+                                        && TextUtils.equals(info.packageName, owningPackage))
+                                .findFirst()
+                                .orElse(null);
+                if (overlayInfo == null) {
+                    Log.e(LOG_TAG, "Failed to get overlay info ", new Throwable());
+                    return null;
+                }
+                ResourcesLoader colorsLoader = new ResourcesLoader();
+                colorsLoader.addProvider(ResourcesProvider.loadOverlay(overlayInfo));
+                return new ColorResources(colorsLoader, colorMapping.clone());
+            } catch (Exception e) {
+                Log.e(LOG_TAG, "Failed to add theme color overlay into loader", e);
             }
             return null;
         }
@@ -9259,7 +9336,11 @@ public class RemoteViews implements Parcelable, Filter {
         Set<Integer> bitmapIdSet = getBitmapIdsUsedByActions(new HashSet<>());
         int result = 0;
         for (int bitmapId: bitmapIdSet) {
-            result += mBitmapCache.getBitmapForId(bitmapId).getAllocationByteCount();
+            Bitmap currentBitmap = mBitmapCache.getBitmapForId(bitmapId);
+            if (currentBitmap == null) {
+                continue;
+            }
+            result += currentBitmap.getAllocationByteCount();
         }
 
         return result;
@@ -9745,7 +9826,7 @@ public class RemoteViews implements Parcelable, Filter {
          */
         @FlaggedApi(FLAG_DRAW_DATA_PARCEL)
         public static long getSupportedVersion() {
-            return VERSION;
+            return (long) CoreDocument.getDocumentApiLevel();
         }
 
         /**

@@ -26,8 +26,7 @@ import android.content.Context;
 import android.os.Process;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
-import android.platform.test.ravenwood.RavenwoodConfig;
-import android.platform.test.ravenwood.RavenwoodConfig.Config;
+import android.platform.test.ravenwood.RavenwoodRule;
 
 import com.android.internal.os.PowerStats;
 import com.android.server.power.feature.flags.Flags;
@@ -39,10 +38,9 @@ import org.junit.Test;
 
 public class WakelockPowerStatsCollectorTest {
 
-    @Config
-    public static final RavenwoodConfig sConfig =
-            new RavenwoodConfig.Builder()
-                    .setProvideMainThread(true)
+    @Rule
+    public final RavenwoodRule mRule =
+            new RavenwoodRule.Builder()
                     .setSystemPropertyImmutable(
                             "persist.sys.com.android.server.power.feature.flags."
                                     + "framework_wakelock_info-override",

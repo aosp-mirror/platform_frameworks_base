@@ -16,6 +16,8 @@
 
 package com.android.server.job;
 
+import static android.app.job.JobParameters.OVERRIDE_HANDLE_ABANDONED_JOBS;
+
 import static com.android.server.job.JobConcurrencyManager.WORK_TYPE_NONE;
 import static com.android.server.job.JobSchedulerService.sElapsedRealtimeClock;
 import static com.android.server.job.JobSchedulerService.safelyScaleBytesToKBForHistogram;
@@ -546,7 +548,12 @@ public final class JobServiceContext implements ServiceConnection {
                     job.getNumAppliedFlexibleConstraints(),
                     job.getNumDroppedFlexibleConstraints(),
                     job.getFilteredTraceTag(),
-                    job.getFilteredDebugTags());
+                    job.getFilteredDebugTags(),
+                    job.getNumAbandonedFailures(),
+                    /* 0 is reserved for UNKNOWN_POLICY */
+                    job.getJob().getBackoffPolicy() + 1,
+                    mService.shouldUseAggressiveBackoff(
+                            job.getNumAbandonedFailures(), job.getSourceUid()));
             sEnqueuedJwiAtJobStart.logSampleWithUid(job.getUid(), job.getWorkCount());
             final String sourcePackage = job.getSourcePackageName();
             if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
@@ -1457,7 +1464,10 @@ public final class JobServiceContext implements ServiceConnection {
                     final StringBuilder debugStopReason = new StringBuilder("client timed out");
 
                     if (android.app.job.Flags.handleAbandonedJobs()
-                            && executing != null && executing.isAbandoned()) {
+                            && executing != null
+                            && !CompatChanges.isChangeEnabled(
+                                    OVERRIDE_HANDLE_ABANDONED_JOBS, executing.getSourceUid())
+                            && executing.isAbandoned()) {
                         final String abandonedMessage = " and maybe abandoned";
                         stopReason = JobParameters.STOP_REASON_TIMEOUT_ABANDONED;
                         internalStopReason = JobParameters.INTERNAL_STOP_REASON_TIMEOUT_ABANDONED;
@@ -1681,7 +1691,12 @@ public final class JobServiceContext implements ServiceConnection {
                 completedJob.getNumAppliedFlexibleConstraints(),
                 completedJob.getNumDroppedFlexibleConstraints(),
                 completedJob.getFilteredTraceTag(),
-                completedJob.getFilteredDebugTags());
+                completedJob.getFilteredDebugTags(),
+                completedJob.getNumAbandonedFailures(),
+                /* 0 is reserved for UNKNOWN_POLICY */
+                completedJob.getJob().getBackoffPolicy() + 1,
+                mService.shouldUseAggressiveBackoff(
+                        completedJob.getNumAbandonedFailures(), completedJob.getSourceUid()));
         if (Trace.isTagEnabled(Trace.TRACE_TAG_SYSTEM_SERVER)) {
             Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_SYSTEM_SERVER,
                     JobSchedulerService.TRACE_TRACK_NAME, getId());

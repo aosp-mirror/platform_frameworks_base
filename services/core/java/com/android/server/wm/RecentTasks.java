@@ -40,7 +40,7 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
-import static com.android.launcher3.Flags.enableRefactorTaskThumbnail;
+import static com.android.launcher3.Flags.enableUseTopVisibleActivityForExcludeFromRecentTask;
 import static com.android.server.wm.ActivityRecord.State.RESUMED;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
@@ -326,9 +326,12 @@ class RecentTasks {
         ProtoLog.i(WM_DEBUG_TASKS, "Setting frozen recents task list");
 
         // Always update the reordering time when this is called to ensure that the timeout
-        // is reset
+        // is reset.  Extend this duration when running in tests.
+        final long timeout = ActivityManager.isRunningInUserTestHarness()
+                ? mFreezeTaskListTimeoutMs * 10
+                : mFreezeTaskListTimeoutMs;
         mService.mH.removeCallbacks(mResetFreezeTaskListOnTimeoutRunnable);
-        mService.mH.postDelayed(mResetFreezeTaskListOnTimeoutRunnable, mFreezeTaskListTimeoutMs);
+        mService.mH.postDelayed(mResetFreezeTaskListOnTimeoutRunnable, timeout);
     }
 
     /**
@@ -492,11 +495,18 @@ class RecentTasks {
         mTaskNotificationController.notifyTaskListUpdated();
     }
 
-    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess) {
+    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess,
+            boolean removedForAddTask) {
         for (int i = 0; i < mCallbacks.size(); i++) {
             mCallbacks.get(i).onRecentTaskRemoved(task, wasTrimmed, killProcess);
         }
         mTaskNotificationController.notifyTaskListUpdated();
+        if (removedForAddTask) {
+            mTaskNotificationController.notifyRecentTaskRemovedForAddTask(task.mTaskId);
+        }
+    }
+    private void notifyTaskRemoved(Task task, boolean wasTrimmed, boolean killProcess) {
+        notifyTaskRemoved(task, wasTrimmed, killProcess, false /* removedForAddTask */);
     }
 
     /**
@@ -1505,9 +1515,9 @@ class RecentTasks {
             boolean skipExcludedCheck) {
         if (!skipExcludedCheck) {
             // Keep the most recent task of home display even if it is excluded from recents.
-            final boolean isExcludeFromRecents =
-                    (task.getBaseIntent().getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
-                            == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
+            final boolean isExcludeFromRecents = task.getBaseIntent() != null
+                    && (task.getBaseIntent().getFlags() & FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS)
+                    == FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
             if (isExcludeFromRecents) {
                 if (DEBUG_RECENTS_TRIM_TASKS) {
                     Slog.d(TAG,
@@ -1519,7 +1529,7 @@ class RecentTasks {
                 // The Recents is only supported on default display now, we should only keep the
                 // most recent task of home display.
                 boolean isMostRecentTask;
-                if (enableRefactorTaskThumbnail()) {
+                if (enableUseTopVisibleActivityForExcludeFromRecentTask()) {
                     isMostRecentTask = task.getTopVisibleActivity() != null;
                 } else {
                     isMostRecentTask = taskIndex == 0;
@@ -1632,7 +1642,8 @@ class RecentTasks {
                 // from becoming dangling.
                 mHiddenTasks.add(0, removedTask);
             }
-            notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */);
+            notifyTaskRemoved(removedTask, false /* wasTrimmed */, false /* killProcess */,
+                    true /* removedForAddTask */);
             if (DEBUG_RECENTS_TRIM_TASKS) {
                 Slog.d(TAG, "Trimming task=" + removedTask
                         + " for addition of task=" + task);
@@ -2022,21 +2033,8 @@ class RecentTasks {
         // Fill in some deprecated values.
         rti.id = rti.isRunning ? rti.taskId : INVALID_TASK_ID;
         rti.persistentId = rti.taskId;
-        rti.lastSnapshotData.set(tr.mLastTaskSnapshotData);
         if (!getTasksAllowed) {
             Task.trimIneffectiveInfo(tr, rti);
-        }
-
-        // Fill in organized child task info for the task created by organizer.
-        if (tr.mCreatedByOrganizer) {
-            for (int i = tr.getChildCount() - 1; i >= 0; i--) {
-                final Task childTask = tr.getChildAt(i).asTask();
-                if (childTask != null && childTask.isOrganized()) {
-                    final ActivityManager.RecentTaskInfo cti = new ActivityManager.RecentTaskInfo();
-                    childTask.fillTaskInfo(cti, true /* stripExtras */, tda);
-                    rti.childrenTaskInfos.add(cti);
-                }
-            }
         }
         return rti;
     }

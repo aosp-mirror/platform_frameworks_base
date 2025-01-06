@@ -29,7 +29,7 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.util.function.DodecFunction;
 import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
-import com.android.internal.util.function.OctFunction;
+import com.android.internal.util.function.NonaFunction;
 import com.android.internal.util.function.QuadFunction;
 import com.android.internal.util.function.UndecFunction;
 
@@ -86,9 +86,9 @@ public abstract class AppOpsManagerInternal {
          */
         SyncNotedAppOp noteOperation(int code, int uid, @Nullable String packageName,
                 @Nullable String featureId, int virtualDeviceId, boolean shouldCollectAsyncNotedOp,
-                @Nullable String message, boolean shouldCollectMessage,
-                @NonNull OctFunction<Integer, Integer, String, String, Integer, Boolean, String,
-                        Boolean, SyncNotedAppOp> superImpl);
+                @Nullable String message, boolean shouldCollectMessage, int notedCount,
+                @NonNull NonaFunction<Integer, Integer, String, String, Integer, Boolean, String,
+                        Boolean, Integer, SyncNotedAppOp> superImpl);
 
         /**
          * Allows overriding note proxy operation behavior.

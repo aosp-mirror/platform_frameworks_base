@@ -21,14 +21,17 @@ import android.graphics.drawable.Drawable
 
 /**
  * Models an icon, that can either be already [loaded][Icon.Loaded] or be a [reference]
- * [Icon.Resource] to a resource.
+ * [Icon.Resource] to a resource. In case of [Loaded], the resource ID [res] is optional.
  */
 sealed class Icon {
     abstract val contentDescription: ContentDescription?
 
-    data class Loaded(
+    data class Loaded
+    @JvmOverloads
+    constructor(
         val drawable: Drawable,
         override val contentDescription: ContentDescription?,
+        @DrawableRes val res: Int? = null,
     ) : Icon()
 
     data class Resource(
@@ -37,6 +40,11 @@ sealed class Icon {
     ) : Icon()
 }
 
-/** Creates [Icon.Loaded] for a given drawable with an optional [contentDescription]. */
-fun Drawable.asIcon(contentDescription: ContentDescription? = null): Icon.Loaded =
-    Icon.Loaded(this, contentDescription)
+/**
+ * Creates [Icon.Loaded] for a given drawable with an optional [contentDescription] and an optional
+ * [res].
+ */
+fun Drawable.asIcon(
+    contentDescription: ContentDescription? = null,
+    @DrawableRes res: Int? = null,
+): Icon.Loaded = Icon.Loaded(this, contentDescription, res)

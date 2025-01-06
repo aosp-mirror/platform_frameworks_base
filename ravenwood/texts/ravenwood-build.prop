@@ -1,0 +1,45 @@
+# This file contains system properties used on ravenwood.
+
+ro.is_on_ravenwood=1
+
+ro.board.first_api_level=1
+ro.product.first_api_level=1
+ro.soc.manufacturer=Android
+ro.soc.model=Ravenwood
+ro.debuggable=1
+
+# The ones starting with "ro.product" or "ro.bild" will be copied to all "partitions" too.
+# See RavenwoodSystemProperties.
+ro.product.brand=Android
+ro.product.device=Ravenwood
+ro.product.manufacturer=Android
+ro.product.model=Ravenwood
+ro.product.name=Ravenwood
+ro.product.cpu.abilist=x86_64
+ro.product.cpu.abilist32=
+ro.product.cpu.abilist64=x86_64
+
+ro.build.date=Thu Jan 01 00:00:00 GMT 2024
+ro.build.date.utc=1704092400
+ro.build.id=MAIN
+ro.build.tags=dev-keys
+ro.build.type=userdebug
+ro.build.version.incremental=userdebug.ravenwood.20240101
+
+# These are what we used to use on Ravenwood, copied here as a reference.
+#ro.build.version.codename=REL
+#ro.build.version.all_codenames=REL
+#ro.build.version.known_codenames=REL
+#ro.build.version.release=14
+#ro.build.version.release_or_codename=VanillaIceCream
+#ro.build.version.sdk=34
+
+# We pull in the following values from the real build.prop file.
+ro.build.version.codename=$$$ro.build.version.codename
+ro.build.version.all_codenames=$$$ro.build.version.codename
+ro.build.version.known_codenames=$$$ro.build.version.codename
+ro.build.version.release=$$$ro.build.version.release
+ro.build.version.release_or_codename=$$$ro.build.version.release_or_codename
+ro.build.version.release_or_preview_display=$$$ro.build.version.release_or_preview_display
+ro.build.version.sdk=$$$ro.build.version.sdk
+ro.build.version.sdk_full=$$$ro.build.version.sdk_full

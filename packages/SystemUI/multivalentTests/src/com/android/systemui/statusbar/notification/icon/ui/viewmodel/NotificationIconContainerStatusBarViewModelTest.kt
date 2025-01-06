@@ -110,14 +110,10 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
                 lastSleepReason = WakeSleepReason.OTHER,
             )
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(
-                    to = DozeStateModel.DOZE_AOD,
-                )
+                DozeTransitionModel(to = DozeStateModel.DOZE_AOD)
             )
             val animationsEnabled by collectLastValue(underTest.animationsEnabled)
             runCurrent()
@@ -133,14 +129,10 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
                 lastSleepReason = WakeSleepReason.OTHER,
             )
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             keyguardRepository.setDozeTransitionModel(
-                DozeTransitionModel(
-                    to = DozeStateModel.DOZE_PULSING,
-                )
+                DozeTransitionModel(to = DozeStateModel.DOZE_PULSING)
             )
             val animationsEnabled by collectLastValue(underTest.animationsEnabled)
             runCurrent()
@@ -201,9 +193,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
                 lastSleepReason = WakeSleepReason.OTHER,
             )
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             val animationsEnabled by collectLastValue(underTest.animationsEnabled)
             runCurrent()
@@ -216,9 +206,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
             val animationsEnabled by collectLastValue(underTest.animationsEnabled)
 
             keyguardTransitionRepository.sendTransitionStep(
-                TransitionStep(
-                    transitionState = TransitionState.STARTED,
-                )
+                TransitionStep(transitionState = TransitionState.STARTED)
             )
             keyguardRepository.setKeyguardShowing(true)
             runCurrent()
@@ -234,22 +222,15 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
     @Test
     fun iconColors_testsDarkBounds() =
         testScope.runTest {
-            darkIconRepository.darkState.value =
-                SysuiDarkIconDispatcher.DarkChange(
-                    emptyList(),
-                    0f,
-                    0xAABBCC,
-                )
-            val iconColorsLookup by collectLastValue(underTest.iconColors)
-            assertThat(iconColorsLookup).isNotNull()
-
-            val iconColors = iconColorsLookup?.iconColors(Rect())
+            val displayId = 123
+            darkIconRepository.darkState(displayId).value =
+                SysuiDarkIconDispatcher.DarkChange(emptyList(), 0f, 0xAABBCC)
+            val iconColors by collectLastValue(underTest.iconColors(displayId)!!)
             assertThat(iconColors).isNotNull()
-            iconColors!!
 
-            assertThat(iconColors.tint).isEqualTo(0xAABBCC)
+            assertThat(iconColors!!.tint).isEqualTo(0xAABBCC)
 
-            val staticDrawableColor = iconColors.staticDrawableColor(Rect())
+            val staticDrawableColor = iconColors!!.staticDrawableColor(Rect())
 
             assertThat(staticDrawableColor).isEqualTo(0xAABBCC)
         }
@@ -257,14 +238,10 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
     @Test
     fun iconColors_staticDrawableColor_notInDarkTintArea() =
         testScope.runTest {
-            darkIconRepository.darkState.value =
-                SysuiDarkIconDispatcher.DarkChange(
-                    listOf(Rect(0, 0, 5, 5)),
-                    0f,
-                    0xAABBCC,
-                )
-            val iconColorsLookup by collectLastValue(underTest.iconColors)
-            val iconColors = iconColorsLookup?.iconColors(Rect(1, 1, 4, 4))
+            val displayId = 321
+            darkIconRepository.darkState(displayId).value =
+                SysuiDarkIconDispatcher.DarkChange(listOf(Rect(0, 0, 5, 5)), 0f, 0xAABBCC)
+            val iconColors by collectLastValue(underTest.iconColors(displayId)!!)
             val staticDrawableColor = iconColors?.staticDrawableColor(Rect(6, 6, 7, 7))
             assertThat(staticDrawableColor).isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
         }
@@ -272,15 +249,12 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
     @Test
     fun iconColors_notInDarkTintArea() =
         testScope.runTest {
-            darkIconRepository.darkState.value =
-                SysuiDarkIconDispatcher.DarkChange(
-                    listOf(Rect(0, 0, 5, 5)),
-                    0f,
-                    0xAABBCC,
-                )
-            val iconColorsLookup by collectLastValue(underTest.iconColors)
-            val iconColors = iconColorsLookup?.iconColors(Rect(6, 6, 7, 7))
-            assertThat(iconColors).isNull()
+            val displayId = 987
+            darkIconRepository.darkState(displayId).value =
+                SysuiDarkIconDispatcher.DarkChange(listOf(Rect(0, 0, 5, 5)), 0f, 0xAABBCC)
+            val iconColors by collectLastValue(underTest.iconColors(displayId)!!)
+            assertThat(iconColors!!.staticDrawableColor(Rect(6, 6, 7, 7)))
+                .isEqualTo(DarkIconDispatcher.DEFAULT_ICON_TINT)
         }
 
     @Test
@@ -295,7 +269,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
                             activeNotificationModel(
                                 key = "notif1",
                                 groupKey = "group",
-                                statusBarIcon = icon
+                                statusBarIcon = icon,
                             )
                         )
                     }
@@ -322,7 +296,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
                             activeNotificationModel(
                                 key = "notif1",
                                 groupKey = "group",
-                                statusBarIcon = icon
+                                statusBarIcon = icon,
                             )
                         )
                     }
@@ -354,7 +328,7 @@ class NotificationIconContainerStatusBarViewModelTest(flags: FlagsParameterizati
                             activeNotificationModel(
                                 key = "notif1",
                                 groupKey = "group",
-                                statusBarIcon = icon
+                                statusBarIcon = icon,
                             )
                         )
                     }

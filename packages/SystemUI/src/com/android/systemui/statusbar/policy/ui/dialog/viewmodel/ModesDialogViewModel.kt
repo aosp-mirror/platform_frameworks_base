@@ -23,6 +23,7 @@ import android.provider.Settings.ACTION_AUTOMATIC_ZEN_RULE_SETTINGS
 import android.provider.Settings.EXTRA_AUTOMATIC_ZEN_RULE_ID
 import com.android.settingslib.notification.modes.EnableZenModeDialog
 import com.android.settingslib.notification.modes.ZenMode
+import com.android.settingslib.notification.modes.ZenModeDescriptions
 import com.android.systemui.common.shared.model.asIcon
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -54,6 +55,7 @@ constructor(
     private val dialogEventLogger: ModesDialogEventLogger,
 ) {
     private val zenDialogMetricsLogger = QSZenModeDialogMetricsLogger(context)
+    private val zenModeDescriptions = ZenModeDescriptions(context)
 
     // Modes that should be displayed in the dialog
     private val visibleModes: Flow<List<ZenMode>> =
@@ -92,7 +94,8 @@ constructor(
                         icon = zenModeInteractor.getModeIcon(mode).drawable().asIcon(),
                         text = mode.name,
                         subtext = getTileSubtext(mode),
-                        subtextDescription = getModeDescription(mode) ?: "",
+                        subtextDescription =
+                            getModeDescription(mode, forAccessibility = true) ?: "",
                         enabled = mode.isActive,
                         stateDescription =
                             context.getString(
@@ -145,18 +148,21 @@ constructor(
      * This description is used directly for the content description of a mode tile for screen
      * readers, and for the tile subtext will be augmented with the current status of the mode.
      */
-    private fun getModeDescription(mode: ZenMode): String? {
+    private fun getModeDescription(mode: ZenMode, forAccessibility: Boolean): String? {
         if (!mode.rule.isEnabled) {
             return context.resources.getString(R.string.zen_mode_set_up)
         }
         if (!mode.rule.isManualInvocationAllowed && !mode.isActive) {
             return context.resources.getString(R.string.zen_mode_no_manual_invocation)
         }
-        return mode.getDynamicDescription(context)
+        return if (forAccessibility)
+            zenModeDescriptions.getTriggerDescriptionForAccessibility(mode)
+                ?: zenModeDescriptions.getTriggerDescription(mode)
+        else zenModeDescriptions.getTriggerDescription(mode)
     }
 
     private fun getTileSubtext(mode: ZenMode): String {
-        val modeDescription = getModeDescription(mode)
+        val modeDescription = getModeDescription(mode, forAccessibility = false)
         return if (mode.isActive) {
             if (modeDescription != null) {
                 context.getString(R.string.zen_mode_on_with_details, modeDescription)

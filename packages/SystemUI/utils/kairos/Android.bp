@@ -22,7 +22,7 @@ package {
 java_library {
     name: "kairos",
     host_supported: true,
-    kotlincflags: ["-opt-in=com.android.systemui.kairos.ExperimentalFrpApi"],
+    kotlincflags: ["-opt-in=com.android.systemui.kairos.ExperimentalKairosApi"],
     srcs: ["src/**/*.kt"],
     static_libs: [
         "kotlin-stdlib",
@@ -32,6 +32,7 @@ java_library {
 
 java_test {
     name: "kairos-test",
+    kotlincflags: ["-opt-in=com.android.systemui.kairos.ExperimentalKairosApi"],
     optimize: {
         enabled: false,
     },

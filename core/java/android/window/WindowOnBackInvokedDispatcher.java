@@ -546,6 +546,11 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
         }
 
         @Override
+        public void setHandoffHandler(IBackAnimationHandoffHandler handoffHandler) {
+            // no-op
+        }
+
+        @Override
         public void onBackProgressed(BackMotionEvent backEvent) {
             // This is only called in some special cases such as when activity embedding is active
             // or when the activity is letterboxed. Otherwise mProgressAnimator#onBackProgressed is

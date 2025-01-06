@@ -24,9 +24,9 @@
             android:segPointGap="@dimen/notification_progress_segPoint_gap">
             <segments
                 android:color="?attr/colorProgressBackgroundNormal"
-                android:dashGap="@dimen/notification_progress_segments_dash_gap"
-                android:dashWidth="@dimen/notification_progress_segments_dash_width"
-                android:width="@dimen/notification_progress_segments_height" />
+                android:height="@dimen/notification_progress_segments_height"
+                android:fadedHeight="@dimen/notification_progress_segments_faded_height"
+                android:cornerRadius="@dimen/notification_progress_segments_corner_radius"/>
             <points
                 android:color="?attr/colorProgressBackgroundNormal"
                 android:radius="@dimen/notification_progress_points_radius"

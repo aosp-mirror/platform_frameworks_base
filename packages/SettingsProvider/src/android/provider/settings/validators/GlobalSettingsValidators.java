@@ -462,5 +462,16 @@ public class GlobalSettingsValidators {
                 Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_NONE,
                 Global.Wearable.PHONE_SWITCHING_REQUEST_SOURCE_COMPANION
         ));
+        VALIDATORS.put(Global.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(Global.HEARING_DEVICE_LOCAL_NOTIFICATION, ANY_STRING_VALIDATOR);
+        VALIDATORS.put(
+                Global.Wearable.WEAR_SYSTEM_STATUS_TRAY_CONFIGURATION,
+                new DiscreteValueValidator(
+                        new String[] {
+                                String.valueOf(
+                                        Global.Wearable.STATUS_TRAY_CONFIGURATION_DEFAULT),
+                                String.valueOf(
+                                        Global.Wearable.STATUS_TRAY_CONFIGURATION_SYSTEM_HIDDEN)
+                        }));
     }
 }

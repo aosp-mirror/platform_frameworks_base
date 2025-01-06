@@ -16,9 +16,12 @@
 
 package com.android.wm.shell.flicker.pip
 
+import android.platform.test.annotations.RequiresFlagsDisabled
 import android.tools.flicker.junit.FlickerParametersRunnerFactory
 import android.tools.flicker.legacy.FlickerBuilder
 import android.tools.flicker.legacy.LegacyFlickerTest
+import com.android.server.wm.flicker.helpers.PipAppHelper
+import com.android.wm.shell.Flags
 import com.android.wm.shell.flicker.pip.common.ExitPipToAppTransition
 import org.junit.FixMethodOrder
 import org.junit.runner.RunWith
@@ -50,7 +53,10 @@ import org.junit.runners.Parameterized
 @RunWith(Parameterized::class)
 @Parameterized.UseParametersRunnerFactory(FlickerParametersRunnerFactory::class)
 @FixMethodOrder(MethodSorters.NAME_ASCENDING)
+@RequiresFlagsDisabled(Flags.FLAG_ENABLE_PIP2)
 class ExitPipToAppViaIntentTest(flicker: LegacyFlickerTest) : ExitPipToAppTransition(flicker) {
+    override val pipApp: PipAppHelper = PipAppHelper(instrumentation)
+
     override val thisTransition: FlickerBuilder.() -> Unit = {
         setup {
             // launch an app behind the pip one
@@ -58,7 +64,7 @@ class ExitPipToAppViaIntentTest(flicker: LegacyFlickerTest) : ExitPipToAppTransi
         }
         transitions {
             // This will bring PipApp to fullscreen
-            pipApp.exitPipToFullScreenViaIntent(wmHelper)
+            pipApp.exitPipToOriginalTaskViaIntent(wmHelper)
             // Wait until the other app is no longer visible
             wmHelper.StateSyncBuilder().withWindowSurfaceDisappeared(testApp).waitForAndVerify()
         }

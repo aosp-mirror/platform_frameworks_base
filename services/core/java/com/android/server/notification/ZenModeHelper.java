@@ -24,6 +24,8 @@ import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ENABLED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_REMOVED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_UNKNOWN;
 import static android.app.NotificationManager.Policy.PRIORITY_SENDERS_ANY;
+import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
+import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 import static android.service.notification.Condition.SOURCE_UNKNOWN;
 import static android.service.notification.Condition.SOURCE_USER_ACTION;
 import static android.service.notification.Condition.STATE_FALSE;
@@ -44,8 +46,6 @@ import static android.service.notification.ZenModeConfig.isImplicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
-import static android.app.backup.NotificationLoggingConstants.DATA_TYPE_ZEN_CONFIG;
-import static android.app.backup.NotificationLoggingConstants.ERROR_XML_PARSING;
 
 import static java.util.Objects.requireNonNull;
 
@@ -112,9 +112,10 @@ import android.util.SparseArray;
 import android.util.StatsEvent;
 import android.util.proto.ProtoOutputStream;
 
+import androidx.annotation.VisibleForTesting;
+
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.config.sysui.SystemUiSystemPropertiesFlags;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.FrameworkStatsLog;
@@ -279,6 +280,11 @@ public class ZenModeHelper {
         mCallbacks.remove(callback);
     }
 
+    @VisibleForTesting(otherwise = VisibleForTesting.NONE)
+    public List<Callback> getCallbacks() {
+        return mCallbacks;
+    }
+
     public void initZenMode() {
         if (DEBUG) Log.d(TAG, "initZenMode");
         synchronized (mConfigLock) {
@@ -300,6 +306,15 @@ public class ZenModeHelper {
         mHandler.postMetricsTimer();
         cleanUpZenRules();
         mIsSystemServicesReady = true;
+    }
+
+    /**
+     * @return whether a {@link DeviceEffectsApplier} has already been set or not
+     */
+    boolean hasDeviceEffectsApplier() {
+        synchronized (mConfigLock) {
+            return mDeviceEffectsApplier != null;
+        }
     }
 
     /**
@@ -1006,7 +1021,13 @@ public class ZenModeHelper {
     private static void applyConditionAndReconsiderOverride(ZenRule rule, Condition condition,
             int origin) {
         if (Flags.modesApi() && Flags.modesUi()) {
-            if (origin == ORIGIN_USER_IN_SYSTEMUI && condition != null
+            if (isImplicitRuleId(rule.id)) {
+                // Implicit rules do not use overrides, and always apply conditions directly.
+                // This is compatible with the previous behavior (where the package set the
+                // interruption filter, and no "snoozing" took place if the user changed it later).
+                rule.condition = condition;
+                rule.resetConditionOverride();
+            } else if (origin == ORIGIN_USER_IN_SYSTEMUI && condition != null
                     && condition.source == SOURCE_USER_ACTION) {
                 // Apply as override, instead of actual condition.
                 // If the new override is the reverse of a previous (still active) override, try
@@ -1533,15 +1554,18 @@ public class ZenModeHelper {
 
         if (isFromApp) {
             // Don't allow apps to toggle hidden (non-public-API) effects.
-            newEffects = new ZenDeviceEffects.Builder(newEffects)
-                    .setShouldDisableAutoBrightness(oldEffects.shouldDisableAutoBrightness())
-                    .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
-                    .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
-                    .setShouldDisableTouch(oldEffects.shouldDisableTouch())
-                    .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
-                    .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
-                    .setExtraEffects(oldEffects.getExtraEffects())
-                    .build();
+            newEffects =
+                    new ZenDeviceEffects.Builder(newEffects)
+                            .setShouldDisableAutoBrightness(
+                                    oldEffects.shouldDisableAutoBrightness())
+                            .setShouldDisableTapToWake(oldEffects.shouldDisableTapToWake())
+                            .setShouldDisableTiltToWake(oldEffects.shouldDisableTiltToWake())
+                            .setShouldDisableTouch(oldEffects.shouldDisableTouch())
+                            .setShouldMinimizeRadioUsage(oldEffects.shouldMinimizeRadioUsage())
+                            .setShouldMaximizeDoze(oldEffects.shouldMaximizeDoze())
+                            .setShouldUseNightLight(oldEffects.shouldUseNightLight())
+                            .setExtraEffects(oldEffects.getExtraEffects())
+                            .build();
         }
 
         zenRule.zenDeviceEffects = newEffects;
@@ -1579,6 +1603,9 @@ public class ZenModeHelper {
             }
             if (oldEffects.shouldMaximizeDoze() != newEffects.shouldMaximizeDoze()) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_MAXIMIZE_DOZE;
+            }
+            if (oldEffects.shouldUseNightLight() != newEffects.shouldUseNightLight()) {
+                userModifiedFields |= ZenDeviceEffects.FIELD_NIGHT_LIGHT;
             }
             if (!Objects.equals(oldEffects.getExtraEffects(), newEffects.getExtraEffects())) {
                 userModifiedFields |= ZenDeviceEffects.FIELD_EXTRA_EFFECTS;
@@ -1926,7 +1953,17 @@ public class ZenModeHelper {
     @Nullable
     public Policy getNotificationPolicy(UserHandle user) {
         synchronized (mConfigLock) {
-            return getNotificationPolicy(getConfigLocked(user));
+            if (Flags.modesMultiuser()) {
+                // Return a fallback (default) policy for users without a zen config.
+                // Note that zen updates (setPolicy, setFilter) won't be applied, so this is mostly
+                // about preventing NPEs for careless callers.
+                ZenModeConfig config = getConfigLocked(user);
+                return config != null
+                        ? getNotificationPolicy(config)
+                        : getNotificationPolicy(mDefaultConfig);
+            } else {
+                return getNotificationPolicy(getConfigLocked(user));
+            }
         }
     }
 
@@ -2422,7 +2459,7 @@ public class ZenModeHelper {
                 || (mSuppressedEffects & SUPPRESSED_EFFECT_NOTIFICATIONS) != 0;
         // call restrictions
         final boolean muteCalls = zenAlarmsOnly
-                || (zenPriorityOnly && !(allowCalls || allowRepeatCallers))
+                || (zenPriorityOnly && (!allowCalls || !allowRepeatCallers))
                 || (mSuppressedEffects & SUPPRESSED_EFFECT_CALLS) != 0;
         // alarm restrictions
         final boolean muteAlarms = zenPriorityOnly && !allowAlarms;

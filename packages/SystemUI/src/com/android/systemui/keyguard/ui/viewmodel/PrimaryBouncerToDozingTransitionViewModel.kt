@@ -23,7 +23,9 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -40,9 +42,10 @@ import kotlinx.coroutines.flow.flatMapLatest
 class PrimaryBouncerToDozingTransitionViewModel
 @Inject
 constructor(
+    private val blurConfig: BlurConfig,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+) : DeviceEntryIconTransition, PrimaryBouncerTransition {
 
     private val transitionAnimation =
         animationFlow
@@ -50,9 +53,7 @@ constructor(
                 duration = TO_DOZING_DURATION,
                 edge = Edge.create(from = Scenes.Bouncer, to = DOZING),
             )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = PRIMARY_BOUNCER, to = DOZING),
-            )
+            .setupWithoutSceneContainer(edge = Edge.create(from = PRIMARY_BOUNCER, to = DOZING))
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)
@@ -66,4 +67,17 @@ constructor(
                 emptyFlow()
             }
         }
+
+    override val windowBlurRadius: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = TO_DOZING_DURATION,
+            onStep = { step ->
+                transitionProgressToBlurRadius(
+                    starBlurRadius = blurConfig.maxBlurRadiusPx,
+                    endBlurRadius = blurConfig.minBlurRadiusPx,
+                    transitionProgress = step,
+                )
+            },
+            onFinish = { blurConfig.minBlurRadiusPx },
+        )
 }

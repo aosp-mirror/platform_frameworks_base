@@ -106,6 +106,8 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
 
         // Display: 1920x1200 (landscape). First and second display are both 860x1200 (portrait).
         mDisplay = new DualDisplayContent.Builder(mAtm, 1920, 1200).build();
+        // The test verifies that the display area can affect display's getLastOrientation().
+        mDisplay.setIgnoreOrientationRequest(false);
         mFirstRoot = mDisplay.mFirstRoot;
         mSecondRoot = mDisplay.mSecondRoot;
         mFirstTda = mDisplay.getTaskDisplayArea(FEATURE_FIRST_TASK_CONTAINER);

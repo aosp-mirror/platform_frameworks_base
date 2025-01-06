@@ -44,6 +44,9 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.input.NativeInputManagerService$NativeImpl { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.ThreadPriorityBooster { *; }
 
+# allow invoking start-service using class name in both apex and services jar.
+-keep,allowoptimization,allowaccessmodification class com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerService { *; }
+
 # Keep all aconfig Flag class as they might be statically referenced by other packages
 # An merge or inlining could lead to missing dependencies that cause run time errors
 -keepclassmembernames class android.**.Flags, com.android.**.Flags { public *; }
@@ -82,7 +85,7 @@
 -keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbAlsaJackDetector { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.usb.UsbAlsaMidiDevice { *; }
 -keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorController$OnVibrationCompleteListener { *; }
--keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorManagerService$OnSyncedVibrationCompleteListener { *; }
+-keep,allowoptimization,allowaccessmodification class com.android.server.vibrator.VibratorManagerService$VibratorManagerNativeCallbacks { *; }
 -keepclasseswithmembers,allowoptimization,allowaccessmodification class com.android.server.** {
   *** *FromNative(...);
 }

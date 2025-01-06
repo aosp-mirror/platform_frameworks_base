@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktivno (samo lijevo)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktivno (samo desno)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktivno (lijevo i desno)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Ažuriranje okruženja nije uspjelo"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktivno (samo za medijski sadržaj). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktivno (samo za medijski sadržaj). L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> baterije, D: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> baterije."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Povezano (podržava dijeljenje zvuka). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> baterije."</string>
@@ -140,10 +141,10 @@
     <string name="bluetooth_le_audio_profile_summary_connected" msgid="6916226974453480650">"Povezano s LE zvukom"</string>
     <string name="bluetooth_a2dp_profile_summary_connected" msgid="7422607970115444153">"Povezano sa zvukom medija"</string>
     <string name="bluetooth_headset_profile_summary_connected" msgid="2420981566026949688">"Povezano na zvuk telefona"</string>
-    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Povezano sa serverom za prijenos podataka"</string>
+    <string name="bluetooth_opp_profile_summary_connected" msgid="2393521801478157362">"Povezano sa serverom za prenos podataka"</string>
     <string name="bluetooth_map_profile_summary_connected" msgid="4141725591784669181">"Povezano na mapu"</string>
     <string name="bluetooth_sap_profile_summary_connected" msgid="1280297388033001037">"Povezan na SAP"</string>
-    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Nije povezano sa serverom za prijenos podataka"</string>
+    <string name="bluetooth_opp_profile_summary_not_connected" msgid="3959741824627764954">"Nije povezano sa serverom za prenos podataka"</string>
     <string name="bluetooth_hid_profile_summary_connected" msgid="3923653977051684833">"Povezano s ulaznim uređajem"</string>
     <string name="bluetooth_pan_user_profile_summary_connected" msgid="380469653827505727">"Povezano na uređaj za pristup internetu"</string>
     <string name="bluetooth_pan_nap_profile_summary_connected" msgid="3744773111299503493">"Dijeljenje lokalne internetske veze s uređajem"</string>
@@ -152,7 +153,7 @@
     <string name="bluetooth_sap_profile_summary_use_for" msgid="6204902866176714046">"Koristi za pristup SIM-u"</string>
     <string name="bluetooth_a2dp_profile_summary_use_for" msgid="7324694226276491807">"Koristi za zvuk medija"</string>
     <string name="bluetooth_headset_profile_summary_use_for" msgid="808970643123744170">"Koristi za zvuk telefona"</string>
-    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Koristi za prijenos fajlova"</string>
+    <string name="bluetooth_opp_profile_summary_use_for" msgid="461981154387015457">"Koristi za prenos fajlova"</string>
     <string name="bluetooth_hid_profile_summary_use_for" msgid="4289460627406490952">"Koristi kao ulaz"</string>
     <string name="bluetooth_hearing_aid_profile_summary_use_for" msgid="3374057355721486932">"Korištenje za slušne aparate"</string>
     <string name="bluetooth_le_audio_profile_summary_use_for" msgid="2778318636027348572">"Koristi za: LE_AUDIO"</string>
@@ -315,7 +316,7 @@
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Aktivirajte Bluetooth Audio Codec\nOdabir: Način rada po kanalima"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Bluetooth Audio LDAC kodek: kvalitet reprodukcije"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Aktivirajte Bluetooth Audio \nOdabir kodeka: kvalitet reprodukcije"</string>
-    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Prijenos: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
+    <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Prenos: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"Privatni DNS"</string>
     <string name="select_private_dns_configuration_dialog_title" msgid="3731422918335951912">"Odaberite način rada privatnog DNS-a"</string>
     <string name="private_dns_mode_off" msgid="7065962499349997041">"Isključeno"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokalni terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Omogući terminalnu aplik. koja nudi pristup lok. kom. okruženju"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linuxovo okruženje za razvoj"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Pokreni Linux terminal na Androidu"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Eksperimentalno) Pokreni Linux terminal na Androidu"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ako onemogućite ovo, podaci Linux terminala će se obrisati"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP provjera"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Postavke HDCP provjere"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Otklanjanje grešaka"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animacije prijelaza"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala trajanja animatora"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulacija sekundarnih ekrana"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Položaj prikaza sjene"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacije"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ne čuvaj aktivnosti"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Obustavlja se svaka aktivnost čim je korisnik napusti"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ovaj telefon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Ovaj tablet"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Ovaj računar (interno)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Ovaj TV"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Zvučnik priključne stanice"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Vanjski uređaj"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Povezani uređaj"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ovaj telefon"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analogni"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nije moguće reproducirati na uređaju"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Nadogradite račun da promijenite"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Nije moguće reproducirati preuzimanja ovdje"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Povezano je putem ARC-a"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Povezano je putem eARC-a"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Zadano za TV"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI izlaz"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interni zvučnici"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Ugrađeni zvučnik"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Zvuk TV-a"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Došlo je do problema prilikom povezivanja. Isključite, pa ponovo uključite uređaj"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Žičani audio uređaj"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomoć i povratne informacije"</string>
@@ -719,7 +723,7 @@
     <string name="accessibility_data_one_bar" msgid="6892888138070752480">"Prijenos podataka na jednoj crtici."</string>
     <string name="accessibility_data_two_bars" msgid="9202641507241802499">"Prijenos podataka na dvije crtice."</string>
     <string name="accessibility_data_three_bars" msgid="2813876214466722413">"Prijenos podataka na tri crtice."</string>
-    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Signal za prijenos podataka pun."</string>
+    <string name="accessibility_data_signal_full" msgid="1808301899314382337">"Signal za prenos podataka pun."</string>
     <string name="accessibility_ethernet_disconnected" msgid="2832501530856497489">"Veza sa Ethernetom je prekinuta."</string>
     <string name="accessibility_ethernet_connected" msgid="6175942685957461563">"Ethernet."</string>
     <string name="accessibility_no_calling" msgid="3540827068323895748">"Nema pozivanja."</string>

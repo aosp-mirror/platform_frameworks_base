@@ -26,8 +26,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -36,10 +34,8 @@ import android.widget.CheckBox;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -55,7 +51,7 @@ import java.util.function.Consumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class RestartDialogLayoutTest extends ShellTestCase  {
+public class RestartDialogLayoutTest extends CompatUIShellTestCase  {
 
     @Mock private Runnable mDismissCallback;
     @Mock private Consumer<Boolean> mRestartCallback;
@@ -65,10 +61,6 @@ public class RestartDialogLayoutTest extends ShellTestCase  {
     private View mRestartButton;
     private View mDialogContainer;
     private CheckBox mDontRepeatCheckBox;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {

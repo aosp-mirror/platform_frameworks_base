@@ -24,7 +24,6 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 
-import com.android.keyguard.LockIconViewController;
 import com.android.systemui.scene.shared.flag.SceneContainerFlag;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController;
 
@@ -39,7 +38,6 @@ public class DebugDrawable extends Drawable {
     private final NotificationPanelViewController mNotificationPanelViewController;
     private final NotificationPanelView mView;
     private final NotificationStackScrollLayoutController mNotificationStackScrollLayoutController;
-    private final LockIconViewController mLockIconViewController;
     private final QuickSettingsController mQsController;
     private final Set<Integer> mDebugTextUsedYPositions;
     private final Paint mDebugPaint;
@@ -48,13 +46,11 @@ public class DebugDrawable extends Drawable {
             NotificationPanelViewController notificationPanelViewController,
             NotificationPanelView notificationPanelView,
             NotificationStackScrollLayoutController notificationStackScrollLayoutController,
-            LockIconViewController lockIconViewController,
             QuickSettingsController quickSettingsController
     ) {
         mNotificationPanelViewController = notificationPanelViewController;
         mView = notificationPanelView;
         mNotificationStackScrollLayoutController = notificationStackScrollLayoutController;
-        mLockIconViewController = lockIconViewController;
         mQsController = quickSettingsController;
         mDebugTextUsedYPositions = new HashSet<>();
         mDebugPaint = new Paint();
@@ -88,24 +84,6 @@ public class DebugDrawable extends Drawable {
                             mNotificationPanelViewController.getKeyguardNotificationStaticPadding(),
                             mNotificationPanelViewController.getExpandedFraction()),
                     Color.MAGENTA, "calculateNotificationsTopPadding()");
-        }
-        drawDebugInfo(canvas, mNotificationPanelViewController.getClockPositionResult().clockY,
-                Color.GRAY, "mClockPositionResult.clockY");
-        drawDebugInfo(canvas, (int) mLockIconViewController.getTop(), Color.GRAY,
-                "mLockIconViewController.getTop()");
-
-        if (mNotificationPanelViewController.isKeyguardShowing()) {
-            // Notifications have the space between those two lines.
-            drawDebugInfo(canvas,
-                    mNotificationStackScrollLayoutController.getTop()
-                            + (int) mNotificationPanelViewController
-                            .getKeyguardNotificationTopPadding(),
-                    Color.RED, "NSSL.getTop() + mKeyguardNotificationTopPadding");
-
-            drawDebugInfo(canvas, mNotificationStackScrollLayoutController.getBottom()
-                            - (int) mNotificationPanelViewController
-                            .getKeyguardNotificationBottomPadding(),
-                    Color.RED, "NSSL.getBottom() - mKeyguardNotificationBottomPadding");
         }
 
         mDebugPaint.setColor(Color.CYAN);

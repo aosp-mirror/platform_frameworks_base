@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard.ui.view.layout.sections
 
 import android.content.Context
-import android.view.View
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import androidx.constraintlayout.widget.ConstraintLayout
@@ -28,32 +27,23 @@ import androidx.constraintlayout.widget.ConstraintSet.MATCH_CONSTRAINT
 import androidx.constraintlayout.widget.ConstraintSet.PARENT_ID
 import androidx.constraintlayout.widget.ConstraintSet.START
 import androidx.constraintlayout.widget.ConstraintSet.TOP
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.shared.model.KeyguardSection
 import com.android.systemui.media.controls.ui.controller.KeyguardMediaController
 import com.android.systemui.res.R
-import com.android.systemui.shade.NotificationPanelView
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Aligns media on left side for split shade, below smartspace, date, and weather. */
 class SplitShadeMediaSection
 @Inject
 constructor(
-    private val context: Context,
-    private val notificationPanelView: NotificationPanelView,
-    private val keyguardMediaController: KeyguardMediaController
+    @ShadeDisplayAware private val context: Context,
+    private val keyguardMediaController: KeyguardMediaController,
 ) : KeyguardSection() {
     private val mediaContainerId = R.id.status_view_media_container
 
     override fun addViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
-        notificationPanelView.findViewById<View>(mediaContainerId)?.let {
-            notificationPanelView.removeView(it)
-        }
-
         val mediaFrame =
             FrameLayout(context, null).apply {
                 id = mediaContainerId
@@ -61,7 +51,7 @@ constructor(
                 val horizontalPadding =
                     padding +
                         context.resources.getDimensionPixelSize(
-                            R.dimen.status_view_margin_horizontal
+                            customR.dimen.status_view_margin_horizontal
                         )
 
                 setPaddingRelative(horizontalPadding, padding, horizontalPadding, padding)
@@ -73,10 +63,6 @@ constructor(
     override fun bindData(constraintLayout: ConstraintLayout) {}
 
     override fun applyConstraints(constraintSet: ConstraintSet) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         constraintSet.apply {
             constrainWidth(mediaContainerId, MATCH_CONSTRAINT)
             constrainHeight(mediaContainerId, WRAP_CONTENT)
@@ -87,10 +73,6 @@ constructor(
     }
 
     override fun removeViews(constraintLayout: ConstraintLayout) {
-        if (!MigrateClocksToBlueprint.isEnabled) {
-            return
-        }
-
         constraintLayout.removeView(mediaContainerId)
     }
 }

@@ -17,6 +17,7 @@
 package com.android.server.backup.transport;
 
 import android.annotation.Nullable;
+import android.app.backup.BackupAnnotations;
 import android.app.backup.BackupTransport;
 import android.app.backup.IBackupManagerMonitor;
 import android.app.backup.RestoreDescription;
@@ -26,6 +27,7 @@ import android.content.pm.PackageInfo;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.util.ArraySet;
 import android.util.Slog;
 
 import com.android.internal.backup.IBackupTransport;
@@ -372,6 +374,26 @@ public class BackupTransportClient {
         AndroidFuture<IBackupManagerMonitor> resultFuture = mTransportFutures.newFuture();
         mTransportBinder.getBackupManagerMonitor(resultFuture);
         return IBackupManagerMonitor.Stub.asInterface((IBinder) getFutureResult(resultFuture));
+    }
+
+    /**
+     * See
+     * {@link IBackupTransport#getPackagesThatShouldNotUseRestrictedMode(List, int, AndroidFuture)}.
+     */
+    public Set<String> getPackagesThatShouldNotUseRestrictedMode(Set<String> packageNames,
+            @BackupAnnotations.OperationType
+            int operationType) throws RemoteException {
+        AndroidFuture<List<String>> resultFuture = mTransportFutures.newFuture();
+        mTransportBinder.getPackagesThatShouldNotUseRestrictedMode(List.copyOf(packageNames),
+                operationType,
+                resultFuture);
+        List<String> resultList = getFutureResult(resultFuture);
+        Set<String> set = new ArraySet<>();
+        if (resultList == null) {
+            return set;
+        }
+        set.addAll(resultList);
+        return set;
     }
 
     /**

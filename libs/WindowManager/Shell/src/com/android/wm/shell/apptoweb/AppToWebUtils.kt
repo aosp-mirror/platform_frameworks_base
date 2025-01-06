@@ -18,8 +18,11 @@
 
 package com.android.wm.shell.apptoweb
 
+import android.app.assist.AssistContent
+import android.app.assist.AssistContent.EXTRA_SESSION_TRANSFER_WEB_URI
 import android.content.Context
 import android.content.Intent
+import android.content.Intent.ACTION_VIEW
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.content.pm.PackageManager
 import android.content.pm.verify.domain.DomainVerificationManager
@@ -31,7 +34,7 @@ import com.android.wm.shell.protolog.ShellProtoLogGroup
 private const val TAG = "AppToWebUtils"
 
 private val GenericBrowserIntent = Intent()
-    .setAction(Intent.ACTION_VIEW)
+    .setAction(ACTION_VIEW)
     .addCategory(Intent.CATEGORY_BROWSABLE)
     .setData(Uri.parse("http:"))
 
@@ -56,14 +59,33 @@ fun isBrowserApp(context: Context, packageName: String, userId: Int): Boolean {
  * Returns intent if there is a browser application available to handle the uri. Otherwise, returns
  * null.
  */
-fun getBrowserIntent(uri: Uri, packageManager: PackageManager): Intent? {
+fun getBrowserIntent(uri: Uri, packageManager: PackageManager, userId: Int): Intent? {
     val intent = Intent.makeMainSelectorActivity(Intent.ACTION_MAIN, Intent.CATEGORY_APP_BROWSER)
         .setData(uri)
         .addFlags(FLAG_ACTIVITY_NEW_TASK)
-    // If there is no browser application available to handle intent, return null
-    val component = intent.resolveActivity(packageManager) ?: return null
-    intent.setComponent(component)
+    // If there is a browser application available to handle the intent, return the intent.
+    // Otherwise, return null.
+    val resolveInfo = packageManager.resolveActivityAsUser(intent, /* flags= */ 0, userId)
+        ?: return null
+    intent.setComponent(resolveInfo.componentInfo.componentName)
     return intent
+}
+
+/**
+ * Returns intent if there is a non-browser application available to handle the uri. Otherwise,
+ * returns null.
+ */
+fun getAppIntent(uri: Uri, packageManager: PackageManager, userId: Int): Intent? {
+    val intent = Intent(ACTION_VIEW, uri).addFlags(FLAG_ACTIVITY_NEW_TASK)
+    val resolveInfo = packageManager.resolveActivityAsUser(intent, /* flags= */ 0, userId)
+        ?: return null
+    // If there is a non-browser application available to handle the intent, return the intent.
+    // Otherwise, return null.
+     if (resolveInfo.activityInfo != null && !resolveInfo.handleAllWebDataURI) {
+        intent.setComponent(resolveInfo.componentInfo.componentName)
+        return intent
+    }
+    return null
 }
 
 /**
@@ -85,4 +107,11 @@ fun getDomainVerificationUserState(
         )
         return null
     }
+}
+
+/**
+ * Returns the web uri from the given [AssistContent].
+ */
+fun AssistContent.getSessionWebUri(): Uri? {
+    return extras.getParcelable(EXTRA_SESSION_TRANSFER_WEB_URI) ?: webUri
 }

@@ -107,6 +107,11 @@ static jint Typeface_getWeight(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
     return toTypeface(faceHandle)->fStyle.weight();
 }
 
+// Critical Native
+static jboolean Typeface_isVariationInstance(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
+    return toTypeface(faceHandle)->fIsVariationInstance;
+}
+
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray,
                                       jlong fallbackPtr, int weight, int italic) {
     ScopedLongArrayRO families(env, familyArray);
@@ -398,6 +403,7 @@ static const JNINativeMethod gTypefaceMethods[] = {
         {"nativeGetReleaseFunc", "()J", (void*)Typeface_getReleaseFunc},
         {"nativeGetStyle", "(J)I", (void*)Typeface_getStyle},
         {"nativeGetWeight", "(J)I", (void*)Typeface_getWeight},
+        {"nativeIsVariationInstance", "(J)Z", (void*)Typeface_isVariationInstance},
         {"nativeCreateFromArray", "([JJII)J", (void*)Typeface_createFromArray},
         {"nativeSetDefault", "(J)V", (void*)Typeface_setDefault},
         {"nativeGetSupportedAxes", "(J)[I", (void*)Typeface_getSupportedAxes},

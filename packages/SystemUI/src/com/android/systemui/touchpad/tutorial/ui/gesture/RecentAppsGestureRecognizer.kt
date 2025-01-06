@@ -28,10 +28,10 @@ import kotlin.math.abs
 class RecentAppsGestureRecognizer(
     private val gestureDistanceThresholdPx: Int,
     private val velocityThresholdPxPerMs: Float,
-    private val distanceTracker: DistanceTracker = DistanceTracker(),
-    private val velocityTracker: VerticalVelocityTracker = VerticalVelocityTracker(),
+    private val velocityTracker: VelocityTracker = VerticalVelocityTracker(),
 ) : GestureRecognizer {
 
+    private val distanceTracker = DistanceTracker()
     private var gestureStateChangedCallback: (GestureState) -> Unit = {}
 
     override fun addGestureStateCallback(callback: (GestureState) -> Unit) {
@@ -43,7 +43,13 @@ class RecentAppsGestureRecognizer(
     }
 
     override fun accept(event: MotionEvent) {
-        if (!isThreeFingerTouchpadSwipe(event)) return
+        if (!isMultifingerTouchpadSwipe(event)) return
+        if (!isThreeFingerTouchpadSwipe(event)) {
+            if (event.actionMasked == MotionEvent.ACTION_UP) {
+                gestureStateChangedCallback(GestureState.Error)
+            }
+            return
+        }
         val gestureState = distanceTracker.processEvent(event)
         velocityTracker.accept(event)
 

@@ -34,8 +34,10 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.model.SysUiState
 import com.android.systemui.res.R
+import com.android.systemui.shade.data.repository.shadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogManager
+import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
@@ -82,7 +84,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
     private val uiProperties =
         BluetoothTileDialogViewModel.UiProperties.build(
             isBluetoothEnabled = ENABLED,
-            isAutoOnToggleFeatureAvailable = ENABLED
+            isAutoOnToggleFeatureAvailable = ENABLED,
         )
     @Mock private lateinit var sysuiDialogFactory: SystemUIDialog.Factory
     @Mock private lateinit var dialogManager: SystemUIDialogManager
@@ -97,6 +99,8 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
     private lateinit var icon: Pair<Drawable, String>
     private lateinit var mBluetoothTileDialogDelegate: BluetoothTileDialogDelegate
     private lateinit var deviceItem: DeviceItem
+
+    private val kosmos = testKosmos()
 
     @Before
     fun setUp() {
@@ -116,10 +120,16 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 fakeSystemClock,
                 uiEventLogger,
                 logger,
-                sysuiDialogFactory
+                sysuiDialogFactory,
+                kosmos.shadeDialogContextInteractor,
             )
 
-        whenever(sysuiDialogFactory.create(any(SystemUIDialog.Delegate::class.java))).thenAnswer {
+        whenever(
+            sysuiDialogFactory.create(
+                any(SystemUIDialog.Delegate::class.java),
+                any()
+            )
+        ).thenAnswer {
             SystemUIDialog(
                 mContext,
                 0,
@@ -128,7 +138,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 sysuiState,
                 fakeBroadcastDispatcher,
                 dialogTransitionAnimator,
-                it.getArgument(0)
+                it.getArgument(0),
             )
         }
 
@@ -140,7 +150,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
                 iconWithDescription = icon,
-                background = null
+                background = null,
             )
         `when`(cachedBluetoothDevice.isBusy).thenReturn(false)
     }
@@ -169,7 +179,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 dialog,
                 listOf(deviceItem),
                 showSeeAll = false,
-                showPairNewDevice = false
+                showPairNewDevice = false,
             )
 
             val recyclerView = dialog.requireViewById<RecyclerView>(R.id.device_list)
@@ -217,6 +227,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                     uiEventLogger,
                     logger,
                     sysuiDialogFactory,
+                    kosmos.shadeDialogContextInteractor,
                 )
                 .Adapter(bluetoothTileDialogCallback)
                 .DeviceItemViewHolder(view)
@@ -238,7 +249,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 dialog,
                 listOf(deviceItem),
                 showSeeAll = false,
-                showPairNewDevice = true
+                showPairNewDevice = true,
             )
 
             val seeAllButton = dialog.requireViewById<View>(R.id.see_all_button)
@@ -272,6 +283,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                         uiEventLogger,
                         logger,
                         sysuiDialogFactory,
+                        kosmos.shadeDialogContextInteractor,
                     )
                     .createDialog()
             dialog.show()
@@ -295,6 +307,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                         uiEventLogger,
                         logger,
                         sysuiDialogFactory,
+                        kosmos.shadeDialogContextInteractor,
                     )
                     .createDialog()
             dialog.show()
@@ -318,6 +331,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                         uiEventLogger,
                         logger,
                         sysuiDialogFactory,
+                        kosmos.shadeDialogContextInteractor,
                     )
                     .createDialog()
             dialog.show()
@@ -339,7 +353,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 dialog,
                 visibility = VISIBLE,
                 label = null,
-                isActive = true
+                isActive = true,
             )
 
             val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)
@@ -361,7 +375,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 dialog,
                 visibility = VISIBLE,
                 label = null,
-                isActive = false
+                isActive = false,
             )
 
             val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)
@@ -383,7 +397,7 @@ class BluetoothTileDialogDelegateTest : SysuiTestCase() {
                 dialog,
                 visibility = GONE,
                 label = null,
-                isActive = false
+                isActive = false,
             )
 
             val audioSharingButton = dialog.requireViewById<View>(R.id.audio_sharing_button)

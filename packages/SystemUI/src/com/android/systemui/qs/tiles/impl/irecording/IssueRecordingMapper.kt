@@ -19,16 +19,16 @@ package com.android.systemui.qs.tiles.impl.irecording
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 class IssueRecordingMapper
 @Inject
-constructor(@Main private val resources: Resources, private val theme: Theme) :
+constructor(@ShadeDisplayAware private val resources: Resources, private val theme: Theme) :
     QSTileDataToStateMapper<IssueRecordingModel> {
     override fun map(config: QSTileConfig, data: IssueRecordingModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
@@ -39,6 +39,7 @@ constructor(@Main private val resources: Resources, private val theme: Theme) :
                     Icon.Loaded(
                         resources.getDrawable(R.drawable.qs_record_issue_icon_on, theme),
                         null,
+                        R.drawable.qs_record_issue_icon_on,
                     )
                 } else {
                     activationState = QSTileState.ActivationState.INACTIVE
@@ -46,6 +47,7 @@ constructor(@Main private val resources: Resources, private val theme: Theme) :
                     Icon.Loaded(
                         resources.getDrawable(R.drawable.qs_record_issue_icon_off, theme),
                         null,
+                        R.drawable.qs_record_issue_icon_off,
                     )
                 }
             supportedActions = setOf(QSTileState.UserAction.CLICK)

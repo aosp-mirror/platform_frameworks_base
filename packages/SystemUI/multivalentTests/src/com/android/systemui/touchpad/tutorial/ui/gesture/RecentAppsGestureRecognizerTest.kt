@@ -17,21 +17,19 @@
 package com.android.systemui.touchpad.tutorial.ui.gesture
 
 import android.view.MotionEvent
-import androidx.compose.ui.input.pointer.util.VelocityTracker1D
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Finished
+import com.android.systemui.testKosmos
+import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.Error
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.InProgress
 import com.android.systemui.touchpad.tutorial.ui.gesture.GestureState.NotStarted
 import com.android.systemui.touchpad.tutorial.ui.gesture.MultiFingerGesture.Companion.SWIPE_DISTANCE
+import com.android.systemui.touchpad.ui.gesture.fakeVelocityTracker
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
-import org.mockito.kotlin.doReturn
-import org.mockito.kotlin.mock
-import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -39,46 +37,30 @@ class RecentAppsGestureRecognizerTest : SysuiTestCase() {
 
     companion object {
         const val THRESHOLD_VELOCITY_PX_PER_MS = 0.1f
-        // multiply by 1000 to get px/ms instead of px/s which is unit used by velocity tracker
-        const val SLOW = THRESHOLD_VELOCITY_PX_PER_MS * 1000 - 1
-        const val FAST = THRESHOLD_VELOCITY_PX_PER_MS * 1000 + 1
+        const val SLOW = THRESHOLD_VELOCITY_PX_PER_MS - 0.01f
+        const val FAST = THRESHOLD_VELOCITY_PX_PER_MS + 0.01f
     }
 
+    private var velocityTracker = testKosmos().fakeVelocityTracker
+
     private var gestureState: GestureState = GestureState.NotStarted
-    private val velocityTracker1D =
-        mock<VelocityTracker1D> {
-            // by default return correct speed for the gesture - as if pointer is slowing down
-            on { calculateVelocity() } doReturn SLOW
-        }
     private val gestureRecognizer =
         RecentAppsGestureRecognizer(
             gestureDistanceThresholdPx = SWIPE_DISTANCE.toInt(),
             velocityThresholdPxPerMs = THRESHOLD_VELOCITY_PX_PER_MS,
-            velocityTracker = VerticalVelocityTracker(velocityTracker1D),
+            velocityTracker = velocityTracker,
         )
 
     @Before
     fun before() {
+        velocityTracker.setVelocity(Velocity(SLOW))
         gestureRecognizer.addGestureStateCallback { gestureState = it }
     }
 
     @Test
-    fun triggersGestureFinishedForThreeFingerGestureUp() {
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = Finished)
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onGestureSpeedTooHigh() {
-        whenever(velocityTracker1D.calculateVelocity()).thenReturn(FAST)
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = NotStarted)
-    }
-
-    @Test
-    fun triggersGestureProgressForThreeFingerGestureStarted() {
-        assertStateAfterEvents(
-            events = ThreeFingerGesture.startEvents(x = 0f, y = 0f),
-            expectedState = InProgress(progress = 0f),
-        )
+    fun triggersError_onGestureSpeedTooHigh() {
+        velocityTracker.setVelocity(Velocity(FAST))
+        assertStateAfterEvents(events = ThreeFingerGesture.swipeUp(), expectedState = Error)
     }
 
     @Test
@@ -100,31 +82,6 @@ class RecentAppsGestureRecognizerTest : SysuiTestCase() {
         assertProgressWhileMovingFingers(deltaY = SWIPE_DISTANCE / 2, expectedProgress = 0f)
         // going further than required distance
         assertProgressWhileMovingFingers(deltaY = -SWIPE_DISTANCE * 2, expectedProgress = 1f)
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onGestureDistanceTooShort() {
-        assertStateAfterEvents(
-            events = ThreeFingerGesture.swipeUp(distancePx = SWIPE_DISTANCE / 2),
-            expectedState = NotStarted,
-        )
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onThreeFingersSwipeInOtherDirections() {
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeDown(), expectedState = NotStarted)
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeLeft(), expectedState = NotStarted)
-        assertStateAfterEvents(events = ThreeFingerGesture.swipeRight(), expectedState = NotStarted)
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onTwoFingersSwipe() {
-        assertStateAfterEvents(events = TwoFingerGesture.swipeUp(), expectedState = NotStarted)
-    }
-
-    @Test
-    fun doesntTriggerGestureFinished_onFourFingersSwipe() {
-        assertStateAfterEvents(events = FourFingerGesture.swipeUp(), expectedState = NotStarted)
     }
 
     private fun assertStateAfterEvents(events: List<MotionEvent>, expectedState: GestureState) {

@@ -111,13 +111,12 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Zobrazuje sa upozornenie týkajúce sa relácie záznamu obrazovky"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Chcete nahrávať obrazovku?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Nahrávať jednu aplikáciu"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Nahrávať celú obrazovku"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Nahrať túto obrazovku"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Nahrať obrazovku %s"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Pri nahrávaní celej obrazovky sa zaznamená všetko, čo sa na nej zobrazuje. Preto venujte pozornosť položkám, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Pri nahrávaní aplikácie sa zaznamená všetko, čo sa v nej zobrazuje alebo prehráva. Preto venujte pozornosť položkám, ako sú heslá, platobné údaje, správy, fotky a zvuk či video."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Nahrávať obrazovku"</string>
-    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Výber aplikácie na nahrávanie"</string>
+    <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Vyberte aplikáciu, z ktorej chcete nahrávať"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Nahrávať zvuk"</string>
     <string name="screenrecord_device_audio_label" msgid="9016927171280567791">"Zvuk zariadenia"</string>
     <string name="screenrecord_device_audio_description" msgid="4922694220572186193">"Zvuk zo zariadenia, napríklad hudba, hovory a tóny zvonenia"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Momentálne nahrávate aplikáciu <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Zastaviť nahrávanie"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Zdieľa sa obrazovka"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"Obsah sa zdieľa"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Chcete prestať zdieľať obrazovku?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"Chcete zastaviť zdieľanie?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Momentálne zdieľate celú obrazovku s aplikáciou <xliff:g id="HOST_APP_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Momentálne zdieľate celú obrazovku s aplikáciou"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Momentálne zdieľate aplikáciu <xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Momentálne zdieľate aplikáciu"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"Momentálne zdieľate s aplikáciou"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Prestať zdieľať"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Prenáša sa obrazovka"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Chcete zastaviť prenos?"</string>
@@ -310,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Používať Bluetooth"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Pripojené"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Zdieľanie zvuku"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Klepnutím prepnete alebo budete zdieľať zvuk"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Podporuje zdieľanie zvuku"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Uložené"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"odpojiť"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"aktivovať"</string>
@@ -330,6 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Vstup"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Načúvadlá"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Zapína sa…"</string>
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Jas sa nedá upraviť, pretože ho \n ovláda horná aplikácia"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Automatické otáčanie"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Automatické otáčanie obrazovky"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Poloha"</string>
@@ -417,7 +414,17 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Kliknutím spárujete nové zariadenie"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Predvoľbu sa nepodarilo aktualizovať"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Predvoľba"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Vybrané"</string>
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Okolie"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Vľavo"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Vpravo"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Rozbaliť na samostatné ovládanie ľavej a pravej strany"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Zbaliť na jednotné ovládanie"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Vypnúť zvuk okolia"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Zapnúť zvuk okolia"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Nástroje"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Živý prepis"</string>
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Poznámka"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Chcete odblokovať mikrofón zariadenia?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Chcete odblokovať kameru zariadenia?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Chcete odblokovať fotoaparát a mikrofón zariadenia?"</string>
@@ -454,7 +461,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"Vypnuté"</string>
     <string name="zen_mode_set_up" msgid="8231201163894922821">"Nenastavené"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Správa v nastaveniach"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Žiadne aktívne režimy}=1{{mode} je aktívny}few{# režimy sú aktívne}many{# modes are active}other{# režimov je aktívnych}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Žiadne aktívne režimy}=1{Aktívny režim {mode}}few{# aktívne režimy}many{# modes are active}other{# aktívnych režimov}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky, pripomenutia, udalosti a volajúci, ktorých určíte. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Nebudú vás vyrušovať zvuky ani vibrácie, iba budíky. Budete naďalej počuť všetko, čo sa rozhodnete prehrať, ako napríklad hudbu, videá a hry."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Prispôsobiť"</string>
@@ -523,13 +530,15 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Miniaplikácie na uzamknutej obrazovke"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Miniaplikácie na uzamknutej obrazovke uvidia všetci, aj keď je tablet uzamknutý."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"zrušiť výber miniaplikácie"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"Znížiť výšku"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"Zväčšiť výšku"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Miniaplikácie na uzamknutej obrazovke"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Ak chcete otvoriť aplikáciu pomocou miniaplikácie, budete musieť overiť svoju totožnosť. Pamätajte, že si miniaplikáciu môže pozrieť ktokoľvek, aj keď máte tablet uzamknutý. Niektoré miniaplikácie možno nie sú určené pre uzamknutú obrazovku a ich pridanie tu môže byť nebezpečné."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"Dobre"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Miniaplikácie"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Ak chcete pridať odkaz Miniaplikácie, uistite sa, že v nastaveniach je zapnutá možnosť Zobrazovať miniaplikácie na uzamknutej obrazovke."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Nastavenia"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Zobraziť tlačidlo šetriča obrazovky"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Prepnutie používateľa"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"rozbaľovacia ponuka"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Všetky aplikácie a údaje v tejto relácii budú odstránené."</string>
@@ -590,12 +599,13 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Upozornenia"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Konverzácie"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Vymazať všetky tiché upozornenia"</string>
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Otvoriť nastavenia upozornení"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"Upozornenia sú pozastavené režimom bez vyrušení"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Žiadne upozornenia}=1{Upozornenia boli pozastavené režimom {mode}}=2{Upozornenia boli pozastavené režimom {mode} a jedným ďalším}few{Upozornenia boli pozastavené režimom {mode} a # ďalšími}many{Notifications paused by {mode} and # other modes}other{Upozornenia boli pozastavené režimom {mode} a # ďalšími}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Spustiť"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Žiadne upozornenia"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Žiadne nové upozornenia"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Stlmenie upozornení je zapnuté"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"Stlmenie upozornení je zapnuté"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Keď dostanete priveľa upozornení naraz, až na dve minúty sa zníži hlasitosť  zariadenia a upozornenia sa obmedzia."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Vypnúť"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Odomknutím zobrazíte staršie upozornenia"</string>
@@ -701,8 +711,10 @@
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Priestorový zvuk"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Vypnuté"</string>
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Pevné"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Sled. polohy hlavy"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Sledovanie hlavy"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Režim zvonenia zmeníte klepnutím"</string>
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"režim zvonenia"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>, režim zvonenia zmeníte klepnutím"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"vypnite zvuk"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"zapnite zvuk"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"zapnite vibrovanie"</string>
@@ -748,6 +760,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satelit, pripojenie je k dispozícii"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Pomoc cez satelit"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Tiesňové volania alebo pomoc v tiesni"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"žiadny signál"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"jedna čiarka"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"dve čiarky"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"tri čiarky"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"štyri čiarky"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"plný signál"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Pracovný profil"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Pri používaní tuneru postupujte opatrne"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"Tuner používateľského rozhrania systému poskytujte ďalšie spôsoby ladenia a prispôsobenia používateľského rozhrania Android. Tieto experimentálne funkcie sa môžu v budúcich verziách zmeniť, ich poskytovanie môže byť prerušené alebo môžu byť odstránené. Pokračujte opatrne."</string>
@@ -858,20 +877,25 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"Prechod späť"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Prechod na plochu"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Zobrazenie nedávnych aplikácií"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Cyklické prechádzanie dopredu po nedávnych aplikáciách"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"Cyklické prechádzanie dozadu po nedávnych aplikáciách"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"Cyklické prechádzanie dopredu nedávnymi aplikáciámi"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"Cyklické prechádzanie dozadu nedávnymi aplikáciami"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Otvorenie zoznamu aplikácií"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Otvorenie nastavení"</string>
-    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvorenie Asistenta"</string>
+    <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Otvoriť asistenta"</string>
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Uzamknutie obrazovky"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Napísanie poznámky"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Multitasking"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Použite rozdelenú obrazovku s aktuálnou aplikáciou vpravo"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Použite rozdelenú obrazovku s aktuálnou aplikáciou vľavo"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Prepnutie rozdelenej obrazovky na celú"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Rozdelenie obrazovky, aktuálna aplikácia vpravo"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Rozdelenie obrazovky, aktuálna aplikácia vľavo"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Prepnutie na celú obrazovku"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Prechod na aplikáciu vpravo alebo dole pri rozdelenej obrazovke"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Prechod na aplikáciu vľavo alebo hore pri rozdelenej obrazovke"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"Počas rozdelenej obrazovky: nahradenie aplikácie inou"</string>
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Presun aktívneho okna medzi obrazovkami"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"Presun okna doľava"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"Presun okna doprava"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Maximalizovanie okna"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Minimalizovanie okna"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Vstup"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Prepnutie na ďalší jazyk"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Prepnutie na predchádzajúci jazyk"</string>
@@ -943,9 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Zobraziť ikony upozornení s nízkou prioritou"</string>
     <string name="other" msgid="429768510980739978">"Ďalšie"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"odstrániť kartu"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"pridať kartu na koniec"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"pridáte kartu na poslednú pozíciu"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Presunúť kartu"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Pridať kartu"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Pridať kartu na požadovanú pozíciu"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Presunúť na <xliff:g id="POSITION">%1$d</xliff:g>. pozíciu"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Pridať na <xliff:g id="POSITION">%1$d</xliff:g>. pozíciu"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Pozícia je neplatná."</string>
@@ -961,11 +985,10 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"vybrať používateľa"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Žiadny internet"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Otvoriť nastavenia <xliff:g id="ID_1">%s</xliff:g>"</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Upraviť poradie nastavení"</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Upraviť poradie rýchlych nastavení"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Ponuka vypínača"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Strana <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Uzamknutá obrazovka"</string>
-    <string name="finder_active" msgid="7907846989716941952">"Pomocou funkcie Nájdi moje zariadenie môžete zistiť polohu tohto telefónu, aj keď je vypnutý"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Vypína sa…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Zobraziť opatrenia"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Zobraziť opatrenia"</string>
@@ -1193,7 +1216,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(odpojené)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Nedá sa prepnúť. Zopakujte klepnutím."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Pripojiť zariadenie"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Ak chcete túto reláciu prenášať, otvorte aplikáciu."</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Neznáma aplikácia"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Zastaviť prenos"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Dostupné zariadenia pre zvukový výstup."</string>
@@ -1220,6 +1242,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Použite menej znakov než <xliff:g id="LENGTH">%1$d</xliff:g>"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Číslo zostavy"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Číslo zostavy bolo skopírované do schránky."</string>
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"skopírovať do schránky."</string>
     <string name="basic_status" msgid="2315371112182658176">"Otvorená konverzácia"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Miniaplikácie konverzácií"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Klepnite na konverzáciu a pridajte ju tak na plochu"</string>
@@ -1266,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"vstúpte do zariadenia"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Otvorte odtlačkom prsta"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Vyžaduje sa overenie. Dotknite sa senzora odtlačkov prstov."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Prebiehajúci telefonický hovor"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobilné dáta"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Pripojené"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Dočasne pripojené"</string>
@@ -1355,6 +1379,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Ak chcete vyššie rozlíšenie, prevráťte telefón"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Rozloženie skladacieho zariadenia"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Prevrátenie skladacieho zariadenia"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Predná obrazovka je zapnutá"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"zložené"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"rozložené"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1406,52 +1431,72 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Ovládanie systému"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Systémové aplikácie"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Multitasking"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Nedávne aplikácie"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Rozdelená obrazovka"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Vstup"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Odkazy do aplikácií"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Skratky aplikácií"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aktuálna aplikácia"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Dostupnosť"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Klávesové skratky"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Vyhľadávacie odkazy"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Prispôsobenie klávesových skratiek"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Chcete skratku odstrániť?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Chcete resetovať na predvolené nastavenie?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Stlačením klávesa priraďte skratku"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Týmto natrvalo odstránite vlastnú skratku."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Týmto natrvalo odstránite všetky vlastné odkazy."</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Prehľadávať skratky"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Žiadne výsledky vyhľadávania"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Ikona zbalenia"</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Ikona akčného klávesa alebo metaklávesa"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Ikona plus"</string>
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Prispôsobiť"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Resetovať"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Hotovo"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Ikona rozbalenia"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"alebo"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"plus"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"lomka"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Presúvadlo"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Nastavenia klávesnice"</string>
-    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Prechádzajte pomocou klávesnice"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Nastaviť skratku"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Odstrániť"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Áno, resetovať"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Zrušiť"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Stlačte kláves"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Kombinácia klávesov sa už používa. Skúste iný kláves."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Skratku nie je možné nastaviť."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Pohybujte sa v systéme pomocou klávesnice"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Naučte sa klávesové skratky"</string>
-    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Prechádzajte pomocou touchpadu"</string>
+    <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Pohybujte sa v systéme pomocou touchpadu"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Naučte sa gestá touchpadu"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Prechádzajte pomocou klávesnice a touchpadu"</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Pohybujte sa v systéme pomocou klávesnice a touchpadu"</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Naučte sa gestá touchpadu, klávesové skratky a ďalšie funkcie"</string>
-    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Prejsť späť"</string>
+    <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Prechod späť"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"Prejsť na plochu"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Zobrazenie nedávnych aplikácií"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Hotovo"</string>
-    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Prejsť späť"</string>
+    <string name="gesture_error_title" msgid="469064941635578511">"Skúste to znova."</string>
+    <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Prejdenie späť"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Potiahnite troma prstami na touchpade doľava alebo doprava"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Výborne!"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Dokončili ste gesto na prechod späť."</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Použili ste gesto na prechod späť."</string>
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Ak chcete prejsť späť pomocou touchpadu, potiahnite troma prstami doľava alebo doprava"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"Prechod na plochu"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Potiahnite troma prstami na touchpade nahor"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Skvelé!"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Dokončili ste gesto na prechod na plochu"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Použili ste gesto na prechod na plochu."</string>
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Ak chcete prejsť na plochu, potiahnite troma prstami na touchpade"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Zobrazenie nedávnych aplikácií"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Potiahnite troma prstami na touchpade nahor a pridržte"</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Skvelé!"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Dokončili ste gesto na zobrazenie nedávnych aplikácií."</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Použili ste gesto na zobrazenie nedávnych aplikácií."</string>
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Ak si chcete zobraziť nedávne aplikácie, potiahnite troma prstami na touchpade nahor a pridržte ich"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Zobrazenie všetkých aplikácií"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Stlačte na klávesnici akčný kláves"</string>
-    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Výborne!"</string>
-    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Dokončili ste gesto na zobrazenie všetkých aplikácií"</string>
+    <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Dobre!"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Použili ste gesto na zobrazenie všetkých aplikácií."</string>
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Ak si chcete zobraziť všetky aplikácie, stlačte na klávesnici akčný kláves"</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Výuková animácia, kliknutím pozastavíte alebo obnovíte prehrávanie."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Podsvietenie klávesnice"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"%1$d. úroveň z %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Ovládanie domácnosti"</string>
@@ -1483,6 +1528,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Poskytnuté aplikáciami"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Zobrazovanie"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Neznáme"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Resetovanie kariet"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Chcete resetovať karty na pôvodné poradie a veľkosti?"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"Chcete resetovať všetky karty?"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"Všetky karty rýchlych nastavení sa resetujú na pôvodné nastavenia zariadenia"</string>
 </resources>

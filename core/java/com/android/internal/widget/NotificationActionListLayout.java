@@ -20,6 +20,7 @@ import static android.app.Notification.CallStyle.DEBUG_NEW_ACTION_LAYOUT;
 import static android.app.Flags.evenlyDividedCallStyleActionLayout;
 
 import android.annotation.DimenRes;
+import android.app.Flags;
 import android.app.Notification;
 import android.content.Context;
 import android.content.res.TypedArray;
@@ -58,7 +59,7 @@ public class NotificationActionListLayout extends LinearLayout {
     private int mEmphasizedPaddingBottom;
     private int mEmphasizedHeight;
     private int mRegularHeight;
-    @DimenRes private int mCollapsibleIndentDimen = R.dimen.notification_actions_padding_start;
+    @DimenRes private int mCollapsibleIndentDimen;
     int mNumNotGoneChildren;
     int mNumPriorityChildren;
 
@@ -72,6 +73,10 @@ public class NotificationActionListLayout extends LinearLayout {
 
     public NotificationActionListLayout(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
+
+        mCollapsibleIndentDimen = Flags.notificationsRedesignTemplates()
+                ? R.dimen.notification_2025_actions_margin_start
+                : R.dimen.notification_actions_padding_start;
 
         int[] attrIds = { android.R.attr.gravity };
         TypedArray ta = context.obtainStyledAttributes(attrs, attrIds, defStyleAttr, defStyleRes);

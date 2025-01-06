@@ -23,6 +23,7 @@ import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
+import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.viewmodel.UserActionsViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
@@ -44,6 +45,7 @@ constructor(
     private val deviceEntryInteractor: DeviceEntryInteractor,
     private val communalInteractor: CommunalInteractor,
     private val shadeInteractor: ShadeInteractor,
+    private val occlusionInteractor: SceneContainerOcclusionInteractor,
 ) : UserActionsViewModel() {
 
     override suspend fun hydrateActions(setActions: (Map<UserAction, UserActionResult>) -> Unit) {
@@ -57,7 +59,8 @@ constructor(
                     deviceEntryInteractor.isUnlocked,
                     communalInteractor.isCommunalAvailable,
                     shadeInteractor.shadeMode,
-                ) { isDeviceUnlocked, isCommunalAvailable, shadeMode ->
+                    occlusionInteractor.isOccludingActivityShown,
+                ) { isDeviceUnlocked, isCommunalAvailable, shadeMode, isOccluded ->
                     buildList {
                             if (isCommunalAvailable) {
                                 add(Swipe.Start to Scenes.Communal)
@@ -67,7 +70,8 @@ constructor(
 
                             addAll(
                                 when (shadeMode) {
-                                    ShadeMode.Single -> singleShadeActions()
+                                    ShadeMode.Single ->
+                                        singleShadeActions(isDownFromTopEdgeEnabled = !isOccluded)
                                     ShadeMode.Split -> splitShadeActions()
                                     ShadeMode.Dual -> dualShadeActions()
                                 }

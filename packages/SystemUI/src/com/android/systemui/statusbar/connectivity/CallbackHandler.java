@@ -171,28 +171,6 @@ public class CallbackHandler extends Handler implements EmergencyListener, Signa
     }
 
     @Override
-    public void setCallIndicator(IconState statusIcon, int subId) {
-        String currentCallback = new StringBuilder()
-                .append("setCallIndicator: ")
-                .append("statusIcon=").append(statusIcon).append(",")
-                .append("subId=").append(subId)
-                .toString();
-        if (!currentCallback.equals(mLastCallback)) {
-            mLastCallback = currentCallback;
-            String log = new StringBuilder()
-                    .append(SSDF.format(System.currentTimeMillis())).append(",")
-                    .append(currentCallback).append(",")
-                    .toString();
-            recordLastCallback(log);
-        }
-        post(() -> {
-            for (SignalCallback signalCluster : mSignalCallbacks) {
-                signalCluster.setCallIndicator(statusIcon, subId);
-            }
-        });
-    }
-
-    @Override
     public void setSubs(List<SubscriptionInfo> subs) {
         String currentCallback = new StringBuilder()
                 .append("setSubs: ")

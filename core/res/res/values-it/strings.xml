@@ -72,6 +72,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID chiamante generalmente limitato. Prossima chiamata: non limitato"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID chiamante generalmente non limitato. Prossima chiamata: limitato"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID chiamante generalmente non limitato. Prossima chiamata: non limitato"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Questa app non è compatibile con le pagine di 16 kB. Controllo allineamento APK non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Questa app non è compatibile con le pagine di 16 kB. Controllo allineamento ELF non riuscito. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Questa app non è compatibile con le pagine di 16 kB. Controlli di allineamento APK ed ELF non riusciti. Questa app verrà eseguita utilizzando la modalità compatibile con le dimensioni della pagina. Per la massima compatibilità, ricompila l\'applicazione con il supporto a 16 kB. Per maggiori dettagli, consulta &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Servizio non fornito."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Non è possibile modificare l\'impostazione ID chiamante."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"I dati sono stati trasferiti a <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -85,6 +88,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossibile raggiungere la rete mobile"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prova a cambiare la rete preferita. Tocca per cambiare."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Chiamate di emergenza non disponibili"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Per le chiamate di emergenza è necessaria una rete mobile"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Avvisi"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Deviazione chiamate"</string>
@@ -169,7 +174,7 @@
     <string name="scNullCipherIssueActionGotIt" msgid="8747796640866585787">"Ok"</string>
     <string name="fcComplete" msgid="1080909484660507044">"Codice funzione completo."</string>
     <string name="fcError" msgid="5325116502080221346">"Problema di connessione o codice funzione non valido."</string>
-    <string name="httpErrorOk" msgid="6206751415788256357">"OK"</string>
+    <string name="httpErrorOk" msgid="6206751415788256357">"Ok"</string>
     <string name="httpError" msgid="3406003584150566720">"Si è verificato un errore di rete."</string>
     <string name="httpErrorLookup" msgid="3099834738227549349">"Impossibile trovare l\'URL."</string>
     <string name="httpErrorUnsupportedAuthScheme" msgid="3976195595501606787">"Schema di autenticazione del sito non supportato."</string>
@@ -613,6 +618,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Consenti all\'app di stabilire la posizione relativa tra dispositivi a banda ultralarga nelle vicinanze"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Interazione con dispositivi Wi-Fi vicini"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Consente all\'app di trasmettere annunci e connettersi a dispositivi Wi‑Fi vicini e di stabilirne la posizione relativa."</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"stabilire la posizione relativa tra dispositivi nelle vicinanze"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Consenti all\'app di stabilire la posizione relativa tra dispositivi nelle vicinanze"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informazioni del servizio di pagamento NFC preferito"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Consente all\'app di recuperare informazioni del servizio di pagamento NFC preferito, quali destinazione della route e identificatori applicazione registrati."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"controllo Near Field Communication"</string>
@@ -1154,6 +1161,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"tra <xliff:g id="COUNT">%d</xliff:g> h"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"tra <xliff:g id="COUNT">%d</xliff:g> g"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"tra <xliff:g id="COUNT">%d</xliff:g> a"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> min fa"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> h fa"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> g fa"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> anni fa"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> g"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> anno"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"tra <xliff:g id="COUNT">%d</xliff:g> min"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"tra <xliff:g id="COUNT">%d</xliff:g> h"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"tra <xliff:g id="COUNT">%d</xliff:g> g"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"tra <xliff:g id="COUNT">%d</xliff:g> anno"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> min fa"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> h fa"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> g fa"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> anni fa"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minuto fa}many{# di minuti fa}other{# minuti fa}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ora fa}many{# di ore fa}other{# ore fa}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# giorno fa}many{# di giorni fa}other{# giorni fa}}"</string>
@@ -1165,7 +1188,7 @@
     <string name="VideoView_error_title" msgid="5750686717225068016">"Problemi video"</string>
     <string name="VideoView_error_text_invalid_progressive_playback" msgid="3782449246085134720">"Questo video non è valido per lo streaming su questo dispositivo."</string>
     <string name="VideoView_error_text_unknown" msgid="7658683339707607138">"Impossibile riprodurre il video."</string>
-    <string name="VideoView_error_button" msgid="5138809446603764272">"OK"</string>
+    <string name="VideoView_error_button" msgid="5138809446603764272">"Ok"</string>
     <string name="relative_time" msgid="8572030016028033243">"<xliff:g id="DATE">%1$s</xliff:g>, <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="noon" msgid="8365974533050605886">"mezzogiorno"</string>
     <string name="Noon" msgid="6902418443846838189">"Mezzogiorno"</string>
@@ -1204,7 +1227,7 @@
     <string name="app_running_notification_text" msgid="5120815883400228566">"Tocca per ulteriori informazioni o per interrompere l\'app."</string>
     <string name="ok" msgid="2646370155170753815">"Ok"</string>
     <string name="cancel" msgid="6908697720451760115">"Annulla"</string>
-    <string name="yes" msgid="9069828999585032361">"OK"</string>
+    <string name="yes" msgid="9069828999585032361">"Ok"</string>
     <string name="no" msgid="5122037903299899715">"Annulla"</string>
     <string name="dialog_alert_title" msgid="651856561974090712">"Attenzione"</string>
     <string name="loading" msgid="3138021523725055037">"Caricamento…"</string>
@@ -1263,7 +1286,7 @@
     <string name="anr_activity_process" msgid="3477362583767128667">"L\'app <xliff:g id="ACTIVITY">%1$s</xliff:g> non risponde"</string>
     <string name="anr_application_process" msgid="4978772139461676184">"L\'app <xliff:g id="APPLICATION">%1$s</xliff:g> non risponde"</string>
     <string name="anr_process" msgid="1664277165911816067">"Il processo <xliff:g id="PROCESS">%1$s</xliff:g> non risponde"</string>
-    <string name="force_close" msgid="9035203496368973803">"OK"</string>
+    <string name="force_close" msgid="9035203496368973803">"Ok"</string>
     <string name="report" msgid="2149194372340349521">"Segnala"</string>
     <string name="wait" msgid="7765985809494033348">"Attendi"</string>
     <string name="webpage_unresponsive" msgid="7850879412195273433">"La pagina non risponde più.\n\nVuoi chiuderla?"</string>
@@ -1393,7 +1416,7 @@
     <string name="perms_description_app" msgid="2747752389870161996">"Fornito da <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
     <string name="no_permissions" msgid="5729199278862516390">"Nessuna autorizzazione richiesta"</string>
     <string name="perm_costs_money" msgid="749054595022779685">"potrebbe comportare dei costi"</string>
-    <string name="dlg_ok" msgid="5103447663504839312">"OK"</string>
+    <string name="dlg_ok" msgid="5103447663504839312">"Ok"</string>
     <string name="usb_charging_notification_title" msgid="1674124518282666955">"Dispositivo in carica tramite USB"</string>
     <string name="usb_supplying_notification_title" msgid="5378546632408101811">"Dispositivo collegato in carica tramite USB"</string>
     <string name="usb_mtp_notification_title" msgid="1065989144124499810">"Trasferimento file tramite USB attivato"</string>
@@ -1758,6 +1781,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modalità a una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Attenuazione extra"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Protesi uditive"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Rilascia i tasti del volume. Per attivare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tieni di nuovo premuti entrambi i tasti del volume per 3 secondi."</string>
@@ -1890,7 +1921,7 @@
     <string name="restr_pin_try_later" msgid="5897719962541636727">"Riprova più tardi"</string>
     <string name="immersive_cling_title" msgid="2307034298721541791">"Visualizzazione a schermo intero"</string>
     <string name="immersive_cling_description" msgid="2896205051090870978">"Per uscire, scorri verso il basso dalla parte superiore dello schermo"</string>
-    <string name="immersive_cling_positive" msgid="7047498036346489883">"OK"</string>
+    <string name="immersive_cling_positive" msgid="7047498036346489883">"Ok"</string>
     <string name="display_rotation_camera_compat_toast_after_rotation" msgid="7600891546249829854">"Ruota per migliorare l\'anteprima"</string>
     <string name="display_rotation_camera_compat_toast_in_multi_window" msgid="2473122980393502775">"Apri <xliff:g id="NAME">%s</xliff:g> a schermo intero per migliorare la visualizzazione"</string>
     <string name="done_label" msgid="7283767013231718521">"Fine"</string>
@@ -1912,7 +1943,7 @@
     <string name="package_installed_device_owner" msgid="8684974629306529138">"Installato dall\'amministratore.\nVai alle impostazioni per visualizzare le autorizzazioni concesse"</string>
     <string name="package_updated_device_owner" msgid="7560272363805506941">"Aggiornato dall\'amministratore"</string>
     <string name="package_deleted_device_owner" msgid="2292335928930293023">"Eliminato dall\'amministratore"</string>
-    <string name="confirm_battery_saver" msgid="5247976246208245754">"OK"</string>
+    <string name="confirm_battery_saver" msgid="5247976246208245754">"Ok"</string>
     <string name="battery_saver_description_with_learn_more" msgid="5444908404021316250">"Il risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
     <string name="battery_saver_description" msgid="8518809702138617167">"Il risparmio energetico attiva il tema scuro e limita o disattiva l\'attività in background, nonché alcuni effetti visivi, funzionalità e connessioni di rete."</string>
     <string name="data_saver_description" msgid="4995164271550590517">"Per contribuire a ridurre l\'utilizzo dei dati, la funzionalità Risparmio dati impedisce ad alcune app di inviare o ricevere dati in background. Un\'app in uso può accedere ai dati, ma potrebbe farlo con meno frequenza. Per esempio, è possibile che le immagini non vengano visualizzate finché non le tocchi."</string>
@@ -1939,12 +1970,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fine settimana"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Evento"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Notte"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Non disturbare (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Gestione: app <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"On"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Off"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"Da <xliff:g id="START">%1$s</xliff:g> a <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Qualsiasi calendario"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> sta disattivando alcuni suoni"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Si è verificato un problema interno con il dispositivo, che potrebbe essere instabile fino al ripristino dei dati di fabbrica."</string>
@@ -2147,7 +2180,7 @@
     <string name="notification_feedback_indicator_demoted" msgid="8880309924296450875">"Questa notifica è stata posizionata più in basso. Tocca per dare un feedback."</string>
     <string name="nas_upgrade_notification_title" msgid="8436359459300146555">"Notifiche avanzate"</string>
     <string name="nas_upgrade_notification_content" msgid="5157550369837103337">"Ora le risposte e le azioni suggerite vengono fornite dalle notifiche avanzate. Le notifiche adattive Android non sono più supportate."</string>
-    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"OK"</string>
+    <string name="nas_upgrade_notification_enable_action" msgid="3046406808378726874">"Ok"</string>
     <string name="nas_upgrade_notification_disable_action" msgid="3794833210043497982">"Disattiva"</string>
     <string name="nas_upgrade_notification_learn_more_action" msgid="7011130656195423947">"Scopri di più"</string>
     <string name="nas_upgrade_notification_learn_more_content" msgid="3735480566983530650">"Le notifiche adattive Android sono state sostituite dalle notifiche avanzate in Android 12. Questa funzionalità mostra risposte e azioni suggerite e organizza le tue notifiche.\n\nLe notifiche avanzate possono accedere ai contenuti di una notifica, incluse le informazioni personali, come i nomi dei contatti e i messaggi. Questa funzionalità può anche ignorare le notifiche o rispondervi, ad esempio accettando le telefonate, e controllare la modalità Non disturbare."</string>
@@ -2431,6 +2464,30 @@
     <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Attiva"</string>
     <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Indietro"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"In attesa…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS satellitare è disponibile"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Puoi inviare messaggi ai servizi di emergenza se non disponi di una rete mobile o Wi-Fi. Google Messaggi deve essere l\'app di messaggistica predefinita."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"SOS satellitare non supportato"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"SOS satellitare non è supportato su questo dispositivo"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"SOS satellitare non configurato"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Assicurati di avere una connessione a internet attiva e prova a ripetere la configurazione"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS satellitare non disponibile"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS satellitare non è disponibile in questo paese o in questa regione"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"SOS satellitare non configurato"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Per inviare messaggi via satellite, imposta Google Messaggi come app di messaggistica predefinita"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS satellitare non disponibile"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Per verificare se SOS satellitare è disponibile in questo paese o in questa regione, attiva le impostazioni di localizzazione"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Messaggi via satellite disponibili"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Puoi inviare messaggi via satellite se non disponi di una rete mobile o Wi-Fi. Google Messaggi deve essere l\'app di messaggistica predefinita."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Messaggi via satellite non supportati"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"I messaggi via satellite non sono supportati su questo dispositivo"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Messaggi via satellite non configurati"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Assicurati di avere una connessione a internet attiva e prova a ripetere la configurazione"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Messaggi via satellite non disponibili"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"I messaggi via satellite non sono disponibili in questo paese o in questa regione"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Messaggi via satellite non configurati"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Per inviare messaggi via satellite, imposta Google Messaggi come app di messaggistica predefinita"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Messaggi via satellite non disponibili"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Per verificare se i messaggi via satellite sono disponibili in questo paese o in questa regione, attiva le impostazioni di localizzazione"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Riconfigura lo Sblocco con l\'Impronta"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> non può più essere riconosciuto."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> e <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> non possono più essere riconosciuti."</string>
@@ -2440,7 +2497,7 @@
     <string name="face_dangling_notification_msg" msgid="746235263598985384">"Il tuo modello del volto non può più essere riconosciuto. Riconfigura lo Sblocco con il Volto."</string>
     <string name="biometric_dangling_notification_action_set_up" msgid="8246885009807817961">"Configura"</string>
     <string name="biometric_dangling_notification_action_not_now" msgid="8095249216864443491">"Non ora"</string>
-    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Sveglia per: <xliff:g id="USER_NAME">%s</xliff:g>"</string>
+    <string name="bg_user_sound_notification_title_alarm" msgid="5251678483393143527">"Sveglia per <xliff:g id="USER_NAME">%s</xliff:g>"</string>
     <string name="bg_user_sound_notification_button_switch_user" msgid="3091969648572788946">"Cambia utente"</string>
     <string name="bg_user_sound_notification_button_mute" msgid="4942158515665615243">"Disattiva audio"</string>
     <string name="bg_user_sound_notification_message" msgid="8613881975316976673">"Tocca per disattivare l\'audio"</string>

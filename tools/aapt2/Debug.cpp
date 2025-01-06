@@ -21,10 +21,13 @@
 #include <format/binary/ResChunkPullParser.h>
 
 #include <algorithm>
+#include <array>
 #include <map>
 #include <memory>
 #include <queue>
 #include <set>
+#include <span>
+#include <utility>
 #include <vector>
 
 #include "ResourceTable.h"
@@ -680,17 +683,91 @@ class ChunkPrinter {
       item->PrettyPrint(printer_);
       printer_->Print(")");
     }
+  }
 
-    printer_->Print("\n");
+  void PrintQualifiers(uint32_t qualifiers) const {
+    if (qualifiers == 0) {
+      printer_->Print("0");
+      return;
+    }
+
+    printer_->Print(StringPrintf("0x%04x: ", qualifiers));
+    static constinit std::array kValues = {
+        std::pair{ResTable_config::CONFIG_MCC, "mcc"},
+        std::pair{ResTable_config::CONFIG_MNC, "mnc"},
+        std::pair{ResTable_config::CONFIG_LOCALE, "locale"},
+        std::pair{ResTable_config::CONFIG_TOUCHSCREEN, "touchscreen"},
+        std::pair{ResTable_config::CONFIG_KEYBOARD, "keyboard"},
+        std::pair{ResTable_config::CONFIG_KEYBOARD_HIDDEN, "keyboard_hidden"},
+        std::pair{ResTable_config::CONFIG_NAVIGATION, "navigation"},
+        std::pair{ResTable_config::CONFIG_ORIENTATION, "orientation"},
+        std::pair{ResTable_config::CONFIG_DENSITY, "screen_density"},
+        std::pair{ResTable_config::CONFIG_SCREEN_SIZE, "screen_size"},
+        std::pair{ResTable_config::CONFIG_SMALLEST_SCREEN_SIZE, "screen_smallest_size"},
+        std::pair{ResTable_config::CONFIG_VERSION, "version"},
+        std::pair{ResTable_config::CONFIG_SCREEN_LAYOUT, "screen_layout"},
+        std::pair{ResTable_config::CONFIG_UI_MODE, "ui_mode"},
+        std::pair{ResTable_config::CONFIG_LAYOUTDIR, "layout_dir"},
+        std::pair{ResTable_config::CONFIG_SCREEN_ROUND, "screen_round"},
+        std::pair{ResTable_config::CONFIG_COLOR_MODE, "color_mode"},
+        std::pair{ResTable_config::CONFIG_GRAMMATICAL_GENDER, "grammatical_gender"}};
+    const char* delimiter = "";
+    for (auto&& pair : kValues) {
+      if (qualifiers & pair.first) {
+        printer_->Print(StringPrintf("%s%s", delimiter, pair.second));
+        delimiter = "|";
+      }
+    }
+  }
+
+  bool PrintTypeSpec(const ResTable_typeSpec* chunk) const {
+    printer_->Print(StringPrintf(" id: 0x%02x", android::util::DeviceToHost32(chunk->id)));
+    printer_->Print(StringPrintf(" types: %u", android::util::DeviceToHost16(chunk->typesCount)));
+    printer_->Print(
+        StringPrintf(" entry configs: %u\n", android::util::DeviceToHost32(chunk->entryCount)));
+    printer_->Print("Entry qualifier masks:\n");
+    printer_->Indent();
+    std::span<const uint32_t> masks(reinterpret_cast<const uint32_t*>(GetChunkData(&chunk->header)),
+                                    GetChunkDataLen(&chunk->header) / sizeof(uint32_t));
+    int i = 0;
+    int non_empty_count = 0;
+    for (auto dev_mask : masks) {
+      auto mask = android::util::DeviceToHost32(dev_mask);
+      if (mask == 0) {
+        i++;
+        continue;
+      }
+      ++non_empty_count;
+      printer_->Print(StringPrintf("#0x%02x = ", i++));
+      if (mask & ResTable_typeSpec::SPEC_PUBLIC) {
+        mask &= ~ResTable_typeSpec::SPEC_PUBLIC;
+        printer_->Print("(PUBLIC) ");
+      }
+      if (mask & ResTable_typeSpec::SPEC_STAGED_API) {
+        mask &= ~ResTable_typeSpec::SPEC_STAGED_API;
+        printer_->Print("(STAGED) ");
+      }
+      PrintQualifiers(mask);
+      printer_->Print("\n");
+    }
+    if (non_empty_count > 0) {
+      printer_->Print("\n");
+    } else {
+      printer_->Print("(all empty)\n");
+    }
+    printer_->Undent();
+    return true;
   }
 
   bool PrintTableType(const ResTable_type* chunk) {
     printer_->Print(StringPrintf(" id: 0x%02x", android::util::DeviceToHost32(chunk->id)));
-    printer_->Print(StringPrintf(
-        " name: %s",
-        android::util::GetString(type_pool_, android::util::DeviceToHost32(chunk->id) - 1)
-            .c_str()));
+    const auto name =
+        android::util::GetString(type_pool_, android::util::DeviceToHost32(chunk->id) - 1);
+    printer_->Print(StringPrintf(" name: %s", name.c_str()));
     printer_->Print(StringPrintf(" flags: 0x%02x", android::util::DeviceToHost32(chunk->flags)));
+    printer_->Print(android::util::DeviceToHost32(chunk->flags) & ResTable_type::FLAG_SPARSE
+                        ? " (SPARSE)"
+                        : " (DENSE)");
     printer_->Print(
         StringPrintf(" entryCount: %u", android::util::DeviceToHost32(chunk->entryCount)));
     printer_->Print(
@@ -700,8 +777,7 @@ class ChunkPrinter {
     config.copyFromDtoH(chunk->config);
     printer_->Print(StringPrintf(" config: %s\n", config.to_string().c_str()));
 
-    const ResourceType* type = ParseResourceType(
-        android::util::GetString(type_pool_, android::util::DeviceToHost32(chunk->id) - 1));
+    const ResourceType* type = ParseResourceType(name);
 
     printer_->Indent();
 
@@ -740,11 +816,8 @@ class ChunkPrinter {
         for (size_t i = 0; i < map_entry_count; i++) {
           PrintResValue(&(maps[i].value), config, type);
 
-          printer_->Print(StringPrintf(
-              " name: %s name-id:%d\n",
-              android::util::GetString(key_pool_, android::util::DeviceToHost32(maps[i].name.ident))
-                  .c_str(),
-              android::util::DeviceToHost32(maps[i].name.ident)));
+          printer_->Print(StringPrintf(" name-id: 0x%08x\n",
+                                       android::util::DeviceToHost32(maps[i].name.ident)));
         }
       } else {
         printer_->Print("\n");
@@ -752,6 +825,8 @@ class ChunkPrinter {
         // Print the value of the entry
         Res_value value = entry->value();
         PrintResValue(&value, config, type);
+
+        printer_->Print("\n");
       }
 
       printer_->Undent();
@@ -862,6 +937,10 @@ class ChunkPrinter {
 
         case RES_TABLE_TYPE_TYPE:
           PrintTableType(reinterpret_cast<const ResTable_type*>(chunk));
+          break;
+
+        case RES_TABLE_TYPE_SPEC_TYPE:
+          PrintTypeSpec(reinterpret_cast<const ResTable_typeSpec*>(chunk));
           break;
 
         default:

@@ -51,11 +51,11 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
 
     private companion object {
         val TEST_COMPONENT = ComponentName("TestPackageName", "TestClassName")
+        val TEST_STRUCTURE: CharSequence = "TestStructure"
         val TEST_CONTROL =
             mock(Control::class.java, Answers.RETURNS_MOCKS)!!.apply {
                 whenever(structure).thenReturn(TEST_STRUCTURE)
             }
-        val TEST_STRUCTURE: CharSequence = "TestStructure"
         val TEST_APP: CharSequence = "TestApp"
 
         private fun View.waitForPost() {
@@ -158,7 +158,7 @@ class ControlsFavoritingActivityTest : SysuiTestCase() {
                 assertThat(getBooleanExtra(ControlsEditingActivity.EXTRA_FROM_FAVORITING, false))
                     .isTrue()
                 assertThat(getCharSequenceExtra(ControlsEditingActivity.EXTRA_STRUCTURE))
-                    .isEqualTo("")
+                    .isEqualTo(TEST_STRUCTURE)
             }
         }
     }

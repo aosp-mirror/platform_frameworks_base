@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Активно (само лявото)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Активно (само дясното)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Активно (лявото и дясното)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Данните за околните звуци не бяха актуализирани"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Активно (само за мултимедия). Батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Активно (само за мултимедия). Л: батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Д: батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Свързано (поддържа споделяне на звука). Батерия – <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локален терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Актив. на прил. за терминал с достъп до локалния команден ред"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Среда на програмиране на Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Стартиране на терминала на Linux под Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Експериментално) Стартиране на терминала на Linux под Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ако деактивир., данните в терминала на Linux ще бъдат изчистени"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Проверка с HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Проверка с HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отстраняване на грешки"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Скала на преходната анимация"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Скала за Animator"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Симулиране на алтерн. дисплеи"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Позиция на показване на падащия панел"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Приложения"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Без съхран. на дейностите"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Унищож. на всяка дейност при напускане от потребител"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Този телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Този таблет"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Този компютър (вграден)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Този телевизор"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Високоговорител докинг станция"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Външно устройство"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Свързано устройство"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Този телефон"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Аналогов"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Възпроизвеждането не е възможно на това устройство"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Надстройте профила, за да превключите"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Изтеглянията не могат да се възпроизвеждат тук"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Свързано посредством ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Свързано посредством eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Стандартното за телевизора"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI изход"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Вградени високоговорители"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Вграден високоговорител"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Аудио на телевизора"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"При свързването възникна проблем. Изключете устройството и го включете отново"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Аудиоустройство с кабел"</string>
     <string name="help_label" msgid="3528360748637781274">"Помощ и отзиви"</string>

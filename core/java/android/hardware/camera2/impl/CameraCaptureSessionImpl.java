@@ -340,6 +340,30 @@ public class CameraCaptureSessionImpl extends CameraCaptureSession
         }
     }
 
+    /**
+     * Shared Camera capture session API which can be used by the clients
+     * to start streaming.
+     *
+     * @hide
+     */
+    public int startStreaming(List<Surface> surfaces, Executor executor,
+            CaptureCallback callback) throws CameraAccessException {
+
+        synchronized (mDeviceImpl.mInterfaceLock) {
+            checkNotClosed();
+
+            executor = CameraDeviceImpl.checkExecutor(executor, callback);
+
+            if (DEBUG) {
+                Log.v(TAG, mIdString + "startStreaming callback " + callback + " executor"
+                        + " " + executor);
+            }
+
+            return addPendingSequence(mDeviceImpl.startStreaming(surfaces,
+                    createCaptureCallbackProxyWithExecutor(executor, callback), mDeviceExecutor));
+        }
+    }
+
     private void checkRepeatingRequest(CaptureRequest request) {
         if (request == null) {
             throw new IllegalArgumentException("request must not be null");

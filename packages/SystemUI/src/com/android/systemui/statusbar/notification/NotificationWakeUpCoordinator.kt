@@ -32,23 +32,19 @@ import com.android.systemui.keyguard.domain.interactor.PulseExpansionInteractor
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.shade.ShadeExpansionChangeEvent
 import com.android.systemui.shade.ShadeExpansionListener
-import com.android.systemui.shade.ShadeViewController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationsKeyguardInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator
 import com.android.systemui.statusbar.phone.DozeParameters
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.KeyguardBypassController.OnBypassStateChangedListener
 import com.android.systemui.statusbar.phone.ScreenOffAnimationController
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
-import com.android.systemui.util.doOnEnd
-import com.android.systemui.util.doOnStart
 import java.io.PrintWriter
 import javax.inject.Inject
-import kotlin.math.max
 import kotlin.math.min
 import kotlinx.coroutines.CoroutineScope
 
@@ -77,8 +73,6 @@ constructor(
 
     private var inputLinearDozeAmount: Float = 0.0f
     private var inputEasedDozeAmount: Float = 0.0f
-    private var delayedDozeAmountOverride: Float = 0.0f
-    private var delayedDozeAmountAnimator: ObjectAnimator? = null
     /** Valid values: {1f, 0f, null} null => use input */
     private var hardDozeAmountOverride: Float? = null
     private var hardDozeAmountOverrideSource: String = "n/a"
@@ -100,8 +94,9 @@ constructor(
     var fullyAwake: Boolean = false
 
     var wakingUp = false
-        private set(value) {
+        set(value) {
             field = value
+            logger.logSetWakingUp(value)
             willWakeUp = false
             if (value) {
                 if (
@@ -342,8 +337,7 @@ constructor(
 
     private fun updateDozeAmount() {
         // Calculate new doze amount (linear)
-        val newOutputLinearDozeAmount =
-            hardDozeAmountOverride ?: max(inputLinearDozeAmount, delayedDozeAmountOverride)
+        val newOutputLinearDozeAmount = hardDozeAmountOverride ?: inputLinearDozeAmount
         val changed = outputLinearDozeAmount != newOutputLinearDozeAmount
 
         // notify when the animation is starting
@@ -361,7 +355,6 @@ constructor(
         outputEasedDozeAmount = dozeAmountInterpolator.getInterpolation(outputLinearDozeAmount)
         logger.logUpdateDozeAmount(
             inputLinear = inputLinearDozeAmount,
-            delayLinear = delayedDozeAmountOverride,
             hardOverride = hardDozeAmountOverride,
             outputLinear = outputLinearDozeAmount,
             state = statusBarStateController.state,
@@ -377,48 +370,6 @@ constructor(
                 increaseSpeed = false,
             )
         }
-    }
-
-    /**
-     * Notifies the wakeup coordinator that we're waking up.
-     *
-     * [requestDelayedAnimation] is used to request that we delay the start of the wakeup animation
-     * in order to wait for a potential fingerprint authentication to arrive, since unlocking during
-     * the wakeup animation looks chaotic.
-     *
-     * If called with [wakingUp] and [requestDelayedAnimation] both `true`, the [WakeUpListener]s
-     * are guaranteed to receive at least one [WakeUpListener.onDelayedDozeAmountAnimationRunning]
-     * call with `false` at some point in the near future. A call with `true` before that will
-     * happen if the animation is not already running.
-     */
-    fun setWakingUp(wakingUp: Boolean, requestDelayedAnimation: Boolean) {
-        logger.logSetWakingUp(wakingUp, requestDelayedAnimation)
-        this.wakingUp = wakingUp
-        if (wakingUp && requestDelayedAnimation) {
-            scheduleDelayedDozeAmountAnimation()
-        }
-    }
-
-    @Deprecated("As part of b/301915812")
-    private fun scheduleDelayedDozeAmountAnimation() {
-        val alreadyRunning = delayedDozeAmountAnimator != null
-        logger.logStartDelayedDozeAmountAnimation(alreadyRunning)
-        if (alreadyRunning) return
-        delayedDozeAmount.setValue(this, 1.0f)
-        delayedDozeAmountAnimator =
-            ObjectAnimator.ofFloat(this, delayedDozeAmount, 0.0f).apply {
-                interpolator = InterpolatorsAndroidX.LINEAR
-                duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP.toLong()
-                startDelay = ShadeViewController.WAKEUP_ANIMATION_DELAY_MS.toLong()
-                doOnStart {
-                    wakeUpListeners.forEach { it.onDelayedDozeAmountAnimationRunning(true) }
-                }
-                doOnEnd {
-                    delayedDozeAmountAnimator = null
-                    wakeUpListeners.forEach { it.onDelayedDozeAmountAnimationRunning(false) }
-                }
-                start()
-            }
     }
 
     override fun onStateChanged(newState: Int) {
@@ -646,7 +597,6 @@ constructor(
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("inputLinearDozeAmount: $inputLinearDozeAmount")
         pw.println("inputEasedDozeAmount: $inputEasedDozeAmount")
-        pw.println("delayedDozeAmountOverride: $delayedDozeAmountOverride")
         pw.println("hardDozeAmountOverride: $hardDozeAmountOverride")
         pw.println("hardDozeAmountOverrideSource: $hardDozeAmountOverrideSource")
         pw.println("outputLinearDozeAmount: $outputLinearDozeAmount")
@@ -667,19 +617,9 @@ constructor(
         pw.println("canShowPulsingHuns: $canShowPulsingHuns")
     }
 
-    fun logDelayingClockWakeUpAnimation(delayingAnimation: Boolean) {
-        logger.logDelayingClockWakeUpAnimation(delayingAnimation)
-    }
-
     interface WakeUpListener {
         /** Called whenever the notifications are fully hidden or shown */
         fun onFullyHiddenChanged(isFullyHidden: Boolean) {}
-
-        /**
-         * Called when the animator started by [scheduleDelayedDozeAmountAnimation] begins running
-         * after the start delay, or after it ends/is cancelled.
-         */
-        fun onDelayedDozeAmountAnimationRunning(running: Boolean) {}
 
         /** Called whenever a pulse has started or stopped expanding. */
         fun onPulseExpandingChanged(isPulseExpanding: Boolean) {}
@@ -695,20 +635,6 @@ constructor(
 
                 override fun get(coordinator: NotificationWakeUpCoordinator): Float {
                     return coordinator.linearVisibilityAmount
-                }
-            }
-
-        private val delayedDozeAmount =
-            object : FloatProperty<NotificationWakeUpCoordinator>("delayedDozeAmount") {
-
-                override fun setValue(coordinator: NotificationWakeUpCoordinator, value: Float) {
-                    coordinator.delayedDozeAmountOverride = value
-                    coordinator.logger.logSetDelayDozeAmountOverride(value)
-                    coordinator.updateDozeAmount()
-                }
-
-                override fun get(coordinator: NotificationWakeUpCoordinator): Float {
-                    return coordinator.delayedDozeAmountOverride
                 }
             }
     }

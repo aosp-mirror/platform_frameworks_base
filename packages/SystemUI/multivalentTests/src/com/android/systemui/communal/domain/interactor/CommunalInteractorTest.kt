@@ -24,15 +24,18 @@ import android.content.pm.UserInfo
 import android.os.UserHandle
 import android.os.UserManager
 import android.os.userManager
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import android.provider.Settings.Secure.HUB_MODE_TUTORIAL_COMPLETED
 import android.widget.RemoteViews
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_COMMUNAL_RESPONSIVE_GRID
 import com.android.systemui.Flags.FLAG_COMMUNAL_WIDGET_RESIZING
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
 import com.android.systemui.communal.data.model.CommunalSmartspaceTimer
@@ -96,6 +99,8 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 /**
  * This class of test cases assume that communal is enabled. For disabled cases, see
@@ -103,8 +108,8 @@ import org.mockito.MockitoAnnotations
  */
 @SmallTest
 @OptIn(ExperimentalCoroutinesApi::class)
-@RunWith(AndroidJUnit4::class)
-class CommunalInteractorTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class CommunalInteractorTest(flags: FlagsParameterization) : SysuiTestCase() {
     @Mock private lateinit var mainUser: UserInfo
     @Mock private lateinit var secondaryUser: UserInfo
 
@@ -128,6 +133,10 @@ class CommunalInteractorTest : SysuiTestCase() {
     private lateinit var managedProfileController: FakeManagedProfileController
 
     private lateinit var underTest: CommunalInteractor
+
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
 
     @Before
     fun setUp() {
@@ -224,7 +233,7 @@ class CommunalInteractorTest : SysuiTestCase() {
     @Test
     fun isCommunalAvailable_communalDisabled_false() =
         testScope.runTest {
-            mSetFlagsRule.disableFlags(FLAG_COMMUNAL_HUB)
+            mSetFlagsRule.disableFlags(FLAG_COMMUNAL_HUB, FLAG_GLANCEABLE_HUB_V2)
 
             val isAvailable by collectLastValue(underTest.isCommunalAvailable)
             assertThat(isAvailable).isFalse()
@@ -262,71 +271,84 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(widgetContent!![2].appWidgetId).isEqualTo(3)
         }
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun smartspaceDynamicSizing_oneCard_fullSize() =
         testSmartspaceDynamicSizing(
             totalTargets = 1,
-            expectedSizes = listOf(CommunalContentSize.FULL),
+            expectedSizes = listOf(CommunalContentSize.FixedSize.FULL),
         )
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun smartspace_dynamicSizing_twoCards_halfSize() =
         testSmartspaceDynamicSizing(
             totalTargets = 2,
-            expectedSizes = listOf(CommunalContentSize.HALF, CommunalContentSize.HALF),
+            expectedSizes =
+                listOf(CommunalContentSize.FixedSize.HALF, CommunalContentSize.FixedSize.HALF),
         )
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun smartspace_dynamicSizing_threeCards_thirdSize() =
         testSmartspaceDynamicSizing(
             totalTargets = 3,
             expectedSizes =
                 listOf(
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
                 ),
         )
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun smartspace_dynamicSizing_fourCards_threeThirdSizeAndOneFullSize() =
         testSmartspaceDynamicSizing(
             totalTargets = 4,
             expectedSizes =
                 listOf(
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.FULL,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.FULL,
                 ),
         )
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun smartspace_dynamicSizing_fiveCards_threeThirdAndTwoHalfSize() =
         testSmartspaceDynamicSizing(
             totalTargets = 5,
             expectedSizes =
                 listOf(
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.HALF,
-                    CommunalContentSize.HALF,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.HALF,
+                    CommunalContentSize.FixedSize.HALF,
                 ),
         )
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun smartspace_dynamicSizing_sixCards_allThirdSize() =
         testSmartspaceDynamicSizing(
             totalTargets = 6,
             expectedSizes =
                 listOf(
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
-                    CommunalContentSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
+                    CommunalContentSize.FixedSize.THIRD,
                 ),
         )
 
@@ -383,7 +405,9 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(umoContent?.size).isEqualTo(0)
         }
 
+    /** TODO(b/378171351): Handle ongoing content in responsive grid. */
     @Test
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun ongoing_shouldOrderAndSizeByTimestamp() =
         testScope.runTest {
             // Keyguard showing, and tutorial completed.
@@ -410,15 +434,15 @@ class CommunalInteractorTest : SysuiTestCase() {
             assertThat(ongoingContent?.size).isEqualTo(4)
             assertThat(ongoingContent?.get(0)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("timer3"))
-            assertThat(ongoingContent?.get(0)?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(ongoingContent?.get(0)?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
             assertThat(ongoingContent?.get(1)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("timer2"))
-            assertThat(ongoingContent?.get(1)?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(ongoingContent?.get(1)?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
             assertThat(ongoingContent?.get(2)?.key).isEqualTo(CommunalContentModel.KEY.umo())
-            assertThat(ongoingContent?.get(2)?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(ongoingContent?.get(2)?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
             assertThat(ongoingContent?.get(3)?.key)
                 .isEqualTo(CommunalContentModel.KEY.smartspace("timer1"))
-            assertThat(ongoingContent?.get(3)?.size).isEqualTo(CommunalContentSize.HALF)
+            assertThat(ongoingContent?.get(3)?.size).isEqualTo(CommunalContentSize.FixedSize.HALF)
         }
 
     @Test
@@ -1082,6 +1106,7 @@ class CommunalInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING)
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun resizeWidget_withoutUpdatingOrder() =
         testScope.runTest {
             val userInfos = listOf(MAIN_USER_INFO)
@@ -1094,45 +1119,97 @@ class CommunalInteractorTest : SysuiTestCase() {
                 appWidgetId = 1,
                 userId = MAIN_USER_INFO.id,
                 rank = 0,
-                spanY = CommunalContentSize.HALF.span,
+                spanY = CommunalContentSize.FixedSize.HALF.span,
             )
             widgetRepository.addWidget(
                 appWidgetId = 2,
                 userId = MAIN_USER_INFO.id,
                 rank = 1,
-                spanY = CommunalContentSize.HALF.span,
+                spanY = CommunalContentSize.FixedSize.HALF.span,
             )
             widgetRepository.addWidget(
                 appWidgetId = 3,
                 userId = MAIN_USER_INFO.id,
                 rank = 2,
-                spanY = CommunalContentSize.HALF.span,
+                spanY = CommunalContentSize.FixedSize.HALF.span,
             )
 
             val widgetContent by collectLastValue(underTest.widgetContent)
 
             assertThat(widgetContent?.map { it.appWidgetId to it.size })
                 .containsExactly(
-                    1 to CommunalContentSize.HALF,
-                    2 to CommunalContentSize.HALF,
-                    3 to CommunalContentSize.HALF,
+                    1 to CommunalContentSize.FixedSize.HALF,
+                    2 to CommunalContentSize.FixedSize.HALF,
+                    3 to CommunalContentSize.FixedSize.HALF,
                 )
                 .inOrder()
 
-            underTest.resizeWidget(2, CommunalContentSize.FULL.span, emptyMap())
+            underTest.resizeWidget(2, CommunalContentSize.FixedSize.FULL.span, emptyMap())
 
             // Widget 2 should have been resized to FULL
             assertThat(widgetContent?.map { it.appWidgetId to it.size })
                 .containsExactly(
-                    1 to CommunalContentSize.HALF,
-                    2 to CommunalContentSize.FULL,
-                    3 to CommunalContentSize.HALF,
+                    1 to CommunalContentSize.FixedSize.HALF,
+                    2 to CommunalContentSize.FixedSize.FULL,
+                    3 to CommunalContentSize.FixedSize.HALF,
+                )
+                .inOrder()
+        }
+
+    @Test
+    @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING, FLAG_COMMUNAL_RESPONSIVE_GRID)
+    fun resizeWidget_withoutUpdatingOrder_responsive() =
+        testScope.runTest {
+            val userInfos = listOf(MAIN_USER_INFO)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(userInfos = userInfos, selectedUserIndex = 0)
+            runCurrent()
+
+            // Widgets available.
+            widgetRepository.addWidget(
+                appWidgetId = 1,
+                userId = MAIN_USER_INFO.id,
+                rank = 0,
+                spanY = 1,
+            )
+            widgetRepository.addWidget(
+                appWidgetId = 2,
+                userId = MAIN_USER_INFO.id,
+                rank = 1,
+                spanY = 1,
+            )
+            widgetRepository.addWidget(
+                appWidgetId = 3,
+                userId = MAIN_USER_INFO.id,
+                rank = 2,
+                spanY = 1,
+            )
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+
+            assertThat(widgetContent?.map { it.appWidgetId to it.size })
+                .containsExactly(
+                    1 to CommunalContentSize.Responsive(1),
+                    2 to CommunalContentSize.Responsive(1),
+                    3 to CommunalContentSize.Responsive(1),
+                )
+                .inOrder()
+
+            underTest.resizeWidget(appWidgetId = 2, spanY = 5, widgetIdToRankMap = emptyMap())
+
+            // Widget 2 should have been resized to FULL
+            assertThat(widgetContent?.map { it.appWidgetId to it.size })
+                .containsExactly(
+                    1 to CommunalContentSize.Responsive(1),
+                    2 to CommunalContentSize.Responsive(5),
+                    3 to CommunalContentSize.Responsive(1),
                 )
                 .inOrder()
         }
 
     @Test
     @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING)
+    @DisableFlags(FLAG_COMMUNAL_RESPONSIVE_GRID)
     fun resizeWidget_andUpdateOrder() =
         testScope.runTest {
             val userInfos = listOf(MAIN_USER_INFO)
@@ -1145,39 +1222,98 @@ class CommunalInteractorTest : SysuiTestCase() {
                 appWidgetId = 1,
                 userId = MAIN_USER_INFO.id,
                 rank = 0,
-                spanY = CommunalContentSize.HALF.span,
+                spanY = CommunalContentSize.FixedSize.HALF.span,
             )
             widgetRepository.addWidget(
                 appWidgetId = 2,
                 userId = MAIN_USER_INFO.id,
                 rank = 1,
-                spanY = CommunalContentSize.HALF.span,
+                spanY = CommunalContentSize.FixedSize.HALF.span,
             )
             widgetRepository.addWidget(
                 appWidgetId = 3,
                 userId = MAIN_USER_INFO.id,
                 rank = 2,
-                spanY = CommunalContentSize.HALF.span,
+                spanY = CommunalContentSize.FixedSize.HALF.span,
             )
 
             val widgetContent by collectLastValue(underTest.widgetContent)
 
             assertThat(widgetContent?.map { it.appWidgetId to it.size })
                 .containsExactly(
-                    1 to CommunalContentSize.HALF,
-                    2 to CommunalContentSize.HALF,
-                    3 to CommunalContentSize.HALF,
+                    1 to CommunalContentSize.FixedSize.HALF,
+                    2 to CommunalContentSize.FixedSize.HALF,
+                    3 to CommunalContentSize.FixedSize.HALF,
                 )
                 .inOrder()
 
-            underTest.resizeWidget(2, CommunalContentSize.FULL.span, mapOf(2 to 0, 1 to 1))
+            underTest.resizeWidget(
+                2,
+                CommunalContentSize.FixedSize.FULL.span,
+                mapOf(2 to 0, 1 to 1),
+            )
 
             // Widget 2 should have been resized to FULL and moved to the front of the list
             assertThat(widgetContent?.map { it.appWidgetId to it.size })
                 .containsExactly(
-                    2 to CommunalContentSize.FULL,
-                    1 to CommunalContentSize.HALF,
-                    3 to CommunalContentSize.HALF,
+                    2 to CommunalContentSize.FixedSize.FULL,
+                    1 to CommunalContentSize.FixedSize.HALF,
+                    3 to CommunalContentSize.FixedSize.HALF,
+                )
+                .inOrder()
+        }
+
+    @Test
+    @EnableFlags(FLAG_COMMUNAL_WIDGET_RESIZING, FLAG_COMMUNAL_RESPONSIVE_GRID)
+    fun resizeWidget_andUpdateOrder_responsive() =
+        testScope.runTest {
+            val userInfos = listOf(MAIN_USER_INFO)
+            userRepository.setUserInfos(userInfos)
+            userTracker.set(userInfos = userInfos, selectedUserIndex = 0)
+            runCurrent()
+
+            // Widgets available.
+            widgetRepository.addWidget(
+                appWidgetId = 1,
+                userId = MAIN_USER_INFO.id,
+                rank = 0,
+                spanY = 1,
+            )
+            widgetRepository.addWidget(
+                appWidgetId = 2,
+                userId = MAIN_USER_INFO.id,
+                rank = 1,
+                spanY = 1,
+            )
+            widgetRepository.addWidget(
+                appWidgetId = 3,
+                userId = MAIN_USER_INFO.id,
+                rank = 2,
+                spanY = 1,
+            )
+
+            val widgetContent by collectLastValue(underTest.widgetContent)
+
+            assertThat(widgetContent?.map { it.appWidgetId to it.size })
+                .containsExactly(
+                    1 to CommunalContentSize.Responsive(1),
+                    2 to CommunalContentSize.Responsive(1),
+                    3 to CommunalContentSize.Responsive(1),
+                )
+                .inOrder()
+
+            underTest.resizeWidget(
+                appWidgetId = 2,
+                spanY = 5,
+                widgetIdToRankMap = mapOf(2 to 0, 1 to 1),
+            )
+
+            // Widget 2 should have been resized to FULL and moved to the front of the list
+            assertThat(widgetContent?.map { it.appWidgetId to it.size })
+                .containsExactly(
+                    2 to CommunalContentSize.Responsive(5),
+                    1 to CommunalContentSize.Responsive(1),
+                    3 to CommunalContentSize.Responsive(1),
                 )
                 .inOrder()
         }
@@ -1191,9 +1327,15 @@ class CommunalInteractorTest : SysuiTestCase() {
         )
     }
 
-    private companion object {
-        val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
-        val USER_INFO_WORK =
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(FLAG_COMMUNAL_RESPONSIVE_GRID)
+        }
+
+        private val MAIN_USER_INFO = UserInfo(0, "primary", UserInfo.FLAG_MAIN)
+        private val USER_INFO_WORK =
             UserInfo(
                 10,
                 "work",

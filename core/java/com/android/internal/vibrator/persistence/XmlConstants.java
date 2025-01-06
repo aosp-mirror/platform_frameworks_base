@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.VibrationEffect;
+import android.os.VibrationEffect.Composition.DelayType;
 import android.os.VibrationEffect.Composition.PrimitiveType;
 
 import java.lang.annotation.Retention;
@@ -41,16 +42,27 @@ public final class XmlConstants {
     public static final String TAG_PREDEFINED_EFFECT = "predefined-effect";
     public static final String TAG_PRIMITIVE_EFFECT = "primitive-effect";
     public static final String TAG_VENDOR_EFFECT = "vendor-effect";
+    public static final String TAG_WAVEFORM_ENVELOPE_EFFECT = "waveform-envelope-effect";
+    public static final String TAG_BASIC_ENVELOPE_EFFECT = "basic-envelope-effect";
     public static final String TAG_WAVEFORM_EFFECT = "waveform-effect";
+    public static final String TAG_REPEATING_EFFECT = "repeating-effect";
     public static final String TAG_WAVEFORM_ENTRY = "waveform-entry";
     public static final String TAG_REPEATING = "repeating";
+    public static final String TAG_PREAMBLE = "preamble";
+    public static final String TAG_CONTROL_POINT = "control-point";
 
     public static final String ATTRIBUTE_NAME = "name";
     public static final String ATTRIBUTE_FALLBACK = "fallback";
     public static final String ATTRIBUTE_DURATION_MS = "durationMs";
     public static final String ATTRIBUTE_AMPLITUDE = "amplitude";
+    public static final String ATTRIBUTE_FREQUENCY_HZ = "frequencyHz";
+    public static final String ATTRIBUTE_INITIAL_FREQUENCY_HZ = "initialFrequencyHz";
+    public static final String ATTRIBUTE_INTENSITY = "intensity";
+    public static final String ATTRIBUTE_SHARPNESS = "sharpness";
+    public static final String ATTRIBUTE_INITIAL_SHARPNESS = "initialSharpness";
     public static final String ATTRIBUTE_SCALE = "scale";
     public static final String ATTRIBUTE_DELAY_MS = "delayMs";
+    public static final String ATTRIBUTE_DELAY_TYPE = "delayType";
 
     public static final String VALUE_AMPLITUDE_DEFAULT = "default";
 
@@ -87,7 +99,7 @@ public final class XmlConstants {
 
         /**
          * Return the {@link PrimitiveEffectName} that represents given primitive id, or null if
-         * none of the available names maps to the given id.
+         * none of the available names map to the given id.
          */
         @Nullable
         public static PrimitiveEffectName findById(int primitiveId) {
@@ -193,6 +205,55 @@ public final class XmlConstants {
 
         public int getEffectId() {
             return mEffectId;
+        }
+
+        @Override
+        public String toString() {
+            return name().toLowerCase(Locale.ROOT);
+        }
+    }
+
+    /** Represent supported values for attribute delay type in {@link #TAG_PRIMITIVE_EFFECT}  */
+    public enum PrimitiveDelayType {
+        PAUSE(VibrationEffect.Composition.DELAY_TYPE_PAUSE),
+        RELATIVE_START_OFFSET(VibrationEffect.Composition.DELAY_TYPE_RELATIVE_START_OFFSET);
+
+        @DelayType private final int mDelayType;
+
+        PrimitiveDelayType(@DelayType int type) {
+            mDelayType = type;
+        }
+
+        /**
+         * Return the {@link PrimitiveEffectName} that represents given primitive id, or null if
+         * none of the available names maps to the given id.
+         */
+        @Nullable
+        public static PrimitiveDelayType findByType(int delayType) {
+            for (PrimitiveDelayType type : PrimitiveDelayType.values()) {
+                if (type.mDelayType == delayType) {
+                    return type;
+                }
+            }
+            return null;
+        }
+
+        /**
+         * Return the {@link PrimitiveEffectName} that represents given primitive name, or null if
+         * none of the available names maps to the given name.
+         */
+        @Nullable
+        public static PrimitiveDelayType findByName(@NonNull String delayType) {
+            try {
+                return PrimitiveDelayType.valueOf(delayType.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                return null;
+            }
+        }
+
+        @DelayType
+        public int getDelayType() {
+            return mDelayType;
         }
 
         @Override

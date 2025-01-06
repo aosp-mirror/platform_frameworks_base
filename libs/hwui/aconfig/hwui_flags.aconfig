@@ -6,6 +6,7 @@ flag {
   namespace: "core_graphics"
   description: "API for AGSL authored runtime color filters and blenders"
   bug: "358126864"
+  is_exported: true
 }
 
 flag {
@@ -44,6 +45,7 @@ flag {
   namespace: "accessibility"
   description: "Draw a solid rectangle background behind text instead of a stroke outline"
   bug: "186567103"
+  is_exported: true
 }
 
 flag {
@@ -96,6 +98,7 @@ flag {
   namespace: "core_graphics"
   description: "Add canvas#drawRegion API"
   bug: "318612129"
+  is_exported: true
 }
 
 flag {
@@ -153,4 +156,21 @@ flag {
   namespace: "core_graphics"
   description: "API's that enable animated image drawables to use nearest sampling when scaling."
   bug: "370523334"
+}
+
+flag {
+  name: "remove_vri_sketchy_destroy"
+  namespace: "core_graphics"
+  description: "Remove the eager yet thread-violating destroyHardwareResources in VRI#die"
+  bug: "377057106"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "early_preload_gl_context"
+  namespace: "core_graphics"
+  description: "Initialize GL context and GraphicBufferAllocater init on renderThread preload. This improves app startup time for apps using GL."
+  bug: "383612849"
 }

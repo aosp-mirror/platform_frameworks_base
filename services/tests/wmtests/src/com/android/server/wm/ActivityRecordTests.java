@@ -32,6 +32,8 @@ import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_ALWAYS;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_DEFAULT;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_IF_ALLOWLISTED;
 import static android.content.pm.ActivityInfo.LOCK_TASK_LAUNCH_MODE_NEVER;
+import static android.content.pm.ActivityInfo.OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_BEHIND;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE;
@@ -124,6 +126,7 @@ import android.app.servertransaction.ClientTransactionItem;
 import android.app.servertransaction.DestroyActivityItem;
 import android.app.servertransaction.PauseActivityItem;
 import android.app.servertransaction.WindowStateResizeItem;
+import android.compat.testing.PlatformCompatChangeRule;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
@@ -138,6 +141,7 @@ import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteException;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.provider.DeviceConfig;
 import android.util.MutableBoolean;
@@ -159,9 +163,13 @@ import com.android.internal.R;
 import com.android.server.wm.ActivityRecord.State;
 import com.android.window.flags.Flags;
 
+import libcore.junit.util.compat.CoreCompatChangeRule.EnableCompatChanges;
+
 import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.TestRule;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.invocation.InvocationOnMock;
@@ -182,6 +190,9 @@ import java.util.function.Consumer;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class ActivityRecordTests extends WindowTestsBase {
+
+    @Rule
+    public TestRule compatChangeRule = new PlatformCompatChangeRule();
 
     private final String mPackageName = getInstrumentation().getTargetContext().getPackageName();
 
@@ -554,6 +565,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testSetRequestedOrientationUpdatesConfiguration() throws Exception {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = new ActivityBuilder(mAtm)
                 .setCreateTask(true)
                 .setConfigChanges(ORIENTATION_CONFIG_CHANGES)
@@ -641,6 +653,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void ignoreRequestedOrientationForResizableInSplitWindows() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = createActivityWith2LevelTask();
         final Task task = activity.getTask();
         final Task rootTask = activity.getRootTask();
@@ -685,6 +698,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void respectRequestedOrientationForNonResizableInSplitWindows() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
         spyOn(tda);
         doReturn(true).when(tda).supportsNonResizableMultiWindow();
@@ -714,6 +728,64 @@ public class ActivityRecordTests extends WindowTestsBase {
         // Relaunching the app should still respect the orientation request.
         assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
         assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
+    public void testOrientation_allowFixedOrientationForCameraCompatInFreeformWindowing() {
+        final ActivityRecord activity = setupDisplayAndActivityForCameraCompat(
+                /* isCameraRunning= */ true, WINDOWING_MODE_FREEFORM);
+
+        // Task in landscape.
+        assertEquals(ORIENTATION_LANDSCAPE, activity.getTask().getConfiguration().orientation);
+        // The app should be letterboxed.
+        assertEquals(ORIENTATION_PORTRAIT, activity.getConfiguration().orientation);
+        assertTrue(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+    }
+
+    @Test
+    public void testOrientation_dontAllowFixedOrientationForCameraCompatFreeformIfNotEnabled() {
+        final ActivityRecord activity = setupDisplayAndActivityForCameraCompat(
+                /* isCameraRunning= */ true, WINDOWING_MODE_FREEFORM);
+
+        // Task in landscape.
+        assertEquals(ORIENTATION_LANDSCAPE, activity.getTask().getConfiguration().orientation);
+        // Activity is not letterboxed.
+        assertEquals(ORIENTATION_LANDSCAPE, activity.getConfiguration().orientation);
+        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
+    public void testOrientation_noFixedOrientationForCameraCompatFreeformIfCameraNotRunning() {
+        final ActivityRecord activity = setupDisplayAndActivityForCameraCompat(
+                /* isCameraRunning= */ false, WINDOWING_MODE_FREEFORM);
+
+        // Task in landscape.
+        assertEquals(ORIENTATION_LANDSCAPE, activity.getTask().getConfiguration().orientation);
+        // Activity is not letterboxed.
+        assertEquals(ORIENTATION_LANDSCAPE, activity.getConfiguration().orientation);
+        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isLetterboxedForFixedOrientationAndAspectRatio());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CAMERA_COMPAT_FOR_DESKTOP_WINDOWING)
+    @EnableCompatChanges({OVERRIDE_CAMERA_COMPAT_ENABLE_FREEFORM_WINDOWING_TREATMENT})
+    public void testOrientation_dontAllowFixedOrientationForCameraCompatFreeformIfInPip() {
+        final ActivityRecord activity = setupDisplayAndActivityForCameraCompat(
+                /* isCameraRunning= */ true, WINDOWING_MODE_PINNED);
+
+        // Task in landscape.
+        assertEquals(ORIENTATION_LANDSCAPE, activity.getTask().getConfiguration().orientation);
+        // Activity is not letterboxed.
+        assertEquals(ORIENTATION_LANDSCAPE, activity.getConfiguration().orientation);
+        assertFalse(activity.mAppCompatController.getAppCompatAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
 
@@ -1906,6 +1978,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testActivityOnCancelFixedRotationTransform() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = createActivityWithTask();
         final DisplayRotation displayRotation = activity.mDisplayContent.getDisplayRotation();
         final RemoteDisplayChangeController remoteDisplayChangeController = activity
@@ -2054,6 +2127,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testFixedRotationSnapshotStartingWindow() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = createActivityWithTask();
         // TaskSnapshotSurface requires a fullscreen opaque window.
         final WindowManager.LayoutParams params = new WindowManager.LayoutParams(
@@ -2278,6 +2352,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testSupportsFreeform() {
         final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setComponent(getUniqueComponentName(mContext.getPackageName()))
                 .setCreateTask(true)
                 .setResizeMode(ActivityInfo.RESIZE_MODE_UNRESIZEABLE)
                 .setScreenOrientation(SCREEN_ORIENTATION_LANDSCAPE)
@@ -2410,6 +2485,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testOrientationForScreenOrientationBehind() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final Task task = createTask(mDisplayContent);
         // Activity below
         new ActivityBuilder(mAtm)
@@ -2465,11 +2541,14 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         assertEquals(0, activity.getChildCount());
 
-        final WindowState win1 = createWindow(null, TYPE_APPLICATION, activity, "win1");
-        final WindowState startingWin = createWindow(null, TYPE_APPLICATION_STARTING, activity,
-                "startingWin");
-        final WindowState baseWin = createWindow(null, TYPE_BASE_APPLICATION, activity, "baseWin");
-        final WindowState win4 = createWindow(null, TYPE_APPLICATION, activity, "win4");
+        final WindowState win1 = newWindowBuilder("app1", TYPE_APPLICATION).setWindowToken(
+                activity).build();
+        final WindowState startingWin = newWindowBuilder("startingWin",
+                TYPE_APPLICATION_STARTING).setWindowToken(activity).build();
+        final WindowState baseWin = newWindowBuilder("baseWin",
+                TYPE_BASE_APPLICATION).setWindowToken(activity).build();
+        final WindowState win4 = newWindowBuilder("win4", TYPE_APPLICATION).setWindowToken(
+                activity).build();
 
         // Should not contain the windows that were added above.
         assertEquals(4, activity.getChildCount());
@@ -2492,14 +2571,17 @@ public class ActivityRecordTests extends WindowTestsBase {
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         assertNull(activity.findMainWindow());
 
-        final WindowState window1 = createWindow(null, TYPE_BASE_APPLICATION, activity, "window1");
-        final WindowState window11 = createWindow(window1, FIRST_SUB_WINDOW, activity, "window11");
-        final WindowState window12 = createWindow(window1, FIRST_SUB_WINDOW, activity, "window12");
+        final WindowState window1 = newWindowBuilder("window1",
+                TYPE_BASE_APPLICATION).setWindowToken(activity).build();
+        final WindowState window11 = newWindowBuilder("window11", FIRST_SUB_WINDOW).setParent(
+                window1).setWindowToken(activity).build();
+        final WindowState window12 = newWindowBuilder("window12", FIRST_SUB_WINDOW).setParent(
+                window1).setWindowToken(activity).build();
         assertEquals(window1, activity.findMainWindow());
         window1.mAnimatingExit = true;
         assertEquals(window1, activity.findMainWindow());
-        final WindowState window2 = createWindow(null, TYPE_APPLICATION_STARTING, activity,
-                "window2");
+        final WindowState window2 = newWindowBuilder("window2",
+                TYPE_APPLICATION_STARTING).setWindowToken(activity).build();
         assertEquals(window2, activity.findMainWindow());
         activity.removeImmediately();
     }
@@ -2507,6 +2589,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @SetupWindows(addWindows = W_ACTIVITY)
     @Test
     public void testLandscapeSeascapeRotationByApp() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final Task task = new TaskBuilder(mSupervisor)
                 .setDisplay(mDisplayContent).setCreateActivity(true).build();
         final ActivityRecord activity = task.getTopNonFinishingActivity();
@@ -2572,6 +2655,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     @Presubmit
     public void testGetOrientation() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         // ActivityBuilder will resume top activities and cause the activity been added into
         // opening apps list. Since this test is focus on the effect of visible on getting
         // orientation, we skip app transition to avoid interference.
@@ -2642,8 +2726,8 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testStuckExitingWindow() {
-        final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
-                "closingWindow");
+        final WindowState closingWindow = newWindowBuilder("closingWindow",
+                FIRST_APPLICATION_WINDOW).build();
         closingWindow.mAnimatingExit = true;
         closingWindow.mRemoveOnExit = true;
         closingWindow.mActivityRecord.commitVisibility(
@@ -2663,14 +2747,14 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testSetOrientation_restrictedByTargetSdk() {
         mSetFlagsRule.enableFlags(Flags.FLAG_UNIVERSAL_RESIZABLE_BY_DEFAULT);
-        mDisplayContent.setIgnoreOrientationRequest(true);
         makeDisplayLargeScreen(mDisplayContent);
+        assertTrue(mDisplayContent.getIgnoreOrientationRequest());
 
         assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_SOCIAL, false);
         assertSetOrientation(Build.VERSION_CODES.CUR_DEVELOPMENT, CATEGORY_GAME, true);
 
         // Blanket application, also ignoring Target SDK
-        mWm.mConstants.mIgnoreActivityOrientationRequest = true;
+        mWm.mConstants.mIgnoreActivityOrientationRequestLargeScreen = true;
         assertSetOrientation(Build.VERSION_CODES.VANILLA_ICE_CREAM, CATEGORY_SOCIAL, false);
     }
 
@@ -2702,6 +2786,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testRespectTopFullscreenOrientation() {
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         final Configuration displayConfig = activity.mDisplayContent.getConfiguration();
         final Configuration activityConfig = activity.getConfiguration();
@@ -3139,11 +3224,13 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testOnStartingWindowDrawn() {
+        // Skip unnecessary resume top.
+        mSupervisor.beginDeferResume();
         final ActivityRecord activity = new ActivityBuilder(mAtm).setCreateTask(true).build();
         // The task-has-been-visible should not affect the decision of making transition ready.
         activity.getTask().setHasBeenVisible(true);
         activity.detachFromProcess();
-        activity.mStartingData = mock(StartingData.class);
+        activity.mStartingData = new SplashScreenStartingData(mWm, 0, 0);
         registerTestTransitionPlayer();
         final Transition transition = activity.mTransitionController.requestTransitionIfNeeded(
                 WindowManager.TRANSIT_OPEN, 0 /* flags */, null /* trigger */, mDisplayContent);
@@ -3151,7 +3238,11 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertTrue(activity.mStartingData.mIsDisplayed);
         // The transition can be ready by the starting window of a visible-requested activity
         // without a running process.
-        assertTrue(transition.allReady());
+        if (!transition.allReady()) {
+            // Print unsatisfied conditions.
+            transition.onReadyTimeout();
+            Assert.fail(transition + " must be ready by onStartingWindowDrawn");
+        }
 
         // If other event makes the transition unready, the reentrant of onStartingWindowDrawn
         // should not replace the readiness again.
@@ -3237,7 +3328,6 @@ public class ActivityRecordTests extends WindowTestsBase {
         assertFalse(activity.isVisibleRequested());
 
         player.start();
-        mSetFlagsRule.enableFlags(Flags.FLAG_RESET_DRAW_STATE_ON_CLIENT_INVISIBLE);
         // ActivityRecord#commitVisibility(false) -> WindowState#sendAppVisibilityToClients().
         player.finish();
         assertFalse(activity.isVisible());
@@ -3298,7 +3388,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testImeInsetsFrozenFlag_resetWhenNoImeFocusableInActivity() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
         makeWindowVisibleAndDrawn(app, mImeWindow);
         mDisplayContent.setImeLayeringTarget(app);
         mDisplayContent.setImeInputTarget(app);
@@ -3326,7 +3416,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     @SetupWindows(addWindows = W_INPUT_METHOD)
     @Test
     public void testImeInsetsFrozenFlag_resetWhenReportedToBeImeInputTarget() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
 
         mDisplayContent.getInsetsStateController().getImeSourceProvider().setWindowContainer(
                 mImeWindow, null, null);
@@ -3370,8 +3460,8 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testImeInsetsFrozenFlag_noDispatchVisibleInsetsWhenAppNotRequest()
             throws RemoteException {
-        final WindowState app1 = createWindow(null, TYPE_APPLICATION, "app1");
-        final WindowState app2 = createWindow(null, TYPE_APPLICATION, "app2");
+        final WindowState app1 = newWindowBuilder("app1", TYPE_APPLICATION).build();
+        final WindowState app2 = newWindowBuilder("app2", TYPE_APPLICATION).build();
 
         mDisplayContent.getInsetsStateController().getImeSourceProvider().setWindowContainer(
                 mImeWindow, null, null);
@@ -3415,7 +3505,8 @@ public class ActivityRecordTests extends WindowTestsBase {
     @Test
     public void testImeInsetsFrozenFlag_multiWindowActivities() {
         final WindowToken imeToken = createTestWindowToken(TYPE_INPUT_METHOD, mDisplayContent);
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, imeToken, "ime");
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).setWindowToken(
+                imeToken).build();
         makeWindowVisibleAndDrawn(ime);
 
         // Create a split-screen root task with activity1 and activity 2.
@@ -3436,8 +3527,10 @@ public class ActivityRecordTests extends WindowTestsBase {
         activity1.mImeInsetsFrozenUntilStartInput = true;
         activity2.mImeInsetsFrozenUntilStartInput = true;
 
-        final WindowState app1 = createWindow(null, TYPE_APPLICATION, activity1, "app1");
-        final WindowState app2 = createWindow(null, TYPE_APPLICATION, activity2, "app2");
+        final WindowState app1 = newWindowBuilder("app1", TYPE_APPLICATION).setWindowToken(
+                activity1).build();
+        final WindowState app2 = newWindowBuilder("app2", TYPE_APPLICATION).setWindowToken(
+                activity2).build();
         makeWindowVisibleAndDrawn(app1, app2);
 
         final InsetsStateController controller = mDisplayContent.getInsetsStateController();
@@ -3466,7 +3559,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testInClosingAnimation_visibilityNotCommitted_doNotHideSurface() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
         makeWindowVisibleAndDrawn(app);
 
         // Put the activity in close transition.
@@ -3493,7 +3586,7 @@ public class ActivityRecordTests extends WindowTestsBase {
 
     @Test
     public void testInClosingAnimation_visibilityCommitted_hideSurface() {
-        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState app = newWindowBuilder("app", TYPE_APPLICATION).build();
         makeWindowVisibleAndDrawn(app);
         app.mActivityRecord.prepareSurfaces();
 
@@ -3678,6 +3771,37 @@ public class ActivityRecordTests extends WindowTestsBase {
         verify(mClientLifecycleManager, times(2)).scheduleTransaction(any());
         assertEquals(130, appWindow.getWindowConfiguration().getBounds().width());
         assertTrue(appWindow.mResizeReported);
+    }
+
+    private ActivityRecord setupDisplayAndActivityForCameraCompat(boolean isCameraRunning,
+            int windowingMode) {
+        doReturn(true).when(() -> DesktopModeHelper.canEnterDesktopMode(any()));
+        // Create a new DisplayContent so that the flag values create the camera freeform policy.
+        mDisplayContent = new TestDisplayContent.Builder(mAtm, mDisplayContent.getSurfaceWidth(),
+                mDisplayContent.getSurfaceHeight()).build();
+        final CameraStateMonitor cameraStateMonitor = mDisplayContent.mAppCompatCameraPolicy
+                .mCameraStateMonitor;
+        spyOn(cameraStateMonitor);
+        doReturn(isCameraRunning).when(cameraStateMonitor).isCameraRunningForActivity(any());
+        final TaskDisplayArea tda = mDisplayContent.getDefaultTaskDisplayArea();
+        spyOn(tda);
+        doReturn(true).when(tda).supportsNonResizableMultiWindow();
+        final Task rootTask = new TaskBuilder(mSupervisor).setDisplay(mDisplayContent)
+                .setWindowingMode(windowingMode).build();
+        doReturn(mDisplayContent.getDisplayInfo())
+                .when(mDisplayContent.mWmService.mDisplayManagerInternal).getDisplayInfo(anyInt());
+        rootTask.setBounds(0, 0, 1000, 500);
+        final ActivityRecord activity = new ActivityBuilder(mAtm)
+                .setComponent(ComponentName.createRelative(mContext,
+                        com.android.server.wm.ActivityRecordTests.class.getName()))
+                .setParentTask(rootTask)
+                .setCreateTask(true)
+                .setOnTop(true)
+                .setResizeMode(RESIZE_MODE_RESIZEABLE)
+                .setScreenOrientation(SCREEN_ORIENTATION_PORTRAIT)
+                .build();
+        activity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
+        return activity;
     }
 
     private void assertHasStartingWindow(ActivityRecord atoken) {

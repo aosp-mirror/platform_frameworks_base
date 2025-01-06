@@ -37,4 +37,6 @@ interface IQuickAccessWalletServiceCallbacks {
     oneway void onWalletServiceEvent(in WalletServiceEvent event);
     // Called in response to onTargetActivityIntentRequested. May only be called once per request.
     oneway void onTargetActivityPendingIntentReceived(in PendingIntent pendingIntent);
+    //Called in response to onGesturePendingIntent
+    oneway void onGestureTargetActivityPendingIntentReceived(in PendingIntent pendingIntent);
 }

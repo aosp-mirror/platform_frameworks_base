@@ -600,8 +600,8 @@ public class BrightnessSynchronizer {
             final ContentResolver cr = mContext.getContentResolver();
             cr.registerContentObserver(BRIGHTNESS_URI, false,
                     createBrightnessContentObserver(handler), UserHandle.USER_ALL);
-            mDisplayManager.registerDisplayListener(mListener, handler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
+            mDisplayManager.registerDisplayListener(mListener, handler, /* eventFlags */ 0,
+                    DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS);
             mIsObserving = true;
         }
     }

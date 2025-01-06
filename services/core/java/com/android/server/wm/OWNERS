@@ -19,6 +19,9 @@ yunfanc@google.com
 wilsonshih@google.com
 jiamingliu@google.com
 pdwilliams@google.com
+charlesccchen@google.com
+marziana@google.com
+mcarli@google.com
 
 # Files related to background activity launches
 per-file Background*Start* = set noparent
@@ -35,4 +38,5 @@ per-file *WindowTracing* = file:platform/development:/tools/winscope/OWNERS
 
 # Files related to activity security
 per-file ActivityStarter.java = file:/ACTIVITY_SECURITY_OWNERS
+per-file ActivityStartController.java = file:/ACTIVITY_SECURITY_OWNERS
 per-file ActivityTaskManagerService.java = file:/ACTIVITY_SECURITY_OWNERS

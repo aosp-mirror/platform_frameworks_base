@@ -47,24 +47,33 @@ import androidx.lifecycle.ServiceLifecycleDispatcher;
 import androidx.lifecycle.ViewModelStore;
 
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
-import com.android.dream.lowlight.dagger.LowLightDreamModule;
+import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.logging.UiEvent;
 import com.android.internal.logging.UiEventLogger;
 import com.android.internal.policy.PhoneWindow;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
+import com.android.systemui.Flags;
+import com.android.systemui.ambient.touch.TouchHandler;
 import com.android.systemui.ambient.touch.TouchMonitor;
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent;
 import com.android.systemui.ambient.touch.scrim.ScrimManager;
 import com.android.systemui.communal.domain.interactor.CommunalInteractor;
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor;
 import com.android.systemui.communal.shared.log.CommunalUiEvent;
 import com.android.systemui.communal.shared.model.CommunalScenes;
+import com.android.systemui.communal.shared.model.CommunalTransitionKeys;
 import com.android.systemui.complication.dagger.ComplicationComponent;
 import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.dreams.complication.dagger.DreamComplicationComponent;
+import com.android.systemui.dreams.dagger.DreamModule;
 import com.android.systemui.dreams.dagger.DreamOverlayComponent;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.navigationbar.gestural.domain.GestureInteractor;
 import com.android.systemui.navigationbar.gestural.domain.TaskMatcher;
+import com.android.systemui.scene.domain.interactor.SceneInteractor;
+import com.android.systemui.scene.shared.flag.SceneContainerFlag;
+import com.android.systemui.scene.shared.model.Scenes;
 import com.android.systemui.shade.ShadeExpansionChangeEvent;
 import com.android.systemui.touch.TouchInsetManager;
 import com.android.systemui.util.concurrency.DelayableExecutor;
@@ -72,8 +81,8 @@ import com.android.systemui.util.concurrency.DelayableExecutor;
 import kotlinx.coroutines.Job;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
+import java.util.List;
 import java.util.concurrent.CancellationException;
 import java.util.function.Consumer;
 
@@ -134,8 +143,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
      */
     private boolean mBouncerShowing = false;
 
-    private final com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
-            mDreamComplicationComponentFactory;
+    private final DreamComplicationComponent.Factory mDreamComplicationComponentFactory;
     private final ComplicationComponent.Factory mComplicationComponentFactory;
     private final DreamOverlayComponent.Factory mDreamOverlayComponentFactory;
     private final AmbientTouchComponent.Factory mAmbientTouchComponentFactory;
@@ -162,7 +170,9 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
 
     private TouchMonitor mTouchMonitor;
 
+    private final SceneInteractor mSceneInteractor;
     private final CommunalInteractor mCommunalInteractor;
+    private final CommunalSettingsInteractor mCommunalSettingsInteractor;
 
     private boolean mCommunalAvailable;
 
@@ -201,6 +211,7 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mCommunalVisible = communalVisible;
 
                 updateLifecycleStateLocked();
+                updateGestureBlockingLocked();
             });
         }
     };
@@ -208,16 +219,14 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     private final Consumer<Boolean> mBouncerShowingConsumer = new Consumer<>() {
         @Override
         public void accept(Boolean bouncerShowing) {
-            mExecutor.execute(() -> {
-                if (mBouncerShowing == bouncerShowing) {
-                    return;
-                }
+            mExecutor.execute(() -> updateBouncerShowingLocked(bouncerShowing));
+        }
+    };
 
-                mBouncerShowing = bouncerShowing;
-
-                updateLifecycleStateLocked();
-                updateGestureBlockingLocked();
-            });
+    private final Consumer<SceneKey> mCurrentSceneConsumer = new Consumer<>() {
+        @Override
+        public void accept(SceneKey currentScene) {
+            mExecutor.execute(() -> updateBouncerShowingLocked(currentScene == Scenes.Bouncer));
         }
     };
 
@@ -370,18 +379,19 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
             @Main DelayableExecutor executor,
             ViewCaptureAwareWindowManager viewCaptureAwareWindowManager,
             ComplicationComponent.Factory complicationComponentFactory,
-            com.android.systemui.dreams.complication.dagger.ComplicationComponent.Factory
-                    dreamComplicationComponentFactory,
+            DreamComplicationComponent.Factory dreamComplicationComponentFactory,
             DreamOverlayComponent.Factory dreamOverlayComponentFactory,
             AmbientTouchComponent.Factory ambientTouchComponentFactory,
             DreamOverlayStateController stateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
             ScrimManager scrimManager,
             CommunalInteractor communalInteractor,
+            CommunalSettingsInteractor communalSettingsInteractor,
+            SceneInteractor sceneInteractor,
             SystemDialogsCloser systemDialogsCloser,
             UiEventLogger uiEventLogger,
             @Named(DREAM_TOUCH_INSET_MANAGER) TouchInsetManager touchInsetManager,
-            @Nullable @Named(LowLightDreamModule.LOW_LIGHT_DREAM_COMPONENT)
+            @Nullable @Named(DreamModule.LOW_LIGHT_DREAM_SERVICE)
             ComponentName lowLightDreamComponent,
             @Nullable @Named(HOME_CONTROL_PANEL_DREAM_COMPONENT)
             ComponentName homeControlPanelDreamComponent,
@@ -405,6 +415,8 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mDreamOverlayCallbackController = dreamOverlayCallbackController;
         mWindowTitle = windowTitle;
         mCommunalInteractor = communalInteractor;
+        mCommunalSettingsInteractor = communalSettingsInteractor;
+        mSceneInteractor = sceneInteractor;
         mSystemDialogsCloser = systemDialogsCloser;
         mGestureInteractor = gestureInteractor;
         mDreamOverlayComponentFactory = dreamOverlayComponentFactory;
@@ -419,8 +431,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mIsCommunalAvailableCallback));
         mFlows.add(collectFlow(getLifecycle(), communalInteractor.isCommunalVisible(),
                 mCommunalVisibleConsumer));
-        mFlows.add(collectFlow(getLifecycle(), keyguardInteractor.primaryBouncerShowing,
-                mBouncerShowingConsumer));
+        if (SceneContainerFlag.isEnabled()) {
+            mFlows.add(collectFlow(getLifecycle(), sceneInteractor.getCurrentScene(),
+                    mCurrentSceneConsumer));
+        } else {
+            mFlows.add(collectFlow(getLifecycle(), keyguardInteractor.primaryBouncerShowing,
+                    mBouncerShowingConsumer));
+        }
     }
 
     @NonNull
@@ -466,18 +483,23 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
                 mLifecycleOwner,
                 () -> mExecutor.execute(DreamOverlayService.this::requestExit),
                 new ViewModelStore(), mTouchInsetManager);
-        final com.android.systemui.dreams.complication.dagger.ComplicationComponent
-                dreamComplicationComponent = mDreamComplicationComponentFactory.create(
-                complicationComponent.getVisibilityController(), mTouchInsetManager);
+        final DreamComplicationComponent dreamComplicationComponent =
+                mDreamComplicationComponentFactory.create(
+                        complicationComponent.getVisibilityController(), mTouchInsetManager);
 
         final DreamOverlayComponent dreamOverlayComponent = mDreamOverlayComponentFactory.create(
                 mLifecycleOwner, complicationComponent.getComplicationHostViewController(),
                 mTouchInsetManager);
+
+        final ArrayList<TouchHandler> touchHandlers = new ArrayList<>(
+                List.of(dreamComplicationComponent.getHideComplicationTouchHandler()));
+        if (!mCommunalSettingsInteractor.isV2FlagEnabled()) {
+            // Do not add the communal touch handler for glanceable hub v2 since there is no dream
+            // to hub swipe gesture.
+            touchHandlers.add(dreamOverlayComponent.getCommunalTouchHandler());
+        }
         final AmbientTouchComponent ambientTouchComponent = mAmbientTouchComponentFactory.create(
-                mLifecycleOwner,
-                new HashSet<>(Arrays.asList(
-                        dreamComplicationComponent.getHideComplicationTouchHandler(),
-                        dreamOverlayComponent.getCommunalTouchHandler())), TAG);
+                mLifecycleOwner, new HashSet<>(touchHandlers), TAG);
 
         setLifecycleStateLocked(Lifecycle.State.STARTED);
 
@@ -551,14 +573,22 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
     @Override
     public void onWakeRequested() {
         mUiEventLogger.log(CommunalUiEvent.DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START);
-        mCommunalInteractor.changeScene(CommunalScenes.Communal,
-                "dream wake requested",
-                null);
+        if (SceneContainerFlag.isEnabled()) {
+            // Scene interactor can only be modified on main thread.
+            mExecutor.execute(() -> mSceneInteractor.changeScene(Scenes.Communal,
+                    "dream wake redirect to communal"));
+        } else {
+            mCommunalInteractor.changeScene(CommunalScenes.Communal,
+                    "dream wake requested",
+                    mCommunalSettingsInteractor.isV2FlagEnabled()
+                            ? CommunalTransitionKeys.INSTANCE.getSimpleFade() : null);
+        }
     }
 
     private void updateGestureBlockingLocked() {
         final boolean shouldBlock = mStarted && !mShadeExpanded && !mBouncerShowing
-                && !isDreamInPreviewMode();
+                && !isDreamInPreviewMode()
+                && !(Flags.glanceableHubBackAction() && mCommunalVisible);
 
         if (shouldBlock) {
             mGestureInteractor.addGestureBlockedMatcher(DREAM_TYPE_MATCHER,
@@ -617,7 +647,13 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         mSystemDialogsCloser.closeSystemDialogs();
 
         // Hide glanceable hub (this is a nop if glanceable hub is not open).
-        mCommunalInteractor.changeScene(CommunalScenes.Blank, "dream come to front", null);
+        if (SceneContainerFlag.isEnabled()) {
+            // Scene interactor can only be modified on main thread.
+            mExecutor.execute(
+                    () -> mSceneInteractor.changeScene(Scenes.Dream, "closing hub to go to dream"));
+        } else {
+            mCommunalInteractor.changeScene(CommunalScenes.Blank, "dream come to front", null);
+        }
     }
 
     /**
@@ -688,5 +724,16 @@ public class DreamOverlayService extends android.service.dreams.DreamOverlayServ
         }
         Log.w(TAG, "Removing dream overlay container view parent!");
         parentView.removeView(containerView);
+    }
+
+    private void updateBouncerShowingLocked(boolean bouncerShowing) {
+        if (mBouncerShowing == bouncerShowing) {
+            return;
+        }
+
+        mBouncerShowing = bouncerShowing;
+
+        updateLifecycleStateLocked();
+        updateGestureBlockingLocked();
     }
 }

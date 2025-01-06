@@ -1,6 +1,7 @@
 package com.android.settingslib.bluetooth;
 
 import static com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast.UNKNOWN_VALUE_PLACEHOLDER;
+import static com.android.settingslib.flags.Flags.audioSharingHysteresisModeFix;
 import static com.android.settingslib.widget.AdaptiveOutlineDrawable.ICON_TYPE_ADVANCED;
 
 import android.annotation.SuppressLint;
@@ -29,6 +30,7 @@ import android.net.Uri;
 import android.provider.DeviceConfig;
 import android.provider.MediaStore;
 import android.provider.Settings;
+import android.sysprop.BluetoothProperties;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
@@ -64,11 +66,16 @@ public class BluetoothUtils {
 
     public static final int META_INT_ERROR = -1;
     public static final String BT_ADVANCED_HEADER_ENABLED = "bt_advanced_header_enabled";
+    public static final String DEVELOPER_OPTION_PREVIEW_KEY =
+            "bluetooth_le_audio_sharing_ui_preview_enabled";
     private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
     private static final String KEY_HEARABLE_CONTROL_SLICE = "HEARABLE_CONTROL_SLICE_WITH_WIDTH";
     private static final Set<Integer> SA_PROFILES =
             ImmutableSet.of(
                     BluetoothProfile.A2DP, BluetoothProfile.LE_AUDIO, BluetoothProfile.HEARING_AID);
+
+    private static final String TEMP_BOND_TYPE = "TEMP_BOND_TYPE";
+    private static final String TEMP_BOND_DEVICE_METADATA_VALUE = "le_audio_sharing";
 
     private static ErrorListener sErrorListener;
 
@@ -628,32 +635,72 @@ public class BluetoothUtils {
                 assistantProfile.getAllConnectedDevices().stream()
                         .map(deviceManager::findDevice)
                         .filter(Objects::nonNull)
-                        .map(CachedBluetoothDevice::getGroupId)
+                        .map(BluetoothUtils::getGroupId)
                         .collect(Collectors.toSet());
         Set<Integer> activeGroupIds =
                 leAudioProfile.getActiveDevices().stream()
                         .map(deviceManager::findDevice)
                         .filter(Objects::nonNull)
-                        .map(CachedBluetoothDevice::getGroupId)
+                        .map(BluetoothUtils::getGroupId)
                         .collect(Collectors.toSet());
-        int groupId = cachedDevice.getGroupId();
+        int groupId = getGroupId(cachedDevice);
         return activeGroupIds.size() == 1
                 && !activeGroupIds.contains(groupId)
                 && connectedGroupIds.size() == 2
                 && connectedGroupIds.contains(groupId);
     }
 
+    /** Returns if the le audio sharing UI is available. */
+    public static boolean isAudioSharingUIAvailable(@Nullable Context context) {
+        return (Flags.enableLeAudioSharing()
+                || (context != null && Flags.audioSharingDeveloperOption()
+                && getAudioSharingPreviewValue(context.getContentResolver())))
+                && isAudioSharingSupported();
+    }
+
+    /** Returns if the le audio sharing hysteresis mode fix is available. */
+    @WorkerThread
+    public static boolean isAudioSharingHysteresisModeFixAvailable(@Nullable Context context) {
+        return (audioSharingHysteresisModeFix() && Flags.enableLeAudioSharing())
+                || (context != null && Flags.audioSharingDeveloperOption()
+                && getAudioSharingPreviewValue(context.getContentResolver()));
+    }
+
     /** Returns if the le audio sharing is enabled. */
     public static boolean isAudioSharingEnabled() {
+        return Flags.enableLeAudioSharing() && isAudioSharingSupported();
+    }
+
+    /** Returns if the le audio sharing preview is enabled in developer option. */
+    public static boolean isAudioSharingPreviewEnabled(@Nullable ContentResolver contentResolver) {
+        return Flags.audioSharingDeveloperOption()
+                && getAudioSharingPreviewValue(contentResolver)
+                && isAudioSharingSupported();
+    }
+
+    /** Returns if the device has le audio sharing capability */
+    private static boolean isAudioSharingSupported() {
         BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         try {
-            return Flags.enableLeAudioSharing()
-                    && adapter.isLeAudioBroadcastSourceSupported()
-                            == BluetoothStatusCodes.FEATURE_SUPPORTED
-                    && adapter.isLeAudioBroadcastAssistantSupported()
-                            == BluetoothStatusCodes.FEATURE_SUPPORTED;
+            // b/381777424 The APIs have to return ERROR_BLUETOOTH_NOT_ENABLED when BT off based on
+            // CDD definition.
+            // However, app layer need to gate the feature based on whether the device has audio
+            // sharing capability regardless of the BT state.
+            // So here we check the BluetoothProperties when BT off.
+            //
+            // TODO: Also check SystemProperties "persist.bluetooth.leaudio_dynamic_switcher.mode"
+            // and return true if it is in broadcast mode.
+            // Now SystemUI don't have access to read the value.
+            int sourceSupportedCode = adapter.isLeAudioBroadcastSourceSupported();
+            int assistantSupportedCode = adapter.isLeAudioBroadcastAssistantSupported();
+            return (sourceSupportedCode == BluetoothStatusCodes.FEATURE_SUPPORTED
+                    || (sourceSupportedCode == BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED
+                    && BluetoothProperties.isProfileBapBroadcastSourceEnabled().orElse(false)))
+                    && (assistantSupportedCode == BluetoothStatusCodes.FEATURE_SUPPORTED
+                    || (assistantSupportedCode == BluetoothStatusCodes.ERROR_BLUETOOTH_NOT_ENABLED
+                    && BluetoothProperties.isProfileBapBroadcastAssistEnabled().orElse(false)));
         } catch (IllegalStateException e) {
-            Log.d(TAG, "LE state is on, but there is no bluetooth service.", e);
+            Log.d(TAG, "Fail to check isAudioSharingSupported, e = ", e);
             return false;
         }
     }
@@ -709,13 +756,15 @@ public class BluetoothUtils {
     @WorkerThread
     public static boolean hasConnectedBroadcastSourceForBtDevice(
             @Nullable BluetoothDevice device, @Nullable LocalBluetoothManager localBtManager) {
-        if (Flags.audioSharingHysteresisModeFix()) {
+        if (localBtManager == null) {
+            Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
+            return false;
+        }
+        if (isAudioSharingHysteresisModeFixAvailable(localBtManager.getContext())) {
             return hasActiveLocalBroadcastSourceForBtDevice(device, localBtManager);
         }
         LocalBluetoothLeBroadcastAssistant assistant =
-                localBtManager == null
-                        ? null
-                        : localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
+                localBtManager.getProfileManager().getLeAudioBroadcastAssistantProfile();
         if (device == null || assistant == null) {
             Log.d(TAG, "Skip check hasConnectedBroadcastSourceForBtDevice due to arg is null");
             return false;
@@ -996,6 +1045,17 @@ public class BluetoothUtils {
                 BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
     }
 
+    /** Get develop option value for audio sharing preview. */
+    @WorkerThread
+    private static boolean getAudioSharingPreviewValue(@Nullable ContentResolver contentResolver) {
+        if (contentResolver == null) return false;
+        return Settings.Global.getInt(
+                contentResolver,
+                DEVELOPER_OPTION_PREVIEW_KEY,
+                0 // value off
+        ) == 1;
+    }
+
     /** Get secondary {@link CachedBluetoothDevice} in broadcast. */
     @Nullable
     @WorkerThread
@@ -1080,5 +1140,16 @@ public class BluetoothUtils {
             }
         }
         return saDevice;
+    }
+
+    /**
+     * Verifies if the device is temporary bond in audio sharing.
+     *
+     * @param bluetoothDevice the BluetoothDevice to verify
+     * @return if the device is temporary bond
+     */
+    public static boolean isTemporaryBondDevice(@Nullable BluetoothDevice bluetoothDevice) {
+        String metadataValue = getFastPairCustomizedField(bluetoothDevice, TEMP_BOND_TYPE);
+        return Objects.equals(metadataValue, TEMP_BOND_DEVICE_METADATA_VALUE);
     }
 }

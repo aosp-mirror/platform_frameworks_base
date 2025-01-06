@@ -18,14 +18,18 @@ package com.android.systemui.animation;
 
 import android.annotation.Nullable;
 import android.graphics.Canvas;
+import android.graphics.Outline;
+import android.graphics.Path;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.os.Build;
 import android.util.Log;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewRootImpl;
 import android.view.ViewTreeObserver.OnDrawListener;
 
 import java.util.ArrayList;
@@ -38,11 +42,15 @@ import java.util.concurrent.Executor;
  * be changed to INVISIBLE in its view tree. This allows the {@link View} to transform in the
  * full-screen size leash without being constrained by the view tree's boundary or inheriting its
  * parent's alpha and transformation.
+ *
  * @hide
  */
 public class ViewUIComponent implements UIComponent {
     private static final String TAG = "ViewUIComponent";
     private static final boolean DEBUG = Build.IS_USERDEBUG || Log.isLoggable(TAG, Log.DEBUG);
+    private final Path mClippingPath = new Path();
+    private final Outline mClippingOutline = new Outline();
+
     private final OnDrawListener mOnDrawListener = this::postDraw;
     private final View mView;
 
@@ -54,6 +62,14 @@ public class ViewUIComponent implements UIComponent {
 
     public ViewUIComponent(View view) {
         mView = view;
+    }
+
+    /**
+     * @return the view wrapped by this UI component.
+     * @hide
+     */
+    public View getView() {
+        return mView;
     }
 
     @Override
@@ -88,7 +104,6 @@ public class ViewUIComponent implements UIComponent {
         mSurfaceControl =
                 new SurfaceControl.Builder().setName("ViewUIComponent").setBufferSize(w, h).build();
         mSurface = new Surface(mSurfaceControl);
-        forceDraw();
 
         // Attach surface to transition leash
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
@@ -99,8 +114,12 @@ public class ViewUIComponent implements UIComponent {
 
         // Make the view invisible AFTER the surface is shown.
         t.addTransactionCommittedListener(
-                        mView.getContext().getMainExecutor(),
-                        () -> mView.setVisibility(View.INVISIBLE))
+                        mView::post,
+                        () -> {
+                            logD("Surface attached!");
+                            forceDraw();
+                            mView.setVisibility(View.INVISIBLE);
+                        })
                 .apply();
     }
 
@@ -113,19 +132,26 @@ public class ViewUIComponent implements UIComponent {
         mView.getViewTreeObserver().removeOnDrawListener(mOnDrawListener);
         // Restore view visibility
         mView.setVisibility(mVisibleOverride ? View.VISIBLE : View.INVISIBLE);
-        mView.invalidate();
         // Clean up surfaces.
         SurfaceControl.Transaction t = new SurfaceControl.Transaction();
         t.reparent(sc, null)
                 .addTransactionCommittedListener(
-                        mView.getContext().getMainExecutor(),
+                        mView::post,
                         () -> {
                             s.release();
                             sc.release();
                             executor.execute(onDone);
                         });
-        // Apply transaction AFTER the view is drawn.
-        mView.getRootSurfaceControl().applyTransactionOnDraw(t);
+        ViewRootImpl viewRoot = mView.getViewRootImpl();
+        if (viewRoot == null) {
+            t.apply();
+        } else {
+            // Apply transaction AFTER the view is drawn.
+            viewRoot.applyTransactionOnDraw(t);
+            // Request layout to force redrawing the entire view tree, so that the transaction is
+            // guaranteed to be applied.
+            viewRoot.requestLayout();
+        }
     }
 
     @Override
@@ -170,6 +196,17 @@ public class ViewUIComponent implements UIComponent {
             canvas.scale(
                     (float) renderBounds.width() / realBounds.width(),
                     (float) renderBounds.height() / realBounds.height());
+
+            if (mView.getClipToOutline()) {
+                mView.getOutlineProvider().getOutline(mView, mClippingOutline);
+                mClippingPath.reset();
+                RectF rect = new RectF(0, 0, mView.getWidth(), mView.getHeight());
+                final float cornerRadius = mClippingOutline.getRadius();
+                mClippingPath.addRoundRect(rect, cornerRadius, cornerRadius, Path.Direction.CW);
+                mClippingPath.close();
+                canvas.clipPath(mClippingPath);
+            }
+
             canvas.saveLayerAlpha(null, (int) (255 * mView.getAlpha()));
             mView.draw(canvas);
             canvas.restore();
@@ -235,41 +272,40 @@ public class ViewUIComponent implements UIComponent {
         mView.post(this::draw);
     }
 
-    /**
-     * @hide
-     */
+    /** @hide */
     public static class Transaction implements UIComponent.Transaction<ViewUIComponent> {
         private final List<Runnable> mChanges = new ArrayList<>();
 
         @Override
         public Transaction setAlpha(ViewUIComponent ui, float alpha) {
-            mChanges.add(() -> ui.setAlpha(alpha));
+            mChanges.add(() -> ui.mView.post(() -> ui.setAlpha(alpha)));
             return this;
         }
 
         @Override
         public Transaction setVisible(ViewUIComponent ui, boolean visible) {
-            mChanges.add(() -> ui.setVisible(visible));
+            mChanges.add(() -> ui.mView.post(() -> ui.setVisible(visible)));
             return this;
         }
 
         @Override
         public Transaction setBounds(ViewUIComponent ui, Rect bounds) {
-            mChanges.add(() -> ui.setBounds(bounds));
+            mChanges.add(() -> ui.mView.post(() -> ui.setBounds(bounds)));
             return this;
         }
 
         @Override
         public Transaction attachToTransitionLeash(
                 ViewUIComponent ui, SurfaceControl transitionLeash, int w, int h) {
-            mChanges.add(() -> ui.attachToTransitionLeash(transitionLeash, w, h));
+            mChanges.add(
+                    () -> ui.mView.post(() -> ui.attachToTransitionLeash(transitionLeash, w, h)));
             return this;
         }
 
         @Override
         public Transaction detachFromTransitionLeash(
                 ViewUIComponent ui, Executor executor, Runnable onDone) {
-            mChanges.add(() -> ui.detachFromTransitionLeash(executor, onDone));
+            mChanges.add(() -> ui.mView.post(() -> ui.detachFromTransitionLeash(executor, onDone)));
             return this;
         }
 

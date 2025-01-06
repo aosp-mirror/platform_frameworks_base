@@ -357,7 +357,7 @@ public final class BlockedNumbersManager {
          */
         private long mUntilTimestampMillis;
 
-        public BlockSuppressionStatus(boolean isSuppressed, long untilTimestampMillis) {
+        BlockSuppressionStatus(boolean isSuppressed, long untilTimestampMillis) {
             this.mIsSuppressed = isSuppressed;
             this.mUntilTimestampMillis = untilTimestampMillis;
         }

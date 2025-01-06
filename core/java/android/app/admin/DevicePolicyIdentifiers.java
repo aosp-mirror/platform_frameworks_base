@@ -20,6 +20,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.appfunctions.flags.Flags;
 import android.os.UserManager;
 
 import java.util.Objects;
@@ -181,6 +182,12 @@ public final class DevicePolicyIdentifiers {
     public static final String CONTENT_PROTECTION_POLICY = "contentProtection";
 
     /**
+     * String identifier for {@link DevicePolicyManager#setAppFunctionsPolicy(int)}.
+     */
+    @FlaggedApi(Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)
+    public static final String APP_FUNCTIONS_POLICY = "appFunctions";
+
+    /**
      * String identifier for {@link DevicePolicyManager#setUsbDataSignalingEnabled}.
      */
     public static final String USB_DATA_SIGNALING_POLICY = "usbDataSignaling";
@@ -189,6 +196,12 @@ public final class DevicePolicyIdentifiers {
      * String identifier for {@link DevicePolicyManager#setRequiredPasswordComplexity}.
      */
     public static final String PASSWORD_COMPLEXITY_POLICY = "passwordComplexity";
+
+    /**
+     * String identifier for {@link DevicePolicyManager#setMtePolicy(int)}.
+     */
+    @FlaggedApi(android.app.admin.flags.Flags.FLAG_SET_MTE_POLICY_COEXISTENCE)
+    public static final String MEMORY_TAGGING_POLICY = "memoryTagging";
 
     /**
      * @hide

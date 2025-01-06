@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Daha çox seçim üçün cihazı kiliddən çıxarın"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Bu telefonda oxudulur"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Bu planşetdə oxudulur"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Bu telefon sönülü olsa belə, Cihazın Tapılması ilə onu tapa bilərsiniz"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Bu planşet sönülü olsa belə, Cihazın Tapılması ilə onu tapa bilərsiniz"</string>
 </resources>

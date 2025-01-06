@@ -52,6 +52,7 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.display.brightness.clamper.BrightnessClamperController;
 import com.android.server.display.config.HysteresisLevels;
 import com.android.server.display.feature.DisplayManagerFlags;
 import com.android.server.testutils.OffsettableClock;
@@ -102,7 +103,8 @@ public class AutomaticBrightnessControllerTest {
     @Mock BrightnessRangeController mBrightnessRangeController;
     @Mock
     DisplayManagerFlags mDisplayManagerFlags;
-    @Mock BrightnessThrottler mBrightnessThrottler;
+    @Mock
+    BrightnessClamperController mBrightnessClamperController;
 
     @Before
     public void setUp() throws Exception {
@@ -175,7 +177,7 @@ public class AutomaticBrightnessControllerTest {
                 RESET_AMBIENT_LUX_AFTER_WARMUP_CONFIG,
                 mAmbientBrightnessThresholds, mScreenBrightnessThresholds,
                 mAmbientBrightnessThresholdsIdle, mScreenBrightnessThresholdsIdle,
-                mContext, mBrightnessRangeController, mBrightnessThrottler,
+                mContext, mBrightnessRangeController, mBrightnessClamperController,
                 useHorizon ? AMBIENT_LIGHT_HORIZON_SHORT : 1,
                 useHorizon ? AMBIENT_LIGHT_HORIZON_LONG : 10000, userLux, userNits,
                 mDisplayManagerFlags
@@ -186,8 +188,8 @@ public class AutomaticBrightnessControllerTest {
         when(mBrightnessRangeController.getCurrentBrightnessMin()).thenReturn(
                 BRIGHTNESS_MIN_FLOAT);
         // Disable brightness throttling by default. Individual tests can enable it as needed.
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
-        when(mBrightnessThrottler.isThrottled()).thenReturn(false);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessClamperController.isThrottled()).thenReturn(false);
 
         // Configure the brightness controller and grab an instance of the sensor listener,
         // through which we can deliver fake (for test) sensor values.
@@ -754,8 +756,8 @@ public class AutomaticBrightnessControllerTest {
 
         // Apply throttling and notify ABC (simulates DisplayPowerController#updatePowerState())
         final float throttledBrightness = 0.123f;
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(throttledBrightness);
-        when(mBrightnessThrottler.isThrottled()).thenReturn(true);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(throttledBrightness);
+        when(mBrightnessClamperController.isThrottled()).thenReturn(true);
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 BRIGHTNESS_MAX_FLOAT /* brightness= */, false /* userChangedBrightness= */,
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
@@ -766,8 +768,8 @@ public class AutomaticBrightnessControllerTest {
         assertEquals(BRIGHTNESS_MAX_FLOAT, mController.getRawAutomaticScreenBrightness(), 0.0f);
 
         // Remove throttling and notify ABC again
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
-        when(mBrightnessThrottler.isThrottled()).thenReturn(false);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessClamperController.isThrottled()).thenReturn(false);
         mController.configure(AUTO_BRIGHTNESS_ENABLED, null /* configuration= */,
                 BRIGHTNESS_MAX_FLOAT /* brightness= */, false /* userChangedBrightness= */,
                 0 /* adjustment= */, false /* userChanged= */, DisplayPowerRequest.POLICY_BRIGHT,
@@ -1098,7 +1100,7 @@ public class AutomaticBrightnessControllerTest {
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(BRIGHTNESS_MAX_FLOAT);
 
         // Set policy to DOZE
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
@@ -1118,7 +1120,8 @@ public class AutomaticBrightnessControllerTest {
     @Test
     public void testAutoBrightnessInDoze_useNormalBrightnessForDozeFalse_scaleScreenOn()
             throws Exception {
-        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)).thenReturn(
+                true);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -1134,7 +1137,7 @@ public class AutomaticBrightnessControllerTest {
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(BRIGHTNESS_MAX_FLOAT);
 
         // Set policy to DOZE
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
@@ -1154,7 +1157,8 @@ public class AutomaticBrightnessControllerTest {
     @Test
     public void testAutoBrightnessInDoze_useNormalBrightnessForDozeTrue_notScaleScreenOn()
             throws Exception {
-        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled()).thenReturn(true);
+        when(mDisplayManagerFlags.isNormalBrightnessForDozeParameterEnabled(mContext)).thenReturn(
+                true);
 
         ArgumentCaptor<SensorEventListener> listenerCaptor =
                 ArgumentCaptor.forClass(SensorEventListener.class);
@@ -1170,7 +1174,7 @@ public class AutomaticBrightnessControllerTest {
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(BRIGHTNESS_MAX_FLOAT);
 
         // Set policy to DOZE
         mController.configure(AUTO_BRIGHTNESS_ENABLED, /* configuration= */ null,
@@ -1202,7 +1206,7 @@ public class AutomaticBrightnessControllerTest {
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mDozeBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(BRIGHTNESS_MAX_FLOAT);
 
         // Switch mode to DOZE
         mController.switchMode(AUTO_BRIGHTNESS_MODE_DOZE, /* sendUpdate= */ false);
@@ -1237,7 +1241,7 @@ public class AutomaticBrightnessControllerTest {
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mDozeBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(BRIGHTNESS_MAX_FLOAT);
 
         // Send a new sensor value
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));
@@ -1265,7 +1269,7 @@ public class AutomaticBrightnessControllerTest {
         when(mAmbientBrightnessThresholds.getDarkeningThreshold(lux)).thenReturn(lux);
         when(mDozeBrightnessMappingStrategy.getBrightness(eq(lux), /* packageName= */ eq(null),
                 /* category= */ anyInt())).thenReturn(normalizedBrightness);
-        when(mBrightnessThrottler.getBrightnessCap()).thenReturn(BRIGHTNESS_MAX_FLOAT);
+        when(mBrightnessClamperController.getMaxBrightness()).thenReturn(BRIGHTNESS_MAX_FLOAT);
 
         // Send a new sensor value
         listener.onSensorChanged(TestUtils.createSensorEvent(mLightSensor, (int) lux));

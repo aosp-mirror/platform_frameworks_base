@@ -114,6 +114,18 @@ interface KeyguardTransitionRepository {
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState,
     )
+
+    /**
+     * Forces the current transition to emit FINISHED, foregoing any additional RUNNING steps that
+     * otherwise would have been emitted.
+     *
+     * When the screen is off, upcoming performance changes cause all Animators to cease emitting
+     * frames, which means the Animator passed to [startTransition] will never finish if it was
+     * running when the screen turned off. Also, there's simply no reason to emit RUNNING steps when
+     * the screen isn't even on. As long as we emit FINISHED, everything should end up in the
+     * correct state.
+     */
+    suspend fun forceFinishCurrentTransition()
 }
 
 @SysUISingleton
@@ -134,6 +146,7 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
     override val transitions = _transitions.asSharedFlow().distinctUntilChanged()
     private var lastStep: TransitionStep = TransitionStep()
     private var lastAnimator: ValueAnimator? = null
+    private var animatorListener: AnimatorListenerAdapter? = null
 
     private val withContextMutex = Mutex()
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
@@ -233,7 +246,7 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
                     )
                 }
 
-                val adapter =
+                animatorListener =
                     object : AnimatorListenerAdapter() {
                         override fun onAnimationStart(animation: Animator) {
                             emitTransition(
@@ -254,9 +267,10 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
                             animator.removeListener(this)
                             animator.removeUpdateListener(updateListener)
                             lastAnimator = null
+                            animatorListener = null
                         }
                     }
-                animator.addListener(adapter)
+                animator.addListener(animatorListener)
                 animator.addUpdateListener(updateListener)
                 animator.start()
                 return@withContext null
@@ -287,6 +301,33 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
             withContextMutex.unlock()
 
             updateTransitionInternal(transitionId, value, state)
+        }
+    }
+
+    override suspend fun forceFinishCurrentTransition() {
+        if (lastAnimator?.isRunning != true) {
+            return
+        }
+
+        withContextMutex.lock()
+
+        return withContext("$TAG#forceFinishCurrentTransition", mainDispatcher) {
+            withContextMutex.unlock()
+
+            Log.d(TAG, "forceFinishCurrentTransition() - emitting FINISHED early.")
+
+            lastAnimator?.apply {
+                // Cancel the animator, but remove listeners first so we don't emit CANCELED.
+                removeAllListeners()
+                cancel()
+
+                // Emit a final 1f RUNNING step to ensure that any transitions not listening for a
+                // FINISHED step end up in the right end state.
+                emitTransition(TransitionStep(currentTransitionInfo, 1f, TransitionState.RUNNING))
+
+                // Ask the listener to emit FINISHED and clean up its state.
+                animatorListener?.onAnimationEnd(this)
+            }
         }
     }
 

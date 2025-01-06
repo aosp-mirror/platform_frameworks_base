@@ -27,6 +27,7 @@ import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.haptics.slider.HapticSlider
 import com.android.systemui.haptics.slider.HapticSliderPlugin
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.settings.brightness.ui.BrightnessWarningToast
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.BrightnessMirrorController
 import com.android.systemui.util.mockito.any
@@ -64,6 +65,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
     @Mock private lateinit var vibratorHelper: VibratorHelper
     @Mock private lateinit var msdlPlayer: MSDLPlayer
     @Mock private lateinit var activityStarter: ActivityStarter
+    @Mock private lateinit var brightnessWarningToast: BrightnessWarningToast
 
     @Captor
     private lateinit var seekBarChangeCaptor: ArgumentCaptor<SeekBar.OnSeekBarChangeListener>
@@ -94,6 +96,7 @@ class BrightnessSliderControllerTest : SysuiTestCase() {
                     HapticSlider.SeekBar(seekBar),
                 ),
                 activityStarter,
+                brightnessWarningToast,
             )
         mController.init()
         mController.setOnChangedListener(listener)

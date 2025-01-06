@@ -21,6 +21,7 @@ package com.android.systemui.keyguard.ui.viewmodel
 import com.android.systemui.bouncer.domain.interactor.mockPrimaryBouncerInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardDismissActionInteractor
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.statusbar.sysuiStatusBarStateController
@@ -33,5 +34,6 @@ val Kosmos.primaryBouncerToGoneTransitionViewModel by Fixture {
         keyguardDismissActionInteractor = { keyguardDismissActionInteractor },
         bouncerToGoneFlows = bouncerToGoneFlows,
         animationFlow = keyguardTransitionAnimationFlow,
+        blurConfig = blurConfig,
     )
 }

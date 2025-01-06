@@ -156,6 +156,7 @@ python_test_host {
     ],
     data: [
         "golden-output/*.txt",
+        "golden-output.RELEASE_TARGET_JAVA_21/*.txt",
     ],
     java_data: [
         "hoststubgen-test-tiny-framework-orig-dump",

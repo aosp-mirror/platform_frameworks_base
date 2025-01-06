@@ -21,8 +21,6 @@ import android.content.IntentSender;
 import android.content.pm.ParceledListSlice;
 import android.content.pm.ShortcutInfo;
 
-import com.android.internal.infra.AndroidFuture;
-
 /** {@hide} */
 interface IShortcutService {
 
@@ -38,11 +36,11 @@ interface IShortcutService {
 
     boolean updateShortcuts(String packageName, in ParceledListSlice shortcuts, int userId);
 
-    void requestPinShortcut(String packageName, in ShortcutInfo shortcut,
-            in IntentSender resultIntent, int userId, in AndroidFuture<String> ret);
+    boolean requestPinShortcut(String packageName, in ShortcutInfo shortcut,
+            in IntentSender resultIntent, int userId);
 
-    void createShortcutResultIntent(String packageName, in ShortcutInfo shortcut, int userId,
-            in AndroidFuture<Intent> ret);
+    Intent createShortcutResultIntent(String packageName, in ShortcutInfo shortcut,
+            int userId);
 
     void disableShortcuts(String packageName, in List<String> shortcutIds,
             CharSequence disabledMessage, int disabledMessageResId, int userId);

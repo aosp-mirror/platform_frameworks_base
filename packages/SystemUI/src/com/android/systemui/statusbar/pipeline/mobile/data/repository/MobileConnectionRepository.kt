@@ -107,6 +107,12 @@ interface MobileConnectionRepository {
     // @IntRange(from = 0, to = 4)
     val primaryLevel: StateFlow<Int>
 
+    /**
+     * This level can be used to reflect the signal strength when in carrier roaming NTN mode
+     * (carrier-based satellite)
+     */
+    val satelliteLevel: StateFlow<Int>
+
     /** The current data connection state. See [DataConnectionState] */
     val dataConnectionState: StateFlow<DataConnectionState>
 

@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ໝາຍເລກຜູ່ໂທ ໄດ້ຮັບການຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນ ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ບໍ່ຖືກຈຳກັດ."</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Caller ID ໂດຍເລີ່ມຕົ້ນຖືກປັບໃຫ້ບໍ່ມີການປິດກັ້ນ. ການໂທຕໍ່ໄປ:ປິດກັ້ນ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ໝາຍເລກຜູ່ໂທ ໄດ້ຮັບການຕັ້ງຄ່າເລີ່ມຕົ້ນເປັນ ບໍ່ຖືກຈຳກັດ. ການໂທຄັ້ງຕໍ່ໄປ: ບໍ່ຖືກຈຳກັດ."</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"ແອັບນີ້ເຂົ້າກັນບໍ່ໄດ້ກັບ 16 KB. ກວດສອບການຈັດຕຳແໜ່ງ APK ບໍ່ສຳເລັດ. ແອັບນີ້ຈະເຮັດວຽກໂດຍໃຊ້ໂໝດທີ່ເຂົ້າກັນໄດ້ກັບຂະໜາດໜ້າ. ເພື່ອຄວາມເຂົ້າກັນໄດ້ດີທີ່ສຸດ, ກະລຸນາຮວມແອັບພລິເຄຊັນຄືນດ້ວຍການຮອງຮັບ 16 KB. ສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ເບິ່ງ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"ແອັບນີ້ເຂົ້າກັນບໍ່ໄດ້ກັບ 16 KB. ກວດສອບການຈັດຕຳແໜ່ງ ELF ບໍ່ສຳເລັດ. ແອັບນີ້ຈະເຮັດວຽກໂດຍໃຊ້ໂໝດທີ່ເຂົ້າກັນໄດ້ກັບຂະໜາດໜ້າ. ເພື່ອຄວາມເຂົ້າກັນໄດ້ດີທີ່ສຸດ, ກະລຸນາຮວມແອັບພລິເຄຊັນຄືນດ້ວຍການຮອງຮັບ 16 KB. ສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ເບິ່ງ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"ແອັບນີ້ເຂົ້າກັນບໍ່ໄດ້ກັບ 16 KB. ກວດສອບການຈັດຕຳແໜ່ງ APK ແລະ ELF ບໍ່ສຳເລັດ. ແອັບນີ້ຈະເຮັດວຽກໂດຍໃຊ້ໂໝດທີ່ເຂົ້າກັນໄດ້ກັບຂະໜາດໜ້າ. ເພື່ອຄວາມເຂົ້າກັນໄດ້ດີທີ່ສຸດ, ກະລຸນາຮວມແອັບພລິເຄຊັນຄືນດ້ວຍການຮອງຮັບ 16 KB. ສຳລັບຂໍ້ມູນເພີ່ມເຕີມ, ໃຫ້ເບິ່ງ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ບໍ່ໄດ້ເປີດໃຊ້ບໍລິການ."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"ທ່ານບໍ່ສາມາດປ່ຽນແປງການຕັ້ງຄ່າ Caller ID"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ປ່ຽນໄປໃຊ້ອິນເຕີເນັດມືຖືຂອງ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> ແລ້ວ"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ບໍ່ສາມາດຕິດຕໍ່ເຄືອຂ່າຍມືຖືໄດ້"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ໃຫ້ລອງປ່ຽນເຄືອຂ່າຍທີ່ຕ້ອງການ. ແຕະເພື່ອປ່ຽນ."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ບໍ່ສາມາດໃຊ້ການໂທສຸກເສີນໄດ້"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ໂທ​ສຸກ​ເສີນຕ້ອງໃຊ້ເຄືອຂ່າຍມືຖື"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ການເຕືອນ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ການໂອນສາຍ"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ອະນຸຍາດໃຫ້ແອັບກຳນົດຕຳແໜ່ງທີ່ສຳພັນກັນລະຫວ່າງອຸປະກອນ Ultra-Wideband ທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ໂຕ້ຕອບກັບອຸປະກອນ Wi‑Fi ທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"ອະນຸຍາດໃຫ້ແອັບໂຄສະນາ, ເຊື່ອມຕໍ່ ແລະ ກຳນົດຕຳແໜ່ງສຳພັນຂອງອຸປະກອນ Wi-Fi ທີ່ຢູ່ໃກ້ຄຽງໄດ້"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"ກຳນົດຕຳແໜ່ງທີ່ກ່ຽວຂ້ອງກັນລະຫວ່າງອຸປະກອນທີ່ຢູ່ໃກ້ຄຽງ"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ອະນຸຍາດໃຫ້ແອັບກຳນົດຕຳແໜ່ງທີ່ກ່ຽວຂ້ອງກັນລະຫວ່າງອຸປະກອນທີ່ຢູ່ໃກ້ຄຽງ"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ອະນຸຍາດໃຫ້ແອັບຮັບຂໍ້ມູນບໍລິການການຈ່າຍເງິນ NFC ທີ່ຕ້ອງການໄດ້ ເຊັ່ນ: ການຊ່ວຍເຫຼືອແບບລົງທະບຽນ ແລະ ປາຍທາງເສັ້ນທາງ."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ຄວບຄຸມ Near Field Communication"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"ໃນ <xliff:g id="COUNT">%d</xliff:g>ຊມ"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"ໃນ <xliff:g id="COUNT">%d</xliff:g>ມ"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"ໃນ <xliff:g id="COUNT">%d</xliff:g>ປ"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> ນາທີກ່ອນ"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> ຊົ່ວໂມງກ່ອນ"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> ມື້ກ່ອນ"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> ປີກ່ອນ"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> ນາທີ"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ຊົ່ວໂມງ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> ມື້"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> ປີ"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"ໃນ <xliff:g id="COUNT">%d</xliff:g> ນາທີ"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"ໃນ <xliff:g id="COUNT">%d</xliff:g> ຊົ່ວໂມງ"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"ໃນ <xliff:g id="COUNT">%d</xliff:g> ມື້"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"ໃນ <xliff:g id="COUNT">%d</xliff:g> ປີ"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> ນາທີກ່ອນ"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> ຊົ່ວໂມງກ່ອນ"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> ມື້ກ່ອນ"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> ປີກ່ອນ"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# ນາທີກ່ອນ}other{# ນາທີກ່ອນ}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ຊົ່ວໂມງກ່ອນ}other{# ຊົ່ວໂມງກ່ອນ}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ມື້ກ່ອນ}other{# ມື້ກ່ອນ}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ໂໝດມືດຽວ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ຫຼຸດແສງເປັນພິເສດ"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ອຸປະກອນຊ່ວຍຟັງ"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ເປີດໃຊ້ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ແລ້ວ."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ກົດປຸ່ມລະດັບສຽງຄ້າງໄວ້. ປິດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ໄວ້ແລ້ວ."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ປ່ອຍປຸ່ມລະດັບສຽງ. ເພື່ອເປີດ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, ໃຫ້ກົດປຸ່ມລະດັບສຽງທັງສອງຄ້າງໄວ້ 3 ວິນາທີ."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ທ້າຍອາທິດ"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ການນັດໝາຍ"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ການນອນ"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"ຫ້າມລົບກວນ (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"ຈັດການໂດຍ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ເປີດຢູ່"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ປິດຢູ່"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> ຫາ <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ປະ​ຕິ​ທິນ​ໃດ​ກໍໄດ້"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ປິດສຽງບາງຢ່າງໄວ້"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ມີ​ບັນ​ຫາ​ພາຍ​ໃນ​ກັບ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ, ແລະ​ມັນ​ອາດ​ຈະ​ບໍ່​ສະ​ຖຽນ​ຈົນ​ກວ່າ​ທ່ານ​ຕັ້ງ​ເປັນ​ຂໍ້​ມູນ​ໂຮງ​ງານ​ຄືນ​ແລ້ວ."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ຮັບ ແລະ ສົ່ງຂໍ້ຄວາມໂດຍບໍ່ຕ້ອງໃຊ້ເຄືອຂ່າຍໂທລະສັບມືຖື ຫຼື Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"ເປີດ Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ມັນເຮັດວຽກແນວໃດ"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"ເປີດໃຊ້ \"ເລືອກເຄືອຂ່າຍອັດຕະໂນມັດ\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"ເປີດໃຊ້ \"ເລືອກເຄືອຂ່າຍອັດຕະໂນມັດ\" ໃນການຕັ້ງຄ່າເພື່ອໃຫ້ໂທລະສັບຂອງທ່ານສາມາດຊອກຫາເຄືອຂ່າຍທີ່ໃຊ້ໄດ້ກັບດາວທຽມ"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ເປີດໃຊ້"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ກັບຄືນ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"ລໍຖ້າດຳເນີນການ..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ຕອນນີ້ SOS ດາວທຽມພ້ອມໃຫ້ບໍລິການແລ້ວ"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"ທ່ານສາມາດສົ່ງຂໍ້ຄວາມໄປຫາບໍລິການສຸກເສີນໄດ້ໃນກໍລະນີທີ່ບໍ່ມີເຄືອຂ່າຍມືຖື ຫຼື Wi-Fi. ຕ້ອງຕັ້ງຄ່າ Google Messages ເປັນແອັບຮັບສົ່ງຂໍ້ຄວາມເລີ່ມຕົ້ນຂອງທ່ານ."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ບໍ່ຮອງຮັບ SOS ດາວທຽມ"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບ SOS ດາວທຽມ"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ບໍ່ໄດ້ຕັ້ງຄ່າ SOS ດາວທຽມ"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"ກະລຸນາກວດສອບໃຫ້ໝັ້ນໃຈວ່າທ່ານໄດ້ເຊື່ອມຕໍ່ອິນເຕີເນັດແລ້ວ ແລະ ລອງຕັ້ງຄ່າອີກຄັ້ງ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS ດາວທຽມບໍ່ພ້ອມໃຫ້ບໍລິການ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS ດາວທຽມບໍ່ພ້ອມໃຫ້ບໍລິການໃນປະເທດ ຫຼື ພາກພື້ນນີ້"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ບໍ່ໄດ້ຕັ້ງຄ່າ SOS ດາວທຽມ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"ເພື່ອຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມ, ໃຫ້ຕັ້ງ Google Messages ເປັນແອັບຮັບສົ່ງຂໍ້ຄວາມເລີ່ມຕົ້ນຂອງທ່ານ"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS ດາວທຽມບໍ່ພ້ອມໃຫ້ບໍລິການ"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ເພື່ອກວດສອບວ່າ SOS ດາວທຽມພ້ອມໃຫ້ບໍລິການໃນປະເທດ ຫຼື ພາກພື້ນນີ້ຫຼືບໍ່, ໃຫ້ເປີດການຕັ້ງຄ່າສະຖານທີ່"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"ການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມພ້ອມໃຫ້ບໍລິການ"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"ທ່ານສາມາດຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມໄດ້ໃນກໍລະນີທີ່ບໍ່ມີເຄືອຂ່າຍມືຖື ຫຼື Wi-Fi. ຕ້ອງຕັ້ງຄ່າ Google Messages ເປັນແອັບຮັບສົ່ງຂໍ້ຄວາມເລີ່ມຕົ້ນຂອງທ່ານ."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"ບໍ່ຮອງຮັບການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມ"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"ອຸປະກອນນີ້ບໍ່ຮອງຮັບການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"ບໍ່ໄດ້ຕັ້ງຄ່າການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"ກະລຸນາກວດສອບໃຫ້ໝັ້ນໃຈວ່າທ່ານໄດ້ເຊື່ອມຕໍ່ອິນເຕີເນັດແລ້ວ ແລະ ລອງຕັ້ງຄ່າອີກຄັ້ງ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"ການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມບໍ່ພ້ອມໃຫ້ບໍລິການ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"ການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມບໍ່ພ້ອມໃຫ້ບໍລິການໃນປະເທດ ຫຼື ພາກພື້ນນີ້"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"ບໍ່ໄດ້ຕັ້ງຄ່າການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"ເພື່ອຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມ, ໃຫ້ຕັ້ງ Google Messages ເປັນແອັບຮັບສົ່ງຂໍ້ຄວາມເລີ່ມຕົ້ນຂອງທ່ານ"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"ການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມບໍ່ພ້ອມໃຫ້ບໍລິການ"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ເພື່ອກວດສອບວ່າການຮັບສົ່ງຂໍ້ຄວາມຜ່ານດາວທຽມພ້ອມໃຫ້ບໍລິການໃນປະເທດ ຫຼື ພາກພື້ນນີ້ຫຼືບໍ່, ໃຫ້ເປີດການຕັ້ງຄ່າສະຖານທີ່"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ຕັ້ງຄ່າການປົດລັອກດ້ວຍລາຍນິ້ວມືຄືນໃໝ່"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"ບໍ່ສາມາດຈຳແນກ <xliff:g id="FINGERPRINT">%s</xliff:g> ໄດ້ອີກຕໍ່ໄປ."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"ບໍ່ສາມາດຈຳແນກ <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ແລະ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> ໄດ້ອີກຕໍ່ໄປ."</string>

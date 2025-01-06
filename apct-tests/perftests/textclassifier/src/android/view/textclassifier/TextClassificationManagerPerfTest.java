@@ -34,6 +34,8 @@ import org.junit.Test;
 public class TextClassificationManagerPerfTest {
     private static final String WRITE_DEVICE_CONFIG_PERMISSION =
             "android.permission.WRITE_DEVICE_CONFIG";
+    private static final String WRITE_ALLOWLISTED_DEVICE_CONFIG_PERMISSION =
+            "android.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG";
 
     @Rule
     public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
@@ -44,7 +46,7 @@ public class TextClassificationManagerPerfTest {
     public static void setUpClass() {
         InstrumentationRegistry.getInstrumentation().getUiAutomation()
                 .adoptShellPermissionIdentity(
-                        WRITE_DEVICE_CONFIG_PERMISSION);
+                        WRITE_DEVICE_CONFIG_PERMISSION, WRITE_ALLOWLISTED_DEVICE_CONFIG_PERMISSION);
     }
 
     @AfterClass

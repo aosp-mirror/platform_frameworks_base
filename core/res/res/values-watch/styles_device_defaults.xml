@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Copyright (C) 2021 The Android Open Source Project
+
+     Licensed under the Apache License, Version 2.0 (the "License");
+     you may not use this file except in compliance with the License.
+     You may obtain a copy of the License at
+
+          http://www.apache.org/licenses/LICENSE-2.0
+
+     Unless required by applicable law or agreed to in writing, software
+     distributed under the License is distributed on an "AS IS" BASIS,
+     WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+     See the License for the specific language governing permissions and
+     limitations under the License.
+-->
+<resources>
+    <style name="DialogWindowTitle.DeviceDefault" parent="DialogWindowTitle.Material">
+        <item name="maxLines">2</item>
+        <item name="shadowRadius">0</item>
+        <item name="ellipsize">end</item>
+        <item name="textAppearance">@style/TextAppearance.DeviceDefault.Title</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Body1" parent="TextAppearance.Material.Body1">
+        <item name="android:textSize">15sp</item>
+        <item name="android:fontFamily">sans-serif</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Title" parent="TextAppearance.Material.Title">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">google-sans</item>
+        <item name="android:textStyle">bold</item>
+    </style>
+    <style name="TextAppearance.DeviceDefault.Subhead" parent="TextAppearance.Material.Subhead">
+        <item name="android:textSize">16sp</item>
+        <item name="android:fontFamily">google-sans-medium</item>
+    </style>
+    <style name="BaseErrorDialog.DeviceDefault" parent="AlertDialog.DeviceDefault">
+        <item name="layout">@layout/watch_base_error_dialog</item>
+    </style>
+
+    <!--  Button Styles  -->
+    <!-- Material Button - Filled (primary colored) -->
+    <style name="Widget.DeviceDefault.Button.Filled" parent="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="android:background">@drawable/btn_background_material_filled_watch</item>
+        <item name="textAppearance">@style/TextAppearance.Widget.Button.Material.Filled</item>
+    </style>
+
+    <!-- Material Button - Filled Tonal (Override system default button styles) -->
+    <style name="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="background">@drawable/btn_background_material_filled_tonal_watch</item>
+        <item name="textAppearance">@style/TextAppearance.Widget.Button.Material</item>
+        <item name="minHeight">@dimen/btn_material_height</item>
+        <item name="maxWidth">@dimen/btn_material_width</item>
+        <item name="android:paddingStart">@dimen/btn_horizontal_edge_padding</item>
+        <item name="android:paddingEnd">@dimen/btn_horizontal_edge_padding</item>
+        <item name="android:drawablePadding">@dimen/btn_drawable_padding</item>
+        <item name="android:maxLines">2</item>
+        <item name="android:ellipsize">end</item>
+        <item name="android:breakStrategy">simple</item>
+        <item name="stateListAnimator">@anim/button_state_list_anim_material</item>
+        <item name="focusable">true</item>
+        <item name="clickable">true</item>
+        <item name="gravity">center_vertical</item>
+    </style>
+
+    <!-- Wear Material3 Button - Outlined -->
+    <style name="Widget.DeviceDefault.Button.Outlined" parent="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="android:background">@drawable/btn_background_material_outlined_watch</item>
+    </style>
+
+    <!-- Wear Material3 Button - Text -->
+    <style name="Widget.DeviceDefault.Button.Text" parent="Widget.DeviceDefault.Button.WearMaterial3">
+        <item name="android:background">@drawable/btn_background_material_text_watch</item>
+    </style>
+
+    <!--  Wear Material3 AlertDialog Styles  -->
+    <style name="AlertDialog.DeviceDefault.WearMaterial3">
+        <item name="layout">@layout/alert_dialog_watch</item>
+    </style>
+
+    <!-- Wear Material3 Progress Bar style: progressed ring.-->
+    <style name="Widget.DeviceDefault.ProgressBar.WearMaterial3">
+        <item name="indeterminateOnly">false</item>
+        <item name="progressDrawable">@drawable/progress_ring_watch</item>
+        <item name="minHeight">@dimen/progress_bar_height</item>
+        <item name="maxHeight">@dimen/progress_bar_height</item>
+        <item name="mirrorForRtl">true</item>
+    </style>
+
+    <style name="Widget.DeviceDefault.ProgressBar" parent="Widget.Material.ProgressBar">
+        <!-- Allow determinate option -->
+        <item name="indeterminateOnly">false</item>
+        <!-- Use Wear Material3 ring shape as default determinate drawable -->
+        <item name="progressDrawable">@drawable/progress_ring_watch</item>
+    </style>
+</resources>

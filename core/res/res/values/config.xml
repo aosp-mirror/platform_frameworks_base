@@ -815,6 +815,11 @@
          we rely on gravity to determine the effective orientation. -->
     <bool name="config_deskDockEnablesAccelerometer">true</bool>
 
+    <!-- Control for allowing the dock rotation functionality before provision like
+         when the SetupWizard is being shown to the user. This defaults to false to
+         preserve existing behavior. -->
+    <bool name="config_allowDockBeforeProvision">false</bool>
+
     <!-- Car dock behavior -->
 
     <!-- The number of degrees to rotate the display when the device is in a car dock.
@@ -1602,6 +1607,10 @@
          brightness value and will repeat for the following ramp if autobrightness is enabled. -->
     <bool name="config_skipScreenOnBrightnessRamp">false</bool>
 
+    <!-- Whether or not to skip a color fade transition to black when the display transitions to
+         STATE_OFF. Setting this to true will skip the color fade transition. -->
+    <bool name="config_skipScreenOffTransition">false</bool>
+
     <!-- Allow automatic adjusting of the screen brightness while dozing in low power state. -->
     <bool name="config_allowAutoBrightnessWhileDozing">false</bool>
 
@@ -1849,6 +1858,10 @@
         <item>-1</item>
     </integer-array>
 
+     <!-- Specifies the delay in milliseconds after the last user input before turning off the
+          keyboard backlight.
+    -->
+    <integer name="config_keyboardBacklightTimeoutMs">30000</integer>
     <!-- An array describing the screen's backlight values corresponding to the brightness
          values in the config_screenBrightnessNits array.
 
@@ -2152,6 +2165,17 @@
          config_enableGeofenceOverlay is false. -->
     <string name="config_geofenceProviderPackageName" translatable="false">@null</string>
 
+    <!-- Whether to enable GNSS assistance overlay which allows GnssAssistanceProvider to be
+     replaced by an app at run-time. When disabled, only the
+     config_gnssAssistanceProviderPackageName package will be searched for
+     GnssAssistanceProvider, otherwise any system package is eligible. Anyone who wants to
+     disable the overlay mechanism can set it to false.
+     -->
+    <bool name="config_enableGnssAssistanceOverlay" translatable="false">true</bool>
+    <!-- Package name providing GNSS assistance API support. Used only when
+         config_enableGnssAssistanceOverlay is false. -->
+    <string name="config_gnssAssistanceProviderPackageName" translatable="false">@null</string>
+
     <!-- Whether to enable Hardware Activity-Recognition overlay which allows Hardware
          Activity-Recognition to be replaced by an app at run-time. When disabled, only the
          config_activityRecognitionHardwarePackageName package will be searched for
@@ -2169,6 +2193,16 @@
         <!-- The standard AOSP fused location provider -->
         <item>com.android.location.fused</item>
     </string-array>
+
+    <!-- Package name providing population density location support. -->
+    <string name="config_populationDensityProviderPackageName" translatable="false">com.android.location.populationdensity</string>
+
+    <!-- Whether to enable population density provider overlay, which allows the population density provider to
+         be replaced by an app at run-time. When disabled, only the
+         config_populationDensityProviderPackageName package will be searched for a population density
+         provider, otherwise any system package is eligible. Anyone who wants to disable the overlay
+         mechanism can set it to false. -->
+    <bool name="config_enablePopulationDensityProviderOverlay" translatable="false">true</bool>
 
    <!-- Package name of the extension software fallback. -->
     <string name="config_extensionFallbackPackageName" translatable="false"></string>
@@ -2353,7 +2387,7 @@
     <string name="default_sms_application" translatable="false">com.android.messaging</string>
 
     <!-- Flag indicating whether the current device supports "Ask every time" for sms-->
-    <bool name="config_sms_ask_every_time_support">true</bool>
+    <bool name="config_sms_ask_every_time_support">false</bool>
 
     <!-- Flag indicating whether the current device allows acknowledgement of SIM operation like
          SM-PP or saving SMS to SIM can be done via the IMS interfaces.
@@ -2727,6 +2761,8 @@
     </string-array>
     <!-- The list of supported dream complications -->
     <integer-array name="config_supportedDreamComplications">
+        <!-- COMPLICATION_TYPE_TIME -->
+        <item>1</item>
     </integer-array>
 
     <!-- Are we allowed to dream while not plugged in? -->
@@ -2772,6 +2808,9 @@
          Matched against ComponentName#flattenToString() for dream components.
          If empty, logs "other" for all. -->
     <string-array name="config_loggable_dream_prefixes"></string-array>
+
+    <!-- Whether to enable glanceable hub features on this device. -->
+    <bool name="config_glanceableHubEnabled">false</bool>
 
     <!-- ComponentName of a dream to show whenever the system would otherwise have
          gone to sleep.  When the PowerManager is asked to go to sleep, it will instead
@@ -4205,6 +4244,13 @@
          is non-interactive. -->
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
 
+    <!-- Allow the gesture to double tap the power button to trigger a target action. -->
+    <bool name="config_doubleTapPowerGestureEnabled">true</bool>
+    <!-- Default target action for double tap of the power button gesture.
+         0: Launch camera
+         1: Launch wallet -->
+    <integer name="config_defaultDoubleTapPowerGestureAction">0</integer>
+
     <!-- Allow the gesture to quick tap the power button multiple times to start the emergency sos
          experience while the device is non-interactive. -->
     <bool name="config_emergencyGestureEnabled">true</bool>
@@ -4595,6 +4641,11 @@
          without explicit consent of the user. If no accessibility service with the specified name
          exists on the device, the accessibility shortcut will be disabled by default. -->
     <string name="config_defaultAccessibilityService" translatable="false"></string>
+
+    <!-- The component name, flattened to a string, for the default select to speak service to be
+         enabled by the accessibility keyboard shortcut. If the service with the specified component
+         name is not preinstalled then this shortcut will do nothing. -->
+    <string name="config_defaultSelectToSpeakService" translatable="false"></string>
 
     <!-- URI for default Accessibility notification sound when to enable accessibility shortcut. -->
     <string name="config_defaultAccessibilityNotificationSound" translatable="false"></string>
@@ -5889,6 +5940,11 @@
         <!-- <item>com.android.settings</item> -->
     </string-array>
 
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         SET_DEFAULT_ACCOUNT_FOR_CONTACTS permissions. The digest should be computed over the DER
+         encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_setContactsDefaultAccountKnownSigners">
+    </string-array>
 
     <!-- Class name of the custom country detector to be used. -->
     <string name="config_customCountryDetector" translatable="false">com.android.server.location.ComprehensiveCountryDetector</string>
@@ -5978,6 +6034,12 @@
 
     <!-- If true, show multiuser switcher by default unless the user specifically disables it. -->
     <bool name="config_showUserSwitcherByDefault">false</bool>
+
+    <!-- If true, user can change state of multiuser switcher. -->
+    <bool name="config_allowChangeUserSwitcherEnabled">true</bool>
+
+    <!-- If true, multiuser switcher would be automatically enabled when second user is created on the device. -->
+    <bool name="config_enableUserSwitcherUponUserCreation">true</bool>
 
     <!-- Set to true to make assistant show in front of the dream/screensaver. -->
     <bool name="config_assistantOnTopOfDream">false</bool>
@@ -6558,7 +6620,7 @@
     </string-array>
 
     <!-- the number of the max cached processes in the system. -->
-    <integer name="config_customizedMaxCachedProcesses">32</integer>
+    <integer name="config_customizedMaxCachedProcesses">1024</integer>
 
     <!-- Whether this device should support taking app snapshots on closure -->
     <bool name="config_disableTaskSnapshots">false</bool>
@@ -7000,6 +7062,15 @@
     <string-array name="config_healthConnectMigrationKnownSigners">
     </string-array>
 
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for backing up HealthConnect's data and settings. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_backupHealthConnectDataAndSettingsKnownSigners"/>
+    <!-- Certificate digests for trusted apps that will be allowed to obtain the knownSigner
+         permission for restoring HealthConnect's data and settings. The digest should be computed over the
+         DER encoding of the trusted certificate using the SHA-256 digest algorithm. -->
+    <string-array name="config_restoreHealthConnectDataAndSettingsKnownSigners"/>
+
     <!-- Package name of Health Connect data migrator application.  -->
     <string name="config_healthConnectMigratorPackageName"></string>
 
@@ -7194,9 +7265,30 @@
     <!-- Package for opening identity check settings page [CHAR LIMIT=NONE] [DO NOT TRANSLATE] -->
     <string name="identity_check_settings_package_name">com\u002eandroid\u002esettings</string>
 
-    <!-- The name of the service for forensic backup transport. -->
-    <string name="config_forensicBackupTransport" translatable="false"></string>
+    <!-- The name of the service for intrusion detection event transport. -->
+    <string name="config_intrusionDetectionEventTransport" translatable="false"></string>
 
     <!-- Whether to enable fp unlock when screen turns off on udfps devices -->
     <bool name="config_screen_off_udfps_enabled">false</bool>
+
+    <!-- The name of the system package that will hold the dependency installer role. -->
+    <string name="config_systemDependencyInstaller" translatable="false" />
+
+    <!-- Whether allow normal brightness when doze policy can be requested. When this is false,
+        brightness follows the display state i.e. ON means bright, DOZE means dim. If true,
+        POLICY_DOZE can also dim the screen unless parameter useNormalBrightnessForDoze of
+        DreamService#setDozeScreenState requests an exception. -->
+    <bool name="config_allowNormalBrightnessForDozePolicy">false</bool>
+
+    <!-- List of protected packages that require biometric authentication for modification
+         (Disable, force-stop or uninstalling updates). -->
+    <string-array name="config_biometric_protected_package_names" translatable="false" />
+
+    <!-- Package name of the on-device intelligent processor for vendor specific
+         features. Examples include the search functionality or the app
+         predictor. -->
+    <string name="config_systemVendorIntelligence" translatable="false"></string>
+
+    <!-- Whether the device supports Wi-Fi USD feature. -->
+    <bool name="config_deviceSupportsWifiUsd">false</bool>
 </resources>

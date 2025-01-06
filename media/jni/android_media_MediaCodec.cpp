@@ -39,6 +39,8 @@
 #include <C2Buffer.h>
 #include <C2PlatformSupport.h>
 
+#include <android_media_codec.h>
+
 #include <android/hardware/cas/native/1.0/IDescrambler.h>
 
 #include <android_runtime/android_hardware_HardwareBuffer.h>
@@ -188,6 +190,22 @@ static struct {
     jmethodID ctorId;
     jmethodID setId;
 } gBufferInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctorId;
+    jfieldID resourceId;
+    jfieldID capacityId;
+    jfieldID availableId;
+} gGlobalResourceInfo;
+
+static struct {
+    jclass clazz;
+    jmethodID ctorId;
+    jfieldID resourceId;
+    jfieldID staticCountId;
+    jfieldID perFrameCountId;
+} gInstanceResourceInfo;
 
 struct fields_t {
     jmethodID postEventFromNativeID;
@@ -1129,6 +1147,37 @@ status_t JMediaCodec::unsubscribeFromVendorParameters(JNIEnv *env, jobject names
     return mCodec->unsubscribeFromVendorParameters(names);
 }
 
+static jobject getJavaResources(
+        JNIEnv *env,
+        const std::vector<InstanceResourceInfo>& resources) {
+    jobject resourcesObj = env->NewObject(gArrayListInfo.clazz, gArrayListInfo.ctorId);
+    for (const InstanceResourceInfo& res : resources) {
+        ScopedLocalRef<jobject> object{env, env->NewObject(
+                gInstanceResourceInfo.clazz, gInstanceResourceInfo.ctorId)};
+        ScopedLocalRef<jstring> nameStr{env, env->NewStringUTF(res.mName.c_str())};
+        env->SetObjectField(object.get(), gInstanceResourceInfo.resourceId, nameStr.get());
+        env->SetLongField(object.get(),
+                          gInstanceResourceInfo.staticCountId,
+                          (jlong)res.mStaticCount);
+        env->SetLongField(object.get(),
+                          gInstanceResourceInfo.perFrameCountId,
+                          (jlong)res.mPerFrameCount);
+        (void)env->CallBooleanMethod(resourcesObj, gArrayListInfo.addId, object.get());
+    }
+
+    return resourcesObj;
+}
+
+status_t JMediaCodec::getRequiredResources(JNIEnv *env, jobject *resourcesObj) {
+    std::vector<InstanceResourceInfo> resources;
+    status_t status = mCodec->getRequiredResources(resources);
+    if (status != OK) {
+        return status;
+    }
+    *resourcesObj = getJavaResources(env, resources);
+    return OK;
+}
+
 static jthrowable createCodecException(
         JNIEnv *env, status_t err, int32_t actionCode, const char *msg = NULL) {
     ScopedLocalRef<jclass> clazz(
@@ -1458,6 +1507,25 @@ void JMediaCodec::handleCallback(const sp<AMessage> &msg) {
                 return;
             }
 
+            break;
+        }
+
+        case MediaCodec::CB_METRICS_FLUSHED:
+        {
+            sp<WrapperObject<std::unique_ptr<mediametrics::Item>>> metrics;
+            CHECK(msg->findObject("metrics", (sp<RefBase>*)&metrics));
+
+            // metrics should never be null. Not sure if checking it here adds any value.
+            if (metrics == nullptr) {
+                return;
+            }
+
+            mediametrics::Item *item = metrics->value.get();
+            obj = MediaMetricsJNI::writeMetricsToBundle(env, item, NULL);
+            break;
+        }
+        case MediaCodec::CB_REQUIRED_RESOURCES_CHANGED:
+        {
             break;
         }
 
@@ -3545,6 +3613,64 @@ static void android_media_MediaCodec_unsubscribeFromVendorParameters(
     return;
 }
 
+static jobject getJavaResources(
+        JNIEnv *env,
+        const std::vector<GlobalResourceInfo>& resources) {
+    jobject resourcesObj = env->NewObject(gArrayListInfo.clazz, gArrayListInfo.ctorId);
+    for (const GlobalResourceInfo& res : resources) {
+        ScopedLocalRef<jobject> object{env, env->NewObject(
+                gGlobalResourceInfo.clazz, gGlobalResourceInfo.ctorId)};
+        ScopedLocalRef<jstring> nameStr{env, env->NewStringUTF(res.mName.c_str())};
+        env->SetObjectField(object.get(), gInstanceResourceInfo.resourceId, nameStr.get());
+        env->SetLongField(object.get(), gGlobalResourceInfo.capacityId, (jlong)res.mCapacity);
+        env->SetLongField(object.get(), gGlobalResourceInfo.availableId, (jlong)res.mAvailable);
+        (void)env->CallBooleanMethod(resourcesObj, gArrayListInfo.addId, object.get());
+    }
+
+    return resourcesObj;
+}
+
+static jobject android_media_MediaCodec_getGloballyAvailableResources(
+        JNIEnv *env, jobject thiz) {
+    (void)thiz;
+    std::vector<GlobalResourceInfo> resources;
+    status_t status = MediaCodec::getGloballyAvailableResources(resources);
+    if (status != OK) {
+        if (status == ERROR_UNSUPPORTED) {
+            jniThrowException(env, "java/lang/UnsupportedOperationException",
+                              "Function Not Implemented");
+        } else {
+            throwExceptionAsNecessary(env, status, nullptr);
+        }
+        return nullptr;
+    }
+
+    return getJavaResources(env, resources);
+}
+
+static jobject android_media_MediaCodec_getRequiredResources(
+        JNIEnv *env, jobject thiz) {
+    sp<JMediaCodec> codec = getMediaCodec(env, thiz);
+    if (codec == nullptr || codec->initCheck() != OK) {
+        throwExceptionAsNecessary(env, INVALID_OPERATION, codec);
+        return nullptr;
+    }
+
+    jobject ret = nullptr;
+    status_t status = codec->getRequiredResources(env, &ret);
+    if (status != OK) {
+        if (status == ERROR_UNSUPPORTED) {
+            jniThrowException(env, "java/lang/UnsupportedOperationException",
+                              "Function Not Implemented");
+        } else {
+            throwExceptionAsNecessary(env, status, nullptr);
+        }
+        return nullptr;
+    }
+
+    return ret;
+}
+
 static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     ScopedLocalRef<jclass> clazz(
             env, env->FindClass("android/media/MediaCodec"));
@@ -3890,6 +4016,36 @@ static void android_media_MediaCodec_native_init(JNIEnv *env, jclass) {
     gFields.bufferInfoOffset = env->GetFieldID(clazz.get(), "offset", "I");
     gFields.bufferInfoPresentationTimeUs =
             env->GetFieldID(clazz.get(), "presentationTimeUs", "J");
+
+    // Since these TestApis are defined under the flag, make sure they are
+    // accessed only when the flag is set.
+    if (android::media::codec::codec_availability()) {
+        clazz.reset(env->FindClass("android/media/MediaCodec$GlobalResourceInfo"));
+        CHECK(clazz.get() != NULL);
+        gGlobalResourceInfo.clazz = (jclass)env->NewGlobalRef(clazz.get());
+        gGlobalResourceInfo.ctorId = env->GetMethodID(clazz.get(), "<init>", "()V");
+        CHECK(gGlobalResourceInfo.ctorId != NULL);
+        gGlobalResourceInfo.resourceId =
+                env->GetFieldID(clazz.get(), "mName", "Ljava/lang/String;");
+        CHECK(gGlobalResourceInfo.resourceId != NULL);
+        gGlobalResourceInfo.capacityId = env->GetFieldID(clazz.get(), "mCapacity", "J");
+        CHECK(gGlobalResourceInfo.capacityId != NULL);
+        gGlobalResourceInfo.availableId = env->GetFieldID(clazz.get(), "mAvailable", "J");
+        CHECK(gGlobalResourceInfo.availableId != NULL);
+
+        clazz.reset(env->FindClass("android/media/MediaCodec$InstanceResourceInfo"));
+        CHECK(clazz.get() != NULL);
+        gInstanceResourceInfo.clazz = (jclass)env->NewGlobalRef(clazz.get());
+        gInstanceResourceInfo.ctorId = env->GetMethodID(clazz.get(), "<init>", "()V");
+        CHECK(gInstanceResourceInfo.ctorId != NULL);
+        gInstanceResourceInfo.resourceId =
+                env->GetFieldID(clazz.get(), "mName", "Ljava/lang/String;");
+        CHECK(gInstanceResourceInfo.resourceId != NULL);
+        gInstanceResourceInfo.staticCountId= env->GetFieldID(clazz.get(), "mStaticCount", "J");
+        CHECK(gInstanceResourceInfo.staticCountId != NULL);
+        gInstanceResourceInfo.perFrameCountId = env->GetFieldID(clazz.get(), "mPerFrameCount", "J");
+        CHECK(gInstanceResourceInfo.perFrameCountId != NULL);
+    }
 }
 
 static void android_media_MediaCodec_native_setup(
@@ -4246,6 +4402,12 @@ static const JNINativeMethod gMethods[] = {
 
     { "native_finalize", "()V",
       (void *)android_media_MediaCodec_native_finalize },
+
+    { "native_getGloballyAvailableResources", "()Ljava/util/List;",
+      (void *)android_media_MediaCodec_getGloballyAvailableResources},
+
+    { "native_getRequiredResources", "()Ljava/util/List;",
+      (void *)android_media_MediaCodec_getRequiredResources},
 };
 
 static const JNINativeMethod gLinearBlockMethods[] = {

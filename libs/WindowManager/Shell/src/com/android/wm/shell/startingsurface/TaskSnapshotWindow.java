@@ -89,8 +89,6 @@ public class TaskSnapshotWindow {
         ProtoLog.v(ShellProtoLogGroup.WM_SHELL_STARTING_WINDOW,
                 "create taskSnapshot surface for task: %d", taskId);
 
-        final InsetsState topWindowInsetsState = info.topOpaqueWindowInsetsState;
-
         final WindowManager.LayoutParams layoutParams = SnapshotDrawerUtils.createLayoutParameters(
                 info, TITLE_FORMAT + taskId, TYPE_APPLICATION_STARTING,
                 snapshot.getHardwareBuffer().getFormat(), appToken);
@@ -152,8 +150,8 @@ public class TaskSnapshotWindow {
             return null;
         }
 
-        SnapshotDrawerUtils.drawSnapshotOnSurface(info, layoutParams, surfaceControl, snapshot,
-                info.taskBounds, topWindowInsetsState, true /* releaseAfterDraw */);
+        SnapshotDrawerUtils.drawSnapshotOnSurface(layoutParams, surfaceControl, snapshot,
+                info.taskBounds, true /* releaseAfterDraw */);
         snapshotSurface.mHasDrawn = true;
         snapshotSurface.reportDrawn();
 

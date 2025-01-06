@@ -18,6 +18,7 @@ package android.widget;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.graphics.Paint.NEW_FONT_VARIATION_MANAGEMENT;
 import static android.view.ContentInfo.FLAG_CONVERT_TO_PLAIN_TEXT;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.ContentInfo.SOURCE_CLIPBOARD;
@@ -26,6 +27,9 @@ import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_RENDER
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX;
 import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY;
+import static android.view.accessibility.AccessibilityNodeInfo.EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY;
+import static android.view.accessibility.Flags.FLAG_A11Y_CHARACTER_IN_WINDOW_API;
+import static android.view.accessibility.Flags.a11yCharacterInWindowApi;
 import static android.view.inputmethod.CursorAnchorInfo.FLAG_HAS_VISIBLE_REGION;
 import static android.view.inputmethod.EditorInfo.STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY;
 import static android.view.inputmethod.Flags.initiationWithoutInputConnection;
@@ -491,6 +495,20 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
     /** Accessibility action start id for "smart" actions. @hide */
     static final int ACCESSIBILITY_ACTION_SMART_START_ID = 0x10001000;
+
+    // Stable extra data keys supported by TextView.
+    private static final List<String> ACCESSIBILITY_EXTRA_DATA_KEYS = List.of(
+            EXTRA_DATA_RENDERING_INFO_KEY,
+            EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
+    );
+
+    // Flagged and stable extra data keys supported by TextView.
+    @FlaggedApi(FLAG_A11Y_CHARACTER_IN_WINDOW_API)
+    private static final List<String> ACCESSIBILITY_EXTRA_DATA_KEYS_FLAGGED = List.of(
+            EXTRA_DATA_RENDERING_INFO_KEY,
+            EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY,
+            EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY
+    );
 
     /**
      * @hide
@@ -5525,7 +5543,21 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                         && fontVariationSettings.equals(existingSettings))) {
             return true;
         }
-        boolean effective = mTextPaint.setFontVariationSettings(fontVariationSettings);
+
+        final boolean useFontVariationStore = Flags.typefaceRedesignReadonly()
+                && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
+        boolean effective;
+        if (useFontVariationStore) {
+            if (mFontWeightAdjustment != 0
+                    && mFontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED) {
+                mTextPaint.setFontVariationSettings(fontVariationSettings, mFontWeightAdjustment);
+            } else {
+                mTextPaint.setFontVariationSettings(fontVariationSettings);
+            }
+            effective = true;
+        } else {
+            effective = mTextPaint.setFontVariationSettings(fontVariationSettings);
+        }
 
         if (effective && mLayout != null) {
             nullLayouts();
@@ -10097,6 +10129,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     outAttrs.extras.putBoolean(
                             STYLUS_HANDWRITING_ENABLED_ANDROIDX_EXTRAS_KEY, handwritingEnabled);
                 }
+                if (android.view.inputmethod.Flags.writingTools()) {
+                    // default to same behavior as isSuggestionsEnabled().
+                    outAttrs.setWritingToolsEnabled(isSuggestionsEnabled());
+                }
                 ArrayList<Class<? extends HandwritingGesture>> gestures = new ArrayList<>();
                 gestures.add(SelectGesture.class);
                 gestures.add(SelectRangeGesture.class);
@@ -14207,10 +14243,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PARAGRAPH
                     | AccessibilityNodeInfo.MOVEMENT_GRANULARITY_PAGE);
             info.addAction(AccessibilityNodeInfo.ACTION_SET_SELECTION);
-            info.setAvailableExtraData(Arrays.asList(
-                    EXTRA_DATA_RENDERING_INFO_KEY,
-                    EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY
-            ));
+            if (a11yCharacterInWindowApi()) {
+                info.setAvailableExtraData(ACCESSIBILITY_EXTRA_DATA_KEYS_FLAGGED);
+            } else {
+                info.setAvailableExtraData(ACCESSIBILITY_EXTRA_DATA_KEYS);
+            }
             info.setTextSelectable(isTextSelectable() || isTextEditable());
         } else {
             info.setAvailableExtraData(Arrays.asList(
@@ -14275,7 +14312,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void addExtraDataToAccessibilityNodeInfo(
             AccessibilityNodeInfo info, String extraDataKey, Bundle arguments) {
-        if (arguments != null && extraDataKey.equals(EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY)) {
+        boolean isCharacterLocationKey = extraDataKey.equals(
+                EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY);
+        boolean isCharacterLocationInWindowKey = (a11yCharacterInWindowApi() && extraDataKey.equals(
+                EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY));
+        if (arguments != null && (isCharacterLocationKey || isCharacterLocationInWindowKey)) {
             int positionInfoStartIndex = arguments.getInt(
                     EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX, -1);
             int positionInfoLength = arguments.getInt(
@@ -14297,7 +14338,11 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     RectF bounds = cursorAnchorInfo
                             .getCharacterBounds(positionInfoStartIndex + i);
                     if (bounds != null) {
-                        mapRectFromViewToScreenCoords(bounds, true);
+                        if (isCharacterLocationKey) {
+                            mapRectFromViewToScreenCoords(bounds, true);
+                        } else if (isCharacterLocationInWindowKey) {
+                            mapRectFromViewToWindowCoords(bounds, true);
+                        }
                         boundingRects[i] = bounds;
                     }
                 }

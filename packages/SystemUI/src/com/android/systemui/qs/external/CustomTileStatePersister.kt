@@ -22,12 +22,14 @@ import android.content.SharedPreferences
 import android.service.quicksettings.Tile
 import android.util.Log
 import com.android.internal.annotations.VisibleForTesting
+import com.android.systemui.dagger.qualifiers.Application
 import javax.inject.Inject
 import org.json.JSONException
 import org.json.JSONObject
 
 data class TileServiceKey(val componentName: ComponentName, val user: Int) {
     private val string = "${componentName.flattenToString()}:$user"
+
     override fun toString() = string
 }
 
@@ -56,12 +58,14 @@ interface CustomTileStatePersister {
      * Any fields that have not been saved will be set to `null`
      */
     fun readState(key: TileServiceKey): Tile?
+
     /**
      * Persists the state into [SharedPreferences].
      *
      * The implementation does not store fields that are `null` or icons.
      */
     fun persistState(key: TileServiceKey, tile: Tile)
+
     /**
      * Removes the state for a given tile, user pair.
      *
@@ -71,7 +75,7 @@ interface CustomTileStatePersister {
 }
 
 // TODO(b/299909989) Merge this class into into CustomTileRepository
-class CustomTileStatePersisterImpl @Inject constructor(context: Context) :
+class CustomTileStatePersisterImpl @Inject constructor(@Application context: Context) :
     CustomTileStatePersister {
     companion object {
         private const val FILE_NAME = "custom_tiles_state"

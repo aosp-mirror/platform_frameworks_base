@@ -59,6 +59,8 @@ import com.android.server.utils.EventLogger;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
@@ -127,6 +129,8 @@ public class SpatializerHelper {
     /** current level as reported by native Spatializer in callback */
     private int mSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
     private int mCapableSpatLevel = Spatializer.SPATIALIZER_IMMERSIVE_LEVEL_NONE;
+    /** cached version of Spatializer.getSpatializedChannelMasks */
+    private List<Integer> mSpatializedChannelMasks = Collections.emptyList();
 
     private boolean mTransauralSupported = false;
     private boolean mBinauralSupported = false;
@@ -1028,6 +1032,17 @@ public class SpatializerHelper {
                 return;
             }
             try {
+                final int[] nativeMasks = mSpat.getSpatializedChannelMasks();
+                for (int i = 0; i < nativeMasks.length; i++) {
+                    nativeMasks[i] = AudioFormat.convertNativeChannelMaskToOutMask(nativeMasks[i]);
+                }
+                mSpatializedChannelMasks = Arrays.stream(nativeMasks).boxed().toList();
+
+            } catch (Exception e) { // just catch Exception in case nativeMasks is null
+                Log.e(TAG, "Error calling getSpatializedChannelMasks", e);
+                mSpatializedChannelMasks = Collections.emptyList();
+            }
+            try {
                 //TODO: register heatracking callback only when sensors are registered
                 if (mIsHeadTrackingSupported) {
                     mActualHeadTrackingMode =
@@ -1098,6 +1113,10 @@ public class SpatializerHelper {
         logd("canBeSpatialized usage:" + attributes.getUsage()
                 + " format:" + format.toLogFriendlyString() + " returning " + able);
         return able;
+    }
+
+    synchronized @NonNull List<Integer> getSpatializedChannelMasks() {
+        return mSpatializedChannelMasks;
     }
 
     //------------------------------------------------------
@@ -1603,6 +1622,14 @@ public class SpatializerHelper {
         pw.println("\tmState:" + mState);
         pw.println("\tmSpatLevel:" + mSpatLevel);
         pw.println("\tmCapableSpatLevel:" + mCapableSpatLevel);
+        List<Integer> speakerMasks = getSpatializedChannelMasks();
+        StringBuilder masks = speakerMasks.isEmpty()
+                ? new StringBuilder("none") : new StringBuilder("");
+        for (Integer mask : speakerMasks) {
+            masks.append(AudioFormat.javaChannelOutMaskToString(mask)).append(" ");
+        }
+        pw.println("\tspatialized speaker masks: " + masks);
+
         pw.println("\tmIsHeadTrackingSupported:" + mIsHeadTrackingSupported);
         StringBuilder modesString = new StringBuilder();
         for (int mode : mSupportedHeadTrackingModes) {

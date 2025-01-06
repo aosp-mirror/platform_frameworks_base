@@ -21,6 +21,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
+import android.service.notification.RateEstimator;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;

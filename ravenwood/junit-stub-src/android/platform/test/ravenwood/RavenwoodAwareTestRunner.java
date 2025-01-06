@@ -31,8 +31,6 @@ import org.junit.runners.model.TestClass;
  * This is only used when a real device-side test has Ravenizer enabled.
  */
 public class RavenwoodAwareTestRunner extends RavenwoodAwareTestRunnerBase {
-    private static final String TAG = "Ravenwood";
-
     private static class NopRule implements TestRule {
         @Override
         public Statement apply(Statement base, Description description) {

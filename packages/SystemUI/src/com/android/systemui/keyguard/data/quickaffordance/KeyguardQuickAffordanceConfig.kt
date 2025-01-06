@@ -21,10 +21,10 @@ import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.res.R
 import kotlinx.coroutines.flow.Flow
 
 /** Defines interface that can act as data source for a single quick affordance model. */
@@ -71,7 +71,7 @@ interface KeyguardQuickAffordanceConfig {
         /** The picker shows the item for selecting this affordance as it normally would. */
         data class Default(
             /** Optional [Intent] to use to start an activity to configure this affordance. */
-            val configureIntent: Intent? = null,
+            val configureIntent: Intent? = null
         ) : PickerScreenState()
 
         /**
@@ -134,33 +134,38 @@ interface KeyguardQuickAffordanceConfig {
         ) : LockScreenState()
     }
 
-    sealed class OnTriggeredResult {
+    sealed class OnTriggeredResult() {
         /**
          * Returning this as a result from the [onTriggered] method means that the implementation
          * has taken care of the action, the system will do nothing.
+         *
+         * @param[actionLaunched] Whether the implementation handled the action by launching a
+         *   dialog or an activity.
          */
-        object Handled : OnTriggeredResult()
+        data class Handled(val actionLaunched: Boolean) : OnTriggeredResult()
 
         /**
          * Returning this as a result from the [onTriggered] method means that the implementation
          * has _not_ taken care of the action and the system should start an activity using the
          * given [Intent].
          */
-        data class StartActivity(
-            val intent: Intent,
-            val canShowWhileLocked: Boolean,
-        ) : OnTriggeredResult()
+        data class StartActivity(val intent: Intent, val canShowWhileLocked: Boolean) :
+            OnTriggeredResult()
 
         /**
          * Returning this as a result from the [onTriggered] method means that the implementation
          * has _not_ taken care of the action and the system should show a Dialog using the given
          * [AlertDialog] and [Expandable].
          */
-        data class ShowDialog(
-            val dialog: AlertDialog,
-            val expandable: Expandable?,
-        ) : OnTriggeredResult()
+        data class ShowDialog(val dialog: AlertDialog, val expandable: Expandable?) :
+            OnTriggeredResult()
     }
+
+    /**
+     * Models an [OnTriggeredResult] that did or did not launch a dialog or activity for a given
+     * config key.
+     */
+    data class LaunchingFromTriggeredResult(val launched: Boolean, val configKey: String)
 
     companion object {
 

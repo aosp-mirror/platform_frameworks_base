@@ -91,6 +91,28 @@ import java.util.UUID;
 public interface AndroidPackage {
 
     /**
+     * An array containing the drawable resources that used for the launcher
+     * activity icons.
+     *
+     * @see R.attr#alternateLauncherIcons
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    int[] getAlternateLauncherIconResIds();
+
+    /**
+     * An array containing the string resources that used for the launcher
+     * activity labels.
+     *
+     * @see R.attr#alternateLauncherLabels
+     * @hide
+     */
+    @Immutable.Ignore
+    @Nullable
+    int[] getAlternateLauncherLabelResIds();
+
+    /**
      * @see ApplicationInfo#className
      * @see R.styleable#AndroidManifestApplication_name
      */
@@ -700,7 +722,7 @@ public interface AndroidPackage {
      * The names of packages to adopt ownership of permissions from, parsed under {@link
      * ParsingPackageUtils#TAG_ADOPT_PERMISSIONS}.
      *
-     * @see R.styleable#AndroidManifestOriginalPackage_name
+     * @see R.styleable#AndroidManifestAdoptPermissions_name
      * @hide
      */
     @NonNull
@@ -851,6 +873,14 @@ public interface AndroidPackage {
      */
     @ApplicationInfo.MemtagMode
     int getMemtagMode();
+
+    /**
+     * @see ApplicationInfo#getPageSizeAppCompatFlags()
+     * @see R.styleable#AndroidManifestApplication_pageSizeCompat
+     * @hide
+     */
+    @ApplicationInfo.PageSizeAppCompatFlags
+    int getPageSizeAppCompatFlags();
 
     /**
      * TODO(b/135203078): Make all the Bundles immutable (and non-null by shared empty reference?)

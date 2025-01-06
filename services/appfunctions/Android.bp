@@ -19,10 +19,18 @@ java_library_static {
     defaults: ["platform_service_defaults"],
     srcs: [
         ":services.appfunctions-sources",
+        ":statslog-appfunctions-java-gen",
         "java/**/*.logtags",
     ],
     libs: ["services.core"],
     lint: {
         baseline_filename: "lint-baseline.xml",
     },
+}
+
+genrule {
+    name: "statslog-appfunctions-java-gen",
+    tools: ["stats-log-api-gen"],
+    cmd: "$(location stats-log-api-gen) --java $(out) --module appfunctions --javaPackage com.android.server.appfunctions --javaClass AppFunctionsStatsLog --minApiLevel 35",
+    out: ["java/com/android/server/appfunctions/AppFunctionsStatsLog.java"],
 }

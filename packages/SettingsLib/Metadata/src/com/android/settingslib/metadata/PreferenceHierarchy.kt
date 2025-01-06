@@ -16,6 +16,8 @@
 
 package com.android.settingslib.metadata
 
+import android.content.Context
+
 /** A node in preference hierarchy that is associated with [PreferenceMetadata]. */
 open class PreferenceHierarchyNode internal constructor(val metadata: PreferenceMetadata) {
     /**
@@ -32,7 +34,8 @@ open class PreferenceHierarchyNode internal constructor(val metadata: Preference
  *
  * A root hierarchy represents a preference screen. A sub-hierarchy represents a preference group.
  */
-class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
+class PreferenceHierarchy
+internal constructor(private val context: Context, metadata: PreferenceMetadata) :
     PreferenceHierarchyNode(metadata) {
 
     private val children = mutableListOf<PreferenceHierarchyNode>()
@@ -51,12 +54,16 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
      *
      * @throws NullPointerException if screen is not registered to [PreferenceScreenRegistry]
      */
-    operator fun String.unaryPlus() = +PreferenceHierarchyNode(PreferenceScreenRegistry[this]!!)
+    operator fun String.unaryPlus() =
+        +PreferenceHierarchyNode(PreferenceScreenRegistry.create(context, this)!!)
 
     operator fun PreferenceHierarchyNode.unaryPlus() = also { children.add(it) }
 
     /** Specifies preference order in the hierarchy. */
     infix fun PreferenceHierarchyNode.order(order: Int) = apply { this.order = order }
+
+    /** Specifies preference order in the hierarchy for group. */
+    infix fun PreferenceHierarchy.order(order: Int) = apply { this.order = order }
 
     /** Adds a preference to the hierarchy. */
     @JvmOverloads
@@ -76,7 +83,7 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     /** Adds a preference group to the hierarchy before given key. */
     fun addGroupBefore(key: String, metadata: PreferenceMetadata): PreferenceHierarchy {
         val (list, index) = findPreference(key) ?: (children to children.size)
-        return PreferenceHierarchy(metadata).also { list.add(index, it) }
+        return PreferenceHierarchy(context, metadata).also { list.add(index, it) }
     }
 
     /** Adds a preference to the hierarchy after given key. */
@@ -88,7 +95,7 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     /** Adds a preference group to the hierarchy after given key. */
     fun addGroupAfter(key: String, metadata: PreferenceMetadata): PreferenceHierarchy {
         val (list, index) = findPreference(key) ?: (children to children.size - 1)
-        return PreferenceHierarchy(metadata).also { list.add(index + 1, it) }
+        return PreferenceHierarchy(context, metadata).also { list.add(index + 1, it) }
     }
 
     private fun findPreference(key: String): Pair<MutableList<PreferenceHierarchyNode>, Int>? {
@@ -103,12 +110,13 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     }
 
     /** Adds a preference group to the hierarchy. */
-    operator fun PreferenceGroup.unaryPlus() = PreferenceHierarchy(this).also { children.add(it) }
+    operator fun PreferenceGroup.unaryPlus() =
+        PreferenceHierarchy(context, this).also { children.add(it) }
 
     /** Adds a preference group and returns its preference hierarchy. */
     @JvmOverloads
     fun addGroup(metadata: PreferenceGroup, order: Int? = null): PreferenceHierarchy =
-        PreferenceHierarchy(metadata).also {
+        PreferenceHierarchy(context, metadata).also {
             this.order = order
             children.add(it)
         }
@@ -125,7 +133,9 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
      * @throws NullPointerException if screen is not registered to [PreferenceScreenRegistry]
      */
     fun addPreferenceScreen(screenKey: String) {
-        children.add(PreferenceHierarchy(PreferenceScreenRegistry[screenKey]!!))
+        children.add(
+            PreferenceHierarchy(context, PreferenceScreenRegistry.create(context, screenKey)!!)
+        )
     }
 
     /** Extensions to add more preferences to the hierarchy. */
@@ -134,6 +144,18 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
     /** Traversals preference hierarchy and applies given action. */
     fun forEach(action: (PreferenceHierarchyNode) -> Unit) {
         for (it in children) action(it)
+    }
+
+    /** Traversals preference hierarchy recursively and applies given action. */
+    fun forEachRecursively(action: (PreferenceHierarchyNode) -> Unit) {
+        action(this)
+        for (child in children) {
+            if (child is PreferenceHierarchy) {
+                child.forEachRecursively(action)
+            } else {
+                action(child)
+            }
+        }
     }
 
     /** Traversals preference hierarchy and applies given action. */
@@ -154,26 +176,14 @@ class PreferenceHierarchy internal constructor(metadata: PreferenceMetadata) :
         }
         return null
     }
-
-    /** Returns all the [PreferenceHierarchyNode]s appear in the hierarchy. */
-    fun getAllPreferences(): List<PreferenceHierarchyNode> =
-        mutableListOf<PreferenceHierarchyNode>().also { getAllPreferences(it) }
-
-    private fun getAllPreferences(result: MutableList<PreferenceHierarchyNode>) {
-        result.add(this)
-        for (child in children) {
-            if (child is PreferenceHierarchy) {
-                child.getAllPreferences(result)
-            } else {
-                result.add(child)
-            }
-        }
-    }
 }
 
 /**
  * Builder function to create [PreferenceHierarchy] in
  * [DSL](https://kotlinlang.org/docs/type-safe-builders.html) manner.
  */
-fun preferenceHierarchy(metadata: PreferenceMetadata, init: PreferenceHierarchy.() -> Unit) =
-    PreferenceHierarchy(metadata).also(init)
+fun preferenceHierarchy(
+    context: Context,
+    metadata: PreferenceMetadata,
+    init: PreferenceHierarchy.() -> Unit,
+) = PreferenceHierarchy(context, metadata).also(init)

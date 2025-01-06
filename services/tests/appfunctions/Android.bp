@@ -33,18 +33,20 @@ android_test {
     ],
 
     static_libs: [
-        "androidx.test.core",
-        "androidx.test.runner",
-        "androidx.test.ext.truth",
         "androidx.core_core-ktx",
+        "androidx.test.core",
+        "androidx.test.ext.truth",
+        "androidx.test.rules",
+        "androidx.test.runner",
+        "frameworks-base-testutils",
         "kotlin-test",
         "kotlinx_coroutines_test",
+        "mockito-kotlin2",
+        "mockito-target-extended-minus-junit4",
         "platform-test-annotations",
         "services.appfunctions",
         "servicestests-core-utils",
         "truth",
-        "frameworks-base-testutils",
-        "androidx.test.rules",
     ],
 
     libs: [

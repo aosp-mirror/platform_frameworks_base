@@ -18,9 +18,13 @@
 
 package com.android.systemui.statusbar.policy.ui.dialog.viewmodel
 
+import android.app.AutomaticZenRule
 import android.content.Intent
 import android.content.applicationContext
 import android.provider.Settings
+import android.service.notification.SystemZenRules
+import android.service.notification.ZenModeConfig
+import android.service.notification.ZenModeConfig.ScheduleInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
@@ -35,6 +39,7 @@ import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
 import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogEventLogger
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import java.util.Calendar
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.test.runCurrent
@@ -60,6 +65,9 @@ class ModesDialogViewModelTest : SysuiTestCase() {
 
     private lateinit var underTest: ModesDialogViewModel
 
+    private lateinit var timeScheduleMode: ZenMode
+    private lateinit var timeScheduleInfo: ScheduleInfo
+
     @Before
     fun setUp() {
         MockitoAnnotations.initMocks(this)
@@ -71,6 +79,21 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 kosmos.mockModesDialogDelegate,
                 kosmos.mockModesDialogEventLogger,
             )
+
+        timeScheduleInfo = ScheduleInfo()
+        timeScheduleInfo.days = intArrayOf(Calendar.MONDAY, Calendar.TUESDAY, Calendar.WEDNESDAY)
+        timeScheduleInfo.startHour = 11
+        timeScheduleInfo.endHour = 15
+        timeScheduleMode =
+            TestModeBuilder()
+                .setPackage(SystemZenRules.PACKAGE_ANDROID)
+                .setType(AutomaticZenRule.TYPE_SCHEDULE_TIME)
+                .setManualInvocationAllowed(true)
+                .setConditionId(ZenModeConfig.toScheduleConditionId(timeScheduleInfo))
+                .setTriggerDescription(
+                    SystemZenRules.getTriggerDescriptionForScheduleTime(mContext, timeScheduleInfo)
+                )
+                .build()
     }
 
     @Test
@@ -103,7 +126,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(3)
+            assertThat(tiles).hasSize(3)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.text).isEqualTo("Disabled by other")
                 assertThat(this.subtext).isEqualTo("Not set")
@@ -153,7 +176,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(3)
+            assertThat(tiles).hasSize(3)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.text).isEqualTo("Active without manual")
                 assertThat(this.subtext).isEqualTo("On")
@@ -203,7 +226,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(3)
+            assertThat(tiles).hasSize(3)
 
             // Check that tile is initially present
             with(tiles?.elementAt(0)!!) {
@@ -216,7 +239,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 runCurrent()
             }
             // Check that tile is still present at the same location, but turned off
-            assertThat(tiles?.size).isEqualTo(3)
+            assertThat(tiles).hasSize(3)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.text).isEqualTo("Active without manual")
                 assertThat(this.subtext).isEqualTo("Manage in settings")
@@ -229,7 +252,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // Check that tile is now gone
-            assertThat(tiles2?.size).isEqualTo(2)
+            assertThat(tiles2).hasSize(2)
             assertThat(tiles2?.elementAt(0)!!.text).isEqualTo("Active with manual")
             assertThat(tiles2?.elementAt(1)!!.text).isEqualTo("Inactive with manual")
         }
@@ -264,22 +287,22 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(3)
+            assertThat(tiles).hasSize(3)
 
             repository.removeMode("A")
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(2)
+            assertThat(tiles).hasSize(2)
 
             repository.removeMode("B")
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(1)
+            assertThat(tiles).hasSize(1)
 
             repository.removeMode("C")
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(0)
+            assertThat(tiles).hasSize(0)
         }
 
     @Test
@@ -325,17 +348,19 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setTriggerDescription(null)
                         .setEnabled(false, /* byUser= */ false)
                         .build(),
+                    timeScheduleMode,
                 )
             )
             runCurrent()
 
-            assertThat(tiles!!).hasSize(6)
+            assertThat(tiles!!).hasSize(7)
             assertThat(tiles!![0].subtext).isEqualTo("When the going gets tough")
             assertThat(tiles!![1].subtext).isEqualTo("On • When in Rome")
             assertThat(tiles!![2].subtext).isEqualTo("Not set")
             assertThat(tiles!![3].subtext).isEqualTo("Off")
             assertThat(tiles!![4].subtext).isEqualTo("On")
             assertThat(tiles!![5].subtext).isEqualTo("Not set")
+            assertThat(tiles!![6].subtext).isEqualTo(timeScheduleMode.triggerDescription)
         }
 
     @Test
@@ -381,11 +406,12 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setTriggerDescription(null)
                         .setEnabled(false, /* byUser= */ false)
                         .build(),
+                    timeScheduleMode,
                 )
             )
             runCurrent()
 
-            assertThat(tiles!!).hasSize(6)
+            assertThat(tiles!!).hasSize(7)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription).isEqualTo("When the going gets tough")
@@ -410,6 +436,15 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription).isEqualTo("Not set")
             }
+            with(tiles?.elementAt(6)!!) {
+                assertThat(this.stateDescription).isEqualTo("Off")
+                assertThat(this.subtextDescription)
+                    .isEqualTo(
+                        SystemZenRules.getDaysOfWeekFull(context, timeScheduleInfo) +
+                            ", " +
+                            SystemZenRules.getTimeSummary(context, timeScheduleInfo)
+                    )
+            }
 
             // All tiles have the same long click info
             tiles!!.forEach { assertThat(it.onLongClickLabel).isEqualTo("Open settings") }
@@ -432,7 +467,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(1)
+            assertThat(tiles).hasSize(1)
             assertThat(tiles?.elementAt(0)?.enabled).isFalse()
 
             // Trigger onClick
@@ -465,13 +500,13 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(1)
+            assertThat(tiles).hasSize(1)
 
             // Click tile to toggle it off
             tiles?.elementAt(0)!!.onClick()
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(1)
+            assertThat(tiles).hasSize(1)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.text).isEqualTo("Active without manual")
                 assertThat(this.subtext).isEqualTo("Manage in settings")
@@ -506,7 +541,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(1)
+            assertThat(tiles).hasSize(1)
             with(tiles?.elementAt(0)!!) {
                 assertThat(this.text).isEqualTo("Disabled by other")
                 assertThat(this.subtext).isEqualTo("Not set")
@@ -558,7 +593,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(2)
+            assertThat(tiles).hasSize(2)
 
             // Trigger onLongClick for A
             tiles?.first()?.onLongClick?.let { it() }
@@ -609,7 +644,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(3)
+            assertThat(tiles).hasSize(3)
 
             // Trigger onClick for each tile in sequence
             tiles?.forEach { it.onClick.invoke() }
@@ -650,7 +685,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles?.size).isEqualTo(2)
+            assertThat(tiles).hasSize(2)
             val modeCaptor = argumentCaptor<ZenMode>()
 
             // long click manual DND and then automatic mode

@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Atbloķējiet ierīci, lai skatītu citas opcijas."</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Notiek atskaņošana šajā tālrunī"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Notiek atskaņošana šajā planšetdatorā"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Lietotni “Atrast ierīci” var izmantot šī tālruņa atrašanās vietas noteikšanai arī tad, ja tālrunis ir izslēgts."</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Lietotni “Atrast ierīci” var izmantot šī planšetdatora atrašanās vietas noteikšanai arī tad, ja planšetdators ir izslēgts."</string>
 </resources>

@@ -41,6 +41,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.accessibility.dialog.AccessibilityTarget;
+import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.accessibility.MotionEventHelper;
@@ -82,13 +83,15 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private HearingAidDeviceManager mHearingAidDeviceManager;
 
     @Before
     public void setUp() throws Exception {
         final WindowManager windowManager = mContext.getSystemService(WindowManager.class);
         final SecureSettings secureSettings = TestUtils.mockSecureSettings();
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                secureSettings);
+                secureSettings, mHearingAidDeviceManager);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 windowManager);
         mStubMenuView = new MenuView(mContext, stubMenuViewModel, stubMenuViewAppearance,
@@ -110,7 +113,8 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
 
         mTouchHandler = new MenuListViewTouchHandler(mMenuAnimationController,
                 mDragToInteractAnimationController);
-        final AccessibilityTargetAdapter stubAdapter = new AccessibilityTargetAdapter(mStubTargets);
+        final AccessibilityTargetAdapter stubAdapter = new AccessibilityTargetAdapter(
+                mStubTargets);
         mStubListView = (RecyclerView) mStubMenuView.getChildAt(0);
         mStubListView.setAdapter(stubAdapter);
     }

@@ -78,6 +78,11 @@ public class LetterboxScrollProcessor {
     @Nullable
     @VisibleForTesting(visibility = PACKAGE)
     public List<MotionEvent> processMotionEvent(@NonNull MotionEvent motionEvent) {
+        if (!motionEvent.isFromSource(InputDevice.SOURCE_CLASS_POINTER)) {
+            // This is a non-pointer event that doesn't correspond to any location on the screen.
+            // Ignore it.
+            return null;
+        }
         mProcessedEvents.clear();
         final Rect appBounds = getAppBounds();
 

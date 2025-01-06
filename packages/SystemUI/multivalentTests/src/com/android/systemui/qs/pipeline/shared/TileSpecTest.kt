@@ -85,6 +85,24 @@ class TileSpecTest : SysuiTestCase() {
         assertThat(TileSpec.create("")).isEqualTo(TileSpec.Invalid)
     }
 
+    @Test
+    fun metricSpec_invalid() {
+        assertThat(TileSpec.Invalid.metricSpec).isEmpty()
+    }
+
+    @Test
+    fun metricSpec_platform_specName() {
+        val tile = "spec"
+        assertThat(TileSpec.create(tile).metricSpec).isEqualTo(tile)
+    }
+
+    @Test
+    fun metricSpec_custom_packageName() {
+        val componentName = ComponentName("test_pkg", "test_cls")
+
+        assertThat(TileSpec.create(componentName).metricSpec).isEqualTo(componentName.packageName)
+    }
+
     companion object {
         private const val CUSTOM_TILE_PREFIX = "custom("
     }

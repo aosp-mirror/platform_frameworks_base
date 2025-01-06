@@ -28,6 +28,7 @@ using ::android::base::unique_fd;
 using ::com::android::basic::R;
 using ::testing::Eq;
 using ::testing::Ge;
+using ::testing::IsNull;
 using ::testing::NotNull;
 using ::testing::SizeIs;
 using ::testing::StrEq;
@@ -106,6 +107,28 @@ TEST(ApkAssetsTest, OpenUncompressedAssetFd) {
   ASSERT_TRUE(base::ReadFully(fd.get(), &*buffer.begin(), length));
 
   EXPECT_THAT(buffer, StrEq("This should be uncompressed.\n\n"));
+}
+
+TEST(ApkAssetsTest, TakeAssetsProviderNotCrashing) {
+  // Make sure the apk assets object can survive taking its assets provider and doesn't crash
+  // the process.
+  {
+    auto loaded_apk = ApkAssets::Load(GetTestDataPath() + "/basic/basic.apk");
+    ASSERT_THAT(loaded_apk, NotNull());
+
+    auto provider = std::move(*loaded_apk).TakeAssetsProvider();
+    ASSERT_THAT(provider, NotNull());
+  }
+  // If this test doesn't crash by this point we're all good.
+}
+
+TEST(ApkAssetsTest, AssetsProviderNotMovedOnError) {
+  auto assets_provider
+      = ZipAssetsProvider::Create(GetTestDataPath() + "/bad/bad.apk", 0);
+  ASSERT_THAT(assets_provider, NotNull());
+  auto loaded_apk = ApkAssets::Load(std::move(assets_provider));
+  ASSERT_THAT(loaded_apk, IsNull());
+  ASSERT_THAT(assets_provider, NotNull());
 }
 
 }  // namespace android

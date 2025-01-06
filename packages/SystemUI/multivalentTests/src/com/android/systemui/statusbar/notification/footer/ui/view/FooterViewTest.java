@@ -78,7 +78,7 @@ public class FooterViewTest extends SysuiTestCase {
     public void setUp() {
         if (NotifRedesignFooter.isEnabled()) {
             mView = (FooterView) LayoutInflater.from(mSpyContext).inflate(
-                    R.layout.status_bar_notification_footer_redesign, null, false);
+                    R.layout.notification_2025_footer, null, false);
         } else {
             mView = (FooterView) LayoutInflater.from(mSpyContext).inflate(
                     R.layout.status_bar_notification_footer, null, false);

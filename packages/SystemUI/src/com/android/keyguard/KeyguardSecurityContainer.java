@@ -32,6 +32,7 @@ import static androidx.constraintlayout.widget.ConstraintSet.START;
 import static androidx.constraintlayout.widget.ConstraintSet.TOP;
 import static androidx.constraintlayout.widget.ConstraintSet.WRAP_CONTENT;
 
+import static com.android.systemui.Flags.gsfBouncer;
 import static com.android.systemui.plugins.FalsingManager.LOW_PENALTY;
 
 import static java.lang.Integer.max;
@@ -50,7 +51,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.BlendMode;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Rect;
+import android.graphics.Typeface;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
@@ -95,6 +98,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.settingslib.Utils;
 import com.android.settingslib.drawable.CircleFramedDrawable;
+import com.android.systemui.Flags;
 import com.android.systemui.Gefingerpoken;
 import com.android.systemui.classifier.FalsingA11yDelegate;
 import com.android.systemui.plugins.FalsingManager;
@@ -344,8 +348,7 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         setPadding(getPaddingLeft(), getPaddingTop() + getResources().getDimensionPixelSize(
                         R.dimen.keyguard_security_container_padding_top), getPaddingRight(),
                 getPaddingBottom());
-        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
-                com.android.internal.R.attr.materialColorSurfaceDim));
+        reloadBackgroundColor();
     }
 
     void onResume(SecurityMode securityMode, boolean faceAuthEnabled) {
@@ -810,10 +813,20 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
         mDisappearAnimRunning = false;
     }
 
+    private void reloadBackgroundColor() {
+        if (Flags.bouncerUiRevamp()) {
+            // Keep the background transparent, otherwise the background color looks like a box
+            // while scaling the bouncer for back animation or while transitioning to the bouncer.
+            setBackgroundColor(Color.TRANSPARENT);
+        } else {
+            setBackgroundColor(
+                    getContext().getColor(com.android.internal.R.color.materialColorSurfaceDim));
+        }
+    }
+
     void reloadColors() {
         mViewMode.reloadColors();
-        setBackgroundColor(Utils.getColorAttrDefaultColor(getContext(),
-                com.android.internal.R.attr.materialColorSurfaceDim));
+        reloadBackgroundColor();
     }
 
     /** Handles density or font scale changes. */
@@ -1335,6 +1348,9 @@ public class KeyguardSecurityContainer extends ConstraintLayout {
                     true);
             mUserSwitcherViewGroup = mView.findViewById(R.id.keyguard_bouncer_user_switcher);
             mUserSwitcher = mView.findViewById(R.id.user_switcher_header);
+            if (gsfBouncer()) {
+                mUserSwitcher.setTypeface(Typeface.create("gsf-label-medium", Typeface.NORMAL));
+            }
         }
 
         interface UserSwitcherCallback {

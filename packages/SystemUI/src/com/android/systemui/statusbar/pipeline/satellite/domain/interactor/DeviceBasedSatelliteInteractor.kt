@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.pipeline.satellite.domain.interactor
 
 import com.android.internal.telephony.flags.Flags
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.log.table.TableLogBuffer
@@ -49,7 +49,7 @@ constructor(
     val repo: DeviceBasedSatelliteRepository,
     iconsInteractor: MobileIconsInteractor,
     wifiInteractor: WifiInteractor,
-    @Application scope: CoroutineScope,
+    @Background scope: CoroutineScope,
     @DeviceBasedSatelliteInputLog private val logBuffer: LogBuffer,
     @DeviceBasedSatelliteTableLog private val tableLog: TableLogBuffer,
 ) {
@@ -160,6 +160,13 @@ constructor(
                 initialValue = true,
             )
             .stateIn(scope, SharingStarted.WhileSubscribed(), true)
+
+    /** True if any known mobile network is currently using a non terrestrial network */
+    val isAnyConnectionNtn =
+        iconsInteractor.icons.aggregateOver(selector = { it.isNonTerrestrial }, false) {
+            nonTerrestrialNetworks ->
+            nonTerrestrialNetworks.any { it == true }
+        }
 
     companion object {
         const val TAG = "DeviceBasedSatelliteInteractor"

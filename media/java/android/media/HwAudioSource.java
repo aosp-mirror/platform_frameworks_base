@@ -145,7 +145,14 @@ public class HwAudioSource extends PlayerBase {
                 mAudioAttributes);
         if (isPlaying()) {
             // FIXME: b/174876389 clean up device id reporting
-            baseStart(getDeviceId());
+            // Set as deviceIds empty and create an array with element if device id is valid.
+            int[] deviceIds = AudioPlaybackConfiguration.PLAYER_DEVICEIDS_INVALID;
+            int deviceId = getDeviceId();
+            if (deviceId != 0) {
+                deviceIds = new int[1];
+                deviceIds[0] = deviceId;
+            }
+            baseStart(deviceIds);
         }
     }
 

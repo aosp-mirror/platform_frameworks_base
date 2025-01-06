@@ -193,4 +193,31 @@ public class SELinux {
             return false;
         }
     }
+
+    /**
+     * Gets the genfs labels version of the vendor. The genfs labels version is
+     * specified in {@code /vendor/etc/selinux/genfs_labels_version.txt}. The
+     * version follows the VINTF version format "YYYYMM" and affects how {@code
+     * genfs_contexts} entries are applied.
+     *
+     * <p>The genfs labels version indicates changes in the SELinux labeling
+     * scheme over time. For example:
+     * <ul>
+     *   <li>For version 202504 and later, {@code /sys/class/udc} is labeled as
+     *   {@code sysfs_udc}.
+     *   <li>For version 202404 and earlier, {@code /sys/class/udc} is labeled
+     *   as {@code sysfs}.
+     * </ul>
+     * Check {@code /system/etc/selinux/plat_sepolicy_genfs_{version}.cil} to
+     * see which labels are new in {version}.
+     *
+     * <p>Older vendors may override {@code genfs_contexts} with vendor-specific
+     * extensions. The framework must not break such labellings to maintain
+     * compatibility with such vendors, by checking the genfs labels version and
+     * implementing a fallback mechanism.
+     *
+     * @return an integer representing the genfs labels version of /vendor, in
+     *         the format YYYYMM.
+     */
+    public static final native int getGenfsLabelsVersion();
 }

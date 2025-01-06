@@ -22,6 +22,7 @@ import android.content.Intent;
 import android.hardware.biometrics.BiometricSourceType;
 
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
 
 import javax.inject.Inject;
 
@@ -43,7 +44,7 @@ public class BiometricNotificationBroadcastReceiver extends BroadcastReceiver {
     private final BiometricNotificationDialogFactory mNotificationDialogFactory;
     @Inject
     BiometricNotificationBroadcastReceiver(
-            Context context,
+            @Main Context context,
             BiometricNotificationDialogFactory notificationDialogFactory) {
         mContext = context;
         mNotificationDialogFactory = notificationDialogFactory;

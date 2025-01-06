@@ -42,6 +42,7 @@ import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
 import android.provider.DeviceConfig;
 import android.testing.TestableLooper;
 
@@ -49,11 +50,13 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
 import com.android.internal.config.sysui.SystemUiDeviceConfigFlags;
+import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.domain.interactor.FakeShadeDialogContextInteractor;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.util.DeviceConfigProxyFake;
 import com.android.systemui.util.concurrency.FakeExecutor;
@@ -82,6 +85,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     FakeExecutor mMainExecutor;
     FakeExecutor mBackgroundExecutor;
     DeviceConfigProxyFake mDeviceConfigProxyFake;
+    FakeShadeDialogContextInteractor mFakeShadeDialogContextInteractor;
 
     @Mock
     IActivityManager mIActivityManager;
@@ -116,11 +120,12 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     public void setUp() throws RemoteException {
         MockitoAnnotations.initMocks(this);
 
+        mFakeShadeDialogContextInteractor = new FakeShadeDialogContextInteractor(mContext);
         mDeviceConfigProxyFake = new DeviceConfigProxyFake();
         mSystemClock = new FakeSystemClock();
         mMainExecutor = new FakeExecutor(mSystemClock);
         mBackgroundExecutor = new FakeExecutor(mSystemClock);
-        when(mSystemUIDialogFactory.create()).thenReturn(mSystemUIDialog);
+        when(mSystemUIDialogFactory.create(eq(mContext))).thenReturn(mSystemUIDialog);
 
         mUserProfiles = new ArrayList<>();
         Mockito.doReturn(mUserProfiles).when(mUserTracker).getUserProfiles();
@@ -315,13 +320,36 @@ public class FgsManagerControllerTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_STOPPABLE_FGS_SYSTEM_APP)
+    public void testButtonVisibilityOfStoppableApps() throws Exception {
+        setUserProfiles(0);
+        setBackgroundRestrictionExemptionReason("pkg", 12345, REASON_ALLOWLISTED_PACKAGE);
+        setBackgroundRestrictionExemptionReason("vendor_pkg", 67890, REASON_ALLOWLISTED_PACKAGE);
+
+        // Same as above, but apps are opt-in to be stoppable
+        setStoppableApps(new String[] {"pkg"}, /* vendor */ false);
+        setStoppableApps(new String[] {"vendor_pkg"}, /* vendor */ true);
+
+        final Binder binder = new Binder();
+        setShowStopButtonForUserAllowlistedApps(true);
+        // Both are foreground.
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "pkg", 0, true);
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "vendor_pkg", 0, true);
+        Assert.assertEquals(2, mFmc.visibleButtonsCount());
+
+        // The vendor package is no longer foreground. Only `pkg` remains.
+        mIForegroundServiceObserver.onForegroundStateChanged(binder, "vendor_pkg", 0, false);
+        Assert.assertEquals(1, mFmc.visibleButtonsCount());
+    }
+
+    @Test
     public void testShowUserVisibleJobsOnCreation() {
         // Test when the default is on.
         mDeviceConfigProxyFake.setProperty(DeviceConfig.NAMESPACE_SYSTEMUI,
                 SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
                 "true", false);
         FgsManagerController fmc = new FgsManagerControllerImpl(
-                mContext,
+                mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,
                 mSystemClock,
@@ -333,7 +361,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
-                mSystemUIDialogFactory
+                mSystemUIDialogFactory,
+                mFakeShadeDialogContextInteractor
         );
         fmc.init();
         Assert.assertTrue(fmc.getIncludesUserVisibleJobs());
@@ -348,7 +377,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 SystemUiDeviceConfigFlags.TASK_MANAGER_SHOW_USER_VISIBLE_JOBS,
                 "false", false);
         fmc = new FgsManagerControllerImpl(
-                mContext,
+                mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,
                 mSystemClock,
@@ -360,7 +389,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
-                mSystemUIDialogFactory
+                mSystemUIDialogFactory,
+                mFakeShadeDialogContextInteractor
         );
         fmc.init();
         Assert.assertFalse(fmc.getIncludesUserVisibleJobs());
@@ -446,6 +476,11 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 .getBackgroundRestrictionExemptionReason(uid);
     }
 
+    private void setStoppableApps(String[] packageNames, boolean vendor) throws Exception {
+        overrideResource(vendor ? com.android.internal.R.array.vendor_stoppable_fgs_system_apps
+                    : com.android.internal.R.array.stoppable_fgs_system_apps, packageNames);
+    }
+
     FgsManagerController createFgsManagerController() throws RemoteException {
         ArgumentCaptor<IForegroundServiceObserver> iForegroundServiceObserverArgumentCaptor =
                 ArgumentCaptor.forClass(IForegroundServiceObserver.class);
@@ -455,7 +490,7 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(BroadcastReceiver.class);
 
         FgsManagerController result = new FgsManagerControllerImpl(
-                mContext,
+                mContext.getResources(),
                 mMainExecutor,
                 mBackgroundExecutor,
                 mSystemClock,
@@ -467,7 +502,8 @@ public class FgsManagerControllerTest extends SysuiTestCase {
                 mDialogTransitionAnimator,
                 mBroadcastDispatcher,
                 mDumpManager,
-                mSystemUIDialogFactory
+                mSystemUIDialogFactory,
+                mFakeShadeDialogContextInteractor
         );
         result.init();
 

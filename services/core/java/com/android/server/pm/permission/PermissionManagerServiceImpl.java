@@ -1014,6 +1014,11 @@ public class PermissionManagerServiceImpl implements PermissionManagerServiceInt
     }
 
     @Override
+    public int getPermissionRequestState(String packageName, String permName, String deviceId) {
+        throw new IllegalStateException("getPermissionRequestState is not supported.");
+    }
+
+    @Override
     public Map<String, PermissionManager.PermissionState> getAllPermissionStates(
             @NonNull String packageName, @NonNull String deviceId, int userId) {
         throw new UnsupportedOperationException(

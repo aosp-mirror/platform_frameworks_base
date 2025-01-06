@@ -16,7 +16,16 @@
 
 package com.android.wm.shell.recents;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.view.WindowManager.TRANSIT_TO_FRONT;
+
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+import static com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_ANIMATING;
+import static com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_NOT_RUNNING;
+import static com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_REQUESTED;
+import static com.android.wm.shell.transition.Transitions.TRANSIT_START_RECENTS_TRANSITION;
+
+import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertNull;
 import static org.mockito.ArgumentMatchers.any;
@@ -27,6 +36,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.IApplicationThread;
 import android.app.KeyguardManager;
@@ -38,7 +48,10 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.platform.test.flag.junit.SetFlagsRule;
+import android.view.SurfaceControl;
+import android.window.TransitionInfo;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -47,16 +60,20 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession;
 import com.android.internal.os.IResultReceiver;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
+import com.android.wm.shell.TestRunningTaskInfoBuilder;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayInsetsController;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.transition.HomeTransitionObserver;
+import com.android.wm.shell.transition.TransitionInfoBuilder;
 import com.android.wm.shell.transition.Transitions;
+import com.android.wm.shell.util.StubTransaction;
 
 import org.junit.After;
 import org.junit.Before;
@@ -84,7 +101,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     @Mock
     private ShellCommandHandler mShellCommandHandler;
     @Mock
-    private DesktopRepository mDesktopRepository;
+    private DesktopUserRepositories mDesktopUserRepositories;
     @Mock
     private ActivityTaskManager mActivityTaskManager;
     @Mock
@@ -93,6 +110,10 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     private IRecentTasksListener mRecentTasksListener;
     @Mock
     private TaskStackTransitionObserver mTaskStackTransitionObserver;
+    @Mock
+    private Transitions mTransitions;
+
+    @Mock private DesktopRepository mDesktopRepository;
 
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
@@ -113,6 +134,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
         ExtendedMockito.doReturn(true)
                 .when(() -> DesktopModeStatus.canEnterDesktopMode(any()));
 
+        when(mDesktopUserRepositories.getCurrent()).thenReturn(mDesktopRepository);
         mMainExecutor = new TestShellExecutor();
         when(mContext.getPackageManager()).thenReturn(mock(PackageManager.class));
         when(mContext.getSystemService(KeyguardManager.class))
@@ -122,17 +144,16 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
                 mDisplayInsetsController, mMainExecutor));
         mRecentTasksControllerReal = new RecentTasksController(mContext, mShellInit,
                 mShellController, mShellCommandHandler, mTaskStackListener, mActivityTaskManager,
-                Optional.of(mDesktopRepository), mTaskStackTransitionObserver,
+                Optional.of(mDesktopUserRepositories), mTaskStackTransitionObserver,
                 mMainExecutor);
         mRecentTasksController = spy(mRecentTasksControllerReal);
         mShellTaskOrganizer = new ShellTaskOrganizer(mShellInit, mShellCommandHandler,
                 null /* sizeCompatUI */, Optional.empty(), Optional.of(mRecentTasksController),
                 mMainExecutor);
 
-        final Transitions transitions = mock(Transitions.class);
-        doReturn(mMainExecutor).when(transitions).getMainExecutor();
+        doReturn(mMainExecutor).when(mTransitions).getMainExecutor();
         mRecentsTransitionHandler = new RecentsTransitionHandler(mShellInit, mShellTaskOrganizer,
-                transitions, mRecentTasksController, mock(HomeTransitionObserver.class));
+                mTransitions, mRecentTasksController, mock(HomeTransitionObserver.class));
 
         mShellInit.init();
     }
@@ -146,12 +167,8 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     public void testStartSyntheticRecentsTransition_callsOnAnimationStartAndFinishCallback() throws Exception {
         final IRecentsAnimationRunner runner = mock(IRecentsAnimationRunner.class);
         final IResultReceiver finishCallback = mock(IResultReceiver.class);
-        doReturn(new Binder()).when(runner).asBinder();
-        Bundle options = new Bundle();
-        options.putBoolean("is_synthetic_recents_transition", true);
-        IBinder transition = mRecentsTransitionHandler.startRecentsTransition(
-                mock(PendingIntent.class), new Intent(), options, mock(IApplicationThread.class),
-                runner);
+
+        final IBinder transition = startRecentsTransition(/* synthetic= */ true, runner);
         verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any());
 
         // Finish and verify no transition remains and that the provided finish callback is called
@@ -165,17 +182,146 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
     @Test
     public void testStartSyntheticRecentsTransition_callsOnAnimationCancel() throws Exception {
         final IRecentsAnimationRunner runner = mock(IRecentsAnimationRunner.class);
-        doReturn(new Binder()).when(runner).asBinder();
-        Bundle options = new Bundle();
-        options.putBoolean("is_synthetic_recents_transition", true);
-        IBinder transition = mRecentsTransitionHandler.startRecentsTransition(
-                mock(PendingIntent.class), new Intent(), options, mock(IApplicationThread.class),
-                runner);
+
+        final IBinder transition = startRecentsTransition(/* synthetic= */ true, runner);
         verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any());
 
         mRecentsTransitionHandler.findController(transition).cancel("test");
         mMainExecutor.flushAll();
         verify(runner).onAnimationCanceled(any(), any());
         assertNull(mRecentsTransitionHandler.findController(transition));
+    }
+
+    @Test
+    public void testStartTransition_updatesStateListeners() {
+        final TestTransitionStateListener listener = new TestTransitionStateListener();
+        mRecentsTransitionHandler.addTransitionStateListener(listener);
+
+        startRecentsTransition(/* synthetic= */ false);
+        mMainExecutor.flushAll();
+
+        assertThat(listener.getState()).isEqualTo(TRANSITION_STATE_REQUESTED);
+    }
+
+    @Test
+    public void testStartAnimation_updatesStateListeners() {
+        final TestTransitionStateListener listener = new TestTransitionStateListener();
+        mRecentsTransitionHandler.addTransitionStateListener(listener);
+
+        final IBinder transition = startRecentsTransition(/* synthetic= */ false);
+        mRecentsTransitionHandler.startAnimation(
+                transition, createTransitionInfo(), new StubTransaction(), new StubTransaction(),
+                mock(Transitions.TransitionFinishCallback.class));
+        mMainExecutor.flushAll();
+
+        assertThat(listener.getState()).isEqualTo(TRANSITION_STATE_ANIMATING);
+    }
+
+    @Test
+    public void testFinishTransition_updatesStateListeners() {
+        final TestTransitionStateListener listener = new TestTransitionStateListener();
+        mRecentsTransitionHandler.addTransitionStateListener(listener);
+
+        final IBinder transition = startRecentsTransition(/* synthetic= */ false);
+        mRecentsTransitionHandler.startAnimation(
+                transition, createTransitionInfo(), new StubTransaction(), new StubTransaction(),
+                mock(Transitions.TransitionFinishCallback.class));
+        mRecentsTransitionHandler.findController(transition).finish(true /* toHome */,
+                false /* sendUserLeaveHint */, mock(IResultReceiver.class));
+        mMainExecutor.flushAll();
+
+        assertThat(listener.getState()).isEqualTo(TRANSITION_STATE_NOT_RUNNING);
+    }
+
+    @Test
+    public void testCancelTransition_updatesStateListeners() {
+        final TestTransitionStateListener listener = new TestTransitionStateListener();
+        mRecentsTransitionHandler.addTransitionStateListener(listener);
+
+        final IBinder transition = startRecentsTransition(/* synthetic= */ false);
+        mRecentsTransitionHandler.findController(transition).cancel("test");
+        mMainExecutor.flushAll();
+
+        assertThat(listener.getState()).isEqualTo(TRANSITION_STATE_NOT_RUNNING);
+    }
+
+    @Test
+    public void testStartAnimation_synthetic_updatesStateListeners() {
+        final TestTransitionStateListener listener = new TestTransitionStateListener();
+        mRecentsTransitionHandler.addTransitionStateListener(listener);
+
+        startRecentsTransition(/* synthetic= */ true);
+        mMainExecutor.flushAll();
+
+        assertThat(listener.getState()).isEqualTo(TRANSITION_STATE_ANIMATING);
+    }
+
+    @Test
+    public void testFinishTransition_synthetic_updatesStateListeners() {
+        final TestTransitionStateListener listener = new TestTransitionStateListener();
+        mRecentsTransitionHandler.addTransitionStateListener(listener);
+
+        final IBinder transition = startRecentsTransition(/* synthetic= */ true);
+        mRecentsTransitionHandler.findController(transition).finish(true /* toHome */,
+                false /* sendUserLeaveHint */, mock(IResultReceiver.class));
+        mMainExecutor.flushAll();
+
+        assertThat(listener.getState()).isEqualTo(TRANSITION_STATE_NOT_RUNNING);
+    }
+
+    @Test
+    public void testCancelTransition_synthetic_updatesStateListeners() {
+        final TestTransitionStateListener listener = new TestTransitionStateListener();
+        mRecentsTransitionHandler.addTransitionStateListener(listener);
+
+        final IBinder transition = startRecentsTransition(/* synthetic= */ true);
+        mRecentsTransitionHandler.findController(transition).cancel("test");
+        mMainExecutor.flushAll();
+
+        assertThat(listener.getState()).isEqualTo(TRANSITION_STATE_NOT_RUNNING);
+    }
+
+    private IBinder startRecentsTransition(boolean synthetic) {
+        return startRecentsTransition(synthetic, mock(IRecentsAnimationRunner.class));
+    }
+
+    private IBinder startRecentsTransition(boolean synthetic,
+            @NonNull IRecentsAnimationRunner runner) {
+        doReturn(new Binder()).when(runner).asBinder();
+        final Bundle options = new Bundle();
+        options.putBoolean("is_synthetic_recents_transition", synthetic);
+        final IBinder transition = new Binder();
+        when(mTransitions.startTransition(anyInt(), any(), any())).thenReturn(transition);
+        return mRecentsTransitionHandler.startRecentsTransition(
+                mock(PendingIntent.class), new Intent(), options, mock(IApplicationThread.class),
+                runner);
+    }
+
+    private TransitionInfo createTransitionInfo() {
+        final ActivityManager.RunningTaskInfo task = new TestRunningTaskInfoBuilder()
+                .setTopActivityType(ACTIVITY_TYPE_HOME)
+                .build();
+        final TransitionInfo.Change homeChange = new TransitionInfo.Change(
+                task.token, new SurfaceControl());
+        homeChange.setMode(TRANSIT_TO_FRONT);
+        homeChange.setTaskInfo(task);
+        return new TransitionInfoBuilder(TRANSIT_START_RECENTS_TRANSITION)
+                .addChange(homeChange)
+                .build();
+    }
+
+    private static class TestTransitionStateListener implements RecentsTransitionStateListener {
+        @RecentsTransitionState
+        private int mState = TRANSITION_STATE_NOT_RUNNING;
+
+        @Override
+        public void onTransitionStateChanged(int state) {
+            mState = state;
+        }
+
+        @RecentsTransitionState
+        int getState() {
+            return mState;
+        }
     }
 }

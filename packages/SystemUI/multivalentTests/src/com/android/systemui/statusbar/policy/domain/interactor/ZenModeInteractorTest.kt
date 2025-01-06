@@ -251,6 +251,22 @@ class ZenModeInteractorTest : SysuiTestCase() {
         }
 
     @Test
+    fun deactivateAllModes_updatesCorrectModes() =
+        testScope.runTest {
+            zenModeRepository.addModes(
+                listOf(
+                    TestModeBuilder.MANUAL_DND_ACTIVE,
+                    TestModeBuilder().setName("Inactive").setActive(false).build(),
+                    TestModeBuilder().setName("Active").setActive(true).build(),
+                )
+            )
+
+            underTest.deactivateAllModes()
+
+            assertThat(zenModeRepository.getModes().filter { it.isActive }).isEmpty()
+        }
+
+    @Test
     fun activeModes_computesMainActiveMode() =
         testScope.runTest {
             val activeModes by collectLastValue(underTest.activeModes)
@@ -378,8 +394,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
 
             assertThat(dndMode!!.isActive).isFalse()
 
-            zenModeRepository.removeMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
             runCurrent()
 
             assertThat(dndMode!!.isActive).isTrue()

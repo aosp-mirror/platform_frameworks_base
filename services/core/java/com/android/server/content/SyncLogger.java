@@ -73,6 +73,8 @@ public class SyncLogger {
      */
     public static synchronized SyncLogger getInstance() {
         if (sInstance == null) {
+            // Always default to the sync logger for now (see b/381957278#comment8).
+            /*
             final String flag = SystemProperties.get("debug.synclog");
             final boolean enable =
                     (Build.IS_DEBUGGABLE
@@ -83,6 +85,8 @@ public class SyncLogger {
             } else {
                 sInstance = new SyncLogger();
             }
+            */
+            sInstance = new SyncLogger();
         }
         return sInstance;
     }

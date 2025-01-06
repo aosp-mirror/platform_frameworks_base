@@ -39,6 +39,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.text.flags.Flags;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -514,9 +516,14 @@ public class TypefaceSystemFallbackTest {
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
 
         paint.setElegantTextHeight(false);
-        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
-        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("b"), 0.0f);
-        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+        if (Flags.deprecateElegantTextHeightApi()) {
+            // Calling setElegantTextHeight is no-op.
+            assertTrue(paint.isElegantTextHeight());
+        } else {
+            assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
+            assertEquals(GLYPH_3EM_WIDTH, paint.measureText("b"), 0.0f);
+            assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
+        }
     }
 
     @Test
@@ -553,9 +560,14 @@ public class TypefaceSystemFallbackTest {
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
 
         paint.setElegantTextHeight(false);
-        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
-        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
-        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("c"), 0.0f);
+        if (Flags.deprecateElegantTextHeightApi()) {
+            // Calling setElegantTextHeight is no-op.
+            assertTrue(paint.isElegantTextHeight());
+        } else {
+            assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
+            assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
+            assertEquals(GLYPH_3EM_WIDTH, paint.measureText("c"), 0.0f);
+        }
 
         testTypeface = fontMap.get("sans-serif");
         assertNotNull(testTypeface);
@@ -566,9 +578,14 @@ public class TypefaceSystemFallbackTest {
         assertEquals(GLYPH_1EM_WIDTH, paint.measureText("c"), 0.0f);
 
         paint.setElegantTextHeight(false);
-        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
-        assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
-        assertEquals(GLYPH_3EM_WIDTH, paint.measureText("c"), 0.0f);
+        if (Flags.deprecateElegantTextHeightApi()) {
+            // Calling setElegantTextHeight is no-op.
+            assertTrue(paint.isElegantTextHeight());
+        } else {
+            assertEquals(GLYPH_1EM_WIDTH, paint.measureText("a"), 0.0f);
+            assertEquals(GLYPH_1EM_WIDTH, paint.measureText("b"), 0.0f);
+            assertEquals(GLYPH_3EM_WIDTH, paint.measureText("c"), 0.0f);
+        }
     }
 
     @Test

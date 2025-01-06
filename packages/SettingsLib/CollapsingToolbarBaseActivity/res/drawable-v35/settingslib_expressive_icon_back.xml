@@ -17,12 +17,9 @@
 
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item
-        android:start="16dp"
-        android:end="16dp"
-        android:top="4dp"
-        android:bottom="4dp">
+        android:start="16dp">
         <shape>
-            <size android:width="32dp" android:height="40dp" />
+            <size android:width="40dp" android:height="40dp" />
             <solid android:color="@color/settingslib_materialColorSurfaceContainerHighest" />
             <corners
                 android:radius="100dp" />
@@ -30,23 +27,21 @@
     </item>
 
     <item
-        android:width="24dp"
-        android:height="24dp"
+        android:width="16dp"
+        android:height="16dp"
         android:gravity="center"
         android:start="16dp"
-        android:end="16dp"
-        android:top="4dp"
-        android:bottom="4dp">
+>
         <vector
-            android:width="24dp"
-            android:height="24dp"
-            android:viewportWidth="960"
-            android:viewportHeight="960"
+            android:width="16dp"
+            android:height="16dp"
+            android:viewportWidth="16"
+            android:viewportHeight="16"
             android:tint="@color/settingslib_materialColorOnSurfaceVariant"
             android:autoMirrored="true">
             <path
                 android:fillColor="@android:color/white"
-                android:pathData="M313,520L537,744L480,800L160,480L480,160L537,216L313,440L800,440L800,520L313,520Z"/>
+                android:pathData="M3.626,9L8.526,13.9C8.726,14.1 8.817,14.333 8.801,14.6C8.801,14.867 8.701,15.1 8.501,15.3C8.301,15.483 8.067,15.583 7.801,15.6C7.534,15.6 7.301,15.5 7.101,15.3L0.501,8.7C0.401,8.6 0.326,8.492 0.276,8.375C0.242,8.258 0.226,8.133 0.226,8C0.226,7.867 0.242,7.742 0.276,7.625C0.326,7.508 0.401,7.4 0.501,7.3L7.101,0.7C7.284,0.517 7.509,0.425 7.776,0.425C8.059,0.425 8.301,0.517 8.501,0.7C8.701,0.9 8.801,1.142 8.801,1.425C8.801,1.692 8.701,1.925 8.501,2.125L3.626,7H14.801C15.084,7 15.317,7.1 15.501,7.3C15.701,7.483 15.801,7.717 15.801,8C15.801,8.283 15.701,8.525 15.501,8.725C15.317,8.908 15.084,9 14.801,9H3.626Z"/>
         </vector>
     </item>
 </layer-list>

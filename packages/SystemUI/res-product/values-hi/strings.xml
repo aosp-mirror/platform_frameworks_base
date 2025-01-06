@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ज़्यादा विकल्प देखने के लिए, अपना डिवाइस अनलॉक करें"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"मीडिया इस फ़ोन पर चल रहा है"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"मीडिया इस टैबलेट पर चल रहा है"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"आप Find My Device की मदद से, इस फ़ोन के बंद होने पर भी इसकी जगह की जानकारी का पता लगा सकते हैं"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"आप Find My Device की मदद से, इस टैबलेट के बंद होने पर भी इसकी जगह की जानकारी का पता लगा सकते हैं"</string>
 </resources>

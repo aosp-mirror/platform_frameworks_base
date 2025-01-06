@@ -35,9 +35,12 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.domain.startable.sceneContainerStartable
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.shade.ui.viewmodel.notificationsShadeOverlayContentViewModel
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -119,6 +122,38 @@ class NotificationsShadeOverlayContentViewModelTest : SysuiTestCase() {
             lockDevice()
             assertThat(isShadeTouchable).isFalse()
             assertThat(currentOverlays).doesNotContain(Overlays.NotificationsShade)
+        }
+
+    @Test
+    fun showHeader_showsOnNarrowScreen() =
+        testScope.runTest {
+            kosmos.shadeRepository.setShadeLayoutWide(false)
+
+            // Shown when notifications are present.
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            runCurrent()
+            assertThat(underTest.showHeader).isTrue()
+
+            // Hidden when notifications are not present.
+            kosmos.activeNotificationListRepository.setActiveNotifs(0)
+            runCurrent()
+            assertThat(underTest.showHeader).isFalse()
+        }
+
+    @Test
+    fun showHeader_hidesOnWideScreen() =
+        testScope.runTest {
+            kosmos.shadeRepository.setShadeLayoutWide(true)
+
+            // Hidden when notifications are present.
+            kosmos.activeNotificationListRepository.setActiveNotifs(1)
+            runCurrent()
+            assertThat(underTest.showHeader).isFalse()
+
+            // Hidden when notifications are not present.
+            kosmos.activeNotificationListRepository.setActiveNotifs(0)
+            runCurrent()
+            assertThat(underTest.showHeader).isFalse()
         }
 
     private fun TestScope.lockDevice() {

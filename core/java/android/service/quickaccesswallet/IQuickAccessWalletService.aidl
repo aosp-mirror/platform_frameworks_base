@@ -43,4 +43,6 @@ interface IQuickAccessWalletService {
     oneway void unregisterWalletServiceEventListener(in WalletServiceEventListenerRequest request);
     // Request to get a PendingIntent to launch an activity from which the user can manage their cards.
     oneway void onTargetActivityIntentRequested(in IQuickAccessWalletServiceCallbacks callbacks);
+    // Request to get a PendingIntent to launch an activity, triggered when the user performs a gesture.
+    oneway void onGestureTargetActivityIntentRequested(in IQuickAccessWalletServiceCallbacks callbacks);
    }

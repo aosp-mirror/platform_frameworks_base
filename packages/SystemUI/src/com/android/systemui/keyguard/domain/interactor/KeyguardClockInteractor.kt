@@ -19,7 +19,6 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.util.Log
 import com.android.keyguard.ClockEventController
-import com.android.keyguard.KeyguardClockSwitch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.data.repository.KeyguardClockRepository
@@ -121,9 +120,6 @@ constructor(
             keyguardInteractor.clockShouldBeCentered
         }
 
-    fun setClockSize(@KeyguardClockSwitch.ClockSize size: Int) =
-        setClockSize(ClockSize.fromLegacy(size))
-
     fun setClockSize(size: ClockSize) {
         SceneContainerFlag.assertInLegacyMode()
         keyguardClockRepository.setClockSize(size)
@@ -134,7 +130,7 @@ constructor(
             return clock?.let { clock -> clock.config.id }
                 ?: run {
                     Log.e(TAG, "No clock is available")
-                    KeyguardClockSwitch.MISSING_CLOCK_ID
+                    "MISSING_CLOCK_ID"
                 }
         }
 

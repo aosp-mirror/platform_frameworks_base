@@ -236,6 +236,12 @@
     <!-- The size of a bluetooth indicator icon that displays next to the RSSI status icon. -->
     <dimen name="status_bar_connected_device_bt_indicator_size">17dp</dimen>
 
+    <!-- Height of a small notification in the status bar (2025 redesign version) -->
+    <dimen name="notification_2025_header_height">@*android:dimen/notification_2025_header_height</dimen>
+
+    <!-- Height of a small notification in the status bar (2025 redesign version) -->
+    <dimen name="notification_2025_min_height">@*android:dimen/notification_2025_min_height</dimen>
+
     <!-- Height of a small notification in the status bar-->
     <dimen name="notification_min_height">@*android:dimen/notification_min_height</dimen>
 
@@ -367,6 +373,9 @@
     <dimen name="notification_guts_header_top_padding">12dp</dimen>
     <!-- The vertical space between items in the alert selections in the inline settings -->
     <dimen name="notification_guts_option_vertical_padding">16dp</dimen>
+
+    <!-- Extra space for guts bundle feedback button -->
+    <dimen name="notification_guts_bundle_feedback_size">48dp</dimen>
 
     <dimen name="notification_importance_toggle_size">48dp</dimen>
     <dimen name="notification_importance_button_separation">8dp</dimen>
@@ -773,6 +782,13 @@
     <!-- The top margin for the notification children container in its non-expanded form. -->
     <dimen name="notification_children_container_margin_top">48dp</dimen>
 
+    <!-- The spacing between the notification children container in its non-expanded form, and the
+         header text above it, scaling with text size. This value is chosen so that, taking into
+         account the text spacing for both the text in the top line and the text in the container,
+         the distance between them is 4dp with the default screen configuration (and will grow
+         accordingly for larger font sizes). -->
+    <dimen name="notification_2025_children_container_margin_top">@*android:dimen/notification_2025_content_margin_top</dimen>
+
     <!-- The height of the gap between adjacent notification sections. -->
     <dimen name="notification_section_divider_height">@dimen/notification_side_paddings</dimen>
 
@@ -787,6 +803,18 @@
 
     <!-- Size of an avatar shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_avatar_size">24dp</dimen>
+
+    <!-- Size of the face pile shown on one-line (children of a group) conversation notifications
+         (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_face_pile_size">16dp</dimen>
+
+    <!-- Size of the avatars within a face pile shown on one-line (children of a group) conversation
+         notifications (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_face_pile_avatar_size">11dp</dimen>
+
+    <!-- Size of an avatar shown on one-line (children of a group) conversation notifications
+         (2025 redesign version) -->
+    <dimen name="notification_2025_single_line_avatar_size">16dp</dimen>
 
     <!-- Border width for avatars in the face pile shown on one-line (children of a group) conversation notifications -->
     <dimen name="conversation_single_line_face_pile_protection_width">1dp</dimen>
@@ -815,8 +843,7 @@
     <dimen name="keyguard_clock_top_margin">18dp</dimen>
     <!-- The amount to shift the clocks during a small/large transition -->
     <dimen name="keyguard_clock_switch_y_shift">14dp</dimen>
-    <!-- When large clock is showing, offset the smartspace by this amount -->
-    <dimen name="keyguard_smartspace_top_offset">12dp</dimen>
+
     <!-- The amount to translate lockscreen elements on the GONE->AOD transition -->
     <dimen name="keyguard_enter_from_top_translation_y">-100dp</dimen>
     <!-- The amount to translate lockscreen elements on the GONE->AOD transition, on device fold -->
@@ -937,7 +964,6 @@
     <dimen name="keyguard_translate_distance_on_swipe_up">-200dp</dimen>
 
     <dimen name="keyguard_indication_margin_bottom">32dp</dimen>
-    <dimen name="lock_icon_margin_bottom">74dp</dimen>
     <dimen name="ambient_indication_margin_bottom">71dp</dimen>
 
 
@@ -1205,6 +1231,9 @@
     <dimen name="min_window_blur_radius">1px</dimen>
     <dimen name="max_window_blur_radius">23px</dimen>
 
+    <!-- Blur radius behind Notification Shade -->
+    <dimen name="max_shade_window_blur_radius">60dp</dimen>
+
     <!-- How much into a DisplayCutout's bounds we can go, on each side -->
     <dimen name="display_cutout_margin_consumption">0px</dimen>
 
@@ -1466,7 +1495,7 @@
     <dimen name="screenrecord_spinner_height">72dp</dimen>
     <dimen name="screenrecord_spinner_margin">24dp</dimen>
     <dimen name="screenrecord_spinner_text_padding_start">20dp</dimen>
-    <dimen name="screenrecord_spinner_text_padding_end">80dp</dimen>
+    <dimen name="screenrecord_spinner_text_padding_end">20dp</dimen>
     <dimen name="screenrecord_spinner_arrow_size">24dp</dimen>
     <dimen name="screenrecord_spinner_background_radius">28dp</dimen>
 
@@ -1492,7 +1521,6 @@
     <dimen name="media_output_dialog_header_icon_padding">16dp</dimen>
     <dimen name="media_output_dialog_icon_corner_radius">16dp</dimen>
     <dimen name="media_output_dialog_title_anim_y_delta">12.5dp</dimen>
-    <dimen name="media_output_dialog_app_tier_icon_size">20dp</dimen>
     <dimen name="media_output_dialog_background_radius">16dp</dimen>
     <dimen name="media_output_dialog_active_background_radius">30dp</dimen>
     <dimen name="media_output_dialog_default_margin_end">16dp</dimen>
@@ -1655,10 +1683,14 @@
     <dimen name="accessibility_floating_menu_margin">16dp</dimen>
     <dimen name="accessibility_floating_menu_small_padding">6dp</dimen>
     <dimen name="accessibility_floating_menu_small_width_height">36dp</dimen>
+    <dimen name="accessibility_floating_menu_small_badge_width_height">12dp</dimen>
+    <dimen name="accessibility_floating_menu_badge_position">0.67</dimen>
+    <dimen name="accessibility_floating_menu_left_badge_x_position">-0.67</dimen>
     <dimen name="accessibility_floating_menu_small_single_radius">25dp</dimen>
     <dimen name="accessibility_floating_menu_small_multiple_radius">20dp</dimen>
     <dimen name="accessibility_floating_menu_large_padding">8dp</dimen>
     <dimen name="accessibility_floating_menu_large_width_height">56dp</dimen>
+    <dimen name="accessibility_floating_menu_large_badge_width_height">18dp</dimen>
     <dimen name="accessibility_floating_menu_large_single_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_large_multiple_radius">35dp</dimen>
     <dimen name="accessibility_floating_menu_ime_shifting_space">48dp</dimen>
@@ -1738,6 +1770,8 @@
     <dimen name="wallet_button_vertical_padding">8dp</dimen>
 
     <!-- Ongoing activity chip -->
+    <dimen name="ongoing_activity_chip_max_text_width">74dp</dimen>
+    <dimen name="ongoing_activity_chip_margin_start">5dp</dimen>
     <!-- The activity chip side padding, used with the default phone icon. -->
     <dimen name="ongoing_activity_chip_side_padding">12dp</dimen>
     <!-- The activity chip side padding, used with an icon that has embedded padding (e.g. if the icon comes from the notification's smallIcon field). If the icon has padding, the chip itself can have less padding. -->
@@ -1750,6 +1784,7 @@
     <dimen name="ongoing_activity_chip_icon_text_padding">4dp</dimen>
     <!-- The end padding for the timer text view. Only used if an embedded padding icon is used. -->
     <dimen name="ongoing_activity_chip_text_end_padding_for_embedded_padding_icon">6dp</dimen>
+    <dimen name="ongoing_activity_chip_text_fading_edge_length">12dp</dimen>
     <dimen name="ongoing_activity_chip_corner_radius">28dp</dimen>
 
     <!-- Status bar user chip -->
@@ -1806,10 +1841,9 @@
 
     <!-- Hearing devices dialog related dimensions -->
     <dimen name="hearing_devices_layout_margin">12dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_height">72dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_text_padding_start">20dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_text_padding_vertical">15dp</dimen>
-    <dimen name="hearing_devices_preset_spinner_arrow_size">24dp</dimen>
+    <dimen name="hearing_devices_small_title_padding_horizontal">16dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_padding">22dp</dimen>
+    <dimen name="hearing_devices_preset_spinner_icon_size">24dp</dimen>
     <dimen name="hearing_devices_preset_spinner_background_radius">28dp</dimen>
     <dimen name="hearing_devices_tool_icon_size">28dp</dimen>
 
@@ -1957,8 +1991,6 @@
     <dimen name="dream_overlay_entry_y_offset">40dp</dimen>
     <dimen name="dream_overlay_exit_y_offset">40dp</dimen>
 
-    <dimen name="status_view_margin_horizontal">0dp</dimen>
-
     <!-- Media output broadcast dialog QR code picture size -->
     <dimen name="media_output_qrcode_size">216dp</dimen>
     <dimen name="media_output_broadcast_info">21dp</dimen>
@@ -1984,12 +2016,16 @@
     <dimen name="backlight_indicator_step_large_radius">28dp</dimen>
 
     <!-- Touchpad gestures tutorial-->
-    <!-- This value is in unit of dp/ms
+    <!-- This value is in dp/ms.
         TriggerSwipeUpTouchTracker (which is base for gesture tutorial implementation) uses value
         of 0.5dp but from manual testing it's too high and doesn't really feel like it's forcing
         slowing down. Also for tutorial it should be fine to lean to the side of being more strict
         rather than not strict enough and not teaching user the proper gesture as a result.-->
     <dimen name="touchpad_recent_apps_gesture_velocity_threshold">0.05dp</dimen>
+    <!-- This value is in dp/ms.
+        As above, it's not tied to system-wide value (defined in launcher's
+        quickstep_fling_threshold_speed) because for tutorial it's fine to be more strict. -->
+    <dimen name="touchpad_home_gesture_velocity_threshold">0.5dp</dimen>
     <!-- Normal gesture threshold is system_gestures_distance_threshold but for tutorial we can
          exaggerate gesture, which also works much better with live tracking -->
     <dimen name="touchpad_tutorial_gestures_distance_threshold">48dp</dimen>
@@ -2048,6 +2084,9 @@
     <!-- UDFPS view attributes -->
     <!-- UDFPS icon size in microns/um -->
     <dimen name="udfps_icon_size" format="float">6000</dimen>
+    <!-- Limits the updates to at most one update per debounce duration to avoid too many
+         updates due to quick changes to padding.   -->
+    <integer name="udfps_padding_debounce_duration">100</integer>
     <!-- Microns/ums (1000 um = 1mm) per pixel for the given device. If unspecified, UI that
          relies on this value will not be sized correctly. -->
     <item name="pixel_pitch" format="float" type="dimen">-1</item>
@@ -2062,26 +2101,35 @@
     <dimen name="contextual_edu_dialog_elevation">2dp</dimen>
 
     <!-- Volume start -->
-    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
     <dimen name="volume_dialog_width">60dp</dimen>
-    <dimen name="volume_dialog_vertical_padding">10dp</dimen>
+
+    <dimen name="volume_dialog_background_corner_radius">30dp</dimen>
+    <dimen name="volume_dialog_background_vertical_margin">-10dp</dimen>
+    <!-- top margin covers half the ringer button + components spacing -->
+    <dimen name="volume_dialog_background_top_margin">-28dp</dimen>
+
     <dimen name="volume_dialog_components_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_spacing">8dp</dimen>
     <dimen name="volume_dialog_floating_sliders_vertical_padding">10dp</dimen>
+    <dimen name="volume_dialog_floating_sliders_vertical_padding_negative">-10dp</dimen>
     <dimen name="volume_dialog_floating_sliders_horizontal_padding">4dp</dimen>
-    <dimen name="volume_dialog_spacing">4dp</dimen>
-    <dimen name="volume_dialog_button_size">48dp</dimen>
-    <dimen name="volume_dialog_floating_sliders_bottom_padding">48dp</dimen>
+    <dimen name="volume_dialog_button_size">40dp</dimen>
     <dimen name="volume_dialog_slider_width">52dp</dimen>
     <dimen name="volume_dialog_slider_height">254dp</dimen>
 
+    <fraction name="volume_dialog_half_opened_bias">0.2</fraction>
+
+    <dimen name="volume_dialog_slider_max_deviation">56dp</dimen>
+
+    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
+
+    <dimen name="volume_dialog_ringer_drawer_margin">10dp</dimen>
+    <dimen name="volume_dialog_ringer_drawer_diff_end_margin">6dp</dimen>
+    <dimen name="volume_dialog_ringer_drawer_button_size">@dimen/volume_dialog_button_size</dimen>
+    <dimen name="volume_dialog_ringer_drawer_button_icon_radius">10dp</dimen>
+    <dimen name="volume_dialog_ringer_selected_button_background_radius">20dp</dimen>
+
     <dimen name="volume_panel_slice_vertical_padding">8dp</dimen>
     <dimen name="volume_panel_slice_horizontal_padding">24dp</dimen>
-
-    <dimen name="volume_dialog_ringer_horizontal_padding">10dp</dimen>
-    <dimen name="volume_dialog_ringer_drawer_button_size">40dp</dimen>
-    <dimen name="volume_dialog_ringer_drawer_button_icon_radius">10dp</dimen>
-    <dimen name="volume_dialog_background_square_corner_radius">12dp</dimen>
-    <dimen name="volume_dialog_ringer_selected_button_background_radius">20dp</dimen>
     <!-- Volume end -->
 </resources>

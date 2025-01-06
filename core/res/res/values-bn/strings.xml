@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে৷ পরবর্তী কল: সীমাবদ্ধ নয়"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে না৷ পরবর্তী কল: সীমাবদ্ধ"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ডিফল্টরূপে কলার আইডি সীমাবদ্ধ করা থাকে না৷ পরবর্তী কল: সীমাবদ্ধ নয়"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"এই অ্যাপ ১৬ কেবির সাথে মানানসই নয়। APK অ্যালাইনমেন্ট চেক করা যায়নি। এই অ্যাপ পৃষ্ঠার সাইজের সাথে মানানসই মোড ব্যবহার করে চলবে। সবচেয়ে ভালো মানানসই হিসেবে কাজ করার জন্য অ্যাপ্লিকেশনকে ১৬ কেবি সাপোর্টের সাথে আবার কম্পাইল করুন। আরও তথ্যের জন্য, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; দেখুন"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"এই অ্যাপ ১৬ কেবির সাথে মানানসই নয়। ELF অ্যালাইনমেন্ট চেক করা যায়নি। এই অ্যাপ পৃষ্ঠার সাইজের সাথে মানানসই মোড ব্যবহার করে চলবে। সবচেয়ে ভালো মানানসই হিসেবে কাজ করার জন্য অ্যাপ্লিকেশনকে ১৬ কেবি সাপোর্টের সাথে আবার কম্পাইল করুন। আরও তথ্যের জন্য, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; দেখুন"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"এই অ্যাপ ১৬ কেবির সাথে মানানসই নয়। APK ও ELF অ্যালাইনমেন্ট পরীক্ষা করা যায়নি। এই অ্যাপ পৃষ্ঠার সাইজের সাথে মানানসই মোড ব্যবহার করে চলবে। সবচেয়ে ভালো মানানসই হিসেবে কাজ করার জন্য অ্যাপ্লিকেশনকে ১৬ কেবি সাপোর্টের সাথে আবার কম্পাইল করুন। আরও তথ্যের জন্য, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; দেখুন"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"পরিষেবা প্রস্তুত নয়৷"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"আপনি কলার আইডি এর সেটিংস পরিবর্তন করতে পারবেন না৷"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"<xliff:g id="CARRIERDISPLAY">%s</xliff:g>-এর ডেটা ব্যবহার করা হয়েছে"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"মোবাইল নেটওয়ার্কে কানেক্ট করা যাচ্ছে না"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"পছন্দের নেটওয়ার্ক পরিবর্তন করে দেখুন। অন্য নেটওয়ার্ক বেছে নিতে ট্যাপ করুন।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"জরুরি কল করা যাবে না"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"জরুরি কলের জন্য মোবাইল নেটওয়ার্ক থাকতে হবে"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"সতর্কতা"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"কল ফরওয়ার্ড করা"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"অ্যাপকে আশেপাশের Ultra-Wideband ডিভাইসগুলির আপেক্ষিক অবস্থান নির্ণয় করার অনুমতি দিন"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"আশপাশের ওয়াই-ফাই ডিভাইসের সাথে ইন্টার‍্যাক্ট করুন"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এটির ফলে অ্যাপ আশপাশের ওয়াই-ফাই ডিভাইসের তথ্য দেখতে, তাদের সাথে কানেক্ট করতে এবং তা কত দূরত্বে আছে সেটি জানতে পারবে"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"আশেপাশের ডিভাইসের আপেক্ষিক অবস্থান নির্ণয় করুন"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"অ্যাপকে আশেপাশের ডিভাইসের আপেক্ষিক অবস্থান নির্ণয় করার অনুমতি দিন"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"পছন্দের NFC পেমেন্ট পরিষেবার তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"অ্যাপের মাধ্যমে পছন্দসই এনএফসি পেমেন্ট পরিষেবার তথ্য, যেমন রেজিস্ট্রার করার সহায়তা এবং রুট ডেস্টিনেশন সম্পর্কিত তথ্য অ্যাক্সেস করার অনুমতি দেয়।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়ার ফিল্ড কমিউনিকেশন নিয়ন্ত্রণ করে"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g>ঘণ্টার মধ্যে"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>দিনের মধ্যে"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g>বছরের মধ্যে"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g>মিনিট আগে"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g>ঘণ্টা আগে"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g>দিন আগে"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g>বছর আগে"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g>মিনিট"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g>ঘণ্টা"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g>দিন"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g>বছর"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g>মিনিটের মধ্যে"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g>ঘণ্টার মধ্যে"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g>দিনের মধ্যে"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g>বছরের মধ্যে"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g>মিনিট আগে"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g>ঘন্টা আগে"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g>দিন আগে"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g>বছর আগে"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# মিনিট আগে}one{# মিনিট আগে}other{# মিনিট আগে}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ঘণ্টা আগে}one{# ঘণ্টা আগে}other{# ঘণ্টা আগে}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# দিন আগে}one{# দিন আগে}other{# দিন আগে}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এক হাতে ব্যবহার করার মোড"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিরিক্ত কম উজ্জ্বলতা"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"হিয়ারিং ডিভাইস"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> চালু করা হয়েছে।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধরে ছিলেন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> বন্ধ করা হয়েছে।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ভলিউম \'কী\' রিলিজ করুন। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> চালু করুন, দু\'টি ভলিউম \'কী\' আবার প্রেস করে ৩ সেকেন্ড ধরে রাখুন।"</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহান্ত"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ইভেন্ট"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"ঘুমানোর সময়"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"বিরক্ত করবে না (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> ম্যানেজ করে"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"চালু আছে"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"বন্ধ আছে"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> থেকে <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"যেকোনও ক্যালেন্ডার"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> কিছু সাউন্ডকে মিউট করে দিচ্ছে"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠান ও রিসিভ করুন"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খুলুন"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"এটি কীভাবে কাজ করে"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"নেটওয়ার্ক অটোমেটিক বেছে নিন\" বিকল্প চালু করুন"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"সেটিংসে \"নেটওয়ার্ক অটোমেটিক বেছে নিন\" বিকল্পটি চালু করলে আপনার ফোন এমন নেটওয়ার্ক বেছে নিতে পারবে যা স্যাটেলাইটের মাধ্যমে কাজ করে"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"চালু করুন"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ফিরে যান"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বাকি আছে…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"স্যাটেলাইট SOS এখন উপলভ্য"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"কোনও মোবাইল বা ওয়াই-ফাই নেটওয়ার্ক না থাকলেও আপনি জরুরি পরিষেবাতে মেসেজ করতে পারবেন। Google Messages অবশ্যই আপনার ডিফল্ট মেসেজিং অ্যাপ হতে হবে।"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"স্যাটেলাইট SOS কাজ করে না"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"এই ডিভাইসে স্যাটেলাইট SOS কাজ করে না"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"স্যাটেলাইট SOS সেট আপ করা হয়নি"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"আপনার ডিভাইসে ইন্টারনেট কানেকশন আছে কিনা দেখে নিন এবং আবার সেটআপ করার চেষ্টা করুন"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"স্যাটেলাইট SOS উপলভ্য নেই"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"এই দেশ অথবা অঞ্চলে স্যাটেলাইট SOS উপলভ্য নেই"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"স্যাটেলাইট SOS সেট আপ করা নেই"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"স্যাটেলাইটের সাহায্যে মেসেজ পাঠাতে, আপনার ডিফল্ট মেসেজিং অ্যাপ হিসেবে Google Messages সেট করুন"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"স্যাটেলাইট SOS উপলভ্য নেই"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"এই দেশে বা অঞ্চলে স্যাটেলাইট SOS উপলভ্য আছে কিনা দেখতে, লোকেশন সেটিংস চালু করুন"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"\'স্যাটেলাইট মেসেজিং\' ফিচার উপলভ্য"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"কোনও মোবাইল বা ওয়াই-ফাই নেটওয়ার্ক না থাকলে, স্যাটেলাইটের মাধ্যমে মেসেজ করতে পারবেন। Google Messages অবশ্যই আপনার ডিফল্ট মেসেজিং অ্যাপ হতে হবে।"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"\'স্যাটেলাইট মেসেজিং\' ফিচার কাজ করে না"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"এই ডিভাইসে \'স্যাটেলাইট মেসেজিং\' ফিচার কাজ করে না"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"\'স্যাটেলাইট মেসেজিং\' ফিচার সেট আপ করা নেই"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"আপনার ডিভাইসে ইন্টারনেট কানেকশন আছে কিনা দেখে নিন এবং আবার সেটআপ করার চেষ্টা করুন"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"\'স্যাটেলাইট মেসেজিং\' ফিচার উপলভ্য নেই"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"এই দেশে বা অঞ্চলে \'স্যাটেলাইট মেসেজিং\' ফিচার উপলভ্য নেই"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"\'স্যাটেলাইট মেসেজিং\' ফিচার সেট আপ করা নেই"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"স্যাটেলাইটের সাহায্যে মেসেজ পাঠাতে, আপনার ডিফল্ট মেসেজিং অ্যাপ হিসেবে Google Messages সেট করুন"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"\'স্যাটেলাইট মেসেজিং\' ফিচার উপলভ্য নেই"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"\'স্যাটেলাইট মেসেজিং\' ফিচার এই দেশে বা অঞ্চলে উপলভ্য আছে কিনা দেখতে, লোকেশন সেটিংস চালু করুন"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"\'ফিঙ্গারপ্রিন্ট আনলক\' আবার সেট-আপ করুন"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> আর শনাক্ত করা যাবে না।"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> ও <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> আর শনাক্ত করা যাবে না।"</string>

@@ -19,8 +19,19 @@ package com.android.server.devicestate;
 import static android.Manifest.permission.CONTROL_DEVICE_STATE;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FEATURE_DUAL_DISPLAY;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FEATURE_REAR_DISPLAY;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN;
+import static android.frameworks.devicestate.DeviceStateConfiguration.DeviceStatePropertyValue.FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY;
 import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY;
+import static android.hardware.devicestate.DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_AVAILABLE_FOR_APP_REQUEST;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_OVERRIDE_REQUESTS;
 import static android.hardware.devicestate.DeviceState.PROPERTY_POLICY_CANCEL_WHEN_REQUESTER_NOT_ON_TOP;
@@ -44,6 +55,10 @@ import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.IProcessObserver;
 import android.content.Context;
+import android.frameworks.devicestate.DeviceStateConfiguration;
+import android.frameworks.devicestate.ErrorCode;
+import android.frameworks.devicestate.IDeviceStateListener;
+import android.frameworks.devicestate.IDeviceStateService;
 import android.hardware.devicestate.DeviceState;
 import android.hardware.devicestate.DeviceStateInfo;
 import android.hardware.devicestate.DeviceStateManager;
@@ -56,9 +71,12 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
+import android.os.ServiceManager;
+import android.os.ServiceSpecificException;
 import android.os.ShellCallback;
 import android.os.SystemProperties;
 import android.os.Trace;
+import android.util.LongSparseLongArray;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -130,6 +148,8 @@ public final class DeviceStateManagerService extends SystemService {
     @NonNull
     private final BinderService mBinderService;
     @NonNull
+    private final HalService mHalService;
+    @NonNull
     private final OverrideRequestController mOverrideRequestController;
     @NonNull
     private final DeviceStateProviderListener mDeviceStateProviderListener;
@@ -139,7 +159,7 @@ public final class DeviceStateManagerService extends SystemService {
 
     // All supported device states keyed by identifier.
     @GuardedBy("mLock")
-    private SparseArray<DeviceState> mDeviceStates = new SparseArray<>();
+    private final SparseArray<DeviceState> mDeviceStates = new SparseArray<>();
 
     // The current committed device state. Will be empty until the first device state provided by
     // the DeviceStateProvider is committed.
@@ -177,7 +197,7 @@ public final class DeviceStateManagerService extends SystemService {
     @GuardedBy("mLock")
     private final SparseArray<ProcessRecord> mProcessRecords = new SparseArray<>();
 
-    private Set<Integer> mDeviceStatesAvailableForAppRequests = new HashSet<>();
+    private final Set<Integer> mDeviceStatesAvailableForAppRequests = new HashSet<>();
 
     private Set<Integer> mFoldedDeviceStates = new HashSet<>();
 
@@ -259,6 +279,7 @@ public final class DeviceStateManagerService extends SystemService {
         mDeviceStateProviderListener = new DeviceStateProviderListener();
         mDeviceStatePolicy.getDeviceStateProvider().setListener(mDeviceStateProviderListener);
         mBinderService = new BinderService();
+        mHalService = new HalService();
         mActivityTaskManagerInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mDeviceStateNotificationController = new DeviceStateNotificationController(
                 context, mHandler,
@@ -272,6 +293,10 @@ public final class DeviceStateManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.DEVICE_STATE_SERVICE, mBinderService);
+        String halServiceName = IDeviceStateService.DESCRIPTOR + "/default";
+        if (ServiceManager.isDeclared(halServiceName)) {
+            publishBinderService(halServiceName, mHalService);
+        }
         publishLocalService(DeviceStateManagerInternal.class, new LocalService());
 
         if (!Flags.deviceStatePropertyMigration()) {
@@ -438,6 +463,11 @@ public final class DeviceStateManagerService extends SystemService {
     @VisibleForTesting
     IDeviceStateManager getBinderService() {
         return mBinderService;
+    }
+
+    @VisibleForTesting
+    IDeviceStateService getHalBinderService() {
+        return mHalService;
     }
 
     private void updateSupportedStates(DeviceState[] supportedDeviceStates,
@@ -825,7 +855,7 @@ public final class DeviceStateManagerService extends SystemService {
         }
     }
 
-    private void requestStateInternal(int state, int flags, int callingPid, int callingUid,
+    private void requestStateInternal(int requestedState, int flags, int callingPid, int callingUid,
             @NonNull IBinder token, boolean hasControlDeviceStatePermission) {
         synchronized (mLock) {
             final ProcessRecord processRecord = mProcessRecords.get(callingPid);
@@ -840,19 +870,30 @@ public final class DeviceStateManagerService extends SystemService {
                         + " token: " + token);
             }
 
-            final Optional<DeviceState> deviceState = getStateLocked(state);
-            if (!deviceState.isPresent()) {
-                throw new IllegalArgumentException("Requested state: " + state
+            final Optional<DeviceState> requestedDeviceState = getStateLocked(requestedState);
+            if (requestedDeviceState.isEmpty()) {
+                throw new IllegalArgumentException("Requested state: " + requestedState
                         + " is not supported.");
             }
 
-            OverrideRequest request = new OverrideRequest(token, callingPid, callingUid,
-                    deviceState.get(), flags, OVERRIDE_REQUEST_TYPE_EMULATED_STATE);
+            final OverrideRequest request = new OverrideRequest(token, callingPid, callingUid,
+                    requestedDeviceState.get(), flags, OVERRIDE_REQUEST_TYPE_EMULATED_STATE);
 
             if (Flags.deviceStatePropertyMigration()) {
-                // If we don't have the CONTROL_DEVICE_STATE permission, we want to show the overlay
-                if (!hasControlDeviceStatePermission && deviceState.get().hasProperty(
-                        PROPERTY_FEATURE_REAR_DISPLAY)) {
+                final boolean isRequestingRdm = requestedDeviceState.get()
+                        .hasProperty(PROPERTY_FEATURE_REAR_DISPLAY);
+                final boolean isRequestingRdmOuterDefault = requestedDeviceState.get()
+                        .hasProperty(PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT);
+
+                final boolean isDeviceClosed = mCommittedState.isEmpty() ? false
+                        : mCommittedState.get().hasProperty(
+                                PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED);
+
+                final boolean shouldShowRdmEduDialog = isRequestingRdm && shouldShowRdmEduDialog(
+                        hasControlDeviceStatePermission, isRequestingRdmOuterDefault,
+                        isDeviceClosed);
+
+                if (shouldShowRdmEduDialog) {
                     showRearDisplayEducationalOverlayLocked(request);
                 } else {
                     mOverrideRequestController.addRequest(request);
@@ -860,12 +901,34 @@ public final class DeviceStateManagerService extends SystemService {
             } else {
                 // If we don't have the CONTROL_DEVICE_STATE permission, we want to show the overlay
                 if (!hasControlDeviceStatePermission && mRearDisplayState != null
-                        && state == mRearDisplayState.getIdentifier()) {
+                        && requestedState == mRearDisplayState.getIdentifier()) {
                     showRearDisplayEducationalOverlayLocked(request);
                 } else {
                     mOverrideRequestController.addRequest(request);
                 }
             }
+        }
+    }
+
+    /**
+     * Determines if the system should show an educational dialog before entering rear display mode
+     * @param hasControlDeviceStatePermission If the app has the CONTROL_DEVICE_STATE permission, we
+     *                                        don't need to show the overlay
+     * @param requestingRdmOuterDefault True if the system is requesting
+     *                                  PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT
+     * @param isDeviceClosed True if the device is closed (folded) when the request was made
+     */
+    @VisibleForTesting
+    static boolean shouldShowRdmEduDialog(boolean hasControlDeviceStatePermission,
+            boolean requestingRdmOuterDefault, boolean isDeviceClosed) {
+        if (hasControlDeviceStatePermission) {
+            return false;
+        }
+
+        if (requestingRdmOuterDefault) {
+            return isDeviceClosed;
+        } else {
+            return true;
         }
     }
 
@@ -1279,6 +1342,124 @@ public final class DeviceStateManagerService extends SystemService {
                             ex);
                 }
             });
+        }
+    }
+
+    private final class HalService extends IDeviceStateService.Stub {
+        private final LongSparseLongArray mPublicProperties = new LongSparseLongArray();
+        public HalService() {
+            mPublicProperties.put(
+                    DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED,
+                    FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED);
+            mPublicProperties.put(
+                    DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN,
+                    FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_HALF_OPEN);
+            mPublicProperties.put(
+                    DeviceState.PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN,
+                    FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_OPEN);
+            mPublicProperties.put(
+                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY,
+                    FOLDABLE_DISPLAY_CONFIGURATION_OUTER_PRIMARY);
+            mPublicProperties.put(
+                    PROPERTY_FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY,
+                    FOLDABLE_DISPLAY_CONFIGURATION_INNER_PRIMARY);
+            mPublicProperties.put(
+                    PROPERTY_FEATURE_REAR_DISPLAY,
+                    FEATURE_REAR_DISPLAY);
+            mPublicProperties.put(
+                    PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT,
+                    FEATURE_DUAL_DISPLAY);
+        }
+
+        private final class HalBinderCallback implements IDeviceStateManagerCallback {
+            private final IDeviceStateListener mListener;
+
+            private HalBinderCallback(@NonNull IDeviceStateListener listener) {
+                mListener = listener;
+            }
+
+            @Override
+            public void onDeviceStateInfoChanged(DeviceStateInfo info) throws RemoteException {
+                DeviceStateConfiguration config = new DeviceStateConfiguration();
+                Set<Integer> systemProperties = new HashSet<>(
+                        info.currentState.getConfiguration().getSystemProperties());
+                Set<Integer> physicalProperties = new HashSet<>(
+                        info.currentState.getConfiguration().getPhysicalProperties());
+                config.deviceProperties = 0;
+                for (Integer prop : systemProperties) {
+                    Long publicProperty = mPublicProperties.get(prop);
+                    if (publicProperty != null) {
+                        config.deviceProperties |= publicProperty.longValue();
+                    }
+                }
+                for (Integer prop : physicalProperties) {
+                    Long publicProperty = mPublicProperties.get(prop);
+                    if (publicProperty != null) {
+                        config.deviceProperties |= publicProperty.longValue();
+                    }
+                }
+                mListener.onDeviceStateChanged(config);
+            }
+
+            @Override
+            public void onRequestActive(IBinder token) {
+                //No-op
+            }
+
+            @Override
+            public void onRequestCanceled(IBinder token) {
+                //No-op
+            }
+
+            @Override
+            public IBinder asBinder() {
+                return mListener.asBinder();
+            }
+        }
+
+        @Override
+        public void registerListener(IDeviceStateListener listener) throws RemoteException {
+            if (listener == null) {
+                throw new ServiceSpecificException(ErrorCode.BAD_INPUT);
+            }
+
+            final int callingPid = Binder.getCallingPid();
+            final long token = Binder.clearCallingIdentity();
+            try {
+                HalBinderCallback callback = new HalBinderCallback(listener);
+                DeviceStateInfo info = registerProcess(callingPid, callback);
+                if (info != null)  {
+                    callback.onDeviceStateInfoChanged(info);
+                }
+            } catch (SecurityException e) {
+                throw new ServiceSpecificException(ErrorCode.ALREADY_EXISTS);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void unregisterListener(IDeviceStateListener listener) throws RemoteException {
+            final int callingPid = Binder.getCallingPid();
+
+            synchronized (mLock) {
+                if (mProcessRecords.contains(callingPid)) {
+                    mProcessRecords.remove(callingPid);
+                    return;
+                }
+            }
+
+            throw new ServiceSpecificException(ErrorCode.BAD_INPUT);
+        }
+
+        @Override
+        public int getInterfaceVersion() throws RemoteException {
+            return IDeviceStateService.VERSION;
+        }
+
+        @Override
+        public String getInterfaceHash() throws RemoteException {
+            return IDeviceStateService.HASH;
         }
     }
 

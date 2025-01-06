@@ -53,16 +53,6 @@ flag {
 
 flag {
      namespace: "backstage_power"
-     name: "gate_fgs_timeout_anr_behavior"
-     description: "Gate the new behavior where an ANR is thrown once an FGS times out."
-     bug: "339315145"
-     metadata {
-         purpose: PURPOSE_BUGFIX
-     }
-}
-
-flag {
-     namespace: "backstage_power"
      name: "enable_fgs_timeout_crash_behavior"
      description: "Enable the new behavior where the app is crashed once an FGS times out."
      bug: "339526947"
@@ -164,4 +154,12 @@ flag {
      name: "app_start_info_component"
      description: "Control ApplicationStartInfo component field and API"
      bug: "362537357"
+     is_exported: true
+}
+
+flag {
+    name: "jank_perceptible_narrow"
+    namespace: "system_performance"
+    description: "Narrow the scope of Jank Perceptible"
+    bug: "304837972"
 }

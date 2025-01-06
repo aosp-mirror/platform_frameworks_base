@@ -17,6 +17,8 @@
 package com.android.server.location.contexthub;
 
 import android.chre.flags.Flags;
+import android.hardware.contexthub.IEndpointCommunication;
+import android.hardware.contexthub.Message;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubTransactionCallback;
 import android.hardware.location.NanoAppBinary;
@@ -84,9 +86,9 @@ import java.util.concurrent.atomic.AtomicInteger;
     protected final Map<Integer, ContextHubServiceTransaction> mReliableMessageTransactionMap =
             new HashMap<>();
 
-    /** A set of host endpoint IDs that have an active pending transaction. */
+    /** A set of IDs of transaction owners that have an active pending transaction. */
     @GuardedBy("mReliableMessageLock")
-    protected final Set<Short> mReliableMessageHostEndpointIdActiveSet = new HashSet<>();
+    protected final Set<Long> mReliableMessageOwnerIdActiveSet = new HashSet<>();
 
     protected final AtomicInteger mNextAvailableId = new AtomicInteger();
 
@@ -355,29 +357,78 @@ import java.util.concurrent.atomic.AtomicInteger;
     /**
      * Creates a transaction to send a reliable message.
      *
-     * @param hostEndpointId      The ID of the host endpoint sending the message.
-     * @param contextHubId        The ID of the hub to send the message to.
-     * @param message             The message to send.
+     * @param ownerId The ID of the transaction owner.
+     * @param contextHubId The ID of the hub to send the message to.
+     * @param message The message to send.
      * @param transactionCallback The callback of the transactions.
-     * @param packageName         The host package associated with this transaction.
+     * @param packageName The host package associated with this transaction.
      * @return The generated transaction.
      */
     /* package */ ContextHubServiceTransaction createMessageTransaction(
-            short hostEndpointId, int contextHubId, NanoAppMessage message,
-            IContextHubTransactionCallback transactionCallback, String packageName) {
-        return new ContextHubServiceTransaction(mNextAvailableId.getAndIncrement(),
-                ContextHubTransaction.TYPE_RELIABLE_MESSAGE, packageName,
-                mNextAvailableMessageSequenceNumber.getAndIncrement(), hostEndpointId) {
+            short ownerId,
+            int contextHubId,
+            NanoAppMessage message,
+            IContextHubTransactionCallback transactionCallback,
+            String packageName) {
+        return new ContextHubServiceTransaction(
+                mNextAvailableId.getAndIncrement(),
+                ContextHubTransaction.TYPE_RELIABLE_MESSAGE,
+                packageName,
+                mNextAvailableMessageSequenceNumber.getAndIncrement(),
+                ownerId) {
             @Override
             /* package */ int onTransact() {
                 try {
                     message.setIsReliable(/* isReliable= */ true);
                     message.setMessageSequenceNumber(getMessageSequenceNumber());
 
-                    return mContextHubProxy.sendMessageToContextHub(hostEndpointId, contextHubId,
-                            message);
+                    return mContextHubProxy.sendMessageToContextHub(ownerId, contextHubId, message);
                 } catch (RemoteException e) {
                     Log.e(TAG, "RemoteException while trying to send a reliable message", e);
+                    return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
+                }
+            }
+
+            @Override
+            /* package */ void onTransactionComplete(@ContextHubTransaction.Result int result) {
+                try {
+                    transactionCallback.onTransactionComplete(result);
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while calling client onTransactionComplete", e);
+                }
+            }
+        };
+    }
+
+    /**
+     * Creates a transaction to send a message through a session.
+     *
+     * @param hubInterface Interface for interacting with other endpoint hubs.
+     * @param sessionId The ID of the endpoint session the message should be sent through.
+     * @param message The message to send.
+     * @param transactionCallback The callback of the transactions.
+     * @return The generated transaction.
+     */
+    /* package */ ContextHubServiceTransaction createSessionMessageTransaction(
+            IEndpointCommunication hubInterface,
+            int sessionId,
+            Message message,
+            String packageName,
+            IContextHubTransactionCallback transactionCallback) {
+        return new ContextHubServiceTransaction(
+                mNextAvailableId.getAndIncrement(),
+                ContextHubTransaction.TYPE_HUB_MESSAGE_REQUIRES_RESPONSE,
+                packageName,
+                mNextAvailableMessageSequenceNumber.getAndIncrement(),
+                sessionId) {
+            @Override
+            /* package */ int onTransact() {
+                try {
+                    message.sequenceNumber = getMessageSequenceNumber();
+                    hubInterface.sendMessageToEndpoint(sessionId, message);
+                    return ContextHubTransaction.RESULT_SUCCESS;
+                } catch (RemoteException e) {
+                    Log.e(TAG, "RemoteException while trying to send a session message", e);
                     return ContextHubTransaction.RESULT_FAILED_UNKNOWN;
                 }
             }
@@ -452,9 +503,14 @@ import java.util.concurrent.atomic.AtomicInteger;
             mTransactionRecordDeque.add(new TransactionRecord(transaction.toString()));
         }
 
-        if (Flags.reliableMessageRetrySupportService()
-                && transaction.getTransactionType()
-                        == ContextHubTransaction.TYPE_RELIABLE_MESSAGE) {
+        boolean isReliableMessage =
+                Flags.reliableMessageRetrySupportService()
+                        && (transaction.getTransactionType()
+                                == ContextHubTransaction.TYPE_RELIABLE_MESSAGE);
+        boolean isEndpointMessage =
+                (transaction.getTransactionType()
+                        == ContextHubTransaction.TYPE_HUB_MESSAGE_REQUIRES_RESPONSE);
+        if (isReliableMessage || isEndpointMessage) {
             synchronized (mReliableMessageLock) {
                 if (mReliableMessageTransactionMap.size() >= MAX_PENDING_REQUESTS) {
                     throw new IllegalStateException(
@@ -492,14 +548,21 @@ import java.util.concurrent.atomic.AtomicInteger;
     /* package */
     void onTransactionResponse(int transactionId, boolean success) {
         TransactionAcceptConditions conditions =
-                transaction -> transaction.getTransactionId() == transactionId;
+                transaction -> {
+                    if (transaction.getTransactionId() != transactionId) {
+                        Log.w(
+                                TAG,
+                                "Unexpected transaction: expected "
+                                        + transactionId
+                                        + ", received "
+                                        + transaction.getTransactionId());
+                        return false;
+                    }
+                    return true;
+                };
         ContextHubServiceTransaction transaction = getTransactionAndHandleNext(conditions);
         if (transaction == null) {
-            Log.w(TAG, "Received unexpected transaction response (expected ID = "
-                    + transactionId
-                    + ", received ID = "
-                    + transaction.getTransactionId()
-                    + ")");
+            Log.w(TAG, "Received unexpected transaction response");
             return;
         }
 
@@ -581,7 +644,7 @@ import java.util.concurrent.atomic.AtomicInteger;
                 transaction.getTransactionType() == ContextHubTransaction.TYPE_QUERY_NANOAPPS;
         ContextHubServiceTransaction transaction = getTransactionAndHandleNext(conditions);
         if (transaction == null) {
-            Log.w(TAG, "Received unexpected query response (expected " + transaction + ")");
+            Log.w(TAG, "Received unexpected query response");
             return;
         }
 
@@ -759,10 +822,10 @@ import java.util.concurrent.atomic.AtomicInteger;
                         mReliableMessageTransactionMap.entrySet().iterator();
                 while (iter.hasNext()) {
                     ContextHubServiceTransaction transaction = iter.next().getValue();
-                    short hostEndpointId = transaction.getHostEndpointId();
+                    long ownerId = transaction.getOwnerId();
                     int numCompletedStartCalls = transaction.getNumCompletedStartCalls();
                     if (numCompletedStartCalls == 0
-                            && mReliableMessageHostEndpointIdActiveSet.contains(hostEndpointId)) {
+                            && mReliableMessageOwnerIdActiveSet.contains(ownerId)) {
                         continue;
                     }
 
@@ -864,7 +927,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         } else {
             iter.remove();
         }
-        mReliableMessageHostEndpointIdActiveSet.remove(transaction.getHostEndpointId());
+        mReliableMessageOwnerIdActiveSet.remove(transaction.getOwnerId());
     }
 
     /**
@@ -899,7 +962,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             transaction.setTimeoutTime(now + RELIABLE_MESSAGE_TIMEOUT.toNanos());
         }
         transaction.setNumCompletedStartCalls(numCompletedStartCalls + 1);
-        mReliableMessageHostEndpointIdActiveSet.add(transaction.getHostEndpointId());
+        mReliableMessageOwnerIdActiveSet.add(transaction.getOwnerId());
     }
 
     private int toStatsTransactionResult(@ContextHubTransaction.Result int result) {

@@ -21,7 +21,6 @@ import android.content.Context
 import android.graphics.drawable.AnimatedImageDrawable
 import android.view.View
 import android.view.ViewGroup
-import android.view.ViewGroup.MarginLayoutParams
 import com.android.internal.widget.CachingIconView
 import com.android.internal.widget.ConversationLayout
 import com.android.internal.widget.MessagingGroup
@@ -94,13 +93,6 @@ class NotificationConversationTemplateViewWrapper(
         // Reinspect the notification. Before the super call, because the super call also updates
         // the transformation types and we need to have our values set by then.
         resolveViews()
-        if (Flags.notificationsRedesignAppIcons() && row.isShowingAppIcon) {
-            // Override the margins to be 2dp instead of 4dp according to the new design if we're
-            // showing the app icon.
-            val lp = badgeIconView.layoutParams as MarginLayoutParams
-            lp.setMargins(2, 2, 2, 2)
-            badgeIconView.layoutParams = lp
-        }
         super.onContentUpdated(row)
     }
 

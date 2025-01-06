@@ -17,6 +17,8 @@
 package com.android.server.input;
 
 import static android.hardware.input.InputGestureData.createKeyTrigger;
+
+import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
@@ -171,7 +173,7 @@ final class InputGestureManager {
                 ),
                 createKeyGesture(
                         KeyEvent.KEYCODE_DPAD_LEFT,
-                        KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                        KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
                         KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT
                 ),
                 createKeyGesture(
@@ -181,7 +183,7 @@ final class InputGestureManager {
                 ),
                 createKeyGesture(
                         KeyEvent.KEYCODE_DPAD_RIGHT,
-                        KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                        KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
                         KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT
                 ),
                 createKeyGesture(
@@ -209,12 +211,58 @@ final class InputGestureManager {
                     KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY
             ));
         }
-        if (keyboardA11yShortcutControl()) {
-            systemShortcuts.add(createKeyGesture(
-                    KeyEvent.KEYCODE_T,
+        if (enableTalkbackAndMagnifierKeyGestures()) {
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_T,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK
+                    KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_MINUS,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_EQUALS,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_LEFT,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_RIGHT,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_UP,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_DOWN,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_M,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION));
+            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_S,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK));
+        }
+        if (enableTaskResizingKeyboardShortcuts()) {
+            systemShortcuts.add(createKeyGesture(
+                    KeyEvent.KEYCODE_LEFT_BRACKET,
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW
             ));
+            systemShortcuts.add(createKeyGesture(
+                    KeyEvent.KEYCODE_RIGHT_BRACKET,
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW
+            ));
+            systemShortcuts.add(createKeyGesture(
+                    KeyEvent.KEYCODE_EQUALS,
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW
+            ));
+            systemShortcuts.add(createKeyGesture(
+                    KeyEvent.KEYCODE_MINUS,
+                    KeyEvent.META_META_ON,
+                    KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW
+            ));
+        }
+        if (keyboardA11yShortcutControl()) {
             if (InputSettings.isAccessibilityBounceKeysFeatureEnabled()) {
                 systemShortcuts.add(createKeyGesture(
                         KeyEvent.KEYCODE_3,
@@ -241,28 +289,6 @@ final class InputGestureManager {
                         KeyEvent.KEYCODE_6,
                         KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                         KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS
-                ));
-            }
-            if (enableTaskResizingKeyboardShortcuts()) {
-                systemShortcuts.add(createKeyGesture(
-                        KeyEvent.KEYCODE_LEFT_BRACKET,
-                        KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW
-                ));
-                systemShortcuts.add(createKeyGesture(
-                        KeyEvent.KEYCODE_RIGHT_BRACKET,
-                        KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW
-                ));
-                systemShortcuts.add(createKeyGesture(
-                        KeyEvent.KEYCODE_EQUALS,
-                        KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_MAXIMIZE_FREEFORM_WINDOW
-                ));
-                systemShortcuts.add(createKeyGesture(
-                        KeyEvent.KEYCODE_MINUS,
-                        KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_RESTORE_FREEFORM_WINDOW_SIZE
                 ));
             }
         }
@@ -321,26 +347,50 @@ final class InputGestureManager {
                 return InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_DOES_NOT_EXIST;
             }
             customGestures.remove(data.getTrigger());
-            if (customGestures.size() == 0) {
+            if (customGestures.isEmpty()) {
                 mCustomInputGestures.remove(userId);
             }
             return InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS;
         }
     }
 
-    public void removeAllCustomInputGestures(int userId) {
+    public void removeAllCustomInputGestures(int userId, @Nullable InputGestureData.Filter filter) {
         synchronized (mGestureLock) {
-            mCustomInputGestures.remove(userId);
+            Map<InputGestureData.Trigger, InputGestureData> customGestures =
+                    mCustomInputGestures.get(userId);
+            if (customGestures == null) {
+                return;
+            }
+            if (filter == null) {
+                mCustomInputGestures.remove(userId);
+                return;
+            }
+            customGestures.entrySet().removeIf(entry -> filter.matches(entry.getValue()));
+            if (customGestures.isEmpty()) {
+                mCustomInputGestures.remove(userId);
+            }
         }
     }
 
     @NonNull
-    public List<InputGestureData> getCustomInputGestures(int userId) {
+    public List<InputGestureData> getCustomInputGestures(int userId,
+            @Nullable InputGestureData.Filter filter) {
         synchronized (mGestureLock) {
             if (!mCustomInputGestures.contains(userId)) {
                 return List.of();
             }
-            return new ArrayList<>(mCustomInputGestures.get(userId).values());
+            Map<InputGestureData.Trigger, InputGestureData> customGestures =
+                    mCustomInputGestures.get(userId);
+            if (filter == null) {
+                return new ArrayList<>(customGestures.values());
+            }
+            List<InputGestureData> result = new ArrayList<>();
+            for (InputGestureData customGesture : customGestures.values()) {
+                if (filter.matches(customGesture)) {
+                    result.add(customGesture);
+                }
+            }
+            return result;
         }
     }
 
@@ -358,6 +408,22 @@ final class InputGestureManager {
             }
             int modifierState = event.getMetaState() & KEY_GESTURE_META_MASK;
             return customGestures.get(InputGestureData.createKeyTrigger(keyCode, modifierState));
+        }
+    }
+
+    @Nullable
+    public InputGestureData getCustomGestureForTouchpadGesture(@UserIdInt int userId,
+            int touchpadGestureType) {
+        if (touchpadGestureType == InputGestureData.TOUCHPAD_GESTURE_TYPE_UNKNOWN) {
+            return null;
+        }
+        synchronized (mGestureLock) {
+            Map<InputGestureData.Trigger, InputGestureData> customGestures =
+                    mCustomInputGestures.get(userId);
+            if (customGestures == null) {
+                return null;
+            }
+            return customGestures.get(InputGestureData.createTouchpadTrigger(touchpadGestureType));
         }
     }
 

@@ -122,6 +122,6 @@ class DesktopTilingDividerWindowManagerTest : ShellTestCase() {
 
     companion object {
         private val BOUNDS = Rect(1, 2, 3, 4)
-        private val CORNER_RADIUS = 28
+        private const val CORNER_RADIUS = 28
     }
 }

@@ -73,7 +73,11 @@ class FlashlightMapperTest : SysuiTestCase() {
             mapper.map(qsTileConfig, FlashlightTileModel.FlashlightAvailable(true))
 
         val expectedIcon =
-            Icon.Loaded(context.getDrawable(R.drawable.qs_flashlight_icon_on)!!, null)
+            Icon.Loaded(
+                context.getDrawable(R.drawable.qs_flashlight_icon_on)!!,
+                null,
+                R.drawable.qs_flashlight_icon_on,
+            )
         val actualIcon = tileState.icon
         assertThat(actualIcon).isEqualTo(expectedIcon)
     }
@@ -84,7 +88,11 @@ class FlashlightMapperTest : SysuiTestCase() {
             mapper.map(qsTileConfig, FlashlightTileModel.FlashlightAvailable(false))
 
         val expectedIcon =
-            Icon.Loaded(context.getDrawable(R.drawable.qs_flashlight_icon_off)!!, null)
+            Icon.Loaded(
+                context.getDrawable(R.drawable.qs_flashlight_icon_off)!!,
+                null,
+                R.drawable.qs_flashlight_icon_off,
+            )
         val actualIcon = tileState.icon
         assertThat(actualIcon).isEqualTo(expectedIcon)
     }
@@ -95,7 +103,11 @@ class FlashlightMapperTest : SysuiTestCase() {
             mapper.map(qsTileConfig, FlashlightTileModel.FlashlightTemporarilyUnavailable)
 
         val expectedIcon =
-            Icon.Loaded(context.getDrawable(R.drawable.qs_flashlight_icon_off)!!, null)
+            Icon.Loaded(
+                context.getDrawable(R.drawable.qs_flashlight_icon_off)!!,
+                null,
+                R.drawable.qs_flashlight_icon_off,
+            )
         val actualIcon = tileState.icon
         assertThat(actualIcon).isEqualTo(expectedIcon)
     }

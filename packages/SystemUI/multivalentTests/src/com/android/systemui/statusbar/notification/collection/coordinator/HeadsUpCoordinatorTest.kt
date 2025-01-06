@@ -28,7 +28,6 @@ import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.statusbar.NotificationRemoteInputManager
 import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
-import com.android.systemui.statusbar.notification.HeadsUpManagerPhone
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
 import com.android.systemui.statusbar.notification.collection.GroupEntryBuilder
 import com.android.systemui.statusbar.notification.collection.NotifPipeline
@@ -39,20 +38,19 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.OnBefo
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifPromoter
 import com.android.systemui.statusbar.notification.collection.listbuilder.pluggable.NotifSectioner
 import com.android.systemui.statusbar.notification.collection.mockNotifCollection
-import com.android.systemui.statusbar.notification.collection.notifCollection
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifCollectionListener
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender.OnEndLifetimeExtensionCallback
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManagerImpl
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProvider.FullScreenIntentDecision
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.DecisionImpl
 import com.android.systemui.statusbar.notification.interruption.NotificationInterruptStateProviderWrapper.FullScreenIntentDecisionImpl
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
-import com.android.systemui.statusbar.notification.row.NotifBindPipeline.BindCallback
 import com.android.systemui.statusbar.phone.NotificationGroupTestHelper
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.testKosmos
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
@@ -77,6 +75,7 @@ import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.argumentCaptor
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -84,7 +83,9 @@ import org.mockito.MockitoAnnotations
 class HeadsUpCoordinatorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
-    private val statusBarNotificationChipsInteractor = kosmos.statusBarNotificationChipsInteractor
+    private val statusBarNotificationChipsInteractor by lazy {
+        kosmos.statusBarNotificationChipsInteractor
+    }
     private val notifCollection = kosmos.mockNotifCollection
 
     private lateinit var coordinator: HeadsUpCoordinator
@@ -101,7 +102,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
     private val notifPipeline: NotifPipeline = mock()
     private val logger = HeadsUpCoordinatorLogger(logcatLogBuffer(), verbose = true)
-    private val headsUpManager: HeadsUpManagerPhone = mock()
+    private val headsUpManager: HeadsUpManagerImpl = mock()
     private val headsUpViewBinder: HeadsUpViewBinder = mock()
     private val visualInterruptionDecisionProvider: VisualInterruptionDecisionProvider = mock()
     private val remoteInputManager: NotificationRemoteInputManager = mock()
@@ -314,7 +315,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // WHEN the notification is added but not yet binding
         collectionListener.onEntryAdded(entry)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any(), any())
 
         // THEN only promote mEntry
         assertTrue(notifPromoter.shouldPromoteToTopLevel(entry))
@@ -329,7 +330,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(entry)
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(entry))
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
-        verify(headsUpViewBinder).bindHeadsUpView(eq(entry), any())
+        verify(headsUpViewBinder).bindHeadsUpView(eq(entry), eq(false), any())
 
         // THEN only promote mEntry
         assertTrue(notifPromoter.shouldPromoteToTopLevel(entry))
@@ -381,11 +382,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(entry)
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(entry))
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
-        verify(headsUpManager, never()).showNotification(entry)
-        withArgCaptor<BindCallback> {
-                verify(headsUpViewBinder).bindHeadsUpView(eq(entry), capture())
-            }
-            .onBindFinished(entry)
+
+        finishBind(entry)
 
         // THEN we tell the HeadsUpManager to show the notification
         verify(headsUpManager).showNotification(entry)
@@ -400,8 +398,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
 
         // THEN we never bind the heads up view or tell HeadsUpManager to show the notification
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any())
-        verify(headsUpManager, never()).showNotification(entry)
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any(), any())
+        verify(headsUpManager, never()).showNotification(eq(entry), any())
     }
 
     @Test
@@ -434,8 +432,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
 
         // THEN the notification is never bound or shown
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
-        verify(headsUpManager, never()).showNotification(any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
+        verify(headsUpManager, never()).showNotification(any(), any())
     }
 
     @Test
@@ -470,7 +468,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
 
             finishBind(entry)
-            verify(headsUpManager).showNotification(entry)
+            verify(headsUpManager).showNotification(entry, isPinnedByUser = true)
         }
 
     @Test
@@ -484,8 +482,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             executor.runAllReady()
             beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
 
-            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any())
-            verify(headsUpManager, never()).showNotification(entry)
+            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any(), any())
+            verify(headsUpManager, never()).showNotification(eq(entry), any())
         }
 
     @Test
@@ -508,7 +506,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
             // THEN it's still shown as heads up
             finishBind(entry)
-            verify(headsUpManager).showNotification(entry)
+            verify(headsUpManager).showNotification(entry, isPinnedByUser = true)
         }
 
     @Test
@@ -524,8 +522,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             beforeTransformGroupsListener.onBeforeTransformGroups(listOf(promotedEntry))
             beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(promotedEntry))
 
-            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(promotedEntry), any())
-            verify(headsUpManager, never()).showNotification(promotedEntry)
+            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(promotedEntry), any(), any())
+            verify(headsUpManager, never()).showNotification(eq(promotedEntry), any())
 
             // Then a new notification comes in that should be heads up
             setShouldHeadsUp(entry, false)
@@ -543,10 +541,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
             // THEN the promoted entry is shown as a HUN, *not* the new entry
             finishBind(promotedEntry)
-            verify(headsUpManager).showNotification(promotedEntry)
+            verify(headsUpManager).showNotification(promotedEntry, isPinnedByUser = true)
 
-            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any())
-            verify(headsUpManager, never()).showNotification(entry)
+            verify(headsUpViewBinder, never()).bindHeadsUpView(eq(entry), any(), any())
+            verify(headsUpManager, never()).showNotification(eq(entry), any())
         }
 
     @Test
@@ -557,10 +555,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(groupSummary)
         collectionListener.onEntryAdded(groupSibling1)
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupSibling1))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupSibling1))
 
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any(), any())
         finishBind(groupSibling1)
 
         verify(headsUpManager, never()).showNotification(groupSummary)
@@ -579,10 +577,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(groupSummary)
         collectionListener.onEntryAdded(groupChild1)
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupChild1))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupChild1))
 
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any(), any())
         finishBind(groupChild1)
 
         verify(headsUpManager, never()).showNotification(groupSummary)
@@ -602,12 +600,12 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(groupSibling2)
         val entryList = listOf(groupSibling1, groupSibling2)
         beforeTransformGroupsListener.onBeforeTransformGroups(entryList)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(entryList)
 
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any(), any())
         finishBind(groupSibling1)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any(), any())
 
         // THEN we tell the HeadsUpManager to show the notification
         verify(headsUpManager, never()).showNotification(groupSummary)
@@ -628,12 +626,12 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         collectionListener.onEntryAdded(groupChild2)
         val entryList = listOf(groupChild1, groupChild2)
         beforeTransformGroupsListener.onBeforeTransformGroups(entryList)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(entryList)
 
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any(), any())
         finishBind(groupChild1)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupChild2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupChild2), any(), any())
 
         // THEN we tell the HeadsUpManager to show the notification
         verify(headsUpManager, never()).showNotification(groupSummary)
@@ -660,7 +658,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
                 .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
                 .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(beforeTransformGroup))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
 
         val afterTransformGroup =
             GroupEntryBuilder()
@@ -671,10 +669,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             listOf(groupPriority, afterTransformGroup)
         )
 
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any(), any())
         finishBind(groupPriority)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any(), any())
 
         // THEN we tell the HeadsUpManager to show the notification
         verify(headsUpManager, never()).showNotification(groupSummary)
@@ -701,7 +699,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
                 .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
                 .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(beforeTransformGroup))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
 
         val afterTransformGroup =
             GroupEntryBuilder()
@@ -712,10 +710,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             listOf(groupPriority, afterTransformGroup)
         )
 
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any(), any())
         finishBind(groupPriority)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any(), any())
 
         verify(headsUpManager, never()).showNotification(groupSummary)
         verify(headsUpManager).showNotification(groupPriority)
@@ -739,7 +737,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
                 .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
                 .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(beforeTransformGroup))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
 
         val afterTransformGroup =
             GroupEntryBuilder()
@@ -750,10 +748,10 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
             listOf(groupPriority, afterTransformGroup)
         )
 
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any(), any())
         finishBind(groupPriority)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any(), any())
 
         verify(headsUpManager, never()).showNotification(groupSummary)
         verify(headsUpManager).showNotification(groupPriority)
@@ -778,7 +776,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
                 .setChildren(listOf(groupSibling1, groupPriority, groupSibling2))
                 .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(beforeTransformGroup))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
 
         val afterTransformGroup =
             GroupEntryBuilder()
@@ -790,9 +788,9 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         )
 
         finishBind(groupSummary)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupPriority), any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupPriority), any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any(), any())
 
         verify(headsUpManager).showNotification(groupSummary)
         verify(headsUpManager, never()).showNotification(groupPriority)
@@ -815,12 +813,12 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
                 .setChildren(listOf(groupSibling1, groupSibling2))
                 .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupEntry))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupEntry))
 
         finishBind(groupSummary)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling1), any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSibling2), any(), any())
 
         verify(headsUpManager).showNotification(groupSummary)
         verify(headsUpManager, never()).showNotification(groupSibling1)
@@ -841,12 +839,12 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
                 .setChildren(listOf(groupChild1, groupChild2))
                 .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupEntry))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupEntry))
 
         finishBind(groupSummary)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupChild1), any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupChild2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupChild1), any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupChild2), any(), any())
 
         verify(headsUpManager).showNotification(groupSummary)
         verify(headsUpManager, never()).showNotification(groupChild1)
@@ -870,12 +868,12 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
                 .setChildren(listOf(groupChild1, groupChild2))
                 .build()
         beforeTransformGroupsListener.onBeforeTransformGroups(listOf(groupEntry))
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(groupEntry))
 
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupSummary), any(), any())
         finishBind(groupChild1)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupChild2), any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(eq(groupChild2), any(), any())
 
         verify(headsUpManager, never()).showNotification(groupSummary)
         verify(headsUpManager).showNotification(groupChild1)
@@ -899,7 +897,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN the notification is shown
         finishBind(entry)
-        verify(headsUpManager).showNotification(entry)
+        verify(headsUpManager).showNotification(entry, isPinnedByUser = false)
     }
 
     @Test
@@ -916,8 +914,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
 
         // THEN the notification is never bound or shown
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
-        verify(headsUpManager, never()).showNotification(any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
+        verify(headsUpManager, never()).showNotification(any(), any())
     }
 
     @Test
@@ -937,7 +935,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN the notification is shown
         finishBind(entry)
-        verify(headsUpManager).showNotification(entry)
+        verify(headsUpManager).showNotification(entry, isPinnedByUser = false)
     }
 
     @Test
@@ -957,8 +955,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         beforeFinalizeFilterListener.onBeforeFinalizeFilter(listOf(entry))
 
         // THEN the notification is never bound or shown
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
-        verify(headsUpManager, never()).showNotification(any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
+        verify(headsUpManager, never()).showNotification(any(), any())
     }
 
     @Test
@@ -1021,8 +1019,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN it should full screen and log but it should NOT HUN
         verify(launchFullScreenIntentProvider).launchFullScreenIntent(entry)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
-        verify(headsUpManager, never()).showNotification(any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
+        verify(headsUpManager, never()).showNotification(any(), any())
         verifyLoggedFullScreenIntentDecision(
             entry,
             FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE,
@@ -1062,8 +1060,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN it should still not yet full screen or HUN
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
-        verify(headsUpManager, never()).showNotification(any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
+        verify(headsUpManager, never()).showNotification(any(), any())
 
         // Same decision as before; is not logged
         verifyNoFullScreenIntentDecisionLogged()
@@ -1079,8 +1077,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN it should full screen and log but it should NOT HUN
         verify(launchFullScreenIntentProvider).launchFullScreenIntent(entry)
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
-        verify(headsUpManager, never()).showNotification(any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
+        verify(headsUpManager, never()).showNotification(any(), any())
         verifyLoggedFullScreenIntentDecision(
             entry,
             FullScreenIntentDecision.FSI_DEVICE_NOT_INTERACTIVE,
@@ -1106,8 +1104,8 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
 
         // THEN it should NOT full screen or HUN
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
-        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any())
-        verify(headsUpManager, never()).showNotification(any())
+        verify(headsUpViewBinder, never()).bindHeadsUpView(any(), any(), any())
+        verify(headsUpManager, never()).showNotification(any(), any())
 
         // NOW the DND logic changes and FSI and HUN are available
         clearInvocations(launchFullScreenIntentProvider)
@@ -1120,7 +1118,7 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
         // VERIFY that the FSI didn't happen, but that we do HUN
         verify(launchFullScreenIntentProvider, never()).launchFullScreenIntent(any())
         finishBind(entry)
-        verify(headsUpManager).showNotification(entry)
+        verify(headsUpManager).showNotification(entry, isPinnedByUser = false)
     }
 
     @Test
@@ -1205,10 +1203,12 @@ class HeadsUpCoordinatorTest : SysuiTestCase() {
     }
 
     private fun finishBind(entry: NotificationEntry) {
-        verify(headsUpManager, never()).showNotification(entry)
-        withArgCaptor<BindCallback> {
-                verify(headsUpViewBinder).bindHeadsUpView(eq(entry), capture())
+        verify(headsUpManager, never()).showNotification(eq(entry), any())
+        val isPinnedByUserCaptor = argumentCaptor<Boolean>()
+        withArgCaptor<HeadsUpViewBinder.HeadsUpBindCallback> {
+                verify(headsUpViewBinder)
+                    .bindHeadsUpView(eq(entry), isPinnedByUserCaptor.capture(), capture())
             }
-            .onBindFinished(entry)
+            .onHeadsUpBindFinished(entry, isPinnedByUserCaptor.firstValue)
     }
 }

@@ -87,7 +87,7 @@ class FakeKeyguardTransitionRepository(
     ) : this(
         initInLockscreen = true,
         initiallySendTransitionStepsOnStartTransition = true,
-        testScope
+        testScope,
     )
 
     private val _currentTransitionInfo: MutableStateFlow<TransitionInfo> =
@@ -191,12 +191,12 @@ class FakeKeyguardTransitionRepository(
         if (lastStep != null && lastStep.transitionState != TransitionState.FINISHED) {
             sendTransitionStep(
                 step =
-                TransitionStep(
-                    transitionState = TransitionState.CANCELED,
-                    from = lastStep.from,
-                    to = lastStep.to,
-                    value = 0f,
-                )
+                    TransitionStep(
+                        transitionState = TransitionState.CANCELED,
+                        from = lastStep.from,
+                        to = lastStep.to,
+                        value = 0f,
+                    )
             )
             testScheduler.runCurrent()
         }
@@ -390,6 +390,18 @@ class FakeKeyguardTransitionRepository(
         @FloatRange(from = 0.0, to = 1.0) value: Float,
         state: TransitionState,
     ) = Unit
+
+    override suspend fun forceFinishCurrentTransition() {
+        _transitions.tryEmit(
+            TransitionStep(
+                _currentTransitionInfo.value.from,
+                _currentTransitionInfo.value.to,
+                1f,
+                TransitionState.FINISHED,
+                ownerName = _currentTransitionInfo.value.ownerName,
+            )
+        )
+    }
 }
 
 @Module

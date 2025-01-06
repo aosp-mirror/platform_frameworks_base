@@ -44,7 +44,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.infra.AndroidFuture;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -598,10 +597,8 @@ public class ShortcutManager {
     public boolean requestPinShortcut(@NonNull ShortcutInfo shortcut,
             @Nullable IntentSender resultIntent) {
         try {
-            AndroidFuture<String> ret = new AndroidFuture<>();
-            mService.requestPinShortcut(mContext.getPackageName(), shortcut, resultIntent,
-                    injectMyUserId(), ret);
-            return Boolean.parseBoolean(getFutureOrThrow(ret));
+            return mService.requestPinShortcut(mContext.getPackageName(), shortcut, resultIntent,
+                    injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -626,11 +623,9 @@ public class ShortcutManager {
      */
     @WorkerThread
     public Intent createShortcutResultIntent(@NonNull ShortcutInfo shortcut) {
-        final AndroidFuture<Intent> ret = new AndroidFuture<>();
         try {
-            mService.createShortcutResultIntent(mContext.getPackageName(),
-                    shortcut, injectMyUserId(), ret);
-            Intent result = getFutureOrThrow(ret);
+            Intent result = mService.createShortcutResultIntent(mContext.getPackageName(),
+                    shortcut, injectMyUserId());
             if (result != null) {
                 result.prepareToEnterProcess(LOCAL_FLAG_FROM_SYSTEM,
                         mContext.getAttributionSource());
@@ -791,23 +786,6 @@ public class ShortcutManager {
             mService.pushDynamicShortcut(mContext.getPackageName(), shortcut, injectMyUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
-        }
-    }
-
-    private static <T> T getFutureOrThrow(@NonNull AndroidFuture<T> future) {
-        try {
-            return future.get();
-        } catch (Throwable e) {
-            if (e instanceof ExecutionException) {
-                e = e.getCause();
-            }
-            if (e instanceof RuntimeException) {
-                throw (RuntimeException) e;
-            }
-            if (e instanceof Error) {
-                throw (Error) e;
-            }
-            throw new RuntimeException(e);
         }
     }
 }

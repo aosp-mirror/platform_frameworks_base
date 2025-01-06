@@ -24,7 +24,6 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
 import com.android.compose.ui.util.SpaceVectorConverter
-import kotlin.math.sign
 import kotlinx.coroutines.Deferred
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -102,8 +101,8 @@ interface OnStopScope {
  * over the default nested scrolling logic.
  *
  * When started, this connection intercepts scroll events *before* they reach child composables.
- * This "priority mode" is activated activated when either [canStartPreScroll], [canStartPostScroll]
- * or [canStartPostFling] returns `true`.
+ * This "priority mode" is activated when either [canStartPreScroll] or [canStartPostScroll] returns
+ * `true`.
  *
  * Once started, the [onStart] lambda provides a [ScrollController] to manage the scrolling. This
  * controller allows you to directly manipulate the scroll state and define how scroll events are
@@ -123,8 +122,6 @@ interface OnStopScope {
  * @param canStartPostScroll A lambda that returns `true` if the connection should enter priority
  *   mode during the post-scroll phase. This is called after child connections have consumed the
  *   scroll.
- * @param canStartPostFling A lambda that returns `true` if the connection should enter priority
- *   mode during the post-fling phase. This is called after a fling gesture has been initiated.
  * @param onStart A lambda that is called when the connection enters priority mode. It should return
  *   a [ScrollController] that will be used to control the scroll.
  * @sample LargeTopAppBarNestedScrollConnection
@@ -136,7 +133,6 @@ class PriorityNestedScrollConnection(
         (offsetAvailable: Float, offsetBeforeStart: Float, source: NestedScrollSource) -> Boolean,
     private val canStartPostScroll:
         (offsetAvailable: Float, offsetBeforeStart: Float, source: NestedScrollSource) -> Boolean,
-    private val canStartPostFling: (velocityAvailable: Float) -> Boolean,
     private val onStart: (firstScroll: Float) -> ScrollController,
 ) : NestedScrollConnection, SpaceVectorConverter by SpaceVectorConverter(orientation) {
 
@@ -207,6 +203,9 @@ class PriorityNestedScrollConnection(
     }
 
     override suspend fun onPreFling(available: Velocity): Velocity {
+        // Note: This method may be called multiple times. Due to NestedScrollDispatcher, the order
+        // of method calls (pre/post scroll/fling) cannot be guaranteed.
+        if (isStopping) return Velocity.Zero
         val controller = currentController ?: return Velocity.Zero
 
         // If in priority mode and can stop on pre-fling phase, stop the scroll.
@@ -219,23 +218,15 @@ class PriorityNestedScrollConnection(
     }
 
     override suspend fun onPostFling(consumed: Velocity, available: Velocity): Velocity {
+        // Note: This method may be called multiple times. Due to NestedScrollDispatcher, the order
+        // of method calls (pre/post scroll/fling) cannot be guaranteed.
+        if (isStopping) return Velocity.Zero
         val availableFloat = available.toFloat()
         val controller = currentController
 
         // If in priority mode, stop the scroll.
         if (controller != null) {
             return stop(velocity = availableFloat)
-        }
-
-        // Check if post-fling condition is met, and start priority mode if necessary.
-        // TODO(b/291053278): Remove canStartPostFling() and instead make it possible to define the
-        // overscroll behavior on the Scene level.
-        if (canStartPostFling(availableFloat)) {
-            // The offset passed to onPriorityStart() must be != 0f, so we create a small offset of
-            // 1px given the available velocity.
-            val smallOffset = availableFloat.sign
-            start(availableOffset = smallOffset)
-            return stop(availableFloat)
         }
 
         // Reset offset tracking after the fling gesture is finished.
@@ -315,6 +306,7 @@ class PriorityNestedScrollConnection(
      * @return The consumed velocity.
      */
     suspend fun stop(velocity: Float): Velocity {
+        if (isStopping) return Velocity.Zero
         val controller = requireController(isStopping = false)
         return coroutineScope {
             try {
@@ -358,12 +350,16 @@ private class OnStopScopeImpl(private val controller: ScrollController) : OnStop
         flingBehavior: FlingBehavior,
     ): Float {
         return with(flingBehavior) {
-            object : ScrollScope {
-                    override fun scrollBy(pixels: Float): Float {
-                        return controller.onScroll(pixels, NestedScrollSource.SideEffect)
+            val remainingVelocity =
+                object : ScrollScope {
+                        override fun scrollBy(pixels: Float): Float {
+                            return controller.onScroll(pixels, NestedScrollSource.SideEffect)
+                        }
                     }
-                }
-                .performFling(initialVelocity)
+                    .performFling(initialVelocity)
+
+            // returns the consumed velocity
+            initialVelocity - remainingVelocity
         }
     }
 }

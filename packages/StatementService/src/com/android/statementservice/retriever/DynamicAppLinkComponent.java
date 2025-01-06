@@ -130,7 +130,7 @@ public final class DynamicAppLinkComponent {
     @Override
     public String toString() {
         StringBuilder statement = new StringBuilder();
-        statement.append("HandleAllUriRule: ");
+        statement.append("DynamicAppLinkComponent: ");
         statement.append(mExclude);
         statement.append(", ");
         statement.append(mFragment);

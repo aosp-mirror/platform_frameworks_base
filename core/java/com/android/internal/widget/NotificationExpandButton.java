@@ -16,6 +16,8 @@
 
 package com.android.internal.widget;
 
+import static android.app.Flags.notificationsRedesignTemplates;
+
 import android.annotation.ColorInt;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -25,12 +27,12 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
 import android.util.AttributeSet;
 import android.view.RemotableViewMethod;
-import android.view.View;
 import android.view.ViewGroup;
 import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RemoteViews;
 import android.widget.TextView;
 
@@ -47,12 +49,15 @@ public class NotificationExpandButton extends FrameLayout {
     private Drawable mPillDrawable;
     private TextView mNumberView;
     private ImageView mIconView;
+    private LinearLayout mPillView;
     private boolean mExpanded;
     private int mNumber;
     private int mDefaultPillColor;
     private int mDefaultTextColor;
     private int mHighlightPillColor;
     private int mHighlightTextColor;
+    // Track whether this ever had mExpanded = true, so that we don't highlight it anymore.
+    private boolean mWasExpanded = false;
 
     public NotificationExpandButton(Context context) {
         this(context, null, 0, 0);
@@ -76,8 +81,8 @@ public class NotificationExpandButton extends FrameLayout {
     protected void onFinishInflate() {
         super.onFinishInflate();
 
-        final View pillView = findViewById(R.id.expand_button_pill);
-        final LayerDrawable layeredPill = (LayerDrawable) pillView.getBackground();
+        mPillView = findViewById(R.id.expand_button_pill);
+        final LayerDrawable layeredPill = (LayerDrawable) mPillView.getBackground();
         mPillDrawable = layeredPill.findDrawableByLayerId(R.id.expand_button_pill_colorized_layer);
         mNumberView = findViewById(R.id.expand_button_number);
         mIconView = findViewById(R.id.expand_button_icon);
@@ -130,17 +135,30 @@ public class NotificationExpandButton extends FrameLayout {
         int drawableId;
         int contentDescriptionId;
         if (mExpanded) {
-            drawableId = R.drawable.ic_collapse_notification;
+            if (notificationsRedesignTemplates()) {
+                mWasExpanded = true;
+                drawableId = R.drawable.ic_notification_2025_collapse;
+            } else {
+                drawableId = R.drawable.ic_collapse_notification;
+            }
             contentDescriptionId = R.string.expand_button_content_description_expanded;
         } else {
-            drawableId = R.drawable.ic_expand_notification;
+            if (notificationsRedesignTemplates()) {
+                drawableId = R.drawable.ic_notification_2025_expand;
+            } else {
+                drawableId = R.drawable.ic_expand_notification;
+            }
             contentDescriptionId = R.string.expand_button_content_description_collapsed;
         }
         setContentDescription(mContext.getText(contentDescriptionId));
         mIconView.setImageDrawable(getContext().getDrawable(drawableId));
 
-        // changing the expanded state can affect the number display
-        updateNumber();
+        if (!notificationsRedesignTemplates()) {
+            // changing the expanded state can affect the number display
+            updateNumber();
+        } else {
+            updateColors();
+        }
     }
 
     private void updateNumber() {
@@ -154,31 +172,76 @@ public class NotificationExpandButton extends FrameLayout {
             mNumberView.setVisibility(GONE);
         }
 
-        // changing number can affect the color
+        // changing number can affect the color and padding
         updateColors();
+        updatePadding();
+    }
+
+    private void updatePadding() {
+        if (!notificationsRedesignTemplates()) {
+            return;
+        }
+
+        // Reduce the padding at the end when showing the number, since the arrow icon has more
+        // inherent spacing than the number does. This makes the content look more centered.
+        // Vertical padding remains unchanged.
+        int reducedPadding = getResources().getDimensionPixelSize(
+                R.dimen.notification_2025_expand_button_reduced_end_padding);
+        int normalPadding = getResources().getDimensionPixelSize(
+                R.dimen.notification_2025_expand_button_horizontal_icon_padding);
+        mPillView.setPaddingRelative(
+                /* start = */ normalPadding,
+                /* top = */ mPillView.getPaddingTop(),
+                /* end = */ shouldShowNumber() ? reducedPadding : normalPadding,
+                /* bottom = */ mPillView.getPaddingBottom()
+        );
+    }
+
+    /**
+     * Use highlight colors for the expander for groups (when the number is showing) that haven't
+     * been opened before, as long as the colors are available.
+     */
+    private boolean shouldBeHighlighted() {
+        return !mWasExpanded && shouldShowNumber()
+                && mHighlightPillColor != 0 && mHighlightTextColor != 0;
     }
 
     private void updateColors() {
-        if (shouldShowNumber()) {
-            if (mHighlightPillColor != 0) {
+        if (notificationsRedesignTemplates()) {
+            if (shouldBeHighlighted()) {
                 mPillDrawable.setTintList(ColorStateList.valueOf(mHighlightPillColor));
-            }
-            mIconView.setColorFilter(mHighlightTextColor);
-            if (mHighlightTextColor != 0) {
+                mIconView.setColorFilter(mHighlightTextColor);
                 mNumberView.setTextColor(mHighlightTextColor);
+            } else {
+                mPillDrawable.setTintList(ColorStateList.valueOf(mDefaultPillColor));
+                mIconView.setColorFilter(mDefaultTextColor);
+                mNumberView.setTextColor(mDefaultTextColor);
             }
         } else {
-            if (mDefaultPillColor != 0) {
-                mPillDrawable.setTintList(ColorStateList.valueOf(mDefaultPillColor));
-            }
-            mIconView.setColorFilter(mDefaultTextColor);
-            if (mDefaultTextColor != 0) {
-                mNumberView.setTextColor(mDefaultTextColor);
+            if (shouldShowNumber()) {
+                if (mHighlightPillColor != 0) {
+                    mPillDrawable.setTintList(ColorStateList.valueOf(mHighlightPillColor));
+                }
+                mIconView.setColorFilter(mHighlightTextColor);
+                if (mHighlightTextColor != 0) {
+                    mNumberView.setTextColor(mHighlightTextColor);
+                }
+            } else {
+                if (mDefaultPillColor != 0) {
+                    mPillDrawable.setTintList(ColorStateList.valueOf(mDefaultPillColor));
+                }
+                mIconView.setColorFilter(mDefaultTextColor);
+                if (mDefaultTextColor != 0) {
+                    mNumberView.setTextColor(mDefaultTextColor);
+                }
             }
         }
     }
 
     private boolean shouldShowNumber() {
+        if (notificationsRedesignTemplates()) {
+            return mNumber > 1;
+        }
         return !mExpanded && mNumber > 1;
     }
 
@@ -220,7 +283,7 @@ public class NotificationExpandButton extends FrameLayout {
 
     /**
      * Sets the number shown inside the expand button.
-     * This only appears when the expand button is collapsed, and when greater than 1.
+     * This only appears when {@link this#shouldShowNumber()} is true.
      */
     @RemotableViewMethod
     public void setNumber(int number) {

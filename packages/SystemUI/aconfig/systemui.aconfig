@@ -16,10 +16,30 @@ flag {
 }
 
 flag {
+   name: "multiuser_wifi_picker_tracker_support"
+   namespace: "systemui"
+   description: "Adds WifiPickerTracker support for multiple users to support when HSUM is enabled."
+   bug: "371586248"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "udfps_view_performance"
    namespace: "systemui"
    description: "Decrease screen off blocking calls by waiting until the device is finished going to sleep before adding the udfps view."
    bug: "225183106"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
+   name: "user_encrypted_source"
+   namespace: "systemui"
+   description: "Get rid of the local cache and rely on UserManager.isUserUnlocked directly to determine whether user CE storage is encrypted."
+   bug: "333656491"
    metadata {
         purpose: PURPOSE_BUGFIX
    }
@@ -136,13 +156,6 @@ flag {
 }
 
 flag {
-    name: "notifications_improved_hun_animation"
-    namespace: "systemui"
-    description: "Adds a translateY animation, and other improvements to match the motion specs of the HUN Intro + Outro animations."
-    bug: "243302608"
-}
-
-flag {
     name: "notification_content_alpha_optimization"
     namespace: "systemui"
     description: "Only reset alpha values of needed content views"
@@ -247,16 +260,8 @@ flag {
 flag {
     name: "dual_shade"
     namespace: "systemui"
-    description: "Enables the BC25 Dual Shade (go/bc25-dual-shade-design)."
+    description: "Enables Dual Shade (go/dual-shade-design-doc)."
     bug: "337259436"
-}
-
-flag {
-    name: "keyguard_bottom_area_refactor"
-    namespace: "systemui"
-    description: "Bottom area of keyguard refactor move into KeyguardRootView. Includes "
-        "lock icon and others."
-    bug: "290652751"
 }
 
 flag {
@@ -404,6 +409,29 @@ flag {
 }
 
 flag {
+    name: "status_bar_auto_start_screen_record_chip"
+    namespace: "systemui"
+    description: "When screen recording, use the specified start time to update the screen record "
+        "chip state instead of waiting for an official 'recording started' signal"
+    bug: "366448907"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+
+flag {
+    name: "status_bar_chips_modernization"
+    namespace: "systemui"
+    description: "Deprecate OngoingCallController and implement OngoingActivityChips"
+    "in compose"
+    bug: "372657935"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "status_bar_use_repos_for_call_chip"
     namespace: "systemui"
     description: "Use repositories as the source of truth for call notifications shown as a chip in"
@@ -426,6 +454,13 @@ flag {
    namespace: "systemui"
    description: "Use a settings observer for airplane mode and make StatusBarSignalPolicy startable"
    bug: "264539100"
+}
+
+flag {
+   name: "status_bar_signal_policy_refactor_ethernet"
+   namespace: "systemui"
+   description: "Use recommended architecture for ethernet icon in status bar"
+   bug: "291321279"
 }
 
 flag {
@@ -464,17 +499,24 @@ flag {
     name: "status_bar_notification_chips"
     namespace: "systemui"
     description: "Show promoted ongoing notifications as chips in the status bar"
-    bug: "361346412"
+    bug: "364653005"
 }
 
 flag {
-    name: "status_bar_notification_chips_test"
+    name: "status_bar_popup_chips"
     namespace: "systemui"
-    description: "Flag to enable certain features that let us test the status bar notification "
-        "chips with teamfooders. This flag should *never* be released to trunkfood or nextfood."
-    bug: "361346412"
+    description: "Show rich ongoing processes as chips in the status bar"
+    bug: "372964148"
 }
 
+flag {
+    name: "promote_notifications_automatically"
+    namespace: "systemui"
+    description: "Flag to automatically turn certain notifications into promoted notifications so "
+        " we can test promoted notifications with teamfooders. This flag should *never* be released "
+        "to trunkfood or nextfood."
+    bug: "367705002"
+}
 
 flag {
     name: "compose_bouncer"
@@ -512,18 +554,17 @@ flag {
 }
 
 flag {
-   name: "migrate_clocks_to_blueprint"
-   namespace: "systemui"
-   description: "Move clock related views from KeyguardStatusView to KeyguardRootView, "
-        "and use modern architecture for lockscreen clocks"
-   bug: "301502635"
-}
-
-flag {
    name: "clock_reactive_variants"
    namespace: "systemui"
    description: "Add reactive variant fonts to some clocks"
    bug: "343495953"
+}
+
+flag {
+   name: "lockscreen_custom_clocks"
+   namespace: "systemui"
+   description: "Enable lockscreen custom clocks"
+   bug: "378486437"
 }
 
 flag {
@@ -594,9 +635,9 @@ flag {
 
 flag {
   name: "status_bar_connected_displays"
-  namespace: "systemui"
+  namespace: "lse_desktop_experience"
   description: "Shows the status bar on connected displays"
-  bug: "362720336"
+  bug: "379264862"
 }
 
 flag {
@@ -610,9 +651,9 @@ flag {
 }
 
 flag {
-    name: "status_bar_simple_fragment"
+    name: "status_bar_root_modernization"
     namespace: "systemui"
-    description: "Feature flag for refactoring the collapsed status bar fragment"
+    description: "Feature flag for replacing the status bar fragment with a compose root"
     bug: "364360986"
 }
 
@@ -636,8 +677,18 @@ flag {
 flag {
     name: "volume_redesign"
     namespace: "systemui"
-    description: "Enables Volume BC25 visuals update"
+    description: "Enables Volume visuals update"
     bug: "368308908"
+}
+
+flag {
+    name: "clipboard_overlay_multiuser"
+    namespace: "systemui"
+    description: "Fix clipboard overlay for secondary users"
+    bug: "217922018"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -716,13 +767,6 @@ flag {
     namespace: "systemui"
     description: "Improves screenshot policy handling for split screen and desktop mode."
     bug: "365597999"
-}
-
-flag {
-    name: "screenshot_context_url"
-    namespace: "systemui"
-    description: "Include optional app-provided context URL when sharing a screenshot."
-    bug: "242791070"
 }
 
 flag {
@@ -1163,6 +1207,30 @@ flag {
 }
 
 flag {
+  name: "communal_hub_use_thread_pool_for_widgets"
+  namespace: "systemui"
+  description: "Use a dedicated thread pool executor for loading widgets on glanceable hub"
+  bug: "369412569"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "communal_responsive_grid"
+  namespace: "systemui"
+  description: "Enables responsive grid on glanceable hub"
+  bug: "378171351"
+}
+
+flag {
+  name: "low_light_clock_dream"
+  namespace: "systemui"
+  description: "Enables low light clock dream experience on mobile phones"
+  bug: "378174125"
+}
+
+flag {
   name: "communal_standalone_support"
   namespace: "systemui"
   description: "Support communal features without a dock"
@@ -1170,10 +1238,25 @@ flag {
 }
 
 flag {
-  name: "communal_hub_on_mobile"
+  name: "glanceable_hub_v2"
   namespace: "systemui"
-  description: "Brings the glanceable hub experience to mobile phones"
+  description: "Gates the refreshed glanceable hub experience that also brings the glanceable hub to mobile phones"
   bug: "375689917"
+}
+
+flag {
+  name: "glanceable_hub_v2_resources"
+  namespace: "systemui"
+  description: "Read only flag for rolling out glanceable hub v2 resource values"
+  bug: "375689917"
+  is_fixed_read_only: true
+}
+
+flag {
+    name: "glanceable_hub_back_action"
+    namespace: "systemui"
+    description: "Support back action from glanceable hub"
+    bug: "382771533"
 }
 
 flag {
@@ -1262,20 +1345,17 @@ flag {
 }
 
 flag {
+  name: "media_controls_ui_update"
+  namespace: "systemui"
+  description: "Enables media visuals update"
+  bug: "379044958"
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
   bug: "336521992"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "validate_keyboard_shortcut_helper_icon_uri"
-  namespace: "systemui"
-  description: "Adds a check that the caller can access the content URI of an icon in the shortcut helper."
-  bug: "331180422"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -1323,16 +1403,6 @@ flag {
   namespace: "systemui"
   description: "Decide whether to execute binder calls to schedule alarms in background thread"
   bug: "330492575"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
-  name: "notification_pulsing_fix"
-  namespace: "systemui"
-  description: "Allow showing new pulsing notifications when the device is already pulsing."
-  bug: "335560575"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -1474,6 +1544,16 @@ flag {
 }
 
 flag {
+   name: "sim_pin_use_slot_id"
+   namespace: "systemui"
+   description: "Reorient SIM data processing around slotId instead of subId"
+   bug: "376173142"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "use_transitions_for_keyguard_occluded"
    namespace: "systemui"
    description: "Use Keyguard Transitions to set Notification Shade occlusion state"
@@ -1578,6 +1658,13 @@ flag {
 }
 
 flag {
+   name: "show_clipboard_indication"
+   namespace: "systemui"
+   description: "Show indication text under the clipboard overlay when copied something"
+   bug: "361199935"
+}
+
+flag {
    name: "media_projection_dialog_behind_lockscreen"
    namespace: "systemui"
    description: "Ensure MediaProjection Dialog appears behind the lockscreen"
@@ -1659,6 +1746,16 @@ flag {
 }
 
 flag {
+   name: "show_toast_when_app_control_brightness"
+   namespace: "systemui"
+   description: "Showing the warning toast if the current running app window has controlled the brightness value."
+   bug: "363225340"
+   metadata {
+       purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
   name: "home_controls_dream_hsum"
   namespace: "systemui"
   description: "Enables the home controls dream in HSUM"
@@ -1703,13 +1800,10 @@ flag {
 }
 
 flag {
-  name: "ensure_enr_views_visibility"
-  namespace: "systemui"
-  description: "Ensures public and private visibilities"
-  bug: "361552380"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
+    name: "notification_shade_blur"
+    namespace: "systemui"
+    description: "Enables the new blur effect on the Notification Shade."
+    bug: "370555223"
 }
 
 flag {
@@ -1719,6 +1813,15 @@ flag {
   bug: "371224114"
 }
 
+flag {
+  name: "disable_shade_expands_on_trackpad_two_finger_swipe"
+  namespace: "systemui"
+  description: "Disables expansion of the shade via two finger swipe on a trackpad"
+  bug: "356804470"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
 
 flag {
     name: "keyboard_shortcut_helper_shortcut_customizer"
@@ -1728,8 +1831,101 @@ flag {
 }
 
 flag {
-   name: "touchpad_three_finger_tap_customization"
+    name: "notification_reentrant_dismiss"
+    namespace: "systemui"
+    description: "Posts to avoid a crashing reentrant pipeline run"
+    bug: "328328054"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+      }
+}
+
+flag {
+    name: "stoppable_fgs_system_app"
+    namespace: "systemui"
+    description: "System app with foreground service can opt in to be stoppable."
+    bug: "376564917"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "keyguard_transition_force_finish_on_screen_off"
+    namespace: "systemui"
+    description: "Forces KTF transitions to finish if the screen turns all the way off."
+    bug: "331636736"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "gsf_bouncer"
+    namespace: "systemui"
+    description: "Applies GSF font styles to Bouncer surfaces."
+    bug: "379364381"
+}
+
+flag {
+    name: "gsf_quick_settings"
+    namespace: "systemui"
+    description: "Applies GSF font styles to Quick Settings surfaces."
+    bug: "379364381"
+}
+
+flag {
+    name: "glanceable_hub_shortcut_button"
+    namespace: "systemui"
+    description: "Adds a shortcut button to lockscreen to show glanceable hub."
+    bug: "378173531"
+}
+
+flag {
+    name: "spatial_model_launcher_pushback"
+    namespace: "systemui"
+    description: "Implement the depth push scaling effect on Launcher when users pull down shade."
+    bug: "370562309"
+}
+
+flag {
+    name: "spatial_model_app_pushback"
+    namespace: "systemui"
+    description: "Implement the depth push scaling effect on the current app when users pull down shade."
+    bug: "370560660"
+}
+
+flag {
+    name: "expanded_privacy_indicators_on_large_screen"
+    namespace: "systemui"
+    description: "Larger privacy indicators on large screen"
+    bug: "381864715"
+}
+
+flag {
+    name: "desktop_effects_qs_tile"
+    namespace: "systemui"
+    description: "Enables the QS tile for desktop effects"
+    bug: "376797327"
+}
+
+flag {
+   name: "hub_edit_mode_touch_adjustments"
    namespace: "systemui"
-   description: "Customize touchpad three finger tap"
-   bug: "365063048"
+   description: "Makes selected widget toggleable in edit mode and modifier buttons mutually exclusive."
+   bug: "383160667"
+}
+
+flag {
+   name: "glanceable_hub_direct_edit_mode"
+   namespace: "systemui"
+   description: "Invokes edit mode directly from long press in glanceable hub"
+   bug: "382531177"
+}
+
+flag {
+   name: "notification_magic_actions_treatment"
+   namespace: "systemui"
+   description: "Special UI treatment for magic actions"
+   bug: "383567383"
 }

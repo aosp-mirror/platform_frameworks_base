@@ -16,12 +16,24 @@
 
 package com.android.settingslib.widget
 
+import android.os.Bundle
+import android.view.View
+import androidx.annotation.CallSuper
 import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import androidx.recyclerview.widget.RecyclerView
 
 /** Base class for Settings to use PreferenceFragmentCompat */
-open abstract class SettingsBasePreferenceFragment : PreferenceFragmentCompat() {
+abstract class SettingsBasePreferenceFragment : PreferenceFragmentCompat() {
+
+    @CallSuper
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+        if (SettingsThemeHelper.isExpressiveTheme(requireContext())) {
+            // Don't allow any divider in between the preferences in expressive design.
+            setDivider(null)
+        }
+    }
 
     override fun onCreateAdapter(preferenceScreen: PreferenceScreen): RecyclerView.Adapter<*> {
         if (SettingsThemeHelper.isExpressiveTheme(requireContext()))

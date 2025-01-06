@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.domain.interactor.scenetransition
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.systemui.CoreStartable
@@ -38,7 +39,6 @@ import java.util.UUID
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * This class listens to scene framework scene transitions and manages keyguard transition framework
@@ -111,7 +111,10 @@ constructor(
         if (currentTransitionId == null) return
         if (prevTransition !is ObservableTransitionState.Transition) return
 
-        if (idle.currentScene == prevTransition.toContent) {
+        if (
+            idle.currentScene == prevTransition.toContent ||
+                idle.currentOverlays.contains(prevTransition.toContent)
+        ) {
             finishCurrentTransition()
         } else {
             val targetState =

@@ -8,7 +8,6 @@ import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.focusable
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
@@ -21,6 +20,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.BlendMode
@@ -42,9 +42,9 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.observableTransitionState
 import com.android.compose.animation.scene.transitions
+import com.android.compose.modifiers.thenIf
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.shared.model.CommunalTransitionKeys
@@ -124,14 +124,11 @@ val sceneTransitions = transitions {
         }
         timestampRange(
             startMillis = TransitionDuration.EDIT_MODE_TO_HUB_GRID_DELAY_MS,
-            endMillis = TransitionDuration.EDIT_MODE_TO_HUB_GRID_END_MS
+            endMillis = TransitionDuration.EDIT_MODE_TO_HUB_GRID_END_MS,
         ) {
             fade(Communal.Elements.Grid)
         }
     }
-    // Disable horizontal overscroll. If the scene is overscrolled too soon after showing, this
-    // can lead to inconsistent KeyguardState changes.
-    overscrollDisabled(CommunalScenes.Communal, Orientation.Horizontal)
 }
 
 /**
@@ -163,6 +160,7 @@ fun CommunalContainer(
             transitions = sceneTransitions,
         )
     }
+    val isUiBlurred by viewModel.isUiBlurred.collectAsStateWithLifecycle()
 
     val detector = remember { CommunalSwipeDetector() }
 
@@ -179,30 +177,35 @@ fun CommunalContainer(
         onDispose { viewModel.setTransitionState(null) }
     }
 
+    val blurRadius = with(LocalDensity.current) { viewModel.blurRadiusPx.toDp() }
+
     SceneTransitionLayout(
         state = state,
-        modifier = modifier.fillMaxSize(),
+        modifier = modifier.fillMaxSize().thenIf(isUiBlurred) { Modifier.blur(blurRadius) },
         swipeSourceDetector = detector,
         swipeDetector = detector,
     ) {
         scene(
             CommunalScenes.Blank,
             userActions =
-                mapOf(Swipe(SwipeDirection.Start, fromSource = Edge.End) to CommunalScenes.Communal)
+                if (viewModel.v2FlagEnabled()) emptyMap()
+                else mapOf(Swipe.Start(fromSource = Edge.End) to CommunalScenes.Communal),
         ) {
             // This scene shows nothing only allowing for transitions to the communal scene.
             Box(modifier = Modifier.fillMaxSize())
         }
 
-        val userActions = mapOf(Swipe(SwipeDirection.End) to CommunalScenes.Blank)
-
-        scene(CommunalScenes.Communal, userActions = userActions) {
+        scene(
+            CommunalScenes.Communal,
+            userActions =
+                if (viewModel.v2FlagEnabled()) emptyMap()
+                else mapOf(Swipe.End to CommunalScenes.Blank),
+        ) {
             CommunalScene(
                 backgroundType = backgroundType,
                 colors = colors,
                 content = content,
                 viewModel = viewModel,
-                modifier = Modifier.horizontalNestedScrollToScene(),
             )
         }
     }
@@ -257,13 +260,9 @@ fun SceneScope.CommunalScene(
 
 /** Default background of the hub, a single color */
 @Composable
-private fun BoxScope.DefaultBackground(
-    colors: CommunalColors,
-) {
+private fun BoxScope.DefaultBackground(colors: CommunalColors) {
     val backgroundColor by colors.backgroundColor.collectAsStateWithLifecycle()
-    Box(
-        modifier = Modifier.matchParentSize().background(Color(backgroundColor.toArgb())),
-    )
+    Box(modifier = Modifier.matchParentSize().background(Color(backgroundColor.toArgb())))
 }
 
 /** Experimental hub background, static linear gradient */
@@ -273,7 +272,7 @@ private fun BoxScope.StaticLinearGradient() {
     Box(
         Modifier.matchParentSize()
             .background(
-                Brush.linearGradient(colors = listOf(colors.primary, colors.primaryContainer)),
+                Brush.linearGradient(colors = listOf(colors.primary, colors.primaryContainer))
             )
     )
     BackgroundTopScrim()
@@ -288,7 +287,7 @@ private fun BoxScope.AnimatedLinearGradient() {
             .background(colors.primary)
             .animatedRadialGradientBackground(
                 toColor = colors.primary,
-                fromColor = colors.primaryContainer.copy(alpha = 0.6f)
+                fromColor = colors.primaryContainer.copy(alpha = 0.6f),
             )
     )
     BackgroundTopScrim()
@@ -324,9 +323,9 @@ fun Modifier.animatedRadialGradientBackground(toColor: Color, fromColor: Color):
                             durationMillis = ANIMATION_DURATION_MS,
                             easing = CubicBezierEasing(0.33f, 0f, 0.67f, 1f),
                         ),
-                    repeatMode = RepeatMode.Reverse
+                    repeatMode = RepeatMode.Reverse,
                 ),
-            label = "radial gradient center fraction"
+            label = "radial gradient center fraction",
         )
 
     // Offset to place the center of the gradients offscreen. This is applied to both the
@@ -337,16 +336,9 @@ fun Modifier.animatedRadialGradientBackground(toColor: Color, fromColor: Color):
         val gradientRadius = (size.width / 2) + offsetPx
         val totalHeight = size.height + 2 * offsetPx
 
-        val leftCenter =
-            Offset(
-                x = -offsetPx,
-                y = totalHeight * centerFraction - offsetPx,
-            )
+        val leftCenter = Offset(x = -offsetPx, y = totalHeight * centerFraction - offsetPx)
         val rightCenter =
-            Offset(
-                x = offsetPx + size.width,
-                y = totalHeight * (1f - centerFraction) - offsetPx,
-            )
+            Offset(x = offsetPx + size.width, y = totalHeight * (1f - centerFraction) - offsetPx)
 
         // Right gradient
         drawCircle(
@@ -354,7 +346,7 @@ fun Modifier.animatedRadialGradientBackground(toColor: Color, fromColor: Color):
                 Brush.radialGradient(
                     colors = listOf(fromColor, toColor),
                     center = rightCenter,
-                    radius = gradientRadius
+                    radius = gradientRadius,
                 ),
             center = rightCenter,
             radius = gradientRadius,
@@ -367,7 +359,7 @@ fun Modifier.animatedRadialGradientBackground(toColor: Color, fromColor: Color):
                 Brush.radialGradient(
                     colors = listOf(fromColor, toColor),
                     center = leftCenter,
-                    radius = gradientRadius
+                    radius = gradientRadius,
                 ),
             center = leftCenter,
             radius = gradientRadius,

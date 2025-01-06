@@ -584,14 +584,23 @@ static jboolean android_media_AudioRecord_setInputDevice(
     return lpRecorder->setInputDevice(device_id) == NO_ERROR;
 }
 
-static jint android_media_AudioRecord_getRoutedDeviceId(
-                JNIEnv *env,  jobject thiz) {
-
+static jintArray android_media_AudioRecord_getRoutedDeviceIds(JNIEnv *env, jobject thiz) {
     sp<AudioRecord> lpRecorder = getAudioRecord(env, thiz);
-    if (lpRecorder == 0) {
-        return 0;
+    if (lpRecorder == NULL) {
+        return NULL;
     }
-    return (jint)lpRecorder->getRoutedDeviceId();
+    DeviceIdVector deviceIds = lpRecorder->getRoutedDeviceIds();
+    jintArray result;
+    result = env->NewIntArray(deviceIds.size());
+    if (result == NULL) {
+        return NULL;
+    }
+    jint *values = env->GetIntArrayElements(result, 0);
+    for (unsigned int i = 0; i < deviceIds.size(); i++) {
+        values[i++] = static_cast<jint>(deviceIds[i]);
+    }
+    env->ReleaseIntArrayElements(result, values, 0);
+    return result;
 }
 
 // Enable and Disable Callback methods are synchronized on the Java side
@@ -821,8 +830,7 @@ static const JNINativeMethod gMethods[] = {
         // name,               signature,  funcPtr
         {"native_start", "(II)I", (void *)android_media_AudioRecord_start},
         {"native_stop", "()V", (void *)android_media_AudioRecord_stop},
-        {"native_setup",
-         "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/os/Parcel;JII)I",
+        {"native_setup", "(Ljava/lang/Object;Ljava/lang/Object;[IIIII[ILandroid/os/Parcel;JII)I",
          (void *)android_media_AudioRecord_setup},
         {"native_finalize", "()V", (void *)android_media_AudioRecord_finalize},
         {"native_release", "()V", (void *)android_media_AudioRecord_release},
@@ -846,7 +854,7 @@ static const JNINativeMethod gMethods[] = {
         {"native_getMetrics", "()Landroid/os/PersistableBundle;",
          (void *)android_media_AudioRecord_native_getMetrics},
         {"native_setInputDevice", "(I)Z", (void *)android_media_AudioRecord_setInputDevice},
-        {"native_getRoutedDeviceId", "()I", (void *)android_media_AudioRecord_getRoutedDeviceId},
+        {"native_getRoutedDeviceIds", "()[I", (void *)android_media_AudioRecord_getRoutedDeviceIds},
         {"native_enableDeviceCallback", "()V",
          (void *)android_media_AudioRecord_enableDeviceCallback},
         {"native_disableDeviceCallback", "()V",

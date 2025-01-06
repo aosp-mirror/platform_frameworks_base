@@ -30,4 +30,13 @@ flag {
     namespace: "usb"
     description: "Feature flag to enable exposing usb speed system api"
     bug: "373653182"
+    is_exported: true
+}
+
+flag {
+    name: "enable_accessory_stream_api"
+    is_exported: true
+    namespace: "usb"
+    description: "Feature flag to enable stream APIs for Accessory mode"
+    bug: "369356693"
 }

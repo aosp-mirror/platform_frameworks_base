@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.flags.Flags.FLAG_SCROLL_CAPTURE_TARGET_Z_ORDER_FIX;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
@@ -30,16 +32,20 @@ import android.content.Context;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.os.CancellationSignal;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.flag.junit.SetFlagsRule;
 
 import androidx.annotation.NonNull;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.junit.MockitoJUnitRunner;
 
+import java.util.List;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -50,6 +56,9 @@ import java.util.function.Consumer;
 @SmallTest
 @RunWith(MockitoJUnitRunner.class)
 public class ViewGroupScrollCaptureTest {
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private static final Executor DIRECT_EXECUTOR = Runnable::run;
 
@@ -237,6 +246,56 @@ public class ViewGroupScrollCaptureTest {
 
         // Has callback, but hint=excluded, so excluded.
         assertNull(results.getTopResult());
+    }
+
+    @EnableFlags(FLAG_SCROLL_CAPTURE_TARGET_Z_ORDER_FIX)
+    @MediumTest
+    @Test
+    public void testDispatchScrollCaptureSearch_traversesInDrawingOrder() throws Exception {
+        final Context context = getInstrumentation().getContext();
+        // Uses childDrawingOrder to reverse drawing order of children.
+        final MockViewGroup viewGroup = new MockViewGroup(context, 0, 0, 200, 200);
+
+        // w=200, h=180, z=10, drawn on top
+        final MockView view1 = new MockView(context, 0, 20, 200, 200);
+        TestScrollCaptureCallback callback1 = new TestScrollCaptureCallback();
+        view1.setScrollCaptureCallback(callback1);
+        view1.setZ(10f);
+
+        // w=200, h=200, z=0, drawn first, under view1
+        final MockView view2 = new MockView(context, 0, 0, 200, 200);
+        TestScrollCaptureCallback callback2 = new TestScrollCaptureCallback();
+        view2.setScrollCaptureCallback(callback2);
+
+        viewGroup.addView(view1); // test order is dependent on draw order by adding z=10 first
+        viewGroup.addView(view2);
+
+        Rect localVisibleRect = new Rect(0, 0, 200, 200);
+        Point windowOffset = new Point(0, 0);
+
+        // Where targets are added
+        final ScrollCaptureSearchResults results = new ScrollCaptureSearchResults(DIRECT_EXECUTOR);
+
+        viewGroup.dispatchScrollCaptureSearch(localVisibleRect, windowOffset, results::addTarget);
+        callback1.completeSearchRequest(new Rect(0, 0, 200, 180));
+        callback2.completeSearchRequest(new Rect(0, 0, 200, 200));
+        assertTrue(results.isComplete());
+
+        List<ScrollCaptureTarget> targets = results.getTargets();
+        List<View> targetViews =
+                targets.stream().map(ScrollCaptureTarget::getContainingView).toList();
+        assertEquals(List.of(view2,  view1), targetViews);
+    }
+
+    static final class ReverseDrawingViewGroup extends MockViewGroup {
+        ReverseDrawingViewGroup(Context context, int left, int top, int right, int bottom) {
+            super(context, left, top, right, bottom, View.SCROLL_CAPTURE_HINT_AUTO);
+        }
+
+        @Override
+        protected int getChildDrawingOrder(int childCount, int drawingPosition) {
+            return childCount == 0 ? 0 : childCount - (drawingPosition + 1);
+        }
     }
 
     /**
@@ -511,7 +570,7 @@ public class ViewGroupScrollCaptureTest {
         }
     };
 
-    public static final class MockViewGroup extends ViewGroup {
+    public static class MockViewGroup extends ViewGroup {
         private ScrollCaptureCallback mInternalCallback;
         private Rect mOnScrollCaptureSearchLastLocalVisibleRect;
         private Point mOnScrollCaptureSearchLastWindowOffset;

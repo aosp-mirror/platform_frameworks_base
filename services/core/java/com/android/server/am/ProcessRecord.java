@@ -351,7 +351,8 @@ class ProcessRecord implements WindowProcessListener {
     private String[] mIsolatedEntryPointArgs;
 
     /**
-     * Process is currently hosting a backup agent for backup or restore.
+     * Process is currently hosting a backup agent for backup or restore. Note that this is only set
+     * when the process is put into restricted backup mode.
      */
     @GuardedBy("mService")
     private boolean mInFullBackup;
@@ -1001,6 +1002,11 @@ class ProcessRecord implements WindowProcessListener {
     @GuardedBy(anyOf = {"mService", "mProcLock"})
     ActiveInstrumentation getActiveInstrumentation() {
         return mInstr;
+    }
+
+    @GuardedBy(anyOf = {"mService", "mProcLock"})
+    boolean hasActiveInstrumentation() {
+        return mInstr != null;
     }
 
     @GuardedBy(anyOf = {"mService", "mProcLock"})
@@ -1698,7 +1704,7 @@ class ProcessRecord implements WindowProcessListener {
         return mService.mOomAdjuster.mCachedAppOptimizer.useFreezer()
                 && !mOptRecord.isFreezeExempt()
                 && !mOptRecord.shouldNotFreeze()
-                && mState.getCurAdj() >= ProcessList.FREEZER_CUTOFF_ADJ;
+                && mState.getCurAdj() >= mService.mConstants.FREEZER_CUTOFF_ADJ;
     }
 
     public void forEachConnectionHost(Consumer<ProcessRecord> consumer) {

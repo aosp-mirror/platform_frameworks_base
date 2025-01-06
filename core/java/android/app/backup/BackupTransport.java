@@ -16,6 +16,8 @@
 
 package android.app.backup;
 
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.content.Intent;
@@ -27,6 +29,7 @@ import android.os.RemoteException;
 import com.android.internal.backup.IBackupTransport;
 import com.android.internal.backup.ITransportStatusCallback;
 import com.android.internal.infra.AndroidFuture;
+import com.android.server.backup.Flags;
 
 import java.util.Arrays;
 import java.util.List;
@@ -671,6 +674,22 @@ public class BackupTransport {
     }
 
     /**
+     * Ask the transport whether packages that are about to be backed up or restored should not be
+     * put into a restricted mode by the framework and started normally instead.
+     *
+     * @param operationType 0 for backup, 1 for restore.
+     * @return a subset of the {@code packageNames} passed in, indicating
+     * which packages should NOT be put into restricted mode for the given operation type.
+     */
+    @NonNull
+    @FlaggedApi(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+    public List<String> getPackagesThatShouldNotUseRestrictedMode(
+            @NonNull List<String> packageNames,
+            @BackupAnnotations.OperationType int operationType) {
+        return List.of();
+    }
+
+    /**
      * Bridge between the actual IBackupTransport implementation and the stable API.  If the
      * binder interface needs to change, we use this layer to translate so that we can
      * (if appropriate) decouple those framework-side changes from the BackupTransport
@@ -973,6 +992,20 @@ public class BackupTransport {
             try {
                 BackupManagerMonitor result = BackupTransport.this.getBackupManagerMonitor();
                 resultFuture.complete(new BackupManagerMonitorWrapper(result));
+            } catch (RuntimeException e) {
+                resultFuture.cancel(/* mayInterruptIfRunning */ true);
+            }
+        }
+
+        @Override
+        @FlaggedApi(Flags.FLAG_ENABLE_RESTRICTED_MODE_CHANGES)
+        public void getPackagesThatShouldNotUseRestrictedMode(List<String> packageNames,
+                int operationType, AndroidFuture<List<String>> resultFuture) {
+            try {
+                List<String> result =
+                        BackupTransport.this.getPackagesThatShouldNotUseRestrictedMode(packageNames,
+                                operationType);
+                resultFuture.complete(result);
             } catch (RuntimeException e) {
                 resultFuture.cancel(/* mayInterruptIfRunning */ true);
             }

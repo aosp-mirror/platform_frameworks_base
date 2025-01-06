@@ -27,6 +27,8 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.key.onPreviewKeyEvent
 import androidx.compose.ui.input.pointer.motionEventSpy
+import androidx.compose.ui.semantics.hideFromAccessibility
+import androidx.compose.ui.semantics.semantics
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 
 @OptIn(ExperimentalFoundationApi::class, ExperimentalComposeUiApi::class)
@@ -42,6 +44,9 @@ fun CommunalTouchableSurface(
     Box(
         modifier =
             modifier
+                // The touchable surface is hidden for accessibility because these actions are
+                // already provided through custom accessibility actions.
+                .semantics { hideFromAccessibility() }
                 .combinedClickable(
                     onLongClick = viewModel::onLongClick,
                     onClick = viewModel::onClick,

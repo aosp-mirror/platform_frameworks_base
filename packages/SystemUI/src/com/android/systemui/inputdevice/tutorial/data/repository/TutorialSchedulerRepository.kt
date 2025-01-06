@@ -19,6 +19,7 @@ package com.android.systemui.inputdevice.tutorial.data.repository
 import android.content.Context
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
@@ -47,26 +48,34 @@ class TutorialSchedulerRepository(
     private val Context.dataStore: DataStore<Preferences> by
         preferencesDataStore(name = dataStoreName, scope = backgroundScope)
 
-    suspend fun isLaunched(deviceType: DeviceType): Boolean = loadData()[deviceType]!!.isLaunched
+    suspend fun setScheduledTutorialLaunchTime(device: DeviceType, time: Instant) {
+        applicationContext.dataStore.edit { pref -> pref[getLaunchKey(device)] = time.epochSecond }
+    }
 
-    suspend fun launchTime(deviceType: DeviceType): Instant? = loadData()[deviceType]!!.launchTime
+    suspend fun isScheduledTutorialLaunched(deviceType: DeviceType): Boolean =
+        loadData()[deviceType]!!.isLaunched
+
+    suspend fun getScheduledTutorialLaunchTime(deviceType: DeviceType): Instant? =
+        loadData()[deviceType]!!.launchTime
+
+    suspend fun setFirstConnectionTime(device: DeviceType, time: Instant) {
+        applicationContext.dataStore.edit { pref -> pref[getConnectKey(device)] = time.epochSecond }
+    }
+
+    suspend fun setNotified(device: DeviceType) {
+        applicationContext.dataStore.edit { pref -> pref[getNotificationKey(device)] = true }
+    }
+
+    suspend fun isNotified(deviceType: DeviceType): Boolean = loadData()[deviceType]!!.isNotified
 
     suspend fun wasEverConnected(deviceType: DeviceType): Boolean =
         loadData()[deviceType]!!.wasEverConnected
 
-    suspend fun firstConnectionTime(deviceType: DeviceType): Instant? =
+    suspend fun getFirstConnectionTime(deviceType: DeviceType): Instant? =
         loadData()[deviceType]!!.firstConnectionTime
 
     private suspend fun loadData(): Map<DeviceType, DeviceSchedulerInfo> {
         return applicationContext.dataStore.data.map { pref -> getSchedulerInfo(pref) }.first()
-    }
-
-    suspend fun updateFirstConnectionTime(device: DeviceType, time: Instant) {
-        applicationContext.dataStore.edit { pref -> pref[getConnectKey(device)] = time.epochSecond }
-    }
-
-    suspend fun updateLaunchTime(device: DeviceType, time: Instant) {
-        applicationContext.dataStore.edit { pref -> pref[getLaunchKey(device)] = time.epochSecond }
     }
 
     private fun getSchedulerInfo(pref: Preferences): Map<DeviceType, DeviceSchedulerInfo> {
@@ -79,7 +88,8 @@ class TutorialSchedulerRepository(
     private fun getDeviceSchedulerInfo(pref: Preferences, device: DeviceType): DeviceSchedulerInfo {
         val launchTime = pref[getLaunchKey(device)]
         val connectionTime = pref[getConnectKey(device)]
-        return DeviceSchedulerInfo(launchTime, connectionTime)
+        val isNotified = pref[getNotificationKey(device)] == true
+        return DeviceSchedulerInfo(launchTime, connectionTime, isNotified)
     }
 
     private fun getLaunchKey(device: DeviceType) =
@@ -87,6 +97,9 @@ class TutorialSchedulerRepository(
 
     private fun getConnectKey(device: DeviceType) =
         longPreferencesKey(device.name + CONNECT_TIME_SUFFIX)
+
+    private fun getNotificationKey(device: DeviceType) =
+        booleanPreferencesKey(device.name + NOTIFIED_SUFFIX)
 
     suspend fun clear() {
         applicationContext.dataStore.edit { it.clear() }
@@ -96,6 +109,7 @@ class TutorialSchedulerRepository(
         const val DATASTORE_NAME = "TutorialScheduler"
         const val LAUNCH_TIME_SUFFIX = "_LAUNCH_TIME"
         const val CONNECT_TIME_SUFFIX = "_CONNECT_TIME"
+        const val NOTIFIED_SUFFIX = "_NOTIFIED"
     }
 }
 

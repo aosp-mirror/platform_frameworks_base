@@ -215,27 +215,30 @@
     <item type="id" name="backlight_icon" />
 
     <!-- IDs for use in the keyguard/lockscreen scene -->
-    <item type="id" name="keyguard_root_view" />
-    <item type="id" name="keyguard_indication_area" />
-    <item type="id" name="keyguard_indication_text" />
-    <item type="id" name="keyguard_indication_text_bottom" />
-    <item type="id" name="nssl_guideline" />
-    <item type="id" name="nssl_placeholder" />
+    <item type="id" name="accessibility_actions_view" />
+    <item type="id" name="ambient_indication_container" />
     <item type="id" name="aod_notification_icon_container" />
-    <item type="id" name="split_shade_guideline" />
-    <item type="id" name="lock_icon" />
-    <item type="id" name="lock_icon_bg" />
     <item type="id" name="burn_in_layer" />
     <item type="id" name="burn_in_layer_empty_view" />
     <item type="id" name="communal_tutorial_indicator" />
+    <item type="id" name="end_button" />
+    <item type="id" name="lock_icon" />
+    <item type="id" name="lock_icon_bg" />
+    <item type="id" name="keyguard_indication_area" />
+    <item type="id" name="keyguard_indication_text" />
+    <item type="id" name="keyguard_indication_text_bottom" />
+    <item type="id" name="keyguard_root_view" />
+    <item type="id" name="keyguard_settings_button" />
+    <item type="id" name="nssl_guideline" />
+    <item type="id" name="nssl_placeholder" />
     <item type="id" name="nssl_placeholder_barrier_bottom" />
-    <item type="id" name="ambient_indication_container" />
-    <item type="id" name="status_view_media_container" />
-    <item type="id" name="smart_space_barrier_bottom" />
     <item type="id" name="small_clock_guideline_top" />
+    <item type="id" name="smart_space_barrier_bottom" />
+    <item type="id" name="split_shade_guideline" />
+    <item type="id" name="start_button" />
+    <item type="id" name="status_view_media_container" />
     <item type="id" name="weather_clock_date_and_icons_barrier_bottom" />
     <item type="id" name="weather_clock_bc_smartspace_bottom" />
-    <item type="id" name="accessibility_actions_view" />
 
     <!-- Privacy dialog -->
     <item type="id" name="privacy_dialog_close_app_button" />
@@ -280,7 +283,7 @@
     <item type="id" name="udfps_accessibility_overlay_top_guideline" />
 
     <!-- Ids for communal hub widgets -->
-    <item type="id" name="communal_widget_disposable_tag"/>
+    <item type="id" name="communal_widget_listener_tag"/>
 
     <!-- snapshot view-binding IDs -->
     <item type="id" name="snapshot_view_binding" />

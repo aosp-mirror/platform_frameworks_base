@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.inputmethodservice.InputMethodService;
 import android.os.IBinder;
@@ -90,8 +91,10 @@ interface InsetsControlTarget extends InsetsTarget {
     /**
      * @param visible the requested visibility for the IME, used for
      * {@link com.android.server.wm.DisplayContent.RemoteInsetsControlTarget}
+     * @param statsToken the token tracking the current IME request
      */
-    default void setImeInputTargetRequestedVisibility(boolean visible) {
+    default void setImeInputTargetRequestedVisibility(boolean visible,
+            @NonNull ImeTracker.Token statsToken) {
     }
 
     /** Returns {@code target.getWindow()}, or null if {@code target} is {@code null}. */

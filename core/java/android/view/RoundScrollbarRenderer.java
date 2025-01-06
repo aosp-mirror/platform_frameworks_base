@@ -35,7 +35,9 @@ import android.view.flags.Flags;
  * @hide
  */
 public class RoundScrollbarRenderer {
-    private static final String BLUECHIP_ENABLED_SYSPROP = "persist.cw_build.bluechip.enabled";
+    /** @hide */
+    public static final String BLUECHIP_ENABLED_SYSPROP = "persist.cw_build.bluechip.enabled";
+
     // The range of the scrollbar position represented as an angle in degrees.
     private static final float SCROLLBAR_ANGLE_RANGE = 28.8f;
     private static final float MAX_SCROLLBAR_ANGLE_SWIPE = 26.3f; // 90%

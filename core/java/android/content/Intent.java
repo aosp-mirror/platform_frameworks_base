@@ -55,6 +55,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Rect;
 import android.net.Uri;
+import android.os.BadParcelableException;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.BundleMerger;
@@ -108,6 +109,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TimeZone;
+import java.util.function.Consumer;
 
 /**
  * An intent is an abstract description of an operation to be performed.  It
@@ -892,6 +894,20 @@ public class Intent implements Parcelable, Cloneable {
     public static void maybeMarkAsMissingCreatorToken(Object object) {
         if (object instanceof Intent intent) {
             maybeMarkAsMissingCreatorTokenInternal(intent);
+        } else if (object instanceof Parcelable[] parcelables) {
+            for (Parcelable p : parcelables) {
+                if (p instanceof Intent intent) {
+                    maybeMarkAsMissingCreatorTokenInternal(intent);
+                }
+            }
+        } else if (object instanceof ArrayList parcelables) {
+            int N = parcelables.size();
+            for (int i = 0; i < N; i++) {
+                Object p = parcelables.get(i);
+                if (p instanceof Intent intent) {
+                    maybeMarkAsMissingCreatorTokenInternal(intent);
+                }
+            }
         }
     }
 
@@ -1196,8 +1212,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@link android.telecom.TelecomManager#placeCall(Uri, Bundle)} to place calls rather than
      * relying on this intent.
      *
-     * <p>Note: if you app targets {@link android.os.Build.VERSION_CODES#M M}
-     * and above and declares as using the {@link android.Manifest.permission#CALL_PHONE}
+     * <p>Note: If your app targets {@link android.os.Build.VERSION_CODES#M M}
+     * or higher and declares as using the {@link android.Manifest.permission#CALL_PHONE}
      * permission which is not granted, then attempting to use this action will
      * result in a {@link java.lang.SecurityException}.
      */
@@ -6172,7 +6188,8 @@ public class Intent implements Parcelable, Cloneable {
      * {@link #EXTRA_CHOOSER_MODIFY_SHARE_ACTION},
      * {@link #EXTRA_METADATA_TEXT},
      * {@link #EXTRA_CHOOSER_REFINEMENT_INTENT_SENDER},
-     * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER}.
+     * {@link #EXTRA_CHOOSER_RESULT_INTENT_SENDER},
+     * {@link #EXTRA_EXCLUDE_COMPONENTS}.
      * </p>
      */
     public static final String EXTRA_CHOOSER_ADDITIONAL_CONTENT_URI =
@@ -7705,6 +7722,7 @@ public class Intent implements Parcelable, Cloneable {
     @IntDef(flag = true, prefix = { "EXTENDED_FLAG_" }, value = {
             EXTENDED_FLAG_FILTER_MISMATCH,
             EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN,
+            EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ExtendedFlags {}
@@ -7724,6 +7742,13 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public static final int EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN = 1 << 1;
+
+    /**
+     * This flag indicates this intent called {@link #collectExtraIntentKeys()}.
+     *
+     * @hide
+     */
+    public static final int EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED = 1 << 2;
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
@@ -7832,6 +7857,10 @@ public class Intent implements Parcelable, Cloneable {
      * that can handle it.</p>
      */
     public static final int URI_ALLOW_UNSAFE = 1<<2;
+
+    static {
+        Bundle.intentClass = Intent.class;
+    }
 
     // ---------------------------------------------------------------------
 
@@ -7944,6 +7973,24 @@ public class Intent implements Parcelable, Cloneable {
      */
     public @NonNull Intent cloneFilter() {
         return new Intent(this, COPY_MODE_FILTER);
+    }
+
+    /**
+     * Make a copy of all members important to identify an intent with its creator token.
+     * @hide
+     */
+    public @NonNull Intent cloneForCreatorToken() {
+        Intent clone = new Intent()
+                .setAction(this.mAction)
+                .setDataAndType(this.mData, this.mType)
+                .setPackage(this.mPackage)
+                .setComponent(this.mComponent)
+                .setFlags(this.mFlags & IMMUTABLE_FLAGS);
+        if (this.mClipData != null) {
+            clone.setClipData(this.mClipData.cloneOnlyUriItems());
+        }
+        clone.mCreatorTokenInfo = this.mCreatorTokenInfo;
+        return clone;
     }
 
     /**
@@ -11661,12 +11708,51 @@ public class Intent implements Parcelable, Cloneable {
                 Log.w(TAG, "Failure filling in extras", e);
             }
         }
-        mCreatorTokenInfo = other.mCreatorTokenInfo;
+        fillInCreatorTokenInfo(other.mCreatorTokenInfo, changes);
         if (mayHaveCopiedUris && mContentUserHint == UserHandle.USER_CURRENT
                 && other.mContentUserHint != UserHandle.USER_CURRENT) {
             mContentUserHint = other.mContentUserHint;
         }
         return changes;
+    }
+
+    // keep original creator token and merge nested intent keys.
+    private void fillInCreatorTokenInfo(CreatorTokenInfo otherCreatorTokenInfo, int changes) {
+        if (otherCreatorTokenInfo != null && otherCreatorTokenInfo.mNestedIntentKeys != null) {
+            if (mCreatorTokenInfo == null) {
+                mCreatorTokenInfo = new CreatorTokenInfo();
+            }
+            ArraySet<NestedIntentKey> otherNestedIntentKeys =
+                    otherCreatorTokenInfo.mNestedIntentKeys;
+            if (mCreatorTokenInfo.mNestedIntentKeys == null) {
+                mCreatorTokenInfo.mNestedIntentKeys = new ArraySet<>(otherNestedIntentKeys);
+            } else {
+                ArraySet<NestedIntentKey> otherKeys;
+                if ((changes & FILL_IN_CLIP_DATA) == 0) {
+                    // If clip data is Not filled in from other, do not merge clip data keys.
+                    otherKeys = new ArraySet<>();
+                    int N = otherNestedIntentKeys.size();
+                    for (int i = 0; i < N; i++) {
+                        NestedIntentKey key = otherNestedIntentKeys.valueAt(i);
+                        if (key.mType != NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA) {
+                            otherKeys.add(key);
+                        }
+                    }
+                } else {
+                    // If clip data is filled in from other, remove clip data keys from this
+                    // creatorTokenInfo and then merge every key from the others.
+                    int N = mCreatorTokenInfo.mNestedIntentKeys.size();
+                    for (int i = N - 1; i >= 0; i--) {
+                        NestedIntentKey key = mCreatorTokenInfo.mNestedIntentKeys.valueAt(i);
+                        if (key.mType == NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA) {
+                            mCreatorTokenInfo.mNestedIntentKeys.removeAt(i);
+                        }
+                    }
+                    otherKeys = otherNestedIntentKeys;
+                }
+                mCreatorTokenInfo.mNestedIntentKeys.addAll(otherKeys);
+            }
+        }
     }
 
     /**
@@ -12204,7 +12290,69 @@ public class Intent implements Parcelable, Cloneable {
         // Stores a creator token for an intent embedded as an extra intent in a top level intent,
         private IBinder mCreatorToken;
         // Stores all extra keys whose values are intents for a top level intent.
-        private ArraySet<String> mExtraIntentKeys;
+        private ArraySet<NestedIntentKey> mNestedIntentKeys;
+    }
+
+    /**
+     * @hide
+     */
+    public static class NestedIntentKey {
+        /** @hide */
+        @IntDef(flag = true, prefix = {"NESTED_INTENT_KEY_TYPE"}, value = {
+                NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL,
+                NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY,
+                NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST,
+                NESTED_INTENT_KEY_TYPE_CLIP_DATA,
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        private @interface NestedIntentKeyType {
+        }
+
+        /**
+         * This flag indicates the key is for an extra parcel in mExtras.
+         */
+        private static final int NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL = 1 << 0;
+
+        /**
+         * This flag indicates the key is for an extra parcel array in mExtras and the index is the
+         * index of that array.
+         */
+        private static final int NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY = 1 << 1;
+
+        /**
+         * This flag indicates the key is for an extra parcel list in mExtras and the index is the
+         * index of that list.
+         */
+        private static final int NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST = 1 << 2;
+
+        /**
+         * This flag indicates the key is for an extra parcel in mClipData.mItems.
+         */
+        private static final int NESTED_INTENT_KEY_TYPE_CLIP_DATA = 1 << 3;
+
+        private final @NestedIntentKeyType int mType;
+        private final String mKey;
+        private final int mIndex;
+
+        private NestedIntentKey(@NestedIntentKeyType int type, String key, int index) {
+            this.mType = type;
+            this.mKey = key;
+            this.mIndex = index;
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            NestedIntentKey that = (NestedIntentKey) o;
+            return mType == that.mType && mIndex == that.mIndex && Objects.equals(mKey, that.mKey);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mType, mKey, mIndex);
+        }
+
     }
 
     private @Nullable CreatorTokenInfo mCreatorTokenInfo;
@@ -12227,8 +12375,8 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     /** @hide */
-    public Set<String> getExtraIntentKeys() {
-        return mCreatorTokenInfo == null ? null : mCreatorTokenInfo.mExtraIntentKeys;
+    public Set<NestedIntentKey> getExtraIntentKeys() {
+        return mCreatorTokenInfo == null ? null : mCreatorTokenInfo.mNestedIntentKeys;
     }
 
     /** @hide */
@@ -12246,45 +12394,192 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public void collectExtraIntentKeys() {
-        if (!preventIntentRedirect()) return;
+        if (preventIntentRedirect()) {
+            collectNestedIntentKeysRecur(new ArraySet<>());
+        }
+    }
 
+    private void collectNestedIntentKeysRecur(Set<Intent> visited) {
+        addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
         if (mExtras != null && !mExtras.isEmpty()) {
             for (String key : mExtras.keySet()) {
-                if (mExtras.get(key) instanceof Intent) {
-                    if (mCreatorTokenInfo == null) {
-                        mCreatorTokenInfo = new CreatorTokenInfo();
-                    }
-                    if (mCreatorTokenInfo.mExtraIntentKeys == null) {
-                        mCreatorTokenInfo.mExtraIntentKeys = new ArraySet<>();
-                    }
-                    mCreatorTokenInfo.mExtraIntentKeys.add(key);
+                Object value;
+                try {
+                    value = mExtras.get(key);
+                } catch (BadParcelableException e) {
+                    // This could happen when the key points to a LazyValue whose class cannot be
+                    // found by the classLoader - A nested object more than 1 level deeper who is
+                    // of type of a custom class could trigger this situation. In such case, we
+                    // ignore it since it is not an intent. However, it could be a custom type that
+                    // extends from Intent. If such an object is retrieved later in another
+                    // component, then trying to launch such a custom class object will fail unless
+                    // removeLaunchSecurityProtection() is called before it is launched.
+                    value = null;
+                }
+                if (value instanceof Intent intent) {
+                    handleNestedIntent(intent, visited, new NestedIntentKey(
+                            NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL, key, 0));
+                } else if (value instanceof Parcelable[] parcelables) {
+                    handleParcelableArray(parcelables, key, visited);
+                } else if (value instanceof ArrayList<?> parcelables) {
+                    handleParcelableList(parcelables, key, visited);
+                }
+            }
+        }
+
+        if (mClipData != null) {
+            for (int i = 0; i < mClipData.getItemCount(); i++) {
+                Intent intent = mClipData.getItemAt(i).mIntent;
+                if (intent != null && !visited.contains(intent)) {
+                    handleNestedIntent(intent, visited, new NestedIntentKey(
+                            NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA, null, i));
                 }
             }
         }
     }
 
+    private void handleNestedIntent(Intent intent, Set<Intent> visited, NestedIntentKey key) {
+        if (mCreatorTokenInfo == null) {
+            mCreatorTokenInfo = new CreatorTokenInfo();
+        }
+        if (mCreatorTokenInfo.mNestedIntentKeys == null) {
+            mCreatorTokenInfo.mNestedIntentKeys = new ArraySet<>();
+        }
+        mCreatorTokenInfo.mNestedIntentKeys.add(key);
+        if (!visited.contains(intent)) {
+            visited.add(intent);
+            intent.collectNestedIntentKeysRecur(visited);
+        }
+    }
+
+    private void handleParcelableArray(Parcelable[] parcelables, String key, Set<Intent> visited) {
+        for (int i = 0; i < parcelables.length; i++) {
+            if (parcelables[i] instanceof Intent intent && !visited.contains(intent)) {
+                handleNestedIntent(intent, visited, new NestedIntentKey(
+                        NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY, key, i));
+            }
+        }
+    }
+
+    private void handleParcelableList(ArrayList<?> parcelables, String key, Set<Intent> visited) {
+        for (int i = 0; i < parcelables.size(); i++) {
+            if (parcelables.get(i) instanceof Intent intent && !visited.contains(intent)) {
+                handleNestedIntent(intent, visited, new NestedIntentKey(
+                        NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST, key, i));
+            }
+        }
+    }
+
+    private static final Consumer<Intent> MARK_TRUSTED_TOKEN_PRESENT_ACTION = intent -> {
+        intent.mLocalFlags |= LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT;
+    };
+
+    private static final Consumer<Intent> ENABLE_TOKEN_VERIFY_ACTION = intent -> {
+        if (intent.mExtras != null) {
+            intent.mExtras.enableTokenVerification();
+        }
+    };
+
     /** @hide */
     public void checkCreatorToken() {
-        if (mExtras == null) return;
-        if (mCreatorTokenInfo != null && mCreatorTokenInfo.mExtraIntentKeys != null) {
-            for (String key : mCreatorTokenInfo.mExtraIntentKeys) {
-                try {
-                    Intent extraIntent = mExtras.getParcelable(key, Intent.class);
-                    if (extraIntent == null) {
-                        Log.w(TAG, "The key {" + key
-                                + "} does not correspond to an intent in the bundle.");
-                        continue;
+        forEachNestedCreatorToken(MARK_TRUSTED_TOKEN_PRESENT_ACTION, ENABLE_TOKEN_VERIFY_ACTION);
+        if (mExtras != null) {
+            // mark the bundle as intent extras after calls to getParcelable.
+            // otherwise, the logic to mark missing token would run before
+            // mark trusted creator token present.
+            mExtras.enableTokenVerification();
+        }
+    }
+
+    /** @hide */
+    public void forEachNestedCreatorToken(Consumer<? super Intent> action) {
+        forEachNestedCreatorToken(action, null);
+    }
+
+    private void forEachNestedCreatorToken(Consumer<? super Intent> action,
+            Consumer<? super Intent> postAction) {
+        if (mExtras == null && mClipData == null) return;
+
+        if (mCreatorTokenInfo != null && mCreatorTokenInfo.mNestedIntentKeys != null) {
+            int N = mCreatorTokenInfo.mNestedIntentKeys.size();
+            for (int i = 0; i < N; i++) {
+                NestedIntentKey key = mCreatorTokenInfo.mNestedIntentKeys.valueAt(i);
+                Intent extraIntent = extractIntentFromKey(key);
+
+                if (extraIntent != null) {
+                    action.accept(extraIntent);
+                    extraIntent.forEachNestedCreatorToken(action);
+                    if (postAction != null) {
+                        postAction.accept(extraIntent);
                     }
-                    extraIntent.mLocalFlags |= LOCAL_FLAG_TRUSTED_CREATOR_TOKEN_PRESENT;
-                } catch (Exception e) {
-                    Log.e(TAG, "Failed to validate creator token. key: " + key + ".", e);
+                } else {
+                    Log.w(TAG, getLogMessageForKey(key));
                 }
             }
         }
-        // mark the bundle as intent extras after calls to getParcelable.
-        // otherwise, the logic to mark missing token would run before
-        // mark trusted creator token present.
-        mExtras.setIsIntentExtra();
+    }
+
+    private Intent extractIntentFromKey(NestedIntentKey key) {
+        switch (key.mType) {
+            case NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL:
+                return mExtras == null ? null : mExtras.getParcelable(key.mKey, Intent.class);
+            case NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY:
+                if (mExtras == null) return null;
+                Intent[] extraIntents = mExtras.getParcelableArray(key.mKey, Intent.class);
+                if (extraIntents != null && key.mIndex < extraIntents.length) {
+                    return extraIntents[key.mIndex];
+                }
+                break;
+            case NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST:
+                if (mExtras == null) return null;
+                ArrayList<Intent> extraIntentsList = mExtras.getParcelableArrayList(key.mKey,
+                        Intent.class);
+                if (extraIntentsList != null && key.mIndex < extraIntentsList.size()) {
+                    return extraIntentsList.get(key.mIndex);
+                }
+                break;
+            case NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA:
+                if (mClipData == null) return null;
+                if (key.mIndex < mClipData.getItemCount()) {
+                    ClipData.Item item = mClipData.getItemAt(key.mIndex);
+                    if (item != null) {
+                        return item.mIntent;
+                    }
+                }
+                break;
+        }
+        return null;
+    }
+
+    private String getLogMessageForKey(NestedIntentKey key) {
+        switch (key.mType) {
+            case NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL:
+                return "The key {" + key + "} does not correspond to an intent in the bundle.";
+            case NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY:
+                if (mExtras.getParcelableArray(key.mKey, Intent.class) == null) {
+                    return "The key {" + key
+                            + "} does not correspond to a Parcelable[] in the bundle.";
+                } else {
+                    return "Parcelable[" + key.mIndex + "] for key {" + key + "} is not an intent.";
+                }
+            case NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST:
+                if (mExtras.getParcelableArrayList(key.mKey, Intent.class) == null) {
+                    return "The key {" + key
+                            + "} does not correspond to an ArrayList<Parcelable> in the bundle.";
+                } else {
+                    return "List.get(" + key.mIndex + ") for key {" + key + "} is not an intent.";
+                }
+            case NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA:
+                if (key.mIndex >= mClipData.getItemCount()) {
+                    return "Index out of range for clipData items. index: " + key.mIndex
+                            + ". item counts: " + mClipData.getItemCount();
+                } else {
+                    return "clipData items at index [" + key.mIndex
+                            + "] is null or does not contain an intent.";
+                }
+            default:
+                return "Unknown key type: " + key.mType;
+        }
     }
 
     /**
@@ -12357,7 +12652,19 @@ public class Intent implements Parcelable, Cloneable {
             } else {
                 out.writeInt(1);
                 out.writeStrongBinder(mCreatorTokenInfo.mCreatorToken);
-                out.writeArraySet(mCreatorTokenInfo.mExtraIntentKeys);
+
+                if (mCreatorTokenInfo.mNestedIntentKeys != null) {
+                    final int N = mCreatorTokenInfo.mNestedIntentKeys.size();
+                    out.writeInt(N);
+                    for (int i = 0; i < N; i++) {
+                        NestedIntentKey key = mCreatorTokenInfo.mNestedIntentKeys.valueAt(i);
+                        out.writeInt(key.mType);
+                        out.writeString8(key.mKey);
+                        out.writeInt(key.mIndex);
+                    }
+                } else {
+                    out.writeInt(0);
+                }
             }
         }
     }
@@ -12422,7 +12729,18 @@ public class Intent implements Parcelable, Cloneable {
             if (in.readInt() != 0) {
                 mCreatorTokenInfo = new CreatorTokenInfo();
                 mCreatorTokenInfo.mCreatorToken = in.readStrongBinder();
-                mCreatorTokenInfo.mExtraIntentKeys = (ArraySet<String>) in.readArraySet(null);
+
+                N = in.readInt();
+                if (N > 0) {
+                    mCreatorTokenInfo.mNestedIntentKeys = new ArraySet<>(N);
+                    for (int i = 0; i < N; i++) {
+                        int type = in.readInt();
+                        String key = in.readString8();
+                        int index = in.readInt();
+                        mCreatorTokenInfo.mNestedIntentKeys.append(
+                                new NestedIntentKey(type, key, index));
+                    }
+                }
             }
         }
     }

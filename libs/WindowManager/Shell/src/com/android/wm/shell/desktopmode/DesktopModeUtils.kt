@@ -28,6 +28,7 @@ import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.graphics.Rect
 import android.os.SystemProperties
 import android.util.Size
+import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 
 val DESKTOP_MODE_INITIAL_BOUNDS_SCALE: Float =
@@ -36,21 +37,14 @@ val DESKTOP_MODE_INITIAL_BOUNDS_SCALE: Float =
 val DESKTOP_MODE_LANDSCAPE_APP_PADDING: Int =
     SystemProperties.getInt("persist.wm.debug.desktop_mode_landscape_app_padding", 25)
 
-/**
- * Calculates the initial bounds to enter desktop, centered on the display.
- */
+/** Calculates the initial bounds to enter desktop, centered on the display. */
 fun calculateDefaultDesktopTaskBounds(displayLayout: DisplayLayout): Rect {
     // TODO(b/319819547): Account for app constraints so apps do not become letterboxed
     val desiredWidth = (displayLayout.width() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
     val desiredHeight = (displayLayout.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE).toInt()
     val heightOffset = (displayLayout.height() - desiredHeight) / 2
     val widthOffset = (displayLayout.width() - desiredWidth) / 2
-    return Rect(
-        widthOffset,
-        heightOffset,
-        desiredWidth + widthOffset,
-        desiredHeight + heightOffset
-    )
+    return Rect(widthOffset, heightOffset, desiredWidth + widthOffset, desiredHeight + heightOffset)
 }
 
 /**
@@ -62,7 +56,7 @@ fun calculateDefaultDesktopTaskBounds(displayLayout: DisplayLayout): Rect {
 fun calculateInitialBounds(
     displayLayout: DisplayLayout,
     taskInfo: RunningTaskInfo,
-    scale: Float = DESKTOP_MODE_INITIAL_BOUNDS_SCALE
+    scale: Float = DESKTOP_MODE_INITIAL_BOUNDS_SCALE,
 ): Rect {
     val screenBounds = Rect(0, 0, displayLayout.width(), displayLayout.height())
     val appAspectRatio = calculateAspectRatio(taskInfo)
@@ -87,8 +81,10 @@ fun calculateInitialBounds(
                     if (isFixedOrientationPortrait(topActivityInfo.screenOrientation)) {
                         // For portrait resizeable activities, respect apps fullscreen width but
                         // apply ideal size height.
-                        Size(taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth,
-                            idealSize.height)
+                        Size(
+                            taskInfo.appCompatTaskInfo.topActivityAppBounds.width(),
+                            idealSize.height,
+                        )
                     } else {
                         // For landscape resizeable activities, simply apply ideal size.
                         idealSize
@@ -108,7 +104,7 @@ fun calculateInitialBounds(
                         // apply custom app width.
                         Size(
                             customPortraitWidthForLandscapeApp,
-                            taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight
+                            taskInfo.appCompatTaskInfo.topActivityAppBounds.height(),
                         )
                     } else {
                         // For portrait resizeable activities, simply apply ideal size.
@@ -122,7 +118,7 @@ fun calculateInitialBounds(
                         maximizeSizeGivenAspectRatio(
                             taskInfo,
                             Size(customPortraitWidthForLandscapeApp, idealSize.height),
-                            appAspectRatio
+                            appAspectRatio,
                         )
                     } else {
                         // For portrait unresizeable activities, calculate maximum size (within the
@@ -140,13 +136,10 @@ fun calculateInitialBounds(
 }
 
 /**
- * Calculates the maximized bounds of a task given in the given [DisplayLayout], taking
- * resizability into consideration.
+ * Calculates the maximized bounds of a task given in the given [DisplayLayout], taking resizability
+ * into consideration.
  */
-fun calculateMaximizeBounds(
-    displayLayout: DisplayLayout,
-    taskInfo: RunningTaskInfo,
-): Rect {
+fun calculateMaximizeBounds(displayLayout: DisplayLayout, taskInfo: RunningTaskInfo): Rect {
     val stableBounds = Rect()
     displayLayout.getStableBounds(stableBounds)
     if (taskInfo.isResizeable) {
@@ -155,10 +148,13 @@ fun calculateMaximizeBounds(
     } else {
         // if non-resizable then calculate max bounds according to aspect ratio
         val activityAspectRatio = calculateAspectRatio(taskInfo)
-        val newSize = maximizeSizeGivenAspectRatio(taskInfo,
-            Size(stableBounds.width(), stableBounds.height()), activityAspectRatio)
-        return centerInArea(
-            newSize, stableBounds, stableBounds.left, stableBounds.top)
+        val newSize =
+            maximizeSizeGivenAspectRatio(
+                taskInfo,
+                Size(stableBounds.width(), stableBounds.height()),
+                activityAspectRatio,
+            )
+        return centerInArea(newSize, stableBounds, stableBounds.left, stableBounds.top)
     }
 }
 
@@ -169,7 +165,7 @@ fun calculateMaximizeBounds(
 fun maximizeSizeGivenAspectRatio(
     taskInfo: RunningTaskInfo,
     targetArea: Size,
-    aspectRatio: Float
+    aspectRatio: Float,
 ): Size {
     val targetHeight = targetArea.height
     val targetWidth = targetArea.width
@@ -200,27 +196,41 @@ fun maximizeSizeGivenAspectRatio(
 
 /** Calculates the aspect ratio of an activity from its fullscreen bounds. */
 fun calculateAspectRatio(taskInfo: RunningTaskInfo): Float {
-    val appLetterboxWidth = taskInfo.appCompatTaskInfo.topActivityLetterboxAppWidth
-    val appLetterboxHeight = taskInfo.appCompatTaskInfo.topActivityLetterboxAppHeight
-    if (taskInfo.appCompatTaskInfo.isTopActivityLetterboxed || !taskInfo.canChangeAspectRatio) {
-        return maxOf(appLetterboxWidth, appLetterboxHeight) /
-            minOf(appLetterboxWidth, appLetterboxHeight).toFloat()
-    }
-    val appBounds = taskInfo.configuration.windowConfiguration.appBounds ?: return 1f
+    if (taskInfo.appCompatTaskInfo.topActivityAppBounds.isEmpty) return 1f
+    val appBounds = taskInfo.appCompatTaskInfo.topActivityAppBounds
     return maxOf(appBounds.height(), appBounds.width()) /
         minOf(appBounds.height(), appBounds.width()).toFloat()
+}
+
+/** Returns whether the task is maximized. */
+fun isTaskMaximized(taskInfo: RunningTaskInfo, displayController: DisplayController): Boolean {
+    val displayLayout =
+        displayController.getDisplayLayout(taskInfo.displayId)
+            ?: error("Could not get display layout for display=${taskInfo.displayId}")
+    val stableBounds = Rect()
+    displayLayout.getStableBounds(stableBounds)
+    return isTaskMaximized(taskInfo, stableBounds)
+}
+
+/** Returns whether the task is maximized. */
+fun isTaskMaximized(taskInfo: RunningTaskInfo, stableBounds: Rect): Boolean {
+    val currentTaskBounds = taskInfo.configuration.windowConfiguration.bounds
+    return if (taskInfo.isResizeable) {
+        isTaskBoundsEqual(currentTaskBounds, stableBounds)
+    } else {
+        isTaskWidthOrHeightEqual(currentTaskBounds, stableBounds)
+    }
 }
 
 /** Returns true if task's width or height is maximized else returns false. */
 fun isTaskWidthOrHeightEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
     return taskBounds.width() == stableBounds.width() ||
-            taskBounds.height() == stableBounds.height()
+        taskBounds.height() == stableBounds.height()
 }
 
 /** Returns true if task bound is equal to stable bounds else returns false. */
 fun isTaskBoundsEqual(taskBounds: Rect, stableBounds: Rect): Boolean {
-    return taskBounds.width() == stableBounds.width() &&
-            taskBounds.height() == stableBounds.height()
+    return taskBounds == stableBounds
 }
 
 /**
@@ -248,8 +258,8 @@ private val TaskInfo.canChangeAspectRatio: Boolean
     get() = isResizeable && !appCompatTaskInfo.hasMinAspectRatioOverride()
 
 /**
- * Adjusts bounds to be positioned in the middle of the area provided, not necessarily the
- * entire screen, as area can be offset by left and top start.
+ * Adjusts bounds to be positioned in the middle of the area provided, not necessarily the entire
+ * screen, as area can be offset by left and top start.
  */
 fun centerInArea(desiredSize: Size, areaBounds: Rect, leftStart: Int, topStart: Int): Rect {
     val heightOffset = (areaBounds.height() - desiredSize.height) / 2
@@ -275,7 +285,7 @@ private fun TaskInfo.hasPortraitTopActivity(): Boolean {
         }
 
         // Then check if the activity is portrait when letterboxed
-        appCompatTaskInfo.isTopActivityLetterboxed -> appCompatTaskInfo.isTopActivityPillarboxed
+        appCompatTaskInfo.isTopActivityLetterboxed -> appCompatTaskInfo.isTopActivityPillarboxShaped
 
         // Then check if the activity is portrait
         appBounds != null -> appBounds.height() > appBounds.width()
@@ -286,6 +296,6 @@ private fun TaskInfo.hasPortraitTopActivity(): Boolean {
 }
 
 private fun hasFullscreenOverride(taskInfo: RunningTaskInfo): Boolean {
-    return taskInfo.appCompatTaskInfo.isUserFullscreenOverrideEnabled
-            || taskInfo.appCompatTaskInfo.isSystemFullscreenOverrideEnabled
+    return taskInfo.appCompatTaskInfo.isUserFullscreenOverrideEnabled ||
+        taskInfo.appCompatTaskInfo.isSystemFullscreenOverrideEnabled
 }

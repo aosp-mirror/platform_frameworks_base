@@ -64,4 +64,9 @@ interface IVirtualDeviceManagerNative {
      * Returns the device policy for the given virtual device and policy type.
      */
     int getDevicePolicy(int deviceId, int policyType);
+
+    /**
+     * Returns the ID of the device which owns the display with the given ID.
+     */
+    int getDeviceIdForDisplayId(int displayId);
 }

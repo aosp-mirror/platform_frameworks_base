@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -54,7 +56,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         mOutputLeft = Float.isNaN(mLeft) ? context.getFloat(Utils.idFromNan(mLeft)) : mLeft;
         mOutputTop = Float.isNaN(mTop) ? context.getFloat(Utils.idFromNan(mTop)) : mTop;
         mOutputRight = Float.isNaN(mRight) ? context.getFloat(Utils.idFromNan(mRight)) : mRight;
@@ -62,7 +64,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (Float.isNaN(mLeft)) {
             context.listensTo(Utils.idFromNan(mLeft), this);
         }
@@ -78,10 +80,11 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mLeft, mTop, mRight, mBottom, mDescriptionId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DrawBitmap (desc="
@@ -97,28 +100,45 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
                 + ";";
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         float sLeft = buffer.readFloat();
         float srcTop = buffer.readFloat();
         float srcRight = buffer.readFloat();
         float srcBottom = buffer.readFloat();
-        int discriptionId = buffer.readInt();
+        int descriptionId = buffer.readInt();
 
-        DrawBitmap op = new DrawBitmap(id, sLeft, srcTop, srcRight, srcBottom, discriptionId);
+        DrawBitmap op = new DrawBitmap(id, sLeft, srcTop, srcRight, srcBottom, descriptionId);
         operations.add(op);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int id,
             float left,
             float top,
@@ -134,7 +154,12 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
         buffer.writeInt(descriptionId);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap")
                 .field(INT, "id", "id of float")
@@ -146,7 +171,7 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.drawBitmap(mId, mOutputLeft, mOutputTop, mOutputRight, mOutputBottom);
     }
 }

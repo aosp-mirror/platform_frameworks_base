@@ -141,6 +141,14 @@ public abstract class Animator implements Cloneable {
     }
 
     /**
+     * @see #sPostNotifyEndListenerEnabled
+     * @hide
+     */
+    public static boolean isPostNotifyEndListenerEnabled() {
+        return sPostNotifyEndListenerEnabled;
+    }
+
+    /**
      * Starts this animation. If the animation has a nonzero startDelay, the animation will start
      * running after that delay elapses. A non-delayed animation will have its initial
      * value(s) set immediately, followed by calls to

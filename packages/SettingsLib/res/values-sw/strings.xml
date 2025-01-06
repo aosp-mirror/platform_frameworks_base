@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Inatumika (kushoto pekee)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Inatumika (kulia pekee)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Inatumika (kushoto na kulia)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Imeshindwa kusasisha mazingira"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Inatumika (maudhui pekee). Chaji ya betri imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Inatumika (maudhui pekee), Kushoto: chaji ya betri imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Kulia: chaji ya betri imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Imeunganishwa (inaweza kutumia kipengele cha kusikiliza pamoja). Chaji imefika <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -237,7 +238,7 @@
     <string name="choose_profile" msgid="343803890897657450">"Chagua wasifu"</string>
     <string name="category_personal" msgid="6236798763159385225">"Binafsi"</string>
     <string name="category_work" msgid="4014193632325996115">"Kazini"</string>
-    <string name="category_private" msgid="4244892185452788977">"Faragha"</string>
+    <string name="category_private" msgid="4244892185452788977">"Sehemu ya Faragha"</string>
     <string name="category_clone" msgid="1554511758987195974">"Kloni"</string>
     <string name="development_settings_title" msgid="140296922921597393">"Chaguo za wasanidi"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"Washa chaguo za wasanidi programu"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Kituo cha karibu"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Washa programu ya mwisho inayotoa ufikiaji mkuu wa karibu"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Mazingira ya usanidi wa Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Tumia temino ya Linux kwenye Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Ya majaribio) Tumia temino ya Linux kwenye Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ukizima, data ya kituo cha Linux itafutwa"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Inakagua HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Weka HDCP ya kukagua tabia"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Utatuzi"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Mageuzi ya kipimo cha uhuishaji"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Mizani ya muda wa uhuishaji"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Iga maonyesho mbadala"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Nafasi ya kiwango kwenye skrini"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Programu"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Usihifadhi shughuli"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Haribu kila shughuli pindi tu mtumiaji anapoondoka"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Simu hii"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Kishikwambi hiki"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Kompyuta hii (spika ya ndani)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Televisheni hii"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Spika ya kituo"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Kifaa cha Nje"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Kifaa kilichounganishwa"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Simu hii"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analogi"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Huwezi kucheza maudhui kwenye kifaa hiki"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Pata toleo jipya la akaunti ili ubadilishe"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Imeshindwa kucheza maudhui yaliyopakuliwa hapa"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Imeunganishwa kupitia ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Imeunganishwa kupitia eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Mipangilio Chaguomsingi ya TV"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Kutoa sauti kupitia HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Spika za ndani"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Spika iliyojumuishwa ndani"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Sauti ya Televisheni"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Kuna tatizo la kuunganisha kwenye Intaneti. Zima kisha uwashe kifaa"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Kifaa cha sauti kinachotumia waya"</string>
     <string name="help_label" msgid="3528360748637781274">"Usaidizi na maoni"</string>

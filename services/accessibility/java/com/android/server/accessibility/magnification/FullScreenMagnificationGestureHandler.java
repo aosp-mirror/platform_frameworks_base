@@ -58,8 +58,6 @@ import android.util.TypedValue;
 import android.view.GestureDetector;
 import android.view.GestureDetector.SimpleOnGestureListener;
 import android.view.MotionEvent;
-import android.view.MotionEvent.PointerCoords;
-import android.view.MotionEvent.PointerProperties;
 import android.view.ScaleGestureDetector;
 import android.view.ScaleGestureDetector.OnScaleGestureListener;
 import android.view.VelocityTracker;
@@ -154,9 +152,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
 
     @VisibleForTesting State mCurrentState;
     @VisibleForTesting State mPreviousState;
-
-    private PointerCoords[] mTempPointerCoords;
-    private PointerProperties[] mTempPointerProperties;
 
     @VisibleForTesting static final int OVERSCROLL_NONE = 0;
     @VisibleForTesting static final int OVERSCROLL_LEFT_EDGE = 1;
@@ -428,38 +423,6 @@ public class FullScreenMagnificationGestureHandler extends MagnificationGestureH
         mDetectingState.clear();
         mViewportDraggingState.clear();
         mPanningScalingState.clear();
-    }
-
-    private PointerCoords[] getTempPointerCoordsWithMinSize(int size) {
-        final int oldSize = (mTempPointerCoords != null) ? mTempPointerCoords.length : 0;
-        if (oldSize < size) {
-            PointerCoords[] oldTempPointerCoords = mTempPointerCoords;
-            mTempPointerCoords = new PointerCoords[size];
-            if (oldTempPointerCoords != null) {
-                System.arraycopy(oldTempPointerCoords, 0, mTempPointerCoords, 0, oldSize);
-            }
-        }
-        for (int i = oldSize; i < size; i++) {
-            mTempPointerCoords[i] = new PointerCoords();
-        }
-        return mTempPointerCoords;
-    }
-
-    private PointerProperties[] getTempPointerPropertiesWithMinSize(int size) {
-        final int oldSize = (mTempPointerProperties != null) ? mTempPointerProperties.length
-                : 0;
-        if (oldSize < size) {
-            PointerProperties[] oldTempPointerProperties = mTempPointerProperties;
-            mTempPointerProperties = new PointerProperties[size];
-            if (oldTempPointerProperties != null) {
-                System.arraycopy(oldTempPointerProperties, 0, mTempPointerProperties, 0,
-                        oldSize);
-            }
-        }
-        for (int i = oldSize; i < size; i++) {
-            mTempPointerProperties[i] = new PointerProperties();
-        }
-        return mTempPointerProperties;
     }
 
     @VisibleForTesting

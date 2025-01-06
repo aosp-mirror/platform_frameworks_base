@@ -26,6 +26,7 @@ import android.app.admin.DevicePolicyManager;
 import android.content.ContentResolver;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageInstaller.SessionInfo;
@@ -36,6 +37,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Process;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -62,9 +64,12 @@ public class InstallStart extends Activity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
+        boolean testOverrideForPiaV2 = Settings.System.getInt(getContentResolver(),
+                "use_pia_v2", 0) == 1;
+        boolean usePiaV2aConfig = usePiaV2();
 
-        if (usePiaV2()) {
-            Log.i(TAG, "Using Pia V2");
+        if (usePiaV2aConfig || testOverrideForPiaV2) {
+            logReasonForDebug(usePiaV2aConfig, testOverrideForPiaV2);
 
             Intent piaV2 = new Intent(getIntent());
             piaV2.putExtra(InstallLaunch.EXTRA_CALLING_PKG_NAME, getLaunchedFromPackage());
@@ -270,8 +275,20 @@ public class InstallStart extends Activity {
     }
 
     private boolean canPackageQuery(int callingUid, Uri packageUri) {
-        ProviderInfo info = mPackageManager.resolveContentProvider(packageUri.getAuthority(),
-                PackageManager.ComponentInfoFlags.of(0));
+        ProviderInfo info;
+        try {
+            if (Flags.uidBasedProviderLookup()) {
+                info = mPackageManager.resolveContentProviderForUid(packageUri.getAuthority(),
+                    PackageManager.ComponentInfoFlags.of(0), callingUid);
+            } else {
+                info = mPackageManager.resolveContentProvider(packageUri.getAuthority(),
+                    PackageManager.ComponentInfoFlags.of(0));
+            }
+        } catch (Exception e) {
+            Log.e(TAG, "Caller cannot access " + packageUri, e);
+            return false;
+        }
+
         if (info == null) {
             return false;
         }
@@ -380,5 +397,21 @@ public class InstallStart extends Activity {
                         R.string.unknown_apps_user_restriction_dlg_text);
         }
         return null;
+    }
+
+    private void logReasonForDebug(boolean usePiaV2aConfig, boolean testOverrideForPiaV2) {
+        StringBuilder sb = new StringBuilder("Using Pia V2 due to: ");
+        boolean aconfigUsed = false;
+        if (usePiaV2aConfig) {
+            sb.append("aconfig flag USE_PIA_V2");
+            aconfigUsed = true;
+        }
+        if (testOverrideForPiaV2) {
+            if (aconfigUsed) {
+                sb.append(" and ");
+            }
+            sb.append("testOverrideForPiaV2.");
+        }
+        Log.i(TAG, sb.toString());
     }
 }

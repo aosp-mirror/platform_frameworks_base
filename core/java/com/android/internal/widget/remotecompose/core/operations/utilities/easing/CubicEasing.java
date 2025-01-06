@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
+import android.annotation.NonNull;
+
 class CubicEasing extends Easing {
     float mX1 = 0f;
     float mY1 = 0f;
@@ -62,7 +64,7 @@ class CubicEasing extends Easing {
         mType = type;
     }
 
-    void setup(float[] values) {
+    void setup(@NonNull float[] values) {
         setup(values[0], values[1], values[2], values[3]);
     }
 

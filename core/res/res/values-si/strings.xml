@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී ඇත. මීළඟ ඇමතුම: සීමා කර නැත"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"අමතන්නාගේ ID සුපුරුදු අනුව සීමා වී නැත. මීළඟ ඇමතුම: සීමා කර ඇත"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"මෙම යෙදුම 16 KB අනුකූල නොවේ. APK පෙළගැස්වීමේ පරීක්ෂාව අසමත් විය. මෙම යෙදුම පිටු ප්‍රමාණයට ගැළපෙන ප්‍රකාරය භාවිතයෙන් ධාවනය වනු ඇත. හොඳම ගැළපුම සඳහා, 16 KB සහාය ඇතිව යෙදුම නැවත සම්පාදනය කරන්න. වැඩිපුර තොරතුරු සඳහා, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; බලන්න"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"මෙම යෙදුම 16 KB අනුකූල නොවේ. ELF පෙළගැස්වීමේ පරීක්ෂාව අසමත් විය. මෙම යෙදුම පිටු ප්‍රමාණයට ගැළපෙන ප්‍රකාරය භාවිතයෙන් ධාවනය වනු ඇත. හොඳම ගැළපුම සඳහා, 16 KB සහාය ඇතිව යෙදුම නැවත සම්පාදනය කරන්න. වැඩිපුර තොරතුරු සඳහා, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; බලන්න"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"මෙම යෙදුම 16 KB අනුකූල නොවේ. APK සහ ELF පෙළගැස්වීමේ පරීක්ෂාවන් අසමත් විය. මෙම යෙදුම පිටු ප්‍රමාණයට ගැළපෙන ප්‍රකාරය භාවිතයෙන් ධාවනය වනු ඇත. හොඳම ගැළපුම සඳහා, 16 KB සහාය ඇතිව යෙදුම නැවත සම්පාදනය කරන්න. වැඩිපුර තොරතුරු සඳහා, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; බලන්න"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"සේවාවන් සපයා නැත."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"අමතන්නාගේ ID සැකසීම ඔබට වෙනස්කල නොහැක."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"දත්ත <xliff:g id="CARRIERDISPLAY">%s</xliff:g> වෙත මාරු කරන ලදි"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ජංගම ජාලය වෙත ළඟා විය නොහැකිය"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"කැමති ජාලය වෙනස් කිරීමට උත්සාහ කරන්න. වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"හදිසි ඇමතුම් ලබා ගත නොහැකිය"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"හදිසි ඇමතුම් සඳහා ජංගම ජාලයක් අවශ්‍ය වේ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ඇඟවීම්"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ඇමතුම ප්‍රතියොමු කිරීම"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"අවට ඇති අල්ට්‍රා-වයිඩ්බෑන්ඩ් උපාංග අතර සාපේක්ෂ පිහිටීම නිර්ණය කිරීමට යෙදුමට ඉඩ දීම"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"අවට Wi‑Fi උපාංග සමග අන්තර්ක්‍රියා කරන්න"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"වෙළඳ දැන්වීම් පළ කිරීමට, සම්බන්ධ වීමට සහ අවට ඇති Wi-Fi උපාංගවල සාපේක්ෂ පිහිටීම නිර්ණය කිරීමට යෙදුමට ඉඩ දෙයි"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"අවට උපාංග අතර සාපේක්ෂ පිහිටීම තීරණය කරන්න"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"අවට උපාංග අතර සාපේක්ෂ පිහිටීම තීරණය කිරීමට යෙදුමට ඉඩ දෙන්න"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"කැමති NFC ගෙවීම් සේවා තොරතුරු"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"ලියාපදිංචි කළ ආධාර සහ ගමන් මාර්ග ගමනාන්ත වැනි කැමති nfc ගෙවීම් සේවා තොරතුරු ලබා ගැනීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ආසන්න ක්ෂේත්‍ර සන්නිවේදනය පාලනය කරන්න"</string>
@@ -1057,7 +1064,7 @@
     <string name="lockscreen_access_pattern_cell_added_verbose" msgid="2931364927622563465">"<xliff:g id="CELL_INDEX">%1$s</xliff:g> කොටුව එකතු කරන ලදි"</string>
     <string name="lockscreen_access_pattern_detected" msgid="3931150554035194012">"රටාව සම්පූර්ණයි"</string>
     <string name="lockscreen_access_pattern_area" msgid="1288780416685002841">"රටා ප්‍රදේශය."</string>
-    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%%1$s. %%3$d න් %%2$d විජටය."</string>
+    <string name="keyguard_accessibility_widget_changed" msgid="7298011259508200234">"%1$s. %3$d න් %2$d විජටය."</string>
     <string name="keyguard_accessibility_add_widget" msgid="8245795023551343672">"විජටය එක් කරන්න."</string>
     <string name="keyguard_accessibility_widget_empty_slot" msgid="544239307077644480">"හිස්"</string>
     <string name="keyguard_accessibility_unlock_area_expanded" msgid="7768634718706488951">"අගුළු අරින ප්‍රදේශය විදහා ඇත."</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"පැ<xliff:g id="COUNT">%d</xliff:g>කින්"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"දි<xliff:g id="COUNT">%d</xliff:g>කින්"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"ව<xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"මිනි <xliff:g id="COUNT">%d</xliff:g>කට පෙර"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"පැය <xliff:g id="COUNT">%d</xliff:g>කට පෙර"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"දින <xliff:g id="COUNT">%d</xliff:g>කට පෙර"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"වසර <xliff:g id="COUNT">%d</xliff:g>කට පෙර"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"මිනි <xliff:g id="COUNT">%d</xliff:g>ක්"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"පැය <xliff:g id="COUNT">%d</xliff:g>ක්"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"දින <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"වසර <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"මිනි <xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"පැය <xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"දින <xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"වසර <xliff:g id="COUNT">%d</xliff:g>කින්"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"මිනි <xliff:g id="COUNT">%d</xliff:g>කට පෙර"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"පැය <xliff:g id="COUNT">%d</xliff:g>කට පෙර"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"දින <xliff:g id="COUNT">%d</xliff:g>කට පෙර"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"වසර <xliff:g id="COUNT">%d</xliff:g>කට පෙර"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{මිනිත්තු #කට පෙර}one{මිනිත්තු #කට පෙර}other{මිනිත්තු #කට පෙර}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{පැය #කට පෙර}one{පැය #කට පෙර}other{පැය #කට පෙර}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{දින #කට පෙර}one{දින #කට පෙර}other{දින #කට පෙර}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"තනි අත් ප්‍රකාරය"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"තවත් අඳුරු"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ශ්‍රවණ උපාංග"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මකයි."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිතයි."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"හඬ පරිමා යතුරු මුදා හරින්න. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> සක්‍රීය කිරීමට, හඬ පරිමා යතුරු දෙකම නැවත තත්පර 3ක් ඔබා අල්ලා සිටින්න."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"සති අන්තය"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"සිදුවීම"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"නිදා ගනිමින්"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"බාධා නොකරන්න (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> විසින් කළමනාකරණය කරයි"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ක්‍රියාත්මකයි"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ක්‍රියාවිරහිතයි"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="END">%2$s</xliff:g> සිට <xliff:g id="START">%1$s</xliff:g> දක්වා"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ඕනෑම දින දර්ශනයක්"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> සමහර ශබ්ද නිහඬ කරමින්"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"ඔබේ උපාංගය සමගින් ගැටලුවක් ඇති අතර, ඔබේ කර්මාන්තශාලා දත්ත යළි සකසන තෙක් එය අස්ථායි විය හැකිය."</string>
@@ -2405,7 +2437,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"යතුරු පුවරුව <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g> ලෙස සකසා ඇත… වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"භෞතික යතුරු පුවරුව වින්‍යාස කෙරිණි"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"යතුරු පුවරු බැලීමට තට්ටු කරන්න"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"පෞද්ගලික"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"රහසිගත"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"ක්ලෝන කරන්න"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"කාර්යාලය"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"කාර්යාලය 2"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ජංගම හෝ Wi-Fi ජාලයකින් තොරව පණිවිඩ යැවීම සහ ලැබීම"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages විවෘත කරන්න"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"එය ක්‍රියා කරන ආකාරය"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"ස්වයංක්‍රීයව ජාලය තෝරන්න\" ක්‍රියාත්මක කරන්න"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"ඔබේ දුරකථනයට චන්ද්‍රිකාව සමග ක්‍රියා කරන ජාලයක් සොයා ගැනීමට හැකි වන පරිදි සැකසීම් තුළ \"ස්වයංක්‍රීයව ජාලය තෝරන්න\" ක්‍රියාත්මක කරන්න"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ක්‍රියාත්මක කරන්න"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ආපසු යන්න"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"පොරොත්තුයි..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"චන්ද්‍රිකා SOS දැන් ලබා ගත හැක"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"ජංගම හෝ Wi-Fi ජාලයක් නොමැති නම් ඔබට හදිසි සේවා පණිවිඩ යැවීමට හැක. Google Messages ඔබේ පෙරනිමි පණිවිඩකරණ යෙදුම විය යුතු යි."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"චන්ද්‍රිකා SOS සහාය නොදක්වයි"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"මෙම උපාංගය මත චන්ද්‍රිකා SOS සහාය නොදක්වයි"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"චන්ද්‍රිකා SOS පිහිටුවා නැත"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"ඔබ අන්තර්ජාලයට සම්බන්ධ වී ඇති බවට වග බලා ගෙන නැවත පිහිටුවීමට උත්සාහ කරන්න"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"චන්‍ද්‍රික SOS ලබා ගත නොහැක"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"චන්ද්‍රිකා SOS මෙම රටෙහි හෝ කලාපයෙහි ලබා ගත නොහැක"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"චන්ද්‍රිකා SOS පිහිටුවා නැත"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"චන්ද්‍රිකා මඟින් පණිවිඩ යැවීමට, Google Messages ඔබේ පෙරනිමි පණිවිඩ යැවීමේ යෙදුම ලෙස සකසන්න"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"චන්‍ද්‍රික SOS ලබා ගත නොහැක"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"මෙම රටෙහි හෝ කලාපය තුළ චන්ද්‍රිකා SOS ලබා ගත හැකි දැයි පරීක්ෂා කිරීමට, ස්ථාන සැකසීම් ක්‍රියාත්මක කරන්න"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"චන්ද්‍රිකා පණිවිඩ යැවීම ලබා ගත හැක"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"ජංගම හෝ Wi-Fi ජාලයක් නොමැති නම් ඔබට චන්ද්‍රිකාවෙන් පණිවිඩයක් යැවිය හැක. Google Messages ඔබේ පෙරනිමි පණිවිඩකරණ යෙදුම විය යුතු යි."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"චන්ද්‍රිකා පණිවිඩ යැවීමට සහය නොදක්වයි"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"මෙම උපාංගය මත චන්ද්‍රිකා පණිවිඩ යැවීමට සහය නොදක්වයි"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"චන්ද්‍රිකා පණිවිඩ යැවීම පිහිටුවා නැත"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"ඔබ අන්තර්ජාලයට සම්බන්ධ වී ඇති බවට වග බලා ගෙන නැවත පිහිටුවීමට උත්සාහ කරන්න"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"චන්ද්‍රිකා පණිවිඩ යැවීම ලබා ගත නොහැක"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"චන්ද්‍රිකා පණිවිඩ යැවීම මෙම රටෙහි හෝ කලාපයෙහි ලබා ගත නොහැක"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"චන්ද්‍රිකා පණිවිඩ යැවීම පිහිටුවා නැත"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"චන්ද්‍රිකා මඟින් පණිවිඩ යැවීමට, Google Messages ඔබේ පෙරනිමි පණිවිඩ යැවීමේ යෙදුම ලෙස සකසන්න"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"චන්ද්‍රිකා පණිවිඩ යැවීම ලබා ගත නොහැක"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"මෙම රටෙහි හෝ කලාපය තුළ චන්ද්‍රිකා පණිවිඩ යැවීම ලබා ගත හැකි දැයි පරීක්ෂා කිරීමට, ස්ථාන සැකසීම් ක්‍රියාත්මක කරන්න"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ඇඟිලි සලකුණු අගුලු හැරීම නැවත සකසන්න"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> තවදුරටත් හඳුනා ගත නොහැක."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> සහ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> තවදුරටත් හඳුනා ගත නොහැක."</string>

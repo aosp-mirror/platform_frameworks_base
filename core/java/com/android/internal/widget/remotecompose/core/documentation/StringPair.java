@@ -15,20 +15,22 @@
  */
 package com.android.internal.widget.remotecompose.core.documentation;
 
-public class StringPair {
-    String mName;
-    String mValue;
+import android.annotation.NonNull;
 
-    StringPair(String name, String value) {
+public class StringPair {
+    final @NonNull String mName;
+    final @NonNull String mValue;
+
+    StringPair(@NonNull String name, @NonNull String value) {
         mName = name;
         mValue = value;
     }
 
-    public String getName() {
+    public @NonNull String getName() {
         return mName;
     }
 
-    public String getValue() {
+    public @NonNull String getValue() {
         return mValue;
     }
 }

@@ -574,55 +574,14 @@ public class PackageVerificationStateTest extends AndroidTestCase {
         assertTrue(state.isInstallAllowed());
     }
 
-    public void testAreAllVerificationsComplete_onlyVerificationPasses() {
+    public void testAreAllVerificationsComplete() {
         PackageVerificationState state = new PackageVerificationState(null);
         state.addRequiredVerifierUid(REQUIRED_UID_1);
         assertFalse(state.areAllVerificationsComplete());
 
-        state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_ALLOW);
-
-        assertFalse(state.areAllVerificationsComplete());
-    }
-
-    public void testAreAllVerificationsComplete_onlyIntegrityCheckPasses() {
-        PackageVerificationState state = new PackageVerificationState(null);
-        state.addRequiredVerifierUid(REQUIRED_UID_1);
-        assertFalse(state.areAllVerificationsComplete());
-
-        state.setIntegrityVerificationResult(PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
-
-        assertFalse(state.areAllVerificationsComplete());
-    }
-
-    public void testAreAllVerificationsComplete_bothPasses() {
-        PackageVerificationState state = new PackageVerificationState(null);
-        state.addRequiredVerifierUid(REQUIRED_UID_1);
-        assertFalse(state.areAllVerificationsComplete());
-
-        state.setIntegrityVerificationResult(PackageManagerInternal.INTEGRITY_VERIFICATION_ALLOW);
         state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_ALLOW);
 
         assertTrue(state.areAllVerificationsComplete());
-    }
-
-    public void testAreAllVerificationsComplete_onlyVerificationFails() {
-        PackageVerificationState state = new PackageVerificationState(null);
-        state.addRequiredVerifierUid(REQUIRED_UID_1);
-        assertFalse(state.areAllVerificationsComplete());
-
-        state.setVerifierResponse(REQUIRED_UID_1, PackageManager.VERIFICATION_REJECT);
-
-        assertFalse(state.areAllVerificationsComplete());
-    }
-
-    public void testAreAllVerificationsComplete_onlyIntegrityCheckFails() {
-        PackageVerificationState state = new PackageVerificationState(null);
-        state.addRequiredVerifierUid(REQUIRED_UID_1);
-        assertFalse(state.areAllVerificationsComplete());
-
-        state.setIntegrityVerificationResult(PackageManagerInternal.INTEGRITY_VERIFICATION_REJECT);
-
-        assertFalse(state.areAllVerificationsComplete());
     }
 
     private void processOnTimeout(PackageVerificationState state, int code, int uid) {

@@ -25,11 +25,13 @@ import androidx.compose.foundation.layout.offset
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.util.fastCoerceAtLeast
 import com.android.compose.nestedscroll.OnStopScope
@@ -80,9 +82,29 @@ fun Modifier.stackVerticalOverscroll(
         }
 
     return this.then(
-        Modifier.nestedScroll(stackNestedScrollConnection).offset {
-            IntOffset(x = 0, y = overscrollOffset.value.roundToInt())
-        }
+        Modifier.nestedScroll(
+                remember {
+                    object : NestedScrollConnection {
+                        override suspend fun onPostFling(
+                            consumed: Velocity,
+                            available: Velocity,
+                        ): Velocity {
+                            return if (available.y < 0f && !canScrollForward()) {
+                                overscrollOffset.animateTo(
+                                    targetValue = 0f,
+                                    initialVelocity = available.y,
+                                    animationSpec = tween(),
+                                )
+                                available
+                            } else {
+                                Velocity.Zero
+                            }
+                        }
+                    }
+                }
+            )
+            .nestedScroll(stackNestedScrollConnection)
+            .offset { IntOffset(x = 0, y = overscrollOffset.value.roundToInt()) }
     )
 }
 
@@ -100,7 +122,6 @@ fun NotificationStackNestedScrollConnection(
         canStartPostScroll = { offsetAvailable, offsetBeforeStart, _ ->
             offsetAvailable < 0f && offsetBeforeStart < 0f && !canScrollForward()
         },
-        canStartPostFling = { velocityAvailable -> velocityAvailable < 0f && !canScrollForward() },
         onStart = { firstScroll ->
             onStart(firstScroll)
             object : ScrollController {

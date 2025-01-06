@@ -38,12 +38,6 @@ interface ShadeLockscreenInteractor {
      */
     @Deprecated("Use ShadeInteractor instead") val isExpanded: Boolean
 
-    /** Called before animating Keyguard dismissal, i.e. the animation dismissing the bouncer. */
-    fun startBouncerPreHideAnimation()
-
-    /** Called once every minute while dozing. */
-    fun dozeTimeTick()
-
     /**
      * Do not let the user drag the shade up and down for the current touch session. This is
      * necessary to avoid shade expansion while/after the bouncer is dismissed.
@@ -61,13 +55,6 @@ interface ShadeLockscreenInteractor {
 
     /** @see ViewGroupFadeHelper.reset */
     @Deprecated("Not supported by scenes") fun resetViewGroupFade()
-
-    /**
-     * Set the alpha and translationY of the keyguard elements which only show on the lockscreen,
-     * but not in shade locked / shade. This is used when dragging down to the full shade.
-     */
-    @Deprecated("Not supported by scenes")
-    fun setKeyguardTransitionProgress(keyguardAlpha: Float, keyguardTranslationY: Int)
 
     /** Sets the overstretch amount in raw pixels when dragging down. */
     @Deprecated("Not supported by scenes") fun setOverStretchAmount(amount: Float)

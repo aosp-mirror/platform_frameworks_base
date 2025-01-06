@@ -20,7 +20,7 @@ import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_EXAMPLE_FLAG
-import com.android.systemui.Flags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+import com.android.systemui.Flags.FLAG_NOTIFICATION_AVALANCHE_THROTTLE_HUN
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.andSceneContainer
@@ -66,7 +66,7 @@ internal class SceneContainerFlagParameterizationTest : SysuiTestCase() {
 
     @Test
     fun oneDependencyAndSceneContainer() {
-        val dependentFlag = FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR
+        val dependentFlag = FLAG_NOTIFICATION_AVALANCHE_THROTTLE_HUN
         val result = FlagsParameterization.allCombinationsOf(dependentFlag).andSceneContainer()
         Truth.assertThat(result).hasSize(3)
         Truth.assertThat(result[0].mOverrides[dependentFlag]).isFalse()

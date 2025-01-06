@@ -19,12 +19,12 @@ package com.android.systemui.media.taptotransfer.common
 import android.content.Context
 import android.content.pm.PackageManager
 import android.graphics.drawable.Drawable
-import androidx.annotation.AttrRes
+import androidx.annotation.ColorRes
 import androidx.annotation.DrawableRes
-import com.android.systemui.res.R
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.common.shared.model.TintedIcon
+import com.android.systemui.res.R
 import com.android.systemui.temporarydisplay.chipbar.ChipbarInfo.Companion.DEFAULT_ICON_TINT
 
 /** Utility methods for media tap-to-transfer. */
@@ -108,7 +108,7 @@ class MediaTttUtils {
 data class IconInfo(
     val contentDescription: ContentDescription,
     val icon: MediaTttIcon,
-    @AttrRes val tint: Int?,
+    @ColorRes val tint: Int?,
     /**
      * True if [drawable] is the app's icon, and false if [drawable] is some generic default icon.
      */

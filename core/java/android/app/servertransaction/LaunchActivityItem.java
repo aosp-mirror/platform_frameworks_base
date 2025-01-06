@@ -202,8 +202,8 @@ public class LaunchActivityItem extends ClientTransactionItem {
     public void preExecute(@NonNull ClientTransactionHandler client) {
         client.countLaunchingActivities(1);
         client.updateProcessState(mProcState, false);
-        CompatibilityInfo.applyOverrideScaleIfNeeded(mCurConfig);
-        CompatibilityInfo.applyOverrideScaleIfNeeded(mOverrideConfig);
+        CompatibilityInfo.applyOverrideIfNeeded(mCurConfig);
+        CompatibilityInfo.applyOverrideIfNeeded(mOverrideConfig);
         client.updatePendingConfiguration(mCurConfig);
         if (mActivityClientController != null) {
             ActivityClient.setActivityClientController(mActivityClientController);

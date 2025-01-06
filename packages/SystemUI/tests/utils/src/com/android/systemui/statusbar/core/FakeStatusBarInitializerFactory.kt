@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.core
 
+import com.android.systemui.plugins.DarkIconDispatcher
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
 import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository
 import com.android.systemui.statusbar.window.StatusBarWindowController
 
@@ -24,5 +26,7 @@ class FakeStatusBarInitializerFactory() : StatusBarInitializer.Factory {
     override fun create(
         statusBarWindowController: StatusBarWindowController,
         statusBarModePerDisplayRepository: StatusBarModePerDisplayRepository,
+        statusBarConfigurationController: StatusBarConfigurationController,
+        darkIconDispatcher: DarkIconDispatcher,
     ): StatusBarInitializer = FakeStatusBarInitializer()
 }

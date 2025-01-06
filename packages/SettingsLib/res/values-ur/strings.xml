@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"فعال ہے (صرف بایاں)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"فعال ہے (صرف دایاں)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"فعال ہے (بایاں اور دایاں)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"اطراف کو اپ ڈیٹ نہیں کیا جا سکا"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"فعال (صرف میڈیا)۔ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"‏فعال (صرف میڈیا)۔ L: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>، ‏R: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> بیٹری۔"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"‏منسلک ہے (آڈیو کے اشتراک کو سپورٹ کرتا ہے)۔ ‎<xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> بیٹری۔"</string>
@@ -237,7 +238,7 @@
     <string name="choose_profile" msgid="343803890897657450">"پروفائل منتخب کریں"</string>
     <string name="category_personal" msgid="6236798763159385225">"ذاتی"</string>
     <string name="category_work" msgid="4014193632325996115">"دفتر"</string>
-    <string name="category_private" msgid="4244892185452788977">"نجی"</string>
+    <string name="category_private" msgid="4244892185452788977">"پرائیویٹ"</string>
     <string name="category_clone" msgid="1554511758987195974">"کلون کریں"</string>
     <string name="development_settings_title" msgid="140296922921597393">"ڈویلپر کے اختیارات"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"ڈویلپر کے اختیارات فعال کریں"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"مقامی ٹرمینل"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"مقامی شیل رسائی پیش کرنے والی ٹرمینل ایپ فعال کریں"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"‏‫Linux ڈیولپمنٹ ماحول"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"‏‫Android پر Linux ٹرمینل چلائیں"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"‏(تجرباتی) Android پر Linux ٹرمینل چلائیں"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"‏اگر آپ غیر فعال کرتے ہیں تو Linux ٹرمینل کا ڈیٹا صاف ہو جائے گا"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"‏HDCP چیکنگ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"‏HDCP چیکنگ برتاؤ سیٹ کریں"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ڈیبگ کرنا"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ٹرانزیشن اینیمیشن اسکیل"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"اینیمیٹر دورانیے کا اسکیل"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ثانوی ڈسپلیز کو تحریک دیں"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"شیڈ ڈسپلے کی پوزیشن"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ایپس"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"سرگرمیوں کو نہ رکھیں"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"صارف کی ہر سرگرمی صارف کے چھوڑنے پر حذف کر دیں"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"یہ فون"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"یہ ٹیبلیٹ"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"یہ کمپیوٹر (داخلی)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"‏یہ TV"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ڈاک اسپیکر"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"بیرونی آلہ"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"منسلک آلہ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"یہ فون"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"اینالاگ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"اس آلے پر چلایا نہیں جا سکتا"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"سوئچ کرنے کے لیے اکاؤنٹ اپ گریڈ کریں"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ڈاؤن لوڈز کو یہاں چلایا نہیں جا سکتا"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"‏ARC کے ذریعے منسلک ہے"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"‏eARC کے ذریعے منسلک ہے"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"‏TV ڈیفالٹ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"‏HDMI آؤٹ پٹ"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"اندرونی اسپیکرز"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"پہلے سے شامل اسپیکر"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"‏‫TV آڈیو"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"منسلک کرنے میں مسئلہ پیش آ گیا۔ آلہ کو آف اور بیک آن کریں"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"وائرڈ آڈیو آلہ"</string>
     <string name="help_label" msgid="3528360748637781274">"مدد اور تاثرات"</string>

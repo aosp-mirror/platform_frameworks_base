@@ -44,6 +44,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
+import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.AudioManager;
 import android.media.AudioRecordingConfiguration;
@@ -593,11 +594,11 @@ public class AppOpsControllerTest extends SysuiTestCase {
 
         //untrusted receiver access
         mController.onOpActiveChanged(AppOpsManager.OPSTR_RECORD_AUDIO, TEST_UID,
-                TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME, true,
+                TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME, Context.DEVICE_ID_DEFAULT, true,
                 AppOpsManager.ATTRIBUTION_FLAG_RECEIVER, TEST_CHAIN_ID);
         //untrusted intermediary access
         mController.onOpActiveChanged(AppOpsManager.OPSTR_RECORD_AUDIO, TEST_UID,
-                TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME, true,
+                TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME, Context.DEVICE_ID_DEFAULT, true,
                 AppOpsManager.ATTRIBUTION_FLAG_INTERMEDIARY, TEST_CHAIN_ID);
         assertTrue(mController.getActiveAppOps().isEmpty());
     }
@@ -606,11 +607,11 @@ public class AppOpsControllerTest extends SysuiTestCase {
     public void testTrustedChainUsagesKept() {
         //untrusted accessor access
         mController.onOpActiveChanged(AppOpsManager.OPSTR_RECORD_AUDIO, TEST_UID,
-                TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME, true,
+                TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME, Context.DEVICE_ID_DEFAULT, true,
                 AppOpsManager.ATTRIBUTION_FLAG_ACCESSOR, TEST_CHAIN_ID);
         //trusted access
         mController.onOpActiveChanged(AppOpsManager.OPSTR_CAMERA, TEST_UID,
-                TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME, true,
+                TEST_PACKAGE_NAME, TEST_ATTRIBUTION_NAME, Context.DEVICE_ID_DEFAULT, true,
                 AppOpsManager.ATTRIBUTION_FLAG_RECEIVER | AppOpsManager.ATTRIBUTION_FLAG_TRUSTED,
                 TEST_CHAIN_ID);
         assertEquals(2, mController.getActiveAppOps().size());

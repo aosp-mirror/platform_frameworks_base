@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.key
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
@@ -67,15 +68,20 @@ fun SceneScope.QuickQuickSettings(
             val it = sizedTiles[spanIndex]
             val column = cellIndex % columns
             cellIndex += it.width
-            Tile(
-                tile = it.tile,
-                iconOnly = it.isIcon,
-                modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
-                squishiness = { squishiness },
-                coroutineScope = scope,
-                bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
-                tileHapticsViewModelFactoryProvider = viewModel.tileHapticsViewModelFactoryProvider,
-            )
+            key(it.tile.spec) {
+                Tile(
+                    tile = it.tile,
+                    iconOnly = it.isIcon,
+                    modifier = Modifier.element(it.tile.spec.toElementKey(spanIndex)),
+                    squishiness = { squishiness },
+                    coroutineScope = scope,
+                    bounceableInfo = bounceables.bounceableInfo(it, spanIndex, column, columns),
+                    tileHapticsViewModelFactoryProvider =
+                        viewModel.tileHapticsViewModelFactoryProvider,
+                    // There should be no QuickQuickSettings when the details view is enabled.
+                    detailsViewModel = null,
+                )
+            }
         }
     }
 }

@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"কলাৰ আইডি সীমিত কৰিবলৈ পূর্বনির্ধাৰণ কৰা হৈছে। পৰৱৰ্তী কল: সীমিত কৰা হৈছে"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"কলাৰ আইডি সীমিত নকৰিবলৈ পূর্বনির্ধাৰণ কৰা হৈছে। পৰৱৰ্তী কল: সীমিত কৰা হোৱা নাই"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"কলাৰ আইডি সীমিত নকৰিবলৈ পূর্বনির্ধাৰণ কৰা হৈছে। পৰৱৰ্তী কল: সীমিত কৰা হোৱা নাই"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"এই এপ্‌টো ১৬ কেবিৰ সমিল নহয়। APKৰ শাৰীবিন্যাস পৰীক্ষা বিফল হৈছে। এই এপ্‌টো পৃষ্ঠাৰ আকাৰৰ সমিল ম’ড ব্যৱহাৰ কৰি চলোৱা হ’ব। উত্তম সমিলতাৰ বাবে, অনুগ্ৰহ কৰি এপ্লিকেশ্বনটো ১৬ কেবিৰ সমৰ্থনৰ সৈতে পুনৰায় কম্পাইল কৰক। অধিক তথ্যৰ বাবে, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;লৈ যাওক"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"এই এপ্‌টো ১৬ কেবিৰ সমিল নহয়। ELFৰ শাৰীবিন্যাস পৰীক্ষা বিফল হৈছে। এই এপ্‌টো পৃষ্ঠাৰ আকাৰৰ সমিল ম’ড ব্যৱহাৰ কৰি চলোৱা হ’ব। উত্তম সমিলতাৰ বাবে, অনুগ্ৰহ কৰি এপ্লিকেশ্বনটো ১৬ কেবিৰ সমৰ্থনৰ সৈতে পুনৰায় কম্পাইল কৰক। অধিক তথ্যৰ বাবে, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;লৈ যাওক"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"এই এপ্‌টো ১৬ কেবিৰ সমিল নহয়। APK আৰু ELFৰ শাৰীবিন্যাস পৰীক্ষা বিফল হৈছে। এই এপ্‌টো পৃষ্ঠাৰ আকাৰৰ সমিল ম’ড ব্যৱহাৰ কৰি চলোৱা হ’ব। উত্তম সমিলতাৰ বাবে, অনুগ্ৰহ কৰি এপ্লিকেশ্বনটো ১৬ কেবিৰ সমৰ্থনৰ সৈতে পুনৰায় কম্পাইল কৰক। অধিক তথ্যৰ বাবে, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;লৈ যাওক"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"সুবিধা যোগান ধৰা হোৱা নাই।"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"আপুনি কলাৰ আইডি ছেটিং সলনি কৰিব নোৱাৰে।"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"ডেটা <xliff:g id="CARRIERDISPLAY">%s</xliff:g>লৈ সলনি কৰা হৈছে"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ম’বাইল নেটৱৰ্কৰ লগত সংযোগ কৰিব পৰা নাই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"পচন্দৰ নেটৱৰ্ক সলনি কৰি চেষ্টা কৰি চাওক। সলনি কৰিবলৈ টিপক।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"জৰুৰীকালীন কল কৰিবলৈ ম’বাইল নেটৱৰ্কৰ প্ৰয়োজন"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"সতৰ্কবাণীসমূহ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"কল ফৰৱাৰ্ডিং"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"এপ্‌টোক নিকটৱৰ্তী আল্ট্ৰা-ৱাইডবেণ্ড ডিভাইচসমূহৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"নিকটৱৰ্তী ৱাই-ফাই ডিভাইচসমূহৰ সৈতে ভাব বিনিময় কৰক"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"এপ্‌টোক বিজ্ঞাপন প্ৰচাৰাভিযান কৰিবলৈ, সংযোগ কৰিবলৈ আৰু নিকটৱৰ্তী ৱাই-ফাই ডিভাইচৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ে"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"নিকটৱৰ্তী ডিভাইচৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰক"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"এপ্‌টোক নিকটৱৰ্তী ডিভাইচসমূহৰ মাজৰ আপেক্ষিক স্থান নিৰ্ধাৰণ কৰিবলৈ অনুমতি দিয়ক"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"অগ্ৰাধিকাৰ দিয়া NFC পৰিশোধ সেৱাৰ তথ্য"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"এপ্‌টোক অগ্ৰাধিকাৰ দিয়া nfc পৰিশোধ সেৱাৰ পঞ্জীকৃত সহায়কসমূহ আৰু পৰিশোধ কৰিব লগা লক্ষ্যস্থান দৰে তথ্য পাবলৈ অনুমতি দিয়ে।"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"নিয়েৰ ফিল্ড কমিউনিকেশ্বন নিয়ন্ত্ৰণ কৰক"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> ঘণ্টাত"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g>দিনত"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> বছৰত"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> মিনিট পূৰ্বে"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> ঘণ্টা পূৰ্বে"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> দিন পূৰ্বে"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> বছৰৰ পূৰ্বে"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> মিনিট"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ঘণ্টা"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> দিন"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> বছৰ"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> মিনিটত"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> ঘণ্টাত"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> দিনত"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> বছৰত"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> মিনিট পূৰ্বে"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> ঘণ্টা পূৰ্বে"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> দিন পূৰ্বে"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> বছৰৰ পূৰ্বে"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# মিনিট পূৰ্বে}one{# মিনিট পূৰ্বে}other{# মিনিট পূৰ্বে}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ঘণ্টা পূৰ্বে}one{# ঘণ্টা পূৰ্বে}other{# ঘণ্টা পূৰ্বে}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# দিন পূর্বে}one{# দিন পূৰ্বে}other{# দিন পূৰ্বে}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এখন হাতেৰে ব্যৱহাৰ কৰাৰ ম’ড"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিৰিক্তভাৱে পোহৰ কমোৱাৰ সুবিধা"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"শুনাৰ ডিভাইচ"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কীসমূহ ধৰি ৰাখক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধৰি ৰাখিছিল। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অফ কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ভলিউম কী এৰি দিয়ক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰিবলৈ, দুয়োটা ভলিউম কী পুনৰ ৩ ছেকেণ্ডৰ বাবে টিপি হেঁচি ৰাখক।"</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"সপ্তাহ অন্ত"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"অনুষ্ঠান"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"নিদ্ৰাৰত"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"অসুবিধা নিদিব (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ পৰিচালনা কৰা"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"অন আছে"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"অফ আছে"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>ৰ পৰা <xliff:g id="END">%2$s</xliff:g>লৈ"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"যিকোনো কেলেণ্ডাৰ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g>এ কিছুমান ধ্বনি মিউট কৰি আছে"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"আপোনাৰ ডিভাইচত এটা আভ্যন্তৰীণ সমস্যা আছে আৰু আপুনি ফেক্টৰী ডেটা ৰিছেট নকৰালৈকে ই সুস্থিৰভাৱে কাম নকৰিব পাৰে।"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"আপুনি কোনো ম’বাইল বা ৱাই-ফাই নেটৱৰ্ক নোহোৱাকৈ বাৰ্তা পঠিয়াওক আৰু লাভ কৰক"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খোলক"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"ই কেনেকৈ কাম কৰে"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"স্বয়ংক্ৰিয়ভাৱে নেটৱৰ্ক বাছনি কৰক\" অন কৰক"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"ছেটিঙত \"স্বয়ংক্ৰিয়ভাৱে নেটৱৰ্ক বাছনি কৰক\" অন কৰক, যাতে আপোনাৰ ফ’নটোৱে উপগ্ৰহৰ সৈতে কাম কৰা এটা নেটৱৰ্ক বিচাৰি পাব পাৰে"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"অন কৰক"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"উভতি যাওক"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"বিবেচনাধীন হৈ আছে..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"উপগ্ৰহ SOS সুবিধাটো এতিয়া উপলব্ধ"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"যদি ম’বাইল বা ৱাই-ফাই নেটৱৰ্ক নাথাকিলেও আপুনি জৰুৰীকালীন সেৱাসমূহলৈ বার্তা পঠিয়াব পাৰে। Google Messages আপোনাৰ ডিফ’ল্ট বাৰ্তা আদান-প্ৰদান কৰা এপ্‌ হ’বই লাগিব।"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"উপগ্ৰহ SOS সুবিধা সমৰ্থিত নহয়"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"এই ডিভাইচটোত উপগ্ৰহ SOS সুবিধা সমৰ্থিত নহয়"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"উপগ্ৰহ SOS সুবিধা ছেট আপ কৰা হোৱা নাই"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"আপুনি ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ থকাটো নিশ্চিত কৰক আৰু পুনৰ ছেটআপ কৰিবলৈ চেষ্টা কৰক"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"উপগ্ৰহ SOS সুবিধা উপলব্ধ নহয়"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"এই দেশ বা অঞ্চলত উপগ্ৰহ SOS সুবিধা উপলব্ধ নহয়"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"উপগ্ৰহ SOS সুবিধা ছেট আপ কৰা হোৱা নাই"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"উপগ্ৰহৰ জৰিয়তে বাৰ্তা পঠিয়াবলৈ, Google Messagesক আপোনাৰ ডিফ’ল্ট বাৰ্তা আদান-প্ৰদান কৰা এপ্‌ হিচাপে ছেট কৰক"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"উপগ্ৰহ SOS সুবিধা উপলব্ধ নহয়"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"এই দেশ বা অঞ্চলত উপগ্ৰহ SOS সুবিধা উপলব্ধ হয় নে নহয় পৰীক্ষা কৰিবলৈ, অৱস্থানৰ ছেটিং অন কৰক"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা উপলব্ধ"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"ম’বাইল বা ৱাই-ফাই নেটৱৰ্ক নাথাকিলেও আপুনি উপগ্ৰহৰ জৰিয়তে বার্তা পঠিয়াব পাৰে। Google Messages আপোনাৰ ডিফ’ল্ট বাৰ্তা আদান-প্ৰদান কৰা এপ্‌ হ’বই লাগিব।"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা সমৰ্থিত নহয়"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"এই ডিভাইচটোত উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা সমৰ্থিত নহয়"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা ছেট আপ কৰা হোৱা নাই"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"আপুনি ইণ্টাৰনেটৰ সৈতে সংযুক্ত হৈ থকাটো নিশ্চিত কৰক আৰু পুনৰ ছেটআপ কৰিবলৈ চেষ্টা কৰক"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা উপলব্ধ নহয়"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"এই দেশ বা অঞ্চলত উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা উপলব্ধ নহয়"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা ছেট আপ কৰা হোৱা নাই"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"উপগ্ৰহৰ জৰিয়তে বাৰ্তা পঠিয়াবলৈ, Google Messagesক আপোনাৰ ডিফ’ল্ট বাৰ্তা আদান-প্ৰদান কৰা এপ্‌ হিচাপে ছেট কৰক"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা উপলব্ধ নহয়"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"এই দেশ বা অঞ্চলত উপগ্ৰহৰ দ্বাৰা বাৰ্তা বিনিময়ৰ সুবিধা উপলব্ধ হয় নে নহয় পৰীক্ষা কৰিবলৈ, অৱস্থানৰ ছেটিং অন কৰক"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ফিংগাৰপ্ৰিণ্ট আনলক পুনৰ ছেট আপ কৰক"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> আৰু চিনাক্ত কৰিব নোৱাৰি।"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> আৰু <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> আৰু চিনাক্ত কৰিব নোৱাৰি।"</string>

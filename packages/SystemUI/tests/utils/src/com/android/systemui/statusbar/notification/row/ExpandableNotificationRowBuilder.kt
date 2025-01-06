@@ -34,8 +34,9 @@ import com.android.systemui.TestableDependency
 import com.android.systemui.classifier.FalsingManagerFake
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FakeFeatureFlagsClassic
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
+import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.media.controls.util.MediaFeatureFlag
 import com.android.systemui.media.dialog.MediaOutputDialogManager
 import com.android.systemui.plugins.ActivityStarter
@@ -60,9 +61,12 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManagerImpl
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManagerImpl
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.icon.IconBuilder
 import com.android.systemui.statusbar.notification.icon.IconManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationContentExtractorImpl
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationLogger
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.CoordinateOnClickListener
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.ExpandableNotificationRowLogger
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.OnExpandClickListener
@@ -77,7 +81,6 @@ import com.android.systemui.statusbar.notification.row.shared.NotificationRowCon
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainerLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.SmartActionInflaterImpl
 import com.android.systemui.statusbar.policy.SmartReplyConstants
 import com.android.systemui.statusbar.policy.SmartReplyInflaterImpl
@@ -88,8 +91,6 @@ import com.android.systemui.util.DeviceConfigProxyFake
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.time.FakeSystemClock
-import com.android.systemui.wmshell.BubblesManager
-import java.util.Optional
 import java.util.concurrent.CountDownLatch
 import java.util.concurrent.Executor
 import java.util.concurrent.TimeUnit
@@ -102,7 +103,7 @@ import org.mockito.Mockito
 class ExpandableNotificationRowBuilder(
     private val context: Context,
     dependency: TestableDependency,
-    private val featureFlags: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic(),
+    featureFlags: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic(),
 ) {
 
     private val mMockLogger: ExpandableNotificationRowLogger
@@ -133,7 +134,7 @@ class ExpandableNotificationRowBuilder(
         featureFlags.setDefault(Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE)
         featureFlags.setDefault(Flags.BIGPICTURE_NOTIFICATION_LAZY_LOADING)
 
-        dependency.injectTestDependency(FeatureFlags::class.java, featureFlags)
+        dependency.injectTestDependency(FeatureFlagsClassic::class.java, featureFlags)
         dependency.injectMockDependency(NotificationMediaManager::class.java)
         dependency.injectMockDependency(NotificationShadeWindowController::class.java)
         dependency.injectMockDependency(MediaOutputDialogManager::class.java)
@@ -220,6 +221,11 @@ class ExpandableNotificationRowBuilder(
                 Mockito.mock(LauncherApps::class.java, STUB_ONLY),
                 Mockito.mock(ConversationNotificationManager::class.java, STUB_ONLY),
             )
+        val promotedNotificationContentExtractor =
+            PromotedNotificationContentExtractorImpl(
+                context,
+                PromotedNotificationLogger(logcatLogBuffer("PromotedNotifLog")),
+            )
 
         mContentBinder =
             if (NotificationRowContentBinderRefactor.isEnabled)
@@ -231,6 +237,7 @@ class ExpandableNotificationRowBuilder(
                     smartReplyStateInflater,
                     notifLayoutInflaterFactoryProvider,
                     Mockito.mock(HeadsUpStyleProvider::class.java, STUB_ONLY),
+                    promotedNotificationContentExtractor,
                     Mockito.mock(NotificationRowContentBinderLogger::class.java, STUB_ONLY),
                 )
             else
@@ -243,6 +250,7 @@ class ExpandableNotificationRowBuilder(
                     smartReplyStateInflater,
                     notifLayoutInflaterFactoryProvider,
                     Mockito.mock(HeadsUpStyleProvider::class.java, STUB_ONLY),
+                    promotedNotificationContentExtractor,
                     Mockito.mock(NotificationRowContentBinderLogger::class.java, STUB_ONLY),
                 )
         mContentBinder.setInflateSynchronously(true)
@@ -282,7 +290,7 @@ class ExpandableNotificationRowBuilder(
     }
 
     private fun getNotifRemoteViewsFactoryContainer(
-        featureFlags: FeatureFlags
+        featureFlags: FeatureFlagsClassic
     ): NotifRemoteViewsFactoryContainer {
         return NotifRemoteViewsFactoryContainerImpl(
             featureFlags,
@@ -363,7 +371,6 @@ class ExpandableNotificationRowBuilder(
             mStatusBarStateController,
             mPeopleNotificationIdentifier,
             mOnUserInteractionCallback,
-            Optional.of(Mockito.mock(BubblesManager::class.java, STUB_ONLY)),
             Mockito.mock(NotificationGutsManager::class.java, STUB_ONLY),
             mDismissibilityProvider,
             Mockito.mock(MetricsLogger::class.java, STUB_ONLY),
@@ -371,11 +378,10 @@ class ExpandableNotificationRowBuilder(
             Mockito.mock(ColorUpdateLogger::class.java, STUB_ONLY),
             mSmartReplyConstants,
             mSmartReplyController,
-            featureFlags,
             Mockito.mock(IStatusBarService::class.java, STUB_ONLY),
             Mockito.mock(UiEventLogger::class.java, STUB_ONLY),
         )
-        row.setAboveShelfChangedListener { aboveShelf: Boolean -> }
+        row.setAboveShelfChangedListener {}
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags)
         inflateAndWait(entry)
         return row
@@ -393,7 +399,7 @@ class ExpandableNotificationRowBuilder(
         private const val PKG = "com.android.systemui"
         private const val UID = 1000
         private val USER_HANDLE = UserHandle.of(ActivityManager.getCurrentUser())
-        private val INFLATION_FLAGS =
+        private const val INFLATION_FLAGS =
             FLAG_CONTENT_VIEW_CONTRACTED or FLAG_CONTENT_VIEW_EXPANDED or FLAG_CONTENT_VIEW_HEADS_UP
         private const val IS_CONVERSATION_FLAG = "test.isConversation"
 

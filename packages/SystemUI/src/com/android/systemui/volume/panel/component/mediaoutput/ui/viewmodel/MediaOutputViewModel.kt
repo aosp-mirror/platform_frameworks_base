@@ -17,7 +17,9 @@
 package com.android.systemui.volume.panel.component.mediaoutput.ui.viewmodel
 
 import android.content.Context
+import android.graphics.Color as GraphicsColor
 import com.android.internal.logging.UiEventLogger
+import com.android.systemui.Flags
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Color
 import com.android.systemui.common.shared.model.Icon
@@ -77,7 +79,13 @@ constructor(
                 ConnectedDeviceViewModel(
                     label = label,
                     labelColor =
-                        Color.Attribute(com.android.internal.R.attr.materialColorOnSurfaceVariant),
+                        if (Flags.volumeRedesign()) {
+                            Color.Resource(com.android.internal.R.color.materialColorOnSurface)
+                        } else {
+                            Color.Resource(
+                                com.android.internal.R.color.materialColorOnSurfaceVariant
+                            )
+                        },
                     deviceName =
                         if (mediaOutputModel.isInAudioSharing) {
                             context.getString(R.string.audio_sharing_description)
@@ -88,19 +96,15 @@ constructor(
                         },
                     deviceNameColor =
                         if (mediaOutputModel.canOpenAudioSwitcher) {
-                            Color.Attribute(com.android.internal.R.attr.materialColorOnSurface)
+                            Color.Resource(com.android.internal.R.color.materialColorOnSurface)
                         } else {
-                            Color.Attribute(
-                                com.android.internal.R.attr.materialColorOnSurfaceVariant
+                            Color.Resource(
+                                com.android.internal.R.color.materialColorOnSurfaceVariant
                             )
                         },
                 )
             }
-            .stateIn(
-                coroutineScope,
-                SharingStarted.Eagerly,
-                null,
-            )
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
 
     val deviceIconViewModel: StateFlow<DeviceIconViewModel?> =
         mediaOutputComponentInteractor.mediaOutputModel
@@ -121,17 +125,33 @@ constructor(
                         icon = icon,
                         iconColor =
                             if (mediaOutputModel.canOpenAudioSwitcher) {
-                                Color.Attribute(com.android.internal.R.attr.materialColorSurface)
+                                if (Flags.volumeRedesign()) {
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorOnPrimary
+                                    )
+                                } else {
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorSurface
+                                    )
+                                }
                             } else {
-                                Color.Attribute(
-                                    com.android.internal.R.attr.materialColorSurfaceContainerHighest
+                                Color.Resource(
+                                    com.android.internal.R.color.materialColorSurfaceContainerHighest
                                 )
                             },
                         backgroundColor =
                             if (mediaOutputModel.canOpenAudioSwitcher) {
-                                Color.Attribute(com.android.internal.R.attr.materialColorSecondary)
+                                if (Flags.volumeRedesign()) {
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorPrimary
+                                    )
+                                } else {
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorSecondary
+                                    )
+                                }
                             } else {
-                                Color.Attribute(com.android.internal.R.attr.materialColorOutline)
+                                Color.Resource(com.android.internal.R.color.materialColorOutline)
                             },
                     )
                 } else {
@@ -139,38 +159,29 @@ constructor(
                         icon = icon,
                         iconColor =
                             if (mediaOutputModel.canOpenAudioSwitcher) {
-                                Color.Attribute(
-                                    com.android.internal.R.attr.materialColorOnSurfaceVariant
-                                )
+                                if (Flags.volumeRedesign()) {
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorPrimary
+                                    )
+                                } else {
+                                    Color.Resource(
+                                        com.android.internal.R.color.materialColorOnSurfaceVariant
+                                    )
+                                }
                             } else {
-                                Color.Attribute(com.android.internal.R.attr.materialColorOutline)
+                                Color.Resource(com.android.internal.R.color.materialColorOutline)
                             },
-                        backgroundColor =
-                            if (mediaOutputModel.canOpenAudioSwitcher) {
-                                Color.Attribute(com.android.internal.R.attr.materialColorSurface)
-                            } else {
-                                Color.Attribute(
-                                    com.android.internal.R.attr.materialColorSurfaceContainerHighest
-                                )
-                            },
+                        backgroundColor = Color.Loaded(GraphicsColor.TRANSPARENT),
                     )
                 }
             }
-            .stateIn(
-                coroutineScope,
-                SharingStarted.Eagerly,
-                null,
-            )
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
 
     val enabled: StateFlow<Boolean> =
         mediaOutputComponentInteractor.mediaOutputModel
             .filterData()
             .map { it.canOpenAudioSwitcher }
-            .stateIn(
-                coroutineScope,
-                SharingStarted.Eagerly,
-                true,
-            )
+            .stateIn(coroutineScope, SharingStarted.Eagerly, true)
 
     fun onBarClick(expandable: Expandable?) {
         uiEventLogger.log(VolumePanelUiEvent.VOLUME_PANEL_MEDIA_OUTPUT_CLICKED)
@@ -178,7 +189,7 @@ constructor(
             mediaOutputComponentInteractor.mediaOutputModel.value
         actionsInteractor.onBarClick(
             (result as? Result.Data<MediaOutputComponentModel>)?.data,
-            expandable
+            expandable,
         )
     }
 }

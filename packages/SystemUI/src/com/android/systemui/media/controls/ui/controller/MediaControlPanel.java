@@ -1369,8 +1369,9 @@ public class MediaControlPanel {
         boolean visible = mediaAction != null && !shouldBeHiddenDueToScrubbing;
 
         int notVisibleValue;
-        if ((buttonId == R.id.actionPrev && semanticActions.getReservePrev())
-                || (buttonId == R.id.actionNext && semanticActions.getReserveNext())) {
+        if (!shouldBeHiddenDueToScrubbing
+                && ((buttonId == R.id.actionPrev && semanticActions.getReservePrev())
+                    || (buttonId == R.id.actionNext && semanticActions.getReserveNext()))) {
             notVisibleValue = ConstraintSet.INVISIBLE;
             mMediaViewHolder.getAction(buttonId).setFocusable(visible);
             mMediaViewHolder.getAction(buttonId).setClickable(visible);
@@ -1408,7 +1409,9 @@ public class MediaControlPanel {
         // The scrubbing time views replace the SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING action views,
         // so we should only allow scrubbing times to be shown if those action views are present.
         return semanticActions != null && SEMANTIC_ACTIONS_HIDE_WHEN_SCRUBBING.stream().allMatch(
-                id -> semanticActions.getActionById(id) != null
+                id -> (semanticActions.getActionById(id) != null
+                        || ((id == R.id.actionPrev && semanticActions.getReservePrev())
+                            || (id == R.id.actionNext && semanticActions.getReserveNext())))
         );
     }
 

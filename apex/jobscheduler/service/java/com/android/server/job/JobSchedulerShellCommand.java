@@ -86,6 +86,8 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
                     return getTransferredNetworkBytes(pw, BYTE_OPTION_DOWNLOAD);
                 case "get-transferred-upload-bytes":
                     return getTransferredNetworkBytes(pw, BYTE_OPTION_UPLOAD);
+                case "get-job-wakelock-tag":
+                    return getJobWakelockTag(pw);
                 case "get-job-state":
                     return getJobState(pw);
                 case "heartbeat":
@@ -424,6 +426,9 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             case android.app.job.Flags.FLAG_JOB_DEBUG_INFO_APIS:
                 pw.println(android.app.job.Flags.jobDebugInfoApis());
                 break;
+            case android.app.job.Flags.FLAG_ADD_TYPE_INFO_TO_WAKELOCK_TAG:
+                pw.println(android.app.job.Flags.addTypeInfoToWakelockTag());
+                break;
             case com.android.server.job.Flags.FLAG_BATCH_ACTIVE_BUCKET_JOBS:
                 pw.println(com.android.server.job.Flags.batchActiveBucketJobs());
                 break;
@@ -433,11 +438,14 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
             case com.android.server.job.Flags.FLAG_DO_NOT_FORCE_RUSH_EXECUTION_AT_BOOT:
                 pw.println(com.android.server.job.Flags.doNotForceRushExecutionAtBoot());
                 break;
-            case android.app.job.Flags.FLAG_BACKUP_JOBS_EXEMPTION:
-                pw.println(android.app.job.Flags.backupJobsExemption());
-                break;
             case android.app.job.Flags.FLAG_IGNORE_IMPORTANT_WHILE_FOREGROUND:
                 pw.println(android.app.job.Flags.ignoreImportantWhileForeground());
+                break;
+            case android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_API:
+                pw.println(android.app.job.Flags.getPendingJobReasonsApi());
+                break;
+            case android.app.job.Flags.FLAG_GET_PENDING_JOB_REASONS_HISTORY_API:
+                pw.println(android.app.job.Flags.getPendingJobReasonsHistoryApi());
                 break;
             default:
                 pw.println("Unknown flag: " + flagName);
@@ -571,6 +579,49 @@ public final class JobSchedulerShellCommand extends BasicShellCommandHandler {
         try {
             int ret = mInternal.getTransferredNetworkBytes(pw, pkgName, userId, namespace,
                     jobId, byteOption);
+            printError(ret, pkgName, userId, namespace, jobId);
+            return ret;
+        } finally {
+            Binder.restoreCallingIdentity(ident);
+        }
+    }
+
+    private int getJobWakelockTag(PrintWriter pw) throws Exception {
+        checkPermission("get job wakelock tag");
+
+        int userId = UserHandle.USER_SYSTEM;
+        String namespace = null;
+
+        String opt;
+        while ((opt = getNextOption()) != null) {
+            switch (opt) {
+                case "-u":
+                case "--user":
+                    userId = UserHandle.parseUserArg(getNextArgRequired());
+                    break;
+
+                case "-n":
+                case "--namespace":
+                    namespace = getNextArgRequired();
+                    break;
+
+                default:
+                    pw.println("Error: unknown option '" + opt + "'");
+                    return -1;
+            }
+        }
+
+        if (userId == UserHandle.USER_CURRENT) {
+            userId = ActivityManager.getCurrentUser();
+        }
+
+        final String pkgName = getNextArgRequired();
+        final String jobIdStr = getNextArgRequired();
+        final int jobId = Integer.parseInt(jobIdStr);
+
+        final long ident = Binder.clearCallingIdentity();
+        try {
+            int ret = mInternal.getJobWakelockTag(pw, pkgName, userId, namespace, jobId);
             printError(ret, pkgName, userId, namespace, jobId);
             return ret;
         } finally {

@@ -16,8 +16,10 @@
 
 package android.service.autofill;
 
+import static android.service.autofill.Flags.FLAG_AUTOFILL_W_METRICS;
 import static android.view.autofill.Helper.sVerbose;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -63,14 +65,21 @@ public final class FillEventHistory implements Parcelable {
     private static final String TAG = "FillEventHistory";
 
     /**
-     * Not in parcel. The ID of the autofill session that created the {@link FillResponse}.
+     * The ID of the autofill session that created the {@link FillResponse}.
+     *
+     * TODO: add this to the parcel.
      */
     private final int mSessionId;
 
     @Nullable private final Bundle mClientState;
     @Nullable List<Event> mEvents;
 
-    /** @hide */
+    /**
+     * Returns the unique identifier of this FillEventHistory.
+     *
+     * <p>This is used to differentiate individual FillEventHistory.
+     */
+    @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
     public int getSessionId() {
         return mSessionId;
     }
@@ -161,6 +170,9 @@ public final class FillEventHistory implements Parcelable {
                 }
                 parcel.writeInt(event.mSaveDialogNotShowReason);
                 parcel.writeInt(event.mUiType);
+                if (Flags.addLastFocusedIdToFillEventHistory()) {
+                    parcel.writeParcelable(event.mFocusedId, 0);
+                }
             }
         }
     }
@@ -283,6 +295,13 @@ public final class FillEventHistory implements Parcelable {
         /** All fields matched contents of datasets. */
         public static final int NO_SAVE_UI_REASON_DATASET_MATCH = 6;
 
+        /**
+         * Credential Manager is invoked instead of Autofill. When that happens, Save Dialog cannot
+         * be shown, and this will be populated in
+         */
+        @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+        public static final int NO_SAVE_UI_REASON_USING_CREDMAN = 7;
+
         /** @hide */
         @IntDef(prefix = { "NO_SAVE_UI_REASON_" }, value = {
                 NO_SAVE_UI_REASON_NONE,
@@ -310,10 +329,19 @@ public final class FillEventHistory implements Parcelable {
         public static final int UI_TYPE_DIALOG = 3;
 
         /**
-         *  The autofill suggestion is shown os a credman bottom sheet
-         *  @hide
+         * The autofill suggestion is shown os a credman bottom sheet
+         *
+         * <p>Note, this was introduced as bottom sheet even though it applies to all credman UI
+         * types. Instead of exposing this directly to the public, the generic UI_TYPE_CREDMAN is
+         * introduced with the same number.
+         *
+         * @hide
          */
         public static final int UI_TYPE_CREDMAN_BOTTOM_SHEET = 4;
+
+        /** Credential Manager suggestions are shown instead of Autofill suggestion */
+        @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+        public static final int UI_TYPE_CREDENTIAL_MANAGER = 4;
 
         /** @hide */
         @IntDef(prefix = { "UI_TYPE_" }, value = {
@@ -350,6 +378,8 @@ public final class FillEventHistory implements Parcelable {
         @UiType
         private final int mUiType;
 
+        @Nullable private final AutofillId mFocusedId;
+
         /**
          * Returns the type of the event.
          *
@@ -357,6 +387,13 @@ public final class FillEventHistory implements Parcelable {
          */
         public int getType() {
             return mEventType;
+        }
+
+        /** Gets the {@code AutofillId} that's focused at the time of action */
+        @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+        @Nullable
+        public AutofillId getFocusedId() {
+            return mFocusedId;
         }
 
         /**
@@ -388,6 +425,17 @@ public final class FillEventHistory implements Parcelable {
         @NonNull public Set<String> getSelectedDatasetIds() {
             return mSelectedDatasetIds == null ? Collections.emptySet()
                     : new ArraySet<>(mSelectedDatasetIds);
+        }
+
+        /**
+         * Returns which datasets were shown to the user.
+         *
+         * <p><b>Note: </b>Only set on events of type {@link #TYPE_DATASETS_SHOWN}.
+         */
+        @FlaggedApi(FLAG_AUTOFILL_W_METRICS)
+        @NonNull
+        public Set<String> getShownDatasetIds() {
+            return Collections.emptySet();
         }
 
         /**
@@ -581,6 +629,7 @@ public final class FillEventHistory implements Parcelable {
          * @param manuallyFilledDatasetIds The ids of datasets that had values matching the
          * respective entry on {@code manuallyFilledFieldIds}.
          * @param detectedFieldClassifications the field classification matches.
+         * @param focusedId the field which was focused at the time of event trigger
          *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
@@ -597,11 +646,12 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
                 @Nullable AutofillId[] detectedFieldIds,
-                @Nullable FieldClassification[] detectedFieldClassifications) {
+                @Nullable FieldClassification[] detectedFieldClassifications,
+                @Nullable AutofillId focusedId) {
             this(eventType, datasetId, clientState, selectedDatasetIds, ignoredDatasetIds,
                     changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                     manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
-                    NO_SAVE_UI_REASON_NONE);
+                    NO_SAVE_UI_REASON_NONE, focusedId);
         }
 
         /**
@@ -622,6 +672,7 @@ public final class FillEventHistory implements Parcelable {
          * respective entry on {@code manuallyFilledFieldIds}.
          * @param detectedFieldClassifications the field classification matches.
          * @param saveDialogNotShowReason The reason why a save dialog was not shown.
+         * @param focusedId the field which was focused at the time of event trigger
          *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
@@ -639,11 +690,12 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
                 @Nullable AutofillId[] detectedFieldIds,
                 @Nullable FieldClassification[] detectedFieldClassifications,
-                int saveDialogNotShowReason) {
+                int saveDialogNotShowReason,
+                @Nullable AutofillId focusedId) {
             this(eventType, datasetId, clientState, selectedDatasetIds, ignoredDatasetIds,
                     changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                     manuallyFilledDatasetIds, detectedFieldIds, detectedFieldClassifications,
-                    saveDialogNotShowReason, UI_TYPE_UNKNOWN);
+                    saveDialogNotShowReason, UI_TYPE_UNKNOWN, focusedId);
         }
 
         /**
@@ -665,6 +717,7 @@ public final class FillEventHistory implements Parcelable {
          * @param detectedFieldClassifications the field classification matches.
          * @param saveDialogNotShowReason The reason why a save dialog was not shown.
          * @param uiType The ui presentation type for fill suggestion.
+         * @param focusedId the field which was focused at the time of event trigger
          *
          * @throws IllegalArgumentException If the length of {@code changedFieldIds} and
          * {@code changedDatasetIds} doesn't match.
@@ -682,7 +735,7 @@ public final class FillEventHistory implements Parcelable {
                 @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
                 @Nullable AutofillId[] detectedFieldIds,
                 @Nullable FieldClassification[] detectedFieldClassifications,
-                int saveDialogNotShowReason, int uiType) {
+                int saveDialogNotShowReason, int uiType, @Nullable AutofillId focusedId) {
             mEventType = Preconditions.checkArgumentInRange(eventType, 0,
                     TYPE_VIEW_REQUESTED_AUTOFILL, "eventType");
             mDatasetId = datasetId;
@@ -713,6 +766,7 @@ public final class FillEventHistory implements Parcelable {
                     NO_SAVE_UI_REASON_NONE, NO_SAVE_UI_REASON_DATASET_MATCH,
                     "saveDialogNotShowReason");
             mUiType = uiType;
+            mFocusedId = focusedId;
         }
 
         @Override
@@ -809,13 +863,17 @@ public final class FillEventHistory implements Parcelable {
                                 : null;
                         final int saveDialogNotShowReason = parcel.readInt();
                         final int uiType = parcel.readInt();
+                        AutofillId focusedId = null;
+                        if (Flags.addLastFocusedIdToFillEventHistory()) {
+                            focusedId = parcel.readParcelable(null, AutofillId.class);
+                        }
 
                         selection.addEvent(new Event(eventType, datasetId, clientState,
                                 selectedDatasetIds, ignoredDatasets,
                                 changedFieldIds, changedDatasetIds,
                                 manuallyFilledFieldIds, manuallyFilledDatasetIds,
                                 detectedFieldIds, detectedFieldClassifications,
-                                saveDialogNotShowReason, uiType));
+                                saveDialogNotShowReason, uiType, focusedId));
                     }
                     return selection;
                 }

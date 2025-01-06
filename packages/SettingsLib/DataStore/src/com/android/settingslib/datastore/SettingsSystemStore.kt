@@ -16,6 +16,7 @@
 
 package com.android.settingslib.datastore
 
+import android.Manifest
 import android.content.ContentResolver
 import android.content.Context
 import android.net.Uri
@@ -82,5 +83,11 @@ class SettingsSystemStore private constructor(contentResolver: ContentResolver) 
                             instance = it
                         }
                 }
+
+        /** Returns the required permissions to read [System] settings. */
+        fun getReadPermissions() = Permissions.EMPTY
+
+        /** Returns the required permissions to write [System] settings. */
+        fun getWritePermissions() = Permissions.allOf(Manifest.permission.WRITE_SETTINGS)
     }
 }

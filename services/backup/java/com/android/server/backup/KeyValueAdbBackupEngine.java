@@ -146,7 +146,8 @@ public class KeyValueAdbBackupEngine {
 
     private IBackupAgent bindToAgent(ApplicationInfo targetApp) {
         try {
-            return mBackupManagerService.bindToAgentSynchronous(targetApp,
+            return mBackupManagerService.getBackupAgentConnectionManager().bindToAgentSynchronous(
+                    targetApp,
                     ApplicationThreadConstants.BACKUP_MODE_INCREMENTAL,
                     BackupAnnotations.BackupDestination.CLOUD);
         } catch (SecurityException e) {
@@ -299,7 +300,8 @@ public class KeyValueAdbBackupEngine {
     }
 
     private void cleanup() {
-        mBackupManagerService.tearDownAgentAndKill(mCurrentPackage.applicationInfo);
+        mBackupManagerService.getBackupAgentConnectionManager().unbindAgent(
+                mCurrentPackage.applicationInfo, /* allowKill= */ true);
         mBlankStateName.delete();
         mNewStateName.delete();
         mBackupDataName.delete();

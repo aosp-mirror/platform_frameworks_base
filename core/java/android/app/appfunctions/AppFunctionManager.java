@@ -16,7 +16,7 @@
 
 package android.app.appfunctions;
 
-import static android.app.appfunctions.ExecuteAppFunctionResponse.getResultCode;
+import static android.app.appfunctions.AppFunctionException.ERROR_SYSTEM_ERROR;
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 
 import android.Manifest;
@@ -34,12 +34,12 @@ import android.os.ICancellationSignal;
 import android.os.OutcomeReceiver;
 import android.os.ParcelableException;
 import android.os.RemoteException;
+import android.os.SystemClock;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 import java.util.concurrent.Executor;
-import java.util.function.Consumer;
 
 /**
  * Provides access to app functions.
@@ -147,16 +147,16 @@ public final class AppFunctionManager {
      * @param request the request to execute the app function
      * @param executor the executor to run the callback
      * @param cancellationSignal the cancellation signal to cancel the execution.
-     * @param callback the callback to receive the function execution result.
+     * @param callback the callback to receive the function execution result or error.
      *     <p>If the calling app does not own the app function or does not have {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED} or {@code
      *     android.permission.EXECUTE_APP_FUNCTIONS}, the execution result will contain {@code
-     *     ExecuteAppFunctionResponse.RESULT_DENIED}.
+     *     AppFunctionException.ERROR_DENIED}.
      *     <p>If the caller only has {@code android.permission.EXECUTE_APP_FUNCTIONS} but the
      *     function requires {@code android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}, the execution
-     *     result will contain {@code ExecuteAppFunctionResponse.RESULT_DENIED}
+     *     result will contain {@code AppFunctionException.ERROR_DENIED}
      *     <p>If the function requested for execution is disabled, then the execution result will
-     *     contain {@code ExecuteAppFunctionResponse.RESULT_DISABLED}
+     *     contain {@code AppFunctionException.ERROR_DISABLED}
      *     <p>If the cancellation signal is issued, the operation is cancelled and no response is
      *     returned to the caller.
      */
@@ -171,14 +171,17 @@ public final class AppFunctionManager {
             @NonNull ExecuteAppFunctionRequest request,
             @NonNull @CallbackExecutor Executor executor,
             @NonNull CancellationSignal cancellationSignal,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback) {
+            @NonNull
+                    OutcomeReceiver<ExecuteAppFunctionResponse, AppFunctionException>
+                            callback) {
         Objects.requireNonNull(request);
         Objects.requireNonNull(executor);
         Objects.requireNonNull(callback);
 
         ExecuteAppFunctionAidlRequest aidlRequest =
                 new ExecuteAppFunctionAidlRequest(
-                        request, mContext.getUser(), mContext.getPackageName());
+                        request, mContext.getUser(), mContext.getPackageName(),
+                        /* requestTime= */ SystemClock.elapsedRealtime());
 
         try {
             ICancellationSignal cancellationTransport =
@@ -186,19 +189,24 @@ public final class AppFunctionManager {
                             aidlRequest,
                             new IExecuteAppFunctionCallback.Stub() {
                                 @Override
-                                public void onResult(ExecuteAppFunctionResponse result) {
+                                public void onSuccess(ExecuteAppFunctionResponse result) {
                                     try {
-                                        executor.execute(() -> callback.accept(result));
+                                        executor.execute(() -> callback.onResult(result));
                                     } catch (RuntimeException e) {
                                         // Ideally shouldn't happen since errors are wrapped into
-                                        // the
-                                        // response, but we catch it here for additional safety.
-                                        callback.accept(
-                                                ExecuteAppFunctionResponse.newFailure(
-                                                        getResultCode(e),
-                                                        e.getMessage(),
-                                                        /* extras= */ null));
+                                        // the response, but we catch it here for additional safety.
+                                        executor.execute(
+                                                () ->
+                                                        callback.onError(
+                                                                new AppFunctionException(
+                                                                        ERROR_SYSTEM_ERROR,
+                                                                        e.getMessage())));
                                     }
+                                }
+
+                                @Override
+                                public void onError(AppFunctionException exception) {
+                                    executor.execute(() -> callback.onError(exception));
                                 }
                             });
             if (cancellationTransport != null) {

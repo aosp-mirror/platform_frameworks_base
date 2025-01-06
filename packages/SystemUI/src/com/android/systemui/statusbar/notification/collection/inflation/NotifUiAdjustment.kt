@@ -20,22 +20,24 @@ import android.app.Notification
 import android.app.RemoteInput
 import android.graphics.drawable.Icon
 import android.text.TextUtils
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.RedactionType
 import com.android.systemui.statusbar.notification.row.shared.AsyncGroupHeaderViewInflation
 import com.android.systemui.statusbar.notification.row.shared.AsyncHybridViewInflation
 
 /**
  * An immutable object which contains minimal state extracted from an entry that represents state
- * which can change without a direct app update (e.g. with a ranking update).
- * Diffing two entries determines if view re-inflation is needed.
+ * which can change without a direct app update (e.g. with a ranking update). Diffing two entries
+ * determines if view re-inflation is needed.
  */
-class NotifUiAdjustment internal constructor(
+class NotifUiAdjustment
+internal constructor(
     val key: String,
     val smartActions: List<Notification.Action>,
     val smartReplies: List<CharSequence>,
     val isConversation: Boolean,
     val isSnoozeEnabled: Boolean,
     val isMinimized: Boolean,
-    val needsRedaction: Boolean,
+    @RedactionType val redactionType: Int,
     val isChildInGroup: Boolean,
     val isGroupSummary: Boolean,
 ) {
@@ -43,65 +45,72 @@ class NotifUiAdjustment internal constructor(
         @JvmStatic
         fun needReinflate(
             oldAdjustment: NotifUiAdjustment,
-            newAdjustment: NotifUiAdjustment
-        ): Boolean = when {
-            oldAdjustment === newAdjustment -> false
-            oldAdjustment.isConversation != newAdjustment.isConversation -> true
-            oldAdjustment.isSnoozeEnabled != newAdjustment.isSnoozeEnabled -> true
-            oldAdjustment.isMinimized != newAdjustment.isMinimized -> true
-            oldAdjustment.needsRedaction != newAdjustment.needsRedaction -> true
-            areDifferent(oldAdjustment.smartActions, newAdjustment.smartActions) -> true
-            newAdjustment.smartReplies != oldAdjustment.smartReplies -> true
-            AsyncHybridViewInflation.isEnabled &&
-                    !oldAdjustment.isChildInGroup && newAdjustment.isChildInGroup -> true
-            AsyncGroupHeaderViewInflation.isEnabled &&
-                !oldAdjustment.isGroupSummary && newAdjustment.isGroupSummary -> true
-            else -> false
-        }
+            newAdjustment: NotifUiAdjustment,
+        ): Boolean =
+            when {
+                oldAdjustment === newAdjustment -> false
+                oldAdjustment.isConversation != newAdjustment.isConversation -> true
+                oldAdjustment.isSnoozeEnabled != newAdjustment.isSnoozeEnabled -> true
+                oldAdjustment.isMinimized != newAdjustment.isMinimized -> true
+                oldAdjustment.redactionType != newAdjustment.redactionType -> true
+                areDifferent(oldAdjustment.smartActions, newAdjustment.smartActions) -> true
+                newAdjustment.smartReplies != oldAdjustment.smartReplies -> true
+                AsyncHybridViewInflation.isEnabled &&
+                    !oldAdjustment.isChildInGroup &&
+                    newAdjustment.isChildInGroup -> true
+                AsyncGroupHeaderViewInflation.isEnabled &&
+                    !oldAdjustment.isGroupSummary &&
+                    newAdjustment.isGroupSummary -> true
+                else -> false
+            }
 
         private fun areDifferent(
             first: List<Notification.Action>,
-            second: List<Notification.Action>
-        ): Boolean = when {
-            first === second -> false
-            first.size != second.size -> true
-            else -> first.asSequence().zip(second.asSequence()).any {
-                (!TextUtils.equals(it.first.title, it.second.title)) ||
-                    (areDifferent(it.first.getIcon(), it.second.getIcon())) ||
-                    (it.first.actionIntent != it.second.actionIntent) ||
-                    (areDifferent(it.first.remoteInputs, it.second.remoteInputs))
+            second: List<Notification.Action>,
+        ): Boolean =
+            when {
+                first === second -> false
+                first.size != second.size -> true
+                else ->
+                    first.asSequence().zip(second.asSequence()).any {
+                        (!TextUtils.equals(it.first.title, it.second.title)) ||
+                            (areDifferent(it.first.getIcon(), it.second.getIcon())) ||
+                            (it.first.actionIntent != it.second.actionIntent) ||
+                            (areDifferent(it.first.remoteInputs, it.second.remoteInputs))
+                    }
             }
-        }
 
-        private fun areDifferent(first: Icon?, second: Icon?): Boolean = when {
-            first === second -> false
-            first == null || second == null -> true
-            else -> !first.sameAs(second)
-        }
-
-        private fun areDifferent(
-            first: Array<RemoteInput>?,
-            second: Array<RemoteInput>?
-        ): Boolean = when {
-            first === second -> false
-            first == null || second == null -> true
-            first.size != second.size -> true
-            else -> first.asSequence().zip(second.asSequence()).any {
-                (!TextUtils.equals(it.first.label, it.second.label)) ||
-                    (areDifferent(it.first.choices, it.second.choices))
+        private fun areDifferent(first: Icon?, second: Icon?): Boolean =
+            when {
+                first === second -> false
+                first == null || second == null -> true
+                else -> !first.sameAs(second)
             }
-        }
+
+        private fun areDifferent(first: Array<RemoteInput>?, second: Array<RemoteInput>?): Boolean =
+            when {
+                first === second -> false
+                first == null || second == null -> true
+                first.size != second.size -> true
+                else ->
+                    first.asSequence().zip(second.asSequence()).any {
+                        (!TextUtils.equals(it.first.label, it.second.label)) ||
+                            (areDifferent(it.first.choices, it.second.choices))
+                    }
+            }
 
         private fun areDifferent(
             first: Array<CharSequence>?,
-            second: Array<CharSequence>?
-        ): Boolean = when {
-            first === second -> false
-            first == null || second == null -> true
-            first.size != second.size -> true
-            else -> first.asSequence().zip(second.asSequence()).any {
-                !TextUtils.equals(it.first, it.second)
+            second: Array<CharSequence>?,
+        ): Boolean =
+            when {
+                first === second -> false
+                first == null || second == null -> true
+                first.size != second.size -> true
+                else ->
+                    first.asSequence().zip(second.asSequence()).any {
+                        !TextUtils.equals(it.first, it.second)
+                    }
             }
-        }
     }
 }

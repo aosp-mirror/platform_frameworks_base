@@ -1,11 +1,8 @@
 package com.android.systemui.scene.ui.composable
 
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.Orientation
-import com.android.compose.animation.scene.ProgressConverter
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transitions
-import com.android.systemui.bouncer.ui.composable.Bouncer
 import com.android.systemui.notifications.ui.composable.Notifications
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
@@ -15,7 +12,10 @@ import com.android.systemui.scene.ui.composable.transitions.bouncerToGoneTransit
 import com.android.systemui.scene.ui.composable.transitions.bouncerToLockscreenPreview
 import com.android.systemui.scene.ui.composable.transitions.communalToBouncerTransition
 import com.android.systemui.scene.ui.composable.transitions.communalToShadeTransition
+import com.android.systemui.scene.ui.composable.transitions.dreamToBouncerTransition
+import com.android.systemui.scene.ui.composable.transitions.dreamToCommunalTransition
 import com.android.systemui.scene.ui.composable.transitions.dreamToGoneTransition
+import com.android.systemui.scene.ui.composable.transitions.dreamToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.goneToSplitShadeTransition
@@ -30,7 +30,6 @@ import com.android.systemui.scene.ui.composable.transitions.notificationsShadeTo
 import com.android.systemui.scene.ui.composable.transitions.shadeToQuickSettingsTransition
 import com.android.systemui.scene.ui.composable.transitions.toNotificationsShadeTransition
 import com.android.systemui.scene.ui.composable.transitions.toQuickSettingsShadeTransition
-import com.android.systemui.shade.ui.composable.OverlayShade
 import com.android.systemui.shade.ui.composable.Shade
 
 /**
@@ -49,13 +48,15 @@ val SceneContainerTransitions = transitions {
     interruptionHandler = SceneContainerInterruptionHandler
 
     // Overscroll progress starts linearly with some resistance (3f) and slowly approaches 0.2f
-    defaultOverscrollProgressConverter = ProgressConverter.tanh(maxProgress = 0.2f, tilt = 3f)
     defaultSwipeSpec = spring(stiffness = 300f, dampingRatio = 0.8f, visibilityThreshold = 0.5f)
 
     // Scene transitions
 
     from(Scenes.Bouncer, to = Scenes.Gone) { bouncerToGoneTransition() }
+    from(Scenes.Dream, to = Scenes.Bouncer) { dreamToBouncerTransition() }
+    from(Scenes.Dream, to = Scenes.Communal) { dreamToCommunalTransition() }
     from(Scenes.Dream, to = Scenes.Gone) { dreamToGoneTransition() }
+    from(Scenes.Dream, to = Scenes.Shade) { dreamToShadeTransition() }
     from(Scenes.Gone, to = Scenes.Shade) { goneToShadeTransition() }
     from(Scenes.Gone, to = Scenes.Shade, key = ToSplitShade) { goneToSplitShadeTransition() }
     from(Scenes.Gone, to = Scenes.Shade, key = SlightlyFasterShadeCollapse) {
@@ -121,30 +122,5 @@ val SceneContainerTransitions = transitions {
     }
     from(Scenes.Lockscreen, to = Overlays.QuickSettingsShade, key = SlightlyFasterShadeCollapse) {
         toQuickSettingsShadeTransition(durationScale = 0.9)
-    }
-
-    // Scene overscroll
-
-    overscrollDisabled(Scenes.Gone, Orientation.Vertical)
-    overscrollDisabled(Scenes.Lockscreen, Orientation.Vertical)
-    overscroll(Scenes.Bouncer, Orientation.Vertical) {
-        translate(Bouncer.Elements.Content, y = { absoluteDistance })
-    }
-    overscroll(Scenes.Shade, Orientation.Vertical) {
-        translate(
-            Notifications.Elements.NotificationScrim,
-            y = Shade.Dimensions.ScrimOverscrollLimit,
-        )
-        translate(Shade.Elements.SplitShadeStartColumn, y = Shade.Dimensions.ScrimOverscrollLimit)
-        translate(
-            Notifications.Elements.NotificationStackPlaceholder,
-            y = Shade.Dimensions.ScrimOverscrollLimit,
-        )
-    }
-    overscroll(Overlays.NotificationsShade, Orientation.Vertical) {
-        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
-    }
-    overscroll(Overlays.QuickSettingsShade, Orientation.Vertical) {
-        translate(OverlayShade.Elements.Panel, y = OverlayShade.Dimensions.OverscrollLimit)
     }
 }

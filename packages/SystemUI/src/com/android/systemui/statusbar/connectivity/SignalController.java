@@ -34,7 +34,11 @@ import java.util.List;
  *
  * @param <T> State of the SysUI controller.
  * @param <I> Icon groups of the SysUI controller for a given State.
+ *
+ * @deprecated "Use Recommended Architecture classes instead: MobileIconsInteractor, WifiInteractor,
+ * AirplaneModeInteractor, and EthernetInteractor
  */
+@Deprecated
 public abstract class SignalController<T extends ConnectivityState, I extends IconGroup> {
     // Save the previous SignalController.States of all SignalControllers for dumps.
     static final boolean RECORD_HISTORY = true;
@@ -165,10 +169,6 @@ public abstract class SignalController<T extends ConnectivityState, I extends Ic
             saveLastState();
             notifyListeners();
         }
-    }
-
-    protected final void notifyCallStateChange(IconState statusIcon, int subId) {
-        mCallbackHandler.setCallIndicator(statusIcon, subId);
     }
 
     /**

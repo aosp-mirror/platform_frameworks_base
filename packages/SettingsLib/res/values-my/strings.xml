@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"သုံးနေသည် (ဘယ်ဘက်သီးသန့်)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"သုံးနေသည် (ညာဘက်သီးသန့်)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"သုံးနေသည် (ဘယ်နှင့်ညာ)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"ဝန်းကျင်အသံ အပ်ဒိတ်လုပ်၍ မရလိုက်ပါ"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"အသုံးပြုနေသည် (မီဒီယာသီးသန့်)။ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>။"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"အသုံးပြုနေသည် (မီဒီယာသီးသန့်)။ ဘက်ထရီ L- <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>၊ R- <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>။"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"ချိတ်ဆက်ထားသည် (အော်ဒီယို မျှဝေခြင်း ပံ့ပိုးသည်)။ ဘက်ထရီ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>။"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"လိုကယ်တာမီနယ်"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"local shell အသုံးပြုခွင့်ကမ်းလှမ်းသော တာမင်နယ်အပလီကေးရှင်းဖွင့်ပါ"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ဆော့ဖ်ဝဲရေးမှု ပတ်ဝန်းကျင်"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android တွင် Linux တာမီနယ် လုပ်ဆောင်ရန်"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(စမ်းသပ်) Android တွင် Linux တာမီနယ်ကို လုပ်ဆောင်ရန်"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"ပိတ်လိုက်ပါက Linux တာမီနယ်ဒေတာကို ရှင်းထုတ်ပါမည်"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP စစ်ဆေးမှု"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP စစ်ဆေးပုံကို သတ်မှတ်မည်"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"အမှားရှာဖွေဖယ်ရှားခြင်း"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"သက်ဝင်အသွင်ပြောင်းခြင်း"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"လှုပ်ရှားမှုကြာချိန်စကေး"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ဆင့်ပွားမျက်နှာပြင် အသွင်ဆောင်ခြင်း"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"အရိပ်ပြကွက် တည်နေရာ"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"အက်ပ်များ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ဆောင်ရွက်မှုများကို သိမ်းမထားပါနှင့်"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"သုံးသူထွက်သွားသည်နှင့် လုပ်ဆောင်ချက်များ ဖျက်ရန်"</string>
@@ -475,7 +478,7 @@
     <string name="daltonizer_mode_protanomaly" msgid="7805583306666608440">"Protanomaly (အနီ-အစိမ်း)"</string>
     <string name="daltonizer_mode_tritanomaly" msgid="7135266249220732267">"Tritanomaly (အပြာ-အဝါ)"</string>
     <string name="accessibility_display_daltonizer_preference_title" msgid="1810693571332381974">"အရောင် အမှန်ပြင်ခြင်း"</string>
-    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုခြင်း&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားခြင်း&lt;/li&gt; &lt;/ol&gt;"</string>
+    <string name="accessibility_display_daltonizer_preference_subtitle" msgid="1522101114585266455">"အရောင် အမှန်ပြင်ခြင်းသည် အောက်ပါတို့အတွက် အသုံးဝင်နိုင်သည်-&lt;br/&gt; &lt;ol&gt; &lt;li&gt;&amp;nbsp;အရောင်များကို ပိုမိုမှန်ကန်စွာ ကြည့်ရှုရန်&lt;/li&gt; &lt;li&gt;&amp;nbsp;အာရုံစိုက်နိုင်ရန် အရောင်များ ဖယ်ရှားရန်&lt;/li&gt; &lt;/ol&gt;"</string>
     <string name="daltonizer_type_overridden" msgid="4509604753672535721">"<xliff:g id="TITLE">%1$s</xliff:g> မှ ကျော်၍ လုပ်ထားသည်။"</string>
     <string name="power_remaining_settings_home_page" msgid="4885165789445462557">"<xliff:g id="PERCENTAGE">%1$s</xliff:g> - <xliff:g id="TIME_STRING">%2$s</xliff:g>"</string>
     <string name="power_charging_on_hold_settings_home_page" msgid="7690464049464805856">"<xliff:g id="LEVEL">%1$s</xliff:g> - ဘက်ထရီကာကွယ်ရန် အားသွင်းခြင်းကို ခဏရပ်ထားသည်"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ဤဖုန်း"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ဤတက်ဘလက်"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ဤကွန်ပျူတာ (စက်တွင်း)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ဤ TV"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"အထိုင် စပီကာ"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ပြင်ပစက်"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"ချိတ်ဆက်ကိရိယာ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ဤဖုန်း"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"ရိုးရိုး"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ဤစက်ပစ္စည်းတွင် ဖွင့်၍မရပါ"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"ပြောင်းရန် အကောင့်အဆင့်ကိုမြှင့်ပါ"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ဤနေရာတွင် ဒေါင်းလုဒ်များ ဖွင့်မရပါ"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC မှတစ်ဆင့် ချိတ်ဆက်ထားသည်"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV မူရင်း"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI အထွက်"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"စက်ရှိ စပီကာများ"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"မူလပါရှိသည့် စပီကာ"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"TV အသံ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"ချိတ်ဆက်ရာတွင် ပြဿနာရှိပါသည်။ စက်ကိုပိတ်ပြီး ပြန်ဖွင့်ပါ"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ကြိုးတပ် အသံစက်ပစ္စည်း"</string>
     <string name="help_label" msgid="3528360748637781274">"အကူအညီနှင့် အကြံပြုချက်"</string>

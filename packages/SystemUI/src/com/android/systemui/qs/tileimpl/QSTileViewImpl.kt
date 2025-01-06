@@ -27,6 +27,7 @@ import android.content.res.Resources.ID_NULL
 import android.graphics.Color
 import android.graphics.PorterDuff
 import android.graphics.Rect
+import android.graphics.Typeface
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.GradientDrawable
 import android.graphics.drawable.LayerDrawable
@@ -59,6 +60,7 @@ import com.android.app.tracing.traceSection
 import com.android.settingslib.Utils
 import com.android.systemui.Flags
 import com.android.systemui.FontSizeUtils
+import com.android.systemui.FontStyles
 import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.LaunchableView
 import com.android.systemui.animation.LaunchableViewDelegate
@@ -308,6 +310,16 @@ constructor(
         }
         setLabelColor(getLabelColorForState(QSTile.State.DEFAULT_STATE))
         setSecondaryLabelColor(getSecondaryLabelColorForState(QSTile.State.DEFAULT_STATE))
+
+        if (Flags.gsfQuickSettings()) {
+            label.apply {
+                typeface = Typeface.create(FontStyles.GSF_TITLE_SMALL_EMPHASIZED, Typeface.NORMAL)
+            }
+            secondaryLabel.apply {
+                typeface = Typeface.create(FontStyles.GSF_LABEL_MEDIUM, Typeface.NORMAL)
+            }
+        }
+
         addView(labelContainer)
     }
 
@@ -415,7 +427,10 @@ constructor(
             initLongPressEffectCallback()
             init(
                 { _: View -> longPressEffect.onTileClick() },
-                { _: View -> true }, // Haptics and long-clicks are handled by [QSLongPressEffect]
+                { _: View ->
+                    longPressEffect.onTileLongClick()
+                    true
+                }, // Haptics and long-clicks are handled by [QSLongPressEffect]
             )
         } else {
             val expandable = Expandable.fromView(this)
@@ -764,11 +779,15 @@ constructor(
         lastIconTint = icon.getColor(state)
 
         // Long-press effects
-        longPressEffect?.qsTile?.state?.handlesLongClick = state.handlesLongClick
-        if (
-            state.handlesLongClick &&
-                longPressEffect?.initializeEffect(longPressEffectDuration) == true
-        ) {
+        updateLongPressEffect(state.handlesLongClick)
+    }
+
+    private fun updateLongPressEffect(handlesLongClick: Boolean) {
+        // The long press effect in the tile can't be updated if it is still running
+        if (longPressEffect?.state != QSLongPressEffect.State.IDLE) return
+
+        longPressEffect.qsTile?.state?.handlesLongClick = handlesLongClick
+        if (handlesLongClick && longPressEffect.initializeEffect(longPressEffectDuration)) {
             showRippleEffect = false
             longPressEffect.qsTile?.state?.state = lastState // Store the tile's state
             longPressEffect.resetState()

@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Chaguomsingi za kitambulisho cha mpigaji simu huwa kuzuiwa. Simu ifuatayo: Haijazuiliwa"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo:Imezuiliwa"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Chaguomsingi za ID ya mpigaji simu za kutozuia. Simu ifuatayo: Haijazuiliwa"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Programu hii haioani na ukubwa wa ukurasa wa KB 16. Imeshindwa kukagua mpangilio wa APK. Programu hii itaendeshwa katika hali inayooana na ukubwa wa ukurasa. Tafadhali rekebisha mipangilio ya programu ijumuishe KB 16 ili ioane vizuri. Tembelea &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; upate maelezo zaidi"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Programu hii haioani na ukubwa wa ukurasa wa KB 16. Imeshindwa kukagua mpangilio wa ELF. Programu hii itaendeshwa katika hali inayooana na ukubwa wa ukurasa. Tafadhali rekebisha mipangilio ya programu ijumuishe KB 16 ili ioane vizuri. Tembelea &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; upate maelezo zaidi"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Programu hii haioani na ukubwa wa ukurasa wa KB 16. Imeshindwa kukagua mpangilio wa APK na ELF. Programu hii itaendeshwa katika hali inayooana na ukubwa wa ukurasa. Tafadhali rekebisha mipangilio ya programu ijumuishe KB 16 ili ioane vizuri. Tembelea &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; upate maelezo zaidi"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Huduma haitathminiwi."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Hauwezi kubadilisha mpangilio wa kitambulisho cha anayepiga."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Sasa unatumia data ya mtandao wa <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Imeshindwa kufikia mtandao wa simu"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Jaribu kutumia mtandao unaopendelea. Gusa ili ubadilishe."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Huduma ya kupiga simu za dharura haipatikani"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Huduma ya kupiga simu za dharura inahitaji mtandao wa simu"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Arifa"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Kupeleka simu kwenye namba nyingine"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Ruhusu programu ibainishe nafasi kati ya vifaa vyenye Bendi Pana Zaidi vilivyo karibu"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tumia vifaa vya Wi‑Fi vilivyo karibu"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Huruhusu programu kutangaza, kuunganisha na kubaini mahali palipokadiriwa vilipo vifaa vya Wi-Fi vilivyo karibu"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"kubainisha nafasi kati ya vifaa vilivyo karibu"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Ruhusu programu ibainishe nafasi kati ya vifaa vilivyo karibu"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Maelezo ya Huduma Inayopendelewa ya Malipo ya NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Huruhusu programu kupata maelezo ya huduma inayopendelewa ya malipo ya nfc kama vile huduma zilizosajiliwa na njia."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"baada ya saa <xliff:g id="COUNT">%d</xliff:g>"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"baada ya siku <xliff:g id="COUNT">%d</xliff:g>"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"baada ya mwaka <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"dak <xliff:g id="COUNT">%d</xliff:g> zilizopita"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"saa <xliff:g id="COUNT">%d</xliff:g> zilizopita"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"siku <xliff:g id="COUNT">%d</xliff:g> zilizopita"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"miaka <xliff:g id="COUNT">%d</xliff:g> iliyopita"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"dak <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"saa <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"siku <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"miaka <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"ndani ya dak <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"ndani ya saa <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"ndani ya siku <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"ndani ya miaka <xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"dak <xliff:g id="COUNT">%d</xliff:g> zilizopita"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"saa <xliff:g id="COUNT">%d</xliff:g> zilizopita"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"siku <xliff:g id="COUNT">%d</xliff:g> zilizopita"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"miaka <xliff:g id="COUNT">%d</xliff:g> iliyopita"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{Dakika # iliyopita}other{Dakika # zilizopita}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{Saa # iliyopita}other{Saa # zilizopita}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{Siku # iliyopita}other{Siku # zilizopita}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Hali ya kutumia kwa mkono mmoja"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Kipunguza mwangaza zaidi"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Vifaa vya kusaidia kusikia"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Vitufe vya sauti vilivyoshikiliwa. Umewasha <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Vitufe vya sauti vimeshikiliwa. Umezima <xliff:g id="SERVICE_NAME">%1$s</xliff:g>."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Achilia vitufe vya sauti. Ili uwashe <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, bonyeza na ushikilie tena vitufe vyote vya sauti kwa sekunde 3."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Wikendi"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Tukio"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Kulala"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Usinisumbue (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Inadhibitiwa na <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Imewashwa"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Imezimwa"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> hadi <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Kalenda yoyote"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> inazima baadhi ya sauti"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Kuna hitilafu ya ndani ya kifaa chako, na huenda kisiwe thabiti mpaka urejeshe mipangilio ya kiwandani."</string>
@@ -2405,7 +2437,7 @@
     <string name="keyboard_layout_notification_more_than_three_selected_message" msgid="1581834181578206937">"Muundo wa kibodi umewekwa kuwa <xliff:g id="LAYOUT_1">%1$s</xliff:g>, <xliff:g id="LAYOUT_2">%2$s</xliff:g>, <xliff:g id="LAYOUT_3">%3$s</xliff:g>… Gusa ili ubadilishe."</string>
     <string name="keyboard_layout_notification_multiple_selected_title" msgid="5242444914367024499">"Mipangilio ya kibodi halisi imewekwa"</string>
     <string name="keyboard_layout_notification_multiple_selected_message" msgid="6576533454124419202">"Gusa ili uangalie kibodi"</string>
-    <string name="profile_label_private" msgid="6463418670715290696">"Faragha"</string>
+    <string name="profile_label_private" msgid="6463418670715290696">"Sehemu ya Faragha"</string>
     <string name="profile_label_clone" msgid="769106052210954285">"Nakala"</string>
     <string name="profile_label_work" msgid="3495359133038584618">"Kazini"</string>
     <string name="profile_label_work_2" msgid="4691533661598632135">"Wa 2 wa Kazini"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Tuma na upokee ujumbe bila kutumia mtandao wa simu wala Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Fungua Programu ya Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Utaratibu wake"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Washa kipengele cha \"Chagua mtandao kiotomatiki\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Washa kipengele cha \"Chagua mtandao kiotomatiki\" katika Mipangilio ili simu yako iweze kupata mtandao unaotumia setilaiti"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Washa"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Rudi nyuma"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Inashughulikiwa..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Kipengele cha Msaada kupitia Setilaiti sasa kinapatikana"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Unaweza kutumia huduma za dharura ujumbe iwapo hakuna mtandao wa simu au wa Wi-Fi. Ni sharti uweke Google Messages iwe programu yako chaguomsingi ya kutuma ujumbe."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Kipengele cha Msaada kupitia Setilaiti hakiwezi kutumika"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Kipengele cha Msaada kupitia Setilaiti hakiwezi kutumika kwenye kifaa hiki"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Mipangilio ya kipengele cha Msaada kupitia Setilaiti haijawekwa"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Hakikisha kuwa umeunganisha kifaa chako kwenye intaneti kisha ujaribu kuweka mipangilio tena"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Kipengele cha Msaada kupitia Setilaiti hakipatikani"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Kipengele cha Msaada kupitia Setilaiti hakipatikani katika nchi au eneo hili"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Mipangilio ya kipengele cha Msaada kupitia Setilaiti haijawekwa"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Ili utume ujumbe kupitia setilaiti, weka Google Messages iwe programu yako chaguomsingi ya kutuma ujumbe"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Kipengele cha Msaada kupitia Setilaiti hakipatikani"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Ili uangalie iwapo kipengele cha Msaada kupitia Setilaiti kinapatikana katika nchi au eneo hili, washa mipangilio ya mahali"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Kipengele cha kutuma ujumbe kupitia setilaiti kinapatikana"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Unaweza kutuma ujumbe kupitia setilaiti iwapo hakuna mtandao wa simu au wa Wi-Fi. Ni sharti uweke Google Messages iwe programu yako chaguomsingi ya kutuma ujumbe."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Kipengele cha kutuma ujumbe kupitia setilaiti hakiwezi kutumika"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Kipengele cha kutuma ujumbe kupitia setilaiti hakiwezi kutumika kwenye kifaa hiki"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Mipangilio ya kutuma ujumbe kupitia setilaiti haijawekwa"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Hakikisha kuwa umeunganisha kifaa chako kwenye intaneti kisha ujaribu kuweka mipangilio tena"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Kipengele cha kutuma ujumbe kupitia setilaiti hakipatikani"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Kipengele cha kutuma ujumbe kupitia setilaiti hakipatikani katika nchi au eneo hili"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Mipangilio ya kutuma ujumbe kupitia setilaiti haijawekwa"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Ili utume ujumbe kupitia setilaiti, weka Google Messages iwe programu yako chaguomsingi ya kutuma ujumbe"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Kipengele cha kutuma ujumbe kupitia setilaiti hakipatikani"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Ili uangalie iwapo kipengele cha kutuma ujumbe kupitia setilaiti kinapatikana katika nchi au eneo hili, washa mipangilio ya mahali"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Weka tena mipangilio ya Kufungua kwa Alama ya Kidole"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> haitambuliki tena."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> na <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> havitambuliki tena."</string>

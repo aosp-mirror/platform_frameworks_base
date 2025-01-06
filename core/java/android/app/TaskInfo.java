@@ -308,10 +308,16 @@ public class TaskInfo {
     public boolean isSleeping;
 
     /**
-     * Whether the top activity fillsParent() is false
+     * Whether the top activity fillsParent() is false.
      * @hide
      */
     public boolean isTopActivityTransparent;
+
+    /**
+     * Whether fillsParent() is false for every activity in the tasks stack.
+     * @hide
+     */
+    public boolean isActivityStackTransparent;
 
     /**
      * The last non-fullscreen bounds the task was launched in or resized to.
@@ -340,10 +346,10 @@ public class TaskInfo {
     public int requestedVisibleTypes;
 
     /**
-     * Whether the top activity has requested to limit educational dialogs shown by the system.
+     * The timestamp of the top activity's last request to show the "Open in Browser" education.
      * @hide
      */
-    public boolean isTopActivityLimitSystemEducationDialogs;
+    public long topActivityRequestOpenInBrowserEducationTimestamp;
 
     /**
      * Encapsulate specific App Compat information.
@@ -364,8 +370,9 @@ public class TaskInfo {
         // Do nothing
     }
 
-    private TaskInfo(Parcel source) {
-        readFromParcel(source);
+    /** @hide */
+    public TaskInfo(Parcel source) {
+        readTaskFromParcel(source);
     }
 
     /**
@@ -488,12 +495,13 @@ public class TaskInfo {
                 && parentTaskId == that.parentTaskId
                 && Objects.equals(topActivity, that.topActivity)
                 && isTopActivityTransparent == that.isTopActivityTransparent
+                && isActivityStackTransparent == that.isActivityStackTransparent
                 && Objects.equals(lastNonFullscreenBounds, that.lastNonFullscreenBounds)
                 && Objects.equals(capturedLink, that.capturedLink)
                 && capturedLinkTimestamp == that.capturedLinkTimestamp
                 && requestedVisibleTypes == that.requestedVisibleTypes
-                && isTopActivityLimitSystemEducationDialogs
-                    == that.isTopActivityLimitSystemEducationDialogs
+                && topActivityRequestOpenInBrowserEducationTimestamp
+                    == that.topActivityRequestOpenInBrowserEducationTimestamp
                 && appCompatTaskInfo.equalsForTaskOrganizer(that.appCompatTaskInfo)
                 && Objects.equals(topActivityMainWindowFrame, that.topActivityMainWindowFrame);
     }
@@ -524,7 +532,7 @@ public class TaskInfo {
     /**
      * Reads the TaskInfo from a parcel.
      */
-    void readFromParcel(Parcel source) {
+    void readTaskFromParcel(Parcel source) {
         userId = source.readInt();
         taskId = source.readInt();
         effectiveUid = source.readInt();
@@ -566,19 +574,21 @@ public class TaskInfo {
         mTopActivityLocusId = source.readTypedObject(LocusId.CREATOR);
         displayAreaFeatureId = source.readInt();
         isTopActivityTransparent = source.readBoolean();
+        isActivityStackTransparent = source.readBoolean();
         lastNonFullscreenBounds = source.readTypedObject(Rect.CREATOR);
         capturedLink = source.readTypedObject(Uri.CREATOR);
         capturedLinkTimestamp = source.readLong();
         requestedVisibleTypes = source.readInt();
-        isTopActivityLimitSystemEducationDialogs = source.readBoolean();
+        topActivityRequestOpenInBrowserEducationTimestamp = source.readLong();
         appCompatTaskInfo = source.readTypedObject(AppCompatTaskInfo.CREATOR);
         topActivityMainWindowFrame = source.readTypedObject(Rect.CREATOR);
     }
 
     /**
      * Writes the TaskInfo to a parcel.
+     * @hide
      */
-    void writeToParcel(Parcel dest, int flags) {
+    public void writeTaskToParcel(Parcel dest, int flags) {
         dest.writeInt(userId);
         dest.writeInt(taskId);
         dest.writeInt(effectiveUid);
@@ -621,11 +631,12 @@ public class TaskInfo {
         dest.writeTypedObject(mTopActivityLocusId, flags);
         dest.writeInt(displayAreaFeatureId);
         dest.writeBoolean(isTopActivityTransparent);
+        dest.writeBoolean(isActivityStackTransparent);
         dest.writeTypedObject(lastNonFullscreenBounds, flags);
         dest.writeTypedObject(capturedLink, flags);
         dest.writeLong(capturedLinkTimestamp);
         dest.writeInt(requestedVisibleTypes);
-        dest.writeBoolean(isTopActivityLimitSystemEducationDialogs);
+        dest.writeLong(topActivityRequestOpenInBrowserEducationTimestamp);
         dest.writeTypedObject(appCompatTaskInfo, flags);
         dest.writeTypedObject(topActivityMainWindowFrame, flags);
     }
@@ -666,12 +677,13 @@ public class TaskInfo {
                 + " locusId=" + mTopActivityLocusId
                 + " displayAreaFeatureId=" + displayAreaFeatureId
                 + " isTopActivityTransparent=" + isTopActivityTransparent
+                + " isActivityStackTransparent=" + isActivityStackTransparent
                 + " lastNonFullscreenBounds=" + lastNonFullscreenBounds
                 + " capturedLink=" + capturedLink
                 + " capturedLinkTimestamp=" + capturedLinkTimestamp
                 + " requestedVisibleTypes=" + requestedVisibleTypes
-                + " isTopActivityLimitSystemEducationDialogs="
-                + isTopActivityLimitSystemEducationDialogs
+                + " topActivityRequestOpenInBrowserEducationTimestamp="
+                + topActivityRequestOpenInBrowserEducationTimestamp
                 + " appCompatTaskInfo=" + appCompatTaskInfo
                 + " topActivityMainWindowFrame=" + topActivityMainWindowFrame
                 + "}";

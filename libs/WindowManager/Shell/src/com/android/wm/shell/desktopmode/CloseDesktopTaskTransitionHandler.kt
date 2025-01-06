@@ -106,13 +106,13 @@ constructor(
                 // Scale the end bounds of the window down with an anchor in the center
                 inset(
                     (startBounds.width().toFloat() * (1 - CLOSE_ANIM_SCALE) / 2).toInt(),
-                    (startBounds.height().toFloat() * (1 - CLOSE_ANIM_SCALE) / 2).toInt()
+                    (startBounds.height().toFloat() * (1 - CLOSE_ANIM_SCALE) / 2).toInt(),
                 )
                 val offsetY =
                     TypedValue.applyDimension(
                             TypedValue.COMPLEX_UNIT_DIP,
                             CLOSE_ANIM_OFFSET_Y,
-                            context.resources.displayMetrics
+                            context.resources.displayMetrics,
                         )
                         .toInt()
                 offset(/* dx= */ 0, offsetY)

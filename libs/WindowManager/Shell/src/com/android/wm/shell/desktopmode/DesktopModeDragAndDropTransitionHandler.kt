@@ -27,16 +27,14 @@ import android.window.WindowContainerTransaction
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TransitionFinishCallback
 
-/**
- * Transition handler for drag-and-drop (i.e., tab tear) transitions that occur in desktop mode.
- */
+/** Transition handler for drag-and-drop (i.e., tab tear) transitions that occur in desktop mode. */
 class DesktopModeDragAndDropTransitionHandler(private val transitions: Transitions) :
     Transitions.TransitionHandler {
     private val pendingTransitionTokens: MutableList<IBinder> = mutableListOf()
 
     /**
-     * Begin a transition when a [android.app.PendingIntent] is dropped without a window to
-     * accept it.
+     * Begin a transition when a [android.app.PendingIntent] is dropped without a window to accept
+     * it.
      */
     fun handleDropEvent(wct: WindowContainerTransaction): IBinder {
         val token = transitions.startTransition(TRANSIT_OPEN, wct, this)
@@ -49,29 +47,32 @@ class DesktopModeDragAndDropTransitionHandler(private val transitions: Transitio
         info: TransitionInfo,
         startTransaction: SurfaceControl.Transaction,
         finishTransaction: SurfaceControl.Transaction,
-        finishCallback: TransitionFinishCallback
+        finishCallback: TransitionFinishCallback,
     ): Boolean {
         if (!pendingTransitionTokens.contains(transition)) return false
         val change = findRelevantChange(info)
         val leash = change.leash
         val endBounds = change.endAbsBounds
-        startTransaction.hide(leash)
+        startTransaction
+            .hide(leash)
             .setWindowCrop(leash, endBounds.width(), endBounds.height())
             .apply()
         val animator = ValueAnimator()
         animator.setFloatValues(0f, 1f)
         animator.setDuration(FADE_IN_ANIMATION_DURATION)
         val t = SurfaceControl.Transaction()
-        animator.addListener(object : AnimatorListenerAdapter() {
-            override fun onAnimationStart(animation: Animator) {
-                t.show(leash)
-                t.apply()
-            }
+        animator.addListener(
+            object : AnimatorListenerAdapter() {
+                override fun onAnimationStart(animation: Animator) {
+                    t.show(leash)
+                    t.apply()
+                }
 
-            override fun onAnimationEnd(animation: Animator) {
-                finishCallback.onTransitionFinished(null)
+                override fun onAnimationEnd(animation: Animator) {
+                    finishCallback.onTransitionFinished(null)
+                }
             }
-        })
+        )
         animator.addUpdateListener { animation: ValueAnimator ->
             t.setAlpha(leash, animation.animatedFraction)
             t.apply()
@@ -83,9 +84,7 @@ class DesktopModeDragAndDropTransitionHandler(private val transitions: Transitio
 
     private fun findRelevantChange(info: TransitionInfo): TransitionInfo.Change {
         val matchingChanges =
-            info.changes.filter { c ->
-                isValidTaskChange(c) && c.mode == TRANSIT_OPEN
-            }
+            info.changes.filter { c -> isValidTaskChange(c) && c.mode == TRANSIT_OPEN }
         if (matchingChanges.size != 1) {
             throw IllegalStateException(
                 "Expected 1 relevant change but found: ${matchingChanges.size}"
@@ -100,7 +99,7 @@ class DesktopModeDragAndDropTransitionHandler(private val transitions: Transitio
 
     override fun handleRequest(
         transition: IBinder,
-        request: TransitionRequestInfo
+        request: TransitionRequestInfo,
     ): WindowContainerTransaction? {
         return null
     }

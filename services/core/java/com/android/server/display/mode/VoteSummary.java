@@ -55,6 +55,11 @@ final class VoteSummary {
     @Nullable
     public List<Integer> supportedModeIds;
 
+    /**
+     * set of rejected modes due to mode config failure for connected display
+     */
+    public Set<Integer> rejectedModeIds = new HashSet<>();
+
     final boolean mIsDisplayResolutionRangeVotingEnabled;
 
     private final boolean mSupportedModesVoteEnabled;
@@ -130,6 +135,9 @@ final class VoteSummary {
                 continue;
             }
             if (!validateModeSupported(mode)) {
+                continue;
+            }
+            if (!validateModeRejected(mode)) {
                 continue;
             }
             if (!validateModeSize(mode)) {
@@ -285,6 +293,22 @@ final class VoteSummary {
         return false;
     }
 
+    private boolean validateModeRejected(Display.Mode mode) {
+        if (rejectedModeIds == null) {
+            return true;
+        }
+        if (!rejectedModeIds.contains(mode.getModeId())) {
+            return true;
+        }
+        if (mLoggingEnabled) {
+            Slog.w(TAG, "Discarding mode" + mode.getModeId()
+                    + ", is a rejectedMode"
+                    + ": mode.modeId=" + mode.getModeId()
+                    + ", rejectedModeIds=" + rejectedModeIds);
+        }
+        return false;
+    }
+
     private boolean validateRefreshRatesSupported(Display.Mode mode) {
         if (supportedRefreshRates == null || !mSupportedModesVoteEnabled) {
             return true;
@@ -397,6 +421,7 @@ final class VoteSummary {
         requestedRefreshRates.clear();
         supportedRefreshRates = null;
         supportedModeIds = null;
+        rejectedModeIds.clear();
         if (mLoggingEnabled) {
             Slog.i(TAG, "Summary reset: " + this);
         }
@@ -421,6 +446,7 @@ final class VoteSummary {
                 + ", requestRefreshRates=" + requestedRefreshRates
                 + ", supportedRefreshRates=" + supportedRefreshRates
                 + ", supportedModeIds=" + supportedModeIds
+                + ", rejectedModeIds=" + rejectedModeIds
                 + ", mIsDisplayResolutionRangeVotingEnabled="
                 + mIsDisplayResolutionRangeVotingEnabled
                 + ", mSupportedModesVoteEnabled=" + mSupportedModesVoteEnabled

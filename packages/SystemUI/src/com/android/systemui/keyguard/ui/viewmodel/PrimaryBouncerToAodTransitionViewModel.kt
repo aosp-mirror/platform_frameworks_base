@@ -23,7 +23,9 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlin.time.Duration.Companion.milliseconds
@@ -41,18 +43,17 @@ import kotlinx.coroutines.flow.flatMapLatest
 class PrimaryBouncerToAodTransitionViewModel
 @Inject
 constructor(
+    private val blurConfig: BlurConfig,
     deviceEntryUdfpsInteractor: DeviceEntryUdfpsInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+) : DeviceEntryIconTransition, PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
                 duration = FromPrimaryBouncerTransitionInteractor.TO_AOD_DURATION,
                 edge = Edge.create(from = Scenes.Bouncer, to = AOD),
             )
-            .setupWithoutSceneContainer(
-                edge = Edge.create(from = PRIMARY_BOUNCER, to = AOD),
-            )
+            .setupWithoutSceneContainer(edge = Edge.create(from = PRIMARY_BOUNCER, to = AOD))
 
     val deviceEntryBackgroundViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)
@@ -60,7 +61,7 @@ constructor(
     val lockscreenAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(
             duration = FromPrimaryBouncerTransitionInteractor.TO_AOD_DURATION,
-            onStep = { it }
+            onStep = { it },
         )
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
@@ -77,4 +78,17 @@ constructor(
                 emptyFlow()
             }
         }
+
+    override val windowBlurRadius: Flow<Float> =
+        transitionAnimation.sharedFlow(
+            duration = FromPrimaryBouncerTransitionInteractor.TO_AOD_DURATION,
+            onStep = { step ->
+                transitionProgressToBlurRadius(
+                    starBlurRadius = blurConfig.maxBlurRadiusPx,
+                    endBlurRadius = blurConfig.minBlurRadiusPx,
+                    transitionProgress = step,
+                )
+            },
+            onFinish = { blurConfig.minBlurRadiusPx },
+        )
 }

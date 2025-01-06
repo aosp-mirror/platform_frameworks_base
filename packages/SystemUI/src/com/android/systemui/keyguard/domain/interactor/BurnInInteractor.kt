@@ -25,6 +25,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.doze.util.BurnInHelperWrapper
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -44,10 +45,10 @@ import kotlinx.coroutines.flow.stateIn
 class BurnInInteractor
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val burnInHelperWrapper: BurnInHelperWrapper,
     @Application private val scope: CoroutineScope,
-    private val configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware private val configurationInteractor: ConfigurationInteractor,
     private val keyguardInteractor: KeyguardInteractor,
 ) {
     val deviceEntryIconXOffset: StateFlow<Int> =
@@ -62,7 +63,7 @@ constructor(
             .stateIn(
                 scope,
                 SharingStarted.WhileSubscribed(),
-                burnInHelperWrapper.burnInProgressOffset()
+                burnInHelperWrapper.burnInProgressOffset(),
             )
 
     /** Given the max x,y dimens, determine the current translation shifts. */
@@ -71,7 +72,7 @@ constructor(
                 burnInOffset(xDimenResourceId, isXAxis = true),
                 burnInOffset(yDimenResourceId, isXAxis = false).map {
                     it * 2 - context.resources.getDimensionPixelSize(yDimenResourceId)
-                }
+                },
             ) { translationX, translationY ->
                 BurnInModel(translationX, translationY, burnInHelperWrapper.burnInScale())
             }
@@ -117,7 +118,7 @@ constructor(
     private fun calculateOffset(
         maxBurnInOffsetPixels: Int,
         isXAxis: Boolean,
-        scale: Float = 1f
+        scale: Float = 1f,
     ): Int {
         return (burnInHelperWrapper.burnInOffset(maxBurnInOffsetPixels, isXAxis) * scale).toInt()
     }

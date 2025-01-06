@@ -18,6 +18,7 @@ package com.android.systemui.keyboard.shortcut.ui.composable
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.IndicationNodeFactory
+import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -44,6 +45,7 @@ import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTonalElevationEnabled
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -125,8 +127,7 @@ fun SelectableShortcutSurface(
                     .selectable(
                         selected = selected,
                         interactionSource = interactionSource,
-                        indication =
-                            ShortcutHelperIndication(interactionSource, interactionsConfig),
+                        indication = ShortcutHelperIndication(interactionsConfig),
                         enabled = enabled,
                         onClick = onClick,
                     )
@@ -180,8 +181,7 @@ fun ClickableShortcutSurface(
                     )
                     .clickable(
                         interactionSource = interactionSource,
-                        indication =
-                            ShortcutHelperIndication(interactionSource, interactionsConfig),
+                        indication = ShortcutHelperIndication(interactionsConfig),
                         enabled = enabled,
                         onClick = onClick,
                     ),
@@ -228,24 +228,18 @@ fun ShortcutHelperButton(
     contentColor: Color,
     contentPaddingHorizontal: Dp = 16.dp,
     contentPaddingVertical: Dp = 10.dp,
+    enabled: Boolean = true,
+    border: BorderStroke? = null,
 ) {
-    ClickableShortcutSurface(
+    ShortcutHelperButtonSurface(
         onClick = onClick,
         shape = shape,
         color = color,
-        modifier = modifier.semantics { role = Role.Button }.width(width).height(height),
-        interactionsConfig =
-            InteractionsConfig(
-                hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
-                hoverOverlayAlpha = 0.11f,
-                pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
-                pressedOverlayAlpha = 0.15f,
-                focusOutlineColor = MaterialTheme.colorScheme.secondary,
-                focusOutlineStrokeWidth = 3.dp,
-                focusOutlinePadding = 2.dp,
-                surfaceCornerRadius = 28.dp,
-                focusOutlineCornerRadius = 33.dp,
-            ),
+        modifier = modifier,
+        enabled = enabled,
+        width = width,
+        height = height,
+        border = border,
     ) {
         Row(
             modifier =
@@ -260,14 +254,14 @@ fun ShortcutHelperButton(
                 Icon(
                     tint = contentColor,
                     imageVector = iconSource.imageVector,
-                    contentDescription = null,
+                    contentDescription =
+                        null, // TODO this probably should not be null for accessibility.
                     modifier = Modifier.size(20.dp).wrapContentSize(Alignment.Center),
                 )
             }
 
-            if (iconSource.imageVector != null && text != null) {
+            if (iconSource.imageVector != null && text != null)
                 Spacer(modifier = Modifier.weight(1f))
-            }
 
             if (text != null) {
                 Text(
@@ -278,6 +272,51 @@ fun ShortcutHelperButton(
                     modifier = Modifier.wrapContentSize(Alignment.Center),
                 )
             }
+        }
+    }
+}
+
+@Composable
+private fun ShortcutHelperButtonSurface(
+    onClick: () -> Unit,
+    shape: Shape,
+    color: Color,
+    modifier: Modifier = Modifier,
+    enabled: Boolean,
+    width: Dp,
+    height: Dp,
+    border: BorderStroke?,
+    content: @Composable () -> Unit,
+) {
+    if (enabled) {
+        ClickableShortcutSurface(
+            onClick = onClick,
+            shape = shape,
+            color = color,
+            border = border,
+            modifier = modifier.semantics { role = Role.Button }.width(width).height(height),
+            interactionsConfig =
+                InteractionsConfig(
+                    hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
+                    hoverOverlayAlpha = 0.11f,
+                    pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
+                    pressedOverlayAlpha = 0.15f,
+                    focusOutlineColor = MaterialTheme.colorScheme.secondary,
+                    focusOutlineStrokeWidth = 3.dp,
+                    focusOutlinePadding = 2.dp,
+                    surfaceCornerRadius = 28.dp,
+                    focusOutlineCornerRadius = 33.dp,
+                ),
+        ) {
+            content()
+        }
+    } else {
+        Surface(
+            shape = shape,
+            color = color.copy(0.38f),
+            modifier = modifier.semantics { role = Role.Button }.width(width).height(height),
+        ) {
+            content()
         }
     }
 }
@@ -404,10 +443,8 @@ private class ShortcutHelperInteractionsNode(
     }
 }
 
-data class ShortcutHelperIndication(
-    private val interactionSource: InteractionSource,
-    private val interactionsConfig: InteractionsConfig,
-) : IndicationNodeFactory {
+data class ShortcutHelperIndication(private val interactionsConfig: InteractionsConfig) :
+    IndicationNodeFactory {
     override fun create(interactionSource: InteractionSource): DelegatableNode {
         return ShortcutHelperInteractionsNode(interactionSource, interactionsConfig)
     }
@@ -426,3 +463,15 @@ data class InteractionsConfig(
     val hoverPadding: Dp = 0.dp,
     val pressedPadding: Dp = hoverPadding,
 )
+
+@Composable
+fun ProvideShortcutHelperIndication(
+    interactionsConfig: InteractionsConfig,
+    content: @Composable () -> Unit,
+) {
+    CompositionLocalProvider(
+        LocalIndication provides ShortcutHelperIndication(interactionsConfig)
+    ) {
+        content()
+    }
+}

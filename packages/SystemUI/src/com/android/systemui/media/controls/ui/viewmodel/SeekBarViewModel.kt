@@ -93,7 +93,7 @@ constructor(
             scrubbing = false,
             elapsedTime = null,
             duration = 0,
-            listening = false
+            listening = false,
         )
         set(value) {
             val enabledChanged = value.enabled != field.enabled
@@ -135,7 +135,6 @@ constructor(
 
             override fun onMetadataChanged(metadata: MediaMetadata?) {
                 if (!Flags.mediaControlsPostsOptimization()) return
-
                 val (enabled, duration) = getEnabledStateAndDuration(metadata)
                 if (_data.duration != duration) {
                     _data = _data.copy(enabled = enabled, duration = duration)
@@ -323,7 +322,7 @@ constructor(
                     bgExecutor.executeRepeatedly(
                         this::checkPlaybackPosition,
                         0L,
-                        POSITION_UPDATE_INTERVAL_MILLIS
+                        POSITION_UPDATE_INTERVAL_MILLIS,
                     )
                 cancel = Runnable {
                     cancelPolling.run()
@@ -331,6 +330,7 @@ constructor(
                 }
             }
         } else {
+            checkPlaybackPosition()
             cancel?.run()
             cancel = null
         }
@@ -542,7 +542,7 @@ constructor(
             eventStart: MotionEvent?,
             event: MotionEvent,
             distanceX: Float,
-            distanceY: Float
+            distanceY: Float,
         ): Boolean {
             return shouldGoToSeekBar
         }
@@ -556,7 +556,7 @@ constructor(
             eventStart: MotionEvent?,
             event: MotionEvent,
             velocityX: Float,
-            velocityY: Float
+            velocityY: Float,
         ): Boolean {
             if (Math.abs(velocityX) > flingVelocity || Math.abs(velocityY) > flingVelocity) {
                 viewModel.onSeekFalse()

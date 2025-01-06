@@ -100,6 +100,9 @@ public interface NotificationListContainer extends
      */
     void addContainerViewAt(View v, int index);
 
+    /** Sets whether the notificatios are displayed on the unoccluded lockscreen. */
+    void setOnLockscreen(boolean isOnKeyguard);
+
     /**
      * Sets the maximum number of notifications to display.
      *

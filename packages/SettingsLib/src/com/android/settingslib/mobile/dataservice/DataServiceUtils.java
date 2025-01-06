@@ -18,8 +18,6 @@ package com.android.settingslib.mobile.dataservice;
 
 import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
-import android.telephony.UiccPortInfo;
-import android.telephony.UiccSlotMapping;
 
 public class DataServiceUtils {
 
@@ -43,35 +41,6 @@ public class DataServiceUtils {
          * {@see MobileNetworkUtils#isMobileDataEnabled(Context)}.
          */
         public static final String COLUMN_IS_MOBILE_DATA_ENABLED = "isMobileDataEnabled";
-
-        /**
-         * The name of the show toggle for physicalSim state column,
-         * {@see SubscriptionUtil#showToggleForPhysicalSim(SubscriptionManager)}.
-         */
-        public static final String COLUMN_SHOW_TOGGLE_FOR_PHYSICAL_SIM = "showToggleForPhysicalSim";
-    }
-
-    /**
-     * Represents columns of the UiccInfoData table, define these columns from
-     * {@link android.telephony.UiccSlotInfo}, {@link android.telephony.UiccCardInfo},
-     * {@link UiccSlotMapping} and {@link android.telephony.UiccPortInfo}.If columns of these 4
-     * classes are changed, we should also update the table except PII data.
-     */
-    public static final class UiccInfoData {
-
-        /** The name of the UiccInfoData table. */
-        public static final String TABLE_NAME = "uiccInfo";
-
-        /**
-         * The name of the ID column, set the {@link SubscriptionInfo#getSubscriptionId()}
-         * as the primary key.
-         */
-        public static final String COLUMN_ID = "sudId";
-
-        /**
-         * The name of the active state column, see {@link UiccPortInfo#isActive()}.
-         */
-        public static final String COLUMN_IS_ACTIVE = "isActive";
     }
 
     /**
@@ -139,12 +108,5 @@ public class DataServiceUtils {
          * {@link SubscriptionManager#isActiveSubscriptionId(int)}.
          */
         public static final String COLUMN_IS_ACTIVE_SUBSCRIPTION_ID = "isActiveSubscription";
-
-        /**
-         * The name of the active data subscription state column, see
-         * {@link SubscriptionManager#getActiveDataSubscriptionId()}.
-         */
-        public static final String COLUMN_IS_ACTIVE_DATA_SUBSCRIPTION =
-                "isActiveDataSubscriptionId";
     }
 }

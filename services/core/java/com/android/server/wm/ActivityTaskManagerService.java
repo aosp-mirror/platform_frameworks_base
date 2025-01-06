@@ -314,6 +314,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Supplier;
 
 /**
  * System service for managing activities and their containers (task, displays,... ).
@@ -437,10 +438,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     /** It is set from keyguard-going-away to set-keyguard-shown. */
     static final int DEMOTE_TOP_REASON_DURING_UNLOCKING = 1;
+    /** It is set when notification shade occludes the foreground app. */
+    static final int DEMOTE_TOP_REASON_EXPANDED_NOTIFICATION_SHADE = 1 << 1;
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({
             DEMOTE_TOP_REASON_DURING_UNLOCKING,
+            DEMOTE_TOP_REASON_EXPANDED_NOTIFICATION_SHADE,
     })
     @interface DemoteTopReason {}
 
@@ -1555,7 +1559,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
 
             final ActivityRecord[] outActivity = new ActivityRecord[1];
-            getActivityStartController().obtainStarter(intent, "dream")
+            final int res = getActivityStartController()
+                    .obtainStarter(intent, "dream")
                     .setCallingUid(callingUid)
                     .setCallingPid(callingPid)
                     .setCallingPackage(intent.getPackage())
@@ -1569,9 +1574,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     .execute();
 
             final ActivityRecord started = outActivity[0];
-            final IAppTask appTask = started == null ? null :
-                    new AppTaskImpl(this, started.getTask().mTaskId, callingUid);
-            return appTask;
+            if (started == null || !ActivityManager.isStartResultSuccessful(res)) {
+                // start the dream activity failed.
+                return null;
+            }
+            return new AppTaskImpl(this, started.getTask().mTaskId, callingUid);
         }
     }
 
@@ -3794,6 +3801,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             r.setPictureInPictureParams(params);
             enterPipTransition.setPipActivity(r);
             r.mAutoEnteringPip = isAutoEnter;
+
+            if (r.getTaskFragment() != null && r.getTaskFragment().isEmbeddedWithBoundsOverride()
+                    && enterPipTransition != null) {
+                enterPipTransition.addFlag(FLAG_IN_TASK_WITH_EMBEDDED_ACTIVITY);
+            }
+
             getTransitionController().startCollectOrQueue(enterPipTransition, (deferred) -> {
                 getTransitionController().requestStartTransition(enterPipTransition,
                         r.getTask(), null /* remoteTransition */, null /* displayChange */);
@@ -3915,12 +3928,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void setLimitSystemEducationDialogs(
-            IBinder appToken, boolean limitSystemEducationDialogs) {
+    public void requestOpenInBrowserEducation(IBinder appToken) {
         synchronized (mGlobalLock) {
             final ActivityRecord r = ActivityRecord.isInRootTaskLocked(appToken);
             if (r != null) {
-                r.setLimitSystemEducationDialogs(limitSystemEducationDialogs);
+                r.requestOpenInBrowserEducation();
             }
         }
     }
@@ -3988,15 +4000,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             // Try to load snapshot from cache first, and add reference if the snapshot is in cache.
             final TaskSnapshot snapshot = mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
-                    task.mUserId, false /* restoreFromDisk */, isLowResolution);
+                    isLowResolution, usage);
             if (snapshot != null) {
-                snapshot.addReference(usage);
                 return snapshot;
             }
         }
         // Don't call this while holding the lock as this operation might hit the disk.
-        return mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
-                task.mUserId, true /* restoreFromDisk */, isLowResolution);
+        return mWindowManager.mTaskSnapshotController.getSnapshotFromDisk(taskId,
+                task.mUserId,  isLowResolution, usage);
     }
 
     @Override
@@ -4012,10 +4023,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     Slog.w(TAG, "getTaskSnapshot: taskId=" + taskId + " not found");
                     return null;
                 }
+                final TaskSnapshot snapshot = mWindowManager.mTaskSnapshotController.getSnapshot(
+                        taskId, isLowResolution, TaskSnapshot.REFERENCE_WRITE_TO_PARCEL);
+                if (snapshot != null) {
+                    return snapshot;
+                }
             }
             // Don't call this while holding the lock as this operation might hit the disk.
-            return mWindowManager.mTaskSnapshotController.getSnapshot(taskId,
-                    task.mUserId, true /* restoreFromDisk */, isLowResolution);
+            return mWindowManager.mTaskSnapshotController.getSnapshotFromDisk(taskId,
+                    task.mUserId, isLowResolution, TaskSnapshot.REFERENCE_WRITE_TO_PARCEL);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -4026,6 +4042,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mAmInternal.enforceCallingPermission(READ_FRAME_BUFFER, "takeTaskSnapshot()");
         final long ident = Binder.clearCallingIdentity();
         try {
+            final Supplier<TaskSnapshot> supplier;
             synchronized (mGlobalLock) {
                 final Task task = mRootWindowContainer.anyTaskForId(taskId,
                         MATCH_ATTACHED_TASK_OR_RECENT_TASKS);
@@ -4038,11 +4055,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 // be retrieved by recents. While if updateCache is false, the real snapshot will
                 // always be taken and the snapshot won't be put into SnapshotPersister.
                 if (updateCache) {
-                    return mWindowManager.mTaskSnapshotController.recordSnapshot(task);
+                    supplier = mWindowManager.mTaskSnapshotController
+                            .getRecordSnapshotSupplier(task);
                 } else {
                     return mWindowManager.mTaskSnapshotController.snapshot(task);
                 }
             }
+            return supplier != null ? supplier.get() : null;
         } finally {
             Binder.restoreCallingIdentity(ident);
         }
@@ -4996,7 +5015,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return showDialogs;
     }
 
-    private void updateFontScaleIfNeeded(@UserIdInt int userId) {
+    void updateFontScaleIfNeeded(@UserIdInt int userId) {
         if (userId != getCurrentUserId()) {
             return;
         }
@@ -5231,6 +5250,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 : mRootWindowContainer.getTopResumedActivity();
         mTopApp = top != null ? top.app : null;
         if (mTopApp == mPreviousProcess) mPreviousProcess = null;
+
+        final int demoteReasons = mDemoteTopAppReasons;
+        if ((demoteReasons & DEMOTE_TOP_REASON_EXPANDED_NOTIFICATION_SHADE) != 0) {
+            Trace.instant(TRACE_TAG_WINDOW_MANAGER, "cancel-demote-top-for-ns-switch");
+            mDemoteTopAppReasons = demoteReasons & ~DEMOTE_TOP_REASON_EXPANDED_NOTIFICATION_SHADE;
+        }
     }
 
     /**
@@ -6391,6 +6416,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public boolean shuttingDown(boolean booted, int timeout) {
             mShuttingDown = true;
+            mWindowManager.mSnapshotController.mTaskSnapshotController.prepareShutdown();
             synchronized (mGlobalLock) {
                 mRootWindowContainer.prepareForShutdown();
                 updateEventDispatchingLocked(booted);
@@ -7149,7 +7175,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void onHandleAppCrash(@NonNull WindowProcessController wpc) {
             synchronized (mGlobalLock) {
-                wpc.handleAppCrash();
+                final boolean hasVisibleActivity;
+                mTaskSupervisor.beginDeferResume();
+                try {
+                    hasVisibleActivity = wpc.handleAppCrash();
+                } finally {
+                    mTaskSupervisor.endDeferResume();
+                }
+
+                if (hasVisibleActivity) {
+                    deferWindowLayout();
+                    try {
+                        mRootWindowContainer.ensureVisibilityOnVisibleActivityDiedOrCrashed(
+                                "onHandleAppCrash");
+                    } finally {
+                        continueWindowLayout();
+                    }
+                }
             }
         }
 

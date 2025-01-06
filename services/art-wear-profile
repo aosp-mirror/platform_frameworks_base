@@ -1330,7 +1330,7 @@ Lcom/android/server/utils/WatchedSparseSetArray;
 Lcom/android/server/utils/Watcher;
 Lcom/android/server/vibrator/VibratorController$NativeWrapper;
 Lcom/android/server/vibrator/VibratorController$OnVibrationCompleteListener;
-Lcom/android/server/vibrator/VibratorManagerService$OnSyncedVibrationCompleteListener;
+Lcom/android/server/vibrator/VibratorManagerService$VibratorManagerNativeCallbacks;
 Lcom/android/server/vibrator/VibratorManagerService;
 Lcom/android/server/vr/EnabledComponentsObserver$EnabledComponentChangeListener;
 Lcom/android/server/vr/VrManagerService;
@@ -7419,7 +7419,7 @@ PLcom/android/server/app/GameManagerService;->sendUserMessage(IILjava/lang/Strin
 PLcom/android/server/app/GameManagerService;->updateConfigsForUser(IZ[Ljava/lang/String;)V
 PLcom/android/server/app/GameManagerService;->writeGameModeInterventionsToFile(I)V
 PLcom/android/server/app/GameManagerSettings;-><init>(Ljava/io/File;)V
-HPLcom/android/server/app/GameManagerSettings;->getConfigOverride(Ljava/lang/String;)Lcom/android/server/app/GameManagerService$GamePackageConfiguration;
+HPLcom/android/server/app/GameManagerSettings;->getConfigOverrideLocked(Ljava/lang/String;)Lcom/android/server/app/GameManagerService$GamePackageConfiguration;
 HPLcom/android/server/app/GameManagerSettings;->getGameModeLocked(Ljava/lang/String;)I
 PLcom/android/server/app/GameManagerSettings;->readPersistentDataLocked()Z
 PLcom/android/server/appbinding/AppBindingConstants;-><init>(Ljava/lang/String;)V
@@ -24948,7 +24948,7 @@ PLcom/android/server/vibrator/VibratorManagerService$NativeWrapper;-><init>()V
 PLcom/android/server/vibrator/VibratorManagerService$NativeWrapper;->cancelSynced()V
 PLcom/android/server/vibrator/VibratorManagerService$NativeWrapper;->getCapabilities()J
 PLcom/android/server/vibrator/VibratorManagerService$NativeWrapper;->getVibratorIds()[I
-PLcom/android/server/vibrator/VibratorManagerService$NativeWrapper;->init(Lcom/android/server/vibrator/VibratorManagerService$OnSyncedVibrationCompleteListener;)V
+PLcom/android/server/vibrator/VibratorManagerService$NativeWrapper;->init(Lcom/android/server/vibrator/VibratorManagerService$VibratorManagerNativeCallbacks;)V
 PLcom/android/server/vibrator/VibratorManagerService$VibrationCompleteListener;-><init>(Lcom/android/server/vibrator/VibratorManagerService;)V
 PLcom/android/server/vibrator/VibratorManagerService$VibrationCompleteListener;->onComplete(IJ)V
 PLcom/android/server/vibrator/VibratorManagerService$VibrationRecords;-><init>(II)V

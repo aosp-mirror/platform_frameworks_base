@@ -16,6 +16,8 @@
 
 package com.android.server.companion.securechannel;
 
+import static android.security.attestationverification.AttestationVerificationManager.FLAG_FAILURE_UNKNOWN;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Build;
@@ -67,7 +69,7 @@ public class SecureChannel {
     private D2DConnectionContextV1 mConnectionContext;
 
     private String mAlias;
-    private int mVerificationResult;
+    private int mVerificationResult = FLAG_FAILURE_UNKNOWN;
     private boolean mPskVerified;
 
 

@@ -26,6 +26,7 @@ import android.hardware.camera2.params.OutputConfiguration;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.ExceptionUtils;
 import android.hardware.camera2.utils.SubmitInfo;
+import android.hardware.common.fmq.MQDescriptor;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
@@ -61,6 +62,17 @@ public class ICameraDeviceUserWrapper {
             mRemoteDevice.disconnect();
         } catch (RemoteException t) {
             // ignore binder errors for disconnect
+        }
+    }
+
+    public SubmitInfo startStreaming(int[] streamIdxArray, int[] surfaceIdxArray)
+            throws CameraAccessException {
+        try {
+            return mRemoteDevice.startStreaming(streamIdxArray, surfaceIdxArray);
+        } catch (ServiceSpecificException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        } catch (RemoteException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
         }
     }
 
@@ -294,6 +306,29 @@ public class ICameraDeviceUserWrapper {
     public int getGlobalAudioRestriction() throws CameraAccessException {
         try {
             return mRemoteDevice.getGlobalAudioRestriction();
+        } catch (ServiceSpecificException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        } catch (RemoteException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        }
+    }
+
+    /**
+     * API to check if the client is primary client when camera device is opened in shared mode.
+     */
+    public boolean isPrimaryClient() throws CameraAccessException {
+        try {
+            return mRemoteDevice.isPrimaryClient();
+        } catch (ServiceSpecificException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        } catch (RemoteException e) {
+            throw ExceptionUtils.throwAsPublicException(e);
+        }
+    }
+
+    public MQDescriptor<Byte, Byte> getCaptureResultMetadataQueue() throws CameraAccessException {
+        try {
+            return mRemoteDevice.getCaptureResultMetadataQueue();
         } catch (ServiceSpecificException e) {
             throw ExceptionUtils.throwAsPublicException(e);
         } catch (RemoteException e) {

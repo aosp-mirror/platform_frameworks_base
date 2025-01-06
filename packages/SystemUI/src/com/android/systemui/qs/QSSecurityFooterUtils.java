@@ -87,6 +87,7 @@ import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig;
 import com.android.systemui.res.R;
 import com.android.systemui.security.data.model.SecurityModel;
 import com.android.systemui.settings.UserTracker;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.SecurityController;
 
@@ -177,7 +178,7 @@ public class QSSecurityFooterUtils implements DialogInterface.OnClickListener {
 
     @Inject
     QSSecurityFooterUtils(
-            @Application Context context, DevicePolicyManager devicePolicyManager,
+            @ShadeDisplayAware Context context, DevicePolicyManager devicePolicyManager,
             UserTracker userTracker, @Main Handler mainHandler, ActivityStarter activityStarter,
             SecurityController securityController, @Background Looper bgLooper,
             DialogTransitionAnimator dialogTransitionAnimator) {

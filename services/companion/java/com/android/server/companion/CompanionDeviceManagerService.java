@@ -31,16 +31,13 @@ import static android.os.UserHandle.getCallingUserId;
 
 import static com.android.internal.util.CollectionUtils.any;
 import static com.android.internal.util.Preconditions.checkState;
-import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.companion.utils.PackageUtils.enforceUsesCompanionDeviceFeature;
-import static com.android.server.companion.utils.PackageUtils.getPackageInfo;
 import static com.android.server.companion.utils.PackageUtils.isRestrictedSettingsAllowed;
 import static com.android.server.companion.utils.PermissionsUtils.enforceCallerCanManageAssociationsForPackage;
 import static com.android.server.companion.utils.PermissionsUtils.enforceCallerIsSystemOr;
 import static com.android.server.companion.utils.PermissionsUtils.enforceCallerIsSystemOrCanInteractWithUserId;
 
 import static java.util.Objects.requireNonNull;
-import static java.util.concurrent.TimeUnit.MINUTES;
 
 import android.annotation.EnforcePermission;
 import android.annotation.NonNull;
@@ -58,6 +55,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothManager;
 import android.companion.AssociationInfo;
 import android.companion.AssociationRequest;
+import android.companion.DeviceId;
 import android.companion.IAssociationRequestCallback;
 import android.companion.ICompanionDeviceManager;
 import android.companion.IOnAssociationsChangedListener;
@@ -69,31 +67,22 @@ import android.companion.datatransfer.PermissionSyncRequest;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.net.MacAddress;
-import android.net.NetworkPolicyManager;
 import android.os.Binder;
-import android.os.Environment;
 import android.os.Parcel;
 import android.os.ParcelFileDescriptor;
 import android.os.PowerExemptionManager;
 import android.os.PowerManagerInternal;
 import android.os.RemoteException;
-import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.permission.flags.Flags;
-import android.util.ArraySet;
 import android.util.ExceptionUtils;
 import android.util.Slog;
 
-import com.android.internal.app.IAppOpsService;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.notification.NotificationAccessConfirmationActivityContract;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.server.FgThread;
@@ -114,35 +103,25 @@ import com.android.server.companion.devicepresence.DevicePresenceProcessor;
 import com.android.server.companion.devicepresence.ObservableUuid;
 import com.android.server.companion.devicepresence.ObservableUuidStore;
 import com.android.server.companion.transport.CompanionTransportManager;
-import com.android.server.pm.UserManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @SuppressLint("LongLogTag")
 public class CompanionDeviceManagerService extends SystemService {
     private static final String TAG = "CDM_CompanionDeviceManagerService";
 
     private static final long PAIR_WITHOUT_PROMPT_WINDOW_MS = 10 * 60 * 1000; // 10 min
-
-    private static final String PREF_FILE_NAME = "companion_device_preferences.xml";
-    private static final String PREF_KEY_AUTO_REVOKE_GRANTS_DONE = "auto_revoke_grants_done";
     private static final int MAX_CN_LENGTH = 500;
-
-    private final ActivityTaskManagerInternal mAtmInternal;
-    private final ActivityManagerInternal mAmInternal;
-    private final IAppOpsService mAppOpsManager;
-    private final PowerExemptionManager mPowerExemptionManager;
-    private final PackageManagerInternal mPackageManagerInternal;
 
     private final AssociationStore mAssociationStore;
     private final SystemDataTransferRequestStore mSystemDataTransferRequestStore;
     private final ObservableUuidStore mObservableUuidStore;
+
+    private final CompanionExemptionProcessor mCompanionExemptionProcessor;
     private final AssociationRequestsProcessor mAssociationRequestsProcessor;
     private final SystemDataTransferProcessor mSystemDataTransferProcessor;
     private final BackupRestoreProcessor mBackupRestoreProcessor;
@@ -156,12 +135,15 @@ public class CompanionDeviceManagerService extends SystemService {
         super(context);
 
         final ActivityManager activityManager = context.getSystemService(ActivityManager.class);
-        mPowerExemptionManager = context.getSystemService(PowerExemptionManager.class);
-        mAppOpsManager = IAppOpsService.Stub.asInterface(
-                ServiceManager.getService(Context.APP_OPS_SERVICE));
-        mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
-        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mPackageManagerInternal = LocalServices.getService(PackageManagerInternal.class);
+        final PowerExemptionManager powerExemptionManager = context.getSystemService(
+                PowerExemptionManager.class);
+        final AppOpsManager appOpsManager = context.getSystemService(AppOpsManager.class);
+        final ActivityTaskManagerInternal atmInternal = LocalServices.getService(
+                ActivityTaskManagerInternal.class);
+        final ActivityManagerInternal amInternal = LocalServices.getService(
+                ActivityManagerInternal.class);
+        final PackageManagerInternal packageManagerInternal = LocalServices.getService(
+                PackageManagerInternal.class);
         final UserManager userManager = context.getSystemService(UserManager.class);
         final PowerManagerInternal powerManagerInternal = LocalServices.getService(
                 PowerManagerInternal.class);
@@ -173,25 +155,29 @@ public class CompanionDeviceManagerService extends SystemService {
 
         // Init processors
         mAssociationRequestsProcessor = new AssociationRequestsProcessor(context,
-                mPackageManagerInternal, mAssociationStore);
-        mBackupRestoreProcessor = new BackupRestoreProcessor(context, mPackageManagerInternal,
+                packageManagerInternal, mAssociationStore);
+        mBackupRestoreProcessor = new BackupRestoreProcessor(context, packageManagerInternal,
                 mAssociationStore, associationDiskStore, mSystemDataTransferRequestStore,
                 mAssociationRequestsProcessor);
 
         mCompanionAppBinder = new CompanionAppBinder(context);
 
+        mCompanionExemptionProcessor = new CompanionExemptionProcessor(context,
+                powerExemptionManager, appOpsManager, packageManagerInternal, atmInternal,
+                amInternal, mAssociationStore);
+
         mDevicePresenceProcessor = new DevicePresenceProcessor(context,
                 mCompanionAppBinder, userManager, mAssociationStore, mObservableUuidStore,
-                powerManagerInternal);
+                powerManagerInternal, mCompanionExemptionProcessor);
 
         mTransportManager = new CompanionTransportManager(context, mAssociationStore);
 
         mDisassociationProcessor = new DisassociationProcessor(context, activityManager,
-                mAssociationStore, mPackageManagerInternal, mDevicePresenceProcessor,
+                mAssociationStore, packageManagerInternal, mDevicePresenceProcessor,
                 mCompanionAppBinder, mSystemDataTransferRequestStore, mTransportManager);
 
         mSystemDataTransferProcessor = new SystemDataTransferProcessor(this,
-                mPackageManagerInternal, mAssociationStore,
+                packageManagerInternal, mAssociationStore,
                 mSystemDataTransferRequestStore, mTransportManager);
 
         // TODO(b/279663946): move context sync to a dedicated system service
@@ -202,7 +188,6 @@ public class CompanionDeviceManagerService extends SystemService {
     public void onStart() {
         // Init association stores
         mAssociationStore.refreshCache();
-        mAssociationStore.registerLocalListener(mAssociationStoreChangeListener);
 
         // Init UUID store
         mObservableUuidStore.getObservableUuidsForUser(getContext().getUserId());
@@ -240,11 +225,8 @@ public class CompanionDeviceManagerService extends SystemService {
 
         if (associations.isEmpty()) return;
 
-        updateAtm(userId, associations);
-
-        BackgroundThread.getHandler().sendMessageDelayed(
-                obtainMessage(CompanionDeviceManagerService::maybeGrantAutoRevokeExemptions, this),
-                MINUTES.toMillis(10));
+        mCompanionExemptionProcessor.updateAtm(userId, associations);
+        mCompanionExemptionProcessor.updateAutoRevokeExemptions();
     }
 
     @Override
@@ -262,9 +244,12 @@ public class CompanionDeviceManagerService extends SystemService {
         if (!associationsForPackage.isEmpty()) {
             Slog.i(TAG, "Package removed or data cleared for user=[" + userId + "], package=["
                     + packageName + "]. Cleaning up CDM data...");
-        }
-        for (AssociationInfo association : associationsForPackage) {
-            mDisassociationProcessor.disassociate(association.getId());
+
+            for (AssociationInfo association : associationsForPackage) {
+                mDisassociationProcessor.disassociate(association.getId());
+            }
+
+            mCompanionAppBinder.onPackageChanged(userId);
         }
 
         // Clear observable UUIDs for the package.
@@ -273,19 +258,16 @@ public class CompanionDeviceManagerService extends SystemService {
         for (ObservableUuid uuid : uuidsTobeObserved) {
             mObservableUuidStore.removeObservableUuid(userId, uuid.getUuid(), packageName);
         }
-
-        mCompanionAppBinder.onPackagesChanged(userId);
     }
 
     private void onPackageModifiedInternal(@UserIdInt int userId, @NonNull String packageName) {
-        final List<AssociationInfo> associationsForPackage =
+        final List<AssociationInfo> associations =
                 mAssociationStore.getAssociationsByPackage(userId, packageName);
-        for (AssociationInfo association : associationsForPackage) {
-            updateSpecialAccessPermissionForAssociatedPackage(association.getUserId(),
-                    association.getPackageName());
-        }
+        if (!associations.isEmpty()) {
+            mCompanionExemptionProcessor.exemptPackage(userId, packageName, false);
 
-        mCompanionAppBinder.onPackagesChanged(userId);
+            mCompanionAppBinder.onPackageChanged(userId);
+        }
     }
 
     private void onPackageAddedInternal(@UserIdInt int userId, @NonNull String packageName) {
@@ -337,7 +319,6 @@ public class CompanionDeviceManagerService extends SystemService {
         public List<AssociationInfo> getAssociations(String packageName, int userId) {
             enforceCallerCanManageAssociationsForPackage(getContext(), userId, packageName,
                     "get associations");
-
             return mAssociationStore.getActiveAssociationsByPackage(userId, packageName);
         }
 
@@ -713,14 +694,10 @@ public class CompanionDeviceManagerService extends SystemService {
         }
 
         @Override
-        public void setAssociationTag(int associationId, String tag) {
-            mAssociationRequestsProcessor.setAssociationTag(associationId, tag);
+        public void setDeviceId(int associationId, DeviceId deviceId) {
+            mAssociationRequestsProcessor.setDeviceId(associationId, deviceId);
         }
 
-        @Override
-        public void clearAssociationTag(int associationId) {
-            setAssociationTag(associationId, null);
-        }
 
         @Override
         public byte[] getBackupPayload(int userId) {
@@ -765,130 +742,6 @@ public class CompanionDeviceManagerService extends SystemService {
         }
     }
 
-    /**
-     * Update special access for the association's package
-     */
-    public void updateSpecialAccessPermissionForAssociatedPackage(int userId, String packageName) {
-        final PackageInfo packageInfo =
-                getPackageInfo(getContext(), userId, packageName);
-
-        Binder.withCleanCallingIdentity(() -> updateSpecialAccessPermissionAsSystem(packageInfo));
-    }
-
-    private void updateSpecialAccessPermissionAsSystem(PackageInfo packageInfo) {
-        if (packageInfo == null) {
-            return;
-        }
-
-        if (containsEither(packageInfo.requestedPermissions,
-                android.Manifest.permission.RUN_IN_BACKGROUND,
-                android.Manifest.permission.REQUEST_COMPANION_RUN_IN_BACKGROUND)) {
-            mPowerExemptionManager.addToPermanentAllowList(packageInfo.packageName);
-        } else {
-            try {
-                mPowerExemptionManager.removeFromPermanentAllowList(packageInfo.packageName);
-            } catch (UnsupportedOperationException e) {
-                Slog.w(TAG, packageInfo.packageName + " can't be removed from power save"
-                        + " whitelist. It might due to the package is whitelisted by the system.");
-            }
-        }
-
-        NetworkPolicyManager networkPolicyManager = NetworkPolicyManager.from(getContext());
-        try {
-            if (containsEither(packageInfo.requestedPermissions,
-                    android.Manifest.permission.USE_DATA_IN_BACKGROUND,
-                    android.Manifest.permission.REQUEST_COMPANION_USE_DATA_IN_BACKGROUND)) {
-                networkPolicyManager.addUidPolicy(
-                        packageInfo.applicationInfo.uid,
-                        NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
-            } else {
-                networkPolicyManager.removeUidPolicy(
-                        packageInfo.applicationInfo.uid,
-                        NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND);
-            }
-        } catch (IllegalArgumentException e) {
-            Slog.e(TAG, e.getMessage());
-        }
-
-        exemptFromAutoRevoke(packageInfo.packageName, packageInfo.applicationInfo.uid);
-    }
-
-    private void exemptFromAutoRevoke(String packageName, int uid) {
-        try {
-            mAppOpsManager.setMode(
-                    AppOpsManager.OP_AUTO_REVOKE_PERMISSIONS_IF_UNUSED,
-                    uid,
-                    packageName,
-                    AppOpsManager.MODE_IGNORED);
-        } catch (RemoteException e) {
-            Slog.w(TAG, "Error while granting auto revoke exemption for " + packageName, e);
-        }
-    }
-
-    private void updateAtm(int userId, List<AssociationInfo> associations) {
-        final Set<Integer> companionAppUids = new ArraySet<>();
-        for (AssociationInfo association : associations) {
-            final int uid = mPackageManagerInternal.getPackageUid(association.getPackageName(),
-                    0, userId);
-            if (uid >= 0) {
-                companionAppUids.add(uid);
-            }
-        }
-        if (mAtmInternal != null) {
-            mAtmInternal.setCompanionAppUids(userId, companionAppUids);
-        }
-        if (mAmInternal != null) {
-            // Make a copy of the set and send it to ActivityManager.
-            mAmInternal.setCompanionAppUids(userId, new ArraySet<>(companionAppUids));
-        }
-    }
-
-    private void maybeGrantAutoRevokeExemptions() {
-        Slog.d(TAG, "maybeGrantAutoRevokeExemptions()");
-
-        PackageManager pm = getContext().getPackageManager();
-        for (int userId : LocalServices.getService(UserManagerInternal.class).getUserIds()) {
-            SharedPreferences pref = getContext().getSharedPreferences(
-                    new File(Environment.getUserSystemDirectory(userId), PREF_FILE_NAME),
-                    Context.MODE_PRIVATE);
-            if (pref.getBoolean(PREF_KEY_AUTO_REVOKE_GRANTS_DONE, false)) {
-                continue;
-            }
-
-            try {
-                final List<AssociationInfo> associations =
-                        mAssociationStore.getActiveAssociationsByUser(userId);
-                for (AssociationInfo a : associations) {
-                    try {
-                        int uid = pm.getPackageUidAsUser(a.getPackageName(), userId);
-                        exemptFromAutoRevoke(a.getPackageName(), uid);
-                    } catch (PackageManager.NameNotFoundException e) {
-                        Slog.w(TAG, "Unknown companion package: " + a.getPackageName(), e);
-                    }
-                }
-            } finally {
-                pref.edit().putBoolean(PREF_KEY_AUTO_REVOKE_GRANTS_DONE, true).apply();
-            }
-        }
-    }
-
-    private final AssociationStore.OnChangeListener mAssociationStoreChangeListener =
-            new AssociationStore.OnChangeListener() {
-                @Override
-                public void onAssociationChanged(int changeType, AssociationInfo association) {
-                    Slog.d(TAG, "onAssociationChanged changeType=[" + changeType
-                            + "], association=[" + association);
-
-                    final int userId = association.getUserId();
-                    final List<AssociationInfo> updatedAssociations =
-                            mAssociationStore.getActiveAssociationsByUser(userId);
-
-                    updateAtm(userId, updatedAssociations);
-                    updateSpecialAccessPermissionForAssociatedPackage(association.getUserId(),
-                            association.getPackageName());
-                }
-            };
-
     private final PackageMonitor mPackageMonitor = new PackageMonitor() {
         @Override
         public void onPackageRemoved(String packageName, int uid) {
@@ -910,10 +763,6 @@ public class CompanionDeviceManagerService extends SystemService {
             onPackageAddedInternal(getChangingUserId(), packageName);
         }
     };
-
-    private static <T> boolean containsEither(T[] array, T a, T b) {
-        return ArrayUtils.contains(array, a) || ArrayUtils.contains(array, b);
-    }
 
     private class LocalService implements CompanionDeviceManagerServiceInternal {
 

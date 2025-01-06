@@ -398,27 +398,23 @@ class JetpackTaskFragmentOrganizer extends TaskFragmentOrganizer {
                 new TaskFragmentAnimationParams.Builder();
         final int animationBackgroundColor = getAnimationBackgroundColor(splitAttributes);
         builder.setAnimationBackgroundColor(animationBackgroundColor);
-        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-            final int openAnimationResId =
-                    splitAttributes.getAnimationParams().getOpenAnimationResId();
-            builder.setOpenAnimationResId(openAnimationResId);
-            final int closeAnimationResId =
-                    splitAttributes.getAnimationParams().getCloseAnimationResId();
-            builder.setCloseAnimationResId(closeAnimationResId);
-            final int changeAnimationResId =
-                    splitAttributes.getAnimationParams().getChangeAnimationResId();
-            builder.setChangeAnimationResId(changeAnimationResId);
-        }
+        final int openAnimationResId =
+                splitAttributes.getAnimationParams().getOpenAnimationResId();
+        builder.setOpenAnimationResId(openAnimationResId);
+        final int closeAnimationResId =
+                splitAttributes.getAnimationParams().getCloseAnimationResId();
+        builder.setCloseAnimationResId(closeAnimationResId);
+        final int changeAnimationResId =
+                splitAttributes.getAnimationParams().getChangeAnimationResId();
+        builder.setChangeAnimationResId(changeAnimationResId);
         return builder.build();
     }
 
     @ColorInt
     private static int getAnimationBackgroundColor(@NonNull SplitAttributes splitAttributes) {
         int animationBackgroundColor = DEFAULT_ANIMATION_BACKGROUND_COLOR;
-        AnimationBackground animationBackground = splitAttributes.getAnimationBackground();
-        if (Flags.activityEmbeddingAnimationCustomizationFlag()) {
-            animationBackground = splitAttributes.getAnimationParams().getAnimationBackground();
-        }
+        final AnimationBackground animationBackground =
+            splitAttributes.getAnimationParams().getAnimationBackground();
         if (animationBackground instanceof AnimationBackground.ColorBackground colorBackground) {
             animationBackgroundColor = colorBackground.getColor();
         }

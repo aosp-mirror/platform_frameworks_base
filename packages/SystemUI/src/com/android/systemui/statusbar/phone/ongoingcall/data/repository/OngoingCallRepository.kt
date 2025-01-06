@@ -20,6 +20,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,7 +34,9 @@ import kotlinx.coroutines.flow.asStateFlow
  * [com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController] and
  * [com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore]. Instead, those two
  * classes both refer to this repository.
+ * @deprecated Use [OngoingCallInteractor] instead.
  */
+@Deprecated("Use OngoingCallInteractor instead")
 @SysUISingleton
 class OngoingCallRepository
 @Inject
@@ -49,6 +52,8 @@ constructor(
      * [com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController].
      */
     fun setOngoingCallState(state: OngoingCallModel) {
+        StatusBarChipsModernization.assertInLegacyMode()
+
         logger.log(
             TAG,
             LogLevel.DEBUG,

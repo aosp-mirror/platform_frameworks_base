@@ -136,6 +136,7 @@ public class DisplayModeDirector {
     private final ProximitySensorObserver mSensorObserver;
     private final HbmObserver mHbmObserver;
     private final SkinThermalStatusObserver mSkinThermalStatusObserver;
+    private final ModeChangeObserver mModeChangeObserver;
 
     @Nullable
     private final SystemRequestObserver mSystemRequestObserver;
@@ -247,6 +248,7 @@ public class DisplayModeDirector {
         mDisplayObserver = new DisplayObserver(context, handler, mVotesStorage, injector);
         mSensorObserver = new ProximitySensorObserver(mVotesStorage, injector);
         mSkinThermalStatusObserver = new SkinThermalStatusObserver(injector, mVotesStorage);
+        mModeChangeObserver = new ModeChangeObserver(mVotesStorage, injector, handler.getLooper());
         mHbmObserver = new HbmObserver(injector, mVotesStorage, BackgroundThread.getHandler(),
                 mDeviceConfigDisplaySettings);
         if (displayManagerFlags.isRestrictDisplayModesEnabled()) {
@@ -275,6 +277,9 @@ public class DisplayModeDirector {
         mSensorObserver.observe();
         mHbmObserver.observe();
         mSkinThermalStatusObserver.observe();
+        if (mDisplayManagerFlags.isDisplayConfigErrorHalEnabled()) {
+            mModeChangeObserver.observe();
+        }
         synchronized (mLock) {
             // We may have a listener already registered before the call to start, so go ahead and
             // notify them to pick up our newly initialized state.
@@ -2075,10 +2080,13 @@ public class DisplayModeDirector {
 
             restartObserver();
             mDeviceConfigDisplaySettings.startListening();
+            registerDisplayListener();
+        }
 
+        private void registerDisplayListener() {
             mInjector.registerDisplayListener(this, mHandler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                            | DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS);
+                    DisplayManager.EVENT_TYPE_DISPLAY_CHANGED,
+                    DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS);
         }
 
         private void setLoggingEnabled(boolean loggingEnabled) {
@@ -2878,8 +2886,8 @@ public class DisplayModeDirector {
             }
             mDisplayManagerInternal = mInjector.getDisplayManagerInternal();
             mInjector.registerDisplayListener(this, mHandler,
-                    DisplayManager.EVENT_FLAG_DISPLAY_BRIGHTNESS
-                    | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
+                    DisplayManager.EVENT_TYPE_DISPLAY_REMOVED,
+                    DisplayManager.PRIVATE_EVENT_TYPE_DISPLAY_BRIGHTNESS);
         }
 
         /**
@@ -3108,6 +3116,9 @@ public class DisplayModeDirector {
         void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
                 Handler handler, long flags);
 
+        void registerDisplayListener(@NonNull DisplayManager.DisplayListener listener,
+                Handler handler, long flags, long privateFlags);
+
         Display getDisplay(int displayId);
 
         Display[] getDisplays();
@@ -3172,6 +3183,12 @@ public class DisplayModeDirector {
         public void registerDisplayListener(DisplayManager.DisplayListener listener,
                 Handler handler, long flags) {
             getDisplayManager().registerDisplayListener(listener, handler, flags);
+        }
+
+        @Override
+        public void registerDisplayListener(DisplayManager.DisplayListener listener,
+                Handler handler, long flags, long privateFlags) {
+            getDisplayManager().registerDisplayListener(listener, handler, flags, privateFlags);
         }
 
         @Override

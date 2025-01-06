@@ -1,9 +1,1 @@
 // Signature format: 2.0
-package android.service.watchdog {
-
-  public abstract class ExplicitHealthCheckService extends android.app.Service {
-    method public void setCallback(@Nullable android.os.RemoteCallback);
-  }
-
-}
-

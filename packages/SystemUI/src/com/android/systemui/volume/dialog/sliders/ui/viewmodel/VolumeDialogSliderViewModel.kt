@@ -21,10 +21,9 @@ import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogVisibilityInteractor
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.domain.interactor.VolumeDialogSliderInteractor
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -33,7 +32,9 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.stateIn
 
@@ -50,22 +51,41 @@ import kotlinx.coroutines.flow.stateIn
 private const val VOLUME_UPDATE_GRACE_PERIOD = 1000
 
 @OptIn(ExperimentalCoroutinesApi::class)
+@VolumeDialogSliderScope
 class VolumeDialogSliderViewModel
-@AssistedInject
+@Inject
 constructor(
-    @Assisted private val interactor: VolumeDialogSliderInteractor,
+    private val interactor: VolumeDialogSliderInteractor,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
     @VolumeDialog private val coroutineScope: CoroutineScope,
+    private val volumeDialogSliderIconProvider: VolumeDialogSliderIconProvider,
     private val systemClock: SystemClock,
 ) {
 
     private val userVolumeUpdates = MutableStateFlow<VolumeUpdate?>(null)
-
-    val model: Flow<VolumeDialogStreamModel> =
+    private val model: Flow<VolumeDialogStreamModel> =
         interactor.slider
             .filter {
                 val lastVolumeUpdateTime = userVolumeUpdates.value?.timestampMillis ?: 0
                 getTimestampMillis() - lastVolumeUpdateTime > VOLUME_UPDATE_GRACE_PERIOD
+            }
+            .stateIn(coroutineScope, SharingStarted.Eagerly, null)
+            .filterNotNull()
+
+    val state: Flow<VolumeDialogSliderStateModel> =
+        model
+            .flatMapLatest { streamModel ->
+                with(streamModel) {
+                        volumeDialogSliderIconProvider.getStreamIcon(
+                            stream = stream,
+                            level = level,
+                            levelMin = levelMin,
+                            levelMax = levelMax,
+                            isMuted = muted,
+                            isRoutedToBluetooth = routedToBluetooth,
+                        )
+                    }
+                    .map { icon -> streamModel.toStateModel(icon) }
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
             .filterNotNull()
@@ -89,12 +109,6 @@ constructor(
     }
 
     private fun getTimestampMillis(): Long = systemClock.uptimeMillis()
-
-    @AssistedFactory
-    interface Factory {
-
-        fun create(interactor: VolumeDialogSliderInteractor): VolumeDialogSliderViewModel
-    }
 
     private data class VolumeUpdate(val newVolumeLevel: Int, val timestampMillis: Long)
 }

@@ -101,4 +101,10 @@ public interface NotificationDelegate {
     void onNotificationFeedbackReceived(String key, Bundle feedback);
 
     void prepareForPossibleShutdown();
+
+    /**
+     *  Called when the notification should be unbundled.
+     * @param key the notification key
+     */
+    void unbundleNotification(String key);
 }

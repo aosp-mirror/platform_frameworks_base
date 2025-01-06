@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.collection.inflation
 
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.RedactionType
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.render.NotifViewController
 
@@ -61,6 +62,6 @@ interface NotifInflater {
         val showSnooze: Boolean,
         val isChildInGroup: Boolean = false,
         val isGroupSummary: Boolean = false,
-        val needsRedaction: Boolean,
+        @RedactionType val redactionType: Int,
     )
 }

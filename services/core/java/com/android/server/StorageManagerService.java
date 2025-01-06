@@ -96,6 +96,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.ParcelFileDescriptor;
 import android.os.ParcelableException;
+import android.os.PermissionEnforcer;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -3653,10 +3654,16 @@ class StorageManagerService extends IStorageManager.Stub
         return mInternalStorageSize;
     }
 
-    @EnforcePermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @Override
     public int getInternalStorageRemainingLifetime() throws RemoteException {
-        super.getInternalStorageRemainingLifetime_enforcePermission();
+        PermissionEnforcer.fromContext(mContext)
+            .enforcePermissionAnyOf(
+                new String[] {
+                    android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+                    android.Manifest.permission.ALLOCATE_AGGRESSIVE
+                },
+                getCallingPid(),
+                getCallingUid());
         return mVold.getStorageRemainingLifetime();
     }
 

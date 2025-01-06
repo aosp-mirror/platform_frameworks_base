@@ -36,6 +36,9 @@ interface StatusBarWindowController {
     /** Adds the status bar view to the window manager. */
     fun attach()
 
+    /** Called when work should stop and resources should be released. */
+    fun stop()
+
     /** Adds the given view to the status bar window view. */
     fun addViewToWindow(view: View, layoutParams: ViewGroup.LayoutParams)
 
@@ -78,7 +81,7 @@ interface StatusBarWindowController {
      */
     fun setOngoingProcessRequiresStatusBarVisible(visible: Boolean)
 
-    interface Factory {
+    fun interface Factory {
         fun create(
             context: Context,
             viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,

@@ -25,7 +25,7 @@
     <string name="dialog_sign_in_options_button" msgid="448002958902615054">"گزینه‌های ورود به سیستم"</string>
     <string name="sign_in_options_title" msgid="6720572645638986680">"گزینه‌های ورود به سیستم"</string>
     <string name="provider_list_title" msgid="6803918216129492212">"مدیریت ورود به سیستم"</string>
-    <string name="choose_sign_in_title" msgid="3616025924746872202">"ورود به سیستم را انتخاب کنید"</string>
+    <string name="choose_sign_in_title" msgid="3616025924746872202">"انتخاب روش ورود به سیستم"</string>
     <string name="choose_passkey_title" msgid="8459270617632817465">"گذرکلید را انتخاب کنید"</string>
     <string name="choose_password_title" msgid="7610721820858017214">"گذرواژه را انتخاب کنید"</string>
     <string name="sign_in_on_phone_button" msgid="7618621977586522403">"ورود به سیستم در تلفن"</string>

@@ -84,6 +84,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsDisabled;
 import android.util.ArrayMap;
 import android.util.Rational;
 import android.view.Display;
@@ -122,6 +123,8 @@ import java.util.function.BiConsumer;
  * Build/Install/Run:
  *  atest WmTests:WindowOrganizerTests
  */
+
+// TODO revert parts of this set to set the flag to test the behavior
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
@@ -541,6 +544,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testSetActivityWindowingMode() {
         final ActivityRecord record = makePipableActivity();
         final Task rootTask = record.getRootTask();
@@ -773,6 +777,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testSetIgnoreOrientationRequest_taskDisplayArea() {
         removeGlobalMinSizeRestriction();
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task rootTask = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
@@ -811,6 +816,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     @Test
     public void testSetIgnoreOrientationRequest_displayContent() {
         removeGlobalMinSizeRestriction();
+        mDisplayContent.setIgnoreOrientationRequest(false);
         final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
         final Task rootTask = taskDisplayArea.createRootTask(
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, false /* onTop */);
@@ -903,8 +909,8 @@ public class WindowOrganizerTests extends WindowTestsBase {
         WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setAdjacentRoots(info1.token, info2.token);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
-        assertEquals(task1.getAdjacentTaskFragment(), task2);
-        assertEquals(task2.getAdjacentTaskFragment(), task1);
+        assertTrue(task1.isAdjacentTo(task2));
+        assertTrue(task2.isAdjacentTo(task1));
 
         wct = new WindowContainerTransaction();
         wct.setLaunchAdjacentFlagRoot(info1.token);
@@ -915,9 +921,52 @@ public class WindowOrganizerTests extends WindowTestsBase {
         wct.clearAdjacentRoots(info1.token);
         wct.clearLaunchAdjacentFlagRoot(info1.token);
         mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
-        assertEquals(task1.getAdjacentTaskFragment(), null);
-        assertEquals(task2.getAdjacentTaskFragment(), null);
+        assertFalse(task1.hasAdjacentTaskFragment());
+        assertFalse(task2.hasAdjacentTaskFragment());
         assertEquals(dc.getDefaultTaskDisplayArea().mLaunchAdjacentFlagRootTask, null);
+    }
+
+    @EnableFlags(Flags.FLAG_ALLOW_MULTIPLE_ADJACENT_TASK_FRAGMENTS)
+    @Test
+    public void testSetAdjacentLaunchRootSet() {
+        final DisplayContent dc = mWm.mRoot.getDisplayContent(Display.DEFAULT_DISPLAY);
+
+        final Task task1 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                dc, WINDOWING_MODE_MULTI_WINDOW, null);
+        final RunningTaskInfo info1 = task1.getTaskInfo();
+        final Task task2 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                dc, WINDOWING_MODE_MULTI_WINDOW, null);
+        final RunningTaskInfo info2 = task2.getTaskInfo();
+        final Task task3 = mWm.mAtmService.mTaskOrganizerController.createRootTask(
+                dc, WINDOWING_MODE_MULTI_WINDOW, null);
+        final RunningTaskInfo info3 = task3.getTaskInfo();
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setAdjacentRootSet(info1.token, info2.token, info3.token);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertTrue(task1.hasAdjacentTaskFragment());
+        assertTrue(task2.hasAdjacentTaskFragment());
+        assertTrue(task3.hasAdjacentTaskFragment());
+        assertTrue(task1.isAdjacentTo(task2));
+        assertTrue(task1.isAdjacentTo(task3));
+        assertTrue(task2.isAdjacentTo(task3));
+
+        wct = new WindowContainerTransaction();
+        wct.clearAdjacentRoots(info1.token);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertFalse(task1.hasAdjacentTaskFragment());
+        assertTrue(task2.hasAdjacentTaskFragment());
+        assertTrue(task3.hasAdjacentTaskFragment());
+        assertFalse(task1.isAdjacentTo(task2));
+        assertFalse(task1.isAdjacentTo(task3));
+        assertTrue(task2.isAdjacentTo(task3));
+
+        wct = new WindowContainerTransaction();
+        wct.clearAdjacentRoots(info2.token);
+        mWm.mAtmService.mWindowOrganizerController.applyTransaction(wct);
+        assertFalse(task2.hasAdjacentTaskFragment());
+        assertFalse(task3.hasAdjacentTaskFragment());
+        assertFalse(task2.isAdjacentTo(task3));
     }
 
     @Test
@@ -1299,6 +1348,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testEnterPipParams() {
         final StubOrganizer o = new StubOrganizer();
         mWm.mAtmService.mTaskOrganizerController.registerTaskOrganizer(o);
@@ -1314,6 +1364,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
     }
 
     @Test
+    @RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testChangePipParams() {
         class ChangeSavingOrganizer extends StubOrganizer {
             RunningTaskInfo mChangedInfo;
@@ -1885,6 +1936,7 @@ public class WindowOrganizerTests extends WindowTestsBase {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    @RequiresFlagsDisabled(com.android.wm.shell.Flags.FLAG_ENABLE_PIP2)
     public void testResumeTopsWhenLeavingPinned() {
         final ActivityRecord home = new ActivityBuilder(mAtm).setTask(
                 mRootWindowContainer.getDefaultTaskDisplayArea().getRootHomeTask()).build();

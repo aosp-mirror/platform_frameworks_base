@@ -18,23 +18,32 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
           package="android.app.jank.tests">
 
-    <application>
-        <uses-library android:name="android.test.runner" />
-        <activity android:name=".EmptyActivity"
-                  android:label="EmptyActivity"
-                  android:exported="true">
+    <application android:appCategory="news">
+        <activity android:name=".JankTrackerActivity"
+                  android:exported="true"
+                  android:label="JankTrackerActivity"
+                  android:launchMode="singleTop">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <action android:name="android.intent.action.VIEW_PERMISSION_USAGE"/>
             </intent-filter>
         </activity>
+        <activity android:name=".EmptyActivity"
+                  android:exported="true"
+                  android:label="EmptyActivity">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN"/>
+                <action android:name="android.intent.action.VIEW_PERMISSION_USAGE"/>
+            </intent-filter>
+        </activity>
+        <uses-library android:name="android.test.runner"/>
     </application>
 
     <!--  self-instrumenting test package. -->
     <instrumentation
         android:name="androidx.test.runner.AndroidJUnitRunner"
-        android:targetPackage="android.app.jank.tests"
-        android:label="Core tests of App Jank Tracking">
+        android:label="Core tests of App Jank Tracking"
+        android:targetPackage="android.app.jank.tests">
     </instrumentation>
 
 </manifest>

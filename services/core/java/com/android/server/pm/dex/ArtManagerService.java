@@ -426,6 +426,7 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
     private static final int TRON_COMPILATION_REASON_PREBUILT = 23;
     private static final int TRON_COMPILATION_REASON_VDEX = 24;
     private static final int TRON_COMPILATION_REASON_BOOT_AFTER_MAINLINE_UPDATE = 25;
+    private static final int TRON_COMPILATION_REASON_CLOUD = 26;
 
     // The annotation to add as a suffix to the compilation reason when dexopt was
     // performed with dex metadata.
@@ -460,6 +461,8 @@ public class ArtManagerService extends android.content.pm.dex.IArtManager.Stub {
                 return TRON_COMPILATION_REASON_INSTALL_BULK_DOWNGRADED;
             case "install-bulk-secondary-downgraded" :
                 return TRON_COMPILATION_REASON_INSTALL_BULK_SECONDARY_DOWNGRADED;
+            case "cloud":
+                return TRON_COMPILATION_REASON_CLOUD;
             // These are special markers for dex metadata installation that do not
             // have an equivalent as a system property.
             case "install" + DEXOPT_REASON_WITH_DEX_METADATA_ANNOTATION :

@@ -1,0 +1,18 @@
+package: "android.net.vcn"
+container: "com.android.tethering"
+
+flag {
+    name: "safe_mode_config"
+    is_exported: true
+    namespace: "vcn"
+    description: "Feature flag for safe mode configurability"
+    bug: "276358140"
+}
+
+flag {
+     name: "mainline_vcn_module_api"
+     namespace: "vcn"
+     description: "Expose APIs from VCN for mainline migration"
+     is_exported: true
+     bug: "376339506"
+}

@@ -63,13 +63,14 @@ import com.android.wm.shell.R
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.SyncTransactionQueue
-import com.android.wm.shell.desktopmode.calculateMaximizeBounds
+import com.android.wm.shell.desktopmode.isTaskMaximized
 import com.android.wm.shell.shared.animation.Interpolators.EMPHASIZED_DECELERATE
 import com.android.wm.shell.shared.animation.Interpolators.FAST_OUT_LINEAR_IN
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalViewHostViewContainer
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
 import com.android.wm.shell.windowdecor.common.OPACITY_12
 import com.android.wm.shell.windowdecor.common.OPACITY_40
+import com.android.wm.shell.windowdecor.common.OPACITY_60
 import com.android.wm.shell.windowdecor.common.withAlpha
 import java.util.function.Supplier
 
@@ -230,11 +231,7 @@ class MaximizeMenu(
     }
 
     private fun getSizeToggleDirection(): MaximizeMenuView.SizeToggleDirection {
-        val maximizeBounds = calculateMaximizeBounds(
-            displayController.getDisplayLayout(taskInfo.displayId)!!,
-            taskInfo
-        )
-        val maximized = taskInfo.configuration.windowConfiguration.bounds.equals(maximizeBounds)
+        val maximized = isTaskMaximized(taskInfo, displayController)
         return if (maximized)
             MaximizeMenuView.SizeToggleDirection.RESTORE
         else
@@ -310,8 +307,6 @@ class MaximizeMenu(
             .desktop_mode_maximize_menu_immersive_button_fill_padding)
         private val maximizeFillPaddingDefault = context.resources.getDimensionPixelSize(R.dimen
             .desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding)
-        private val maximizeFillPaddingBottom = context.resources.getDimensionPixelSize(R.dimen
-            .desktop_mode_maximize_menu_snap_and_maximize_buttons_fill_padding_bottom)
         private val maximizeRestoreFillPaddingVertical = context.resources.getDimensionPixelSize(
             R.dimen.desktop_mode_maximize_menu_restore_button_fill_vertical_padding)
         private val maximizeRestoreFillPaddingHorizontal = context.resources.getDimensionPixelSize(
@@ -320,7 +315,7 @@ class MaximizeMenu(
             maximizeFillPaddingDefault,
             maximizeFillPaddingDefault,
             maximizeFillPaddingDefault,
-            maximizeFillPaddingBottom
+            maximizeFillPaddingDefault
         )
         private val maximizeRestoreFillPaddingRect = Rect(
             maximizeRestoreFillPaddingHorizontal,
@@ -684,7 +679,7 @@ class MaximizeMenu(
                     inactiveSnapSideColor = colorScheme.outlineVariant.toArgb(),
                     semiActiveSnapSideColor = colorScheme.primary.toArgb().withAlpha(OPACITY_40),
                     activeSnapSideColor = colorScheme.primary.toArgb(),
-                    inactiveStrokeColor = colorScheme.outlineVariant.toArgb(),
+                    inactiveStrokeColor = colorScheme.outlineVariant.toArgb().withAlpha(OPACITY_60),
                     activeStrokeColor = colorScheme.primary.toArgb(),
                     inactiveBackgroundColor = menuBackgroundColor,
                     activeBackgroundColor = colorScheme.primary.toArgb().withAlpha(OPACITY_12)
@@ -753,7 +748,8 @@ class MaximizeMenu(
             val activeStrokeAndFill = colorScheme.primary.toArgb()
             val activeBackground = colorScheme.primary.toArgb().withAlpha(OPACITY_12)
             val activeDrawable = createMaximizeOrImmersiveButtonDrawable(
-                strokeAndFillColor = activeStrokeAndFill,
+                strokeColor = activeStrokeAndFill,
+                fillColor = activeStrokeAndFill,
                 backgroundColor = activeBackground,
                 // Add a mask with the menu background's color because the active background color is
                 // semi transparent, otherwise the transparency will reveal the stroke/fill color
@@ -770,7 +766,8 @@ class MaximizeMenu(
                 addState(
                     StateSet.WILD_CARD,
                     createMaximizeOrImmersiveButtonDrawable(
-                        strokeAndFillColor = colorScheme.outlineVariant.toArgb(),
+                        strokeColor = colorScheme.outlineVariant.toArgb().withAlpha(OPACITY_60),
+                        fillColor = colorScheme.outlineVariant.toArgb(),
                         backgroundColor = colorScheme.surfaceContainerLow.toArgb(),
                         backgroundMask = null, // not needed because the bg color is fully opaque
                         fillPadding = fillPadding,
@@ -780,7 +777,8 @@ class MaximizeMenu(
         }
 
         private fun createMaximizeOrImmersiveButtonDrawable(
-            @ColorInt strokeAndFillColor: Int,
+            @ColorInt strokeColor: Int,
+            @ColorInt fillColor: Int,
             @ColorInt backgroundColor: Int,
             @ColorInt backgroundMask: Int?,
             fillPadding: Rect,
@@ -794,7 +792,7 @@ class MaximizeMenu(
                     null /* inset */,
                     null /* innerRadii */
                 )
-                paint.color = strokeAndFillColor
+                paint.color = strokeColor
                 paint.style = Paint.Style.FILL
             })
             // Second layer, a mask for the next (background) layer if needed because of
@@ -829,7 +827,7 @@ class MaximizeMenu(
                     null /* inset */,
                     null /* innerRadii */
                 )
-                paint.color = strokeAndFillColor
+                paint.color = fillColor
                 paint.style = Paint.Style.FILL
             })
 

@@ -571,10 +571,10 @@ public enum BlendMode {
     }
 
     @NonNull
-    private final Xfermode mXfermode;
+    private final PorterDuffXfermode mXfermode;
 
     BlendMode(int mode) {
-        mXfermode = new Xfermode();
+        mXfermode = new PorterDuffXfermode();
         mXfermode.porterDuffMode = mode;
     }
 
@@ -582,7 +582,7 @@ public enum BlendMode {
      * @hide
      */
     @NonNull
-    public Xfermode getXfermode() {
+    public PorterDuffXfermode getXfermode() {
         return mXfermode;
     }
 }

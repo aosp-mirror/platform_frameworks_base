@@ -90,14 +90,6 @@ flag {
 
 flag {
     namespace: "backstage_power"
-    name: "use_permission_manager_for_broadcast_delivery_check"
-    description: "Use PermissionManager API for broadcast delivery permission checks."
-    bug: "315468967"
-    is_fixed_read_only: true
-}
-
-flag {
-    namespace: "backstage_power"
     name: "trace_receiver_registration"
     description: "Add tracing for broadcast receiver registration and un-registration"
     bug: "336385821"
@@ -250,4 +242,59 @@ flag {
     is_fixed_read_only: true
     description: "Add +X to the prev scores according to their positions in the process LRU list"
     bug: "359912586"
+}
+
+flag {
+    name: "fix_apply_oomadj_order"
+    namespace: "backstage_power"
+    is_fixed_read_only: true
+    description: "Fix the iteration direction of process LRU list when applying oom adj"
+    bug: "378580264"
+}
+
+flag {
+    name: "phantom_processes_fix"
+    namespace: "backstage_power"
+    description: "Make sure setProcessGroupForPhantomProcessOfApp deals with phantom processes properly"
+    bug: "375058190"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "use_cpu_time_capability"
+    namespace: "backstage_power"
+    description: "Use PROCESS_CAPABILITY_CPU_TIME to control unfreeze state."
+    bug: "370817323"
+}
+
+flag {
+    name: "add_modify_raw_oom_adj_service_level"
+    namespace: "backstage_power"
+    description: "Add a SERVICE_ADJ level to the modifyRawOomAdj method"
+    bug: "374810368"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "app_start_info_isolated_process"
+    namespace: "system_performance"
+    description: "Adjust handling of isolated process records to be discarded."
+    bug: "374032823"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "expedite_activity_launch_on_cold_start"
+    namespace: "system_performance"
+    description: "Notify ActivityTaskManager of cold starts early to fix app launch behavior."
+    bug: "319519089"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

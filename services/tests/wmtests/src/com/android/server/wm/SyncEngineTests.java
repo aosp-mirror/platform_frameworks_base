@@ -152,9 +152,9 @@ public class SyncEngineTests extends WindowTestsBase {
         final Task task = taskRoot.getTask();
         final ActivityRecord translucentTop = new ActivityBuilder(mAtm).setTask(task)
                 .setActivityTheme(android.R.style.Theme_Translucent).build();
-        createWindow(null, TYPE_BASE_APPLICATION, taskRoot, "win");
-        final WindowState startingWindow = createWindow(null, TYPE_APPLICATION_STARTING,
-                translucentTop, "starting");
+        newWindowBuilder("win", TYPE_BASE_APPLICATION).setWindowToken(taskRoot).build();
+        final WindowState startingWindow = newWindowBuilder("starting",
+                TYPE_APPLICATION_STARTING).setWindowToken(translucentTop).build();
         startingWindow.mStartingData = new SnapshotStartingData(mWm, null, 0);
         task.mSharedStartingData = startingWindow.mStartingData;
         task.prepareSync();
@@ -355,7 +355,7 @@ public class SyncEngineTests extends WindowTestsBase {
         assertEquals(SYNC_STATE_NONE, botChildWC.mSyncState);
 
         // If the appearance of window won't change after reparenting, its sync state can be kept.
-        final WindowState w = createWindow(null, TYPE_BASE_APPLICATION, "win");
+        final WindowState w = newWindowBuilder("win", TYPE_BASE_APPLICATION).build();
         parentWC.onRequestedOverrideConfigurationChanged(w.getConfiguration());
         w.reparent(botChildWC, POSITION_TOP);
         parentWC.prepareSync();
@@ -435,7 +435,7 @@ public class SyncEngineTests extends WindowTestsBase {
 
     @Test
     public void testNonBlastMethod() {
-        mAppWindow = createWindow(null, TYPE_BASE_APPLICATION, "mAppWindow");
+        mAppWindow = newWindowBuilder("mAppWindow", TYPE_BASE_APPLICATION).build();
 
         final BLASTSyncEngine bse = createTestBLASTSyncEngine();
 

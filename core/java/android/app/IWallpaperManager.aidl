@@ -97,6 +97,16 @@ interface IWallpaperManager {
     List getBitmapCrops(in List<Point> displaySizes, int which, boolean originalBitmap, int userId);
 
     /**
+     * For a given user, if the wallpaper of the specified which is an ImageWallpaper, return
+     * a bundle which is a Map<Integer, Rect> containing the custom cropHints that were sent to
+     * setBitmapWithCrops or setStreamWithCrops. These crops are relative to the original bitmap.
+     * If the wallpaper isn't an ImageWallpaper, return null.
+     */
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL)")
+    @SuppressWarnings(value={"untyped-collection"})
+    Bundle getCurrentBitmapCrops(int which, int userId);
+
+    /**
      * Return how a bitmap of a given size would be cropped for a given list of display sizes when
      * set with the given suggested crops.
      * @hide

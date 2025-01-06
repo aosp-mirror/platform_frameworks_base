@@ -27,11 +27,14 @@ import androidx.compose.runtime.getValue
 import androidx.lifecycle.Lifecycle.State.STARTED
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger
 import com.android.systemui.inputdevice.tutorial.InputDeviceTutorialLogger.TutorialContext
 import com.android.systemui.inputdevice.tutorial.KeyboardTouchpadTutorialMetricsLogger
 import com.android.systemui.inputdevice.tutorial.TouchpadTutorialScreensProvider
+import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor
+import com.android.systemui.inputdevice.tutorial.domain.interactor.TutorialSchedulerInteractor.TutorialType
 import com.android.systemui.inputdevice.tutorial.ui.composable.ActionKeyTutorialScreen
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.KeyboardTouchpadTutorialViewModel
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.KeyboardTouchpadTutorialViewModel.Factory.ViewModelFactoryAssistedProvider
@@ -40,7 +43,6 @@ import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.BACK_GESTUR
 import com.android.systemui.inputdevice.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import java.util.Optional
 import javax.inject.Inject
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Activity for out of the box experience for keyboard and touchpad. Note that it's possible that
@@ -51,15 +53,19 @@ class KeyboardTouchpadTutorialActivity
 constructor(
     private val viewModelFactoryAssistedProvider: ViewModelFactoryAssistedProvider,
     private val touchpadTutorialScreensProvider: Optional<TouchpadTutorialScreensProvider>,
+    private val schedulerInteractor: TutorialSchedulerInteractor,
     private val logger: InputDeviceTutorialLogger,
     private val metricsLogger: KeyboardTouchpadTutorialMetricsLogger,
 ) : ComponentActivity() {
 
     companion object {
-        const val INTENT_TUTORIAL_TYPE_KEY = "tutorial_type"
-        const val INTENT_TUTORIAL_TYPE_TOUCHPAD = "touchpad"
-        const val INTENT_TUTORIAL_TYPE_KEYBOARD = "keyboard"
-        const val INTENT_TUTORIAL_TYPE_BOTH = "both"
+        const val INTENT_TUTORIAL_SCOPE_KEY = "tutorial_scope"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD = "touchpad"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD_BACK = "touchpad_back"
+        const val INTENT_TUTORIAL_SCOPE_TOUCHPAD_HOME = "touchpad_home"
+        const val INTENT_TUTORIAL_SCOPE_KEYBOARD = "keyboard"
+        const val INTENT_TUTORIAL_SCOPE_ALL = "all"
+
         const val INTENT_TUTORIAL_ENTRY_POINT_KEY = "entry_point"
         const val INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER = "scheduler"
         const val INTENT_TUTORIAL_ENTRY_POINT_CONTEXTUAL_EDU = "contextual_edu"
@@ -91,12 +97,26 @@ constructor(
             PlatformTheme { KeyboardTouchpadTutorialContainer(vm, touchpadTutorialScreensProvider) }
         }
         if (savedInstanceState == null) {
-            metricsLogger.logPeripheralTutorialLaunched(
-                intent.getStringExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY),
-                intent.getStringExtra(INTENT_TUTORIAL_TYPE_KEY),
-            )
             logger.logOpenTutorial(TutorialContext.KEYBOARD_TOUCHPAD_TUTORIAL)
+
+            val entryPointExtra = intent.getStringExtra(INTENT_TUTORIAL_ENTRY_POINT_KEY)
+            val tutorialTypeExtra = intent.getStringExtra(INTENT_TUTORIAL_SCOPE_KEY)
+            metricsLogger.logPeripheralTutorialLaunched(entryPointExtra, tutorialTypeExtra)
+            // We only update launched info when the tutorial is triggered by the scheduler
+            if (entryPointExtra.equals(INTENT_TUTORIAL_ENTRY_POINT_SCHEDULER))
+                updateLaunchInfo(tutorialTypeExtra)
         }
+    }
+
+    private fun updateLaunchInfo(tutorialTypeExtra: String?) {
+        val type =
+            when (tutorialTypeExtra) {
+                INTENT_TUTORIAL_SCOPE_KEYBOARD -> TutorialType.KEYBOARD
+                INTENT_TUTORIAL_SCOPE_TOUCHPAD -> TutorialType.TOUCHPAD
+                INTENT_TUTORIAL_SCOPE_ALL -> TutorialType.BOTH
+                else -> TutorialType.NONE
+            }
+        schedulerInteractor.updateLaunchInfo(type)
     }
 }
 

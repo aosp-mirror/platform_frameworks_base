@@ -17,9 +17,11 @@
 package com.android.systemui.keyguard.ui.composable.section
 
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardMediaViewModel
@@ -27,6 +29,7 @@ import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.media.dagger.MediaModule
+import com.android.systemui.res.R
 import javax.inject.Inject
 import javax.inject.Named
 
@@ -39,13 +42,22 @@ constructor(
 ) {
 
     @Composable
-    fun SceneScope.KeyguardMediaCarousel() {
+    fun SceneScope.KeyguardMediaCarousel(
+        isShadeLayoutWide: Boolean,
+        modifier: Modifier = Modifier,
+    ) {
         val isMediaVisible by keyguardMediaViewModel.isMediaVisible.collectAsStateWithLifecycle()
-
+        val horizontalPadding =
+            if (isShadeLayoutWide) {
+                dimensionResource(id = R.dimen.notification_side_paddings)
+            } else {
+                dimensionResource(id = R.dimen.notification_side_paddings) +
+                    dimensionResource(id = R.dimen.notification_panel_margin_horizontal)
+            }
         MediaCarousel(
             isVisible = isMediaVisible,
             mediaHost = mediaHost,
-            modifier = Modifier.fillMaxWidth(),
+            modifier = modifier.fillMaxWidth().padding(horizontal = horizontalPadding),
             carouselController = mediaCarouselController,
         )
     }

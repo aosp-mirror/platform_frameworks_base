@@ -36,12 +36,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.min
+import com.android.settingslib.spa.framework.compose.thenIf
 import com.android.settingslib.spa.framework.theme.SettingsDimension
 import com.android.settingslib.spa.framework.theme.SettingsOpacity.alphaForEnabled
 import com.android.settingslib.spa.framework.theme.SettingsShape
 import com.android.settingslib.spa.framework.theme.SettingsTheme
 import com.android.settingslib.spa.framework.theme.isSpaExpressiveEnabled
+import com.android.settingslib.spa.widget.ui.LocalIsInCategory
 import com.android.settingslib.spa.widget.ui.SettingsTitle
 
 @Composable
@@ -57,18 +58,18 @@ internal fun BaseLayout(
     paddingVertical: Dp = SettingsDimension.itemPaddingVertical,
     widget: @Composable () -> Unit = {},
 ) {
+    val surfaceBright = MaterialTheme.colorScheme.surfaceBright
     Row(
         modifier =
             modifier
                 .fillMaxWidth()
                 .semantics(mergeDescendants = true) {}
-                .then(
-                    if (isSpaExpressiveEnabled)
-                        Modifier.heightIn(min = SettingsDimension.preferenceMinHeight)
-                            .clip(SettingsShape.CornerExtraSmall)
-                            .background(MaterialTheme.colorScheme.surfaceBright)
-                    else Modifier
-                )
+                .thenIf(isSpaExpressiveEnabled) {
+                    Modifier.heightIn(min = SettingsDimension.preferenceMinHeight)
+                }
+                .thenIf(isSpaExpressiveEnabled && LocalIsInCategory.current) {
+                    Modifier.clip(SettingsShape.CornerExtraSmall).background(surfaceBright)
+                }
                 .padding(end = paddingEnd),
         verticalAlignment = Alignment.CenterVertically,
     ) {

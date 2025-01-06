@@ -24,7 +24,7 @@ import java.lang.annotation.Retention;
 import javax.inject.Scope;
 
 /**
- * Scope annotation for singleton items within the KeyguardUserSwitcherComponent.
+ * Scope annotation for singleton items within the KeyguardQsUserSwitchComponent.
  */
 @Documented
 @Retention(RUNTIME)

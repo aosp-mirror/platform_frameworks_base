@@ -170,6 +170,8 @@ final class InstallRequest {
     private final boolean mHasAppMetadataFileFromInstaller;
 
     private boolean mKeepArtProfile = false;
+    private final boolean mDependencyInstallerEnabled;
+    private final int mMissingSharedLibraryCount;
 
     // New install
     InstallRequest(InstallingSession params) {
@@ -190,6 +192,8 @@ final class InstallRequest {
         mRequireUserAction = params.mRequireUserAction;
         mPreVerifiedDomains = params.mPreVerifiedDomains;
         mHasAppMetadataFileFromInstaller = params.mHasAppMetadataFile;
+        mDependencyInstallerEnabled = params.mDependencyInstallerEnabled;
+        mMissingSharedLibraryCount = params.mMissingSharedLibraryCount;
     }
 
     // Install existing package as user
@@ -209,6 +213,8 @@ final class InstallRequest {
         mInstallerUidForInstallExisting = installerUid;
         mSystem = isSystem;
         mHasAppMetadataFileFromInstaller = false;
+        mDependencyInstallerEnabled = false;
+        mMissingSharedLibraryCount = 0;
     }
 
     // addForInit
@@ -231,6 +237,8 @@ final class InstallRequest {
         mRequireUserAction = USER_ACTION_UNSPECIFIED;
         mDisabledPs = disabledPs;
         mHasAppMetadataFileFromInstaller = false;
+        mDependencyInstallerEnabled = false;
+        mMissingSharedLibraryCount = 0;
     }
 
     @Nullable
@@ -1068,5 +1076,13 @@ final class InstallRequest {
 
     boolean isKeepArtProfile() {
         return mKeepArtProfile;
+    }
+
+    int getMissingSharedLibraryCount() {
+        return mMissingSharedLibraryCount;
+    }
+
+    boolean isDependencyInstallerEnabled() {
+        return mDependencyInstallerEnabled;
     }
 }

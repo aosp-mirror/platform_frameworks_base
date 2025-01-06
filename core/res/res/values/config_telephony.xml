@@ -318,6 +318,12 @@
     <bool name="config_oem_enabled_satellite_access_allow">true</bool>
     <java-symbol type="bool" name="config_oem_enabled_satellite_access_allow" />
 
+    <!-- Whether the satellite modem support concurrent TN scanning while device is in
+         NTN mode.
+         -->
+    <bool name="config_satellite_modem_support_concurrent_tn_scanning">true</bool>
+    <java-symbol type="bool" name="config_satellite_modem_support_concurrent_tn_scanning" />
+
     <!-- The time duration in seconds which is used to decide whether the Location returned from
          LocationManager#getLastKnownLocation is fresh.
 
@@ -460,6 +466,17 @@
     <integer name="config_satellite_location_query_throttle_interval_minutes">10</integer>
     <java-symbol type="integer" name="config_satellite_location_query_throttle_interval_minutes" />
 
+    <!-- The file contains satellite access configuration like supported frequencies, bands,
+    satellite positions, and so on -->
+    <string name="satellite_access_config_file" translatable="false"></string>
+    <java-symbol type="string" name="satellite_access_config_file" />
+
+    <!-- A string defines the NIDD (Non-IP Data Delivery) APN to be used for satellite attachment. For more on NIDD,
+         see 3GPP TS 29.542. This config is used for an NTN-only subscription, which requires activation before being used.
+         -->
+    <string name="config_satellite_nidd_apn_name" translatable="false"></string>
+    <java-symbol type="string" name="config_satellite_nidd_apn_name" />
+
     <!-- Boolean indicating whether to enable MT SMS polling for NB IOT NTN. -->
     <bool name="config_enabled_mt_sms_polling">true</bool>
     <java-symbol type="bool" name="config_enabled_mt_sms_polling" />
@@ -477,8 +494,22 @@
     <java-symbol type="string" name="config_satellite_carrier_roaming_non_emergency_session_class" />
 
     <!-- Whether to show the system notification to users whenever there is a change
-     in the satellite availability state at the current location. -->
-    <bool name="config_satellite_should_notify_availability">false</bool>
+         in the satellite availability state at the current location. -->
+    <bool name="config_satellite_should_notify_availability">true</bool>
     <java-symbol type="bool" name="config_satellite_should_notify_availability" />
+
+    <!-- Whether to allow check message datagrams to be sent even when the satellite modem is in
+         not connected state. -->
+    <bool name="config_satellite_allow_check_message_in_not_connected">false</bool>
+    <java-symbol type="bool" name="config_satellite_allow_check_message_in_not_connected" />
+
+    <!-- Whether to allow TN scanning during satellite session. -->
+    <bool name="config_satellite_allow_tn_scanning_during_satellite_session">true</bool>
+    <java-symbol type="bool" name="config_satellite_allow_tn_scanning_during_satellite_session" />
+
+    <!-- List of integer tag Ids representing VZW satellite coverage. -->
+    <integer-array name="config_verizon_satellite_enabled_tagids">
+    </integer-array>
+    <java-symbol type="array" name="config_verizon_satellite_enabled_tagids" />
 
 </resources>

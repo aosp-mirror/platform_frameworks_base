@@ -18,7 +18,6 @@ package com.android.systemui.qs.ui.viewmodel
 
 import com.android.compose.animation.scene.Back
 import com.android.compose.animation.scene.Swipe
-import com.android.compose.animation.scene.SwipeDirection
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.UserActionResult.HideOverlay
@@ -47,7 +46,7 @@ constructor(private val editModeViewModel: EditModeViewModel) : UserActionsViewM
                         put(Back, HideOverlay(Overlays.QuickSettingsShade))
                     }
                     put(
-                        Swipe(SwipeDirection.Down, fromSource = SceneContainerEdge.TopLeft),
+                        Swipe.Down(fromSource = SceneContainerEdge.TopLeft),
                         ReplaceByOverlay(Overlays.NotificationsShade),
                     )
                 }

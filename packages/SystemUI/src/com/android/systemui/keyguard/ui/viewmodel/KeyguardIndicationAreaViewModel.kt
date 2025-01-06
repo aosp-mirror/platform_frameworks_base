@@ -21,16 +21,14 @@ import com.android.systemui.communal.domain.interactor.CommunalSceneInteractor
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.doze.util.BurnInHelperWrapper
-import com.android.systemui.keyguard.KeyguardBottomAreaRefactor
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.domain.interactor.BurnInInteractor
-import com.android.systemui.keyguard.domain.interactor.KeyguardBottomAreaInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.BurnInModel
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import javax.inject.Inject
 import javax.inject.Named
@@ -47,13 +45,11 @@ class KeyguardIndicationAreaViewModel
 @Inject
 constructor(
     private val keyguardInteractor: KeyguardInteractor,
-    bottomAreaInteractor: KeyguardBottomAreaInteractor,
-    keyguardBottomAreaViewModel: KeyguardBottomAreaViewModel,
     private val burnInHelperWrapper: BurnInHelperWrapper,
     burnInInteractor: BurnInInteractor,
     @Named(KeyguardQuickAffordancesCombinedViewModelModule.Companion.LOCKSCREEN_INSTANCE)
     shortcutsCombinedViewModel: KeyguardQuickAffordancesCombinedViewModel,
-    configurationInteractor: ConfigurationInteractor,
+    @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
     communalSceneInteractor: CommunalSceneInteractor,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
@@ -63,34 +59,21 @@ constructor(
     /** Notifies when a new configuration is set */
     val configurationChange: Flow<Unit> = configurationInteractor.onAnyConfigurationChange
 
-    /** An observable for the alpha level for the entire bottom area. */
-    val alpha: Flow<Float> = keyguardBottomAreaViewModel.alpha
-
     /** An observable for the visibility value for the indication area view. */
     val visible: Flow<Boolean> =
         anyOf(
             keyguardInteractor.statusBarState.map { state -> state == StatusBarState.KEYGUARD },
-            communalSceneInteractor.isCommunalVisible
+            communalSceneInteractor.isCommunalVisible,
         )
 
     /** An observable for whether the indication area should be padded. */
     val isIndicationAreaPadded: Flow<Boolean> =
-        if (KeyguardBottomAreaRefactor.isEnabled) {
-            combine(shortcutsCombinedViewModel.startButton, shortcutsCombinedViewModel.endButton) {
-                    startButtonModel,
-                    endButtonModel ->
-                    startButtonModel.isVisible || endButtonModel.isVisible
-                }
-                .distinctUntilChanged()
-        } else {
-            combine(
-                    keyguardBottomAreaViewModel.startButton,
-                    keyguardBottomAreaViewModel.endButton
-                ) { startButtonModel, endButtonModel ->
-                    startButtonModel.isVisible || endButtonModel.isVisible
-                }
-                .distinctUntilChanged()
-        }
+        combine(shortcutsCombinedViewModel.startButton, shortcutsCombinedViewModel.endButton) {
+                startButtonModel,
+                endButtonModel ->
+                startButtonModel.isVisible || endButtonModel.isVisible
+            }
+            .distinctUntilChanged()
 
     @OptIn(ExperimentalCoroutinesApi::class)
     private val burnIn: Flow<BurnInModel> =
@@ -113,26 +96,10 @@ constructor(
 
     /** An observable for the x-offset by which the indication area should be translated. */
     val indicationAreaTranslationX: Flow<Float> =
-        if (MigrateClocksToBlueprint.isEnabled || KeyguardBottomAreaRefactor.isEnabled) {
-            burnIn.map { it.translationX.toFloat() }.flowOn(mainDispatcher)
-        } else {
-            bottomAreaInteractor.clockPosition.map { it.x.toFloat() }.distinctUntilChanged()
-        }
+        burnIn.map { it.translationX.toFloat() }.flowOn(mainDispatcher)
 
     /** Returns an observable for the y-offset by which the indication area should be translated. */
     fun indicationAreaTranslationY(defaultBurnInOffset: Int): Flow<Float> {
-        return if (MigrateClocksToBlueprint.isEnabled) {
-            burnIn.map { it.translationY.toFloat() }.flowOn(mainDispatcher)
-        } else {
-            keyguardInteractor.dozeAmount
-                .map { dozeAmount ->
-                    dozeAmount *
-                        (burnInHelperWrapper.burnInOffset(
-                            /* amplitude = */ defaultBurnInOffset * 2,
-                            /* xAxis= */ false,
-                        ) - defaultBurnInOffset)
-                }
-                .distinctUntilChanged()
-        }
+        return burnIn.map { it.translationY.toFloat() }.flowOn(mainDispatcher)
     }
 }

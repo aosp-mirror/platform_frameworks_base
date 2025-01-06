@@ -325,6 +325,7 @@ public class ZenModeConfig implements Parcelable {
     private static final String DEVICE_EFFECT_DISABLE_TOUCH = "zdeDisableTouch";
     private static final String DEVICE_EFFECT_MINIMIZE_RADIO_USAGE = "zdeMinimizeRadioUsage";
     private static final String DEVICE_EFFECT_MAXIMIZE_DOZE = "zdeMaximizeDoze";
+    private static final String DEVICE_EFFECT_USE_NIGHT_LIGHT = "zdeUseNightLight";
     private static final String DEVICE_EFFECT_EXTRAS = "zdeExtraEffects";
     private static final String DEVICE_EFFECT_USER_MODIFIED_FIELDS = "zdeUserModifiedFields";
 
@@ -1508,25 +1509,32 @@ public class ZenModeConfig implements Parcelable {
     @FlaggedApi(Flags.FLAG_MODES_API)
     @Nullable
     private static ZenDeviceEffects readZenDeviceEffectsXml(TypedXmlPullParser parser) {
-        ZenDeviceEffects deviceEffects = new ZenDeviceEffects.Builder()
-                .setShouldDisplayGrayscale(
-                        safeBoolean(parser, DEVICE_EFFECT_DISPLAY_GRAYSCALE, false))
-                .setShouldSuppressAmbientDisplay(
-                        safeBoolean(parser, DEVICE_EFFECT_SUPPRESS_AMBIENT_DISPLAY, false))
-                .setShouldDimWallpaper(safeBoolean(parser, DEVICE_EFFECT_DIM_WALLPAPER, false))
-                .setShouldUseNightMode(safeBoolean(parser, DEVICE_EFFECT_USE_NIGHT_MODE, false))
-                .setShouldDisableAutoBrightness(
-                        safeBoolean(parser, DEVICE_EFFECT_DISABLE_AUTO_BRIGHTNESS, false))
-                .setShouldDisableTapToWake(
-                        safeBoolean(parser, DEVICE_EFFECT_DISABLE_TAP_TO_WAKE, false))
-                .setShouldDisableTiltToWake(
-                        safeBoolean(parser, DEVICE_EFFECT_DISABLE_TILT_TO_WAKE, false))
-                .setShouldDisableTouch(safeBoolean(parser, DEVICE_EFFECT_DISABLE_TOUCH, false))
-                .setShouldMinimizeRadioUsage(
-                        safeBoolean(parser, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE, false))
-                .setShouldMaximizeDoze(safeBoolean(parser, DEVICE_EFFECT_MAXIMIZE_DOZE, false))
-                .setExtraEffects(safeStringSet(parser, DEVICE_EFFECT_EXTRAS))
-                .build();
+        ZenDeviceEffects deviceEffects =
+                new ZenDeviceEffects.Builder()
+                        .setShouldDisplayGrayscale(
+                                safeBoolean(parser, DEVICE_EFFECT_DISPLAY_GRAYSCALE, false))
+                        .setShouldSuppressAmbientDisplay(
+                                safeBoolean(parser, DEVICE_EFFECT_SUPPRESS_AMBIENT_DISPLAY, false))
+                        .setShouldDimWallpaper(
+                                safeBoolean(parser, DEVICE_EFFECT_DIM_WALLPAPER, false))
+                        .setShouldUseNightMode(
+                                safeBoolean(parser, DEVICE_EFFECT_USE_NIGHT_MODE, false))
+                        .setShouldDisableAutoBrightness(
+                                safeBoolean(parser, DEVICE_EFFECT_DISABLE_AUTO_BRIGHTNESS, false))
+                        .setShouldDisableTapToWake(
+                                safeBoolean(parser, DEVICE_EFFECT_DISABLE_TAP_TO_WAKE, false))
+                        .setShouldDisableTiltToWake(
+                                safeBoolean(parser, DEVICE_EFFECT_DISABLE_TILT_TO_WAKE, false))
+                        .setShouldDisableTouch(
+                                safeBoolean(parser, DEVICE_EFFECT_DISABLE_TOUCH, false))
+                        .setShouldMinimizeRadioUsage(
+                                safeBoolean(parser, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE, false))
+                        .setShouldMaximizeDoze(
+                                safeBoolean(parser, DEVICE_EFFECT_MAXIMIZE_DOZE, false))
+                        .setShouldUseNightLight(
+                                safeBoolean(parser, DEVICE_EFFECT_USE_NIGHT_LIGHT, false))
+                        .setExtraEffects(safeStringSet(parser, DEVICE_EFFECT_EXTRAS))
+                        .build();
 
         return deviceEffects.hasEffects() ? deviceEffects : null;
     }
@@ -1550,6 +1558,7 @@ public class ZenModeConfig implements Parcelable {
         writeBooleanIfTrue(out, DEVICE_EFFECT_MINIMIZE_RADIO_USAGE,
                 deviceEffects.shouldMinimizeRadioUsage());
         writeBooleanIfTrue(out, DEVICE_EFFECT_MAXIMIZE_DOZE, deviceEffects.shouldMaximizeDoze());
+        writeBooleanIfTrue(out, DEVICE_EFFECT_USE_NIGHT_LIGHT, deviceEffects.shouldUseNightLight());
         writeStringSet(out, DEVICE_EFFECT_EXTRAS, deviceEffects.getExtraEffects());
     }
 
@@ -2532,7 +2541,7 @@ public class ZenModeConfig implements Parcelable {
 
     /** Returns whether the rule id corresponds to an implicit rule. */
     public static boolean isImplicitRuleId(@NonNull String ruleId) {
-        return ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
+        return ruleId != null && ruleId.startsWith(IMPLICIT_RULE_ID_PREFIX);
     }
 
     private static int[] tryParseHourAndMinute(String value) {

@@ -34,9 +34,6 @@ import android.content.Context;
 import android.os.RemoteException;
 import android.os.ResultReceiver;
 import android.os.ShellCallback;
-import android.tracing.perfetto.DataSourceParams;
-import android.tracing.perfetto.InitArguments;
-import android.tracing.perfetto.Producer;
 import android.util.Log;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
@@ -110,39 +107,31 @@ public class ProtoLogConfigurationServiceImpl extends IProtoLogConfigurationServ
     private final ViewerConfigFileTracer mViewerConfigFileTracer;
 
     public ProtoLogConfigurationServiceImpl() {
-        this(ProtoLogDataSource::new, ProtoLogConfigurationServiceImpl::dumpViewerConfig);
+        this(ProtoLog.getSharedSingleInstanceDataSource(),
+                ProtoLogConfigurationServiceImpl::dumpViewerConfig);
     }
 
     @VisibleForTesting
-    public ProtoLogConfigurationServiceImpl(@NonNull ProtoLogDataSourceBuilder dataSourceBuilder) {
-        this(dataSourceBuilder, ProtoLogConfigurationServiceImpl::dumpViewerConfig);
+    public ProtoLogConfigurationServiceImpl(@NonNull ProtoLogDataSource datasource) {
+        this(datasource, ProtoLogConfigurationServiceImpl::dumpViewerConfig);
     }
 
     @VisibleForTesting
     public ProtoLogConfigurationServiceImpl(@NonNull ViewerConfigFileTracer tracer) {
-        this(ProtoLogDataSource::new, tracer);
+        this(ProtoLog.getSharedSingleInstanceDataSource(), tracer);
     }
 
     @VisibleForTesting
     public ProtoLogConfigurationServiceImpl(
-            @NonNull ProtoLogDataSourceBuilder dataSourceBuilder,
+            @NonNull ProtoLogDataSource datasource,
             @NonNull ViewerConfigFileTracer tracer) {
-        mDataSource = dataSourceBuilder.build(
-            this::onTracingInstanceStart,
-            this::onTracingInstanceFlush,
-            this::onTracingInstanceStop
-        );
-
-        // Initialize the Perfetto producer and register the Perfetto ProtoLog datasource to be
-        // receive the lifecycle callbacks of the datasource and write the viewer configs if and
-        // when required to the datasource.
-        Producer.init(InitArguments.DEFAULTS);
-        final var params = new DataSourceParams.Builder()
-                .setBufferExhaustedPolicy(DataSourceParams.PERFETTO_DS_BUFFER_EXHAUSTED_POLICY_DROP)
-                .build();
-        mDataSource.register(params);
-
         mViewerConfigFileTracer = tracer;
+
+        datasource.registerOnStartCallback(this::onTracingInstanceStart);
+        datasource.registerOnFlushCallback(this::onTracingInstanceFlush);
+        datasource.registerOnStopCallback(this::onTracingInstanceStop);
+
+        mDataSource = datasource;
     }
 
     public static class RegisterClientArgs extends IRegisterClientArgs.Stub {

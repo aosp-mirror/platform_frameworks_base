@@ -16,24 +16,24 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.internal.util.Key
-import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.map
-import kotlinx.coroutines.CoroutineStart
-import kotlinx.coroutines.Deferred
+import com.android.systemui.kairos.internal.util.logDuration
 
-internal val neverImpl: TFlowImpl<Nothing> = TFlowCheap { null }
+internal val neverImpl: EventsImpl<Nothing> = EventsImplCheap { null }
 
-internal class MapNode<A, B>(val upstream: PullNode<A>, val transform: suspend EvalScope.(A) -> B) :
+internal class MapNode<A, B>(val upstream: PullNode<A>, val transform: EvalScope.(A, Int) -> B) :
     PullNode<B> {
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<B> =
-        upstream.getPushEvent(evalScope).map { evalScope.transform(it) }
+    override fun getPushEvent(logIndent: Int, evalScope: EvalScope): B =
+        logDuration(logIndent, "MapNode.getPushEvent") {
+            val upstream =
+                logDuration("upstream event") { upstream.getPushEvent(currentLogIndent, evalScope) }
+            logDuration("transform") { evalScope.transform(upstream, currentLogIndent) }
+        }
 }
 
 internal inline fun <A, B> mapImpl(
-    crossinline upstream: suspend EvalScope.() -> TFlowImpl<A>,
-    noinline transform: suspend EvalScope.(A) -> B,
-): TFlowImpl<B> = TFlowCheap { downstream ->
+    crossinline upstream: EvalScope.() -> EventsImpl<A>,
+    noinline transform: EvalScope.(A, Int) -> B,
+): EventsImpl<B> = EventsImplCheap { downstream ->
     upstream().activate(evalScope = this, downstream)?.let { (connection, needsEval) ->
         ActivationResult(
             connection =
@@ -46,20 +46,29 @@ internal inline fun <A, B> mapImpl(
     }
 }
 
-internal class CachedNode<A>(val key: Key<Deferred<Maybe<A>>>, val upstream: PullNode<A>) :
-    PullNode<A> {
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<A> {
-        val deferred =
-            evalScope.transactionStore.getOrPut(key) {
-                evalScope.deferAsync(CoroutineStart.LAZY) { upstream.getPushEvent(evalScope) }
-            }
-        return deferred.await()
-    }
+internal class CachedNode<A>(
+    private val transactionCache: TransactionCache<Lazy<A>>,
+    val upstream: PullNode<A>,
+) : PullNode<A> {
+    override fun getPushEvent(logIndent: Int, evalScope: EvalScope): A =
+        logDuration(logIndent, "CachedNode.getPushEvent") {
+            val deferred =
+                logDuration("CachedNode.getOrPut", false) {
+                    transactionCache.getOrPut(evalScope) {
+                        evalScope.deferAsync {
+                            logDuration("CachedNode.getUpstreamEvent") {
+                                upstream.getPushEvent(currentLogIndent, evalScope)
+                            }
+                        }
+                    }
+                }
+            logDuration("await") { deferred.value }
+        }
 }
 
-internal fun <A> TFlowImpl<A>.cached(): TFlowImpl<A> {
-    val key = object : Key<Deferred<Maybe<A>>> {}
-    return TFlowCheap {
+internal fun <A> EventsImpl<A>.cached(): EventsImpl<A> {
+    val key = TransactionCache<Lazy<A>>()
+    return EventsImplCheap { it ->
         activate(this, it)?.let { (connection, needsEval) ->
             ActivationResult(
                 connection =

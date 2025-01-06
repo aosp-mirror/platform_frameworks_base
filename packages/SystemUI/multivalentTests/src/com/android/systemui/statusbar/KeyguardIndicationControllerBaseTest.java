@@ -86,6 +86,7 @@ import com.android.systemui.statusbar.phone.KeyguardBypassController;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+import com.android.systemui.user.domain.interactor.UserLogoutInteractor;
 import com.android.systemui.util.concurrency.FakeExecutor;
 import com.android.systemui.util.time.FakeSystemClock;
 import com.android.systemui.util.wakelock.WakeLockFake;
@@ -159,6 +160,8 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
     protected DeviceEntryFaceAuthInteractor mDeviceEntryFaceAuthInteractor;
     @Mock
     protected DeviceEntryFingerprintAuthInteractor mDeviceEntryFingerprintAuthInteractor;
+    @Mock
+    protected UserLogoutInteractor mUserLogoutInteractor;
     @Mock
     protected ScreenLifecycle mScreenLifecycle;
     @Mock
@@ -248,6 +251,9 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
 
         when(mFaceHelpMessageDeferralFactory.create()).thenReturn(mFaceHelpMessageDeferral);
         when(mDeviceEntryFingerprintAuthInteractor.isEngaged()).thenReturn(mock(StateFlow.class));
+        StateFlow mockLogoutEnabledFlow = mock(StateFlow.class);
+        when(mockLogoutEnabledFlow.getValue()).thenReturn(false);
+        when(mUserLogoutInteractor.isLogoutEnabled()).thenReturn(mockLogoutEnabledFlow);
 
         mIndicationHelper = new IndicationHelper(mKeyguardUpdateMonitor);
 
@@ -258,7 +264,9 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
 
     @After
     public void tearDown() throws Exception {
-        mTextView.setAnimationsEnabled(true);
+        if (mTextView != null) {
+            mTextView.setAnimationsEnabled(true);
+        }
         if (mController != null) {
             mController.destroy();
             mController = null;
@@ -291,7 +299,8 @@ public class KeyguardIndicationControllerBaseTest extends SysuiTestCase {
                 KeyguardInteractorFactory.create(mFlags).getKeyguardInteractor(),
                 mBiometricMessageInteractor,
                 mDeviceEntryFingerprintAuthInteractor,
-                mDeviceEntryFaceAuthInteractor
+                mDeviceEntryFaceAuthInteractor,
+                mUserLogoutInteractor
         );
         mController.init();
         mController.setIndicationArea(mIndicationArea);

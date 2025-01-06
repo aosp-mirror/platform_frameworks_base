@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar
 
 import android.app.ActivityManager
-import android.content.res.Resources
 import android.os.SystemProperties
 import android.os.Trace
 import android.os.Trace.TRACE_TAG_APP
@@ -29,21 +28,21 @@ import android.view.SurfaceControl
 import android.view.ViewRootImpl
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import java.io.PrintWriter
 import javax.inject.Inject
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 
 @SysUISingleton
 open class BlurUtils @Inject constructor(
-    @Main private val resources: Resources,
+    blurConfig: BlurConfig,
     private val crossWindowBlurListeners: CrossWindowBlurListeners,
     dumpManager: DumpManager
 ) : Dumpable {
-    val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
-    val maxBlurRadius = resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
+    val minBlurRadius = blurConfig.minBlurRadiusPx
+    val maxBlurRadius = blurConfig.maxBlurRadiusPx
+
     private var lastAppliedBlur = 0
     private var earlyWakeupEnabled = false
 
@@ -58,7 +57,7 @@ open class BlurUtils @Inject constructor(
         if (ratio == 0f) {
             return 0f
         }
-        return MathUtils.lerp(minBlurRadius.toFloat(), maxBlurRadius.toFloat(), ratio)
+        return MathUtils.lerp(minBlurRadius, maxBlurRadius, ratio)
     }
 
     /**
@@ -68,7 +67,7 @@ open class BlurUtils @Inject constructor(
         if (blur == 0f) {
             return 0f
         }
-        return MathUtils.map(minBlurRadius.toFloat(), maxBlurRadius.toFloat(),
+        return MathUtils.map(minBlurRadius, maxBlurRadius,
                 0f /* maxStart */, 1f /* maxStop */, blur)
     }
 

@@ -19,6 +19,7 @@ package com.android.server.display.color;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyString;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.server.display.color.DisplayTransformManager.LEVEL_COLOR_MATRIX_NIGHT_DISPLAY;
+import static com.android.server.display.color.DisplayTransformManager.LEVEL_COLOR_MATRIX_REDUCE_BRIGHT_COLORS;
 import static com.android.server.display.color.DisplayTransformManager.PERSISTENT_PROPERTY_COMPOSITION_COLOR_MODE;
 import static com.android.server.display.color.DisplayTransformManager.PERSISTENT_PROPERTY_DISPLAY_COLOR;
 import static com.android.server.display.color.DisplayTransformManager.PERSISTENT_PROPERTY_SATURATION;
@@ -51,12 +52,14 @@ public class DisplayTransformManagerTest {
     private MockitoSession mSession;
     private DisplayTransformManager mDtm;
     private float[] mNightDisplayMatrix;
+    private float[] mRbcMatrix;
     private HashMap<String, String> mSystemProperties;
 
     @Before
     public void setUp() {
         mDtm = new DisplayTransformManager();
         mNightDisplayMatrix = mDtm.getColorMatrix(LEVEL_COLOR_MATRIX_NIGHT_DISPLAY);
+        mRbcMatrix = mDtm.getColorMatrix(LEVEL_COLOR_MATRIX_REDUCE_BRIGHT_COLORS);
 
         mSession = ExtendedMockito.mockitoSession()
                 .initMocks(this)
@@ -81,7 +84,8 @@ public class DisplayTransformManagerTest {
 
     @Test
     public void setColorMode_natural() {
-        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL, mNightDisplayMatrix, -1);
+        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL, mNightDisplayMatrix, mRbcMatrix,
+                Display.COLOR_MODE_INVALID);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_DISPLAY_COLOR))
                 .isEqualTo("0" /* managed */);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_SATURATION))
@@ -90,7 +94,8 @@ public class DisplayTransformManagerTest {
 
     @Test
     public void setColorMode_boosted() {
-        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_BOOSTED, mNightDisplayMatrix, -1);
+        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_BOOSTED, mNightDisplayMatrix, mRbcMatrix,
+                Display.COLOR_MODE_INVALID);
 
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_DISPLAY_COLOR))
                 .isEqualTo("0" /* managed */);
@@ -100,7 +105,8 @@ public class DisplayTransformManagerTest {
 
     @Test
     public void setColorMode_saturated() {
-        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_SATURATED, mNightDisplayMatrix, -1);
+        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_SATURATED, mNightDisplayMatrix, mRbcMatrix,
+                Display.COLOR_MODE_INVALID);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_DISPLAY_COLOR))
                 .isEqualTo("1" /* unmanaged */);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_SATURATION))
@@ -109,7 +115,8 @@ public class DisplayTransformManagerTest {
 
     @Test
     public void setColorMode_automatic() {
-        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_AUTOMATIC, mNightDisplayMatrix, -1);
+        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_AUTOMATIC, mNightDisplayMatrix, mRbcMatrix,
+                Display.COLOR_MODE_INVALID);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_DISPLAY_COLOR))
                 .isEqualTo("2" /* enhanced */);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_SATURATION))
@@ -118,7 +125,7 @@ public class DisplayTransformManagerTest {
 
     @Test
     public void setColorMode_vendor() {
-        mDtm.setColorMode(0x100, mNightDisplayMatrix, -1);
+        mDtm.setColorMode(0x100, mNightDisplayMatrix, mRbcMatrix, Display.COLOR_MODE_INVALID);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_DISPLAY_COLOR))
                 .isEqualTo(Integer.toString(0x100) /* pass-through */);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_SATURATION))
@@ -127,7 +134,7 @@ public class DisplayTransformManagerTest {
 
     @Test
     public void setColorMode_outOfBounds() {
-        mDtm.setColorMode(0x50, mNightDisplayMatrix, -1);
+        mDtm.setColorMode(0x50, mNightDisplayMatrix, mRbcMatrix, Display.COLOR_MODE_INVALID);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_DISPLAY_COLOR))
                 .isEqualTo(null);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_SATURATION))
@@ -141,7 +148,7 @@ public class DisplayTransformManagerTest {
         // Start with a known state, which we expect to remain unmodified
         SystemProperties.set(PERSISTENT_PROPERTY_COMPOSITION_COLOR_MODE, magicPropertyValue);
 
-        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL, mNightDisplayMatrix,
+        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL, mNightDisplayMatrix, mRbcMatrix,
                 Display.COLOR_MODE_INVALID);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_COMPOSITION_COLOR_MODE))
                 .isEqualTo(magicPropertyValue);
@@ -155,7 +162,7 @@ public class DisplayTransformManagerTest {
         // Start with a known state, which we expect to get modified
         SystemProperties.set(PERSISTENT_PROPERTY_COMPOSITION_COLOR_MODE, magicPropertyValue);
 
-        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL, mNightDisplayMatrix,
+        mDtm.setColorMode(ColorDisplayManager.COLOR_MODE_NATURAL, mNightDisplayMatrix, mRbcMatrix,
                 testPropertyValue);
         assertThat(mSystemProperties.get(PERSISTENT_PROPERTY_COMPOSITION_COLOR_MODE))
                 .isEqualTo(Integer.toString(testPropertyValue));

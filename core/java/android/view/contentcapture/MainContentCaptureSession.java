@@ -17,6 +17,7 @@ package android.view.contentcapture;
 
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_CONTEXT_UPDATED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_FINISHED;
+import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_FLUSH;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_PAUSED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_RESUMED;
 import static android.view.contentcapture.ContentCaptureEvent.TYPE_SESSION_STARTED;
@@ -623,6 +624,8 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     @Override
     public void flush(@FlushReason int reason) {
+        // TODO: b/380381249 renaming the internal APIs to prevent confusions between this and the
+        // public API.
         runOnContentCaptureThread(() -> flushImpl(reason));
     }
 
@@ -888,6 +891,12 @@ public final class MainContentCaptureSession extends ContentCaptureSession {
                 new ContentCaptureEvent(sessionId, TYPE_WINDOW_BOUNDS_CHANGED)
                         .setBounds(bounds);
         enqueueEvent(event);
+    }
+
+    @Override
+    void internalNotifySessionFlushEvent(int sessionId) {
+        final ContentCaptureEvent event = new ContentCaptureEvent(sessionId, TYPE_SESSION_FLUSH);
+        enqueueEvent(event, FORCE_FLUSH);
     }
 
     private List<ContentCaptureEvent> clearBufferEvents() {

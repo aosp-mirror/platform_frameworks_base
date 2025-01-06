@@ -6473,6 +6473,7 @@ android.os.connectivity.WifiActivityEnergyInfo$1
 android.os.connectivity.WifiActivityEnergyInfo
 android.os.connectivity.WifiBatteryStats$1
 android.os.connectivity.WifiBatteryStats
+android.os.flagging.AconfigPackage
 android.os.health.HealthKeys$Constant
 android.os.health.HealthKeys$Constants
 android.os.health.HealthKeys$SortedIntArray
@@ -6586,6 +6587,7 @@ android.permission.LegacyPermissionManager
 android.permission.PermissionCheckerManager
 android.permission.PermissionControllerManager$1
 android.permission.PermissionControllerManager
+android.permission.PermissionManager
 android.permission.PermissionManager$1
 android.permission.PermissionManager$2
 android.permission.PermissionManager$OnPermissionsChangeListenerDelegate

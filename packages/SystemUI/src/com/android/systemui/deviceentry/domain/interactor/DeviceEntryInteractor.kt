@@ -16,6 +16,7 @@
 
 package com.android.systemui.deviceentry.domain.interactor
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.policy.IKeyguardDismissCallback
 import com.android.systemui.authentication.domain.interactor.AuthenticationInteractor
 import com.android.systemui.authentication.shared.model.AuthenticationMethodModel
@@ -43,7 +44,6 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Hosts application business logic related to device entry.
@@ -84,30 +84,53 @@ constructor(
             )
 
     /**
+     * Emits `true` when the current scene switches to [Scenes.Gone] for the first time after having
+     * been on [Scenes.Lockscreen].
+     *
+     * Different from [isDeviceEntered] such that the current scene must actually go through
+     * [Scenes.Gone] to produce a `true`. [isDeviceEntered] also takes into account the navigation
+     * back stack and will produce a `true` value even when the current scene is still not
+     * [Scenes.Gone] but the bottommost entry of the navigation back stack switched from
+     * [Scenes.Lockscreen] to [Scenes.Gone] while the user is staring at another scene.
+     */
+    val isDeviceEnteredDirectly: StateFlow<Boolean> =
+        sceneInteractor.currentScene
+            .filter { currentScene ->
+                currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
+            }
+            .mapLatestConflated { scene ->
+                if (scene == Scenes.Gone) {
+                    // Make sure device unlock status is definitely unlocked before we
+                    // consider the device "entered".
+                    deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
+                    true
+                } else {
+                    false
+                }
+            }
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = false,
+            )
+
+    /**
      * Whether the device has been entered (i.e. the lockscreen has been dismissed, by any method).
      * This can be `false` when the device is unlocked, e.g. when the user still needs to swipe away
      * the non-secure lockscreen, even though they've already authenticated.
      *
      * Note: This does not imply that the lockscreen is visible or not.
+     *
+     * Different from [isDeviceEnteredDirectly] such that the current scene doesn't actually have to
+     * go through [Scenes.Gone] to produce a `true`. [isDeviceEnteredDirectly] doesn't take the
+     * navigation back stack into account and will only produce a `true` value even when the current
+     * scene is actually [Scenes.Gone].
      */
     val isDeviceEntered: StateFlow<Boolean> =
         combine(
                 // This flow emits true when the currentScene switches to Gone for the first time
                 // after having been on Lockscreen.
-                sceneInteractor.currentScene
-                    .filter { currentScene ->
-                        currentScene == Scenes.Gone || currentScene == Scenes.Lockscreen
-                    }
-                    .mapLatestConflated { scene ->
-                        if (scene == Scenes.Gone) {
-                            // Make sure device unlock status is definitely unlocked before we
-                            // consider the device "entered".
-                            deviceUnlockedInteractor.deviceUnlockStatus.first { it.isUnlocked }
-                            true
-                        } else {
-                            false
-                        }
-                    },
+                isDeviceEnteredDirectly,
                 // This flow emits true only if the bottom of the navigation back stack has been
                 // switched from Lockscreen to Gone. In other words, only if the device was unlocked
                 // while visiting at least one scene "above" the Lockscreen scene.
@@ -174,6 +197,14 @@ constructor(
     }
 
     /**
+     * Whether lockscreen bypass is enabled. When enabled, the lockscreen will be automatically
+     * dismissed once the authentication challenge is completed. For example, completing a biometric
+     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
+     * lockscreen.
+     */
+    val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
+
+    /**
      * Attempt to enter the device and dismiss the lockscreen. If authentication is required to
      * unlock the device it will transition to bouncer.
      *
@@ -238,11 +269,8 @@ constructor(
         isLockscreenEnabled()
     }
 
-    /**
-     * Whether lockscreen bypass is enabled. When enabled, the lockscreen will be automatically
-     * dismissed once the authentication challenge is completed. For example, completing a biometric
-     * authentication challenge via face unlock or fingerprint sensor can automatically bypass the
-     * lockscreen.
-     */
-    val isBypassEnabled: StateFlow<Boolean> = repository.isBypassEnabled
+    /** Locks the device instantly. */
+    fun lockNow() {
+        deviceUnlockedInteractor.lockNow()
+    }
 }

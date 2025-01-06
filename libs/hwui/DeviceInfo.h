@@ -84,6 +84,7 @@ public:
     // this value is only valid after the GPU has been initialized and there is a valid graphics
     // context or if you are using the HWUI_NULL_GPU
     int maxTextureSize() const;
+    bool hasMaxTextureSize() const { return mMaxTextureSize > 0; }
     sk_sp<SkColorSpace> getWideColorSpace() const { return mWideColorSpace; }
     SkColorType getWideColorType() {
         static std::once_flag kFlag;

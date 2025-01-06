@@ -35,7 +35,7 @@ class FakeMediaControllerFactory(context: Context) : MediaControllerFactory(cont
         return mediaControllersForToken[token]!!
     }
 
-    override suspend fun create(token: SessionToken, looper: Looper): Media3Controller {
+    override suspend fun create(token: SessionToken, looper: Looper): Media3Controller? {
         return media3Controller ?: super.create(token, looper)
     }
 

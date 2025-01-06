@@ -43,8 +43,6 @@ class PackageVerificationState {
 
     private boolean mRequiredVerificationPassed;
 
-    private boolean mIntegrityVerificationComplete;
-
     /**
      * Create a new package verification state where {@code requiredVerifierUid} is the user ID for
      * the package that must reply affirmative before things can continue.
@@ -213,15 +211,7 @@ class PackageVerificationState {
         return mExtendedTimeoutUids.get(uid, false);
     }
 
-    void setIntegrityVerificationResult(int code) {
-        mIntegrityVerificationComplete = true;
-    }
-
-    boolean isIntegrityVerificationComplete() {
-        return mIntegrityVerificationComplete;
-    }
-
     boolean areAllVerificationsComplete() {
-        return mIntegrityVerificationComplete && isVerificationComplete();
+        return isVerificationComplete();
     }
 }

@@ -115,6 +115,7 @@ import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__PROC_START_TYPE__PROCESS_START_TYPE_WARM;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__BIND;
 import static com.android.internal.util.FrameworkStatsLog.SERVICE_REQUEST_EVENT_REPORTED__REQUEST_TYPE__START;
+import static com.android.media.flags.Flags.enableNotifyingActivityManagerWithMediaSessionStatusChange;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKGROUND_CHECK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOREGROUND_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
@@ -755,9 +756,6 @@ public final class ActiveServices {
                         + ", can delay others up to " + when);
                 Message msg = obtainMessage(MSG_BG_START_TIMEOUT);
                 sendMessageAtTime(msg, when);
-            }
-            if (mStartingBackground.size() < mMaxStartingBackground) {
-                mAm.backgroundServicesFinishedLocked(mUserId);
             }
         }
     }
@@ -4603,7 +4601,7 @@ public final class ActiveServices {
         return true;
     }
 
-    void unbindFinishedLocked(ServiceRecord r, Intent intent, boolean doRebind) {
+    void unbindFinishedLocked(ServiceRecord r, Intent intent) {
         final long origId = mAm.mInjector.clearCallingIdentity();
         try {
             if (r != null) {
@@ -5844,7 +5842,7 @@ public final class ActiveServices {
             if (r.inSharedIsolatedProcess) {
                 app = mAm.mProcessList.getSharedIsolatedProcess(procName, r.appInfo.uid,
                         r.appInfo.packageName);
-                if (app != null) {
+                if (app != null && !app.isKilled()) {
                     final IApplicationThread thread = app.getThread();
                     final int pid = app.getPid();
                     final UidRecord uidRecord = app.getUidRecord();
@@ -5869,6 +5867,8 @@ public final class ActiveServices {
                         // If a dead object exception was thrown -- fall through to
                         // restart the application.
                     }
+                } else {
+                    app = null;
                 }
             } else {
                 // If this service runs in an isolated process, then each time
@@ -9318,6 +9318,86 @@ public final class ActiveServices {
             Slog.e(TAG, "stopForegroundServiceDelegateLocked delegate does not exist");
         }
     }
+    /**
+     * Handles notifications from MediaSessionService about active media service.
+     * This method evaluates the provided information and transitions corresponding service to
+     * foreground state.
+     *
+     * @param packageName The package name of the app running the service.
+     * @param userId The user ID associated with the service.
+     * @param notificationId The ID of the media notification associated with the service.
+     */
+    void notifyActiveMediaForegroundServiceLocked(@NonNull String packageName,
+            @UserIdInt int userId, int notificationId) {
+        if (!enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+
+        final ServiceMap smap = mServiceMap.get(userId);
+        if (smap == null) {
+            return;
+        }
+        final int serviceSize = smap.mServicesByInstanceName.size();
+        for (int i = 0; i < serviceSize; i++) {
+            final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
+            if (sr.appInfo.packageName.equals(packageName) && !sr.isForeground) {
+                // foregroundServiceType is cleared when media session is user-disengaged
+                // and calls notifyInactiveMediaForegroundService->setServiceForegroundInnerLocked.
+                if (sr.foregroundServiceType
+                        == ServiceInfo.FOREGROUND_SERVICE_TYPE_NONE
+                        && sr.foregroundId == notificationId) {
+                    if (DEBUG_FOREGROUND_SERVICE) {
+                        Slog.d(TAG, "Moving media service to foreground for package "
+                                + packageName);
+                    }
+                    setServiceForegroundInnerLocked(sr, sr.foregroundId,
+                             sr.foregroundNoti, /* flags */ 0,
+                             ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK,
+                             /* callingUidStart */ 0);
+                }
+            }
+        }
+    }
+
+    /**
+     * Handles notifications from MediaSessionService about inactive media foreground services.
+     * This method evaluates the provided information and determines whether to stop the
+     * corresponding foreground service.
+     *
+     * @param packageName The package name of the app running the foreground service.
+     * @param userId The user ID associated with the foreground service.
+     * @param notificationId The ID of the media notification associated with the foreground
+     *                      service.
+     */
+    void notifyInactiveMediaForegroundServiceLocked(@NonNull String packageName,
+            @UserIdInt int userId, int notificationId) {
+        if (!enableNotifyingActivityManagerWithMediaSessionStatusChange()) {
+            return;
+        }
+
+        final ServiceMap smap = mServiceMap.get(userId);
+        if (smap == null) {
+            return;
+        }
+        final int serviceSize = smap.mServicesByInstanceName.size();
+        for (int i = 0; i < serviceSize; i++) {
+            final ServiceRecord sr = smap.mServicesByInstanceName.valueAt(i);
+            if (sr.appInfo.packageName.equals(packageName) && sr.isForeground) {
+                if (sr.foregroundServiceType
+                        == ServiceInfo.FOREGROUND_SERVICE_TYPE_MEDIA_PLAYBACK
+                        && sr.foregroundId == notificationId) {
+                    if (DEBUG_FOREGROUND_SERVICE) {
+                        Slog.d(TAG, "Forcing media foreground service to background for package "
+                                + packageName);
+                    }
+                    setServiceForegroundInnerLocked(sr, /* id */ 0,
+                            /* notification */ null, /* flags */ 0,
+                            /* foregroundServiceType */ 0, /* callingUidStart */ 0);
+                }
+            }
+        }
+    }
+
 
     private static void getClientPackages(ServiceRecord sr, ArraySet<String> output) {
         var connections = sr.getConnections();

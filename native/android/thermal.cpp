@@ -17,6 +17,7 @@
 #define LOG_TAG "thermal"
 
 #include <android-base/thread_annotations.h>
+#include <android/os/BnThermalHeadroomListener.h>
 #include <android/os/BnThermalStatusListener.h>
 #include <android/os/IThermalService.h>
 #include <android/thermal.h>
@@ -33,10 +34,10 @@ using android::sp;
 using namespace android;
 using namespace android::os;
 
-struct ThermalServiceListener : public BnThermalStatusListener {
+struct ThermalServiceStatusListener : public BnThermalStatusListener {
 public:
     virtual binder::Status onStatusChange(int32_t status) override;
-    ThermalServiceListener(AThermalManager *manager) {
+    ThermalServiceStatusListener(AThermalManager *manager) {
         mMgr = manager;
     }
 
@@ -44,9 +45,27 @@ private:
     AThermalManager *mMgr;
 };
 
-struct ListenerCallback {
+struct ThermalServiceHeadroomListener : public BnThermalHeadroomListener {
+public:
+    virtual binder::Status onHeadroomChange(float headroom, float forecastHeadroom,
+                                            int32_t forecastSeconds,
+                                            const ::std::vector<float> &thresholds) override;
+    ThermalServiceHeadroomListener(AThermalManager *manager) {
+        mMgr = manager;
+    }
+
+private:
+    AThermalManager *mMgr;
+};
+
+struct StatusListenerCallback {
     AThermal_StatusCallback callback;
     void* data;
+};
+
+struct HeadroomListenerCallback {
+    AThermal_HeadroomCallback callback;
+    void *data;
 };
 
 static IThermalService *gIThermalServiceForTesting = nullptr;
@@ -57,26 +76,40 @@ public:
     AThermalManager() = delete;
     ~AThermalManager();
     status_t notifyStateChange(int32_t status);
+    status_t notifyHeadroomChange(float headroom, float forecastHeadroom, int32_t forecastSeconds,
+                                  const ::std::vector<float> &thresholds);
     status_t getCurrentThermalStatus(int32_t *status);
-    status_t addListener(AThermal_StatusCallback, void *data);
-    status_t removeListener(AThermal_StatusCallback, void *data);
+    status_t addStatusListener(AThermal_StatusCallback, void *data);
+    status_t removeStatusListener(AThermal_StatusCallback, void *data);
     status_t getThermalHeadroom(int32_t forecastSeconds, float *result);
     status_t getThermalHeadroomThresholds(const AThermalHeadroomThreshold **, size_t *size);
+    status_t addHeadroomListener(AThermal_HeadroomCallback, void *data);
+    status_t removeHeadroomListener(AThermal_HeadroomCallback, void *data);
 
 private:
     AThermalManager(sp<IThermalService> service);
     sp<IThermalService> mThermalSvc;
-    std::mutex mListenerMutex;
-    sp<ThermalServiceListener> mServiceListener GUARDED_BY(mListenerMutex);
-    std::vector<ListenerCallback> mListeners GUARDED_BY(mListenerMutex);
-    std::mutex mThresholdsMutex;
-    const AThermalHeadroomThreshold *mThresholds = nullptr; // GUARDED_BY(mThresholdsMutex)
-    size_t mThresholdsCount GUARDED_BY(mThresholdsMutex);
+    std::mutex mStatusListenerMutex;
+    sp<ThermalServiceStatusListener> mServiceStatusListener GUARDED_BY(mStatusListenerMutex);
+    std::vector<StatusListenerCallback> mStatusListeners GUARDED_BY(mStatusListenerMutex);
+
+    std::mutex mHeadroomListenerMutex;
+    sp<ThermalServiceHeadroomListener> mServiceHeadroomListener GUARDED_BY(mHeadroomListenerMutex);
+    std::vector<HeadroomListenerCallback> mHeadroomListeners GUARDED_BY(mHeadroomListenerMutex);
 };
 
-binder::Status ThermalServiceListener::onStatusChange(int32_t status) {
+binder::Status ThermalServiceStatusListener::onStatusChange(int32_t status) {
     if (mMgr != nullptr) {
         mMgr->notifyStateChange(status);
+    }
+    return binder::Status::ok();
+}
+
+binder::Status ThermalServiceHeadroomListener::onHeadroomChange(
+        float headroom, float forecastHeadroom, int32_t forecastSeconds,
+        const ::std::vector<float> &thresholds) {
+    if (mMgr != nullptr) {
+        mMgr->notifyHeadroomChange(headroom, forecastHeadroom, forecastSeconds, thresholds);
     }
     return binder::Status::ok();
 }
@@ -96,89 +129,113 @@ AThermalManager* AThermalManager::createAThermalManager() {
 }
 
 AThermalManager::AThermalManager(sp<IThermalService> service)
-      : mThermalSvc(std::move(service)), mServiceListener(nullptr) {}
+      : mThermalSvc(std::move(service)),
+        mServiceStatusListener(nullptr),
+        mServiceHeadroomListener(nullptr) {}
 
 AThermalManager::~AThermalManager() {
     {
-        std::scoped_lock<std::mutex> listenerLock(mListenerMutex);
-        mListeners.clear();
-        if (mServiceListener != nullptr) {
+        std::scoped_lock<std::mutex> listenerLock(mStatusListenerMutex);
+        mStatusListeners.clear();
+        if (mServiceStatusListener != nullptr) {
             bool success = false;
-            mThermalSvc->unregisterThermalStatusListener(mServiceListener, &success);
-            mServiceListener = nullptr;
+            mThermalSvc->unregisterThermalStatusListener(mServiceStatusListener, &success);
+            mServiceStatusListener = nullptr;
         }
     }
-    std::scoped_lock<std::mutex> lock(mThresholdsMutex);
-    delete[] mThresholds;
+    {
+        std::scoped_lock<std::mutex> headroomListenerLock(mHeadroomListenerMutex);
+        mHeadroomListeners.clear();
+        if (mServiceHeadroomListener != nullptr) {
+            bool success = false;
+            mThermalSvc->unregisterThermalHeadroomListener(mServiceHeadroomListener, &success);
+            mServiceHeadroomListener = nullptr;
+        }
+    }
 }
 
 status_t AThermalManager::notifyStateChange(int32_t status) {
-    std::scoped_lock<std::mutex> lock(mListenerMutex);
+    std::scoped_lock<std::mutex> lock(mStatusListenerMutex);
     AThermalStatus thermalStatus = static_cast<AThermalStatus>(status);
 
-    for (auto listener : mListeners) {
+    for (auto listener : mStatusListeners) {
         listener.callback(listener.data, thermalStatus);
     }
     return OK;
 }
 
-status_t AThermalManager::addListener(AThermal_StatusCallback callback, void *data) {
-    std::scoped_lock<std::mutex> lock(mListenerMutex);
+status_t AThermalManager::notifyHeadroomChange(float headroom, float forecastHeadroom,
+                                               int32_t forecastSeconds,
+                                               const ::std::vector<float> &thresholds) {
+    std::scoped_lock<std::mutex> lock(mHeadroomListenerMutex);
+    size_t thresholdsCount = thresholds.size();
+    auto t = new AThermalHeadroomThreshold[thresholdsCount];
+    for (int i = 0; i < (int)thresholdsCount; i++) {
+        t[i].headroom = thresholds[i];
+        t[i].thermalStatus = static_cast<AThermalStatus>(i);
+    }
+    for (auto listener : mHeadroomListeners) {
+        listener.callback(listener.data, headroom, forecastHeadroom, forecastSeconds, t,
+                          thresholdsCount);
+    }
+    delete[] t;
+    return OK;
+}
+
+status_t AThermalManager::addStatusListener(AThermal_StatusCallback callback, void *data) {
+    std::scoped_lock<std::mutex> lock(mStatusListenerMutex);
 
     if (callback == nullptr) {
         // Callback can not be nullptr
         return EINVAL;
     }
-    for (const auto& cb : mListeners) {
+    for (const auto &cb : mStatusListeners) {
         // Don't re-add callbacks.
         if (callback == cb.callback && data == cb.data) {
             return EINVAL;
         }
     }
-    mListeners.emplace_back(ListenerCallback{callback, data});
 
-    if (mServiceListener != nullptr) {
+    if (mServiceStatusListener != nullptr) {
+        mStatusListeners.emplace_back(StatusListenerCallback{callback, data});
         return OK;
     }
     bool success = false;
-    mServiceListener = new ThermalServiceListener(this);
-    if (mServiceListener == nullptr) {
+    mServiceStatusListener = new ThermalServiceStatusListener(this);
+    if (mServiceStatusListener == nullptr) {
         return ENOMEM;
     }
-    auto ret = mThermalSvc->registerThermalStatusListener(mServiceListener, &success);
+    auto ret = mThermalSvc->registerThermalStatusListener(mServiceStatusListener, &success);
     if (!success || !ret.isOk()) {
+        mServiceStatusListener = nullptr;
         ALOGE("Failed in registerThermalStatusListener %d", success);
         if (ret.exceptionCode() == binder::Status::EX_SECURITY) {
             return EPERM;
         }
         return EPIPE;
     }
+    mStatusListeners.emplace_back(StatusListenerCallback{callback, data});
     return OK;
 }
 
-status_t AThermalManager::removeListener(AThermal_StatusCallback callback, void *data) {
-    std::scoped_lock<std::mutex> lock(mListenerMutex);
+status_t AThermalManager::removeStatusListener(AThermal_StatusCallback callback, void *data) {
+    std::scoped_lock<std::mutex> lock(mStatusListenerMutex);
 
-    auto it = std::remove_if(mListeners.begin(),
-                             mListeners.end(),
-                             [&](const ListenerCallback& cb) {
-                                    return callback == cb.callback &&
-                                           data == cb.data;
+    auto it = std::remove_if(mStatusListeners.begin(), mStatusListeners.end(),
+                             [&](const StatusListenerCallback &cb) {
+                                 return callback == cb.callback && data == cb.data;
                              });
-    if (it == mListeners.end()) {
+    if (it == mStatusListeners.end()) {
         // If the listener and data pointer were not previously added.
         return EINVAL;
     }
-    mListeners.erase(it, mListeners.end());
+    if (mServiceStatusListener == nullptr || mStatusListeners.size() > 1) {
+        mStatusListeners.erase(it, mStatusListeners.end());
+        return OK;
+    }
 
-    if (!mListeners.empty()) {
-        return OK;
-    }
-    if (mServiceListener == nullptr) {
-        return OK;
-    }
     bool success = false;
-    auto ret = mThermalSvc->unregisterThermalStatusListener(mServiceListener, &success);
+    auto ret = mThermalSvc->unregisterThermalStatusListener(mServiceStatusListener, &success);
     if (!success || !ret.isOk()) {
         ALOGE("Failed in unregisterThermalStatusListener %d", success);
         if (ret.exceptionCode() == binder::Status::EX_SECURITY) {
@@ -186,7 +243,69 @@ status_t AThermalManager::removeListener(AThermal_StatusCallback callback, void 
         }
         return EPIPE;
     }
-    mServiceListener = nullptr;
+    mServiceStatusListener = nullptr;
+    mStatusListeners.erase(it, mStatusListeners.end());
+    return OK;
+}
+
+status_t AThermalManager::addHeadroomListener(AThermal_HeadroomCallback callback, void *data) {
+    std::scoped_lock<std::mutex> lock(mHeadroomListenerMutex);
+    if (callback == nullptr) {
+        return EINVAL;
+    }
+    for (const auto &cb : mHeadroomListeners) {
+        if (callback == cb.callback && data == cb.data) {
+            return EINVAL;
+        }
+    }
+
+    if (mServiceHeadroomListener != nullptr) {
+        mHeadroomListeners.emplace_back(HeadroomListenerCallback{callback, data});
+        return OK;
+    }
+    bool success = false;
+    mServiceHeadroomListener = new ThermalServiceHeadroomListener(this);
+    if (mServiceHeadroomListener == nullptr) {
+        return ENOMEM;
+    }
+    auto ret = mThermalSvc->registerThermalHeadroomListener(mServiceHeadroomListener, &success);
+    if (!success || !ret.isOk()) {
+        ALOGE("Failed in registerThermalHeadroomListener %d", success);
+        mServiceHeadroomListener = nullptr;
+        if (ret.exceptionCode() == binder::Status::EX_SECURITY) {
+            return EPERM;
+        }
+        return EPIPE;
+    }
+    mHeadroomListeners.emplace_back(HeadroomListenerCallback{callback, data});
+    return OK;
+}
+
+status_t AThermalManager::removeHeadroomListener(AThermal_HeadroomCallback callback, void *data) {
+    std::scoped_lock<std::mutex> lock(mHeadroomListenerMutex);
+
+    auto it = std::remove_if(mHeadroomListeners.begin(), mHeadroomListeners.end(),
+                             [&](const HeadroomListenerCallback &cb) {
+                                 return callback == cb.callback && data == cb.data;
+                             });
+    if (it == mHeadroomListeners.end()) {
+        return EINVAL;
+    }
+    if (mServiceHeadroomListener == nullptr || mHeadroomListeners.size() > 1) {
+        mHeadroomListeners.erase(it, mHeadroomListeners.end());
+        return OK;
+    }
+    bool success = false;
+    auto ret = mThermalSvc->unregisterThermalHeadroomListener(mServiceHeadroomListener, &success);
+    if (!success || !ret.isOk()) {
+        ALOGE("Failed in unregisterThermalHeadroomListener %d", success);
+        if (ret.exceptionCode() == binder::Status::EX_SECURITY) {
+            return EPERM;
+        }
+        return EPIPE;
+    }
+    mServiceHeadroomListener = nullptr;
+    mHeadroomListeners.erase(it, mHeadroomListeners.end());
     return OK;
 }
 
@@ -216,61 +335,36 @@ status_t AThermalManager::getThermalHeadroom(int32_t forecastSeconds, float *res
 
 status_t AThermalManager::getThermalHeadroomThresholds(const AThermalHeadroomThreshold **result,
                                                        size_t *size) {
-    std::scoped_lock<std::mutex> lock(mThresholdsMutex);
-    if (mThresholds == nullptr) {
-        auto thresholds = std::make_unique<std::vector<float>>();
-        binder::Status ret = mThermalSvc->getThermalHeadroomThresholds(thresholds.get());
-        if (!ret.isOk()) {
-            if (ret.exceptionCode() == binder::Status::EX_UNSUPPORTED_OPERATION) {
-                // feature is not enabled
-                return ENOSYS;
-            }
-            return EPIPE;
+    auto thresholds = std::make_unique<std::vector<float>>();
+    binder::Status ret = mThermalSvc->getThermalHeadroomThresholds(thresholds.get());
+    if (!ret.isOk()) {
+        if (ret.exceptionCode() == binder::Status::EX_UNSUPPORTED_OPERATION) {
+            // feature is not enabled
+            return ENOSYS;
         }
-        mThresholdsCount = thresholds->size();
-        auto t = new AThermalHeadroomThreshold[mThresholdsCount];
-        for (int i = 0; i < (int)mThresholdsCount; i++) {
-            t[i].headroom = (*thresholds)[i];
-            t[i].thermalStatus = static_cast<AThermalStatus>(i);
-        }
-        mThresholds = t;
+        return EPIPE;
     }
-    *size = mThresholdsCount;
-    *result = mThresholds;
+    size_t thresholdsCount = thresholds->size();
+    auto t = new AThermalHeadroomThreshold[thresholdsCount];
+    for (int i = 0; i < (int)thresholdsCount; i++) {
+        t[i].headroom = (*thresholds)[i];
+        t[i].thermalStatus = static_cast<AThermalStatus>(i);
+    }
+    *size = thresholdsCount;
+    *result = t;
     return OK;
 }
 
-/**
-  * Acquire an instance of the thermal manager. This must be freed using
-  * {@link AThermal_releaseManager}.
-  *
-  * @return manager instance on success, nullptr on failure.
- */
 AThermalManager* AThermal_acquireManager() {
     auto manager = AThermalManager::createAThermalManager();
 
     return manager;
 }
 
-/**
- * Release the thermal manager pointer acquired by
- * {@link AThermal_acquireManager}.
- *
- * @param manager The manager to be released.
- *
- */
 void AThermal_releaseManager(AThermalManager *manager) {
     delete manager;
 }
 
-/**
-  * Gets the current thermal status.
-  *
-  * @param manager The manager instance to use to query the thermal status,
-  * acquired by {@link AThermal_acquireManager}.
-  *
-  * @return current thermal status, ATHERMAL_STATUS_ERROR on failure.
-*/
 AThermalStatus AThermal_getCurrentThermalStatus(AThermalManager *manager) {
     int32_t status = 0;
     status_t ret = manager->getCurrentThermalStatus(&status);
@@ -280,59 +374,16 @@ AThermalStatus AThermal_getCurrentThermalStatus(AThermalManager *manager) {
     return static_cast<AThermalStatus>(status);
 }
 
-/**
- * Register the thermal status listener for thermal status change.
- *
- * @param manager The manager instance to use to register.
- * acquired by {@link AThermal_acquireManager}.
- * @param callback The callback function to be called when thermal status updated.
- * @param data The data pointer to be passed when callback is called.
- *
- * @return 0 on success
- *         EINVAL if the listener and data pointer were previously added and not removed.
- *         EPERM if the required permission is not held.
- *         EPIPE if communication with the system service has failed.
- */
 int AThermal_registerThermalStatusListener(AThermalManager *manager,
-        AThermal_StatusCallback callback, void *data) {
-    return manager->addListener(callback, data);
+                                           AThermal_StatusCallback callback, void *data) {
+    return manager->addStatusListener(callback, data);
 }
 
-/**
- * Unregister the thermal status listener previously resgistered.
- *
- * @param manager The manager instance to use to unregister.
- * acquired by {@link AThermal_acquireManager}.
- * @param callback The callback function to be called when thermal status updated.
- * @param data The data pointer to be passed when callback is called.
- *
- * @return 0 on success
- *         EINVAL if the listener and data pointer were not previously added.
- *         EPERM if the required permission is not held.
- *         EPIPE if communication with the system service has failed.
- */
 int AThermal_unregisterThermalStatusListener(AThermalManager *manager,
-        AThermal_StatusCallback callback, void *data) {
-    return manager->removeListener(callback, data);
+                                             AThermal_StatusCallback callback, void *data) {
+    return manager->removeStatusListener(callback, data);
 }
 
-/**
- * Provides an estimate of how much thermal headroom the device currently has
- * before hitting severe throttling.
- *
- * Note that this only attempts to track the headroom of slow-moving sensors,
- * such as the skin temperature sensor. This means that there is no benefit to
- * calling this function more frequently than about once per second, and attempts
- * to call significantly more frequently may result in the function returning {@code NaN}.
- *
- * See also PowerManager#getThermalHeadroom.
- *
- * @param manager The manager instance to use
- * @param forecastSeconds how many seconds in the future to forecast
- * @return a value greater than or equal to 0.0 where 1.0 indicates the SEVERE throttling
- *  	   threshold. Returns NaN if the device does not support this functionality or if
- * 	       this function is called significantly faster than once per second.
- */
 float AThermal_getThermalHeadroom(AThermalManager *manager, int forecastSeconds) {
     float result = 0.0f;
     status_t ret = manager->getThermalHeadroom(forecastSeconds, &result);
@@ -353,4 +404,14 @@ int AThermal_getThermalHeadroomThresholds(AThermalManager *manager,
 
 void AThermal_setIThermalServiceForTesting(void *iThermalService) {
     gIThermalServiceForTesting = static_cast<IThermalService *>(iThermalService);
+}
+
+int AThermal_registerThermalHeadroomListener(AThermalManager *manager,
+                                             AThermal_HeadroomCallback callback, void *data) {
+    return manager->addHeadroomListener(callback, data);
+}
+
+int AThermal_unregisterThermalHeadroomListener(AThermalManager *manager,
+                                               AThermal_HeadroomCallback callback, void *data) {
+    return manager->removeHeadroomListener(callback, data);
 }

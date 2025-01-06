@@ -18,6 +18,8 @@ package com.android.server;
 
 import static android.provider.DeviceConfig.Properties;
 
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SKIPPED;
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SUCCESS;
 import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
 
 import android.annotation.IntDef;
@@ -166,7 +168,7 @@ public class RescueParty {
     /** Register the Rescue Party observer as a Package Watchdog health observer */
     public static void registerHealthObserver(Context context) {
         PackageWatchdog.getInstance(context).registerHealthObserver(
-                RescuePartyObserver.getInstance(context));
+                null, RescuePartyObserver.getInstance(context));
     }
 
     private static boolean isDisabled() {
@@ -387,10 +389,10 @@ public class RescueParty {
             callingPackageList.addAll(callingPackages);
             Slog.i(TAG, "Starting to observe: " + callingPackageList + ", updated namespace: "
                     + updatedNamespace);
-            PackageWatchdog.getInstance(context).startObservingHealth(
-                    rescuePartyObserver,
+            PackageWatchdog.getInstance(context).startExplicitHealthCheck(
                     callingPackageList,
-                    DEFAULT_OBSERVING_DURATION_MS);
+                    DEFAULT_OBSERVING_DURATION_MS,
+                    rescuePartyObserver);
         }
     }
 
@@ -859,10 +861,10 @@ public class RescueParty {
         }
 
         @Override
-        public boolean execute(@Nullable VersionedPackage failedPackage,
+        public int onExecuteHealthCheckMitigation(@Nullable VersionedPackage failedPackage,
                 @FailureReasons int failureReason, int mitigationCount) {
             if (isDisabled()) {
-                return false;
+                return MITIGATION_RESULT_SKIPPED;
             }
             Slog.i(TAG, "Executing remediation."
                     + " failedPackage: "
@@ -884,9 +886,9 @@ public class RescueParty {
                 }
                 executeRescueLevel(mContext,
                         failedPackage == null ? null : failedPackage.getPackageName(), level);
-                return true;
+                return MITIGATION_RESULT_SUCCESS;
             } else {
-                return false;
+                return MITIGATION_RESULT_SKIPPED;
             }
         }
 
@@ -927,9 +929,9 @@ public class RescueParty {
         }
 
         @Override
-        public boolean executeBootLoopMitigation(int mitigationCount) {
+        public int onExecuteBootLoopMitigation(int mitigationCount) {
             if (isDisabled()) {
-                return false;
+                return MITIGATION_RESULT_SKIPPED;
             }
             boolean mayPerformReboot = !shouldThrottleReboot();
             final int level;
@@ -944,7 +946,7 @@ public class RescueParty {
                 level = getRescueLevel(mitigationCount, mayPerformReboot);
             }
             executeRescueLevel(mContext, /*failedPackage=*/ null, level);
-            return true;
+            return MITIGATION_RESULT_SUCCESS;
         }
 
         @Override

@@ -29,6 +29,7 @@ import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Objects;
 
 /**
  * Collection of recent historical broadcasts that are available to be dumped
@@ -163,10 +164,11 @@ public class BroadcastHistory {
 
     @NeverCompile
     public boolean dumpLocked(@NonNull PrintWriter pw, @Nullable String dumpPackage,
-            @NonNull String queueName, @NonNull SimpleDateFormat sdf,
-            boolean dumpAll, boolean needSep) {
-        dumpBroadcastList(pw, sdf, mFrozenBroadcasts, "Frozen");
-        dumpBroadcastList(pw, sdf, mPendingBroadcasts, "Pending");
+            @Nullable String dumpIntentAction,
+            @NonNull SimpleDateFormat sdf, boolean dumpAll) {
+        boolean needSep = true;
+        dumpBroadcastList(pw, sdf, mFrozenBroadcasts, dumpIntentAction, dumpAll, "Frozen");
+        dumpBroadcastList(pw, sdf, mPendingBroadcasts, dumpIntentAction, dumpAll, "Pending");
 
         int i;
         boolean printed = false;
@@ -187,17 +189,28 @@ public class BroadcastHistory {
             if (dumpPackage != null && !dumpPackage.equals(r.callerPackage)) {
                 continue;
             }
+            if (dumpIntentAction != null && !Objects.equals(dumpIntentAction,
+                    r.intent.getAction())) {
+                continue;
+            }
             if (!printed) {
                 if (needSep) {
                     pw.println();
                 }
                 needSep = true;
-                pw.println("  Historical broadcasts [" + queueName + "]:");
+                pw.println("  Historical broadcasts:");
                 printed = true;
             }
-            if (dumpAll) {
-                pw.print("  Historical Broadcast " + queueName + " #");
-                        pw.print(i); pw.println(":");
+            if (dumpIntentAction != null) {
+                pw.print("  Historical Broadcast #");
+                pw.print(i); pw.println(":");
+                r.dump(pw, "    ", sdf);
+                if (!dumpAll) {
+                    break;
+                }
+            } else if (dumpAll) {
+                pw.print("  Historical Broadcast #");
+                pw.print(i); pw.println(":");
                 r.dump(pw, "    ", sdf);
             } else {
                 pw.print("  #"); pw.print(i); pw.print(": "); pw.println(r);
@@ -213,7 +226,7 @@ public class BroadcastHistory {
             }
         } while (ringIndex != lastIndex);
 
-        if (dumpPackage == null) {
+        if (dumpPackage == null && dumpIntentAction == null) {
             lastIndex = ringIndex = mSummaryHistoryNext;
             if (dumpAll) {
                 printed = false;
@@ -243,7 +256,7 @@ public class BroadcastHistory {
                         pw.println();
                     }
                     needSep = true;
-                    pw.println("  Historical broadcasts summary [" + queueName + "]:");
+                    pw.println("  Historical broadcasts summary:");
                     printed = true;
                 }
                 if (!dumpAll && i >= 50) {
@@ -276,15 +289,28 @@ public class BroadcastHistory {
     }
 
     private void dumpBroadcastList(@NonNull PrintWriter pw, @NonNull SimpleDateFormat sdf,
-            @NonNull ArrayList<BroadcastRecord> broadcasts, @NonNull String flavor) {
+            @NonNull ArrayList<BroadcastRecord> broadcasts, @Nullable String dumpIntentAction,
+            boolean dumpAll, @NonNull String flavor) {
         pw.print("  "); pw.print(flavor); pw.println(" broadcasts:");
         if (broadcasts.isEmpty()) {
             pw.println("    <empty>");
         } else {
+            boolean printedAnything = false;
             for (int idx = broadcasts.size() - 1; idx >= 0; --idx) {
                 final BroadcastRecord r = broadcasts.get(idx);
+                if (dumpIntentAction != null && !Objects.equals(dumpIntentAction,
+                        r.intent.getAction())) {
+                    continue;
+                }
                 pw.print(flavor); pw.print("  broadcast #"); pw.print(idx); pw.println(":");
                 r.dump(pw, "    ", sdf);
+                printedAnything = true;
+                if (dumpIntentAction != null && !dumpAll) {
+                    break;
+                }
+            }
+            if (!printedAnything) {
+                pw.println("    <no-matches>");
             }
         }
     }

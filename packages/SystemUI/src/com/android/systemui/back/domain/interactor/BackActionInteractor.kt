@@ -21,8 +21,11 @@ import android.window.OnBackAnimationCallback
 import android.window.OnBackInvokedCallback
 import android.window.OnBackInvokedDispatcher
 import android.window.WindowOnBackInvokedDispatcher
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
+import com.android.systemui.Flags.glanceableHubBackAction
 import com.android.systemui.Flags.predictiveBackAnimateShade
+import com.android.systemui.communal.domain.interactor.CommunalBackActionInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -35,7 +38,6 @@ import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Handles requests to go back either from a button or gesture. */
 @SysUISingleton
@@ -50,6 +52,7 @@ constructor(
     private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor,
     private val shadeBackActionInteractor: ShadeBackActionInteractor,
     private val qsController: QuickSettingsController,
+    private val communalBackActionInteractor: CommunalBackActionInteractor,
 ) : CoreStartable {
 
     private var isCallbackRegistered = false
@@ -111,8 +114,11 @@ constructor(
             shadeBackActionInteractor.animateCollapseQs(false)
             return true
         }
-        if (shadeBackActionInteractor.closeUserSwitcherIfOpen()) {
-            return true
+        if (glanceableHubBackAction()) {
+            if (communalBackActionInteractor.canBeDismissed()) {
+                communalBackActionInteractor.onBackPressed()
+                return true
+            }
         }
         if (shouldBackBeHandled()) {
             if (shadeBackActionInteractor.canBeCollapsed()) {

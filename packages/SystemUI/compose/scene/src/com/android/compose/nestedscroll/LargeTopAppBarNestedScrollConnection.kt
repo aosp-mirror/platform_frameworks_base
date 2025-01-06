@@ -48,15 +48,14 @@ fun LargeTopAppBarNestedScrollConnection(
         orientation = Orientation.Vertical,
         // When swiping up, the LargeTopAppBar will shrink (to [minHeight]) and the content will
         // expand. Then, you can then scroll down the content.
-        canStartPreScroll = { offsetAvailable, offsetBeforeStart, _ ->
-            offsetAvailable < 0 && offsetBeforeStart == 0f && height() > minHeight()
+        canStartPreScroll = { offsetAvailable, _, _ ->
+            offsetAvailable < 0 && height() > minHeight()
         },
         // When swiping down, the content will scroll up until it reaches the top. Then, the
         // LargeTopAppBar will expand until it reaches its [maxHeight].
         canStartPostScroll = { offsetAvailable, _, _ ->
             offsetAvailable > 0 && height() < maxHeight()
         },
-        canStartPostFling = { false },
         onStart = {
             LargeTopAppBarScrollController(
                 height = height,

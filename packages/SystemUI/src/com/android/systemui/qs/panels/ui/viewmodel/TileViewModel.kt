@@ -24,6 +24,7 @@ import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.onStart
 
 @Immutable
@@ -37,6 +38,7 @@ class TileViewModel(private val tile: QSTile, val spec: TileSpec) {
                 awaitClose { tile.removeCallback(callback) }
             }
             .onStart { emit(tile.state) }
+            .filterNotNull()
             .distinctUntilChanged()
 
     val currentState: QSTile.State

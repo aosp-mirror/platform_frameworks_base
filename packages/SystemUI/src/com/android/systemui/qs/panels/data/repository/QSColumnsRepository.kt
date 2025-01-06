@@ -19,8 +19,8 @@ package com.android.systemui.qs.panels.data.repository
 import android.content.res.Resources
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.kotlin.emitOnStart
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -33,8 +33,8 @@ import kotlinx.coroutines.flow.mapLatest
 class QSColumnsRepository
 @Inject
 constructor(
-    @Main private val resources: Resources,
-    configurationRepository: ConfigurationRepository,
+    @ShadeDisplayAware private val resources: Resources,
+    @ShadeDisplayAware configurationRepository: ConfigurationRepository,
 ) {
     val splitShadeColumns: Flow<Int> =
         flowOf(resources.getInteger(R.integer.quick_settings_split_shade_num_columns))

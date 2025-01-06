@@ -71,49 +71,87 @@ constructor(
 
     override fun onSystemEventAnimationBegin(): Animator {
         isAnimationRunning = true
-        val moveOut =
-            ValueAnimator.ofFloat(0f, 1f).apply {
-                duration = 23.frames
-                interpolator = STATUS_BAR_X_MOVE_OUT
-                addUpdateListener {
-                    onTranslationXChanged(-(translationXIn * animatedValue as Float))
-                }
-            }
-        val alphaOut =
-            ValueAnimator.ofFloat(1f, 0f).apply {
-                duration = 8.frames
-                interpolator = null
-                addUpdateListener { onAlphaChanged(animatedValue as Float) }
-            }
-
-        val animSet = AnimatorSet()
-        animSet.playTogether(moveOut, alphaOut)
-        return animSet
+        return getDefaultStatusBarAnimationForChipEnter(
+            translationXIn,
+            onTranslationXChanged,
+            onAlphaChanged,
+        )
     }
 
     override fun onSystemEventAnimationFinish(hasPersistentDot: Boolean): Animator {
         onTranslationXChanged(translationXOut.toFloat())
-        val moveIn =
-            ValueAnimator.ofFloat(1f, 0f).apply {
-                duration = 23.frames
-                startDelay = 7.frames
-                interpolator = STATUS_BAR_X_MOVE_IN
-                addUpdateListener {
-                    onTranslationXChanged(translationXOut * animatedValue as Float)
-                }
-            }
-        val alphaIn =
-            ValueAnimator.ofFloat(0f, 1f).apply {
-                duration = 5.frames
-                startDelay = 11.frames
-                interpolator = null
-                addUpdateListener { onAlphaChanged(animatedValue as Float) }
-            }
+        val anim =
+            getDefaultStatusBarAnimationForChipExit(
+                translationXOut,
+                onTranslationXChanged,
+                onAlphaChanged,
+            )
+        anim.doOnEnd { isAnimationRunning = false }
+        anim.doOnCancel { isAnimationRunning = false }
 
-        val animatorSet = AnimatorSet()
-        animatorSet.playTogether(moveIn, alphaIn)
-        animatorSet.doOnEnd { isAnimationRunning = false }
-        animatorSet.doOnCancel { isAnimationRunning = false }
-        return animatorSet
+        return anim
+    }
+
+    /** Static definition of these animations so we can use them more easily from view binders */
+    companion object {
+        /**
+         * Chip: coming in. Animated view: going out.
+         *
+         * Implements the exact spec for animating any status bar elements OUT to make space for the
+         * chip IN animation.
+         */
+        fun getDefaultStatusBarAnimationForChipEnter(
+            targetTranslation: Int,
+            setX: (Float) -> Unit,
+            setAlpha: (Float) -> Unit,
+        ): Animator {
+            val moveOut =
+                ValueAnimator.ofFloat(0f, 1f).apply {
+                    duration = 23.frames
+                    interpolator = STATUS_BAR_X_MOVE_OUT
+                    addUpdateListener { setX(-(targetTranslation * animatedValue as Float)) }
+                }
+            val alphaOut =
+                ValueAnimator.ofFloat(1f, 0f).apply {
+                    duration = 8.frames
+                    interpolator = null
+                    addUpdateListener { setAlpha(animatedValue as Float) }
+                }
+
+            val animSet = AnimatorSet()
+            animSet.playTogether(moveOut, alphaOut)
+            return animSet
+        }
+
+        /**
+         * Chip: going out. Animated view: coming in.
+         *
+         * Implements the exact spec for animating any status bar elements IN as the chip is
+         * animating OUT
+         */
+        fun getDefaultStatusBarAnimationForChipExit(
+            targetTranslation: Int,
+            setX: (Float) -> Unit,
+            setAlpha: (Float) -> Unit,
+        ): Animator {
+            val moveIn =
+                ValueAnimator.ofFloat(1f, 0f).apply {
+                    duration = 23.frames
+                    startDelay = 7.frames
+                    interpolator = STATUS_BAR_X_MOVE_IN
+                    addUpdateListener { setX(targetTranslation * animatedValue as Float) }
+                }
+            val alphaIn =
+                ValueAnimator.ofFloat(0f, 1f).apply {
+                    duration = 5.frames
+                    startDelay = 11.frames
+                    interpolator = null
+                    addUpdateListener { setAlpha(animatedValue as Float) }
+                }
+
+            val animatorSet = AnimatorSet()
+            animatorSet.playTogether(moveIn, alphaIn)
+            return animatorSet
+        }
     }
 }

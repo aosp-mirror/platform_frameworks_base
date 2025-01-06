@@ -18,7 +18,6 @@
 package com.android.systemui.user.ui.dialog
 
 import android.app.Dialog
-import android.content.Context
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.users.UserCreatingDialog
@@ -32,6 +31,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.tiles.UserDetailView
+import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
 import com.android.systemui.user.UserSwitchFullscreenDialog
 import com.android.systemui.user.domain.interactor.UserSwitcherInteractor
 import com.android.systemui.user.domain.model.ShowDialogRequestModel
@@ -48,7 +48,6 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 class UserSwitcherDialogCoordinator
 @Inject
 constructor(
-    @Application private val context: Lazy<Context>,
     @Application private val applicationScope: Lazy<CoroutineScope>,
     private val falsingManager: Lazy<FalsingManager>,
     private val broadcastSender: Lazy<BroadcastSender>,
@@ -59,6 +58,7 @@ constructor(
     private val activityStarter: Lazy<ActivityStarter>,
     private val falsingCollector: Lazy<FalsingCollector>,
     private val userSwitcherViewModel: Lazy<UserSwitcherViewModel>,
+    private val shadeDialogContextInteractor: Lazy<ShadeDialogContextInteractor>,
 ) : CoreStartable {
 
     private var currentDialog: Dialog? = null
@@ -71,12 +71,13 @@ constructor(
     private fun startHandlingDialogShowRequests() {
         applicationScope.get().launch {
             interactor.get().dialogShowRequests.filterNotNull().collect { request ->
+                val context = shadeDialogContextInteractor.get().context
                 val (dialog, dialogCuj) =
                     when (request) {
                         is ShowDialogRequestModel.ShowAddUserDialog ->
                             Pair(
                                 AddUserDialog(
-                                    context = context.get(),
+                                    context = context,
                                     userHandle = request.userHandle,
                                     isKeyguardShowing = request.isKeyguardShowing,
                                     showEphemeralMessage = request.showEphemeralMessage,
@@ -92,7 +93,7 @@ constructor(
                         is ShowDialogRequestModel.ShowUserCreationDialog ->
                             Pair(
                                 UserCreatingDialog(
-                                    context.get(),
+                                    context,
                                     request.isGuest,
                                 ),
                                 null,
@@ -100,7 +101,7 @@ constructor(
                         is ShowDialogRequestModel.ShowExitGuestDialog ->
                             Pair(
                                 ExitGuestDialog(
-                                    context = context.get(),
+                                    context = context,
                                     guestUserId = request.guestUserId,
                                     isGuestEphemeral = request.isGuestEphemeral,
                                     targetUserId = request.targetUserId,
@@ -117,7 +118,7 @@ constructor(
                         is ShowDialogRequestModel.ShowUserSwitcherDialog ->
                             Pair(
                                 UserSwitchDialog(
-                                    context = context.get(),
+                                    context = context,
                                     adapter = userDetailAdapterProvider.get(),
                                     uiEventLogger = eventLogger.get(),
                                     falsingManager = falsingManager.get(),
@@ -132,7 +133,7 @@ constructor(
                         is ShowDialogRequestModel.ShowUserSwitcherFullscreenDialog ->
                             Pair(
                                 UserSwitchFullscreenDialog(
-                                    context = context.get(),
+                                    context = context,
                                     falsingCollector = falsingCollector.get(),
                                     userSwitcherViewModel = userSwitcherViewModel.get(),
                                 ),

@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"已关闭"</item>
     <item msgid="3028994095749238254">"已开启"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"不可用"</item>
+    <item msgid="6419996398343291862">"关闭"</item>
+    <item msgid="5908720590832378783">"开启"</item>
+  </string-array>
 </resources>

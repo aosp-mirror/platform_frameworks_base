@@ -16,7 +16,11 @@
 
 package android.media.quality;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.graphics.PixelFormat;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -26,9 +30,10 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * @hide
+ * Settings to configure ambient backlight hardware.
  */
-public class AmbientBacklightSettings implements Parcelable {
+@FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
+public final class AmbientBacklightSettings implements Parcelable {
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({SOURCE_NONE, SOURCE_AUDIO, SOURCE_VIDEO, SOURCE_AUDIO_VIDEO})
@@ -54,30 +59,6 @@ public class AmbientBacklightSettings implements Parcelable {
      */
     public static final int SOURCE_AUDIO_VIDEO = 3;
 
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({COLOR_FORMAT_RGB888})
-    public @interface ColorFormat {}
-
-    /**
-     * The color format is RGB888.
-     */
-    public static final int COLOR_FORMAT_RGB888 = 1;
-
-    /** @hide */
-    @Retention(RetentionPolicy.SOURCE)
-    @IntDef({ALGORITHM_NONE, ALGORITHM_RLE})
-    public @interface CompressAlgorithm {}
-
-    /**
-     * The compress algorithm is disabled.
-     */
-    public static final int ALGORITHM_NONE = 0;
-
-    /**
-     * The compress algorithm is RLE.
-     */
-    public static final int ALGORITHM_RLE = 1;
 
     /**
      * The source of the ambient backlight.
@@ -114,8 +95,16 @@ public class AmbientBacklightSettings implements Parcelable {
      */
     private final int mThreshold;
 
-    public AmbientBacklightSettings(int source, int maxFps, int colorFormat,
-            int horizontalZonesNumber, int verticalZonesNumber, boolean isLetterboxOmitted,
+    /**
+     * Constructs AmbientBacklightSettings.
+     */
+    public AmbientBacklightSettings(
+            @Source int source,
+            int maxFps,
+            @PixelFormat.Format int colorFormat,
+            int horizontalZonesNumber,
+            int verticalZonesNumber,
+            boolean isLetterboxOmitted,
             int threshold) {
         mSource = source;
         mMaxFps = maxFps;
@@ -136,32 +125,67 @@ public class AmbientBacklightSettings implements Parcelable {
         mThreshold = in.readInt();
     }
 
+    /**
+     * Gets source of ambient backlight detection.
+     */
     @Source
     public int getSource() {
         return mSource;
     }
 
+    /**
+     * Gets max frames per second.
+     */
+    @IntRange(from = 1)
     public int getMaxFps() {
         return mMaxFps;
     }
 
-    @ColorFormat
+    /**
+     * Gets color format.
+     */
+    @PixelFormat.Format
     public int getColorFormat() {
         return mColorFormat;
     }
 
-    public int getHorizontalZonesNumber() {
+    /**
+     * Gets the number of horizontal color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
+     */
+    @IntRange(from = 0)
+    public int getHorizontalZonesCount() {
         return mHorizontalZonesNumber;
     }
 
-    public int getVerticalZonesNumber() {
+    /**
+     * Gets the number of vertical color zones.
+     *
+     * <p>A color zone is a group of lights that always display the same color.
+     */
+    @IntRange(from = 0)
+    public int getVerticalZonesCount() {
         return mVerticalZonesNumber;
     }
 
+    /**
+     * Returns {@code true} if the black portion of the screen in letter box mode is omitted;
+     * {@code false} otherwise.
+     *
+     * <p>Letter-box is a technique to keep the original aspect ratio when displayed on a screen
+     * with different aspect ratio. Black bars are added to the top and bottom.
+     */
     public boolean isLetterboxOmitted() {
         return mIsLetterboxOmitted;
     }
 
+    /**
+     * Gets the detection threshold of the ambient light.
+     *
+     * <p>If the color of a color zone is changed but the difference is smaller than the threshold,
+     * the change is ignored.
+     */
     public int getThreshold() {
         return mThreshold;
     }

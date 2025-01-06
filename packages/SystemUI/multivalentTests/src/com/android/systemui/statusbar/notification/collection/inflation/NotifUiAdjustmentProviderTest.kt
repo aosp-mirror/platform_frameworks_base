@@ -27,6 +27,8 @@ import com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDIN
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.NotificationLockscreenUserManager
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_PUBLIC
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
@@ -42,6 +44,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.SecureSettings
 import com.google.common.truth.Truth.assertThat
+import kotlin.test.assertEquals
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Before
@@ -212,12 +215,12 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
         whenever(sensitiveNotifProtectionController.shouldProtectNotification(entry))
             .thenReturn(false)
         val oldAdjustment: NotifUiAdjustment = adjustmentProvider.calculateAdjustment(entry)
-        assertFalse(oldAdjustment.needsRedaction)
+        assertEquals(REDACTION_TYPE_NONE, oldAdjustment.redactionType)
 
         whenever(sensitiveNotifProtectionController.shouldProtectNotification(entry))
             .thenReturn(true)
         val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
-        assertTrue(newAdjustment.needsRedaction)
+        assertEquals(REDACTION_TYPE_PUBLIC, newAdjustment.redactionType)
 
         // Then: need re-inflation
         assertTrue(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))
@@ -229,12 +232,12 @@ class NotifUiAdjustmentProviderTest : SysuiTestCase() {
         whenever(sensitiveNotifProtectionController.shouldProtectNotification(entry))
             .thenReturn(false)
         val oldAdjustment = adjustmentProvider.calculateAdjustment(entry)
-        assertFalse(oldAdjustment.needsRedaction)
+        assertEquals(REDACTION_TYPE_NONE, oldAdjustment.redactionType)
 
         whenever(sensitiveNotifProtectionController.shouldProtectNotification(entry))
             .thenReturn(true)
         val newAdjustment = adjustmentProvider.calculateAdjustment(entry)
-        assertFalse(newAdjustment.needsRedaction)
+        assertEquals(REDACTION_TYPE_NONE, newAdjustment.redactionType)
 
         // Then: need no re-inflation
         assertFalse(NotifUiAdjustment.needReinflate(oldAdjustment, newAdjustment))

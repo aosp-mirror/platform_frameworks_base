@@ -13,50 +13,74 @@
      See the License for the specific language governing permissions and
      limitations under the License.
 -->
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:id="@+id/volume_dialog_container"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:layout_gravity="right"
-    android:divider="@drawable/volume_dialog_floating_sliders_spacer"
-    android:orientation="horizontal"
-    android:showDividers="middle|end|beginning"
-    android:theme="@style/volume_dialog_theme">
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/volume_dialog_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:clipChildren="false"
+    app:layoutDescription="@xml/volume_dialog_scene">
+
+    <View
+        android:id="@+id/volume_dialog_background"
+        android:layout_width="@dimen/volume_dialog_width"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/volume_dialog_background_top_margin"
+        android:layout_marginBottom="@dimen/volume_dialog_background_vertical_margin"
+        android:background="@drawable/volume_dialog_background"
+        app:layout_constraintBottom_toBottomOf="@id/volume_dialog_settings"
+        app:layout_constraintEnd_toEndOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintStart_toStartOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintTop_toTopOf="@id/volume_dialog_main_slider_container" />
+
+    <include
+        android:id="@id/volume_ringer_drawer"
+        layout="@layout/volume_ringer_drawer"
+        android:layout_width="0dp"
+        android:layout_height="0dp"
+        android:layout_marginEnd="@dimen/volume_dialog_ringer_drawer_diff_end_margin"
+        android:layout_marginBottom="@dimen/volume_dialog_components_spacing"
+        app:layout_constraintBottom_toTopOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintEnd_toEndOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"/>
+
+    <include
+        android:id="@+id/volume_dialog_main_slider_container"
+        layout="@layout/volume_dialog_slider" />
+
+    <ImageButton
+        android:id="@+id/volume_dialog_settings"
+        android:layout_width="@dimen/volume_dialog_button_size"
+        android:layout_height="@dimen/volume_dialog_button_size"
+        android:layout_marginTop="@dimen/volume_dialog_components_spacing"
+        android:background="@drawable/ripple_drawable_20dp"
+        android:contentDescription="@string/accessibility_volume_settings"
+        android:scaleType="centerInside"
+        android:soundEffectsEnabled="false"
+        android:tint="@androidprv:color/materialColorPrimary"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintStart_toStartOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintTop_toBottomOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintVertical_bias="0" />
 
     <LinearLayout
         android:id="@+id/volume_dialog_floating_sliders_container"
         android:layout_width="wrap_content"
-        android:layout_height="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="@dimen/volume_dialog_floating_sliders_vertical_padding_negative"
+        android:layout_marginBottom="@dimen/volume_dialog_floating_sliders_vertical_padding_negative"
+        android:clipChildren="false"
+        android:clipToOutline="false"
+        android:clipToPadding="false"
         android:divider="@drawable/volume_dialog_floating_sliders_spacer"
         android:gravity="bottom"
         android:orientation="horizontal"
-        android:paddingBottom="@dimen/volume_dialog_floating_sliders_bottom_padding"
-        android:showDividers="middle" />
+        android:showDividers="middle|beginning|end"
+        app:layout_constraintBottom_toBottomOf="@id/volume_dialog_main_slider_container"
+        app:layout_constraintEnd_toStartOf="@id/volume_dialog_background"
+        app:layout_constraintTop_toTopOf="@id/volume_dialog_main_slider_container" />
 
-    <LinearLayout
-        android:id="@+id/volume_dialog"
-        android:layout_width="@dimen/volume_dialog_width"
-        android:layout_height="wrap_content"
-        android:background="@drawable/volume_dialog_background"
-        android:divider="@drawable/volume_dialog_spacer"
-        android:paddingVertical="@dimen/volume_dialog_vertical_padding"
-        android:gravity="center_horizontal"
-        android:orientation="vertical"
-        android:showDividers="middle">
-
-        <include layout="@layout/volume_ringer_drawer" />
-
-        <include layout="@layout/volume_dialog_slider" />
-
-        <ImageButton
-            android:id="@+id/volume_dialog_settings"
-            android:layout_width="@dimen/volume_dialog_button_size"
-            android:layout_height="@dimen/volume_dialog_button_size"
-            android:background="@drawable/ripple_drawable_20dp"
-            android:contentDescription="@string/accessibility_volume_settings"
-            android:soundEffectsEnabled="false"
-            android:src="@drawable/horizontal_ellipsis"
-            android:tint="?androidprv:attr/materialColorPrimary" />
-    </LinearLayout>
-</LinearLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>

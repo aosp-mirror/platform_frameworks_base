@@ -20,6 +20,7 @@ import android.content.Context
 import androidx.annotation.ArrayRes
 import androidx.annotation.IntDef
 import com.android.settingslib.datastore.KeyValueStore
+import com.android.settingslib.datastore.Permissions
 
 /** Permit of read and write request. */
 @IntDef(
@@ -29,6 +30,7 @@ import com.android.settingslib.datastore.KeyValueStore
     ReadWritePermit.REQUIRE_USER_AGREEMENT,
 )
 @Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.TYPE)
 annotation class ReadWritePermit {
     companion object {
         /** Allow to read/write value. */
@@ -39,6 +41,19 @@ annotation class ReadWritePermit {
         const val REQUIRE_APP_PERMISSION = 2
         /** Require explicit user agreement (e.g. terms of service). */
         const val REQUIRE_USER_AGREEMENT = 3
+    }
+}
+
+/** Indicates how sensitive of the data. */
+@Retention(AnnotationRetention.SOURCE)
+@Target(AnnotationTarget.TYPE)
+annotation class SensitivityLevel {
+    companion object {
+        const val UNKNOWN_SENSITIVITY = 0
+        const val NO_SENSITIVITY = 1
+        const val LOW_SENSITIVITY = 2
+        const val MEDIUM_SENSITIVITY = 3
+        const val HIGH_SENSITIVITY = 4
     }
 }
 
@@ -54,38 +69,53 @@ interface PersistentPreference<T> {
     fun storage(context: Context): KeyValueStore =
         PreferenceScreenRegistry.getKeyValueStore(context, this as PreferenceMetadata)!!
 
+    /** Returns the required permissions to read preference value. */
+    fun getReadPermissions(context: Context): Permissions? = null
+
     /**
-     * Returns if the external application (identified by [callingUid]) has permission to read
-     * preference value.
+     * Returns if the external application (identified by [callingPid] and [callingUid]) is
+     * permitted to read preference value.
      *
      * The underlying implementation does NOT need to check common states like isEnabled,
-     * isRestricted or isAvailable.
+     * isRestricted, isAvailable or permissions in [getReadPermissions]. The framework will do it
+     * behind the scene.
      */
-    @ReadWritePermit
-    fun getReadPermit(context: Context, myUid: Int, callingUid: Int): Int =
+    fun getReadPermit(context: Context, callingPid: Int, callingUid: Int): @ReadWritePermit Int =
         PreferenceScreenRegistry.getReadPermit(
             context,
-            myUid,
+            callingPid,
             callingUid,
             this as PreferenceMetadata,
         )
 
+    /** Returns the required permissions to write preference value. */
+    fun getWritePermissions(context: Context): Permissions? = null
+
     /**
-     * Returns if the external application (identified by [callingUid]) has permission to write
-     * preference with given [value].
+     * Returns if the external application (identified by [callingPid] and [callingUid]) is
+     * permitted to write preference with given [value].
      *
      * The underlying implementation does NOT need to check common states like isEnabled,
-     * isRestricted or isAvailable.
+     * isRestricted, isAvailable or permissions in [getWritePermissions]. The framework will do it
+     * behind the scene.
      */
-    @ReadWritePermit
-    fun getWritePermit(context: Context, value: T?, myUid: Int, callingUid: Int): Int =
+    fun getWritePermit(
+        context: Context,
+        value: T?,
+        callingPid: Int,
+        callingUid: Int,
+    ): @ReadWritePermit Int =
         PreferenceScreenRegistry.getWritePermit(
             context,
             value,
-            myUid,
+            callingPid,
             callingUid,
             this as PreferenceMetadata,
         )
+
+    /** The sensitivity level of the preference. */
+    val sensitivityLevel: @SensitivityLevel Int
+        get() = SensitivityLevel.UNKNOWN_SENSITIVITY
 }
 
 /** Descriptor of values. */
@@ -172,3 +202,6 @@ interface RangeValue : ValueDescriptor {
     override fun isValidValue(context: Context, index: Int) =
         index in getMinValue(context)..getMaxValue(context)
 }
+
+/** A persistent preference that has a float value. */
+interface FloatPersistentPreference : PersistentPreference<Float>

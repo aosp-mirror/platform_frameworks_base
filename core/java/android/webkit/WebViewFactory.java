@@ -51,12 +51,6 @@ import java.lang.reflect.Method;
  */
 @SystemApi
 public final class WebViewFactory {
-
-    // visible for WebViewZygoteInit to look up the class by reflection and call preloadInZygote.
-    /** @hide */
-    private static final String CHROMIUM_WEBVIEW_FACTORY =
-            "com.android.webview.chromium.WebViewChromiumFactoryProviderForT";
-
     private static final String CHROMIUM_WEBVIEW_FACTORY_METHOD = "create";
 
     private static final String LOGTAG = "WebViewFactory";
@@ -275,8 +269,8 @@ public final class WebViewFactory {
      */
     public static Class<WebViewFactoryProvider> getWebViewProviderClass(ClassLoader clazzLoader)
             throws ClassNotFoundException {
-        return (Class<WebViewFactoryProvider>) Class.forName(CHROMIUM_WEBVIEW_FACTORY,
-                true, clazzLoader);
+        return (Class<WebViewFactoryProvider>) Class.forName(
+                WebViewFactoryProvider.getWebViewFactoryClassName(), true, clazzLoader);
     }
 
     /**

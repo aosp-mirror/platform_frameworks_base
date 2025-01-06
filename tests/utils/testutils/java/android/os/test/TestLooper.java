@@ -90,20 +90,6 @@ public class TestLooper {
      * and call {@link #dispatchAll()}.
      */
     public TestLooper(Clock clock) {
-        Field messageQueueUseConcurrentField = null;
-        boolean previousUseConcurrentValue = false;
-        try {
-            messageQueueUseConcurrentField = MessageQueue.class.getDeclaredField("sUseConcurrent");
-            messageQueueUseConcurrentField.setAccessible(true);
-            previousUseConcurrentValue = messageQueueUseConcurrentField.getBoolean(null);
-            // If we are using CombinedMessageQueue, we need to disable concurrent mode for testing.
-            messageQueueUseConcurrentField.set(null, false);
-        } catch (NoSuchFieldException e) {
-            // Ignore - maybe this is not CombinedMessageQueue?
-        } catch (IllegalAccessException e) {
-            throw new RuntimeException("Reflection error constructing or accessing looper", e);
-        }
-
         try {
             mLooper = LOOPER_CONSTRUCTOR.newInstance(false);
 
@@ -115,14 +101,6 @@ public class TestLooper {
         }
 
         mClock = clock;
-
-        if (messageQueueUseConcurrentField != null) {
-            try {
-                messageQueueUseConcurrentField.set(null, previousUseConcurrentValue);
-            } catch (IllegalAccessException e) {
-                throw new RuntimeException("Reflection error constructing or accessing looper", e);
-            }
-        }
     }
 
     public Looper getLooper() {

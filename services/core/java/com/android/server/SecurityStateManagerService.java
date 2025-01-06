@@ -22,6 +22,7 @@ import static android.os.SecurityStateManager.KEY_VENDOR_SPL;
 
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.ISecurityStateManager;
@@ -56,6 +57,15 @@ public class SecurityStateManagerService extends ISecurityStateManager.Stub {
 
     @Override
     public Bundle getGlobalSecurityState() {
+        final long token = Binder.clearCallingIdentity();
+        try {
+            return getGlobalSecurityStateInternal();
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    private Bundle getGlobalSecurityStateInternal() {
         Bundle globalSecurityState = new Bundle();
         globalSecurityState.putString(KEY_SYSTEM_SPL, Build.VERSION.SECURITY_PATCH);
         globalSecurityState.putString(KEY_VENDOR_SPL,

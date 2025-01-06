@@ -142,6 +142,11 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
+    void internalNotifySessionFlushEvent(int sessionId) {
+        getMainCaptureSession().internalNotifySessionFlushEvent(sessionId);
+    }
+
+    @Override
     boolean isContentCaptureEnabled() {
         return getMainCaptureSession().isContentCaptureEnabled();
     }

@@ -138,7 +138,8 @@ import com.android.internal.util.CollectionUtils;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 import com.android.modules.utils.TypedXmlSerializer;
-import com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerInternal;
+import com.android.server.LocalManagerRegistry;
+import com.android.server.ondeviceintelligence.OnDeviceIntelligenceManagerLocal;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.pm.dex.PackageDexUsage;
 import com.android.server.pm.parsing.PackageInfoUtils;
@@ -4748,6 +4749,38 @@ public class ComputerEngine implements Computer {
 
     @Nullable
     @Override
+    public ProviderInfo resolveContentProviderForUid(@NonNull String name,
+            @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId,
+            int filterCallingUid) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.RESOLVE_COMPONENT_FOR_UID,
+                "resolveContentProviderForUid");
+
+        int callingUid = Binder.getCallingUid();
+        int filterUserId = UserHandle.getUserId(filterCallingUid);
+        enforceCrossUserPermission(callingUid, filterUserId, false, false,
+                "resolveContentProviderForUid");
+
+        // Real callingUid should be able to see filterCallingUid
+        if (filterAppAccess(filterCallingUid, callingUid)) {
+            return null;
+        }
+
+        ProviderInfo pInfo = resolveContentProvider(name, flags, userId, filterCallingUid);
+        if (pInfo == null) {
+            return null;
+        }
+        // Real callingUid should be able to see the ContentProvider accessible to filterCallingUid
+        ProviderInfo pInfo2 = resolveContentProvider(name, flags, userId, callingUid);
+        if (pInfo2 != null
+                && Objects.equals(pInfo.name, pInfo2.name)
+                && Objects.equals(pInfo.authority, pInfo2.authority)) {
+            return pInfo;
+        }
+        return null;
+    }
+
+    @Nullable
+    @Override
     public ProviderInfo resolveContentProvider(@NonNull String name,
             @PackageManager.ResolveInfoFlagsBits long flags, @UserIdInt int userId,
             int callingUid) {
@@ -5353,7 +5386,7 @@ public class ComputerEngine implements Computer {
                     + ", uid:" + callingUid);
             throw new IllegalArgumentException("Unknown package: " + packageName);
         }
-        if (pkg.getUid() != callingUid
+        if (!UserHandle.isSameApp(callingUid, pkg.getUid())
                 && Process.SYSTEM_UID != callingUid) {
             throw new SecurityException("May not access signing KeySet of other apps.");
         }
@@ -5851,10 +5884,10 @@ public class ComputerEngine implements Computer {
         if (isHotword) {
             return true;
         }
-        OnDeviceIntelligenceManagerInternal onDeviceIntelligenceManagerInternal =
-                mInjector.getLocalService(OnDeviceIntelligenceManagerInternal.class);
-        return onDeviceIntelligenceManagerInternal != null
-                && uid == onDeviceIntelligenceManagerInternal.getInferenceServiceUid();
+        OnDeviceIntelligenceManagerLocal onDeviceIntelligenceManagerLocal =
+                LocalManagerRegistry.getManager(OnDeviceIntelligenceManagerLocal.class);
+        return onDeviceIntelligenceManagerLocal != null
+                && uid == onDeviceIntelligenceManagerLocal.getInferenceServiceUid();
     }
 
     @Nullable

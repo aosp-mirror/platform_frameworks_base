@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktibo (ezkerrekoa soilik)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktibo (eskuinekoa soilik)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktibo (ezkerrekoa eta eskuinekoa)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Ezin izan da eguneratu ingurunea"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktibo (multimedia-edukia soilik). Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktibo (multimedia-edukia soilik). L aldearen bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>. R aldearen bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Konektatuta (audioa partekatzeko eginbidea onartzen du). Bateria: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Tokiko terminala"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Gaitu tokiko shell-sarbidea duen terminal-aplikazioa"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-eko garapen-ingurunea"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Exekutatu Linux-en terminala Android-en"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"Exekutatu Linux terminala Android-en (esperimentala)"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Desgaitzen baduzu, Linux-eko terminaleko datuak garbituko dira"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP egiaztapena"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Ezarri HDCP egiaztapen-portaera"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Arazketa"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Trantsizioen animazio-eskala"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Animatzailearen iraupen-eskala"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulatu bigarren mailako pantailak"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Itzalak pantailan duen posizioa"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikazioak"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ez mantendu jarduerak"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Ezabatu jarduerak erabiltzailea haietatik irtetean"</string>
@@ -561,9 +564,9 @@
     <string name="save" msgid="3745809743277153149">"Gorde"</string>
     <string name="okay" msgid="949938843324579502">"Ados"</string>
     <string name="done" msgid="381184316122520313">"Eginda"</string>
-    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmak eta abisuak"</string>
-    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Eman alarmak eta abisuak ezartzeko baimena"</string>
-    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta abisuak"</string>
+    <string name="alarms_and_reminders_label" msgid="6918395649731424294">"Alarmak eta gogorarazpenak"</string>
+    <string name="alarms_and_reminders_switch_title" msgid="4939393911531826222">"Eman alarmak eta gogorarazpenak ezartzeko baimena"</string>
+    <string name="alarms_and_reminders_title" msgid="8819933264635406032">"Alarmak eta gogorarazpenak"</string>
     <string name="alarms_and_reminders_footer_title" msgid="6302587438389079695">"Eman alarmak ezartzeko eta denbora-muga duten ekintzak programatzeko baimena aplikazioari. Hala, aplikazioak atzeko planoan funtzionatuko du, eta litekeena da bateria gehiago kontsumitzea.\n\nBaimen hori ematen ez baduzu, ez dute funtzionatuko aplikazio honen bidez programatutako alarmek eta denbora-muga duten ekintzek."</string>
     <string name="keywords_alarms_and_reminders" msgid="6633360095891110611">"programazioa, alarma, gogorarazpena, erlojua"</string>
     <string name="zen_mode_do_not_disturb_name" msgid="6798711401734798283">"Ez molestatzeko"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Telefono hau"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Tableta hau"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Ordenagailu hau (barnekoa)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Telebista hau"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Oinarri bozgorailuduna"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Kanpoko gailua"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Konektatutako gailua"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Telefono hau"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analogikoa"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Ezin da erreproduzitu gailu honetan"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Aldatzeko, bertsio-berritu kontua"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Deskargak ezin dira hemen erreproduzitu"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC bidez konektatuta"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC bidez konektatuta"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Telebistaren audio-erreproduzigailu lehenetsia"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI irteera"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Barneko bozgorailuak"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Bozgorailu integratua"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Telebistako audioa"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Arazo bat izan da konektatzean. Itzali gailua eta pitz ezazu berriro."</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Audio-gailu kableduna"</string>
     <string name="help_label" msgid="3528360748637781274">"Laguntza eta iritziak"</string>

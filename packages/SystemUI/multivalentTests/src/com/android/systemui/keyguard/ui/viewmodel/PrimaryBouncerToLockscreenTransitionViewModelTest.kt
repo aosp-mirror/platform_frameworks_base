@@ -21,11 +21,13 @@ import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.data.repository.fingerprintPropertyRepository
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.keyguard.data.repository.biometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.collect.Range
@@ -110,16 +112,47 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
             assertThat(bgViewAlpha).isEqualTo(1f)
         }
 
+    @Test
+    fun blurRadiusGoesFromMaxToMinWhenShadeIsNotExpanded() =
+        testScope.runTest {
+            val values by collectValues(underTest.windowBlurRadius)
+            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(false)
+
+            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+                transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
+                startValue = kosmos.blurConfig.maxBlurRadiusPx,
+                endValue = kosmos.blurConfig.minBlurRadiusPx,
+                actualValuesProvider = { values },
+                transitionFactory = ::step,
+            )
+        }
+
+    @Test
+    fun blurRadiusRemainsAtMaxWhenShadeIsExpanded() =
+        testScope.runTest {
+            val values by collectValues(underTest.windowBlurRadius)
+            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+
+            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+                transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
+                startValue = kosmos.blurConfig.maxBlurRadiusPx,
+                endValue = kosmos.blurConfig.maxBlurRadiusPx,
+                actualValuesProvider = { values },
+                transitionFactory = ::step,
+                checkInterpolatedValues = false,
+            )
+        }
+
     private fun step(
         value: Float,
-        state: TransitionState = TransitionState.RUNNING
+        state: TransitionState = TransitionState.RUNNING,
     ): TransitionStep {
         return TransitionStep(
             from = KeyguardState.PRIMARY_BOUNCER,
             to = KeyguardState.LOCKSCREEN,
             value = value,
             transitionState = state,
-            ownerName = "PrimaryBouncerToLockscreenTransitionViewModelTest"
+            ownerName = "PrimaryBouncerToLockscreenTransitionViewModelTest",
         )
     }
 }

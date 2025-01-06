@@ -25,6 +25,7 @@
 #include <private/android/choreographer.h>
 #include <sys/resource.h>
 #include <ui/FatVector.h>
+#include <ui/GraphicBufferAllocator.h>
 #include <utils/Condition.h>
 #include <utils/Log.h>
 #include <utils/Mutex.h>
@@ -518,10 +519,17 @@ bool RenderThread::isCurrent() {
 void RenderThread::preload() {
     // EGL driver is always preloaded only if HWUI renders with GL.
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaGL) {
-        std::thread eglInitThread([]() { eglGetDisplay(EGL_DEFAULT_DISPLAY); });
-        eglInitThread.detach();
+        if (Properties::earlyPreloadGlContext()) {
+            queue().post([this]() { requireGlContext(); });
+        } else {
+            std::thread eglInitThread([]() { eglGetDisplay(EGL_DEFAULT_DISPLAY); });
+            eglInitThread.detach();
+        }
     } else {
         requireVkContext();
+    }
+    if (Properties::earlyPreloadGlContext()) {
+        queue().post([]() { GraphicBufferAllocator::getInstance(); });
     }
     HardwareBitmapUploader::initialize();
 }

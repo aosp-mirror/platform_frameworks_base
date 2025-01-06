@@ -60,3 +60,28 @@ flag {
     bug: "331749778"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "enable_restricted_mode_changes"
+    namespace: "onboarding"
+    description: "Enables the new framework behavior of not putting apps in restricted mode for "
+            "B&R operations in certain cases."
+    bug: "376661510"
+    is_fixed_read_only: true
+    is_exported: true
+}
+
+flag {
+    name: "enable_read_all_external_storage_files"
+    is_exported: true
+    namespace: "onboarding"
+    description: "Enables read all external storage files"
+    bug: "376598575"
+}
+flag {
+    name: "enable_metrics_settings_backup_agents"
+    namespace: "onboarding"
+    description: "Enable SettingsBackupAgent to collect B&R agent metrics."
+    bug: "379861078"
+    is_fixed_read_only: true
+}

@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"চালু আছে (শুধু বাঁদিক)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"চালু আছে (শুধু ডানদিক)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"চালু আছে (বাঁদিক ও ডানদিক)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"সারাউন্ডিং আপডেট করা যায়নি"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"চালু আছে (শুধুমাত্র মিডিয়া)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ব্যাটারি।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"চালু আছে (শুধুমাত্র মিডিয়া), বাঁদিক: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ডানদিক: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ব্যাটারি।"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"কানেক্ট করা আছে (অডিও শেয়ারিংয়ে কাজ করে), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ব্যাটারি।"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"স্থানীয় টার্মিনাল"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"স্থানীয় শেল অ্যাক্সেসের প্রস্তাব করে এমন টার্মিনাল অ্যাপ্লিকেশন সক্ষম করুন"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux ডেভেলপমেন্ট এনভায়র্নমেন্ট"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android-এ Linux টার্মিনাল রান করান"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(পরীক্ষামূলক) Android-এ Linux টার্মিনাল চালান"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"আপনি বন্ধ করে দিলে, Linux টার্মিনাল ডেটা মুছে যাবে"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP পরীক্ষণ"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP চেক করার আচরণ সেট করুন"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"ডিবাগিং"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ট্র্যানজিশন অ্যানিমেশন স্কেল"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"অ্যানিমেটর সময়কাল স্কেল"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"গৌণ প্রদর্শনগুলি নকল করুন"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"শেড ডিসপ্লে করার পজিশন"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"অ্যাপ"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"অ্যাক্টিভিটি রাখবেন না"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ব্যবহারকারী এটি ছেড়ে যাওয়ার পরে যত তাড়াতাড়ি সম্ভব প্রতিটি অ্যাক্টিভিটি ধ্বংস করুন"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"এই ফোন"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"এই ট্যাবলেট"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"এই কম্পিউটার (ইন্টার্নাল)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"এই টিভি"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"ডক স্পিকার"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"এক্সটার্নাল ডিভাইস"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"কানেক্ট থাকা ডিভাইস"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"এই ফোনটি"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"অ্যানালগ"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"এই ডিভাইসে চালানো যাবে না"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"পাল্টাতে অ্যাকাউন্ট আপগ্রেড করুন"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"এতে ডাউনলোড করা কন্টেন্ট প্লে করা যাবে না"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC-এর মাধ্যমে কানেক্ট করা হয়েছে"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC-এর মাধ্যমে কানেক্ট করা হয়েছে"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"টিভির ডিফল্ট সেটিং"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI আউটপুট"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ইন্টার্নাল স্পিকার"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"বিল্ট-ইন স্পিকার"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"টিভি অডিও"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"কানেক্ট করতে সমস্যা হচ্ছে। ডিভাইস বন্ধ করে আবার চালু করুন"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"ওয়্যার অডিও ডিভাইস"</string>
     <string name="help_label" msgid="3528360748637781274">"সহায়তা ও মতামত"</string>

@@ -19,8 +19,8 @@
     xmlns:androidprv="http://schemas.android.com/apk/prv/res/android">
 
     <!-- These colors are used for Remote Views. -->
-    <color name="onSurface">?androidprv:attr/materialColorOnSurface</color>
-    <color name="onSurfaceVariant">?androidprv:attr/materialColorOnSurfaceVariant</color>
-    <color name="surfaceDim">?androidprv:attr/materialColorSurfaceDim</color>
-    <color name="surfaceContainer">?androidprv:attr/materialColorSurfaceContainer</color>
+    <color name="onSurface">@androidprv:color/materialColorOnSurface</color>
+    <color name="onSurfaceVariant">@androidprv:color/materialColorOnSurfaceVariant</color>
+    <color name="surfaceDim">@androidprv:color/materialColorSurfaceDim</color>
+    <color name="surfaceContainer">@androidprv:color/materialColorSurfaceContainer</color>
 </resources>

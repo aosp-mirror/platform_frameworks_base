@@ -26,6 +26,7 @@ import android.util.Slog;
 
 import com.android.internal.util.dump.DualDumpOutputStream;
 import com.android.server.audio.AudioService;
+import com.android.server.usb.flags.Flags;
 
 import java.util.Arrays;
 
@@ -211,6 +212,9 @@ public final class UsbAlsaDevice {
         mIsSelected[direction] = true;
         mState[direction] = 0;
         startJackDetect();
+        if (direction == OUTPUT && Flags.maximizeUsbAudioVolumeWhenConnecting()) {
+            nativeSetVolume(mCardNum, 1.0f /*volume*/);
+        }
         updateWiredDeviceConnectionState(direction, true /*enable*/);
     }
 
@@ -412,5 +416,7 @@ public final class UsbAlsaDevice {
 
         return result;
     }
+
+    private native void nativeSetVolume(int card, float volume);
 }
 

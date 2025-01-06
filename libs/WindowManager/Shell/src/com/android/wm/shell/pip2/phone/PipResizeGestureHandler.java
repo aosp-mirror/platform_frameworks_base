@@ -531,7 +531,7 @@ public class PipResizeGestureHandler implements
                 // If resize transition was scheduled from this component, handle leash updates.
                 mWaitingForBoundsChangeTransition = false;
 
-                SurfaceControl pipLeash = mPipTransitionState.mPinnedTaskLeash;
+                SurfaceControl pipLeash = mPipTransitionState.getPinnedTaskLeash();
                 Preconditions.checkState(pipLeash != null,
                         "No leash cached by mPipTransitionState=" + mPipTransitionState);
 

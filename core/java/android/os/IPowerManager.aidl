@@ -22,6 +22,7 @@ import android.os.ParcelDuration;
 import android.os.PowerSaveState;
 import android.os.WorkSource;
 import android.os.IWakeLockCallback;
+import android.os.IScreenTimeoutPolicyListener;
 
 /** @hide */
 
@@ -45,6 +46,10 @@ interface IPowerManager
     @UnsupportedAppUsage
     boolean isWakeLockLevelSupported(int level);
     boolean isWakeLockLevelSupportedWithDisplayId(int level, int displayId);
+    oneway void addScreenTimeoutPolicyListener(int displayId,
+        IScreenTimeoutPolicyListener listener);
+    oneway void removeScreenTimeoutPolicyListener(int displayId,
+        IScreenTimeoutPolicyListener listener);
 
     void userActivity(int displayId, long time, int event, int flags);
     void wakeUp(long time, int reason, String details, String opPackageName);
@@ -55,7 +60,7 @@ interface IPowerManager
     void goToSleepWithDisplayId(int displayId, long time, int reason, int flags);
     @UnsupportedAppUsage(maxTargetSdk = 28)
     void nap(long time);
-    float getBrightnessConstraint(int constraint);
+    float getBrightnessConstraint(int displayId, int constraint);
     @UnsupportedAppUsage
     boolean isInteractive();
     boolean isDisplayInteractive(int displayId);

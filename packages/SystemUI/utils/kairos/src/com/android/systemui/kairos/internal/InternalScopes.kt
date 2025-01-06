@@ -16,39 +16,25 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.FrpBuildScope
-import com.android.systemui.kairos.FrpStateScope
-import com.android.systemui.kairos.FrpTransactionScope
-import com.android.systemui.kairos.TFlow
-import com.android.systemui.kairos.internal.util.HeteroMap
-import com.android.systemui.kairos.internal.util.Key
-import com.android.systemui.kairos.util.Maybe
+import com.android.systemui.kairos.BuildScope
+import com.android.systemui.kairos.Events
+import com.android.systemui.kairos.StateScope
+import com.android.systemui.kairos.TransactionScope
 
 internal interface InitScope {
     val networkId: Any
 }
 
-internal interface EvalScope : NetworkScope, DeferScope {
-    val frpScope: FrpTransactionScope
+internal interface EvalScope : NetworkScope, DeferScope, TransactionScope
 
-    suspend fun <R> runInTransactionScope(block: suspend FrpTransactionScope.() -> R): R
+internal interface InternalStateScope : EvalScope, StateScope {
+    val endSignal: Events<Any>
+    val endSignalOnce: Events<Any>
+
+    fun childStateScope(newEnd: Events<Any>): InternalStateScope
 }
 
-internal interface StateScope : EvalScope {
-    override val frpScope: FrpStateScope
-
-    suspend fun <R> runInStateScope(block: suspend FrpStateScope.() -> R): R
-
-    val endSignal: TFlow<Any>
-
-    fun childStateScope(newEnd: TFlow<Any>): StateScope
-}
-
-internal interface BuildScope : StateScope {
-    override val frpScope: FrpBuildScope
-
-    suspend fun <R> runInBuildScope(block: suspend FrpBuildScope.() -> R): R
-}
+internal interface InternalBuildScope : InternalStateScope, BuildScope
 
 internal interface NetworkScope : InitScope {
 
@@ -58,25 +44,15 @@ internal interface NetworkScope : InitScope {
     val compactor: Scheduler
     val scheduler: Scheduler
 
-    val transactionStore: HeteroMap
+    val transactionStore: TransactionStore
 
     fun scheduleOutput(output: Output<*>)
 
-    fun scheduleMuxMover(muxMover: MuxDeferredNode<*, *>)
+    fun scheduleMuxMover(muxMover: MuxDeferredNode<*, *, *>)
 
-    fun schedule(state: TStateSource<*>)
-
-    suspend fun schedule(node: MuxNode<*, *, *>)
+    fun schedule(state: StateSource<*>)
 
     fun scheduleDeactivation(node: PushNode<*>)
 
     fun scheduleDeactivation(output: Output<*>)
 }
-
-internal fun <A> NetworkScope.setResult(node: Key<A>, result: A) {
-    transactionStore[node] = result
-}
-
-internal fun <A> NetworkScope.getCurrentValue(key: Key<A>): Maybe<A> = transactionStore[key]
-
-internal fun NetworkScope.hasCurrentValue(key: Key<*>): Boolean = transactionStore.contains(key)

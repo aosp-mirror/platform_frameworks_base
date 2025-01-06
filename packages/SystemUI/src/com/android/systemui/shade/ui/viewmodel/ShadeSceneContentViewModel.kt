@@ -30,15 +30,21 @@ import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.settings.brightness.ui.viewModel.BrightnessMirrorViewModel
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.shade.shared.model.ShadeMode
+import com.android.systemui.statusbar.disableflags.domain.interactor.DisableFlagsInteractor
 import com.android.systemui.unfold.domain.interactor.UnfoldTransitionInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.util.concurrent.atomic.AtomicBoolean
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.launchIn
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.onEach
 
 /**
  * Models UI state used to render the content of the shade scene.
@@ -54,6 +60,7 @@ constructor(
     val brightnessMirrorViewModelFactory: BrightnessMirrorViewModel.Factory,
     val mediaCarouselInteractor: MediaCarouselInteractor,
     shadeInteractor: ShadeInteractor,
+    private val disableFlagsInteractor: DisableFlagsInteractor,
     private val footerActionsViewModelFactory: FooterActionsViewModel.Factory,
     private val footerActionsController: FooterActionsController,
     private val unfoldTransitionInteractor: UnfoldTransitionInteractor,
@@ -70,12 +77,21 @@ constructor(
 
     val isMediaVisible: StateFlow<Boolean> = mediaCarouselInteractor.hasActiveMediaOrRecommendation
 
+    private val _isQsEnabled =
+        MutableStateFlow(!disableFlagsInteractor.disableFlags.value.isQuickSettingsEnabled())
+    val isQsEnabled: StateFlow<Boolean> = _isQsEnabled.asStateFlow()
+
     private val footerActionsControllerInitialized = AtomicBoolean(false)
 
-    override suspend fun onActivated(): Nothing {
-        deviceEntryInteractor.isDeviceEntered.collect { isDeviceEntered ->
-            _isEmptySpaceClickable.value = !isDeviceEntered
-        }
+    override suspend fun onActivated(): Nothing = coroutineScope {
+        deviceEntryInteractor.isDeviceEntered
+            .onEach { isDeviceEntered -> _isEmptySpaceClickable.value = !isDeviceEntered }
+            .launchIn(this)
+        disableFlagsInteractor.disableFlags
+            .map { it.isQuickSettingsEnabled() }
+            .onEach { _isQsEnabled.value = it }
+            .launchIn(this)
+        awaitCancellation()
     }
 
     /**

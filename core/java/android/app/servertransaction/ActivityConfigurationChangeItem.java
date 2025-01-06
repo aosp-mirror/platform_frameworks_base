@@ -56,7 +56,7 @@ public class ActivityConfigurationChangeItem extends ActivityTransactionItem {
 
     @Override
     public void preExecute(@NonNull ClientTransactionHandler client) {
-        CompatibilityInfo.applyOverrideScaleIfNeeded(mConfiguration);
+        CompatibilityInfo.applyOverrideIfNeeded(mConfiguration);
         // Notify the client of an upcoming change in the token configuration. This ensures that
         // batches of config change items only process the newest configuration.
         client.updatePendingActivityConfiguration(getActivityToken(), mConfiguration);

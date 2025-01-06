@@ -10,6 +10,7 @@ import com.android.systemui.Prefs;
 import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.qs.customize.QSCustomizerController;
 import com.android.systemui.qs.dagger.QSScope;
+import com.android.systemui.shade.ShadeDisplayAware;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -96,7 +97,7 @@ public class QSTileRevealController {
         private final QSCustomizerController mQsCustomizerController;
 
         @Inject
-        Factory(Context context, QSCustomizerController qsCustomizerController) {
+        Factory(@ShadeDisplayAware Context context, QSCustomizerController qsCustomizerController) {
             mContext = context;
             mQsCustomizerController = qsCustomizerController;
         }

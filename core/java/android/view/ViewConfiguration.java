@@ -591,7 +591,7 @@ public class ViewConfiguration {
                 res.getBoolean(
                         com.android.internal.R.bool.config_viewBasedRotaryEncoderHapticsEnabled);
         mViewTouchScreenHapticScrollFeedbackEnabled =
-                Flags.enableTouchScrollFeedback()
+                Flags.enableScrollFeedbackForTouch()
                         ? res.getBoolean(
                         com.android.internal.R.bool
                                 .config_viewTouchScreenHapticScrollFeedbackEnabled)

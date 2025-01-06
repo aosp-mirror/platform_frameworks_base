@@ -17,13 +17,17 @@
 package android.os;
 
 import android.os.CombinedVibration;
+import android.os.ICancellationSignal;
 import android.os.IVibratorStateListener;
 import android.os.VibrationAttributes;
 import android.os.VibratorInfo;
+import android.os.vibrator.IVibrationSession;
+import android.os.vibrator.IVibrationSessionCallback;
 
 /** {@hide} */
 interface IVibratorManagerService {
     int[] getVibratorIds();
+    int getCapabilities();
     VibratorInfo getVibratorInfo(int vibratorId);
     @EnforcePermission("ACCESS_VIBRATOR_STATE")
     boolean isVibrating(int vibratorId);
@@ -50,4 +54,9 @@ interface IVibratorManagerService {
     oneway void performHapticFeedbackForInputDevice(int uid, int deviceId, String opPkg,
             int constant, int inputDeviceId, int inputSource, String reason, int flags,
             int privFlags);
+
+    @EnforcePermission(allOf={"VIBRATE", "VIBRATE_VENDOR_EFFECTS", "START_VIBRATION_SESSIONS"})
+    ICancellationSignal startVendorVibrationSession(int uid, int deviceId, String opPkg,
+            in int[] vibratorIds, in VibrationAttributes attributes, String reason,
+            in IVibrationSessionCallback callback);
 }

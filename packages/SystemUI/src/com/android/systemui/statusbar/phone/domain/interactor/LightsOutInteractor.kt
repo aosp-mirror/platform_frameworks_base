@@ -34,8 +34,8 @@ class LightsOutInteractor
 @Inject
 constructor(private val repository: StatusBarModeRepositoryStore) {
 
-    fun isLowProfile(displayId: Int): Flow<Boolean> =
-        repository.forDisplay(displayId).statusBarMode.map {
+    fun isLowProfile(displayId: Int): Flow<Boolean>? =
+        repository.forDisplay(displayId)?.statusBarMode?.map {
             when (it) {
                 StatusBarMode.LIGHTS_OUT,
                 StatusBarMode.LIGHTS_OUT_TRANSPARENT -> true

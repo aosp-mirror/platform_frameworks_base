@@ -19,6 +19,7 @@ package android.media;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.media.flags.Flags.FLAG_ENABLE_BUILT_IN_SPEAKER_ROUTE_SUITABILITY_STATUSES;
 import static com.android.media.flags.Flags.FLAG_ENABLE_GET_TRANSFERABLE_ROUTES;
+import static com.android.media.flags.Flags.FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME;
 import static com.android.media.flags.Flags.FLAG_ENABLE_PRIVILEGED_ROUTING_FOR_MEDIA_ROUTING_CONTROL;
 import static com.android.media.flags.Flags.FLAG_ENABLE_RLP_CALLBACKS_IN_MEDIA_ROUTER2;
 import static com.android.media.flags.Flags.FLAG_ENABLE_SCREEN_OFF_SCANNING;
@@ -809,7 +810,7 @@ public final class MediaRouter2 {
      * updates} in order to keep the system UI in a consistent state. You can also call this method
      * at any other point to update the listing preference dynamically.
      *
-     * <p>Any calls to this method from a privileged router will throw an {@link
+     * <p>Calling this method on a proxy router instance will throw an {@link
      * UnsupportedOperationException}.
      *
      * <p>Notes:
@@ -1385,19 +1386,27 @@ public final class MediaRouter2 {
                         "requestCreateSessionByManager | requestId: %d, oldSession: %s, route: %s",
                         managerRequestId, oldSession, route));
         RoutingController controller;
+        String oldSessionId = oldSession.getId();
         if (oldSession.isSystemSession()) {
             controller = getSystemController();
         } else {
             synchronized (mLock) {
-                controller = mNonSystemRoutingControllers.get(oldSession.getId());
+                controller = mNonSystemRoutingControllers.get(oldSessionId);
             }
         }
         if (controller == null) {
+            Log.w(
+                    TAG,
+                    TextUtils.formatSimple(
+                            "Ignoring requestCreateSessionByManager (requestId: %d) because no"
+                                + " controller for old session (id: %s) was found.",
+                            managerRequestId, oldSessionId));
             return;
         }
         requestCreateController(controller, route, managerRequestId);
     }
 
+    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
     private List<MediaRoute2Info> getSortedRoutes(
             List<MediaRoute2Info> routes, List<String> packageOrder) {
         if (packageOrder.isEmpty()) {
@@ -1412,11 +1421,13 @@ public final class MediaRouter2 {
         ArrayList<MediaRoute2Info> sortedRoutes = new ArrayList<>(routes);
         // take the negative for descending order
         sortedRoutes.sort(
-                Comparator.comparingInt(r -> -packagePriority.getOrDefault(r.getPackageName(), 0)));
+                Comparator.comparingInt(
+                        r -> -packagePriority.getOrDefault(r.getProviderPackageName(), 0)));
         return sortedRoutes;
     }
 
     @GuardedBy("mLock")
+    @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
     private List<MediaRoute2Info> filterRoutesWithCompositePreferenceLocked(
             List<MediaRoute2Info> routes) {
 
@@ -1429,10 +1440,10 @@ public final class MediaRouter2 {
                 continue;
             }
             if (!mDiscoveryPreference.getAllowedPackages().isEmpty()
-                    && (route.getPackageName() == null
+                    && (route.getProviderPackageName() == null
                             || !mDiscoveryPreference
                                     .getAllowedPackages()
-                                    .contains(route.getPackageName()))) {
+                                    .contains(route.getProviderPackageName()))) {
                 continue;
             }
             if (mDiscoveryPreference.shouldRemoveDuplicates()) {
@@ -1771,10 +1782,12 @@ public final class MediaRouter2 {
     }
 
     /**
-     * A class to control media routing session in media route provider. For example,
-     * selecting/deselecting/transferring to routes of a session can be done through this. Instances
-     * are created when {@link TransferCallback#onTransfer(RoutingController, RoutingController)} is
-     * called, which is invoked after {@link #transferTo(MediaRoute2Info)} is called.
+     * Controls a media routing session.
+     *
+     * <p>Routing controllers wrap a {@link RoutingSessionInfo}, taking care of mapping route ids to
+     * {@link MediaRoute2Info} instances. You can still access the underlying session using {@link
+     * #getRoutingSessionInfo()}, but keep in mind it can be changed by other threads. Changes to
+     * the routing session are notified via {@link ControllerCallback}.
      */
     public class RoutingController {
         private final Object mControllerLock = new Object();
@@ -1836,7 +1849,9 @@ public final class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of currently selected routes
+         * Returns the unmodifiable list of currently selected routes
+         *
+         * @see RoutingSessionInfo#getSelectedRoutes()
          */
         @NonNull
         public List<MediaRoute2Info> getSelectedRoutes() {
@@ -1848,7 +1863,9 @@ public final class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of selectable routes for the session.
+         * Returns the unmodifiable list of selectable routes for the session.
+         *
+         * @see RoutingSessionInfo#getSelectableRoutes()
          */
         @NonNull
         public List<MediaRoute2Info> getSelectableRoutes() {
@@ -1860,7 +1877,9 @@ public final class MediaRouter2 {
         }
 
         /**
-         * @return the unmodifiable list of deselectable routes for the session.
+         * Returns the unmodifiable list of deselectable routes for the session.
+         *
+         * @see RoutingSessionInfo#getDeselectableRoutes()
          */
         @NonNull
         public List<MediaRoute2Info> getDeselectableRoutes() {
@@ -2667,7 +2686,7 @@ public final class MediaRouter2 {
         @Override
         public void setRouteListingPreference(@Nullable RouteListingPreference preference) {
             throw new UnsupportedOperationException(
-                    "RouteListingPreference cannot be set by a privileged MediaRouter2 instance.");
+                    "RouteListingPreference cannot be set by a proxy MediaRouter2 instance.");
         }
 
         @Override
@@ -3635,6 +3654,7 @@ public final class MediaRouter2 {
             }
         }
 
+        @FlaggedApi(FLAG_ENABLE_MEDIA_ROUTE_2_INFO_PROVIDER_PACKAGE_NAME)
         @Override
         public List<MediaRoute2Info> filterRoutesWithIndividualPreference(
                 List<MediaRoute2Info> routes, RouteDiscoveryPreference discoveryPreference) {
@@ -3644,10 +3664,10 @@ public final class MediaRouter2 {
                     continue;
                 }
                 if (!discoveryPreference.getAllowedPackages().isEmpty()
-                        && (route.getPackageName() == null
+                        && (route.getProviderPackageName() == null
                                 || !discoveryPreference
                                         .getAllowedPackages()
-                                        .contains(route.getPackageName()))) {
+                                        .contains(route.getProviderPackageName()))) {
                     continue;
                 }
                 filteredRoutes.add(route);

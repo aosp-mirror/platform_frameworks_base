@@ -22,14 +22,14 @@
     android:gravity="bottom|end">
 
     <include android:id="@+id/user_aspect_ratio_settings_hint"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:layout_width="@dimen/compat_hint_width"
         android:layout_height="wrap_content"
         layout="@layout/compat_mode_hint"/>
 
     <ImageButton
         android:id="@+id/user_aspect_ratio_settings_button"
-        android:visibility="invisible"
+        android:visibility="gone"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginEnd="@dimen/compat_button_margin"

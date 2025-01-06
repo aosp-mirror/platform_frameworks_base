@@ -35,9 +35,7 @@ import com.android.systemui.qs.footer.FooterActionsTestUtils
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.truth.correspondence.FakeUiEvent
 import com.android.systemui.truth.correspondence.LogMaker
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
-import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.google.common.truth.Truth.assertThat
@@ -45,8 +43,11 @@ import kotlinx.coroutines.test.TestCoroutineScheduler
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -92,9 +93,10 @@ class FooterActionsInteractorTest : SysuiTestCase() {
         // Dialog is shown.
         verify(globalActionsDialogLite)
             .showOrHideDialog(
-                /* keyguardShowing= */ false,
-                /* isDeviceProvisioned= */ true,
-                expandable,
+                /* keyguardShowing= */ eq(false),
+                /* isDeviceProvisioned= */ eq(true),
+                eq(expandable),
+                anyInt(),
             )
     }
 

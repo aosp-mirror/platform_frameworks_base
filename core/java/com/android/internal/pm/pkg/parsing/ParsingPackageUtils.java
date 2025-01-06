@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.INSTALL_PARSE_FAILED_UNEXPECTED_
 import static android.os.Build.VERSION_CODES.DONUT;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
+import static android.sdk.Flags.majorMinorVersioningScheme;
 
 import static com.android.internal.pm.pkg.parsing.ParsingUtils.parseKnownActivityEmbeddingCerts;
 
@@ -46,6 +47,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.ConfigurationInfo;
 import android.content.pm.FeatureGroupInfo;
 import android.content.pm.FeatureInfo;
+import android.content.pm.Flags;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.Property;
@@ -153,6 +155,13 @@ import java.util.StringTokenizer;
 public class ParsingPackageUtils {
 
     private static final String TAG = ParsingUtils.TAG;
+
+    // It is the maximum length of the typedArray of {@link android.R.attr#alternateIcons}
+    // and {@link android.R.attr#alternateLabels}.
+    private static final int MAXIMUM_LAUNCHER_ALTERNATE_IDS_LENGTH = 500;
+
+    private static final String TYPE_STRING = "string";
+    private static final String TYPE_DRAWABLE = "drawable";
 
     public static final boolean DEBUG_JAR = false;
     public static final boolean DEBUG_BACKUP = false;
@@ -533,6 +542,7 @@ public class ParsingPackageUtils {
 
         pkg.setGwpAsanMode(-1);
         pkg.setMemtagMode(-1);
+        pkg.setPageSizeAppCompatFlags(ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED);
 
         afterParseBaseApplication(pkg);
 
@@ -1680,6 +1690,21 @@ public class ParsingPackageUtils {
                     targetCode = minCode;
                 }
 
+                if (majorMinorVersioningScheme()) {
+                    val = sa.peekValue(R.styleable.AndroidManifestUsesSdk_minSdkVersionFull);
+                    if (val != null) {
+                        if (val.type == TypedValue.TYPE_STRING && val.string != null) {
+                            String minSdkVersionFullString = val.string.toString();
+                            ParseResult<Void> minSdkVersionFullResult =
+                                    FrameworkParsingPackageUtils.verifyMinSdkVersionFull(
+                                        minSdkVersionFullString, Build.VERSION.SDK_INT_FULL, input);
+                            if (minSdkVersionFullResult.isError()) {
+                                return input.error(minSdkVersionFullResult);
+                            }
+                        }
+                    }
+                }
+
                 if (isApkInApex) {
                     val = sa.peekValue(R.styleable.AndroidManifestUsesSdk_maxSdkVersion);
                     if (val != null) {
@@ -2021,6 +2046,24 @@ public class ParsingPackageUtils {
                 pkg.setManageSpaceActivityName(manageSpaceActivityName);
             }
 
+            if (Flags.changeLauncherBadging()) {
+                ParseResult<int[]> result = drawableResIdArray(input, sa, res,
+                        R.styleable.AndroidManifestApplication_alternateLauncherIcons,
+                        MAXIMUM_LAUNCHER_ALTERNATE_IDS_LENGTH);
+                if (result.isError()) {
+                    return input.error(result);
+                }
+                pkg.setAlternateLauncherIconResIds(result.getResult());
+
+                result = stringResIdArray(input, sa, res,
+                        R.styleable.AndroidManifestApplication_alternateLauncherLabels,
+                        MAXIMUM_LAUNCHER_ALTERNATE_IDS_LENGTH);
+                if (result.isError()) {
+                    return input.error(result);
+                }
+                pkg.setAlternateLauncherLabelResIds(result.getResult());
+            }
+
             if (pkg.isBackupAllowed()) {
                 // backupAgent, killAfterRestore, fullBackupContent, backupInForeground,
                 // and restoreAnyVersion are only relevant if backup is possible for the
@@ -2156,6 +2199,13 @@ public class ParsingPackageUtils {
 
             pkg.setGwpAsanMode(sa.getInt(R.styleable.AndroidManifestApplication_gwpAsanMode, -1));
             pkg.setMemtagMode(sa.getInt(R.styleable.AndroidManifestApplication_memtagMode, -1));
+
+            if (Flags.appCompatOption16kb()) {
+                pkg.setPageSizeAppCompatFlags(
+                        sa.getInt(R.styleable.AndroidManifestApplication_pageSizeCompat,
+                                ApplicationInfo.PAGE_SIZE_APP_COMPAT_FLAG_UNDEFINED));
+            }
+
             if (sa.hasValue(R.styleable.AndroidManifestApplication_nativeHeapZeroInitialized)) {
                 final boolean v = sa.getBoolean(
                         R.styleable.AndroidManifestApplication_nativeHeapZeroInitialized, false);
@@ -2351,6 +2401,7 @@ public class ParsingPackageUtils {
      * Flags are separated by type and by default value. They are sorted alphabetically within each
      * section.
      */
+    @SuppressWarnings("AndroidFrameworkCompatChange")
     private void parseBaseAppBasicFlags(ParsingPackage pkg, TypedArray sa) {
         int targetSdk = pkg.getTargetSdkVersion();
         //@formatter:off
@@ -2388,12 +2439,20 @@ public class ParsingPackageUtils {
                 .setResetEnabledSettingsOnAppDataCleared(bool(false,
                         R.styleable.AndroidManifestApplication_resetEnabledSettingsOnAppDataCleared,
                         sa))
-                .setOnBackInvokedCallbackEnabled(bool(false, R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback, sa))
                 // targetSdkVersion gated
                 .setAllowAudioPlaybackCapture(bool(targetSdk >= Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_allowAudioPlaybackCapture, sa))
                 .setHardwareAccelerated(bool(targetSdk >= Build.VERSION_CODES.ICE_CREAM_SANDWICH, R.styleable.AndroidManifestApplication_hardwareAccelerated, sa))
                 .setRequestLegacyExternalStorage(bool(targetSdk < Build.VERSION_CODES.Q, R.styleable.AndroidManifestApplication_requestLegacyExternalStorage, sa))
                 .setCleartextTrafficAllowed(bool(targetSdk < Build.VERSION_CODES.P, R.styleable.AndroidManifestApplication_usesCleartextTraffic, sa))
+                // CompatChange.isChangeEnabled() can't be used here because this is called during
+                // PackageManagerService initialization. PlatformCompat can't be used because this
+                // code is not guaranteed to be called from the system_server process. Therefore
+                // accessing Build.VERSION_CODES directly and suppressing
+                // AndroidFrameworkCompatChange warning
+                .setOnBackInvokedCallbackEnabled(bool(
+                        com.android.window.flags.Flags.predictiveBackDefaultEnableSdk36()
+                            && targetSdk > Build.VERSION_CODES.VANILLA_ICE_CREAM,
+                        R.styleable.AndroidManifestApplication_enableOnBackInvokedCallback, sa))
                 // Ints Default 0
                 .setUiOptions(anInt(R.styleable.AndroidManifestApplication_uiOptions, sa))
                 // Ints
@@ -3074,9 +3133,9 @@ public class ParsingPackageUtils {
 
     private static ParseResult<ParsingPackage> parseAdoptPermissions(ParseInput input,
             ParsingPackage pkg, Resources res, XmlResourceParser parser) {
-        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestOriginalPackage);
+        TypedArray sa = res.obtainAttributes(parser, R.styleable.AndroidManifestAdoptPermissions);
         try {
-            String name = nonConfigString(0, R.styleable.AndroidManifestOriginalPackage_name, sa);
+            String name = nonConfigString(0, R.styleable.AndroidManifestAdoptPermissions_name, sa);
             if (name != null) {
                 pkg.addAdoptPermission(name);
             }
@@ -3393,6 +3452,95 @@ public class ParsingPackageUtils {
     @AnyRes
     private static int resId(@StyleableRes int attribute, TypedArray sa) {
         return sa.getResourceId(attribute, 0);
+    }
+
+    /**
+     * Parse the drawable resource id array in the typed array {@code resourceId}
+     * if available. If {@code maxSize} is not zero, only parse and preserve at most
+     * {@code maxSize} ids.
+     */
+    private static ParseResult<int[]> drawableResIdArray(ParseInput input, @NonNull TypedArray sa,
+            @NonNull Resources res, int resourceId, int maxSize) {
+        return resIdArray(input, sa, res, resourceId, TYPE_DRAWABLE, maxSize);
+    }
+
+    /**
+     * Parse the string resource id array in the typed array {@code resourceId}
+     * if available. If {@code maxSize} is not zero, only parse and preserve at most
+     * {@code maxSize} ids.
+     */
+    private static ParseResult<int[]> stringResIdArray(ParseInput input, @NonNull TypedArray sa,
+            @NonNull Resources res, int resourceId, int maxSize) {
+        return resIdArray(input, sa, res, resourceId, TYPE_STRING, maxSize);
+    }
+
+    /**
+     * Parse the resource id array in the typed array {@code resourceId}
+     * if available. If {@code maxSize} is larger than zero, only parse and preserve
+     * at most {@code maxSize} ids that type is matched to the {@code expectedTypeName}.
+     * Because the TypedArray allows mixed types in an array, if {@code expectedTypeName}
+     * is null, it means don't check the type.
+     */
+    private static ParseResult<int[]> resIdArray(ParseInput input, @NonNull TypedArray sa,
+            @NonNull Resources res, int resourceId, @Nullable String expectedTypeName,
+            int maxSize) {
+        if (!sa.hasValue(resourceId)) {
+            return input.success(null);
+        }
+
+        final int typeArrayResId = sa.getResourceId(resourceId, /* defValue= */ 0);
+        if (typeArrayResId == 0) {
+            return input.success(null);
+        }
+
+        // Parse the typedArray
+        try (TypedArray typedArray = res.obtainTypedArray(typeArrayResId)) {
+            final String typedArrayName = res.getResourceName(typeArrayResId);
+            final int length = typedArray.length();
+            if (maxSize > 0 && length > maxSize) {
+                return input.error(TextUtils.formatSimple(
+                        "The length of the typedArray (%s) is larger than %d.",
+                        typedArrayName, maxSize));
+            }
+            Set<Integer> resourceIdSet = new ArraySet<>();
+            for (int i = 0; i < length; i++) {
+                final int id = typedArray.getResourceId(i, /* defValue= */ 0);
+                // Add the id when the conditions are all matched:
+                // 1. The resource Id is not 0
+                // 2. The type is the expected type
+                // 3. The id is not duplicated
+                if (id == 0) {
+                    return input.error(TextUtils.formatSimple(
+                            "There is an item that is not a resource id in the typedArray (%s).",
+                            typedArrayName));
+                }
+
+                try {
+                    if (resourceIdSet.contains(id)) {
+                        return input.error(TextUtils.formatSimple(
+                                "There is a duplicated resource (%s) in the typedArray (%s).",
+                                res.getResourceName(id), typedArrayName));
+                    }
+                    final String typeName = res.getResourceTypeName(id);
+                    if (expectedTypeName != null
+                            && !TextUtils.equals(typeName, expectedTypeName)) {
+                        return input.error(TextUtils.formatSimple(
+                                "There is a resource (%s) in the typedArray (%s) that is not a"
+                                        + " %s type.", res.getResourceName(id), typedArrayName,
+                                expectedTypeName));
+                    }
+                } catch (Resources.NotFoundException e) {
+                    return input.error(TextUtils.formatSimple(
+                            "There is a resource in the typedArray (%s) that is not found in"
+                                    + " the app resources.", typedArrayName));
+                }
+                resourceIdSet.add(id);
+            }
+            if (resourceIdSet.isEmpty()) {
+                return input.success(null);
+            }
+            return input.success(resourceIdSet.stream().mapToInt(i -> i).toArray());
+        }
     }
 
     private static String string(@StyleableRes int attribute, TypedArray sa) {

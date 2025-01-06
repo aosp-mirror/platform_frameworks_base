@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.data.model.activeNotification
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -169,8 +170,12 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.promotedOngoingNotifications)
 
-            val promoted1 = activeNotificationModel(key = "notif1", isPromoted = true)
-            val notPromoted2 = activeNotificationModel(key = "notif2", isPromoted = false)
+            val promoted1 =
+                activeNotificationModel(
+                    key = "notif1",
+                    promotedContent = PromotedNotificationContentModel.Builder("notif1").build(),
+                )
+            val notPromoted2 = activeNotificationModel(key = "notif2", promotedContent = null)
 
             activeNotificationListRepository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()
@@ -189,9 +194,9 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
 
             activeNotificationListRepository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()
-                    .apply { activeNotificationModel(key = "notif1", isPromoted = false) }
-                    .apply { activeNotificationModel(key = "notif2", isPromoted = false) }
-                    .apply { activeNotificationModel(key = "notif3", isPromoted = false) }
+                    .apply { activeNotificationModel(key = "notif1", promotedContent = null) }
+                    .apply { activeNotificationModel(key = "notif2", promotedContent = null) }
+                    .apply { activeNotificationModel(key = "notif3", promotedContent = null) }
                     .build()
 
             assertThat(latest!!).isEmpty()
@@ -203,10 +208,18 @@ class ActiveNotificationsInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.promotedOngoingNotifications)
 
-            val promoted1 = activeNotificationModel(key = "notif1", isPromoted = true)
-            val notPromoted2 = activeNotificationModel(key = "notif2", isPromoted = false)
-            val notPromoted3 = activeNotificationModel(key = "notif3", isPromoted = false)
-            val promoted4 = activeNotificationModel(key = "notif4", isPromoted = true)
+            val promoted1 =
+                activeNotificationModel(
+                    key = "notif1",
+                    promotedContent = PromotedNotificationContentModel.Builder("notif1").build(),
+                )
+            val notPromoted2 = activeNotificationModel(key = "notif2", promotedContent = null)
+            val notPromoted3 = activeNotificationModel(key = "notif3", promotedContent = null)
+            val promoted4 =
+                activeNotificationModel(
+                    key = "notif4",
+                    promotedContent = PromotedNotificationContentModel.Builder("notif4").build(),
+                )
 
             activeNotificationListRepository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()

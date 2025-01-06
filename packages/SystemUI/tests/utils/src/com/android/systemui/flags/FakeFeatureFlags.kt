@@ -23,13 +23,13 @@ import java.io.PrintWriter
 
 class FakeFeatureFlagsClassic : FakeFeatureFlags()
 
+val FeatureFlagsClassic.fake
+    get() = this as FakeFeatureFlagsClassic
+
 @Deprecated(
     message = "Use FakeFeatureFlagsClassic instead.",
     replaceWith =
-        ReplaceWith(
-            "FakeFeatureFlagsClassic",
-            "com.android.systemui.flags.FakeFeatureFlagsClassic",
-        ),
+        ReplaceWith("FakeFeatureFlagsClassic", "com.android.systemui.flags.FakeFeatureFlagsClassic"),
 )
 open class FakeFeatureFlags : FeatureFlagsClassic {
     private val booleanFlags = mutableMapOf<String, Boolean>()
@@ -105,6 +105,7 @@ open class FakeFeatureFlags : FeatureFlagsClassic {
                 listener.onFlagChanged(
                     object : FlagListenable.FlagEvent {
                         override val flagName = flag.name
+
                         override fun requestNoRestart() {}
                     }
                 )
@@ -165,7 +166,7 @@ open class FakeFeatureFlags : FeatureFlagsClassic {
 
 @Module(includes = [FakeFeatureFlagsClassicModule.Bindings::class])
 class FakeFeatureFlagsClassicModule(
-    @get:Provides val fakeFeatureFlagsClassic: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic(),
+    @get:Provides val fakeFeatureFlagsClassic: FakeFeatureFlagsClassic = FakeFeatureFlagsClassic()
 ) {
 
     constructor(
@@ -175,7 +176,9 @@ class FakeFeatureFlagsClassicModule(
     @Module
     interface Bindings {
         @Binds fun bindFake(fake: FakeFeatureFlagsClassic): FeatureFlagsClassic
+
         @Binds fun bindClassic(classic: FeatureFlagsClassic): FeatureFlags
+
         @Binds fun bindFakeClassic(fake: FakeFeatureFlagsClassic): FakeFeatureFlags
     }
 }

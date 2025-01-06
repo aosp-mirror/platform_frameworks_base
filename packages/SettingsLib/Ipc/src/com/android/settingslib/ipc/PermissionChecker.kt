@@ -18,6 +18,7 @@ package com.android.settingslib.ipc
 
 import android.app.Application
 import android.content.pm.PackageManager
+import android.os.Process
 import androidx.collection.mutableIntIntMapOf
 
 /** Checker for permission. */
@@ -26,18 +27,18 @@ fun interface PermissionChecker {
      * Checks permission.
      *
      * @param application application context
-     * @param myUid uid of current process
+     * @param callingPid uid of peer process
      * @param callingUid uid of peer process
      */
-    fun check(application: Application, myUid: Int, callingUid: Int): Boolean
+    fun check(application: Application, callingPid: Int, callingUid: Int): Boolean
 }
 
 /** Verifies apk signatures as permission check. */
 class SignatureChecker : PermissionChecker {
     private val cache = mutableIntIntMapOf()
 
-    override fun check(application: Application, myUid: Int, callingUid: Int): Boolean =
+    override fun check(application: Application, callingPid: Int, callingUid: Int): Boolean =
         cache.getOrPut(callingUid) {
-            application.packageManager.checkSignatures(myUid, callingUid)
+            application.packageManager.checkSignatures(Process.myUid(), callingUid)
         } == PackageManager.SIGNATURE_MATCH
 }

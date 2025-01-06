@@ -30,6 +30,7 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager.RunningTaskInfo;
 import android.app.TaskInfo;
@@ -38,9 +39,6 @@ import android.content.res.Configuration;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.testing.AndroidTestingRunner;
 import android.view.InsetsSource;
 import android.view.InsetsState;
@@ -51,7 +49,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -61,15 +58,17 @@ import com.android.wm.shell.common.DockStateReader;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.api.CompatUIInfo;
+import com.android.wm.shell.desktopmode.DesktopRepository;
+import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
+import com.android.wm.shell.transition.FocusTransitionObserver;
 import com.android.wm.shell.transition.Transitions;
 
 import dagger.Lazy;
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -77,24 +76,19 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Optional;
+
 /**
  * Tests for {@link CompatUIController}.
  *
  * Build/Install/Run:
- *  atest WMShellUnitTests:CompatUIControllerTest
+ * atest WMShellUnitTests:CompatUIControllerTest
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class CompatUIControllerTest extends ShellTestCase {
+public class CompatUIControllerTest extends CompatUIShellTestCase {
     private static final int DISPLAY_ID = 0;
     private static final int TASK_ID = 12;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
-
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
     private CompatUIController mController;
     private ShellInit mShellInit;
@@ -130,6 +124,12 @@ public class CompatUIControllerTest extends ShellTestCase {
     private CompatUIShellCommandHandler mCompatUIShellCommandHandler;
     @Mock
     private AccessibilityManager mAccessibilityManager;
+    @Mock
+    private DesktopUserRepositories mDesktopUserRepositories;
+    @Mock
+    private DesktopRepository mDesktopRepository;
+    @Mock
+    private FocusTransitionObserver mFocusTransitionObserver;
 
     @Captor
     ArgumentCaptor<OnInsetsChangedListener> mOnInsetsChangedListenerCaptor;
@@ -137,7 +137,6 @@ public class CompatUIControllerTest extends ShellTestCase {
     @NonNull
     private CompatUIStatusManager mCompatUIStatusManager;
 
-    private boolean mInDesktopModePredicateResult;
 
     @Before
     public void setUp() {
@@ -152,6 +151,8 @@ public class CompatUIControllerTest extends ShellTestCase {
         doReturn(TASK_ID).when(mMockLetterboxEduLayout).getTaskId();
         doReturn(true).when(mMockLetterboxEduLayout).createLayout(anyBoolean());
         doReturn(true).when(mMockLetterboxEduLayout).updateCompatInfo(any(), any(), anyBoolean());
+        doReturn(mDesktopRepository).when(mDesktopUserRepositories).getCurrent();
+        doReturn(mDesktopRepository).when(mDesktopUserRepositories).getProfile(anyInt());
 
         doReturn(DISPLAY_ID).when(mMockRestartDialogLayout).getDisplayId();
         doReturn(TASK_ID).when(mMockRestartDialogLayout).getTaskId();
@@ -164,7 +165,8 @@ public class CompatUIControllerTest extends ShellTestCase {
                 mMockDisplayController, mMockDisplayInsetsController, mMockImeController,
                 mMockSyncQueue, mMockExecutor, mMockTransitionsLazy, mDockStateReader,
                 mCompatUIConfiguration, mCompatUIShellCommandHandler, mAccessibilityManager,
-                mCompatUIStatusManager, i -> mInDesktopModePredicateResult) {
+                mCompatUIStatusManager, Optional.of(mDesktopUserRepositories),
+                mFocusTransitionObserver) {
             @Override
             CompatUIWindowManager createCompatUiWindowManager(Context context, TaskInfo taskInfo,
                     ShellTaskOrganizer.TaskListener taskListener) {
@@ -282,6 +284,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         doReturn(false).when(mMockRestartDialogLayout).updateCompatInfo(any(), any(), anyBoolean());
 
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(true);
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
 
         verify(mController).createCompatUiWindowManager(any(), eq(taskInfo), eq(mMockTaskListener));
@@ -413,6 +416,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         // Verify button remains hidden while IME is showing.
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
 
         verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener,
                 /* canShow= */ false);
@@ -445,6 +449,7 @@ public class CompatUIControllerTest extends ShellTestCase {
         // Verify button remains hidden while keyguard is showing.
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
 
         verify(mMockCompatLayout).updateCompatInfo(taskInfo, mMockTaskListener,
                 /* canShow= */ false);
@@ -525,6 +530,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testRestartLayoutRecreatedIfNeeded() {
         final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
         doReturn(true).when(mMockRestartDialogLayout)
                 .needsToBeRecreated(any(TaskInfo.class),
                         any(ShellTaskOrganizer.TaskListener.class));
@@ -540,6 +546,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
     public void testRestartLayoutNotRecreatedIfNotNeeded() {
         final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
         doReturn(false).when(mMockRestartDialogLayout)
                 .needsToBeRecreated(any(TaskInfo.class),
                         any(ShellTaskOrganizer.TaskListener.class));
@@ -560,7 +567,8 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         // Create new task
         final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
-                /* isVisible */ true, /* isFocused */ true);
+                /* isVisible */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(true);
 
         // Simulate new task being shown
         mController.updateActiveTaskInfo(taskInfo);
@@ -576,7 +584,8 @@ public class CompatUIControllerTest extends ShellTestCase {
     public void testUpdateActiveTaskInfo_newTask_notVisibleOrFocused_notUpdated() {
         // Create new task
         final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
-                /* isVisible */ true, /* isFocused */ true);
+                /* isVisible */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(true);
 
         // Simulate task being shown
         mController.updateActiveTaskInfo(taskInfo);
@@ -594,7 +603,8 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         // Create visible but NOT focused task
         final TaskInfo taskInfo1 = createTaskInfo(DISPLAY_ID, newTaskId, /* hasSizeCompat= */ true,
-                /* isVisible */ true, /* isFocused */ false);
+                /* isVisible */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
 
         // Simulate new task being shown
         mController.updateActiveTaskInfo(taskInfo1);
@@ -606,7 +616,8 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         // Create focused but NOT visible task
         final TaskInfo taskInfo2 = createTaskInfo(DISPLAY_ID, newTaskId, /* hasSizeCompat= */ true,
-                /* isVisible */ false, /* isFocused */ true);
+                /* isVisible */ false);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(true);
 
         // Simulate new task being shown
         mController.updateActiveTaskInfo(taskInfo2);
@@ -618,7 +629,8 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         // Create NOT focused but NOT visible task
         final TaskInfo taskInfo3 = createTaskInfo(DISPLAY_ID, newTaskId, /* hasSizeCompat= */ true,
-                /* isVisible */ false, /* isFocused */ false);
+                /* isVisible */ false);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
 
         // Simulate new task being shown
         mController.updateActiveTaskInfo(taskInfo3);
@@ -634,7 +646,8 @@ public class CompatUIControllerTest extends ShellTestCase {
     public void testUpdateActiveTaskInfo_sameTask_notUpdated() {
         // Create new task
         final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
-                /* isVisible */ true, /* isFocused */ true);
+                /* isVisible */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(true);
 
         // Simulate new task being shown
         mController.updateActiveTaskInfo(taskInfo);
@@ -662,7 +675,8 @@ public class CompatUIControllerTest extends ShellTestCase {
     public void testUpdateActiveTaskInfo_transparentTask_notUpdated() {
         // Create new task
         final TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true,
-                /* isVisible */ true, /* isFocused */ true);
+                /* isVisible */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(true);
 
         // Simulate new task being shown
         mController.updateActiveTaskInfo(taskInfo);
@@ -680,7 +694,8 @@ public class CompatUIControllerTest extends ShellTestCase {
 
         // Create transparent task
         final TaskInfo taskInfo1 = createTaskInfo(DISPLAY_ID, newTaskId, /* hasSizeCompat= */ true,
-                /* isVisible */ true, /* isFocused */ true, /* isTopActivityTransparent */ true);
+                /* isVisible */ true, /* isTopActivityTransparent */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(true);
 
         // Simulate new task being shown
         mController.updateActiveTaskInfo(taskInfo1);
@@ -696,6 +711,7 @@ public class CompatUIControllerTest extends ShellTestCase {
     public void testLetterboxEduLayout_notCreatedWhenLetterboxEducationIsDisabled() {
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
         taskInfo.appCompatTaskInfo.setLetterboxEducationEnabled(false);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
 
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
 
@@ -707,13 +723,18 @@ public class CompatUIControllerTest extends ShellTestCase {
     @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
     @EnableFlags(Flags.FLAG_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE)
     public void testUpdateActiveTaskInfo_removeAllComponentWhenInDesktopModeFlagEnabled() {
-        mInDesktopModePredicateResult = false;
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+        when(mDesktopUserRepositories.getCurrent().getVisibleTaskCount(DISPLAY_ID)).thenReturn(0);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
+
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+
         verify(mController, never()).removeLayouts(taskInfo.taskId);
 
-        mInDesktopModePredicateResult = true;
+        when(mDesktopUserRepositories.getCurrent().getVisibleTaskCount(DISPLAY_ID)).thenReturn(2);
+
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+
         verify(mController).removeLayouts(taskInfo.taskId);
     }
 
@@ -721,35 +742,39 @@ public class CompatUIControllerTest extends ShellTestCase {
     @RequiresFlagsDisabled(Flags.FLAG_APP_COMPAT_UI_FRAMEWORK)
     @DisableFlags(Flags.FLAG_SKIP_COMPAT_UI_EDUCATION_IN_DESKTOP_MODE)
     public void testUpdateActiveTaskInfo_removeAllComponentWhenInDesktopModeFlagDisabled() {
-        mInDesktopModePredicateResult = false;
+        when(mDesktopUserRepositories.getCurrent().getVisibleTaskCount(DISPLAY_ID)).thenReturn(0);
         TaskInfo taskInfo = createTaskInfo(DISPLAY_ID, TASK_ID, /* hasSizeCompat= */ true);
+        when(mFocusTransitionObserver.hasGlobalFocus((RunningTaskInfo) taskInfo)).thenReturn(false);
+
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+
         verify(mController, never()).removeLayouts(taskInfo.taskId);
 
-        mInDesktopModePredicateResult = true;
+        when(mDesktopUserRepositories.getCurrent().getVisibleTaskCount(DISPLAY_ID)).thenReturn(2);
+
         mController.onCompatInfoChanged(new CompatUIInfo(taskInfo, mMockTaskListener));
+
         verify(mController, never()).removeLayouts(taskInfo.taskId);
     }
 
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat) {
         return createTaskInfo(displayId, taskId, hasSizeCompat, /* isVisible */ false,
-                /* isFocused */ false, /* isTopActivityTransparent */ false);
+                /* isTopActivityTransparent */ false);
     }
 
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
-            boolean isVisible, boolean isFocused) {
+            boolean isVisible) {
         return createTaskInfo(displayId, taskId, hasSizeCompat,
-                isVisible, isFocused, /* isTopActivityTransparent */ false);
+                isVisible, /* isTopActivityTransparent */ false);
     }
 
     private static TaskInfo createTaskInfo(int displayId, int taskId, boolean hasSizeCompat,
-            boolean isVisible, boolean isFocused, boolean isTopActivityTransparent) {
+            boolean isVisible, boolean isTopActivityTransparent) {
         RunningTaskInfo taskInfo = new RunningTaskInfo();
         taskInfo.taskId = taskId;
         taskInfo.displayId = displayId;
         taskInfo.appCompatTaskInfo.setTopActivityInSizeCompat(hasSizeCompat);
         taskInfo.isVisible = isVisible;
-        taskInfo.isFocused = isFocused;
         taskInfo.isTopActivityTransparent = isTopActivityTransparent;
         taskInfo.appCompatTaskInfo.setLetterboxEducationEnabled(true);
         taskInfo.appCompatTaskInfo.setTopActivityLetterboxed(true);

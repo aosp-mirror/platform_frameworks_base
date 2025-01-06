@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Số gọi đến mặc định thành bị giới hạn. Cuộc gọi tiếp theo. Không bị giới hạn"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Số gọi đến mặc định thành không bị giới hạn. Cuộc gọi tiếp theo. Bị giới hạn"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Số gọi đến mặc định thành không bị giới hạn. Cuộc gọi tiếp theo. Không bị giới hạn"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Ứng dụng này không tương thích với kích thước trang 16 KB. Không kiểm tra được sự tương thích của tệp APK. Ứng dụng này sẽ chạy ở chế độ tương thích với kích thước trang. Để đảm bảo khả năng tương thích tốt nhất, vui lòng biên dịch lại ứng dụng ở chế độ hỗ trợ kích thước trang 16 KB. Để biết thêm thông tin, hãy xem &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Ứng dụng này không tương thích với kích thước trang 16 KB. Không kiểm tra được sự tương thích của tệp ELF. Ứng dụng này sẽ chạy ở chế độ tương thích với kích thước trang. Để đảm bảo khả năng tương thích tốt nhất, vui lòng biên dịch lại ứng dụng ở chế độ hỗ trợ kích thước trang 16 KB. Để biết thêm thông tin, hãy xem &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Ứng dụng này không tương thích với kích thước trang 16 KB. Không kiểm tra được sự tương thích của tệp APK và tệp ELF. Ứng dụng này sẽ chạy ở chế độ tương thích với kích thước trang. Để đảm bảo khả năng tương thích tốt nhất, vui lòng biên dịch lại ứng dụng ở chế độ hỗ trợ kích thước trang 16 KB. Để biết thêm thông tin, hãy xem &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Dịch vụ không được cấp phép."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Bạn không thể thay đổi cài đặt ID người gọi."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Đã chuyển dữ liệu sang <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Không thể kết nối với mạng di động"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Hãy thử thay đổi mạng ưu tiên. Nhấn để thay đổi."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Không có dịch vụ gọi khẩn cấp"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Cần có mạng di động để thực hiện các cuộc gọi khẩn cấp"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Thông báo"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Chuyển tiếp cuộc gọi"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Cho phép ứng dụng xác định khoảng cách tương đối giữa các thiết bị ở gần dùng Băng tần siêu rộng"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"tương tác với các thiết bị Wi‑Fi lân cận"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Cho phép ứng dụng này thông báo, kết nối và xác định vị trí tương đối của các thiết bị Wi‑Fi lân cận"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"xác định vị trí tương đối giữa các thiết bị ở gần"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Cho phép ứng dụng xác định vị trí tương đối giữa các thiết bị ở gần"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần (NFC) được ưu tiên"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Cho phép ứng dụng nhận thông tin về dịch vụ thanh toán qua công nghệ giao tiếp tầm gần mà bạn ưu tiên, chẳng hạn như các hình thức hỗ trợ đã đăng ký và điểm đến trong hành trình."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kiểm soát Liên lạc trường gần"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> giờ nữa"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> ngày nữa"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> năm nữa"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> phút trước"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> giờ trước"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> ngày trước"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> năm trước"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> phút"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> giờ"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> ngày"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> năm"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> phút nữa"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> giờ nữa"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> ngày nữa"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> năm nữa"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> phút trước"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> giờ trước"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> ngày trước"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> năm trước"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# phút trước}other{# phút trước}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# giờ trước}other{# giờ trước}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ngày trước}other{# ngày trước}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Chế độ một tay"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Siêu tối"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Thiết bị trợ thính"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã tắt."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Thả phím âm lượng. Để bật <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, hãy nhấn và giữ cả 2 phím âm lượng trong 3 giây một lần nữa."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Cuối tuần"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Sự kiện"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Ngủ"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Không làm phiền (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Do <xliff:g id="APP_NAME">%1$s</xliff:g> quản lý"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Bật"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Tắt"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> đến <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Bất kỳ lịch nào"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> đang tắt một số âm thanh"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Đã xảy ra sự cố nội bộ với thiết bị của bạn và thiết bị có thể sẽ không ổn định cho tới khi bạn thiết lập lại dữ liệu ban đầu."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Gửi và nhận tin nhắn mà không cần mạng di động hoặc Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Cách hoạt động"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Bật tính năng \"Tự động chọn mạng\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Bật tính năng \"Tự động chọn mạng\" trong phần Cài đặt để điện thoại có thể tìm thấy mạng hoạt động với vệ tinh"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Bật"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Quay lại"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Đang chờ xử lý..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Tính năng Liên lạc khẩn cấp qua vệ tinh đang hoạt động"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Bạn có thể nhắn tin cho dịch vụ khẩn cấp khi không có mạng di động hay mạng Wi-Fi. Google Tin nhắn phải là ứng dụng nhắn tin mặc định của bạn."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Chưa hỗ trợ tính năng Liên lạc khẩn cấp qua vệ tinh"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Thiết bị này chưa hỗ trợ tính năng Liên lạc khẩn cấp qua vệ tinh"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Chưa thiết lập tính năng Liên lạc khẩn cấp qua vệ tinh"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Hãy kiểm tra để chắc chắn rằng bạn đã kết nối Internet, rồi thử thiết lập lại"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Tính năng Liên lạc khẩn cấp qua vệ tinh chưa hoạt động"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Tính năng Liên lạc khẩn cấp qua vệ tinh chưa hoạt động ở quốc gia hoặc khu vực này"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Chưa thiết lập tính năng Liên lạc khẩn cấp qua vệ tinh"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Để nhắn tin qua vệ tinh, hãy đặt Google Tin nhắn làm ứng dụng nhắn tin mặc định của bạn"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Tính năng Liên lạc khẩn cấp qua vệ tinh chưa hoạt động"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Để kiểm tra xem tính năng Liên lạc khẩn cấp qua vệ tinh có hoạt động ở quốc gia hoặc khu vực này không, hãy bật chế độ cài đặt vị trí"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Tính năng nhắn tin qua vệ tinh đang hoạt động"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Bạn có thể nhắn tin qua vệ tinh khi không có mạng di động hay mạng Wi-Fi. Google Tin nhắn phải là ứng dụng nhắn tin mặc định của bạn."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Chưa hỗ trợ tính năng nhắn tin qua vệ tinh"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Thiết bị này chưa hỗ trợ tính năng nhắn tin qua vệ tinh"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Chưa thiết lập tính năng nhắn tin qua vệ tinh"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Hãy kiểm tra để chắc chắn rằng bạn đã kết nối Internet, rồi thử thiết lập lại"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Tính năng nhắn tin qua vệ tinh chưa hoạt động"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Tính năng nhắn tin qua vệ tinh chưa hoạt động ở quốc gia hoặc khu vực này"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Chưa thiết lập tính năng nhắn tin qua vệ tinh"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Để nhắn tin qua vệ tinh, hãy đặt Google Tin nhắn làm ứng dụng nhắn tin mặc định của bạn"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Tính năng nhắn tin qua vệ tinh chưa hoạt động"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Để kiểm tra xem tính năng nhắn tin qua vệ tinh có hoạt động ở quốc gia hoặc khu vực này không, hãy bật chế độ cài đặt vị trí"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Thiết lập lại tính năng Mở khoá bằng vân tay"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Không nhận dạng được <xliff:g id="FINGERPRINT">%s</xliff:g> nữa."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Không nhận dạng được <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> và <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nữa."</string>

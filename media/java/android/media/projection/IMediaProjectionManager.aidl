@@ -16,11 +16,13 @@
 
 package android.media.projection;
 
+import android.graphics.Rect;
 import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.media.projection.IMediaProjectionWatcherCallback;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.ReviewGrantedConsentResult;
+import android.media.projection.StopReason;
 import android.os.IBinder;
 import android.view.ContentRecordingSession;
 
@@ -107,12 +109,7 @@ interface IMediaProjectionManager {
     @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
-    void stopActiveProjection();
-
-    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
-    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
-            + ".permission.MANAGE_MEDIA_PROJECTION)")
-    void notifyActiveProjectionCapturedContentResized(int width, int height);
+    void stopActiveProjection(in StopReason stopReason);
 
     @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
@@ -227,5 +224,11 @@ interface IMediaProjectionManager {
     @EnforcePermission("MANAGE_MEDIA_PROJECTION")
     @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
             + ".permission.MANAGE_MEDIA_PROJECTION)")
-    void notifyWindowingModeChanged(int contentToRecord, int targetProcessUid, int windowingMode);
+    oneway void notifyWindowingModeChanged(int contentToRecord, int targetProcessUid, int windowingMode);
+
+    @EnforcePermission("MANAGE_MEDIA_PROJECTION")
+    @JavaPassthrough(annotation = "@android.annotation.RequiresPermission(android.Manifest"
+            + ".permission.MANAGE_MEDIA_PROJECTION)")
+    oneway void notifyCaptureBoundsChanged(int contentToRecord, int targetProcessUid,
+            in Rect captureBounds);
 }

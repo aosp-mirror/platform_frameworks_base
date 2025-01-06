@@ -48,11 +48,7 @@ import kotlinx.coroutines.flow.asStateFlow
  * 3. Add the new [BooleanCarrierConfig] to the list of tracked configs, so they are properly
  *    updated when a new carrier config comes down
  */
-class SystemUiCarrierConfig
-internal constructor(
-    val subId: Int,
-    defaultConfig: PersistableBundle,
-) {
+class SystemUiCarrierConfig constructor(val subId: Int, defaultConfig: PersistableBundle) {
     @VisibleForTesting
     var isUsingDefault = true
         private set
@@ -67,17 +63,11 @@ internal constructor(
     /** Flow tracking the [KEY_SHOW_OPERATOR_NAME_IN_STATUSBAR_BOOL] config */
     val showOperatorNameInStatusBar: StateFlow<Boolean> = showOperatorName.config
 
-    private val showNetworkSlice =
-        BooleanCarrierConfig(KEY_SHOW_5G_SLICE_ICON_BOOL, defaultConfig)
+    private val showNetworkSlice = BooleanCarrierConfig(KEY_SHOW_5G_SLICE_ICON_BOOL, defaultConfig)
     /** Flow tracking the [KEY_SHOW_5G_SLICE_ICON_BOOL] config */
     val allowNetworkSliceIndicator: StateFlow<Boolean> = showNetworkSlice.config
 
-    private val trackedConfigs =
-        listOf(
-            inflateSignalStrength,
-            showOperatorName,
-            showNetworkSlice,
-        )
+    private val trackedConfigs = listOf(inflateSignalStrength, showOperatorName, showNetworkSlice)
 
     /** Ingest a new carrier config, and switch all of the tracked keys over to the new values */
     fun processNewCarrierConfig(config: PersistableBundle) {
@@ -98,10 +88,7 @@ internal constructor(
 }
 
 /** Extracts [key] from the carrier config, and stores it in a flow */
-private class BooleanCarrierConfig(
-    val key: String,
-    defaultConfig: PersistableBundle,
-) {
+private class BooleanCarrierConfig(val key: String, defaultConfig: PersistableBundle) {
     private val _configValue = MutableStateFlow(defaultConfig.getBoolean(key))
     val config = _configValue.asStateFlow()
 

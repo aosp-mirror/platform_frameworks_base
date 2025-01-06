@@ -1,6 +1,7 @@
 package com.android.systemui.biometrics.ui
 
 import com.android.systemui.biometrics.AuthPanelController
+import com.android.systemui.biometrics.plugins.AuthContextPlugins
 import com.android.systemui.biometrics.ui.binder.Spaghetti
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel
 
@@ -29,5 +30,6 @@ sealed interface CredentialView {
         panelViewController: AuthPanelController,
         animatePanel: Boolean,
         legacyCallback: Spaghetti.Callback,
+        plugins: AuthContextPlugins?,
     )
 }

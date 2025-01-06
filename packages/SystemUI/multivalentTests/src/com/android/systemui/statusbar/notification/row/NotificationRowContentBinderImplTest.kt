@@ -18,9 +18,11 @@ package com.android.systemui.statusbar.notification.row
 import android.app.Notification
 import android.app.Person
 import android.content.Context
+import android.graphics.drawable.Icon
 import android.os.AsyncTask
 import android.os.Build
 import android.os.CancellationSignal
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.util.TypedValue
@@ -33,13 +35,22 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_PUBLIC
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_SENSITIVE_CONTENT
+import com.android.systemui.statusbar.NotificationLockscreenUserManager.RedactionType
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.ConversationNotificationProcessor
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
+import com.android.systemui.statusbar.notification.promoted.FakePromotedNotificationContentExtractor
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.BindParams
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_ALL
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_CONTRACTED
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_EXPANDED
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_HEADS_UP
+import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationCallback
 import com.android.systemui.statusbar.notification.row.NotificationRowContentBinder.InflationFlag
@@ -82,7 +93,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         object : NotifLayoutInflaterFactory.Provider {
             override fun provide(
                 row: ExpandableNotificationRow,
-                layoutType: Int
+                layoutType: Int,
             ): NotifLayoutInflaterFactory = mock()
         }
     private val smartReplyStateInflater: SmartReplyStateInflater =
@@ -95,7 +106,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 notifPackageContext: Context,
                 entry: NotificationEntry,
                 existingSmartReplyState: InflatedSmartReplyState?,
-                newSmartReplyState: InflatedSmartReplyState
+                newSmartReplyState: InflatedSmartReplyState,
             ): InflatedSmartReplyViewHolder {
                 return inflatedSmartReplies
             }
@@ -104,6 +115,8 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 return inflatedSmartReplyState
             }
         }
+    private val promotedNotificationContentExtractor = FakePromotedNotificationContentExtractor()
+    private val conversationNotificationProcessor: ConversationNotificationProcessor = mock()
 
     @Before
     fun setUp() {
@@ -120,47 +133,49 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             NotificationRowContentBinderImpl(
                 cache,
                 mock(),
-                mock<ConversationNotificationProcessor>(),
+                conversationNotificationProcessor,
                 mock(),
                 smartReplyStateInflater,
                 layoutInflaterFactoryProvider,
                 mock<HeadsUpStyleProvider>(),
-                mock()
+                promotedNotificationContentExtractor,
+                mock(),
             )
     }
 
     @Test
     fun testIncreasedHeadsUpBeingUsed() {
-        val params = BindParams()
-        params.usesIncreasedHeadsUpHeight = true
+        val params =
+            BindParams(false, false, /* usesIncreasedHeadsUpHeight */ true, REDACTION_TYPE_NONE)
         val builder = spy(builder)
         notificationInflater.inflateNotificationViews(
             row.entry,
             row,
             params,
-            true /* inflateSynchronously */,
+            true, /* inflateSynchronously */
             FLAG_CONTENT_VIEW_ALL,
             builder,
             mContext,
-            smartReplyStateInflater
+            smartReplyStateInflater,
+            mock(),
         )
         verify(builder).createHeadsUpContentView(true)
     }
 
     @Test
     fun testIncreasedHeightBeingUsed() {
-        val params = BindParams()
-        params.usesIncreasedHeight = true
+        val params = BindParams(false, /* usesIncreasedHeight */ true, false, REDACTION_TYPE_NONE)
         val builder = spy(builder)
         notificationInflater.inflateNotificationViews(
             row.entry,
             row,
             params,
-            true /* inflateSynchronously */,
+            true, /* inflateSynchronously */
             FLAG_CONTENT_VIEW_ALL,
             builder,
             mContext,
-            smartReplyStateInflater
+            smartReplyStateInflater,
+            mock(),
         )
         verify(builder).createContentView(true)
     }
@@ -184,14 +199,17 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         row.entry.sbn.notification.contentView =
             RemoteViews(mContext.packageName, R.layout.status_bar)
         inflateAndWait(
-            true /* expectingException */,
+            true, /* expectingException */
             notificationInflater,
             FLAG_CONTENT_VIEW_ALL,
-            row
+            REDACTION_TYPE_NONE,
+            row,
         )
         Assert.assertTrue(row.privateLayout.childCount == 0)
         verify(row, times(0)).onNotificationUpdated()
     }
+
+    @Test fun testInflationOfSensitiveContentPublicView() {}
 
     @Test
     fun testAsyncTaskRemoved() {
@@ -208,9 +226,9 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             row.entry,
             row,
             FLAG_CONTENT_VIEW_ALL,
-            BindParams(),
-            false /* forceInflate */,
-            null /* callback */
+            BindParams(false, false, false, REDACTION_TYPE_NONE),
+            false, /* forceInflate */
+            null, /* callback */
         )
         Assert.assertNull(row.entry.runningTask)
     }
@@ -223,7 +241,8 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             NotificationRowContentBinderImpl.InflationProgress(
                 packageContext = mContext,
                 remoteViews = NewRemoteViews(),
-                contentModel = NotificationContentModel(headsUpStatusBarModel)
+                contentModel = NotificationContentModel(headsUpStatusBarModel),
+                promotedContent = null,
             )
         val countDownLatch = CountDownLatch(1)
         NotificationRowContentBinderImpl.applyRemoteView(
@@ -261,7 +280,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                         get() =
                             AsyncFailRemoteView(
                                 mContext.packageName,
-                                com.android.systemui.tests.R.layout.custom_view_dark
+                                com.android.systemui.tests.R.layout.custom_view_dark,
                             )
                 },
             logger = mock(),
@@ -280,7 +299,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         val decoratedMediaView = builder.createContentView()
         Assert.assertFalse(
             "The decorated media style doesn't allow a view to be reapplied!",
-            NotificationRowContentBinderImpl.canReapplyRemoteView(mediaView, decoratedMediaView)
+            NotificationRowContentBinderImpl.canReapplyRemoteView(mediaView, decoratedMediaView),
         )
     }
 
@@ -304,7 +323,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         Assert.assertEquals(
             "Binder inflated a new view even though the old one was cached and usable.",
             view,
-            row.privateLayout.contractedChild
+            row.privateLayout.contractedChild,
         )
     }
 
@@ -327,7 +346,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         Assert.assertNotEquals(
             "Binder (somehow) used the same view when inflating.",
             view,
-            row.privateLayout.contractedChild
+            row.privateLayout.contractedChild,
         )
     }
 
@@ -396,7 +415,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     private fun getValidationError(
         measuredHeightDp: Float,
         targetSdk: Int,
-        contentView: RemoteViews?
+        contentView: RemoteViews?,
     ): String? {
         val view: View = mock()
         whenever(view.measuredHeight)
@@ -404,7 +423,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 TypedValue.applyDimension(
                         COMPLEX_UNIT_SP,
                         measuredHeightDp,
-                        mContext.resources.displayMetrics
+                        mContext.resources.displayMetrics,
                     )
                     .toInt()
             )
@@ -419,9 +438,9 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         row.entry.sbn.notification.contentView =
             RemoteViews(
                 mContext.packageName,
-                com.android.systemui.tests.R.layout.invalid_notification_height
+                com.android.systemui.tests.R.layout.invalid_notification_height,
             )
-        inflateAndWait(true, notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
+        inflateAndWait(true, notificationInflater, FLAG_CONTENT_VIEW_ALL, REDACTION_TYPE_NONE, row)
         Assert.assertEquals(0, row.privateLayout.childCount.toLong())
         verify(row, times(0)).onNotificationUpdated()
     }
@@ -430,7 +449,13 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     @Test
     fun testInflatePublicSingleLineView() {
         row.publicLayout.removeAllViews()
-        inflateAndWait(false, notificationInflater, FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE, row)
+        inflateAndWait(
+            false,
+            notificationInflater,
+            FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE,
+            REDACTION_TYPE_NONE,
+            row,
+        )
         Assert.assertNotNull(row.publicLayout.mSingleLineView)
         Assert.assertTrue(row.publicLayout.mSingleLineView is HybridNotificationView)
     }
@@ -438,12 +463,15 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     @Test
     fun testInflatePublicSingleLineConversationView() {
         val testPerson = Person.Builder().setName("Person").build()
+        val style = Notification.MessagingStyle(testPerson)
         val messagingBuilder =
             Notification.Builder(mContext, "no-id")
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text")
-                .setStyle(Notification.MessagingStyle(testPerson))
+                .setStyle(style)
+        whenever(conversationNotificationProcessor.processNotification(any(), any(), any()))
+            .thenReturn(style)
 
         val messagingRow = spy(testHelper.createRow(messagingBuilder.build()))
         messagingRow.publicLayout.removeAllViews()
@@ -451,13 +479,148 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             false,
             notificationInflater,
             FLAG_CONTENT_VIEW_PUBLIC_SINGLE_LINE,
-            messagingRow
+            REDACTION_TYPE_NONE,
+            messagingRow,
         )
         Assert.assertNotNull(messagingRow.publicLayout.mSingleLineView)
         // assert this is the conversation layout
         Assert.assertTrue(
             messagingRow.publicLayout.mSingleLineView is HybridConversationNotificationView
         )
+    }
+
+    @Test
+    @DisableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun testExtractsPromotedContent_notWhenBothFlagsDisabled() {
+        val content = PromotedNotificationContentModel.Builder("key").build()
+        promotedNotificationContentExtractor.resetForEntry(row.entry, content)
+
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
+
+        promotedNotificationContentExtractor.verifyZeroExtractCalls()
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME)
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testExtractsPromotedContent_whenPromotedNotificationUiFlagEnabled() {
+        val content = PromotedNotificationContentModel.Builder("key").build()
+        promotedNotificationContentExtractor.resetForEntry(row.entry, content)
+
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
+
+        promotedNotificationContentExtractor.verifyOneExtractCall()
+        Assert.assertEquals(content, row.entry.promotedNotificationContentModel)
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    @DisableFlags(PromotedNotificationUi.FLAG_NAME)
+    fun testExtractsPromotedContent_whenStatusBarNotifChipsFlagEnabled() {
+        val content = PromotedNotificationContentModel.Builder("key").build()
+        promotedNotificationContentExtractor.resetForEntry(row.entry, content)
+
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
+
+        promotedNotificationContentExtractor.verifyOneExtractCall()
+        Assert.assertEquals(content, row.entry.promotedNotificationContentModel)
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun testExtractsPromotedContent_whenBothFlagsEnabled() {
+        val content = PromotedNotificationContentModel.Builder("key").build()
+        promotedNotificationContentExtractor.resetForEntry(row.entry, content)
+
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
+
+        promotedNotificationContentExtractor.verifyOneExtractCall()
+        Assert.assertEquals(content, row.entry.promotedNotificationContentModel)
+    }
+
+    @Test
+    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    fun testExtractsPromotedContent_null() {
+        promotedNotificationContentExtractor.resetForEntry(row.entry, null)
+
+        inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
+
+        promotedNotificationContentExtractor.verifyOneExtractCall()
+        Assert.assertNull(row.entry.promotedNotificationContentModel)
+    }
+
+    @Test
+    @Throws(java.lang.Exception::class)
+    @EnableFlags(LockscreenOtpRedaction.FLAG_NAME)
+    fun testSensitiveContentPublicView_messageStyle() {
+        val displayName = "Display Name"
+        val messageText = "Message Text"
+        val contentText = "Content Text"
+        val personIcon = Icon.createWithResource(mContext, R.drawable.ic_person)
+        val testPerson = Person.Builder().setName(displayName).setIcon(personIcon).build()
+        val messagingStyle = Notification.MessagingStyle(testPerson)
+        messagingStyle.addMessage(
+            Notification.MessagingStyle.Message(messageText, System.currentTimeMillis(), testPerson)
+        )
+        messagingStyle.setConversationType(Notification.MessagingStyle.CONVERSATION_TYPE_NORMAL)
+        messagingStyle.setShortcutIcon(personIcon)
+        val messageNotif =
+            Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_person)
+                .setStyle(messagingStyle)
+                .build()
+        val newRow: ExpandableNotificationRow = testHelper.createRow(messageNotif)
+        inflateAndWait(
+            false,
+            notificationInflater,
+            FLAG_CONTENT_VIEW_PUBLIC,
+            REDACTION_TYPE_SENSITIVE_CONTENT,
+            newRow,
+        )
+        // The display name should be included, but not the content or message text
+        val publicView = newRow.publicLayout
+        Assert.assertNotNull(publicView)
+        Assert.assertFalse(hasText(publicView, messageText))
+        Assert.assertFalse(hasText(publicView, contentText))
+        Assert.assertTrue(hasText(publicView, displayName))
+    }
+
+    @Test
+    @Throws(java.lang.Exception::class)
+    @EnableFlags(LockscreenOtpRedaction.FLAG_NAME)
+    fun testSensitiveContentPublicView_nonMessageStyle() {
+        val contentTitle = "Content Title"
+        val contentText = "Content Text"
+        val notif =
+            Notification.Builder(mContext)
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle(contentTitle)
+                .setContentText(contentText)
+                .build()
+        val newRow: ExpandableNotificationRow = testHelper.createRow(notif)
+        inflateAndWait(
+            false,
+            notificationInflater,
+            FLAG_CONTENT_VIEW_PUBLIC,
+            REDACTION_TYPE_SENSITIVE_CONTENT,
+            newRow,
+        )
+        var publicView = newRow.publicLayout
+        Assert.assertNotNull(publicView)
+        Assert.assertFalse(hasText(publicView, contentText))
+        Assert.assertTrue(hasText(publicView, contentTitle))
+
+        // The standard public view should not use the content title or text
+        inflateAndWait(
+            false,
+            notificationInflater,
+            FLAG_CONTENT_VIEW_PUBLIC,
+            REDACTION_TYPE_PUBLIC,
+            newRow,
+        )
+        publicView = newRow.publicLayout
+        Assert.assertFalse(hasText(publicView, contentText))
+        Assert.assertFalse(hasText(publicView, contentTitle))
     }
 
     private class ExceptionHolder {
@@ -476,7 +639,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             parent: ViewGroup,
             executor: Executor,
             listener: OnViewAppliedListener,
-            handler: InteractionHandler?
+            handler: InteractionHandler?,
         ): CancellationSignal {
             executor.execute { listener.onError(RuntimeException("Failed to inflate async")) }
             return CancellationSignal()
@@ -486,7 +649,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             context: Context,
             parent: ViewGroup,
             executor: Executor,
-            listener: OnViewAppliedListener
+            listener: OnViewAppliedListener,
         ): CancellationSignal {
             return applyAsync(context, parent, executor, listener, null)
         }
@@ -496,15 +659,22 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
         private fun inflateAndWait(
             inflater: NotificationRowContentBinderImpl,
             @InflationFlag contentToInflate: Int,
-            row: ExpandableNotificationRow
+            row: ExpandableNotificationRow,
         ) {
-            inflateAndWait(false /* expectingException */, inflater, contentToInflate, row)
+            inflateAndWait(
+                false /* expectingException */,
+                inflater,
+                contentToInflate,
+                REDACTION_TYPE_NONE,
+                row,
+            )
         }
 
         private fun inflateAndWait(
             expectingException: Boolean,
             inflater: NotificationRowContentBinderImpl,
             @InflationFlag contentToInflate: Int,
+            @RedactionType redactionType: Int,
             row: ExpandableNotificationRow,
         ) {
             val countDownLatch = CountDownLatch(1)
@@ -533,12 +703,26 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 row.entry,
                 row,
                 contentToInflate,
-                BindParams(),
-                false /* forceInflate */,
-                callback /* callback */
+                BindParams(false, false, false, redactionType),
+                false, /* forceInflate */
+                callback, /* callback */
             )
             Assert.assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS))
             exceptionHolder.exception?.let { throw it }
+        }
+
+        fun hasText(parent: ViewGroup, text: CharSequence): Boolean {
+            for (i in 0 until parent.childCount) {
+                val child = parent.getChildAt(i)
+                if (child is ViewGroup) {
+                    if (hasText(child, text)) {
+                        return true
+                    }
+                } else if (child is TextView) {
+                    return child.text.toString().contains(text)
+                }
+            }
+            return false
         }
     }
 }

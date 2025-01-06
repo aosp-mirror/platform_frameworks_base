@@ -55,6 +55,8 @@ import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECT
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_OTHER;
 import static android.view.inputmethod.ConnectionlessHandwritingCallback.CONNECTIONLESS_HANDWRITING_ERROR_UNSUPPORTED;
 import static android.view.inputmethod.Flags.FLAG_CONNECTIONLESS_HANDWRITING;
+import static android.view.inputmethod.Flags.FLAG_IME_SWITCHER_REVAMP_API;
+import static android.view.inputmethod.Flags.FLAG_VERIFY_KEY_EVENT;
 import static android.view.inputmethod.Flags.ctrlShiftShortcut;
 import static android.view.inputmethod.Flags.predictiveBackIme;
 
@@ -404,6 +406,12 @@ public class InputMethodService extends AbstractInputMethodService {
      * Tracks the ctrl+shift shortcut
      **/
     private boolean mUsingCtrlShiftShortcut = false;
+
+    /**
+     * Last handwriting bounds used for stylus handwriting
+     * {@link #setStylusHandwritingRegion(Region)}.
+     */
+    private Region mLastHandwritingRegion;
 
     /**
      * Returns whether {@link InputMethodService} is responsible for rendering the back button and
@@ -1191,6 +1199,11 @@ public class InputMethodService extends AbstractInputMethodService {
                     // when the stylus is not down.
                     mPrivOps.setHandwritingSurfaceNotTouchable(true);
                     break;
+                case MotionEvent.ACTION_OUTSIDE:
+                    // TODO(b/350047836): determine if there is use-case for simultaneous touch
+                    //  and stylus handwriting and we shouldn't finish for that.
+                    finishStylusHandwriting();
+                    break;
             }
         }
 
@@ -1531,6 +1544,7 @@ public class InputMethodService extends AbstractInputMethodService {
                     return;
                 }
                 editorInfo.makeCompatible(getApplicationInfo().targetSdkVersion);
+                mLastHandwritingRegion = null;
                 getInputMethodInternal().restartInput(new RemoteInputConnection(ric, sessionId),
                         editorInfo);
             }
@@ -2839,6 +2853,7 @@ public class InputMethodService extends AbstractInputMethodService {
             mHandler.removeCallbacks(mFinishHwRunnable);
         }
         mFinishHwRunnable = null;
+        mLastHandwritingRegion = null;
 
         final int requestId = mHandwritingRequestId.getAsInt();
         mHandwritingRequestId = OptionalInt.empty();
@@ -3165,6 +3180,42 @@ public class InputMethodService extends AbstractInputMethodService {
         registerDefaultOnBackInvokedCallback();
     }
 
+    /**
+     * Sets a new stylus handwriting region as user continues to write on an editor on screen.
+     * Stylus strokes that are started within the {@code touchableRegion} are treated as
+     * continuation of handwriting and all the events outside are passed-through to the IME target
+     * app, causing stylus handwriting to finish {@link #finishStylusHandwriting()}.
+     * By default, {@link WindowManager#getMaximumWindowMetrics()} is handwritable and
+     * {@code touchableRegion} resets after each handwriting session.
+     * <p>
+     * For example, the IME can use this API to dynamically expand the stylus handwriting region on
+     * every stylus stroke as user continues to write on an editor. The region should grow around
+     * the last stroke so that a UI element below the IME window is still interactable when it is
+     * spaced sufficiently away (~2 character dimensions) from last stroke.
+     * </p>
+     * <p>
+     * Note: Setting handwriting touchable region is supported on IMEs that support stylus
+     * handwriting {@link InputMethodInfo#supportsStylusHandwriting()}.
+     * </p>
+     *
+     * @param handwritingRegion new stylus handwritable {@link Region} that can accept stylus touch.
+     */
+    @FlaggedApi(Flags.FLAG_ADAPTIVE_HANDWRITING_BOUNDS)
+    public final void setStylusHandwritingRegion(@NonNull Region handwritingRegion) {
+        final Region immutableHandwritingRegion = new Region(handwritingRegion);
+        if (immutableHandwritingRegion.equals(mLastHandwritingRegion)) {
+            Log.v(TAG, "Failed to set setStylusHandwritingRegion():"
+                    + " same region set twice.");
+            return;
+        }
+
+        if (DEBUG) {
+            Log.d(TAG, "Setting new handwriting region for stylus handwriting "
+                    + immutableHandwritingRegion + " from last " + mLastHandwritingRegion);
+        }
+        mPrivOps.setHandwritingTouchableRegion(immutableHandwritingRegion);
+        mLastHandwritingRegion = immutableHandwritingRegion;
+    }
 
     /**
      * Registers an {@link OnBackInvokedCallback} to handle back invocation when ahead-of-time
@@ -3436,7 +3487,7 @@ public class InputMethodService extends AbstractInputMethodService {
         initialize();
         mInlineSuggestionSessionController.notifyOnStartInput(
                 editorInfo == null ? null : editorInfo.packageName,
-                editorInfo == null ? null : editorInfo.autofillId);
+                editorInfo == null ? null : editorInfo.getAutofillId());
         if (DEBUG) Log.v(TAG, "CALL: onStartInput");
         onStartInput(editorInfo, restarting);
         if (mDecorViewVisible) {
@@ -3731,6 +3782,23 @@ public class InputMethodService extends AbstractInputMethodService {
         }
 
         return doMovementKey(keyCode, event, MOVEMENT_DOWN);
+    }
+
+    /**
+     * Received by the IME before dispatch to {@link #onKeyDown(int, KeyEvent)} to let the system
+     * know if the {@link KeyEvent} needs to be verified that it originated from the system.
+     * {@link KeyEvent}s may originate from outside of the system and any sensitive keys should be
+     * marked for verification. One example of this could be using key shortcuts for switching to
+     * another IME.
+     *
+     * @param keyEvent the event that may need verification.
+     * @return {@code true} if {@link KeyEvent} should have its HMAC verified before dispatch,
+     * {@code false} otherwise.
+     */
+    @FlaggedApi(FLAG_VERIFY_KEY_EVENT)
+    @Override
+    public boolean onShouldVerifyKeyEvent(@NonNull KeyEvent keyEvent) {
+        return false;
     }
 
     /**
@@ -4389,6 +4457,39 @@ public class InputMethodService extends AbstractInputMethodService {
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PRIVATE)
     public final boolean isImeNavigationBarShownForTesting() {
         return mNavigationBarController.isShown();
+    }
+
+    /**
+     * Called when the requested visibility of a custom IME Switcher button changes.
+     *
+     * <p>When the system provides an IME navigation bar, it may decide to show an IME Switcher
+     * button inside this bar. However, the IME can request hiding the bar provided by the system
+     * with {@code getWindowInsetsController().hide(captionBar())} (the IME navigation bar provides
+     * {@link Type#captionBar() captionBar} insets to the IME window). If the request is successful,
+     * then it becomes the IME's responsibility to provide a custom IME Switcher button in its
+     * input view, with equivalent functionality.</p>
+     *
+     * <p>This custom button is only requested to be visible when the system provides the IME
+     * navigation bar, both the bar and the IME Switcher button inside it should be visible,
+     * but the IME successfully requested to hide the bar. This does not depend on the current
+     * visibility of the IME. It could be called with {@code true} while the IME is hidden, in
+     * which case the IME should prepare to show the button as soon as the IME itself is shown.</p>
+     *
+     * <p>This is only called when the requested visibility changes. The default value is
+     * {@code false} and as such, this will not be called initially if the resulting value is
+     * {@code false}.</p>
+     *
+     * <p>This can be called at any time after {@link #onCreate}, even if the IME is not currently
+     * visible. However, this is not guaranteed to be called before the IME is shown, as it depends
+     * on when the IME requested hiding the IME navigation bar. If the request is sent during
+     * the showing flow (e.g. during {@link #onStartInputView}), this will be called shortly after
+     * {@link #onWindowShown}, but before the first IME frame is drawn.</p>
+     *
+     * @param visible whether the button is requested visible or not.
+     */
+    @FlaggedApi(FLAG_IME_SWITCHER_REVAMP_API)
+    public void onCustomImeSwitcherButtonRequestedVisible(boolean visible) {
+        // Intentionally empty
     }
 
     /**

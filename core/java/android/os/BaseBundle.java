@@ -45,7 +45,8 @@ import java.util.function.BiFunction;
  * {@link PersistableBundle} subclass.
  */
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
-public class BaseBundle {
+@SuppressWarnings("HiddenSuperclass")
+public class BaseBundle implements Parcel.ClassLoaderProvider {
     /** @hide */
     protected static final String TAG = "Bundle";
     static final boolean DEBUG = false;
@@ -299,8 +300,9 @@ public class BaseBundle {
 
     /**
      * Return the ClassLoader currently associated with this Bundle.
+     * @hide
      */
-    ClassLoader getClassLoader() {
+    public ClassLoader getClassLoader() {
         return mClassLoader;
     }
 
@@ -405,6 +407,9 @@ public class BaseBundle {
             if ((mFlags & Bundle.FLAG_VERIFY_TOKENS_PRESENT) != 0) {
                 Intent.maybeMarkAsMissingCreatorToken(object);
             }
+        } else if (object instanceof Bundle) {
+            Bundle bundle = (Bundle) object;
+            bundle.setClassLoaderSameAsContainerBundleWhenRetrievedFirstTime(this);
         }
         return (clazz != null) ? clazz.cast(object) : (T) object;
     }
@@ -475,10 +480,10 @@ public class BaseBundle {
             map.erase();
             map.ensureCapacity(count);
         }
-        int numLazyValues = 0;
+        int[] numLazyValues = new int[]{0};
         try {
-            numLazyValues = parcelledData.readArrayMap(map, count, !parcelledByNative,
-                    /* lazy */ ownsParcel, mClassLoader);
+            parcelledData.readArrayMap(map, count, !parcelledByNative,
+                    /* lazy */ ownsParcel, this, numLazyValues);
         } catch (BadParcelableException e) {
             if (sShouldDefuse) {
                 Log.w(TAG, "Failed to parse Bundle, but defusing quietly", e);
@@ -489,14 +494,14 @@ public class BaseBundle {
         } finally {
             mWeakParcelledData = null;
             if (ownsParcel) {
-                if (numLazyValues == 0) {
+                if (numLazyValues[0] == 0) {
                     recycleParcel(parcelledData);
                 } else {
                     mWeakParcelledData = new WeakReference<>(parcelledData);
                 }
             }
 
-            mLazyValues = numLazyValues;
+            mLazyValues = numLazyValues[0];
             mParcelledByNative = false;
             mMap = map;
             // Set field last as it is volatile

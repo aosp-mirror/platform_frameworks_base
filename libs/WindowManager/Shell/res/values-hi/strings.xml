@@ -84,7 +84,7 @@
     <string name="bubble_overflow_empty_subtitle" msgid="2627417924958633713">"हाल ही के बबल्स और हटाए गए बबल्स यहां दिखेंगे"</string>
     <string name="bubble_bar_education_stack_title" msgid="2486903590422497245">"बबल्स का इस्तेमाल करके चैट करें"</string>
     <string name="bubble_bar_education_stack_text" msgid="2446934610817409820">"नई बातचीत, आपकी स्क्रीन पर सबसे नीचे आइकॉन के तौर पर दिखती हैं. किसी आइकॉन को बड़ा करने के लिए उस पर टैप करें या खारिज करने के लिए उसे खींचें और छोड़ें."</string>
-    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"जब चाहें, बबल्स की सुविधा को कंट्रोल करें"</string>
+    <string name="bubble_bar_education_manage_title" msgid="6148404487810835924">"जब चाहें, बबल्स को कंट्रोल करें"</string>
     <string name="bubble_bar_education_manage_text" msgid="3199732148641842038">"किसी ऐप्लिकेशन और बातचीत के लिए बबल की सुविधा को मैनेज करने के लिए यहां टैप करें"</string>
     <string name="notification_bubble_title" msgid="6082910224488253378">"बबल"</string>
     <string name="manage_bubbles_text" msgid="7730624269650594419">"मैनेज करें"</string>
@@ -125,13 +125,15 @@
     <string name="select_text" msgid="5139083974039906583">"चुनें"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"स्क्रीनशॉट"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"ब्राउज़र में खोलें"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"ऐप्लिकेशन में खोलें"</string>
     <string name="new_window_text" msgid="6318648868380652280">"नई विंडो"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"विंडो मैनेज करें"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"आसपेक्ट रेशियो (लंबाई-चौड़ाई का अनुपात) बदलें"</string>
     <string name="close_text" msgid="4986518933445178928">"बंद करें"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"मेन्यू बंद करें"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"मेन्यू खोलें"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"स्क्रीन को बड़ा करें"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"स्नैप स्क्रीन"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"साइज़ बदलें"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"ऐप्लिकेशन को यहां मूव नहीं किया जा सकता"</string>
     <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"इमर्सिव"</string>
     <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"वापस लाएं"</string>
@@ -144,4 +146,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"ऐप्लिकेशन में"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"आपके ब्राउज़र में"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"ठीक है"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"अपने ब्राउज़र में तुरंत ऐप्लिकेशन खोलें"</string>
 </resources>

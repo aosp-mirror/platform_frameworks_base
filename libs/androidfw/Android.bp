@@ -80,6 +80,7 @@ cc_library {
         "LoadedArsc.cpp",
         "Locale.cpp",
         "LocaleData.cpp",
+        "LocaleDataLookup.cpp",
         "misc.cpp",
         "NinePatch.cpp",
         "ObbFile.cpp",
@@ -199,6 +200,7 @@ cc_test {
         // This is to suppress warnings/errors from gtest
         "-Wno-unnamed-type-template-args",
     ],
+    require_root: true,
     srcs: [
         // Helpers/infra for testing.
         "tests/CommonHelpers.cpp",
@@ -224,6 +226,7 @@ cc_test {
         "tests/Idmap_test.cpp",
         "tests/LoadedArsc_test.cpp",
         "tests/Locale_test.cpp",
+        "tests/LocaleDataLookup_test.cpp",
         "tests/NinePatch_test.cpp",
         "tests/ResourceTimer_test.cpp",
         "tests/ResourceUtils_test.cpp",

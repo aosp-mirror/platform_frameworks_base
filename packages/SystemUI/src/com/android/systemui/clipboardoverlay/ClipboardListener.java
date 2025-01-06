@@ -19,6 +19,7 @@ package com.android.systemui.clipboardoverlay;
 import static android.content.ClipDescription.CLASSIFICATION_COMPLETE;
 
 import static com.android.systemui.Flags.clipboardNoninteractiveOnLockscreen;
+import static com.android.systemui.Flags.clipboardOverlayMultiuser;
 import static com.android.systemui.Flags.overrideSuppressOverlayCondition;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_ENTERED;
 import static com.android.systemui.clipboardoverlay.ClipboardOverlayEvent.CLIPBOARD_OVERLAY_UPDATED;
@@ -35,11 +36,17 @@ import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.UiEventLogger;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.dagger.SysUISingleton;
+import com.android.systemui.dagger.qualifiers.Main;
+import com.android.systemui.settings.UserTracker;
 import com.android.systemui.user.utils.UserScopedService;
+
+import java.util.concurrent.Executor;
 
 import javax.inject.Inject;
 import javax.inject.Provider;
@@ -61,42 +68,71 @@ public class ClipboardListener implements
     private final Context mContext;
     private final Provider<ClipboardOverlayController> mOverlayProvider;
     private final ClipboardToast mClipboardToast;
-    private final ClipboardManager mClipboardManager;
-    private final KeyguardManager mKeyguardManager;
+    private final UserScopedService<ClipboardManager> mClipboardManagerProvider;
+    private final UserScopedService<KeyguardManager> mKeyguardManagerProvider;
     private final UiEventLogger mUiEventLogger;
     private final ClipboardOverlaySuppressionController mClipboardOverlaySuppressionController;
     private ClipboardOverlay mClipboardOverlay;
+    private ClipboardManager mClipboardManagerForUser;
+    private KeyguardManager mKeyguardManagerForUser;
+
+    private final UserTracker mUserTracker;
+    private final Executor mMainExecutor;
+
+    private final UserTracker.Callback mCallback = new UserTracker.Callback() {
+        @Override
+        public void onUserChanged(int newUser, @NonNull Context userContext) {
+            UserTracker.Callback.super.onUserChanged(newUser, userContext);
+            mClipboardManagerForUser.removePrimaryClipChangedListener(ClipboardListener.this);
+            setUser(mUserTracker.getUserHandle());
+            mClipboardManagerForUser.addPrimaryClipChangedListener(ClipboardListener.this);
+        }
+    };
 
     @Inject
     public ClipboardListener(Context context,
             Provider<ClipboardOverlayController> clipboardOverlayControllerProvider,
             ClipboardToast clipboardToast,
+            UserTracker userTracker,
             UserScopedService<ClipboardManager> clipboardManager,
-            KeyguardManager keyguardManager,
+            UserScopedService<KeyguardManager> keyguardManager,
             UiEventLogger uiEventLogger,
+            @Main Executor mainExecutor,
             ClipboardOverlaySuppressionController clipboardOverlaySuppressionController) {
         mContext = context;
         mOverlayProvider = clipboardOverlayControllerProvider;
         mClipboardToast = clipboardToast;
-        mClipboardManager = clipboardManager.forUser(UserHandle.CURRENT);
-        mKeyguardManager = keyguardManager;
+        mClipboardManagerProvider = clipboardManager;
+        mKeyguardManagerProvider = keyguardManager;
         mUiEventLogger = uiEventLogger;
         mClipboardOverlaySuppressionController = clipboardOverlaySuppressionController;
+
+        mMainExecutor = mainExecutor;
+        mUserTracker = userTracker;
+        setUser(mUserTracker.getUserHandle());
+    }
+
+    private void setUser(UserHandle user) {
+        mClipboardManagerForUser = mClipboardManagerProvider.forUser(user);
+        mKeyguardManagerForUser = mKeyguardManagerProvider.forUser(user);
     }
 
     @Override
     public void start() {
-        mClipboardManager.addPrimaryClipChangedListener(this);
+        if (clipboardOverlayMultiuser()) {
+            mUserTracker.addCallback(mCallback, mMainExecutor);
+        }
+        mClipboardManagerForUser.addPrimaryClipChangedListener(this);
     }
 
     @Override
     public void onPrimaryClipChanged() {
-        if (!mClipboardManager.hasPrimaryClip()) {
+        if (!mClipboardManagerForUser.hasPrimaryClip()) {
             return;
         }
 
-        String clipSource = mClipboardManager.getPrimaryClipSource();
-        ClipData clipData = mClipboardManager.getPrimaryClip();
+        String clipSource = mClipboardManagerForUser.getPrimaryClipSource();
+        ClipData clipData = mClipboardManagerForUser.getPrimaryClip();
 
         if (overrideSuppressOverlayCondition()) {
             if (mClipboardOverlaySuppressionController.shouldSuppressOverlay(clipData, clipSource,
@@ -112,7 +148,7 @@ public class ClipboardListener implements
         }
 
         // user should not access intents before setup or while device is locked
-        if ((clipboardNoninteractiveOnLockscreen() && mKeyguardManager.isDeviceLocked())
+        if ((clipboardNoninteractiveOnLockscreen() && mKeyguardManagerForUser.isDeviceLocked())
                 || !isUserSetupComplete()
                 || clipData == null // shouldn't happen, but just in case
                 || clipData.getItemCount() == 0) {

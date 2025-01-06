@@ -46,7 +46,7 @@
         android:textAlignment="center"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_marginTop="@dimen/hearing_devices_layout_margin"
+        android:layout_marginTop="4dp"
         android:ellipsize="end"
         android:textSize="12sp"
         android:maxLines="3"

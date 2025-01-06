@@ -36,9 +36,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBars
-import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
+import androidx.compose.foundation.overscroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
@@ -64,7 +64,6 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.animation.scene.NestedScrollBehavior
 import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
@@ -76,7 +75,6 @@ import com.android.compose.modifiers.thenIf
 import com.android.systemui.battery.BatteryMeterViewController
 import com.android.systemui.common.ui.compose.windowinsets.CutoutLocation
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
-import com.android.systemui.common.ui.compose.windowinsets.LocalScreenCornerRadius
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.ExclusiveActivatable
@@ -239,7 +237,7 @@ private fun SceneScope.ShadeScene(
                 modifier = modifier,
                 shadeSession = shadeSession,
             )
-        is ShadeMode.Dual -> error("Dual shade is not yet implemented!")
+        is ShadeMode.Dual -> error("Dual shade is implemented separately as an overlay.")
     }
 }
 
@@ -270,6 +268,7 @@ private fun SceneScope.SingleShade(
         )
     val isEmptySpaceClickable by viewModel.isEmptySpaceClickable.collectAsStateWithLifecycle()
     val isMediaVisible by viewModel.isMediaVisible.collectAsStateWithLifecycle()
+    val isQsEnabled by viewModel.isQsEnabled.collectAsStateWithLifecycle()
 
     val shouldPunchHoleBehindScrim =
         layoutState.isTransitioningBetween(Scenes.Gone, Scenes.Shade) ||
@@ -282,7 +281,7 @@ private fun SceneScope.SingleShade(
             key = MediaLandscapeTopOffset,
             canOverflow = false,
         )
-
+    val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
     val navBarHeight = WindowInsets.systemBars.asPaddingValues().calculateBottomPadding()
 
     val mediaOffsetProvider = remember {
@@ -353,14 +352,26 @@ private fun SceneScope.SingleShade(
                     )
                 }
 
+                val qqsLayoutPaddingBottom =
+                    dimensionResource(id = R.dimen.qqs_layout_padding_bottom)
                 ShadeMediaCarousel(
                     isVisible = isMediaVisible,
                     isInRow = mediaInRow,
                     mediaHost = mediaHost,
                     mediaOffsetProvider = mediaOffsetProvider,
                     carouselController = mediaCarouselController,
-                    modifier = Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Media),
+                    modifier =
+                        Modifier.layoutId(SingleShadeMeasurePolicy.LayoutId.Media)
+                            .padding(
+                                horizontal =
+                                    shadeHorizontalPadding +
+                                        dimensionResource(id = R.dimen.qs_horizontal_margin)
+                            )
+                            .thenIf(!mediaInRow) {
+                                Modifier.padding(bottom = qqsLayoutPaddingBottom)
+                            },
                     usingCollapsedLandscapeMedia = usingCollapsedLandscapeMedia,
+                    isQsEnabled = isQsEnabled,
                     isInSplitShade = false,
                 )
 
@@ -370,6 +381,8 @@ private fun SceneScope.SingleShade(
                     viewModel = notificationsPlaceholderViewModel,
                     maxScrimTop = { maxNotifScrimTop.toFloat() },
                     shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+                    stackTopPadding = notificationStackPadding,
+                    stackBottomPadding = navBarHeight,
                     supportNestedScrolling = true,
                     onEmptySpaceClick =
                         viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
@@ -386,10 +399,6 @@ private fun SceneScope.SingleShade(
                     .height(navBarHeight)
                     // Intercepts touches, prevents the scrollable container behind from scrolling.
                     .clickable(interactionSource = null, indication = null) { /* do nothing */ }
-                    .verticalNestedScrollToScene(
-                        topBehavior = NestedScrollBehavior.EdgeAlways,
-                        isExternalOverscrollGesture = { false },
-                    )
         ) {
             NotificationStackCutoffGuideline(
                 stackScrollView = notificationStackScrollView,
@@ -413,9 +422,8 @@ private fun SceneScope.SplitShade(
     modifier: Modifier = Modifier,
     shadeSession: SaveableSession,
 ) {
-    val screenCornerRadius = LocalScreenCornerRadius.current
-
     val isCustomizing by viewModel.qsSceneAdapter.isCustomizing.collectAsStateWithLifecycle()
+    val isQsEnabled by viewModel.isQsEnabled.collectAsStateWithLifecycle()
     val isCustomizerShowing by
         viewModel.qsSceneAdapter.isCustomizerShowing.collectAsStateWithLifecycle()
     val customizingAnimationDuration by
@@ -434,6 +442,7 @@ private fun SceneScope.SplitShade(
     val unfoldTranslationXForEndSide by
         viewModel.unfoldTranslationX(isOnStartSide = false).collectAsStateWithLifecycle(0f)
 
+    val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
     val navBarBottomHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
     val bottomPadding by
         animateDpAsState(
@@ -513,6 +522,7 @@ private fun SceneScope.SplitShade(
                 Box(
                     modifier =
                         Modifier.element(Shade.Elements.SplitShadeStartColumn)
+                            .overscroll(verticalOverscrollEffect)
                             .weight(1f)
                             .graphicsLayer { translationX = unfoldTranslationXForStartSide }
                 ) {
@@ -562,11 +572,16 @@ private fun SceneScope.SplitShade(
                                 mediaOffsetProvider = mediaOffsetProvider,
                                 modifier =
                                     Modifier.thenIf(
-                                        MediaContentPicker.shouldElevateMedia(layoutState)
-                                    ) {
-                                        Modifier.zIndex(1f)
-                                    },
+                                            MediaContentPicker.shouldElevateMedia(layoutState)
+                                        ) {
+                                            Modifier.zIndex(1f)
+                                        }
+                                        .padding(
+                                            horizontal =
+                                                dimensionResource(id = R.dimen.qs_horizontal_margin)
+                                        ),
                                 carouselController = mediaCarouselController,
+                                isQsEnabled = isQsEnabled,
                                 isInSplitShade = true,
                             )
                         }
@@ -588,8 +603,9 @@ private fun SceneScope.SplitShade(
                     stackScrollView = notificationStackScrollView,
                     viewModel = notificationsPlaceholderViewModel,
                     maxScrimTop = { 0f },
+                    stackTopPadding = notificationStackPadding,
+                    stackBottomPadding = notificationStackPadding,
                     shouldPunchHoleBehindScrim = false,
-                    shouldReserveSpaceForNavBar = false,
                     supportNestedScrolling = false,
                     onEmptySpaceClick =
                         viewModel::onEmptySpaceClicked.takeIf { isEmptySpaceClickable },
@@ -608,7 +624,9 @@ private fun SceneScope.SplitShade(
         NotificationStackCutoffGuideline(
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
-            modifier = Modifier.align(Alignment.BottomCenter).navigationBarsPadding(),
+            modifier =
+                Modifier.align(Alignment.BottomCenter)
+                    .padding(bottom = notificationStackPadding + navBarBottomHeight),
         )
     }
 }
@@ -620,10 +638,14 @@ private fun SceneScope.ShadeMediaCarousel(
     mediaHost: MediaHost,
     carouselController: MediaCarouselController,
     mediaOffsetProvider: ShadeMediaOffsetProvider,
+    isInSplitShade: Boolean,
+    isQsEnabled: Boolean,
     modifier: Modifier = Modifier,
     usingCollapsedLandscapeMedia: Boolean = false,
-    isInSplitShade: Boolean,
 ) {
+    if (!isQsEnabled) {
+        return
+    }
     MediaCarousel(
         modifier = modifier.fillMaxWidth(),
         isVisible = isVisible,

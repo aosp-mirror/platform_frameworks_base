@@ -940,10 +940,10 @@ public class UserManager {
 
     /**
      * Specifies if a user is disallowed from resetting network settings
-     * from Settings. This can only be set by device owners and profile owners on the primary user.
+     * from Settings. This can only be set by device owners and profile owners on the main user.
      * The default value is <code>false</code>.
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can reset the network settings of the device.
+     * <p>This restriction has no effect on non-Admin users since they cannot reset the network
+     * settings of the device.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
@@ -1077,11 +1077,11 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from configuring cell broadcasts.
      *
-     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * <p>This restriction can only be set by a device owner, a profile owner on the main
      * user or a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
-     * on the primary user or by a profile owner of an organization-owned managed profile on
-     * the parent profile, it disables the primary user from configuring cell broadcasts.
+     * on the main user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the user from configuring cell broadcasts.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
@@ -1089,8 +1089,8 @@ public class UserManager {
      *
      * <p>The default value is <code>false</code>.
      *
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can configure cell broadcasts.
+     * <p>This restriction has no effect on non-Admin users since they cannot configure cell
+     * broadcasts.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -1103,11 +1103,11 @@ public class UserManager {
     /**
      * Specifies if a user is disallowed from configuring mobile networks.
      *
-     * <p>This restriction can only be set by a device owner, a profile owner on the primary
+     * <p>This restriction can only be set by a device owner, a profile owner on the main
      * user or a profile owner of an organization-owned managed profile on the parent profile.
      * When it is set by a device owner, it applies globally. When it is set by a profile owner
-     * on the primary user or by a profile owner of an organization-owned managed profile on
-     * the parent profile, it disables the primary user from configuring mobile networks.
+     * on the main user or by a profile owner of an organization-owned managed profile on
+     * the parent profile, it disables the user from configuring mobile networks.
      *
      * <p>Holders of the permission
      * {@link android.Manifest.permission#MANAGE_DEVICE_POLICY_MOBILE_NETWORK}
@@ -1115,8 +1115,8 @@ public class UserManager {
      *
      * <p>The default value is <code>false</code>.
      *
-     * <p>This restriction has no effect on secondary users and managed profiles since only the
-     * primary user can configure mobile networks.
+     * <p>This restriction has no effect on non-Admin users since they cannot configure mobile
+     * networks.
      *
      * <p>Key for user restrictions.
      * <p>Type: Boolean
@@ -3846,7 +3846,7 @@ public class UserManager {
     }
 
     /**
-     * Return the time when the context user was unlocked elapsed milliseconds since boot,
+     * Return the time when the calling user was unlocked elapsed milliseconds since boot,
      * or 0 if not unlocked.
      *
      * @hide
@@ -3878,7 +3878,11 @@ public class UserManager {
             Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS,
             Manifest.permission.QUERY_USERS})
+    @CachedProperty(api = "user_manager_user_data")
     public UserInfo getUserInfo(@UserIdInt int userId) {
+        if (android.multiuser.Flags.cacheUserInfoReadOnly()) {
+            return UserManagerCache.getUserInfo(mService::getUserInfo, userId);
+        }
         try {
             return mService.getUserInfo(userId);
         } catch (RemoteException re) {
@@ -3928,9 +3932,9 @@ public class UserManager {
 
         final int callingUid = Binder.getCallingUid();
         final int processUid = Process.myUid();
-        if (Build.isDebuggable() && callingUid != processUid) {
-            Log.w(TAG, "Uid " + processUid + " is fetching a copy of UserProperties on"
-                            + " behalf of callingUid " + callingUid + ". Possibly"
+        if (processUid == Process.SYSTEM_UID && callingUid != processUid) {
+            Log.w(TAG, "The System (uid " + processUid + ") is fetching a copy of"
+                            + " UserProperties on behalf of callingUid " + callingUid + ". Possibly"
                             + " it should carefully first clearCallingIdentity or perhaps use"
                             + " UserManagerInternal.getUserProperties() instead?",
                     new Throwable());
@@ -4193,11 +4197,24 @@ public class UserManager {
             android.Manifest.permission.MANAGE_USERS,
             android.Manifest.permission.INTERACT_ACROSS_USERS}, conditional = true)
     private boolean hasUserRestrictionForUser(@NonNull @UserRestrictionKey String restrictionKey,
-            @UserIdInt int userId) {
-        try {
-            return mService.hasUserRestriction(restrictionKey, userId);
-        } catch (RemoteException re) {
-            throw re.rethrowFromSystemServer();
+            @NonNull @UserIdInt int userId) {
+        return getUserRestrictionFromQuery(new Pair(restrictionKey, userId));
+    }
+
+    /** @hide */
+    @CachedProperty()
+    private boolean getUserRestrictionFromQuery(@NonNull Pair<String, Integer> restrictionPerUser) {
+        return UserManagerCache.getUserRestrictionFromQuery(
+                (Pair<String, Integer> q) -> mService.hasUserRestriction(q.first, q.second),
+                // bypass cache if the flag is disabled
+                (Pair<String, Integer> q) -> !android.multiuser.Flags.cacheUserRestrictionsReadOnly(),
+                restrictionPerUser);
+    }
+
+    /** @hide */
+    public static final void invalidateUserRestriction() {
+        if (android.multiuser.Flags.cacheUserRestrictionsReadOnly()) {
+            UserManagerCache.invalidateUserRestrictionFromQuery();
         }
     }
 
@@ -5308,7 +5325,13 @@ public class UserManager {
             Manifest.permission.MANAGE_USERS,
             Manifest.permission.CREATE_USERS,
             Manifest.permission.QUERY_USERS}, conditional = true)
+    @CachedProperty(api = "user_manager_user_data")
     public List<UserInfo> getProfiles(@UserIdInt int userId) {
+        if (android.multiuser.Flags.cacheProfilesReadOnly()) {
+            return UserManagerCache.getProfiles(
+                    (Integer userIdentifier) -> mService.getProfiles(userIdentifier, false),
+                    userId);
+        }
         try {
             return mService.getProfiles(userId, false /* enabledOnly */);
         } catch (RemoteException re) {
@@ -6467,6 +6490,7 @@ public class UserManager {
             UserManagerCache.invalidateProfileParent();
         }
         invalidateEnabledProfileIds();
+        invalidateUserRestriction();
     }
 
     /**
@@ -6480,6 +6504,23 @@ public class UserManager {
     public static final void invalidateOnUserInfoFlagChange(@UserInfoFlag int flags) {
         if ((flags & UserInfo.FLAG_DISABLED) > 0) {
             invalidateEnabledProfileIds();
+        }
+    }
+
+    /**
+     * This method is used to invalidate caches, when UserManagerService.mUsers
+     * {@link UserManagerService.UserData} is modified, including changes to {@link UserInfo}.
+     * In practice we determine modification by when that data is persisted, or scheduled to be
+     * presisted, to xml.
+     * @hide
+     */
+    public static final void invalidateCacheOnUserDataChanged() {
+        if (android.multiuser.Flags.cacheProfilesReadOnly()
+                || android.multiuser.Flags.cacheUserInfoReadOnly()) {
+            // TODO(b/383175685): Rename the invalidation call to make it clearer that it
+            // invalidates the caches for both getProfiles and getUserInfo (since they both use the
+            // same user_manager_user_data CachedProperty.api).
+            UserManagerCache.invalidateProfiles();
         }
     }
 

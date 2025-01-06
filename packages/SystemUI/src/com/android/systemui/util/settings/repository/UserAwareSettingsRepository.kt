@@ -16,7 +16,6 @@
 
 package com.android.systemui.util.settings.repository
 
-import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.user.data.repository.UserRepository
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
@@ -34,10 +33,10 @@ import kotlinx.coroutines.withContext
 
 /**
  * Repository for observing values of a [UserSettingsProxy], for the currently active user. That
- * means that when user is switched and the new user has a different value, the flow will emit the
- * new value.
+ * means that when the user is switched and the new user has a different value, the flow will emit
+ * the new value.
  */
-@SysUISingleton
+// TODO: b/377244768 - Make internal when UserAwareSecureSettingsRepository can be made internal.
 @OptIn(ExperimentalCoroutinesApi::class)
 abstract class UserAwareSettingsRepository(
     private val userSettings: UserSettingsProxy,
@@ -83,6 +82,12 @@ abstract class UserAwareSettingsRepository(
     suspend fun getInt(name: String, defaultValue: Int): Int {
         return withContext(bgContext) {
             userSettings.getIntForUser(name, defaultValue, userRepository.getSelectedUserInfo().id)
+        }
+    }
+
+    suspend fun setBoolean(name: String, value: Boolean) {
+        withContext(bgContext) {
+            userSettings.putBoolForUser(name, value, userRepository.getSelectedUserInfo().id)
         }
     }
 

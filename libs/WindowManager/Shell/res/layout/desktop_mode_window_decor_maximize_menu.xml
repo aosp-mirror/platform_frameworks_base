@@ -58,7 +58,7 @@
                 android:fontFamily="google-sans-text"
                 android:importantForAccessibility="no"
                 android:text="@string/desktop_mode_maximize_menu_immersive_button_text"
-                android:textColor="?androidprv:attr/materialColorOnSurface"
+                android:textColor="@androidprv:color/materialColorOnSurface"
                 android:alpha="0"/>
         </LinearLayout>
 
@@ -89,7 +89,7 @@
                 android:fontFamily="google-sans-text"
                 android:importantForAccessibility="no"
                 android:text="@string/desktop_mode_maximize_menu_maximize_text"
-                android:textColor="?androidprv:attr/materialColorOnSurface"
+                android:textColor="@androidprv:color/materialColorOnSurface"
                 android:alpha="0"/>
         </LinearLayout>
 
@@ -113,7 +113,7 @@
                     style="?android:attr/buttonBarButtonStyle"
                     android:layout_width="41dp"
                     android:layout_height="@dimen/desktop_mode_maximize_menu_button_height"
-                    android:layout_marginRight="4dp"
+                    android:layout_marginEnd="4dp"
                     android:background="@drawable/desktop_mode_maximize_menu_button_background"
                     android:importantForAccessibility="yes"
                     android:contentDescription="@string/desktop_mode_maximize_menu_snap_left_button_text"
@@ -140,7 +140,7 @@
                 android:importantForAccessibility="no"
                 android:fontFamily="google-sans-text"
                 android:text="@string/desktop_mode_maximize_menu_snap_text"
-                android:textColor="?androidprv:attr/materialColorOnSurface"
+                android:textColor="@androidprv:color/materialColorOnSurface"
                 android:alpha="0"/>
         </LinearLayout>
     </LinearLayout>

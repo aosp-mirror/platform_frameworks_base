@@ -1362,13 +1362,26 @@ static jboolean android_media_MediaPlayer_setOutputDevice(JNIEnv *env, jobject t
     return mp->setOutputDevice(device_id) == NO_ERROR;
 }
 
-static jint android_media_MediaPlayer_getRoutedDeviceId(JNIEnv *env, jobject thiz)
+static jintArray android_media_MediaPlayer_getRoutedDeviceIds(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
-        return AUDIO_PORT_HANDLE_NONE;
+        return NULL;
     }
-    return mp->getRoutedDeviceId();
+    DeviceIdVector deviceIds;
+    // TODO: b/379161379 - Should we throw an exception if the result is not ok?
+    mp->getRoutedDeviceIds(deviceIds);
+    jintArray result;
+    result = env->NewIntArray(deviceIds.size());
+    if (result == NULL) {
+        return NULL;
+    }
+    jint* values = env->GetIntArrayElements(result, 0);
+    for (unsigned int i = 0; i < deviceIds.size(); i++) {
+        values[i++] = static_cast<jint>(deviceIds[i]);
+    }
+    env->ReleaseIntArrayElements(result, values, 0);
+    return result;
 }
 
 static void android_media_MediaPlayer_enableDeviceCallback(
@@ -1452,7 +1465,8 @@ static const JNINativeMethod gMethods[] = {
 
     // AudioRouting
     {"native_setOutputDevice", "(I)Z",                          (void *)android_media_MediaPlayer_setOutputDevice},
-    {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaPlayer_getRoutedDeviceId},
+    {"native_getRoutedDeviceIds", "()[I",
+         (void *)android_media_MediaPlayer_getRoutedDeviceIds},
     {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaPlayer_enableDeviceCallback},
 };
 

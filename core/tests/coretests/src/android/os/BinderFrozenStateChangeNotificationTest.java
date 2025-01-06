@@ -200,7 +200,7 @@ public class BinderFrozenStateChangeNotificationTest {
         IBinder.FrozenStateChangeCallback callback =
                 (IBinder who, int state) -> results.offer(who);
         try {
-            binder.addFrozenStateChangeCallback(callback);
+            binder.addFrozenStateChangeCallback(new HandlerExecutor(Handler.getMain()), callback);
         } catch (UnsupportedOperationException e) {
             return;
         }
@@ -227,7 +227,7 @@ public class BinderFrozenStateChangeNotificationTest {
             final IBinder.FrozenStateChangeCallback callback =
                     (IBinder who, int state) ->
                             queue.offer(state == IBinder.FrozenStateChangeCallback.STATE_FROZEN);
-            binder.addFrozenStateChangeCallback(callback);
+            binder.addFrozenStateChangeCallback(new HandlerExecutor(Handler.getMain()), callback);
             return callback;
         } catch (UnsupportedOperationException e) {
             return null;

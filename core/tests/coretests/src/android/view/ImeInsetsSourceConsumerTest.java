@@ -133,7 +133,7 @@ public class ImeInsetsSourceConsumerTest {
             // Called once through the show flow.
             verify(mController).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(true) /* fromIme */,
-                    eq(statsToken));
+                    eq(false) /* skipsCallbacks */, eq(statsToken));
 
             // set control and verify visibility is applied.
             InsetsSourceControl control = new InsetsSourceControl(ID_IME,
@@ -142,10 +142,10 @@ public class ImeInsetsSourceConsumerTest {
             // IME show animation should be triggered when control becomes available.
             verify(mController).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
-                    and(not(eq(statsToken)), notNull()));
+                    eq(false) /* skipsCallbacks */, and(not(eq(statsToken)), notNull()));
             verify(mController, never()).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(false) /* fromIme */,
-                    and(not(eq(statsToken)), notNull()));
+                    eq(false) /* skipsCallbacks */, and(not(eq(statsToken)), notNull()));
         });
     }
 
@@ -163,7 +163,7 @@ public class ImeInsetsSourceConsumerTest {
             // Called once through the show flow.
             verify(mController).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(true) /* fromIme */,
-                    eq(statsToken));
+                    eq(false) /* skipsCallbacks */, eq(statsToken));
             // Clear previous invocations to verify this is never called with control without leash.
             clearInvocations(mController);
 
@@ -175,10 +175,10 @@ public class ImeInsetsSourceConsumerTest {
             // as we have no leash.
             verify(mController, never()).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
-                    and(not(eq(statsToken)), notNull()));
+                    eq(false) /* skipsCallbacks */, and(not(eq(statsToken)), notNull()));
             verify(mController, never()).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(false) /* fromIme */,
-                    and(not(eq(statsToken)), notNull()));
+                    eq(false) /* skipsCallbacks */, and(not(eq(statsToken)), notNull()));
 
             // set control with leash and verify visibility is applied.
             InsetsSourceControl controlWithLeash = new InsetsSourceControl(ID_IME,
@@ -187,10 +187,10 @@ public class ImeInsetsSourceConsumerTest {
             // IME show animation should be triggered when control with leash becomes available.
             verify(mController).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(true) /* show */, eq(false) /* fromIme */,
-                    and(not(eq(statsToken)), notNull()));
+                    eq(false) /* skipsCallbacks */, and(not(eq(statsToken)), notNull()));
             verify(mController, never()).applyAnimation(
                     eq(WindowInsets.Type.ime()), eq(false) /* show */, eq(false) /* fromIme */,
-                    and(not(eq(statsToken)), notNull()));
+                    eq(false) /* skipsCallbacks */, and(not(eq(statsToken)), notNull()));
         });
     }
 
@@ -223,7 +223,8 @@ public class ImeInsetsSourceConsumerTest {
                 // Called once through the show flow.
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
                         eq(true) /* show */, eq(true) /* fromIme */,
-                        eq(false) /* skipAnim */, eq(statsToken));
+                        eq(false) /* skipsAnim */, eq(false) /* skipsCallbacks */,
+                        eq(statsToken));
             }
 
             // set control and verify visibility is applied.
@@ -241,7 +242,8 @@ public class ImeInsetsSourceConsumerTest {
                 // so the statsToken won't match.
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
                         eq(true) /* show */, eq(false) /* fromIme */,
-                        eq(expectSkipAnim) /* skipAnim */, and(not(eq(statsToken)), notNull()));
+                        eq(expectSkipAnim) /* skipsAnim */, eq(false) /* skipsCallbacks */,
+                        and(not(eq(statsToken)), notNull()));
             }
 
             // If previously hasViewFocus is false, verify when requesting the IME visible next
@@ -252,14 +254,16 @@ public class ImeInsetsSourceConsumerTest {
                 // Called once through the show flow.
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
                         eq(true) /* show */, eq(true) /* fromIme */,
-                        eq(false) /* skipAnim */, eq(statsTokenNext));
+                        eq(false) /* skipsAnim */, eq(false) /* skipsCallbacks */,
+                        eq(statsTokenNext));
                 mController.onControlsChanged(new InsetsSourceControl[]{ control });
                 // Verify IME show animation should be triggered when control becomes available and
                 // the animation will be skipped by getAndClearSkipAnimationOnce invoked.
                 verify(control).getAndClearSkipAnimationOnce();
                 verify(mController).applyAnimation(eq(WindowInsets.Type.ime()),
                         eq(true) /* show */, eq(false) /* fromIme */,
-                        eq(true) /* skipAnim */, and(not(eq(statsToken)), notNull()));
+                        eq(true) /* skipsAnim */, eq(false) /* skipsCallbacks */,
+                        and(not(eq(statsToken)), notNull()));
             }
         });
     }

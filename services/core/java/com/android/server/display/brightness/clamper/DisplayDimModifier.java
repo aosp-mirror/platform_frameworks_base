@@ -38,12 +38,12 @@ class DisplayDimModifier extends BrightnessModifier {
     // mScreenBrightnessDimConfig.
     private final float mScreenBrightnessMinimumDimAmount;
 
-    DisplayDimModifier(Context context) {
+    DisplayDimModifier(int displayId, Context context) {
         PowerManager pm = Objects.requireNonNull(context.getSystemService(PowerManager.class));
         Resources resources = context.getResources();
 
         mScreenBrightnessDimConfig = BrightnessUtils.clampAbsoluteBrightness(
-                pm.getBrightnessConstraint(PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM));
+                pm.getBrightnessConstraint(displayId, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM));
         mScreenBrightnessMinimumDimAmount = resources.getFloat(
                 R.dimen.config_screenBrightnessMinimumDimAmountFloat);
     }

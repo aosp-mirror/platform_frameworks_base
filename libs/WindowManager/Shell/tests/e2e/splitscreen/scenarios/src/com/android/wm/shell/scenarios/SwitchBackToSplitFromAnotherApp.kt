@@ -66,5 +66,6 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
     fun teardown() {
         primaryApp.exit(wmHelper)
         secondaryApp.exit(wmHelper)
+        Utils.resetFreezeRecentTaskList()
     }
 }

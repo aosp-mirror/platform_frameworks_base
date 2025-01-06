@@ -143,6 +143,38 @@ public class VibratorManagerServicePermissionTest {
     }
 
     @Test
+    public void testStartVendorVibrationSessionWithoutVibratePermissionFails() throws Exception {
+        getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                Manifest.permission.VIBRATE_VENDOR_EFFECTS,
+                Manifest.permission.START_VIBRATION_SESSIONS);
+        expectSecurityException("VIBRATE");
+        mVibratorService.startVendorVibrationSession(Process.myUid(), DEVICE_ID, PACKAGE_NAME,
+                new int[] { 1 }, ATTRS, "testVibrate", null);
+    }
+
+    @Test
+    public void testStartVendorVibrationSessionWithoutVibrateVendorEffectsPermissionFails()
+            throws Exception {
+        getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                Manifest.permission.VIBRATE,
+                Manifest.permission.START_VIBRATION_SESSIONS);
+        expectSecurityException("VIBRATE");
+        mVibratorService.startVendorVibrationSession(Process.myUid(), DEVICE_ID, PACKAGE_NAME,
+                new int[] { 1 }, ATTRS, "testVibrate", null);
+    }
+
+    @Test
+    public void testStartVendorVibrationSessionWithoutStartSessionPermissionFails()
+            throws Exception {
+        getInstrumentation().getUiAutomation().adoptShellPermissionIdentity(
+                Manifest.permission.VIBRATE,
+                Manifest.permission.VIBRATE_VENDOR_EFFECTS);
+        expectSecurityException("VIBRATE");
+        mVibratorService.startVendorVibrationSession(Process.myUid(), DEVICE_ID, PACKAGE_NAME,
+                new int[] { 1 }, ATTRS, "testVibrate", null);
+    }
+
+    @Test
     public void testCancelVibrateFails() throws RemoteException {
         expectSecurityException("VIBRATE");
         mVibratorService.cancelVibrate(/* usageFilter= */ -1, new Binder());

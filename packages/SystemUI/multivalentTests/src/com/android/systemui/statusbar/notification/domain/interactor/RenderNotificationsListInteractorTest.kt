@@ -16,7 +16,6 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.app.Notification
-import android.app.Notification.FLAG_PROMOTED_ONGOING
 import android.platform.test.annotations.EnableFlags
 import android.service.notification.StatusBarNotification
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -29,7 +28,7 @@ import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
-import com.android.systemui.statusbar.notification.promoted.promotedNotificationsProvider
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.byKey
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.mock
@@ -48,11 +47,7 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
     private val notifsRepository = kosmos.activeNotificationListRepository
     private val notifsInteractor = kosmos.activeNotificationsInteractor
     private val underTest =
-        RenderNotificationListInteractor(
-            notifsRepository,
-            sectionStyleProvider = mock(),
-            promotedNotificationsProvider = kosmos.promotedNotificationsProvider,
-        )
+        RenderNotificationListInteractor(notifsRepository, sectionStyleProvider = mock())
 
     @Test
     fun setRenderedList_preservesOrdering() =
@@ -127,12 +122,16 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(PromotedNotificationUi.FLAG_NAME)
-    fun setRenderList_setsPromotionStatus() =
+    fun setRenderList_setsPromotionContent() =
         testScope.runTest {
             val actual by collectLastValue(notifsInteractor.topLevelRepresentativeNotifications)
 
-            val notPromoted1 = mockNotificationEntry("key1", flag = null)
-            val promoted2 = mockNotificationEntry("key2", flag = FLAG_PROMOTED_ONGOING)
+            val notPromoted1 = mockNotificationEntry("key1", promotedContent = null)
+            val promoted2 =
+                mockNotificationEntry(
+                    "key2",
+                    promotedContent = PromotedNotificationContentModel.Builder("key2").build(),
+                )
 
             underTest.setRenderedList(listOf(notPromoted1, promoted2))
 
@@ -140,22 +139,19 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
 
             val first = actual!![0]
             assertThat(first.key).isEqualTo("key1")
-            assertThat(first.isPromoted).isFalse()
+            assertThat(first.promotedContent).isNull()
 
             val second = actual!![1]
             assertThat(second.key).isEqualTo("key2")
-            assertThat(second.isPromoted).isTrue()
+            assertThat(second.promotedContent).isNotNull()
         }
 
     private fun mockNotificationEntry(
         key: String,
         rank: Int = 0,
-        flag: Int? = null,
+        promotedContent: PromotedNotificationContentModel? = null,
     ): NotificationEntry {
         val nBuilder = Notification.Builder(context, "a")
-        if (flag != null) {
-            nBuilder.setFlag(flag, true)
-        }
         val notification = nBuilder.build()
 
         val mockSbn =
@@ -169,6 +165,7 @@ class RenderNotificationsListInteractorTest : SysuiTestCase() {
             whenever(this.representativeEntry).thenReturn(this)
             whenever(this.ranking).thenReturn(RankingBuilder().setRank(rank).build())
             whenever(this.sbn).thenReturn(mockSbn)
+            whenever(this.promotedNotificationContentModel).thenReturn(promotedContent)
         }
     }
 }

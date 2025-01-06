@@ -44,6 +44,8 @@ public class DisplayDimModifierTest {
     private static final float MIN_DIM_AMOUNT = 0.05f;
     private static final float DIM_CONFIG = 0.4f;
 
+    private static final int DISPLAY_ID = 3;
+
     @Mock
     private Context mMockContext;
 
@@ -66,9 +68,9 @@ public class DisplayDimModifierTest {
                 R.dimen.config_screenBrightnessMinimumDimAmountFloat)).thenReturn(MIN_DIM_AMOUNT);
         when(mMockContext.getSystemService(PowerManager.class)).thenReturn(mMockPowerManager);
         when(mMockPowerManager.getBrightnessConstraint(
-                PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM)).thenReturn(DIM_CONFIG);
+                DISPLAY_ID, PowerManager.BRIGHTNESS_CONSTRAINT_TYPE_DIM)).thenReturn(DIM_CONFIG);
 
-        mModifier = new DisplayDimModifier(mMockContext);
+        mModifier = new DisplayDimModifier(DISPLAY_ID, mMockContext);
         mRequest.policy = DisplayManagerInternal.DisplayPowerRequest.POLICY_DIM;
     }
 

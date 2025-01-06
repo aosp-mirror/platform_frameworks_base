@@ -1217,183 +1217,6 @@
              a value of 'true' will not override any 'false' value in its parent chain nor will
              it prevent any 'false' in any of its children. -->
         <attr name="forceDarkAllowed" format="boolean" />
-
-        <!-- A lower-emphasized variant of the color on the fixed secondary branding color. @hide
-             -->
-        <attr name="materialColorOnSecondaryFixedVariant" format="color"/>
-        <!-- A lower-emphasized variant of the color on the fixed tertiary branding color. @hide
-             -->
-        <attr name="materialColorOnTertiaryFixedVariant" format="color"/>
-        <!-- The container color of surface the most lowered. @hide -->
-        <attr name="materialColorSurfaceContainerLowest" format="color"/>
-        <!-- A lower-emphasized variant of the color on the fixed primary branding color. @hide -->
-        <attr name="materialColorOnPrimaryFixedVariant" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             the secondary container color. @hide -->
-        <attr name="materialColorOnSecondaryContainer" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             the tertiary container color. @hide -->
-        <attr name="materialColorOnTertiaryContainer" format="color"/>
-        <!-- The container color of surface slightly lowered, which replaces the previous surface
-             at elevation level 1. @hide -->
-        <attr name="materialColorSurfaceContainerLow" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             the primary container color. @hide -->
-        <attr name="materialColorOnPrimaryContainer" format="color"/>
-        <!-- A stronger, more emphasized variant of the fixed secondary branding color. @hide -->
-        <attr name="materialColorSecondaryFixedDim" format="color"/>
-        <!-- A tonal variation of the on error color that passes accessibility guidelines for
-             text/iconography when drawn on top of error container. @hide -->
-        <attr name="materialColorOnErrorContainer" format="color"/>
-        <!-- The color text/iconography when drawn on top of the fixed secondary branding color.
-             @hide -->
-        <attr name="materialColorOnSecondaryFixed" format="color"/>
-        <!-- The "on surface" inverse color, useful for inverted backgrounds. @hide -->
-        <attr name="materialColorOnSurfaceInverse" format="color"/>
-        <!-- A stronger, more emphasized variant of the fixed tertiary branding color. @hide -->
-        <attr name="materialColorTertiaryFixedDim" format="color"/>
-        <!-- The color text/iconography when drawn on top of the fixed tertiary branding color.
-             @hide -->
-        <attr name="materialColorOnTertiaryFixed" format="color"/>
-        <!-- A stronger, more emphasized variant of the fixed primary branding color. @hide -->
-        <attr name="materialColorPrimaryFixedDim" format="color"/>
-        <!-- A tonal variation of the secondary color suitable for background color of container
-             views. @hide -->
-        <attr name="materialColorSecondaryContainer" format="color"/>
-        <!-- A tonal variation of the error color suitable for background color of container views.
-             @hide -->
-        <attr name="materialColorErrorContainer" format="color"/>
-        <!-- The color text/iconography when drawn on top of the fixed primary branding color.
-             @hide -->
-        <attr name="materialColorOnPrimaryFixed" format="color"/>
-        <!-- The inverse color of colorPrimary. @hide -->
-        <attr name="materialColorPrimaryInverse" format="color"/>
-        <!-- A secondary branding color for the app, which stays the same between light and dark
-             themes. @hide -->
-        <attr name="materialColorSecondaryFixed" format="color"/>
-        <!-- The surface inverse color, useful for inverted backgrounds. @hide -->
-        <attr name="materialColorSurfaceInverse" format="color"/>
-        <!-- A tonal variation of the surface color. @hide -->
-        <attr name="materialColorSurfaceVariant" format="color"/>
-        <!-- A tonal variation of the tertiary color suitable for background color of container
-             views. @hide -->
-        <attr name="materialColorTertiaryContainer" format="color"/>
-        <!-- A tertiary branding color for the app, which stays the same between light and dark
-             themes. @hide -->
-        <attr name="materialColorTertiaryFixed" format="color"/>
-        <!-- A tonal variation of the primary color suitable for background color of container
-             views. @hide -->
-        <attr name="materialColorPrimaryContainer" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             background. @hide -->
-        <attr name="materialColorOnBackground" format="color"/>
-        <!-- A primary branding color for the app, which stays the same between light and dark
-             themes. @hide -->
-        <attr name="materialColorPrimaryFixed" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             secondary. @hide -->
-        <attr name="materialColorOnSecondary" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             tertiary. @hide -->
-        <attr name="materialColorOnTertiary" format="color"/>
-        <!-- The surface color which always stay the dimmest in either dark or light theme. @hide
-             -->
-        <attr name="materialColorSurfaceDim" format="color"/>
-        <!-- The surface color which always stay the brightest in either dark or light theme. @hide
-             -->
-        <attr name="materialColorSurfaceBright" format="color"/>
-        <!-- The secondary branding color for the app, usually a bright complement to the primary
-             branding color. @hide -->
-        <attr name="materialColorSecondary" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             error. @hide -->
-        <attr name="materialColorOnError" format="color"/>
-        <!-- The color of surfaces such as cards, sheets, menus. @hide -->
-        <attr name="materialColorSurface" format="color"/>
-        <!-- The container color of surface slightly elevated, which replaces the previous surface
-             at elevation level 3. @hide -->
-        <attr name="materialColorSurfaceContainerHigh" format="color"/>
-        <!-- The tertiary branding color for the app, usually a bright complement to the primary
-             branding color. @hide -->
-        <attr name="materialColorTertiary" format="color"/>
-        <!-- The container color of surface the most elevated, which replaces the previous surface
-             variant. @hide -->
-        <attr name="materialColorSurfaceContainerHighest" format="color"/>
-        <!-- A tonal variation of the on surface color that passes accessibility guidelines for
-             text/iconography when drawn on top of surface variant. @hide -->
-        <attr name="materialColorOnSurfaceVariant" format="color"/>
-        <!-- A color meant to be used in element outlines. @hide -->
-        <attr name="materialColorOutline" format="color"/>
-        <!-- A color meant to be used in element outlines on the surface-variant color. @hide -->
-        <attr name="materialColorOutlineVariant" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             primary. @hide -->
-        <attr name="materialColorOnPrimary" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top of
-             surface. @hide -->
-        <attr name="materialColorOnSurface" format="color"/>
-        <!-- The container color of surface, which replaces the previous surface at elevation level
-             2. @hide -->
-        <attr name="materialColorSurfaceContainer" format="color"/>
-        <!-- The container color of surface, which replaces the previous surface at elevation level
-             2. @hide -->
-        <attr name="materialColorSurfaceContainer" format="color"/>
-         <!-- The primary branding color for the app. By default, this is the color applied to the
-             action bar background. @hide -->
-        <attr name="materialColorPrimary" format="color"/>
-        <!-- The secondary branding color for the app, usually a bright complement to the primary
-             branding color. @hide -->
-        <attr name="materialColorSecondary" format="color"/>
-        <!-- A color that passes accessibility guidelines for text/iconography when drawn on top
-             of tertiary. @hide -->
-        <attr name="materialColorTertiary" format="color"/>
-        <!-- The error color for the app, intended to draw attention to error conditions. @hide -->
-        <attr name="materialColorError" format="color"/>
-
-        <!-- System Custom Tokens-->
-        <!-- @hide -->
-        <attr name="customColorWidgetBackground" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockHour" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockMinute" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorClockSecond" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeApp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnThemeApp" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeAppRing" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorThemeNotif" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandA" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandB" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandC" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorBrandD" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorUnderSurface" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeActive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeActive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeActiveVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeInactive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeInactive" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOnShadeInactiveVariant" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorShadeDisabled" format="color"/>
-        <!-- @hide -->
-        <attr name="customColorOverviewBackground" format="color"/>
-
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -4418,6 +4241,10 @@
     <declare-styleable name="InputMethod_Subtype">
         <!-- The name of the subtype. -->
         <attr name="label" />
+        <!-- The layout label of the subtype.
+             {@link android.view.inputmethod.InputMethodSubtype#getLayoutDisplayName} returns the
+             value specified in this attribute. -->
+        <attr name="layoutLabel" format="reference" />
         <!-- The icon of the subtype. -->
         <attr name="icon" />
         <!-- The locale of the subtype. This string should be a locale (for example en_US and fr_FR)
@@ -4809,6 +4636,12 @@
         <!-- Whether the device should default to observe mode when this service is
              default or in the foreground. -->
         <attr name="shouldDefaultToObserveMode" format="boolean"/>
+        <!-- Whether this service should share the same AID routing priority as the role
+             owner. This package and the role owner must have the same signature, and the
+             role owner must opt into this behavior by using the property named by
+             {@link android.nfc.cardemulation.CardEmulation.PROPERTY_ALLOW_SHARED_ROLE_PRIORITY }
+             in the <code>&lt;application&rt;</code> tag. -->
+        <attr name="wantsRoleHolderPriority" format="boolean"/>
     </declare-styleable>
 
     <!-- Use <code>offhost-apdu-service</code> as the root tag of the XML resource that
@@ -4836,6 +4669,7 @@
         <!-- Whether the device should default to observe mode when this service is
              default or in the foreground. -->
         <attr name="shouldDefaultToObserveMode"/>
+        <attr name="wantsRoleHolderPriority"/>
     </declare-styleable>
 
     <!-- Specify one or more <code>aid-group</code> elements inside a
@@ -7749,14 +7583,14 @@
     <!-- Used to config the segments of a NotificationProgressDrawable. -->
     <!-- @hide internal use only -->
     <declare-styleable name="NotificationProgressDrawableSegments">
-        <!-- Width of the stroke. -->
-        <attr name="width" />
-        <!-- Default color of the stroke. -->
+        <!-- Height of the solid segments -->
+        <attr name="height" />
+        <!-- Height of the faded segments -->
+        <attr name="fadedHeight" format="dimension"/>
+        <!-- Corner radius of the segment rect. -->
+        <attr name="cornerRadius" format="dimension" />
+        <!-- Default color of the segment. -->
         <attr name="color" />
-        <!-- Length of a dash in the stroke for the dashed segments. -->
-        <attr name="dashWidth" />
-        <!-- Gap between dashes in the stroke for the dashed segments. -->
-        <attr name="dashGap" />
     </declare-styleable>
 
     <!-- Used to config the points of a NotificationProgressDrawable. -->
@@ -7767,7 +7601,7 @@
         <!-- Inset of the point icon or rect. -->
         <attr name="inset" />
         <!-- Corner radius of the point rect. -->
-        <attr name="cornerRadius" format="dimension" />
+        <attr name="cornerRadius"/>
         <!-- Default color of the point rect. -->
         <attr name="color" />
     </declare-styleable>
@@ -10281,28 +10115,36 @@
     </declare-styleable>
 
     <!-- @hide -->
+    <attr name="modifierState">
+        <flag name="META" value="0x10000" />
+        <flag name="CTRL" value="0x1000" />
+        <flag name="ALT" value="0x02" />
+        <flag name="SHIFT" value="0x1" />
+        <flag name="SYM" value="0x4" />
+        <flag name="FUNCTION" value="0x8" />
+        <flag name="CAPS_LOCK" value="0x100000" />
+        <flag name="NUM_LOCK" value="0x200000" />
+        <flag name="SCROLL_LOCK" value="0x400000" />
+    </attr>
+
+    <!-- @hide -->
     <declare-styleable name="HardwareDefinedShortcut">
         <attr name="keycode" />
         <!-- The values are taken from public constants for modifier state defined in
              {@see KeyEvent.java}. Here we allow multiple modifier flags as value, since this
              represents the modifier state -->
-        <attr name="modifierState">
-            <flag name="META" value="0x10000" />
-            <flag name="CTRL" value="0x1000" />
-            <flag name="ALT" value="0x02" />
-            <flag name="SHIFT" value="0x1" />
-            <flag name="SYM" value="0x4" />
-            <flag name="FUNCTION" value="0x8" />
-            <flag name="CAPS_LOCK" value="0x100000" />
-            <flag name="NUM_LOCK" value="0x200000" />
-            <flag name="SCROLL_LOCK" value="0x400000" />
-        </attr>
+        <attr name="modifierState" />
         <attr name="outKeycode" />
     </declare-styleable>
 
     <!-- @hide -->
     <declare-styleable name="FunctionRowKey">
         <attr name="keycode" />
+    </declare-styleable>
+
+    <declare-styleable name="Bookmark">
+        <attr name="keycode" />
+        <attr name="modifierState" />
     </declare-styleable>
 
     <declare-styleable name="MediaRouteButton">
@@ -10556,6 +10398,32 @@
 
     <declare-styleable name="DateTimeView">
         <attr name="showRelative" format="boolean" />
+        <!-- For relative times, controls what kinds of times get disambiguation text.
+
+             The default value is "future".
+
+             Does nothing if showRelative=false.
+             -->
+        <attr name="relativeTimeDisambiguationText">
+            <!-- Times in the past will have extra clarifying text indicating that the time is in
+                 the past. For example, 1 minute ago is represented as "1m ago". If this flag is not
+                 set, times in the past are represented as just "1m". -->
+            <flag name="past" value="0x01" />
+            <!-- Times in the future will have extra clarifying text indicating that the time is in
+                 the future. For example, 1 minute in the future is represented as "in 1m". If this
+                 flag is not set, times in the future are represented as just "1m". -->
+            <flag name="future" value="0x02" />
+        </attr>
+        <!-- For relative times, sets the length of the time unit displayed (minutes, hours, etc.).
+
+             Does nothing if showRelative=false.
+             -->
+        <attr name="relativeTimeUnitDisplayLength">
+            <!-- The time unit will be shown as a short as possible (1 character if possible). -->
+            <enum name="shortest" value="0" />
+            <!-- The time unit will be shortened to a medium length (2-3 characters in general). -->
+            <enum name="medium" value="1" />
+        </attr>
     </declare-styleable>
 
     <declare-styleable name="ResolverDrawerLayout_LayoutParams">

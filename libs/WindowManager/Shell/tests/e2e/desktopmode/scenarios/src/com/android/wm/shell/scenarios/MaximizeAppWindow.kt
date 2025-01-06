@@ -38,8 +38,11 @@ import org.junit.Test
 
 @Ignore("Test Base Class")
 abstract class MaximizeAppWindow
-constructor(private val rotation: Rotation = Rotation.ROTATION_0, isResizable: Boolean = true) {
-
+constructor(
+    private val rotation: Rotation = Rotation.ROTATION_0,
+    isResizable: Boolean = true,
+    private val usingKeyboard: Boolean = false
+) {
     private val instrumentation: Instrumentation = InstrumentationRegistry.getInstrumentation()
     private val tapl = LauncherInstrumentation()
     private val wmHelper = WindowManagerStateHelper(instrumentation)
@@ -55,15 +58,18 @@ constructor(private val rotation: Rotation = Rotation.ROTATION_0, isResizable: B
     @Before
     fun setup() {
         Assume.assumeTrue(Flags.enableDesktopWindowingMode() && tapl.isTablet)
+        if (usingKeyboard) {
+            Assume.assumeTrue(Flags.enableTaskResizingKeyboardShortcuts())
+        }
         tapl.setEnableRotation(true)
         tapl.setExpectedRotation(rotation.value)
         ChangeDisplayOrientationRule.setRotation(rotation)
-        testApp.enterDesktopWithDrag(wmHelper, device)
+        testApp.enterDesktopMode(wmHelper, device)
     }
 
     @Test
     open fun maximizeAppWindow() {
-        testApp.maximiseDesktopApp(wmHelper, device)
+        testApp.maximiseDesktopApp(wmHelper, device, usingKeyboard = usingKeyboard)
     }
 
     @After

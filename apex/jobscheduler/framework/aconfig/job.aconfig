@@ -29,6 +29,7 @@ flag {
    namespace: "backstage_power"
    description: "Detect, report and take action on jobs that maybe abandoned by the app without calling jobFinished."
    bug: "372529068"
+   is_exported: true
 }
 
 flag {
@@ -36,6 +37,7 @@ flag {
     namespace: "backstage_power"
     description: "Ignore the important_while_foreground flag and change the related APIs to be not effective"
     bug: "374175032"
+    is_exported: true
 }
 
 flag {
@@ -44,4 +46,23 @@ flag {
     namespace: "backstage_power"
     description: "Introduce a new getPendingJobReasons() API which returns reasons why a job may not have executed. Also deprecate the existing getPendingJobReason() API."
     bug: "372031023"
+}
+
+flag {
+    name: "get_pending_job_reasons_history_api"
+    is_exported: true
+    namespace: "backstage_power"
+    description: "Introduce a new getPendingJobReasonsHistory() API which returns a limited historical view of getPendingJobReasons()."
+    bug: "372031023"
+}
+
+
+flag {
+    name: "add_type_info_to_wakelock_tag"
+    namespace: "backstage_power"
+    description: "Append the job type info to wakelock tag"
+    bug: "381880530"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

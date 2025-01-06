@@ -24,6 +24,7 @@ import androidx.collection.LruCache
 import com.android.statementservice.network.retriever.StatementRetriever
 import com.android.statementservice.retriever.AbstractAsset
 import com.android.statementservice.retriever.AbstractAssetMatcher
+import com.android.statementservice.retriever.Statement
 import com.android.statementservice.utils.Result
 import com.android.statementservice.utils.StatementUtils
 import com.android.statementservice.utils.component1
@@ -63,7 +64,8 @@ class DomainVerifier private constructor(
 
     private val targetAssetCache = AssetLruCache()
 
-    fun collectHosts(packageNames: Iterable<String>): Iterable<Triple<UUID, String, String>> {
+    fun collectHosts(packageNames: Iterable<String>, statusFilter: (Int) -> Boolean):
+            Iterable<Triple<UUID, String, Iterable<String>>> {
         return packageNames.mapNotNull { packageName ->
             val (domainSetId, _, hostToStateMap) = try {
                 manager.getDomainVerificationInfo(packageName)
@@ -73,24 +75,23 @@ class DomainVerifier private constructor(
             } ?: return@mapNotNull null
 
             val hostsToRetry = hostToStateMap
-                .filterValues(VerifyStatus::shouldRetry)
+                .filterValues(statusFilter)
                 .takeIf { it.isNotEmpty() }
                 ?.map { it.key }
                 ?: return@mapNotNull null
 
-            hostsToRetry.map { Triple(domainSetId, packageName, it) }
+            Triple(domainSetId, packageName, hostsToRetry)
         }
-            .flatten()
     }
 
     suspend fun verifyHost(
         host: String,
         packageName: String,
         network: Network? = null
-    ): Pair<WorkResult, VerifyStatus> {
+    ): Triple<WorkResult, VerifyStatus, Statement?> {
         val assetMatcher = synchronized(targetAssetCache) { targetAssetCache[packageName] }
             .takeIf { it!!.isPresent }
-            ?: return WorkResult.failure() to VerifyStatus.FAILURE_PACKAGE_MANAGER
+            ?: return Triple(WorkResult.failure(), VerifyStatus.FAILURE_PACKAGE_MANAGER, null)
         return verifyHost(host, assetMatcher.get(), network)
     }
 
@@ -98,34 +99,34 @@ class DomainVerifier private constructor(
         host: String,
         assetMatcher: AbstractAssetMatcher,
         network: Network? = null
-    ): Pair<WorkResult, VerifyStatus> {
+    ): Triple<WorkResult, VerifyStatus, Statement?> {
         var exception: Exception? = null
         val resultAndStatus = try {
             val sourceAsset = StatementUtils.createWebAssetString(host)
                 .let(AbstractAsset::create)
             val result = retriever.retrieve(sourceAsset, network)
-                ?: return WorkResult.success() to VerifyStatus.FAILURE_UNKNOWN
+                ?: return Triple(WorkResult.success(), VerifyStatus.FAILURE_UNKNOWN, null)
             when (result.responseCode) {
                 HttpURLConnection.HTTP_MOVED_PERM,
                 HttpURLConnection.HTTP_MOVED_TEMP -> {
-                    WorkResult.failure() to VerifyStatus.FAILURE_REDIRECT
+                    Triple(WorkResult.failure(), VerifyStatus.FAILURE_REDIRECT, null)
                 }
                 else -> {
-                    val isVerified = result.statements.any { statement ->
+                    val statement = result.statements.firstOrNull { statement ->
                         (StatementUtils.RELATION.matches(statement.relation) &&
                                 assetMatcher.matches(statement.target))
                     }
 
-                    if (isVerified) {
-                        WorkResult.success() to VerifyStatus.SUCCESS
+                    if (statement != null) {
+                        Triple(WorkResult.success(), VerifyStatus.SUCCESS, statement)
                     } else {
-                        WorkResult.failure() to VerifyStatus.FAILURE_REJECTED_BY_SERVER
+                        Triple(WorkResult.failure(), VerifyStatus.FAILURE_REJECTED_BY_SERVER, statement)
                     }
                 }
             }
         } catch (e: Exception) {
             exception = e
-            WorkResult.retry() to VerifyStatus.FAILURE_UNKNOWN
+            Triple(WorkResult.retry(), VerifyStatus.FAILURE_UNKNOWN, null)
         }
 
         if (DEBUG) {

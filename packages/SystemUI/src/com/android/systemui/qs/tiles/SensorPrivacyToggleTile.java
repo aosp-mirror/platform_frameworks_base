@@ -119,7 +119,7 @@ public abstract class SensorPrivacyToggleTile extends QSTileImpl<QSTile.BooleanS
 
         checkIfRestrictionEnforcedByAdminOnly(state, getRestriction());
 
-        state.icon = ResourceIcon.get(getIconRes(isBlocked));
+        state.icon = maybeLoadResourceIcon(getIconRes(isBlocked));
         state.state = isBlocked ? Tile.STATE_INACTIVE : Tile.STATE_ACTIVE;
         state.value = !isBlocked;
         state.label = getTileLabel();

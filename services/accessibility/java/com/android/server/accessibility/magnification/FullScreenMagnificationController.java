@@ -699,10 +699,9 @@ public class FullScreenMagnificationController implements
             if (!mRegistered) {
                 return false;
             }
-            // If the border implementation is on system ui side but the connection is not
+            // The border implementation is on system ui side but the connection is not
             // established, the fullscreen magnification should not work.
-            if (com.android.window.flags.Flags.alwaysDrawMagnificationFullscreenBorder()
-                    && !mMagnificationConnectionStateSupplier.get()) {
+            if (!mMagnificationConnectionStateSupplier.get()) {
                 return false;
             }
             if (DEBUG) {

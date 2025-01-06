@@ -18,28 +18,14 @@ package com.android.server.location.contexthub;
 
 import android.chre.flags.Flags;
 import android.hardware.location.ContextHubTransaction;
-import android.hardware.location.IContextHubTransactionCallback;
-import android.hardware.location.NanoAppBinary;
-import android.hardware.location.NanoAppMessage;
 import android.hardware.location.NanoAppState;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.util.Log;
 
-import java.time.Duration;
-import java.util.ArrayDeque;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
-import java.util.Set;
-import java.util.concurrent.ScheduledFuture;
-import java.util.concurrent.ScheduledThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Manages transactions at the Context Hub Service.
@@ -326,10 +312,10 @@ import java.util.concurrent.atomic.AtomicInteger;
                     mReliableMessageTransactionMap.entrySet().iterator();
             while (iter.hasNext()) {
                 ContextHubServiceTransaction transaction = iter.next().getValue();
-                short hostEndpointId = transaction.getHostEndpointId();
+                long ownerId = transaction.getOwnerId();
                 int numCompletedStartCalls = transaction.getNumCompletedStartCalls();
                 if (numCompletedStartCalls == 0
-                        && mReliableMessageHostEndpointIdActiveSet.contains(hostEndpointId)) {
+                        && mReliableMessageOwnerIdActiveSet.contains(ownerId)) {
                     continue;
                 }
 
@@ -394,7 +380,7 @@ import java.util.concurrent.atomic.AtomicInteger;
         } else {
             iter.remove();
         }
-        mReliableMessageHostEndpointIdActiveSet.remove(transaction.getHostEndpointId());
+        mReliableMessageOwnerIdActiveSet.remove(transaction.getOwnerId());
 
         Log.d(
                 TAG,
@@ -436,7 +422,7 @@ import java.util.concurrent.atomic.AtomicInteger;
             transaction.setTimeoutTime(now + RELIABLE_MESSAGE_TIMEOUT.toNanos());
         }
         transaction.setNumCompletedStartCalls(numCompletedStartCalls + 1);
-        mReliableMessageHostEndpointIdActiveSet.add(transaction.getHostEndpointId());
+        mReliableMessageOwnerIdActiveSet.add(transaction.getOwnerId());
     }
 
     @Override

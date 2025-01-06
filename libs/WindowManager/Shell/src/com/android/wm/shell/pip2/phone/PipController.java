@@ -16,13 +16,14 @@
 
 package com.android.wm.shell.pip2.phone;
 
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 
-import static com.android.wm.shell.shared.ShellSharedConstants.KEY_EXTRA_SHELL_PIP;
-
+import android.annotation.NonNull;
 import android.app.ActivityManager;
 import android.app.PictureInPictureParams;
+import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
@@ -54,6 +55,7 @@ import com.android.wm.shell.common.TaskStackListenerCallback;
 import com.android.wm.shell.common.TaskStackListenerImpl;
 import com.android.wm.shell.common.pip.IPip;
 import com.android.wm.shell.common.pip.IPipAnimationListener;
+import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
@@ -66,6 +68,8 @@ import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Consumer;
 
 /**
@@ -92,12 +96,14 @@ public class PipController implements ConfigurationChangeListener,
     private final ShellTaskOrganizer mShellTaskOrganizer;
     private final PipTransitionState mPipTransitionState;
     private final PipTouchHandler mPipTouchHandler;
+    private final PipAppOpsListener mPipAppOpsListener;
+    private final PhonePipMenuController mPipMenuController;
     private final ShellExecutor mMainExecutor;
     private final PipImpl mImpl;
-    private Consumer<Boolean> mOnIsInPipStateChangedListener;
+    private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
 
     // Wrapper for making Binder calls into PiP animation listener hosted in launcher's Recents.
-    private PipAnimationListener mPipRecentsAnimationListener;
+    @Nullable private PipAnimationListener mPipRecentsAnimationListener;
 
     @VisibleForTesting
     interface PipAnimationListener {
@@ -135,6 +141,8 @@ public class PipController implements ConfigurationChangeListener,
             ShellTaskOrganizer shellTaskOrganizer,
             PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler,
+            PipAppOpsListener pipAppOpsListener,
+            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
@@ -150,6 +158,8 @@ public class PipController implements ConfigurationChangeListener,
         mPipTransitionState = pipTransitionState;
         mPipTransitionState.addPipTransitionStateChangedListener(this);
         mPipTouchHandler = pipTouchHandler;
+        mPipAppOpsListener = pipAppOpsListener;
+        mPipMenuController = pipMenuController;
         mMainExecutor = mainExecutor;
         mImpl = new PipImpl();
 
@@ -175,6 +185,8 @@ public class PipController implements ConfigurationChangeListener,
             ShellTaskOrganizer shellTaskOrganizer,
             PipTransitionState pipTransitionState,
             PipTouchHandler pipTouchHandler,
+            PipAppOpsListener pipAppOpsListener,
+            PhonePipMenuController pipMenuController,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -184,7 +196,8 @@ public class PipController implements ConfigurationChangeListener,
         return new PipController(context, shellInit, shellCommandHandler, shellController,
                 displayController, displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
                 pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
-                pipTransitionState, pipTouchHandler, mainExecutor);
+                pipTransitionState, pipTouchHandler, pipAppOpsListener, pipMenuController,
+                mainExecutor);
     }
 
     public PipImpl getPipImpl() {
@@ -209,7 +222,7 @@ public class PipController implements ConfigurationChangeListener,
                 });
 
         // Allow other outside processes to bind to PiP controller using the key below.
-        mShellController.addExternalInterface(KEY_EXTRA_SHELL_PIP,
+        mShellController.addExternalInterface(IPip.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellController.addConfigurationChangeListener(this);
 
@@ -223,6 +236,20 @@ public class PipController implements ConfigurationChangeListener,
                 mPipScheduler.scheduleExitPipViaExpand();
             }
         });
+
+        mPipAppOpsListener.setCallback(mPipTouchHandler.getMotionHelper());
+        mPipTransitionState.addPipTransitionStateChangedListener(
+                (oldState, newState, extra) -> {
+                    if (newState == PipTransitionState.ENTERED_PIP) {
+                        final TaskInfo taskInfo = mPipTransitionState.getPipTaskInfo();
+                        if (taskInfo != null && taskInfo.topActivity != null) {
+                            mPipAppOpsListener.onActivityPinned(
+                                    taskInfo.topActivity.getPackageName());
+                        }
+                    } else if (newState == PipTransitionState.EXITED_PIP) {
+                        mPipAppOpsListener.onActivityUnpinned();
+                    }
+                });
     }
 
     private ExternalInterfaceBinder createExternalInterface() {
@@ -250,6 +277,7 @@ public class PipController implements ConfigurationChangeListener,
     @Override
     public void onConfigurationChanged(Configuration newConfiguration) {
         mPipDisplayLayoutState.onConfigurationChanged();
+        mPipTouchHandler.onConfigurationChanged();
     }
 
     @Override
@@ -290,6 +318,11 @@ public class PipController implements ConfigurationChangeListener,
 
         // Update the display layout caches even if we are not in PiP.
         setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
+        if (toRotation != ROTATION_UNDEFINED) {
+            // Make sure we rotate to final rotation ourselves in case display change is coming
+            // from the remote rotation as a part of an already collecting transition.
+            mPipDisplayLayoutState.rotateTo(toRotation);
+        }
 
         if (!mPipTransitionState.isInPip()) {
             // Skip the PiP-relevant updates if we aren't in a valid PiP state.
@@ -301,6 +334,7 @@ public class PipController implements ConfigurationChangeListener,
         }
 
         mPipTouchHandler.updateMinMaxSize(mPipBoundsState.getAspectRatio());
+        mPipMenuController.hideMenu();
 
         if (mPipTransitionState.isInFixedRotation()) {
             // Do not change the bounds when in fixed rotation, but do update the movement bounds
@@ -319,7 +353,7 @@ public class PipController implements ConfigurationChangeListener,
             mPipBoundsAlgorithm.applySnapFraction(toBounds, snapFraction);
             mPipBoundsState.setBounds(toBounds);
         }
-        t.setBounds(mPipTransitionState.mPipTaskToken, mPipBoundsState.getBounds());
+        t.setBounds(mPipTransitionState.getPipTaskToken(), mPipBoundsState.getBounds());
     }
 
     private void setDisplayLayout(DisplayLayout layout) {
@@ -370,24 +404,28 @@ public class PipController implements ConfigurationChangeListener,
             tx.setLayer(overlay, Integer.MAX_VALUE);
             tx.apply();
         }
-        mPipRecentsAnimationListener.onPipAnimationStarted();
+        if (mPipRecentsAnimationListener != null) {
+            mPipRecentsAnimationListener.onPipAnimationStarted();
+        }
     }
 
     private void setLauncherKeepClearAreaHeight(boolean visible, int height) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "setLauncherKeepClearAreaHeight: visible=%b, height=%d", visible, height);
-        if (visible) {
-            Rect rect = new Rect(
-                    0, mPipDisplayLayoutState.getDisplayBounds().bottom - height,
-                    mPipDisplayLayoutState.getDisplayBounds().right,
-                    mPipDisplayLayoutState.getDisplayBounds().bottom);
-            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
-                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
-        } else {
-            mPipBoundsState.setNamedUnrestrictedKeepClearArea(
-                    PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
-        }
-        mPipTouchHandler.onShelfVisibilityChanged(visible, height);
+        mPipTransitionState.setOnIdlePipTransitionStateRunnable(() -> {
+            if (visible) {
+                Rect rect = new Rect(
+                        0, mPipDisplayLayoutState.getDisplayBounds().bottom - height,
+                        mPipDisplayLayoutState.getDisplayBounds().right,
+                        mPipDisplayLayoutState.getDisplayBounds().bottom);
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, rect);
+            } else {
+                mPipBoundsState.setNamedUnrestrictedKeepClearArea(
+                        PipBoundsState.NAMED_KCA_LAUNCHER_SHELF, null);
+            }
+            mPipTouchHandler.onShelfVisibilityChanged(visible, height);
+        });
     }
 
     @Override
@@ -411,13 +449,13 @@ public class PipController implements ConfigurationChangeListener,
                 if (mPipTransitionState.isInSwipePipToHomeTransition()) {
                     mPipTransitionState.resetSwipePipToHomeState();
                 }
-                if (mOnIsInPipStateChangedListener != null) {
-                    mOnIsInPipStateChangedListener.accept(true /* inPip */);
+                for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
+                    listener.accept(true /* inPip */);
                 }
                 break;
             case PipTransitionState.EXITED_PIP:
-                if (mOnIsInPipStateChangedListener != null) {
-                    mOnIsInPipStateChangedListener.accept(false /* inPip */);
+                for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
+                    listener.accept(false /* inPip */);
                 }
                 break;
         }
@@ -449,10 +487,16 @@ public class PipController implements ConfigurationChangeListener,
         mPipTransitionState.dump(pw, innerPrefix);
     }
 
-    private void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
-        mOnIsInPipStateChangedListener = callback;
-        if (mOnIsInPipStateChangedListener != null) {
+    private void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        if (callback != null) {
+            mOnIsInPipStateChangedListeners.add(callback);
             callback.accept(mPipTransitionState.isInPip());
+        }
+    }
+
+    private void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+        if (callback != null) {
+            mOnIsInPipStateChangedListeners.remove(callback);
         }
     }
 
@@ -471,9 +515,16 @@ public class PipController implements ConfigurationChangeListener,
         public void onSystemUiStateChanged(boolean isSysUiStateValid, long flag) {}
 
         @Override
-        public void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {
+        public void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
             mMainExecutor.execute(() -> {
-                PipController.this.setOnIsInPipStateChangedListener(callback);
+                PipController.this.addOnIsInPipStateChangedListener(callback);
+            });
+        }
+
+        @Override
+        public void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {
+            mMainExecutor.execute(() -> {
+                PipController.this.removeOnIsInPipStateChangedListener(callback);
             });
         }
 

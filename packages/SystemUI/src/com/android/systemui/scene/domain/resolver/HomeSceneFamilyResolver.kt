@@ -23,8 +23,10 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardEnabledInteractor
+import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.scene.shared.model.SceneFamilies
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.util.kotlin.combine
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -33,7 +35,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -46,6 +47,7 @@ class HomeSceneFamilyResolver
 constructor(
     @Application private val applicationScope: CoroutineScope,
     deviceEntryInteractor: DeviceEntryInteractor,
+    keyguardInteractor: KeyguardInteractor,
     keyguardEnabledInteractor: KeyguardEnabledInteractor,
 ) : SceneResolver {
     override val targetFamily: SceneKey = SceneFamilies.Home
@@ -56,6 +58,8 @@ constructor(
                 deviceEntryInteractor.canSwipeToEnter,
                 deviceEntryInteractor.isDeviceEntered,
                 deviceEntryInteractor.isUnlocked,
+                keyguardInteractor.isDreamingWithOverlay,
+                keyguardInteractor.isAbleToDream,
                 transform = ::homeScene,
             )
             .stateIn(
@@ -67,7 +71,9 @@ constructor(
                         canSwipeToEnter = deviceEntryInteractor.canSwipeToEnter.value,
                         isDeviceEntered = deviceEntryInteractor.isDeviceEntered.value,
                         isUnlocked = deviceEntryInteractor.isUnlocked.value,
-                    )
+                        isDreamingWithOverlay = false,
+                        isAbleToDream = false,
+                    ),
             )
 
     override fun includesScene(scene: SceneKey): Boolean = scene in homeScenes
@@ -77,8 +83,12 @@ constructor(
         canSwipeToEnter: Boolean?,
         isDeviceEntered: Boolean,
         isUnlocked: Boolean,
+        isDreamingWithOverlay: Boolean,
+        isAbleToDream: Boolean,
     ): SceneKey =
         when {
+            // Dream can run even if Keyguard is disabled, thus it has the highest priority here.
+            isDreamingWithOverlay && isAbleToDream -> Scenes.Dream
             !isKeyguardEnabled -> Scenes.Gone
             canSwipeToEnter == true -> Scenes.Lockscreen
             !isDeviceEntered -> Scenes.Lockscreen
@@ -91,6 +101,9 @@ constructor(
             setOf(
                 Scenes.Gone,
                 Scenes.Lockscreen,
+                // Dream is a home scene as the dream activity occludes keyguard and can show the
+                // shade on top.
+                Scenes.Dream,
             )
     }
 }

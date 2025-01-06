@@ -16,9 +16,8 @@
 
 package android.media;
 
+import static android.media.tv.flags.Flags.FLAG_MEDIACAS_UPDATE_CLIENT_PROFILE_PRIORITY;
 import static android.media.tv.flags.Flags.FLAG_SET_RESOURCE_HOLDER_RETAIN;
-
-import static com.android.media.flags.Flags.FLAG_UPDATE_CLIENT_PROFILE_PRIORITY;
 
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -996,11 +995,14 @@ public final class MediaCas implements AutoCloseable {
      * @param niceValue the nice value.
      * @hide
      */
-    @FlaggedApi(FLAG_UPDATE_CLIENT_PROFILE_PRIORITY)
+    @FlaggedApi(FLAG_MEDIACAS_UPDATE_CLIENT_PROFILE_PRIORITY)
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
     public boolean updateResourcePriority(int priority, int niceValue) {
-        return mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
+        if (mTunerResourceManager != null) {
+            return mTunerResourceManager.updateClientPriority(mClientId, priority, niceValue);
+        }
+        return false;
     }
 
     /**
@@ -1008,16 +1010,18 @@ public final class MediaCas implements AutoCloseable {
      * scenario, when both resource holder and resource challenger have same processId and same
      * priority.
      *
-     * @param resourceHolderRetain Set to {@code true} to allow the resource holder to retain
-     *     ownership, or false to allow the resource challenger to acquire the resource.
-     *     If not explicitly set, resourceHolderRetain is set to {@code false}.
+     *@param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
      * @hide
      */
     @FlaggedApi(FLAG_SET_RESOURCE_HOLDER_RETAIN)
     @SystemApi
     @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
-    public void setResourceHolderRetain(boolean resourceHolderRetain) {
-        mTunerResourceManager.setResourceHolderRetain(mClientId, resourceHolderRetain);
+    public void setResourceOwnershipRetention(boolean enabled) {
+        if (mTunerResourceManager != null) {
+            mTunerResourceManager.setResourceOwnershipRetention(mClientId, enabled);
+        }
     }
 
     IHwBinder getBinder() {

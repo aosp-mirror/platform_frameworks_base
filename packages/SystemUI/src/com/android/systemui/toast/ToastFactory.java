@@ -65,15 +65,16 @@ public class ToastFactory implements Dumpable {
     /**
      * Create a toast to be shown by ToastUI.
      */
-    public SystemUIToast createToast(Context context, CharSequence text, String packageName,
-            int userId, int orientation) {
-        LayoutInflater layoutInflater = LayoutInflater.from(context);
+    public SystemUIToast createToast(Context applicationContext, Context displayContext,
+            CharSequence text, String packageName, int userId, int orientation) {
+        LayoutInflater layoutInflater = LayoutInflater.from(displayContext);
         if (isPluginAvailable()) {
-            return new SystemUIToast(layoutInflater, context, text, mPlugin.createToast(text,
-                    packageName, userId), packageName, userId, orientation);
+            return new SystemUIToast(layoutInflater, applicationContext, displayContext, text,
+                    mPlugin.createToast(text, packageName, userId), packageName, userId,
+                    orientation);
         }
-        return new SystemUIToast(layoutInflater, context, text, packageName, userId,
-                orientation);
+        return new SystemUIToast(layoutInflater, applicationContext, displayContext, text,
+                packageName, userId, orientation);
     }
 
     private boolean isPluginAvailable() {

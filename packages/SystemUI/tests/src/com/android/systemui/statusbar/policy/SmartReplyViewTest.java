@@ -58,6 +58,7 @@ import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.SysuiStatusBarStateController;
 import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import kotlin.sequences.Sequence;

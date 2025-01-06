@@ -100,6 +100,7 @@ package android.content {
     method @NonNull public android.content.Context createContextForSdkInSandbox(@NonNull android.content.pm.ApplicationInfo, int) throws android.content.pm.PackageManager.NameNotFoundException;
     method @NonNull public android.os.IBinder getProcessToken();
     method @NonNull public android.os.UserHandle getUser();
+    field @FlaggedApi("android.app.ondeviceintelligence.flags.enable_on_device_intelligence_module") public static final int BIND_FOREGROUND_SERVICE = 67108864; // 0x4000000
     field public static final String PAC_PROXY_SERVICE = "pac_proxy";
     field public static final String TEST_NETWORK_SERVICE = "test_network";
     field @FlaggedApi("android.os.mainline_vcn_platform_api") public static final String VCN_MANAGEMENT_SERVICE = "vcn_management";
@@ -379,6 +380,13 @@ package android.os {
     field public static final int DEVICE_INITIAL_SDK_INT;
   }
 
+  public final class Bundle extends android.os.BaseBundle implements java.lang.Cloneable android.os.Parcelable {
+    method @FlaggedApi("android.os.enable_has_binders") public int hasBinders();
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_NOT_PRESENT = 0; // 0x0
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_PRESENT = 1; // 0x1
+    field @FlaggedApi("android.os.enable_has_binders") public static final int STATUS_BINDERS_UNKNOWN = 2; // 0x2
+  }
+
   public class Handler {
     method @FlaggedApi("android.os.mainline_vcn_platform_api") public final boolean hasMessagesOrCallbacks();
     method @FlaggedApi("android.os.mainline_vcn_platform_api") public final void removeCallbacksAndEqualMessages(@Nullable Object);
@@ -459,6 +467,10 @@ package android.os {
     method public static void traceCounter(long, @NonNull String, int);
     method public static void traceEnd(long);
     field public static final long TRACE_TAG_NETWORK = 2097152L; // 0x200000L
+  }
+
+  public class UpdateEngine {
+    method @FlaggedApi("android.os.update_engine_api") public void triggerPostinstall(@NonNull String);
   }
 
 }

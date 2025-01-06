@@ -18,15 +18,18 @@ package com.android.internal.widget.remotecompose.core.operations.layout;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 
+import java.util.ArrayList;
 import java.util.List;
 
-public class ComponentStart implements ComponentStartOperation {
+public class ComponentStart extends Operation implements Container {
 
     int mType = DEFAULT;
     float mX;
@@ -34,6 +37,8 @@ public class ComponentStart implements ComponentStartOperation {
     float mWidth;
     float mHeight;
     int mComponentId;
+
+    @NonNull public ArrayList<Operation> mList = new ArrayList<>();
 
     public int getType() {
         return mType;
@@ -69,10 +74,11 @@ public class ComponentStart implements ComponentStartOperation {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mType, mComponentId, mWidth, mHeight);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "COMPONENT_START (type "
@@ -90,13 +96,14 @@ public class ComponentStart implements ComponentStartOperation {
                 + ")";
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         // nothing
     }
 
@@ -119,6 +126,13 @@ public class ComponentStart implements ComponentStartOperation {
     public static final int LAYOUT_ROW = 15;
     public static final int LAYOUT_COLUMN = 16;
 
+    /**
+     * Returns the string representation of the component type
+     *
+     * @param type
+     * @return a string representing the component type
+     */
+    @NonNull
     public static String typeDescription(int type) {
         switch (type) {
             case DEFAULT:
@@ -152,16 +166,36 @@ public class ComponentStart implements ComponentStartOperation {
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return "ComponentStart";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.COMPONENT_START;
     }
 
+    /**
+     * Write the operation on the buffer
+     *
+     * @param buffer
+     * @param type
+     * @param componentId
+     * @param width
+     * @param height
+     */
     public static void apply(
-            WireBuffer buffer, int type, int componentId, float width, float height) {
+            @NonNull WireBuffer buffer, int type, int componentId, float width, float height) {
         buffer.start(Operations.COMPONENT_START);
         buffer.writeInt(type);
         buffer.writeInt(componentId);
@@ -169,11 +203,22 @@ public class ComponentStart implements ComponentStartOperation {
         buffer.writeFloat(height);
     }
 
+    /**
+     * Return the size of the operation in byte
+     *
+     * @return the size in byte
+     */
     public static int size() {
         return 1 + 4 + 4 + 4;
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int type = buffer.readInt();
         int componentId = buffer.readInt();
         float width = buffer.readFloat();
@@ -181,7 +226,12 @@ public class ComponentStart implements ComponentStartOperation {
         operations.add(new ComponentStart(type, componentId, width, height));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(
                         "Basic component encapsulating draw commands." + "This is not resizable.")
@@ -189,5 +239,11 @@ public class ComponentStart implements ComponentStartOperation {
                 .field(INT, "COMPONENT_ID", "unique id for this component")
                 .field(FLOAT, "WIDTH", "width of the component")
                 .field(FLOAT, "HEIGHT", "height of the component");
+    }
+
+    @NonNull
+    @Override
+    public ArrayList<Operation> getList() {
+        return mList;
     }
 }

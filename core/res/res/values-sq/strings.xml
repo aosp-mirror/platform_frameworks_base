@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të kufizuar. Telefonata e radhës: e pakufizuar!"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të pakufizuar. Telefonata e radhës: e kufizuar!"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"ID-ja e telefonuesit kalon me paracaktim në listën e të telefonuesve të pakufizuar. Telefonata e radhës: e pakufizuar!"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Ky aplikacion nuk është i përputhshëm me modalitetin 16 KB. Kontrolli i drejtvendosjes për APK dështoi. Ky aplikacion do të ekzekutohet duke përdorur modalitetin në përputhje me madhësinë e faqes. Për përputhshmërinë më të mirë, ripërpiloje aplikacionin me mbështetjen e modalitetit 16 KB. Për më shumë informacione, shiko &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Ky aplikacion nuk është i përputhshëm me modalitetin 16 KB. Kontrolli i drejtvendosjes për ELF dështoi. Ky aplikacion do të ekzekutohet duke përdorur modalitetin në përputhje me madhësinë e faqes. Për përputhshmërinë më të mirë, ripërpiloje aplikacionin me mbështetjen e modalitetit 16 KB. Për më shumë informacione, shiko &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Ky aplikacion nuk është i përputhshëm me modalitetin 16 KB. Kontrollet e drejtvendosjes për APK dhe ELF dështuan. Ky aplikacion do të ekzekutohet duke përdorur modalitetin në përputhje me madhësinë e faqes. Për përputhshmërinë më të mirë, ripërpiloje aplikacionin me mbështetjen e modalitetit 16 KB. Për më shumë informacione, shiko &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Shërbimi nuk është përgatitur."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Nuk mund ta ndryshosh cilësimin e ID-së së telefonuesit."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Të dhënat u kaluan te <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Rrjeti celular është i paarritshëm"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Provo të ndryshosh rrjetin e preferuar. Trokit për ta ndryshuar."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Telefonatat e urgjencës nuk ofrohen"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Telefonatat e urgjencës kërkojnë një rrjet celular"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Sinjalizimet"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Transferimi i telefonatave"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Lejo që aplikacioni të përcaktojë pozicionin e përafërt mes pajisjeve në afërsi me brezin ultra të gjerë"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"të ndërveprojë me pajisjet Wi-Fi në afërsi"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Lejon që aplikacioni të reklamojë, të lidhet dhe të përcaktojë pozicionin përkatës të pajisjeve Wi-Fi në afërsi"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"të përcaktojë pozicionin e përafërt mes pajisjeve në afërsi"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Lejo që aplikacioni të përcaktojë pozicionin e përafërt mes pajisjeve në afërsi"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Informacionet për shërbimin e preferuar të pagesës me NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Lejon aplikacionin të marrë informacione për shërbimin e preferuar të pagesës me NFC si p.sh. ndihmat e regjistruara dhe destinacionin e itinerarit."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"kontrollo \"Komunikimin e fushës në afërsi\" NFC"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"për <xliff:g id="COUNT">%d</xliff:g> orë"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"për <xliff:g id="COUNT">%d</xliff:g> ditë"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"për <xliff:g id="COUNT">%d</xliff:g> vit"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> min. më parë"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> orë më parë"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> ditë më parë"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> vite më parë"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> min."</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> orë"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> ditë"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> vite"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"për <xliff:g id="COUNT">%d</xliff:g> min."</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"për <xliff:g id="COUNT">%d</xliff:g> orë"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"për <xliff:g id="COUNT">%d</xliff:g> ditë"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"për <xliff:g id="COUNT">%d</xliff:g> vite"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> min. më parë"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> orë më parë"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> ditë më parë"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> vite më parë"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# minutë më parë}other{# minuta më parë}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# orë më parë}other{# orë më parë}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ditë më parë}other{# ditë më parë}}"</string>
@@ -1663,7 +1686,7 @@
     <string name="default_audio_route_name_headphones" msgid="6954070994792640762">"Kufjet"</string>
     <string name="default_audio_route_name_usb" msgid="895668743163316932">"USB"</string>
     <string name="default_audio_route_category_name" msgid="5241740395748134483">"Sistemi"</string>
-    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Audioja e \"bluetooth-it\""</string>
+    <string name="bluetooth_a2dp_audio_route_name" msgid="4214648773120426288">"Audioja me Bluetooth"</string>
     <string name="wireless_display_route_description" msgid="8297563323032966831">"Ekran wireless"</string>
     <string name="media_route_button_content_description" msgid="2299223698196869956">"Transmeto"</string>
     <string name="media_route_chooser_title" msgid="6646594924991269208">"Lidhu me pajisjen"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modaliteti i përdorimit me një dorë"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Shumë më i zbehtë"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Pajisjet e dëgjimit"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tastet e volumit të mbajtura shtypur. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> i aktivizuar."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tastet e volumit të mbajtura shtypur. U çaktivizua \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\"."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Lësho tastet e volumit. Për të aktivizuar <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, shtyp dhe mbaj shtypur të dy tastet e volumit sërish për 3 sekonda."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Fundjava"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Ngjarje"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Në gjumë"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Mos shqetëso (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Menaxhohet nga <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Aktivizuar"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Çaktivizuar"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Çdo kalendar"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> po çaktivizon disa tinguj"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Ka një problem të brendshëm me pajisjen tënde. Ajo mund të jetë e paqëndrueshme derisa të rivendosësh të dhënat në gjendje fabrike."</string>
@@ -2182,7 +2214,7 @@
     <string name="bluetooth_airplane_mode_toast" msgid="2066399056595768554">"Bluetooth-i do të qëndrojë i aktivizuar gjatë modalitetit të aeroplanit"</string>
     <string name="car_loading_profile" msgid="8219978381196748070">"Po ngarkohet"</string>
     <string name="file_count" msgid="3220018595056126969">"{count,plural, =1{{file_name} + # skedar}other{{file_name} + # skedarë}}"</string>
-    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nuk ka persona të rekomanduar për ta ndarë"</string>
+    <string name="chooser_no_direct_share_targets" msgid="1511722103987329028">"Nuk ka persona të rekomanduar për të ndarë"</string>
     <string name="chooser_all_apps_button_label" msgid="3230427756238666328">"Lista e aplikacioneve"</string>
     <string name="usb_device_resolve_prompt_warn" msgid="325871329788064199">"Këtij aplikacioni nuk i është dhënë leje për regjistrim, por mund të regjistrojë audio përmes kësaj pajisjeje USB."</string>
     <string name="accessibility_system_action_home_label" msgid="3234748160850301870">"Ekrani bazë"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Dërgo dhe merr mesazhe pa një rrjet celular ose Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Hap \"Mesazhet\""</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Si funksionon"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Aktivizo \"Zgjidh automatikisht rrjetin\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Aktivizo \"Zgjidh automatikisht rrjetin\" te \"Cilësimet\" që telefoni yt të mund të gjejë një rrjet që funksionon me satelitin"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Aktivizo"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Kthehu prapa"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Në pritje..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"\"SOS satelitor\" ofrohet tani"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Mund t\'u dërgosh mesazhe shërbimeve të urgjencës nëse nuk ka rrjet celular ose Wi-Fi. \"Mesazhet e Google\" duhet të jenë aplikacioni yt i parazgjedhur i mesazheve."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"\"SOS satelitor\" nuk mbështetet"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"\"SOS satelitor\" nuk mbështetet në këtë pajisje"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"\"SOS satelitor\" nuk është konfiguruar"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Sigurohu që të jesh lidhur me internetin dhe provo përsëri konfigurimin"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"\"SOS satelitor\" nuk ofrohet"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"\"SOS satelitor\" nuk ofrohet në këtë shtet ose rajon"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"\"SOS satelitor\" nuk është konfiguruar"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Për të shkëmbyer mesazhe nëpërmjet satelitit, cakto \"Mesazhet e Google\" si aplikacionin e parazgjedhur të mesazheve"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"\"SOS satelitor\" nuk ofrohet"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Për të kontrolluar nëse \"SOS satelitor\" ofrohet në këtë shtet ose rajon, aktivizo cilësimet e vendndodhjes"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Ofrohet shkëmbimi i mesazheve nëpërmjet satelitit"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Mund të shkëmbesh mesazhe nëpërmjet satelitit nëse nuk ka rrjet celular ose Wi-Fi. \"Mesazhet e Google\" duhet të jenë aplikacioni yt i parazgjedhur i mesazheve."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Shkëmbimi i mesazheve nëpërmjet satelitit nuk mbështetet"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Shkëmbimi i mesazheve nëpërmjet satelitit nuk mbështetet në këtë pajisje"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Shkëmbimi i mesazheve nëpërmjet satelitit nuk është konfiguruar"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Sigurohu që të jesh lidhur me internetin dhe provo përsëri konfigurimin"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Shkëmbimi i mesazheve nëpërmjet satelitit nuk ofrohet"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Shkëmbimi i mesazheve nëpërmjet satelitit nuk ofrohet në këtë shtet ose rajon"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Shkëmbimi i mesazheve nëpërmjet satelitit nuk është konfiguruar"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Për të shkëmbyer mesazhe nëpërmjet satelitit, cakto \"Mesazhet e Google\" si aplikacionin e parazgjedhur të mesazheve"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Shkëmbimi i mesazheve nëpërmjet satelitit nuk ofrohet"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Për të kontrolluar nëse shkëmbimi i mesazheve nëpërmjet satelitit ofrohet në këtë shtet ose rajon, aktivizo cilësimet e vendndodhjes"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Konfiguro përsëri \"Shkyçjen me gjurmën e gishtit\""</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g> nuk mund të njihet më."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> dhe <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> nuk mund të njihen më."</string>

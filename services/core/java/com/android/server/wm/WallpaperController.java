@@ -895,7 +895,11 @@ class WallpaperController {
             }
         }
 
-        updateWallpaperTokens(visible, mDisplayContent.isKeyguardLocked());
+        boolean visibleRequested = visible;
+        if (mDisplayContent.mWmService.mFlags.mEnsureWallpaperInTransitions) {
+            visibleRequested = mWallpaperTarget != null && mWallpaperTarget.isVisibleRequested();
+        }
+        updateWallpaperTokens(visibleRequested, mDisplayContent.isKeyguardLocked());
 
         ProtoLog.v(WM_DEBUG_WALLPAPER,
                 "Wallpaper at display %d - visibility: %b, keyguardLocked: %b",
@@ -1104,7 +1108,6 @@ class WallpaperController {
         for (int i = mWallpaperTokens.size() - 1; i >= 0; i--) {
             final WallpaperWindowToken t = mWallpaperTokens.get(i);
             pw.print(prefix); pw.println("token " + t + ":");
-            pw.print(prefix); pw.print("  canShowWhenLocked="); pw.println(t.canShowWhenLocked());
             dumpValue(pw, prefix, "mWallpaperX", t.mWallpaperX);
             dumpValue(pw, prefix, "mWallpaperY", t.mWallpaperY);
             dumpValue(pw, prefix, "mWallpaperXStep", t.mWallpaperXStep);

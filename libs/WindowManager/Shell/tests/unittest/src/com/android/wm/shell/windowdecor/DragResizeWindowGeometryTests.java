@@ -63,6 +63,7 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
     private static final int EDGE_RESIZE_HANDLE_INSET = 4;
     private static final int FINE_CORNER_SIZE = EDGE_RESIZE_THICKNESS * 2 + 10;
     private static final int LARGE_CORNER_SIZE = FINE_CORNER_SIZE + 10;
+    private static final int SMALL_OFFSET = 10;
     private static final DragResizeWindowGeometry GEOMETRY = new DragResizeWindowGeometry(
             TASK_CORNER_RADIUS, TASK_SIZE, EDGE_RESIZE_THICKNESS, EDGE_RESIZE_HANDLE_INSET,
             FINE_CORNER_SIZE, LARGE_CORNER_SIZE, DragResizeWindowGeometry.DisabledEdge.NONE);
@@ -147,15 +148,19 @@ public class DragResizeWindowGeometryTests extends ShellTestCase {
         assertThat(region.contains(point.x + EDGE_RESIZE_THICKNESS, point.y)).isTrue();
         assertThat(region.contains(point.x - EDGE_RESIZE_THICKNESS, point.y)).isTrue();
         // Vertically along the edge is not contained.
-        assertThat(region.contains(point.x, point.y - EDGE_RESIZE_THICKNESS)).isFalse();
-        assertThat(region.contains(point.x, point.y + EDGE_RESIZE_THICKNESS + 10)).isFalse();
+        assertThat(
+                region.contains(point.x, point.y - EDGE_RESIZE_THICKNESS - SMALL_OFFSET)).isFalse();
+        assertThat(
+                region.contains(point.x, point.y + EDGE_RESIZE_THICKNESS + SMALL_OFFSET)).isFalse();
     }
 
     private static void verifyVerticalEdge(@NonNull Region region, @NonNull Point point) {
         assertThat(region.contains(point.x, point.y)).isTrue();
         // Horizontally along the edge is not contained.
-        assertThat(region.contains(point.x + EDGE_RESIZE_THICKNESS, point.y)).isFalse();
-        assertThat(region.contains(point.x - EDGE_RESIZE_THICKNESS, point.y)).isFalse();
+        assertThat(
+                region.contains(point.x + EDGE_RESIZE_THICKNESS + SMALL_OFFSET, point.y)).isFalse();
+        assertThat(
+                region.contains(point.x - EDGE_RESIZE_THICKNESS - SMALL_OFFSET, point.y)).isFalse();
         // Vertically along the edge is contained.
         assertThat(region.contains(point.x, point.y - EDGE_RESIZE_THICKNESS)).isTrue();
         assertThat(region.contains(point.x, point.y + EDGE_RESIZE_THICKNESS)).isTrue();

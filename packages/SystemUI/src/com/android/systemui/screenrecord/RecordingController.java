@@ -23,6 +23,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.media.projection.StopReason;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.os.Process;
@@ -32,17 +33,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.broadcast.BroadcastDispatcher;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dagger.qualifiers.Main;
-import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.mediaprojection.SessionCreationSource;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver;
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDisabledDialogDelegate;
-import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.policy.CallbackController;
 
@@ -62,16 +59,15 @@ public class RecordingController
     private boolean mIsStarting;
     private boolean mIsRecording;
     private PendingIntent mStopIntent;
+    private @StopReason int mStopReason = StopReason.STOP_UNKNOWN;
     private final Bundle mInteractiveBroadcastOption;
     private CountDownTimer mCountDownTimer = null;
     private final Executor mMainExecutor;
     private final BroadcastDispatcher mBroadcastDispatcher;
-    private final FeatureFlags mFlags;
     private final UserTracker mUserTracker;
     private final RecordingControllerLogger mRecordingControllerLogger;
     private final MediaProjectionMetricsLogger mMediaProjectionMetricsLogger;
     private final ScreenCaptureDisabledDialogDelegate mScreenCaptureDisabledDialogDelegate;
-    private final ScreenRecordDialogDelegate.Factory mScreenRecordDialogFactory;
     private final ScreenRecordPermissionDialogDelegate.Factory
             mScreenRecordPermissionDialogDelegateFactory;
 
@@ -89,7 +85,7 @@ public class RecordingController
             new UserTracker.Callback() {
                 @Override
                 public void onUserChanged(int newUser, @NonNull Context userContext) {
-                    stopRecording();
+                    stopRecording(StopReason.STOP_USER_SWITCH);
                 }
             };
 
@@ -116,24 +112,20 @@ public class RecordingController
     public RecordingController(
             @Main Executor mainExecutor,
             BroadcastDispatcher broadcastDispatcher,
-            FeatureFlags flags,
             Lazy<ScreenCaptureDevicePolicyResolver> devicePolicyResolver,
             UserTracker userTracker,
             RecordingControllerLogger recordingControllerLogger,
             MediaProjectionMetricsLogger mediaProjectionMetricsLogger,
             ScreenCaptureDisabledDialogDelegate screenCaptureDisabledDialogDelegate,
-            ScreenRecordDialogDelegate.Factory screenRecordDialogFactory,
             ScreenRecordPermissionDialogDelegate.Factory
                     screenRecordPermissionDialogDelegateFactory) {
         mMainExecutor = mainExecutor;
-        mFlags = flags;
         mDevicePolicyResolver = devicePolicyResolver;
         mBroadcastDispatcher = broadcastDispatcher;
         mUserTracker = userTracker;
         mRecordingControllerLogger = recordingControllerLogger;
         mMediaProjectionMetricsLogger = mediaProjectionMetricsLogger;
         mScreenCaptureDisabledDialogDelegate = screenCaptureDisabledDialogDelegate;
-        mScreenRecordDialogFactory = screenRecordDialogFactory;
         mScreenRecordPermissionDialogDelegateFactory = screenRecordPermissionDialogDelegateFactory;
 
         BroadcastOptions options = BroadcastOptions.makeBasic();
@@ -158,12 +150,8 @@ public class RecordingController
     /** Create a dialog to show screen recording options to the user.
      *  If screen capturing is currently not allowed it will return a dialog
      *  that warns users about it. */
-    public Dialog createScreenRecordDialog(Context context, FeatureFlags flags,
-                                           DialogTransitionAnimator dialogTransitionAnimator,
-                                           ActivityStarter activityStarter,
-                                           @Nullable Runnable onStartRecordingClicked) {
-        if (mFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)
-                && mDevicePolicyResolver.get()
+    public Dialog createScreenRecordDialog(@Nullable Runnable onStartRecordingClicked) {
+        if (mDevicePolicyResolver.get()
                         .isScreenCaptureCompletelyDisabled(getHostUserHandle())) {
             return mScreenCaptureDisabledDialogDelegate.createSysUIDialog();
         }
@@ -254,9 +242,11 @@ public class RecordingController
     }
 
     /**
-     * Stop the recording
+     * Stop the recording and sets the stop reason to be used by the RecordingService
+     * @param stopReason the method of the recording stopped (i.e. QS tile, status bar chip, etc.)
      */
-    public void stopRecording() {
+    public void stopRecording(@StopReason int stopReason) {
+        mStopReason = stopReason;
         try {
             if (mStopIntent != null) {
                 mRecordingControllerLogger.logRecordingStopped();
@@ -289,6 +279,10 @@ public class RecordingController
                 cb.onRecordingEnd();
             }
         }
+    }
+
+    public @StopReason int getStopReason() {
+        return mStopReason;
     }
 
     @Override

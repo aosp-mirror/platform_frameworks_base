@@ -8,9 +8,15 @@ container: "system"
 flag {
   name: "notifications_redesign_app_icons"
   namespace: "systemui"
-  description: "Notifications Redesign: Use app icons in notification rows (not to be confused with"
-    " notifications_use_app_icons, notifications_use_app_icon_in_row which are just experiments)."
+  description: "Notifications Redesign: Use app icons in notification rows"
   bug: "371174789"
+}
+
+flag {
+  name: "notifications_redesign_templates"
+  namespace: "systemui"
+  description: "Notifications Redesign: Update notification templates"
+  bug: "378660052"
 }
 
 flag {
@@ -99,41 +105,6 @@ flag {
   description: "Does a check to see if notification should be autogrouped before posting, and if so groups before post."
   bug: "330214226"
 }
-
-flag {
-  name: "visit_person_uri"
-  namespace: "systemui"
-  description: "Guards the security fix that ensures all URIs Person.java are valid"
-  bug: "281044385"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-# vvv Prototypes for using app icons in notifications vvv
-
-flag {
-  name: "notifications_use_app_icon"
-  namespace: "systemui"
-  description: "Experiment to replace the small icon in a notification with the app icon. This includes the status bar, AOD, shelf and notification row itself."
-  bug: "335211019"
-}
-
-flag {
-  name: "notifications_use_app_icon_in_row"
-  namespace: "systemui"
-  description: "Experiment to replace the small icon in a notification row with the app icon."
-  bug: "335211019"
-}
-
-flag {
-  name: "notifications_use_monochrome_app_icon"
-  namespace: "systemui"
-  description: "Experiment to replace the notification icon in the status bar and shelf with the monochrome app icon, if available."
-  bug: "335211019"
-}
-
-# ^^^ Prototypes for using app icons in notifications ^^^
 
 flag {
   name: "notification_expansion_optional"
@@ -303,4 +274,32 @@ flag {
   namespace: "systemui"
   description: "Adds UI for NAS classification of notifications"
   bug: "367996732"
+}
+
+flag {
+  name: "nm_binder_perf_permission_check"
+  namespace: "systemui"
+  description: "Use PermissionManager for areNotificationsEnabled() instead of NMS"
+  bug: "362981561"
+}
+
+flag {
+  name: "nm_binder_perf_cache_channels"
+  namespace: "systemui"
+  description: "Use IpcDataCache for notification channel/group lookups"
+  bug: "362981561"
+}
+
+flag {
+  name: "nm_binder_perf_throttle_notify"
+  namespace: "systemui"
+  description: "Rate-limit calls to enqueueNotificationWithTag client-side"
+  bug: "362981561"
+}
+
+flag {
+  name: "no_sbnholder"
+  namespace: "systemui"
+  description: "removes sbnholder from NLS"
+  bug: "362981561"
 }

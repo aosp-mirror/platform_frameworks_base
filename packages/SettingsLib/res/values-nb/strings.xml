@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktiv (bare venstre)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktiv (bare høyre)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktiv (venstre og høyre)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Kunne ikke oppdatere omgivelsene"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiv (bare medieinnhold) <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiv (bare medieinnhold). V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> batteri, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Tilkoblet (støtter lyddeling). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktiver terminalappen som gir lokal kommandolistetilgang"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-utviklingsmiljø"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Kjør Linux-terminal på Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(På forsøksstadiet) Kjør Linux-terminal på Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Hvis du slår av dette, slettes Linux-terminaldataene"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontroll"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Angi HDPC-kontrolladferd"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Feilsøking"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animasjonsskala for overgang"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Varighetsskala for animasjoner"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulering av sekundærskjermer"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Plassering av skyggeskjermen"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Apper"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ikke behold aktiviteter"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Fjern hver aktivitet så fort brukeren forlater den"</string>
@@ -498,7 +501,7 @@
     <string name="power_remaining_only_more_than_subtext" msgid="4873750633368888062">"Mer enn <xliff:g id="TIME_REMAINING">%1$s</xliff:g> gjenstår"</string>
     <string name="power_charging" msgid="6727132649743436802">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATE">%2$s</xliff:g>"</string>
     <string name="power_remaining_charging_duration_only" msgid="8085099012811384899">"Fulladet om <xliff:g id="TIME">%1$s</xliff:g>"</string>
-    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – Fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
+    <string name="power_charging_duration" msgid="6127154952524919719">"<xliff:g id="LEVEL">%1$s</xliff:g> – fulladet om <xliff:g id="TIME">%2$s</xliff:g>"</string>
     <string name="power_charging_limited" msgid="4144004473976005214">"<xliff:g id="LEVEL">%1$s</xliff:g> – Ladingen er satt på vent for å beskytte batteriet"</string>
     <string name="power_charging_future_paused" msgid="1809543660923642799">"<xliff:g id="LEVEL">%1$s</xliff:g> – lader"</string>
     <string name="power_fast_charging_duration_v2" msgid="3797735998640359490">"<xliff:g id="LEVEL">%1$s</xliff:g> – <xliff:g id="STATUS">%2$s</xliff:g> – Fulladet innen <xliff:g id="TIME">%3$s</xliff:g>"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Denne telefonen"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Dette nettbrettet"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Denne datamaskinen (intern)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Denne TV-en"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dokkhøyttaler"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Ekstern enhet"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Tilkoblet enhet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Denne telefonen"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analog"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan ikke spille på denne enheten"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Oppgrader kontoen for å bytte"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Kan ikke spille av nedlastinger her"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Tilkoblet via ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Tilkoblet via eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"TV-ens standardinnstilling"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-utgang"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interne høyttalere"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Innebygd høyttaler"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"TV-lyd"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Tilkoblingsproblemer. Slå enheten av og på igjen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Lydenhet med kabel"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjelp og tilbakemelding"</string>

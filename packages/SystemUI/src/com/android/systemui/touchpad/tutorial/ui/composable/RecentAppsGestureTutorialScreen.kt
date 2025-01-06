@@ -16,23 +16,23 @@
 
 package com.android.systemui.touchpad.tutorial.ui.composable
 
-import android.content.res.Resources
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
-import androidx.compose.ui.platform.LocalContext
 import com.airbnb.lottie.compose.rememberLottieDynamicProperties
 import com.android.compose.theme.LocalAndroidColorScheme
 import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialScreenConfig
 import com.android.systemui.inputdevice.tutorial.ui.composable.rememberColorFilterProperty
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureFlowAdapter
-import com.android.systemui.touchpad.tutorial.ui.gesture.GestureRecognizer
-import com.android.systemui.touchpad.tutorial.ui.gesture.RecentAppsGestureRecognizer
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.EasterEggGestureViewModel
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureScreenViewModel
 
 @Composable
-fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () -> Unit) {
+fun RecentAppsGestureTutorialScreen(
+    viewModel: RecentAppsGestureScreenViewModel,
+    easterEggGestureViewModel: EasterEggGestureViewModel,
+    onDoneButtonClicked: () -> Unit,
+    onBack: () -> Unit,
+) {
     val screenConfig =
         TutorialScreenConfig(
             colors = rememberScreenColors(),
@@ -42,30 +42,24 @@ fun RecentAppsGestureTutorialScreen(onDoneButtonClicked: () -> Unit, onBack: () 
                     bodyResId = R.string.touchpad_recent_apps_gesture_guidance,
                     titleSuccessResId = R.string.touchpad_recent_apps_gesture_success_title,
                     bodySuccessResId = R.string.touchpad_recent_apps_gesture_success_body,
+                    titleErrorResId = R.string.gesture_error_title,
+                    bodyErrorResId = R.string.touchpad_recent_gesture_error_body,
                 ),
             animations =
                 TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_recent_apps_edu),
         )
-    val recognizer = rememberRecentAppsGestureRecognizer(LocalContext.current.resources)
-    val gestureUiState: Flow<GestureUiState> =
-        remember(recognizer) {
-            GestureFlowAdapter(recognizer).gestureStateAsFlow.map {
-                it.toGestureUiState(
-                    progressStartMarker = "drag with gesture",
-                    progressEndMarker = "onPause",
-                    successAnimation = R.raw.trackpad_recent_apps_success,
-                )
-            }
-        }
-    GestureTutorialScreen(screenConfig, recognizer, gestureUiState, onDoneButtonClicked, onBack)
-}
-
-@Composable
-private fun rememberRecentAppsGestureRecognizer(resources: Resources): GestureRecognizer {
-    val distance =
-        resources.getDimensionPixelSize(R.dimen.touchpad_tutorial_gestures_distance_threshold)
-    val velocity = resources.getDimension(R.dimen.touchpad_recent_apps_gesture_velocity_threshold)
-    return remember(distance, velocity) { RecentAppsGestureRecognizer(distance, velocity) }
+    GestureTutorialScreen(
+        screenConfig = screenConfig,
+        gestureUiStateFlow = viewModel.gestureUiState,
+        motionEventConsumer = {
+            easterEggGestureViewModel.accept(it)
+            viewModel.handleEvent(it)
+        },
+        easterEggTriggeredFlow = easterEggGestureViewModel.easterEggTriggered,
+        onEasterEggFinished = easterEggGestureViewModel::onEasterEggFinished,
+        onDoneButtonClicked = onDoneButtonClicked,
+        onBack = onBack,
+    )
 }
 
 @Composable

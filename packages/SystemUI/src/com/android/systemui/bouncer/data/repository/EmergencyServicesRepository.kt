@@ -36,7 +36,7 @@ class EmergencyServicesRepository
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Main private val resources: Resources,
-    configurationRepository: ConfigurationRepository,
+    @Main configurationRepository: ConfigurationRepository,
 ) {
     /**
      * Whether to enable emergency services calls while the SIM card is locked. This is disabled in
@@ -48,7 +48,7 @@ constructor(
             .stateIn(
                 scope = applicationScope,
                 started = SharingStarted.Eagerly,
-                initialValue = getEnableEmergencyCallWhileSimLocked()
+                initialValue = getEnableEmergencyCallWhileSimLocked(),
             )
 
     private fun getEnableEmergencyCallWhileSimLocked(): Boolean {

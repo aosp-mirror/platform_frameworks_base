@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Активно (само лево)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Активно (само десно)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Активно (лево и десно)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Ажурирање окружења није успело"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Активно (само за медије). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерије."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Активно (само за медије). Лево: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, десно: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> батерије."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Повезано (подржава дељење звука), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> батерије."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Локални терминал"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Омогући апл. терминала за приступ локалном командном окружењу"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux окружење за програмирање"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Покрените Linux терминал на Android-у"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Експериментално) Покрените Linux терминал на Android-у"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Ако онемогућите, подаци Linux терминала се бришу"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP провера"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Подешавање понашања HDCP провере"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Отклањање грешака"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Размера анимације прелаза"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Аниматорова размера трајања"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Симулирај секундарне екране"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Положај сенке на екрану"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Апликације"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Не чувај активности"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Уништава сваку активност чим је корисник напусти"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Овај телефон"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Овај таблет"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Овај рачунар (интерно)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Овај ТВ"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Звучник базне станице"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Спољни уређај"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Повезани уређај"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Овај телефон"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Аналогни"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Не можете да пустите на овом уређају"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Надоградите налог ради пребацивања"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Преузимања не могу да се пуштају овде"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Повезано преко ARC-а"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Повезано преко eARC-а"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Подразумевана вредност за ТВ"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI излаз"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Унутрашњи звучници"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Уграђени звучник"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Звук ТВ-а"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Проблем при повезивању. Искључите уређај, па га поново укључите"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Жичани аудио уређај"</string>
     <string name="help_label" msgid="3528360748637781274">"Помоћ и повратне информације"</string>

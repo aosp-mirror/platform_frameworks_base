@@ -29,7 +29,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
-import android.view.accessibility.Flags;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -65,9 +64,6 @@ public class AccessibilityServiceWarning {
         Window window = ad.getWindow();
         WindowManager.LayoutParams params = window.getAttributes();
         params.privateFlags |= SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
-        if (!Flags.warningUseDefaultDialogType()) {
-            params.type = WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG;
-        }
         window.setAttributes(params);
         return ad;
     }

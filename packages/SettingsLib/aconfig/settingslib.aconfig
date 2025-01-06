@@ -9,10 +9,10 @@ flag {
 }
 
 flag {
-   name: "bluetooth_qs_tile_dialog_auto_on_toggle"
-   namespace: "bluetooth"
-   description: "Displays the auto on toggle in the bluetooth QS tile dialog"
-   bug: "316985153"
+    name: "bluetooth_qs_tile_dialog_auto_on_toggle"
+    namespace: "bluetooth"
+    description: "Displays the auto on toggle in the bluetooth QS tile dialog"
+    bug: "316985153"
 }
 
 flag {
@@ -23,24 +23,24 @@ flag {
 }
 
 flag {
-  name: "enable_le_audio_sharing"
-  namespace: "pixel_cross_device_control"
-  description: "Gates whether to enable LE audio sharing"
-  bug: "323125723"
+    name: "enable_le_audio_sharing"
+    namespace: "pixel_cross_device_control"
+    description: "Gates whether to enable LE audio sharing"
+    bug: "323125723"
 }
 
 flag {
-  name: "enable_le_audio_qr_code_private_broadcast_sharing"
-  namespace: "pixel_cross_device_control"
-  description: "Gates whether to enable LE audio private broadcast sharing via QR code"
-  bug: "323125723"
+    name: "enable_le_audio_qr_code_private_broadcast_sharing"
+    namespace: "pixel_cross_device_control"
+    description: "Gates whether to enable LE audio private broadcast sharing via QR code"
+    bug: "323125723"
 }
 
 flag {
-  name: "enable_hide_exclusively_managed_bluetooth_device"
-  namespace: "dck_framework"
-  description: "Hide exclusively managed Bluetooth devices in BT settings menu."
-  bug: "324475542"
+    name: "enable_hide_exclusively_managed_bluetooth_device"
+    namespace: "dck_framework"
+    description: "Hide exclusively managed Bluetooth devices in BT settings menu."
+    bug: "324475542"
 }
 
 flag {
@@ -74,16 +74,6 @@ flag {
 }
 
 flag {
-    name: "volume_panel_broadcast_fix"
-    namespace: "systemui"
-    description: "Make the volume panel's repository listen for the new ACTION_CONSOLIDATED_NOTIFICATION_POLICY_CHANGED broadcast instead of ACTION_NOTIFICATION_POLICY_CHANGED"
-    bug: "347707024"
-    metadata {
-        purpose: PURPOSE_BUGFIX
-    }
-}
-
-flag {
     name: "volume_dialog_audio_sharing_fix"
     namespace: "cross_device_experiences"
     description: "Gates whether to show separate volume bars during audio sharing"
@@ -99,7 +89,7 @@ flag {
     description: "the battery saver can pause all non-essential apps and their corresponding notification when device is in locked state to introduce the security vulnerability"
     bug: "346513692"
     metadata {
-      purpose: PURPOSE_BUGFIX
+        purpose: PURPOSE_BUGFIX
     }
 }
 
@@ -107,17 +97,29 @@ flag {
     name: "settings_catalyst"
     namespace: "android_settings"
     description: "Settings catalyst project migration"
+    is_exported: true
     bug: "323791114"
+    is_exported: true
 }
 
 flag {
-  name: "asha_profile_access_profile_enabled_true"
-  namespace: "accessibility"
-  description: "Changes the return value of HearingAidProfile.accessProfileEnabled() to true"
-  bug: "356530795"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
+    name: "write_system_preference_permission_enabled"
+    is_fixed_read_only: true
+    namespace: "android_settings"
+    description: "Enable WRITE_SYSTEM_PREFERENCE permission and appop"
+    is_exported: true
+    bug: "375193223"
+    is_exported: true
+}
+
+flag {
+    name: "asha_profile_access_profile_enabled_true"
+    namespace: "accessibility"
+    description: "Changes the return value of HearingAidProfile.accessProfileEnabled() to true"
+    bug: "356530795"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -165,4 +167,55 @@ flag {
     namespace: "accessibility"
     description: "Enable the ambient volume control in device details and hearing devices dialog."
     bug: "357878944"
+}
+
+flag {
+    name: "settings_preference_write_consent_enabled"
+    namespace: "android_settings"
+    description: "Enable the user consent prompt before writing sensitive preferences via service"
+    bug: "378552675"
+}
+
+flag {
+    name: "hearing_devices_input_routing_control"
+    namespace: "accessibility"
+    description: "Enable the input routing control in device details and hearing devices dialog."
+    bug: "349255906"
+}
+
+flag {
+    name: "hearing_device_set_connection_status_report"
+    namespace: "accessibility"
+    description: "Enable the connection status report for a set of hearing device."
+    bug: "357882387"
+}
+
+flag {
+    name: "ignore_a2dp_disconnection_for_android_auto"
+    namespace: "cross_device_experiences"
+    description: "Do not show problem connecting message when Android Auto disconnect A2DP"
+    bug: "381981752"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "disable_audio_sharing_auto_pick_fallback_in_ui"
+    namespace: "cross_device_experiences"
+    description: "Do not auto pick audio sharing fallback device in UI"
+    bug: "383469911"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
+    name: "enable_temporary_bond_devices_ui"
+    namespace: "cross_device_experiences"
+    description: "UI changes for temporary bond devices in audio sharing."
+    bug: "362859132"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }

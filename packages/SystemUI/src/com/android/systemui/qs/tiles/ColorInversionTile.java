@@ -39,6 +39,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.shared.QSSettingsPackageRepository;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
@@ -51,6 +52,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     public static final String TILE_SPEC = "inversion";
     private final UserSettingObserver mSetting;
+    private final QSSettingsPackageRepository mQSSettingsPackageRepository;
 
     @Inject
     public ColorInversionTile(
@@ -64,11 +66,13 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             UserTracker userTracker,
-            SecureSettings secureSettings
+            SecureSettings secureSettings,
+            QSSettingsPackageRepository qsSettingsPackageRepository
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
+        mQSSettingsPackageRepository = qsSettingsPackageRepository;
         mSetting = new UserSettingObserver(secureSettings, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_INVERSION_ENABLED, userTracker.getUserId()) {
             @Override
@@ -104,7 +108,8 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_COLOR_INVERSION_SETTINGS);
+        return new Intent(Settings.ACTION_COLOR_INVERSION_SETTINGS)
+                .setPackage(mQSSettingsPackageRepository.getSettingsPackageName());
     }
 
     @Override
@@ -124,7 +129,7 @@ public class ColorInversionTile extends QSTileImpl<BooleanState> {
         state.value = enabled;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_inversion_label);
-        state.icon = ResourceIcon.get(state.value
+        state.icon = maybeLoadResourceIcon(state.value
                 ? R.drawable.qs_invert_colors_icon_on
                 : R.drawable.qs_invert_colors_icon_off);
         state.expandedAccessibilityClassName = Switch.class.getName();

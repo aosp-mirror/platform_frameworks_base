@@ -86,6 +86,7 @@
     <uses-permission android:name="android.permission.LOCATION_HARDWARE" />
     <uses-permission android:name="android.permission.NETWORK_FACTORY" />
     <uses-permission android:name="android.permission.SATELLITE_COMMUNICATION" />
+    <uses-permission android:name="android.permission.INTERNET" />
     <!-- Physical hardware -->
     <uses-permission android:name="android.permission.MANAGE_USB" />
     <uses-permission android:name="android.permission.CONTROL_DISPLAY_BRIGHTNESS" />
@@ -322,6 +323,9 @@
     <!-- Query all packages on device on R+ -->
     <uses-permission android:name="android.permission.QUERY_ALL_PACKAGES" />
 
+    <!-- Query advanced protection state -->
+    <uses-permission android:name="android.permission.QUERY_ADVANCED_PROTECTION_MODE" />
+
     <queries>
         <intent>
             <action android:name="android.intent.action.CREATE_NOTE" />
@@ -384,6 +388,9 @@
     <!-- To be able to intercept meta key events, might need to be removed once b/358569822
          is ready -->
     <uses-permission android:name="android.permission.OVERRIDE_SYSTEM_KEY_BEHAVIOR_IN_FOCUSED_WINDOW" />
+
+    <!-- To be able to decipher default applications for certain roles in shortcut helper -->
+    <uses-permission android:name="android.permission.MANAGE_DEFAULT_APPLICATIONS" />
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
     <protected-broadcast android:name="com.android.settingslib.action.UNREGISTER_SLICE_RECEIVER" />
@@ -459,7 +466,7 @@
                   android:label="@string/screenshot_scroll_label"
                   android:finishOnTaskLaunch="true" />
 
-        <service android:name=".screenshot.ScreenshotProxyService"
+        <service android:name=".screenshot.proxy.ScreenshotProxyService"
                  android:permission="com.android.systemui.permission.SELF"
                  android:exported="false" />
 
@@ -490,6 +497,7 @@
         <activity android:name=".touchpad.tutorial.ui.view.TouchpadTutorialActivity"
             android:exported="true"
             android:showForAllUsers="true"
+            android:excludeFromRecents="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TOUCHPAD_TUTORIAL"/>
@@ -500,6 +508,7 @@
         <activity android:name=".inputdevice.tutorial.ui.view.KeyboardTouchpadTutorialActivity"
             android:exported="true"
             android:showForAllUsers="true"
+            android:excludeFromRecents="true"
             android:theme="@style/Theme.AppCompat.NoActionBar">
             <intent-filter>
                 <action android:name="com.android.systemui.action.TOUCHPAD_KEYBOARD_TUTORIAL"/>
@@ -1013,6 +1022,7 @@
             android:autoRemoveFromRecents="true"
             android:launchMode="singleTop"
             android:showForAllUsers="true"
+            android:turnScreenOn="true"
             android:exported="false">
         </activity>
 

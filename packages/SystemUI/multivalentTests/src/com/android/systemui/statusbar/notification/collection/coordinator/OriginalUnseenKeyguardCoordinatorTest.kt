@@ -27,7 +27,6 @@ import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
 import com.android.systemui.keyguard.data.repository.keyguardRepository
-import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
@@ -48,9 +47,9 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.lockScreenShowOnlyUnseenNotificationsSetting
 import com.android.systemui.statusbar.notification.domain.interactor.seenNotificationsInteractor
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
+import com.android.systemui.statusbar.notification.headsup.mockHeadsUpManager
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
-import com.android.systemui.statusbar.policy.headsUpManager
 import com.android.systemui.testKosmos
 import com.android.systemui.util.settings.FakeSettings
 import com.android.systemui.util.settings.fakeSettings
@@ -155,7 +154,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
         runKeyguardCoordinatorTest {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Gone),
-                stateTransition = TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+                stateTransition = TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE),
             )
 
             // WHEN: A notification is posted
@@ -170,7 +169,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
             keyguardRepository.setKeyguardShowing(true)
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
-                stateTransition = TransitionStep(KeyguardState.GONE, KeyguardState.AOD)
+                stateTransition = TransitionStep(KeyguardState.GONE, KeyguardState.AOD),
             )
 
             // THEN: The notification is recognized as "seen" and is filtered out.
@@ -180,7 +179,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
             keyguardRepository.setKeyguardShowing(false)
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Gone),
-                stateTransition = TransitionStep(KeyguardState.AOD, KeyguardState.GONE)
+                stateTransition = TransitionStep(KeyguardState.AOD, KeyguardState.GONE),
             )
 
             // THEN: The notification is shown regardless
@@ -359,14 +358,14 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
             keyguardRepository.setKeyguardShowing(false)
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Gone),
-                stateTransition = TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+                stateTransition = TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE),
             )
 
             // WHEN: Keyguard is shown again
             keyguardRepository.setKeyguardShowing(true)
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
-                stateTransition = TransitionStep(KeyguardState.GONE, KeyguardState.AOD)
+                stateTransition = TransitionStep(KeyguardState.GONE, KeyguardState.AOD),
             )
 
             // THEN: The notification is now recognized as "seen" and is filtered out.
@@ -412,7 +411,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
         runKeyguardCoordinatorTest {
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
-                stateTransition = TransitionStep(KeyguardState.GONE, KeyguardState.LOCKSCREEN)
+                stateTransition = TransitionStep(KeyguardState.GONE, KeyguardState.LOCKSCREEN),
             )
             val firstEntry = NotificationEntryBuilder().setId(1).build()
             collectionListener.onEntryAdded(firstEntry)
@@ -435,14 +434,14 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
             keyguardRepository.setKeyguardShowing(false)
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Gone),
-                stateTransition = TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE)
+                stateTransition = TransitionStep(KeyguardState.LOCKSCREEN, KeyguardState.GONE),
             )
 
             // WHEN: Keyguard is shown again
             keyguardRepository.setKeyguardShowing(true)
             kosmos.setTransition(
                 sceneTransition = Idle(Scenes.Lockscreen),
-                stateTransition = TransitionStep(KeyguardState.GONE, KeyguardState.LOCKSCREEN)
+                stateTransition = TransitionStep(KeyguardState.GONE, KeyguardState.LOCKSCREEN),
             )
 
             // THEN: The first notification is considered seen and is filtered out.
@@ -626,7 +625,7 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
         val keyguardCoordinator =
             OriginalUnseenKeyguardCoordinator(
                 dumpManager = kosmos.dumpManager,
-                headsUpManager = kosmos.headsUpManager,
+                headsUpManager = kosmos.mockHeadsUpManager,
                 keyguardRepository = kosmos.keyguardRepository,
                 keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
                 logger = KeyguardCoordinatorLogger(logcatLogBuffer()),
@@ -664,7 +663,8 @@ class OriginalUnseenKeyguardCoordinatorTest(flags: FlagsParameterization) : Sysu
 
         val onHeadsUpChangedListener: OnHeadsUpChangedListener
             get() =
-                argumentCaptor { verify(kosmos.headsUpManager).addListener(capture()) }.lastValue
+                argumentCaptor { verify(kosmos.mockHeadsUpManager).addListener(capture()) }
+                    .lastValue
     }
 
     companion object {

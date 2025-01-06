@@ -66,6 +66,9 @@ class InMemoryOutputFilter(
         methodName: String,
         descriptor: String
     ) {
+        if (descriptor == "*") {
+            return
+        }
         if (classes.findMethod(className, methodName, descriptor) == null) {
             log.w("Unknown method $className.$methodName$descriptor")
         }
@@ -92,7 +95,8 @@ class InMemoryOutputFilter(
             descriptor: String,
             ): FilterPolicyWithReason {
         return mPolicies[getMethodKey(className, methodName, descriptor)]
-                ?: super.getPolicyForMethod(className, methodName, descriptor)
+            ?: mPolicies[getMethodKey(className, methodName, "*")]
+            ?: super.getPolicyForMethod(className, methodName, descriptor)
     }
 
     fun setPolicyForMethod(
@@ -107,7 +111,8 @@ class InMemoryOutputFilter(
 
     override fun getRenameTo(className: String, methodName: String, descriptor: String): String? {
         return mRenames[getMethodKey(className, methodName, descriptor)]
-                ?: super.getRenameTo(className, methodName, descriptor)
+            ?: mRenames[getMethodKey(className, methodName, "*")]
+            ?: super.getRenameTo(className, methodName, descriptor)
     }
 
     fun setRenameTo(className: String, methodName: String, descriptor: String, toName: String) {

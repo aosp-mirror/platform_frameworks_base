@@ -464,6 +464,74 @@ class PermissionService(private val service: AccessCheckingService) :
         return size
     }
 
+    override fun getPermissionRequestState(
+        packageName: String,
+        permissionName: String,
+        deviceId: String
+    ): Int {
+        val pid = Binder.getCallingPid()
+        val uid = Binder.getCallingUid()
+        val result = context.checkPermission(permissionName, pid, uid)
+        if (result == PackageManager.PERMISSION_GRANTED) {
+            return Context.PERMISSION_REQUEST_STATE_GRANTED
+        }
+
+        val appId = UserHandle.getAppId(uid)
+        val userId = UserHandle.getUserId(uid)
+        val packageState =
+            packageManagerLocal.withFilteredSnapshot(uid, userId).use {
+                it.getPackageState(packageName)
+            } ?: return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
+        val androidPackage =
+            packageState.androidPackage ?: return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
+        if (appId != packageState.appId) {
+            return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
+        }
+        val permission = service.getState { with(policy) { getPermissions()[permissionName] } }
+        if (permission == null || !permission.isRuntime) {
+            return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
+        }
+        if (permissionName !in androidPackage.requestedPermissions) {
+            return Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
+        }
+
+        val permissionFlags =
+            service.getState {
+                getPermissionFlagsWithPolicy(appId, userId, permissionName, deviceId)
+            }
+        val isUnreqestable = permissionFlags.hasAnyBit(UNREQUESTABLE_MASK)
+        // Special case for READ_MEDIA_IMAGES due to photo picker
+        if ((permissionName == Manifest.permission.READ_MEDIA_IMAGES ||
+                permissionName == Manifest.permission.READ_MEDIA_VIDEO) && isUnreqestable) {
+            val isUserSelectedGranted =
+                context.checkPermission(
+                    Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
+                    pid,
+                    uid,
+                ) == PackageManager.PERMISSION_GRANTED
+            val userSelectedPermissionFlags =
+                service.getState {
+                    getPermissionFlagsWithPolicy(
+                        appId,
+                        userId,
+                        Manifest.permission.READ_MEDIA_VISUAL_USER_SELECTED,
+                        deviceId,
+                    )
+                }
+            if (
+                isUserSelectedGranted &&
+                    userSelectedPermissionFlags.hasBits(PermissionFlags.USER_FIXED)
+            ) {
+                return Context.PERMISSION_REQUEST_STATE_REQUESTABLE
+            }
+        }
+        return if (isUnreqestable) {
+            Context.PERMISSION_REQUEST_STATE_UNREQUESTABLE
+        } else {
+            Context.PERMISSION_REQUEST_STATE_REQUESTABLE
+        }
+    }
+
     override fun checkUidPermission(uid: Int, permissionName: String, deviceId: String): Int {
         val userId = UserHandle.getUserId(uid)
         if (!userManagerInternal.exists(userId)) {
@@ -472,7 +540,7 @@ class PermissionService(private val service: AccessCheckingService) :
 
         // PackageManagerInternal.getPackage(int) already checks package visibility and enforces
         // that instant apps can't see shared UIDs. Note that on the contrary,
-        // Note that PackageManagerInternal.getPackage(String) doesn't perform any checks.
+        // PackageManagerInternal.getPackage(String) doesn't perform any checks.
         val androidPackage = packageManagerInternal.getPackage(uid)
         if (androidPackage != null) {
             // Note that PackageManagerInternal.getPackageStateInternal() is not filtered.

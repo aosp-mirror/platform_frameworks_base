@@ -23,6 +23,8 @@ sealed interface GestureState {
 
     data class InProgress(val progress: Float = 0f, val direction: GestureDirection? = null) :
         GestureState
+
+    data object Error : GestureState
 }
 
 enum class GestureDirection {

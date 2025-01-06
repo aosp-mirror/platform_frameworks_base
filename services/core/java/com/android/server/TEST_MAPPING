@@ -119,6 +119,10 @@
                     "include-filter": "android.os.storage.cts.StorageStatsManagerTest"
                 }
             ]
+        },
+        {
+            "name": "FrameworksMockingServicesTests_service_batteryServiceTest",
+            "file_patterns": ["BatteryService\\.java"]
         }
     ],
     "presubmit-large": [

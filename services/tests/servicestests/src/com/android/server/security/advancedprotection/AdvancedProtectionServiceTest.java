@@ -31,6 +31,7 @@ import android.os.test.FakePermissionEnforcer;
 import android.os.test.TestLooper;
 import android.provider.Settings;
 import android.security.advancedprotection.AdvancedProtectionFeature;
+import android.security.advancedprotection.AdvancedProtectionManager;
 import android.security.advancedprotection.IAdvancedProtectionCallback;
 
 import androidx.annotation.NonNull;
@@ -54,13 +55,14 @@ public class AdvancedProtectionServiceTest {
     private Context mContext;
     private AdvancedProtectionService.AdvancedProtectionStore mStore;
     private TestLooper mLooper;
-    AdvancedProtectionFeature mFeature = new AdvancedProtectionFeature("test-id");
+    AdvancedProtectionFeature mTestFeature2g = new AdvancedProtectionFeature(
+            AdvancedProtectionManager.FEATURE_ID_DISALLOW_CELLULAR_2G);
 
     @Before
     public void setup() throws Settings.SettingNotFoundException {
         mContext = mock(Context.class);
         mPermissionEnforcer = new FakePermissionEnforcer();
-        mPermissionEnforcer.grant(Manifest.permission.SET_ADVANCED_PROTECTION_MODE);
+        mPermissionEnforcer.grant(Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE);
         mPermissionEnforcer.grant(Manifest.permission.QUERY_ADVANCED_PROTECTION_MODE);
 
         mStore = new AdvancedProtectionService.AdvancedProtectionStore(mContext) {
@@ -105,7 +107,7 @@ public class AdvancedProtectionServiceTest {
                     @NonNull
                     @Override
                     public AdvancedProtectionFeature getFeature() {
-                        return mFeature;
+                        return mTestFeature2g;
                     }
 
                     @Override
@@ -135,7 +137,7 @@ public class AdvancedProtectionServiceTest {
                     @NonNull
                     @Override
                     public AdvancedProtectionFeature getFeature() {
-                        return mFeature;
+                        return mTestFeature2g;
                     }
 
                     @Override
@@ -165,7 +167,7 @@ public class AdvancedProtectionServiceTest {
                     @NonNull
                     @Override
                     public AdvancedProtectionFeature getFeature() {
-                        return mFeature;
+                        return mTestFeature2g;
                     }
 
                     @Override
@@ -238,8 +240,10 @@ public class AdvancedProtectionServiceTest {
 
     @Test
     public void testGetFeatures() {
-        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature("id-1");
-        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature("id-2");
+        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature(
+                AdvancedProtectionManager.FEATURE_ID_DISALLOW_CELLULAR_2G);
+        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature(
+                AdvancedProtectionManager.FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES);
         AdvancedProtectionHook hook = new AdvancedProtectionHook(mContext, true) {
             @NonNull
             @Override
@@ -268,8 +272,10 @@ public class AdvancedProtectionServiceTest {
 
     @Test
     public void testGetFeatures_featureNotAvailable() {
-        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature("id-1");
-        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature("id-2");
+        AdvancedProtectionFeature feature1 = new AdvancedProtectionFeature(
+                AdvancedProtectionManager.FEATURE_ID_DISALLOW_CELLULAR_2G);
+        AdvancedProtectionFeature feature2 = new AdvancedProtectionFeature(
+                AdvancedProtectionManager.FEATURE_ID_DISALLOW_INSTALL_UNKNOWN_SOURCES);
         AdvancedProtectionHook hook = new AdvancedProtectionHook(mContext, true) {
             @NonNull
             @Override
@@ -299,7 +305,7 @@ public class AdvancedProtectionServiceTest {
 
     @Test
     public void testSetProtection_withoutPermission() {
-        mPermissionEnforcer.revoke(Manifest.permission.SET_ADVANCED_PROTECTION_MODE);
+        mPermissionEnforcer.revoke(Manifest.permission.MANAGE_ADVANCED_PROTECTION_MODE);
         assertThrows(SecurityException.class, () -> mService.setAdvancedProtectionEnabled(true));
     }
 

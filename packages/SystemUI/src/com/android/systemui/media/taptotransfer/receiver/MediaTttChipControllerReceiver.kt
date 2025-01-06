@@ -43,7 +43,6 @@ import com.android.systemui.common.ui.binder.TintedIconViewBinder
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
-import com.android.systemui.media.taptotransfer.MediaTttFlags
 import com.android.systemui.media.taptotransfer.common.MediaTttIcon
 import com.android.systemui.media.taptotransfer.common.MediaTttUtils
 import com.android.systemui.res.R
@@ -68,25 +67,27 @@ import javax.inject.Inject
  * TODO(b/245610654): Re-name this to be MediaTttReceiverCoordinator.
  */
 @SysUISingleton
-open class MediaTttChipControllerReceiver @Inject constructor(
-        private val commandQueue: CommandQueue,
-        context: Context,
-        logger: MediaTttReceiverLogger,
-        viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
-        @Main mainExecutor: DelayableExecutor,
-        accessibilityManager: AccessibilityManager,
-        configurationController: ConfigurationController,
-        dumpManager: DumpManager,
-        powerManager: PowerManager,
-        @Main private val mainHandler: Handler,
-        private val mediaTttFlags: MediaTttFlags,
-        private val uiEventLogger: MediaTttReceiverUiEventLogger,
-        private val viewUtil: ViewUtil,
-        wakeLockBuilder: WakeLock.Builder,
-        systemClock: SystemClock,
-        private val rippleController: MediaTttReceiverRippleController,
-        private val temporaryViewUiEventLogger: TemporaryViewUiEventLogger,
-) : TemporaryViewDisplayController<ChipReceiverInfo, MediaTttReceiverLogger>(
+open class MediaTttChipControllerReceiver
+@Inject
+constructor(
+    private val commandQueue: CommandQueue,
+    context: Context,
+    logger: MediaTttReceiverLogger,
+    viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
+    @Main private val mainExecutor: DelayableExecutor,
+    accessibilityManager: AccessibilityManager,
+    configurationController: ConfigurationController,
+    dumpManager: DumpManager,
+    powerManager: PowerManager,
+    @Main private val mainHandler: Handler,
+    private val uiEventLogger: MediaTttReceiverUiEventLogger,
+    private val viewUtil: ViewUtil,
+    wakeLockBuilder: WakeLock.Builder,
+    systemClock: SystemClock,
+    private val rippleController: MediaTttReceiverRippleController,
+    private val temporaryViewUiEventLogger: TemporaryViewUiEventLogger,
+) :
+    TemporaryViewDisplayController<ChipReceiverInfo, MediaTttReceiverLogger>(
         context,
         logger,
         viewCaptureAwareWindowManager,
@@ -99,36 +100,43 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         wakeLockBuilder,
         systemClock,
         temporaryViewUiEventLogger,
-) {
+    ) {
     @SuppressLint("WrongConstant") // We're allowed to use LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-    override val windowLayoutParams = commonWindowLayoutParams.apply {
-        gravity = Gravity.BOTTOM.or(Gravity.CENTER_HORIZONTAL)
-        // Params below are needed for the ripple to work correctly
-        width = WindowManager.LayoutParams.MATCH_PARENT
-        height = WindowManager.LayoutParams.MATCH_PARENT
-        layoutInDisplayCutoutMode = WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-        fitInsetsTypes = 0 // Ignore insets from all system bars
-    }
+    override val windowLayoutParams =
+        commonWindowLayoutParams.apply {
+            gravity = Gravity.BOTTOM.or(Gravity.CENTER_HORIZONTAL)
+            // Params below are needed for the ripple to work correctly
+            width = WindowManager.LayoutParams.MATCH_PARENT
+            height = WindowManager.LayoutParams.MATCH_PARENT
+            layoutInDisplayCutoutMode =
+                WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
+            fitInsetsTypes = 0 // Ignore insets from all system bars
+        }
 
     // Value animator that controls the bouncing animation of views.
-    private val bounceAnimator = ValueAnimator.ofFloat(0f, 1f).apply {
-        repeatCount = ValueAnimator.INFINITE
-        repeatMode = ValueAnimator.REVERSE
-        duration = ICON_BOUNCE_ANIM_DURATION
-    }
-
-    private val commandQueueCallbacks = object : CommandQueue.Callbacks {
-        override fun updateMediaTapToTransferReceiverDisplay(
-            @StatusBarManager.MediaTransferReceiverState displayState: Int,
-            routeInfo: MediaRoute2Info,
-            appIcon: Icon?,
-            appName: CharSequence?
-        ) {
-            this@MediaTttChipControllerReceiver.updateMediaTapToTransferReceiverDisplay(
-                displayState, routeInfo, appIcon, appName
-            )
+    private val bounceAnimator =
+        ValueAnimator.ofFloat(0f, 1f).apply {
+            repeatCount = ValueAnimator.INFINITE
+            repeatMode = ValueAnimator.REVERSE
+            duration = ICON_BOUNCE_ANIM_DURATION
         }
-    }
+
+    private val commandQueueCallbacks =
+        object : CommandQueue.Callbacks {
+            override fun updateMediaTapToTransferReceiverDisplay(
+                @StatusBarManager.MediaTransferReceiverState displayState: Int,
+                routeInfo: MediaRoute2Info,
+                appIcon: Icon?,
+                appName: CharSequence?,
+            ) {
+                this@MediaTttChipControllerReceiver.updateMediaTapToTransferReceiverDisplay(
+                    displayState,
+                    routeInfo,
+                    appIcon,
+                    appName,
+                )
+            }
+        }
 
     // A map to store instance id per route info id.
     private var instanceMap: MutableMap<String, InstanceId> = mutableMapOf()
@@ -139,7 +147,7 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         @StatusBarManager.MediaTransferReceiverState displayState: Int,
         routeInfo: MediaRoute2Info,
         appIcon: Icon?,
-        appName: CharSequence?
+        appName: CharSequence?,
     ) {
         val chipState: ChipStateReceiver? = ChipStateReceiver.getReceiverStateFromId(displayState)
         val stateName = chipState?.name ?: "Invalid"
@@ -150,8 +158,8 @@ open class MediaTttChipControllerReceiver @Inject constructor(
             return
         }
 
-        val instanceId: InstanceId = instanceMap[routeInfo.id]
-                ?: temporaryViewUiEventLogger.getNewInstanceId()
+        val instanceId: InstanceId =
+            instanceMap[routeInfo.id] ?: temporaryViewUiEventLogger.getNewInstanceId()
         uiEventLogger.logReceiverStateChange(chipState, instanceId)
 
         if (chipState != ChipStateReceiver.CLOSE_TO_SENDER) {
@@ -175,53 +183,51 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         }
 
         appIcon.loadDrawableAsync(
-                context,
-                Icon.OnDrawableLoadedListener { drawable ->
-                    displayView(
-                        ChipReceiverInfo(
-                            routeInfo,
-                            drawable,
-                            appName,
-                            id = routeInfo.id,
-                            instanceId = instanceId,
-                        )
+            context,
+            Icon.OnDrawableLoadedListener { drawable ->
+                displayView(
+                    ChipReceiverInfo(
+                        routeInfo,
+                        drawable,
+                        appName,
+                        id = routeInfo.id,
+                        instanceId = instanceId,
                     )
-                },
-                // Notify the listener on the main handler since the listener will update
-                // the UI.
-                mainHandler
+                )
+            },
+            // Notify the listener on the main handler since the listener will update
+            // the UI.
+            mainHandler,
         )
     }
 
     override fun start() {
         super.start()
-        if (mediaTttFlags.isMediaTttEnabled()) {
-            commandQueue.addCallback(commandQueueCallbacks)
-        }
+        commandQueue.addCallback(commandQueueCallbacks)
         registerListener(displayListener)
     }
 
     override fun updateView(newInfo: ChipReceiverInfo, currentView: ViewGroup) {
         val packageName: String? = newInfo.routeInfo.clientPackageName
-        var iconInfo = MediaTttUtils.getIconInfoFromPackageName(
-            context,
-            packageName,
-            isReceiver = true,
-        ) {
-            packageName?.let { logger.logPackageNotFound(it) }
-        }
+        var iconInfo =
+            MediaTttUtils.getIconInfoFromPackageName(context, packageName, isReceiver = true) {
+                packageName?.let { logger.logPackageNotFound(it) }
+            }
 
         if (newInfo.appNameOverride != null) {
-            iconInfo = iconInfo.copy(
-                contentDescription = ContentDescription.Loaded(newInfo.appNameOverride.toString())
-            )
+            iconInfo =
+                iconInfo.copy(
+                    contentDescription =
+                        ContentDescription.Loaded(newInfo.appNameOverride.toString())
+                )
         }
 
         if (newInfo.appIconDrawableOverride != null) {
-            iconInfo = iconInfo.copy(
-                icon = MediaTttIcon.Loaded(newInfo.appIconDrawableOverride),
-                isAppIcon = true,
-            )
+            iconInfo =
+                iconInfo.copy(
+                    icon = MediaTttIcon.Loaded(newInfo.appIconDrawableOverride),
+                    isAppIcon = true,
+                )
         }
 
         val iconPadding =
@@ -279,6 +285,14 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         } else {
             rippleController.collapseRipple(rippleView, onAnimationEnd)
             animateViewTranslationAndFade(iconContainerView, translationYBy, 0f)
+            mainExecutor.executeDelayed(
+                {
+                    if (view.isAttachedToWindow) {
+                        onAnimationEnd.run()
+                    }
+                },
+                ICON_TRANSLATION_ANIM_DURATION,
+            )
         }
     }
 
@@ -298,16 +312,14 @@ open class MediaTttChipControllerReceiver @Inject constructor(
         alphaDuration: Long = ICON_ALPHA_ANIM_DURATION,
         onAnimationEnd: Runnable? = null,
     ) {
-        view.animate()
+        view
+            .animate()
             .translationYBy(translationYBy)
             .setInterpolator(interpolator)
             .setDuration(translationDuration)
             .withEndAction { onAnimationEnd?.run() }
             .start()
-        view.animate()
-            .alpha(alphaEndValue)
-            .setDuration(alphaDuration)
-            .start()
+        view.animate().alpha(alphaEndValue).setDuration(alphaDuration).start()
     }
 
     /** Returns the amount that the chip will be translated by in its intro animation. */

@@ -20,7 +20,7 @@
     android:color="?android:attr/colorControlHighlight">
     <item>
         <shape android:shape="rectangle">
-            <solid android:color="?androidprv:attr/materialColorPrimaryContainer"/>
+            <solid android:color="@androidprv:color/materialColorPrimaryContainer"/>
             <corners android:radius="@dimen/settingslib_switch_bar_radius"/>
         </shape>
     </item>

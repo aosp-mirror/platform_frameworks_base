@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.RedactionType;
+
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -141,20 +143,33 @@ public interface NotificationRowContentBinder {
      */
     class BindParams {
 
+        public BindParams(boolean minimized, boolean increasedHeight,
+                boolean increasedHeadsUpHeight, int redaction) {
+            isMinimized = minimized;
+            usesIncreasedHeight = increasedHeight;
+            usesIncreasedHeadsUpHeight = increasedHeadsUpHeight;
+            redactionType = redaction;
+        }
+
         /**
          * Bind a minimized version of the content views.
          */
-        public boolean isMinimized;
+        public final boolean isMinimized;
 
         /**
          * Use increased height when binding contracted view.
          */
-        public boolean usesIncreasedHeight;
+        public final boolean usesIncreasedHeight;
 
         /**
          * Use increased height when binding heads up views.
          */
-        public boolean usesIncreasedHeadsUpHeight;
+        public final boolean usesIncreasedHeadsUpHeight;
+
+        /**
+         * Controls the type of public view to show, if a public view is requested
+         */
+        public final @RedactionType int redactionType;
     }
 
     /**

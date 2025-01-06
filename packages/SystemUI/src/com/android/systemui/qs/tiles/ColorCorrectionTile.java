@@ -38,6 +38,7 @@ import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
+import com.android.systemui.qs.shared.QSSettingsPackageRepository;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
@@ -50,8 +51,10 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
 
     public static final String TILE_SPEC = "color_correction";
 
-    private final Icon mIcon = ResourceIcon.get(R.drawable.ic_qs_color_correction);
+    @Nullable
+    private Icon mIcon = null;
     private final UserSettingObserver mSetting;
+    private final QSSettingsPackageRepository mQSSettingsPackageRepository;
 
     @Inject
     public ColorCorrectionTile(
@@ -65,11 +68,13 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
             ActivityStarter activityStarter,
             QSLogger qsLogger,
             UserTracker userTracker,
-            SecureSettings secureSettings
+            SecureSettings secureSettings,
+            QSSettingsPackageRepository qsSettingsPackageRepository
     ) {
         super(host, uiEventLogger, backgroundLooper, mainHandler, falsingManager, metricsLogger,
                 statusBarStateController, activityStarter, qsLogger);
 
+        mQSSettingsPackageRepository = qsSettingsPackageRepository;
         mSetting = new UserSettingObserver(secureSettings, mHandler,
                 Secure.ACCESSIBILITY_DISPLAY_DALTONIZER_ENABLED, userTracker.getUserId()) {
             @Override
@@ -105,7 +110,8 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
 
     @Override
     public Intent getLongClickIntent() {
-        return new Intent(Settings.ACTION_COLOR_CORRECTION_SETTINGS);
+        return new Intent(Settings.ACTION_COLOR_CORRECTION_SETTINGS)
+                .setPackage(mQSSettingsPackageRepository.getSettingsPackageName());
     }
 
     @Override
@@ -122,6 +128,9 @@ public class ColorCorrectionTile extends QSTileImpl<BooleanState> {
     protected void handleUpdateState(BooleanState state, Object arg) {
         final int value = arg instanceof Integer ? (Integer) arg : mSetting.getValue();
         final boolean enabled = value != 0;
+        if (mIcon == null) {
+            mIcon = maybeLoadResourceIcon(R.drawable.ic_qs_color_correction);
+        }
         state.value = enabled;
         state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.label = mContext.getString(R.string.quick_settings_color_correction_label);

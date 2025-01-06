@@ -16,95 +16,77 @@
 
 package com.android.systemui.volume.dialog.sliders.ui
 
-import android.animation.Animator
-import android.animation.ObjectAnimator
+import android.annotation.SuppressLint
 import android.view.View
-import android.view.animation.DecelerateInterpolator
-import com.android.systemui.lifecycle.WindowLifecycleState
-import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.viewModel
+import androidx.dynamicanimation.animation.FloatPropertyCompat
+import androidx.dynamicanimation.animation.SpringAnimation
+import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.res.R
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
-import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
+import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
+import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderStateModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
-import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
-import com.android.systemui.volume.dialog.ui.utils.awaitAnimation
-import com.google.android.material.slider.LabelFormatter
 import com.google.android.material.slider.Slider
-import dagger.assisted.Assisted
-import dagger.assisted.AssistedFactory
-import dagger.assisted.AssistedInject
+import javax.inject.Inject
 import kotlin.math.roundToInt
-import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 
-private const val PROGRESS_CHANGE_ANIMATION_DURATION_MS = 80L
-
+@VolumeDialogSliderScope
 class VolumeDialogSliderViewBinder
-@AssistedInject
-constructor(
-    @Assisted private val viewModelProvider: () -> VolumeDialogSliderViewModel,
-    private val jankListenerFactory: JankListenerFactory,
-) {
+@Inject
+constructor(private val viewModel: VolumeDialogSliderViewModel) {
 
-    fun bind(view: View) {
-        with(view) {
-            val sliderView: Slider =
-                requireViewById<Slider>(R.id.volume_dialog_slider).apply {
-                    labelBehavior = LabelFormatter.LABEL_GONE
-                }
-            repeatWhenAttached {
-                viewModel(
-                    traceName = "VolumeDialogSliderViewBinder",
-                    minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                    factory = { viewModelProvider() },
-                ) { viewModel ->
-                    sliderView.addOnChangeListener { _, value, fromUser ->
-                        viewModel.setStreamVolume(value.roundToInt(), fromUser)
-                    }
+    private val sliderValueProperty =
+        object : FloatPropertyCompat<Slider>("value") {
+            override fun getValue(slider: Slider): Float = slider.value
 
-                    viewModel.model.onEach { it.bindToSlider(sliderView) }.launchIn(this)
-
-                    awaitCancellation()
-                }
+            override fun setValue(slider: Slider, value: Float) {
+                slider.value = value
             }
         }
+    private val springForce =
+        SpringForce().apply {
+            stiffness = SpringForce.STIFFNESS_MEDIUM
+            dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
+        }
+
+    fun CoroutineScope.bind(view: View) {
+        var isInitialUpdate = true
+        val sliderView: Slider = view.requireViewById(R.id.volume_dialog_slider)
+        val animation = SpringAnimation(sliderView, sliderValueProperty)
+        animation.spring = springForce
+
+        sliderView.addOnChangeListener { _, value, fromUser ->
+            viewModel.setStreamVolume(value.roundToInt(), fromUser)
+        }
+
+        viewModel.state
+            .onEach {
+                sliderView.setModel(it, animation, isInitialUpdate)
+                isInitialUpdate = false
+            }
+            .launchIn(this)
     }
 
-    private suspend fun VolumeDialogStreamModel.bindToSlider(slider: Slider) {
-        slider.setOnScrollChangeListener { v, scrollX, scrollY, oldScrollX, oldScrollY -> }
-        with(slider) {
-            valueFrom = levelMin.toFloat()
-            valueTo = levelMax.toFloat()
-            // coerce the current value to the new value range before animating it
-            value = value.coerceIn(valueFrom, valueTo)
-            setValueAnimated(
-                level.toFloat(),
-                jankListenerFactory.update(this, PROGRESS_CHANGE_ANIMATION_DURATION_MS),
-            )
+    @SuppressLint("UseCompatLoadingForDrawables")
+    private fun Slider.setModel(
+        model: VolumeDialogSliderStateModel,
+        animation: SpringAnimation,
+        isInitialUpdate: Boolean,
+    ) {
+        valueFrom = model.minValue
+        animation.setMinValue(model.minValue)
+        valueTo = model.maxValue
+        animation.setMaxValue(model.maxValue)
+        // coerce the current value to the new value range before animating it. This prevents
+        // animating from the value that is outside of current [valueFrom, valueTo].
+        value = value.coerceIn(valueFrom, valueTo)
+        setTrackIconActiveStart(model.iconRes)
+        if (isInitialUpdate) {
+            value = model.value
+        } else {
+            animation.animateToFinalPosition(model.value)
         }
     }
-
-    @AssistedFactory
-    @VolumeDialogScope
-    interface Factory {
-
-        fun create(
-            viewModelProvider: () -> VolumeDialogSliderViewModel
-        ): VolumeDialogSliderViewBinder
-    }
-}
-
-private suspend fun Slider.setValueAnimated(
-    newValue: Float,
-    jankListener: Animator.AnimatorListener,
-) {
-    ObjectAnimator.ofFloat(value, newValue)
-        .apply {
-            duration = PROGRESS_CHANGE_ANIMATION_DURATION_MS
-            interpolator = DecelerateInterpolator()
-            addListener(jankListener)
-        }
-        .awaitAnimation<Float> { value = it }
 }

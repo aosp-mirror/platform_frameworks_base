@@ -27,6 +27,7 @@ import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLoggin
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.power.shared.model.DozeScreenStateModel
 import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.power.shared.model.WakeSleepReason
 import com.android.systemui.power.shared.model.WakefulnessModel
@@ -64,6 +65,9 @@ interface PowerRepository {
      */
     val screenPowerState: StateFlow<ScreenPowerState>
 
+    /** More granular display states, mainly for use in dozing. */
+    val dozeScreenState: MutableStateFlow<DozeScreenStateModel>
+
     /** Wakes up the device. */
     fun wakeUp(why: String, @PowerManager.WakeReason wakeReason: Int)
 
@@ -99,6 +103,8 @@ constructor(
     private val systemClock: SystemClock,
     dispatcher: BroadcastDispatcher,
 ) : PowerRepository {
+
+    override val dozeScreenState = MutableStateFlow(DozeScreenStateModel.UNKNOWN)
 
     override val isInteractive: Flow<Boolean> = conflatedCallbackFlow {
         fun send() {

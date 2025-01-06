@@ -15,32 +15,72 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 /** Utilities to be used across all core operations */
 public class Utils {
+    /**
+     * Convert an integer id into a float
+     *
+     * @param v the integer id to convert
+     * @return the id as an float
+     */
     public static float asNan(int v) {
         return Float.intBitsToFloat(v | -0x800000);
     }
 
+    /**
+     * convert a float into an integer id
+     *
+     * @param value the float id to convert
+     * @return the id as an integer
+     */
     public static int idFromNan(float value) {
         int b = Float.floatToRawIntBits(value);
         return b & 0x3FFFFF;
     }
 
+    /**
+     * Converts an id encoded in a float to the corresponding long id.
+     *
+     * @param value the float if to convert
+     * @return the float id converted to a long id
+     */
+    public static long longIdFromNan(float value) {
+        return ((long) idFromNan(value)) + 0x100000000L;
+    }
+
+    /**
+     * convert a long into an ID
+     *
+     * @param v the long to convert
+     * @return the id still as a long
+     */
     public static long idFromLong(long v) {
         return v - 0x100000000L;
     }
 
+    /**
+     * convert a float id and turn it into a string
+     *
+     * @param value float to convert
+     * @return string form of an id
+     */
+    @NonNull
     public static String idStringFromNan(float value) {
         int b = Float.floatToRawIntBits(value) & 0x3FFFFF;
         return idString(b);
     }
 
+    /**
+     * print an id as a string
+     *
+     * @param b the id
+     * @return the id as a string
+     */
+    @NonNull
     public static String idString(int b) {
         return (b > 0xFFFFF) ? "A_" + (b & 0xFFFFF) : "" + b;
-    }
-
-    public static float getActualValue(float lr) {
-        return 0;
     }
 
     /**
@@ -50,7 +90,8 @@ public class Utils {
      * @param n
      * @return
      */
-    public static String trimString(String str, int n) {
+    @NonNull
+    public static String trimString(@NonNull String str, int n) {
         if (str.length() > n) {
             str = str.substring(0, n - 3) + "...";
         }
@@ -64,7 +105,7 @@ public class Utils {
      * @param value
      * @return
      */
-    public static String floatToString(float idvalue, float value) {
+    public static @NonNull String floatToString(float idvalue, float value) {
         if (Float.isNaN(idvalue)) {
             if (idFromNan(value) == 0) {
                 return "NaN";
@@ -80,7 +121,7 @@ public class Utils {
      * @param value
      * @return
      */
-    public static String floatToString(float value) {
+    public static @NonNull String floatToString(float value) {
         if (Float.isNaN(value)) {
             if (idFromNan(value) == 0) {
                 return "NaN";
@@ -95,7 +136,7 @@ public class Utils {
      *
      * @param str
      */
-    public static void log(String str) {
+    public static void log(@NonNull String str) {
         StackTraceElement s = new Throwable().getStackTrace()[1];
         System.out.println(
                 "("
@@ -114,7 +155,7 @@ public class Utils {
      * @param str
      * @param n
      */
-    public static void logStack(String str, int n) {
+    public static void logStack(@NonNull String str, int n) {
         StackTraceElement[] st = new Throwable().getStackTrace();
         for (int i = 1; i < n + 1; i++) {
             StackTraceElement s = st[i];
@@ -145,6 +186,7 @@ public class Utils {
      * @param color
      * @return
      */
+    @NonNull
     public static String colorInt(int color) {
         String str = "000000000000" + Integer.toHexString(color);
         return "0x" + str.substring(str.length() - 8);

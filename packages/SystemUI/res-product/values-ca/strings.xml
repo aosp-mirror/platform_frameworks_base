@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Desbloqueja el teu dispositiu per veure més opcions"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"S\'està reproduint en aquest telèfon"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"S\'està reproduint en aquesta tauleta"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Pots localitzar aquest telèfon amb Troba el meu dispositiu fins i tot quan estigui apagat"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Pots localitzar aquesta tauleta amb Troba el meu dispositiu fins i tot quan estigui apagada"</string>
 </resources>

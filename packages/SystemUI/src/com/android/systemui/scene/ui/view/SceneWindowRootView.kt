@@ -5,7 +5,6 @@ import android.util.AttributeSet
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.scene.shared.model.SceneContainerConfig
 import com.android.systemui.scene.shared.model.SceneDataSourceDelegator
@@ -35,7 +34,6 @@ class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootVi
         layoutInsetController: LayoutInsetsController,
         sceneDataSourceDelegator: SceneDataSourceDelegator,
         qsSceneAdapter: Provider<QSSceneAdapter>,
-        alternateBouncerDependencies: AlternateBouncerDependencies,
     ) {
         setLayoutInsetsController(layoutInsetController)
         SceneWindowRootViewBinder.bind(
@@ -54,7 +52,6 @@ class SceneWindowRootView(context: Context, attrs: AttributeSet?) : WindowRootVi
             },
             dataSourceDelegator = sceneDataSourceDelegator,
             qsSceneAdapter = qsSceneAdapter,
-            alternateBouncerDependencies = alternateBouncerDependencies,
         )
     }
 

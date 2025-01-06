@@ -15,6 +15,9 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.operations.paint.PaintBundle;
 
 /** Specify an abstract paint context used by RemoteCompose commands to draw */
@@ -22,26 +25,33 @@ public abstract class PaintContext {
     public static final int TEXT_MEASURE_MONOSPACE_WIDTH = 0x01;
     public static final int TEXT_MEASURE_FONT_HEIGHT = 0x02;
 
-    protected RemoteContext mContext;
+    protected @NonNull RemoteContext mContext;
     private boolean mNeedsRepaint = false;
 
+    @NonNull
     public RemoteContext getContext() {
         return mContext;
     }
 
+    /**
+     * Returns true if the needsRepaint flag is set
+     *
+     * @return true if the document asks to be repainted
+     */
     public boolean doesNeedsRepaint() {
         return mNeedsRepaint;
     }
 
+    /** Clear the needsRepaint flag */
     public void clearNeedsRepaint() {
         mNeedsRepaint = false;
     }
 
-    public PaintContext(RemoteContext context) {
+    public PaintContext(@NonNull RemoteContext context) {
         this.mContext = context;
     }
 
-    public void setContext(RemoteContext context) {
+    public void setContext(@NonNull RemoteContext context) {
         this.mContext = context;
     }
 
@@ -61,6 +71,20 @@ public abstract class PaintContext {
         matrixSave();
     }
 
+    /**
+     * Draw a bitmap
+     *
+     * @param imageId
+     * @param srcLeft
+     * @param srcTop
+     * @param srcRight
+     * @param srcBottom
+     * @param dstLeft
+     * @param dstTop
+     * @param dstRight
+     * @param dstBottom
+     * @param cdId
+     */
     public abstract void drawBitmap(
             int imageId,
             int srcLeft,
@@ -73,26 +97,105 @@ public abstract class PaintContext {
             int dstBottom,
             int cdId);
 
+    /**
+     * scale the following commands
+     *
+     * @param scaleX horizontal scale factor
+     * @param scaleY vertical scale factor
+     */
     public abstract void scale(float scaleX, float scaleY);
 
+    /**
+     * Rotate the following commands
+     *
+     * @param translateX horizontal translation
+     * @param translateY vertical translation
+     */
     public abstract void translate(float translateX, float translateY);
 
+    /**
+     * Draw an arc
+     *
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @param startAngle
+     * @param sweepAngle
+     */
     public abstract void drawArc(
             float left, float top, float right, float bottom, float startAngle, float sweepAngle);
 
+    /**
+     * Draw a sector
+     *
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @param startAngle
+     * @param sweepAngle
+     */
     public abstract void drawSector(
             float left, float top, float right, float bottom, float startAngle, float sweepAngle);
 
+    /**
+     * Draw a bitmap
+     *
+     * @param id
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     */
     public abstract void drawBitmap(int id, float left, float top, float right, float bottom);
 
+    /**
+     * Draw a circle
+     *
+     * @param centerX
+     * @param centerY
+     * @param radius
+     */
     public abstract void drawCircle(float centerX, float centerY, float radius);
 
+    /**
+     * Draw a line
+     *
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     */
     public abstract void drawLine(float x1, float y1, float x2, float y2);
 
+    /**
+     * Draw an oval
+     *
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     */
     public abstract void drawOval(float left, float top, float right, float bottom);
 
+    /**
+     * Draw a path
+     *
+     * @param id the path id
+     * @param start starting point of the path where we start drawing it
+     * @param end ending point of the path where we stop drawing it
+     */
     public abstract void drawPath(int id, float start, float end);
 
+    /**
+     * Draw a rectangle
+     *
+     * @param left left coordinate of the rectangle
+     * @param top top coordinate of the rectangle
+     * @param right right coordinate of the rectangle
+     * @param bottom bottom coordinate of the rectangle
+     */
     public abstract void drawRect(float left, float top, float right, float bottom);
 
     /** this caches the paint to a paint stack */
@@ -101,9 +204,27 @@ public abstract class PaintContext {
     /** This restores the paint form the paint stack */
     public abstract void restorePaint();
 
+    /**
+     * draw a round rect
+     *
+     * @param left left coordinate of the rectangle
+     * @param top top coordinate of the rectangle
+     * @param right right coordinate of the rectangle
+     * @param bottom bottom coordinate of the rectangle
+     * @param radiusX horizontal radius of the rounded corner
+     * @param radiusY vertical radius of the rounded corner
+     */
     public abstract void drawRoundRect(
             float left, float top, float right, float bottom, float radiusX, float radiusY);
 
+    /**
+     * Draw the text glyphs on the provided path
+     *
+     * @param textId id of the text
+     * @param pathId id of the path
+     * @param hOffset horizontal offset
+     * @param vOffset vertical offset
+     */
     public abstract void drawTextOnPath(int textId, int pathId, float hOffset, float vOffset);
 
     /**
@@ -117,7 +238,8 @@ public abstract class PaintContext {
      *     descent of the font (not just of the measured text)
      * @param bounds the bounds (left, top, right, bottom)
      */
-    public abstract void getTextBounds(int textId, int start, int end, int flags, float[] bounds);
+    public abstract void getTextBounds(
+            int textId, int start, int end, int flags, @NonNull float[] bounds);
 
     /**
      * Draw a text starting ast x,y
@@ -154,11 +276,21 @@ public abstract class PaintContext {
             int path1Id, int path2Id, float tween, float start, float stop);
 
     /**
+     * Interpolate between two path and return the resulting path
+     *
+     * @param out the interpolated path
+     * @param path1 start path
+     * @param path2 end path
+     * @param tween interpolation value from 0 (start path) to 1 (end path)
+     */
+    public abstract void tweenPath(int out, int path1, int path2, float tween);
+
+    /**
      * This applies changes to the current paint
      *
      * @param mPaintData the list of changes
      */
-    public abstract void applyPaint(PaintBundle mPaintData);
+    public abstract void applyPaint(@NonNull PaintBundle mPaintData);
 
     /**
      * Scale the rendering by scaleX and saleY (1.0 = no scale). Scaling is done about
@@ -264,11 +396,61 @@ public abstract class PaintContext {
      *
      * @param content the content to log
      */
-    public void log(String content) {
+    public void log(@NonNull String content) {
         System.out.println("[LOG] " + content);
     }
 
+    /** Indicates the document needs to be repainted */
     public void needsRepaint() {
         mNeedsRepaint = true;
     }
+
+    /**
+     * Starts a graphics layer
+     *
+     * @param w
+     * @param h
+     */
+    public abstract void startGraphicsLayer(int w, int h);
+
+    /**
+     * Starts a graphics layer
+     *
+     * @param scaleX
+     * @param scaleY
+     * @param rotationX
+     * @param rotationY
+     * @param rotationZ
+     * @param shadowElevation
+     * @param transformOriginX
+     * @param transformOriginY
+     * @param alpha
+     * @param renderEffectId
+     */
+    public abstract void setGraphicsLayer(
+            float scaleX,
+            float scaleY,
+            float rotationX,
+            float rotationY,
+            float rotationZ,
+            float shadowElevation,
+            float transformOriginX,
+            float transformOriginY,
+            float alpha,
+            int renderEffectId);
+
+    /** Ends a graphics layer */
+    public abstract void endGraphicsLayer();
+
+    public boolean isVisualDebug() {
+        return mContext.isVisualDebug();
+    }
+
+    /**
+     * Returns a String from an id
+     *
+     * @param textID
+     * @return the string if found
+     */
+    public abstract @Nullable String getText(int textID);
 }

@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 
 import static com.android.internal.widget.remotecompose.core.operations.Utils.floatToString;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -64,13 +66,13 @@ public class DrawText extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         mOutX = Float.isNaN(mX) ? context.getFloat(Utils.idFromNan(mX)) : mX;
         mOutY = Float.isNaN(mY) ? context.getFloat(Utils.idFromNan(mY)) : mY;
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (Float.isNaN(mX)) {
             context.listensTo(Utils.idFromNan(mX), this);
         }
@@ -80,10 +82,11 @@ public class DrawText extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mTextID, mStart, mEnd, mContextStart, mContextEnd, mX, mY, mRtl);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DrawTextRun ["
@@ -98,7 +101,13 @@ public class DrawText extends PaintOperation implements VariableSupport {
                 + floatToString(mY, mOutY);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int text = buffer.readInt();
         int start = buffer.readInt();
         int end = buffer.readInt();
@@ -112,10 +121,21 @@ public class DrawText extends PaintOperation implements VariableSupport {
         operations.add(op);
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -134,7 +154,7 @@ public class DrawText extends PaintOperation implements VariableSupport {
      * @param rtl is it Right to Left text
      */
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int textID,
             int start,
             int end,
@@ -154,7 +174,12 @@ public class DrawText extends PaintOperation implements VariableSupport {
         buffer.writeBoolean(rtl);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", id(), CLASS_NAME)
                 .description("Draw a run of text, all in a single direction")
                 .field(DocumentedOperation.INT, "textId", "id of bitmap")
@@ -177,7 +202,7 @@ public class DrawText extends PaintOperation implements VariableSupport {
     }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         context.drawTextRun(mTextID, mStart, mEnd, mContextStart, mContextEnd, mOutX, mOutY, mRtl);
     }
 }

@@ -17,7 +17,6 @@ package com.android.keyguard;
 
 import static org.junit.Assume.assumeFalse;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -36,7 +35,6 @@ import com.android.systemui.keyguard.KeyguardSliceProvider;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.settings.FakeDisplayTracker;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.tuner.TunerService;
 
 import org.junit.After;
 import org.junit.Before;
@@ -52,8 +50,6 @@ import org.mockito.MockitoAnnotations;
 public class KeyguardSliceViewControllerTest extends SysuiTestCase {
     @Mock
     private KeyguardSliceView mView;
-    @Mock
-    private TunerService mTunerService;
     @Mock
     private ConfigurationController mConfigurationController;
     @Mock
@@ -74,7 +70,7 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
         when(mView.isAttachedToWindow()).thenReturn(true);
         when(mView.getContext()).thenReturn(mContext);
         mController = new KeyguardSliceViewController(mHandler, mBgHandler, mView,
-                mActivityStarter, mConfigurationController, mTunerService, mDumpManager,
+                mActivityStarter, mConfigurationController, mDumpManager,
                 mDisplayTracker);
         mController.setupUri(KeyguardSliceProvider.KEYGUARD_SLICE_URI);
     }
@@ -101,7 +97,6 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
         assumeFalse(isWatch());
 
         mController.init();
-        verify(mTunerService).addTunable(any(TunerService.Tunable.class), anyString());
         verify(mConfigurationController).addCallback(
                 any(ConfigurationController.ConfigurationListener.class));
     }
@@ -120,7 +115,6 @@ public class KeyguardSliceViewControllerTest extends SysuiTestCase {
 
         attachListenerArgumentCaptor.getValue().onViewDetachedFromWindow(mView);
 
-        verify(mTunerService).removeTunable(any(TunerService.Tunable.class));
         verify(mConfigurationController).removeCallback(
                 any(ConfigurationController.ConfigurationListener.class));
     }

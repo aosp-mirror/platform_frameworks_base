@@ -30,6 +30,7 @@ import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
 import android.telephony.ims.MediaThreshold;
+import android.telephony.satellite.NtnSignalStrength;
 import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -657,12 +658,15 @@ public class TelephonyCallback {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED = 42;
 
     /**
      * Event for listening to changes in carrier roaming non-terrestrial network eligibility.
      *
-     * @see CarrierRoamingNtnModeListener
+     * @see CarrierRoamingNtnModeListener#onCarrierRoamingNtnEligibleStateChanged(boolean)
      *
      * Device is eligible for satellite communication if all the following conditions are met:
      * <ul>
@@ -678,11 +682,15 @@ public class TelephonyCallback {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED = 43;
 
     /**
      * Event for listening to changes in carrier roaming non-terrestrial network available services
-     * via callback onCarrierRoamingNtnAvailableServicesChanged().
+     * via callback {@link
+     * CarrierRoamingNtnModeListener#onCarrierRoamingNtnAvailableServicesChanged(List)}
      * This callback is triggered when the available services provided by the carrier roaming
      * satellite changes. The carrier roaming satellite is defined by the following conditions.
      * <ul>
@@ -692,7 +700,45 @@ public class TelephonyCallback {
      *
      * @hide
      */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
     public static final int EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED = 44;
+
+    /**
+     * Event for listening to carrier roaming non-terrestrial network signal strength changes.
+     *
+     * @see CarrierRoamingNtnModeListener#onCarrierRoamingNtnSignalStrengthChanged(
+     * NtnSignalStrength)
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    public static final int EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED = 45;
+
+    /**
+     * Event for changes to mobile network ciphering algorithms.
+     * See {@link SecurityAlgorithmsListener#onSecurityAlgorithmsChanged}
+     *
+     * @hide
+     */
+    @FlaggedApi(Flags.FLAG_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public static final int EVENT_SECURITY_ALGORITHMS_CHANGED = 46;
+
+     /**
+      * Event for updates to sensitive device identifier disclosures (IMSI, IMEI, unciphered SUCI).
+      * See {@link CellularIdentifierDisclosedListener#onCellularIdentifierDisclosedChanged}
+      *
+      * @hide
+      */
+    @FlaggedApi(Flags.FLAG_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    @SystemApi
+    public static final int EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED = 47;
 
     /**
      * @hide
@@ -741,7 +787,10 @@ public class TelephonyCallback {
             EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED,
             EVENT_CARRIER_ROAMING_NTN_MODE_CHANGED,
             EVENT_CARRIER_ROAMING_NTN_ELIGIBLE_STATE_CHANGED,
-            EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED
+            EVENT_CARRIER_ROAMING_NTN_AVAILABLE_SERVICES_CHANGED,
+            EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED,
+            EVENT_SECURITY_ALGORITHMS_CHANGED,
+            EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface TelephonyEvent {
@@ -960,7 +1009,7 @@ public class TelephonyCallback {
      */
     public interface CellInfoListener {
         /**
-         * Callback invoked when a observed cell info has changed or new cells have been added
+         * Callback invoked when an observed cell info has changed or new cells have been added
          * or removed on the registered subscription.
          * Note, the registration subscription ID s from {@link TelephonyManager} object
          * which registers TelephonyCallback by
@@ -1768,7 +1817,9 @@ public class TelephonyCallback {
      *
      * @hide
      */
-    public interface CarrierRoamingNtnModeListener {
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    public interface CarrierRoamingNtnListener {
         /**
          * Callback invoked when carrier roaming non-terrestrial network mode changes.
          *
@@ -1801,10 +1852,53 @@ public class TelephonyCallback {
          * Callback invoked when carrier roaming non-terrestrial network available
          * service changes.
          *
-         * @param availableServices The list of the supported services.
+         * @param availableServices array of supported services.
          */
         default void onCarrierRoamingNtnAvailableServicesChanged(
-                @NetworkRegistrationInfo.ServiceType List<Integer> availableServices) {}
+                @NonNull @NetworkRegistrationInfo.ServiceType int[] availableServices) {}
+
+        /**
+         * Callback invoked when carrier roaming non-terrestrial network signal strength changes.
+         *
+         * @param ntnSignalStrength non-terrestrial network signal strength.
+         */
+        default void onCarrierRoamingNtnSignalStrengthChanged(
+                @NonNull NtnSignalStrength ntnSignalStrength) {}
+    }
+
+    /**
+     * Interface for CellularIdentifierDisclosedListener
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    public interface CellularIdentifierDisclosedListener {
+        /**
+         * Callback invoked when a device identifier (IMSI, IMEI, or unciphered SUCI)
+         * is disclosed over the network before a security context is established
+         * ("pre-authentication").
+         *
+         * @param disclosure details of the identifier disclosure
+         * See {@link CellularIdentifierDisclosure} for more details
+         */
+        void onCellularIdentifierDisclosedChanged(@NonNull CellularIdentifierDisclosure disclosure);
+    }
+
+    /**
+     * Interface for SecurityAlgorithmsListener
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(Flags.FLAG_SECURITY_ALGORITHMS_UPDATE_INDICATIONS)
+    public interface SecurityAlgorithmsListener {
+        /**
+         * Callback invoked when the most recently reported security algorithms has changed,
+         * per a specified connection event.
+         *
+         * @param securityAlgorithmUpdate details of the security algorithm update
+         * See {@link SecurityAlgorithmUpdate} for more details
+         */
+        void onSecurityAlgorithmsChanged(@NonNull SecurityAlgorithmUpdate securityAlgorithmUpdate);
     }
 
     /**
@@ -2238,8 +2332,8 @@ public class TelephonyCallback {
         public void onCarrierRoamingNtnModeChanged(boolean active) {
             if (!Flags.carrierEnabledSatelliteFlag()) return;
 
-            CarrierRoamingNtnModeListener listener =
-                    (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
+            CarrierRoamingNtnListener listener =
+                    (CarrierRoamingNtnListener) mTelephonyCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(
@@ -2249,8 +2343,8 @@ public class TelephonyCallback {
         public void onCarrierRoamingNtnEligibleStateChanged(boolean eligible) {
             if (!Flags.carrierRoamingNbIotNtn()) return;
 
-            CarrierRoamingNtnModeListener listener =
-                    (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
+            CarrierRoamingNtnListener listener =
+                    (CarrierRoamingNtnListener) mTelephonyCallbackWeakRef.get();
             if (listener == null) return;
 
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
@@ -2261,14 +2355,47 @@ public class TelephonyCallback {
                 @NetworkRegistrationInfo.ServiceType int[] availableServices) {
             if (!Flags.carrierRoamingNbIotNtn()) return;
 
-            CarrierRoamingNtnModeListener listener =
-                    (CarrierRoamingNtnModeListener) mTelephonyCallbackWeakRef.get();
+            CarrierRoamingNtnListener listener =
+                    (CarrierRoamingNtnListener) mTelephonyCallbackWeakRef.get();
             if (listener == null) return;
 
-            List<Integer> ServiceList = Arrays.stream(availableServices).boxed()
-                    .collect(Collectors.toList());
             Binder.withCleanCallingIdentity(() -> mExecutor.execute(
-                    () -> listener.onCarrierRoamingNtnAvailableServicesChanged(ServiceList)));
+                    () -> listener.onCarrierRoamingNtnAvailableServicesChanged(availableServices)));
+        }
+
+        public void onCarrierRoamingNtnSignalStrengthChanged(
+                @NonNull NtnSignalStrength ntnSignalStrength) {
+            if (!Flags.carrierRoamingNbIotNtn()) return;
+
+            CarrierRoamingNtnListener listener =
+                    (CarrierRoamingNtnListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onCarrierRoamingNtnSignalStrengthChanged(ntnSignalStrength)));
+
+        }
+
+        public void onSecurityAlgorithmsChanged(SecurityAlgorithmUpdate update) {
+            if (!Flags.securityAlgorithmsUpdateIndications()) return;
+
+            SecurityAlgorithmsListener listener =
+                    (SecurityAlgorithmsListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onSecurityAlgorithmsChanged(update)));
+        }
+
+        public void onCellularIdentifierDisclosedChanged(CellularIdentifierDisclosure disclosure) {
+            if (!Flags.cellularIdentifierDisclosureIndications()) return;
+
+            CellularIdentifierDisclosedListener listener =
+                    (CellularIdentifierDisclosedListener) mTelephonyCallbackWeakRef.get();
+            if (listener == null) return;
+
+            Binder.withCleanCallingIdentity(() -> mExecutor.execute(
+                    () -> listener.onCellularIdentifierDisclosedChanged(disclosure)));
         }
     }
 }

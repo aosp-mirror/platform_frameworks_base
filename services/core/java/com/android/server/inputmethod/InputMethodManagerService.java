@@ -84,6 +84,7 @@ import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
+import android.graphics.Region;
 import android.hardware.display.DisplayManagerInternal;
 import android.hardware.input.InputManager;
 import android.inputmethodservice.InputMethodService;
@@ -1208,8 +1209,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Hide soft input before user switch task since switch task may block main handler a while
         // and delayed the hideCurrentInputLocked().
         final var userData = getUserData(userId);
-        hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow, 0 /* flags */,
-                SoftInputShowHideReason.HIDE_SWITCH_USER, userId);
+        if (Flags.refactorInsetsController()) {
+            final var statsToken = createStatsTokenForFocusedClient(false /* show */,
+                    SoftInputShowHideReason.HIDE_SWITCH_USER, userId);
+            setImeVisibilityOnFocusedWindowClient(false, userData, statsToken);
+        } else {
+            hideCurrentInputLocked(userData.mImeBindingState.mFocusedWindow, 0 /* flags */,
+                    SoftInputShowHideReason.HIDE_SWITCH_USER, userId);
+        }
         final UserSwitchHandlerTask task = new UserSwitchHandlerTask(this, userId,
                 clientToBeReset);
         mUserSwitchHandlerTask = task;
@@ -1310,7 +1317,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         // Do not reset the default (current) IME when it is a 3rd-party IME
         String selectedMethodId = bindingController.getSelectedMethodId();
         final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        if (selectedMethodId != null
+        if (selectedMethodId != null && settings.getMethodMap().get(selectedMethodId) != null
                 && !settings.getMethodMap().get(selectedMethodId).isSystem()) {
             return;
         }
@@ -2716,17 +2723,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
             return false;
         }
 
-        final InputMethodSettings settings = InputMethodSettingsRepository.get(userId);
-        if (Flags.imeSwitcherRevamp()) {
-            // The IME switcher button should be shown when the current IME specified a
-            // language settings activity.
-            final var curImi = settings.getMethodMap().get(settings.getSelectedInputMethod());
-            if (curImi != null && curImi.createImeLanguageSettingsActivityIntent() != null) {
-                return true;
-            }
-        }
-
-        return hasMultipleSubtypesForSwitcher(false /* nonAuxOnly */, settings);
+        return hasMultipleSubtypesForSwitcher(false /* nonAuxOnly */, userId);
     }
 
     /**
@@ -2734,10 +2731,11 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
      * across all enabled IMEs for the given user.
      *
      * @param nonAuxOnly whether to check only for non auxiliary subtypes.
-     * @param settings   the input method settings under the given user ID.
+     * @param userId     the id of the user for which to check the number of subtypes.
      */
     private static boolean hasMultipleSubtypesForSwitcher(boolean nonAuxOnly,
-            @NonNull InputMethodSettings settings) {
+            @UserIdInt int userId) {
+        final var settings = InputMethodSettingsRepository.get(userId);
         List<InputMethodInfo> imes = settings.getEnabledInputMethodListWithFilter(
                 InputMethodInfo::shouldShowInInputMethodPicker);
         final int numImes = imes.size();
@@ -4123,12 +4121,25 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
     @GuardedBy("ImfLock.class")
     private void onImeSwitchButtonClickLocked(int displayId, @NonNull UserData userData) {
         final int userId = userData.mUserId;
-        final var settings = InputMethodSettingsRepository.get(userId);
-        if (hasMultipleSubtypesForSwitcher(true /* nonAuxOnly */, settings)) {
+        if (hasMultipleSubtypesForSwitcher(true /* nonAuxOnly */, userId)) {
             switchToNextInputMethodLocked(false /* onlyCurrentIme */, userData);
         } else {
             showInputMethodPickerFromSystem(
                     InputMethodManager.SHOW_IM_PICKER_MODE_INCLUDE_AUXILIARY_SUBTYPES, displayId);
+        }
+    }
+
+    /**
+     * A test API for CTS to check whether the IME Switcher button should be shown when the IME
+     * is shown.
+     */
+    @IInputMethodManagerImpl.PermissionVerified(Manifest.permission.TEST_INPUT_METHOD)
+    public boolean shouldShowImeSwitcherButtonForTest() {
+        final int callingUserId = UserHandle.getCallingUserId();
+        synchronized (ImfLock.class) {
+            final int userId = resolveImeUserIdLocked(callingUserId);
+            return shouldShowImeSwitcherLocked(
+                    InputMethodService.IME_ACTIVE | InputMethodService.IME_VISIBLE, userId);
         }
     }
 
@@ -6883,6 +6894,14 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
                     return;
                 }
                 mImms.mHwController.setNotTouchable(notTouchable);
+            }
+        }
+
+        @BinderThread
+        @Override
+        public void setHandwritingTouchableRegion(Region region) {
+            synchronized (ImfLock.class) {
+                mImms.mHwController.setHandwritingTouchableRegion(region);
             }
         }
 

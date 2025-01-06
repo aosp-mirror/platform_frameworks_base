@@ -149,7 +149,8 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
     private double mContrast = 0.0;
     // Theme variant: Vibrant, Tonal, Expressive, etc
     @VisibleForTesting
-    protected Style mThemeStyle = Style.TONAL_SPOT;
+    @Style.Type
+    protected int mThemeStyle = Style.TONAL_SPOT;
     // Accent colors overlay
     private FabricatedOverlay mSecondaryOverlay;
     // Neutral system colors overlay
@@ -826,15 +827,16 @@ public class ThemeOverlayController implements CoreStartable, Dumpable {
 
     }
 
-    private Style fetchThemeStyleFromSetting() {
+    @Style.Type
+    private int fetchThemeStyleFromSetting() {
         // Allow-list of Style objects that can be created from a setting string, i.e. can be
         // used as a system-wide theme.
         // - Content intentionally excluded, intended for media player, not system-wide
-        List<Style> validStyles = new ArrayList<>(Arrays.asList(Style.EXPRESSIVE, Style.SPRITZ,
-                Style.TONAL_SPOT, Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT,
+        @Style.Type List<Integer> validStyles = new ArrayList<>(Arrays.asList(Style.EXPRESSIVE,
+                Style.SPRITZ, Style.TONAL_SPOT, Style.FRUIT_SALAD, Style.RAINBOW, Style.VIBRANT,
                 Style.MONOCHROMATIC));
 
-        Style style = mThemeStyle;
+        @Style.Type int style = mThemeStyle;
         final String overlayPackageJson = mSecureSettings.getStringForUser(
                 Settings.Secure.THEME_CUSTOMIZATION_OVERLAY_PACKAGES,
                 mUserTracker.getUserId());

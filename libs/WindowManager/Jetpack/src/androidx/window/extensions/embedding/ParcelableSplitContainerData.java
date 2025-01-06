@@ -44,7 +44,6 @@ class ParcelableSplitContainerData implements Parcelable {
     @NonNull
     private final IBinder mSecondaryContainerToken;
 
-    // TODO(b/289875940): making this as non-null once the tag can be auto-generated from the rule.
     @Nullable
     final String mSplitRuleTag;
 

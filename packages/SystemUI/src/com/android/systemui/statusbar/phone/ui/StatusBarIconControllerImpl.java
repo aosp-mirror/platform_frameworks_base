@@ -47,7 +47,6 @@ import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.StatusIconDisplayable;
 import com.android.systemui.statusbar.phone.StatusBarIconHolder;
 import com.android.systemui.statusbar.phone.StatusBarIconHolder.BindableIconHolder;
-import com.android.systemui.statusbar.phone.StatusBarSignalPolicy.CallIndicatorIconState;
 import com.android.systemui.statusbar.pipeline.StatusBarPipelineFlags;
 import com.android.systemui.statusbar.pipeline.icons.shared.BindableIconsRegistry;
 import com.android.systemui.statusbar.pipeline.icons.shared.model.BindableIcon;
@@ -329,56 +328,6 @@ public class StatusBarIconControllerImpl implements Tunable,
             } else {
                 // Don't have to do anything in the new world
             }
-        }
-    }
-
-    /**
-     * Accept a list of CallIndicatorIconStates, and show the call strength icons.
-     * @param slot statusbar slot for the call strength icons
-     * @param states All of the no Calling & SMS icon states
-     */
-    @Override
-    public void setCallStrengthIcons(String slot, List<CallIndicatorIconState> states) {
-        Slot callStrengthSlot = mStatusBarIconList.getSlot(slot);
-        Collections.reverse(states);
-        for (CallIndicatorIconState state : states) {
-            if (!state.isNoCalling) {
-                StatusBarIconHolder holder = callStrengthSlot.getHolderForTag(state.subId);
-                if (holder == null) {
-                    holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
-                } else {
-                    holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
-                            Icon.createWithResource(mContext, state.callStrengthResId), 0, 0,
-                            state.callStrengthDescription, StatusBarIcon.Type.SystemIcon));
-                }
-                setIcon(slot, holder);
-            }
-            setIconVisibility(slot, !state.isNoCalling, state.subId);
-        }
-    }
-
-    /**
-     * Accept a list of CallIndicatorIconStates, and show the no calling icons.
-     * @param slot statusbar slot for the no calling icons
-     * @param states All of the no Calling & SMS icon states
-     */
-    @Override
-    public void setNoCallingIcons(String slot, List<CallIndicatorIconState> states) {
-        Slot noCallingSlot = mStatusBarIconList.getSlot(slot);
-        Collections.reverse(states);
-        for (CallIndicatorIconState state : states) {
-            if (state.isNoCalling) {
-                StatusBarIconHolder holder = noCallingSlot.getHolderForTag(state.subId);
-                if (holder == null) {
-                    holder = StatusBarIconHolder.fromCallIndicatorState(mContext, state);
-                } else {
-                    holder.setIcon(new StatusBarIcon(UserHandle.SYSTEM, mContext.getPackageName(),
-                            Icon.createWithResource(mContext, state.noCallingResId), 0, 0,
-                            state.noCallingDescription, StatusBarIcon.Type.SystemIcon));
-                }
-                setIcon(slot, holder);
-            }
-            setIconVisibility(slot, state.isNoCalling, state.subId);
         }
     }
 

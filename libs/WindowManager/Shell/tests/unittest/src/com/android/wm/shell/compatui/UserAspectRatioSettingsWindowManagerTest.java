@@ -41,8 +41,6 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.Pair;
@@ -56,7 +54,6 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -65,7 +62,6 @@ import com.android.wm.shell.compatui.CompatUIController.CompatUIHintsState;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -87,7 +83,7 @@ import java.util.function.Supplier;
 @RunWith(AndroidTestingRunner.class)
 @RunWithLooper
 @SmallTest
-public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
+public class UserAspectRatioSettingsWindowManagerTest extends CompatUIShellTestCase {
 
     private static final int TASK_ID = 1;
 
@@ -111,10 +107,6 @@ public class UserAspectRatioSettingsWindowManagerTest extends ShellTestCase {
     private TaskInfo mTaskInfo;
 
     private TestShellExecutor mExecutor;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {

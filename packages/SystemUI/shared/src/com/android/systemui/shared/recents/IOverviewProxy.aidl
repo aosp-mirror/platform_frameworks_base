@@ -115,23 +115,23 @@ oneway interface IOverviewProxy {
     /**
      * Sent when {@link TaskbarDelegate#checkNavBarModes} is called.
      */
-    void checkNavBarModes() = 30;
+    void checkNavBarModes(int displayId) = 30;
 
     /**
      * Sent when {@link TaskbarDelegate#finishBarAnimations} is called.
      */
-    void finishBarAnimations() = 31;
+    void finishBarAnimations(int displayId) = 31;
 
     /**
      * Sent when {@link TaskbarDelegate#touchAutoDim} is called. {@param reset} is true, when auto
      * dim is reset after a timeout.
      */
-    void touchAutoDim(boolean reset) = 32;
+    void touchAutoDim(int displayid, boolean reset) = 32;
 
     /**
      * Sent when {@link TaskbarDelegate#transitionTo} is called.
      */
-    void transitionTo(int barMode, boolean animate) = 33;
+    void transitionTo(int displayId, int barMode, boolean animate) = 33;
 
     /**
      * Sent when {@link TaskbarDelegate#appTransitionPending} is called.

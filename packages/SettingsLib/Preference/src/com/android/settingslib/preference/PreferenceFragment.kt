@@ -21,18 +21,18 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.XmlRes
-import androidx.preference.PreferenceFragmentCompat
 import androidx.preference.PreferenceScreen
 import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_KEY
 import com.android.settingslib.metadata.PreferenceScreenBindingKeyProvider
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.android.settingslib.preference.PreferenceScreenBindingHelper.Companion.bindRecursively
+import com.android.settingslib.widget.SettingsBasePreferenceFragment
 
 /** Fragment to display a preference screen. */
 open class PreferenceFragment :
-    PreferenceFragmentCompat(), PreferenceScreenProvider, PreferenceScreenBindingKeyProvider {
+    SettingsBasePreferenceFragment(), PreferenceScreenProvider, PreferenceScreenBindingKeyProvider {
 
-    private var preferenceScreenBindingHelper: PreferenceScreenBindingHelper? = null
+    protected var preferenceScreenBindingHelper: PreferenceScreenBindingHelper? = null
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceScreen = createPreferenceScreen()
@@ -83,7 +83,7 @@ open class PreferenceFragment :
     @XmlRes protected open fun getPreferenceScreenResId(context: Context): Int = 0
 
     protected fun getPreferenceScreenCreator(context: Context): PreferenceScreenCreator? =
-        (PreferenceScreenRegistry[getPreferenceScreenBindingKey(context)]
+        (PreferenceScreenRegistry.create(context, getPreferenceScreenBindingKey(context))
                 as? PreferenceScreenCreator)
             ?.run { if (isFlagEnabled(context)) this else null }
 
@@ -129,7 +129,9 @@ open class PreferenceFragment :
     }
 
     protected fun getPreferenceKeysInHierarchy(): Set<String> =
-        preferenceScreenBindingHelper?.getPreferences()?.map { it.metadata.key }?.toSet() ?: setOf()
+        preferenceScreenBindingHelper?.let {
+            mutableSetOf<String>().apply { it.forEachRecursively { add(it.metadata.key) } }
+        } ?: setOf()
 
     companion object {
         private const val TAG = "PreferenceFragment"

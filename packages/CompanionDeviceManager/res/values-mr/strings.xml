@@ -36,6 +36,9 @@
     <string name="title_nearby_device_streaming" msgid="2727103756701741359">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ला तुमच्या <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> ला अ‍ॅप्स &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt;वर स्ट्रीम करण्याची अनुमती द्यायची आहे का?"</string>
     <string name="summary_nearby_device_streaming" msgid="70434958004946884">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ला ऑडिओ, फोटो, पेमेंट माहिती, पासवर्ड आणि मेसेज यांसह तुमच्या <xliff:g id="DEVICE_NAME_1">%3$s</xliff:g> वर दिसणाऱ्या किंवा प्ले होणाऱ्या सर्व गोष्टींचा अ‍ॅक्सेस असेल.&lt;br/&gt;&lt;br/&gt;तुम्ही या परवानगीचा अ‍ॅक्सेस काढून टाकेपर्यंत <xliff:g id="APP_NAME_2">%1$s</xliff:g> हे <xliff:g id="DEVICE_NAME_3">%3$s</xliff:g> वर ॲप्स स्ट्रीम करू शकेल."</string>
     <string name="helper_summary_nearby_device_streaming" msgid="4712712177819370967">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे तुमच्या <xliff:g id="DEVICE_TYPE">%3$s</xliff:g> वरून अ‍ॅप्स आणि सिस्टीम वैशिष्ट्ये स्ट्रीम करण्यासाठी <xliff:g id="DEVICE_NAME">%2$s</xliff:g> च्या वतीने परवानगीची विनंती करत आहे"</string>
+    <string name="title_sensor_device_streaming" msgid="2395553261097861497">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ला तुमच्या <xliff:g id="DEVICE_TYPE">%2$s</xliff:g> आणि &lt;strong&gt;<xliff:g id="DEVICE_NAME">%3$s</xliff:g>&lt;/strong&gt; दरम्यान ऑडिओ आणि सिस्टीम वैशिष्ट्ये स्ट्रीम करू द्यायची आहेत का?"</string>
+    <string name="summary_sensor_device_streaming" msgid="3413105061195145547">"<xliff:g id="APP_NAME_0">%1$s</xliff:g> ला तुमच्या <xliff:g id="DEVICE_NAME_1">%3$s</xliff:g> वर प्ले केलेल्या कोणत्याही गोष्टीचा अ‍ॅक्सेस असेल.&lt;br/&gt;&lt;br/&gt;<xliff:g id="APP_NAME_2">%1$s</xliff:g> हे तुम्ही या परवानगीचा अ‍ॅक्सेस काढून टाकेपर्यंत <xliff:g id="DEVICE_NAME_3">%3$s</xliff:g> वर ऑडिओ स्ट्रीम करू शकेल."</string>
+    <string name="helper_summary_sensor_device_streaming" msgid="8860174545653786353">"<xliff:g id="APP_NAME">%1$s</xliff:g> हे तुमच्या डिव्हाइसदरम्यान ऑडिओ आणि सिस्टीम वैशिष्ट्ये स्ट्रीम करण्यासाठी <xliff:g id="DEVICE_NAME">%2$s</xliff:g> च्या वतीने परवानगीची विनंती करत आहे."</string>
     <string name="profile_name_generic" msgid="6851028682723034988">"डिव्हाइस"</string>
     <string name="summary_generic" msgid="1761976003668044801">"हे ॲप तुमचा फोन आणि निवडलेल्या डिव्‍हाइसदरम्यान कॉल करत असलेल्‍या एखाद्या व्यक्तीचे नाव यासारखी माहिती सिंक करू शकेल"</string>
     <string name="consent_yes" msgid="8344487259618762872">"अनुमती द्या"</string>
@@ -56,7 +59,7 @@
     <string name="permission_nearby_devices" msgid="7530973297737123481">"जवळपासची डिव्हाइस"</string>
     <string name="permission_media_routing_control" msgid="5498639511586715253">"मीडिया आउटपुट बदला"</string>
     <string name="permission_storage" msgid="6831099350839392343">"फोटो आणि मीडिया"</string>
-    <string name="permission_notifications" msgid="4099418516590632909">"सूचना"</string>
+    <string name="permission_notifications" msgid="4099418516590632909">"नोटिफिकेशन"</string>
     <string name="permission_phone_summary" msgid="8246321093970051702">"फोन कॉल करणे आणि ते व्यवस्थापित करणे"</string>
     <string name="permission_call_logs_summary" msgid="7545243592757693321">"फोन कॉल लॉग रीड अँड राइट करणे"</string>
     <string name="permission_sms_summary" msgid="8499509535410068616">"एसएमएस पाठवणे आणि पाहणे"</string>

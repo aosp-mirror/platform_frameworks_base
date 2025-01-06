@@ -162,6 +162,10 @@ public class SafeActivityOptionsTest {
             verifySecureExceptionThrown(activityOptions, taskSupervisor);
 
             activityOptions = ActivityOptions.makeBasic();
+            activityOptions.setTaskAlwaysOnTop(true);
+            verifySecureExceptionThrown(activityOptions, taskSupervisor);
+
+            activityOptions = ActivityOptions.makeBasic();
             activityOptions.setLaunchDisplayId(DEFAULT_DISPLAY);
             verifySecureExceptionThrown(activityOptions, taskSupervisor);
 

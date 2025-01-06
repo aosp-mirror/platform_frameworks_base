@@ -18,25 +18,27 @@ package com.android.systemui.qs.tiles.impl.hearingdevices.domain
 
 import android.content.res.Resources
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.hearingdevices.domain.model.HearingDevicesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [HearingDevicesTileModel] to [QSTileState]. */
 class HearingDevicesTileMapper
 @Inject
-constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
-    QSTileDataToStateMapper<HearingDevicesTileModel> {
+constructor(
+    @ShadeDisplayAware private val resources: Resources,
+    private val theme: Resources.Theme,
+) : QSTileDataToStateMapper<HearingDevicesTileModel> {
 
     override fun map(config: QSTileConfig, data: HearingDevicesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.quick_settings_hearing_devices_label)
-            iconRes = R.drawable.qs_hearing_devices_icon
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            val iconRes = R.drawable.qs_hearing_devices_icon
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             contentDescription = label
             if (data.isAnyActiveHearingDevice) {

@@ -34,6 +34,8 @@ per-file TestProtoLibraries.bp = file:platform/tools/tradefederation:/OWNERS
 per-file *ravenwood* = file:ravenwood/OWNERS
 per-file *Ravenwood* = file:ravenwood/OWNERS
 
+per-file PREUPLOAD.cfg = file:/PREUPLOAD_OWNERS
+
 per-file INPUT_OWNERS = file:/INPUT_OWNERS
 per-file ZYGOTE_OWNERS = file:/ZYGOTE_OWNERS
 per-file SQLITE_OWNERS = file:/SQLITE_OWNERS
@@ -48,3 +50,4 @@ per-file BROADCASTS_OWNERS = file:/BROADCASTS_OWNERS
 per-file ADPF_OWNERS = file:/ADPF_OWNERS
 per-file GAME_MANAGER_OWNERS = file:/GAME_MANAGER_OWNERS
 per-file SDK_OWNERS = file:/SDK_OWNERS
+per-file PREUPLOAD_OWNERS = file:/PREUPLOAD_OWNERS

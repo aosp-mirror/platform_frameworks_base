@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"యాక్టివ్‌గా ఉంది (ఎడమ వైపు మాత్రమే)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"యాక్టివ్‌గా ఉంది (కుడి వైపు మాత్రమే)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"యాక్టివ్‌గా ఉంది (ఎడమ వైపు, కుడి వైపు)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"పరిసరాలను అప్‌డేట్ చేయడం సాధ్యం కాలేదు"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"యాక్టివ్ (మీడియా మాత్రమే). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"యాక్టివ్ (మీడియా మాత్రమే). ఎడమ వైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> బ్యాటరీ, కుడివైపు: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> బ్యాటరీ."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"కనెక్ట్ చేయబడింది (ఆడియో షేరింగ్‌కు సపోర్ట్ చేస్తుంది). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> బ్యాటరీ."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"స్థానిక టెర్మినల్"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"స్థానిక షెల్ యాక్సెస్‌ను అందించే టెర్మినల్ యాప్‌ను ప్రారంభించండి"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux డెవలప్మెంట్ ఎన్విరాన్మెంట్"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidలో Linux టెర్మినల్‌ను రన్ చేయండి"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ప్రయోగాత్మకం) Linux టెర్మినల్‌ను Androidలో రన్ చేయండి"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"మీరు డిజేబుల్ చేస్తే, Linux టెర్మినల్ డేటా క్లియర్ అవుతుంది"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP చెకింగ్‌"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP తనిఖీ ప్రవర్తనను సెట్ చేయండి"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"డీబగ్గింగ్"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"ట్రాన్సిషన్ యానిమేషన్ స్కేల్"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"యానిమేటర్ వ్యవధి స్కేల్"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"ఇతర డిస్‌ప్లేలను సిమ్యులేట్‌ చేయండి"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"షేడ్ డిస్‌ప్లే స్థానం"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"యాప్‌లు"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"యాక్టివిటీస్‌ను ఉంచవద్దు"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"యూజర్ నిష్క్రమించాక పూర్తి యాక్టివిటీని తొలగించండి"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"ఈ ఫోన్"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"ఈ టాబ్లెట్"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"ఈ కంప్యూటర్ (ఇంటర్నల్)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ఈ టీవీ"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"డాక్ స్పీకర్"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"ఎక్స్‌టర్నల్ పరికరం"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"కనెక్ట్ చేసిన పరికరం"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"ఈ ఫోన్"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"అనలాగ్"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"ఈ పరికరంలో ప్లే చేయడం సాధ్యపడదు"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"మారడానికి ఖాతాను అప్‌గ్రేడ్ చేయండి"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"ఇక్కడ డౌన్‌లోడ్‌లను ప్లే చేయడం సాధ్యపడదు"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC ద్వారా కనెక్ట్ చేయబడింది"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC ద్వారా కనెక్ట్ చేయబడింది"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"టీవీ ఆటోమేటిక్ సెట్టింగ్"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI అవుట్‌పుట్"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"అంతర్గత స్పీకర్‌లు"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"బిల్ట్-ఇన్ స్పీకర్"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"టీవీ ఆడియో"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"కనెక్ట్ చేయడంలో సమస్య ఉంది. పరికరాన్ని ఆఫ్ చేసి, ఆపై తిరిగి ఆన్ చేయండి"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"వైర్ గల ఆడియో పరికరం"</string>
     <string name="help_label" msgid="3528360748637781274">"సహాయం &amp; ఫీడ్‌బ్యాక్"</string>

@@ -84,7 +84,11 @@ internal class RestrictionsProviderImpl(
         for (key in restrictions.keys) {
             RestrictedLockUtilsInternal
                 .checkIfRestrictionEnforced(context, key, restrictions.userId)
-                ?.let { return BlockedByAdminImpl(context = context, enforcedAdmin = it) }
+                ?.let { return BlockedByAdminImpl(
+                    context = context,
+                    enforcedAdmin = it,
+                    userId = restrictions.userId
+                ) }
         }
 
         restrictions.enhancedConfirmation?.let { ec ->

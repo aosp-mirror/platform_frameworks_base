@@ -20,6 +20,9 @@ import static com.android.internal.widget.remotecompose.core.documentation.Docum
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.SHORT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -30,6 +33,7 @@ import com.android.internal.widget.remotecompose.core.documentation.DocumentedOp
 import com.android.internal.widget.remotecompose.core.operations.utilities.AnimatedFloatExpression;
 import com.android.internal.widget.remotecompose.core.operations.utilities.NanMap;
 import com.android.internal.widget.remotecompose.core.operations.utilities.easing.FloatAnimation;
+import com.android.internal.widget.remotecompose.core.operations.utilities.easing.SpringStopEngine;
 
 import java.util.List;
 
@@ -38,30 +42,35 @@ import java.util.List;
  * like injecting the width of the component int draw rect As well as supporting generalized
  * animation floats. The floats represent a RPN style calculator
  */
-public class FloatExpression implements Operation, VariableSupport {
+public class FloatExpression extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.ANIMATED_FLOAT;
     private static final String CLASS_NAME = "FloatExpression";
     public int mId;
-    public float[] mSrcValue;
-    public float[] mSrcAnimation;
-    public FloatAnimation mFloatAnimation;
-    public float[] mPreCalcValue;
+    @NonNull public float[] mSrcValue;
+    @Nullable public float[] mSrcAnimation;
+    @Nullable public FloatAnimation mFloatAnimation;
+    @Nullable private SpringStopEngine mSpring;
+    @Nullable public float[] mPreCalcValue;
     private float mLastChange = Float.NaN;
     private float mLastCalculatedValue = Float.NaN;
-    AnimatedFloatExpression mExp = new AnimatedFloatExpression();
+    @NonNull AnimatedFloatExpression mExp = new AnimatedFloatExpression();
     public static final int MAX_EXPRESSION_SIZE = 32;
 
-    public FloatExpression(int id, float[] value, float[] animation) {
+    public FloatExpression(int id, @NonNull float[] value, @Nullable float[] animation) {
         this.mId = id;
         this.mSrcValue = value;
         this.mSrcAnimation = animation;
         if (mSrcAnimation != null) {
-            mFloatAnimation = new FloatAnimation(mSrcAnimation);
+            if (mSrcAnimation.length > 4 && mSrcAnimation[0] == 0) {
+                mSpring = new SpringStopEngine(mSrcAnimation);
+            } else {
+                mFloatAnimation = new FloatAnimation(mSrcAnimation);
+            }
         }
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         if (mPreCalcValue == null || mPreCalcValue.length != mSrcValue.length) {
             mPreCalcValue = new float[mSrcValue.length];
         }
@@ -72,8 +81,19 @@ public class FloatExpression implements Operation, VariableSupport {
             if (Float.isNaN(v)
                     && !AnimatedFloatExpression.isMathOperator(v)
                     && !NanMap.isDataVariable(v)) {
+                int id = Utils.idFromNan(v);
                 float newValue = context.getFloat(Utils.idFromNan(v));
+
+                // TODO: rethink the lifecycle for variable updates
+                if (id == RemoteContext.ID_DENSITY && newValue == 0f) {
+                    newValue = 1f;
+                }
                 if (mFloatAnimation != null) {
+                    if (mPreCalcValue[i] != newValue) {
+                        value_changed = true;
+                        mPreCalcValue[i] = newValue;
+                    }
+                } else if (mSpring != null) {
                     if (mPreCalcValue[i] != newValue) {
                         value_changed = true;
                         mPreCalcValue[i] = newValue;
@@ -103,11 +123,13 @@ public class FloatExpression implements Operation, VariableSupport {
                 mFloatAnimation.setInitialValue(mFloatAnimation.getTargetValue());
             }
             mFloatAnimation.setTargetValue(v);
+        } else if (value_changed && mSpring != null) {
+            mSpring.setTargetValue(v);
         }
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         for (float v : mSrcValue) {
             if (Float.isNaN(v)
                     && !AnimatedFloatExpression.isMathOperator(v)
@@ -117,28 +139,63 @@ public class FloatExpression implements Operation, VariableSupport {
         }
     }
 
+    // Keep track of the last computed value when we are animated,
+    // e.g. if FloatAnimation or Spring is used, so that we can
+    // ask for a repaint.
+    float mLastAnimatedValue = Float.NaN;
+
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         updateVariables(context);
         float t = context.getAnimationTime();
         if (Float.isNaN(mLastChange)) {
             mLastChange = t;
         }
-        if (mFloatAnimation != null) {
-            float f = mFloatAnimation.get(t - mLastChange);
-            context.loadFloat(mId, f);
+        if (mFloatAnimation != null && !Float.isNaN(mLastCalculatedValue)) {
+            float lastComputedValue = mFloatAnimation.get(t - mLastChange);
+            if (lastComputedValue != mLastAnimatedValue) {
+                mLastAnimatedValue = lastComputedValue;
+                context.loadFloat(mId, lastComputedValue);
+                context.needsRepaint();
+            }
+        } else if (mSpring != null) {
+            float lastComputedValue = mSpring.get(t - mLastChange);
+            if (lastComputedValue != mLastAnimatedValue) {
+                mLastAnimatedValue = lastComputedValue;
+                context.loadFloat(mId, lastComputedValue);
+                context.needsRepaint();
+            }
         } else {
-            context.loadFloat(
-                    mId,
-                    mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length));
+            float v =
+                    mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length);
+            if (mFloatAnimation != null) {
+                mFloatAnimation.setTargetValue(v);
+            }
+            context.loadFloat(mId, v);
         }
     }
 
+    /**
+     * Evaluate the expression
+     *
+     * @param context current context
+     * @return the resulting value
+     */
+    public float evaluate(@NonNull RemoteContext context) {
+        updateVariables(context);
+        float t = context.getAnimationTime();
+        if (Float.isNaN(mLastChange)) {
+            mLastChange = t;
+        }
+        return mExp.eval(context.getCollectionsAccess(), mPreCalcValue, mPreCalcValue.length);
+    }
+
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mSrcValue, mSrcAnimation);
     }
 
+    @NonNull
     @Override
     public String toString() {
         String[] labels = new String[mSrcValue.length];
@@ -161,10 +218,21 @@ public class FloatExpression implements Operation, VariableSupport {
                 + ")";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -177,11 +245,18 @@ public class FloatExpression implements Operation, VariableSupport {
      * @param value the float expression array
      * @param animation the animation expression array
      */
-    public static void apply(WireBuffer buffer, int id, float[] value, float[] animation) {
+    public static void apply(
+            @NonNull WireBuffer buffer,
+            int id,
+            @NonNull float[] value,
+            @Nullable float[] animation) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
 
         int len = value.length;
+        if (len > MAX_EXPRESSION_SIZE) {
+            throw new RuntimeException(AnimatedFloatExpression.toString(value, null) + " to long");
+        }
         if (animation != null) {
             len |= (animation.length << 16);
         }
@@ -197,12 +272,18 @@ public class FloatExpression implements Operation, VariableSupport {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int len = buffer.readInt();
         int valueLen = len & 0xFFFF;
         if (valueLen > MAX_EXPRESSION_SIZE) {
-            throw new RuntimeException("Float expression to long");
+            throw new RuntimeException("Float expression too long");
         }
         int animLen = (len >> 16) & 0xFFFF;
         float[] values = new float[valueLen];
@@ -222,7 +303,12 @@ public class FloatExpression implements Operation, VariableSupport {
         operations.add(new FloatExpression(id, values, animation));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("A Float expression")
                 .field(DocumentedOperation.INT, "id", "The id of the Color")
@@ -245,8 +331,9 @@ public class FloatExpression implements Operation, VariableSupport {
                 .field(FLOAT, "wrapValue", "> [Wrap value] ");
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

@@ -23,7 +23,6 @@ import androidx.test.core.app.ApplicationProvider
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.settingslib.spa.testutils.firstWithTimeoutOrNull
 import com.android.settingslib.spa.testutils.toListWithTimeout
-import com.android.settingslib.spaprivileged.framework.common.asUser
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.async
 import kotlinx.coroutines.delay
@@ -35,6 +34,7 @@ import org.mockito.kotlin.doAnswer
 import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.spy
+import org.mockito.kotlin.whenever
 
 @RunWith(AndroidJUnit4::class)
 class PermissionsChangedFlowTest {
@@ -49,7 +49,7 @@ class PermissionsChangedFlowTest {
     }
 
     private val context: Context = spy(ApplicationProvider.getApplicationContext()) {
-        on { asUser(APP.userHandle) } doReturn mock
+        doReturn(mock).whenever(mock).createContextAsUser(APP.userHandle, 0)
         on { packageManager } doReturn mockPackageManager
     }
 

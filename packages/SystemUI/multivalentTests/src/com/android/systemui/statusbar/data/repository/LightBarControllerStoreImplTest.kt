@@ -51,7 +51,7 @@ class LightBarControllerStoreImplTest : SysuiTestCase() {
     @Test
     fun forDisplay_startsInstance() =
         testScope.runTest {
-            val instance = underTest.forDisplay(DEFAULT_DISPLAY)
+            val instance = underTest.forDisplay(DEFAULT_DISPLAY)!!
 
             verify(instance).start()
         }
@@ -59,7 +59,7 @@ class LightBarControllerStoreImplTest : SysuiTestCase() {
     @Test
     fun beforeDisplayRemoved_doesNotStopInstances() =
         testScope.runTest {
-            val instance = underTest.forDisplay(DEFAULT_DISPLAY)
+            val instance = underTest.forDisplay(DEFAULT_DISPLAY)!!
 
             verify(instance, never()).stop()
         }
@@ -67,7 +67,7 @@ class LightBarControllerStoreImplTest : SysuiTestCase() {
     @Test
     fun displayRemoved_stopsInstance() =
         testScope.runTest {
-            val instance = underTest.forDisplay(DEFAULT_DISPLAY)
+            val instance = underTest.forDisplay(DEFAULT_DISPLAY)!!
 
             fakeDisplayRepository.removeDisplay(DEFAULT_DISPLAY)
 

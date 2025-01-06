@@ -76,10 +76,8 @@ interface ShadeModeInteractor {
 
 class ShadeModeInteractorImpl
 @Inject
-constructor(
-    @Application applicationScope: CoroutineScope,
-    private val repository: ShadeRepository,
-) : ShadeModeInteractor {
+constructor(@Application applicationScope: CoroutineScope, repository: ShadeRepository) :
+    ShadeModeInteractor {
 
     override val isShadeLayoutWide: StateFlow<Boolean> = repository.isShadeLayoutWide
 
@@ -92,15 +90,7 @@ constructor(
                 initialValue = determineShadeMode(isShadeLayoutWide.value),
             )
 
-    @FloatRange(from = 0.0, to = 1.0)
-    override fun getTopEdgeSplitFraction(): Float {
-        // Note: this implicitly relies on isShadeLayoutWide being hot (i.e. collected). This
-        // assumption allows us to query its value on demand (during swipe source detection) instead
-        // of running another infinite coroutine.
-        // TODO(b/338577208): Instead of being fixed at 0.8f, this should dynamically updated based
-        //  on the position of system-status icons in the status bar.
-        return if (repository.isShadeLayoutWide.value) 0.8f else 0.5f
-    }
+    @FloatRange(from = 0.0, to = 1.0) override fun getTopEdgeSplitFraction(): Float = 0.5f
 
     private fun determineShadeMode(isShadeLayoutWide: Boolean): ShadeMode {
         return when {

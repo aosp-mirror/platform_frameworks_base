@@ -19,6 +19,7 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -27,5 +28,6 @@ val Kosmos.lockscreenToPrimaryBouncerTransitionViewModel by Fixture {
     LockscreenToPrimaryBouncerTransitionViewModel(
         shadeDependentFlows = shadeDependentFlows,
         animationFlow = keyguardTransitionAnimationFlow,
+        blurConfig = blurConfig,
     )
 }

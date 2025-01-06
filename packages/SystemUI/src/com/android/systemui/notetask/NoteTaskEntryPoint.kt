@@ -44,4 +44,7 @@ enum class NoteTaskEntryPoint {
 
     /** @see [NoteTaskInitializer.callbacks] */
     KEYBOARD_SHORTCUT,
+
+    /** @see [NotesTile] */
+    QS_NOTES_TILE,
 }

@@ -19,22 +19,21 @@ package com.android.systemui.qs.tiles.impl.modes.ui
 import android.content.res.Resources
 import android.icu.text.MessageFormat
 import android.widget.Button
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import java.util.Locale
 import javax.inject.Inject
 
 class ModesTileMapper
 @Inject
-constructor(@Main private val resources: Resources, val theme: Resources.Theme) :
+constructor(@ShadeDisplayAware private val resources: Resources, val theme: Resources.Theme) :
     QSTileDataToStateMapper<ModesTileModel> {
     override fun map(config: QSTileConfig, data: ModesTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes = data.iconResId
             icon = data.icon
             activationState =
                 if (data.isActivated) {
@@ -45,7 +44,11 @@ constructor(@Main private val resources: Resources, val theme: Resources.Theme) 
             secondaryLabel = getModesStatus(data, resources)
             contentDescription = "$label. $secondaryLabel"
             supportedActions =
-                setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
+                setOf(
+                    QSTileState.UserAction.CLICK,
+                    QSTileState.UserAction.LONG_CLICK,
+                    QSTileState.UserAction.TOGGLE_CLICK,
+                )
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             expandedAccessibilityClass = Button::class
         }

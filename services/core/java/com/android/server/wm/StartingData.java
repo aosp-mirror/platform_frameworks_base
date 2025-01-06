@@ -63,18 +63,6 @@ public abstract class StartingData {
 
     /**
      * For Shell transition.
-     * There will be a transition happen on attached activity, do not remove starting window during
-     * this period, because the transaction to show app window may not apply before remove starting
-     * window.
-     * Note this isn't equal to transition playing, the period should be
-     * Sync finishNow -> Start transaction apply.
-     * @deprecated TODO(b/362347290): cleanup after fix ramp up
-     */
-    @Deprecated
-    boolean mWaitForSyncTransactionCommit;
-
-    /**
-     * For Shell transition.
      * This starting window should be removed after applying the start transaction of transition,
      * which ensures the app window has shown.
      */
@@ -114,7 +102,6 @@ public abstract class StartingData {
     public String toString() {
         return getClass().getSimpleName() + "{"
                 + Integer.toHexString(System.identityHashCode(this))
-                + " waitForSyncTransactionCommit=" + mWaitForSyncTransactionCommit
                 + " removeAfterTransaction= " + mRemoveAfterTransaction
                 + "}";
     }

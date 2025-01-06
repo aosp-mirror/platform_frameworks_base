@@ -73,6 +73,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"Идентификация абонента по умолчанию запрещена. След. вызов: разрешена"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"Идентификация абонента по умолчанию не запрещена. След. вызов: запрещена"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"Идентификация абонента по умолчанию не запрещена. След. вызов: разрешена"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Это приложение не поддерживает страничную память объемом 16 КБ. Не удалось проверить выравнивание данных в APK-файле. Приложение будет запущено в режиме совместимости. Чтобы улучшить совместимость, заново скомпилируйте приложение для поддержки страничной памяти объемом 16 КБ. Подробнее: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Это приложение не поддерживает страничную память объемом 16 КБ. Не удалось проверить выравнивание данных в ELF-файле. Приложение будет запущено в режиме совместимости. Чтобы улучшить совместимость, заново скомпилируйте приложение для поддержки страничной памяти объемом 16 КБ. Подробнее: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Это приложение не поддерживает страничную память объемом 16 КБ. Не удалось проверить выравнивание данных в APK- и ELF-файлах. Приложение будет запущено в режиме совместимости. Чтобы улучшить совместимость, заново скомпилируйте приложение для поддержки страничной памяти объемом 16 КБ. Подробнее: &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;."</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Услуга не предоставляется."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Невозможно изменить параметр идентификатора вызывающего абонента."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Используется мобильный интернет <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -86,6 +89,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобильная сеть недоступна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Нажмите, чтобы выбрать другую сеть."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Экстренные вызовы недоступны"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Для экстренных вызовов нужна мобильная сеть."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Оповещения"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресация вызовов"</string>
@@ -614,6 +619,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Приложение сможет определять относительное позиционирование устройств с технологией сверхширокополосной связи поблизости"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"Взаимодействие с устройствами Wi‑Fi поблизости"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Приложение сможет передавать данные на устройства Wi‑Fi рядом, подключаться к ним и определять их примерное местоположение."</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"относительное местоположение устройств поблизости"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Приложение сможет определять относительное местоположение устройств поблизости."</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Сведения о предпочтительном платежном сервисе NFC"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Приложение сможет получать сведения о предпочтительном платежном сервисе NFC (например, зарегистрированные идентификаторы AID и конечный пункт маршрута)."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"Управление NFC-модулем"</string>
@@ -1155,6 +1162,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"через <xliff:g id="COUNT">%d</xliff:g> ч."</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"через <xliff:g id="COUNT">%d</xliff:g> дн."</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"через <xliff:g id="COUNT">%d</xliff:g> г."</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> г./лет назад"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> мин."</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ч."</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> дн."</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> г./лет"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"через <xliff:g id="COUNT">%d</xliff:g> мин."</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"через <xliff:g id="COUNT">%d</xliff:g> ч."</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"через <xliff:g id="COUNT">%d</xliff:g> дн."</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"через <xliff:g id="COUNT">%d</xliff:g> г./лет"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> мин. назад"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> ч. назад"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> дн. назад"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> г./лет назад"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# минуту назад}one{# минуту назад}few{# минуты назад}many{# минут назад}other{# минуты назад}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# час назад}one{# час назад}few{# часа назад}many{# часов назад}other{# часа назад}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# день назад}one{# день назад}few{# дня назад}many{# дней назад}other{# дня назад}}"</string>
@@ -1530,7 +1553,7 @@
     <string name="forward_intent_to_work" msgid="3620262405636021151">"Вы перешли в рабочий профиль"</string>
     <string name="input_method_binding_label" msgid="1166731601721983656">"Способ ввода"</string>
     <string name="sync_binding_label" msgid="469249309424662147">"Синхр."</string>
-    <string name="accessibility_binding_label" msgid="1974602776545801715">"Спец. возможности"</string>
+    <string name="accessibility_binding_label" msgid="1974602776545801715">"Специальные возможности"</string>
     <string name="wallpaper_binding_label" msgid="1197440498000786738">"Фоновый рисунок"</string>
     <string name="chooser_wallpaper" msgid="3082405680079923708">"Сменить обои"</string>
     <string name="notification_listener_binding_label" msgid="2702165274471499713">"Служба просмотра уведомлений"</string>
@@ -1759,6 +1782,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим управления одной рукой"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дополнительное уменьшение яркости"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Слуховые аппараты"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Использован жест с кнопками регулировки громкости. Функция \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Использован жест с кнопками регулировки громкости. Функция \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" отключена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Отпустите кнопки громкости. Чтобы включить <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, нажмите и удерживайте обе кнопки регулировки громкости в течение трех секунд."</string>
@@ -1940,13 +1971,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Выходные"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Мероприятие"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Время сна"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Не беспокоить (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Под управлением приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\""</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Включено"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Отключено"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> – <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Любой календарь"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> приглушает некоторые звуки."</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Произошла внутренняя ошибка, и устройство может работать нестабильно, пока вы не выполните сброс настроек."</string>
@@ -2428,15 +2460,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Отправляйте и получайте сообщения без подключения к мобильной сети или Wi-Fi."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Открыть Сообщения"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Узнать принцип работы"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Включите автоматический выбор сети"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Чтобы ваш телефон мог найти сеть, которая поддерживает спутниковую связь, включите в настройках параметр \"Выбирать сеть автоматически\"."</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Включить"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Назад"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Обработка…"</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Доступен спутниковый SOS"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Вы можете отправлять сообщения экстренным службам, даже когда подключение по мобильной сети или Wi-Fi недоступно. Google Сообщения должны быть выбраны в качестве мессенджера по умолчанию."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Спутниковый SOS не поддерживается"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Функция недоступна на этом устройстве."</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Спутниковый SOS не настроен"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Проверьте подключение к интернету и повторите попытку."</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Спутниковый SOS недоступен"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Функция недоступна в стране или в этом регионе."</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Спутниковый SOS не настроен"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Чтобы использовать эту функцию, необходимо выбрать Google Сообщения в качестве мессенджера по умолчанию."</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Спутниковый SOS недоступен"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Чтобы узнать, можно ли использовать спутниковый SOS в стране или в этом регионе, включите настройки геолокации."</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Доступен спутниковый обмен сообщениями"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Вы можете обмениваться сообщениями по спутниковой связи, даже когда подключение к мобильной сети или Wi-Fi недоступно. Google Сообщения должны быть выбраны в качестве мессенджера по умолчанию."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Спутниковый обмен сообщениями не поддерживается"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Функция недоступна на этом устройстве."</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Спутниковый обмен сообщениями не настроен"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Проверьте подключение к интернету и повторите попытку."</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Спутниковый обмен сообщениями недоступен"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Функция недоступна в стране или в этом регионе."</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Спутниковый обмен сообщениями не настроен"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Чтобы использовать эту функцию, необходимо выбрать Google Сообщения в качестве мессенджера по умолчанию."</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Спутниковый обмен сообщениями недоступен"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Чтобы узнать, можно ли обмениваться сообщениями по спутниковой связи в стране или в этом регионе, включите настройки геолокации."</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Настройте разблокировку по отпечатку пальца заново"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"Отпечаток \"<xliff:g id="FINGERPRINT">%s</xliff:g>\" больше нельзя распознать."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"Отпечатки \"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>\" и \"<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>\" больше нельзя распознать."</string>

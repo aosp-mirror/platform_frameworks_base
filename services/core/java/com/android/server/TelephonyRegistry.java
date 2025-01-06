@@ -65,6 +65,7 @@ import android.telephony.CellSignalStrengthLte;
 import android.telephony.CellSignalStrengthNr;
 import android.telephony.CellSignalStrengthTdscdma;
 import android.telephony.CellSignalStrengthWcdma;
+import android.telephony.CellularIdentifierDisclosure;
 import android.telephony.DisconnectCause;
 import android.telephony.LinkCapacityEstimate;
 import android.telephony.LocationAccessPolicy;
@@ -76,6 +77,7 @@ import android.telephony.PreciseCallState;
 import android.telephony.PreciseDataConnectionState;
 import android.telephony.PreciseDisconnectCause;
 import android.telephony.Rlog;
+import android.telephony.SecurityAlgorithmUpdate;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionInfo;
@@ -88,6 +90,7 @@ import android.telephony.emergency.EmergencyNumber;
 import android.telephony.ims.ImsCallSession;
 import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.MediaQualityStatus;
+import android.telephony.satellite.NtnSignalStrength;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -440,10 +443,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
     private boolean[] mCarrierRoamingNtnEligible = null;
 
     private List<IntArray> mCarrierRoamingNtnAvailableServices;
+    private NtnSignalStrength[] mCarrierRoamingNtnSignalStrength;
 
     // Local cache to check if Satellite Modem is enabled
     private AtomicBoolean mIsSatelliteEnabled;
     private AtomicBoolean mWasSatelliteEnabledNotified;
+
+    private final int mPid = Process.myPid();
 
     /**
      * Per-phone map of precise data connection state. The key of the map is the pair of transport
@@ -588,7 +594,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 || events.contains(TelephonyCallback.EVENT_ALLOWED_NETWORK_TYPE_LIST_CHANGED)
                 || events.contains(TelephonyCallback.EVENT_EMERGENCY_CALLBACK_MODE_CHANGED)
                 || events.contains(TelephonyCallback
-                        .EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED);
+                        .EVENT_SIMULTANEOUS_CELLULAR_CALLING_SUBSCRIPTIONS_CHANGED)
+                || events.contains(TelephonyCallback.EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED)
+                || events.contains(TelephonyCallback.EVENT_SECURITY_ALGORITHMS_CHANGED);
     }
 
     private static final int MSG_USER_SWITCHED = 1;
@@ -745,6 +753,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mSCBMDuration = copyOf(mSCBMDuration, mNumPhones);
             mCarrierRoamingNtnMode = copyOf(mCarrierRoamingNtnMode, mNumPhones);
             mCarrierRoamingNtnEligible = copyOf(mCarrierRoamingNtnEligible, mNumPhones);
+            if (mCarrierRoamingNtnSignalStrength != null) {
+                mCarrierRoamingNtnSignalStrength = copyOf(
+                        mCarrierRoamingNtnSignalStrength, mNumPhones);
+            } else {
+                mCarrierRoamingNtnSignalStrength = new NtnSignalStrength[mNumPhones];
+            }
             // ds -> ss switch.
             if (mNumPhones < oldNumPhones) {
                 cutListToSize(mCellInfo, mNumPhones);
@@ -807,6 +821,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 mCarrierRoamingNtnMode[i] = false;
                 mCarrierRoamingNtnEligible[i] = false;
                 mCarrierRoamingNtnAvailableServices.add(i, new IntArray());
+                mCarrierRoamingNtnSignalStrength[i] = new NtnSignalStrength(
+                        NtnSignalStrength.NTN_SIGNAL_STRENGTH_NONE);
             }
         }
     }
@@ -883,9 +899,9 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCarrierRoamingNtnMode = new boolean[numPhones];
         mCarrierRoamingNtnEligible = new boolean[numPhones];
         mCarrierRoamingNtnAvailableServices = new ArrayList<>();
+        mCarrierRoamingNtnSignalStrength = new NtnSignalStrength[numPhones];
         mIsSatelliteEnabled = new AtomicBoolean();
         mWasSatelliteEnabledNotified = new AtomicBoolean();
-
 
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
@@ -932,6 +948,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCarrierRoamingNtnMode[i] = false;
             mCarrierRoamingNtnEligible[i] = false;
             mCarrierRoamingNtnAvailableServices.add(i, new IntArray());
+            mCarrierRoamingNtnSignalStrength[i] = new NtnSignalStrength(
+                    NtnSignalStrength.NTN_SIGNAL_STRENGTH_NONE);
         }
 
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -1425,7 +1443,17 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
                 if (events.contains(TelephonyCallback.EVENT_CALL_ATTRIBUTES_CHANGED)) {
                     try {
-                        r.callback.onCallStatesChanged(mCallStateLists.get(r.phoneId));
+                        if (Flags.passCopiedCallStateList()) {
+                            List<CallState> callList;
+                            if (r.callerPid == mPid) {
+                                callList = List.copyOf(mCallStateLists.get(r.phoneId));
+                            } else {
+                                callList = mCallStateLists.get(r.phoneId);
+                            }
+                            r.callback.onCallStatesChanged(callList);
+                        } else {
+                            r.callback.onCallStatesChanged(mCallStateLists.get(r.phoneId));
+                        }
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -1561,6 +1589,15 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     try {
                         r.callback.onCarrierRoamingNtnAvailableServicesChanged(
                                 mCarrierRoamingNtnAvailableServices.get(r.phoneId).toArray());
+                    } catch (RemoteException ex) {
+                        remove(r.binder);
+                    }
+                }
+                if (events.contains(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnSignalStrengthChanged(
+                                mCarrierRoamingNtnSignalStrength[r.phoneId]);
                     } catch (RemoteException ex) {
                         remove(r.binder);
                     }
@@ -2141,7 +2178,11 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             overrideNetworkType = TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA_MMWAVE;
         }
         boolean isRoaming = telephonyDisplayInfo.isRoaming();
-        return new TelephonyDisplayInfo(networkType, overrideNetworkType, isRoaming);
+        boolean isNtn = telephonyDisplayInfo.isNtn();
+        boolean isSatelliteConstrainedData =
+                telephonyDisplayInfo.isSatelliteConstrainedData();
+        return new TelephonyDisplayInfo(networkType, overrideNetworkType, isRoaming,
+                isNtn, isSatelliteConstrainedData);
     }
 
     public void notifyCallForwardingChanged(boolean cfi) {
@@ -2544,12 +2585,25 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 }
 
                 if (notifyCallState) {
+                    List<CallState> copyList = null;
                     for (Record r : mRecords) {
                         if (r.matchTelephonyCallbackEvent(
                                 TelephonyCallback.EVENT_CALL_ATTRIBUTES_CHANGED)
                                 && idMatch(r, subId, phoneId)) {
+                            // If listener is in the same process, original instance can be passed
+                            // to the listener via AIDL without serialization/de-serialization. We
+                            // will pass the copied list. Since the element is newly created instead
+                            // of modification for the change, we can use shallow copy for this.
                             try {
-                                r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                                if (Flags.passCopiedCallStateList()) {
+                                    if (r.callerPid == mPid && copyList == null) {
+                                        copyList = List.copyOf(mCallStateLists.get(phoneId));
+                                    }
+                                    r.callback.onCallStatesChanged(copyList == null
+                                            ? mCallStateLists.get(phoneId) : copyList);
+                                } else {
+                                    r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                                }
                             } catch (RemoteException ex) {
                                 mRemoveList.add(r.binder);
                             }
@@ -2877,13 +2931,21 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     log("There is no active call to report CallQuality");
                     return;
                 }
-
+                List<CallState> copyList = null;
                 for (Record r : mRecords) {
                     if (r.matchTelephonyCallbackEvent(
                             TelephonyCallback.EVENT_CALL_ATTRIBUTES_CHANGED)
                             && idMatch(r, subId, phoneId)) {
                         try {
-                            r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                            if (Flags.passCopiedCallStateList()) {
+                                if (r.callerPid == mPid && copyList == null) {
+                                    copyList = List.copyOf(mCallStateLists.get(phoneId));
+                                }
+                                r.callback.onCallStatesChanged(copyList == null
+                                        ? mCallStateLists.get(phoneId) : copyList);
+                            } else {
+                                r.callback.onCallStatesChanged(mCallStateLists.get(phoneId));
+                            }
                         } catch (RemoteException ex) {
                             mRemoveList.add(r.binder);
                         }
@@ -3803,6 +3865,135 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    /**
+     * Notify external listeners that carrier roaming non-terrestrial network
+     * signal strength changed.
+     * @param subId subscription ID.
+     * @param ntnSignalStrength non-terrestrial network signal strength.
+     */
+    public void notifyCarrierRoamingNtnSignalStrengthChanged(int subId,
+            @NonNull NtnSignalStrength ntnSignalStrength) {
+        if (!checkNotifyPermission("notifyCarrierRoamingNtnSignalStrengthChanged")) {
+            log("notifyCarrierRoamingNtnSignalStrengthChanged: caller does not have required "
+                    + "permissions.");
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyCarrierRoamingNtnSignalStrengthChanged: "
+                    + "subId=" + subId + " ntnSignalStrength=" + ntnSignalStrength.getLevel());
+        }
+
+        synchronized (mRecords) {
+            int phoneId = getPhoneIdFromSubId(subId);
+            mCarrierRoamingNtnSignalStrength[phoneId] = ntnSignalStrength;
+            for (Record r : mRecords) {
+                if (r.matchTelephonyCallbackEvent(
+                        TelephonyCallback.EVENT_CARRIER_ROAMING_NTN_SIGNAL_STRENGTH_CHANGED)
+                        && idMatch(r, subId, phoneId)) {
+                    try {
+                        r.callback.onCarrierRoamingNtnSignalStrengthChanged(ntnSignalStrength);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    /**
+     * Notify that the radio security algorithms have changed.
+     *
+     * @param phoneId the phone id.
+     * @param subId the subId.
+     * @param update the security algorithm update.
+     */
+    public void notifySecurityAlgorithmsChanged(int phoneId, int subId,
+            SecurityAlgorithmUpdate update) {
+        if (!Flags.securityAlgorithmsUpdateIndications()) {
+            log("Not available due to securityAlgorithmsUpdateIndications() flag");
+            return;
+        }
+        if (!checkNotifyPermission("notifySecurityAlgorithmChanged()")) {
+            return;
+        }
+
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                if (update == null) {
+                    loge("SecurityAlgorithmUpdate is null, subId=" + subId
+                            + ", phoneId=" + phoneId);
+                    // Listeners shouldn't be updated for null updates.
+                    return;
+                }
+
+                for (Record r : mRecords) {
+                    if (r.matchTelephonyCallbackEvent(
+                            TelephonyCallback.EVENT_SECURITY_ALGORITHMS_CHANGED)
+                            && idMatch(r, subId, phoneId)) {
+                        try {
+                            if (VDBG) {
+                                log("notifySecurityAlgorithmsChanged: securityAlgorithmUpdate= "
+                                        + update);
+                            }
+                            r.callback.onSecurityAlgorithmsChanged(update);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
+    /**
+     * Notify of a cellular identifier disclosure.
+     *
+     * @param phoneId the phone id.
+     * @param subId the subId.
+     * @param disclosure the cellular identifier disclosure.
+     */
+    public void notifyCellularIdentifierDisclosedChanged(int phoneId, int subId,
+            @NonNull CellularIdentifierDisclosure disclosure) {
+        if (!Flags.cellularIdentifierDisclosureIndications()) {
+            log("Not available due to cellularIdentifierDisclosureIndications() flag");
+            return;
+        }
+        if (!checkNotifyPermission("notifyCellularIdentifierDisclosedChanged()")) {
+            return;
+        }
+
+        synchronized (mRecords) {
+            if (validatePhoneId(phoneId)) {
+                if (disclosure == null) {
+                    loge("CellularIdentifierDisclosure is null, subId=" + subId
+                            + ", phoneId=" + phoneId);
+                    // Listeners shouldn't be updated for null disclosures.
+                    return;
+                }
+
+                for (Record r : mRecords) {
+                    if (r.matchTelephonyCallbackEvent(
+                            TelephonyCallback.EVENT_CELLULAR_IDENTIFIER_DISCLOSED_CHANGED)
+                            && idMatch(r, subId, phoneId)) {
+                        try {
+                            if (VDBG) {
+                                log("notifyCellularIdentifierDisclosedChanged: disclosure= "
+                                        + disclosure);
+                            }
+                            r.callback.onCellularIdentifierDisclosedChanged(disclosure);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
     @NeverCompile // Avoid size overhead of debugging code.
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
@@ -3858,6 +4049,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 pw.println("mSCBMDuration=" + mSCBMDuration[i]);
                 pw.println("mCarrierRoamingNtnMode=" + mCarrierRoamingNtnMode[i]);
                 pw.println("mCarrierRoamingNtnEligible=" + mCarrierRoamingNtnEligible[i]);
+                pw.println("mCarrierRoamingNtnSignalStrength="
+                        + mCarrierRoamingNtnSignalStrength[i]);
 
                 // We need to obfuscate package names, and primitive arrays' native toString is ugly
                 Pair<List<String>, int[]> carrierPrivilegeState = mCarrierPrivilegeStates.get(i);

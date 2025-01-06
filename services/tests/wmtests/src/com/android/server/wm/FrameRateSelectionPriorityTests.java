@@ -69,9 +69,11 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
     private static final FrameRateVote FRAME_RATE_VOTE_60_PREFERRED =
             new FrameRateVote(60, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT,
                     SurfaceControl.FRAME_RATE_SELECTION_STRATEGY_OVERRIDE_CHILDREN);
-
+    private static final float HI_REFRESH_RATE = 90;
+    private static final float MID_REFRESH_RATE = 70;
+    private static final float LOW_REFRESH_RATE = 60;
     WindowState createWindow(String name) {
-        WindowState window = createWindow(null, TYPE_APPLICATION, name);
+        WindowState window = newWindowBuilder(name, TYPE_APPLICATION).build();
         when(window.mWmService.mDisplayManagerInternal.getRefreshRateSwitchingType())
                 .thenReturn(DisplayManager.SWITCHING_TYPE_WITHIN_GROUPS);
         return window;
@@ -82,14 +84,16 @@ public class FrameRateSelectionPriorityTests extends WindowTestsBase {
         DisplayInfo di = new DisplayInfo(mDisplayInfo);
         Mode defaultMode = di.getDefaultMode();
         Mode hiMode = new Mode(1,
-                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 90);
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), HI_REFRESH_RATE);
         Mode midMode = new Mode(2,
-                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 70);
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), MID_REFRESH_RATE);
         Mode lowMode = new Mode(LOW_MODE_ID,
-                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), 60);
+                defaultMode.getPhysicalWidth(), defaultMode.getPhysicalHeight(), LOW_REFRESH_RATE);
 
         di.supportedModes = new Mode[] { hiMode, midMode };
         di.appsSupportedModes = new Mode[] { hiMode, midMode, lowMode };
+        di.supportedRefreshRates = new float[] {HI_REFRESH_RATE, MID_REFRESH_RATE,
+                LOW_REFRESH_RATE};
         di.defaultModeId = 1;
         mRefreshRatePolicy = new RefreshRatePolicy(mWm, di, mDenylist);
         when(mDisplayPolicy.getRefreshRatePolicy()).thenReturn(mRefreshRatePolicy);

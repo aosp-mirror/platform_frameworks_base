@@ -24,14 +24,6 @@ flag {
     bug: "290696572"
 }
 
-flag {
-    name: "backup_tasks_settings_screen"
-    is_exported: true
-    namespace: "backstage_power"
-    description: "Add a new settings page for the RUN_BACKUP_JOBS permission."
-    bug: "320563660"
-}
-
 # OWNER = tgunn TARGET=25Q1
 flag {
     name: "allow_config_maximum_call_log_entries_per_sim"
@@ -62,4 +54,12 @@ flag {
     metadata {
         purpose: PURPOSE_BUGFIX
     }
+}
+
+flag {
+    name: "system_regional_preferences_api_enabled"
+    is_exported: true
+    namespace: "globalintl"
+    description: "Feature flag for regional preferences APIs"
+    bug: "370379000"
 }

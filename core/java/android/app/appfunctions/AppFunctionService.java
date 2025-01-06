@@ -17,7 +17,6 @@
 package android.app.appfunctions;
 
 import static android.Manifest.permission.BIND_APP_FUNCTION_SERVICE;
-import static android.app.appfunctions.ExecuteAppFunctionResponse.getResultCode;
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 
@@ -25,6 +24,7 @@ import android.annotation.FlaggedApi;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.SdkConstant;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
@@ -32,10 +32,8 @@ import android.os.Binder;
 import android.os.CancellationSignal;
 import android.os.IBinder;
 import android.os.ICancellationSignal;
+import android.os.OutcomeReceiver;
 import android.os.RemoteException;
-import android.util.Log;
-
-import java.util.function.Consumer;
 
 /**
  * Abstract base class to provide app functions to the system.
@@ -62,6 +60,7 @@ public abstract class AppFunctionService extends Service {
      * service must also require the {@link BIND_APP_FUNCTION_SERVICE} permission so that other
      * applications can not abuse it.
      */
+    @SdkConstant(SdkConstant.SdkConstantType.SERVICE_ACTION)
     @NonNull
     public static final String SERVICE_INTERFACE = "android.app.appfunctions.AppFunctionService";
 
@@ -80,7 +79,9 @@ public abstract class AppFunctionService extends Service {
                 @NonNull ExecuteAppFunctionRequest request,
                 @NonNull String callingPackage,
                 @NonNull CancellationSignal cancellationSignal,
-                @NonNull Consumer<ExecuteAppFunctionResponse> callback);
+                @NonNull
+                        OutcomeReceiver<ExecuteAppFunctionResponse, AppFunctionException>
+                                callback);
     }
 
     /** @hide */
@@ -105,13 +106,22 @@ public abstract class AppFunctionService extends Service {
                             request,
                             callingPackage,
                             buildCancellationSignal(cancellationCallback),
-                            safeCallback::onResult);
+                            new OutcomeReceiver<>() {
+                                @Override
+                                public void onResult(ExecuteAppFunctionResponse result) {
+                                    safeCallback.onResult(result);
+                                }
+
+                                @Override
+                                public void onError(AppFunctionException exception) {
+                                    safeCallback.onError(exception);
+                                }
+                            });
                 } catch (Exception ex) {
                     // Apps should handle exceptions. But if they don't, report the error on
                     // behalf of them.
-                    safeCallback.onResult(
-                            ExecuteAppFunctionResponse.newFailure(
-                                    getResultCode(ex), ex.getMessage(), /* extras= */ null));
+                    safeCallback.onError(
+                            new AppFunctionException(toErrorCode(ex), ex.getMessage()));
                 }
             }
         };
@@ -164,12 +174,26 @@ public abstract class AppFunctionService extends Service {
      * @param request The function execution request.
      * @param callingPackage The package name of the app that is requesting the execution.
      * @param cancellationSignal A signal to cancel the execution.
-     * @param callback A callback to report back the result.
+     * @param callback A callback to report back the result or error.
      */
     @MainThread
     public abstract void onExecuteFunction(
             @NonNull ExecuteAppFunctionRequest request,
             @NonNull String callingPackage,
             @NonNull CancellationSignal cancellationSignal,
-            @NonNull Consumer<ExecuteAppFunctionResponse> callback);
+            @NonNull
+                    OutcomeReceiver<ExecuteAppFunctionResponse, AppFunctionException>
+                            callback);
+
+    /**
+     * Returns result codes from throwable.
+     *
+     * @hide
+     */
+    private static @AppFunctionException.ErrorCode int toErrorCode(@NonNull Throwable t) {
+        if (t instanceof IllegalArgumentException) {
+            return AppFunctionException.ERROR_INVALID_ARGUMENT;
+        }
+        return AppFunctionException.ERROR_APP_UNKNOWN_ERROR;
+    }
 }

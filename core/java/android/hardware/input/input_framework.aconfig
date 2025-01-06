@@ -30,24 +30,9 @@ flag {
 
 flag {
     namespace: "input_native"
-    name: "emoji_and_screenshot_keycodes_available"
-    is_exported: true
-    description: "Add new KeyEvent keycodes for opening Emoji Picker and Taking Screenshots"
-    bug: "315307777"
-}
-
-flag {
-    namespace: "input_native"
     name: "keyboard_a11y_slow_keys_flag"
     description: "Controls if the slow keys accessibility feature for physical keyboard is available to the user"
     bug: "294546335"
-}
-
-flag {
-    namespace: "input_native"
-    name: "touchpad_tap_dragging"
-    description: "Offers a setting to enable touchpad tap dragging"
-    bug: "321978150"
 }
 
 flag {
@@ -82,17 +67,28 @@ flag {
 }
 
 flag {
-  name: "modifier_shortcut_dump"
-  namespace: "input"
-  description: "Dump keyboard shortcuts in dumpsys window"
-  bug: "351963350"
+    name: "modifier_shortcut_dump"
+    namespace: "input"
+    description: "Dump keyboard shortcuts in dumpsys window"
+    bug: "351963350"
 }
 
 flag {
-  name: "modifier_shortcut_manager_refactor"
-  namespace: "input"
-  description: "Refactor ModifierShortcutManager internal representation of shortcuts."
-  bug: "358603902"
+    name: "modifier_shortcut_manager_refactor"
+    namespace: "input"
+    description: "Refactor ModifierShortcutManager internal representation of shortcuts."
+    bug: "358603902"
+}
+
+flag {
+    name: "input_manager_lifecycle_support"
+    namespace: "input"
+    description: "Add support for Lifecycle support in input manager"
+    bug: "362473586"
+    is_fixed_read_only: true
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
 }
 
 flag {
@@ -111,38 +107,45 @@ flag {
 }
 
 flag {
-    namespace: "input_native"
-    name: "use_key_gesture_event_handler_multi_press_gestures"
+    namespace: "input"
+    name: "use_key_gesture_event_handler_multi_key_gestures"
     description: "Use KeyGestureEvent handler APIs to control multi key press gestures"
     bug: "358569822"
 }
 
 flag {
-  name: "keyboard_repeat_keys"
-  namespace: "input_native"
-  description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"
-  bug: "336585002"
+    name: "keyboard_repeat_keys"
+    namespace: "input_native"
+    description: "Allow configurable timeout before key repeat and repeat delay rate for key repeats"
+    bug: "336585002"
 }
 
 flag {
-  name: "mouse_reverse_vertical_scrolling"
-  namespace: "input"
-  description: "Controls whether external mouse vertical scrolling can be reversed"
-  bug: "352598211"
+    name: "mouse_reverse_vertical_scrolling"
+    namespace: "input"
+    description: "Controls whether external mouse vertical scrolling can be reversed"
+    bug: "352598211"
 }
 
 flag {
-  name: "mouse_swap_primary_button"
-  namespace: "input"
-  description: "Controls whether the connected mice's primary buttons, left and right, can be swapped."
-  bug: "352598211"
+    name: "mouse_swap_primary_button"
+    namespace: "input"
+    description: "Controls whether the connected mice's primary buttons, left and right, can be swapped."
+    bug: "352598211"
 }
 
 flag {
-  name: "keyboard_a11y_shortcut_control"
-  namespace: "input"
-  description: "Adds shortcuts to toggle and control a11y features"
-  bug: "373458181"
+    name: "keyboard_a11y_shortcut_control"
+    namespace: "input"
+    description: "Adds shortcuts to toggle and control a11y keyboard features"
+    bug: "373458181"
+}
+
+flag {
+    name: "touchpad_system_gesture_disable"
+    namespace: "input"
+    description: "Adds an accessibility setting to disable system navigation gestures (3- and 4-finger swipes) on touchpads"
+    bug: "353947750"
 }
 
 flag {
@@ -153,15 +156,65 @@ flag {
 }
 
 flag {
-  name: "override_power_key_behavior_in_focused_window"
-  namespace: "input_native"
-  description: "Allows privileged focused windows to capture power key events."
-  bug: "357144512"
+    name: "enable_new_25q2_keycodes"
+    namespace: "input"
+    description: "Enables new 25Q2 keycodes"
+    bug: "365920375"
+    is_exported: true
 }
 
 flag {
-  name: "touchpad_three_finger_tap_shortcut"
-  namespace: "input"
-  description: "Turns three-finger touchpad taps into a customizable shortcut."
-  bug: "365063048"
+    name: "override_power_key_behavior_in_focused_window"
+    namespace: "wallet_integration"
+    description: "Allows privileged focused windows to override the power key double tap behavior."
+    bug: "357144512"
+}
+
+flag {
+    name: "touchpad_three_finger_tap_shortcut"
+    namespace: "input"
+    description: "Turns three-finger touchpad taps into a customizable shortcut."
+    bug: "365063048"
+}
+
+flag {
+    name: "enable_talkback_and_magnifier_key_gestures"
+    namespace: "input"
+    description: "Adds key gestures for talkback and magnifier"
+    bug: "375277034"
+}
+
+flag {
+    name: "enable_voice_access_key_gestures"
+    namespace: "input"
+    description: "Adds key gestures for voice access"
+    bug: "383734125"
+}
+
+flag {
+    name: "can_window_override_power_gesture_api"
+    namespace: "wallet_integration"
+    description: "Adds new API in WindowManager class to check if the window can override the power key double tap behavior."
+    bug: "378736024"
+}
+
+flag {
+    name: "pointer_acceleration"
+    namespace: "input"
+    description: "Allows the user to disable pointer acceleration for mouse and touchpads."
+    bug: "349006858"
+}
+
+flag {
+    name: "mouse_scrolling_acceleration"
+    namespace: "input"
+    description: "Allows the user to disable input scrolling acceleration for mouse."
+    bug: "383555305"
+}
+
+flag {
+    name: "remove_fallback_modifiers"
+    namespace: "input"
+    description: "Removes modifiers from the original key event that activated the fallback, ensuring that only the intended fallback event is sent."
+    bug: "382545048"
 }

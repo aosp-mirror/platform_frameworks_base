@@ -157,7 +157,7 @@ public class ConversionUtil {
             SoundTrigger.RecognitionConfig apiConfig) {
         RecognitionConfig aidlConfig = new RecognitionConfig();
         aidlConfig.captureRequested = apiConfig.isCaptureRequested();
-        // apiConfig.isAllowMultipleTriggers() is ignored by the lower layers.
+        // apiConfig.isMultipleTriggersAllowed() is ignored by the lower layers.
         aidlConfig.phraseRecognitionExtras =
                 new PhraseRecognitionExtra[apiConfig.getKeyphrases().size()];
         for (int i = 0; i < apiConfig.getKeyphrases().size(); ++i) {
@@ -178,7 +178,7 @@ public class ConversionUtil {
         }
         return new SoundTrigger.RecognitionConfig.Builder()
             .setCaptureRequested(aidlConfig.captureRequested)
-            .setAllowMultipleTriggers(false)
+            .setMultipleTriggersAllowed(false)
             .setKeyphrases(keyphrases)
             .setData(Arrays.copyOf(aidlConfig.data, aidlConfig.data.length))
             .setAudioCapabilities(aidl2apiAudioCapabilities(aidlConfig.audioCapabilities))

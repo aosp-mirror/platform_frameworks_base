@@ -47,13 +47,37 @@ class ApkAssets : public RefBase {
                                  package_property_t flags = 0U, off64_t offset = 0,
                                  off64_t len = AssetsProvider::kUnknownLength);
 
+  //
   // Creates an ApkAssets from an AssetProvider.
-  // The ApkAssets will take care of destroying the AssetsProvider when it is destroyed.
-  static ApkAssetsPtr Load(std::unique_ptr<AssetsProvider> assets, package_property_t flags = 0U);
+  // The ApkAssets will take care of destroying the AssetsProvider when it is destroyed;
+  // the original argument is not moved from if loading fails.
+  //
+  // Note: this function takes care of the case when you pass a move(unique_ptr<Derived>)
+  //    that would create a temporary unique_ptr<AssetsProvider> by moving your pointer into
+  //    it before the function call, making it impossible to not move from the parameter
+  //    on loading failure. The two overloads take care of moving the pointer back if needed.
+  //
+
+  template <class T>
+  static ApkAssetsPtr Load(std::unique_ptr<T>&& assets, package_property_t flags = 0U)
+      requires(std::is_same_v<T, AssetsProvider>) {
+    return LoadImpl(std::move(assets), flags);
+  }
+
+  template <class T>
+  static ApkAssetsPtr Load(std::unique_ptr<T>&& assets, package_property_t flags = 0U)
+      requires(!std::is_same_v<T, AssetsProvider> && std::is_base_of_v<AssetsProvider, T>) {
+    std::unique_ptr<AssetsProvider> base_assets(std::move(assets));
+    auto res = LoadImpl(std::move(base_assets), flags);
+    if (!res) {
+      assets.reset(static_cast<T*>(base_assets.release()));
+    }
+    return res;
+  }
 
   // Creates an ApkAssets from the given asset file representing a resources.arsc.
-  static ApkAssetsPtr LoadTable(std::unique_ptr<Asset> resources_asset,
-                                std::unique_ptr<AssetsProvider> assets,
+  static ApkAssetsPtr LoadTable(std::unique_ptr<Asset>&& resources_asset,
+                                std::unique_ptr<AssetsProvider>&& assets,
                                 package_property_t flags = 0U);
 
   // Creates an ApkAssets from an IDMAP, which contains the original APK path, and the overlay
@@ -94,17 +118,29 @@ class ApkAssets : public RefBase {
 
   bool IsUpToDate() const;
 
- private:
-  static ApkAssetsPtr LoadImpl(std::unique_ptr<AssetsProvider> assets,
-                               package_property_t property_flags,
-                               std::unique_ptr<Asset> idmap_asset,
-                               std::unique_ptr<LoadedIdmap> loaded_idmap);
+  // DANGER!
+  // This is a destructive method that rips the assets provider out of ApkAssets object.
+  // It is only useful when one knows this assets object can't be used anymore, and they
+  // need the underlying assets provider back (e.g. when initialization fails for some
+  // reason).
+  std::unique_ptr<AssetsProvider> TakeAssetsProvider() && {
+    return std::move(assets_provider_);
+  }
 
-  static ApkAssetsPtr LoadImpl(std::unique_ptr<Asset> resources_asset,
-                               std::unique_ptr<AssetsProvider> assets,
+ private:
+  static ApkAssetsPtr LoadImpl(std::unique_ptr<AssetsProvider>&& assets,
                                package_property_t property_flags,
-                               std::unique_ptr<Asset> idmap_asset,
-                               std::unique_ptr<LoadedIdmap> loaded_idmap);
+                               std::unique_ptr<Asset>&& idmap_asset,
+                               std::unique_ptr<LoadedIdmap>&& loaded_idmap);
+
+  static ApkAssetsPtr LoadImpl(std::unique_ptr<Asset>&& resources_asset,
+                               std::unique_ptr<AssetsProvider>&& assets,
+                               package_property_t property_flags,
+                               std::unique_ptr<Asset>&& idmap_asset,
+                               std::unique_ptr<LoadedIdmap>&& loaded_idmap);
+
+  static ApkAssetsPtr LoadImpl(std::unique_ptr<AssetsProvider>&& assets,
+                               package_property_t flags = 0U);
 
   // Allows us to make it possible to call make_shared from inside the class but still keeps the
   // ctor 'private' for all means and purposes.

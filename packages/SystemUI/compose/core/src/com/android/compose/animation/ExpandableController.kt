@@ -52,6 +52,9 @@ import kotlin.math.roundToInt
 interface ExpandableController {
     /** The [Expandable] controlled by this controller. */
     val expandable: Expandable
+
+    /** Called when the [Expandable] stop being included in the composition. */
+    fun onDispose()
 }
 
 /**
@@ -88,33 +91,44 @@ fun rememberExpandableController(
     // Whether this composable is still composed. We only do the dialog exit animation if this is
     // true.
     val isComposed = remember { mutableStateOf(true) }
-    DisposableEffect(Unit) { onDispose { isComposed.value = false } }
 
-    return remember(
-        color,
-        contentColor,
-        shape,
-        borderStroke,
-        composeViewRoot,
-        density,
-        layoutDirection,
-    ) {
-        ExpandableControllerImpl(
+    val controller =
+        remember(
             color,
             contentColor,
             shape,
             borderStroke,
             composeViewRoot,
             density,
-            animatorState,
-            isDialogShowing,
-            overlay,
-            currentComposeViewInOverlay,
-            boundsInComposeViewRoot,
             layoutDirection,
-            isComposed,
-        )
+        ) {
+            ExpandableControllerImpl(
+                color,
+                contentColor,
+                shape,
+                borderStroke,
+                composeViewRoot,
+                density,
+                animatorState,
+                isDialogShowing,
+                overlay,
+                currentComposeViewInOverlay,
+                boundsInComposeViewRoot,
+                layoutDirection,
+                isComposed,
+            )
+        }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            isComposed.value = false
+            if (TransitionAnimator.returnAnimationsEnabled()) {
+                controller.onDispose()
+            }
+        }
     }
+
+    return controller
 }
 
 internal class ExpandableControllerImpl(
@@ -132,19 +146,29 @@ internal class ExpandableControllerImpl(
     private val layoutDirection: LayoutDirection,
     private val isComposed: State<Boolean>,
 ) : ExpandableController {
+    /** The [ActivityTransitionAnimator.Controller] to be cleaned up [onDispose]. */
+    private var activityControllerForDisposal: ActivityTransitionAnimator.Controller? = null
+
     override val expandable: Expandable =
         object : Expandable {
             override fun activityTransitionController(
                 launchCujType: Int?,
                 cookie: ActivityTransitionAnimator.TransitionCookie?,
                 component: ComponentName?,
-                returnCujType: Int?
+                returnCujType: Int?,
+                isEphemeral: Boolean,
             ): ActivityTransitionAnimator.Controller? {
                 if (!isComposed.value) {
                     return null
                 }
 
-                return activityController(launchCujType, cookie, component, returnCujType)
+                val controller = activityController(launchCujType, cookie, component, returnCujType)
+                if (TransitionAnimator.returnAnimationsEnabled() && isEphemeral) {
+                    activityControllerForDisposal?.onDispose()
+                    activityControllerForDisposal = controller
+                }
+
+                return controller
             }
 
             override fun dialogTransitionController(
@@ -157,6 +181,11 @@ internal class ExpandableControllerImpl(
                 return dialogController(cuj)
             }
         }
+
+    override fun onDispose() {
+        activityControllerForDisposal?.onDispose()
+        activityControllerForDisposal = null
+    }
 
     /**
      * Create a [TransitionAnimator.Controller] that is going to be used to drive an activity or
@@ -181,7 +210,7 @@ internal class ExpandableControllerImpl(
             override fun onTransitionAnimationProgress(
                 state: TransitionAnimator.State,
                 progress: Float,
-                linearProgress: Float
+                linearProgress: Float,
             ) {
                 // We copy state given that it's always the same object that is mutated by
                 // ActivityTransitionAnimator.
@@ -269,7 +298,7 @@ internal class ExpandableControllerImpl(
         launchCujType: Int?,
         cookie: ActivityTransitionAnimator.TransitionCookie?,
         component: ComponentName?,
-        returnCujType: Int?
+        returnCujType: Int?,
     ): ActivityTransitionAnimator.Controller {
         val delegate = transitionController()
         return object :

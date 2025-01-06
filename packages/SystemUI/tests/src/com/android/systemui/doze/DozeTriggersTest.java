@@ -46,7 +46,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.internal.logging.InstanceId;
 import com.android.internal.logging.UiEventLogger;
-import com.android.systemui.Flags;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.biometrics.AuthController;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -222,7 +221,6 @@ public class DozeTriggersTest extends SysuiTestCase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_NOTIFICATION_PULSING_FIX)
     public void testOnNotification_alreadyPulsing_notificationNotSuppressed() {
         // GIVEN device is pulsing
         Runnable pulseSuppressListener = mock(Runnable.class);

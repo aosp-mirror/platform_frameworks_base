@@ -15,22 +15,24 @@
  */
 package com.android.internal.widget.remotecompose.core.operations.utilities.easing;
 
+import android.annotation.NonNull;
+
 /** Provides and interface to create easing functions */
 public class GeneralEasing extends Easing {
-    float[] mEasingData = new float[0];
-    Easing mEasingCurve = new CubicEasing(CUBIC_STANDARD);
+    @NonNull float[] mEasingData = new float[0];
+    @NonNull Easing mEasingCurve = new CubicEasing(CUBIC_STANDARD);
 
     /**
      * Set the curve based on the float encoding of it
      *
      * @param data
      */
-    public void setCurveSpecification(float[] data) {
+    public void setCurveSpecification(@NonNull float[] data) {
         mEasingData = data;
         createEngine();
     }
 
-    public float[] getCurveSpecification() {
+    public @NonNull float[] getCurveSpecification() {
         return mEasingData;
     }
 

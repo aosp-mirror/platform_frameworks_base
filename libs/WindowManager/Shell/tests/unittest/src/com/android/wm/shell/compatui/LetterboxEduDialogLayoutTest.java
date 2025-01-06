@@ -25,8 +25,6 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -34,10 +32,8 @@ import android.view.View;
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.ShellTestCase;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -51,7 +47,7 @@ import org.mockito.MockitoAnnotations;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class LetterboxEduDialogLayoutTest extends ShellTestCase {
+public class LetterboxEduDialogLayoutTest extends CompatUIShellTestCase {
 
     @Mock
     private Runnable mDismissCallback;
@@ -59,10 +55,6 @@ public class LetterboxEduDialogLayoutTest extends ShellTestCase {
     private LetterboxEduDialogLayout mLayout;
     private View mDismissButton;
     private View mDialogContainer;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {

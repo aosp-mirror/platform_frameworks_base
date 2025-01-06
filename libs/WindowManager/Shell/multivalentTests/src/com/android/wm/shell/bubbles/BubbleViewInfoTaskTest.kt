@@ -35,13 +35,13 @@ import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.ShellTaskOrganizer
-import com.android.wm.shell.WindowManagerShellWrapper
+import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.properties.BubbleProperties
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.DisplayImeController
 import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.FloatingContentCoordinator
-import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.TaskStackListenerImpl
 import com.android.wm.shell.shared.TransactionPool
@@ -70,8 +70,8 @@ class BubbleViewInfoTaskTest {
     private lateinit var metadataFlagListener: Bubbles.BubbleMetadataFlagListener
     private lateinit var iconFactory: BubbleIconFactory
     private lateinit var bubbleController: BubbleController
-    private lateinit var mainExecutor: TestExecutor
-    private lateinit var bgExecutor: TestExecutor
+    private lateinit var mainExecutor: TestShellExecutor
+    private lateinit var bgExecutor: TestShellExecutor
     private lateinit var bubbleStackView: BubbleStackView
     private lateinit var bubblePositioner: BubblePositioner
     private lateinit var bubbleLogger: BubbleLogger
@@ -94,8 +94,8 @@ class BubbleViewInfoTaskTest {
                 context.resources.getDimensionPixelSize(R.dimen.importance_ring_stroke_width)
             )
 
-        mainExecutor = TestExecutor()
-        bgExecutor = TestExecutor()
+        mainExecutor = TestShellExecutor()
+        bgExecutor = TestShellExecutor()
         val windowManager = context.getSystemService(WindowManager::class.java)
         val shellInit = ShellInit(mainExecutor)
         val shellCommandHandler = ShellCommandHandler()
@@ -141,7 +141,8 @@ class BubbleViewInfoTaskTest {
                 bubbleDataRepository,
                 mock<IStatusBarService>(),
                 windowManager,
-                WindowManagerShellWrapper(mainExecutor),
+                mock<DisplayInsetsController>(),
+                mock<DisplayImeController>(),
                 mock<UserManager>(),
                 mock<LauncherApps>(),
                 bubbleLogger,
@@ -334,28 +335,5 @@ class BubbleViewInfoTaskTest {
             mainExecutor,
             bgExecutor
         )
-    }
-
-    private class TestExecutor : ShellExecutor {
-
-        private val runnables: MutableList<Runnable> = mutableListOf()
-
-        override fun execute(runnable: Runnable) {
-            runnables.add(runnable)
-        }
-
-        override fun executeDelayed(runnable: Runnable, delayMillis: Long) {
-            execute(runnable)
-        }
-
-        override fun removeCallbacks(runnable: Runnable?) {}
-
-        override fun hasCallback(runnable: Runnable?): Boolean = false
-
-        fun flushAll() {
-            while (runnables.isNotEmpty()) {
-                runnables.removeAt(0).run()
-            }
-        }
     }
 }

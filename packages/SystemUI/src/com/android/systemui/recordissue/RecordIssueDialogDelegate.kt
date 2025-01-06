@@ -35,7 +35,6 @@ import androidx.annotation.WorkerThread
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlagsClassic
-import com.android.systemui.flags.Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
 import com.android.systemui.mediaprojection.SessionCreationSource
 import com.android.systemui.mediaprojection.devicepolicy.ScreenCaptureDevicePolicyResolver
@@ -132,10 +131,9 @@ constructor(
     @WorkerThread
     private fun onScreenRecordSwitchClicked() {
         if (
-            flags.isEnabled(WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES) &&
-                devicePolicyResolver
-                    .get()
-                    .isScreenCaptureCompletelyDisabled(UserHandle.of(userTracker.userId))
+            devicePolicyResolver
+                .get()
+                .isScreenCaptureCompletelyDisabled(UserHandle.of(userTracker.userId))
         ) {
             mainExecutor.execute {
                 screenCaptureDisabledDialogDelegate.createSysUIDialog().show()
@@ -173,9 +171,16 @@ constructor(
             }
         ALL_ISSUE_TYPES.keys.forEach {
             popupMenu.menu.add(it).apply {
+                // Set this for every item in the list to ensure equal spacing. Set it to
+                // transparent for non-selected items so icon is only visible for selected element.
                 setIcon(R.drawable.arrow_pointing_down)
                 if (it != state.issueTypeRes) {
                     iconTintList = ColorStateList.valueOf(Color.TRANSPARENT)
+                } else {
+                    contentDescription =
+                        context.getString(com.android.internal.R.string.selected) +
+                            " " +
+                            context.getString(it)
                 }
                 intent = Intent().putExtra(EXTRA_ISSUE_TYPE_RES, it)
 

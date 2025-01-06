@@ -24,8 +24,8 @@ import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.flags.andSceneContainer
 import com.android.systemui.shade.transition.LargeScreenShadeInterpolator
 import com.android.systemui.statusbar.StatusBarState
+import com.android.systemui.statusbar.notification.headsup.AvalancheController
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
-import com.android.systemui.statusbar.policy.AvalancheController
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.google.common.truth.Truth.assertThat

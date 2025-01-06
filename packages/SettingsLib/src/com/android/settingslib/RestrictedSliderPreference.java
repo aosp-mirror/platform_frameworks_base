@@ -19,7 +19,6 @@ package com.android.settingslib;
 import android.annotation.SuppressLint;
 import android.content.Context;
 import android.os.Process;
-import android.os.UserHandle;
 import android.util.AttributeSet;
 
 import androidx.annotation.NonNull;
@@ -34,8 +33,10 @@ import com.android.settingslib.widget.SliderPreference;
  * Slide Preference that supports being disabled by a user restriction
  * set by a device admin.
  */
-public class RestrictedSliderPreference extends SliderPreference implements RestrictedInterface {
-    RestrictedPreferenceHelper mHelper;
+public class RestrictedSliderPreference extends SliderPreference implements
+        RestrictedPreferenceHelperProvider {
+
+    private final RestrictedPreferenceHelper mHelper;
 
     public RestrictedSliderPreference(@NonNull Context context, @Nullable AttributeSet attrs,
             int defStyleAttr, @Nullable String packageName, int uid) {
@@ -66,6 +67,11 @@ public class RestrictedSliderPreference extends SliderPreference implements Rest
     }
 
     @Override
+    public @NonNull RestrictedPreferenceHelper getRestrictedPreferenceHelper() {
+        return mHelper;
+    }
+
+    @Override
     public void onBindViewHolder(@NonNull PreferenceViewHolder holder) {
         super.onBindViewHolder(holder);
         mHelper.onBindViewHolder(holder);
@@ -81,66 +87,17 @@ public class RestrictedSliderPreference extends SliderPreference implements Rest
 
     @Override
     public void setEnabled(boolean enabled) {
-        if (enabled && isDisabledByAdmin()) {
+        if (enabled && mHelper.isDisabledByAdmin()) {
             mHelper.setDisabledByAdmin(null);
             return;
         }
 
-        if (enabled && isDisabledByEcm()) {
+        if (enabled && mHelper.isDisabledByEcm()) {
             mHelper.setDisabledByEcm(null);
             return;
         }
 
         super.setEnabled(enabled);
-    }
-
-    @Override
-    public void useAdminDisabledSummary(boolean useSummary) {
-        mHelper.useAdminDisabledSummary(useSummary);
-    }
-
-    @Override
-    public void checkRestrictionAndSetDisabled(@NonNull String userRestriction) {
-        mHelper.checkRestrictionAndSetDisabled(userRestriction, UserHandle.myUserId());
-    }
-
-    @Override
-    public void checkRestrictionAndSetDisabled(@NonNull String userRestriction, int userId) {
-        mHelper.checkRestrictionAndSetDisabled(userRestriction, userId);
-    }
-
-    @Override
-    public void checkEcmRestrictionAndSetDisabled(@NonNull String settingIdentifier,
-            @NonNull String packageName) {
-        mHelper.checkEcmRestrictionAndSetDisabled(settingIdentifier, packageName);
-    }
-
-    @Override
-    public void setDisabledByAdmin(@Nullable RestrictedLockUtils.EnforcedAdmin admin) {
-        if (mHelper.setDisabledByAdmin(admin)) {
-            notifyChanged();
-        }
-    }
-
-    @Override
-    public boolean isDisabledByAdmin() {
-        return mHelper.isDisabledByAdmin();
-    }
-
-    @Override
-    public boolean isDisabledByEcm() {
-        return mHelper.isDisabledByEcm();
-    }
-
-    @Override
-    public int getUid() {
-        return mHelper != null ? mHelper.uid : Process.INVALID_UID;
-    }
-
-    @Override
-    @Nullable
-    public String getPackageName() {
-        return mHelper != null ? mHelper.packageName : null;
     }
 
     @Override

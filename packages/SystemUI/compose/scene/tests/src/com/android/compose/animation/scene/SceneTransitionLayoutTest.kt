@@ -20,7 +20,6 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
@@ -28,7 +27,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
@@ -55,13 +53,11 @@ import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
-import com.android.compose.test.setContentAndCreateMainScope
 import com.android.compose.test.subjects.DpOffsetSubject
 import com.android.compose.test.subjects.assertThat
 import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.junit.Assert.assertThrows
 import org.junit.Rule
 import org.junit.Test
@@ -308,43 +304,6 @@ class SceneTransitionLayoutTest {
             at(48) { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(140.dp, 130.dp) }
             after { rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(120.dp, 140.dp) }
         }
-    }
-
-    @Test
-    fun layoutSizeDoesNotOverscrollWhenOverscrollIsSpecified() {
-        val state =
-            rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
-                    SceneA,
-                    transitions { overscrollDisabled(SceneB, Orientation.Horizontal) },
-                )
-            }
-
-        val layoutTag = "layout"
-        val scope =
-            rule.setContentAndCreateMainScope {
-                SceneTransitionLayout(state, Modifier.testTag(layoutTag)) {
-                    scene(SceneA) { Box(Modifier.size(50.dp)) }
-                    scene(SceneB) { Box(Modifier.size(70.dp)) }
-                }
-            }
-
-        // Overscroll on A at -100%: size should be interpolated given that there is no overscroll
-        // defined for scene A.
-        var progress by mutableStateOf(-1f)
-        scope.launch {
-            state.startTransition(transition(from = SceneA, to = SceneB, progress = { progress }))
-        }
-        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(30.dp)
-
-        // Middle of the transition.
-        progress = 0.5f
-        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(60.dp)
-
-        // Overscroll on B at 200%: size should not be interpolated given that there is an
-        // overscroll defined for scene B.
-        progress = 2f
-        rule.onNodeWithTag(layoutTag).assertSizeIsEqualTo(70.dp)
     }
 
     @Test

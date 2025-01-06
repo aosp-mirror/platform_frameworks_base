@@ -29,11 +29,13 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCsipSetCoordinator;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeBroadcastReceiveState;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothStatusCodes;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
@@ -48,6 +50,7 @@ import android.util.Pair;
 
 import com.android.internal.R;
 import com.android.settingslib.flags.Flags;
+import com.android.settingslib.testutils.shadow.ShadowBluetoothAdapter;
 import com.android.settingslib.widget.AdaptiveIcon;
 
 import com.google.common.collect.ImmutableList;
@@ -61,6 +64,8 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
+import org.robolectric.annotation.Config;
+import org.robolectric.shadow.api.Shadow;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -69,6 +74,7 @@ import java.util.List;
 import java.util.Set;
 
 @RunWith(RobolectricTestRunner.class)
+@Config(shadows = {ShadowBluetoothAdapter.class})
 public class BluetoothUtilsTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
@@ -88,7 +94,9 @@ public class BluetoothUtilsTest {
     @Mock private BluetoothLeBroadcastReceiveState mLeBroadcastReceiveState;
 
     private Context mContext;
+    private ShadowBluetoothAdapter mShadowBluetoothAdapter;
     private static final String STRING_METADATA = "string_metadata";
+    private static final String LE_AUDIO_SHARING_METADATA = "le_audio_sharing";
     private static final String BOOL_METADATA = "true";
     private static final String INT_METADATA = "25";
     private static final int METADATA_FAST_PAIR_CUSTOMIZED_FIELDS = 25;
@@ -97,6 +105,8 @@ public class BluetoothUtilsTest {
             "<HEARABLE_CONTROL_SLICE_WITH_WIDTH>"
                     + STRING_METADATA
                     + "</HEARABLE_CONTROL_SLICE_WITH_WIDTH>";
+    private static final String TEMP_BOND_METADATA =
+            "<TEMP_BOND_TYPE>" + LE_AUDIO_SHARING_METADATA + "</TEMP_BOND_TYPE>";
     private static final String TEST_EXCLUSIVE_MANAGER_PACKAGE = "com.test.manager";
     private static final String TEST_EXCLUSIVE_MANAGER_COMPONENT = "com.test.manager/.component";
     private static final int TEST_BROADCAST_ID = 25;
@@ -109,6 +119,7 @@ public class BluetoothUtilsTest {
 
         mContext = spy(RuntimeEnvironment.application);
         mSetFlagsRule.disableFlags(FLAG_ENABLE_DETERMINING_ADVANCED_DETAILS_HEADER_WITH_METADATA);
+        mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         when(mLocalBluetoothManager.getProfileManager()).thenReturn(mProfileManager);
         when(mLocalBluetoothManager.getCachedDeviceManager()).thenReturn(mDeviceManager);
         when(mProfileManager.getLeAudioBroadcastProfile()).thenReturn(mBroadcast);
@@ -962,8 +973,10 @@ public class BluetoothUtilsTest {
         when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
 
         BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(device1);
         when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
         BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice2.getDevice()).thenReturn(device2);
         when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
 
         when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device1, device2));
@@ -983,8 +996,10 @@ public class BluetoothUtilsTest {
         when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
 
         BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(device1);
         when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
         BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice2.getDevice()).thenReturn(device2);
         when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
 
         when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device1, device2));
@@ -1004,8 +1019,10 @@ public class BluetoothUtilsTest {
         when(cachedBluetoothDevice2.getGroupId()).thenReturn(2);
 
         BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(device1);
         when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
         BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice2.getDevice()).thenReturn(device2);
         when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
 
         when(mAssistant.getAllConnectedDevices()).thenReturn(ImmutableList.of(device2));
@@ -1027,10 +1044,13 @@ public class BluetoothUtilsTest {
         when(cachedBluetoothDevice3.getGroupId()).thenReturn(3);
 
         BluetoothDevice device1 = mock(BluetoothDevice.class);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(device1);
         when(mDeviceManager.findDevice(device1)).thenReturn(mCachedBluetoothDevice);
         BluetoothDevice device2 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice2.getDevice()).thenReturn(device2);
         when(mDeviceManager.findDevice(device2)).thenReturn(cachedBluetoothDevice2);
         BluetoothDevice device3 = mock(BluetoothDevice.class);
+        when(cachedBluetoothDevice3.getDevice()).thenReturn(device3);
         when(mDeviceManager.findDevice(device3)).thenReturn(cachedBluetoothDevice3);
 
         when(mAssistant.getAllConnectedDevices())
@@ -1122,5 +1142,176 @@ public class BluetoothUtilsTest {
                                 AudioDeviceAttributes.ROLE_OUTPUT,
                                 AudioDeviceInfo.TYPE_HEARING_AID,
                                 address));
+    }
+
+    @Test
+    public void isAudioSharingEnabled_flagOff_returnsFalse() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+
+        assertThat(BluetoothUtils.isAudioSharingEnabled()).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingEnabled_featureNotSupported_returnsFalse() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_NOT_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+
+        assertThat(BluetoothUtils.isAudioSharingEnabled()).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingEnabled_featureSupported_returnsTrue() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+
+        assertThat(BluetoothUtils.isAudioSharingEnabled()).isTrue();
+    }
+
+    @Test
+    public void isAudioSharingPreviewEnabled_flagOff_returnsFalse() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+
+        assertThat(BluetoothUtils.isAudioSharingPreviewEnabled(
+                mContext.getContentResolver())).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingPreviewEnabled_featureNotSupported_returnsFalse() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_NOT_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+
+        assertThat(BluetoothUtils.isAudioSharingPreviewEnabled(
+                mContext.getContentResolver())).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingPreviewEnabled_developerOptionOff_returnsFalse() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                BluetoothUtils.DEVELOPER_OPTION_PREVIEW_KEY, 0);
+
+        assertThat(BluetoothUtils.isAudioSharingPreviewEnabled(
+                mContext.getContentResolver())).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingPreviewEnabled_developerOptionOn_returnsTrue() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                BluetoothUtils.DEVELOPER_OPTION_PREVIEW_KEY, 1);
+
+        assertThat(BluetoothUtils.isAudioSharingPreviewEnabled(
+                mContext.getContentResolver())).isTrue();
+    }
+
+    @Test
+    public void isAudioSharingUIAvailable_audioSharingAndPreviewFlagOff_returnsFalse() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+
+        assertThat(BluetoothUtils.isAudioSharingUIAvailable(mContext)).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingUIAvailable_audioSharingAndPreviewDisabled_returnsFalse() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_NOT_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+
+        assertThat(BluetoothUtils.isAudioSharingUIAvailable(mContext)).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingUIAvailable_audioSharingEnabled_returnsTrue() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                BluetoothUtils.DEVELOPER_OPTION_PREVIEW_KEY, 0);
+
+        assertThat(BluetoothUtils.isAudioSharingUIAvailable(mContext)).isTrue();
+    }
+
+    @Test
+    public void isAudioSharingUIAvailable_audioSharingPreviewEnabled_returnsTrue() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastSourceSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mShadowBluetoothAdapter.setIsLeAudioBroadcastAssistantSupported(
+                BluetoothStatusCodes.FEATURE_SUPPORTED);
+        mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                BluetoothUtils.DEVELOPER_OPTION_PREVIEW_KEY, 1);
+
+        assertThat(BluetoothUtils.isAudioSharingUIAvailable(mContext)).isTrue();
+    }
+
+    @Test
+    public void isAudioSharingHysteresisModeFixAvailable_mainAndPreviewFlagOff_returnsFalse() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_HYSTERESIS_MODE_FIX);
+        mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+
+        assertThat(BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext)).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingHysteresisModeFixAvailable_hysteresisFixFlagOff_returnsFalse() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_HYSTERESIS_MODE_FIX);
+        mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+
+        assertThat(BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext)).isFalse();
+    }
+
+    @Test
+    public void isAudioSharingHysteresisModeFixAvailable_previewFlagOn_returnsTrue() {
+        mSetFlagsRule.disableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_HYSTERESIS_MODE_FIX);
+        mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+        Settings.Global.putInt(mContext.getContentResolver(),
+                BluetoothUtils.DEVELOPER_OPTION_PREVIEW_KEY, 1);
+
+        assertThat(BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext)).isTrue();
+    }
+
+    @Test
+    public void isAudioSharingHysteresisModeFixAvailable_mainAndPreviewFlagOn_returnsTrue() {
+        mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
+        mSetFlagsRule.enableFlags(Flags.FLAG_AUDIO_SHARING_HYSTERESIS_MODE_FIX);
+        mSetFlagsRule.disableFlags(Flags.FLAG_AUDIO_SHARING_DEVELOPER_OPTION);
+
+        assertThat(BluetoothUtils.isAudioSharingHysteresisModeFixAvailable(mContext)).isTrue();
+    }
+
+    @Test
+    public void isTemporaryBondDevice_hasMetadata_returnsTrue() {
+        when(mBluetoothDevice.getMetadata(METADATA_FAST_PAIR_CUSTOMIZED_FIELDS))
+                .thenReturn(TEMP_BOND_METADATA.getBytes());
+
+        assertThat(BluetoothUtils.isTemporaryBondDevice(mBluetoothDevice)).isTrue();
     }
 }

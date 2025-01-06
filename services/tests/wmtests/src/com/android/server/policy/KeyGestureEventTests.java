@@ -26,12 +26,12 @@ import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAV
 import static com.android.server.policy.PhoneWindowManager.POWER_VOLUME_UP_BEHAVIOR_MUTE;
 import static com.android.server.policy.PhoneWindowManager.SETTINGS_KEY_BEHAVIOR_NOTIFICATION_PANEL;
 
-import android.hardware.input.InputSettings;
 import android.hardware.input.KeyGestureEvent;
 import android.os.RemoteException;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.provider.Settings;
 import android.view.KeyEvent;
 
 import androidx.test.filters.MediumTest;
@@ -258,9 +258,9 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"EXPLORER key -> Launch Default Browser", new int[]{KeyEvent.KEYCODE_EXPLORER},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_BROWSER,
                         KeyEvent.KEYCODE_EXPLORER, 0},
-                {"Meta + C -> Launch Default Contacts", new int[]{META_KEY, KeyEvent.KEYCODE_C},
+                {"Meta + P -> Launch Default Contacts", new int[]{META_KEY, KeyEvent.KEYCODE_P},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS,
-                        KeyEvent.KEYCODE_C, META_ON},
+                        KeyEvent.KEYCODE_P, META_ON},
                 {"CONTACTS key -> Launch Default Contacts", new int[]{KeyEvent.KEYCODE_CONTACTS},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CONTACTS,
                         KeyEvent.KEYCODE_CONTACTS, 0},
@@ -270,15 +270,12 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                 {"ENVELOPE key -> Launch Default Email", new int[]{KeyEvent.KEYCODE_ENVELOPE},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_EMAIL,
                         KeyEvent.KEYCODE_ENVELOPE, 0},
-                {"Meta + K -> Launch Default Calendar", new int[]{META_KEY, KeyEvent.KEYCODE_K},
+                {"Meta + C -> Launch Default Calendar", new int[]{META_KEY, KeyEvent.KEYCODE_C},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR,
-                        KeyEvent.KEYCODE_K, META_ON},
+                        KeyEvent.KEYCODE_C, META_ON},
                 {"CALENDAR key -> Launch Default Calendar", new int[]{KeyEvent.KEYCODE_CALENDAR},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_CALENDAR,
                         KeyEvent.KEYCODE_CALENDAR, 0},
-                {"Meta + P -> Launch Default Music", new int[]{META_KEY, KeyEvent.KEYCODE_P},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC,
-                        KeyEvent.KEYCODE_P, META_ON},
                 {"MUSIC key -> Launch Default Music", new int[]{KeyEvent.KEYCODE_MUSIC},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MUSIC,
                         KeyEvent.KEYCODE_MUSIC, 0},
@@ -291,11 +288,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
                         KeyEvent.KEYCODE_CALCULATOR, 0},
                 {"Meta + M -> Launch Default Maps", new int[]{META_KEY, KeyEvent.KEYCODE_M},
                         KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MAPS,
-                        KeyEvent.KEYCODE_M, META_ON},
-                {"Meta + S -> Launch Default Messaging App",
-                        new int[]{META_KEY, KeyEvent.KEYCODE_S},
-                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_DEFAULT_MESSAGING,
-                        KeyEvent.KEYCODE_S, META_ON}};
+                        KeyEvent.KEYCODE_M, META_ON}};
     }
 
     @Keep
@@ -397,7 +390,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL)
+    @EnableFlags(Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
     @DisableFlags(com.android.hardware.input.Flags.FLAG_USE_KEY_GESTURE_EVENT_HANDLER)
     public void testToggleTalkbackPress() {
         testShortcutInternal("Meta + Alt + T -> Toggle talkback",
@@ -464,6 +457,14 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     public void testKeyGestureLaunchAssistant() {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT));
+        mPhoneWindowManager.assertSearchManagerLaunchAssist();
+    }
+
+    @Test
+    public void testKeyGestureLaunchVoiceAssistant() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT));
         mPhoneWindowManager.assertSearchManagerLaunchAssist();
     }
 
@@ -745,7 +746,7 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @EnableFlags(com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL)
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
     public void testKeyGestureToggleTalkback() {
         Assert.assertTrue(
                 sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
@@ -757,54 +758,57 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_STICKY_KEYS_FLAG})
-    public void testKeyGestureToggleStickyKeys() {
+    public void testKeyGestureToggleDoNotDisturb() {
+        mPhoneWindowManager.overrideZenMode(Settings.Global.ZEN_MODE_OFF);
         Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS));
-        Assert.assertTrue(InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB));
+        mPhoneWindowManager.assertZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
+        mPhoneWindowManager.overrideZenMode(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
         Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_STICKY_KEYS));
-        Assert.assertFalse(InputSettings.isAccessibilityStickyKeysEnabled(mContext));
+                sendKeyGestureEventComplete(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_DO_NOT_DISTURB));
+        mPhoneWindowManager.assertZenMode(Settings.Global.ZEN_MODE_OFF);
     }
 
     @Test
-    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SLOW_KEYS_FLAG})
-    public void testKeyGestureToggleSlowKeys() {
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS));
-        Assert.assertTrue(InputSettings.isAccessibilitySlowKeysEnabled(mContext));
+    public void testLaunchSettingsAndSearchDoesntOpenAnything_withKeyguardOn() {
+        mPhoneWindowManager.overrideKeyguardOn(true);
 
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_SLOW_KEYS));
-        Assert.assertFalse(InputSettings.isAccessibilitySlowKeysEnabled(mContext));
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS);
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH);
+
+        mPhoneWindowManager.assertNoActivityLaunched();
     }
 
     @Test
-    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_MOUSE_KEYS})
-    public void testKeyGestureToggleMouseKeys() {
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS));
-        Assert.assertTrue(InputSettings.isAccessibilityMouseKeysEnabled(mContext));
+    public void testLaunchSettingsAndSearchDoesntOpenAnything_withUserSetupIncomplete() {
+        mPhoneWindowManager.overrideIsUserSetupComplete(false);
 
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MOUSE_KEYS));
-        Assert.assertFalse(InputSettings.isAccessibilityMouseKeysEnabled(mContext));
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS);
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SEARCH);
+
+        mPhoneWindowManager.assertNoActivityLaunched();
     }
 
     @Test
-    @EnableFlags({com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_SHORTCUT_CONTROL,
-            com.android.hardware.input.Flags.FLAG_KEYBOARD_A11Y_BOUNCE_KEYS_FLAG})
-    public void testKeyGestureToggleBounceKeys() {
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS));
-        Assert.assertTrue(InputSettings.isAccessibilityBounceKeysEnabled(mContext));
+    public void testLaunchAssistantDoesntWork_withKeyguardOn() {
+        mPhoneWindowManager.overrideKeyguardOn(true);
 
-        Assert.assertTrue(
-                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_BOUNCE_KEYS));
-        Assert.assertFalse(InputSettings.isAccessibilityBounceKeysEnabled(mContext));
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT);
+
+        mPhoneWindowManager.assertSearchManagerDoesntLaunchAssist();
+    }
+
+    @Test
+    public void testLaunchAssistantDoesntWork_withUserSetupIncomplete() {
+        mPhoneWindowManager.overrideIsUserSetupComplete(false);
+
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT);
+        sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT);
+
+        mPhoneWindowManager.assertSearchManagerDoesntLaunchAssist();
     }
 }

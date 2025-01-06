@@ -21,6 +21,7 @@ import android.cts.input.EventVerifier
 import android.graphics.PointF
 import android.hardware.input.InputManager
 import android.os.ParcelFileDescriptor
+import android.server.wm.CtsWindowInfoUtils.waitForWindowOnTop
 import android.util.Log
 import android.util.Size
 import android.view.InputEvent
@@ -113,6 +114,7 @@ class UinputRecordingIntegrationTests {
             testName,
             size = testData.displaySize
         ).use { scenario ->
+            waitForWindowOnTop(scenario.activity.window)
             scenario.activity.window.decorView.requestUnbufferedDispatch(INPUT_DEVICE_SOURCE_ALL)
 
             try {

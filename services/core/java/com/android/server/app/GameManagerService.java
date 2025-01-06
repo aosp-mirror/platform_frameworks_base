@@ -100,6 +100,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.SystemService;
 import com.android.server.SystemService.TargetUser;
+import com.android.server.utils.LazyJniRegistrar;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.CompatScaleProvider;
 
@@ -157,6 +158,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
     private static final String USER_ID_MSG_KEY = "userId";
     private static final String GAME_MODE_INTERVENTION_LIST_FILE_NAME =
             "game_mode_intervention.list";
+
+    static {
+        LazyJniRegistrar.registerGameManagerService();
+    }
 
     private final Context mContext;
     private final Object mLock = new Object();
@@ -1418,10 +1423,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             final GameManagerSettings settings = mSettings.get(userId);
             // look for the existing GamePackageConfiguration override
-            configOverride = settings.getConfigOverride(packageName);
+            configOverride = settings.getConfigOverrideLocked(packageName);
             if (configOverride == null) {
                 configOverride = new GamePackageConfiguration(packageName);
-                settings.setConfigOverride(packageName, configOverride);
+                settings.setConfigOverrideLocked(packageName, configOverride);
             }
         }
         GamePackageConfiguration.GameModeConfiguration internalConfig =
@@ -1754,10 +1759,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             final GameManagerSettings settings = mSettings.get(userId);
             // look for the existing GamePackageConfiguration override
-            configOverride = settings.getConfigOverride(packageName);
+            configOverride = settings.getConfigOverrideLocked(packageName);
             if (configOverride == null) {
                 configOverride = new GamePackageConfiguration(packageName);
-                settings.setConfigOverride(packageName, configOverride);
+                settings.setConfigOverrideLocked(packageName, configOverride);
             }
         }
         // modify GameModeConfiguration intervention settings
@@ -1796,7 +1801,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
             }
             final GameManagerSettings settings = mSettings.get(userId);
             if (gameModeToReset != -1) {
-                final GamePackageConfiguration configOverride = settings.getConfigOverride(
+                final GamePackageConfiguration configOverride = settings.getConfigOverrideLocked(
                         packageName);
                 if (configOverride == null) {
                     return;
@@ -1807,10 +1812,10 @@ public final class GameManagerService extends IGameManagerService.Stub {
                 }
                 configOverride.removeModeConfig(gameModeToReset);
                 if (!configOverride.hasActiveGameModeConfig()) {
-                    settings.removeConfigOverride(packageName);
+                    settings.removeConfigOverrideLocked(packageName);
                 }
             } else {
-                settings.removeConfigOverride(packageName);
+                settings.removeConfigOverrideLocked(packageName);
             }
         }
 
@@ -2025,7 +2030,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
 
         synchronized (mLock) {
             if (mSettings.containsKey(userId)) {
-                overrideConfig = mSettings.get(userId).getConfigOverride(packageName);
+                overrideConfig = mSettings.get(userId).getConfigOverrideLocked(packageName);
             }
         }
         if (overrideConfig == null || config == null) {
@@ -2070,7 +2075,7 @@ public final class GameManagerService extends IGameManagerService.Stub {
                                 }
                                 synchronized (mLock) {
                                     if (mSettings.containsKey(userId)) {
-                                        mSettings.get(userId).removeGame(packageName);
+                                        mSettings.get(userId).removeGameLocked(packageName);
                                     }
                                     sendUserMessage(userId, WRITE_SETTINGS,
                                             Intent.ACTION_PACKAGE_REMOVED, WRITE_DELAY_MILLIS);

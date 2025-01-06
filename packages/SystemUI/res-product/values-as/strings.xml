@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"অধিক বিকল্পৰ বাবে আপোনাৰ ডিভাইচটো আনলক কৰক"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"এই ফ’নটোত প্লে’ কৰি থকা হৈছে"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"এই টেবলেটটোত প্লে’ কৰি থকা হৈছে"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"পাৱাৰ অফ কৰা থাকিলেও Find My Deviceৰ জৰিয়তে আপুনি এই ফ’নটোৰ অৱস্থান নিৰ্ধাৰণ কৰিব পাৰে"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"পাৱাৰ অফ কৰা থাকিলেও Find My Deviceৰ জৰিয়তে আপুনি এই টেবলেটটোৰ অৱস্থান নিৰ্ধাৰণ কৰিব পাৰে"</string>
 </resources>

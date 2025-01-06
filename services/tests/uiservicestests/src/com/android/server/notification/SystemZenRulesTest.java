@@ -69,6 +69,8 @@ public class SystemZenRulesTest extends UiServiceTestCase {
                 R.string.zen_mode_trigger_summary_range_symbol_combination, "%1$s-%2$s");
         mContext.getOrCreateTestableResources().addOverride(
                 R.string.zen_mode_trigger_summary_divider_text, ",");
+        mContext.getOrCreateTestableResources().addOverride(
+                R.string.zen_mode_trigger_summary_combined, "%1$s,%2$s");
     }
 
     @Test

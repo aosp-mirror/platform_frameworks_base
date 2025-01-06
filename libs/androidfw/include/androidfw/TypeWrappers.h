@@ -27,24 +27,14 @@ struct TypeVariant {
 
     class iterator {
     public:
-        iterator& operator=(const iterator& rhs) {
-            mTypeVariant = rhs.mTypeVariant;
-            mIndex = rhs.mIndex;
-            return *this;
-        }
-
         bool operator==(const iterator& rhs) const {
             return mTypeVariant == rhs.mTypeVariant && mIndex == rhs.mIndex;
         }
 
-        bool operator!=(const iterator& rhs) const {
-            return mTypeVariant != rhs.mTypeVariant || mIndex != rhs.mIndex;
-        }
-
         iterator operator++(int) {
-            uint32_t prevIndex = mIndex;
+            iterator prev = *this;
             operator++();
-            return iterator(mTypeVariant, prevIndex);
+            return prev;
         }
 
         const ResTable_entry* operator->() const {
@@ -60,18 +50,26 @@ struct TypeVariant {
 
     private:
         friend struct TypeVariant;
-        iterator(const TypeVariant* tv, uint32_t index)
-            : mTypeVariant(tv), mIndex(index) {}
+
+        enum class Kind { Begin, End };
+        iterator(const TypeVariant* tv, Kind kind)
+            : mTypeVariant(tv) {
+          mSparseIndex = mIndex = kind == Kind::Begin ? 0 : tv->mLength;
+          // mSparseIndex here is technically past the number of sparse entries, but it is still
+          // ok as it is enough to infer that this is the end iterator.
+        }
+
         const TypeVariant* mTypeVariant;
         uint32_t mIndex;
+        uint32_t mSparseIndex;
     };
 
     iterator beginEntries() const {
-        return iterator(this, 0);
+        return iterator(this, iterator::Kind::Begin);
     }
 
     iterator endEntries() const {
-        return iterator(this, mLength);
+        return iterator(this, iterator::Kind::End);
     }
 
     const ResTable_type* data;

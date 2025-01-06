@@ -16,11 +16,16 @@
 
 package com.android.systemui.display.data.repository
 
+import android.content.Context
+import android.view.Display
 import com.android.systemui.display.shared.model.DisplayWindowProperties
 import com.google.common.collect.HashBasedTable
+import org.mockito.kotlin.doReturn
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
 
-class FakeDisplayWindowPropertiesRepository : DisplayWindowPropertiesRepository {
+class FakeDisplayWindowPropertiesRepository(private val context: Context) :
+    DisplayWindowPropertiesRepository {
 
     private val properties = HashBasedTable.create<Int, Int, DisplayWindowProperties>()
 
@@ -29,10 +34,50 @@ class FakeDisplayWindowPropertiesRepository : DisplayWindowPropertiesRepository 
             ?: DisplayWindowProperties(
                     displayId = displayId,
                     windowType = windowType,
-                    context = mock(),
+                    context = contextWithDisplayId(context, displayId),
                     windowManager = mock(),
                     layoutInflater = mock(),
                 )
                 .also { properties.put(displayId, windowType, it) }
     }
+
+    private fun contextWithDisplayId(context: Context, displayId: Int): Context {
+        val newDisplay = displayWithId(context.display, displayId)
+        return spy(context) {
+            on { getDisplayId() } doReturn displayId
+            on { display } doReturn newDisplay
+            on { displayNoVerify } doReturn newDisplay
+        }
+    }
+
+    private fun displayWithId(display: Display, displayId: Int): Display {
+        return spy(display) { on { getDisplayId() } doReturn displayId }
+    }
+
+    /** Sets an instance, just for testing purposes. */
+    fun insert(instance: DisplayWindowProperties) {
+        properties.put(instance.displayId, instance.windowType, instance)
+    }
+
+    /** inserts an entry, mocking everything except the context. */
+    fun insertForContext(displayId: Int, windowType: Int, context: Context) {
+        properties.put(
+            displayId,
+            windowType,
+            DisplayWindowProperties(
+                displayId = displayId,
+                windowType = windowType,
+                context = context,
+                windowManager = mock(),
+                layoutInflater = mock(),
+            ),
+        )
+    }
+
+    /** Whether the repository contains an entry already. */
+    fun contains(displayId: Int, windowType: Int): Boolean =
+        properties.contains(displayId, windowType)
+
+    /** Removes all the entries. */
+    fun clear() = properties.clear()
 }

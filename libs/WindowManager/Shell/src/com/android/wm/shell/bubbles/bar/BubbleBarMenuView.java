@@ -16,10 +16,8 @@
 package com.android.wm.shell.bubbles.bar;
 
 import android.annotation.ColorInt;
-import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.content.res.TypedArray;
 import android.graphics.Color;
 import android.graphics.drawable.Icon;
 import android.util.AttributeSet;
@@ -43,13 +41,15 @@ import java.util.ArrayList;
  */
 public class BubbleBarMenuView extends LinearLayout {
 
-    public static final Object DISMISS_ACTION_TAG = new Object();
-
     private ViewGroup mBubbleSectionView;
     private ViewGroup mActionsSectionView;
     private ImageView mBubbleIconView;
     private ImageView mBubbleDismissIconView;
     private TextView mBubbleTitleView;
+    // The animation has three stages. Each stage transition lasts until the animation ends. In
+    // stage 1, the title item content fades in. In stage 2, the background of the option items
+    // fades in. In stage 3, the option item content fades in.
+    private static final int SHOW_MENU_STAGES_COUNT = 3;
 
     public BubbleBarMenuView(Context context) {
         this(context, null /* attrs */);
@@ -90,13 +90,39 @@ public class BubbleBarMenuView extends LinearLayout {
     }
 
     private void updateThemeColors() {
-        try (TypedArray ta = mContext.obtainStyledAttributes(new int[]{
-                com.android.internal.R.attr.materialColorSurfaceBright,
-                com.android.internal.R.attr.materialColorOnSurface
-        })) {
-            mActionsSectionView.getBackground().setTint(ta.getColor(0, Color.WHITE));
-            ImageViewCompat.setImageTintList(mBubbleDismissIconView,
-                    ColorStateList.valueOf(ta.getColor(1, Color.BLACK)));
+        mActionsSectionView.getBackground().setTint(
+                mContext.getColor(com.android.internal.R.color.materialColorSurfaceBright));
+        ImageViewCompat.setImageTintList(mBubbleDismissIconView,
+                ColorStateList.valueOf(
+                        mContext.getColor(com.android.internal.R.color.materialColorOnSurface)));
+    }
+
+    /** Animates the menu from the specified start scale. */
+    public void animateFromStartScale(float currentScale, float progress) {
+        int menuItemElevation = getResources().getDimensionPixelSize(
+                R.dimen.bubble_manage_menu_elevation);
+        setScaleX(currentScale);
+        setScaleY(currentScale);
+        setAlphaForTitleViews(progress);
+        mBubbleSectionView.setElevation(menuItemElevation * progress);
+        float actionsBackgroundAlpha = Math.max(0,
+                (progress - (float) 1 / SHOW_MENU_STAGES_COUNT) * (SHOW_MENU_STAGES_COUNT - 1));
+        float actionItemsAlpha = Math.max(0,
+                (progress - (float) 2 / SHOW_MENU_STAGES_COUNT) * SHOW_MENU_STAGES_COUNT);
+        mActionsSectionView.setAlpha(actionsBackgroundAlpha);
+        mActionsSectionView.setElevation(menuItemElevation * actionsBackgroundAlpha);
+        setMenuItemViewsAlpha(actionItemsAlpha);
+    }
+
+    private void setAlphaForTitleViews(float alpha) {
+        mBubbleIconView.setAlpha(alpha);
+        mBubbleTitleView.setAlpha(alpha);
+        mBubbleDismissIconView.setAlpha(alpha);
+    }
+
+    private void setMenuItemViewsAlpha(float alpha) {
+        for (int i = mActionsSectionView.getChildCount() - 1; i >= 0; i--) {
+            mActionsSectionView.getChildAt(i).setAlpha(alpha);
         }
     }
 
@@ -123,9 +149,6 @@ public class BubbleBarMenuView extends LinearLayout {
                     R.layout.bubble_bar_menu_item, mActionsSectionView, false);
             itemView.update(action.mIcon, action.mTitle, action.mTint);
             itemView.setOnClickListener(action.mOnClick);
-            if (action.mTag != null) {
-                itemView.setTag(action.mTag);
-            }
             mActionsSectionView.addView(itemView);
         }
     }
@@ -159,6 +182,11 @@ public class BubbleBarMenuView extends LinearLayout {
         return mBubbleSectionView.getAlpha();
     }
 
+    /** Return title menu item height. */
+    public float getTitleItemHeight() {
+        return mBubbleSectionView.getHeight();
+    }
+
     /**
      * Menu action details used to create menu items
      */
@@ -166,8 +194,6 @@ public class BubbleBarMenuView extends LinearLayout {
         private Icon mIcon;
         private @ColorInt int mTint;
         private String mTitle;
-        @Nullable
-        private Object mTag;
         private OnClickListener mOnClick;
 
         MenuAction(Icon icon, String title, OnClickListener onClick) {
@@ -178,15 +204,6 @@ public class BubbleBarMenuView extends LinearLayout {
             this.mIcon = icon;
             this.mTitle = title;
             this.mTint = tint;
-            this.mOnClick = onClick;
-        }
-
-        MenuAction(Icon icon, String title, @ColorInt int tint, @Nullable Object tag,
-                OnClickListener onClick) {
-            this.mIcon = icon;
-            this.mTitle = title;
-            this.mTint = tint;
-            this.mTag = tag;
             this.mOnClick = onClick;
         }
     }

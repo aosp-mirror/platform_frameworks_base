@@ -46,9 +46,13 @@ import static com.android.internal.policy.PhoneWindow.FEATURE_OPTIONS_PANEL;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
+import android.annotation.FlaggedApi;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.app.WindowConfiguration;
+import android.app.jank.AppJankStats;
+import android.app.jank.JankTracker;
 import android.compat.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -282,6 +286,9 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
     private Consumer<Boolean> mCrossWindowBlurEnabledListener;
 
     private final WearGestureInterceptionDetector mWearGestureInterceptionDetector;
+
+    @Nullable
+    private AppJankStatsCallback mAppJankStatsCallback;
 
     DecorView(Context context, int featureId, PhoneWindow window,
             WindowManager.LayoutParams params) {
@@ -2334,6 +2341,38 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         } else {
             return mPendingInsetsController;
         }
+    }
+
+    public interface AppJankStatsCallback {
+        /**
+         * Called when app jank stats are being reported to the platform or when a widget needs
+         * to obtain a reference to the JankTracker instance to update states.
+         */
+        JankTracker getAppJankTracker();
+    }
+
+    public void setAppJankStatsCallback(AppJankStatsCallback
+            jankStatsReportedCallback) {
+        mAppJankStatsCallback = jankStatsReportedCallback;
+    }
+
+    @Override
+    @FlaggedApi(android.app.jank.Flags.FLAG_DETAILED_APP_JANK_METRICS_API)
+    public void reportAppJankStats(@NonNull AppJankStats appJankStats) {
+        if (mAppJankStatsCallback != null) {
+            JankTracker jankTracker = mAppJankStatsCallback.getAppJankTracker();
+            if (jankTracker != null) {
+                jankTracker.mergeAppJankStats(appJankStats);
+            }
+        }
+    }
+
+    @Override
+    public @Nullable JankTracker getJankTracker() {
+        if (mAppJankStatsCallback != null) {
+            return mAppJankStatsCallback.getAppJankTracker();
+        }
+        return null;
     }
 
     @Override

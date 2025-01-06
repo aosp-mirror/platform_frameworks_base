@@ -17,15 +17,19 @@
 package com.android.systemui.statusbar
 
 import android.os.IBinder
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper.RunWithLooper
 import android.view.Choreographer
 import android.view.View
 import android.view.ViewRootImpl
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeExpansionChangeEvent
@@ -35,8 +39,10 @@ import com.android.systemui.statusbar.phone.ScrimController
 import com.android.systemui.statusbar.policy.FakeConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.ResourcesSplitShadeStateController
+import com.android.systemui.testKosmos
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.util.mockito.eq
+import com.android.systemui.window.domain.interactor.WindowRootViewBlurInteractor
 import com.google.common.truth.Truth.assertThat
 import java.util.function.Consumer
 import org.junit.Before
@@ -44,6 +50,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.ArgumentMatchers.anyInt
 import org.mockito.ArgumentMatchers.floatThat
 import org.mockito.Captor
@@ -63,7 +70,10 @@ import org.mockito.junit.MockitoJUnit
 @RunWithLooper
 @SmallTest
 class NotificationShadeDepthControllerTest : SysuiTestCase() {
+    private val kosmos = testKosmos()
 
+    private val applicationScope = kosmos.testScope.backgroundScope
+    @Mock private lateinit var windowRootViewBlurInteractor: WindowRootViewBlurInteractor
     @Mock private lateinit var statusBarStateController: StatusBarStateController
     @Mock private lateinit var blurUtils: BlurUtils
     @Mock private lateinit var biometricUnlockController: BiometricUnlockController
@@ -101,8 +111,8 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
             answer.arguments[0] as Float / maxBlur.toFloat()
         }
         `when`(blurUtils.supportsBlursOnWindows()).thenReturn(true)
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur.toFloat())
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur.toFloat())
 
         notificationShadeDepthController =
             NotificationShadeDepthController(
@@ -115,9 +125,12 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 notificationShadeWindowController,
                 dozeParameters,
                 context,
-                    ResourcesSplitShadeStateController(),
+                ResourcesSplitShadeStateController(),
+                windowRootViewBlurInteractor,
+                applicationScope,
                 dumpManager,
-                configurationController,)
+                configurationController,
+            )
         notificationShadeDepthController.shadeAnimation = shadeAnimation
         notificationShadeDepthController.brightnessMirrorSpring = brightnessSpring
         notificationShadeDepthController.root = root
@@ -309,8 +322,8 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         `when`(blurUtils.ratioOfBlurRadius(anyFloat())).then { answer ->
             answer.arguments[0] as Float / maxBlur.toFloat()
         }
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
-        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur)
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur.toFloat())
+        `when`(blurUtils.maxBlurRadius).thenReturn(maxBlur.toFloat())
 
         notificationShadeDepthController.transitionToFullShadeProgress = 1f
         notificationShadeDepthController.updateBlurCallback.doFrame(0)
@@ -356,11 +369,19 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_BOUNCER_UI_REVAMP)
     fun ignoreShadeBlurUntilHidden_schedulesFrame() {
         notificationShadeDepthController.blursDisabledForAppLaunch = true
         verify(blurUtils).prepareBlur(any(), anyInt())
         verify(choreographer)
             .postFrameCallback(eq(notificationShadeDepthController.updateBlurCallback))
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_BOUNCER_UI_REVAMP)
+    fun ignoreShadeBlurUntilHidden_requestsBlur_windowBlurFlag() {
+        notificationShadeDepthController.blursDisabledForAppLaunch = true
+        verify(windowRootViewBlurInteractor).requestBlurForShade(anyInt(), anyBoolean())
     }
 
     @Test
@@ -410,6 +431,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_BOUNCER_UI_REVAMP)
     fun brightnessMirror_hidesShadeBlur() {
         // Brightness mirror is fully visible
         `when`(brightnessSpring.ratio).thenReturn(1f)
@@ -424,6 +446,23 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
         verify(wallpaperController).setNotificationShadeZoom(eq(1f))
         verify(blurUtils).prepareBlur(any(), eq(0))
         verify(blurUtils).applyBlur(eq(viewRootImpl), eq(0), eq(false))
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_BOUNCER_UI_REVAMP)
+    fun brightnessMirror_hidesShadeBlur_withWindowBlurFlag() {
+        // Brightness mirror is fully visible
+        `when`(brightnessSpring.ratio).thenReturn(1f)
+        // And shade is blurred
+        notificationShadeDepthController.onPanelExpansionChanged(
+            ShadeExpansionChangeEvent(fraction = 1f, expanded = true, tracking = false)
+        )
+        `when`(shadeAnimation.radius).thenReturn(maxBlur.toFloat())
+
+        notificationShadeDepthController.updateBlurCallback.doFrame(0)
+        verify(notificationShadeWindowController).setBackgroundBlurRadius(eq(0))
+        verify(wallpaperController).setNotificationShadeZoom(eq(1f))
+        verify(windowRootViewBlurInteractor).requestBlurForShade(0, false)
     }
 
     @Test

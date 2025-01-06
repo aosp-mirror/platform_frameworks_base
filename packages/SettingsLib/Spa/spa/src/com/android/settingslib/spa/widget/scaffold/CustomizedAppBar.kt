@@ -142,10 +142,11 @@ private fun Title(title: String, maxLines: Int = Int.MAX_VALUE) {
     Text(
         text = title,
         modifier =
-            Modifier.padding(
+            Modifier
+                .padding(
                     start =
-                        if (isSpaExpressiveEnabled) SettingsDimension.paddingExtraSmall
-                        else SettingsDimension.itemPaddingAround,
+                    if (isSpaExpressiveEnabled) SettingsDimension.paddingExtraSmall
+                    else SettingsDimension.itemPaddingAround,
                     end = SettingsDimension.itemPaddingEnd,
                 )
                 .semantics { heading() },
@@ -156,13 +157,22 @@ private fun Title(title: String, maxLines: Int = Int.MAX_VALUE) {
 
 @Composable
 private fun topAppBarColors() =
-    TopAppBarColors(
-        containerColor = MaterialTheme.colorScheme.settingsBackground,
-        scrolledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-        navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
-        titleContentColor = MaterialTheme.colorScheme.onSurface,
-        actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
-    )
+    if (isSpaExpressiveEnabled)
+        TopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainer,
+            scrolledContainerColor = MaterialTheme.colorScheme.surfaceContainer,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            actionIconContentColor = MaterialTheme.colorScheme.primary,
+        )
+    else
+        TopAppBarColors(
+            containerColor = MaterialTheme.colorScheme.settingsBackground,
+            scrolledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
+            navigationIconContentColor = MaterialTheme.colorScheme.onSurface,
+            titleContentColor = MaterialTheme.colorScheme.onSurface,
+            actionIconContentColor = MaterialTheme.colorScheme.onSurfaceVariant,
+        )
 
 /**
  * Represents the colors used by a top app bar in different states.
@@ -257,14 +267,16 @@ private fun SingleRowTopAppBar(
     // Compose a Surface with a TopAppBarLayout content.
     Box(
         modifier =
-            Modifier.drawBehind { drawRect(color = colors.scrolledContainerColor) }
+            Modifier
+                .drawBehind { drawRect(color = colors.scrolledContainerColor) }
                 .semantics { isTraversalGroup = true }
                 .pointerInput(Unit) {}
     ) {
         val height = LocalDensity.current.run { ContainerHeight.toPx() }
         TopAppBarLayout(
             modifier =
-                Modifier.windowInsetsPadding(windowInsets)
+                Modifier
+                    .windowInsetsPadding(windowInsets)
                     // clip after padding so we don't show the title over the inset area
                     .clipToBounds(),
             heightPx = height,
@@ -387,7 +399,8 @@ private fun TwoRowsTopAppBar(
         Column {
             TopAppBarLayout(
                 modifier =
-                    Modifier.windowInsetsPadding(windowInsets)
+                    Modifier
+                        .windowInsetsPadding(windowInsets)
                         // clip after padding so we don't show the title over the inset area
                         .clipToBounds(),
                 heightPx = pinnedHeightPx,
@@ -495,14 +508,17 @@ private fun TopAppBarLayout(
 ) {
     Layout(
         {
-            Box(Modifier.layoutId("navigationIcon").padding(start = TopAppBarHorizontalPadding)) {
+            Box(Modifier
+                .layoutId("navigationIcon")
+                .padding(start = TopAppBarHorizontalPadding)) {
                 CompositionLocalProvider(
                     LocalContentColor provides navigationIconContentColor,
                     content = navigationIcon,
                 )
             }
             Box(
-                Modifier.layoutId("title")
+                Modifier
+                    .layoutId("title")
                     .padding(horizontal = TopAppBarHorizontalPadding)
                     .then(if (hideTitleSemantics) Modifier.clearAndSetSemantics {} else Modifier)
                     .graphicsLayer { alpha = titleAlpha() }
@@ -521,7 +537,9 @@ private fun TopAppBarLayout(
                     )
                 }
             }
-            Box(Modifier.layoutId("actionIcons").padding(end = TopAppBarHorizontalPadding)) {
+            Box(Modifier
+                .layoutId("actionIcons")
+                .padding(end = TopAppBarHorizontalPadding)) {
                 CompositionLocalProvider(
                     LocalContentColor provides actionIconContentColor,
                     content = actions,

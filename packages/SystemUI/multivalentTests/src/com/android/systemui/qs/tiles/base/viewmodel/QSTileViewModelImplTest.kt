@@ -117,7 +117,6 @@ class QSTileViewModelImplTest : SysuiTestCase() {
                     "test_spec:\n" +
                         "    QSTileState(" +
                         "icon=Resource(res=0, contentDescription=Resource(res=0)), " +
-                        "iconRes=null, " +
                         "label=test_data, " +
                         "activationState=INACTIVE, " +
                         "secondaryLabel=null, " +

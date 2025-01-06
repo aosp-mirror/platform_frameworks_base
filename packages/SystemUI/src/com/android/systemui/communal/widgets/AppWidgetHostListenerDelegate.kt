@@ -19,11 +19,12 @@ package com.android.systemui.communal.widgets
 import android.appwidget.AppWidgetHost.AppWidgetHostListener
 import android.appwidget.AppWidgetProviderInfo
 import android.widget.RemoteViews
-import com.android.systemui.dagger.qualifiers.Main
+import com.android.app.tracing.coroutines.launchTraced
+import com.android.systemui.dagger.qualifiers.Application
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
-import java.util.concurrent.Executor
+import kotlinx.coroutines.CoroutineScope
 
 /**
  * Wrapper for an [AppWidgetHostListener] to ensure the callbacks are executed on the main thread.
@@ -31,24 +32,27 @@ import java.util.concurrent.Executor
 class AppWidgetHostListenerDelegate
 @AssistedInject
 constructor(
-    @Main private val mainExecutor: Executor,
+    @Application private val mainScope: CoroutineScope,
+    @Assisted private val tag: String,
     @Assisted private val listener: AppWidgetHostListener,
 ) : AppWidgetHostListener {
 
     @AssistedFactory
-    interface Factory {
-        fun create(listener: AppWidgetHostListener): AppWidgetHostListenerDelegate
+    fun interface Factory {
+        fun create(tag: String, listener: AppWidgetHostListener): AppWidgetHostListenerDelegate
     }
 
     override fun onUpdateProviderInfo(appWidget: AppWidgetProviderInfo?) {
-        mainExecutor.execute { listener.onUpdateProviderInfo(appWidget) }
+        mainScope.launchTraced("$tag#onUpdateProviderInfo") {
+            listener.onUpdateProviderInfo(appWidget)
+        }
     }
 
     override fun updateAppWidget(views: RemoteViews?) {
-        mainExecutor.execute { listener.updateAppWidget(views) }
+        mainScope.launchTraced("$tag#updateAppWidget") { listener.updateAppWidget(views) }
     }
 
     override fun onViewDataChanged(viewId: Int) {
-        mainExecutor.execute { listener.onViewDataChanged(viewId) }
+        mainScope.launchTraced("$tag#onViewDataChanged") { listener.onViewDataChanged(viewId) }
     }
 }

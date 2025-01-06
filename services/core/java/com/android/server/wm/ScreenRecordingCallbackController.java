@@ -95,8 +95,9 @@ public class ScreenRecordingCallbackController {
         if (mediaProjectionInfo.getLaunchCookie() == null) {
             mRecordedWC = (WindowContainer) mWms.mRoot.getDefaultDisplay();
         } else {
-            mRecordedWC = mWms.mRoot.getActivity(activity -> activity.mLaunchCookie
-                    == mediaProjectionInfo.getLaunchCookie().binder).getTask();
+            final ActivityRecord matchingActivity = mWms.mRoot.getActivity(activity ->
+                    activity.mLaunchCookie == mediaProjectionInfo.getLaunchCookie().binder);
+            mRecordedWC = matchingActivity != null ? matchingActivity.getTask() : null;
         }
     }
 

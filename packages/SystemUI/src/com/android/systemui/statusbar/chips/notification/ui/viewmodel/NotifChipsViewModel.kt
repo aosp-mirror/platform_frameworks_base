@@ -17,18 +17,23 @@
 package com.android.systemui.statusbar.chips.notification.ui.viewmodel
 
 import android.view.View
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.statusbar.chips.notification.domain.interactor.StatusBarNotificationChipsInteractor
+import com.android.systemui.statusbar.chips.notification.domain.model.NotificationChipModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
-import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
 
 /** A view model for status bar chips for promoted ongoing notifications. */
@@ -37,47 +42,106 @@ class NotifChipsViewModel
 @Inject
 constructor(
     @Application private val applicationScope: CoroutineScope,
-    activeNotificationsInteractor: ActiveNotificationsInteractor,
     private val notifChipsInteractor: StatusBarNotificationChipsInteractor,
+    headsUpNotificationInteractor: HeadsUpNotificationInteractor,
 ) {
     /**
      * A flow modeling the notification chips that should be shown. Emits an empty list if there are
      * no notifications that should show a status bar chip.
      */
     val chips: Flow<List<OngoingActivityChipModel.Shown>> =
-        activeNotificationsInteractor.promotedOngoingNotifications.map { notifications ->
-            notifications.mapNotNull { it.toChipModel() }
-        }
+        combine(
+                notifChipsInteractor.notificationChips,
+                headsUpNotificationInteractor.statusBarHeadsUpState,
+            ) { notifications, headsUpState ->
+                notifications.map { it.toActivityChipModel(headsUpState) }
+            }
+            .distinctUntilChanged()
 
-    /**
-     * Converts the notification to the [OngoingActivityChipModel] object. Returns null if the
-     * notification has invalid data such that it can't be displayed as a chip.
-     */
-    private fun ActiveNotificationModel.toChipModel(): OngoingActivityChipModel.Shown? {
+    /** Converts the notification to the [OngoingActivityChipModel] object. */
+    private fun NotificationChipModel.toActivityChipModel(
+        headsUpState: PinnedStatus
+    ): OngoingActivityChipModel.Shown {
         StatusBarNotifChips.assertInNewMode()
-        // TODO(b/364653005): Log error if there's no icon view.
-        val rawIcon = this.statusBarChipIconView ?: return null
-        val icon = OngoingActivityChipModel.ChipIcon.StatusBarView(rawIcon)
-        // TODO(b/364653005): Use the notification color if applicable.
-        val colors = ColorsModel.Themed
+        val icon =
+            if (this.statusBarChipIconView != null) {
+                StatusBarConnectedDisplays.assertInLegacyMode()
+                OngoingActivityChipModel.ChipIcon.StatusBarView(this.statusBarChipIconView)
+            } else {
+                StatusBarConnectedDisplays.assertInNewMode()
+                OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(this.key)
+            }
+        val colors =
+            ColorsModel.Custom(
+                backgroundColorInt = this.promotedContent.colors.backgroundColor,
+                primaryTextColorInt = this.promotedContent.colors.primaryTextColor,
+            )
         val onClickListener =
             View.OnClickListener {
                 // The notification pipeline needs everything to run on the main thread, so keep
                 // this event on the main thread.
                 applicationScope.launch {
-                    notifChipsInteractor.onPromotedNotificationChipTapped(this@toChipModel.key)
+                    notifChipsInteractor.onPromotedNotificationChipTapped(
+                        this@toActivityChipModel.key
+                    )
                 }
             }
-        return OngoingActivityChipModel.Shown.ShortTimeDelta(
-            icon,
-            colors,
-            time = this.whenTime,
-            onClickListener,
-        )
-        // TODO(b/364653005): If Notification.showWhen = false, don't show the time delta.
-        // TODO(b/364653005): If Notification.whenTime is in the past, show "ago" in the text.
-        // TODO(b/364653005): If Notification.shortCriticalText is set, use that instead of `when`.
-        // TODO(b/364653005): If the app that posted the notification is in the foreground, don't
-        // show that app's chip.
+
+        if (headsUpState == PinnedStatus.PinnedByUser) {
+            // If the user tapped the chip to show the HUN, we want to just show the icon because
+            // the HUN will show the rest of the information.
+            return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
+        }
+
+        if (this.promotedContent.shortCriticalText != null) {
+            return OngoingActivityChipModel.Shown.Text(
+                icon,
+                colors,
+                this.promotedContent.shortCriticalText,
+                onClickListener,
+            )
+        }
+
+        if (
+            Flags.promoteNotificationsAutomatically() &&
+                this.promotedContent.wasPromotedAutomatically
+        ) {
+            // When we're promoting notifications automatically, the `when` time set on the
+            // notification will likely just be set to the current time, which would cause the chip
+            // to always show "now". We don't want early testers to get that experience since it's
+            // not what will happen at launch, so just don't show any time.
+            return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
+        }
+
+        if (this.promotedContent.time == null) {
+            return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
+        }
+        when (this.promotedContent.time.mode) {
+            PromotedNotificationContentModel.When.Mode.BasicTime -> {
+                return OngoingActivityChipModel.Shown.ShortTimeDelta(
+                    icon,
+                    colors,
+                    time = this.promotedContent.time.time,
+                    onClickListener,
+                )
+            }
+            PromotedNotificationContentModel.When.Mode.CountUp -> {
+                return OngoingActivityChipModel.Shown.Timer(
+                    icon,
+                    colors,
+                    startTimeMs = this.promotedContent.time.time,
+                    onClickListener,
+                )
+            }
+            PromotedNotificationContentModel.When.Mode.CountDown -> {
+                // TODO(b/364653005): Support CountDown.
+                return OngoingActivityChipModel.Shown.Timer(
+                    icon,
+                    colors,
+                    startTimeMs = this.promotedContent.time.time,
+                    onClickListener,
+                )
+            }
+        }
     }
 }

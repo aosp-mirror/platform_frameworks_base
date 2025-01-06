@@ -132,7 +132,7 @@ constructor(
         val isDefaultNotesAppSet =
             noteTaskInfoResolver.resolveInfo(
                 QUICK_AFFORDANCE,
-                user = controller.getUserForHandlingNotesTaking(QUICK_AFFORDANCE)
+                user = controller.getUserForHandlingNotesTaking(QUICK_AFFORDANCE),
             ) != null
         return when {
             isEnabled && isDefaultNotesAppSet -> PickerScreenState.Default()
@@ -158,7 +158,7 @@ constructor(
 
     override fun onTriggered(expandable: Expandable?): OnTriggeredResult {
         controller.showNoteTask(entryPoint = QUICK_AFFORDANCE)
-        return OnTriggeredResult.Handled
+        return OnTriggeredResult.Handled(true)
     }
 }
 
@@ -194,7 +194,7 @@ private fun RoleManager.createNotesRoleFlow(
     fun isDefaultNotesAppSetForUser() =
         noteTaskInfoResolver.resolveInfo(
             QUICK_AFFORDANCE,
-            user = noteTaskController.getUserForHandlingNotesTaking(QUICK_AFFORDANCE)
+            user = noteTaskController.getUserForHandlingNotesTaking(QUICK_AFFORDANCE),
         ) != null
 
     trySendBlocking(isDefaultNotesAppSetForUser())

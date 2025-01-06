@@ -64,9 +64,11 @@ public class SeekBarViewModelTest : SysuiTestCase() {
             override fun executeOnDiskIO(runnable: Runnable) {
                 runnable.run()
             }
+
             override fun postToMainThread(runnable: Runnable) {
                 runnable.run()
             }
+
             override fun isMainThread(): Boolean {
                 return true
             }
@@ -804,5 +806,33 @@ public class SeekBarViewModelTest : SysuiTestCase() {
         // THEN we unregister callback (as a result of clearing the controller)
         fakeExecutor.runAllReady()
         verify(mockController).unregisterCallback(any())
+    }
+
+    @Test
+    fun positionUpdatedWhileStopped() {
+        // When playback is stopped at one position
+        val firstPosition = 200L
+        val state =
+            PlaybackState.Builder().run {
+                setState(PlaybackState.STATE_STOPPED, firstPosition, 1f)
+                build()
+            }
+        whenever(mockController.playbackState).thenReturn(state)
+        val captor = ArgumentCaptor.forClass(MediaController.Callback::class.java)
+        viewModel.updateController(mockController)
+        verify(mockController).registerCallback(captor.capture())
+        assertThat(viewModel.progress.value!!.elapsedTime).isEqualTo(firstPosition.toInt())
+
+        // And the state is updated with a new position
+        val secondPosition = 42L
+        val secondState =
+            PlaybackState.Builder().run {
+                setState(PlaybackState.STATE_STOPPED, secondPosition, 1f)
+                build()
+            }
+        captor.value.onPlaybackStateChanged(secondState)
+
+        // THEN then elapsed time should be updated
+        assertThat(viewModel.progress.value!!.elapsedTime).isEqualTo(secondPosition.toInt())
     }
 }

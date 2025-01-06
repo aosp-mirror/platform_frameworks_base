@@ -36,6 +36,7 @@ import com.android.systemui.Flags.lightRevealMigration
 import com.android.systemui.biometrics.data.repository.FacePropertyRepository
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.deviceentry.domain.interactor.AuthRippleInteractor
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.shared.model.BiometricUnlockSource
@@ -69,9 +70,9 @@ import javax.inject.Provider
 class AuthRippleController
 @Inject
 constructor(
-    private val sysuiContext: Context,
+    @Main private val sysuiContext: Context,
     private val authController: AuthController,
-    private val configurationController: ConfigurationController,
+    @Main private val configurationController: ConfigurationController,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val keyguardStateController: KeyguardStateController,
     private val wakefulnessLifecycle: WakefulnessLifecycle,

@@ -60,12 +60,6 @@ class BrightnessRangeControllerTest {
     }
 
     @Test
-    fun testMaxBrightness_HbmDisabledAndNotAllowed() {
-        val controller = createController(nbmEnabled = false, hbmAllowed = false)
-        assertThat(controller.currentBrightnessMax).isEqualTo(MAX_BRIGHTNESS)
-    }
-
-    @Test
     fun testMaxBrightness_transitionPointLessThanCurrentNbmLimit() {
         val controller = createController(
             hbmAllowed = false,
@@ -76,13 +70,11 @@ class BrightnessRangeControllerTest {
     }
 
     private fun createController(
-        nbmEnabled: Boolean = true,
         hbmSupported: Boolean = true,
         hbmAllowed: Boolean = true,
         hbmMaxBrightness: Float = MAX_BRIGHTNESS,
         nbmMaxBrightness: Float = NORMAL_BRIGHTNESS_LOW
     ): BrightnessRangeController {
-        whenever(mockFlags.isNbmControllerEnabled).thenReturn(nbmEnabled)
         whenever(mockHbmController.deviceSupportsHbm()).thenReturn(hbmSupported)
         whenever(mockHbmController.isHbmCurrentlyAllowed).thenReturn(hbmAllowed)
         whenever(mockHbmController.currentBrightnessMax).thenReturn(hbmMaxBrightness)

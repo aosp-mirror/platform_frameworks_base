@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktive (vetëm majtas)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktive (vetëm djathtas)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktive (majtas dhe djathtas)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Ambienti rrethues nuk mund të përditësohej"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiv (vetëm për media). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> bateri."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiv (vetëm për media). Majtas: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> bateri, djathtas: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> bateri."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Lidhur (mbështet ndarjen e audios). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> bateri."</string>
@@ -304,16 +305,16 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"Zgjidh versionin AVRCP të Bluetooth-it"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"Versioni MAP i Bluetooth-it"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"Zgjidh versionin MAP të Bluetooth-it"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Kodeku Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"Kodeku i audios me Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"Shpejtësia e shembullit të Bluetooth Audio"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Shpejtësia e shembullit"</string>
     <string name="bluetooth_select_a2dp_codec_type_help_info" msgid="8647200416514412338">"Çaktivizimi do të thotë se nuk mbështetet nga telefoni ose kufjet"</string>
-    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bite për shembull Bluetooth Audio"</string>
+    <string name="bluetooth_select_a2dp_codec_bits_per_sample" msgid="6253965294594390806">"Bite të audios me Bluetooth për shembull"</string>
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Bite për shembull"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"Modaliteti i kanalit të audios me Bluetooth"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"Aktivizo kodekun e audios me Bluetooth\nZgjedhja: Modaliteti i kanalit"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Kodeku LDAC i audios së Bluetooth-it: Cilësia e luajtjes"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"Kodeku LDAC i audios me Bluetooth: Cilësia e luajtjes"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"Aktivizo LDAC të audios me Bluetooth\nZgjedhja e kodekut: Cilësia e luajtjes"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"Transmetimi: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS-ja private"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminali lokal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivizo aplikacionin terminal që ofron qasje në guaskën lokale"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Ambienti i zhvillimit për Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Ekzekuto terminalin e Linux në Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Eksperimentale) Ekzekuto terminalin e Linux në Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Nëse e çaktivizon, të dhënat e terminalit të Linux do të pastrohen"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kontrolli HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Cakto kontrollin e HDCP-së"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Korrigjimi i gabimeve"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Animacioni kalimtar"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Kohëzgjatja e animatorit"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulo ekranet dytësore"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Pozicioni i shfaqjes së hijes"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacionet"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Mos i ruaj aktivitetet"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Fshi çdo aktivitet sapo të largohet përdoruesi"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ky telefon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Ky tablet"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Ky kompjuter (i brendshëm)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Ky televizor"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Altoparlanti i stacionit"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Pajisja e jashtme"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Pajisja e lidhur"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ky telefon"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analoge"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nuk mund të luhet në këtë pajisje"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Përmirëso llogarinë për të ndryshuar"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Shkarkimet nuk mund të luhen këtu"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Lidhur përmes ARC-së"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Lidhur përmes eARC-së"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Parazgjedhja e televizorit"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Dalja HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Altoparlantët e brendshëm"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Altoparlanti i integruar"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Audioja e televizorit"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem me lidhjen. Fike dhe ndize përsëri pajisjen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Pajisja audio me tel"</string>
     <string name="help_label" msgid="3528360748637781274">"Ndihma dhe komentet"</string>

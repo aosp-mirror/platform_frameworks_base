@@ -21,11 +21,13 @@ import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRIN
 import static android.hardware.fingerprint.FingerprintSensorProperties.TYPE_REAR;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.systemui.Flags.contAuthPlugin;
 import static com.android.systemui.util.ConvenienceExtensionsKt.toKotlinLazy;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityTaskManager;
+import android.app.KeyguardManager;
 import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
 import android.content.Context;
@@ -74,6 +76,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.CoreStartable;
 import com.android.systemui.biometrics.domain.interactor.LogContextInteractor;
 import com.android.systemui.biometrics.domain.interactor.PromptSelectorInteractor;
+import com.android.systemui.biometrics.plugins.AuthContextPlugins;
 import com.android.systemui.biometrics.shared.model.UdfpsOverlayParams;
 import com.android.systemui.biometrics.ui.viewmodel.CredentialViewModel;
 import com.android.systemui.biometrics.ui.viewmodel.PromptViewModel;
@@ -108,6 +111,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 
 import javax.inject.Inject;
@@ -139,6 +143,7 @@ public class AuthController implements
     private final ActivityTaskManager mActivityTaskManager;
     @Nullable private final FingerprintManager mFingerprintManager;
     @Nullable private final FaceManager mFaceManager;
+    @Nullable private final AuthContextPlugins mContextPlugins;
     private final Provider<UdfpsController> mUdfpsControllerFactory;
     private final CoroutineScope mApplicationCoroutineScope;
     private Job mBiometricContextListenerJob = null;
@@ -709,14 +714,15 @@ public class AuthController implements
         onDialogDismissed(reason);
     }
     @Inject
-    public AuthController(Context context,
+    public AuthController(@Main Context context,
             @Application CoroutineScope applicationCoroutineScope,
             Execution execution,
             CommandQueue commandQueue,
             ActivityTaskManager activityTaskManager,
-            @NonNull WindowManager windowManager,
+            @NonNull @Main WindowManager windowManager,
             @Nullable FingerprintManager fingerprintManager,
             @Nullable FaceManager faceManager,
+            Optional<AuthContextPlugins> contextPlugins,
             Provider<UdfpsController> udfpsControllerFactory,
             @NonNull DisplayManager displayManager,
             @NonNull WakefulnessLifecycle wakefulnessLifecycle,
@@ -732,6 +738,7 @@ public class AuthController implements
             @Background DelayableExecutor bgExecutor,
             @NonNull UdfpsUtils udfpsUtils,
             @NonNull VibratorHelper vibratorHelper,
+            @NonNull KeyguardManager keyguardManager,
             Lazy<ViewCapture> daggerLazyViewCapture,
             @NonNull MSDLPlayer msdlPlayer) {
         mContext = context;
@@ -744,6 +751,7 @@ public class AuthController implements
         mActivityTaskManager = activityTaskManager;
         mFingerprintManager = fingerprintManager;
         mFaceManager = faceManager;
+        mContextPlugins = contAuthPlugin() ? contextPlugins.orElse(null) : null;
         mUdfpsControllerFactory = udfpsControllerFactory;
         mUdfpsLogger = udfpsLogger;
         mDisplayManager = displayManager;
@@ -761,6 +769,15 @@ public class AuthController implements
         mPromptSelectorInteractor = promptSelectorInteractorProvider;
         mPromptViewModelProvider = promptViewModelProvider;
         mCredentialViewModelProvider = credentialViewModelProvider;
+
+        keyguardManager.addKeyguardLockedStateListener(
+                context.getMainExecutor(),
+                isKeyguardLocked -> {
+                    if (isKeyguardLocked) {
+                        closeDialog("Device lock");
+                    }
+                }
+        );
 
         mOrientationListener = new BiometricDisplayListener(
                 context,
@@ -858,6 +875,10 @@ public class AuthController implements
         mActivityTaskManager.registerTaskStackListener(mTaskStackListener);
         mOrientationListener.enable();
         updateSensorLocations();
+
+        if (mContextPlugins != null) {
+            mContextPlugins.activate();
+        }
     }
 
     @Override
@@ -1350,7 +1371,7 @@ public class AuthController implements
         config.mSensorIds = sensorIds;
         config.mScaleProvider = this::getScaleFactor;
         return new AuthContainerView(config, mApplicationCoroutineScope, mFpProps, mFaceProps,
-                wakefulnessLifecycle, userManager, lockPatternUtils,
+                wakefulnessLifecycle, userManager, mContextPlugins, lockPatternUtils,
                 mInteractionJankMonitor, mPromptSelectorInteractor, viewModel,
                 mCredentialViewModelProvider, bgExecutor, mVibratorHelper,
                 mLazyViewCapture, mMSDLPlayer);

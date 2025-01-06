@@ -303,12 +303,21 @@ class TextFileFilterPolicyParser(
     }
 
     private fun parseMethod(fields: Array<String>) {
-        if (fields.size < 4) {
-            throw ParseException("Method ('m') expects 3 fields.")
+        if (fields.size < 3 || fields.size > 4) {
+            throw ParseException("Method ('m') expects 3 or 4 fields.")
         }
         val name = fields[1]
-        val signature = fields[2]
-        val policy = parsePolicy(fields[3])
+        val signature: String
+        val policyStr: String
+        if (fields.size <= 3) {
+            signature = "*"
+            policyStr = fields[2]
+        } else {
+            signature = fields[2]
+            policyStr = fields[3]
+        }
+
+        val policy = parsePolicy(policyStr)
 
         if (!policy.isUsableWithMethods) {
             throw ParseException("Method can't have policy '$policy'")
@@ -321,7 +330,7 @@ class TextFileFilterPolicyParser(
             policy.withReason(FILTER_REASON)
         )
         if (policy == FilterPolicy.Substitute) {
-            val fromName = fields[3].substring(1)
+            val fromName = policyStr.substring(1)
 
             if (fromName == name) {
                 throw ParseException(

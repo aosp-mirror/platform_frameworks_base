@@ -16,12 +16,9 @@
 
 package com.android.systemui.shared.clocks
 
-import android.content.Context
-import android.content.res.Resources
 import android.graphics.Rect
 import androidx.annotation.VisibleForTesting
 import com.android.systemui.log.core.Logger
-import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.AlarmData
 import com.android.systemui.plugins.clocks.ClockAnimations
 import com.android.systemui.plugins.clocks.ClockEvents
@@ -37,31 +34,22 @@ import java.util.Locale
 import java.util.TimeZone
 
 class ComposedDigitalLayerController(
-    private val ctx: Context,
-    private val resources: Resources,
-    private val assets: AssetLoader, // TODO(b/364680879): Remove and replace w/ resources
+    private val clockCtx: ClockContext,
     private val layer: ComposedDigitalHandLayer,
-    messageBuffer: MessageBuffer,
 ) : SimpleClockLayerController {
-    private val logger = Logger(messageBuffer, ComposedDigitalLayerController::class.simpleName!!)
+    private val logger =
+        Logger(clockCtx.messageBuffer, ComposedDigitalLayerController::class.simpleName!!)
 
     val layerControllers = mutableListOf<SimpleClockLayerController>()
     val dozeState = DefaultClockController.AnimationState(1F)
 
-    override val view = FlexClockView(ctx, assets, messageBuffer)
+    override val view = FlexClockView(clockCtx)
 
     init {
         layer.digitalLayers.forEach {
-            val childView = SimpleDigitalClockTextView(ctx, messageBuffer)
+            val childView = SimpleDigitalClockTextView(clockCtx)
             val controller =
-                SimpleDigitalHandLayerController(
-                    ctx,
-                    resources,
-                    assets,
-                    it as DigitalHandLayer,
-                    childView,
-                    messageBuffer,
-                )
+                SimpleDigitalHandLayerController(clockCtx, it as DigitalHandLayer, childView)
 
             view.addView(childView)
             layerControllers.add(controller)
@@ -156,8 +144,9 @@ class ComposedDigitalLayerController(
                 val color =
                     when {
                         theme.seedColor != null -> theme.seedColor!!
-                        theme.isDarkTheme -> resources.getColor(android.R.color.system_accent1_100)
-                        else -> resources.getColor(android.R.color.system_accent2_600)
+                        theme.isDarkTheme ->
+                            clockCtx.resources.getColor(android.R.color.system_accent1_100)
+                        else -> clockCtx.resources.getColor(android.R.color.system_accent2_600)
                     }
 
                 view.updateColor(color)

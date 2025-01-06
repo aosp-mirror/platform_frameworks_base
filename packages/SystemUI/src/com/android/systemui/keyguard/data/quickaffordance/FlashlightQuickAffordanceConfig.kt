@@ -18,15 +18,15 @@
 package com.android.systemui.keyguard.data.quickaffordance
 
 import android.content.Context
-import com.android.systemui.res.R
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
 import com.android.systemui.common.coroutine.ConflatedCallbackFlow.conflatedCallbackFlow
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
+import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.FlashlightController
 import javax.inject.Inject
 import kotlinx.coroutines.channels.awaitClose
@@ -36,7 +36,7 @@ import kotlinx.coroutines.flow.Flow
 class FlashlightQuickAffordanceConfig
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val flashlightController: FlashlightController,
 ) : KeyguardQuickAffordanceConfig {
 
@@ -49,9 +49,9 @@ constructor(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     Icon.Resource(
                         R.drawable.qs_flashlight_icon_on,
-                        ContentDescription.Resource(R.string.quick_settings_flashlight_label)
+                        ContentDescription.Resource(R.string.quick_settings_flashlight_label),
                     ),
-                    ActivationState.Active
+                    ActivationState.Active,
                 )
         }
 
@@ -60,9 +60,9 @@ constructor(
                 KeyguardQuickAffordanceConfig.LockScreenState.Visible(
                     Icon.Resource(
                         R.drawable.qs_flashlight_icon_off,
-                        ContentDescription.Resource(R.string.quick_settings_flashlight_label)
+                        ContentDescription.Resource(R.string.quick_settings_flashlight_label),
                     ),
-                    ActivationState.Inactive
+                    ActivationState.Inactive,
                 )
         }
 
@@ -91,14 +91,14 @@ constructor(
                             } else {
                                 FlashlightState.OffAvailable.toLockScreenState()
                             },
-                            TAG
+                            TAG,
                         )
                     }
 
                     override fun onFlashlightError() {
                         trySendWithFailureLogging(
                             FlashlightState.OffAvailable.toLockScreenState(),
-                            TAG
+                            TAG,
                         )
                     }
 
@@ -113,7 +113,7 @@ constructor(
                                     FlashlightState.OffAvailable.toLockScreenState()
                                 }
                             },
-                            TAG
+                            TAG,
                         )
                     }
                 }
@@ -129,7 +129,7 @@ constructor(
         flashlightController.setFlashlight(
             flashlightController.isAvailable && !flashlightController.isEnabled
         )
-        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
     }
 
     override suspend fun getPickerScreenState(): KeyguardQuickAffordanceConfig.PickerScreenState =

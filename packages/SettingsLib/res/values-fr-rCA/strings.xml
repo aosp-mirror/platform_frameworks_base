@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Actif (gauche seulement)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Actif (droite seulement)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Actif (gauche et droite)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Impossible de mettre à jour les sons de l\'environnement"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Actif (contenu multimédia uniquement). Pile à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Actif (contenu multimédia uniquement). G. : pile à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, D. : pile à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Connecté (prise en charge du partage audio). Pile à <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal local"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Activer l\'appli Terminal permettant l\'accès au shell local"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Environnement de développement Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Exécuter le terminal Linux sur Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Expérimental) Exécutez le terminal Linux sur Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"La désactivation effacera les données du terminal Linux"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Vérification HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Configurer vérification HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Débogage"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Éch. d\'animation des transitions"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Échelle durée animation"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simuler affich. secondaires"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Position d\'affichage du volet"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Applis"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Ne pas conserver activités"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Supprimer immédiatement les activités abandonnées"</string>
@@ -512,7 +515,7 @@
     <string name="battery_info_status_charging_wireless" msgid="8924722966861282197">"En recharge sans fil"</string>
     <string name="battery_info_status_charging_dock" msgid="8573274094093364791">"Recharge en cours…"</string>
     <string name="battery_info_status_discharging" msgid="6962689305413556485">"N\'est pas en charge"</string>
-    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Connecté, mais ne se recharge pas"</string>
+    <string name="battery_info_status_not_charging" msgid="1103084691314264664">"Appareil connecté, mais pas en cours de recharge"</string>
     <string name="battery_info_status_full" msgid="1339002294876531312">"Chargée"</string>
     <string name="battery_info_status_full_charged" msgid="3536054261505567948">"Complètement rechargée"</string>
     <string name="battery_info_status_charging_on_hold" msgid="6364355145521694438">"Recharge en pause"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ce téléphone"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Cette tablette"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Cet ordinateur (interne)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Ce téléviseur"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Haut-parleur du socle"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Appareil externe"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Appareil connecté"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ce téléphone"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analogique"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Impossible de faire jouer le contenu sur cet appareil"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Mettez à jour le compte pour passer à la version payante"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Lecture des téléchargements impossible ici"</string>
@@ -603,10 +608,9 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Connecté par ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Connecté par eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Sortie audio par défaut de la télévision"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Sortie HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Haut-parleurs internes"</string>
-    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteingez et rallumez l\'appareil"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Haut-parleur intégré"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Sortie audio du téléviseur"</string>
+    <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problème de connexion. Éteignez et rallumez l\'appareil"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Appareil audio à câble"</string>
     <string name="help_label" msgid="3528360748637781274">"Aide et commentaires"</string>
     <string name="storage_category" msgid="2287342585424631813">"Stockage"</string>

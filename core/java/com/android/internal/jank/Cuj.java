@@ -235,8 +235,19 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_SNAP_RESIZE = 118;
 
+    /**
+     * Track unmaximize window interaction in desktop mode.
+     *
+     * <p> Tracking starts when the maximize button or option is clicked {@link
+     * com.android.wm.shell.windowdecor.DesktopModeWindowDecorViewModel#onClick}
+     * and finishes when the animation finishes {@link
+     * com.android.wm.shell.windowdecor.ToggleResizeDesktopTaskTransitionHandler#startAnimation}
+     * </p>
+     */
+    public static final int CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW = 119;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_SNAP_RESIZE;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW;
 
     /** @hide */
     @IntDef({
@@ -346,7 +357,8 @@ public class Cuj {
             CUJ_LAUNCHER_KEYBOARD_QUICK_SWITCH_APP_LAUNCH,
             CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE,
             CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE,
-            CUJ_DESKTOP_MODE_SNAP_RESIZE
+            CUJ_DESKTOP_MODE_SNAP_RESIZE,
+            CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -467,6 +479,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_RELEASE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_SNAP_RESIZE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_SNAP_RESIZE;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_UNMAXIMIZE_WINDOW;
     }
 
     private Cuj() {
@@ -699,6 +712,8 @@ public class Cuj {
                 return "DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE";
             case CUJ_DESKTOP_MODE_SNAP_RESIZE:
                 return "DESKTOP_MODE_SNAP_RESIZE";
+            case CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW:
+                return "DESKTOP_MODE_UNMAXIMIZE_WINDOW";
         }
         return "UNKNOWN";
     }

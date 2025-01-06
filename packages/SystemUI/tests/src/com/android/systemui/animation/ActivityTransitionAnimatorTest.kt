@@ -14,12 +14,16 @@ import android.testing.TestableLooper.RunWithLooper
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationAdapter
 import android.view.RemoteAnimationTarget
+import android.view.RemoteAnimationTarget.MODE_CLOSING
+import android.view.RemoteAnimationTarget.MODE_OPENING
 import android.view.SurfaceControl
 import android.view.ViewGroup
+import android.view.WindowManager.TRANSIT_NONE
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.window.RemoteTransition
 import android.window.TransitionFilter
+import android.window.WindowAnimationState
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -43,6 +47,7 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.ArgumentMatchers.anyBoolean
 import org.mockito.Mock
+import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
@@ -209,22 +214,12 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     )
     @Test
     fun registersLongLivedTransition() {
-        activityTransitionAnimator.register(
-            object : DelegateTransitionAnimatorController(controller) {
-                override val transitionCookie =
-                    ActivityTransitionAnimator.TransitionCookie("test_cookie_1")
-                override val component = ComponentName("com.test.package", "Test1")
-            }
-        )
+        var factory = controllerFactory()
+        activityTransitionAnimator.register(factory.cookie, factory)
         assertEquals(2, testShellTransitions.remotes.size)
 
-        activityTransitionAnimator.register(
-            object : DelegateTransitionAnimatorController(controller) {
-                override val transitionCookie =
-                    ActivityTransitionAnimator.TransitionCookie("test_cookie_2")
-                override val component = ComponentName("com.test.package", "Test2")
-            }
-        )
+        factory = controllerFactory()
+        activityTransitionAnimator.register(factory.cookie, factory)
         assertEquals(4, testShellTransitions.remotes.size)
     }
 
@@ -235,20 +230,12 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     @Test
     fun registersLongLivedTransitionOverridingPreviousRegistration() {
         val cookie = ActivityTransitionAnimator.TransitionCookie("test_cookie")
-        activityTransitionAnimator.register(
-            object : DelegateTransitionAnimatorController(controller) {
-                override val transitionCookie = cookie
-                override val component = ComponentName("com.test.package", "Test1")
-            }
-        )
+        var factory = controllerFactory(cookie)
+        activityTransitionAnimator.register(cookie, factory)
         val transitions = testShellTransitions.remotes.values.toList()
 
-        activityTransitionAnimator.register(
-            object : DelegateTransitionAnimatorController(controller) {
-                override val transitionCookie = cookie
-                override val component = ComponentName("com.test.package", "Test2")
-            }
-        )
+        factory = controllerFactory(cookie)
+        activityTransitionAnimator.register(cookie, factory)
         assertEquals(2, testShellTransitions.remotes.size)
         for (transition in transitions) {
             assertThat(testShellTransitions.remotes.values).doesNotContain(transition)
@@ -258,40 +245,19 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     @DisableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED)
     @Test
     fun doesNotRegisterLongLivedTransitionIfFlagIsDisabled() {
-
-        val controller =
-            object : DelegateTransitionAnimatorController(controller) {
-                override val transitionCookie =
-                    ActivityTransitionAnimator.TransitionCookie("test_cookie")
-                override val component = ComponentName("com.test.package", "Test")
-            }
+        val factory = controllerFactory(component = null)
         assertThrows(IllegalStateException::class.java) {
-            activityTransitionAnimator.register(controller)
+            activityTransitionAnimator.register(factory.cookie, factory)
         }
     }
 
     @EnableFlags(Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED)
     @Test
     fun doesNotRegisterLongLivedTransitionIfMissingRequiredProperties() {
-
-        // No TransitionCookie
-        val controllerWithoutCookie =
-            object : DelegateTransitionAnimatorController(controller) {
-                override val transitionCookie = null
-            }
-        assertThrows(IllegalStateException::class.java) {
-            activityTransitionAnimator.register(controllerWithoutCookie)
-        }
-
         // No ComponentName
-        val controllerWithoutComponent =
-            object : DelegateTransitionAnimatorController(controller) {
-                override val transitionCookie =
-                    ActivityTransitionAnimator.TransitionCookie("test_cookie")
-                override val component = null
-            }
+        var factory = controllerFactory(component = null)
         assertThrows(IllegalStateException::class.java) {
-            activityTransitionAnimator.register(controllerWithoutComponent)
+            activityTransitionAnimator.register(factory.cookie, factory)
         }
 
         // No TransitionRegister
@@ -303,14 +269,9 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
                 testTransitionAnimator,
                 disableWmTimeout = true,
             )
-        val validController =
-            object : DelegateTransitionAnimatorController(controller) {
-                override val transitionCookie =
-                    ActivityTransitionAnimator.TransitionCookie("test_cookie")
-                override val component = ComponentName("com.test.package", "Test")
-            }
+        factory = controllerFactory()
         assertThrows(IllegalStateException::class.java) {
-            activityTransitionAnimator.register(validController)
+            activityTransitionAnimator.register(factory.cookie, factory)
         }
     }
 
@@ -320,18 +281,12 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
     )
     @Test
     fun unregistersLongLivedTransition() {
-
         val cookies = arrayOfNulls<ActivityTransitionAnimator.TransitionCookie>(3)
 
         for (index in 0 until 3) {
-            cookies[index] = ActivityTransitionAnimator.TransitionCookie("test_cookie_$index")
-
-            val controller =
-                object : DelegateTransitionAnimatorController(controller) {
-                    override val transitionCookie = cookies[index]
-                    override val component = ComponentName("foo.bar", "Foobar")
-                }
-            activityTransitionAnimator.register(controller)
+            cookies[index] = mock(ActivityTransitionAnimator.TransitionCookie::class.java)
+            val factory = controllerFactory(cookies[index]!!)
+            activityTransitionAnimator.register(factory.cookie, factory)
         }
 
         activityTransitionAnimator.unregister(cookies[0]!!)
@@ -346,9 +301,9 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
 
     @Test
     fun doesNotStartIfAnimationIsCancelled() {
-        val runner = activityTransitionAnimator.createRunner(controller)
+        val runner = activityTransitionAnimator.createEphemeralRunner(controller)
         runner.onAnimationCancelled()
-        runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
+        runner.onAnimationStart(TRANSIT_NONE, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
         verify(controller).onTransitionAnimationCancelled()
@@ -360,8 +315,8 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
 
     @Test
     fun cancelsIfNoOpeningWindowIsFound() {
-        val runner = activityTransitionAnimator.createRunner(controller)
-        runner.onAnimationStart(0, emptyArray(), emptyArray(), emptyArray(), iCallback)
+        val runner = activityTransitionAnimator.createEphemeralRunner(controller)
+        runner.onAnimationStart(TRANSIT_NONE, emptyArray(), emptyArray(), emptyArray(), iCallback)
 
         waitForIdleSync()
         verify(controller).onTransitionAnimationCancelled()
@@ -373,8 +328,14 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
 
     @Test
     fun startsAnimationIfWindowIsOpening() {
-        val runner = activityTransitionAnimator.createRunner(controller)
-        runner.onAnimationStart(0, arrayOf(fakeWindow()), emptyArray(), emptyArray(), iCallback)
+        val runner = activityTransitionAnimator.createEphemeralRunner(controller)
+        runner.onAnimationStart(
+            TRANSIT_NONE,
+            arrayOf(fakeWindow()),
+            emptyArray(),
+            emptyArray(),
+            iCallback,
+        )
         waitForIdleSync()
         verify(listener).onTransitionAnimationStart()
         verify(controller).onTransitionAnimationStart(anyBoolean())
@@ -387,16 +348,139 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         }
     }
 
+    @DisableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun creatingRunnerWithLazyInitializationThrows_whenTheFlagsAreDisabled() {
+        assertThrows(IllegalStateException::class.java) {
+            val factory = controllerFactory()
+            activityTransitionAnimator.createLongLivedRunner(factory, forLaunch = true)
+        }
+    }
+
+    @EnableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun runnerCreatesDelegateLazily_whenPostingTimeouts() {
+        val factory = controllerFactory()
+        val runner = activityTransitionAnimator.createLongLivedRunner(factory, forLaunch = true)
+        assertNull(runner.delegate)
+        runner.postTimeouts()
+        assertNotNull(runner.delegate)
+    }
+
+    @EnableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun runnerCreatesDelegateLazily_onAnimationStart() {
+        val factory = controllerFactory()
+        val runner = activityTransitionAnimator.createLongLivedRunner(factory, forLaunch = true)
+        assertNull(runner.delegate)
+
+        var delegateInitialized = false
+        activityTransitionAnimator.addListener(
+            object : ActivityTransitionAnimator.Listener {
+                override fun onTransitionAnimationStart() {
+                    // This is called iff the delegate was initialized, so it's a good proxy for
+                    // checking the initialization.
+                    delegateInitialized = true
+                }
+            }
+        )
+        runner.onAnimationStart(
+            TRANSIT_NONE,
+            arrayOf(fakeWindow()),
+            emptyArray(),
+            emptyArray(),
+            iCallback,
+        )
+
+        waitForIdleSync()
+        assertTrue(delegateInitialized)
+    }
+
+    @EnableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun runnerCreatesDelegateLazily_onAnimationTakeover() {
+        val factory = controllerFactory()
+        val runner = activityTransitionAnimator.createLongLivedRunner(factory, forLaunch = false)
+        assertNull(runner.delegate)
+
+        var delegateInitialized = false
+        activityTransitionAnimator.addListener(
+            object : ActivityTransitionAnimator.Listener {
+                override fun onTransitionAnimationStart() {
+                    // This is called iff the delegate was initialized, so it's a good proxy for
+                    // checking the initialization.
+                    delegateInitialized = true
+                }
+            }
+        )
+        runner.takeOverAnimation(
+            arrayOf(fakeWindow(MODE_CLOSING)),
+            arrayOf(WindowAnimationState()),
+            SurfaceControl.Transaction(),
+            iCallback,
+        )
+
+        waitForIdleSync()
+        assertTrue(delegateInitialized)
+    }
+
+    @DisableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
+    @Test
+    fun animationTakeoverThrows_whenTheFlagsAreDisabled() {
+        val runner = activityTransitionAnimator.createEphemeralRunner(controller)
+        assertThrows(IllegalStateException::class.java) {
+            runner.takeOverAnimation(
+                arrayOf(fakeWindow()),
+                emptyArray(),
+                SurfaceControl.Transaction(),
+                iCallback,
+            )
+        }
+    }
+
+    @DisableFlags(
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LIBRARY,
+        Flags.FLAG_RETURN_ANIMATION_FRAMEWORK_LONG_LIVED,
+    )
     @Test
     fun disposeRunner_delegateDereferenced() {
-        val runner = activityTransitionAnimator.createRunner(controller)
+        val runner = activityTransitionAnimator.createEphemeralRunner(controller)
         assertNotNull(runner.delegate)
         runner.dispose()
         waitForIdleSync()
         assertNull(runner.delegate)
     }
 
-    private fun fakeWindow(): RemoteAnimationTarget {
+    private fun controllerFactory(
+        cookie: ActivityTransitionAnimator.TransitionCookie =
+            mock(ActivityTransitionAnimator.TransitionCookie::class.java),
+        component: ComponentName? = mock(ComponentName::class.java),
+    ): ActivityTransitionAnimator.ControllerFactory {
+        return object : ActivityTransitionAnimator.ControllerFactory(cookie, component) {
+            override fun createController(forLaunch: Boolean) =
+                object : DelegateTransitionAnimatorController(controller) {
+                    override val isLaunching: Boolean
+                        get() = forLaunch
+                }
+        }
+    }
+
+    private fun fakeWindow(mode: Int = MODE_OPENING): RemoteAnimationTarget {
         val bounds = Rect(10 /* left */, 20 /* top */, 30 /* right */, 40 /* bottom */)
         val taskInfo = ActivityManager.RunningTaskInfo()
         taskInfo.topActivity = ComponentName("com.android.systemui", "FakeActivity")
@@ -404,12 +488,12 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
 
         return RemoteAnimationTarget(
             0,
-            RemoteAnimationTarget.MODE_OPENING,
+            mode,
             SurfaceControl(),
             false,
             Rect(),
             Rect(),
-            0,
+            1,
             Point(),
             Rect(),
             bounds,

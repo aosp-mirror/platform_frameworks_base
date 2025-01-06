@@ -19,30 +19,30 @@ package com.android.systemui.qs.tiles.impl.flashlight.domain
 import android.content.res.Resources
 import android.content.res.Resources.Theme
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.flashlight.domain.model.FlashlightTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [FlashlightTileModel] to [QSTileState]. */
 class FlashlightMapper
 @Inject
-constructor(@Main private val resources: Resources, private val theme: Theme) :
+constructor(@ShadeDisplayAware private val resources: Resources, private val theme: Theme) :
     QSTileDataToStateMapper<FlashlightTileModel> {
 
     override fun map(config: QSTileConfig, data: FlashlightTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
-            iconRes =
+            val iconRes =
                 if (data is FlashlightTileModel.FlashlightAvailable && data.isEnabled) {
                     R.drawable.qs_flashlight_icon_on
                 } else {
                     R.drawable.qs_flashlight_icon_off
                 }
 
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
 
             contentDescription = label
 

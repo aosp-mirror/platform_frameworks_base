@@ -959,6 +959,8 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
                 CONTENT_CHANGE_TYPE_CONTENT_INVALID,
                 CONTENT_CHANGE_TYPE_ERROR,
                 CONTENT_CHANGE_TYPE_ENABLED,
+                CONTENT_CHANGE_TYPE_CHECKED,
+                CONTENT_CHANGE_TYPE_EXPANDED,
                 CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION,
             })
     public @interface ContentChangeTypes {}
@@ -1241,6 +1243,16 @@ public final class AccessibilityEvent extends AccessibilityRecord implements Par
             case CONTENT_CHANGE_TYPE_ERROR: return "CONTENT_CHANGE_TYPE_ERROR";
             case CONTENT_CHANGE_TYPE_ENABLED: return "CONTENT_CHANGE_TYPE_ENABLED";
             default: {
+                if (Flags.triStateChecked()) {
+                    if (type == CONTENT_CHANGE_TYPE_CHECKED) {
+                        return "CONTENT_CHANGE_TYPE_CHECKED";
+                    }
+                }
+                if (Flags.a11yExpansionStateApi()) {
+                    if (type == CONTENT_CHANGE_TYPE_EXPANDED) {
+                        return "CONTENT_CHANGE_TYPE_EXPANDED";
+                    }
+                }
                 if (Flags.supplementalDescription()) {
                     if (type == CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION) {
                         return "CONTENT_CHANGE_TYPE_SUPPLEMENTAL_DESCRIPTION";

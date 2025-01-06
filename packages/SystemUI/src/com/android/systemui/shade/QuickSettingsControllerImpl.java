@@ -68,7 +68,6 @@ import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor;
 import com.android.systemui.dump.DumpManager;
 import com.android.systemui.fragments.FragmentHostManager;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager;
 import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager;
 import com.android.systemui.plugins.FalsingManager;
@@ -98,7 +97,7 @@ import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ScrimController;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
-import com.android.systemui.statusbar.phone.StatusBarTouchableRegionManager;
+import com.android.systemui.statusbar.phone.ShadeTouchableRegionManager;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
@@ -114,6 +113,7 @@ import kotlin.Unit;
 import java.io.PrintWriter;
 
 import javax.inject.Inject;
+import javax.inject.Provider;
 
 /** Handles QuickSettings touch handling, expansion and animation state
  * TODO (b/264460656) make this dumpable
@@ -140,7 +140,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private final LockscreenShadeTransitionController mLockscreenShadeTransitionController;
     private final NotificationShadeDepthController mDepthController;
     private final ShadeHeaderController mShadeHeaderController;
-    private final StatusBarTouchableRegionManager mStatusBarTouchableRegionManager;
+    private final ShadeTouchableRegionManager mShadeTouchableRegionManager;
+    private final Provider<StatusBarLongPressGestureDetector> mStatusBarLongPressGestureDetector;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardBypassController mKeyguardBypassController;
     private final NotificationRemoteInputManager mRemoteInputManager;
@@ -315,7 +316,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             LockscreenShadeTransitionController lockscreenShadeTransitionController,
             NotificationShadeDepthController notificationShadeDepthController,
             ShadeHeaderController shadeHeaderController,
-            StatusBarTouchableRegionManager statusBarTouchableRegionManager,
+            ShadeTouchableRegionManager shadeTouchableRegionManager,
+            Provider<StatusBarLongPressGestureDetector> statusBarLongPressGestureDetector,
             KeyguardStateController keyguardStateController,
             KeyguardBypassController keyguardBypassController,
             ScrimController scrimController,
@@ -363,7 +365,8 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         mLockscreenShadeTransitionController = lockscreenShadeTransitionController;
         mDepthController = notificationShadeDepthController;
         mShadeHeaderController = shadeHeaderController;
-        mStatusBarTouchableRegionManager = statusBarTouchableRegionManager;
+        mShadeTouchableRegionManager = shadeTouchableRegionManager;
+        mStatusBarLongPressGestureDetector = statusBarLongPressGestureDetector;
         mKeyguardStateController = keyguardStateController;
         mKeyguardBypassController = keyguardBypassController;
         mScrimController = scrimController;
@@ -691,7 +694,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 /* right= */ (int) mQsFrame.getX() + mQsFrame.getWidth(),
                 /* bottom= */ headerBottom + frameTop);
         // Also allow QS to intercept if the touch is near the notch.
-        mStatusBarTouchableRegionManager.updateRegionForNotch(mInterceptRegion);
+        mShadeTouchableRegionManager.updateRegionForNotch(mInterceptRegion);
         final boolean onHeader = mInterceptRegion.contains((int) x, (int) y);
 
         if (getExpanded()) {
@@ -1196,7 +1199,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                 !mSplitShadeEnabled && qsExpansionFraction == 0 && qsPanelBottomY > 0;
         final boolean qsVisible = qsExpansionFraction > 0;
         final boolean qsOrQqsVisible = qqsVisible || qsVisible;
-        checkCorrectScrimVisibility(qsExpansionFraction);
 
         int top = calculateTopClippingBound(qsPanelBottomY);
         int bottom = calculateBottomClippingBound(top);
@@ -1397,21 +1399,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
             return -mAmbientState.getStackTopMargin();
         } else {
             return qsTop - mNotificationStackScrollLayoutController.getTop();
-        }
-    }
-
-    private void checkCorrectScrimVisibility(float expansionFraction) {
-        // issues with scrims visible on keyguard occur only in split shade
-        if (mSplitShadeEnabled) {
-            // TODO (b/265193930): remove dependency on NPVC
-            boolean keyguardViewsVisible = mBarState == KEYGUARD
-                            && mPanelViewControllerLazy.get().getKeyguardOnlyContentAlpha() == 1;
-            // expansionFraction == 1 means scrims are fully visible as their size/visibility depend
-            // on QS expansion
-            if (expansionFraction == 1 && keyguardViewsVisible) {
-                Log.wtf(TAG,
-                        "Incorrect state, scrim is visible at the same time when clock is visible");
-            }
         }
     }
 
@@ -1648,6 +1635,10 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         if (isSplitShadeAndTouchXOutsideQs(event.getX())) {
             return false;
         }
+        boolean isInStatusBar = event.getY(event.getActionIndex()) < mStatusBarMinHeight;
+        if (ShadeExpandsOnStatusBarLongPress.isEnabled() && isInStatusBar) {
+            mStatusBarLongPressGestureDetector.get().handleTouch(event);
+        }
         final int action = event.getActionMasked();
         boolean collapsedQs = !getExpanded() && !mSplitShadeEnabled;
         boolean expandedShadeCollapsedQs = mShadeExpandedFraction == 1f
@@ -1684,9 +1675,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         if (action == MotionEvent.ACTION_DOWN && isFullyCollapsed && isExpansionEnabled()) {
             mTwoFingerExpandPossible = true;
         }
-        if (mTwoFingerExpandPossible && isOpenQsEvent(event)
-                && event.getY(event.getActionIndex())
-                < mStatusBarMinHeight) {
+        if (mTwoFingerExpandPossible && isOpenQsEvent(event) && isInStatusBar) {
             mMetricsLogger.count(COUNTER_PANEL_OPEN_QS, 1);
             setExpandImmediate(true);
             mNotificationStackScrollLayoutController.setShouldShowShelfOnly(!mSplitShadeEnabled);
@@ -1822,16 +1811,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                             "onQsIntercept: down action, QS partially expanded/collapsed");
                     return true;
                 }
-                // TODO (b/265193930): remove dependency on NPVC
-                if (mPanelViewControllerLazy.get().isKeyguardShowing()
-                        && shouldQuickSettingsIntercept(mInitialTouchX, mInitialTouchY, 0)) {
-                    // Dragging down on the lockscreen statusbar should prohibit other interactions
-                    // immediately, otherwise we'll wait on the touchslop. This is to allow
-                    // dragging down to expanded quick settings directly on the lockscreen.
-                    if (!MigrateClocksToBlueprint.isEnabled()) {
-                        mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
-                    }
-                }
                 if (mExpansionAnimator != null) {
                     mInitialHeightOnTouch = mExpansionHeight;
                     mShadeLog.logMotionEvent(event,
@@ -1873,9 +1852,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
                         && Math.abs(h) > Math.abs(x - mInitialTouchX)
                         && shouldQuickSettingsIntercept(
                         mInitialTouchX, mInitialTouchY, h)) {
-                    if (!MigrateClocksToBlueprint.isEnabled()) {
-                        mPanelView.getParent().requestDisallowInterceptTouchEvent(true);
-                    }
                     mShadeLog.onQsInterceptMoveQsTrackingEnabled(h);
                     setTracking(true);
                     traceQsJank(true, false);

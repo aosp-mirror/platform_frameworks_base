@@ -53,8 +53,8 @@ import kotlinx.coroutines.launch
 /**
  * Controls App-to-Web education end to end.
  *
- * Listen to usages of App-to-Web, calls an api to check if the education
- * should be shown and controls education UI.
+ * Listen to usages of App-to-Web, calls an api to check if the education should be shown and
+ * controls education UI.
  */
 @OptIn(kotlinx.coroutines.FlowPreview::class)
 @kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -88,8 +88,9 @@ class AppToWebEducationController(
                                 .debounce(APP_TO_WEB_EDUCATION_DELAY_MILLIS)
                                 .filter { captionState ->
                                     captionState !is CaptionState.NoCaption &&
-                                            appToWebEducationFilter
-                                                .shouldShowAppToWebEducation(captionState)
+                                        appToWebEducationFilter.shouldShowAppToWebEducation(
+                                            captionState
+                                        )
                                 }
                         }
                     }
@@ -104,18 +105,23 @@ class AppToWebEducationController(
 
             applicationCoroutineScope.launch {
                 if (isFeatureUsed()) return@launch
-                windowDecorCaptionHandleRepository.appToWebUsageFlow
-                    .collect {
-                        // If user utilizes App-to-Web, mark user has used the feature
-                        appToWebEducationDatastoreRepository
-                            .updateFeatureUsedTimestampMillis(isViewed = true)
-                    }
+                windowDecorCaptionHandleRepository.appToWebUsageFlow.collect {
+                    // If user utilizes App-to-Web, mark user has used the feature
+                    appToWebEducationDatastoreRepository.updateFeatureUsedTimestampMillis(
+                        isViewed = true
+                    )
+                }
             }
         }
     }
 
     private inline fun runIfEducationFeatureEnabled(block: () -> Unit) {
-        if (canEnterDesktopMode(context) && Flags.enableDesktopWindowingAppToWebEducation()) block()
+        if (
+            canEnterDesktopMode(context) &&
+                Flags.enableDesktopWindowingAppToWebEducationIntegration()
+        ) {
+            block()
+        }
     }
 
     private fun showEducation(captionState: CaptionState, colorScheme: EducationColorScheme) {
@@ -126,10 +132,8 @@ class AppToWebEducationController(
                 val appHandleBounds = captionState.globalAppHandleBounds
                 val educationWidth =
                     loadDimensionPixelSize(R.dimen.desktop_windowing_education_promo_width)
-                educationGlobalCoordinates = Point(
-                    appHandleBounds.centerX() - educationWidth / 2,
-                    appHandleBounds.bottom
-                )
+                educationGlobalCoordinates =
+                    Point(appHandleBounds.centerX() - educationWidth / 2, appHandleBounds.bottom)
                 taskId = captionState.runningTaskInfo.taskId
             }
 
@@ -152,19 +156,22 @@ class AppToWebEducationController(
                 viewGlobalCoordinates = educationGlobalCoordinates,
                 educationText = getString(R.string.desktop_windowing_app_to_web_education_text),
                 widthId = R.dimen.desktop_windowing_education_promo_width,
-                heightId = R.dimen.desktop_windowing_education_promo_height
+                heightId = R.dimen.desktop_windowing_education_promo_height,
             )
 
         windowingEducationViewController.showEducation(
-            viewConfig = educationConfig, taskId = taskId)
+            viewConfig = educationConfig,
+            taskId = taskId,
+        )
     }
 
     private fun educationColorScheme(captionState: CaptionState): EducationColorScheme? {
-        val taskInfo: RunningTaskInfo = when (captionState) {
-            is CaptionState.AppHandle -> captionState.runningTaskInfo
-            is CaptionState.AppHeader -> captionState.runningTaskInfo
-            else -> return null
-        }
+        val taskInfo: RunningTaskInfo =
+            when (captionState) {
+                is CaptionState.AppHandle -> captionState.runningTaskInfo
+                is CaptionState.AppHeader -> captionState.runningTaskInfo
+                else -> return null
+            }
 
         val colorScheme = decorThemeUtil.getColorScheme(taskInfo)
         val tooltipContainerColor = colorScheme.surfaceBright.toArgb()
@@ -178,8 +185,7 @@ class AppToWebEducationController(
      */
     private fun isEducationViewLimitReachedFlow(): Flow<Boolean> =
         appToWebEducationDatastoreRepository.dataStoreFlow
-            .map { preferences ->
-                appToWebEducationFilter.isEducationViewLimitReached(preferences)}
+            .map { preferences -> appToWebEducationFilter.isEducationViewLimitReached(preferences) }
             .distinctUntilChanged()
 
     /**
@@ -199,9 +205,6 @@ class AppToWebEducationController(
     companion object {
         const val TAG = "AppToWebEducationController"
         val APP_TO_WEB_EDUCATION_DELAY_MILLIS: Long
-            get() = SystemProperties.getLong(
-                "persist.windowing_app_handle_education_delay",
-                3000L
-            )
+            get() = SystemProperties.getLong("persist.windowing_app_handle_education_delay", 3000L)
     }
 }

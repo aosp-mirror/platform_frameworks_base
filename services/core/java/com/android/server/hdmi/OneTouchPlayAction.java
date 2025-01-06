@@ -152,7 +152,8 @@ final class OneTouchPlayAction extends HdmiCecFeatureAction {
         // If the device wasn´t the active source yet,
         // this makes it the active source and wakes it up.
         mSource.mService.setAndBroadcastActiveSourceFromOneDeviceType(
-                mTargetAddress, getSourcePath(), "OneTouchPlayAction#broadcastActiveSource()");
+                mTargetAddress, getServicePath(),
+                "OneTouchPlayAction#broadcastActiveSource()");
         // When OneTouchPlay is called, client side should be responsible to send out the intent
         // of which internal source, for example YouTube, it would like to switch to.
         // Here we only update the active port and the active source records in the local

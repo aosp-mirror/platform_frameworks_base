@@ -19,7 +19,6 @@ package com.android.systemui.communal.ui.viewmodel
 import android.appwidget.AppWidgetProviderInfo
 import android.content.ComponentName
 import android.os.UserHandle
-import android.view.View
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TransitionKey
@@ -29,6 +28,7 @@ import com.android.systemui.communal.domain.model.CommunalContentModel
 import com.android.systemui.communal.shared.model.EditModeState
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.keyguard.shared.model.KeyguardState
+import com.android.systemui.media.controls.ui.controller.MediaCarouselController
 import com.android.systemui.media.controls.ui.view.MediaHost
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
 import com.android.systemui.util.kotlin.BooleanFlowOperators.not
@@ -43,6 +43,7 @@ abstract class BaseCommunalViewModel(
     val communalSceneInteractor: CommunalSceneInteractor,
     private val communalInteractor: CommunalInteractor,
     val mediaHost: MediaHost,
+    val mediaCarouselController: MediaCarouselController,
 ) {
     val currentScene: Flow<SceneKey> = communalSceneInteractor.currentScene
 
@@ -77,9 +78,6 @@ abstract class BaseCommunalViewModel(
      * vertical, which the lazy horizontal grid does not handle.
      */
     val glanceableTouchAvailable: Flow<Boolean> = anyOf(not(isTouchConsumed), isNestedScrolling)
-
-    /** Accessibility delegate to be set on CommunalAppWidgetHostView. */
-    open val widgetAccessibilityDelegate: View.AccessibilityDelegate? = null
 
     /**
      * The up-to-date value of the grid scroll offset. persisted to interactor on
@@ -178,7 +176,13 @@ abstract class BaseCommunalViewModel(
      *   alongside the resize, in case resizing also requires re-ordering. This ensures the
      *   re-ordering is done in the same database transaction as the resize.
      */
-    open fun onResizeWidget(appWidgetId: Int, spanY: Int, widgetIdToRankMap: Map<Int, Int>) {}
+    open fun onResizeWidget(
+        appWidgetId: Int,
+        spanY: Int,
+        widgetIdToRankMap: Map<Int, Int>,
+        componentName: ComponentName,
+        rank: Int,
+    ) {}
 
     /** Called as the UI requests opening the widget editor with an optional preselected widget. */
     open fun onOpenWidgetEditor(shouldOpenWidgetPickerOnStart: Boolean = false) {}
@@ -187,7 +191,7 @@ abstract class BaseCommunalViewModel(
     open fun onDismissCtaTile() {}
 
     /** Called as the user starts dragging a widget to reorder. */
-    open fun onReorderWidgetStart() {}
+    open fun onReorderWidgetStart(draggingItemKey: String) {}
 
     /** Called as the user finishes dragging a widget to reorder. */
     open fun onReorderWidgetEnd() {}

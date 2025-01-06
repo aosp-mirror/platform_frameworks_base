@@ -29,6 +29,7 @@ const i18n = "i18n.module.public.api"
 const virtualization = "framework-virtualization"
 const location = "framework-location"
 const platformCrashrecovery = "framework-platformcrashrecovery"
+const ondeviceintelligence = "framework-ondeviceintelligence-platform"
 
 var core_libraries_modules = []string{art, conscrypt, i18n}
 
@@ -40,7 +41,7 @@ var core_libraries_modules = []string{art, conscrypt, i18n}
 // APIs.
 // In addition, the modules in this list are allowed to contribute to test APIs
 // stubs.
-var non_updatable_modules = []string{virtualization, location, platformCrashrecovery}
+var non_updatable_modules = []string{virtualization, location, platformCrashrecovery, ondeviceintelligence}
 
 // The intention behind this soong plugin is to generate a number of "merged"
 // API-related modules that would otherwise require a large amount of very
@@ -104,7 +105,7 @@ func (a *CombinedApis) DepsMutator(ctx android.BottomUpMutatorContext) {
 
 func (a *CombinedApis) GenerateAndroidBuildActions(ctx android.ModuleContext) {
 	ctx.WalkDeps(func(child, parent android.Module) bool {
-		if _, ok := child.(java.AndroidLibraryDependency); ok && child.Name() != "framework-res" {
+		if _, ok := android.OtherModuleProvider(ctx, child, java.AndroidLibraryInfoProvider); ok && child.Name() != "framework-res" {
 			// Stubs of BCP and SSCP libraries should not have any dependencies on apps
 			// This check ensures that we do not run into circular dependencies when UNBUNDLED_BUILD_TARGET_SDK_WITH_API_FINGERPRINT=true
 			ctx.ModuleErrorf(
@@ -429,8 +430,9 @@ func createMergedFrameworkSystemServerExportableStubs(ctx android.LoadHookContex
 
 func createPublicStubsSourceFilegroup(ctx android.LoadHookContext, modules proptools.Configurable[[]string]) {
 	props := fgProps{}
-	props.Name = proptools.StringPtr("all-modules-public-stubs-source")
-	props.Device_common_srcs = createSrcs(modules, "{.public.stubs.source}")
+	props.Name = proptools.StringPtr("all-modules-public-stubs-source-exportable")
+	transformConfigurableArray(modules, "", ".stubs.source")
+	props.Device_common_srcs = createSrcs(modules, "{.exportable}")
 	props.Visibility = []string{"//frameworks/base"}
 	ctx.CreateModule(android.FileGroupFactory, &props)
 }

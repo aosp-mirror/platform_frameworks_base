@@ -24,6 +24,7 @@ import android.media.MediaRouter;
 import android.media.MediaRouter.RouteInfo;
 import android.media.projection.MediaProjectionInfo;
 import android.media.projection.MediaProjectionManager;
+import android.media.projection.StopReason;
 import android.os.Handler;
 import android.util.ArrayMap;
 
@@ -184,13 +185,13 @@ public class CastControllerImpl implements CastController {
     }
 
     @Override
-    public void stopCasting(CastDevice device) {
+    public void stopCasting(CastDevice device, @StopReason int stopReason) {
         final boolean isProjection = device.getTag() instanceof MediaProjectionInfo;
         mLogger.logStopCasting(isProjection);
         if (isProjection) {
             final MediaProjectionInfo projection = (MediaProjectionInfo) device.getTag();
             if (Objects.equals(mProjectionManager.getActiveProjectionInfo(), projection)) {
-                mProjectionManager.stopActiveProjection();
+                mProjectionManager.stopActiveProjection(stopReason);
             } else {
                 mLogger.logStopCastingNoProjection(projection);
             }

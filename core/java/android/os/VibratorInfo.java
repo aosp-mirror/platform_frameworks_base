@@ -121,7 +121,7 @@ public class VibratorInfo implements Parcelable {
      * @param qFactor                  The vibrator quality factor.
      * @param frequencyProfileLegacy   The description of the vibrator supported frequencies and max
      *                                 amplitude mappings.
-     * @param frequencyProfile       The description of the vibrator supported frequencies and
+     * @param frequencyProfile         The description of the vibrator supported frequencies and
      *                                 output acceleration mappings.
      * @param maxEnvelopeEffectSize    The maximum number of control points supported for an
      *                                 envelope effect.

@@ -30,7 +30,7 @@ import org.junit.runners.Parameterized
 /**
  * Test launching an app after cold opening camera
  *
- * To run this test: `atest FlickerTestsAppLaunch:OpenAppAfterCameraTest`
+ * To run this test: `atest FlickerTestsAppLaunch:OpenAppFromIntentColdAfterCameraTest`
  *
  * Notes: Some default assertions are inherited [OpenAppTransition]
  */

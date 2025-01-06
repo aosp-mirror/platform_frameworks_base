@@ -15,10 +15,10 @@ package com.android.systemui.shared.clocks
 
 import android.content.Context
 import android.content.res.Resources
+import android.graphics.Typeface
 import android.view.LayoutInflater
 import com.android.systemui.customization.R
-import com.android.systemui.log.core.LogLevel
-import com.android.systemui.log.core.LogcatOnlyMessageBuffer
+import com.android.systemui.log.core.MessageBuffer
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFontAxis
 import com.android.systemui.plugins.clocks.ClockFontAxisSetting
@@ -33,13 +33,20 @@ import com.android.systemui.shared.clocks.view.VerticalAlignment
 private val TAG = DefaultClockProvider::class.simpleName
 const val DEFAULT_CLOCK_ID = "DEFAULT"
 
+data class ClockContext(
+    val context: Context,
+    val resources: Resources,
+    val settings: ClockSettings,
+    val typefaceCache: TypefaceCache,
+    val messageBuffers: ClockMessageBuffers,
+    val messageBuffer: MessageBuffer,
+)
+
 /** Provides the default system clock */
 class DefaultClockProvider(
     val ctx: Context,
     val layoutInflater: LayoutInflater,
     val resources: Resources,
-    private val hasStepClockAnimation: Boolean = false,
-    private val migratedClocks: Boolean = false,
     private val isClockReactiveVariantsEnabled: Boolean = false,
 ) : ClockProvider {
     private var messageBuffers: ClockMessageBuffers? = null
@@ -56,29 +63,26 @@ class DefaultClockProvider(
         }
 
         return if (isClockReactiveVariantsEnabled) {
-            val buffer =
-                messageBuffers?.infraMessageBuffer ?: LogcatOnlyMessageBuffer(LogLevel.INFO)
-            val assets = AssetLoader(ctx, ctx, "clocks/", buffer)
-            assets.setSeedColor(settings.seedColor, null)
+            val buffers = messageBuffers ?: ClockMessageBuffers(LogUtil.DEFAULT_MESSAGE_BUFFER)
             val fontAxes = ClockFontAxis.merge(FlexClockController.FONT_AXES, settings.axes)
+            val clockSettings = settings.copy(axes = fontAxes.map { it.toSetting() })
+            val typefaceCache =
+                TypefaceCache(buffers.infraMessageBuffer, NUM_CLOCK_FONT_ANIMATION_STEPS) {
+                    FLEX_TYPEFACE
+                }
             FlexClockController(
-                ctx,
-                resources,
-                settings.copy(axes = fontAxes.map { it.toSetting() }),
-                assets,
+                ClockContext(
+                    ctx,
+                    resources,
+                    clockSettings,
+                    typefaceCache,
+                    buffers,
+                    buffers.infraMessageBuffer,
+                ),
                 FLEX_DESIGN,
-                messageBuffers,
             )
         } else {
-            DefaultClockController(
-                ctx,
-                layoutInflater,
-                resources,
-                settings,
-                hasStepClockAnimation,
-                migratedClocks,
-                messageBuffers,
-            )
+            DefaultClockController(ctx, layoutInflater, resources, settings, messageBuffers)
         }
     }
 
@@ -101,6 +105,8 @@ class DefaultClockProvider(
     }
 
     companion object {
+        const val NUM_CLOCK_FONT_ANIMATION_STEPS = 30
+
         // TODO(b/364681643): Variations for retargetted DIGITAL_CLOCK_FLEX
         val LEGACY_FLEX_LS_VARIATION =
             listOf(
@@ -117,6 +123,11 @@ class DefaultClockProvider(
                 ClockFontAxisSetting("ROND", 100f),
                 ClockFontAxisSetting("slnt", 0f),
             )
+
+        val FLEX_TYPEFACE by lazy {
+            // TODO(b/364680873): Move constant to config_clockFontFamily when shipping
+            Typeface.create("google-sans-flex-clock", Typeface.NORMAL)
+        }
 
         val FLEX_DESIGN = run {
             val largeLayer =
@@ -141,7 +152,7 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER,
+                                            VerticalAlignment.BASELINE,
                                         ),
                                     dateTimeFormat = "hh",
                                 ),
@@ -160,7 +171,7 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER,
+                                            VerticalAlignment.BASELINE,
                                         ),
                                     dateTimeFormat = "hh",
                                 ),
@@ -179,7 +190,7 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER,
+                                            VerticalAlignment.BASELINE,
                                         ),
                                     dateTimeFormat = "mm",
                                 ),
@@ -198,7 +209,7 @@ class DefaultClockProvider(
                                     alignment =
                                         DigitalAlignment(
                                             HorizontalAlignment.CENTER,
-                                            VerticalAlignment.CENTER,
+                                            VerticalAlignment.BASELINE,
                                         ),
                                     dateTimeFormat = "mm",
                                 ),

@@ -38,6 +38,15 @@ flag {
 }
 
 flag {
+    name: "usd"
+    is_exported: true
+    namespace: "wifi"
+    description: "Unsynchronized Service Discovery"
+    bug: "340878198"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "hotspot_network_connecting_state_for_details_page"
     namespace: "wifi"
     description: "Update getConnectedState in HotspotNetworkEntry so that details page displays correctly."

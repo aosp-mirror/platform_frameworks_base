@@ -197,7 +197,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
 
             val dndMode = currentModes!!.single()
             assertThat(dndMode.isActive).isFalse()
-            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false), result)
         }
 
     @Test
@@ -222,7 +222,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
                 )
 
             // then
-            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false), result)
             assertEquals(ZEN_MODE_OFF, spyZenMode.value)
             assertNull(spyConditionId.value)
         }
@@ -244,7 +244,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
             val dndMode = currentModes!!.single()
             assertThat(dndMode.isActive).isTrue()
             assertThat(zenModeRepository.getModeActiveDuration(dndMode.id)).isNull()
-            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false), result)
         }
 
     @Test
@@ -268,7 +268,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
                 )
 
             // then
-            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false), result)
             assertEquals(ZEN_MODE_IMPORTANT_INTERRUPTIONS, spyZenMode.value)
             assertNull(spyConditionId.value)
         }
@@ -285,7 +285,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
             val result = underTest.onTriggered(null)
             runCurrent()
 
-            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false), result)
             val dndMode = currentModes!!.single()
             assertThat(dndMode.isActive).isTrue()
             assertThat(zenModeRepository.getModeActiveDuration(dndMode.id))
@@ -313,7 +313,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
                 )
 
             // then
-            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled, result)
+            assertEquals(KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false), result)
             assertEquals(ZEN_MODE_IMPORTANT_INTERRUPTIONS, spyZenMode.value)
             assertEquals(conditionUri, spyConditionId.value)
         }
@@ -405,7 +405,8 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
         testScope.runTest {
             val lockScreenState by collectLastValue(underTest.lockScreenState)
 
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
+            val manualDnd = TestModeBuilder.MANUAL_DND_INACTIVE
+            zenModeRepository.addMode(manualDnd)
             runCurrent()
 
             assertThat(lockScreenState)
@@ -419,8 +420,7 @@ class DoNotDisturbQuickAffordanceConfigTest : SysuiTestCase() {
                     )
                 )
 
-            zenModeRepository.removeMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(manualDnd)
             runCurrent()
 
             assertThat(lockScreenState)

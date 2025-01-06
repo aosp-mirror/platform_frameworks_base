@@ -18,7 +18,7 @@ package com.android.keyguard.dagger;
 
 import dagger.Module;
 
-/** Dagger module for {@link KeyguardUserSwitcherComponent}. */
+/** Dagger module for {@link KeyguardQsUserSwitchComponent}. */
 @Module
 public abstract class KeyguardUserSwitcherModule {
 }

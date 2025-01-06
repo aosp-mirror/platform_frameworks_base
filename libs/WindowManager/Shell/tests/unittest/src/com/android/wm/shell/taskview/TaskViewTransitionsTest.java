@@ -83,6 +83,7 @@ public class TaskViewTransitionsTest extends ShellTestCase {
     @Mock
     WindowContainerToken mToken;
 
+    TaskViewRepository mTaskViewRepository;
     TaskViewTransitions mTaskViewTransitions;
 
     public TaskViewTransitionsTest(FlagsParameterization flags) {
@@ -102,7 +103,8 @@ public class TaskViewTransitionsTest extends ShellTestCase {
         mTaskInfo.taskId = 314;
         mTaskInfo.taskDescription = mock(ActivityManager.TaskDescription.class);
 
-        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions));
+        mTaskViewRepository = new TaskViewRepository();
+        mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository));
         mTaskViewTransitions.addTaskView(mTaskViewTaskController);
         when(mTaskViewTaskController.getTaskInfo()).thenReturn(mTaskInfo);
     }

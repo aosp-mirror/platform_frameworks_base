@@ -22,15 +22,12 @@ import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.res.Configuration;
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 
 import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.transition.Transitions;
@@ -38,7 +35,6 @@ import com.android.wm.shell.transition.Transitions;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -54,7 +50,7 @@ import java.util.function.Consumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class RestartDialogWindowManagerTest extends ShellTestCase {
+public class RestartDialogWindowManagerTest extends CompatUIShellTestCase {
 
     @Mock
     private SyncTransactionQueue mSyncTransactionQueue;
@@ -65,10 +61,6 @@ public class RestartDialogWindowManagerTest extends ShellTestCase {
     @Mock private  Consumer<Pair<TaskInfo, ShellTaskOrganizer.TaskListener>> mOnDismissCallback;
     private RestartDialogWindowManager mWindowManager;
     private TaskInfo mTaskInfo;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {

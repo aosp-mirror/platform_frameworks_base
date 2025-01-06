@@ -49,6 +49,7 @@ import android.os.SystemClock;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.SnoozeCriterion;
 import android.service.notification.StatusBarNotification;
+import android.util.Log;
 import android.view.ContentInfo;
 
 import androidx.annotation.NonNull;
@@ -64,7 +65,9 @@ import com.android.systemui.statusbar.notification.collection.listbuilder.plugga
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifDismissInterceptor;
 import com.android.systemui.statusbar.notification.collection.notifcollection.NotifLifetimeExtender;
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus;
 import com.android.systemui.statusbar.notification.icon.IconPack;
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
@@ -193,6 +196,10 @@ public final class NotificationEntry extends ListEntry {
      * Whether this notification has ever been a non-sticky HUN.
      */
     private boolean mIsDemoted = false;
+
+    // TODO(b/377565433): Move into NotificationContentModel during/after
+    //  NotificationRowContentBinderRefactor.
+    private PromotedNotificationContentModel mPromotedNotificationContentModel;
 
     /**
      * True if both
@@ -659,7 +666,16 @@ public final class NotificationEntry extends ListEntry {
     }
 
     public boolean isRowPinned() {
-        return row != null && row.isPinned();
+        return getPinnedStatus().isPinned();
+    }
+
+    /** Returns this notification's current pinned status. */
+    public PinnedStatus getPinnedStatus() {
+        if (row != null) {
+            return row.getPinnedStatus();
+        } else {
+            return PinnedStatus.NotPinned;
+        }
     }
 
     /**
@@ -669,8 +685,8 @@ public final class NotificationEntry extends ListEntry {
         return row != null && row.isPinnedAndExpanded();
     }
 
-    public void setRowPinned(boolean pinned) {
-        if (row != null) row.setPinned(pinned);
+    public void setRowPinnedStatus(PinnedStatus pinnedStatus) {
+        if (row != null) row.setPinnedStatus(pinnedStatus);
     }
 
     public boolean isRowHeadsUp() {
@@ -1061,6 +1077,32 @@ public final class NotificationEntry extends ListEntry {
         this.mHeadsUpStatusBarTextPublic.setValue(headsUpStatusBarModel.getPublicText());
     }
 
+    /**
+     * Gets the content needed to render this notification as a promoted notification on various
+     * surfaces (like status bar chips and AOD).
+     */
+    public PromotedNotificationContentModel getPromotedNotificationContentModel() {
+        if (PromotedNotificationContentModel.featureFlagEnabled()) {
+            return mPromotedNotificationContentModel;
+        } else {
+            Log.wtf(TAG, "getting promoted content without feature flag enabled", new Throwable());
+            return null;
+        }
+    }
+
+    /**
+     * Sets the content needed to render this notification as a promoted notification on various
+     * surfaces (like status bar chips and AOD).
+     */
+    public void setPromotedNotificationContentModel(
+            @Nullable PromotedNotificationContentModel promotedNotificationContentModel) {
+        if (PromotedNotificationContentModel.featureFlagEnabled()) {
+            this.mPromotedNotificationContentModel = promotedNotificationContentModel;
+        } else {
+            Log.wtf(TAG, "setting promoted content without feature flag enabled", new Throwable());
+        }
+    }
+
     /** Information about a suggestion that is being edited. */
     public static class EditedSuggestionInfo {
 
@@ -1101,4 +1143,6 @@ public final class NotificationEntry extends ListEntry {
     private static final long INITIALIZATION_DELAY = 400;
     private static final long NOT_LAUNCHED_YET = -LAUNCH_COOLDOWN;
     private static final int COLOR_INVALID = 1;
+
+    private static final String TAG = "NotificationEntry";
 }

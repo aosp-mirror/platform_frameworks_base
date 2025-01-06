@@ -16,6 +16,7 @@
 
 package android.app;
 
+import static android.app.Flags.FLAG_PIC_ISOLATE_CACHE_BY_UID;
 import static android.app.PropertyInvalidatedCache.NONCE_UNSET;
 import static android.app.PropertyInvalidatedCache.MODULE_BLUETOOTH;
 import static android.app.PropertyInvalidatedCache.MODULE_SYSTEM;
@@ -24,14 +25,18 @@ import static android.app.PropertyInvalidatedCache.NonceStore.INVALID_NONCE_INDE
 import static com.android.internal.os.Flags.FLAG_APPLICATION_SHARED_MEMORY_ENABLED;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import android.app.PropertyInvalidatedCache.Args;
 import android.annotation.SuppressLint;
+import android.app.PropertyInvalidatedCache.Args;
+import android.app.PropertyInvalidatedCache.NonceWatcher;
+import android.app.PropertyInvalidatedCache.NonceStore;
+import android.os.Binder;
 import com.android.internal.os.ApplicationSharedMemory;
 
 import android.platform.test.annotations.IgnoreUnderRavenwood;
@@ -42,10 +47,14 @@ import android.platform.test.ravenwood.RavenwoodRule;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.os.ApplicationSharedMemory;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+
+import java.util.concurrent.TimeUnit;
 
 /**
  * Test for verifying the behavior of {@link PropertyInvalidatedCache}.  This test does
@@ -58,6 +67,7 @@ import org.junit.Test;
  */
 @SmallTest
 public class PropertyInvalidatedCacheTests {
+    @Rule
     public final CheckFlagsRule mCheckFlagsRule =
             DeviceFlagsValueProvider.createCheckFlagsRule();
 
@@ -184,38 +194,38 @@ public class PropertyInvalidatedCacheTests {
                         new ServerQuery(tester));
 
         // Caches are enabled upon creation.
-        assertEquals(false, cache1.getDisabledState());
-        assertEquals(false, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertFalse(cache1.isDisabled());
+        assertFalse(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Disable the cache1 instance.  Only cache1 is disabled
         cache1.disableInstance();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(false, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertFalse(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Disable cache1.  This will disable cache1 and cache2 because they share the
         // same name.  cache3 has a different name and will not be disabled.
         cache1.disableLocal();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(true, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertTrue(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Create a new cache1.  Verify that the new instance is disabled.
         cache1 = new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
                 new ServerQuery(tester));
-        assertEquals(true, cache1.getDisabledState());
+        assertTrue(cache1.isDisabled());
 
         // Remove the record of caches being locally disabled.  This is a clean-up step.
         cache1.forgetDisableLocal();
-        assertEquals(true, cache1.getDisabledState());
-        assertEquals(true, cache2.getDisabledState());
-        assertEquals(false, cache3.getDisabledState());
+        assertTrue(cache1.isDisabled());
+        assertTrue(cache2.isDisabled());
+        assertFalse(cache3.isDisabled());
 
         // Create a new cache1.  Verify that the new instance is not disabled.
         cache1 = new PropertyInvalidatedCache<>(4, MODULE, API, "cache1",
                 new ServerQuery(tester));
-        assertEquals(false, cache1.getDisabledState());
+        assertFalse(cache1.isDisabled());
     }
 
     private static class TestQuery
@@ -226,7 +236,12 @@ public class PropertyInvalidatedCacheTests {
         @Override
         public String apply(Integer qv) {
             mRecomputeCount += 1;
-            return "foo" + qv.toString();
+            // Special case for testing caches of nulls.  Integers in the range 30-40 return null.
+            if (qv >= 30 && qv < 40) {
+                return null;
+            } else {
+                return "foo" + qv.toString();
+            }
         }
 
         int getRecomputeCount() {
@@ -265,7 +280,7 @@ public class PropertyInvalidatedCacheTests {
     public void testCacheRecompute() {
         TestCache cache = new TestCache();
         cache.invalidateCache();
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
@@ -368,15 +383,15 @@ public class PropertyInvalidatedCacheTests {
     @Test
     public void testLocalProcessDisable() {
         TestCache cache = new TestCache();
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         cache.invalidateCache();
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
         assertEquals("foo5", cache.query(5));
         assertEquals(1, cache.getRecomputeCount());
-        assertEquals(cache.isDisabled(), false);
+        assertFalse(cache.isDisabled());
         cache.disableLocal();
-        assertEquals(cache.isDisabled(), true);
+        assertTrue(cache.isDisabled());
         assertEquals("foo5", cache.query(5));
         assertEquals("foo5", cache.query(5));
         assertEquals(3, cache.getRecomputeCount());
@@ -455,8 +470,9 @@ public class PropertyInvalidatedCacheTests {
     // Test the Args-style constructor.
     @Test
     public void testArgsConstructor() {
-        // Create a cache with a maximum of four entries.
-        TestCache cache = new TestCache(new Args(MODULE_TEST).api("init1").maxEntries(4),
+        // Create a cache with a maximum of four entries and non-isolated UIDs.
+        TestCache cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).isolateUids(false).api("init1"),
                 new TestQuery());
 
         cache.invalidateCache();
@@ -480,6 +496,62 @@ public class PropertyInvalidatedCacheTests {
         }
     }
 
+    // Verify that NonceWatcher change reporting works properly
+    @Test
+    public void testNonceWatcherChanged() {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(MODULE_SYSTEM, "watcher1");
+        sysCache.testPropertyName();
+
+        try (NonceWatcher watcher1 = sysCache.getNonceWatcher()) {
+
+            // The property has never been invalidated so it is still unset.
+            assertFalse(watcher1.isChanged());
+
+            // Invalidate the cache.  The first call to isChanged will return true but the second
+            // call will return false;
+            sysCache.invalidateCache();
+            assertTrue(watcher1.isChanged());
+            assertFalse(watcher1.isChanged());
+
+            // Invalidate the cache.  The first call to isChanged will return true but the second
+            // call will return false;
+            sysCache.invalidateCache();
+            sysCache.invalidateCache();
+            assertTrue(watcher1.isChanged());
+            assertFalse(watcher1.isChanged());
+
+            NonceWatcher watcher2 = sysCache.getNonceWatcher();
+            // This watcher return isChanged() immediately because the nonce is not UNSET.
+            assertTrue(watcher2.isChanged());
+        }
+    }
+
+    // Verify that NonceWatcher wait-for-change works properly
+    @Test
+    public void testNonceWatcherWait() throws Exception {
+        // Create a cache that will write a system nonce.
+        TestCache sysCache = new TestCache(MODULE_TEST, "watcher1");
+
+        // Use the watcher outside a try-with-resources block.
+        NonceWatcher watcher1 = sysCache.getNonceWatcher();
+
+        // Invalidate the cache and then "wait".
+        sysCache.invalidateCache();
+        assertEquals(watcher1.waitForChange(), 1);
+
+        // Invalidate the cache three times and then "wait".
+        sysCache.invalidateCache();
+        sysCache.invalidateCache();
+        sysCache.invalidateCache();
+        assertEquals(watcher1.waitForChange(), 3);
+
+        // Wait for a change.  It won't happen, but the code will time out after 10ms.
+        assertEquals(watcher1.waitForChange(10, TimeUnit.MILLISECONDS), 0);
+
+        watcher1.close();
+    }
+
     // Verify the behavior of shared memory nonce storage.  This does not directly test the cache
     // storing nonces in shared memory.
     @RequiresFlagsEnabled(FLAG_APPLICATION_SHARED_MEMORY_ENABLED)
@@ -492,10 +564,8 @@ public class PropertyInvalidatedCacheTests {
 
         // Create a server-side store and a client-side store.  The server's store is mutable and
         // the client's store is not mutable.
-        PropertyInvalidatedCache.NonceStore server =
-                new PropertyInvalidatedCache.NonceStore(shmem.getSystemNonceBlock(), true);
-        PropertyInvalidatedCache.NonceStore client =
-                new PropertyInvalidatedCache.NonceStore(shmem.getSystemNonceBlock(), false);
+        NonceStore server = new NonceStore(shmem.getSystemNonceBlock(), true);
+        NonceStore client = new NonceStore(shmem.getSystemNonceBlock(), false);
 
         final String name1 = "name1";
         assertEquals(server.getHandleForName(name1), INVALID_NONCE_INDEX);
@@ -569,5 +639,119 @@ public class PropertyInvalidatedCacheTests {
         } catch (IllegalArgumentException e) {
             // Expected exception.
         }
+    }
+
+    // Verify that a cache created with isolatedUids(true) separates out the results.
+    @RequiresFlagsEnabled(FLAG_PIC_ISOLATE_CACHE_BY_UID)
+    @Test
+    public void testIsolatedUids() {
+        TestCache cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).isolateUids(true).api("testIsolatedUids").testMode(true),
+                new TestQuery());
+        cache.invalidateCache();
+        final int uid1 = 1;
+        final int uid2 = 2;
+
+        long token = Binder.setCallingWorkSourceUid(uid1);
+        try {
+            // Populate the cache for user 1
+            assertEquals("foo5", cache.query(5));
+            assertEquals(1, cache.getRecomputeCount());
+            assertEquals("foo5", cache.query(5));
+            assertEquals(1, cache.getRecomputeCount());
+            assertEquals("foo6", cache.query(6));
+            assertEquals(2, cache.getRecomputeCount());
+
+            // Populate the cache for user 2.  User 1 values are not reused.
+            Binder.setCallingWorkSourceUid(uid2);
+            assertEquals("foo5", cache.query(5));
+            assertEquals(3, cache.getRecomputeCount());
+            assertEquals("foo5", cache.query(5));
+            assertEquals(3, cache.getRecomputeCount());
+
+            // Verify that the cache for user 1 is still populated.
+            Binder.setCallingWorkSourceUid(uid1);
+            assertEquals("foo5", cache.query(5));
+            assertEquals(3, cache.getRecomputeCount());
+
+        } finally {
+            Binder.restoreCallingWorkSource(token);
+        }
+
+        // Repeat the test with a non-isolated cache.
+        cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).isolateUids(false).api("testIsolatedUids2").testMode(true),
+                new TestQuery());
+        cache.invalidateCache();
+        token = Binder.setCallingWorkSourceUid(uid1);
+        try {
+            // Populate the cache for user 1
+            assertEquals("foo5", cache.query(5));
+            assertEquals(1, cache.getRecomputeCount());
+            assertEquals("foo5", cache.query(5));
+            assertEquals(1, cache.getRecomputeCount());
+            assertEquals("foo6", cache.query(6));
+            assertEquals(2, cache.getRecomputeCount());
+
+            // Populate the cache for user 2.  User 1 values are reused.
+            Binder.setCallingWorkSourceUid(uid2);
+            assertEquals("foo5", cache.query(5));
+            assertEquals(2, cache.getRecomputeCount());
+            assertEquals("foo5", cache.query(5));
+            assertEquals(2, cache.getRecomputeCount());
+
+            // Verify that the cache for user 1 is still populated.
+            Binder.setCallingWorkSourceUid(uid1);
+            assertEquals("foo5", cache.query(5));
+            assertEquals(2, cache.getRecomputeCount());
+
+        } finally {
+            Binder.restoreCallingWorkSource(token);
+        }
+    }
+
+    @Test
+    public void testCachingNulls() {
+        TestCache cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).api("testCachingNulls").cacheNulls(true),
+                new TestQuery());
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+
+        cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).api("testCachingNulls").cacheNulls(false),
+                new TestQuery());
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        // The recompute is 4 because nulls were not cached.
+        assertEquals(4, cache.getRecomputeCount());
+
+        // Verify that the default is not to cache nulls.
+        cache = new TestCache(new Args(MODULE_TEST)
+                .maxEntries(4).api("testCachingNulls"),
+                new TestQuery());
+        cache.invalidateCache();
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        assertEquals(3, cache.getRecomputeCount());
+        assertEquals("foo1", cache.query(1));
+        assertEquals("foo2", cache.query(2));
+        assertEquals(null, cache.query(30));
+        // The recompute is 4 because nulls were not cached.
+        assertEquals(4, cache.getRecomputeCount());
     }
 }

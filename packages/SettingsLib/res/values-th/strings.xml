@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"ใช้งานอยู่ (เฉพาะข้างซ้าย)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"ใช้งานอยู่ (เฉพาะข้างขวา)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"ใช้งานอยู่ (ข้างซ้ายและขวา)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"อัปเดตเสียงแวดล้อมไม่ได้"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"ใช้งานอยู่ (สื่อเท่านั้น) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"ใช้งานอยู่ (สื่อเท่านั้น) แบตเตอรี่ข้างซ้าย: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, ข้างขวา: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"เชื่อมต่อแล้ว (รองรับการแชร์เสียง) แบตเตอรี่ <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g>"</string>
@@ -304,7 +305,7 @@
     <string name="bluetooth_select_avrcp_version_dialog_title" msgid="7846922290083709633">"เลือกเวอร์ชันของบลูทูธ AVRCP"</string>
     <string name="bluetooth_select_map_version_string" msgid="526308145174175327">"เวอร์ชันของบลูทูธ MAP"</string>
     <string name="bluetooth_select_map_version_dialog_title" msgid="7085934373987428460">"เลือกเวอร์ชันของบลูทูธ MAP"</string>
-    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ตัวแปลงสัญญาณเสียงบลูทูธ"</string>
+    <string name="bluetooth_select_a2dp_codec_type" msgid="952001408455456494">"ตัวแปลงรหัสเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_type_dialog_title" msgid="7510542404227225545">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate" msgid="1638623076480928191">"อัตราตัวอย่างเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_sample_rate_dialog_title" msgid="5876305103137067798">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: อัตราตัวอย่าง"</string>
@@ -313,7 +314,7 @@
     <string name="bluetooth_select_a2dp_codec_bits_per_sample_dialog_title" msgid="4898693684282596143">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: บิตต่อตัวอย่าง"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode" msgid="364277285688014427">"โหมดช่องสัญญาณเสียงบลูทูธ"</string>
     <string name="bluetooth_select_a2dp_codec_channel_mode_dialog_title" msgid="2076949781460359589">"ทริกเกอร์การเลือกตัวแปลงรหัส\nเสียงบลูทูธ: โหมดช่องสัญญาณ"</string>
-    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ตัวแปลงสัญญาณเสียงบลูทูธที่ใช้ LDAC: คุณภาพการเล่น"</string>
+    <string name="bluetooth_select_a2dp_codec_ldac_playback_quality" msgid="3233402355917446304">"ตัวแปลงรหัสเสียงบลูทูธที่ใช้ LDAC: คุณภาพการเล่น"</string>
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="7274396574659784285">"ทริกเกอร์การเลือกตัวแปลงรหัส LDAC\nเสียงบลูทูธ: คุณภาพการเล่น"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="2040810756832027227">"สตรีมมิง: <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="7887550926056143018">"DNS ส่วนตัว"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"เทอร์มินัลในตัวเครื่อง"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"เปิดใช้งานแอปเทอร์มินัลที่ให้การเข้าถึงเชลล์ในตัวเครื่อง"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"สภาพแวดล้อมในการพัฒนาซอฟต์แวร์ Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"เรียกใช้เทอร์มินัล Linux บน Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(ทดลอง) เรียกใช้เทอร์มินัล Linux ใน Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"หากปิดใช้ ระบบจะล้างข้อมูลเทอร์มินัล Linux"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"การตรวจสอบ HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"ตั้งค่าการตรวจสอบ HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"การแก้ไขข้อบกพร่อง"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"อัตราการเคลื่อนไหวของการเปลี่ยนภาพ"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"อัตราความเร็วตามตัวสร้างภาพเคลื่อนไหว"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"จำลองจอแสดงผลรอง"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ตำแหน่งการแสดงผลของเฉดสี"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"แอปพลิเคชัน"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"ไม่เก็บกิจกรรม"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"ล้างทุกกิจกรรมทันทีที่ผู้ใช้ออกไป"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"โทรศัพท์เครื่องนี้"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"แท็บเล็ตเครื่องนี้"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"คอมพิวเตอร์เครื่องนี้ (ภายใน)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"ทีวีเครื่องนี้"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"แท่นชาร์จที่มีลำโพง"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"อุปกรณ์ภายนอก"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"อุปกรณ์ที่เชื่อมต่อ"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"โทรศัพท์เครื่องนี้"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"แอนะล็อก"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"เล่นในอุปกรณ์นี้ไม่ได้"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"อัปเกรดบัญชีเพื่อเปลี่ยน"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"เล่นเนื้อหาที่ดาวน์โหลดที่นี่ไม่ได้"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"เชื่อมต่อผ่าน ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"เชื่อมต่อผ่าน eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"ค่าเริ่มต้นของทีวี"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"เอาต์พุต HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"ลำโพงของเครื่อง"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"ลำโพงในตัว"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"เสียงจากทีวี"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"เกิดปัญหาในการเชื่อมต่อ ปิดอุปกรณ์แล้วเปิดใหม่อีกครั้ง"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"อุปกรณ์เสียงแบบมีสาย"</string>
     <string name="help_label" msgid="3528360748637781274">"ความช่วยเหลือและความคิดเห็น"</string>

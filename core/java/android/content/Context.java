@@ -18,6 +18,8 @@ package android.content;
 
 import static android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER;
 import static android.content.flags.Flags.FLAG_ENABLE_BIND_PACKAGE_ISOLATED_PROCESS;
+import static android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE;
+import static android.security.Flags.FLAG_SECURE_LOCKDOWN;
 
 import android.annotation.AttrRes;
 import android.annotation.CallbackExecutor;
@@ -639,12 +641,15 @@ public abstract class Context {
     public static final int BIND_FOREGROUND_SERVICE_WHILE_AWAKE = 0x02000000;
 
     /**
-     * @hide Flag for {@link #bindService}: For only the case where the binding
+     * Flag for {@link #bindService}: For only the case where the binding
      * is coming from the system, set the process state to BOUND_FOREGROUND_SERVICE
      * instead of the normal maximum of IMPORTANT_FOREGROUND.  That is, this is
      * saying that the process shouldn't participate in the normal power reduction
      * modes (removing network access etc).
+     * @hide
      */
+    @SystemApi(client = SystemApi.Client.MODULE_LIBRARIES)
+    @FlaggedApi(FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
     public static final int BIND_FOREGROUND_SERVICE = 0x04000000;
 
     /**
@@ -781,6 +786,40 @@ public abstract class Context {
      * Has the same behavior as marking a statically registered receiver with "exported=false"
      */
     public static final int RECEIVER_NOT_EXPORTED = 0x4;
+
+    /**
+     * The permission is granted.
+     *
+     * @hide
+     */
+    public static final int PERMISSION_REQUEST_STATE_GRANTED = 0;
+
+    /**
+     * The permission isn't granted, but apps can request the permission. When the app request
+     * the permission, user will be prompted with permission dialog to grant or deny the request.
+     *
+     * @hide
+     */
+    public static final int PERMISSION_REQUEST_STATE_REQUESTABLE = 1;
+
+    /**
+     * The permission is denied, and shouldn't be requested by apps. Permission request
+     * will be automatically denied by the system, preventing the permission dialog from being
+     * displayed to the user.
+     *
+     * @hide
+     */
+    public static final int PERMISSION_REQUEST_STATE_UNREQUESTABLE = 2;
+
+
+    /** @hide */
+    @IntDef(prefix = { "PERMISSION_REQUEST_STATE_" }, value = {
+            PERMISSION_REQUEST_STATE_GRANTED,
+            PERMISSION_REQUEST_STATE_REQUESTABLE,
+            PERMISSION_REQUEST_STATE_UNREQUESTABLE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PermissionRequestState {}
 
     /**
      * Returns an AssetManager instance for the application's package.
@@ -4249,6 +4288,7 @@ public abstract class Context {
             //@hide: WIFI_RTT_SERVICE,
             //@hide: ETHERNET_SERVICE,
             WIFI_RTT_RANGING_SERVICE,
+            WIFI_USD_SERVICE,
             NSD_SERVICE,
             AUDIO_SERVICE,
             AUDIO_DEVICE_VOLUME_SERVICE,
@@ -4256,6 +4296,7 @@ public abstract class Context {
             FINGERPRINT_SERVICE,
             //@hide: FACE_SERVICE,
             BIOMETRIC_SERVICE,
+            AUTHENTICATION_POLICY_SERVICE,
             MEDIA_ROUTER_SERVICE,
             TELEPHONY_SERVICE,
             TELEPHONY_SUBSCRIPTION_SERVICE,
@@ -4437,6 +4478,9 @@ public abstract class Context {
      * web domain approval state.
      * <dt> {@link #DISPLAY_HASH_SERVICE} ("display_hash")
      * <dd> A {@link android.view.displayhash.DisplayHashManager} for management of display hashes.
+     * <dt> {@link #AUTHENTICATION_POLICY_SERVICE} ("authentication_policy")
+     * <dd> A {@link android.security.authenticationpolicy.AuthenticationPolicyManager}
+     * for managing authentication related policies on the device.
      * </dl>
      *
      * <p>Note:  System services obtained via this API may be closely associated with
@@ -4521,8 +4565,9 @@ public abstract class Context {
      * @see android.content.pm.verify.domain.DomainVerificationManager
      * @see #DISPLAY_HASH_SERVICE
      * @see android.view.displayhash.DisplayHashManager
+     * @see #AUTHENTICATION_POLICY_SERVICE
+     * @see android.security.authenticationpolicy.AuthenticationPolicyManager
      */
-    // TODO(b/347269120): Re-add @Nullable
     public abstract Object getSystemService(@ServiceName @NonNull String name);
 
     /**
@@ -4543,7 +4588,8 @@ public abstract class Context {
      * {@link android.os.BatteryManager}, {@link android.app.job.JobScheduler},
      * {@link android.app.usage.NetworkStatsManager},
      * {@link android.content.pm.verify.domain.DomainVerificationManager},
-     * {@link android.view.displayhash.DisplayHashManager}.
+     * {@link android.view.displayhash.DisplayHashManager}
+     * {@link android.security.authenticationpolicy.AuthenticationPolicyManager}.
      * </p>
      *
      * <p>
@@ -4568,7 +4614,6 @@ public abstract class Context {
      */
     @SuppressWarnings("unchecked")
     @RavenwoodKeep
-    // TODO(b/347269120): Re-add @Nullable
     public final <T> T getSystemService(@NonNull Class<T> serviceClass) {
         // Because subclasses may override getSystemService(String) we cannot
         // perform a lookup by class alone.  We must first map the class to its
@@ -5090,6 +5135,19 @@ public abstract class Context {
      */
     public static final String WIFI_RTT_RANGING_SERVICE = "wifirtt";
 
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a {@link
+     * android.net.wifi.usd.UsdManager} for Unsynchronized Service Discovery (USD) operation.
+     *
+     * @see #getSystemService(String)
+     * @see android.net.wifi.usd.UsdManager
+     * @hide
+     */
+    @FlaggedApi(android.net.wifi.flags.Flags.FLAG_USD)
+    @SystemApi
+    public static final String WIFI_USD_SERVICE = "wifi_usd";
+
     /**
      * Use with {@link #getSystemService(String)} to retrieve a {@link
      * android.net.lowpan.LowpanManager} for handling management of
@@ -5181,6 +5239,18 @@ public abstract class Context {
      * @hide
      */
     public static final String AUTH_SERVICE = "auth";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve an {@link
+     * android.security.authenticationpolicy.AuthenticationPolicyManager}.
+     * @see #getSystemService
+     * @see android.security.authenticationpolicy.AuthenticationPolicyManager
+     *
+     * @hide
+     */
+    @SystemApi
+    @FlaggedApi(FLAG_SECURE_LOCKDOWN)
+    public static final String AUTHENTICATION_POLICY_SERVICE = "authentication_policy";
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
@@ -5695,12 +5765,12 @@ public abstract class Context {
     public static final String BINARY_TRANSPARENCY_SERVICE = "transparency";
 
     /**
-     * System service name for ForensicService.
-     * The service manages the forensic info on device.
+     * System service name for IntrusionDetectionService.
+     * The service manages the intrusion detection info on device.
      * @hide
      */
     @FlaggedApi(android.security.Flags.FLAG_AFL_API)
-    public static final String FORENSIC_SERVICE = "forensic";
+    public static final String INTRUSION_DETECTION_SERVICE = "intrusion_detection";
 
     /**
      * System service name for the DeviceIdleManager.
@@ -6802,6 +6872,12 @@ public abstract class Context {
     public static final String MEDIA_QUALITY_SERVICE = "media_quality";
 
     /**
+     * Service to perform operations needed for dynamic instrumentation.
+     * @hide
+     */
+    public static final String DYNAMIC_INSTRUMENTATION_SERVICE = "dynamic_instrumentation";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
@@ -6945,6 +7021,31 @@ public abstract class Context {
     @PermissionMethod(orSelf = true)
     public abstract void enforceCallingOrSelfPermission(
             @NonNull @PermissionName String permission, @Nullable String message);
+
+    /**
+     * Returns the permission request state for a given runtime permission. This method provides a
+     * streamlined mechanism for applications to determine whether a permission can be
+     * requested (i.e. whether the user will be prompted with a permission dialog).
+     *
+     * <p>Traditionally, determining if a permission has been permanently denied (unrequestable)
+     * required applications to initiate a permission request and subsequently analyze the result
+     * of {@link android.app.Activity#shouldShowRequestPermissionRationale} in conjunction with the
+     * grant result within the {@link android.app.Activity#onRequestPermissionsResult} callback.
+     *
+     * @param permission The name of the permission.
+     *
+     * @return The current request state of the specified permission, represented by one of the
+     * following constants: {@link PermissionRequestState#PERMISSION_REQUEST_STATE_GRANTED},
+     * {@link PermissionRequestState#PERMISSION_REQUEST_STATE_REQUESTABLE}, or
+     * {@link PermissionRequestState#PERMISSION_REQUEST_STATE_UNREQUESTABLE}.
+     *
+     * @hide
+     */
+    @CheckResult
+    @PermissionRequestState
+    public int getPermissionRequestState(@NonNull String permission) {
+        throw new RuntimeException("Not implemented. Must override in a subclass.");
+    }
 
     /**
      * Grant permission to access a specific Uri to another package, regardless

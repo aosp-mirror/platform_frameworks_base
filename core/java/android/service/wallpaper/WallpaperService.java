@@ -17,6 +17,7 @@
 package android.service.wallpaper;
 
 import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
+import static android.app.Flags.liveWallpaperContentHandling;
 import static android.app.WallpaperManager.COMMAND_FREEZE;
 import static android.app.WallpaperManager.COMMAND_UNFREEZE;
 import static android.app.WallpaperManager.SetWallpaperFlags;
@@ -2408,6 +2409,12 @@ public abstract class WallpaperService extends Service {
                 };
 
         private Surface getOrCreateBLASTSurface(int width, int height, int format) {
+            if (mBbqSurfaceControl == null || !mBbqSurfaceControl.isValid()) {
+                Log.w(TAG, "Skipping BlastBufferQueue update/create"
+                    + " - invalid surface control");
+                return null;
+            }
+
             Surface ret = null;
             if (mBlastBufferQueue == null) {
                 mBlastBufferQueue = new BLASTBufferQueue("Wallpaper", mBbqSurfaceControl,
@@ -2417,11 +2424,7 @@ public abstract class WallpaperService extends Service {
                 // it hasn't changed and there is no need to update.
                 ret = mBlastBufferQueue.createSurface();
             } else {
-                if (mBbqSurfaceControl != null && mBbqSurfaceControl.isValid()) {
-                    mBlastBufferQueue.update(mBbqSurfaceControl, width, height, format);
-                } else {
-                    Log.w(TAG, "Skipping BlastBufferQueue update - invalid surface control");
-                }
+                mBlastBufferQueue.update(mBbqSurfaceControl, width, height, format);
             }
 
             return ret;
@@ -2624,7 +2627,7 @@ public abstract class WallpaperService extends Service {
         private void doAttachEngine() {
             Trace.beginSection("WPMS.onCreateEngine");
             Engine engine;
-            if (mDescription != null) {
+            if (liveWallpaperContentHandling()) {
                 engine = onCreateEngine(mDescription);
             } else {
                 engine = onCreateEngine();

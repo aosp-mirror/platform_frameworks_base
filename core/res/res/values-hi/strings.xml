@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित है. अगली कॉल: सीमित नहीं"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित नहीं है. अगली कॉल: सीमित"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"कॉलर आईडी डिफ़ॉल्ट रूप से सीमित नहीं है. अगली कॉल: सीमित नहीं"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"यह ऐप्लिकेशन 16 केबी वाले पेजों के साथ काम नहीं करता. APK के अलाइनमेंट की जांच नहीं की जा सकी. यह ऐप्लिकेशन, पेज साइज़ के साथ काम करने वाले मोड का इस्तेमाल करके चलेगा. पेज साइज़ के साथ बेहतर तरीके से काम के लिए, कृपया 16 केबी वाले पेजों के साथ ऐप्लिकेशन को फिर से कंपाइल करें. ज़्यादा जानकारी के लिए, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; पर जाएं"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"यह ऐप्लिकेशन 16 केबी वाले पेज साइज़ के साथ काम नहीं करता. इसके लिए ज़रूरी ईएलएफ़ अलाइनमेंट की जांच भी पूरी नहीं हो सकी. यह ऐप्लिकेशन, इस पेज साइज़ के साथ काम करने वाले मोड का इस्तेमाल करके चलेगा. इस पेज साइज़ के साथ बेहतर तरीके से काम के लिए, कृपया ऐप्लिकेशन को 16 केबी वाले पेज साइज़ के साथ फिर से कंपाइल करें. ज़्यादा जानकारी के लिए, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; पर जाएं"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"यह ऐप्लिकेशन 16 केबी वाले पेज साइज़ के साथ काम नहीं करता. APK और ईएलएफ़ के अलाइनमेंट से जुड़ी ज़रूरी जांच भी पूरी नहीं हो सकी. यह ऐप्लिकेशन, इस पेज साइज़ के साथ काम करने वाले मोड का इस्तेमाल करके चलेगा. इस पेज साइज़ के साथ बेहतर तरीके से काम के लिए, कृपया ऐप्लिकेशन को 16 केबी वाले पेज साइज़ के साथ फिर से कंपाइल करें. ज़्यादा जानकारी के लिए, &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; पर जाएं"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"सेवा प्रावधान की हुई नहीं है."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"आप कॉलर आईडी सेटिंग नहीं बदल सकते."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"डेटा को <xliff:g id="CARRIERDISPLAY">%s</xliff:g> पर स्विच किया गया"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"मोबाइल नेटवर्क से कनेक्ट नहीं किया जा सका"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"पसंदीदा नेटवर्क बदलकर देखें. बदलने के लिए टैप करें."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"आपातकालीन कॉल करने की सुविधा उपलब्ध नहीं है"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"आपातकालीन कॉल के लिए मोबाइल नेटवर्क ज़रूरी है"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"सूचनाएं"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"कॉल को दूसरे नंबर पर भेजना"</string>
@@ -322,7 +327,7 @@
     <string name="permgrouplab_location" msgid="1858277002233964394">"जगह की जानकारी"</string>
     <string name="permgroupdesc_location" msgid="1995955142118450685">"इस डिवाइस की जगह तक पहुंचने दें"</string>
     <string name="permgrouplab_calendar" msgid="6426860926123033230">"कैलेंडर"</string>
-    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"अपने कैलेंडर को ऐक्सेस करें"</string>
+    <string name="permgroupdesc_calendar" msgid="6762751063361489379">"आपके कैलेंडर को ऐक्सेस करने की अनुमति"</string>
     <string name="permgrouplab_sms" msgid="795737735126084874">"मैसेज (एसएमएस)"</string>
     <string name="permgroupdesc_sms" msgid="5726462398070064542">"मैसेज (एसएमएस) भेजें और देखें"</string>
     <string name="permgrouplab_storage" msgid="17339216290379241">"फ़ाइल"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"ऐप्लिकेशन को आस-पास मौजूद Ultra-Wideband डिवाइसों के बीच की दूरी का पता लगाने की अनुमति दें"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"आस-पास मौजूद वाई-फ़ाई डिवाइसों से इंटरैक्ट करें"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"इससे, ऐप्लिकेशन आस-पास मौजूद वाई-फ़ाई डिवाइसों की जानकारी दिखा पाएगा, उनसे कनेक्ट कर पाएगा, और उनकी दूरी पता लगा पाएगा"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"आस-पास मौजूद डिवाइसों के बीच की दूरी का पता लगाएं"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"ऐप्लिकेशन को, आस-पास मौजूद डिवाइसों के बीच की दूरी का पता लगाने की अनुमति दें"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"NFC का इस्तेमाल करने वाली पैसे चुकाने की पसंदीदा सेवा की जानकारी"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"अगर ऐप्लिकेशन को अनुमति दी जाती है, तो वह पैसे चुकाने की आपकी उस पसंदीदा सेवा के बारे में जानकारी पा सकता है जो NFC का इस्तेमाल करती है. इसमें रजिस्टर किए गए डिवाइस और उनके आउटपुट के रूट जैसी जानकारी शामिल होती है."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"नियर फ़ील्‍ड कम्‍यूनिकेशन नियंत्रित करें"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> घंटे में"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> दिन में"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> साल में"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> मिनट पहले"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> घंटे पहले"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> दिन पहले"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> साल पहले"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> मिनट"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> घंटे"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> दिन"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> साल"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"<xliff:g id="COUNT">%d</xliff:g> मिनट में"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"<xliff:g id="COUNT">%d</xliff:g> घंटे में"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"<xliff:g id="COUNT">%d</xliff:g> दिन में"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"<xliff:g id="COUNT">%d</xliff:g> साल में"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> मिनट पहले"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> घंटे पहले"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> दिन पहले"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> साल पहले"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# मिनट पहले}one{# मिनट पहले}other{# मिनट पहले}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# घंटा पहले}one{# घंटा पहले}other{# घंटे पहले}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# दिन पहले}one{# दिन पहले}other{# दिन पहले}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"वन-हैंडेड मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"स्क्रीन की रोशनी को सामान्य लेवल से और कम करने की सुविधा"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"कान की मशीन"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को चालू कर दिया गया."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"आवाज़ कम-ज़्यादा करने वाले दोनों बटन दबाकर रखें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> को बंद कर दिया गया."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"आवाज़ बटन को छोड़ें. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> की सुविधा चालू करने के लिए, आवाज़ वाले दोनों बटन तीन सेकंड तक दबाकर रखें."</string>
@@ -1937,15 +1968,16 @@
     <string name="zen_mode_default_weeknights_name" msgid="7902108149994062847">"हफ़्ते की रात"</string>
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"सप्ताहांत"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"इवेंट"</string>
-    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"सोने का समय"</string>
+    <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"स्लीपिंग मोड"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"\'परेशान न करें\' सुविधा (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"मैनेज करने वाला ऐप्लिकेशन: <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"चालू है"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"बंद है"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
-    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"कोई भी कैलेंडर"</string>
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> से <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"किसी भी कैलेंडर के इवेंट के लिए"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> कुछ आवाज़ें म्‍यूट कर रहा है"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"आपके डिवाइस में कोई अंदरूनी समस्या है और यह तब तक ठीक नहीं होगी जब तक आप फ़ैक्‍टरी डेटा रीसेट नहीं करते."</string>
     <string name="system_error_manufacturer" msgid="703545241070116315">"आपके डिवाइस के साथ कोई आंतरिक गड़बड़ी हुई. विवरणों के लिए अपने निर्माता से संपर्क करें."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"मोबाइल या वाई-फ़ाई नेटवर्क के बिना मैसेज भेजें और पाएं"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ऐप्लिकेशन खोलें"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"यह सेटिंग कैसे काम करती है"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"\"नेटवर्क अपने-आप चुना जाए\" को चालू करें"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"सेटिंग में जाकर, \"नेटवर्क अपने-आप चुना जाए\" को चालू करें, ताकि आपका फ़ोन ऐसा नेटवर्क ढूंढ सके जो सैटलाइट के साथ काम करता है"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"चालू करें"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"रद्द करें"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"प्रोसेस जारी है..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"सैटलाइट एसओएस की सुविधा अब उपलब्ध है"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"मोबाइल या वाई-फ़ाई नेटवर्क न होने पर भी, आपातकालीन सेवाओं को मैसेज भेजा जा सकता है. इसके लिए, आपको Google Messages को अपने डिवाइस के डिफ़ॉल्ट मैसेजिंग ऐप्लिकेशन के तौर पर सेट करना होगा."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"सैटलाइट एसओएस की सुविधा उपलब्ध नहीं है"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"इस डिवाइस पर सैटलाइट एसओएस की सुविधा काम नहीं करती"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"सैटलाइट एसओएस सेट अप नहीं किया गया है"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"पक्का करें कि आपका डिवाइस, इंटरनेट से कनेक्ट है या नहीं. इसके बाद, फिर से सेटअप करने की कोशिश करें"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"सैटलाइट एसओएस की सुविधा उपलब्ध नहीं है"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"इस देश या इलाके में सैटलाइट एसओएस की सुविधा उपलब्ध नहीं है"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"सैटलाइट एसओएस की सुविधा सेट अप नहीं की गई"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"सैटलाइट से मैसेज भेजने के लिए, Google Messages को डिफ़ॉल्ट मैसेजिंग ऐप्लिकेशन के तौर पर सेट करें"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"सैटलाइट एसओएस की सुविधा उपलब्ध नहीं है"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"जगह की जानकारी की सेटिंग चालू करें. इससे यह देखा जा सकता है कि इस देश या इलाके में सैटलाइट एसओएस की सुविधा उपलब्ध है या नहीं"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"सैटलाइट के ज़रिए मैसेज भेजने की सुविधा उपलब्ध है"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"मोबाइल या वाई-फ़ाई नेटवर्क न होने पर भी, सैटलाइट के ज़रिए मैसेज भेजा जा सकता है. इसके लिए, आपको Google Messages को अपने डिवाइस के डिफ़ॉल्ट मैसेजिंग ऐप्लिकेशन के तौर पर सेट करना होगा."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"सैटलाइट के ज़रिए मैसेज भेजने की सुविधा काम नहीं करती"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"इस डिवाइस पर सैटलाइट के ज़रिए मैसेज भेजने की सुविधा काम नहीं करती"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"सैटलाइट के ज़रिए मैसेज भेजने की सुविधा सेट अप नहीं की गई"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"पक्का करें कि आपका डिवाइस, इंटरनेट से कनेक्ट है या नहीं. इसके बाद, फिर से सेटअप करने की कोशिश करें"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"सैटलाइट के ज़रिए मैसेज भेजने की सुविधा उपलब्ध नहीं है"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"इस देश या इलाके में सैटलाइट के ज़रिए मैसेज भेजने की सुविधा उपलब्ध नहीं है"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"सैटलाइट के ज़रिए मैसेज भेजने की सुविधा सेट अप नहीं की गई"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"सैटलाइट से मैसेज भेजने के लिए, Google Messages को डिफ़ॉल्ट मैसेजिंग ऐप्लिकेशन के तौर पर सेट करें"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"सैटलाइट के ज़रिए मैसेज भेजने की सुविधा उपलब्ध नहीं है"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"जगह की जानकारी की सेटिंग चालू करें. इससे यह देखा जा सकता है कि इस देश या इलाके में सैटलाइट के ज़रिए मैसेज भेजने की सुविधा उपलब्ध है या नहीं"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"फ़िंगरप्रिंट अनलॉक की सुविधा दोबारा सेट अप करें"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"अब <xliff:g id="FINGERPRINT">%s</xliff:g> की पहचान नहीं की जा सकती."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"अब <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> और <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> की पहचान नहीं की जा सकती."</string>

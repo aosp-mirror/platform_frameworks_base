@@ -83,12 +83,15 @@ final class SkinThermalStatusObserver extends IThermalEventListener.Stub impleme
         if (!mInjector.registerThermalServiceListener(this)) {
             return;
         }
-
-        mInjector.registerDisplayListener(this, mHandler,
-                DisplayManager.EVENT_FLAG_DISPLAY_ADDED | DisplayManager.EVENT_FLAG_DISPLAY_CHANGED
-                        | DisplayManager.EVENT_FLAG_DISPLAY_REMOVED);
-
+        registerDisplayListener();
         populateInitialDisplayInfo();
+    }
+
+    private void registerDisplayListener() {
+        mInjector.registerDisplayListener(this, mHandler,
+                DisplayManager.EVENT_TYPE_DISPLAY_ADDED
+                        | DisplayManager.EVENT_TYPE_DISPLAY_CHANGED
+                        | DisplayManager.EVENT_TYPE_DISPLAY_REMOVED);
     }
 
     void setLoggingEnabled(boolean enabled) {

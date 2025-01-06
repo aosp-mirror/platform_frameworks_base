@@ -16,6 +16,7 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.media.projection.StopReason;
 import android.testing.LeakCheck;
 
 import com.android.systemui.statusbar.policy.CastController;
@@ -51,7 +52,7 @@ public class LeakCheckerCastController extends BaseLeakChecker<Callback> impleme
     }
 
     @Override
-    public void stopCasting(CastDevice device) {
+    public void stopCasting(CastDevice device, @StopReason int stopReason) {
 
     }
 

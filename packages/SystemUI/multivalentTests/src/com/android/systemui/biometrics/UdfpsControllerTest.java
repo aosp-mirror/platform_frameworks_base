@@ -365,6 +365,25 @@ public class UdfpsControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void showUdfpsOverlay_invokedTwice_doesNotNotifyListenerSecondTime() throws RemoteException {
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricRequestConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+
+        verify(mFingerprintManager).onUdfpsUiEvent(FingerprintManager.UDFPS_UI_OVERLAY_SHOWN,
+                TEST_REQUEST_ID, mOpticalProps.sensorId);
+
+        reset(mFingerprintManager);
+
+        // Second attempt should do nothing
+        mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
+                BiometricRequestConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);
+        mFgExecutor.runAllReady();
+        verify(mFingerprintManager, never()).onUdfpsUiEvent(FingerprintManager.UDFPS_UI_OVERLAY_SHOWN,
+                TEST_REQUEST_ID, mOpticalProps.sensorId);
+    }
+
+    @Test
     public void testSubscribesToOrientationChangesWhenShowingOverlay() throws Exception {
         mOverlayController.showUdfpsOverlay(TEST_REQUEST_ID, mOpticalProps.sensorId,
                 BiometricRequestConstants.REASON_AUTH_KEYGUARD, mUdfpsOverlayControllerCallback);

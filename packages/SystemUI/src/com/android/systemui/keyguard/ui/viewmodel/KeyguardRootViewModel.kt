@@ -29,7 +29,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.domain.interactor.PulseExpansionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
-import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DREAMING
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
@@ -92,6 +91,8 @@ constructor(
         AlternateBouncerToLockscreenTransitionViewModel,
     private val alternateBouncerToOccludedTransitionViewModel:
         AlternateBouncerToOccludedTransitionViewModel,
+    private val alternateBouncerToPrimaryBouncerTransitionViewModel:
+        AlternateBouncerToPrimaryBouncerTransitionViewModel,
     private val aodToGoneTransitionViewModel: AodToGoneTransitionViewModel,
     private val aodToLockscreenTransitionViewModel: AodToLockscreenTransitionViewModel,
     private val aodToOccludedTransitionViewModel: AodToOccludedTransitionViewModel,
@@ -128,7 +129,6 @@ constructor(
         PrimaryBouncerToLockscreenTransitionViewModel,
     private val screenOffAnimationController: ScreenOffAnimationController,
     private val aodBurnInViewModel: AodBurnInViewModel,
-    private val aodAlphaViewModel: AodAlphaViewModel,
     private val shadeInteractor: ShadeInteractor,
 ) {
     val burnInLayerVisibility: Flow<Int> =
@@ -238,6 +238,7 @@ constructor(
                         alternateBouncerToAodTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         alternateBouncerToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
+                        alternateBouncerToPrimaryBouncerTransitionViewModel.lockscreenAlpha,
                         alternateBouncerToOccludedTransitionViewModel.lockscreenAlpha,
                         aodToGoneTransitionViewModel.lockscreenAlpha(viewState),
                         aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState),
@@ -280,15 +281,6 @@ constructor(
             }
             .distinctUntilChanged()
     }
-
-    /** Specific alpha value for elements visible during [KeyguardState.LOCKSCREEN] */
-    @Deprecated("only used for legacy status view")
-    fun lockscreenStateAlpha(viewState: ViewStateAccessor): Flow<Float> {
-        return aodToLockscreenTransitionViewModel.lockscreenAlpha(viewState)
-    }
-
-    /** For elements that appear and move during the animation -> AOD */
-    val burnInLayerAlpha: Flow<Float> = aodAlphaViewModel.alpha
 
     val translationY: Flow<Float> = aodBurnInViewModel.movement.map { it.translationY.toFloat() }
 

@@ -35,20 +35,40 @@ import java.util.Objects;
  */
 public final class InputGestureData {
 
+    public static final int TOUCHPAD_GESTURE_TYPE_UNKNOWN = 0;
+    public static final int TOUCHPAD_GESTURE_TYPE_THREE_FINGER_TAP = 1;
+
     @NonNull
     private final AidlInputGestureData mInputGestureData;
 
-    public InputGestureData(AidlInputGestureData inputGestureData) {
+    public InputGestureData(@NonNull AidlInputGestureData inputGestureData) {
         this.mInputGestureData = inputGestureData;
         validate();
     }
 
     /** Returns the trigger information for this input gesture */
     public Trigger getTrigger() {
-        if (mInputGestureData.keycode != KeyEvent.KEYCODE_UNKNOWN) {
-            return new KeyTrigger(mInputGestureData.keycode, mInputGestureData.modifierState);
+        switch (mInputGestureData.trigger.getTag()) {
+            case AidlInputGestureData.Trigger.Tag.key: {
+                AidlInputGestureData.KeyTrigger trigger = mInputGestureData.trigger.getKey();
+                if (trigger == null) {
+                    throw new RuntimeException("InputGestureData is corrupted, null key trigger!");
+                }
+                return createKeyTrigger(trigger.keycode, trigger.modifierState);
+            }
+            case AidlInputGestureData.Trigger.Tag.touchpadGesture: {
+                AidlInputGestureData.TouchpadGestureTrigger trigger =
+                        mInputGestureData.trigger.getTouchpadGesture();
+                if (trigger == null) {
+                    throw new RuntimeException(
+                            "InputGestureData is corrupted, null touchpad trigger!");
+                }
+                return createTouchpadTrigger(trigger.gestureType);
+            }
+            default:
+                throw new RuntimeException("InputGestureData is corrupted, invalid trigger type!");
+
         }
-        throw new RuntimeException("InputGestureData is corrupted, invalid trigger type!");
     }
 
     /** Returns the action to perform for this input gesture */
@@ -127,9 +147,15 @@ public final class InputGestureData {
                         "No app launch data for system action launch application");
             }
             AidlInputGestureData data = new AidlInputGestureData();
+            data.trigger = new AidlInputGestureData.Trigger();
             if (mTrigger instanceof KeyTrigger keyTrigger) {
-                data.keycode = keyTrigger.getKeycode();
-                data.modifierState = keyTrigger.getModifierState();
+                data.trigger.setKey(new AidlInputGestureData.KeyTrigger());
+                data.trigger.getKey().keycode = keyTrigger.getKeycode();
+                data.trigger.getKey().modifierState = keyTrigger.getModifierState();
+            } else if (mTrigger instanceof TouchpadTrigger touchpadTrigger) {
+                data.trigger.setTouchpadGesture(new AidlInputGestureData.TouchpadGestureTrigger());
+                data.trigger.getTouchpadGesture().gestureType =
+                        touchpadTrigger.getTouchpadGestureType();
             } else {
                 throw new IllegalArgumentException("Invalid trigger type!");
             }
@@ -163,30 +189,12 @@ public final class InputGestureData {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
         InputGestureData that = (InputGestureData) o;
-        return mInputGestureData.keycode == that.mInputGestureData.keycode
-                && mInputGestureData.modifierState == that.mInputGestureData.modifierState
-                && mInputGestureData.gestureType == that.mInputGestureData.gestureType
-                && Objects.equals(mInputGestureData.appLaunchCategory, that.mInputGestureData.appLaunchCategory)
-                && Objects.equals(mInputGestureData.appLaunchRole, that.mInputGestureData.appLaunchRole)
-                && Objects.equals(mInputGestureData.appLaunchPackageName, that.mInputGestureData.appLaunchPackageName)
-                && Objects.equals(mInputGestureData.appLaunchPackageName, that.mInputGestureData.appLaunchPackageName);
+        return Objects.equals(mInputGestureData, that.mInputGestureData);
     }
 
     @Override
     public int hashCode() {
-        int _hash = 1;
-        _hash = 31 * _hash + mInputGestureData.keycode;
-        _hash = 31 * _hash + mInputGestureData.modifierState;
-        _hash = 31 * _hash + mInputGestureData.gestureType;
-        _hash = 31 * _hash + (mInputGestureData.appLaunchCategory != null
-                ? mInputGestureData.appLaunchCategory.hashCode() : 0);
-        _hash = 31 * _hash + (mInputGestureData.appLaunchRole != null
-                ? mInputGestureData.appLaunchRole.hashCode() : 0);
-        _hash = 31 * _hash + (mInputGestureData.appLaunchPackageName != null
-                ? mInputGestureData.appLaunchPackageName.hashCode() : 0);
-        _hash = 31 * _hash + (mInputGestureData.appLaunchPackageName != null
-                ? mInputGestureData.appLaunchPackageName.hashCode() : 0);
-        return _hash;
+        return mInputGestureData.hashCode();
     }
 
     public interface Trigger {
@@ -195,6 +203,11 @@ public final class InputGestureData {
     /** Creates a input gesture trigger based on a key press */
     public static Trigger createKeyTrigger(int keycode, int modifierState) {
         return new KeyTrigger(keycode, modifierState);
+    }
+
+    /** Creates a input gesture trigger based on a touchpad gesture */
+    public static Trigger createTouchpadTrigger(int touchpadGestureType) {
+        return new TouchpadTrigger(touchpadGestureType);
     }
 
     /** Key based input gesture trigger */
@@ -242,8 +255,76 @@ public final class InputGestureData {
         }
     }
 
+    /** Touchpad based input gesture trigger */
+    public static class TouchpadTrigger implements Trigger {
+        private final int mTouchpadGestureType;
+
+        private TouchpadTrigger(int touchpadGestureType) {
+            if (touchpadGestureType != TOUCHPAD_GESTURE_TYPE_THREE_FINGER_TAP) {
+                throw new IllegalArgumentException(
+                        "Invalid touchpadGestureType = " + touchpadGestureType);
+            }
+            mTouchpadGestureType = touchpadGestureType;
+        }
+
+        public int getTouchpadGestureType() {
+            return mTouchpadGestureType;
+        }
+
+        @Override
+        public String toString() {
+            return "TouchpadTrigger{" +
+                    "mTouchpadGestureType=" + mTouchpadGestureType +
+                    '}';
+        }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            TouchpadTrigger that = (TouchpadTrigger) o;
+            return mTouchpadGestureType == that.mTouchpadGestureType;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hashCode(mTouchpadGestureType);
+        }
+    }
+
     /** Data for action to perform when input gesture is triggered */
     public record Action(@KeyGestureEvent.KeyGestureType int keyGestureType,
                          @Nullable AppLaunchData appLaunchData) {
+    }
+
+    /** Filter definition for InputGestureData */
+    public enum Filter {
+        KEY(AidlInputGestureData.Trigger.Tag.key),
+        TOUCHPAD(AidlInputGestureData.Trigger.Tag.touchpadGesture);
+
+        @AidlInputGestureData.Trigger.Tag
+        private final int mTag;
+
+        Filter(@AidlInputGestureData.Trigger.Tag int tag) {
+            mTag = tag;
+        }
+
+        @Nullable
+        public static Filter of(@AidlInputGestureData.Trigger.Tag int tag) {
+            return switch (tag) {
+                case AidlInputGestureData.Trigger.Tag.key -> KEY;
+                case AidlInputGestureData.Trigger.Tag.touchpadGesture -> TOUCHPAD;
+                default -> null;
+            };
+        }
+
+        @AidlInputGestureData.Trigger.Tag
+        public int getTag() {
+            return mTag;
+        }
+
+        public boolean matches(@NonNull InputGestureData inputGestureData) {
+            return mTag == inputGestureData.mInputGestureData.trigger.getTag();
+        }
     }
 }

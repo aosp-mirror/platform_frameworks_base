@@ -19,12 +19,12 @@ package com.android.keyguard
 import android.content.Context
 import android.view.View
 import com.android.systemui.customization.R as customR
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.res.R
-import com.android.systemui.shared.R as sharedR
 import com.android.systemui.shade.NotificationShadeWindowView
+import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.shared.R as sharedR
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.END
 import com.android.systemui.shared.animation.UnfoldConstantTranslateAnimator.Direction.START
@@ -43,7 +43,7 @@ import javax.inject.Inject
 class KeyguardUnfoldTransition
 @Inject
 constructor(
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val keyguardRootView: KeyguardRootView,
     private val shadeWindowView: NotificationShadeWindowView,
     statusBarStateController: StatusBarStateController,
@@ -54,16 +54,17 @@ constructor(
     var statusViewCentered = false
 
     private val filterKeyguardAndSplitShadeOnly: () -> Boolean = {
-        statusBarStateController.getState() == KEYGUARD && !statusViewCentered }
+        statusBarStateController.getState() == KEYGUARD && !statusViewCentered
+    }
     private val filterKeyguard: () -> Boolean = { statusBarStateController.getState() == KEYGUARD }
 
     private val translateAnimator by lazy {
-        val smartSpaceViews = if (MigrateClocksToBlueprint.isEnabled) {
-            // Use scrollX instead of translationX as translation is already set by [AodBurnInLayer]
-            val scrollXTranslation = { view: View, translation: Float ->
-                view.scrollX = -translation.toInt()
-            }
+        // Use scrollX instead of translationX as translation is already set by [AodBurnInLayer]
+        val scrollXTranslation = { view: View, translation: Float ->
+            view.scrollX = -translation.toInt()
+        }
 
+        val smartSpaceViews =
             setOf(
                 ViewIdToTranslate(
                     viewId = sharedR.id.date_smartspace_view,
@@ -82,18 +83,8 @@ constructor(
                     direction = START,
                     shouldBeAnimated = filterKeyguard,
                     translateFunc = scrollXTranslation,
-                )
+                ),
             )
-        } else {
-            setOf(ViewIdToTranslate(
-                viewId = R.id.keyguard_status_area,
-                direction = START,
-                shouldBeAnimated = filterKeyguard,
-                translateFunc = { view, value ->
-                    (view as? KeyguardStatusAreaView)?.translateXFromUnfold = value
-                }
-            ))
-        }
 
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
@@ -101,39 +92,39 @@ constructor(
                     ViewIdToTranslate(
                         viewId = customR.id.lockscreen_clock_view_large,
                         direction = START,
-                        shouldBeAnimated = filterKeyguardAndSplitShadeOnly
+                        shouldBeAnimated = filterKeyguardAndSplitShadeOnly,
                     ),
                     ViewIdToTranslate(
                         viewId = customR.id.lockscreen_clock_view,
                         direction = START,
-                        shouldBeAnimated = filterKeyguard
+                        shouldBeAnimated = filterKeyguard,
                     ),
                     ViewIdToTranslate(
                         viewId = R.id.notification_stack_scroller,
                         direction = END,
-                        shouldBeAnimated = filterKeyguardAndSplitShadeOnly
-                    )
+                        shouldBeAnimated = filterKeyguardAndSplitShadeOnly,
+                    ),
                 ) + smartSpaceViews,
-            progressProvider = unfoldProgressProvider
+            progressProvider = unfoldProgressProvider,
         )
     }
 
     private val shortcutButtonsAnimator by lazy {
         UnfoldConstantTranslateAnimator(
             viewsIdToTranslate =
-            setOf(
-                ViewIdToTranslate(
-                    viewId = R.id.start_button,
-                    direction = START,
-                    shouldBeAnimated = filterKeyguard
+                setOf(
+                    ViewIdToTranslate(
+                        viewId = R.id.start_button,
+                        direction = START,
+                        shouldBeAnimated = filterKeyguard,
+                    ),
+                    ViewIdToTranslate(
+                        viewId = R.id.end_button,
+                        direction = END,
+                        shouldBeAnimated = filterKeyguard,
+                    ),
                 ),
-                ViewIdToTranslate(
-                    viewId = R.id.end_button,
-                    direction = END,
-                    shouldBeAnimated = filterKeyguard
-                )
-            ),
-            progressProvider = unfoldProgressProvider
+            progressProvider = unfoldProgressProvider,
         )
     }
 

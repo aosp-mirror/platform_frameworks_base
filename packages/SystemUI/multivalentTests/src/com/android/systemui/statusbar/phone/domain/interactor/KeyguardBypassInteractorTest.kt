@@ -127,12 +127,6 @@ class KeyguardBypassInteractorTest : SysuiTestCase() {
         kosmos.configureKeyguardBypass(isBypassAvailable = skipIsBypassAvailableCheck)
         underTest = kosmos.keyguardBypassInteractor
 
-        // bouncerShowing false, !onLockscreenScene false
-        // !onLockscreenScene false
-        setScene(
-            bouncerShowing = !skipBouncerShowingCheck,
-            onLockscreenScene = skipOnLockscreenSceneCheck,
-        )
         // alternateBouncerShowing false
         setAlternateBouncerShowing(!skipAlternateBouncerShowingCheck)
         // launchingAffordance false
@@ -141,6 +135,13 @@ class KeyguardBypassInteractorTest : SysuiTestCase() {
         setPulseExpanding(!skipPulseExpandingCheck)
         // qsExpanding false
         setQsExpanded(!skipQsExpandedCheck)
+
+        // bouncerShowing false, !onLockscreenScene false
+        // !onLockscreenScene false
+        setScene(
+            bouncerShowing = !skipBouncerShowingCheck,
+            onLockscreenScene = skipOnLockscreenSceneCheck,
+        )
     }
 
     private fun setAlternateBouncerShowing(alternateBouncerVisible: Boolean) {

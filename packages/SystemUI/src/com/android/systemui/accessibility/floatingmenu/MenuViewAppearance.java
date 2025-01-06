@@ -57,6 +57,8 @@ class MenuViewAppearance {
     private int mLargePadding;
     private int mSmallIconSize;
     private int mLargeIconSize;
+    private int mSmallBadgeSize;
+    private int mLargeBadgeSize;
     private int mSmallSingleRadius;
     private int mSmallMultipleRadius;
     private int mLargeSingleRadius;
@@ -97,6 +99,12 @@ class MenuViewAppearance {
                 mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_width_height);
         mLargeIconSize =
                 mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_large_width_height);
+        mSmallBadgeSize =
+                mRes.getDimensionPixelSize(
+                        R.dimen.accessibility_floating_menu_small_badge_width_height);
+        mLargeBadgeSize =
+                mRes.getDimensionPixelSize(
+                        R.dimen.accessibility_floating_menu_large_badge_width_height);
         mSmallSingleRadius =
                 mRes.getDimensionPixelSize(R.dimen.accessibility_floating_menu_small_single_radius);
         mSmallMultipleRadius = mRes.getDimensionPixelSize(
@@ -209,6 +217,10 @@ class MenuViewAppearance {
 
     int getMenuIconSize() {
         return mSizeType == SMALL ? mSmallIconSize : mLargeIconSize;
+    }
+
+    int getBadgeIconSize() {
+        return mSizeType == SMALL ? mSmallBadgeSize : mLargeBadgeSize;
     }
 
     private int getMenuMargin() {

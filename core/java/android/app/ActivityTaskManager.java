@@ -534,10 +534,9 @@ public class ActivityTaskManager {
             dest.writeIntArray(childTaskUserIds);
             dest.writeInt(visible ? 1 : 0);
             dest.writeInt(position);
-            super.writeToParcel(dest, flags);
+            super.writeTaskToParcel(dest, flags);
         }
 
-        @Override
         void readFromParcel(Parcel source) {
             bounds = source.readTypedObject(Rect.CREATOR);
             childTaskIds = source.createIntArray();
@@ -546,7 +545,7 @@ public class ActivityTaskManager {
             childTaskUserIds = source.createIntArray();
             visible = source.readInt() > 0;
             position = source.readInt();
-            super.readFromParcel(source);
+            super.readTaskFromParcel(source);
         }
 
         public static final @NonNull Creator<RootTaskInfo> CREATOR = new Creator<>() {

@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresFeature;
+import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemService;
 import android.annotation.TestApi;
@@ -227,15 +228,16 @@ public class TunerResourceManager {
      * scenario, when both resource holder and resource challenger have same processId and same
      * priority.
      *
-     * @param clientId The client id used to set ownership of resource to owner in case of resource
+     * @param clientId The client id used to set ownership of resource in case of resource
      *     challenger situation.
-     * @param resourceHolderRetain Set to true to allow the resource holder to retain ownership, or
-     *     false to allow the resource challenger to acquire the resource. If not explicitly set,
-     *     resourceHolderRetain is set to false.
+     * @param enabled Set to {@code true} to allow the resource holder to retain ownership,
+     *     or false to allow the resource challenger to acquire the resource.
+     *     If not explicitly set, enabled is set to {@code false}.
      */
-    public void setResourceHolderRetain(int clientId, boolean resourceHolderRetain) {
+    @RequiresPermission(android.Manifest.permission.TUNER_RESOURCE_ACCESS)
+    public void setResourceOwnershipRetention(int clientId, boolean enabled) {
         try {
-            mService.setResourceHolderRetain(clientId, resourceHolderRetain);
+            mService.setResourceOwnershipRetention(clientId, enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

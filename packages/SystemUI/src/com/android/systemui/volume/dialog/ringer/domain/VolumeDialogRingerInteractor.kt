@@ -20,12 +20,12 @@ import android.media.AudioManager
 import android.media.AudioManager.RINGER_MODE_NORMAL
 import android.media.AudioManager.RINGER_MODE_SILENT
 import android.media.AudioManager.RINGER_MODE_VIBRATE
-import android.provider.Settings
 import com.android.settingslib.volume.data.repository.AudioSystemRepository
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.plugins.VolumeDialogController
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.domain.interactor.VolumeDialogStateInteractor
+import com.android.systemui.volume.dialog.ringer.data.repository.VolumeDialogRingerFeedbackRepository
 import com.android.systemui.volume.dialog.ringer.shared.model.VolumeDialogRingerModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStateModel
 import javax.inject.Inject
@@ -45,6 +45,7 @@ constructor(
     volumeDialogStateInteractor: VolumeDialogStateInteractor,
     private val controller: VolumeDialogController,
     private val audioSystemRepository: AudioSystemRepository,
+    private val ringerFeedbackRepository: VolumeDialogRingerFeedbackRepository,
 ) {
 
     val ringerModel: Flow<VolumeDialogRingerModel> =
@@ -64,11 +65,6 @@ constructor(
                             }
                         },
                 currentRingerMode = RingerMode(state.ringerModeInternal),
-                isEnabled =
-                    !(state.zenMode == Settings.Global.ZEN_MODE_ALARMS ||
-                        state.zenMode == Settings.Global.ZEN_MODE_NO_INTERRUPTIONS ||
-                        (state.zenMode == Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS &&
-                            state.disallowRinger)),
                 isMuted = it.level == 0 || it.muted,
                 level = it.level,
                 levelMax = it.levelMax,
@@ -83,5 +79,13 @@ constructor(
 
     fun scheduleTouchFeedback() {
         controller.scheduleTouchFeedback()
+    }
+
+    suspend fun getToastCount(): Int {
+        return ringerFeedbackRepository.getToastCount()
+    }
+
+    suspend fun updateToastCount(toastCount: Int) {
+        ringerFeedbackRepository.updateToastCount(toastCount)
     }
 }

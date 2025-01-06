@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.ui.viewmodel
 
-import com.android.settingslib.AccessibilityContentDescriptions
 import com.android.systemui.Flags.statusBarStaticInoutIndicators
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -28,6 +27,7 @@ import com.android.systemui.statusbar.pipeline.airplane.domain.interactor.Airpla
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.interactor.MobileIconsInteractor
 import com.android.systemui.statusbar.pipeline.mobile.domain.model.SignalIconModel
+import com.android.systemui.statusbar.pipeline.mobile.ui.model.MobileContentDescription
 import com.android.systemui.statusbar.pipeline.shared.ConnectivityConstants
 import com.android.systemui.statusbar.pipeline.shared.data.model.DataActivityModel
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +50,7 @@ interface MobileIconViewModelCommon {
     /** True if this view should be visible at all. */
     val isVisible: StateFlow<Boolean>
     val icon: Flow<SignalIconModel>
-    val contentDescription: Flow<ContentDescription?>
+    val contentDescription: Flow<MobileContentDescription?>
     val roaming: Flow<Boolean>
     /** The RAT icon (LTE, 3G, 5G, etc) to be displayed. Null if we shouldn't show anything */
     val networkTypeIcon: Flow<Icon.Resource?>
@@ -95,10 +95,7 @@ class MobileIconViewModel(
     }
 
     private val satelliteProvider by lazy {
-        CarrierBasedSatelliteViewModelImpl(
-            subscriptionId,
-            iconInteractor,
-        )
+        CarrierBasedSatelliteViewModelImpl(subscriptionId, iconInteractor)
     }
 
     /**
@@ -123,7 +120,7 @@ class MobileIconViewModel(
 
     override val icon: Flow<SignalIconModel> = vmProvider.flatMapLatest { it.icon }
 
-    override val contentDescription: Flow<ContentDescription?> =
+    override val contentDescription: Flow<MobileContentDescription?> =
         vmProvider.flatMapLatest { it.contentDescription }
 
     override val roaming: Flow<Boolean> = vmProvider.flatMapLatest { it.roaming }
@@ -154,8 +151,7 @@ private class CarrierBasedSatelliteViewModelImpl(
     override val isVisible: StateFlow<Boolean> = MutableStateFlow(true)
     override val icon: Flow<SignalIconModel> = interactor.signalLevelIcon
 
-    override val contentDescription: Flow<ContentDescription> =
-        MutableStateFlow(ContentDescription.Loaded(""))
+    override val contentDescription: Flow<MobileContentDescription?> = MutableStateFlow(null)
 
     /** These fields are not used for satellite icons currently */
     override val roaming: Flow<Boolean> = flowOf(false)
@@ -206,26 +202,41 @@ private class CellularIconViewModel(
 
     override val icon: Flow<SignalIconModel> = iconInteractor.signalLevelIcon
 
-    override val contentDescription: Flow<ContentDescription?> =
-        iconInteractor.signalLevelIcon
-            .map {
-                // We expect the signal icon to be cellular here since this is the cellular vm
-                if (it !is SignalIconModel.Cellular) {
-                    null
-                } else {
-                    val resId =
-                        AccessibilityContentDescriptions.getDescriptionForLevel(
-                            it.level,
-                            it.numberOfLevels
+    override val contentDescription: Flow<MobileContentDescription?> =
+        combine(iconInteractor.signalLevelIcon, iconInteractor.networkName) { icon, nameModel ->
+                when (icon) {
+                    is SignalIconModel.Cellular ->
+                        MobileContentDescription.Cellular(
+                            nameModel.name,
+                            icon.levelDescriptionRes(),
                         )
-                    if (resId != 0) {
-                        ContentDescription.Resource(resId)
-                    } else {
-                        null
-                    }
+                    else -> null
                 }
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
+
+    private fun SignalIconModel.Cellular.levelDescriptionRes() =
+        when (level) {
+            0 -> R.string.accessibility_no_signal
+            1 -> R.string.accessibility_one_bar
+            2 -> R.string.accessibility_two_bars
+            3 -> R.string.accessibility_three_bars
+            4 -> {
+                if (numberOfLevels == 6) {
+                    R.string.accessibility_four_bars
+                } else {
+                    R.string.accessibility_signal_full
+                }
+            }
+            5 -> {
+                if (numberOfLevels == 6) {
+                    R.string.accessibility_signal_full
+                } else {
+                    R.string.accessibility_no_signal
+                }
+            }
+            else -> R.string.accessibility_no_signal
+        }
 
     private val showNetworkTypeIcon: Flow<Boolean> =
         combine(
@@ -248,10 +259,9 @@ private class CellularIconViewModel(
             .stateIn(scope, SharingStarted.WhileSubscribed(), false)
 
     override val networkTypeIcon: Flow<Icon.Resource?> =
-        combine(
-                iconInteractor.networkTypeIconGroup,
-                showNetworkTypeIcon,
-            ) { networkTypeIconGroup, shouldShow ->
+        combine(iconInteractor.networkTypeIconGroup, showNetworkTypeIcon) {
+                networkTypeIconGroup,
+                shouldShow ->
                 val desc =
                     if (networkTypeIconGroup.contentDescription != 0)
                         ContentDescription.Resource(networkTypeIconGroup.contentDescription)

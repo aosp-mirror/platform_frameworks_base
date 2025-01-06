@@ -18,7 +18,6 @@
 package com.android.systemui.keyguard.domain.interactor
 
 import com.android.keyguard.logging.KeyguardLogger
-import com.android.systemui.bouncer.domain.interactor.AlternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.PrimaryBouncerInteractor
 import com.android.systemui.bouncer.shared.flag.ComposeBouncerFlags
 import com.android.systemui.dagger.SysUISingleton
@@ -28,15 +27,12 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.DismissAction
 import com.android.systemui.keyguard.shared.model.KeyguardDone
 import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
-import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
-import com.android.systemui.util.kotlin.Utils.Companion.sampleFilter
 import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -66,8 +62,6 @@ constructor(
     val dismissInteractor: KeyguardDismissInteractor,
     @Application private val applicationScope: CoroutineScope,
     deviceUnlockedInteractor: Lazy<DeviceUnlockedInteractor>,
-    powerInteractor: PowerInteractor,
-    alternateBouncerInteractor: AlternateBouncerInteractor,
     shadeInteractor: Lazy<ShadeInteractor>,
     keyguardInteractor: Lazy<KeyguardInteractor>,
     sceneInteractor: Lazy<SceneInteractor>,
@@ -144,42 +138,6 @@ constructor(
             }
         }
 
-    /** Flow that emits whenever we need to reset the dismiss action */
-    private val resetDismissAction: Flow<Unit> =
-        combine(
-                if (SceneContainerFlag.isEnabled) {
-                    // Using currentScene instead of isFinishedIn because of a race condition that
-                    // forms between isFinishedIn(Gone) and isOnShadeWhileUnlocked where the latter
-                    // emits false before the former emits true, causing the evaluation of the
-                    // combine to come up with true, temporarily, before settling on false, which is
-                    // a valid final state. That causes an incorrect reset of the dismiss action to
-                    // occur before it gets executed.
-                    sceneInteractor
-                        .get()
-                        .currentScene
-                        .map { it == Scenes.Gone }
-                        .distinctUntilChanged()
-                } else {
-                    transitionInteractor.isFinishedIn(
-                        scene = Scenes.Gone,
-                        stateWithoutSceneContainer = GONE,
-                    )
-                },
-                transitionInteractor.isFinishedIn(
-                    scene = Scenes.Bouncer,
-                    stateWithoutSceneContainer = PRIMARY_BOUNCER,
-                ),
-                alternateBouncerInteractor.isVisible,
-                isOnShadeWhileUnlocked,
-                powerInteractor.isAsleep,
-            ) { isOnGone, isOnBouncer, isOnAltBouncer, isOnShadeWhileUnlocked, isAsleep ->
-                (!isOnGone && !isOnBouncer && !isOnAltBouncer && !isOnShadeWhileUnlocked) ||
-                    isAsleep
-            }
-            .filter { it }
-            .sampleFilter(dismissAction) { it !is DismissAction.None }
-            .map {}
-
     fun runDismissAnimationOnKeyguard(): Boolean {
         return willAnimateDismissActionOnLockscreen.value
     }
@@ -220,17 +178,13 @@ constructor(
                 }
             }
 
-            launch {
-                resetDismissAction.collect {
-                    log("resetDismissAction")
-                    repository.dismissAction.value.onCancelAction.run()
-                    clearDismissAction()
-                }
-            }
-
             launch { repository.dismissAction.collect { log("updatedDismissAction=$it") } }
             awaitCancellation()
         }
+    }
+
+    fun clearDismissAction() {
+        repository.setDismissAction(DismissAction.None)
     }
 
     /** Run the dismiss action and starts the dismiss keyguard transition. */
@@ -247,10 +201,6 @@ constructor(
             // sharedFlows but are not due to performance concerns.
             primaryBouncerInteractor.notifyKeyguardAuthenticatedHandled()
         }
-    }
-
-    private fun clearDismissAction() {
-        repository.setDismissAction(DismissAction.None)
     }
 
     private fun log(message: String) {

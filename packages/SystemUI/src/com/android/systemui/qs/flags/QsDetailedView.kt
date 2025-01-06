@@ -79,6 +79,14 @@ object QsDetailedView {
     @JvmStatic
     inline fun assertInLegacyMode() = RefactorFlagUtils.assertInLegacyMode(isEnabled, FLAG_NAME)
 
+    /**
+     * Called to ensure code is only run when the flag is enabled. This will throw an exception if
+     * the flag is not enabled to ensure that the refactor author catches issues in testing.
+     * Caution!! Using this check incorrectly will cause crashes in nextfood builds!
+     */
+    @JvmStatic
+    inline fun assertInNewMode() = RefactorFlagUtils.assertInNewMode(isEnabled, FLAG_NAME)
+
     /** Returns a developer-readable string that describes the current requirement list. */
     @JvmStatic
     fun requirementDescription(): String {

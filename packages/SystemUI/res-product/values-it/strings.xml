@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Sblocca il dispositivo per visualizzare altre opzioni"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"In riproduzione su questo telefono"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"In riproduzione su questo tablet"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Puoi trovare questo smartphone tramite Trova il mio dispositivo anche quando è spento"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Puoi trovare questo tablet tramite Trova il mio dispositivo anche quando è spento"</string>
 </resources>

@@ -17,13 +17,13 @@
 package com.android.systemui.screenshot
 
 import android.content.Intent
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.os.Process.myUserHandle
 import android.platform.test.annotations.EnableFlags
 import android.testing.TestableContext
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.screenshot.proxy.SystemUiProxy
+import com.android.systemui.screenshot.proxy.ScreenshotProxy
 import com.android.systemui.settings.DisplayTracker
 import com.android.systemui.shared.system.ActivityManagerWrapper
 import com.android.systemui.statusbar.phone.CentralSurfaces
@@ -45,7 +45,7 @@ class ActionIntentExecutorTest : SysuiTestCase() {
     private val testableContext = TestableContext(mContext)
 
     private val activityManagerWrapper = mock<ActivityManagerWrapper>()
-    private val systemUiProxy = mock<SystemUiProxy>()
+    private val screenshotProxy = mock<ScreenshotProxy>()
 
     private val displayTracker = mock<DisplayTracker>()
 
@@ -55,7 +55,7 @@ class ActionIntentExecutorTest : SysuiTestCase() {
             activityManagerWrapper,
             testScope,
             mainDispatcher,
-            systemUiProxy,
+            screenshotProxy,
             displayTracker,
         )
 

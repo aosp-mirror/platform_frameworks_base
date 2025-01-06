@@ -16,241 +16,152 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.FrpDeferredValue
-import com.android.systemui.kairos.FrpStateScope
-import com.android.systemui.kairos.FrpStateful
-import com.android.systemui.kairos.FrpTransactionScope
-import com.android.systemui.kairos.GroupedTFlow
-import com.android.systemui.kairos.TFlow
-import com.android.systemui.kairos.TFlowInit
-import com.android.systemui.kairos.TFlowLoop
-import com.android.systemui.kairos.TState
-import com.android.systemui.kairos.TStateInit
-import com.android.systemui.kairos.emptyTFlow
+import com.android.systemui.kairos.DeferredValue
+import com.android.systemui.kairos.Events
+import com.android.systemui.kairos.EventsInit
+import com.android.systemui.kairos.EventsLoop
+import com.android.systemui.kairos.GroupedEvents
+import com.android.systemui.kairos.Incremental
+import com.android.systemui.kairos.IncrementalInit
+import com.android.systemui.kairos.State
+import com.android.systemui.kairos.StateInit
+import com.android.systemui.kairos.StateScope
+import com.android.systemui.kairos.Stateful
+import com.android.systemui.kairos.emptyEvents
 import com.android.systemui.kairos.groupByKey
 import com.android.systemui.kairos.init
-import com.android.systemui.kairos.internal.util.mapValuesParallel
 import com.android.systemui.kairos.mapCheap
 import com.android.systemui.kairos.merge
-import com.android.systemui.kairos.switch
+import com.android.systemui.kairos.switchEvents
 import com.android.systemui.kairos.util.Maybe
 import com.android.systemui.kairos.util.map
-import kotlin.coroutines.Continuation
-import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.startCoroutine
-import kotlinx.coroutines.CompletableDeferred
-import kotlinx.coroutines.Deferred
-import kotlinx.coroutines.completeWith
-import kotlinx.coroutines.job
 
-internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: TFlow<Any>) :
-    StateScope, EvalScope by evalScope {
+internal class StateScopeImpl(val evalScope: EvalScope, override val endSignal: Events<Any>) :
+    InternalStateScope, EvalScope by evalScope {
 
-    private val endSignalOnce: TFlow<Any> = endSignal.nextOnlyInternal("StateScope.endSignal")
+    override val endSignalOnce: Events<Any> = endSignal.nextOnlyInternal("StateScope.endSignal")
 
-    private fun <A> TFlow<A>.truncateToScope(operatorName: String): TFlow<A> =
-        if (endSignalOnce === emptyTFlow) {
-            this
-        } else {
-            endSignalOnce.mapCheap { emptyTFlow }.toTStateInternal(operatorName, this).switch()
-        }
+    override fun <A> deferredStateScope(block: StateScope.() -> A): DeferredValue<A> =
+        DeferredValue(deferAsync { block() })
 
-    private fun <A> TFlow<A>.nextOnlyInternal(operatorName: String): TFlow<A> =
-        if (this === emptyTFlow) {
-            this
-        } else {
-            TFlowLoop<A>().apply {
-                loopback =
-                    mapCheap { emptyTFlow }
-                        .toTStateInternal(operatorName, this@nextOnlyInternal)
-                        .switch()
-            }
-        }
-
-    private fun <A> TFlow<A>.toTStateInternal(operatorName: String, init: A): TState<A> =
-        toTStateInternalDeferred(operatorName, CompletableDeferred(init))
-
-    private fun <A> TFlow<A>.toTStateInternalDeferred(
-        operatorName: String,
-        init: Deferred<A>,
-    ): TState<A> {
-        val changes = this@toTStateInternalDeferred
-        val name = operatorName
-        val impl =
-            mkState(name, operatorName, evalScope, { changes.init.connect(evalScope = this) }, init)
-        return TStateInit(constInit(name, impl))
-    }
-
-    private fun <R> deferredInternal(block: suspend FrpStateScope.() -> R): FrpDeferredValue<R> =
-        FrpDeferredValue(deferAsync { runInStateScope(block) })
-
-    private fun <A> TFlow<A>.toTStateDeferredInternal(
-        initialValue: FrpDeferredValue<A>
-    ): TState<A> {
-        val operatorName = "toTStateDeferred"
+    override fun <A> Events<A>.holdStateDeferred(initialValue: DeferredValue<A>): State<A> {
+        val operatorName = "holdStateDeferred"
         // Ensure state is only collected until the end of this scope
         return truncateToScope(operatorName)
-            .toTStateInternalDeferred(operatorName, initialValue.unwrapped)
+            .holdStateInternalDeferred(operatorName, initialValue.unwrapped)
     }
 
-    private fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyInternal(
-        storage: TState<Map<K, TFlow<V>>>
-    ): TFlow<Map<K, V>> {
-        val name = "mergeIncrementally"
-        return TFlowInit(
+    override fun <K, V> Events<Map<K, Maybe<V>>>.foldStateMapIncrementally(
+        initialValues: DeferredValue<Map<K, V>>
+    ): Incremental<K, V> {
+        val operatorName = "foldStateMapIncrementally"
+        val name = operatorName
+        return IncrementalInit(
             constInit(
-                name,
-                switchDeferredImpl(
-                    getStorage = {
-                        storage.init
-                            .connect(this)
-                            .getCurrentWithEpoch(this)
-                            .first
-                            .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
-                    },
-                    getPatches = {
-                        mapImpl({ init.connect(this) }) { patch ->
-                            patch.mapValuesParallel { (_, m) ->
-                                m.map { flow -> flow.init.connect(this) }
-                            }
-                        }
-                    },
+                operatorName,
+                activatedIncremental(
+                    name,
+                    operatorName,
+                    evalScope,
+                    { init.connect(this) },
+                    initialValues.unwrapped,
                 ),
             )
         )
     }
 
-    private fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptInternal(
-        storage: TState<Map<K, TFlow<V>>>
-    ): TFlow<Map<K, V>> {
-        val name = "mergeIncrementallyPrompt"
-        return TFlowInit(
-            constInit(
-                name,
-                switchPromptImpl(
-                    getStorage = {
-                        storage.init
-                            .connect(this)
-                            .getCurrentWithEpoch(this)
-                            .first
-                            .mapValuesParallel { (_, flow) -> flow.init.connect(this) }
-                    },
-                    getPatches = {
-                        mapImpl({ init.connect(this) }) { patch ->
-                            patch.mapValuesParallel { (_, m) ->
-                                m.map { flow -> flow.init.connect(this) }
-                            }
-                        }
-                    },
-                ),
-            )
-        )
-    }
-
-    private fun <K, A, B> TFlow<Map<K, Maybe<FrpStateful<A>>>>.applyLatestStatefulForKeyInternal(
-        init: FrpDeferredValue<Map<K, FrpStateful<B>>>,
+    override fun <K, A, B> Events<Map<K, Maybe<Stateful<A>>>>.applyLatestStatefulForKey(
+        init: DeferredValue<Map<K, Stateful<B>>>,
         numKeys: Int?,
-    ): Pair<TFlow<Map<K, Maybe<A>>>, FrpDeferredValue<Map<K, B>>> {
-        val eventsByKey: GroupedTFlow<K, Maybe<FrpStateful<A>>> = groupByKey(numKeys)
-        val initOut: Deferred<Map<K, B>> = deferAsync {
-            init.unwrapped.await().mapValuesParallel { (k, stateful) ->
-                val newEnd = with(frpScope) { eventsByKey[k].skipNext() }
+    ): Pair<Events<Map<K, Maybe<A>>>, DeferredValue<Map<K, B>>> {
+        val eventsByKey: GroupedEvents<K, Maybe<Stateful<A>>> = groupByKey(numKeys)
+        val initOut: Lazy<Map<K, B>> = deferAsync {
+            init.unwrapped.value.mapValues { (k, stateful) ->
+                val newEnd = eventsByKey[k]
                 val newScope = childStateScope(newEnd)
-                newScope.runInStateScope(stateful)
+                newScope.stateful()
             }
         }
-        val changesNode: TFlowImpl<Map<K, Maybe<A>>> =
-            mapImpl(
-                upstream = { this@applyLatestStatefulForKeyInternal.init.connect(evalScope = this) }
-            ) { upstreamMap ->
-                upstreamMap.mapValuesParallel { (k: K, ma: Maybe<FrpStateful<A>>) ->
+        val changesNode: EventsImpl<Map<K, Maybe<A>>> =
+            mapImpl(upstream = { this@applyLatestStatefulForKey.init.connect(evalScope = this) }) {
+                upstreamMap,
+                _ ->
+                upstreamMap.mapValues { (k: K, ma: Maybe<Stateful<A>>) ->
                     reenterStateScope(this@StateScopeImpl).run {
                         ma.map { stateful ->
-                            val newEnd = with(frpScope) { eventsByKey[k].skipNext() }
+                            val newEnd = eventsByKey[k].skipNext()
                             val newScope = childStateScope(newEnd)
-                            newScope.runInStateScope(stateful)
+                            newScope.stateful()
                         }
                     }
                 }
             }
         val operatorName = "applyLatestStatefulForKey"
         val name = operatorName
-        val changes: TFlow<Map<K, Maybe<A>>> = TFlowInit(constInit(name, changesNode.cached()))
-        return changes to FrpDeferredValue(initOut)
+        val changes: Events<Map<K, Maybe<A>>> = EventsInit(constInit(name, changesNode.cached()))
+        return changes to DeferredValue(initOut)
     }
 
-    private fun <A> TFlow<FrpStateful<A>>.observeStatefulsInternal(): TFlow<A> {
-        val operatorName = "observeStatefuls"
+    override fun <A> Events<Stateful<A>>.applyStatefuls(): Events<A> {
+        val operatorName = "applyStatefuls"
         val name = operatorName
-        return TFlowInit(
+        return EventsInit(
             constInit(
                 name,
-                mapImpl(
-                        upstream = { this@observeStatefulsInternal.init.connect(evalScope = this) }
-                    ) { stateful ->
-                        reenterStateScope(outerScope = this@StateScopeImpl)
-                            .runInStateScope(stateful)
+                mapImpl(upstream = { this@applyStatefuls.init.connect(evalScope = this) }) {
+                        stateful,
+                        _ ->
+                        reenterStateScope(outerScope = this@StateScopeImpl).stateful()
                     }
                     .cached(),
             )
         )
     }
 
-    override val frpScope: FrpStateScope = FrpStateScopeImpl()
-
-    private inner class FrpStateScopeImpl :
-        FrpStateScope, FrpTransactionScope by evalScope.frpScope {
-
-        override fun <A> deferredStateScope(
-            block: suspend FrpStateScope.() -> A
-        ): FrpDeferredValue<A> = deferredInternal(block)
-
-        override fun <A> TFlow<A>.holdDeferred(initialValue: FrpDeferredValue<A>): TState<A> =
-            toTStateDeferredInternal(initialValue)
-
-        override fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementally(
-            initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
-        ): TFlow<Map<K, V>> {
-            val storage: TState<Map<K, TFlow<V>>> = foldMapIncrementally(initialTFlows)
-            return mergeIncrementallyInternal(storage)
-        }
-
-        override fun <K : Any, V> TFlow<Map<K, Maybe<TFlow<V>>>>.mergeIncrementallyPromptly(
-            initialTFlows: FrpDeferredValue<Map<K, TFlow<V>>>
-        ): TFlow<Map<K, V>> {
-            val storage: TState<Map<K, TFlow<V>>> = foldMapIncrementally(initialTFlows)
-            return mergeIncrementallyPromptInternal(storage)
-        }
-
-        override fun <K, A, B> TFlow<Map<K, Maybe<FrpStateful<A>>>>.applyLatestStatefulForKey(
-            init: FrpDeferredValue<Map<K, FrpStateful<B>>>,
-            numKeys: Int?,
-        ): Pair<TFlow<Map<K, Maybe<A>>>, FrpDeferredValue<Map<K, B>>> =
-            applyLatestStatefulForKeyInternal(init, numKeys)
-
-        override fun <A> TFlow<FrpStateful<A>>.applyStatefuls(): TFlow<A> =
-            observeStatefulsInternal()
-    }
-
-    override suspend fun <R> runInStateScope(block: suspend FrpStateScope.() -> R): R {
-        val complete = CompletableDeferred<R>(parent = coroutineContext.job)
-        block.startCoroutine(
-            frpScope,
-            object : Continuation<R> {
-                override val context: CoroutineContext
-                    get() = EmptyCoroutineContext
-
-                override fun resumeWith(result: Result<R>) {
-                    complete.completeWith(result)
-                }
-            },
-        )
-        return complete.await()
-    }
-
-    override fun childStateScope(newEnd: TFlow<Any>) =
+    override fun childStateScope(newEnd: Events<Any>) =
         StateScopeImpl(evalScope, merge(newEnd, endSignal))
+
+    private fun <A> Events<A>.truncateToScope(operatorName: String): Events<A> =
+        if (endSignalOnce === emptyEvents) {
+            this
+        } else {
+            endSignalOnce
+                .mapCheap { emptyEvents }
+                .holdStateInternal(operatorName, this)
+                .switchEvents()
+        }
+
+    private fun <A> Events<A>.nextOnlyInternal(operatorName: String): Events<A> =
+        if (this === emptyEvents) {
+            this
+        } else {
+            EventsLoop<A>().apply {
+                loopback =
+                    mapCheap { emptyEvents }
+                        .holdStateInternal(operatorName, this@nextOnlyInternal)
+                        .switchEvents()
+            }
+        }
+
+    private fun <A> Events<A>.holdStateInternal(operatorName: String, init: A): State<A> =
+        holdStateInternalDeferred(operatorName, CompletableLazy(init))
+
+    private fun <A> Events<A>.holdStateInternalDeferred(
+        operatorName: String,
+        init: Lazy<A>,
+    ): State<A> {
+        val changes = this@holdStateInternalDeferred
+        val name = operatorName
+        val impl =
+            activatedStateSource(
+                name,
+                operatorName,
+                evalScope,
+                { changes.init.connect(evalScope = this) },
+                init,
+            )
+        return StateInit(constInit(name, impl))
+    }
 }
 
 private fun EvalScope.reenterStateScope(outerScope: StateScopeImpl) =

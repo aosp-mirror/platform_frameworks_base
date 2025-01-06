@@ -18,13 +18,16 @@ package com.android.internal.widget.remotecompose.core.operations.layout.manager
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
+import com.android.internal.widget.remotecompose.core.RemoteContext;
 import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.operations.layout.Component;
-import com.android.internal.widget.remotecompose.core.operations.layout.ComponentStartOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.LayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
@@ -36,7 +39,7 @@ import java.util.List;
 /**
  * Simple Column layout implementation - also supports weight and horizontal/vertical positioning
  */
-public class ColumnLayout extends LayoutManager implements ComponentStartOperation {
+public class ColumnLayout extends LayoutManager {
     public static final int START = 1;
     public static final int CENTER = 2;
     public static final int END = 3;
@@ -51,7 +54,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     float mSpacedBy = 0f;
 
     public ColumnLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             float x,
@@ -68,7 +71,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     public ColumnLayout(
-            Component parent,
+            @Nullable Component parent,
             int componentId,
             int animationId,
             int horizontalPositioning,
@@ -87,6 +90,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                 spacedBy);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "COLUMN ["
@@ -105,23 +109,37 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                 + mVisibility;
     }
 
+    @NonNull
     @Override
     protected String getSerializedName() {
         return "COLUMN";
     }
 
     @Override
+    public boolean isInVerticalFill() {
+        return super.isInVerticalFill() || childrenHaveVerticalWeights();
+    }
+
+    @Override
     public void computeWrapSize(
-            PaintContext context, float maxWidth, float maxHeight, MeasurePass measure, Size size) {
+            @NonNull PaintContext context,
+            float maxWidth,
+            float maxHeight,
+            boolean horizontalWrap,
+            boolean verticalWrap,
+            @NonNull MeasurePass measure,
+            @NonNull Size size) {
         DebugLog.s(() -> "COMPUTE WRAP SIZE in " + this + " (" + mComponentId + ")");
         int visibleChildrens = 0;
+        float currentMaxHeight = maxHeight;
         for (Component c : mChildrenComponents) {
-            c.measure(context, 0f, maxWidth, 0f, maxHeight, measure);
+            c.measure(context, 0f, maxWidth, 0f, currentMaxHeight, measure);
             ComponentMeasure m = measure.get(c);
             if (m.getVisibility() != Visibility.GONE) {
                 size.setWidth(Math.max(size.getWidth(), m.getW()));
                 size.setHeight(size.getHeight() + m.getH());
                 visibleChildrens++;
+                currentMaxHeight -= m.getH();
             }
         }
         if (!mChildrenComponents.isEmpty()) {
@@ -132,12 +150,12 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
 
     @Override
     public void computeSize(
-            PaintContext context,
+            @NonNull PaintContext context,
             float minWidth,
             float maxWidth,
             float minHeight,
             float maxHeight,
-            MeasurePass measure) {
+            @NonNull MeasurePass measure) {
         DebugLog.s(() -> "COMPUTE SIZE in " + this + " (" + mComponentId + ")");
         float mh = maxHeight;
         for (Component child : mChildrenComponents) {
@@ -151,7 +169,17 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     @Override
-    public void internalLayoutMeasure(PaintContext context, MeasurePass measure) {
+    public float intrinsicHeight(@NonNull RemoteContext context) {
+        float height = computeModifierDefinedHeight(context);
+        float componentHeights = 0f;
+        for (Component c : mChildrenComponents) {
+            componentHeights += c.intrinsicHeight(context);
+        }
+        return Math.max(height, componentHeights);
+    }
+
+    @Override
+    public void internalLayoutMeasure(@NonNull PaintContext context, @NonNull MeasurePass measure) {
         ComponentMeasure selfMeasure = measure.get(this);
         DebugLog.s(
                 () ->
@@ -175,6 +203,16 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         float childrenWidth = 0f;
         float childrenHeight = 0f;
 
+        if (mComponentModifiers.hasHorizontalScroll()) {
+            selfWidth =
+                    mComponentModifiers.getHorizontalScrollDimension()
+                            - mPaddingLeft
+                            - mPaddingRight;
+        }
+        if (mComponentModifiers.hasVerticalScroll()) {
+            selfHeight =
+                    mComponentModifiers.getVerticalScrollDimension() - mPaddingTop - mPaddingBottom;
+        }
         boolean hasWeights = false;
         float totalWeights = 0f;
         for (Component child : mChildrenComponents) {
@@ -273,6 +311,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                 ty = verticalGap / 2f;
                 break;
         }
+
         for (Component child : mChildrenComponents) {
             ComponentMeasure childMeasure = measure.get(child);
             switch (mHorizontalPositioning) {
@@ -302,16 +341,27 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         DebugLog.e();
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return "ColumnLayout";
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return Operations.LAYOUT_COLUMN;
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int componentId,
             int animationId,
             int horizontalPositioning,
@@ -325,7 +375,13 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
         buffer.writeFloat(spacedBy);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int componentId = buffer.readInt();
         int animationId = buffer.readInt();
         int horizontalPositioning = buffer.readInt();
@@ -341,7 +397,12 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
                         spacedBy));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", id(), name())
                 .description(
                         "Column layout implementation, positioning components one"
@@ -374,7 +435,7 @@ public class ColumnLayout extends LayoutManager implements ComponentStartOperati
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mComponentId,

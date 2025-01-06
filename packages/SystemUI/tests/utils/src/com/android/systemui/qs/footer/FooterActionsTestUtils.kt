@@ -69,6 +69,7 @@ class FooterActionsTestUtils(
     private val scheduler: TestCoroutineScheduler,
 ) {
     private val mockActivityStarter: ActivityStarter = mock<ActivityStarter>()
+
     /** Enable or disable the user switcher in the settings. */
     fun setUserSwitcherEnabled(settings: GlobalSettings, enabled: Boolean) {
         settings.putBool(Settings.Global.USER_SWITCHER_ENABLED, enabled)
@@ -110,6 +111,7 @@ class FooterActionsTestUtils(
         userSwitcherRepository: UserSwitcherRepository = userSwitcherRepository(),
         broadcastDispatcher: BroadcastDispatcher = mock(),
         bgDispatcher: CoroutineDispatcher = StandardTestDispatcher(scheduler),
+        context: Context = mock(),
     ): FooterActionsInteractor {
         return FooterActionsInteractorImpl(
             activityStarter,
@@ -124,6 +126,7 @@ class FooterActionsTestUtils(
             userSwitcherRepository,
             broadcastDispatcher,
             bgDispatcher,
+            context,
         )
     }
 
@@ -132,15 +135,12 @@ class FooterActionsTestUtils(
         securityController: SecurityController = FakeSecurityController(),
         bgDispatcher: CoroutineDispatcher = StandardTestDispatcher(scheduler),
     ): SecurityRepository {
-        return SecurityRepositoryImpl(
-            securityController,
-            bgDispatcher,
-        )
+        return SecurityRepositoryImpl(securityController, bgDispatcher)
     }
 
     /** Create a [SecurityRepository] to be used in tests. */
     fun foregroundServicesRepository(
-        fgsManagerController: FakeFgsManagerController = FakeFgsManagerController(),
+        fgsManagerController: FakeFgsManagerController = FakeFgsManagerController()
     ): ForegroundServicesRepository {
         return ForegroundServicesRepositoryImpl(fgsManagerController)
     }

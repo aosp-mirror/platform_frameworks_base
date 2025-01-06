@@ -26,7 +26,8 @@ import com.android.wm.shell.bubbles.Bubbles
 sealed class NoteTaskLaunchMode {
 
     /** @see Bubbles.showOrHideAppBubble */
-    object AppBubble : NoteTaskLaunchMode()
+    data class AppBubble(val bubbleExpandBehavior: NoteTaskBubbleExpandBehavior) :
+        NoteTaskLaunchMode()
 
     /** @see Context.startActivity */
     object Activity : NoteTaskLaunchMode()

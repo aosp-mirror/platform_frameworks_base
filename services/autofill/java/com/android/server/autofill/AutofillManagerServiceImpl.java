@@ -61,6 +61,7 @@ import android.service.autofill.FillEventHistory;
 import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillEventHistory.Event.NoSaveReason;
 import android.service.autofill.FillResponse;
+import android.service.autofill.Flags;
 import android.service.autofill.IAutoFillService;
 import android.service.autofill.InlineSuggestionRenderService;
 import android.service.autofill.SaveInfo;
@@ -100,6 +101,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Random;
+
 /**
  * Bridge between the {@code system_server}'s {@link AutofillManagerService} and the
  * app's {@link IAutoFillService} implementation.
@@ -149,6 +151,15 @@ final class AutofillManagerServiceImpl
      */
     @GuardedBy("mLock")
     private final SparseArray<Session> mSessions = new SparseArray<>();
+
+    /**
+     * Cache of FillEventHistory for active Sessions.
+     *
+     * <p>New histories are added whenever a Session is created and are kept until Sessions are
+     * removed through removeSessionLocked()
+     */
+    @GuardedBy("mLock")
+    private final SparseArray<FillEventHistory> mFillHistories = new SparseArray<>();
 
     /** The last selection */
     @GuardedBy("mLock")
@@ -661,6 +672,10 @@ final class AutofillManagerServiceImpl
                 flags, mInputMethodManagerInternal, isPrimaryCredential);
         mSessions.put(newSession.id, newSession);
 
+        if (Flags.multipleFillHistory() && !forAugmentedAutofillOnly) {
+            mFillHistories.put(newSession.id, new FillEventHistory(sessionId, null));
+        }
+
         return newSession;
     }
 
@@ -748,6 +763,45 @@ final class AutofillManagerServiceImpl
     @GuardedBy("mLock")
     void removeSessionLocked(int sessionId) {
         mSessions.remove(sessionId);
+        if (Flags.autofillSessionDestroyed()) {
+            if (sVerbose) {
+                Slog.v(
+                        TAG,
+                        "removeSessionLocked(): removed " + sessionId);
+            }
+
+            FillEventHistory history = null;
+
+            if (Flags.multipleFillHistory() && mFillHistories != null) {
+                history = mFillHistories.get(sessionId);
+                mFillHistories.delete(sessionId);
+            }
+
+            if (mInfo == null || mInfo.getServiceInfo() == null) {
+                if (sVerbose) {
+                    Slog.v(TAG, "removeSessionLocked(): early return because mInfo is null");
+                }
+                return;
+            }
+
+            if (mMaster == null) {
+                if (sVerbose) {
+                    Slog.v(TAG, "removeSessionLocked(): early return because mMaster is null");
+                }
+                return;
+            }
+
+            RemoteFillService remoteService =
+                    new RemoteFillService(
+                            getContext(),
+                            mInfo.getServiceInfo().getComponentName(),
+                            mUserId,
+                            /* callbacks= */ null,
+                            mMaster.isInstantServiceAllowed(),
+                            /* credentialAutofillService= */ null);
+
+            remoteService.onSessionDestroyed(history);
+        }
     }
 
     /**
@@ -805,6 +859,36 @@ final class AutofillManagerServiceImpl
     }
 
     @GuardedBy("mLock")
+    public void notifyImeAnimationStart(int sessionId, long startTimeMs, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyImeAnimationStart(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.notifyImeAnimationStart(startTimeMs);
+    }
+
+    @GuardedBy("mLock")
+    public void notifyImeAnimationEnd(int sessionId, long endTimeMs, int uid) {
+        if (!isEnabledLocked()) {
+            Slog.wtf(TAG, "Service not enabled");
+            return;
+        }
+        final Session session = mSessions.get(sessionId);
+        if (session == null || uid != session.uid) {
+            Slog.v(TAG, "notifyImeAnimationEnd(): no session for "
+                    + sessionId + "(" + uid + ")");
+            return;
+        }
+        session.notifyImeAnimationEnd(endTimeMs);
+    }
+
+    @GuardedBy("mLock")
     @Override // from PerUserSystemService
     protected void handlePackageUpdateLocked(@NonNull String packageName) {
         final ServiceInfo serviceInfo = mFieldClassificationStrategy.getServiceInfo();
@@ -838,6 +922,10 @@ final class AutofillManagerServiceImpl
             }
         }
         mSessions.clear();
+        if (Flags.multipleFillHistory()) {
+            mFillHistories.clear();
+        }
+
         for (int i = 0; i < remoteFillServices.size(); i++) {
             remoteFillServices.valueAt(i).destroy();
         }
@@ -896,99 +984,208 @@ final class AutofillManagerServiceImpl
         return true;
     }
 
-    /**
-     * Updates the last fill selection when an authentication was selected.
-     */
-    void setAuthenticationSelected(int sessionId, @Nullable Bundle clientState,
-            int uiType) {
-        synchronized (mLock) {
-            if (isValidEventLocked("setAuthenticationSelected()", sessionId)) {
-                mEventHistory.addEvent(
-                        new Event(Event.TYPE_AUTHENTICATION_SELECTED, null, clientState, null, null,
-                                null, null, null, null, null, null,
-                                NO_SAVE_UI_REASON_NONE, uiType));
+    @GuardedBy("mLock")
+    void addEventToHistory(String eventName, int sessionId, Event event) {
+        // For the singleton filleventhistory
+        if (isValidEventLocked(eventName, sessionId)) {
+            mEventHistory.addEvent(event);
+        }
+
+        if (Flags.multipleFillHistory()) {
+            FillEventHistory history = mFillHistories.get(sessionId);
+            if (history != null) {
+                history.addEvent(event);
+            } else {
+                if (sVerbose) {
+                    Slog.v(TAG, eventName
+                            + " not logged because FillEventHistory is not tracked for: "
+                            + sessionId);
+                }
             }
         }
     }
 
     /**
-     * Updates the last fill selection when an dataset authentication was selected.
+     * Updates the last fill selection when an authentication was selected.
      */
-    void logDatasetAuthenticationSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState, int uiType) {
+    void setAuthenticationSelected(int sessionId, @Nullable Bundle clientState,
+            int uiType, @Nullable AutofillId focusedId, boolean shouldAdd) {
         synchronized (mLock) {
-            if (isValidEventLocked("logDatasetAuthenticationSelected()", sessionId)) {
-                mEventHistory.addEvent(
-                        new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
-                                clientState, null, null, null, null, null, null, null, null,
-                                NO_SAVE_UI_REASON_NONE, uiType));
+
+            String methodName = "setAuthenticationSelected()";
+
+            if (!shouldAdd) {
+                if (sVerbose) {
+                    Slog.v(TAG, methodName + " not logged because shouldAdd is false");
+                }
+                return;
             }
+
+            Event event =
+                    new Event(
+                            Event.TYPE_AUTHENTICATION_SELECTED,
+                            null,
+                            clientState,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            null,
+                            NO_SAVE_UI_REASON_NONE,
+                            uiType,
+                            focusedId);
+
+            addEventToHistory(methodName, sessionId, event);
+        }
+    }
+
+    /** Updates the last fill selection when a dataset authentication was selected. */
+    void logDatasetAuthenticationSelected(
+            @Nullable String selectedDataset,
+            int sessionId,
+            @Nullable Bundle clientState,
+            int uiType,
+            @Nullable AutofillId focusedId,
+            boolean shouldAdd) {
+        synchronized (mLock) {
+            String methodName = "logDatasetAuthenticationSelected()";
+
+            if (!shouldAdd) {
+                if (sVerbose) {
+                    Slog.v(TAG, methodName + " not logged because shouldAdd is false");
+                }
+                return;
+            }
+
+            Event event = new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
+                                clientState, null, null, null, null, null, null, null, null,
+                                NO_SAVE_UI_REASON_NONE, uiType, focusedId);
+            addEventToHistory(methodName, sessionId, event);
         }
     }
 
     /**
      * Updates the last fill selection when an save Ui is shown.
      */
-    void logSaveShown(int sessionId, @Nullable Bundle clientState) {
+    void logSaveShown(int sessionId, @Nullable Bundle clientState, boolean shouldAdd) {
         synchronized (mLock) {
-            if (isValidEventLocked("logSaveShown()", sessionId)) {
-                mEventHistory.addEvent(new Event(Event.TYPE_SAVE_SHOWN, null, clientState, null,
-                        null, null, null, null, null, null, null));
+            String methodName = "logSaveShown()";
+
+            if (!shouldAdd) {
+                if (sVerbose) {
+                    Slog.v(TAG, methodName + " not logged because shouldAdd is false");
+                }
+                return;
             }
+
+            Event event = new Event(Event.TYPE_SAVE_SHOWN, null, clientState, null,
+                        null, null, null, null, null, null, null, /* focusedId= */ null);
+
+            addEventToHistory(methodName, sessionId, event);
         }
     }
 
-    /**
-     * Updates the last fill response when a dataset was selected.
-     */
-    void logDatasetSelected(@Nullable String selectedDataset, int sessionId,
-            @Nullable Bundle clientState,  int uiType) {
+    /** Updates the last fill response when a dataset was selected. */
+    void logDatasetSelected(
+            @Nullable String selectedDataset,
+            int sessionId,
+            @Nullable Bundle clientState,
+            int uiType,
+            @Nullable AutofillId focusedId,
+            boolean shouldAdd) {
         synchronized (mLock) {
-            if (isValidEventLocked("logDatasetSelected()", sessionId)) {
-                mEventHistory.addEvent(
-                        new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
-                                null, null, null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                                uiType));
+            String methodName = "logDatasetSelected()";
+
+            if (!shouldAdd) {
+                if (sVerbose) {
+                    Slog.v(TAG, methodName + " not logged because shouldAdd is false");
+                }
+                return;
             }
+
+            Event event = new Event(Event.TYPE_DATASET_SELECTED, selectedDataset, clientState, null,
+                                null, null, null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
+                                uiType, focusedId);
+            addEventToHistory(methodName, sessionId, event);
         }
     }
 
     /**
      * Updates the last fill response when a dataset is shown.
      */
-    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int uiType) {
+    void logDatasetShown(int sessionId, @Nullable Bundle clientState, int uiType,
+            @Nullable AutofillId focusedId, boolean shouldAdd) {
         synchronized (mLock) {
-            if (isValidEventLocked("logDatasetShown", sessionId)) {
-                mEventHistory.addEvent(
-                        new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
+            String methodName = "logDatasetShown()";
+
+            if (!shouldAdd) {
+                if (sVerbose) {
+                    Slog.v(TAG, methodName + " not logged because shouldAdd is false");
+                }
+                return;
+            }
+
+            Event event = new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
                                 null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                                uiType));
+                                uiType, focusedId);
+            addEventToHistory(methodName, sessionId, event);
+        }
+    }
+
+    void logViewEnteredForHistory(
+            int sessionId,
+            @Nullable Bundle clientState,
+            FillEventHistory history,
+            @Nullable AutofillId focusedId) {
+        if (history.getEvents() != null) {
+            // Do not log this event more than once
+            for (Event event : history.getEvents()) {
+                if (event.getType() == Event.TYPE_VIEW_REQUESTED_AUTOFILL) {
+                    if (sVerbose) {
+                        Slog.v(TAG, "logViewEntered: already logged TYPE_VIEW_REQUESTED_AUTOFILL");
+                    }
+                    return;
+                }
             }
         }
+
+        history.addEvent(
+                new Event(Event.TYPE_VIEW_REQUESTED_AUTOFILL, null, clientState, null,
+                        null, null, null, null, null, null, null, focusedId));
     }
 
     /**
      * Updates the last fill response when a view was entered.
      */
-    void logViewEntered(int sessionId, @Nullable Bundle clientState) {
+    void logViewEntered(int sessionId, @Nullable Bundle clientState,
+            @Nullable AutofillId focusedId, boolean shouldAdd) {
         synchronized (mLock) {
-            if (!isValidEventLocked("logViewEntered", sessionId)) {
+            String methodName = "logViewEntered()";
+
+            if (!shouldAdd) {
+                if (sVerbose) {
+                    Slog.v(TAG, methodName + " not logged because shouldAdd is false");
+                }
                 return;
             }
 
-            if (mEventHistory.getEvents() != null) {
-                // Do not log this event more than once
-                for (Event event : mEventHistory.getEvents()) {
-                    if (event.getType() == Event.TYPE_VIEW_REQUESTED_AUTOFILL) {
-                        Slog.v(TAG, "logViewEntered: already logged TYPE_VIEW_REQUESTED_AUTOFILL");
-                        return;
-                    }
-                }
+            // This log does not call addEventToHistory() because each distinct FillEventHistory
+            // can only contain 1 TYPE_VIEW_REQUESTED_AUTOFILL event. Therefore, checking both
+            // the singleton FillEventHistory and the per Session FillEventHistory is necessary
+
+            if (isValidEventLocked(methodName, sessionId)) {
+                logViewEnteredForHistory(sessionId, clientState, mEventHistory, focusedId);
             }
 
-            mEventHistory.addEvent(
-                    new Event(Event.TYPE_VIEW_REQUESTED_AUTOFILL, null, clientState, null,
-                            null, null, null, null, null, null, null));
+            if (Flags.multipleFillHistory()) {
+                FillEventHistory history = mFillHistories.get(sessionId);
+                if (history != null) {
+                    logViewEnteredForHistory(sessionId, clientState, history, focusedId);
+                }
+            }
         }
     }
 
@@ -1001,7 +1198,8 @@ final class AutofillManagerServiceImpl
             }
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASET_AUTHENTICATION_SELECTED, selectedDataset,
-                            clientState, null, null, null, null, null, null, null, null));
+                            clientState, null, null, null, null, null, null, null, null,
+                            /* focusedId= */ null));
         }
     }
 
@@ -1014,7 +1212,7 @@ final class AutofillManagerServiceImpl
             }
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASET_SELECTED, suggestionId, clientState, null, null,
-                            null, null, null, null, null, null));
+                            null, null, null, null, null, null, /* focusedId= */ null));
         }
     }
 
@@ -1029,7 +1227,7 @@ final class AutofillManagerServiceImpl
             mAugmentedAutofillEventHistory.addEvent(
                     new Event(Event.TYPE_DATASETS_SHOWN, null, clientState, null, null, null,
                             null, null, null, null, null, NO_SAVE_UI_REASON_NONE,
-                            UI_TYPE_INLINE));
+                            UI_TYPE_INLINE, /* focusedId= */ null));
 
         }
     }
@@ -1045,12 +1243,12 @@ final class AutofillManagerServiceImpl
             @Nullable ArrayList<String> changedDatasetIds,
             @Nullable ArrayList<AutofillId> manuallyFilledFieldIds,
             @Nullable ArrayList<ArrayList<String>> manuallyFilledDatasetIds,
-            @NonNull ComponentName appComponentName, boolean compatMode) {
+            @NonNull ComponentName appComponentName, boolean compatMode, boolean shouldAdd) {
         logContextCommittedLocked(sessionId, clientState, selectedDatasets, ignoredDatasets,
                 changedFieldIds, changedDatasetIds, manuallyFilledFieldIds,
                 manuallyFilledDatasetIds, /* detectedFieldIdsList= */ null,
                 /* detectedFieldClassificationsList= */ null, appComponentName, compatMode,
-                Event.NO_SAVE_UI_REASON_NONE);
+                Event.NO_SAVE_UI_REASON_NONE, shouldAdd);
     }
 
     @GuardedBy("mLock")
@@ -1064,9 +1262,19 @@ final class AutofillManagerServiceImpl
             @Nullable ArrayList<AutofillId> detectedFieldIdsList,
             @Nullable ArrayList<FieldClassification> detectedFieldClassificationsList,
             @NonNull ComponentName appComponentName, boolean compatMode,
-            @NoSaveReason int saveDialogNotShowReason) {
-        if (isValidEventLocked("logDatasetNotSelected()", sessionId)) {
+            @NoSaveReason int saveDialogNotShowReason,
+            boolean shouldAdd) {
+
+        String methodName = "logContextCommittedLocked()";
+
+        if (!shouldAdd) {
             if (sVerbose) {
+                Slog.v(TAG, methodName + " not logged because shouldAdd is false");
+            }
+            return;
+        }
+
+        if (sVerbose) {
                 Slog.v(TAG, "logContextCommitted() with FieldClassification: id=" + sessionId
                         + ", selectedDatasets=" + selectedDatasets
                         + ", ignoredDatasetIds=" + ignoredDatasets
@@ -1078,43 +1286,58 @@ final class AutofillManagerServiceImpl
                         + ", appComponentName=" + appComponentName.toShortString()
                         + ", compatMode=" + compatMode
                         + ", saveDialogNotShowReason=" + saveDialogNotShowReason);
-            }
-            AutofillId[] detectedFieldsIds = null;
-            FieldClassification[] detectedFieldClassifications = null;
-            if (detectedFieldIdsList != null) {
-                detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
-                detectedFieldIdsList.toArray(detectedFieldsIds);
-                detectedFieldClassifications =
-                        new FieldClassification[detectedFieldClassificationsList.size()];
-                detectedFieldClassificationsList.toArray(detectedFieldClassifications);
-
-                final int numberFields = detectedFieldsIds.length;
-                int totalSize = 0;
-                float totalScore = 0;
-                for (int i = 0; i < numberFields; i++) {
-                    final FieldClassification fc = detectedFieldClassifications[i];
-                    final List<Match> matches = fc.getMatches();
-                    final int size = matches.size();
-                    totalSize += size;
-                    for (int j = 0; j < size; j++) {
-                        totalScore += matches.get(j).getScore();
-                    }
-                }
-
-                final int averageScore = (int) ((totalScore * 100) / totalSize);
-                mMetricsLogger.write(Helper
-                        .newLogMaker(MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
-                                appComponentName, getServicePackageName(), sessionId, compatMode)
-                        .setCounterValue(numberFields)
-                        .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE,
-                                averageScore));
-            }
-            mEventHistory.addEvent(new Event(Event.TYPE_CONTEXT_COMMITTED, null,
-                    clientState, selectedDatasets, ignoredDatasets,
-                    changedFieldIds, changedDatasetIds,
-                    manuallyFilledFieldIds, manuallyFilledDatasetIds,
-                    detectedFieldsIds, detectedFieldClassifications, saveDialogNotShowReason));
         }
+
+        AutofillId[] detectedFieldsIds = null;
+        FieldClassification[] detectedFieldClassifications = null;
+        if (detectedFieldIdsList != null) {
+            detectedFieldsIds = new AutofillId[detectedFieldIdsList.size()];
+            detectedFieldIdsList.toArray(detectedFieldsIds);
+            detectedFieldClassifications =
+                    new FieldClassification[detectedFieldClassificationsList.size()];
+            detectedFieldClassificationsList.toArray(detectedFieldClassifications);
+
+            final int numberFields = detectedFieldsIds.length;
+            int totalSize = 0;
+            float totalScore = 0;
+            for (int i = 0; i < numberFields; i++) {
+                final FieldClassification fc = detectedFieldClassifications[i];
+                final List<Match> matches = fc.getMatches();
+                final int size = matches.size();
+                totalSize += size;
+                for (int j = 0; j < size; j++) {
+                    totalScore += matches.get(j).getScore();
+                }
+            }
+
+            final int averageScore = (int) ((totalScore * 100) / totalSize);
+            mMetricsLogger.write(
+                    Helper.newLogMaker(
+                                    MetricsEvent.AUTOFILL_FIELD_CLASSIFICATION_MATCHES,
+                                    appComponentName,
+                                    getServicePackageName(),
+                                    sessionId,
+                                    compatMode)
+                            .setCounterValue(numberFields)
+                            .addTaggedData(MetricsEvent.FIELD_AUTOFILL_MATCH_SCORE, averageScore));
+        }
+        Event event =
+                new Event(
+                        Event.TYPE_CONTEXT_COMMITTED,
+                        null,
+                        clientState,
+                        selectedDatasets,
+                        ignoredDatasets,
+                        changedFieldIds,
+                        changedDatasetIds,
+                        manuallyFilledFieldIds,
+                        manuallyFilledDatasetIds,
+                        detectedFieldsIds,
+                        detectedFieldClassifications,
+                        saveDialogNotShowReason,
+                        /* focusedId= */ null);
+
+        addEventToHistory(methodName, sessionId, event);
     }
 
     /**
@@ -1122,7 +1345,9 @@ final class AutofillManagerServiceImpl
      *
      * @param callingUid The calling uid
      * @return The history for the autofill or the augmented autofill events depending on the {@code
-     * callingUid}, or {@code null} if there is none.
+     *     callingUid}, or {@code null} if there is none.
+     * @deprecated Use {@link
+     *     android.service.autofill.AutofillService#onSessionDestroyed(FillEventHistory)}
      */
     FillEventHistory getFillEventHistory(int callingUid) {
         synchronized (mLock) {

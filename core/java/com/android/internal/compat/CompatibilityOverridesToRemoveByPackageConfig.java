@@ -29,6 +29,7 @@ import java.util.Map;
  * IDs.
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class CompatibilityOverridesToRemoveByPackageConfig implements Parcelable {
     public final Map<String, CompatibilityOverridesToRemoveConfig> packageNameToOverridesToRemove;
 

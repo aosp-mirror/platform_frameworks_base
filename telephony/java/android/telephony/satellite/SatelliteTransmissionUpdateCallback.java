@@ -58,12 +58,11 @@ public interface SatelliteTransmissionUpdateCallback {
      * @param state The new send datagram transfer state.
      * @param sendPendingCount The number of datagrams that are currently being sent.
      * @param errorCode If datagram transfer failed, the reason for failure.
-     *
-     * @hide
      */
-    void onSendDatagramStateChanged(@SatelliteManager.DatagramType int datagramType,
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
+    default void onSendDatagramStateChanged(@SatelliteManager.DatagramType int datagramType,
             @SatelliteManager.SatelliteDatagramTransferState int state, int sendPendingCount,
-            @SatelliteManager.SatelliteResult int errorCode);
+            @SatelliteManager.SatelliteResult int errorCode) {}
     /**
      * Called when satellite datagram receive state changed.
      *
@@ -80,8 +79,7 @@ public interface SatelliteTransmissionUpdateCallback {
      * Called when framework receives a request to send a datagram.
      *
      * @param datagramType The type of the requested datagram.
-     *
-     * @hide
      */
+    @FlaggedApi(Flags.FLAG_SATELLITE_SYSTEM_APIS)
     default void onSendDatagramRequested(@SatelliteManager.DatagramType int datagramType) {}
 }

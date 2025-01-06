@@ -19,6 +19,7 @@ package com.android.wm.shell.windowdecor
 import android.app.ActivityManager
 import android.app.WindowConfiguration
 import android.content.ComponentName
+import android.graphics.Region
 import android.testing.AndroidTestingRunner
 import android.view.Display
 import android.view.InsetsState
@@ -33,6 +34,9 @@ import org.junit.runner.RunWith
 @SmallTest
 @RunWith(AndroidTestingRunner::class)
 class CaptionWindowDecorationTests : ShellTestCase() {
+
+    private val exclusionRegion = Region.obtain()
+
     @Test
     fun updateRelayoutParams_freeformAndTransparentAppearance_allowsInputFallthrough() {
         val taskInfo = createTaskInfo()
@@ -44,13 +48,15 @@ class CaptionWindowDecorationTests : ShellTestCase() {
 
         CaptionWindowDecoration.updateRelayoutParams(
             relayoutParams,
+            mContext,
             taskInfo,
             true,
             false,
             true /* isStatusBarVisible */,
             false /* isKeyguardVisibleAndOccluded */,
             InsetsState(),
-            true /* hasGlobalFocus */
+            true /* hasGlobalFocus */,
+            exclusionRegion
         )
 
         Truth.assertThat(relayoutParams.hasInputFeatureSpy()).isTrue()
@@ -66,13 +72,15 @@ class CaptionWindowDecorationTests : ShellTestCase() {
 
         CaptionWindowDecoration.updateRelayoutParams(
             relayoutParams,
+            mContext,
             taskInfo,
             true,
             false,
             true /* isStatusBarVisible */,
             false /* isKeyguardVisibleAndOccluded */,
             InsetsState(),
-            true /* hasGlobalFocus */
+            true /* hasGlobalFocus */,
+            exclusionRegion
         )
 
         Truth.assertThat(relayoutParams.hasInputFeatureSpy()).isFalse()
@@ -84,13 +92,15 @@ class CaptionWindowDecorationTests : ShellTestCase() {
         val relayoutParams = WindowDecoration.RelayoutParams()
         CaptionWindowDecoration.updateRelayoutParams(
             relayoutParams,
+            mContext,
             taskInfo,
             true,
             false,
             true /* isStatusBarVisible */,
             false /* isKeyguardVisibleAndOccluded */,
             InsetsState(),
-            true /* hasGlobalFocus */
+            true /* hasGlobalFocus */,
+            exclusionRegion
         )
         Truth.assertThat(relayoutParams.mOccludingCaptionElements.size).isEqualTo(2)
         Truth.assertThat(relayoutParams.mOccludingCaptionElements[0].mAlignment).isEqualTo(

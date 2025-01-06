@@ -19,18 +19,27 @@ package com.android.settingslib.preference
 import android.content.Context
 import androidx.annotation.VisibleForTesting
 import androidx.preference.Preference
+import androidx.preference.PreferenceScreen
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceMetadata
 
 /** Creates [Preference] widget and binds with metadata. */
+@Suppress("UNCHECKED_CAST")
 @VisibleForTesting
-fun <P : Preference> PreferenceMetadata.createAndBindWidget(context: Context): P {
-    val binding = DefaultPreferenceBindingFactory.getPreferenceBinding(this)
+fun <P : Preference> PreferenceMetadata.createAndBindWidget(
+    context: Context,
+    preferenceScreen: PreferenceScreen? = null,
+): P {
+    val binding = PreferenceBindingFactory.defaultFactory.getPreferenceBinding(this)!!
     return (binding.createWidget(context) as P).also {
         if (this is PersistentPreference<*>) {
-            storage(context)?.let { keyValueStore ->
+            storage(context).let { keyValueStore ->
                 it.preferenceDataStore = PreferenceDataStoreAdapter(keyValueStore)
             }
+            // Attach preference to preference screen, otherwise `Preference.performClick` does not
+            // interact with underlying datastore
+            (preferenceScreen ?: PreferenceScreenFactory(context).getOrCreatePreferenceScreen())
+                .addPreference(it)
         }
         binding.bind(it, this)
     }

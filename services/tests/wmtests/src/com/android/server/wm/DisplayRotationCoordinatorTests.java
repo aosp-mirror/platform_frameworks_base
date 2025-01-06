@@ -40,6 +40,9 @@ import org.junit.Test;
 @Presubmit
 public class DisplayRotationCoordinatorTests {
 
+    private static final int FIRST_DISPLAY_ID = 1;
+    private static final int SECOND_DISPLAY_ID = 2;
+
     @NonNull
     private final DisplayRotationCoordinator mCoordinator = new DisplayRotationCoordinator();
 
@@ -50,22 +53,45 @@ public class DisplayRotationCoordinatorTests {
     }
 
     @Test (expected = UnsupportedOperationException.class)
-    public void testSecondRegistrationWithoutRemovingFirst() {
+    public void testSecondRegistrationWithoutRemovingFirstWhenDifferentDisplay() {
         Runnable callback1 = mock(Runnable.class);
         Runnable callback2 = mock(Runnable.class);
-        mCoordinator.setDefaultDisplayRotationChangedCallback(callback1);
-        mCoordinator.setDefaultDisplayRotationChangedCallback(callback2);
+        mCoordinator.setDefaultDisplayRotationChangedCallback(FIRST_DISPLAY_ID, callback1);
+        mCoordinator.setDefaultDisplayRotationChangedCallback(SECOND_DISPLAY_ID, callback2);
         assertEquals(callback1, mCoordinator.mDefaultDisplayRotationChangedCallback);
+    }
+
+    @Test
+    public void testSecondRegistrationWithoutRemovingFirstWhenSameDisplay() {
+        Runnable callback1 = mock(Runnable.class);
+        Runnable callback2 = mock(Runnable.class);
+        mCoordinator.setDefaultDisplayRotationChangedCallback(FIRST_DISPLAY_ID, callback1);
+        mCoordinator.setDefaultDisplayRotationChangedCallback(FIRST_DISPLAY_ID, callback2);
+        assertEquals(callback2, mCoordinator.mDefaultDisplayRotationChangedCallback);
+    }
+
+    @Test
+    public void testRemoveIncorrectRegistration() {
+        Runnable callback1 = mock(Runnable.class);
+        Runnable callback2 = mock(Runnable.class);
+        mCoordinator.setDefaultDisplayRotationChangedCallback(FIRST_DISPLAY_ID, callback1);
+        mCoordinator.removeDefaultDisplayRotationChangedCallback(callback2);
+        assertEquals(callback1, mCoordinator.mDefaultDisplayRotationChangedCallback);
+
+        // FIRST_DISPLAY_ID is still able to register another callback because the previous
+        // removal should not have succeeded.
+        mCoordinator.setDefaultDisplayRotationChangedCallback(FIRST_DISPLAY_ID, callback2);
+        assertEquals(callback2, mCoordinator.mDefaultDisplayRotationChangedCallback);
     }
 
     @Test
     public void testSecondRegistrationAfterRemovingFirst() {
         Runnable callback1 = mock(Runnable.class);
-        mCoordinator.setDefaultDisplayRotationChangedCallback(callback1);
-        mCoordinator.removeDefaultDisplayRotationChangedCallback();
+        mCoordinator.setDefaultDisplayRotationChangedCallback(FIRST_DISPLAY_ID, callback1);
+        mCoordinator.removeDefaultDisplayRotationChangedCallback(callback1);
 
         Runnable callback2 = mock(Runnable.class);
-        mCoordinator.setDefaultDisplayRotationChangedCallback(callback2);
+        mCoordinator.setDefaultDisplayRotationChangedCallback(SECOND_DISPLAY_ID, callback2);
 
         mCoordinator.onDefaultDisplayRotationChanged(Surface.ROTATION_90);
         verify(callback2).run();
@@ -75,7 +101,7 @@ public class DisplayRotationCoordinatorTests {
     @Test
     public void testRegisterThenDefaultDisplayRotationChanged() {
         Runnable callback = mock(Runnable.class);
-        mCoordinator.setDefaultDisplayRotationChangedCallback(callback);
+        mCoordinator.setDefaultDisplayRotationChangedCallback(FIRST_DISPLAY_ID, callback);
         assertEquals(Surface.ROTATION_0, mCoordinator.getDefaultDisplayCurrentRotation());
         verify(callback, never()).run();
 
@@ -88,7 +114,7 @@ public class DisplayRotationCoordinatorTests {
     public void testDefaultDisplayRotationChangedThenRegister() {
         mCoordinator.onDefaultDisplayRotationChanged(Surface.ROTATION_90);
         Runnable callback = mock(Runnable.class);
-        mCoordinator.setDefaultDisplayRotationChangedCallback(callback);
+        mCoordinator.setDefaultDisplayRotationChangedCallback(FIRST_DISPLAY_ID, callback);
         verify(callback).run();
         assertEquals(Surface.ROTATION_90, mCoordinator.getDefaultDisplayCurrentRotation());
     }

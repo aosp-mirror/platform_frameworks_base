@@ -45,6 +45,17 @@
       ]
     },
     {
+      "name": "CtsPackageInstallerCUJUpdateOwnerShipTestCases",
+      "options":[
+        {
+          "exclude-annotation":"androidx.test.filters.FlakyTest"
+        },
+        {
+          "exclude-annotation":"org.junit.Ignore"
+        }
+      ]
+    },
+    {
       "name": "CtsPackageInstallerCUJUpdateSelfTestCases",
       "options":[
         {

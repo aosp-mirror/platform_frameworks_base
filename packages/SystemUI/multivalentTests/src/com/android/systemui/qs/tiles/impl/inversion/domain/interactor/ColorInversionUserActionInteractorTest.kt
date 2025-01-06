@@ -23,29 +23,45 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.accessibility.data.repository.FakeColorInversionRepository
+import com.android.systemui.qs.shared.QSSettingsPackageRepository
 import com.android.systemui.qs.tiles.base.actions.FakeQSTileIntentUserInputHandler
 import com.android.systemui.qs.tiles.base.actions.QSTileIntentUserInputHandlerSubject
 import com.android.systemui.qs.tiles.base.interactor.QSTileInputTestKtx
 import com.android.systemui.qs.tiles.impl.inversion.domain.model.ColorInversionTileModel
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
+import org.junit.Before
+import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.Mock
+import org.mockito.junit.MockitoJUnit
+import org.mockito.junit.MockitoRule
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @EnabledOnRavenwood
 @RunWith(AndroidJUnit4::class)
 class ColorInversionUserActionInteractorTest : SysuiTestCase() {
 
+    @get:Rule val mockito: MockitoRule = MockitoJUnit.rule()
+
+    @Mock private lateinit var settingsPackageRepository: QSSettingsPackageRepository
+
     private val testUser = UserHandle.CURRENT
     private val repository = FakeColorInversionRepository()
     private val inputHandler = FakeQSTileIntentUserInputHandler()
 
-    private val underTest =
-        ColorInversionUserActionInteractor(
-            repository,
-            inputHandler,
-        )
+    private lateinit var underTest: ColorInversionUserActionInteractor
+
+    @Before
+    fun setUp() {
+        whenever(settingsPackageRepository.getSettingsPackageName())
+            .thenReturn(SETTINGS_PACKAGE_NAME)
+
+        underTest =
+            ColorInversionUserActionInteractor(repository, inputHandler, settingsPackageRepository)
+    }
 
     @Test
     fun handleClickWhenEnabled() = runTest {
@@ -86,6 +102,11 @@ class ColorInversionUserActionInteractorTest : SysuiTestCase() {
 
         QSTileIntentUserInputHandlerSubject.assertThat(inputHandler).handledOneIntentInput {
             assertThat(it.intent.action).isEqualTo(Settings.ACTION_COLOR_INVERSION_SETTINGS)
+            assertThat(it.intent.getPackage()).isEqualTo(SETTINGS_PACKAGE_NAME)
         }
+    }
+
+    companion object {
+        private const val SETTINGS_PACKAGE_NAME = "com.android.settings"
     }
 }

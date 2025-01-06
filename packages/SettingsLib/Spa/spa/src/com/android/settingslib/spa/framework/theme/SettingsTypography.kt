@@ -16,6 +16,7 @@
 
 package com.android.settingslib.spa.framework.theme
 
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
@@ -29,134 +30,428 @@ private class SettingsTypography(settingsFontFamily: SettingsFontFamily) {
     private val brand = settingsFontFamily.brand
     private val plain = settingsFontFamily.plain
 
-    val typography = Typography(
-        displayLarge = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 57.sp,
-            lineHeight = 64.sp,
-            letterSpacing = (-0.2).sp,
-            hyphens = Hyphens.Auto,
-        ),
-        displayMedium = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 45.sp,
-            lineHeight = 52.sp,
-            letterSpacing = 0.0.sp,
-            hyphens = Hyphens.Auto,
-        ),
-        displaySmall = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 36.sp,
-            lineHeight = 44.sp,
-            letterSpacing = 0.0.sp,
-            hyphens = Hyphens.Auto,
-        ),
-        headlineLarge = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 32.sp,
-            lineHeight = 40.sp,
-            letterSpacing = 0.0.sp,
-            hyphens = Hyphens.Auto,
-        ),
-        headlineMedium = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 28.sp,
-            lineHeight = 36.sp,
-            letterSpacing = 0.0.sp,
-            hyphens = Hyphens.Auto,
-        ),
-        headlineSmall = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 24.sp,
-            lineHeight = 32.sp,
-            letterSpacing = 0.0.sp,
-            hyphens = Hyphens.Auto,
-        ),
-        titleLarge = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 22.sp,
-            lineHeight = 28.sp,
-            letterSpacing = 0.02.em,
-            hyphens = Hyphens.Auto,
-        ),
-        titleMedium = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 20.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.02.em,
-            hyphens = Hyphens.Auto,
-        ),
-        titleSmall = TextStyle(
-            fontFamily = brand,
-            fontWeight = FontWeight.Normal,
-            fontSize = 18.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.02.em,
-            hyphens = Hyphens.Auto,
-        ),
-        bodyLarge = TextStyle(
-            fontFamily = plain,
-            fontWeight = FontWeight.Normal,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.01.em,
-            hyphens = Hyphens.Auto,
-        ),
-        bodyMedium = TextStyle(
-            fontFamily = plain,
-            fontWeight = FontWeight.Normal,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.01.em,
-            hyphens = Hyphens.Auto,
-        ),
-        bodySmall = TextStyle(
-            fontFamily = plain,
-            fontWeight = FontWeight.Normal,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.01.em,
-            hyphens = Hyphens.Auto,
-        ),
-        labelLarge = TextStyle(
-            fontFamily = plain,
-            fontWeight = FontWeight.Medium,
-            fontSize = 16.sp,
-            lineHeight = 24.sp,
-            letterSpacing = 0.01.em,
-            hyphens = Hyphens.Auto,
-        ),
-        labelMedium = TextStyle(
-            fontFamily = plain,
-            fontWeight = FontWeight.Medium,
-            fontSize = 14.sp,
-            lineHeight = 20.sp,
-            letterSpacing = 0.01.em,
-            hyphens = Hyphens.Auto,
-        ),
-        labelSmall = TextStyle(
-            fontFamily = plain,
-            fontWeight = FontWeight.Medium,
-            fontSize = 12.sp,
-            lineHeight = 16.sp,
-            letterSpacing = 0.01.em,
-            hyphens = Hyphens.Auto,
-        ),
-    )
+    val typography =
+        Typography(
+            displayLarge =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 57.sp,
+                    lineHeight = 64.sp,
+                    letterSpacing = (-0.2).sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            displayMedium =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 45.sp,
+                    lineHeight = 52.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            displaySmall =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 36.sp,
+                    lineHeight = 44.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineLarge =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 32.sp,
+                    lineHeight = 40.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineMedium =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 28.sp,
+                    lineHeight = 36.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineSmall =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 24.sp,
+                    lineHeight = 32.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleLarge =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 22.sp,
+                    lineHeight = 28.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleMedium =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 20.sp,
+                    lineHeight = 24.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleSmall =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 18.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodyLarge =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodyMedium =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodySmall =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelLarge =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelMedium =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelSmall =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+        )
+
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    val expressiveTypography =
+        Typography(
+            displayLarge =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 57.sp,
+                    lineHeight = 64.sp,
+                    letterSpacing = (-0.2).sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            displayLargeEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 57.sp,
+                    lineHeight = 64.sp,
+                    letterSpacing = (-0.2).sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            displayMedium =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 45.sp,
+                    lineHeight = 52.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            displayMediumEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 45.sp,
+                    lineHeight = 52.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            displaySmall =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 36.sp,
+                    lineHeight = 44.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            displaySmallEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 36.sp,
+                    lineHeight = 44.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineLarge =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 32.sp,
+                    lineHeight = 40.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineLargeEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 32.sp,
+                    lineHeight = 40.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineMedium =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 28.sp,
+                    lineHeight = 36.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineMediumEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 28.sp,
+                    lineHeight = 36.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineSmall =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 24.sp,
+                    lineHeight = 32.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            headlineSmallEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 24.sp,
+                    lineHeight = 32.sp,
+                    letterSpacing = 0.0.sp,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleLarge =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 22.sp,
+                    lineHeight = 28.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleLargeEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 22.sp,
+                    lineHeight = 28.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleMedium =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleMediumEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleSmall =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            titleSmallEmphasized =
+                TextStyle(
+                    fontFamily = brand,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.02.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodyLarge =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodyLargeEmphasized =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp,
+                    lineHeight = 24.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodyMedium =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodyMediumEmphasized =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodySmall =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Normal,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            bodySmallEmphasized =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelLarge =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelLargeEmphasized =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 14.sp,
+                    lineHeight = 20.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelMedium =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelMediumEmphasized =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 12.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelSmall =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+            labelSmallEmphasized =
+                TextStyle(
+                    fontFamily = plain,
+                    fontWeight = FontWeight.SemiBold,
+                    fontSize = 11.sp,
+                    lineHeight = 16.sp,
+                    letterSpacing = 0.01.em,
+                    hyphens = Hyphens.Auto,
+                ),
+        )
 }
 
 @Composable
 internal fun rememberSettingsTypography(): Typography {
     val settingsFontFamily = rememberSettingsFontFamily()
-    return remember { SettingsTypography(settingsFontFamily).typography }
+    return remember {
+        if (isSpaExpressiveEnabled) SettingsTypography(settingsFontFamily).expressiveTypography
+        else SettingsTypography(settingsFontFamily).typography
+    }
 }
 
 /** Creates a new [TextStyle] which font weight set to medium. */

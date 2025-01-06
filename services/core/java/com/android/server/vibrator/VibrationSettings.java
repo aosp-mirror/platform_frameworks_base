@@ -617,11 +617,11 @@ final class VibrationSettings {
 
     private void updateRingerMode() {
         synchronized (mLock) {
-            // If audio manager was not loaded yet then assume most restrictive mode.
-            // This will be loaded again as soon as the audio manager is loaded in onSystemReady.
-            mRingerMode = (mAudioManager == null)
-                    ? AudioManager.RINGER_MODE_SILENT
-                    : mAudioManager.getRingerModeInternal();
+            if (mAudioManager == null) {
+                // Service not ready yet or audio service not available, skip this update request.
+                return;
+            }
+            mRingerMode = mAudioManager.getRingerModeInternal();
         }
     }
 

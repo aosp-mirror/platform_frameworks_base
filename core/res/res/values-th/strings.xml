@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นถูกจำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ถูกจำกัด"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"หมายเลขผู้โทรได้รับการตั้งค่าเริ่มต้นเป็นไม่จำกัด การโทรครั้งต่อไป: ไม่จำกัด"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"แอปนี้ไม่รองรับขนาดหน้า 16 KB ผลตรวจสอบการจัดตำแหน่ง APK คือไม่ผ่าน ด้วยเหตุนี้แอปจะทำงานโดยใช้โหมดเข้ากันได้กับขนาดหน้า โปรดคอมไพล์แอปพลิเคชันอีกครั้งโดยมีการรองรับขนาดหน้า 16 KB เพื่อให้ใช้งานร่วมกันได้อย่างดีที่สุด ดูข้อมูลเพิ่มเติมได้ที่ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"แอปนี้ไม่รองรับขนาดหน้า 16 KB ผลตรวจสอบการจัดตำแหน่ง ELF คือไม่ผ่าน ด้วยเหตุนี้แอปจะทำงานโดยใช้โหมดเข้ากันได้กับขนาดหน้า โปรดคอมไพล์แอปพลิเคชันอีกครั้งโดยมีการรองรับขนาดหน้า 16 KB เพื่อให้ใช้งานร่วมกันได้อย่างดีที่สุด ดูข้อมูลเพิ่มเติมได้ที่ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"แอปนี้ไม่รองรับขนาดหน้า 16 KB ผลตรวจสอบการจัดตำแหน่ง APK และ ELF คือไม่ผ่าน ด้วยเหตุนี้แอปจะทำงานโดยใช้โหมดเข้ากันได้กับขนาดหน้า โปรดคอมไพล์แอปพลิเคชันอีกครั้งโดยมีการรองรับขนาดหน้า 16 KB เพื่อให้ใช้งานร่วมกันได้อย่างดีที่สุด ดูข้อมูลเพิ่มเติมได้ที่ &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"ไม่มีการนำเสนอบริการ"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"คุณไม่สามารถเปลี่ยนการตั้งค่าหมายเลขผู้โทร"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"เปลี่ยนไปใช้อินเทอร์เน็ตมือถือของ <xliff:g id="CARRIERDISPLAY">%s</xliff:g> แล้ว"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"เชื่อมต่อเครือข่ายมือถือไม่ได้"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ลองเปลี่ยนเครือข่ายที่ต้องการ แตะเพื่อเปลี่ยน"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"โทรหาหมายเลขฉุกเฉินไม่ได้"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"การโทรหาหมายเลขฉุกเฉินต้องใช้เครือข่ายมือถือ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"การแจ้งเตือน"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"การโอนสาย"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"อนุญาตให้แอประบุตำแหน่งสัมพันธ์ระหว่างอุปกรณ์ที่ใช้แถบความถี่กว้างยิ่งยวดซึ่งอยู่ใกล้เคียง"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"โต้ตอบกับอุปกรณ์ Wi-Fi ที่อยู่ใกล้เคียง"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"อนุญาตให้แอปแสดงข้อมูล เชื่อมต่อ และระบุตำแหน่งซึ่งสัมพันธ์กับอุปกรณ์ Wi-Fi ที่อยู่ใกล้เคียง"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"ระบุตำแหน่งสัมพันธ์ระหว่างอุปกรณ์ที่อยู่ใกล้เคียง"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"อนุญาตให้แอประบุตำแหน่งสัมพันธ์ระหว่างอุปกรณ์ที่อยู่ใกล้เคียง"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ข้อมูลบริการชำระเงิน NFC ที่ต้องการ"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"อนุญาตให้แอปรับข้อมูลบริการชำระเงิน NFC ที่ต้องการ เช่น รหัสแอป (AID) ที่ลงทะเบียนและปลายทางของเส้นทาง"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ควบคุม Near Field Communication"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"ใน <xliff:g id="COUNT">%d</xliff:g> ชม."</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"ใน <xliff:g id="COUNT">%d</xliff:g> วัน"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"ใน <xliff:g id="COUNT">%d</xliff:g> ปี"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> นาทีที่ผ่านมา"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> ชม. ที่ผ่านมา"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> วันที่ผ่านมา"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> ปีที่ผ่านมา"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> นาที"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ชม."</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> วัน"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> ปี"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"ใน <xliff:g id="COUNT">%d</xliff:g> นาที"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"ใน <xliff:g id="COUNT">%d</xliff:g> ชม."</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"ใน <xliff:g id="COUNT">%d</xliff:g> วัน"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"ใน <xliff:g id="COUNT">%d</xliff:g> ปี"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> นาทีที่ผ่านมา"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> ชม. ที่ผ่านมา"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> วันที่ผ่านมา"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> ปีที่ผ่านมา"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# นาทีที่ผ่านมา}other{# นาทีที่ผ่านมา}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ชั่วโมงที่ผ่านมา}other{# ชั่วโมงที่ผ่านมา}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# วันที่ผ่านมา}other{# วันที่ผ่านมา}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"โหมดมือเดียว"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"หรี่แสงเพิ่มเติม"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"เครื่องช่วยฟัง"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว เปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"กดปุ่มปรับระดับเสียงค้างไว้แล้ว ปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> แล้ว"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ปล่อยปุ่มปรับระดับเสียง หากต้องการเปิด <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ให้กดปุ่มปรับระดับเสียงทั้ง 2 ปุ่มค้างไว้อีกครั้งเป็นเวลา 3 วินาที"</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"สุดสัปดาห์"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"กิจกรรม"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"นอนหลับ"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"ห้ามรบกวน (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"จัดการโดย <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"เปิด"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"ปิด"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>ถึง<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ปฏิทินทั้งหมด"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> กำลังปิดเสียงบางรายการ"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"อุปกรณ์ของคุณเกิดปัญหาภายในเครื่อง อุปกรณ์อาจทำงานไม่เสถียรจนกว่าคุณจะรีเซ็ตข้อมูลเป็นค่าเริ่มต้น"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"รับและส่งข้อความโดยไม่ต้องใช้เครือข่ายมือถือหรือ Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"เปิด Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"วิธีการทำงาน"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"เปิด \"เลือกเครือข่ายโดยอัตโนมัติ\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"เปิด \"เลือกเครือข่ายโดยอัตโนมัติ\" ในการตั้งค่าเพื่อให้โทรศัพท์ค้นหาเครือข่ายที่ใช้งานร่วมกับดาวเทียมได้"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"เปิด"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ย้อนกลับ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"รอดำเนินการ..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"SOS ดาวเทียมพร้อมใช้งานแล้ว"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"คุณส่งข้อความหาบริการช่วยเหลือฉุกเฉินได้ในกรณีที่ไม่มีเครือข่ายมือถือหรือ Wi-Fi โดยที่แอปรับส่งข้อความเริ่มต้นของคุณจะต้องเป็น Google Messages"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"ไม่รองรับ SOS ดาวเทียม"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"อุปกรณ์นี้ไม่รองรับ SOS ดาวเทียม"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ไม่ได้ตั้งค่า SOS ดาวเทียม"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"ตรวจสอบว่าคุณได้เชื่อมต่ออินเทอร์เน็ตแล้ว และลองตั้งค่าอีกครั้ง"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"SOS ดาวเทียมไม่พร้อมใช้งาน"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"SOS ดาวเทียมไม่พร้อมใช้งานในประเทศหรือภูมิภาคนี้"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"ไม่ได้ตั้งค่า SOS ดาวเทียม"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"หากต้องการรับส่งข้อความผ่านดาวเทียม ให้ตั้ง Google Messages เป็นแอปรับส่งข้อความเริ่มต้น"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"SOS ดาวเทียมไม่พร้อมใช้งาน"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"หากต้องการตรวจสอบว่า SOS ดาวเทียมพร้อมให้บริการในประเทศหรือภูมิภาคนี้หรือไม่ ให้เปิดการตั้งค่าตำแหน่ง"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"การรับส่งข้อความผ่านดาวเทียมพร้อมใช้งาน"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"คุณรับส่งข้อความผ่านดาวเทียมได้ในกรณีที่ไม่มีเครือข่ายมือถือหรือ Wi-Fi โดยที่แอปรับส่งข้อความเริ่มต้นของคุณจะต้องเป็น Google Messages"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"ไม่รองรับการรับส่งข้อความผ่านดาวเทียม"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"อุปกรณ์นี้ไม่รองรับการรับส่งข้อความผ่านดาวเทียม"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"ไม่ได้ตั้งค่าการรับส่งข้อความผ่านดาวเทียม"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"ตรวจสอบว่าคุณได้เชื่อมต่ออินเทอร์เน็ตแล้ว และลองตั้งค่าอีกครั้ง"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"การรับส่งข้อความผ่านดาวเทียมไม่พร้อมใช้งาน"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"การรับส่งข้อความผ่านดาวเทียมไม่พร้อมใช้งานในประเทศหรือภูมิภาคนี้"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"ไม่ได้ตั้งค่าการรับส่งข้อความผ่านดาวเทียม"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"หากต้องการรับส่งข้อความผ่านดาวเทียม ให้ตั้ง Google Messages เป็นแอปรับส่งข้อความเริ่มต้น"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"การรับส่งข้อความผ่านดาวเทียมไม่พร้อมใช้งาน"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"หากต้องการตรวจสอบว่าการรับส่งข้อความผ่านดาวเทียมพร้อมให้บริการในประเทศหรือภูมิภาคนี้หรือไม่ ให้เปิดการตั้งค่าตำแหน่ง"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"ตั้งค่าการปลดล็อกด้วยลายนิ้วมืออีกครั้ง"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"ระบบไม่จดจำ <xliff:g id="FINGERPRINT">%s</xliff:g> อีกต่อไป"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"ระบบไม่จดจำ <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> และ <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> อีกต่อไป"</string>

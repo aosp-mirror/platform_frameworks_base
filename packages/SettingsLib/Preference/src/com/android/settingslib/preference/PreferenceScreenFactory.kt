@@ -81,8 +81,8 @@ class PreferenceScreenFactory {
      *
      * The screen must be registered in [PreferenceScreenFactory] and provide a complete hierarchy.
      */
-    fun createBindingScreen(screenKey: String?): PreferenceScreen? {
-        val metadata = PreferenceScreenRegistry[screenKey] ?: return null
+    fun createBindingScreen(context: Context, screenKey: String?): PreferenceScreen? {
+        val metadata = PreferenceScreenRegistry.create(context, screenKey) ?: return null
         if (metadata is PreferenceScreenCreator && metadata.hasCompleteHierarchy()) {
             return metadata.createPreferenceScreen(this)
         }
@@ -93,11 +93,12 @@ class PreferenceScreenFactory {
         /** Creates [PreferenceScreen] from [PreferenceScreenRegistry]. */
         @JvmStatic
         fun createBindingScreen(preference: Preference): PreferenceScreen? {
+            val context = preference.context
             val preferenceScreenCreator =
-                (PreferenceScreenRegistry[preference.key] as? PreferenceScreenCreator)
-                    ?: return null
+                (PreferenceScreenRegistry.create(context, preference.key)
+                    as? PreferenceScreenCreator) ?: return null
             if (!preferenceScreenCreator.hasCompleteHierarchy()) return null
-            val factory = PreferenceScreenFactory(preference.context)
+            val factory = PreferenceScreenFactory(context)
             val preferenceScreen = preferenceScreenCreator.createPreferenceScreen(factory)
             factory.preferenceManager.setPreferences(preferenceScreen)
             return preferenceScreen

@@ -516,6 +516,12 @@ public class DisplayWindowSettingsTests extends WindowTestsBase {
         // Verify that newly created displays are created with correct rotation settings
         assertFalse(dcDontIgnoreOrientation.getIgnoreOrientationRequest());
         assertTrue(dcIgnoreOrientation.getIgnoreOrientationRequest());
+
+        // Verify that once ignore-orientation-request has been set, it can be turned off by
+        // applying default value, e.g. the same display switches from large size to small size.
+        settingsEntry2.mIgnoreOrientationRequest = null;
+        mDisplayWindowSettings.applyRotationSettingsToDisplayLocked(dcIgnoreOrientation);
+        assertFalse(dcIgnoreOrientation.getIgnoreOrientationRequest());
     }
 
     @Test

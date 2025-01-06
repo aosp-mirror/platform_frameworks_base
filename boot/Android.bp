@@ -31,6 +31,7 @@ soong_config_module_type {
         "car_bootclasspath_fragment",
         "nfc_apex_bootclasspath_fragment",
         "release_crashrecovery_module",
+        "release_ondevice_intelligence_module",
         "release_package_profiling_module",
     ],
     properties: [
@@ -75,8 +76,8 @@ custom_platform_bootclasspath {
             module: "art-bootclasspath-fragment",
         },
         {
-            apex: "com.android.btservices",
-            module: "com.android.btservices-bootclasspath-fragment",
+            apex: "com.android.bt",
+            module: "com.android.bt-bootclasspath-fragment",
         },
         {
             apex: "com.android.configinfrastructure",
@@ -173,6 +174,15 @@ custom_platform_bootclasspath {
                 {
                     apex: "com.android.crashrecovery",
                     module: "com.android.crashrecovery-bootclasspath-fragment",
+                },
+            ],
+        },
+        release_ondevice_intelligence_module: {
+            fragments: [
+                // only used when ondeviceintelligence is moved to neuralnetworks module
+                {
+                    apex: "com.android.neuralnetworks",
+                    module: "com.android.ondeviceintelligence-bootclasspath-fragment",
                 },
             ],
         },

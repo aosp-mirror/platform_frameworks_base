@@ -19,9 +19,9 @@ package com.android.systemui.statusbar.pipeline.shared
 import android.content.Context
 import android.telephony.TelephonyManager
 import com.android.systemui.Dumpable
-import com.android.systemui.res.R
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dump.DumpManager
+import com.android.systemui.res.R
 import java.io.PrintWriter
 import javax.inject.Inject
 
@@ -30,23 +30,26 @@ import javax.inject.Inject
  *
  * Stored in a class for logging purposes.
  */
+interface ConnectivityConstants {
+    /** True if this device has the capability for data connections and false otherwise. */
+    val hasDataCapabilities: Boolean
+
+    /** True if we should show the activityIn/activityOut icons and false otherwise */
+    val shouldShowActivityConfig: Boolean
+}
+
 @SysUISingleton
-class ConnectivityConstants
+class ConnectivityConstantsImpl
 @Inject
-constructor(
-    context: Context,
-    dumpManager: DumpManager,
-    telephonyManager: TelephonyManager,
-) : Dumpable {
+constructor(context: Context, dumpManager: DumpManager, telephonyManager: TelephonyManager) :
+    ConnectivityConstants, Dumpable {
     init {
         dumpManager.registerNormalDumpable("ConnectivityConstants", this)
     }
 
-    /** True if this device has the capability for data connections and false otherwise. */
-    val hasDataCapabilities = telephonyManager.isDataCapable
+    override val hasDataCapabilities = telephonyManager.isDataCapable
 
-    /** True if we should show the activityIn/activityOut icons and false otherwise */
-    val shouldShowActivityConfig = context.resources.getBoolean(R.bool.config_showActivity)
+    override val shouldShowActivityConfig = context.resources.getBoolean(R.bool.config_showActivity)
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.apply {

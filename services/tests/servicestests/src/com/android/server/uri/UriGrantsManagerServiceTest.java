@@ -61,7 +61,6 @@ import android.os.Process;
 import android.os.UserHandle;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.platform.test.flag.junit.SetFlagsRule;
-import android.platform.test.ravenwood.RavenwoodRule;
 import android.util.ArraySet;
 
 import org.junit.Before;
@@ -77,9 +76,6 @@ import java.util.Set;
 
 @RunWith(Parameterized.class)
 public class UriGrantsManagerServiceTest {
-    @Rule
-    public final RavenwoodRule mRavenwood = new RavenwoodRule();
-
     /**
      * Why this class needs to test all combinations of
      * {@link android.security.Flags#FLAG_CONTENT_URI_PERMISSION_APIS}:

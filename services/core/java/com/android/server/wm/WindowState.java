@@ -182,7 +182,6 @@ import static com.android.server.wm.WindowStateProto.UNRESTRICTED_KEEP_CLEAR_ARE
 import static com.android.server.wm.WindowStateProto.VIEW_VISIBILITY;
 import static com.android.server.wm.WindowStateProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowStateProto.WINDOW_FRAMES;
-import static com.android.window.flags.Flags.secureWindowState;
 import static com.android.window.flags.Flags.surfaceTrustedOverlay;
 
 import android.annotation.CallSuper;
@@ -213,6 +212,7 @@ import android.os.SystemClock;
 import android.os.Trace;
 import android.os.WorkSource;
 import android.provider.Settings;
+import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
@@ -793,6 +793,16 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
     private final List<DrawHandler> mDrawHandlers = new ArrayList<>();
 
+    /**
+     * Indicates whether inset animations are currently running within the Window.
+     * This value is used by (@link com.android.server.wm.RefreshRatePolicy.java)
+     * to omit setting a frame rate on the WindowState. Insets Animation is unique in that
+     * sense that an app might drive an insets animation for a Window owned by a different
+     * app (such as IME). In that case, we need the app that drives the insets animation
+     * to be able to vote for high refresh rate from VRI.
+     */
+    private boolean mInsetsAnimationRunning;
+
     private final Consumer<SurfaceControl.Transaction> mSeamlessRotationFinishedConsumer = t -> {
         finishSeamlessRotation(t);
         updateSurfacePosition(t);
@@ -1187,9 +1197,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (surfaceTrustedOverlay() && isWindowTrustedOverlay()) {
             getPendingTransaction().setTrustedOverlay(mSurfaceControl, true);
         }
-        if (secureWindowState()) {
-            getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
-        }
+        getPendingTransaction().setSecure(mSurfaceControl, isSecureLocked());
         // All apps should be considered as occluding when computing TrustedPresentation Thresholds.
         final boolean canOccludePresentation = !mSession.mCanAddInternalSystemWindow;
         getPendingTransaction().setCanOccludePresentation(mSurfaceControl, canOccludePresentation);
@@ -1623,8 +1631,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         final InsetsState rawInsetsState =
                 mFrozenInsetsState != null ? mFrozenInsetsState : getMergedInsetsState();
-        final InsetsState insetsStateForWindow = insetsPolicy.enforceInsetsPolicyForTarget(
-                mAttrs, getWindowingMode(), isAlwaysOnTop(), rawInsetsState);
+        final InsetsState insetsStateForWindow = insetsPolicy.enforceInsetsPolicyForTarget(this,
+                rawInsetsState);
         return insetsPolicy.adjustInsetsForWindow(this, insetsStateForWindow,
                 includeTransient);
     }
@@ -2749,7 +2757,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * Expands the given rectangle by the region of window resize handle for freeform window.
      * @param inOutRect The rectangle to update.
      */
-    private void adjustRegionInFreefromWindowMode(Rect inOutRect) {
+    private void adjustRegionInFreeformWindowMode(Rect inOutRect) {
         if (!inFreeformWindowingMode()) {
             return;
         }
@@ -2800,7 +2808,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 }
             }
         }
-        adjustRegionInFreefromWindowMode(mTmpRect);
+        adjustRegionInFreeformWindowMode(mTmpRect);
         outRegion.set(mTmpRect);
         cropRegionToRootTaskBoundsIfNeeded(outRegion);
     }
@@ -2989,15 +2997,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         return (mAttrs.flags & FLAG_SHOW_WHEN_LOCKED) != 0;
     }
 
-    @Override
-    void resolveOverrideConfiguration(Configuration newParentConfig) {
-        super.resolveOverrideConfiguration(newParentConfig);
-        if (mActivityRecord != null) {
-            // Let the activity decide whether to apply the size override.
-            return;
-        }
-        final Configuration resolvedConfig = getResolvedOverrideConfiguration();
-        resolvedConfig.seq = newParentConfig.seq;
+    void applySizeOverride(Configuration newParentConfig, Configuration resolvedConfig) {
         applySizeOverrideIfNeeded(
                 getDisplayContent(),
                 mSession.mProcess.mInfo,
@@ -3303,7 +3303,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // just kill it. And if it is a window of foreground activity, the activity can be
             // restarted automatically if needed.
             Slog.w(TAG, "Exception thrown during dispatchAppVisibility " + this, e);
-            if (android.os.Process.getUidForPid(mSession.mPid) == mSession.mUid) {
+            if (android.os.Process.getUidForPid(mSession.mPid) == mSession.mUid
+                    && android.os.Process.getThreadGroupLeader(mSession.mPid) == mSession.mPid) {
                 android.os.Process.killProcess(mSession.mPid);
             }
         }
@@ -3311,8 +3312,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // Because the client is notified to be invisible, it should no longer be considered as
         // drawn state. This prevent the app from showing incomplete content if the app is
         // requested to be visible in a short time (e.g. before activity stopped).
-        if (Flags.resetDrawStateOnClientInvisible() && !clientVisible && mActivityRecord != null
-                && mWinAnimator.mDrawState == HAS_DRAWN) {
+        if (!clientVisible && mActivityRecord != null && mWinAnimator.mDrawState == HAS_DRAWN) {
             mWinAnimator.resetDrawState();
             // Make sure the app can report drawn if it becomes visible again.
             forceReportingResized();
@@ -3380,8 +3380,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             if (cleanupOnResume) {
                 requestUpdateWallpaperIfNeeded();
             }
-            mDestroying = false;
-            destroyedSomething = true;
+            if (!mHasSurface) {
+                mDestroying = false;
+                destroyedSomething = true;
+            }
 
             // Since mDestroying will affect ActivityRecord#allDrawn, we need to perform another
             // traversal in case we are waiting on this window to start the transition.
@@ -3434,7 +3436,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 && mAttrs.type != TYPE_PRIVATE_PRESENTATION
                 && !(mAttrs.type == TYPE_PRESENTATION && isOnVirtualDisplay())
         ) {
-            mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid, shown);
+            mWmService.mAtmService.mActiveUids.onNonAppSurfaceVisibilityChanged(mOwnerUid,
+                    mAttrs.type, shown);
         }
     }
 
@@ -3605,7 +3608,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
 
         rootTask.getDimBounds(mTmpRect);
-        adjustRegionInFreefromWindowMode(mTmpRect);
+        adjustRegionInFreeformWindowMode(mTmpRect);
         region.op(mTmpRect, Region.Op.INTERSECT);
     }
 
@@ -5747,9 +5750,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 || mKeyInterceptionInfo.layoutParamsPrivateFlags != getAttrs().privateFlags
                 || mKeyInterceptionInfo.layoutParamsType != getAttrs().type
                 || mKeyInterceptionInfo.windowTitle != getWindowTag()
-                || mKeyInterceptionInfo.windowOwnerUid != getOwningUid()) {
+                || mKeyInterceptionInfo.windowOwnerUid != getOwningUid()
+                || mKeyInterceptionInfo.inputFeaturesFlags != getAttrs().inputFeatures) {
             mKeyInterceptionInfo = new KeyInterceptionInfo(getAttrs().type, getAttrs().privateFlags,
-                    getWindowTag().toString(), getOwningUid());
+                    getWindowTag().toString(), getOwningUid(), getAttrs().inputFeatures);
         }
         return mKeyInterceptionInfo;
     }
@@ -6180,21 +6184,28 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     void setSecureLocked(boolean isSecure) {
         ProtoLog.i(WM_SHOW_TRANSACTIONS, "SURFACE isSecure=%b: %s", isSecure, getName());
-        if (secureWindowState()) {
-            if (mSurfaceControl == null) {
-                return;
-            }
-            getPendingTransaction().setSecure(mSurfaceControl, isSecure);
-        } else {
-            if (mWinAnimator.mSurfaceControl == null) {
-                return;
-            }
-            getPendingTransaction().setSecure(mWinAnimator.mSurfaceControl,
-                    isSecure);
+        if (mSurfaceControl == null) {
+            return;
         }
+        getPendingTransaction().setSecure(mSurfaceControl, isSecure);
         if (mDisplayContent != null) {
             mDisplayContent.refreshImeSecureFlag(getSyncTransaction());
         }
         mWmService.scheduleAnimationLocked();
+    }
+
+    void notifyInsetsAnimationRunningStateChanged(boolean running) {
+        if (Trace.isTagEnabled(TRACE_TAG_WINDOW_MANAGER)) {
+            Trace.instant(TRACE_TAG_WINDOW_MANAGER,
+                    TextUtils.formatSimple("%s: notifyInsetsAnimationRunningStateChanged(%s)",
+                    getName(),
+                    Boolean.toString(running)));
+        }
+        mInsetsAnimationRunning = running;
+        mWmService.scheduleAnimationLocked();
+    }
+
+    boolean isInsetsAnimationRunning() {
+        return mInsetsAnimationRunning;
     }
 }

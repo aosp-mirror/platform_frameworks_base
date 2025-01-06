@@ -137,9 +137,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
     private static final String TAG = "Transition";
     private static final String TRACE_NAME_PLAY_TRANSITION = "playing";
 
-    /** The default package for resources */
-    private static final String DEFAULT_PACKAGE = "android";
-
     /** The transition has been created but isn't collecting yet. */
     private static final int STATE_PENDING = -1;
 
@@ -463,6 +460,31 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
         }
         return false;
+    }
+
+    /**
+     * This ensures that all changes for previously transient-hide containers are flagged such that
+     * they will report changes and be included in this transition.
+     */
+    void updateChangesForRestoreTransientHideTasks(Transition transientLaunchTransition) {
+        if (transientLaunchTransition.mTransientHideTasks == null) {
+            // Skip if the transient-launch transition has no transient-hide tasks
+            ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                    "Skipping update changes for restore transient hide tasks");
+            return;
+        }
+
+        // For each change, if it was previously transient-hidden, then we should force a flag to
+        // ensure that it is included in the next transition
+        for (int i = 0; i < mChanges.size(); i++) {
+            final WindowContainer container = mChanges.keyAt(i);
+            if (transientLaunchTransition.isInTransientHide(container)) {
+                ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
+                        "Force update transient hide task for restore %d: %s", mSyncId, container);
+                final ChangeInfo info = mChanges.valueAt(i);
+                info.mRestoringTransientHide = true;
+            }
+        }
     }
 
     /** Returns {@code true} if the task should keep visible if this is a transient transition. */
@@ -1404,8 +1426,17 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         // Commit wallpaper visibility after activity, because usually the wallpaper target token is
         // an activity, and wallpaper's visibility depends on activity's visibility.
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
-            final WallpaperWindowToken wt = mParticipants.valueAt(i).asWallpaperToken();
-            if (wt == null) continue;
+            final WindowContainer<?> wc = mParticipants.valueAt(i);
+            WallpaperWindowToken wt = wc.asWallpaperToken();
+            if (!Flags.ensureWallpaperInTransitions()) {
+                if (wt == null) {
+                    final WindowState windowState = wc.asWindowState();
+                    if (windowState != null) {
+                        wt = windowState.mToken.asWallpaperToken();
+                    }
+                }
+            }
+            if (wt == null || !wt.isVisible()) continue;
             final WindowState target = wt.mDisplayContent.mWallpaperController.getWallpaperTarget();
             final boolean isTargetInvisible = target == null || !target.mToken.isVisible();
             final boolean isWallpaperVisibleAtEnd =
@@ -1555,7 +1586,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         cleanUpInternal();
 
         // Handle back animation if it's already started.
-        mController.mAtm.mBackNavigationController.onTransitionFinish(mTargets, this);
+        mController.mAtm.mBackNavigationController.onTransitionFinish(this);
         mController.mFinishingTransition = null;
         mController.mSnapshotController.onTransitionFinish(mType, mTargets);
         // Resume snapshot persist thread after snapshot controller analysis this transition.
@@ -1836,7 +1867,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             final DisplayArea<?> da = wc.asDisplayArea();
             if (da == null) continue;
             if (da.isVisibleRequested()) {
-                mController.mValidateDisplayVis.remove(da);
+                final int inValidateList = mController.mValidateDisplayVis.indexOf(da);
+                if (inValidateList >= 0
+                        // The display-area is visible, but if we only detect a non-visibility
+                        // change, then we shouldn't remove the validator.
+                        && !mChanges.get(da).mVisible) {
+                    mController.mValidateDisplayVis.remove(inValidateList);
+                }
             } else {
                 // In case something accidentally hides a displayarea and nothing shows it again.
                 mController.mValidateDisplayVis.add(da);
@@ -1940,7 +1977,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         } else {
             // No player registered or it's not enabled, so just finish/apply immediately
             if (!mIsPlayerEnabled) {
-                mLogger.mSendTimeNs = SystemClock.uptimeNanos();
+                mLogger.mSendTimeNs = SystemClock.elapsedRealtimeNanos();
                 ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                         "Apply and finish immediately because player is disabled "
                                 + "for transition #%d .", mSyncId);
@@ -2041,6 +2078,12 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             change.setFlags(flags);
             break;
         }
+    }
+
+    // Note that this method is not called in WM lock.
+    @Override
+    public void onTransactionCommitted() {
+        mLogger.mTransactionCommitTimeNs = SystemClock.elapsedRealtimeNanos();
     }
 
     @Override
@@ -2237,19 +2280,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         }
     }
 
-    /**
-
-     * Wallpaper will set itself as target if it wants to keep itself visible without a target.
-     */
-    private static boolean wallpaperIsOwnTarget(WallpaperWindowToken wallpaper) {
-        final WindowState target =
-                wallpaper.getDisplayContent().mWallpaperController.getWallpaperTarget();
-        return target != null && target.isDescendantOf(wallpaper);
-    }
-
-    /**
-     * Reset waitingToshow for all wallpapers, and commit the visibility of the visible ones
-     */
     private void commitVisibleWallpapers(SurfaceControl.Transaction t) {
         boolean showWallpaper = shouldWallpaperBeVisible();
         for (int i = mParticipants.size() - 1; i >= 0; --i) {
@@ -2257,11 +2287,6 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             if (wallpaper != null) {
                 if (!wallpaper.isVisible() && wallpaper.isVisibleRequested()) {
                     wallpaper.commitVisibility(showWallpaper);
-                } else if (wallpaper.mWmService.mFlags.mEnsureWallpaperInTransitions
-                        && wallpaper.isVisible()
-                        && !showWallpaper && !wallpaper.getDisplayContent().isKeyguardLocked()
-                        && !wallpaperIsOwnTarget(wallpaper)) {
-                    wallpaper.setVisibleRequested(false);
                 }
                 if (showWallpaper && wallpaper.isVisibleRequested()) {
                     for (int j = wallpaper.mChildren.size() - 1; j >= 0; --j) {
@@ -2520,15 +2545,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             // TaskFragment doesn't contain occluded ActivityRecord.
             return true;
         }
-        final TaskFragment adjacentTaskFragment = taskFragment.getAdjacentTaskFragment();
-        if (adjacentTaskFragment != null) {
-            // When the TaskFragment has an adjacent TaskFragment, sibling behind them should be
-            // hidden unless any of them are translucent.
-            return adjacentTaskFragment.isTranslucentForTransition();
-        } else {
+        if (!taskFragment.hasAdjacentTaskFragment()) {
             // Non-filling without adjacent is considered as translucent.
             return !wc.fillsParent();
         }
+        // When the TaskFragment has an adjacent TaskFragment, sibling behind them should be
+        // hidden unless any of them are translucent.
+        if (!Flags.allowMultipleAdjacentTaskFragments()) {
+            return taskFragment.getAdjacentTaskFragment().isTranslucentForTransition();
+        }
+        return taskFragment.forOtherAdjacentTaskFragments(TaskFragment::isTranslucentForTransition);
     }
 
     private void updatePriorVisibility() {
@@ -3382,6 +3408,16 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         Trace.asyncTraceForTrackEnd(Trace.TRACE_TAG_WINDOW_MANAGER, TAG, cookie);
     }
 
+    @Override
+    public void onReadyTraceStart(String name, int id) {
+        asyncTraceBegin(name, id);
+    }
+
+    @Override
+    public void onReadyTraceEnd(String name, int id) {
+        asyncTraceEnd(id);
+    }
+
     boolean hasChanged(WindowContainer wc) {
         final ChangeInfo chg = mChanges.get(wc);
         if (chg == null) return false;
@@ -3478,6 +3514,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
 
         // State tracking
         boolean mExistenceChanged = false;
+        // This state indicates that we are restoring transient order as a part of an
+        // end-transition. Because the visibility for transient hide containers has not actually
+        // changed, we need to ensure that hasChanged() still reports the relevant changes
+        boolean mRestoringTransientHide = false;
         // before change state
         boolean mVisible;
         int mWindowingMode;
@@ -3552,7 +3592,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     || !mContainer.getBounds().equals(mAbsoluteBounds)
                     || mRotation != mContainer.getWindowConfiguration().getRotation()
                     || mDisplayId != getDisplayId(mContainer)
-                    || (mFlags & ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP) != 0;
+                    || (mFlags & ChangeInfo.FLAG_CHANGE_MOVED_TO_TOP) != 0
+                    // If we are restoring transient-hide containers, then we should consider them
+                    // important for the transition as well (their requested visibilities would not
+                    // have changed for the checks below to consider it).
+                    || mRestoringTransientHide;
         }
 
         @TransitionInfo.TransitionMode
@@ -3565,6 +3609,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
             final boolean nowVisible = wc.isVisibleRequested();
             if (nowVisible == mVisible) {
+                if (mRestoringTransientHide) {
+                    // The requested visibility has not changed for transient-hide containers, but
+                    // we are restoring them so we should considering them moving to front again
+                    return TRANSIT_TO_FRONT;
+                }
                 return TRANSIT_CHANGE;
             }
             if (mExistenceChanged) {
@@ -3585,6 +3634,10 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
             }
             if (wc.mWmService.mAtmService.mBackNavigationController.isMonitorTransitionTarget(wc)) {
                 flags |= TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
+            }
+            final TaskDisplayArea tda = wc.asTaskDisplayArea();
+            if (tda != null) {
+                flags |= TransitionInfo.FLAG_IS_TASK_DISPLAY_AREA;
             }
             final Task task = wc.asTask();
             if (task != null) {
@@ -3944,7 +3997,7 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         /** @return true if all tracked subtrees are ready. */
         boolean allReady() {
             ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
-                    " allReady query: used=%b " + "override=%b defer=%d states=[%s]", mUsed,
+                    " allReady query: used=%b override=%b defer=%d states=[%s]", mUsed,
                     mReadyOverride, mDeferReadyDepth, groupsToString());
             // If the readiness has never been touched, mUsed will be false. We never want to
             // consider a transition ready if nothing has been reported on it.
@@ -4093,7 +4146,9 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                             .setSourceCrop(cropBounds)
                             .setCaptureSecureLayers(true)
                             .setAllowProtected(true)
-                            .setHintForSeamlessTransition(isDisplayRotation)
+                            // We always reroute this screenshot to the display, so this transition
+                            // is ALWAYS seamless
+                            .setHintForSeamlessTransition(true)
                             .build();
             ScreenCapture.ScreenshotHardwareBuffer screenshotBuffer =
                     ScreenCapture.captureLayers(captureArgs);

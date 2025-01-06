@@ -22,7 +22,6 @@ import android.text.TextUtils
 import androidx.annotation.StringRes
 import com.android.systemui.accessibility.qs.QSAccessibilityModule
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.base.logging.QSTileLogger
@@ -30,6 +29,7 @@ import com.android.systemui.qs.tiles.impl.night.domain.model.NightDisplayTileMod
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import java.time.DateTimeException
 import java.time.LocalTime
 import java.time.format.DateTimeFormatter
@@ -39,7 +39,7 @@ import javax.inject.Inject
 class NightDisplayTileMapper
 @Inject
 constructor(
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val theme: Resources.Theme,
     private val logger: QSTileLogger,
 ) : QSTileDataToStateMapper<NightDisplayTileModel> {
@@ -49,7 +49,7 @@ constructor(
             supportedActions =
                 setOf(QSTileState.UserAction.CLICK, QSTileState.UserAction.LONG_CLICK)
             sideViewIcon = QSTileState.SideViewIcon.None
-
+            val iconRes: Int
             if (data.isActivated) {
                 activationState = QSTileState.ActivationState.ACTIVE
                 iconRes = R.drawable.qs_nightlight_icon_on
@@ -58,7 +58,7 @@ constructor(
                 iconRes = R.drawable.qs_nightlight_icon_off
             }
 
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), contentDescription = null)
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
 
             secondaryLabel = getSecondaryLabel(data, resources)
 

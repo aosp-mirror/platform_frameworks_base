@@ -45,12 +45,17 @@ public interface Pip {
     }
 
     /**
-     * Set the callback when {@link PipTaskOrganizer#isInPip()} state is changed.
+     * Set the callback when isInPip state is changed.
      *
-     * @param callback The callback accepts the result of {@link PipTaskOrganizer#isInPip()}
-     *                 when it's changed.
+     * @param callback The callback accepts the state of isInPip when it's changed.
      */
-    default void setOnIsInPipStateChangedListener(Consumer<Boolean> callback) {}
+    default void addOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {}
+
+    /**
+     * Remove the callback when isInPip state is changed.
+     * @param callback The callback accepts the state of isInPip when it's changed.
+     */
+    default void removeOnIsInPipStateChangedListener(@NonNull Consumer<Boolean> callback) {}
 
     /**
      * Called when showing Pip menu.

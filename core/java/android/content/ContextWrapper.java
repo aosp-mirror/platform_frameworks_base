@@ -960,7 +960,6 @@ public class ContextWrapper extends Context {
     }
 
     @Override
-    // TODO(b/347269120): Re-add @Nullable
     public Object getSystemService(String name) {
         return mBase.getSystemService(name);
     }
@@ -1011,6 +1010,12 @@ public class ContextWrapper extends Context {
     public void enforceCallingOrSelfPermission(
             String permission, @Nullable String message) {
         mBase.enforceCallingOrSelfPermission(permission, message);
+    }
+
+    /** @hide */
+    @Override
+    public int getPermissionRequestState(String permission) {
+        return mBase.getPermissionRequestState(permission);
     }
 
     @Override

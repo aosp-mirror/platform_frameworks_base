@@ -33,7 +33,6 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.flags.FeatureFlags
 import com.android.systemui.keyguard.ui.view.KeyguardRootView
-import com.android.systemui.keyguard.ui.viewmodel.AlternateBouncerDependencies
 import com.android.systemui.privacy.OngoingPrivacyChip
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.res.R
@@ -51,7 +50,6 @@ import com.android.systemui.statusbar.NotificationInsetsController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
-import com.android.systemui.statusbar.phone.KeyguardBottomAreaView
 import com.android.systemui.statusbar.phone.StatusBarLocation
 import com.android.systemui.statusbar.phone.StatusIconContainer
 import com.android.systemui.statusbar.phone.TapAgainView
@@ -91,7 +89,6 @@ abstract class ShadeViewProviderModule {
             layoutInsetController: NotificationInsetsController,
             sceneDataSourceDelegator: Provider<SceneDataSourceDelegator>,
             qsSceneAdapter: Provider<QSSceneAdapter>,
-            alternateBouncerDependencies: Provider<AlternateBouncerDependencies>,
         ): WindowRootView {
             return if (SceneContainerFlag.isEnabled) {
                 checkNoSceneDuplicates(scenesProvider.get())
@@ -107,7 +104,6 @@ abstract class ShadeViewProviderModule {
                     layoutInsetController = layoutInsetController,
                     sceneDataSourceDelegator = sceneDataSourceDelegator.get(),
                     qsSceneAdapter = qsSceneAdapter,
-                    alternateBouncerDependencies = alternateBouncerDependencies.get(),
                 )
                 sceneWindowRootView
             } else {
@@ -146,20 +142,6 @@ abstract class ShadeViewProviderModule {
             notificationShadeWindowView: NotificationShadeWindowView
         ): NotificationPanelView {
             return notificationShadeWindowView.requireViewById(R.id.notification_panel)
-        }
-
-        /**
-         * Constructs a new, unattached [KeyguardBottomAreaView].
-         *
-         * Note that this is explicitly _not_ a singleton, as we want to be able to reinflate it
-         */
-        @Provides
-        fun providesKeyguardBottomAreaView(
-            npv: NotificationPanelView,
-            @ShadeDisplayAware layoutInflater: LayoutInflater,
-        ): KeyguardBottomAreaView {
-            return layoutInflater.inflate(R.layout.keyguard_bottom_area, npv, false)
-                as KeyguardBottomAreaView
         }
 
         @Provides

@@ -15,6 +15,8 @@
  */
 package android.platform.test.ravenwood;
 
+import static com.android.ravenwood.common.RavenwoodCommonUtils.RAVENWOOD_VERBOSE_LOGGING;
+
 import android.platform.test.annotations.internal.InnerRunner;
 import android.util.Log;
 
@@ -35,7 +37,7 @@ import org.junit.runners.model.RunnerBuilder;
 import org.junit.runners.model.TestClass;
 
 abstract class RavenwoodAwareTestRunnerBase extends Runner implements Filterable, Orderable {
-    private static final String TAG = "Ravenwood";
+    public static final String TAG = com.android.ravenwood.common.RavenwoodCommonUtils.TAG;
 
     boolean mRealRunnerTakesRunnerBuilder = false;
 
@@ -53,7 +55,9 @@ abstract class RavenwoodAwareTestRunnerBase extends Runner implements Filterable
         }
 
         try {
-            Log.i(TAG, "Initializing the inner runner: " + runnerClass);
+            if (RAVENWOOD_VERBOSE_LOGGING) {
+                Log.v(TAG, "Initializing the inner runner: " + runnerClass);
+            }
             try {
                 return runnerClass.getConstructor(Class.class)
                         .newInstance(testClass.getJavaClass());

@@ -17,6 +17,8 @@ package com.android.internal.widget.remotecompose.core.operations.layout.modifie
 
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.CoreDocument;
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
@@ -30,7 +32,8 @@ import com.android.internal.widget.remotecompose.core.operations.utilities.Strin
 import java.util.List;
 
 /** Apply a value change on an integer variable. */
-public class ValueIntegerExpressionChangeActionOperation implements ActionOperation {
+public class ValueIntegerExpressionChangeActionOperation extends Operation
+        implements ActionOperation {
     private static final int OP_CODE = Operations.VALUE_INTEGER_EXPRESSION_CHANGE_ACTION;
 
     long mTargetValueId = -1;
@@ -41,51 +44,69 @@ public class ValueIntegerExpressionChangeActionOperation implements ActionOperat
         mValueExpressionId = value;
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "ValueIntegerExpressionChangeActionOperation(" + mTargetValueId + ")";
     }
 
+    @NonNull
     public String serializedName() {
         return "VALUE_INTEGER_EXPRESSION_CHANGE";
     }
 
     @Override
-    public void serializeToString(int indent, StringSerializer serializer) {
+    public void serializeToString(int indent, @NonNull StringSerializer serializer) {
         serializer.append(
                 indent, serializedName() + " = " + mTargetValueId + " -> " + mValueExpressionId);
     }
 
     @Override
-    public void apply(RemoteContext context) {}
+    public void apply(@NonNull RemoteContext context) {}
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return (indent != null ? indent : "") + toString();
     }
 
     @Override
-    public void write(WireBuffer buffer) {}
+    public void write(@NonNull WireBuffer buffer) {}
 
     @Override
     public void runAction(
-            RemoteContext context, CoreDocument document, Component component, float x, float y) {
+            @NonNull RemoteContext context,
+            @NonNull CoreDocument document,
+            @NonNull Component component,
+            float x,
+            float y) {
         document.evaluateIntExpression(mValueExpressionId, (int) mTargetValueId, context);
     }
 
-    public static void apply(WireBuffer buffer, long valueId, long value) {
+    public static void apply(@NonNull WireBuffer buffer, long valueId, long value) {
         buffer.start(OP_CODE);
         buffer.writeLong(valueId);
         buffer.writeLong(value);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         long valueId = buffer.readLong();
         long value = buffer.readLong();
         operations.add(new ValueIntegerExpressionChangeActionOperation(valueId, value));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Layout Operations", OP_CODE, "ValueIntegerExpressionChangeActionOperation")
                 .description(
                         "ValueIntegerExpressionChange action. "

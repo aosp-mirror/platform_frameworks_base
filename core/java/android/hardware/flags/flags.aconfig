@@ -1,0 +1,19 @@
+package: "android.hardware.flags"
+container: "system"
+
+flag {
+    name: "luts_api"
+    is_exported: true
+    is_fixed_read_only: true
+    namespace: "core_graphics"
+    description: "public Luts related Apis"
+    bug: "349667978"
+}
+
+flag {
+    name: "overlayproperties_class_api"
+    is_exported: true
+    namespace: "core_graphics"
+    description: "public OverlayProperties class, OverlayProperties#supportMixedColorSpaces and Display#getOverlaySupport API"
+    bug: "267234573"
+}

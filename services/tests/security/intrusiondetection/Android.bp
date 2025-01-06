@@ -1,0 +1,49 @@
+package {
+    default_team: "trendy_team_platform_security",
+    // See: http://go/android-license-faq
+    // A large-scale-change added 'default_applicable_licenses' to import
+    // all of the 'license_kinds' from "frameworks_base_license"
+    // to get the below license kinds:
+    //   SPDX-license-identifier-Apache-2.0
+    default_applicable_licenses: ["frameworks_base_license"],
+}
+
+android_test {
+    name: "IntrusionDetectionServiceTests",
+    srcs: [
+        "src/**/*.java",
+    ],
+
+    static_libs: [
+        "androidx.test.core",
+        "androidx.test.rules",
+        "androidx.test.runner",
+        "compatibility-device-util-axt",
+        "coretests-aidl",
+        "frameworks-base-testutils",
+        "junit",
+        "platform-test-annotations",
+        "servicestests-utils",
+        "services.core",
+        "truth",
+        "Nene",
+        "Harrier",
+        "TestApp",
+    ],
+    data: [
+        ":TestIntrusionDetectionApp",
+    ],
+
+    platform_apis: true,
+
+    test_suites: [
+        "device-tests",
+        "automotive-tests",
+    ],
+
+    certificate: "platform",
+    dxflags: ["--multi-dex"],
+    optimize: {
+        enabled: false,
+    },
+}

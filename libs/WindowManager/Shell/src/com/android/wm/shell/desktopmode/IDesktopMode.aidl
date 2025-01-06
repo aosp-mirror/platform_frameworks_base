@@ -53,7 +53,8 @@ interface IDesktopMode {
     oneway void setTaskListener(IDesktopTaskListener listener);
 
     /** Move a task with given `taskId` to desktop */
-    void moveToDesktop(int taskId, in DesktopModeTransitionSource transitionSource);
+    void moveToDesktop(int taskId, in DesktopModeTransitionSource transitionSource,
+                        in @nullable RemoteTransition remoteTransition);
 
     /** Remove desktop on the given display */
     oneway void removeDesktop(int displayId);

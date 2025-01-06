@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"ដោះសោ​ឧបករណ៍របស់អ្នក​សម្រាប់​ជម្រើសច្រើនទៀត"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"កំពុង​ចាក់​​នៅ​លើទូរសព្ទនេះ"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"កំពុង​ចាក់​នៅលើ​ថេប្លេត​នេះ"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"អ្នកអាចកំណត់ទីតាំងទូរសព្ទនេះដោយប្រើកម្មវិធីរកឧបករណ៍របស់ខ្ញុំ សូម្បីនៅពេលបិទថាមពល"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"អ្នកអាចកំណត់ទីតាំងថេប្លេតនេះដោយប្រើកម្មវិធីរកឧបករណ៍របស់ខ្ញុំ សូម្បីនៅពេលបិទថាមពល"</string>
 </resources>

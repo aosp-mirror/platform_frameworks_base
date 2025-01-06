@@ -94,7 +94,6 @@ class BackupHelper {
      */
     void scheduleBackup() {
         if (!mSaveEmbeddingState) {
-            // TODO(b/289875940): enabled internally for broader testing.
             return;
         }
 

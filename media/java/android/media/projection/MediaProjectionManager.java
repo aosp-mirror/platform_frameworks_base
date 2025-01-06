@@ -297,10 +297,10 @@ public final class MediaProjectionManager {
      * Stop the current projection if there is one.
      * @hide
      */
-    public void stopActiveProjection() {
+    public void stopActiveProjection(@StopReason int stopReason) {
         try {
             Log.d(TAG, "Content Recording: stopping active projection");
-            mService.stopActiveProjection();
+            mService.stopActiveProjection(stopReason);
         } catch (RemoteException e) {
             Log.e(TAG, "Unable to stop the currently active media projection", e);
         }

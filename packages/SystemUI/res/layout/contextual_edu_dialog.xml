@@ -39,6 +39,7 @@
         android:ellipsize="end"
         android:fontFamily="google-sans-medium"
         android:maxWidth="280dp"
-        android:textColor="?androidprv:attr/materialColorOnTertiaryFixed"
-        android:textSize="14sp" />
+        android:textColor="@androidprv:color/materialColorOnTertiaryFixed"
+        android:textSize="14sp"
+        android:textStyle="bold" />
 </LinearLayout>

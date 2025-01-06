@@ -28,6 +28,7 @@ import java.util.function.Consumer
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
+import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
@@ -64,6 +65,28 @@ class JavaAdapter @Inject constructor(@Application private val scope: CoroutineS
     ): StateFlow<T> {
         return flow.stateIn(scope, started, initialValue)
     }
+
+    /** Call suspend functions from Java */
+    fun <T, R> callSuspend(
+        suspendFunction: suspend (T) -> R,
+        arg: T,
+        onSuccess: (R) -> Unit,
+        onCancel: (CancellationException) -> Unit,
+        onFailure: (Throwable) -> Unit,
+    ): Job =
+        scope.launch {
+            val result =
+                try {
+                    suspendFunction(arg)
+                } catch (ex: CancellationException) {
+                    onCancel(ex)
+                    return@launch
+                } catch (ex: Throwable) {
+                    onFailure(ex)
+                    return@launch
+                }
+            onSuccess(result)
+        }
 }
 
 /**

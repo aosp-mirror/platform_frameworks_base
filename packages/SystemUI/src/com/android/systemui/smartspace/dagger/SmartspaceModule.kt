@@ -65,8 +65,8 @@ abstract class SmartspaceModule {
     @Binds
     @Named(LOCKSCREEN_SMARTSPACE_PRECONDITION)
     abstract fun bindSmartspacePrecondition(
-        lockscreenPrecondition: LockscreenPrecondition?
-    ): SmartspacePrecondition?
+        lockscreenPrecondition: LockscreenPrecondition
+    ): SmartspacePrecondition
 
     @BindsOptionalOf
     @Named(GLANCEABLE_HUB_SMARTSPACE_DATA_PLUGIN)

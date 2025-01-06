@@ -282,20 +282,6 @@ public final class BackNavigationInfo implements Parcelable {
     }
 
     /**
-     * Callback to be called when the back gesture is finished in order to notify the server that
-     * it can ask app to start rendering.
-     * @hide
-     * @param triggerBack Boolean indicating if back gesture has been triggered.
-     */
-    public void onBackGestureFinished(boolean triggerBack) {
-        if (mOnBackNavigationDone != null) {
-            Bundle result = new Bundle();
-            result.putBoolean(KEY_GESTURE_FINISHED, triggerBack);
-            mOnBackNavigationDone.sendResult(result);
-        }
-    }
-
-    /**
      * Get customize animation info.
      * @hide
      */

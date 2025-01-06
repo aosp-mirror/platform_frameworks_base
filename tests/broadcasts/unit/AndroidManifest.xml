@@ -22,6 +22,6 @@
     </application>
 
     <instrumentation android:name="androidx.test.runner.AndroidJUnitRunner"
-            android:targetPackage="com.android.broadcasts.unit"
-            android:label="Broadcasts Unit Tests"/>
+        android:targetPackage="com.android.broadcasts.unit"
+        android:label="Broadcasts Unit Tests"/>
 </manifest>

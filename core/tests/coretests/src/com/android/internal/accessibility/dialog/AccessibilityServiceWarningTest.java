@@ -25,8 +25,6 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.os.RemoteException;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
@@ -35,7 +33,6 @@ import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.Window;
-import android.view.accessibility.Flags;
 import android.widget.TextView;
 
 import androidx.test.platform.app.InstrumentationRegistry;
@@ -92,19 +89,7 @@ public class AccessibilityServiceWarningTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_WARNING_USE_DEFAULT_DIALOG_TYPE)
-    public void createAccessibilityServiceWarningDialog_hasExpectedWindowParams_isSystemDialog() {
-        createAccessibilityServiceWarningDialog_hasExpectedWindowParams(true);
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_WARNING_USE_DEFAULT_DIALOG_TYPE)
     public void createAccessibilityServiceWarningDialog_hasExpectedWindowParams_notSystemDialog() {
-        createAccessibilityServiceWarningDialog_hasExpectedWindowParams(false);
-    }
-
-    private void createAccessibilityServiceWarningDialog_hasExpectedWindowParams(
-            boolean expectSystemDialog) {
         final AlertDialog dialog =
                 AccessibilityServiceWarning.createAccessibilityServiceWarningDialog(
                         mContext,
@@ -116,11 +101,7 @@ public class AccessibilityServiceWarningTest {
         expect.that(dialogWindow.getAttributes().privateFlags
                 & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS).isEqualTo(
                 SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
-        if (expectSystemDialog) {
-            expect.that(dialogWindow.getAttributes().type).isEqualTo(TYPE_SYSTEM_DIALOG);
-        } else {
-            expect.that(dialogWindow.getAttributes().type).isNotEqualTo(TYPE_SYSTEM_DIALOG);
-        }
+        expect.that(dialogWindow.getAttributes().type).isNotEqualTo(TYPE_SYSTEM_DIALOG);
     }
 
     @Test

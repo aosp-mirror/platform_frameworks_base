@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
@@ -34,6 +36,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.display.utils.SensorUtils;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Maintains the proximity state of the display.
@@ -42,17 +46,25 @@ import java.io.PrintWriter;
  */
 public final class DisplayPowerProximityStateController {
     @VisibleForTesting
-    static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 1;
-    @VisibleForTesting
     static final int PROXIMITY_UNKNOWN = -1;
+    private static final int PROXIMITY_NEGATIVE = 0;
     @VisibleForTesting
     static final int PROXIMITY_POSITIVE = 1;
+
+    @IntDef(prefix = { "PROXIMITY_" }, value = {
+            PROXIMITY_UNKNOWN,
+            PROXIMITY_NEGATIVE,
+            PROXIMITY_POSITIVE
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ProximityState {}
+
+    @VisibleForTesting
+    static final int MSG_PROXIMITY_SENSOR_DEBOUNCED = 1;
     @VisibleForTesting
     static final int PROXIMITY_SENSOR_POSITIVE_DEBOUNCE_DELAY = 0;
 
     private static final int MSG_IGNORE_PROXIMITY = 2;
-
-    private static final int PROXIMITY_NEGATIVE = 0;
 
     private static final boolean DEBUG_PRETEND_PROXIMITY_SENSOR_ABSENT = false;
     // Proximity sensor debounce delay in milliseconds for positive transitions.
@@ -73,7 +85,7 @@ public final class DisplayPowerProximityStateController {
     private final DisplayPowerProximityStateHandler mHandler;
     // A runnable to execute the utility to update the power state.
     private final Runnable mNudgeUpdatePowerState;
-    private Clock mClock;
+    private final Clock mClock;
     // A listener which listen's to the events emitted by the proximity sensor.
     private final SensorEventListener mProximitySensorListener = new SensorEventListener() {
         @Override
@@ -117,9 +129,6 @@ public final class DisplayPowerProximityStateController {
     // with the sensor manager.
     private boolean mProximitySensorEnabled;
 
-    // The raw non-debounced proximity sensor state.
-    private int mPendingProximity = PROXIMITY_UNKNOWN;
-
     // -1 if fully debounced. Else, represents the time in ms when the debounce suspend blocker will
     // be removed. Applies for both positive and negative proximity flips.
     private long mPendingProximityDebounceTime = -1;
@@ -128,8 +137,11 @@ public final class DisplayPowerProximityStateController {
     // When the screen turns on again, we report user activity to the power manager.
     private boolean mScreenOffBecauseOfProximity;
 
+    // The raw non-debounced proximity sensor state.
+    private @ProximityState int mPendingProximity = PROXIMITY_UNKNOWN;
+
     // The debounced proximity sensor state.
-    private int mProximity = PROXIMITY_UNKNOWN;
+    private @ProximityState int mProximity = PROXIMITY_UNKNOWN;
 
     // The actual proximity sensor threshold value.
     private float mProximityThreshold;
@@ -139,7 +151,7 @@ public final class DisplayPowerProximityStateController {
     private boolean mSkipRampBecauseOfProximityChangeToNegative = false;
 
     // The DisplayId of the associated Logical Display.
-    private int mDisplayId;
+    private final int mDisplayId;
 
     /**
      * Create a new instance of DisplayPowerProximityStateController.
@@ -152,11 +164,18 @@ public final class DisplayPowerProximityStateController {
      * @param displayId             The DisplayId of the associated Logical Display.
      * @param sensorManager         The manager which lets us access the display's ProximitySensor
      */
-    public DisplayPowerProximityStateController(
-            WakelockController wakeLockController, DisplayDeviceConfig displayDeviceConfig,
-            Looper looper,
+    public DisplayPowerProximityStateController(WakelockController wakeLockController,
+            DisplayDeviceConfig displayDeviceConfig, Looper looper,
+            Runnable nudgeUpdatePowerState, int displayId, SensorManager sensorManager) {
+        this(wakeLockController, displayDeviceConfig, looper, nudgeUpdatePowerState, displayId,
+                sensorManager, new Injector());
+    }
+
+    @VisibleForTesting
+    DisplayPowerProximityStateController(WakelockController wakeLockController,
+            DisplayDeviceConfig displayDeviceConfig, Looper looper,
             Runnable nudgeUpdatePowerState, int displayId, SensorManager sensorManager,
-            Injector injector) {
+            @Nullable Injector injector) {
         if (injector == null) {
             injector = new Injector();
         }
@@ -437,7 +456,7 @@ public final class DisplayPowerProximityStateController {
                 if (mProximity != mPendingProximity) {
                     // if the status of the sensor changed, stop ignoring.
                     mIgnoreProximityUntilChanged = false;
-                    Slog.i(mTag, "No longer ignoring proximity [" + mPendingProximity + "]");
+                    Slog.i(mTag, "Applying proximity: " + proximityToString(mPendingProximity));
                 }
                 // Sensor reading accepted.  Apply the change then release the wake lock.
                 mProximity = mPendingProximity;
@@ -478,7 +497,7 @@ public final class DisplayPowerProximityStateController {
         }
     }
 
-    private String proximityToString(int state) {
+    private String proximityToString(@ProximityState int state) {
         switch (state) {
             case PROXIMITY_UNKNOWN:
                 return "Unknown";
@@ -518,12 +537,12 @@ public final class DisplayPowerProximityStateController {
     }
 
     @VisibleForTesting
-    int getPendingProximity() {
+    @ProximityState int getPendingProximity() {
         return mPendingProximity;
     }
 
     @VisibleForTesting
-    int getProximity() {
+    @ProximityState int getProximity() {
         return mProximity;
     }
 
@@ -550,7 +569,7 @@ public final class DisplayPowerProximityStateController {
     @VisibleForTesting
     static class Injector {
         Clock createClock() {
-            return () -> SystemClock.uptimeMillis();
+            return SystemClock::uptimeMillis;
         }
     }
 }

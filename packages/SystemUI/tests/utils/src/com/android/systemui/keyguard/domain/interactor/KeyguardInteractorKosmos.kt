@@ -38,6 +38,7 @@ val Kosmos.keyguardInteractor: KeyguardInteractor by
             fromGoneTransitionInteractor = { fromGoneTransitionInteractor },
             fromLockscreenTransitionInteractor = { fromLockscreenTransitionInteractor },
             fromOccludedTransitionInteractor = { fromOccludedTransitionInteractor },
+            fromAlternateBouncerTransitionInteractor = { fromAlternateBouncerTransitionInteractor },
             applicationScope = testScope.backgroundScope,
         )
     }

@@ -27,8 +27,6 @@ import android.app.ActivityManager;
 import android.app.TaskInfo;
 import android.content.ComponentName;
 import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.flag.junit.CheckFlagsRule;
-import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.testing.AndroidTestingRunner;
 import android.util.Pair;
 import android.view.LayoutInflater;
@@ -40,7 +38,6 @@ import androidx.test.filters.SmallTest;
 
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
-import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.SyncTransactionQueue;
@@ -48,7 +45,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import junit.framework.Assert;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -66,7 +62,7 @@ import java.util.function.BiConsumer;
  */
 @RunWith(AndroidTestingRunner.class)
 @SmallTest
-public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
+public class UserAspectRatioSettingsLayoutTest extends CompatUIShellTestCase {
 
     private static final int TASK_ID = 1;
 
@@ -87,10 +83,6 @@ public class UserAspectRatioSettingsLayoutTest extends ShellTestCase {
     private UserAspectRatioSettingsWindowManager mWindowManager;
     private UserAspectRatioSettingsLayout mLayout;
     private TaskInfo mTaskInfo;
-
-    @Rule
-    public final CheckFlagsRule mCheckFlagsRule =
-            DeviceFlagsValueProvider.createCheckFlagsRule();
 
     @Before
     public void setUp() {

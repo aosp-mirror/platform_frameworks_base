@@ -1,11 +1,9 @@
 package com.android.systemui.statusbar.notification
 
-import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.statusbar.notification.shared.NotificationsImprovedHunAnimation
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import org.junit.Assert.assertEquals
@@ -148,7 +146,6 @@ class RoundableTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun getCornerRadii_radius_maxed_to_height() {
         whenever(targetView.height).thenReturn(10)
         roundable.requestRoundness(1f, 1f, SOURCE1)
@@ -157,7 +154,6 @@ class RoundableTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun getCornerRadii_topRadius_maxed_to_height() {
         whenever(targetView.height).thenReturn(5)
         roundable.requestRoundness(1f, 0f, SOURCE1)
@@ -166,7 +162,6 @@ class RoundableTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun getCornerRadii_bottomRadius_maxed_to_height() {
         whenever(targetView.height).thenReturn(5)
         roundable.requestRoundness(0f, 1f, SOURCE1)
@@ -175,7 +170,6 @@ class RoundableTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(NotificationsImprovedHunAnimation.FLAG_NAME)
     fun getCornerRadii_radii_kept() {
         whenever(targetView.height).thenReturn(100)
         roundable.requestRoundness(1f, 1f, SOURCE1)
@@ -188,16 +182,9 @@ class RoundableTest : SysuiTestCase() {
         assertEquals("bottomCornerRadius", bottom, roundable.bottomCornerRadius)
     }
 
-    class FakeRoundable(
-        targetView: View,
-        radius: Float = MAX_RADIUS,
-    ) : Roundable {
+    class FakeRoundable(targetView: View, radius: Float = MAX_RADIUS) : Roundable {
         override val roundableState =
-            RoundableState(
-                targetView = targetView,
-                roundable = this,
-                maxRadius = radius,
-            )
+            RoundableState(targetView = targetView, roundable = this, maxRadius = radius)
 
         override val clipHeight: Int
             get() = roundableState.targetView.height

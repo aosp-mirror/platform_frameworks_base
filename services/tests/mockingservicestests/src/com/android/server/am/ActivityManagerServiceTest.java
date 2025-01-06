@@ -80,6 +80,7 @@ import android.Manifest;
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.ApplicationThreadConstants;
 import android.app.BackgroundStartPrivileges;
 import android.app.BroadcastOptions;
 import android.app.ForegroundServiceDelegationOptions;
@@ -87,6 +88,8 @@ import android.app.IUidObserver;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.SyncNotedAppOp;
+import android.app.backup.BackupAnnotations;
+import android.content.ClipData;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -98,6 +101,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ServiceInfo;
+import android.graphics.Rect;
 import android.graphics.drawable.Icon;
 import android.net.Uri;
 import android.os.Bundle;
@@ -105,12 +109,14 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IProgressListener;
+import android.os.IpcDataCache;
 import android.os.Looper;
 import android.os.Message;
 import android.os.Parcel;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.annotations.RequiresFlagsEnabled;
@@ -133,6 +139,7 @@ import com.android.server.am.ProcessList.IsolatedUidRange;
 import com.android.server.am.ProcessList.IsolatedUidRangeAllocator;
 import com.android.server.am.UidObserverController.ChangeRecord;
 import com.android.server.appop.AppOpsService;
+import com.android.server.job.JobSchedulerInternal;
 import com.android.server.notification.NotificationManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.ActivityTaskManagerService;
@@ -199,6 +206,16 @@ public class ActivityManagerServiceTest {
 
     private static final String TEST_AUTHORITY = "test_authority";
     private static final String TEST_MIME_TYPE = "application/test_type";
+    private static final Uri TEST_URI = Uri.parse("content://com.example/people");
+    private static final int TEST_CREATOR_UID = 12345;
+    private static final String TEST_CREATOR_PACKAGE = "android.content.testCreatorPackage";
+    private static final String TEST_TYPE = "testType";
+    private static final String TEST_IDENTIFIER = "testIdentifier";
+    private static final String TEST_CATEGORY = "testCategory";
+    private static final String TEST_LAUNCH_TOKEN = "testLaunchToken";
+    private static final ComponentName TEST_COMPONENT = new ComponentName(TEST_PACKAGE,
+            "TestClass");
+    private static final int ALL_SET_FLAG = 0xFFFFFFFF;
 
     private static final int[] UID_RECORD_CHANGES = {
         UidRecord.CHANGE_PROCSTATE,
@@ -228,6 +245,7 @@ public class ActivityManagerServiceTest {
     @Mock private PackageManagerInternal mPackageManagerInternal;
     @Mock private ActivityTaskManagerInternal mActivityTaskManagerInternal;
     @Mock private NotificationManagerInternal mNotificationManagerInternal;
+    @Mock private JobSchedulerInternal mJobSchedulerInternal;
     @Mock private ContentResolver mContentResolver;
 
     private TestInjector mInjector;
@@ -249,6 +267,7 @@ public class ActivityManagerServiceTest {
         LocalServices.addService(PackageManagerInternal.class, mPackageManagerInternal);
         LocalServices.addService(ActivityTaskManagerInternal.class, mActivityTaskManagerInternal);
         LocalServices.addService(NotificationManagerInternal.class, mNotificationManagerInternal);
+        LocalServices.addService(JobSchedulerInternal.class, mJobSchedulerInternal);
 
         doReturn(new ComponentName("", "")).when(mPackageManagerInternal)
                 .getSystemUiServiceComponent();
@@ -279,9 +298,9 @@ public class ActivityManagerServiceTest {
         // Required for updating DeviceConfig.
         InstrumentationRegistry.getInstrumentation()
                 .getUiAutomation()
-                .adoptShellPermissionIdentity(
-                Manifest.permission.READ_DEVICE_CONFIG,
-                Manifest.permission.WRITE_DEVICE_CONFIG);
+                .adoptShellPermissionIdentity(Manifest.permission.READ_DEVICE_CONFIG,
+                        Manifest.permission.WRITE_DEVICE_CONFIG,
+                        Manifest.permission.WRITE_ALLOWLISTED_DEVICE_CONFIG);
         sProcessListSettingsListener = mAms.mProcessList.getProcessListSettingsListener();
         assertThat(sProcessListSettingsListener).isNotNull();
     }
@@ -308,6 +327,7 @@ public class ActivityManagerServiceTest {
         LocalServices.removeServiceForTest(PackageManagerInternal.class);
         LocalServices.removeServiceForTest(ActivityTaskManagerInternal.class);
         LocalServices.removeServiceForTest(NotificationManagerInternal.class);
+        LocalServices.removeServiceForTest(JobSchedulerInternal.class);
 
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
@@ -954,28 +974,37 @@ public class ActivityManagerServiceTest {
     @Test
     @SuppressWarnings("GuardedBy")
     public void testBroadcastStickyIntent_verifyTypeNotResolved() throws Exception {
-        final Intent intent = new Intent(TEST_ACTION1);
-        final Uri uri = new Uri.Builder()
-                .scheme(SCHEME_CONTENT)
-                .authority(TEST_AUTHORITY)
-                .path("green")
-                .build();
-        intent.setData(uri);
-        broadcastIntent(intent, null, true, TEST_MIME_TYPE, USER_ALL);
-        assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, USER_ALL),
-                StickyBroadcast.create(intent, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
-                        TEST_MIME_TYPE));
-        when(mContentResolver.getType(uri)).thenReturn(TEST_MIME_TYPE);
+        MockitoSession mockitoSession =
+                ExtendedMockito.mockitoSession().mockStatic(IpcDataCache.class).startMocking();
 
-        addUidRecord(TEST_UID, TEST_PACKAGE);
-        final ProcessRecord procRecord = mAms.getProcessRecordLocked(TEST_PACKAGE, TEST_UID);
-        final IntentFilter intentFilter = new IntentFilter(TEST_ACTION1);
-        intentFilter.addDataType(TEST_MIME_TYPE);
-        final Intent resultIntent = mAms.registerReceiverWithFeature(procRecord.getThread(),
-                TEST_PACKAGE, null, null, null, intentFilter, null, TEST_USER,
-                Context.RECEIVER_EXPORTED);
-        assertNotNull(resultIntent);
-        verify(mContentResolver, never()).getType(any());
+        try {
+            final Intent intent = new Intent(TEST_ACTION1);
+            final Uri uri = new Uri.Builder()
+                    .scheme(SCHEME_CONTENT)
+                    .authority(TEST_AUTHORITY)
+                    .path("green")
+                    .build();
+            intent.setData(uri);
+            broadcastIntent(intent, null, true, TEST_MIME_TYPE, USER_ALL);
+            assertStickyBroadcasts(mAms.getStickyBroadcastsForTest(TEST_ACTION1, USER_ALL),
+                    StickyBroadcast.create(intent, false, Process.myUid(), PROCESS_STATE_UNKNOWN,
+                            TEST_MIME_TYPE));
+            when(mContentResolver.getType(uri)).thenReturn(TEST_MIME_TYPE);
+            ExtendedMockito.doNothing().when(
+                    () -> IpcDataCache.invalidateCache(anyString(), anyString()));
+
+            addUidRecord(TEST_UID, TEST_PACKAGE);
+            final ProcessRecord procRecord = mAms.getProcessRecordLocked(TEST_PACKAGE, TEST_UID);
+            final IntentFilter intentFilter = new IntentFilter(TEST_ACTION1);
+            intentFilter.addDataType(TEST_MIME_TYPE);
+            final Intent resultIntent = mAms.registerReceiverWithFeature(procRecord.getThread(),
+                    TEST_PACKAGE, null, null, null, intentFilter, null, TEST_USER,
+                    Context.RECEIVER_EXPORTED);
+            assertNotNull(resultIntent);
+            verify(mContentResolver, never()).getType(any());
+        } finally {
+            mockitoSession.finishMocking();
+        }
     }
 
     @SuppressWarnings("GuardedBy")
@@ -1308,12 +1337,19 @@ public class ActivityManagerServiceTest {
         Intent intent = new Intent();
         Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
         intent.putExtra("EXTRA_INTENT0", extraIntent);
+        Intent nestedIntent = new Intent("NESTED_INTENT_ACTION");
+        extraIntent.putExtra("NESTED_INTENT", nestedIntent);
 
         intent.collectExtraIntentKeys();
         mAms.addCreatorToken(intent, TEST_PACKAGE);
 
         ActivityManagerService.IntentCreatorToken token =
                 (ActivityManagerService.IntentCreatorToken) extraIntent.getCreatorToken();
+        assertThat(token).isNotNull();
+        assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
+        assertThat(token.getCreatorPackage()).isEqualTo(TEST_PACKAGE);
+
+        token = (ActivityManagerService.IntentCreatorToken) nestedIntent.getCreatorToken();
         assertThat(token).isNotNull();
         assertThat(token.getCreatorUid()).isEqualTo(mInjector.getCallingUid());
         assertThat(token.getCreatorPackage()).isEqualTo(TEST_PACKAGE);
@@ -1349,6 +1385,8 @@ public class ActivityManagerServiceTest {
         Intent intent = new Intent();
         Intent extraIntent = new Intent("EXTRA_INTENT_ACTION");
         intent.putExtra("EXTRA_INTENT", extraIntent);
+        Intent nestedIntent = new Intent("NESTED_INTENT_ACTION");
+        extraIntent.putExtra("NESTED_INTENT", nestedIntent);
 
         intent.collectExtraIntentKeys();
 
@@ -1374,8 +1412,11 @@ public class ActivityManagerServiceTest {
         extraIntent = intent.getParcelableExtra("EXTRA_INTENT", Intent.class);
         extraIntent2 = intent.getParcelableExtra("EXTRA_INTENT2", Intent.class);
         extraIntent3 = intent.getParcelableExtra("EXTRA_INTENT3", Intent.class);
+        nestedIntent = extraIntent.getParcelableExtra("NESTED_INTENT", Intent.class);
 
         assertThat(extraIntent.getExtendedFlags()
+                & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
+        assertThat(nestedIntent.getExtendedFlags()
                 & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
         // sneaked in intent should have EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN set.
         assertThat(extraIntent2.getExtendedFlags()
@@ -1383,6 +1424,34 @@ public class ActivityManagerServiceTest {
         // local created intent should not have EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN set.
         assertThat(extraIntent3.getExtendedFlags()
                 & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
+    }
+
+    @Test
+    public void testUseCloneForCreatorTokenAndOriginalIntent_createSameIntentCreatorToken() {
+        Intent testIntent = new Intent(TEST_ACTION1)
+                .setComponent(TEST_COMPONENT)
+                .setDataAndType(TEST_URI, TEST_TYPE)
+                .setIdentifier(TEST_IDENTIFIER)
+                .addCategory(TEST_CATEGORY);
+        testIntent.setOriginalIntent(new Intent(TEST_ACTION2));
+        testIntent.setSelector(new Intent(TEST_ACTION3));
+        testIntent.setSourceBounds(new Rect(0, 0, 100, 100));
+        testIntent.setLaunchToken(TEST_LAUNCH_TOKEN);
+        testIntent.addFlags(ALL_SET_FLAG)
+                .addExtendedFlags(ALL_SET_FLAG);
+        ClipData testClipData = ClipData.newHtmlText("label", "text", "<html/>");
+        testClipData.addItem(new ClipData.Item(new Intent(TEST_ACTION1)));
+        testClipData.addItem(new ClipData.Item(TEST_URI));
+        testIntent.putExtra(TEST_EXTRA_KEY1, TEST_EXTRA_VALUE1);
+
+        ActivityManagerService.IntentCreatorToken tokenForFullIntent =
+                new ActivityManagerService.IntentCreatorToken(TEST_CREATOR_UID,
+                        TEST_CREATOR_PACKAGE, testIntent);
+        ActivityManagerService.IntentCreatorToken tokenForCloneIntent =
+                new ActivityManagerService.IntentCreatorToken(TEST_CREATOR_UID,
+                        TEST_CREATOR_PACKAGE, testIntent.cloneForCreatorToken());
+
+        assertThat(tokenForFullIntent.getKeyFields()).isEqualTo(tokenForCloneIntent.getKeyFields());
     }
 
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,
@@ -1534,6 +1603,50 @@ public class ActivityManagerServiceTest {
                 .cancelNotification(eq(app.info.packageName), eq(app.info.packageName),
                         eq(app.info.uid), eq(app.mPid), eq(null),
                         eq(notificationId), anyInt());
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void bindBackupAgent_fullBackup_shouldUseRestrictedMode_setsInFullBackup()
+            throws Exception {
+        ActivityManagerService spyAms = spy(mAms);
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.packageName = TEST_PACKAGE;
+        applicationInfo.processName = TEST_PACKAGE;
+        applicationInfo.uid = TEST_UID;
+        doReturn(applicationInfo).when(mPackageManager).getApplicationInfo(eq(TEST_PACKAGE),
+                anyLong(), anyInt());
+        ProcessRecord appRec = new ProcessRecord(mAms, applicationInfo, TAG, TEST_UID);
+        doReturn(appRec).when(spyAms).getProcessRecordLocked(eq(TEST_PACKAGE), eq(TEST_UID));
+
+        spyAms.bindBackupAgent(TEST_PACKAGE, ApplicationThreadConstants.BACKUP_MODE_FULL,
+                UserHandle.USER_SYSTEM,
+                BackupAnnotations.BackupDestination.CLOUD, /* shouldUseRestrictedMode= */
+                true);
+
+        assertThat(appRec.isInFullBackup()).isTrue();
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    public void bindBackupAgent_fullBackup_shouldNotUseRestrictedMode_doesNotSetInFullBackup()
+            throws Exception {
+        ActivityManagerService spyAms = spy(mAms);
+        ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.packageName = TEST_PACKAGE;
+        applicationInfo.processName = TEST_PACKAGE;
+        applicationInfo.uid = TEST_UID;
+        doReturn(applicationInfo).when(mPackageManager).getApplicationInfo(eq(TEST_PACKAGE),
+                anyLong(), anyInt());
+        ProcessRecord appRec = new ProcessRecord(mAms, applicationInfo, TAG, TEST_UID);
+        doReturn(appRec).when(spyAms).getProcessRecordLocked(eq(TEST_PACKAGE), eq(TEST_UID));
+
+        spyAms.bindBackupAgent(TEST_PACKAGE, ApplicationThreadConstants.BACKUP_MODE_FULL,
+                UserHandle.USER_SYSTEM,
+                BackupAnnotations.BackupDestination.CLOUD, /* shouldUseRestrictedMode= */
+                false);
+
+        assertThat(appRec.isInFullBackup()).isFalse();
     }
 
     private static class TestHandler extends Handler {

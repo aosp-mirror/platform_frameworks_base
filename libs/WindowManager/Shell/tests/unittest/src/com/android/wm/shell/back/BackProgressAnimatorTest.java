@@ -63,6 +63,7 @@ public class BackProgressAnimatorTest {
     @Before
     public void setUp() throws Exception {
         mTargetProgressCalled = new CountDownLatch(1);
+        mTargetProgress = 0.5f;
         mMainThreadHandler = new Handler(Looper.getMainLooper());
         final BackMotionEvent backEvent = backMotionEventFrom(0, 0);
         mMainThreadHandler.post(
@@ -186,14 +187,14 @@ public class BackProgressAnimatorTest {
         mTargetProgressCalled.await(1, TimeUnit.SECONDS);
         assertNotNull(mReceivedBackEvent);
 
-        // Trigger back invoked animation
         CountDownLatch finishCallbackCalled = new CountDownLatch(1);
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> mProgressAnimator.onBackInvoked(finishCallbackCalled::countDown));
-
-        // remove onBackCancelled finishCallback (while progress is still animating to 0)
-        InstrumentationRegistry.getInstrumentation().runOnMainSync(
-                () -> mProgressAnimator.removeOnBackInvokedFinishCallback());
+        // Trigger back invoked animation and remove onBackInvoked finishCallback (while progress
+        // is still animating to 1)
+        InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> {
+                    mProgressAnimator.onBackInvoked(finishCallbackCalled::countDown);
+                    mProgressAnimator.removeOnBackInvokedFinishCallback();
+                }
+        );
 
         // call reset (which triggers the finishCallback invocation, if one is present)
         InstrumentationRegistry.getInstrumentation().runOnMainSync(() -> mProgressAnimator.reset());

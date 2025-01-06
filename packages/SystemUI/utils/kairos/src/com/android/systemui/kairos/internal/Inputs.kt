@@ -16,105 +16,103 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.internal.util.Key
-import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.just
+import com.android.systemui.kairos.internal.util.logDuration
 import java.util.concurrent.atomic.AtomicBoolean
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.sync.withLock
 
 internal class InputNode<A>(
-    private val activate: suspend EvalScope.() -> Unit = {},
+    private val activate: EvalScope.() -> Unit = {},
     private val deactivate: () -> Unit = {},
-) : PushNode<A>, Key<A> {
+) : PushNode<A> {
 
-    internal val downstreamSet = DownstreamSet()
-    private val mutex = Mutex()
-    private val activated = AtomicBoolean(false)
+    private val downstreamSet = DownstreamSet()
+    val activated = AtomicBoolean(false)
+
+    private val transactionCache = TransactionCache<A>()
+    private val epoch
+        get() = transactionCache.epoch
 
     override val depthTracker: DepthTracker = DepthTracker()
 
-    override suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean =
-        transactionStore.contains(this)
+    override fun hasCurrentValue(logIndent: Int, evalScope: EvalScope): Boolean =
+        epoch == evalScope.epoch
 
-    suspend fun visit(evalScope: EvalScope, value: A) {
-        evalScope.setResult(this, value)
-        coroutineScope {
-            if (!mutex.withLock { scheduleAll(downstreamSet, evalScope) }) {
-                evalScope.scheduleDeactivation(this@InputNode)
-            }
+    fun visit(evalScope: EvalScope, value: A) {
+        transactionCache.put(evalScope, value)
+        if (!scheduleAll(0, downstreamSet, evalScope)) {
+            evalScope.scheduleDeactivation(this@InputNode)
         }
     }
 
-    override suspend fun removeDownstream(downstream: Schedulable) {
-        mutex.withLock { downstreamSet.remove(downstream) }
+    override fun removeDownstream(downstream: Schedulable) {
+        downstreamSet.remove(downstream)
     }
 
-    override suspend fun deactivateIfNeeded() {
-        if (mutex.withLock { downstreamSet.isEmpty() && activated.getAndSet(false) }) {
+    override fun deactivateIfNeeded() {
+        if (downstreamSet.isEmpty() && activated.getAndSet(false)) {
             deactivate()
         }
     }
 
-    override suspend fun scheduleDeactivationIfNeeded(evalScope: EvalScope) {
-        if (mutex.withLock { downstreamSet.isEmpty() }) {
+    override fun scheduleDeactivationIfNeeded(evalScope: EvalScope) {
+        if (downstreamSet.isEmpty()) {
             evalScope.scheduleDeactivation(this)
         }
     }
 
-    override suspend fun addDownstream(downstream: Schedulable) {
-        mutex.withLock { downstreamSet.add(downstream) }
+    override fun addDownstream(downstream: Schedulable) {
+        downstreamSet.add(downstream)
     }
 
-    suspend fun addDownstreamAndActivateIfNeeded(downstream: Schedulable, evalScope: EvalScope) {
-        val needsActivation =
-            mutex.withLock {
-                val wasEmpty = downstreamSet.isEmpty()
-                downstreamSet.add(downstream)
-                wasEmpty && !activated.getAndSet(true)
-            }
+    fun addDownstreamAndActivateIfNeeded(downstream: Schedulable, evalScope: EvalScope) {
+        val needsActivation = run {
+            val wasEmpty = downstreamSet.isEmpty()
+            downstreamSet.add(downstream)
+            wasEmpty && !activated.getAndSet(true)
+        }
         if (needsActivation) {
             activate(evalScope)
         }
     }
 
-    override suspend fun removeDownstreamAndDeactivateIfNeeded(downstream: Schedulable) {
-        val needsDeactivation =
-            mutex.withLock {
-                downstreamSet.remove(downstream)
-                downstreamSet.isEmpty() && activated.getAndSet(false)
-            }
+    override fun removeDownstreamAndDeactivateIfNeeded(downstream: Schedulable) {
+        downstreamSet.remove(downstream)
+        val needsDeactivation = downstreamSet.isEmpty() && activated.getAndSet(false)
         if (needsDeactivation) {
             deactivate()
         }
     }
 
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<A> =
-        evalScope.getCurrentValue(this)
+    override fun getPushEvent(logIndent: Int, evalScope: EvalScope): A =
+        logDuration(logIndent, "Input.getPushEvent", false) {
+            transactionCache.getCurrentValue(evalScope)
+        }
 }
 
-internal fun <A> InputNode<A>.activated() = TFlowCheap { downstream ->
+internal fun <A> InputNode<A>.activated() = EventsImplCheap { downstream ->
     val input = this@activated
     addDownstreamAndActivateIfNeeded(downstream, evalScope = this)
-    ActivationResult(connection = NodeConnection(input, input), needsEval = hasCurrentValue(input))
+    ActivationResult(
+        connection = NodeConnection(input, input),
+        needsEval = input.hasCurrentValue(0, evalScope = this),
+    )
 }
 
 internal data object AlwaysNode : PushNode<Unit> {
 
     override val depthTracker = DepthTracker()
 
-    override suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean = true
+    override fun hasCurrentValue(logIndent: Int, evalScope: EvalScope): Boolean = true
 
-    override suspend fun removeDownstream(downstream: Schedulable) {}
+    override fun removeDownstream(downstream: Schedulable) {}
 
-    override suspend fun deactivateIfNeeded() {}
+    override fun deactivateIfNeeded() {}
 
-    override suspend fun scheduleDeactivationIfNeeded(evalScope: EvalScope) {}
+    override fun scheduleDeactivationIfNeeded(evalScope: EvalScope) {}
 
-    override suspend fun addDownstream(downstream: Schedulable) {}
+    override fun addDownstream(downstream: Schedulable) {}
 
-    override suspend fun removeDownstreamAndDeactivateIfNeeded(downstream: Schedulable) {}
+    override fun removeDownstreamAndDeactivateIfNeeded(downstream: Schedulable) {}
 
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<Unit> = just(Unit)
+    override fun getPushEvent(logIndent: Int, evalScope: EvalScope) =
+        logDuration(logIndent, "Always.getPushEvent", false) { Unit }
 }

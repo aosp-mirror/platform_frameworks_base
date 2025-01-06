@@ -18,6 +18,8 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.FLOAT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -32,7 +34,7 @@ import java.util.List;
  * [command][textID][before,after][flags] before and after define number of digits before and after
  * the decimal point
  */
-public class TextLookup implements Operation, VariableSupport {
+public class TextLookup extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.TEXT_LOOKUP;
     private static final String CLASS_NAME = "TextFromFloat";
     public int mTextId;
@@ -48,10 +50,11 @@ public class TextLookup implements Operation, VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mTextId, mDataSetId, mIndex);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "TextLookup["
@@ -63,23 +66,34 @@ public class TextLookup implements Operation, VariableSupport {
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         if (Float.isNaN(mIndex)) {
             mOutIndex = context.getFloat(Utils.idFromNan(mIndex));
         }
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         if (Float.isNaN(mIndex)) {
             context.listensTo(Utils.idFromNan(mIndex), this);
         }
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -92,21 +106,32 @@ public class TextLookup implements Operation, VariableSupport {
      * @param dataSet float pointer to the array/list to turn int a string
      * @param index index of element to return
      */
-    public static void apply(WireBuffer buffer, int textId, int dataSet, float index) {
+    public static void apply(@NonNull WireBuffer buffer, int textId, int dataSet, float index) {
         buffer.start(OP_CODE);
         buffer.writeInt(textId);
         buffer.writeInt(dataSet);
         buffer.writeFloat(index);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int textId = buffer.readInt();
         int dataSetId = buffer.readInt();
         float index = buffer.readFloat();
         operations.add(new TextLookup(textId, dataSetId, index));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Expressions Operations", OP_CODE, CLASS_NAME)
                 .description("Look an array and turn into a text object")
                 .field(INT, "textId", "id of the text generated")
@@ -115,13 +140,14 @@ public class TextLookup implements Operation, VariableSupport {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         int id = context.getCollectionsAccess().getId(mDataSetId, (int) mOutIndex);
         context.loadText(mTextId, context.getText(id));
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 }

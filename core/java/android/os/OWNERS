@@ -4,6 +4,8 @@ per-file *Vibrator* = file:/services/core/java/com/android/server/vibrator/OWNER
 
 # PowerManager
 per-file IPowerManager.aidl = file:/services/core/java/com/android/server/power/OWNERS
+per-file IScreenTimeoutPolicyListener.aidl = file:/services/core/java/com/android/server/power/OWNERS
+per-file IWakeLockCallback.aidl = file:/services/core/java/com/android/server/power/OWNERS
 per-file PowerManager.java = file:/services/core/java/com/android/server/power/OWNERS
 per-file PowerManagerInternal.java = file:/services/core/java/com/android/server/power/OWNERS
 
@@ -78,6 +80,9 @@ per-file PatternMatcher* = file:/PACKAGE_MANAGER_OWNERS
 # PermissionEnforcer
 per-file PermissionEnforcer.java = tweek@google.com, brufino@google.com
 
+# RemoteCallbackList
+per-file RemoteCallbackList.java = shayba@google.com
+
 # ART
 per-file ArtModuleServiceManager.java = file:platform/art:/OWNERS
 
@@ -86,10 +91,13 @@ per-file DdmSyncState.java = sanglardf@google.com, rpaquay@google.com
 per-file DdmSyncStageUpdater.java = sanglardf@google.com, rpaquay@google.com
 
 # PerformanceHintManager
-per-file PerformanceHintManager.java = file:/ADPF_OWNERS
+per-file CpuHeadroom*.aidl = file:/ADPF_OWNERS
+per-file GpuHeadroom*.aidl = file:/ADPF_OWNERS
+per-file CpuHeadroom*.java = file:/ADPF_OWNERS
+per-file GpuHeadroom*.java = file:/ADPF_OWNERS
 per-file WorkDuration.java = file:/ADPF_OWNERS
-per-file IHintManager.aidl = file:/ADPF_OWNERS
-per-file IHintSession.aidl = file:/ADPF_OWNERS
+per-file *Hint* = file:/ADPF_OWNERS
+per-file *Session* = file:/ADPF_OWNERS
 
 # IThermal interfaces
 per-file IThermal* = file:/THERMAL_OWNERS
@@ -109,12 +117,20 @@ per-file ProfilingServiceManager.java = file:/PERFORMANCE_OWNERS
 # Performance
 per-file IpcDataCache.java = file:/PERFORMANCE_OWNERS
 
+# Processes, threads, and scheduling
+per-file Process.java = file:/PERFORMANCE_OWNERS
+
 # Memory
 per-file OomKillRecord.java = file:/MEMORY_OWNERS
 
-# MessageQueue
+# MessageQueue and related classes
 per-file MessageQueue.java = mfasheh@google.com, shayba@google.com
 per-file Message.java = mfasheh@google.com, shayba@google.com
+per-file Looper.java = mfasheh@google.com, shayba@google.com
+per-file TestLooperManager.java = mfasheh@google.com, shayba@google.com
+per-file Handler.java = mfasheh@google.com, shayba@google.com
+per-file HandlerThread.java = mfasheh@google.com, shayba@google.com
+per-file HandlerExecutor.java = mfasheh@google.com, shayba@google.com
 
 # Stats
 per-file IStatsBootstrapAtomService.aidl = file:/services/core/java/com/android/server/stats/OWNERS
@@ -125,3 +141,6 @@ per-file StatsServiceManager.java = file:/services/core/java/com/android/server/
 
 # Dropbox
 per-file DropBoxManager* = mwachens@google.com
+
+# Flags
+per-file flags.aconfig = file:/FF_LEADS_OWNERS

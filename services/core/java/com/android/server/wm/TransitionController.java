@@ -37,6 +37,7 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -524,6 +525,23 @@ class TransitionController {
         return false;
     }
 
+    /**
+     * @return A pair of the transition and restore-behind target for the given {@param container}.
+     * @param container An ancestor of a transient-launch activity
+     */
+    @Nullable
+    Pair<Transition, Task> getTransientLaunchTransitionAndTarget(
+            @NonNull WindowContainer container) {
+        for (int i = mPlayingTransitions.size() - 1; i >= 0; --i) {
+            final Transition transition = mPlayingTransitions.get(i);
+            final Task restoreBehindTask = transition.getTransientLaunchRestoreTarget(container);
+            if (restoreBehindTask != null) {
+                return new Pair<>(transition, restoreBehindTask);
+            }
+        }
+        return null;
+    }
+
     /** Returns {@code true} if the display contains a transient-launch transition. */
     boolean hasTransientLaunch(@NonNull DisplayContent dc) {
         if (mCollectingTransition != null && mCollectingTransition.hasTransientLaunch()
@@ -640,8 +658,8 @@ class TransitionController {
         }
         // Always allow WindowState to assign layers since it won't affect transition.
         return wc.asWindowState() != null || (!isPlaying()
-                // Don't assign task while collecting.
-                && !(wc.asTask() != null && isCollecting()));
+                // Don't assign task or display area layers while collecting.
+                && !((wc.asTask() != null || wc.asDisplayArea() != null) && isCollecting()));
     }
 
     @WindowConfiguration.WindowingMode
@@ -756,7 +774,7 @@ class TransitionController {
                     "Disabling player for transition #%d because display isn't enabled yet",
                     transition.getSyncId());
             transition.mIsPlayerEnabled = false;
-            transition.mLogger.mRequestTimeNs = SystemClock.uptimeNanos();
+            transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
             mAtm.mH.post(() -> mAtm.mWindowOrganizerController.startTransition(
                     transition.getToken(), null));
             return transition;
@@ -773,19 +791,30 @@ class TransitionController {
             ProtoLog.v(WmProtoLogGroups.WM_DEBUG_WINDOW_TRANSITIONS,
                     "Requesting StartTransition: %s", transition);
             ActivityManager.RunningTaskInfo startTaskInfo = null;
-            ActivityManager.RunningTaskInfo pipTaskInfo = null;
+            TransitionRequestInfo.PipChange pipChange = null;
             if (startTask != null) {
                 startTaskInfo = startTask.getTaskInfo();
             }
 
             // set the pip task in the request if provided
             if (transition.getPipActivity() != null) {
-                pipTaskInfo = transition.getPipActivity().getTask().getTaskInfo();
+                ActivityManager.RunningTaskInfo pipTaskInfo =
+                        transition.getPipActivity().getTask().getTaskInfo();
+                ActivityRecord pipActivity = transition.getPipActivity();
+                if (pipActivity.getTaskFragment() != null
+                        && pipActivity.getTaskFragment() != pipActivity.getTask()) {
+                    // If the PiP activity is in a TF different from its task, this could be
+                    // AE-to-PiP case, so PipChange will have the TF token cached separately.
+                    pipChange = new TransitionRequestInfo.PipChange(pipActivity.getTaskFragment()
+                            .mRemoteToken.toWindowContainerToken(), pipTaskInfo);
+                } else {
+                    pipChange = new TransitionRequestInfo.PipChange(pipTaskInfo);
+                }
                 transition.setPipActivity(null);
             }
 
             final TransitionRequestInfo request = new TransitionRequestInfo(transition.mType,
-                    startTaskInfo, pipTaskInfo, remoteTransition, displayChange,
+                    startTaskInfo, pipChange, remoteTransition, displayChange,
                     transition.getFlags(), transition.getSyncId());
 
             transition.mLogger.mRequestTimeNs = SystemClock.elapsedRealtimeNanos();
@@ -1665,6 +1694,7 @@ class TransitionController {
         long mStartTimeNs;
         long mReadyTimeNs;
         long mSendTimeNs;
+        long mTransactionCommitTimeNs;
         long mFinishTimeNs;
         long mAbortTimeNs;
         TransitionRequestInfo mRequest;
@@ -1717,6 +1747,9 @@ class TransitionController {
             sb.append(" started=").append(toMsString(mStartTimeNs - mCreateTimeNs));
             sb.append(" ready=").append(toMsString(mReadyTimeNs - mCreateTimeNs));
             sb.append(" sent=").append(toMsString(mSendTimeNs - mCreateTimeNs));
+            if (mTransactionCommitTimeNs != 0) {
+                sb.append(" commit=").append(toMsString(mTransactionCommitTimeNs - mSendTimeNs));
+            }
             sb.append(" finished=").append(toMsString(mFinishTimeNs - mCreateTimeNs));
             return sb.toString();
         }

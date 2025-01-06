@@ -217,6 +217,9 @@ public class AccessibilityNodeInfoDumper {
         serializer.attribute("", "selected", Boolean.toString(node.isSelected()));
         serializer.attribute("", "bounds", AccessibilityNodeInfoHelper.getVisibleBoundsInScreen(
                 node, width, height).toShortString());
+        serializer.attribute("", "drawing-order", Integer.toString(node.getDrawingOrder()));
+        serializer.attribute("", "hint", safeCharSeqToString(node.getHintText()));
+
         int count = node.getChildCount();
         for (int i = 0; i < count; i++) {
             AccessibilityNodeInfo child = node.getChild(i);

@@ -21,6 +21,7 @@ import androidx.test.filters.SmallTest
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.coroutines.collectValues
 import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.andSceneContainer
@@ -31,6 +32,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.StatusBarState
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.ui.transitions.blurConfig
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -128,7 +130,7 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
                     emptyFlow(),
                     emptyFlow(),
                     false,
-                    emptyFlow()
+                    emptyFlow(),
                 )
             runCurrent()
             // fade out
@@ -150,6 +152,39 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
             Truth.assertThat(actual).isEqualTo(0f)
         }
 
+    @Test
+    @BrokenWithSceneContainer(330311871)
+    fun blurRadiusIsMaxWhenShadeIsExpanded() =
+        testScope.runTest {
+            val values by collectValues(underTest.windowBlurRadius)
+            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+
+            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+                transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
+                startValue = kosmos.blurConfig.maxBlurRadiusPx,
+                endValue = kosmos.blurConfig.maxBlurRadiusPx,
+                actualValuesProvider = { values },
+                transitionFactory = ::step,
+                checkInterpolatedValues = false,
+            )
+        }
+
+    @Test
+    @BrokenWithSceneContainer(330311871)
+    fun blurRadiusGoesFromMinToMaxWhenShadeIsNotExpanded() =
+        testScope.runTest {
+            val values by collectValues(underTest.windowBlurRadius)
+            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(false)
+
+            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+                transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
+                startValue = kosmos.blurConfig.minBlurRadiusPx,
+                endValue = kosmos.blurConfig.maxBlurRadiusPx,
+                actualValuesProvider = { values },
+                transitionFactory = ::step,
+            )
+        }
+
     private fun step(
         value: Float,
         state: TransitionState = TransitionState.RUNNING,
@@ -161,7 +196,7 @@ class LockscreenToPrimaryBouncerTransitionViewModelTest(flags: FlagsParameteriza
                 else KeyguardState.PRIMARY_BOUNCER,
             value = value,
             transitionState = state,
-            ownerName = "LockscreenToPrimaryBouncerTransitionViewModelTest"
+            ownerName = "LockscreenToPrimaryBouncerTransitionViewModelTest",
         )
     }
 

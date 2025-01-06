@@ -16,11 +16,11 @@
 
 package com.android.systemui.statusbar.pipeline.mobile.data.repository
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
-import com.android.systemui.dagger.qualifiers.Application
+import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Core startable which configures the [CarrierConfigRepository] to listen for updates for the
@@ -30,7 +30,7 @@ class CarrierConfigCoreStartable
 @Inject
 constructor(
     private val carrierConfigRepository: CarrierConfigRepository,
-    @Application private val scope: CoroutineScope,
+    @Background private val scope: CoroutineScope,
 ) : CoreStartable {
 
     override fun start() {

@@ -64,7 +64,7 @@ class CloseDesktopTaskTransitionHandlerTest : ShellTestCase() {
                 context,
                 testExecutor,
                 testExecutor,
-                transactionSupplier
+                transactionSupplier,
             )
     }
 
@@ -81,11 +81,11 @@ class CloseDesktopTaskTransitionHandlerTest : ShellTestCase() {
                 info =
                     createTransitionInfo(
                         type = WindowManager.TRANSIT_OPEN,
-                        task = createTask(WINDOWING_MODE_FREEFORM)
+                        task = createTask(WINDOWING_MODE_FREEFORM),
                     ),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertFalse("Should not animate open transition", animates)
@@ -99,7 +99,7 @@ class CloseDesktopTaskTransitionHandlerTest : ShellTestCase() {
                 info = createTransitionInfo(task = createTask(WINDOWING_MODE_FULLSCREEN)),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertFalse("Should not animate fullscreen task close transition", animates)
@@ -113,11 +113,11 @@ class CloseDesktopTaskTransitionHandlerTest : ShellTestCase() {
                 info =
                     createTransitionInfo(
                         changeMode = WindowManager.TRANSIT_OPEN,
-                        task = createTask(WINDOWING_MODE_FREEFORM)
+                        task = createTask(WINDOWING_MODE_FREEFORM),
                     ),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertFalse("Should not animate opening freeform task close transition", animates)
@@ -131,7 +131,7 @@ class CloseDesktopTaskTransitionHandlerTest : ShellTestCase() {
                 info = createTransitionInfo(task = createTask(WINDOWING_MODE_FREEFORM)),
                 startTransaction = mock(),
                 finishTransaction = mock(),
-                finishCallback = {}
+                finishCallback = {},
             )
 
         assertTrue("Should animate closing freeform task close transition", animates)
@@ -140,7 +140,7 @@ class CloseDesktopTaskTransitionHandlerTest : ShellTestCase() {
     private fun createTransitionInfo(
         type: Int = WindowManager.TRANSIT_CLOSE,
         changeMode: Int = WindowManager.TRANSIT_CLOSE,
-        task: RunningTaskInfo
+        task: RunningTaskInfo,
     ): TransitionInfo =
         TransitionInfo(type, 0 /* flags */).apply {
             addChange(

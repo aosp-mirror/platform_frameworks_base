@@ -41,8 +41,9 @@ public final class ExecuteAppFunctionAidlRequest implements Parcelable {
                             ExecuteAppFunctionRequest.CREATOR.createFromParcel(in);
                     UserHandle userHandle = UserHandle.CREATOR.createFromParcel(in);
                     String callingPackage = in.readString8();
+                    long requestTime = in.readLong();
                     return new ExecuteAppFunctionAidlRequest(
-                            clientRequest, userHandle, callingPackage);
+                            clientRequest, userHandle, callingPackage, requestTime);
                 }
 
                 @Override
@@ -60,11 +61,15 @@ public final class ExecuteAppFunctionAidlRequest implements Parcelable {
     /** The package name of the app that is requesting to execute the app function. */
     private final String mCallingPackage;
 
-    public ExecuteAppFunctionAidlRequest(
-            ExecuteAppFunctionRequest clientRequest, UserHandle userHandle, String callingPackage) {
+    /** The time of calling executeAppFunction(). */
+    private final long mRequestTime;
+
+    public ExecuteAppFunctionAidlRequest(ExecuteAppFunctionRequest clientRequest,
+            UserHandle userHandle, String callingPackage, long requestTime) {
         this.mClientRequest = Objects.requireNonNull(clientRequest);
         this.mUserHandle = Objects.requireNonNull(userHandle);
         this.mCallingPackage = Objects.requireNonNull(callingPackage);
+        this.mRequestTime = requestTime;
     }
 
     @Override
@@ -77,6 +82,7 @@ public final class ExecuteAppFunctionAidlRequest implements Parcelable {
         mClientRequest.writeToParcel(dest, flags);
         mUserHandle.writeToParcel(dest, flags);
         dest.writeString8(mCallingPackage);
+        dest.writeLong(mRequestTime);
     }
 
     /** Returns the client request to execute an app function. */
@@ -95,5 +101,10 @@ public final class ExecuteAppFunctionAidlRequest implements Parcelable {
     @NonNull
     public String getCallingPackage() {
         return mCallingPackage;
+    }
+
+    /** Returns the time of calling executeAppFunction(). */
+    public long getRequestTime() {
+        return mRequestTime;
     }
 }

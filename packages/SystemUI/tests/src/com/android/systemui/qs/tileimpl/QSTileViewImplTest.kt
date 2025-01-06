@@ -236,7 +236,7 @@ class QSTileViewImplTest : SysuiTestCase() {
 
         context.orCreateTestableResources.addOverride(
             R.array.tile_states_internet,
-            arrayOf(unavailableString, offString, onString)
+            arrayOf(unavailableString, offString, onString),
         )
 
         // State UNAVAILABLE
@@ -341,7 +341,7 @@ class QSTileViewImplTest : SysuiTestCase() {
         val testA11yLabel = "TEST_LABEL"
         context.orCreateTestableResources.addOverride(
             R.string.accessibility_tile_disabled_by_policy_action_description,
-            testA11yLabel
+            testA11yLabel,
         )
 
         val stateDisabledByPolicy = QSTile.State()
@@ -374,7 +374,7 @@ class QSTileViewImplTest : SysuiTestCase() {
 
         context.orCreateTestableResources.addOverride(
             R.array.tile_states_internet,
-            arrayOf(unavailableString, offString, onString)
+            arrayOf(unavailableString, offString, onString),
         )
 
         tileView.changeState(state)
@@ -473,6 +473,24 @@ class QSTileViewImplTest : SysuiTestCase() {
         tileView.changeState(state)
 
         // THEN the long-press effect resources are set
+        assertThat(tileView.areLongPressEffectPropertiesSet).isTrue()
+    }
+
+    @Test
+    fun onStateChange_fromLongPress_toNoLongPress_whileLongPressRuns_doesNotClearResources() {
+        // GIVEN that the long-press effect has been initialized
+        val state = QSTile.State()
+        state.handlesLongClick = true
+        tileView.changeState(state)
+
+        // WHEN the long-press effect is running
+        kosmos.qsLongPressEffect.setState(QSLongPressEffect.State.RUNNING_FORWARD)
+
+        // WHEN a state changed happens so that the tile no longer handles long-press
+        state.handlesLongClick = false
+        tileView.changeState(state)
+
+        // THEN the long-press effect resources are not cleared
         assertThat(tileView.areLongPressEffectPropertiesSet).isTrue()
     }
 

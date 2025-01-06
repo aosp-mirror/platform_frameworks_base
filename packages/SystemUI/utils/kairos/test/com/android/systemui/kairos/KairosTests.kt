@@ -1,28 +1,10 @@
-/*
- * Copyright (C) 2024 The Android Open Source Project
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
-@file:OptIn(ExperimentalCoroutinesApi::class, ExperimentalFrpApi::class)
-
 package com.android.systemui.kairos
 
 import com.android.systemui.kairos.util.Either
-import com.android.systemui.kairos.util.Left
+import com.android.systemui.kairos.util.Either.Left
+import com.android.systemui.kairos.util.Either.Right
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
-import com.android.systemui.kairos.util.Right
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.map
 import com.android.systemui.kairos.util.maybe
@@ -53,13 +35,15 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
+import org.junit.Assert.fail
 import org.junit.Test
 
+@OptIn(ExperimentalCoroutinesApi::class)
 class KairosTests {
 
     @Test
     fun basic() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Int>()
+        val emitter = network.mutableEvents<Int>()
         var result: Int? = null
         activateSpec(network) { emitter.observe { result = it } }
         runCurrent()
@@ -70,8 +54,8 @@ class KairosTests {
     }
 
     @Test
-    fun basicTFlow() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Int>()
+    fun basicEvents() = runFrpTest { network ->
+        val emitter = network.mutableEvents<Int>()
         println("starting network")
         val result = activateSpecWithResult(network) { emitter.nextDeferred() }
         runCurrent()
@@ -84,9 +68,9 @@ class KairosTests {
     }
 
     @Test
-    fun basicTState() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Int>()
-        val result = activateSpecWithResult(network) { emitter.hold(0).stateChanges.nextDeferred() }
+    fun basicState() = runFrpTest { network ->
+        val emitter = network.mutableEvents<Int>()
+        val result = activateSpecWithResult(network) { emitter.holdState(0).changes.nextDeferred() }
         runCurrent()
 
         emitter.emit(3)
@@ -110,7 +94,7 @@ class KairosTests {
     fun basicTransactional() = runFrpTest { network ->
         var value: Int? = null
         var bSource = 1
-        val emitter = network.mutableTFlow<Unit>()
+        val emitter = network.mutableEvents<Unit>()
         // Sampling this transactional will increment the source count.
         val transactional = transactionally { bSource++ }
         measureTime {
@@ -149,24 +133,26 @@ class KairosTests {
 
     @Test
     fun diamondGraph() = runFrpTest { network ->
-        val flow = network.mutableTFlow<Int>()
-        val outFlow =
+        val flow = network.mutableEvents<Int>()
+        val ouevents =
             activateSpecWithResult(network) {
-                // map TFlow like we map Flow
+                // map Events like we map Flow
                 val left = flow.map { "left" to it }.onEach { println("left: $it") }
                 val right = flow.map { "right" to it }.onEach { println("right: $it") }
 
-                // convert TFlows to TStates so that they can be combined
+                // convert Eventss to States so that they can be combined
                 val combined =
-                    left.hold("left" to 0).combineWith(right.hold("right" to 0)) { l, r -> l to r }
-                combined.stateChanges // get TState changes
+                    left.holdState("left" to 0).combineWith(right.holdState("right" to 0)) { l, r ->
+                        l to r
+                    }
+                combined.changes // get State changes
                     .onEach { println("merged: $it") }
                     .toSharedFlow() // convert back to Flow
             }
         runCurrent()
 
         val results = mutableListOf<Pair<Pair<String, Int>, Pair<String, Int>>>()
-        backgroundScope.launch { outFlow.toCollection(results) }
+        backgroundScope.launch { ouevents.toCollection(results) }
         runCurrent()
 
         flow.emit(1)
@@ -185,19 +171,19 @@ class KairosTests {
     fun staticNetwork() = runFrpTest { network ->
         var finalSum: Int? = null
 
-        val intEmitter = network.mutableTFlow<Int>()
-        val sampleEmitter = network.mutableTFlow<Unit>()
+        val intEmitter = network.mutableEvents<Int>()
+        val sampleEmitter = network.mutableEvents<Unit>()
 
         activateSpecWithResult(network) {
                 val updates = intEmitter.map { a -> { b: Int -> a + b } }
 
                 val sumD =
-                    TStateLoop<Int>().apply {
+                    StateLoop<Int>().apply {
                         loopback =
                             updates
                                 .sample(this) { f, sum -> f(sum) }
                                 .onEach { println("sum update: $it") }
-                                .hold(0)
+                                .holdState(0)
                     }
                 sampleEmitter
                     .onEach { println("sampleEmitter emitted") }
@@ -227,10 +213,10 @@ class KairosTests {
         var wasSold = false
         var currentAmt: Int? = null
 
-        val coin = network.mutableTFlow<Unit>()
+        val coin = network.mutableEvents<Unit>()
         val price = 50
-        val frpSpec = frpSpec {
-            val eSold = TFlowLoop<Unit>()
+        val buildSpec = buildSpec {
+            val eSold = EventsLoop<Unit>()
 
             val eInsert =
                 coin.map {
@@ -250,10 +236,10 @@ class KairosTests {
 
             val eUpdate = eInsert.mergeWith(eReset) { f, g -> { a -> g(f(a)) } }
 
-            val dTotal = TStateLoop<Int>()
-            dTotal.loopback = eUpdate.sample(dTotal) { f, total -> f(total) }.hold(price)
+            val dTotal = StateLoop<Int>()
+            dTotal.loopback = eUpdate.sample(dTotal) { f, total -> f(total) }.holdState(price)
 
-            val eAmt = dTotal.stateChanges
+            val eAmt = dTotal.changes
             val bAmt = transactionally { dTotal.sample() }
             eSold.loopback =
                 coin
@@ -268,7 +254,7 @@ class KairosTests {
             eSold.nextDeferred()
         }
 
-        activateSpec(network) { frpSpec.applySpec() }
+        activateSpec(network) { buildSpec.applySpec() }
 
         runCurrent()
 
@@ -312,8 +298,8 @@ class KairosTests {
 
     @Test
     fun promptCleanup() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Int>()
-        val stopper = network.mutableTFlow<Unit>()
+        val emitter = network.mutableEvents<Int>()
+        val stopper = network.mutableEvents<Unit>()
 
         var result: Int? = null
 
@@ -331,19 +317,19 @@ class KairosTests {
     }
 
     @Test
-    fun switchTFlow() = runFrpTest { network ->
+    fun switchEvents() = runFrpTest { network ->
         var currentSum: Int? = null
 
-        val switchHandler = network.mutableTFlow<Pair<TFlow<Int>, String>>()
-        val aHandler = network.mutableTFlow<Int>()
-        val stopHandler = network.mutableTFlow<Unit>()
-        val bHandler = network.mutableTFlow<Int>()
+        val switchHandler = network.mutableEvents<Pair<Events<Int>, String>>()
+        val aHandler = network.mutableEvents<Int>()
+        val stopHandler = network.mutableEvents<Unit>()
+        val bHandler = network.mutableEvents<Int>()
 
         val sumFlow =
             activateSpecWithResult(network) {
-                val switchE = TFlowLoop<TFlow<Int>>()
+                val switchE = EventsLoop<Events<Int>>()
                 switchE.loopback =
-                    switchHandler.mapStateful { (intFlow, name) ->
+                    switchHandler.mapStateful { (inevents, name) ->
                         println("[onEach] Switching to: $name")
                         val nextSwitch =
                             switchE.skipNext().onEach { println("[onEach] switched-out") }
@@ -351,11 +337,11 @@ class KairosTests {
                             stopHandler
                                 .onEach { println("[onEach] stopped") }
                                 .mergeWith(nextSwitch) { _, b -> b }
-                        intFlow.takeUntil(stopEvent)
+                        inevents.takeUntil(stopEvent)
                     }
 
-                val adderE: TFlow<(Int) -> Int> =
-                    switchE.hold(emptyTFlow).switch().map { a ->
+                val adderE: Events<(Int) -> Int> =
+                    switchE.holdState(emptyEvents).switchEvents().map { a ->
                         println("[onEach] new number $a")
                         ({ sum: Int ->
                             println("$a+$sum=${a + sum}")
@@ -363,13 +349,13 @@ class KairosTests {
                         })
                     }
 
-                val sumD = TStateLoop<Int>()
+                val sumD = StateLoop<Int>()
                 sumD.loopback =
                     adderE
                         .sample(sumD) { f, sum -> f(sum) }
                         .onEach { println("[onEach] writing sum: $it") }
-                        .hold(0)
-                val sumE = sumD.stateChanges
+                        .holdState(0)
+                val sumE = sumD.changes
 
                 sumE.toSharedFlow()
             }
@@ -493,16 +479,16 @@ class KairosTests {
 
     @Test
     fun switchIndirect() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Unit>()
+        val emitter = network.mutableEvents<Unit>()
         activateSpec(network) {
-            emptyTFlow.map { emitter.map { 1 } }.flatten().map { "$it" }.observe()
+            emptyEvents.map { emitter.map { 1 } }.flatten().map { "$it" }.observe()
         }
         runCurrent()
     }
 
     @Test
     fun switchInWithResult() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Unit>()
+        val emitter = network.mutableEvents<Unit>()
         val out =
             activateSpecWithResult(network) {
                 emitter.map { emitter.map { 1 } }.flatten().toSharedFlow()
@@ -518,11 +504,11 @@ class KairosTests {
     fun switchInCompleted() = runFrpTest { network ->
         val outputs = mutableListOf<Int>()
 
-        val switchAH = network.mutableTFlow<Unit>()
-        val intAH = network.mutableTFlow<Int>()
-        val stopEmitter = network.mutableTFlow<Unit>()
+        val switchAH = network.mutableEvents<Unit>()
+        val intAH = network.mutableEvents<Int>()
+        val stopEmitter = network.mutableEvents<Unit>()
 
-        val top = frpSpec {
+        val top = buildSpec {
             val intS = intAH.takeUntil(stopEmitter)
             val switched = switchAH.map { intS }.flatten()
             switched.toSharedFlow()
@@ -554,13 +540,13 @@ class KairosTests {
     }
 
     @Test
-    fun switchTFlow_outerCompletesFirst() = runFrpTest { network ->
+    fun switchEvents_outerCompletesFirst() = runFrpTest { network ->
         var stepResult: Int? = null
 
-        val switchAH = network.mutableTFlow<Unit>()
-        val switchStopEmitter = network.mutableTFlow<Unit>()
-        val intStopEmitter = network.mutableTFlow<Unit>()
-        val intAH = network.mutableTFlow<Int>()
+        val switchAH = network.mutableEvents<Unit>()
+        val switchStopEmitter = network.mutableEvents<Unit>()
+        val intStopEmitter = network.mutableEvents<Unit>()
+        val intAH = network.mutableEvents<Int>()
         val flow =
             activateSpecWithResult(network) {
                 val intS = intAH.takeUntil(intStopEmitter)
@@ -608,8 +594,8 @@ class KairosTests {
     }
 
     @Test
-    fun mapTFlow() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Int>()
+    fun mapEvents() = runFrpTest { network ->
+        val emitter = network.mutableEvents<Int>()
         var stepResult: Int? = null
 
         val flow =
@@ -643,7 +629,7 @@ class KairosTests {
         var pullValue = 0
         val a = transactionally { pullValue }
         val b = transactionally { a.sample() * 2 }
-        val emitter = network.mutableTFlow<Unit>()
+        val emitter = network.mutableEvents<Unit>()
         val flow =
             activateSpecWithResult(network) {
                 val sampleB = emitter.sample(b) { _, b -> b }
@@ -667,14 +653,14 @@ class KairosTests {
     }
 
     @Test
-    fun mapTState() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Int>()
+    fun mapState() = runFrpTest { network ->
+        val emitter = network.mutableEvents<Int>()
         var stepResult: Int? = null
         val flow =
             activateSpecWithResult(network) {
-                val state = emitter.hold(0).map { it + 2 }
+                val state = emitter.holdState(0).map { it + 2 }
                 val stateCurrent = transactionally { state.sample() }
-                val stateChanges = state.stateChanges
+                val stateChanges = state.changes
                 val sampleState = emitter.sample(stateCurrent) { _, b -> b }
                 val merge = stateChanges.mergeWith(sampleState) { a, b -> a + b }
                 merge.toSharedFlow()
@@ -695,14 +681,14 @@ class KairosTests {
 
     @Test
     fun partitionEither() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Either<Int, Int>>()
+        val emitter = network.mutableEvents<Either<Int, Int>>()
         val result =
             activateSpecWithResult(network) {
                 val (l, r) = emitter.partitionEither()
                 val pDiamond =
                     l.map { it * 2 }
                         .mergeWith(r.map { it * -1 }) { _, _ -> error("unexpected coincidence") }
-                pDiamond.hold(null).toStateFlow()
+                pDiamond.holdState(null).toStateFlow()
             }
         runCurrent()
 
@@ -718,15 +704,16 @@ class KairosTests {
     }
 
     @Test
-    fun accumTState() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Int>()
-        val sampler = network.mutableTFlow<Unit>()
+    fun accumState() = runFrpTest { network ->
+        val emitter = network.mutableEvents<Int>()
+        val sampler = network.mutableEvents<Unit>()
         var stepResult: Int? = null
         val flow =
             activateSpecWithResult(network) {
-                val sumState = emitter.map { a -> { b: Int -> a + b } }.fold(0) { f, a -> f(a) }
+                val sumState =
+                    emitter.map { a -> { b: Int -> a + b } }.foldState(0) { f, a -> f(a) }
 
-                sumState.stateChanges
+                sumState.changes
                     .mergeWith(sampler.sample(sumState) { _, sum -> sum }) { _, _ ->
                         error("Unexpected coincidence")
                     }
@@ -750,11 +737,11 @@ class KairosTests {
     }
 
     @Test
-    fun mergeTFlows() = runFrpTest { network ->
-        val first = network.mutableTFlow<Int>()
-        val stopFirst = network.mutableTFlow<Unit>()
-        val second = network.mutableTFlow<Int>()
-        val stopSecond = network.mutableTFlow<Unit>()
+    fun mergeEventss() = runFrpTest { network ->
+        val first = network.mutableEvents<Int>()
+        val stopFirst = network.mutableEvents<Unit>()
+        val second = network.mutableEvents<Int>()
+        val stopSecond = network.mutableEvents<Unit>()
         var stepResult: Int? = null
 
         val flow: SharedFlow<Int>
@@ -831,19 +818,19 @@ class KairosTests {
                 secondEmitDuration: ${secondEmitDuration.toString(DurationUnit.MILLISECONDS, 2)}
                 stopFirstDuration: ${stopFirstDuration.toString(DurationUnit.MILLISECONDS, 2)}
                 testDeadEmitFirstDuration: ${
-                    testDeadEmitFirstDuration.toString(
-                        DurationUnit.MILLISECONDS,
-                        2,
-                    )
-                }
+        testDeadEmitFirstDuration.toString(
+          DurationUnit.MILLISECONDS,
+          2,
+        )
+      }
                 secondEmitDuration2: ${secondEmitDuration2.toString(DurationUnit.MILLISECONDS, 2)}
                 stopSecondDuration: ${stopSecondDuration.toString(DurationUnit.MILLISECONDS, 2)}
                 testDeadEmitSecondDuration: ${
-                    testDeadEmitSecondDuration.toString(
-                        DurationUnit.MILLISECONDS,
-                        2,
-                    )
-                }
+        testDeadEmitSecondDuration.toString(
+          DurationUnit.MILLISECONDS,
+          2,
+        )
+      }
             """
                 .trimIndent()
         )
@@ -851,10 +838,10 @@ class KairosTests {
 
     @Test
     fun sampleCancel() = runFrpTest { network ->
-        val updater = network.mutableTFlow<Int>()
-        val stopUpdater = network.mutableTFlow<Unit>()
-        val sampler = network.mutableTFlow<Unit>()
-        val stopSampler = network.mutableTFlow<Unit>()
+        val updater = network.mutableEvents<Int>()
+        val stopUpdater = network.mutableEvents<Unit>()
+        val sampler = network.mutableEvents<Unit>()
+        val stopSampler = network.mutableEvents<Unit>()
         var stepResult: Int? = null
         val flow =
             activateSpecWithResult(network) {
@@ -862,7 +849,7 @@ class KairosTests {
                 val samplerS = sampler.takeUntil(stopSamplerFirst)
                 val stopUpdaterFirst = stopUpdater
                 val updaterS = updater.takeUntil(stopUpdaterFirst)
-                val sampledS = samplerS.sample(updaterS.hold(0)) { _, b -> b }
+                val sampledS = samplerS.sample(updaterS.holdState(0)) { _, b -> b }
                 sampledS.toSharedFlow()
             }
 
@@ -893,35 +880,35 @@ class KairosTests {
 
     @Test
     fun combineStates_differentUpstreams() = runFrpTest { network ->
-        val a = network.mutableTFlow<Int>()
-        val b = network.mutableTFlow<Int>()
+        val a = network.mutableEvents<Int>()
+        val b = network.mutableEvents<Int>()
         var observed: Pair<Int, Int>? = null
-        val tState =
+        val state =
             activateSpecWithResult(network) {
-                val state = combine(a.hold(0), b.hold(0)) { a, b -> Pair(a, b) }
-                state.stateChanges.observe { observed = it }
+                val state = combine(a.holdState(0), b.holdState(0)) { a, b -> Pair(a, b) }
+                state.changes.observe { observed = it }
                 state
             }
-        assertEquals(0 to 0, network.transact { tState.sample() })
+        assertEquals(0 to 0, network.transact { state.sample() })
         assertEquals(null, observed)
         a.emit(5)
         assertEquals(5 to 0, observed)
-        assertEquals(5 to 0, network.transact { tState.sample() })
+        assertEquals(5 to 0, network.transact { state.sample() })
         b.emit(3)
         assertEquals(5 to 3, observed)
-        assertEquals(5 to 3, network.transact { tState.sample() })
+        assertEquals(5 to 3, network.transact { state.sample() })
     }
 
     @Test
     fun sampleCombinedStates() = runFrpTest { network ->
-        val updater = network.mutableTFlow<Int>()
-        val emitter = network.mutableTFlow<Unit>()
+        val updater = network.mutableEvents<Int>()
+        val emitter = network.mutableEvents<Unit>()
 
         val result =
             activateSpecWithResult(network) {
-                val bA = updater.map { it * 2 }.hold(0)
-                val bB = updater.hold(0)
-                val combineD: TState<Pair<Int, Int>> = bA.combineWith(bB) { a, b -> a to b }
+                val bA = updater.map { it * 2 }.holdState(0)
+                val bB = updater.holdState(0)
+                val combineD: State<Pair<Int, Int>> = bA.combineWith(bB) { a, b -> a to b }
                 val sampleS = emitter.sample(combineD) { _, b -> b }
                 sampleS.nextDeferred()
             }
@@ -942,13 +929,13 @@ class KairosTests {
 
     @Test
     fun switchMapPromptly() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Unit>()
+        val emitter = network.mutableEvents<Unit>()
         val result =
             activateSpecWithResult(network) {
                 emitter
                     .map { emitter.map { 1 }.map { it + 1 }.map { it * 2 } }
-                    .hold(emptyTFlow)
-                    .switchPromptly()
+                    .holdState(emptyEvents)
+                    .switchEventsPromptly()
                     .nextDeferred()
             }
         runCurrent()
@@ -962,8 +949,8 @@ class KairosTests {
 
     @Test
     fun switchDeeper() = runFrpTest { network ->
-        val emitter = network.mutableTFlow<Unit>()
-        val e2 = network.mutableTFlow<Unit>()
+        val emitter = network.mutableEvents<Unit>()
+        val e2 = network.mutableEvents<Unit>()
         val result =
             activateSpecWithResult(network) {
                 val tres =
@@ -988,14 +975,14 @@ class KairosTests {
 
     @Test
     fun recursionBasic() = runFrpTest { network ->
-        val add1 = network.mutableTFlow<Unit>()
-        val sub1 = network.mutableTFlow<Unit>()
+        val add1 = network.mutableEvents<Unit>()
+        val sub1 = network.mutableEvents<Unit>()
         val stepResult: StateFlow<Int> =
             activateSpecWithResult(network) {
-                val dSum = TStateLoop<Int>()
+                val dSum = StateLoop<Int>()
                 val sAdd1 = add1.sample(dSum) { _, sum -> sum + 1 }
                 val sMinus1 = sub1.sample(dSum) { _, sum -> sum - 1 }
-                dSum.loopback = sAdd1.mergeWith(sMinus1) { a, _ -> a }.hold(0)
+                dSum.loopback = sAdd1.mergeWith(sMinus1) { a, _ -> a }.holdState(0)
                 dSum.toStateFlow()
             }
         runCurrent()
@@ -1017,16 +1004,17 @@ class KairosTests {
     }
 
     @Test
-    fun recursiveTState() = runFrpTest { network ->
-        val e = network.mutableTFlow<Unit>()
+    fun recursiveState() = runFrpTest { network ->
+        val e = network.mutableEvents<Unit>()
         var changes = 0
         val state =
             activateSpecWithResult(network) {
-                val s = TFlowLoop<Unit>()
-                val deferred = s.map { tStateOf(null) }
-                val e3 = e.map { tStateOf(Unit) }
-                val flattened = e3.mergeWith(deferred) { a, _ -> a }.hold(tStateOf(null)).flatten()
-                s.loopback = emptyTFlow
+                val s = EventsLoop<Unit>()
+                val deferred = s.map { stateOf(null) }
+                val e3 = e.map { stateOf(Unit) }
+                val flattened =
+                    e3.mergeWith(deferred) { a, _ -> a }.holdState(stateOf(null)).flatten()
+                s.loopback = emptyEvents
                 flattened.toStateFlow()
             }
 
@@ -1036,7 +1024,7 @@ class KairosTests {
 
     @Test
     fun fanOut() = runFrpTest { network ->
-        val e = network.mutableTFlow<Map<String, Int>>()
+        val e = network.mutableEvents<Map<String, Int>>()
         val (fooFlow, barFlow) =
             activateSpecWithResult(network) {
                 val selector = e.groupByKey()
@@ -1057,16 +1045,30 @@ class KairosTests {
     }
 
     @Test
+    fun propagateError() {
+        try {
+            runFrpTest { network ->
+                runCurrent()
+                try {
+                    network.transact<Unit> { error("message") }
+                    fail("caller did not throw exception")
+                } catch (_: IllegalStateException) {}
+            }
+            fail("scheduler did not throw exception")
+        } catch (_: IllegalStateException) {}
+    }
+
+    @Test
     fun fanOutLateSubscribe() = runFrpTest { network ->
-        val e = network.mutableTFlow<Map<String, Int>>()
+        val e = network.mutableEvents<Map<String, Int>>()
         val barFlow =
             activateSpecWithResult(network) {
                 val selector = e.groupByKey()
                 selector
                     .eventsForKey("foo")
                     .map { selector.eventsForKey("bar") }
-                    .hold(emptyTFlow)
-                    .switchPromptly()
+                    .holdState(emptyEvents)
+                    .switchEventsPromptly()
                     .toSharedFlow()
             }
         val stateFlow = barFlow.stateIn(backgroundScope, SharingStarted.Eagerly, null)
@@ -1081,9 +1083,9 @@ class KairosTests {
     }
 
     @Test
-    fun inputFlowCompleted() = runFrpTest { network ->
+    fun inputEventsCompleted() = runFrpTest { network ->
         val results = mutableListOf<Int>()
-        val e = network.mutableTFlow<Int>()
+        val e = network.mutableEvents<Int>()
         activateSpec(network) { e.nextOnly().observe { results.add(it) } }
         runCurrent()
 
@@ -1099,49 +1101,59 @@ class KairosTests {
 
     @Test
     fun fanOutThenMergeIncrementally() = runFrpTest { network ->
-        // A tflow of group updates, where a group is a tflow of child updates, where a child is a
+        // A events of group updates, where a group is a events of child updates, where a child is a
         // stateflow
-        val e = network.mutableTFlow<Map<Int, Maybe<TFlow<Map<Int, Maybe<StateFlow<String>>>>>>>()
+        val e = network.mutableEvents<Map<Int, Maybe<Events<Map<Int, Maybe<StateFlow<String>>>>>>>()
         println("fanOutMergeInc START")
         val state =
             activateSpecWithResult(network) {
-                // Convert nested Flows to nested TFlow/TState
-                val emitter: TFlow<Map<Int, Maybe<TFlow<Map<Int, Maybe<TState<String>>>>>>> =
+                // Convert nested Flows to nested Events/State
+                val emitter: Events<Map<Int, Maybe<Events<Map<Int, Maybe<State<String>>>>>>> =
                     e.mapBuild { m ->
                         m.mapValues { (_, mFlow) ->
                             mFlow.map {
                                 it.mapBuild { m2 ->
+                                    println("m2: $m2")
                                     m2.mapValues { (_, mState) ->
-                                        mState.map { stateFlow -> stateFlow.toTState() }
+                                        mState.map { stateFlow -> stateFlow.toState() }
                                     }
                                 }
                             }
                         }
                     }
-                // Accumulate all of our updates into a single TState
-                val accState: TState<Map<Int, Map<Int, String>>> =
+                // Accumulate all of our updates into a single State
+                val accState: State<Map<Int, Map<Int, String>>> =
                     emitter
                         .mapStateful {
-                            changeMap: Map<Int, Maybe<TFlow<Map<Int, Maybe<TState<String>>>>>> ->
+                            changeMap: Map<Int, Maybe<Events<Map<Int, Maybe<State<String>>>>>> ->
                             changeMap.mapValues { (groupId, mGroupChanges) ->
                                 mGroupChanges.map {
-                                    groupChanges: TFlow<Map<Int, Maybe<TState<String>>>> ->
+                                    groupChanges: Events<Map<Int, Maybe<State<String>>>> ->
                                     // New group
                                     val childChangeById = groupChanges.groupByKey()
-                                    val map: TFlow<Map<Int, Maybe<TFlow<Maybe<TState<String>>>>>> =
+                                    val map: Events<Map<Int, Maybe<Events<Maybe<State<String>>>>>> =
                                         groupChanges.mapStateful {
-                                            gChangeMap: Map<Int, Maybe<TState<String>>> ->
+                                            gChangeMap: Map<Int, Maybe<State<String>>> ->
+                                            println("gChangeMap: $gChangeMap")
                                             gChangeMap.mapValues { (childId, mChild) ->
-                                                mChild.map { child: TState<String> ->
+                                                mChild.map { child: State<String> ->
                                                     println("new child $childId in the house")
                                                     // New child
                                                     val eRemoved =
                                                         childChangeById
                                                             .eventsForKey(childId)
                                                             .filter { it === None }
-                                                            .nextOnly()
+                                                            .onEach {
+                                                                println(
+                                                                    "removing? (groupId=$groupId, childId=$childId)"
+                                                                )
+                                                            }
+                                                            .nextOnly(
+                                                                name =
+                                                                    "eRemoved(groupId=$groupId, childId=$childId)"
+                                                            )
 
-                                                    val addChild: TFlow<Maybe<TState<String>>> =
+                                                    val addChild: Events<Maybe<State<String>>> =
                                                         now.map { mChild }
                                                             .onEach {
                                                                 println(
@@ -1149,7 +1161,7 @@ class KairosTests {
                                                                 )
                                                             }
 
-                                                    val removeChild: TFlow<Maybe<TState<String>>> =
+                                                    val removeChild: Events<Maybe<State<String>>> =
                                                         eRemoved
                                                             .onEach {
                                                                 println(
@@ -1158,24 +1170,29 @@ class KairosTests {
                                                             }
                                                             .map { none() }
 
-                                                    addChild.mergeWith(removeChild) { _, _ ->
+                                                    addChild.mergeWith(
+                                                        removeChild,
+                                                        name =
+                                                            "childUpdatesMerged(groupId=$groupId, childId=$childId)",
+                                                    ) { _, _ ->
                                                         error("unexpected coincidence")
                                                     }
                                                 }
                                             }
                                         }
-                                    val mergeIncrementally: TFlow<Map<Int, Maybe<TState<String>>>> =
+                                    val mergeIncrementally: Events<Map<Int, Maybe<State<String>>>> =
                                         map.onEach { println("merge patch: $it") }
-                                            .mergeIncrementallyPromptly()
+                                            .mergeIncrementallyPromptly(name = "mergeIncrementally")
                                     mergeIncrementally
-                                        .onEach { println("patch: $it") }
-                                        .foldMapIncrementally()
-                                        .flatMap { it.combineValues() }
+                                        .onEach { println("foldmap patch: $it") }
+                                        .foldStateMapIncrementally()
+                                        .flatMap { it.combine() }
                                 }
                             }
                         }
-                        .foldMapIncrementally()
-                        .flatMap { it.combineValues() }
+                        .onEach { println("fold patch: $it") }
+                        .foldStateMapIncrementally()
+                        .flatMap { it.combine() }
 
                 accState.toStateFlow()
             }
@@ -1183,7 +1200,7 @@ class KairosTests {
 
         assertEquals(emptyMap(), state.value)
 
-        val emitter2 = network.mutableTFlow<Map<Int, Maybe<StateFlow<String>>>>()
+        val emitter2 = network.mutableEvents<Map<Int, Maybe<StateFlow<String>>>>()
         println()
         println("init outer 0")
         e.emit(mapOf(0 to just(emitter2.onEach { println("emitter2 emit: $it") })))
@@ -1218,6 +1235,10 @@ class KairosTests {
 
         assertEquals(mapOf(0 to mapOf(10 to "(2, 10)")), state.value)
 
+        // LogEnabled = true
+
+        println("batch update")
+
         // batch update
         emitter2.emit(
             mapOf(
@@ -1233,13 +1254,13 @@ class KairosTests {
 
     @Test
     fun applyLatestNetworkChanges() = runFrpTest { network ->
-        val newCount = network.mutableTFlow<FrpSpec<Flow<Int>>>()
+        val newCount = network.mutableEvents<BuildSpec<Flow<Int>>>()
         val flowOfFlows: Flow<Flow<Int>> =
             activateSpecWithResult(network) { newCount.applyLatestSpec().toSharedFlow() }
         runCurrent()
 
-        val incCount = network.mutableTFlow<Unit>()
-        fun newFlow(): FrpSpec<SharedFlow<Int>> = frpSpec {
+        val incCount = network.mutableEvents<Unit>()
+        fun newFlow(): BuildSpec<SharedFlow<Int>> = buildSpec {
             launchEffect {
                 try {
                     println("new flow!")
@@ -1248,16 +1269,16 @@ class KairosTests {
                     println("cancelling old flow")
                 }
             }
-            lateinit var count: TState<Int>
+            lateinit var count: State<Int>
             count =
                 incCount
                     .onEach { println("incrementing ${count.sample()}") }
-                    .fold(0) { _, c -> c + 1 }
-            count.stateChanges.toSharedFlow()
+                    .foldState(0) { _, c -> c + 1 }
+            count.changes.toSharedFlow()
         }
 
         var outerCount = 0
-        val lastFlows: StateFlow<Pair<StateFlow<Int?>, StateFlow<Int?>>> =
+        val laseventss: StateFlow<Pair<StateFlow<Int?>, StateFlow<Int?>>> =
             flowOfFlows
                 .map { it.stateIn(backgroundScope, SharingStarted.Eagerly, null) }
                 .pairwise(MutableStateFlow(null))
@@ -1275,18 +1296,18 @@ class KairosTests {
 
         assertEquals(1, outerCount)
         //        assertEquals(1, incCount.subscriptionCount)
-        assertNull(lastFlows.value.second.value)
+        assertNull(laseventss.value.second.value)
 
         incCount.emit(Unit)
         runCurrent()
 
         println("checking")
-        assertEquals(1, lastFlows.value.second.value)
+        assertEquals(1, laseventss.value.second.value)
 
         incCount.emit(Unit)
         runCurrent()
 
-        assertEquals(2, lastFlows.value.second.value)
+        assertEquals(2, laseventss.value.second.value)
 
         newCount.emit(newFlow())
         runCurrent()
@@ -1294,14 +1315,34 @@ class KairosTests {
         runCurrent()
 
         // verify old flow is not getting updates
-        assertEquals(2, lastFlows.value.first.value)
+        assertEquals(2, laseventss.value.first.value)
         // but the new one is
-        assertEquals(1, lastFlows.value.second.value)
+        assertEquals(1, laseventss.value.second.value)
+    }
+
+    @Test
+    fun buildScope_stateAccumulation() = runFrpTest { network ->
+        val input = network.mutableEvents<Unit>()
+        var observedCount: Int? = null
+        activateSpec(network) {
+            val (c, j) = asyncScope { input.foldState(0) { _, x -> x + 1 } }
+            deferredBuildScopeAction { c.get().observe { observedCount = it } }
+        }
+        runCurrent()
+        assertEquals(0, observedCount)
+
+        input.emit(Unit)
+        runCurrent()
+        assertEquals(1, observedCount)
+
+        input.emit(Unit)
+        runCurrent()
+        assertEquals(2, observedCount)
     }
 
     @Test
     fun effect() = runFrpTest { network ->
-        val input = network.mutableTFlow<Unit>()
+        val input = network.mutableEvents<Unit>()
         var effectRunning = false
         var count = 0
         activateSpec(network) {
@@ -1313,7 +1354,7 @@ class KairosTests {
                     effectRunning = false
                 }
             }
-            merge(emptyTFlow, input.nextOnly()).observe {
+            merge(emptyEvents, input.nextOnly()).observe {
                 count++
                 j.cancel()
             }
@@ -1335,23 +1376,93 @@ class KairosTests {
         assertEquals(1, count)
     }
 
+    @Test
+    fun observeEffect_disposeHandle() = runFrpTest { network ->
+        val input = network.mutableEvents<Unit>()
+        val stopper = network.mutableEvents<Unit>()
+        var runningCount = 0
+        val specJob =
+            activateSpec(network) {
+                val handle =
+                    input.observe {
+                        effectCoroutineScope.launch {
+                            runningCount++
+                            awaitClose { runningCount-- }
+                        }
+                    }
+                stopper.nextOnly().observe { handle.dispose() }
+            }
+        runCurrent()
+        assertEquals(0, runningCount)
+
+        input.emit(Unit)
+        assertEquals(1, runningCount)
+
+        input.emit(Unit)
+        assertEquals(2, runningCount)
+
+        stopper.emit(Unit)
+        assertEquals(2, runningCount)
+
+        input.emit(Unit)
+        assertEquals(2, runningCount)
+
+        specJob.cancel()
+        runCurrent()
+        assertEquals(0, runningCount)
+    }
+
+    @Test
+    fun observeEffect_takeUntil() = runFrpTest { network ->
+        val input = network.mutableEvents<Unit>()
+        val stopper = network.mutableEvents<Unit>()
+        var runningCount = 0
+        val specJob =
+            activateSpec(network) {
+                input.takeUntil(stopper).observe {
+                    effectCoroutineScope.launch {
+                        runningCount++
+                        awaitClose { runningCount-- }
+                    }
+                }
+            }
+        runCurrent()
+        assertEquals(0, runningCount)
+
+        input.emit(Unit)
+        assertEquals(1, runningCount)
+
+        input.emit(Unit)
+        assertEquals(2, runningCount)
+
+        stopper.emit(Unit)
+        assertEquals(2, runningCount)
+
+        input.emit(Unit)
+        assertEquals(2, runningCount)
+
+        specJob.cancel()
+        runCurrent()
+        assertEquals(0, runningCount)
+    }
+
     private fun runFrpTest(
         timeout: Duration = 3.seconds,
-        block: suspend TestScope.(FrpNetwork) -> Unit,
+        block: suspend TestScope.(KairosNetwork) -> Unit,
     ) {
         runTest(timeout = timeout) {
-            val network = backgroundScope.newFrpNetwork()
+            val network = backgroundScope.launchKairosNetwork()
             runCurrent()
             block(network)
         }
     }
 
-    private fun TestScope.activateSpec(network: FrpNetwork, spec: FrpSpec<*>) =
+    private fun TestScope.activateSpec(network: KairosNetwork, spec: BuildSpec<*>) =
         backgroundScope.launch { network.activateSpec(spec) }
 
     private suspend fun <R> TestScope.activateSpecWithResult(
-        network: FrpNetwork,
-        spec: FrpSpec<R>,
+        network: KairosNetwork,
+        spec: BuildSpec<R>,
     ): R =
         CompletableDeferred<R>()
             .apply { activateSpec(network) { complete(spec.applySpec()) } }

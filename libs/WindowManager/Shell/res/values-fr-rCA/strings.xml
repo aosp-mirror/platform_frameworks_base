@@ -74,7 +74,7 @@
     <string name="bubbles_app_settings" msgid="3617224938701566416">"Paramètres <xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>"</string>
     <string name="bubble_dismiss_text" msgid="8816558050659478158">"Ignorer la bulle"</string>
     <string name="bubble_fullscreen_text" msgid="1006758103218086231">"Passez en plein écran"</string>
-    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ne pas afficher les conversations dans des bulles"</string>
+    <string name="bubbles_dont_bubble_conversation" msgid="310000317885712693">"Ne pas afficher la conversation dans une bulle"</string>
     <string name="bubbles_user_education_title" msgid="2112319053732691899">"Clavarder en utilisant des bulles"</string>
     <string name="bubbles_user_education_description" msgid="4215862563054175407">"Les nouvelles conversations s\'affichent sous forme d\'icônes flottantes (de bulles). Touchez une bulle pour l\'ouvrir. Faites-la glisser pour la déplacer."</string>
     <string name="bubbles_user_education_manage_title" msgid="7042699946735628035">"Paramètres des bulles"</string>
@@ -125,18 +125,18 @@
     <string name="select_text" msgid="5139083974039906583">"Sélectionner"</string>
     <string name="screenshot_text" msgid="1477704010087786671">"Capture d\'écran"</string>
     <string name="open_in_browser_text" msgid="9181692926376072904">"Ouvrir dans le navigateur"</string>
+    <string name="open_in_app_text" msgid="2874590745116268525">"Ouvrir dans l\'appli"</string>
     <string name="new_window_text" msgid="6318648868380652280">"Nouvelle fenêtre"</string>
     <string name="manage_windows_text" msgid="5567366688493093920">"Gérer les fenêtres"</string>
+    <string name="change_aspect_ratio_text" msgid="9104456064548212806">"Modifier les proportions"</string>
     <string name="close_text" msgid="4986518933445178928">"Fermer"</string>
     <string name="collapse_menu_text" msgid="7515008122450342029">"Fermer le menu"</string>
     <string name="desktop_mode_app_header_chip_text" msgid="6366422614991687237">"Ouvrir le menu"</string>
     <string name="desktop_mode_maximize_menu_maximize_text" msgid="3275717276171114411">"Agrandir l\'écran"</string>
-    <string name="desktop_mode_maximize_menu_snap_text" msgid="2065251022783880154">"Aligner l\'écran"</string>
+    <string name="desktop_mode_maximize_menu_snap_text" msgid="5673738963174074006">"Redimensionner"</string>
     <string name="desktop_mode_non_resizable_snap_text" msgid="3771776422751387878">"Impossible de déplacer l\'appli ici"</string>
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_button_text (559492223133829481) -->
-    <skip />
-    <!-- no translation found for desktop_mode_maximize_menu_immersive_restore_button_text (4900114367354709257) -->
-    <skip />
+    <string name="desktop_mode_maximize_menu_immersive_button_text" msgid="559492223133829481">"Immersif"</string>
+    <string name="desktop_mode_maximize_menu_immersive_restore_button_text" msgid="4900114367354709257">"Restaurer"</string>
     <string name="desktop_mode_maximize_menu_maximize_button_text" msgid="3090199175564175845">"Agrandir"</string>
     <string name="desktop_mode_maximize_menu_restore_button_text" msgid="4234449220944704387">"Restaurer"</string>
     <string name="desktop_mode_maximize_menu_snap_left_button_text" msgid="8077452201179893424">"Épingler à gauche"</string>
@@ -146,4 +146,5 @@
     <string name="open_by_default_dialog_in_app_text" msgid="6978022419634199806">"Dans l\'appli"</string>
     <string name="open_by_default_dialog_in_browser_text" msgid="8042769465958497081">"Dans votre navigateur"</string>
     <string name="open_by_default_dialog_dismiss_button_text" msgid="3487238795534582291">"OK"</string>
+    <string name="desktop_windowing_app_to_web_education_text" msgid="1599668769538703570">"Ouvrez rapidement des applis dans votre navigateur ici"</string>
 </resources>

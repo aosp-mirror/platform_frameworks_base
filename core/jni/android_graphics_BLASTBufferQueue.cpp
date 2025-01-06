@@ -87,6 +87,38 @@ private:
     jobject mTransactionHangObject;
 };
 
+struct {
+    jmethodID onWaitForBufferRelease;
+} gWaitForBufferReleaseCallback;
+
+class WaitForBufferReleaseCallbackWrapper
+      : public LightRefBase<WaitForBufferReleaseCallbackWrapper> {
+public:
+    explicit WaitForBufferReleaseCallbackWrapper(JNIEnv* env, jobject jobject) {
+        env->GetJavaVM(&mVm);
+        mWaitForBufferReleaseObject = env->NewGlobalRef(jobject);
+        LOG_ALWAYS_FATAL_IF(!mWaitForBufferReleaseObject, "Failed to make global ref");
+    }
+
+    ~WaitForBufferReleaseCallbackWrapper() {
+        if (mWaitForBufferReleaseObject != nullptr) {
+            getenv(mVm)->DeleteGlobalRef(mWaitForBufferReleaseObject);
+            mWaitForBufferReleaseObject = nullptr;
+        }
+    }
+
+    void onWaitForBufferRelease() {
+        JNIEnv* env = getenv(mVm);
+        getenv(mVm)->CallVoidMethod(mWaitForBufferReleaseObject,
+                                    gWaitForBufferReleaseCallback.onWaitForBufferRelease);
+        DieIfException(env, "Uncaught exception in WaitForBufferReleaseCallback.");
+    }
+
+private:
+    JavaVM* mVm;
+    jobject mWaitForBufferReleaseObject;
+};
+
 static jlong nativeCreate(JNIEnv* env, jclass clazz, jstring jName,
                           jboolean updateDestinationFrame) {
     ScopedUtfChars name(env, jName);
@@ -215,6 +247,18 @@ static void nativeSetApplyToken(JNIEnv* env, jclass clazz, jlong ptr, jobject ap
     return queue->setApplyToken(std::move(token));
 }
 
+static void nativeSetWaitForBufferReleaseCallback(JNIEnv* env, jclass clazz, jlong ptr,
+                                                  jobject waitForBufferReleaseCallback) {
+    sp<BLASTBufferQueue> queue = reinterpret_cast<BLASTBufferQueue*>(ptr);
+    if (waitForBufferReleaseCallback == nullptr) {
+        queue->setWaitForBufferReleaseCallback(nullptr);
+    } else {
+        sp<WaitForBufferReleaseCallbackWrapper> wrapper =
+                new WaitForBufferReleaseCallbackWrapper{env, waitForBufferReleaseCallback};
+        queue->setWaitForBufferReleaseCallback([wrapper]() { wrapper->onWaitForBufferRelease(); });
+    }
+}
+
 static const JNINativeMethod gMethods[] = {
         /* name, signature, funcPtr */
         // clang-format off
@@ -234,6 +278,9 @@ static const JNINativeMethod gMethods[] = {
          "(JLandroid/graphics/BLASTBufferQueue$TransactionHangCallback;)V",
          (void*)nativeSetTransactionHangCallback},
         {"nativeSetApplyToken", "(JLandroid/os/IBinder;)V", (void*)nativeSetApplyToken},
+        {"nativeSetWaitForBufferReleaseCallback",
+         "(JLandroid/graphics/BLASTBufferQueue$WaitForBufferReleaseCallback;)V",
+         (void*)nativeSetWaitForBufferReleaseCallback},
         // clang-format on
 };
 
@@ -255,6 +302,10 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     gTransactionHangCallback.onTransactionHang =
             GetMethodIDOrDie(env, transactionHangClass, "onTransactionHang",
                              "(Ljava/lang/String;)V");
+    jclass waitForBufferReleaseClass =
+            FindClassOrDie(env, "android/graphics/BLASTBufferQueue$WaitForBufferReleaseCallback");
+    gWaitForBufferReleaseCallback.onWaitForBufferRelease =
+            GetMethodIDOrDie(env, waitForBufferReleaseClass, "onWaitForBufferRelease", "()V");
 
     return 0;
 }

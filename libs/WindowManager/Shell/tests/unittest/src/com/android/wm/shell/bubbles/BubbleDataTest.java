@@ -47,6 +47,7 @@ import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.logging.testing.UiEventLoggerFake;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.bubbles.BubbleData.TimeSource;
 import com.android.wm.shell.common.ShellExecutor;
@@ -102,6 +103,7 @@ public class BubbleDataTest extends ShellTestCase {
 
     private BubbleData mBubbleData;
     private TestableBubblePositioner mPositioner;
+    private UiEventLoggerFake mUiEventLogger;
 
     @Mock
     private TimeSource mTimeSource;
@@ -111,8 +113,6 @@ public class BubbleDataTest extends ShellTestCase {
     private PendingIntent mExpandIntent;
     @Mock
     private PendingIntent mDeleteIntent;
-    @Mock
-    private BubbleLogger mBubbleLogger;
     @Mock
     private BubbleEducationController mEducationController;
     @Mock
@@ -196,10 +196,12 @@ public class BubbleDataTest extends ShellTestCase {
                 mock(Icon.class),
                 mMainExecutor, mBgExecutor);
 
+        mUiEventLogger = new UiEventLoggerFake();
+
         mPositioner = new TestableBubblePositioner(mContext,
                 mContext.getSystemService(WindowManager.class));
-        mBubbleData = new BubbleData(getContext(), mBubbleLogger, mPositioner, mEducationController,
-                mMainExecutor, mBgExecutor);
+        mBubbleData = new BubbleData(getContext(), new BubbleLogger(mUiEventLogger), mPositioner,
+                mEducationController, mMainExecutor, mBgExecutor);
 
         // Used by BubbleData to set lastAccessedTime
         when(mTimeSource.currentTimeMillis()).thenReturn(1000L);
@@ -294,6 +296,82 @@ public class BubbleDataTest extends ShellTestCase {
 
         BubbleBarUpdate bubbleBarUpdate = update.toBubbleBarUpdate();
         assertThat(bubbleBarUpdate.removedBubbles).isEmpty();
+    }
+
+    @Test
+    public void testRemoveBubbleFromBubbleBar_notifCancelled_logEvent() {
+        mPositioner.setShowingInBubbleBar(true);
+
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_NOTIF_CANCEL);
+        assertThat(mUiEventLogger.numLogs()).isEqualTo(1);
+        assertThat(mUiEventLogger.eventId(0)).isEqualTo(
+                BubbleLogger.Event.BUBBLE_BAR_BUBBLE_REMOVED_CANCELED.getId());
+    }
+
+    @Test
+    public void testRemoveBubbleFromBubbleBar_taskFinished_logEvent() {
+        mPositioner.setShowingInBubbleBar(true);
+
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_TASK_FINISHED);
+        assertThat(mUiEventLogger.numLogs()).isEqualTo(1);
+        assertThat(mUiEventLogger.eventId(0)).isEqualTo(
+                BubbleLogger.Event.BUBBLE_BAR_BUBBLE_ACTIVITY_FINISH.getId());
+    }
+
+    @Test
+    public void testRemoveBubbleFromBubbleBar_notifBlocked_logEvent() {
+        mPositioner.setShowingInBubbleBar(true);
+
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_BLOCKED);
+        assertThat(mUiEventLogger.numLogs()).isEqualTo(1);
+        assertThat(mUiEventLogger.eventId(0)).isEqualTo(
+                BubbleLogger.Event.BUBBLE_BAR_BUBBLE_REMOVED_BLOCKED.getId());
+    }
+
+    @Test
+    public void testRemoveBubbleFromBubbleBar_noLongerBubble_logEvent() {
+        mPositioner.setShowingInBubbleBar(true);
+
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_NO_LONGER_BUBBLE);
+        assertThat(mUiEventLogger.numLogs()).isEqualTo(1);
+        assertThat(mUiEventLogger.eventId(0)).isEqualTo(
+                BubbleLogger.Event.BUBBLE_BAR_BUBBLE_REMOVED_BLOCKED.getId());
+    }
+
+    @Test
+    public void testRemoveBubbleFromBubbleBar_addToOverflow_logEvent() {
+        mPositioner.setShowingInBubbleBar(true);
+
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_AGED);
+        assertThat(mUiEventLogger.numLogs()).isEqualTo(1);
+        assertThat(mUiEventLogger.eventId(0)).isEqualTo(
+                BubbleLogger.Event.BUBBLE_BAR_OVERFLOW_ADD_AGED.getId());
+    }
+
+    @Test
+    public void testRemoveBubble_notifCancelled_noLog() {
+        mPositioner.setShowingInBubbleBar(false);
+
+        sendUpdatedEntryAtTime(mEntryA1, 1000);
+        mBubbleData.setListener(mListener);
+
+        mBubbleData.dismissBubbleWithKey(mEntryA1.getKey(), Bubbles.DISMISS_BLOCKED);
+        assertThat(mUiEventLogger.numLogs()).isEqualTo(0);
     }
 
     @Test

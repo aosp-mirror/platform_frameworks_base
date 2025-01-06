@@ -32,6 +32,12 @@ import java.util.Objects;
  * {@hide}
  */
 public class ProfilerInfo implements Parcelable {
+    // Regular profiling which provides different modes of profiling at some performance cost.
+    public static final int PROFILE_TYPE_REGULAR = 0;
+
+    // Low overhead profiling that captures a simple sliding window of past events.
+    public static final int PROFILE_TYPE_LOW_OVERHEAD = 1;
+
     // Version of the profiler output
     public static final int OUTPUT_VERSION_DEFAULT = 1;
     // CLOCK_TYPE_DEFAULT chooses the default used by ART. ART uses CLOCK_TYPE_DUAL by default (see

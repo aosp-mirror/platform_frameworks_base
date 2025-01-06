@@ -74,8 +74,7 @@ public final class DragResizeWindowGeometry {
         mFineTaskCorners = new TaskCorners(mTaskSize, fineCornerSize, disabledEdge);
 
         // Save touch areas for each edge.
-        mTaskEdges = new TaskEdges(mTaskSize, mResizeHandleEdgeOutset, mResizeHandleEdgeInset,
-                mDisabledEdge);
+        mTaskEdges = new TaskEdges(mTaskSize, mResizeHandleEdgeOutset, mDisabledEdge);
     }
 
     /**
@@ -169,7 +168,10 @@ public final class DragResizeWindowGeometry {
         return (e.getSource() & SOURCE_TOUCHSCREEN) == SOURCE_TOUCHSCREEN;
     }
 
-    static boolean isEdgeResizePermitted(@NonNull MotionEvent e) {
+    /**
+     * Whether resizing a window from the edge is permitted based on the motion event.
+     */
+    public static boolean isEdgeResizePermitted(@NonNull MotionEvent e) {
         if (ENABLE_WINDOWING_EDGE_DRAG_RESIZE.isTrue()) {
             return e.getToolType(0) == MotionEvent.TOOL_TYPE_STYLUS
                     || e.getToolType(0) == MotionEvent.TOOL_TYPE_MOUSE
@@ -459,7 +461,7 @@ public final class DragResizeWindowGeometry {
         private final @NonNull DisabledEdge mDisabledEdge;
 
         private TaskEdges(@NonNull Size taskSize, int resizeHandleThickness,
-                int resizeHandleEdgeInset, DisabledEdge disabledEdge) {
+                DisabledEdge disabledEdge) {
             // Save touch areas for each edge.
             mDisabledEdge = disabledEdge;
             // Save touch areas for each edge.
@@ -471,16 +473,16 @@ public final class DragResizeWindowGeometry {
             mLeftEdgeBounds = new Rect(
                     -resizeHandleThickness,
                     0,
-                    resizeHandleEdgeInset,
+                    resizeHandleThickness,
                     taskSize.getHeight());
             mRightEdgeBounds = new Rect(
-                    taskSize.getWidth() - resizeHandleEdgeInset,
+                    taskSize.getWidth() - resizeHandleThickness,
                     0,
                     taskSize.getWidth() + resizeHandleThickness,
                     taskSize.getHeight());
             mBottomEdgeBounds = new Rect(
                     -resizeHandleThickness,
-                    taskSize.getHeight() - resizeHandleEdgeInset,
+                    taskSize.getHeight() - resizeHandleThickness,
                     taskSize.getWidth() + resizeHandleThickness,
                     taskSize.getHeight() + resizeHandleThickness);
 

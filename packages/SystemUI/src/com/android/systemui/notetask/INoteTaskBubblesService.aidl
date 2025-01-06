@@ -16,6 +16,7 @@
 
 package com.android.systemui.notetask;
 
+import com.android.systemui.notetask.NoteTaskBubbleExpandBehavior;
 import android.content.Intent;
 import android.graphics.drawable.Icon;
 import android.os.UserHandle;
@@ -25,5 +26,6 @@ interface INoteTaskBubblesService {
 
     boolean areBubblesAvailable();
 
-    void showOrHideAppBubble(in Intent intent, in UserHandle userHandle, in Icon icon);
+    void showOrHideAppBubble(in Intent intent, in UserHandle userHandle, in Icon icon,
+     in NoteTaskBubbleExpandBehavior bubbleExpandBehavior);
 }

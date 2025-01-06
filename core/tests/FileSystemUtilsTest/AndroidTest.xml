@@ -22,6 +22,7 @@
         <option name="cleanup-apks" value="true" />
         <option name="test-file-name" value="embedded_native_libs_test_app.apk" />
         <option name="test-file-name" value="extract_native_libs_test_app.apk" />
+        <option name="test-file-name" value="app_with_4kb_elf.apk" />
     </target_preparer>
 
     <test class="com.android.compatibility.common.tradefed.testtype.JarHostTest" >

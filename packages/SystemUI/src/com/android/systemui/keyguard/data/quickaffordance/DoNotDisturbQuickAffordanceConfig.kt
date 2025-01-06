@@ -27,7 +27,6 @@ import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
 import android.service.notification.ZenModeConfig
 import android.util.Log
 import com.android.settingslib.notification.modes.EnableZenModeDialog
-import com.android.settingslib.notification.modes.ZenMode
 import com.android.settingslib.notification.modes.ZenModeDialogMetricsLogger
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.coroutine.ChannelExt.trySendWithFailureLogging
@@ -40,6 +39,7 @@ import com.android.systemui.keyguard.shared.quickaffordance.ActivationState
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.ZenModeController
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.util.settings.SecureSettings
@@ -75,7 +75,7 @@ constructor(
 
     @Inject
     constructor(
-        context: Context,
+        @ShadeDisplayAware context: Context,
         controller: ZenModeController,
         interactor: ZenModeInteractor,
         secureSettings: SecureSettings,
@@ -97,15 +97,6 @@ constructor(
     private var zenMode: Int = 0
     private var oldIsAvailable = false
     private var settingsValue: Int = 0
-
-    private val dndMode: StateFlow<ZenMode?> by lazy {
-        ModesUi.assertInNewMode()
-        interactor.dndMode.stateIn(
-            scope = backgroundScope,
-            started = SharingStarted.Eagerly,
-            initialValue = null,
-        )
-    }
 
     private val isAvailable: StateFlow<Boolean> by lazy {
         ModesUi.assertInNewMode()
@@ -145,7 +136,7 @@ constructor(
 
     override val lockScreenState: Flow<KeyguardQuickAffordanceConfig.LockScreenState> =
         if (ModesUi.isEnabled) {
-            combine(isAvailable, dndMode) { isAvailable, dndMode ->
+            combine(isAvailable, interactor.dndMode) { isAvailable, dndMode ->
                 if (!isAvailable) {
                     KeyguardQuickAffordanceConfig.LockScreenState.Hidden
                 } else if (dndMode?.isActive == true) {
@@ -219,16 +210,16 @@ constructor(
     ): KeyguardQuickAffordanceConfig.OnTriggeredResult {
         return if (ModesUi.isEnabled) {
             if (!isAvailable.value) {
-                KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
             } else {
-                val dnd = dndMode.value
+                val dnd = interactor.dndMode.value
                 if (dnd == null) {
                     Log.wtf(TAG, "Triggered DND but it's null!?")
-                    return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                    return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
                 }
                 if (dnd.isActive) {
                     interactor.deactivateMode(dnd)
-                    return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                    return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
                 } else {
                     if (interactor.shouldAskForZenDuration(dnd)) {
                         // NOTE: The dialog handles turning on the mode itself.
@@ -238,16 +229,16 @@ constructor(
                         )
                     } else {
                         interactor.activateMode(dnd)
-                        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                        return KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
                     }
                 }
             }
         } else {
             when {
-                !oldIsAvailable -> KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                !oldIsAvailable -> KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
                 zenMode != ZEN_MODE_OFF -> {
                     controller.setZen(ZEN_MODE_OFF, null, TAG)
-                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
                 }
 
                 settingsValue == ZEN_DURATION_PROMPT ->
@@ -258,12 +249,12 @@ constructor(
 
                 settingsValue == ZEN_DURATION_FOREVER -> {
                     controller.setZen(ZEN_MODE_IMPORTANT_INTERRUPTIONS, null, TAG)
-                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
                 }
 
                 else -> {
                     controller.setZen(ZEN_MODE_IMPORTANT_INTERRUPTIONS, conditionUri, TAG)
-                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled
+                    KeyguardQuickAffordanceConfig.OnTriggeredResult.Handled(false)
                 }
             }
         }

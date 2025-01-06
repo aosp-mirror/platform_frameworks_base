@@ -34,6 +34,11 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
+import com.android.systemui.keyguard.shared.model.DismissAction
+import com.android.systemui.keyguard.shared.model.KeyguardDone
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.res.R
@@ -210,6 +215,25 @@ class BouncerSceneContentViewModelTest : SysuiTestCase() {
 
             kosmos.fakeAuthenticationRepository.setAuthenticationMethod(Pattern)
             assertThat(isFoldSplitRequired).isTrue()
+        }
+
+    @Test
+    fun onUiDestroyed_clearsPendingDismissAction() =
+        kosmos.runTest {
+            val dismissAction by collectLastValue(fakeKeyguardRepository.dismissAction)
+            fakeKeyguardRepository.setDismissAction(
+                DismissAction.RunImmediately(
+                    onDismissAction = { KeyguardDone.IMMEDIATE },
+                    onCancelAction = {},
+                    message = "",
+                    willAnimateOnLockscreen = true,
+                )
+            )
+            assertThat(dismissAction).isNotEqualTo(DismissAction.None)
+
+            underTest.onUiDestroyed()
+
+            assertThat(dismissAction).isEqualTo(DismissAction.None)
         }
 
     private fun authMethodsToTest(): List<AuthenticationMethodModel> {

@@ -66,7 +66,6 @@ constructor(
             colors = communalColors,
             content = communalContent,
             viewModel = contentViewModel,
-            modifier = modifier.horizontalNestedScrollToScene(),
         )
     }
 }

@@ -857,13 +857,45 @@ public class AccessibilityNodeInfo implements Parcelable {
      * <p>
      * The data can be retrieved from the {@code Bundle} returned by {@link #getExtras()} using this
      * string as a key for {@link Bundle#getParcelableArray(String, Class)}. The
-     * {@link android.graphics.RectF} will be null for characters that either do not exist or are
-     * off the screen.
+     * {@link android.graphics.RectF} will be {@code null} for characters that either do not exist
+     * or are off the screen.
+     * <p>
+     * Note that character locations returned are modified by changes in display magnification.
      *
      * {@see #refreshWithExtraData(String, Bundle)}
      */
     public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_KEY =
             "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_KEY";
+
+    /**
+     * Key used to request and locate extra data for text character location in
+     * window coordinates. This key requests that an array of
+     * {@link android.graphics.RectF}s be added to the extras. This request is made
+     * with {@link #refreshWithExtraData(String, Bundle)}. The arguments taken by
+     * this request are two integers:
+     * {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_START_INDEX} and
+     * {@link #EXTRA_DATA_TEXT_CHARACTER_LOCATION_ARG_LENGTH}. The starting index
+     * must be valid inside the CharSequence returned by {@link #getText()}, and
+     * the length must be positive.
+     * <p>
+     * Providers may advertise that they support text characters in window coordinates using
+     * {@link #setAvailableExtraData(List)}. Services may check if an implementation supports text
+     * characters in window coordinates with {@link #getAvailableExtraData()}.
+     * <p>
+     * The data can be retrieved from the {@code Bundle} returned by
+     * {@link #getExtras()} using this string as a key for
+     * {@link Bundle#getParcelableArray(String, Class)}. The
+     * {@link android.graphics.RectF} will be {@code null} for characters that either do
+     * not exist or are outside of the window bounds.
+     * <p>
+     * Note that character locations in window bounds are not modified by
+     * changes in display magnification.
+     *
+     * {@see #refreshWithExtraData(String, Bundle)}
+     */
+    @FlaggedApi(Flags.FLAG_A11Y_CHARACTER_IN_WINDOW_API)
+    public static final String EXTRA_DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY =
+            "android.view.accessibility.extra.DATA_TEXT_CHARACTER_LOCATION_IN_WINDOW_KEY";
 
     /**
      * Integer argument specifying the start index of the requested text location data. Must be
@@ -3834,8 +3866,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Sets the view for which the view represented by this info serves as a
      * label for accessibility purposes.
      *
+     * @deprecated Use {@link #addLabeledBy(View)} on the labeled node instead,
+     * since {@link #getLabeledByList()} and {@link #getLabeledBy()} on the
+     * labeled node are not automatically populated when this method is used.
+     *
      * @param labeled The view for which this info serves as a label.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_ANI_LABEL_FOR_APIS)
+    @Deprecated
     public void setLabelFor(View labeled) {
         setLabelFor(labeled, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
@@ -3856,9 +3894,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
+     * @deprecated Use {@link #addLabeledBy(View)} on the labeled node instead,
+     * since {@link #getLabeledByList()} and {@link #getLabeledBy()} on the
+     * labeled node are not automatically populated when this method is used.
+     *
      * @param root The root whose virtual descendant serves as a label.
      * @param virtualDescendantId The id of the virtual descendant.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_ANI_LABEL_FOR_APIS)
+    @Deprecated
     public void setLabelFor(View root, int virtualDescendantId) {
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
@@ -3870,8 +3914,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Gets the node info for which the view represented by this info serves as
      * a label for accessibility purposes.
      *
+     * @deprecated Use {@link #getLabeledByList()} on the labeled node instead,
+     * since calling {@link #addLabeledBy(View)} or {@link #addLabeledBy(View, int)}
+     * on the labeled node do not automatically provide that node from this method.
+     *
      * @return The labeled info.
      */
+    @FlaggedApi(Flags.FLAG_DEPRECATE_ANI_LABEL_FOR_APIS)
+    @Deprecated
     public AccessibilityNodeInfo getLabelFor() {
         enforceSealed();
         return getNodeForAccessibilityId(mConnectionId, mWindowId, mLabelForId);
@@ -4008,8 +4058,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Sets the view which serves as the label of the view represented by
      * this info for accessibility purposes.
      *
+     * @deprecated Use {@link #addLabeledBy(View)} or {@link #removeLabeledBy(View)} instead.
+     *
      * @param label The view that labels this node's source.
      */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    @Deprecated
     public void setLabeledBy(View label) {
         setLabeledBy(label, AccessibilityNodeProvider.HOST_VIEW_ID);
     }
@@ -4030,9 +4084,14 @@ public class AccessibilityNodeInfo implements Parcelable {
      *   This class is made immutable before being delivered to an AccessibilityService.
      * </p>
      *
+     * @deprecated Use {@link #addLabeledBy(View, int)} or {@link #removeLabeledBy(View, int)}
+     * instead.
+     *
      * @param root The root whose virtual descendant labels this node's source.
      * @param virtualDescendantId The id of the virtual descendant.
      */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    @Deprecated
     public void setLabeledBy(View root, int virtualDescendantId) {
         enforceNotSealed();
         final int rootAccessibilityViewId = (root != null)
@@ -4054,8 +4113,12 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Gets the node info which serves as the label of the view represented by
      * this info for accessibility purposes.
      *
+     * @deprecated Use {@link #getLabeledByList()} instead.
+     *
      * @return The label.
      */
+    @FlaggedApi(Flags.FLAG_SUPPORT_MULTIPLE_LABELEDBY)
+    @Deprecated
     public AccessibilityNodeInfo getLabeledBy() {
         enforceSealed();
         return getNodeForAccessibilityId(mConnectionId, mWindowId, mLabeledById);
@@ -5460,26 +5523,6 @@ public class AccessibilityNodeInfo implements Parcelable {
         }
     }
 
-    private static String getExpandedStateSymbolicName(int state) {
-        if (Flags.a11yExpansionStateApi()) {
-            switch (state) {
-                case EXPANDED_STATE_UNDEFINED:
-                    return "EXPANDED_STATE_UNDEFINED";
-                case EXPANDED_STATE_COLLAPSED:
-                    return "EXPANDED_STATE_COLLAPSED";
-                case EXPANDED_STATE_PARTIAL:
-                    return "EXPANDED_STATE_PARTIAL";
-                case EXPANDED_STATE_FULL:
-                    return "EXPANDED_STATE_FULL";
-                default:
-                    throw new IllegalArgumentException("Unknown expanded state: " + state);
-            }
-        } else {
-            // TODO(b/362782158) Remove when flag is removed.
-            return "";
-        }
-    }
-
     private static boolean canPerformRequestOverConnection(int connectionId,
             int windowId, long accessibilityNodeId) {
         final boolean hasWindowId = windowId != AccessibilityWindowInfo.UNDEFINED_WINDOW_ID;
@@ -5573,20 +5616,12 @@ public class AccessibilityNodeInfo implements Parcelable {
         builder.append("; maxTextLength: ").append(mMaxTextLength);
         builder.append("; stateDescription: ").append(mStateDescription);
         builder.append("; contentDescription: ").append(mContentDescription);
-        if (Flags.supplementalDescription()) {
-            builder.append("; supplementalDescription: ").append(mSupplementalDescription);
-        }
         builder.append("; tooltipText: ").append(mTooltipText);
         builder.append("; containerTitle: ").append(mContainerTitle);
         builder.append("; viewIdResName: ").append(mViewIdResourceName);
         builder.append("; uniqueId: ").append(mUniqueId);
-        builder.append("; expandedState: ").append(getExpandedStateSymbolicName(mExpandedState));
-
         builder.append("; checkable: ").append(isCheckable());
         builder.append("; checked: ").append(isChecked());
-        if (Flags.a11yIsRequiredApi()) {
-            builder.append("; required: ").append(isFieldRequired());
-        }
         builder.append("; focusable: ").append(isFocusable());
         builder.append("; focused: ").append(isFocused());
         builder.append("; selected: ").append(isSelected());
@@ -6505,6 +6540,15 @@ public class AccessibilityNodeInfo implements Parcelable {
      * Class with information if a node is a range.
      */
     public static final class RangeInfo {
+        /** @hide */
+        @IntDef(prefix = { "RANGE_TYPE_" }, value = {
+                RANGE_TYPE_INT,
+                RANGE_TYPE_FLOAT,
+                RANGE_TYPE_PERCENT,
+                RANGE_TYPE_INDETERMINATE
+        })
+        @Retention(RetentionPolicy.SOURCE)
+        public @interface RangeType {}
 
         /** Range type: integer. */
         public static final int RANGE_TYPE_INT = 0;
@@ -6516,15 +6560,23 @@ public class AccessibilityNodeInfo implements Parcelable {
         /**
          * Range type: indeterminate.
          *
-         * A {@link RangeInfo} type used to represent a node which may typically expose range
-         * information but is presently in an indeterminate state, such as a {@link
-         * android.widget.ProgressBar} representing a loading operation of unknown duration.
          * When using this type, the {@code min}, {@code max}, and {@code current} values used to
-         * construct an instance may be ignored. It is recommended to use {@code Float.NaN} for
-         * these values.
+         * construct an instance may be ignored.
+         *
+         *  @see #INDETERMINATE
          */
         @FlaggedApi(Flags.FLAG_INDETERMINATE_RANGE_INFO)
         public static final int RANGE_TYPE_INDETERMINATE = 3;
+
+        /**
+         * A {@link RangeInfo} type used to represent a node which may typically expose range
+         * information but is presently in an indeterminate state, such as a {@link
+         * android.widget.ProgressBar} representing a loading operation of unknown duration.
+         */
+        @NonNull
+        @FlaggedApi(Flags.FLAG_INDETERMINATE_RANGE_INFO)
+        public static final RangeInfo INDETERMINATE = new RangeInfo(RANGE_TYPE_INDETERMINATE, 0.0f,
+                0.0f, 0.0f);
 
         private int mType;
         private float mMin;
@@ -6545,7 +6597,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @param current The current value.
          */
         @Deprecated
-        public static RangeInfo obtain(int type, float min, float max, float current) {
+        public static RangeInfo obtain(@RangeType int type, float min, float max, float current) {
             return new RangeInfo(type, min, max, current);
         }
 
@@ -6559,7 +6611,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          *            maximum.
          * @param current The current value.
          */
-        public RangeInfo(int type, float min, float max, float current) {
+        public RangeInfo(@RangeType int type, float min, float max, float current) {
             mType = type;
             mMin = min;
             mMax = max;
@@ -6575,6 +6627,7 @@ public class AccessibilityNodeInfo implements Parcelable {
          * @see #RANGE_TYPE_FLOAT
          * @see #RANGE_TYPE_PERCENT
          */
+        @RangeType
         public int getType() {
             return mType;
         }

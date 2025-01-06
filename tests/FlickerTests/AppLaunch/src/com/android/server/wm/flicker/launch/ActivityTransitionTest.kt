@@ -35,7 +35,7 @@ import org.junit.runners.Parameterized
 /**
  * Test the back and forward transition between 2 activities.
  *
- * To run this test: `atest FlickerTestsAppLaunch:ActivitiesTransitionTest`
+ * To run this test: `atest FlickerTestsAppLaunch:ActivityTransitionTest`
  *
  * Actions:
  * ```

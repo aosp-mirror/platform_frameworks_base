@@ -219,6 +219,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
     @Test
     fun testAppTransitionFinished_doesNotShowManagedProfileIcon() {
+        whenever(userManager.isProfile(anyInt())).thenReturn(true)
         whenever(userManager.getUserStatusBarIconResId(anyInt())).thenReturn(0 /* ID_NULL */)
         whenever(keyguardStateController.isShowing).thenReturn(false)
         statusBarPolicy.appTransitionFinished(0)
@@ -232,6 +233,7 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
 
     @Test
     fun testAppTransitionFinished_showsManagedProfileIcon() {
+        whenever(userManager.isProfile(anyInt())).thenReturn(true)
         whenever(userManager.getUserStatusBarIconResId(anyInt())).thenReturn(100)
         whenever(keyguardStateController.isShowing).thenReturn(false)
         statusBarPolicy.appTransitionFinished(0)

@@ -22,21 +22,21 @@ import android.app.IActivityTaskManager
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.screenshot.data.model.DisplayContentModel
 import com.android.systemui.screenshot.data.model.SystemUiState
-import com.android.systemui.screenshot.proxy.SystemUiProxy
+import com.android.systemui.screenshot.proxy.ScreenshotProxy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.withContext
 
 /**
  * Implements DisplayTaskRepository using [IActivityTaskManager], along with [ProfileTypeRepository]
- * and [SystemUiProxy].
+ * and [ScreenshotProxy].
  */
 @SuppressLint("MissingPermission")
 class DisplayContentRepositoryImpl
 @Inject
 constructor(
     private val atmService: IActivityTaskManager,
-    private val systemUiProxy: SystemUiProxy,
+    private val screenshotProxy: ScreenshotProxy,
     @Background private val background: CoroutineDispatcher,
 ) : DisplayContentRepository {
 
@@ -53,8 +53,8 @@ constructor(
     ): DisplayContentModel {
         return DisplayContentModel(
             displayId,
-            SystemUiState(systemUiProxy.isNotificationShadeExpanded()),
-            rootTasks
+            SystemUiState(screenshotProxy.isNotificationShadeExpanded()),
+            rootTasks,
         )
     }
 }

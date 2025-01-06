@@ -16,16 +16,20 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.internal.util.Key
-import com.android.systemui.kairos.internal.util.associateByIndexTo
+import com.android.systemui.kairos.internal.store.MapK
+import com.android.systemui.kairos.internal.store.MutableArrayMapK
+import com.android.systemui.kairos.internal.store.MutableMapK
+import com.android.systemui.kairos.internal.store.SingletonMapK
+import com.android.systemui.kairos.internal.store.StoreEntry
+import com.android.systemui.kairos.internal.store.asArrayHolder
+import com.android.systemui.kairos.internal.store.asSingle
+import com.android.systemui.kairos.internal.store.singleOf
 import com.android.systemui.kairos.internal.util.hashString
-import com.android.systemui.kairos.internal.util.mapParallel
-import com.android.systemui.kairos.internal.util.mapValuesNotNullParallelTo
-import com.android.systemui.kairos.util.Just
-import com.android.systemui.kairos.util.Left
+import com.android.systemui.kairos.internal.util.logDuration
+import com.android.systemui.kairos.internal.util.logLn
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
-import com.android.systemui.kairos.util.Right
+import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.These
 import com.android.systemui.kairos.util.flatMap
 import com.android.systemui.kairos.util.getMaybe
@@ -33,49 +37,51 @@ import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.maybeThat
 import com.android.systemui.kairos.util.maybeThis
 import com.android.systemui.kairos.util.merge
-import com.android.systemui.kairos.util.orElseGet
-import com.android.systemui.kairos.util.partitionEithers
+import com.android.systemui.kairos.util.orError
 import com.android.systemui.kairos.util.these
-import java.util.TreeMap
-import kotlinx.coroutines.coroutineScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.withLock
 
-internal class MuxDeferredNode<K : Any, V>(
-    lifecycle: MuxLifecycle<Map<K, V>>,
-    val spec: MuxActivator<Map<K, V>>,
-) : MuxNode<K, V, Map<K, V>>(lifecycle), Key<Map<K, V>> {
+internal class MuxDeferredNode<W, K, V>(
+    val name: String?,
+    lifecycle: MuxLifecycle<W, K, V>,
+    val spec: MuxActivator<W, K, V>,
+    factory: MutableMapK.Factory<W, K>,
+) : MuxNode<W, K, V>(lifecycle, factory) {
 
     val schedulable = Schedulable.M(this)
+    var patches: NodeConnection<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>? = null
+    var patchData: Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>? = null
 
-    @Volatile var patches: NodeConnection<Map<K, Maybe<TFlowImpl<V>>>>? = null
-    @Volatile var patchData: Map<K, Maybe<TFlowImpl<V>>>? = null
-
-    override fun hasCurrentValueLocked(transactionStore: TransactionStore): Boolean =
-        transactionStore.contains(this)
-
-    override suspend fun hasCurrentValue(transactionStore: TransactionStore): Boolean =
-        mutex.withLock { hasCurrentValueLocked(transactionStore) }
-
-    override suspend fun visit(evalScope: EvalScope) {
-        val result = upstreamData.toMap()
-        upstreamData.clear()
-        val scheduleDownstream = result.isNotEmpty()
-        val compactDownstream = depthTracker.isDirty()
-        if (scheduleDownstream || compactDownstream) {
-            coroutineScope {
-                mutex.withLock {
-                    if (compactDownstream) {
+    override fun visit(logIndent: Int, evalScope: EvalScope) {
+        check(epoch < evalScope.epoch) { "node unexpectedly visited multiple times in transaction" }
+        logDuration(logIndent, "MuxDeferred[$name].visit") {
+            val scheduleDownstream: Boolean
+            val result: MapK<W, K, PullNode<V>>
+            logDuration("copying upstream data", false) {
+                scheduleDownstream = upstreamData.isNotEmpty()
+                result = upstreamData.readOnlyCopy()
+                upstreamData.clear()
+            }
+            if (name != null) {
+                logLn("[${this@MuxDeferredNode}] result = $result")
+            }
+            val compactDownstream = depthTracker.isDirty()
+            if (scheduleDownstream || compactDownstream) {
+                if (compactDownstream) {
+                    logDuration("compactDownstream", false) {
                         depthTracker.applyChanges(
-                            coroutineScope = this,
                             evalScope.scheduler,
                             downstreamSet,
                             muxNode = this@MuxDeferredNode,
                         )
                     }
-                    if (scheduleDownstream) {
-                        evalScope.setResult(this@MuxDeferredNode, result)
-                        if (!scheduleAll(downstreamSet, evalScope)) {
+                }
+                if (scheduleDownstream) {
+                    logDuration("scheduleDownstream") {
+                        if (name != null) {
+                            logLn("[${this@MuxDeferredNode}] scheduling")
+                        }
+                        transactionCache.put(evalScope, result)
+                        if (!scheduleAll(currentLogIndent, downstreamSet, evalScope)) {
                             evalScope.scheduleDeactivation(this@MuxDeferredNode)
                         }
                     }
@@ -84,26 +90,26 @@ internal class MuxDeferredNode<K : Any, V>(
         }
     }
 
-    override suspend fun getPushEvent(evalScope: EvalScope): Maybe<Map<K, V>> =
-        evalScope.getCurrentValue(key = this)
+    override fun getPushEvent(logIndent: Int, evalScope: EvalScope): MuxResult<W, K, V> =
+        logDuration(logIndent, "MuxDeferred.getPushEvent") {
+            transactionCache.getCurrentValue(evalScope).also {
+                if (name != null) {
+                    logLn("[${this@MuxDeferredNode}] getPushEvent = $it")
+                }
+            }
+        }
 
-    private suspend fun compactIfNeeded(evalScope: EvalScope) {
+    private fun compactIfNeeded(evalScope: EvalScope) {
         depthTracker.propagateChanges(evalScope.compactor, this)
     }
 
-    override suspend fun doDeactivate() {
+    override fun doDeactivate() {
         // Update lifecycle
-        lifecycle.mutex.withLock {
-            if (lifecycle.lifecycleState !is MuxLifecycleState.Active) return@doDeactivate
-            lifecycle.lifecycleState = MuxLifecycleState.Inactive(spec)
-        }
+        if (lifecycle.lifecycleState !is MuxLifecycleState.Active) return@doDeactivate
+        lifecycle.lifecycleState = MuxLifecycleState.Inactive(spec)
         // Process branch nodes
-        coroutineScope {
-            switchedIn.values.forEach { branchNode ->
-                branchNode.upstream.let {
-                    launch { it.removeDownstreamAndDeactivateIfNeeded(branchNode.schedulable) }
-                }
-            }
+        switchedIn.forEach { (_, branchNode) ->
+            branchNode.upstream.removeDownstreamAndDeactivateIfNeeded(branchNode.schedulable)
         }
         // Process patch node
         patches?.removeDownstreamAndDeactivateIfNeeded(schedulable)
@@ -112,362 +118,343 @@ internal class MuxDeferredNode<K : Any, V>(
     // MOVE phase
     //  - concurrent moves may be occurring, but no more evals. all depth recalculations are
     //    deferred to the end of this phase.
-    suspend fun performMove(evalScope: EvalScope) {
+    fun performMove(logIndent: Int, evalScope: EvalScope) {
+        if (name != null) {
+            logLn(logIndent, "[${this@MuxDeferredNode}] performMove (patchData = $patchData)")
+        }
+
         val patch = patchData ?: return
         patchData = null
 
-        // TODO: this logic is very similar to what's in MuxPromptMoving, maybe turn into an inline
-        //  fun?
+        // TODO: this logic is very similar to what's in MuxPrompt, maybe turn into an inline fun?
 
         // We have a patch, process additions/updates and removals
-        val (adds, removes) =
-            patch
-                .asSequence()
-                .map { (k, newUpstream: Maybe<TFlowImpl<V>>) ->
-                    when (newUpstream) {
-                        is Just -> Left(k to newUpstream.value)
-                        None -> Right(k)
-                    }
-                }
-                .partitionEithers()
+        val adds = mutableListOf<Pair<K, EventsImpl<V>>>()
+        val removes = mutableListOf<K>()
+        patch.forEach { (k, newUpstream) ->
+            when (newUpstream) {
+                is Just -> adds.add(k to newUpstream.value)
+                None -> removes.add(k)
+            }
+        }
 
         val severed = mutableListOf<NodeConnection<*>>()
 
-        coroutineScope {
-            // remove and sever
-            removes.forEach { k ->
-                switchedIn.remove(k)?.let { branchNode: MuxBranchNode<K, V> ->
-                    val conn = branchNode.upstream
-                    severed.add(conn)
-                    launch { conn.removeDownstream(downstream = branchNode.schedulable) }
-                    depthTracker.removeDirectUpstream(conn.depthTracker.snapshotDirectDepth)
-                }
+        // remove and sever
+        removes.forEach { k ->
+            switchedIn.remove(k)?.let { branchNode: BranchNode ->
+                val conn = branchNode.upstream
+                severed.add(conn)
+                conn.removeDownstream(downstream = branchNode.schedulable)
+                depthTracker.removeDirectUpstream(conn.depthTracker.snapshotDirectDepth)
             }
-
-            // add or replace
-            adds
-                .mapParallel { (k, newUpstream: TFlowImpl<V>) ->
-                    val branchNode = MuxBranchNode(this@MuxDeferredNode, k)
-                    k to
-                        newUpstream.activate(evalScope, branchNode.schedulable)?.let { (conn, _) ->
-                            branchNode.apply { upstream = conn }
-                        }
-                }
-                .forEach { (k, newBranch: MuxBranchNode<K, V>?) ->
-                    // remove old and sever, if present
-                    switchedIn.remove(k)?.let { branchNode ->
-                        val conn = branchNode.upstream
-                        severed.add(conn)
-                        launch { conn.removeDownstream(downstream = branchNode.schedulable) }
-                        depthTracker.removeDirectUpstream(conn.depthTracker.snapshotDirectDepth)
-                    }
-
-                    // add new
-                    newBranch?.let {
-                        switchedIn[k] = newBranch
-                        val branchDepthTracker = newBranch.upstream.depthTracker
-                        if (branchDepthTracker.snapshotIsDirect) {
-                            depthTracker.addDirectUpstream(
-                                oldDepth = null,
-                                newDepth = branchDepthTracker.snapshotDirectDepth,
-                            )
-                        } else {
-                            depthTracker.addIndirectUpstream(
-                                oldDepth = null,
-                                newDepth = branchDepthTracker.snapshotIndirectDepth,
-                            )
-                            depthTracker.updateIndirectRoots(
-                                additions = branchDepthTracker.snapshotIndirectRoots,
-                                butNot = this@MuxDeferredNode,
-                            )
-                        }
-                    }
-                }
         }
 
-        coroutineScope {
-            for (severedNode in severed) {
-                launch { severedNode.scheduleDeactivationIfNeeded(evalScope) }
+        // add or replace
+        adds.forEach { (k, newUpstream: EventsImpl<V>) ->
+            // remove old and sever, if present
+            switchedIn.remove(k)?.let { branchNode ->
+                val conn = branchNode.upstream
+                severed.add(conn)
+                conn.removeDownstream(downstream = branchNode.schedulable)
+                depthTracker.removeDirectUpstream(conn.depthTracker.snapshotDirectDepth)
             }
+
+            // add new
+            val newBranch = BranchNode(k)
+            newUpstream.activate(evalScope, newBranch.schedulable)?.let { (conn, _) ->
+                newBranch.upstream = conn
+                switchedIn[k] = newBranch
+                val branchDepthTracker = newBranch.upstream.depthTracker
+                if (branchDepthTracker.snapshotIsDirect) {
+                    depthTracker.addDirectUpstream(
+                        oldDepth = null,
+                        newDepth = branchDepthTracker.snapshotDirectDepth,
+                    )
+                } else {
+                    depthTracker.addIndirectUpstream(
+                        oldDepth = null,
+                        newDepth = branchDepthTracker.snapshotIndirectDepth,
+                    )
+                    depthTracker.updateIndirectRoots(
+                        additions = branchDepthTracker.snapshotIndirectRoots,
+                        butNot = this@MuxDeferredNode,
+                    )
+                }
+            }
+        }
+
+        for (severedNode in severed) {
+            severedNode.scheduleDeactivationIfNeeded(evalScope)
         }
 
         compactIfNeeded(evalScope)
     }
 
-    suspend fun removeDirectPatchNode(scheduler: Scheduler) {
-        mutex.withLock {
-            if (
-                depthTracker.removeIndirectUpstream(depth = 0) or
-                    depthTracker.setIsIndirectRoot(false)
-            ) {
-                depthTracker.schedule(scheduler, this)
-            }
-            patches = null
+    fun removeDirectPatchNode(scheduler: Scheduler) {
+        if (
+            depthTracker.removeIndirectUpstream(depth = 0) or depthTracker.setIsIndirectRoot(false)
+        ) {
+            depthTracker.schedule(scheduler, this)
         }
+        patches = null
     }
 
-    suspend fun removeIndirectPatchNode(
+    fun removeIndirectPatchNode(
         scheduler: Scheduler,
         depth: Int,
-        indirectSet: Set<MuxDeferredNode<*, *>>,
+        indirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) {
         // indirectly connected patches forward the indirectSet
-        mutex.withLock {
-            if (
-                depthTracker.updateIndirectRoots(removals = indirectSet) or
-                    depthTracker.removeIndirectUpstream(depth)
-            ) {
-                depthTracker.schedule(scheduler, this)
-            }
-            patches = null
+        if (
+            depthTracker.updateIndirectRoots(removals = indirectSet) or
+                depthTracker.removeIndirectUpstream(depth)
+        ) {
+            depthTracker.schedule(scheduler, this)
         }
+        patches = null
     }
 
-    suspend fun moveIndirectPatchNodeToDirect(
+    fun moveIndirectPatchNodeToDirect(
         scheduler: Scheduler,
         oldIndirectDepth: Int,
-        oldIndirectSet: Set<MuxDeferredNode<*, *>>,
+        oldIndirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) {
         // directly connected patches are stored as an indirect singleton set of the patchNode
-        mutex.withLock {
-            if (
-                depthTracker.updateIndirectRoots(removals = oldIndirectSet) or
-                    depthTracker.removeIndirectUpstream(oldIndirectDepth) or
-                    depthTracker.setIsIndirectRoot(true)
-            ) {
-                depthTracker.schedule(scheduler, this)
-            }
+        if (
+            depthTracker.updateIndirectRoots(removals = oldIndirectSet) or
+                depthTracker.removeIndirectUpstream(oldIndirectDepth) or
+                depthTracker.setIsIndirectRoot(true)
+        ) {
+            depthTracker.schedule(scheduler, this)
         }
     }
 
-    suspend fun moveDirectPatchNodeToIndirect(
+    fun moveDirectPatchNodeToIndirect(
         scheduler: Scheduler,
         newIndirectDepth: Int,
-        newIndirectSet: Set<MuxDeferredNode<*, *>>,
+        newIndirectSet: Set<MuxDeferredNode<*, *, *>>,
     ) {
         // indirectly connected patches forward the indirectSet
-        mutex.withLock {
-            if (
-                depthTracker.setIsIndirectRoot(false) or
-                    depthTracker.updateIndirectRoots(additions = newIndirectSet, butNot = this) or
-                    depthTracker.addIndirectUpstream(oldDepth = null, newDepth = newIndirectDepth)
-            ) {
-                depthTracker.schedule(scheduler, this)
-            }
+        if (
+            depthTracker.setIsIndirectRoot(false) or
+                depthTracker.updateIndirectRoots(additions = newIndirectSet, butNot = this) or
+                depthTracker.addIndirectUpstream(oldDepth = null, newDepth = newIndirectDepth)
+        ) {
+            depthTracker.schedule(scheduler, this)
         }
     }
 
-    suspend fun adjustIndirectPatchNode(
+    fun adjustIndirectPatchNode(
         scheduler: Scheduler,
         oldDepth: Int,
         newDepth: Int,
-        removals: Set<MuxDeferredNode<*, *>>,
-        additions: Set<MuxDeferredNode<*, *>>,
+        removals: Set<MuxDeferredNode<*, *, *>>,
+        additions: Set<MuxDeferredNode<*, *, *>>,
     ) {
         // indirectly connected patches forward the indirectSet
-        mutex.withLock {
-            if (
-                depthTracker.updateIndirectRoots(
-                    additions = additions,
-                    removals = removals,
-                    butNot = this,
-                ) or depthTracker.addIndirectUpstream(oldDepth = oldDepth, newDepth = newDepth)
-            ) {
-                depthTracker.schedule(scheduler, this)
-            }
+        if (
+            depthTracker.updateIndirectRoots(
+                additions = additions,
+                removals = removals,
+                butNot = this,
+            ) or depthTracker.addIndirectUpstream(oldDepth = oldDepth, newDepth = newDepth)
+        ) {
+            depthTracker.schedule(scheduler, this)
         }
     }
 
-    suspend fun scheduleMover(evalScope: EvalScope) {
-        patchData =
-            checkNotNull(patches) { "mux mover scheduled with unset patches upstream node" }
-                .getPushEvent(evalScope)
-                .orElseGet { null }
-        evalScope.scheduleMuxMover(this)
+    fun scheduleMover(logIndent: Int, evalScope: EvalScope) {
+        logDuration(logIndent, "MuxDeferred.scheduleMover") {
+            patchData =
+                checkNotNull(patches) { "mux mover scheduled with unset patches upstream node" }
+                    .getPushEvent(currentLogIndent, evalScope)
+            evalScope.scheduleMuxMover(this@MuxDeferredNode)
+        }
     }
 
-    override fun toString(): String = "${this::class.simpleName}@$hashString"
+    override fun toString(): String =
+        "${this::class.simpleName}@$hashString${name?.let { "[$it]" }.orEmpty()}"
 }
 
 internal inline fun <A> switchDeferredImplSingle(
-    crossinline getStorage: suspend EvalScope.() -> TFlowImpl<A>,
-    crossinline getPatches: suspend EvalScope.() -> TFlowImpl<TFlowImpl<A>>,
-): TFlowImpl<A> =
-    mapImpl({
+    name: String? = null,
+    crossinline getStorage: EvalScope.() -> EventsImpl<A>,
+    crossinline getPatches: EvalScope.() -> EventsImpl<EventsImpl<A>>,
+): EventsImpl<A> {
+    val patches = mapImpl(getPatches) { newEvents, _ -> singleOf(just(newEvents)).asIterable() }
+    val switchDeferredImpl =
         switchDeferredImpl(
-            getStorage = { mapOf(Unit to getStorage()) },
-            getPatches = { mapImpl(getPatches) { newFlow -> mapOf(Unit to just(newFlow)) } },
+            name = name,
+            getStorage = { singleOf(getStorage()).asIterable() },
+            getPatches = { patches },
+            storeFactory = SingletonMapK.Factory(),
         )
-    }) { map ->
-        map.getValue(Unit)
+    return mapImpl({ switchDeferredImpl }) { map, logIndent ->
+        map.asSingle().getValue(Unit).getPushEvent(logIndent, this).also {
+            if (name != null) {
+                logLn(logIndent, "[$name] extracting single mux: $it")
+            }
+        }
     }
+}
 
-internal fun <K : Any, A> switchDeferredImpl(
-    getStorage: suspend EvalScope.() -> Map<K, TFlowImpl<A>>,
-    getPatches: suspend EvalScope.() -> TFlowImpl<Map<K, Maybe<TFlowImpl<A>>>>,
-): TFlowImpl<Map<K, A>> =
-    MuxLifecycle(
-        object : MuxActivator<Map<K, A>> {
-            override suspend fun activate(
-                evalScope: EvalScope,
-                lifecycle: MuxLifecycle<Map<K, A>>,
-            ): MuxNode<*, *, Map<K, A>>? {
-                val storage: Map<K, TFlowImpl<A>> = getStorage(evalScope)
-                // Initialize mux node and switched-in connections.
-                val muxNode =
-                    MuxDeferredNode(lifecycle, this).apply {
-                        storage.mapValuesNotNullParallelTo(switchedIn) { (key, flow) ->
-                            val branchNode = MuxBranchNode(this@apply, key)
-                            flow.activate(evalScope, branchNode.schedulable)?.let {
-                                (conn, needsEval) ->
-                                branchNode
-                                    .apply { upstream = conn }
-                                    .also {
-                                        if (needsEval) {
-                                            val result = conn.getPushEvent(evalScope)
-                                            if (result is Just) {
-                                                upstreamData[key] = result.value
-                                            }
-                                        }
-                                    }
-                            }
-                        }
-                    }
+internal fun <W, K, V> switchDeferredImpl(
+    name: String? = null,
+    getStorage: EvalScope.() -> Iterable<Map.Entry<K, EventsImpl<V>>>,
+    getPatches: EvalScope.() -> EventsImpl<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>,
+    storeFactory: MutableMapK.Factory<W, K>,
+): EventsImpl<MuxResult<W, K, V>> =
+    MuxLifecycle(MuxDeferredActivator(name, getStorage, storeFactory, getPatches))
+
+private class MuxDeferredActivator<W, K, V>(
+    private val name: String?,
+    private val getStorage: EvalScope.() -> Iterable<Map.Entry<K, EventsImpl<V>>>,
+    private val storeFactory: MutableMapK.Factory<W, K>,
+    private val getPatches: EvalScope.() -> EventsImpl<Iterable<Map.Entry<K, Maybe<EventsImpl<V>>>>>,
+) : MuxActivator<W, K, V> {
+    override fun activate(
+        evalScope: EvalScope,
+        lifecycle: MuxLifecycle<W, K, V>,
+    ): Pair<MuxNode<W, K, V>, (() -> Unit)?>? {
+        // Initialize mux node and switched-in connections.
+        val muxNode =
+            MuxDeferredNode(name, lifecycle, this, storeFactory).apply {
+                initializeUpstream(evalScope, getStorage, storeFactory)
                 // Update depth based on all initial switched-in nodes.
-                muxNode.switchedIn.values.forEach { branch ->
-                    val conn = branch.upstream
-                    if (conn.depthTracker.snapshotIsDirect) {
-                        muxNode.depthTracker.addDirectUpstream(
-                            oldDepth = null,
-                            newDepth = conn.depthTracker.snapshotDirectDepth,
-                        )
-                    } else {
-                        muxNode.depthTracker.addIndirectUpstream(
-                            oldDepth = null,
-                            newDepth = conn.depthTracker.snapshotIndirectDepth,
-                        )
-                        muxNode.depthTracker.updateIndirectRoots(
-                            additions = conn.depthTracker.snapshotIndirectRoots,
-                            butNot = muxNode,
-                        )
-                    }
-                }
+                initializeDepth()
                 // We don't have our patches connection established yet, so for now pretend we have
                 // a direct connection to patches. We will update downstream nodes later if this
                 // turns out to be a lie.
-                muxNode.depthTracker.setIsIndirectRoot(true)
-                muxNode.depthTracker.reset()
+                depthTracker.setIsIndirectRoot(true)
+                depthTracker.reset()
+            }
 
+        // Schedule for evaluation if any switched-in nodes have already emitted within
+        // this transaction.
+        if (muxNode.upstreamData.isNotEmpty()) {
+            muxNode.schedule(evalScope)
+        }
+
+        return muxNode to
+            fun() {
                 // Setup patches connection; deferring allows for a recursive connection, where
                 // muxNode is downstream of itself via patches.
-                var isIndirect = true
-                evalScope.deferAction {
-                    val (patchesConn, needsEval) =
-                        getPatches(evalScope).activate(evalScope, downstream = muxNode.schedulable)
-                            ?: run {
-                                isIndirect = false
-                                // Turns out we can't connect to patches, so update our depth and
-                                // propagate
-                                muxNode.mutex.withLock {
-                                    if (muxNode.depthTracker.setIsIndirectRoot(false)) {
-                                        muxNode.depthTracker.schedule(evalScope.scheduler, muxNode)
-                                    }
-                                }
-                                return@deferAction
-                            }
-                    muxNode.patches = patchesConn
-
-                    if (!patchesConn.schedulerUpstream.depthTracker.snapshotIsDirect) {
-                        // Turns out patches is indirect, so we are not a root. Update depth and
-                        // propagate.
-                        muxNode.mutex.withLock {
-                            if (
-                                muxNode.depthTracker.setIsIndirectRoot(false) or
-                                    muxNode.depthTracker.addIndirectUpstream(
-                                        oldDepth = null,
-                                        newDepth = patchesConn.depthTracker.snapshotIndirectDepth,
-                                    ) or
-                                    muxNode.depthTracker.updateIndirectRoots(
-                                        additions = patchesConn.depthTracker.snapshotIndirectRoots
-                                    )
-                            ) {
+                val (patchesConn, needsEval) =
+                    getPatches(evalScope).activate(evalScope, downstream = muxNode.schedulable)
+                        ?: run {
+                            // Turns out we can't connect to patches, so update our depth and
+                            // propagate
+                            if (muxNode.depthTracker.setIsIndirectRoot(false)) {
+                                // TODO: schedules might not be necessary now that we're not
+                                // parallel?
                                 muxNode.depthTracker.schedule(evalScope.scheduler, muxNode)
                             }
+                            return
                         }
-                    }
-                    // Schedule mover to process patch emission at the end of this transaction, if
-                    // needed.
-                    if (needsEval) {
-                        val result = patchesConn.getPushEvent(evalScope)
-                        if (result is Just) {
-                            muxNode.patchData = result.value
-                            evalScope.scheduleMuxMover(muxNode)
-                        }
-                    }
-                }
+                muxNode.patches = patchesConn
 
-                // Schedule for evaluation if any switched-in nodes have already emitted within
-                // this transaction.
-                if (muxNode.upstreamData.isNotEmpty()) {
-                    evalScope.schedule(muxNode)
+                if (!patchesConn.schedulerUpstream.depthTracker.snapshotIsDirect) {
+                    // Turns out patches is indirect, so we are not a root. Update depth and
+                    // propagate.
+                    if (
+                        muxNode.depthTracker.setIsIndirectRoot(false) or
+                            muxNode.depthTracker.addIndirectUpstream(
+                                oldDepth = null,
+                                newDepth = patchesConn.depthTracker.snapshotIndirectDepth,
+                            ) or
+                            muxNode.depthTracker.updateIndirectRoots(
+                                additions = patchesConn.depthTracker.snapshotIndirectRoots
+                            )
+                    ) {
+                        muxNode.depthTracker.schedule(evalScope.scheduler, muxNode)
+                    }
                 }
-                return muxNode.takeUnless { muxNode.switchedIn.isEmpty() && !isIndirect }
+                // Schedule mover to process patch emission at the end of this transaction, if
+                // needed.
+                if (needsEval) {
+                    muxNode.patchData = patchesConn.getPushEvent(0, evalScope)
+                    evalScope.scheduleMuxMover(muxNode)
+                }
             }
-        }
-    )
+    }
+}
 
 internal inline fun <A> mergeNodes(
-    crossinline getPulse: suspend EvalScope.() -> TFlowImpl<A>,
-    crossinline getOther: suspend EvalScope.() -> TFlowImpl<A>,
-    crossinline f: suspend EvalScope.(A, A) -> A,
-): TFlowImpl<A> {
+    crossinline getPulse: EvalScope.() -> EventsImpl<A>,
+    crossinline getOther: EvalScope.() -> EventsImpl<A>,
+    name: String? = null,
+    crossinline f: EvalScope.(A, A) -> A,
+): EventsImpl<A> {
+    val mergedThese = mergeNodes(name, getPulse, getOther)
     val merged =
-        mapImpl({ mergeNodes(getPulse, getOther) }) { these ->
-            these.merge { thiz, that -> f(thiz, that) }
-        }
+        mapImpl({ mergedThese }) { these, _ -> these.merge { thiz, that -> f(thiz, that) } }
     return merged.cached()
 }
+
+internal fun <T> Iterable<T>.asIterableWithIndex(): Iterable<Map.Entry<Int, T>> =
+    asSequence().mapIndexed { i, t -> StoreEntry(i, t) }.asIterable()
 
 internal inline fun <A, B> mergeNodes(
-    crossinline getPulse: suspend EvalScope.() -> TFlowImpl<A>,
-    crossinline getOther: suspend EvalScope.() -> TFlowImpl<B>,
-): TFlowImpl<These<A, B>> {
+    name: String? = null,
+    crossinline getPulse: EvalScope.() -> EventsImpl<A>,
+    crossinline getOther: EvalScope.() -> EventsImpl<B>,
+): EventsImpl<These<A, B>> {
     val storage =
-        mapOf(
-            0 to mapImpl(getPulse) { These.thiz<A, B>(it) },
-            1 to mapImpl(getOther) { These.that(it) },
+        listOf(
+                mapImpl(getPulse) { it, _ -> These.thiz(it) },
+                mapImpl(getOther) { it, _ -> These.that(it) },
+            )
+            .asIterableWithIndex()
+    val switchNode =
+        switchDeferredImpl(
+            name = name,
+            getStorage = { storage },
+            getPatches = { neverImpl },
+            storeFactory = MutableArrayMapK.Factory(),
         )
-    val switchNode = switchDeferredImpl(getStorage = { storage }, getPatches = { neverImpl })
     val merged =
-        mapImpl({ switchNode }) { mergeResults ->
-            val first = mergeResults.getMaybe(0).flatMap { it.maybeThis() }
-            val second = mergeResults.getMaybe(1).flatMap { it.maybeThat() }
-            these(first, second).orElseGet { error("unexpected missing merge result") }
+        mapImpl({ switchNode }) { it, logIndent ->
+            val mergeResults = it.asArrayHolder()
+            val first =
+                mergeResults.getMaybe(0).flatMap { it.getPushEvent(logIndent, this).maybeThis() }
+            val second =
+                mergeResults.getMaybe(1).flatMap { it.getPushEvent(logIndent, this).maybeThat() }
+            these(first, second).orError { "unexpected missing merge result" }
         }
     return merged.cached()
 }
 
 internal inline fun <A> mergeNodes(
-    crossinline getPulses: suspend EvalScope.() -> Iterable<TFlowImpl<A>>
-): TFlowImpl<List<A>> {
+    crossinline getPulses: EvalScope.() -> Iterable<EventsImpl<A>>
+): EventsImpl<List<A>> {
     val switchNode =
         switchDeferredImpl(
-            getStorage = { getPulses().associateByIndexTo(TreeMap()) },
+            getStorage = { getPulses().asIterableWithIndex() },
             getPatches = { neverImpl },
+            storeFactory = MutableArrayMapK.Factory(),
         )
-    val merged = mapImpl({ switchNode }) { mergeResults -> mergeResults.values.toList() }
+    val merged =
+        mapImpl({ switchNode }) { it, logIndent ->
+            val mergeResults = it.asArrayHolder()
+            mergeResults.map { (_, node) -> node.getPushEvent(logIndent, this) }
+        }
     return merged.cached()
 }
 
 internal inline fun <A> mergeNodesLeft(
-    crossinline getPulses: suspend EvalScope.() -> Iterable<TFlowImpl<A>>
-): TFlowImpl<A> {
+    crossinline getPulses: EvalScope.() -> Iterable<EventsImpl<A>>
+): EventsImpl<A> {
     val switchNode =
         switchDeferredImpl(
-            getStorage = { getPulses().associateByIndexTo(TreeMap()) },
+            getStorage = { getPulses().asIterableWithIndex() },
             getPatches = { neverImpl },
+            storeFactory = MutableArrayMapK.Factory(),
         )
     val merged =
-        mapImpl({ switchNode }) { mergeResults: Map<Int, A> -> mergeResults.values.first() }
+        mapImpl({ switchNode }) { it, logIndent ->
+            val mergeResults = it.asArrayHolder()
+            mergeResults.values.first().getPushEvent(logIndent, this)
+        }
     return merged.cached()
 }

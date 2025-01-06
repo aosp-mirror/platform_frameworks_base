@@ -76,6 +76,11 @@ class AppCompatController {
         mAppCompatSizeCompatModePolicy = new AppCompatSizeCompatModePolicy(mActivityRecord,
                 mAppCompatOverrides);
         mAllowRestrictedResizability = AppCompatUtils.asLazy(() -> {
+            // Application level.
+            if (allowRestrictedResizability(packageManager, mActivityRecord.packageName)) {
+                return true;
+            }
+            // Activity level.
             try {
                 return packageManager.getPropertyAsUser(
                         PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY,
@@ -86,6 +91,15 @@ class AppCompatController {
                 return false;
             }
         });
+    }
+
+    static boolean allowRestrictedResizability(PackageManager pm, String packageName) {
+        try {
+            return pm.getProperty(PROPERTY_COMPAT_ALLOW_RESTRICTED_RESIZABILITY, packageName)
+                    .getBoolean();
+        } catch (PackageManager.NameNotFoundException e) {
+            return false;
+        }
     }
 
     @NonNull
@@ -106,11 +120,6 @@ class AppCompatController {
     @NonNull
     DesktopAppCompatAspectRatioPolicy getDesktopAppCompatAspectRatioPolicy() {
         return mDesktopAppCompatAspectRatioPolicy;
-    }
-
-    @NonNull
-    AppCompatOverrides getAppCompatOverrides() {
-        return mAppCompatOverrides;
     }
 
     @NonNull

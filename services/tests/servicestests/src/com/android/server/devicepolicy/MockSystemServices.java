@@ -35,6 +35,7 @@ import android.app.NotificationManager;
 import android.app.admin.DevicePolicyManager;
 import android.app.backup.IBackupManager;
 import android.app.role.RoleManager;
+import android.app.supervision.SupervisionManagerInternal;
 import android.app.usage.UsageStatsManagerInternal;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -77,8 +78,8 @@ import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.LockSettingsInternal;
 import com.android.server.AlarmManagerInternal;
-import com.android.server.pdb.PersistentDataBlockManagerInternal;
 import com.android.server.net.NetworkPolicyManagerInternal;
+import com.android.server.pdb.PersistentDataBlockManagerInternal;
 import com.android.server.pm.PackageManagerLocal;
 import com.android.server.pm.UserManagerInternal;
 import com.android.server.pm.pkg.PackageState;
@@ -149,6 +150,7 @@ public class MockSystemServices {
     public final BuildMock buildMock = new BuildMock();
     public final File dataDir;
     public final PolicyPathProvider pathProvider;
+    public final SupervisionManagerInternal supervisionManagerInternal;
 
     private final Map<String, PackageState> mTestPackageStates = new ArrayMap<>();
 
@@ -203,6 +205,7 @@ public class MockSystemServices {
         roleManager = realContext.getSystemService(RoleManager.class);
         roleManagerForMock = mock(RoleManagerForMock.class);
         subscriptionManager = mock(SubscriptionManager.class);
+        supervisionManagerInternal = mock(SupervisionManagerInternal.class);
 
         // Package manager is huge, so we use a partial mock instead.
         packageManager = spy(realContext.getPackageManager());

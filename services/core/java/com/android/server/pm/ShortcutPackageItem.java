@@ -187,11 +187,6 @@ abstract class ShortcutPackageItem {
         }
     }
 
-    @GuardedBy("mPackageItemLock")
-    void scheduleSaveToAppSearchLocked() {
-
-    }
-
     public JSONObject dumpCheckin(boolean clear) throws JSONException {
         final JSONObject result = new JSONObject();
         result.put(KEY_NAME, mPackageName);
@@ -221,10 +216,7 @@ abstract class ShortcutPackageItem {
         }
         synchronized (mPackageItemLock) {
             path.getParentFile().mkdirs();
-            // TODO: Since we are persisting shortcuts into AppSearch, we should read from/write to
-            //  AppSearch as opposed to maintaining a separate XML file.
             saveToFileLocked(path, false /*forBackup*/);
-            scheduleSaveToAppSearchLocked();
         }
     }
 

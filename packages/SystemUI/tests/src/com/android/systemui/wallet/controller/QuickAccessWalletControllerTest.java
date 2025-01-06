@@ -16,21 +16,26 @@
 
 package com.android.systemui.wallet.controller;
 
+import static android.service.quickaccesswallet.Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.PendingIntent;
 import android.app.role.RoleManager;
 import android.content.Intent;
+import android.platform.test.annotations.EnableFlags;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
 import android.testing.TestableLooper;
@@ -54,6 +59,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
 
 import java.util.List;
 
@@ -101,15 +107,22 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
             callback.onWalletPendingIntentRetrieved(null);
             return null;
         }).when(mQuickAccessWalletClient).getWalletPendingIntent(any(), any());
+        doAnswer(invocation -> {
+            QuickAccessWalletClient.GesturePendingIntentCallback callback =
+                    (QuickAccessWalletClient.GesturePendingIntentCallback) invocation
+                            .getArguments()[1];
+            callback.onGesturePendingIntentRetrieved(null);
+            return null;
+        }).when(mQuickAccessWalletClient).getGestureTargetActivityPendingIntent(any(), any());
 
-        mController = new QuickAccessWalletController(
+        mController = spy(new QuickAccessWalletController(
                 mContext,
                 MoreExecutors.directExecutor(),
                 MoreExecutors.directExecutor(),
                 mSecureSettings,
                 mQuickAccessWalletClient,
                 mClock,
-                mRoleManager);
+                mRoleManager));
     }
 
     @Test
@@ -286,5 +299,42 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         assertEquals(
                 intent.getComponent().getClassName(),
                 "com.google.android.apps.testapp.TestActivity");
+    }
+
+    @Test
+    @EnableFlags(FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    public void getGestureUiIntent_targetActivityViaPendingIntent_intentComponentIsCorrect() {
+        doAnswer(invocation -> {
+            QuickAccessWalletClient.GesturePendingIntentCallback callback =
+                    (QuickAccessWalletClient.GesturePendingIntentCallback) invocation
+                            .getArguments()[1];
+            Intent intent = new Intent(Intent.ACTION_VIEW).setClassName(
+                    "com.google.android.apps.testapp",
+                    "com.google.android.apps.testapp.GestureTestActivity");
+            callback.onGesturePendingIntentRetrieved(
+                    PendingIntent.getActivity(mContext, 0, intent,
+                            PendingIntent.FLAG_IMMUTABLE));
+            return null;
+        }).when(mQuickAccessWalletClient).getGestureTargetActivityPendingIntent(any(), any());
+        mController.startGestureUiIntent(mActivityStarter, mAnimationController);
+        verify(mActivityStarter).startPendingIntentMaybeDismissingKeyguard(
+                mPendingIntentCaptor.capture(),
+                nullable(Runnable.class),
+                nullable(ActivityTransitionAnimator.Controller.class));
+        PendingIntent pendingIntent = mPendingIntentCaptor.getValue();
+        Intent intent = pendingIntent.getIntent();
+        assertEquals(intent.getAction(), Intent.ACTION_VIEW);
+        assertEquals(
+                intent.getComponent().getClassName(),
+                "com.google.android.apps.testapp.GestureTestActivity");
+    }
+
+    @Test
+    @EnableFlags(FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    public void getGestureUiIntent_noPendingIntent_startsQuickAccessUiIntent() {
+        mController.startGestureUiIntent(mActivityStarter, mAnimationController);
+
+        verify(mController).startQuickAccessUiIntent(eq(mActivityStarter), eq(mAnimationController),
+                anyBoolean());
     }
 }

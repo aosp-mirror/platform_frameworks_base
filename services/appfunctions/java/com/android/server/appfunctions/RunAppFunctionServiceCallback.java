@@ -16,12 +16,14 @@
 package com.android.server.appfunctions;
 
 import android.annotation.NonNull;
+import android.app.appfunctions.AppFunctionException;
 import android.app.appfunctions.ExecuteAppFunctionAidlRequest;
 import android.app.appfunctions.ExecuteAppFunctionResponse;
 import android.app.appfunctions.IAppFunctionService;
 import android.app.appfunctions.ICancellationCallback;
 import android.app.appfunctions.IExecuteAppFunctionCallback;
 import android.app.appfunctions.SafeOneTimeExecuteAppFunctionCallback;
+import android.os.SystemClock;
 import android.util.Slog;
 
 import com.android.server.appfunctions.RemoteServiceCaller.RunServiceCallCallback;
@@ -51,23 +53,29 @@ public class RunAppFunctionServiceCallback implements RunServiceCallCallback<IAp
             @NonNull IAppFunctionService service,
             @NonNull ServiceUsageCompleteListener serviceUsageCompleteListener) {
         try {
+            mSafeExecuteAppFunctionCallback.setExecutionStartTimeAfterBindMillis(
+                    SystemClock.elapsedRealtime());
             service.executeAppFunction(
                     mRequestInternal.getClientRequest(),
                     mRequestInternal.getCallingPackage(),
                     mCancellationCallback,
                     new IExecuteAppFunctionCallback.Stub() {
                         @Override
-                        public void onResult(ExecuteAppFunctionResponse response) {
+                        public void onSuccess(ExecuteAppFunctionResponse response) {
                             mSafeExecuteAppFunctionCallback.onResult(response);
+                            serviceUsageCompleteListener.onCompleted();
+                        }
+
+                        @Override
+                        public void onError(AppFunctionException error) {
+                            mSafeExecuteAppFunctionCallback.onError(error);
                             serviceUsageCompleteListener.onCompleted();
                         }
                     });
         } catch (Exception e) {
-            mSafeExecuteAppFunctionCallback.onResult(
-                    ExecuteAppFunctionResponse.newFailure(
-                            ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
-                            e.getMessage(),
-                            /* extras= */ null));
+            mSafeExecuteAppFunctionCallback.onError(
+                    new AppFunctionException(
+                            AppFunctionException.ERROR_APP_UNKNOWN_ERROR, e.getMessage()));
             serviceUsageCompleteListener.onCompleted();
         }
     }
@@ -75,11 +83,10 @@ public class RunAppFunctionServiceCallback implements RunServiceCallCallback<IAp
     @Override
     public void onFailedToConnect() {
         Slog.e(TAG, "Failed to connect to service");
-        mSafeExecuteAppFunctionCallback.onResult(
-                ExecuteAppFunctionResponse.newFailure(
-                        ExecuteAppFunctionResponse.RESULT_APP_UNKNOWN_ERROR,
-                        "Failed to connect to AppFunctionService",
-                        /* extras= */ null));
+        mSafeExecuteAppFunctionCallback.onError(
+                new AppFunctionException(
+                        AppFunctionException.ERROR_APP_UNKNOWN_ERROR,
+                        "Failed to connect to AppFunctionService"));
     }
 
     @Override

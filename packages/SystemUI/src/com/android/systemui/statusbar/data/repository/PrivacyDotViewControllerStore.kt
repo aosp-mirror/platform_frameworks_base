@@ -52,11 +52,14 @@ constructor(
     PrivacyDotViewControllerStore,
     PerDisplayStoreImpl<PrivacyDotViewController>(backgroundApplicationScope, displayRepository) {
 
-    override fun createInstanceForDisplay(displayId: Int): PrivacyDotViewController {
+    override fun createInstanceForDisplay(displayId: Int): PrivacyDotViewController? {
+        val configurationController =
+            statusBarConfigurationControllerStore.forDisplay(displayId) ?: return null
+        val contentInsetsProvider = contentInsetsProviderStore.forDisplay(displayId) ?: return null
         return factory.create(
             displayScopeRepository.scopeForDisplay(displayId),
-            statusBarConfigurationControllerStore.forDisplay(displayId),
-            contentInsetsProviderStore.forDisplay(displayId),
+            configurationController,
+            contentInsetsProvider,
         )
     }
 

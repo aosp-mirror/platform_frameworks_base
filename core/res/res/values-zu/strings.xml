@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"i-ID yomshayeli ishintshela kokuvinjiwe. Ucingo olulandelayo: Aluvinjelwe"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"I-ID Yomshayeli ishintshela kokungavinjelwe. Ucingo olulandelayo: Luvinjelwe"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"I-ID Yomshayeli ishintshela kokungavinjelwe. Ucingo olulandelayo: Aluvinjelwe"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"Le app ayihambelani ne-16 KB. Ukuhlolwa kokuqondanisa i-APK kuhlulekile. Le app izoqaliswa kusetshenziswa imodi yokuhambelana kobukhulu bekhasi. Ukuze kube nokuhambelana okuhle kakhulu, sicela uhlanganise kabusha i-app ngosekelo lwe-16 KB. Ukuze uthole imininingwane eyengeziwe, bheka &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"Le app ayihambelani ne-16 KB. Ukuhlolwa kokuqondanisa i-ELF kuhlulekile. Le app izoqaliswa kusetshenziswa imodi yokuhambelana kobukhulu bekhasi. Ukuze kube nokuhambelana okuhle kakhulu, sicela uhlanganise kabusha i-app ngosekelo lwe-16 KB. Ukuze uthole imininingwane eyengeziwe, bheka &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"Le app ayihambelani ne-16 KB. Ukuhlola ukuqondanisa i-APK ne-ELF kuhlulekile. Le app izoqaliswa kusetshenziswa imodi yokuhambelana kobukhulu bekhasi. Ukuze kube nokuhambelana okuhle kakhulu, sicela uhlanganise kabusha i-app ngosekelo lwe-16 KB. Ukuze uthole imininingwane eyengeziwe, bheka &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"Isevisi ayilungiselelwe."</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"Ngeke ukwazi ukuguqul izilungiselelo zemininingwane yoshayayo."</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"Ushintshele idatha ku-<xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ayikwazi ukufinyelela kunethiwekhi yeselula"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Zama ukushintsha inethiwekhi encanyelwayo. Thepha ukuze ushintshe."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Ukushaya okuphuthumayo akutholakali"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Amakholi aphuthumayo adinga inethiwekhi yeselula"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Izexwayiso"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Ukudlulisa ikholi"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"Vumela i-app inqume indawo ehambelanayo phakathi kwamadivayisi e-Ultra-Wideband aseduze"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"xhumana namadivayisi we-Wi‑Fi aseduze"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"Ivumela i-app ikhangise, ixhume, futhi inqume isimo esihambisanayo samadivayisi we-Wi-Fi aseduze"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"nquma indawo ehlobene phakathi kwamadivayisi aseduze"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"Vumela i-app inqume indawo ehambelanayo phakathi kwamadivayisi aseduze"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"Ulwazi Lwesevisi Yenkokhelo Ye-NFC Okhethwayo"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"Ivuemela uhlelo lokusebenza ukuthola ulwazi lesevisi yenkokhelo ye-nfc njengezinsiza zokubhalisa nezindawo zomzila."</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"lawula Uxhumano Lwenkambu Eseduze"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"ngehora elingu-<xliff:g id="COUNT">%d</xliff:g>"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"ngosuku olu-<xliff:g id="COUNT">%d</xliff:g>"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"ngonyaka ongu-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"Umzuzu ongu-<xliff:g id="COUNT">%d</xliff:g> odlule"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"Ihora eli-<xliff:g id="COUNT">%d</xliff:g> eledlule"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"Usuku olu-<xliff:g id="COUNT">%d</xliff:g> oludlule"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"Unyaka ongu-<xliff:g id="COUNT">%d</xliff:g> odlule"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"Umzuzu o-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"Ihora eli-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"Usuku olu-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"Unyaka ongu-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"Emzuzwini ongu-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"Emahoreni angu-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"Osukwini olu-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"onyakeni ongu-<xliff:g id="COUNT">%d</xliff:g>"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"Umzuzu ongu-<xliff:g id="COUNT">%d</xliff:g> odlule"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"Ihora eli-<xliff:g id="COUNT">%d</xliff:g> eledlule"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"Usuku olu-<xliff:g id="COUNT">%d</xliff:g> oludlule"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"Unyaka ongu-<xliff:g id="COUNT">%d</xliff:g> odlule"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{umzuzu odlule #}one{imizuzu edlule #}other{imizuzu edlule #}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{ihora elingu-# eledlule}one{amahora adlule angu-#}other{amahora adlule angu-#}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{usuku oludlule #}one{izinsuku ezedlule #}other{izinsuku ezedlule #}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Imodi yesandla esisodwa"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ukufiphaza okwengeziwe"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Amadivayizi okuzwa"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ubambe okhiye bevolumu. I-<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ivuliwe."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ubambe okhiye bevolumu. I-<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ivaliwe."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Khipha okhiye bevolumu. Ukuze uvule i-<xliff:g id="SERVICE_NAME">%1$s</xliff:g>, cindezela bese ubamba bobabili okhiye bevolumu futhi imizuzwana emi-3."</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"Ngempelasonto"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"Umcimbi"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"Ulele"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"Ungaphazamisi (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"Iphethwe yi-<xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"Kuvuliwe"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"Kuvaliwe"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>, <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"U-<xliff:g id="START">%1$s</xliff:g> ukuya ku-<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"Noma iyiphi ikhalenda"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> ithulisa eminye imisindo"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"Kukhona inkinga yangaphakathi ngedivayisi yakho, futhi ingase ibe engazinzile kuze kube yilapho usetha kabusha yonke idatha."</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Thumela futhi wamukele imilayezo ngaphandle kwenethiwekhi yeselula noma yeWiFi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Vula Imilayezo"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"Indlela esebenza ngayo"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"Vula okuthi \"Khetha inethiwekhi ngokuzenzekela\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"Vula okuthi \"Khetha inethiwekhi ngokuzenzekela\" kumasethingi ukuze ifoni yakho ithole inethiwekhi esebenza nesathelayithi"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"Vula"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"Iya emuva"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"Ilindile..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"Isethelayithi yokuxhumana ngezimo eziphuthumayo isiyatholakala manje"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"Ungathumela imiyalezo kumasevisi ezimo eziphuthumayo uma ingekho inethiwekhi yeselula noma ye-Wi-Fi. IGoogle Messages kumelwe kube iyona app yakho yemiyalezo ezenzekelayo."</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"Isethelayithi yokuxhumana ngezimo eziphuthumayo ayisekelwe"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"Isethelayithi yokuxhumana ngezimo eziphuthumayo ayisekelwe kule divayisi"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"Isethelayithi yokuxhumana ngezimo eziphuthumayo ayisethiwe"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"Qiniseka ukuthi uxhumeke ku-inthanethi bese uzama ukusetha futhi"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"Isethelayithi yokuxhumana ngezimo eziphuthumayo ayitholakali"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"Isethelayithi yokuxhumana ngezimo eziphuthumayo ayitholakali kuleli zwe noma kulesi sifunda"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"Isethelayithi yokuxhumana ngezimo eziphuthumayo ayisethiwe"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"Ukuze uthumele umlayezo ngesathelayithi, setha iGoogle Messages ngenge-app yakho yemilayezo ezenzakalelayo"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"Isethelayithi yokuxhumana ngezimo eziphuthumayo ayitholakali"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"Ukuze uhlole ukuthi isethelayithi yokuxhumana ngezimo eziphuthumayo iyatholakala yini kuleli zwe noma kulesi sifunda, vula amasethingi endawo"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"Ukuthumela umyalezo ngesethelayithi kuyatholakala"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"Ungathumela umlayezo ngesathelayithi uma ingekho inethiwekhi yeselula noma ye-Wi-Fi. IGoogle Messages kumelwe kube iyona app yakho yemiyalezo ezenzekelayo."</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"Ukuthumela umyalezo ngesethelayithi akusekelwe"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"Ukuthumela umyalezo ngesethelayithi akusekelwe kule divayisi"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"Ukuthumela umyalezo ngesethelayithi akusethiwe"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"Qiniseka ukuthi uxhumeke ku-inthanethi bese uzama ukusetha futhi"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"Ukuthumela umyalezo ngesethelayithi akutholakali"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"Ukuthumela umyalezo ngesethelayithi akutholakali kuleli zwe noma kulesi sifunda"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"Ukuthumela umyalezo ngesethelayithi akusethiwe"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"Ukuze uthumele umlayezo ngesathelayithi, setha iGoogle Messages ngenge-app yakho yemilayezo ezenzakalelayo"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"Ukuthumela umyalezo ngesethelayithi akutholakali"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"Ukuze uhlole ukuthi ukuthumela umyalezo ngesethelayithi kuyatholakala yini kuleli zwe noma kulesi sifunda, vula amasethingi endawo"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"Setha Ukuvula ngesigxivizo somunwe futhi"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"I-<xliff:g id="FINGERPRINT">%s</xliff:g> angeke isaziwa."</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"I-<xliff:g id="FINGERPRINT_0">%1$s</xliff:g> kanye ne-<xliff:g id="FINGERPRINT_1">%2$s</xliff:g> angeke isaziwa."</string>

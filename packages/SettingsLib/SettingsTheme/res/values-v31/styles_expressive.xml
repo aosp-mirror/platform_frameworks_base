@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Copyright (C) 2024 The Android Open Source Project
+
+  Licensed under the Apache License, Version 2.0 (the "License");
+  you may not use this file except in compliance with the License.
+  You may obtain a copy of the License at
+
+       http://www.apache.org/licenses/LICENSE-2.0
+
+  Unless required by applicable law or agreed to in writing, software
+  distributed under the License is distributed on an "AS IS" BASIS,
+  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+  See the License for the specific language governing permissions and
+  limitations under the License.
+  -->
+
+<resources>
+    <style name="SettingsLibButtonStyle.Expressive.Filled"
+        parent="@style/Widget.Material3Expressive.Button.Icon">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.LabelLarge</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Filled.Large">
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Filled.Extra"
+        parent="@style/SettingsLibButtonStyle.Expressive.Filled.Large">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Filled"
+        parent="@style/Widget.Material3Expressive.Button.IconButton.Filled">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Filled.Large">
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Filled.Extra"
+        parent="@style/SettingsLibButtonStyle.Expressive.Icon.Filled.Large">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Tonal"
+        parent="@style/Widget.Material3Expressive.Button.TonalButton.Icon">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.LabelLarge</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Tonal.Large">
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Tonal.Extra"
+        parent="@style/SettingsLibButtonStyle.Expressive.Tonal.Large">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Tonal"
+        parent="@style/Widget.Material3Expressive.Button.IconButton.Tonal">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Tonal.Large">
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Icon.Tonal.Extra"
+        parent="@style/SettingsLibButtonStyle.Expressive.Tonal.Large">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Outline"
+        parent="@style/Widget.Material3Expressive.Button.OutlinedButton.Icon">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:gravity">center</item>
+        <item name="android:textAppearance">@style/TextAppearance.SettingsLib.LabelLarge</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Outline.Large">
+        <item name="materialSizeOverlay">@style/SizeOverlay.Material3Expressive.Button.Medium</item>
+    </style>
+
+    <style name="SettingsLibButtonStyle.Expressive.Outline.Extra"
+        parent="@style/SettingsLibButtonStyle.Expressive.Outline.Large">
+        <item name="android:layout_width">match_parent</item>
+    </style>
+
+    <style name="SettingslibTextButtonStyle.Expressive"
+        parent="@style/Widget.Material3Expressive.Button.TextButton.Icon">
+        <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
+        <item name="android:layout_width">wrap_content</item>
+        <item name="android:layout_height">wrap_content</item>
+    </style>
+
+    <style name="SettingsLibCardStyle" parent="">
+        <item name="android:layout_width">match_parent</item>
+        <item name="android:layout_height">wrap_content</item>
+        <item name="android:layout_marginHorizontal">?android:attr/listPreferredItemPaddingStart</item>
+        <item name="android:layout_marginVertical">@dimen/settingslib_expressive_space_extrasmall4</item>
+        <item name="cardBackgroundColor">@color/settingslib_materialColorPrimary</item>
+        <item name="cardCornerRadius">@dimen/settingslib_expressive_radius_extralarge3</item>
+        <item name="cardElevation">0dp</item>
+        <item name="rippleColor">?android:attr/colorControlHighlight</item>
+    </style>
+</resources>

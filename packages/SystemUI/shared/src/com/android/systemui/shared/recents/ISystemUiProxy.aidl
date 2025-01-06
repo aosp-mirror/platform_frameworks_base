@@ -21,6 +21,7 @@ import android.graphics.Insets;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.UserHandle;
+import android.view.KeyEvent;
 import android.view.MotionEvent;
 import com.android.internal.util.ScreenshotRequest;
 
@@ -102,9 +103,9 @@ interface ISystemUiProxy {
     oneway void expandNotificationPanel() = 29;
 
     /**
-     * Notifies SystemUI to invoke Back.
+     * Notifies SystemUI of a back KeyEvent.
      */
-    oneway void onBackPressed() = 44;
+    oneway void onBackEvent(in KeyEvent keyEvent) = 44;
 
     /** Sets home rotation enabled. */
     oneway void setHomeRotationEnabled(boolean enabled) = 45;

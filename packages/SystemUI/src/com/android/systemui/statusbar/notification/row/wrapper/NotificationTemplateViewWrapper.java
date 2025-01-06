@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row.wrapper;
 
+import static android.app.Flags.notificationsRedesignTemplates;
 import static android.view.View.VISIBLE;
 
 import static com.android.systemui.statusbar.notification.row.ExpandableNotificationRow.DEFAULT_HEADER_VISIBLE_AMOUNT;
@@ -149,10 +150,15 @@ public class NotificationTemplateViewWrapper extends NotificationHeaderViewWrapp
                     }
 
                 }, TRANSFORMING_VIEW_TEXT);
-        mFullHeaderTranslation = ctx.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin)
-                - ctx.getResources().getDimensionPixelSize(
-                com.android.internal.R.dimen.notification_content_margin_top);
+        int contentMargin = ctx.getResources().getDimensionPixelSize(
+                com.android.internal.R.dimen.notification_content_margin);
+        int contentMarginTop =
+                notificationsRedesignTemplates()
+                        ? Notification.Builder.getContentMarginTop(ctx,
+                            com.android.internal.R.dimen.notification_2025_content_margin_top)
+                        : ctx.getResources().getDimensionPixelSize(
+                            com.android.internal.R.dimen.notification_content_margin_top);
+        mFullHeaderTranslation = contentMargin - contentMarginTop;
     }
 
     @MainThread

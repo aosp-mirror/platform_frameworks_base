@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"செயலில் உள்ளது (இடதுபுறம் மட்டும்)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"செயலில் உள்ளது (வலதுபுறம் மட்டும்)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"செயலில் உள்ளது (இடது மற்றும் வலதுபுறம்)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"சுற்றுப்புறங்களைப் புதுப்பிக்க முடியவில்லை"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"செயலிலுள்ளது (மீடியா மட்டும்). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"செயலிலுள்ளது (மீடியா மட்டும்). இடது பேட்டரி: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, வலது பேட்டரி: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g>."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"இணைக்கப்பட்டுள்ளது (ஆடியோ பகிர்வை ஆதரிக்கிறது). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> பேட்டரி."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"அக முனையம்"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"அக ஷெல் அணுகலை வழங்கும் இறுதிப் ஆப்ஸை இயக்கு"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux டெவெலப்மெண்ட் சூழல்"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Androidல் Linux டெர்மினலை இயக்கும்"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(பரிசோதனை) Androidடில் Linux டெர்மினலை இயக்கலாம்"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"நீங்கள் முடக்கினால், Linux டெர்மினல் தரவு அழிக்கப்படும்"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP சரிபார்ப்பு"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP சரிபார்க்கும் செயல்பாடுகளை அமை"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"பிழைதிருத்தம்"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"அனிமேஷன் மாற்றத்தின் வேகம்"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"அனிமேட்டர் கால அளவு"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"இரண்டாம்நிலைக் காட்சிகளை உருவகப்படுத்து"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"ஷேட் காட்சியின் நிலை"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"ஆப்ஸ்"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"செயல்பாடுகளை வைத்திருக்காதே"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"பயனர் வெளியேறியதும் செயல்பாடுகளை நீக்கும்"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"இந்த மொபைல்"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"இந்த டேப்லெட்"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"இந்தக் கம்ப்யூட்டர் (அகம்)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"இந்த டிவி"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"டாக் ஸ்பீக்கர்"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"வெளிப்புறச் சாதனம்"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"இணைக்கப்பட்டுள்ள சாதனம்"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"இந்த மொபைல்"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"அனலாக்"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"இந்தச் சாதனத்தில் பிளே செய்ய முடியவில்லை"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"மாற்ற, கணக்கை மேம்படுத்துங்கள்"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"பதிவிறக்கங்களை இங்கே பிளே செய்ய முடியாது"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC மூலம் இணைக்கப்பட்டுள்ளவை"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC மூலம் இணைக்கப்பட்டுள்ளவை"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"டிவி இயல்புநிலை"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI அவுட்புட்"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"உட்புற ஸ்பீக்கர்கள்"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"உள்ளமைந்த ஸ்பீக்கர்"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"டிவி ஆடியோ"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"இணைப்பதில் சிக்கல். சாதனத்தை ஆஃப் செய்து மீண்டும் ஆன் செய்யவும்"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"வயருடன்கூடிய ஆடியோ சாதனம்"</string>
     <string name="help_label" msgid="3528360748637781274">"உதவியும் கருத்தும்"</string>

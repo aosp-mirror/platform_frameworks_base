@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Ενεργό (μόνο το αριστερό)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Ενεργό (μόνο το δεξί)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Ενεργό (αριστερό και δεξί)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Δεν ήταν δυνατή η ενημέρωση των ήχων περιβάλλοντος"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Ενεργό (μόνο για μέσα). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> μπαταρία."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Ενεργό (μόνο για μέσα). Α: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, Δ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> μπαταρία."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Συνδεδεμένο (υποστηρίζει κοινή χρήση ήχου). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> μπαταρία."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Τοπική τερματική εφαρμογή"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Ενεργοπ.τερμ.εφαρμογής που προσφέρει πρόσβαση στο τοπικό κέλυφος"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Περιβάλλον ανάπτυξης Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Εκτέλεση τερματικού Linux σε Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Πειραματικό) Εκτέλεση τερματικού Linux σε Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Εάν απενεργοποιηθεί, τα δεδομένα τερματικού Linux θα διαγραφούν"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Έλεγχος HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Ρύθμιση συμπεριφοράς ελέγχου HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Εντοπισμός σφαλμάτων"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Κλίμακα κίνησης μετάβασης"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Κλίμ. διάρ. Animator"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Προσομ. δευτερ. προβολών"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Θέση οθόνης σκίασης"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Εφαρμογές"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Μη διατήρ. δραστηριοτήτων"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Διαγραφή κάθε δραστηριότητας μετά τον τερματισμό"</string>
@@ -520,7 +523,7 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Γρήγορη φόρτιση"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Ελέγχονται από το διαχειριστή"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Ελέγχεται από τη Ρύθμιση με περιορισμό"</string>
-    <string name="disabled" msgid="8017887509554714950">"Απενεργοποιημένο"</string>
+    <string name="disabled" msgid="8017887509554714950">"Απενεργοποιημένη"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Επιτρέπεται"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Δεν επιτρέπεται"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Εγκατ. άγνωστων εφ."</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Αυτό το τηλέφωνο"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Αυτό το tablet"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Αυτός ο υπολογιστής (εσωτερ.)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Αυτή η τηλεόραση"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Ηχείο βάσης σύνδεσης"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Εξωτερική συσκευή"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Συνδεδεμένη συσκευή"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Αυτό το τηλέφ."</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Αναλογικός"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Δεν είναι δυνατή η αναπαραγωγή σε αυτήν τη συσκευή"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Αναβαθμίστε τον λογαριασμό για εναλλαγή"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Δεν είναι δυνατή η αναπαραγωγή των λήψεων εδώ"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Συνδέθηκε μέσω ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Συνδέθηκε μέσω eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Προεπιλογή τηλεόρασης"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Έξοδος HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Εσωτερικά ηχεία"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Ενσωματωμένο ηχείο"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Ήχος τηλεόρασης"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Πρόβλημα κατά τη σύνδεση. Απενεργοποιήστε τη συσκευή και ενεργοποιήστε την ξανά"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Ενσύρματη συσκευή ήχου"</string>
     <string name="help_label" msgid="3528360748637781274">"Βοήθεια και σχόλια"</string>

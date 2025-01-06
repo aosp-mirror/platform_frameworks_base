@@ -66,4 +66,6 @@
     <string name="global_action_lock_message" product="device" msgid="3165224897120346096">"Каб адкрыць іншыя параметры, разблакіруйце прыладу"</string>
     <string name="media_transfer_playing_this_device" product="default" msgid="5795784619523545556">"Прайграецца на гэтым тэлефоне"</string>
     <string name="media_transfer_playing_this_device" product="tablet" msgid="222514408550408633">"Прайграецца на гэтым планшэце"</string>
+    <string name="finder_active" product="default" msgid="2734050945122991747">"Вы можаце знайсці свой тэлефон з дапамогай праграмы \"Знайсці прыладу\", нават калі ён выключаны"</string>
+    <string name="finder_active" product="tablet" msgid="8045583079989970505">"Вы можаце знайсці свой планшэт з дапамогай праграмы \"Знайсці прыладу\", нават калі ён выключаны"</string>
 </resources>

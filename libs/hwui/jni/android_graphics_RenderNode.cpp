@@ -594,14 +594,12 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
             Matrix4 transform;
             SkIRect clipBounds;
             uirenderer::Rect initialClipBounds;
-            const auto clipFlags = props.getClippingFlags();
             if (enableClip) {
-                if (clipFlags) {
-                    props.getClippingRectForFlags(clipFlags, &initialClipBounds);
-                } else {
-                    // Works for RenderNode::damageSelf()
-                    initialClipBounds.set(DIRTY_MIN, DIRTY_MIN, DIRTY_MAX, DIRTY_MAX);
-                }
+                // SurfaceView never draws beyond its bounds regardless of if it can or not,
+                // so if clip-to-bounds is disabled just use the bounds as the starting point
+                // regardless
+                const auto clipFlags = props.getClippingFlags();
+                props.getClippingRectForFlags(clipFlags | CLIP_TO_BOUNDS, &initialClipBounds);
                 clipBounds =
                         info.damageAccumulator
                                 ->computeClipAndTransform(initialClipBounds.toSkRect(), &transform)

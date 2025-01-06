@@ -18,6 +18,8 @@
 
 package com.android.systemui.kairos.util
 
+import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.None
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
 import kotlin.coroutines.EmptyCoroutineContext
@@ -27,13 +29,13 @@ import kotlin.coroutines.startCoroutine
 import kotlin.coroutines.suspendCoroutine
 
 /** Represents a value that may or may not be present. */
-sealed class Maybe<out A>
+sealed interface Maybe<out A> {
+    /** A [Maybe] value that is present. */
+    @JvmInline value class Just<out A> internal constructor(val value: A) : Maybe<A>
 
-/** A [Maybe] value that is present. */
-data class Just<out A> internal constructor(val value: A) : Maybe<A>()
-
-/** A [Maybe] value that is not present. */
-data object None : Maybe<Nothing>()
+    /** A [Maybe] value that is not present. */
+    data object None : Maybe<Nothing>
+}
 
 /** Utilities to query [Maybe] instances from within a [maybe] block. */
 @RestrictsSuspension
@@ -230,8 +232,14 @@ fun <A> Maybe<A>.mergeWith(other: Maybe<A>, transform: (A, A) -> A): Maybe<A> =
  * Returns a list containing only the present results of applying [transform] to each element in the
  * original iterable.
  */
-fun <A, B> Iterable<A>.mapMaybe(transform: (A) -> Maybe<B>): List<B> =
-    asSequence().mapMaybe(transform).toList()
+inline fun <A, B> Iterable<A>.mapMaybe(transform: (A) -> Maybe<B>): List<B> = buildList {
+    for (a in this@mapMaybe) {
+        val result = transform(a)
+        if (result is Just) {
+            add(result.value)
+        }
+    }
+}
 
 /**
  * Returns a sequence containing only the present results of applying [transform] to each element in
@@ -244,9 +252,15 @@ fun <A, B> Sequence<A>.mapMaybe(transform: (A) -> Maybe<B>): Sequence<B> =
  * Returns a map with values of only the present results of applying [transform] to each entry in
  * the original map.
  */
-inline fun <K, A, B> Map<K, A>.mapMaybeValues(
-    crossinline p: (Map.Entry<K, A>) -> Maybe<B>
-): Map<K, B> = asSequence().mapMaybe { entry -> p(entry).map { entry.key to it } }.toMap()
+inline fun <K, A, B> Map<K, A>.mapMaybeValues(transform: (Map.Entry<K, A>) -> Maybe<B>): Map<K, B> =
+    buildMap {
+        for (entry in this@mapMaybeValues) {
+            val result = transform(entry)
+            if (result is Just) {
+                put(entry.key, result.value)
+            }
+        }
+    }
 
 /** Returns a map with all non-present values filtered out. */
 fun <K, A> Map<K, Maybe<A>>.filterJustValues(): Map<K, A> =

@@ -16,6 +16,7 @@
 
 package com.android.systemui.qs.panels.ui.compose
 
+import android.processor.immutability.Immutable
 import com.android.compose.animation.Bounceable
 import com.android.systemui.qs.panels.shared.model.SizedTile
 import com.android.systemui.qs.panels.ui.model.GridCell
@@ -23,6 +24,7 @@ import com.android.systemui.qs.panels.ui.model.TileGridCell
 import com.android.systemui.qs.panels.ui.viewmodel.BounceableTileViewModel
 import com.android.systemui.qs.panels.ui.viewmodel.TileViewModel
 
+@Immutable
 data class BounceableInfo(
     val bounceable: BounceableTileViewModel,
     val previousTile: Bounceable?,

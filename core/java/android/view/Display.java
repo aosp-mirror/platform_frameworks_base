@@ -19,7 +19,9 @@ package android.view;
 import static android.Manifest.permission.CONFIGURE_DISPLAY_COLOR_MODE;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.hardware.flags.Flags.FLAG_OVERLAYPROPERTIES_CLASS_API;
+import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
+import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES;
 import static com.android.server.display.feature.flags.Flags.FLAG_HIGHEST_HDR_SDR_RATIO_API;
 import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_HAS_ARR_SUPPORT;
 import static com.android.server.display.feature.flags.Flags.FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE;
@@ -57,12 +59,14 @@ import android.os.SystemClock;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Log;
+import android.util.TypedValue;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 
@@ -1046,6 +1050,19 @@ public final class Display {
     }
 
     /**
+     * Returns the smallest size of the display in dp
+     * @hide
+     */
+    public float getMinSizeDimensionDp() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            mDisplayInfo.getAppMetrics(mTempMetrics);
+            return TypedValue.deriveDimension(COMPLEX_UNIT_DIP,
+                    Math.min(mDisplayInfo.logicalWidth, mDisplayInfo.logicalHeight), mTempMetrics);
+        }
+    }
+
+    /**
      * @deprecated Use {@link WindowMetrics#getBounds#width()} instead.
      */
     @Deprecated
@@ -1207,17 +1224,36 @@ public final class Display {
 
     /**
      * Get the supported refresh rates of this display in frames per second.
-     * <p>
-     * This method only returns refresh rates for the display's default modes. For more options, use
-     * {@link #getSupportedModes()}.
      *
-     * @deprecated use {@link #getSupportedModes()} instead
+     * <ul>
+     * <li> Android version {@link Build.VERSION_CODES#BAKLAVA} and above:
+     * returns display supported render rates.
+     * <li> Android version {@link Build.VERSION_CODES#VANILLA_ICE_CREAM} and below:
+     * This method only returns refresh rates for the display's default modes. For more options,
+     * use {@link #getSupportedModes()}.
+     * </ul>
      */
-    @Deprecated
-    public float[] getSupportedRefreshRates() {
+    @FlaggedApi(FLAG_ENABLE_GET_SUPPORTED_REFRESH_RATES)
+    public @NonNull float[] getSupportedRefreshRates() {
         synchronized (mLock) {
             updateDisplayInfoLocked();
-            return mDisplayInfo.getDefaultRefreshRates();
+            final float[] refreshRates = mDisplayInfo.getDefaultRefreshRates();
+            Objects.requireNonNull(refreshRates);
+            return refreshRates;
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @TestApi
+    @SuppressLint({"UnflaggedApi"}) // Usage in the CTS to test backward compatibility.
+    public @NonNull float[] getSupportedRefreshRatesLegacy() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            final float[] refreshRates = mDisplayInfo.getDefaultRefreshRatesLegacy();
+            Objects.requireNonNull(refreshRates);
+            return refreshRates;
         }
     }
 
@@ -1279,8 +1315,25 @@ public final class Display {
         }
     }
 
+    /**
+     * Normal category determines the framework's recommended normal frame rate.
+     * Opt for this normal rate unless a higher frame rate significantly enhances
+     * the user experience.
+     *
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_HIGH
+     */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_NORMAL = 0;
+
+    /**
+     * High category determines the framework's recommended high frame rate.
+     * Opt for this high rate when a higher frame rate significantly enhances
+     * the user experience.
+     *
+     * @see #getSuggestedFrameRate(int)
+     * @see #FRAME_RATE_CATEGORY_NORMAL
+     */
     @FlaggedApi(FLAG_ENABLE_GET_SUGGESTED_FRAME_RATE)
     public static final int FRAME_RATE_CATEGORY_HIGH = 1;
 
@@ -1300,22 +1353,17 @@ public final class Display {
      *
      * <p> For example, an animation that does not require fast render rates can use
      * the {@link #FRAME_RATE_CATEGORY_NORMAL} to get the suggested frame rate.
-     * The suggested frame rate then can be used in the
-     * {@link Surface.FrameRateParams.Builder#setDesiredRateRange} for desiredMinRate.
      *
      * <pre>{@code
      *  float desiredMinRate = display.getSuggestedFrameRate(FRAME_RATE_CATEGORY_NORMAL);
-     *  Surface.FrameRateParams params = new Surface.FrameRateParams.Builder().
-     *                                      setDesiredRateRange(desiredMinRate, Float.MAX).build();
-     *  surface.setFrameRate(params);
+     *  surface.setFrameRate(desiredMinRate, Surface.FRAME_RATE_COMPATIBILITY_DEFAULT);
      * }</pre>
      * </p>
      *
      * @param category either {@link #FRAME_RATE_CATEGORY_NORMAL}
      *                 or {@link #FRAME_RATE_CATEGORY_HIGH}
      *
-     * @see Surface#setFrameRate(Surface.FrameRateParams)
-     * @see SurfaceControl.Transaction#setFrameRate(SurfaceControl, Surface.FrameRateParams)
+     * @see Surface#setFrameRate(float, int)
      * @throws IllegalArgumentException when category is not {@link #FRAME_RATE_CATEGORY_NORMAL}
      * or {@link #FRAME_RATE_CATEGORY_HIGH}
      */
@@ -1549,8 +1597,11 @@ public final class Display {
             // Although we only care about the HDR/SDR ratio changing, that can also come in the
             // form of the larger DISPLAY_CHANGED event
             mGlobal.registerDisplayListener(toRegister, executor,
-                    DisplayManager.EVENT_FLAG_HDR_SDR_RATIO_CHANGED
-                            | DisplayManagerGlobal.EVENT_DISPLAY_CHANGED,
+                    DisplayManagerGlobal
+                                    .INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED
+                            | DisplayManagerGlobal.INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE
+                            | DisplayManagerGlobal
+                                    .INTERNAL_EVENT_FLAG_DISPLAY_HDR_SDR_RATIO_CHANGED,
                     ActivityThread.currentPackageName());
         }
 
@@ -1785,7 +1836,12 @@ public final class Display {
      *         {@code getWindowManager()} or {@code getSystemService(Context.WINDOW_SERVICE)}), the
      *         returned metrics provide the size of the current app window. As a result, in
      *         multi-window mode, the returned size can be smaller than the size of the device
-     *         screen.
+     *         screen. System decoration handling may vary depending on API level:
+     *         <ul>
+     *             <li>API level 35 and above, the window size will be returned.
+     *             <li>API level 34 and below, the window size minus system decoration areas and
+     *                 display cutout is returned.
+     *         </ul>
      *     <li>If metrics are requested from a non-activity context (for example, the application
      *         context, where the WindowManager is accessed by
      *         {@code getApplicationContext().getSystemService(Context.WINDOW_SERVICE)}), the
@@ -1998,6 +2054,22 @@ public final class Display {
         synchronized (mLock) {
             updateDisplayInfoLocked();
             return mIsValid ? mDisplayInfo.committedState : STATE_UNKNOWN;
+        }
+    }
+
+    /**
+     * Returns whether the display is eligible for hosting tasks.
+     *
+     * For example, if the display is used for mirroring, this will return {@code false}.
+     *
+     * TODO (b/383666349): Rename this later once there is a better option.
+     *
+     * @hide
+     */
+    public boolean canHostTasks() {
+        synchronized (mLock) {
+            updateDisplayInfoLocked();
+            return mIsValid && mDisplayInfo.canHostTasks;
         }
     }
 
@@ -2432,6 +2504,8 @@ public final class Display {
          * constrained by the system.
          * @hide
          */
+        @SuppressWarnings("UnflaggedApi") // For testing only
+        @TestApi
         public float getVsyncRate() {
             return mVsyncRate;
         }

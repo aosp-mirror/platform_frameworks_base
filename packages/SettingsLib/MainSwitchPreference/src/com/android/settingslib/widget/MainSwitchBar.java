@@ -32,6 +32,7 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.widget.mainswitch.R;
@@ -42,7 +43,7 @@ import java.util.List;
 /**
  * MainSwitchBar is a View with a customized Switch.
  * This component is used as the main switch of the page
- * to enable or disable the prefereces on the page.
+ * to enable or disable the preferences on the page.
  */
 public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListener {
 
@@ -57,6 +58,8 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
     protected TextView mSummaryView;
     protected CompoundButton mSwitch;
     private final View mFrameView;
+
+    private @Nullable PreChangeListener mPreChangeListener;
 
     public MainSwitchBar(Context context) {
         this(context, null);
@@ -138,8 +141,18 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
 
     @Override
     public boolean performClick() {
-        mSwitch.performClick();
+        if (callPreChangeListener()) {
+            mSwitch.performClick();
+        }
         return super.performClick();
+    }
+
+    protected boolean callPreChangeListener() {
+        return mPreChangeListener == null || mPreChangeListener.preChange(!mSwitch.isChecked());
+    }
+
+    public void setPreChangeListener(@Nullable PreChangeListener preChangeListener) {
+        mPreChangeListener = preChangeListener;
     }
 
     /**
@@ -271,7 +284,7 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
         }
     }
 
-    static class SavedState extends BaseSavedState {
+    public static class SavedState extends BaseSavedState {
         boolean mChecked;
         boolean mVisible;
 
@@ -340,5 +353,17 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
         mSwitch.setOnCheckedChangeListener(ss.mVisible ? this : null);
 
         requestLayout();
+    }
+
+    /**
+     * Listener callback before switch is toggled.
+     */
+    public interface PreChangeListener {
+        /**
+         * Returns if the new value can be set.
+         *
+         * When false is return, the switch toggle is not triggered at all.
+         */
+        boolean preChange(boolean isCheck);
     }
 }

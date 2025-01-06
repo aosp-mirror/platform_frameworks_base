@@ -17,21 +17,17 @@
 package com.android.systemui.volume.dialog.ui.binder
 
 import android.app.Dialog
-import android.graphics.Color
-import android.graphics.PixelFormat
-import android.graphics.drawable.ColorDrawable
-import android.view.Gravity
+import android.graphics.Rect
+import android.graphics.Region
 import android.view.View
 import android.view.ViewGroup
-import android.view.Window
-import android.view.WindowManager
+import android.view.ViewTreeObserver
+import android.view.ViewTreeObserver.InternalInsetsInfo
+import androidx.constraintlayout.motion.widget.MotionLayout
 import com.android.internal.view.RotationPolicy
-import com.android.systemui.lifecycle.WindowLifecycleState
-import com.android.systemui.lifecycle.repeatWhenAttached
-import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.res.R
+import com.android.systemui.util.children
 import com.android.systemui.volume.SystemUIInterpolators
-import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerViewBinder
 import com.android.systemui.volume.dialog.settings.ui.binder.VolumeDialogSettingsButtonViewBinder
@@ -40,18 +36,19 @@ import com.android.systemui.volume.dialog.sliders.ui.VolumeDialogSlidersViewBind
 import com.android.systemui.volume.dialog.ui.VolumeDialogResources
 import com.android.systemui.volume.dialog.ui.utils.JankListenerFactory
 import com.android.systemui.volume.dialog.ui.utils.suspendAnimate
-import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogGravityViewModel
 import com.android.systemui.volume.dialog.ui.viewmodel.VolumeDialogViewModel
 import com.android.systemui.volume.dialog.utils.VolumeTracer
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
-import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
+import kotlinx.coroutines.flow.scan
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.suspendCancellableCoroutine
 
 /** Binds the root view of the Volume Dialog. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -60,66 +57,35 @@ class VolumeDialogViewBinder
 @Inject
 constructor(
     private val volumeResources: VolumeDialogResources,
-    private val gravityViewModel: VolumeDialogGravityViewModel,
-    private val viewModelFactory: VolumeDialogViewModel.Factory,
+    private val viewModel: VolumeDialogViewModel,
     private val jankListenerFactory: JankListenerFactory,
     private val tracer: VolumeTracer,
-    @VolumeDialog private val coroutineScope: CoroutineScope,
     private val volumeDialogRingerViewBinder: VolumeDialogRingerViewBinder,
     private val slidersViewBinder: VolumeDialogSlidersViewBinder,
     private val settingsButtonViewBinder: VolumeDialogSettingsButtonViewBinder,
 ) {
 
-    fun bind(dialog: Dialog) {
-        setupDialog(dialog)
-        val view: View = dialog.requireViewById(R.id.volume_dialog_container)
-        view.alpha = 0f
-        view.repeatWhenAttached {
-            view.viewModel(
-                traceName = "VolumeDialogViewBinder",
-                minWindowLifecycleState = WindowLifecycleState.ATTACHED,
-                factory = { viewModelFactory.create() },
-            ) { viewModel ->
-                viewModel.dialogTitle.onEach { dialog.window?.setTitle(it) }.launchIn(this)
+    fun CoroutineScope.bind(dialog: Dialog) {
+        // Root view of the Volume Dialog.
+        val root: MotionLayout = dialog.requireViewById(R.id.volume_dialog_root)
+        root.alpha = 0f
 
-                animateVisibility(view, dialog, viewModel.dialogVisibilityModel)
+        animateVisibility(root, dialog, viewModel.dialogVisibilityModel)
 
-                awaitCancellation()
+        viewModel.dialogTitle.onEach { dialog.window?.setTitle(it) }.launchIn(this)
+        viewModel.motionState
+            .scan(0) { acc, motionState ->
+                // don't animate the initial state
+                root.transitionToState(motionState, animate = acc != 0)
+                acc + 1
             }
-        }
-        volumeDialogRingerViewBinder.bind(view)
-        slidersViewBinder.bind(view)
-        settingsButtonViewBinder.bind(view)
-    }
+            .launchIn(this)
 
-    /** Configures [Window] for the [Dialog]. */
-    private fun setupDialog(dialog: Dialog) {
-        with(dialog.window!!) {
-            clearFlags(WindowManager.LayoutParams.FLAG_DIM_BEHIND)
-            addFlags(
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                    WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
-                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
-                    WindowManager.LayoutParams.FLAG_HARDWARE_ACCELERATED
-            )
-            addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY)
+        launch { root.viewTreeObserver.computeInternalInsetsListener(root) }
 
-            requestFeature(Window.FEATURE_NO_TITLE)
-            setBackgroundDrawable(ColorDrawable(Color.TRANSPARENT))
-            setType(WindowManager.LayoutParams.TYPE_VOLUME_OVERLAY)
-            setWindowAnimations(-1)
-            setFormat(PixelFormat.TRANSLUCENT)
-
-            attributes =
-                attributes.apply {
-                    title = "VolumeDialog" // Not the same as Window#setTitle
-                }
-            setLayout(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT)
-
-            gravityViewModel.dialogGravity.onEach { setGravity(it) }.launchIn(coroutineScope)
-        }
-        dialog.setContentView(R.layout.volume_dialog)
-        dialog.setCanceledOnTouchOutside(true)
+        with(volumeDialogRingerViewBinder) { bind(root) }
+        with(slidersViewBinder) { bind(root) }
+        with(settingsButtonViewBinder) { bind(root) }
     }
 
     private fun CoroutineScope.animateVisibility(
@@ -151,15 +117,13 @@ constructor(
             .launchIn(this)
     }
 
-    private suspend fun calculateTranslationX(view: View): Float? {
+    private fun calculateTranslationX(view: View): Float? {
         return if (view.display.rotation == RotationPolicy.NATURAL_ROTATION) {
-            val dialogGravity = gravityViewModel.dialogGravity.first()
-            val isGravityLeft = (dialogGravity and Gravity.LEFT) == Gravity.LEFT
-            if (isGravityLeft) {
+            if (view.isLayoutRtl) {
                 -1
             } else {
                 1
-            } * view.width / 2.0f
+            } * view.width / 2f
         } else {
             null
         }
@@ -208,5 +172,35 @@ constructor(
             animator.translationX(translationX)
         }
         animator.suspendAnimate(jankListenerFactory.dismiss(this, duration))
+    }
+
+    private suspend fun ViewTreeObserver.computeInternalInsetsListener(viewGroup: ViewGroup) =
+        suspendCancellableCoroutine<Unit> { continuation ->
+            val listener =
+                ViewTreeObserver.OnComputeInternalInsetsListener { inoutInfo ->
+                    viewGroup.fillTouchableBounds(inoutInfo)
+                }
+            addOnComputeInternalInsetsListener(listener)
+            continuation.invokeOnCancellation { removeOnComputeInternalInsetsListener(listener) }
+        }
+
+    private fun ViewGroup.fillTouchableBounds(internalInsetsInfo: InternalInsetsInfo) {
+        for (child in children) {
+            val boundsRect = Rect()
+            internalInsetsInfo.setTouchableInsets(InternalInsetsInfo.TOUCHABLE_INSETS_REGION)
+
+            child.getBoundsInWindow(boundsRect, false)
+            internalInsetsInfo.touchableRegion.op(boundsRect, Region.Op.UNION)
+        }
+        val boundsRect = Rect()
+        getBoundsInWindow(boundsRect, false)
+    }
+
+    private fun MotionLayout.transitionToState(newState: Int, animate: Boolean) {
+        if (animate) {
+            transitionToState(newState)
+        } else {
+            jumpToState(newState)
+        }
     }
 }

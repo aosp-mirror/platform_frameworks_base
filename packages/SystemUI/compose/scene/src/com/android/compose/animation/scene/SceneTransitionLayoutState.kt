@@ -25,17 +25,13 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
-import androidx.compose.ui.util.fastFilter
 import androidx.compose.ui.util.fastForEach
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transformation.SharedElementTransformation
-import com.android.compose.animation.scene.transition.link.LinkedTransition
-import com.android.compose.animation.scene.transition.link.StateLink
-import kotlin.math.absoluteValue
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.cancel
 import kotlinx.coroutines.launch
 
 /**
@@ -236,7 +232,6 @@ fun MutableSceneTransitionLayoutState(
     canShowOverlay: (OverlayKey) -> Boolean = { true },
     canHideOverlay: (OverlayKey) -> Boolean = { true },
     canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
-    stateLinks: List<StateLink> = emptyList(),
 ): MutableSceneTransitionLayoutState {
     return MutableSceneTransitionLayoutStateImpl(
         initialScene,
@@ -246,7 +241,6 @@ fun MutableSceneTransitionLayoutState(
         canShowOverlay,
         canHideOverlay,
         canReplaceOverlay,
-        stateLinks,
     )
 }
 
@@ -258,10 +252,7 @@ internal class MutableSceneTransitionLayoutStateImpl(
     internal val canChangeScene: (SceneKey) -> Boolean = { true },
     internal val canShowOverlay: (OverlayKey) -> Boolean = { true },
     internal val canHideOverlay: (OverlayKey) -> Boolean = { true },
-    internal val canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ ->
-        true
-    },
-    private val stateLinks: List<StateLink> = emptyList(),
+    internal val canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
 ) : MutableSceneTransitionLayoutState {
     private val creationThread: Thread = Thread.currentThread()
 
@@ -275,11 +266,12 @@ internal class MutableSceneTransitionLayoutStateImpl(
         private set
 
     /**
-     * The flattened list of [SharedElementTransformation] within all the transitions in
+     * The flattened list of [SharedElementTransformation.Factory] within all the transitions in
      * [transitionStates].
      */
-    private val transformationsWithElevation: List<SharedElementTransformation> by derivedStateOf {
-        transformationsWithElevation(transitionStates)
+    private val transformationFactoriesWithElevation:
+        List<SharedElementTransformation.Factory> by derivedStateOf {
+        transformationFactoriesWithElevation(transitionStates)
     }
 
     override val currentScene: SceneKey
@@ -361,29 +353,27 @@ internal class MutableSceneTransitionLayoutStateImpl(
     }
 
     override suspend fun startTransition(transition: TransitionState.Transition, chain: Boolean) {
+        Log.i(TAG, "startTransition(transition=$transition, chain=$chain)")
         checkThread()
 
-        try {
-            // Keep a reference to the previous transition (if any).
-            val previousTransition = currentTransition
+        // Prepare the transition before starting it. This is outside of the try/finally block on
+        // purpose because preparing a transition might throw an exception (e.g. if we find multiple
+        // specs matching this transition), in which case we want to throw that exception here
+        // before even starting the transition.
+        prepareTransitionBeforeStarting(transition)
 
+        try {
             // Start the transition.
             startTransitionInternal(transition, chain)
 
-            // Handle transition links.
-            previousTransition?.let { cancelActiveTransitionLinks(it) }
-            if (stateLinks.isNotEmpty()) {
-                coroutineScope { setupTransitionLinks(transition) }
-            }
-
             // Run the transition until it is finished.
-            transition.run()
+            transition.runInternal()
         } finally {
             finishTransition(transition)
         }
     }
 
-    private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {
+    private fun prepareTransitionBeforeStarting(transition: TransitionState.Transition) {
         // Set the current scene and overlays on the transition.
         val currentState = transitionState
         transition.currentSceneWhenTransitionStarted = currentState.currentScene
@@ -392,7 +382,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // Compute the [TransformationSpec] when the transition starts.
         val fromContent = transition.fromContent
         val toContent = transition.toContent
-        val orientation = (transition as? TransitionState.HasOverscrollProperties)?.orientation
 
         // Update the transition specs.
         transition.transformationSpec =
@@ -403,15 +392,9 @@ internal class MutableSceneTransitionLayoutStateImpl(
             transitions
                 .transitionSpec(fromContent, toContent, key = transition.key)
                 .previewTransformationSpec(transition)
-        if (orientation != null) {
-            transition.updateOverscrollSpecs(
-                fromSpec = transitions.overscrollSpec(fromContent, orientation),
-                toSpec = transitions.overscrollSpec(toContent, orientation),
-            )
-        } else {
-            transition.updateOverscrollSpecs(fromSpec = null, toSpec = null)
-        }
+    }
 
+    private fun startTransitionInternal(transition: TransitionState.Transition, chain: Boolean) {
         when (val currentState = transitionStates.last()) {
             is TransitionState.Idle -> {
                 // Replace [Idle] by [transition].
@@ -437,14 +420,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
                     check(transitionStates.size == 1)
                     check(transitionStates[0] is TransitionState.Idle)
                     transitionStates = listOf(transition)
-                } else if (currentState == transition.replacedTransition) {
-                    // Replace the transition.
-                    transitionStates =
-                        transitionStates.subList(0, transitionStates.lastIndex) + transition
-
-                    // Make sure it is removed from the finishedTransitions set if it was already
-                    // finished.
-                    finishedTransitions.remove(currentState)
                 } else {
                     // Append the new transition.
                     transitionStates = transitionStates + transition
@@ -471,42 +446,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
         )
     }
 
-    private fun cancelActiveTransitionLinks(transition: TransitionState.Transition) {
-        transition.activeTransitionLinks.forEach { (link, linkedTransition) ->
-            link.target.finishTransition(linkedTransition)
-        }
-        transition.activeTransitionLinks.clear()
-    }
-
-    private fun CoroutineScope.setupTransitionLinks(transition: TransitionState.Transition) {
-        stateLinks.fastForEach { stateLink ->
-            val matchingLinks =
-                stateLink.transitionLinks.fastFilter { it.isMatchingLink(transition) }
-            if (matchingLinks.isEmpty()) return@fastForEach
-            if (matchingLinks.size > 1) error("More than one link matched.")
-
-            val targetCurrentScene = stateLink.target.transitionState.currentScene
-            val matchingLink = matchingLinks[0]
-
-            if (!matchingLink.targetIsInValidState(targetCurrentScene)) return@fastForEach
-
-            val linkedTransition =
-                LinkedTransition(
-                    originalTransition = transition,
-                    fromScene = targetCurrentScene,
-                    toScene = matchingLink.targetTo,
-                    key = matchingLink.targetTransitionKey,
-                )
-
-            // Start with UNDISPATCHED so that startTransition is called directly and the new linked
-            // transition is observable directly.
-            launch(start = CoroutineStart.UNDISPATCHED) {
-                stateLink.target.startTransition(linkedTransition)
-            }
-            transition.activeTransitionLinks[stateLink] = linkedTransition
-        }
-    }
-
     /**
      * Notify that [transition] was finished and that it settled to its
      * [currentScene][TransitionState.currentScene]. This will do nothing if [transition] was
@@ -520,9 +459,9 @@ internal class MutableSceneTransitionLayoutStateImpl(
             return
         }
 
-        // Make sure that this transition settles in case it was force finished, for instance by
-        // calling snapToScene().
-        transition.freezeAndAnimateToCurrentState()
+        // Make sure that this transition is cancelled in case it was force finished, for instance
+        // if snapToScene() is called.
+        transition.coroutineScope.cancel()
 
         val transitionStates = this.transitionStates
         if (!transitionStates.contains(transition)) {
@@ -530,13 +469,11 @@ internal class MutableSceneTransitionLayoutStateImpl(
             return
         }
 
+        Log.i(TAG, "finishTransition(transition=$transition)")
         check(transitionStates.fastAll { it is TransitionState.Transition })
 
         // Mark this transition as finished.
         finishedTransitions.add(transition)
-
-        // Finish all linked transitions.
-        finishActiveTransitionLinks(transition)
 
         // Keep a reference to the last transition, in case we remove all transitions and should
         // settle to Idle.
@@ -560,13 +497,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
         // If all transitions are finished, we are idle.
         if (i == nStates) {
             check(finishedTransitions.isEmpty())
-            this.transitionStates =
-                listOf(
-                    TransitionState.Idle(
-                        lastTransition.currentScene,
-                        lastTransition.currentOverlays,
-                    )
-                )
+            val idle =
+                TransitionState.Idle(lastTransition.currentScene, lastTransition.currentOverlays)
+            Log.i(TAG, "all transitions finished. idle=$idle")
+            this.transitionStates = listOf(idle)
         } else if (i > 0) {
             this.transitionStates = transitionStates.subList(fromIndex = i, toIndex = nStates)
         }
@@ -582,46 +516,6 @@ internal class MutableSceneTransitionLayoutStateImpl(
 
         check(transitionStates.size == 1)
         transitionStates = listOf(TransitionState.Idle(scene, currentOverlays))
-    }
-
-    private fun finishActiveTransitionLinks(transition: TransitionState.Transition) {
-        for ((link, linkedTransition) in transition.activeTransitionLinks) {
-            link.target.finishTransition(linkedTransition)
-        }
-        transition.activeTransitionLinks.clear()
-    }
-
-    /**
-     * Check if a transition is in progress. If the progress value is near 0 or 1, immediately snap
-     * to the closest scene.
-     *
-     * Important: Snapping to the closest scene will instantly finish *all* ongoing transitions,
-     * only the progress of the last transition will be checked.
-     *
-     * @return true if snapped to the closest scene.
-     */
-    internal fun snapToIdleIfClose(threshold: Float): Boolean {
-        val transition = currentTransition ?: return false
-        val progress = transition.progress
-
-        fun isProgressCloseTo(value: Float) = (progress - value).absoluteValue <= threshold
-
-        fun finishAllTransitions() {
-            // Force finish all transitions.
-            while (currentTransitions.isNotEmpty()) {
-                finishTransition(transitionStates[0] as TransitionState.Transition)
-            }
-        }
-
-        val shouldSnap =
-            (isProgressCloseTo(0f) && transition.currentScene == transition.fromContent) ||
-                (isProgressCloseTo(1f) && transition.currentScene == transition.toContent)
-        return if (shouldSnap) {
-            finishAllTransitions()
-            true
-        } else {
-            false
-        }
     }
 
     override fun showOverlay(
@@ -755,21 +649,23 @@ internal class MutableSceneTransitionLayoutStateImpl(
         animate()
     }
 
-    private fun transformationsWithElevation(
+    private fun transformationFactoriesWithElevation(
         transitionStates: List<TransitionState>
-    ): List<SharedElementTransformation> {
+    ): List<SharedElementTransformation.Factory> {
         return buildList {
             transitionStates.fastForEach { state ->
                 if (state !is TransitionState.Transition) {
                     return@fastForEach
                 }
 
-                state.transformationSpec.transformations.fastForEach { transformation ->
+                state.transformationSpec.transformationMatchers.fastForEach { transformationMatcher
+                    ->
+                    val factory = transformationMatcher.factory
                     if (
-                        transformation is SharedElementTransformation &&
-                            transformation.elevateInContent != null
+                        factory is SharedElementTransformation.Factory &&
+                            factory.elevateInContent != null
                     ) {
-                        add(transformation)
+                        add(factory)
                     }
                 }
             }
@@ -784,10 +680,10 @@ internal class MutableSceneTransitionLayoutStateImpl(
      * necessary, for performance.
      */
     internal fun isElevationPossible(content: ContentKey, element: ElementKey?): Boolean {
-        if (transformationsWithElevation.isEmpty()) return false
-        return transformationsWithElevation.fastAny { transformation ->
-            transformation.elevateInContent == content &&
-                (element == null || transformation.matcher.matches(element, content))
+        if (transformationFactoriesWithElevation.isEmpty()) return false
+        return transformationFactoriesWithElevation.fastAny { factory ->
+            factory.elevateInContent == content &&
+                (element == null || factory.matcher.matches(element, content))
         }
     }
 }

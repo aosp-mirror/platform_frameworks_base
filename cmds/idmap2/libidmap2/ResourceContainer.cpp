@@ -17,10 +17,12 @@
 #include "idmap2/ResourceContainer.h"
 
 #include <memory>
+#include <mutex>
 #include <string>
 #include <utility>
 #include <vector>
 
+#include "android-base/scopeguard.h"
 #include "androidfw/ApkAssets.h"
 #include "androidfw/AssetManager.h"
 #include "androidfw/Util.h"
@@ -268,27 +270,40 @@ struct ResState {
   std::unique_ptr<AssetManager2> am;
   ZipAssetsProvider* zip_assets;
 
-  static Result<ResState> Initialize(std::unique_ptr<ZipAssetsProvider> zip,
+  static Result<ResState> Initialize(std::unique_ptr<ZipAssetsProvider>&& zip,
                                      package_property_t flags) {
     ResState state;
     state.zip_assets = zip.get();
     if ((state.apk_assets = ApkAssets::Load(std::move(zip), flags)) == nullptr) {
-      return Error("failed to load apk asset");
+      return Error("failed to load apk asset for '%s'",
+                   state.zip_assets->GetDebugName().c_str());
     }
 
+    // Make sure we put ZipAssetsProvider where we took it if initialization fails, so the
+    // original object stays valid for any next call it may get.
+    auto scoped_restore_zip_assets = android::base::ScopeGuard([&zip, &state]() {
+      zip = std::unique_ptr<ZipAssetsProvider>(
+          static_cast<ZipAssetsProvider*>(
+              std::move(const_cast<ApkAssets&>(*state.apk_assets)).TakeAssetsProvider().release()));
+    });
+
     if ((state.arsc = state.apk_assets->GetLoadedArsc()) == nullptr) {
-      return Error("failed to retrieve loaded arsc");
+      return Error("failed to retrieve loaded arsc for '%s'",
+                   state.zip_assets->GetDebugName().c_str());
     }
 
     if ((state.package = GetPackageAtIndex0(state.arsc)) == nullptr) {
-      return Error("failed to retrieve loaded package at index 0");
+      return Error("failed to retrieve loaded package at index 0 for '%s'",
+                   state.zip_assets->GetDebugName().c_str());
     }
 
     state.am = std::make_unique<AssetManager2>();
     if (!state.am->SetApkAssets({state.apk_assets}, false)) {
-      return Error("failed to create asset manager");
+      return Error("failed to create asset manager for '%s'",
+                   state.zip_assets->GetDebugName().c_str());
     }
 
+    scoped_restore_zip_assets.Disable();
     return state;
   }
 };
@@ -296,7 +311,7 @@ struct ResState {
 }  // namespace
 
 struct ApkResourceContainer : public TargetResourceContainer, public OverlayResourceContainer {
-  static Result<std::unique_ptr<ApkResourceContainer>> FromPath(const std::string& path);
+  static Result<std::unique_ptr<ApkResourceContainer>> FromPath(std::string path);
 
   // inherited from TargetResourceContainer
   Result<bool> DefinesOverlayable() const override;
@@ -320,6 +335,7 @@ struct ApkResourceContainer : public TargetResourceContainer, public OverlayReso
   Result<const ResState*> GetState() const;
   ZipAssetsProvider* GetZipAssets() const;
 
+  mutable std::mutex state_lock_;
   mutable std::variant<std::unique_ptr<ZipAssetsProvider>, ResState> state_;
   std::string path_;
 };
@@ -330,16 +346,17 @@ ApkResourceContainer::ApkResourceContainer(std::unique_ptr<ZipAssetsProvider> zi
 }
 
 Result<std::unique_ptr<ApkResourceContainer>> ApkResourceContainer::FromPath(
-    const std::string& path) {
+    std::string path) {
   auto zip_assets = ZipAssetsProvider::Create(path, 0 /* flags */);
   if (zip_assets == nullptr) {
     return Error("failed to load zip assets");
   }
   return std::unique_ptr<ApkResourceContainer>(
-      new ApkResourceContainer(std::move(zip_assets), path));
+      new ApkResourceContainer(std::move(zip_assets), std::move(path)));
 }
 
 Result<const ResState*> ApkResourceContainer::GetState() const {
+  std::lock_guard lock(state_lock_);
   if (auto state = std::get_if<ResState>(&state_); state != nullptr) {
     return state;
   }
@@ -355,6 +372,7 @@ Result<const ResState*> ApkResourceContainer::GetState() const {
 }
 
 ZipAssetsProvider* ApkResourceContainer::GetZipAssets() const {
+  std::lock_guard lock(state_lock_);
   if (auto zip = std::get_if<std::unique_ptr<ZipAssetsProvider>>(&state_); zip != nullptr) {
     return zip->get();
   }
@@ -427,7 +445,7 @@ Result<std::string> ApkResourceContainer::GetResourceName(ResourceId id) const {
 
 Result<std::unique_ptr<TargetResourceContainer>> TargetResourceContainer::FromPath(
     std::string path) {
-  auto result = ApkResourceContainer::FromPath(path);
+  auto result = ApkResourceContainer::FromPath(std::move(path));
   if (!result) {
     return result.GetError();
   }
@@ -438,7 +456,7 @@ Result<std::unique_ptr<OverlayResourceContainer>> OverlayResourceContainer::From
     std::string path) {
   // Load the path as a fabricated overlay if the file magic indicates this is a fabricated overlay.
   if (android::IsFabricatedOverlay(path)) {
-    auto result = FabricatedOverlayContainer::FromPath(path);
+    auto result = FabricatedOverlayContainer::FromPath(std::move(path));
     if (!result) {
       return result.GetError();
     }
@@ -446,7 +464,7 @@ Result<std::unique_ptr<OverlayResourceContainer>> OverlayResourceContainer::From
   }
 
   // Fallback to loading the container as an APK.
-  auto result = ApkResourceContainer::FromPath(path);
+  auto result = ApkResourceContainer::FromPath(std::move(path));
   if (!result) {
     return result.GetError();
   }

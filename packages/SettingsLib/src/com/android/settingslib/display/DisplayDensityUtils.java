@@ -29,13 +29,16 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
+import android.window.ConfigurationChangeSetting;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.settingslib.R;
 
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 import java.util.function.Predicate;
 
 /**
@@ -339,5 +342,32 @@ public class DisplayDensityUtils {
                 Log.w(LOG_TAG, "Unable to save forced display density setting");
             }
         });
+    }
+
+    /**
+     * Returns a list of {@link ConfigurationChangeSetting} object representing the forced display
+     * density settings for the displays that satisfy the predicate.
+     *
+     * @param index the index of the density value in the available density values array.
+     * @return a list of {@link ConfigurationChangeSetting} objects.
+     * @see IWindowManager#setConfigurationChangeSettingsForUser
+     */
+    @NonNull
+    public List<ConfigurationChangeSetting> getForcedDisplayDensitySetting(final int index) {
+        final ArrayList<ConfigurationChangeSetting> settings = new ArrayList<>();
+        for (final Display display : mDisplayManager.getDisplays(
+                DisplayManager.DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED)) {
+            final int displayId = display.getDisplayId();
+            final DisplayInfo info = new DisplayInfo();
+            if (!display.getDisplayInfo(info)) {
+                Log.w(LOG_TAG, "Unable to get display info for display " + displayId);
+                continue;
+            }
+            if (!mPredicate.test(info)) {
+                continue;
+            }
+            settings.add(new ConfigurationChangeSetting.DensitySetting(displayId, mValues[index]));
+        }
+        return settings;
     }
 }

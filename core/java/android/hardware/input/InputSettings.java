@@ -25,11 +25,15 @@ import static com.android.hardware.input.Flags.keyboardA11yBounceKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yMouseKeys;
 import static com.android.hardware.input.Flags.keyboardA11ySlowKeysFlag;
 import static com.android.hardware.input.Flags.keyboardA11yStickyKeysFlag;
+import static com.android.hardware.input.Flags.mouseScrollingAcceleration;
 import static com.android.hardware.input.Flags.mouseReverseVerticalScrolling;
 import static com.android.hardware.input.Flags.mouseSwapPrimaryButton;
-import static com.android.hardware.input.Flags.touchpadTapDragging;
+import static com.android.hardware.input.Flags.pointerAcceleration;
+import static com.android.hardware.input.Flags.touchpadSystemGestureDisable;
 import static com.android.hardware.input.Flags.touchpadThreeFingerTapShortcut;
 import static com.android.hardware.input.Flags.touchpadVisualizer;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+import static com.android.hardware.input.Flags.useKeyGestureEventHandlerMultiKeyGestures;
 import static com.android.input.flags.Flags.FLAG_KEYBOARD_REPEAT_KEYS;
 import static com.android.input.flags.Flags.enableInputFilterRustImpl;
 import static com.android.input.flags.Flags.keyboardRepeatKeys;
@@ -363,12 +367,12 @@ public class InputSettings {
     }
 
     /**
-     * Returns true if the feature flag for touchpad tap dragging is enabled.
+     * Returns true if the feature flag for disabling system gestures on touchpads is enabled.
      *
      * @hide
      */
-    public static boolean isTouchpadTapDraggingFeatureFlagEnabled() {
-        return touchpadTapDragging();
+    public static boolean isTouchpadSystemGestureDisableFeatureFlagEnabled() {
+        return touchpadSystemGestureDisable();
     }
 
     /**
@@ -386,7 +390,16 @@ public class InputSettings {
      * @hide
      */
     public static boolean isTouchpadThreeFingerTapShortcutFeatureFlagEnabled() {
-        return enableCustomizableInputGestures() && touchpadThreeFingerTapShortcut();
+        return isCustomizableInputGesturesFeatureFlagEnabled() && touchpadThreeFingerTapShortcut();
+    }
+
+    /**
+     * Returns true if the feature flag for toggling the mouse scrolling acceleration is enabled.
+     *
+     * @hide
+     */
+    public static boolean isMouseScrollingAccelerationFeatureFlagEnabled() {
+        return mouseScrollingAcceleration();
     }
 
     /**
@@ -403,6 +416,15 @@ public class InputSettings {
      */
     public static boolean isMouseSwapPrimaryButtonFeatureFlagEnabled() {
         return mouseSwapPrimaryButton();
+    }
+
+    /**
+     * Returns true if the feature flag for the pointer acceleration toggle is
+     * enabled.
+     * @hide
+     */
+    public static boolean isPointerAccelerationFeatureFlagEnabled() {
+        return pointerAcceleration();
     }
 
     /**
@@ -449,9 +471,6 @@ public class InputSettings {
      * @hide
      */
     public static boolean useTouchpadTapDragging(@NonNull Context context) {
-        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
-            return false;
-        }
         return Settings.System.getIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_TAP_DRAGGING, 0, UserHandle.USER_CURRENT) == 1;
     }
@@ -468,9 +487,6 @@ public class InputSettings {
      */
     @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
     public static void setTouchpadTapDragging(@NonNull Context context, boolean enabled) {
-        if (!isTouchpadTapDraggingFeatureFlagEnabled()) {
-            return;
-        }
         Settings.System.putIntForUser(context.getContentResolver(),
                 Settings.System.TOUCHPAD_TAP_DRAGGING, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
@@ -520,8 +536,45 @@ public class InputSettings {
      * @hide
      */
     public static boolean useTouchpadThreeFingerTapShortcut(@NonNull Context context) {
-        // TODO(b/365063048): determine whether to enable the shortcut based on the settings.
-        return isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
+        int customizedShortcut = Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION,
+                KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED, UserHandle.USER_CURRENT);
+        return customizedShortcut != KeyGestureEvent.KEY_GESTURE_TYPE_UNSPECIFIED
+                && isTouchpadThreeFingerTapShortcutFeatureFlagEnabled();
+    }
+
+    /**
+     * Returns true if system gestures (three- and four-finger swipes) should be enabled for
+     * touchpads.
+     *
+     * @param context The application context.
+     * @return Whether system gestures on touchpads are enabled
+     *
+     * @hide
+     */
+    public static boolean useTouchpadSystemGestures(@NonNull Context context) {
+        if (!isTouchpadSystemGestureDisableFeatureFlagEnabled()) {
+            return true;
+        }
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES, 1, UserHandle.USER_CURRENT) == 1;
+    }
+
+    /**
+     * Sets whether system gestures are enabled for touchpads.
+     *
+     * @param context The application context.
+     * @param enabled True to enable system gestures.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadSystemGesturesEnabled(@NonNull Context context, boolean enabled) {
+        if (!isTouchpadSystemGestureDisableFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_SYSTEM_GESTURES, enabled ? 1 : 0, UserHandle.USER_CURRENT);
     }
 
     /**
@@ -560,7 +613,44 @@ public class InputSettings {
     }
 
     /**
-     * Whether mouse vertical scrolling is enabled, this applies only to connected mice.
+     * Whether mouse scrolling acceleration is enabled. This applies only to connected mice.
+     *
+     * @param context The application context.
+     * @return Whether the mouse scrolling is accelerated based on the user's scrolling speed.
+     *
+     * @hide
+     */
+    public static boolean isMouseScrollingAccelerationEnabled(@NonNull Context context) {
+        if (!isMouseScrollingAccelerationFeatureFlagEnabled()) {
+            return true;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+            Settings.System.MOUSE_SCROLLING_ACCELERATION, 0, UserHandle.USER_CURRENT) != 0;
+    }
+
+    /**
+     * Sets whether the connected mouse scrolling acceleration is enabled.
+     *
+     * @param context The application context.
+     * @param scrollingAcceleration Whether mouse scrolling acceleration is enabled.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseScrollingAcceleration(@NonNull Context context,
+            boolean scrollingAcceleration) {
+        if (!isMouseScrollingAccelerationFeatureFlagEnabled()) {
+            return;
+        }
+
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_SCROLLING_ACCELERATION, scrollingAcceleration ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether mouse vertical scrolling is reversed. This applies only to connected mice.
      *
      * @param context The application context.
      * @return Whether the mouse will have its vertical scrolling reversed
@@ -638,6 +728,47 @@ public class InputSettings {
                 Settings.System.MOUSE_SWAP_PRIMARY_BUTTON, swapPrimaryButton ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
+
+    /**
+     * Whether cursor acceleration is enabled or not for connected mice.
+     *
+     * @param context The application context.
+     *
+     * @hide
+     */
+    public static boolean isMousePointerAccelerationEnabled(@NonNull Context context) {
+        if (!isPointerAccelerationFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_POINTER_ACCELERATION_ENABLED, 1, UserHandle.USER_CURRENT)
+                == 1;
+    }
+
+   /**
+    * Sets whether mouse acceleration is enabled.
+    *
+    * When enabled, the mouse cursor moves farther when it is moved faster.
+    * When disabled, the mouse cursor speed becomes directly proportional to
+    * the speed at which the mouse is moved.
+    *
+    * @param context The application context.
+    * @param enabled Will enable mouse acceleration if true, disable it if
+    *                false.
+    * @hide
+    */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setMouseAccelerationEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!isPointerAccelerationFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.MOUSE_POINTER_ACCELERATION_ENABLED, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
 
     /**
      * Whether Accessibility bounce keys feature is enabled.
@@ -1131,5 +1262,28 @@ public class InputSettings {
         Settings.Secure.putIntForUser(context.getContentResolver(),
                 Settings.Secure.KEY_REPEAT_DELAY_MS, delayTimeMillis,
                 UserHandle.USER_CURRENT);
+    }
+
+    /**
+     * Whether "Customizable key gestures" feature flag is enabled.
+     *
+     * <p>
+     * ‘Customizable key gestures’ is a feature which allows users to customize key based
+     * shortcuts on the physical keyboard.
+     * </p>
+     *
+     * @hide
+     */
+    public static boolean isCustomizableInputGesturesFeatureFlagEnabled() {
+        return enableCustomizableInputGestures() && useKeyGestureEventHandler();
+    }
+
+    /**
+     * Whether multi-key gestures are supported using {@code KeyGestureEventHandler}
+     *
+     * @hide
+     */
+    public static boolean doesKeyGestureEventHandlerSupportMultiKeyGestures() {
+        return useKeyGestureEventHandler() && useKeyGestureEventHandlerMultiKeyGestures();
     }
 }

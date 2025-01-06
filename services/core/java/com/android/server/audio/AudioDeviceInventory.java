@@ -40,6 +40,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothLeAudio;
 import android.bluetooth.BluetoothProfile;
 import android.content.Intent;
+import android.media.AudioDescriptor;
 import android.media.AudioDeviceAttributes;
 import android.media.AudioDeviceInfo;
 import android.media.AudioDevicePort;
@@ -47,6 +48,7 @@ import android.media.AudioFormat;
 import android.media.AudioManager;
 import android.media.AudioManager.AudioDeviceCategory;
 import android.media.AudioPort;
+import android.media.AudioProfile;
 import android.media.AudioRoutesInfo;
 import android.media.AudioSystem;
 import android.media.IAudioRoutesObserver;
@@ -619,6 +621,8 @@ public class AudioDeviceInventory {
         final int mGroupId;
         @NonNull String mPeerDeviceAddress;
         @NonNull String mPeerIdentityDeviceAddress;
+        @NonNull List<AudioProfile> mAudioProfiles;
+        @NonNull List<AudioDescriptor> mAudioDescriptors;
 
         /** Disabled operating modes for this device. Use a negative logic so that by default
          * an empty list means all modes are allowed.
@@ -627,7 +631,8 @@ public class AudioDeviceInventory {
 
         DeviceInfo(int deviceType, String deviceName, String address,
                    String identityAddress, int codecFormat,
-                   int groupId, String peerAddress, String peerIdentityAddress) {
+                   int groupId, String peerAddress, String peerIdentityAddress,
+                   List<AudioProfile> profiles, List<AudioDescriptor> descriptors) {
             mDeviceType = deviceType;
             mDeviceName = TextUtils.emptyIfNull(deviceName);
             mDeviceAddress = TextUtils.emptyIfNull(address);
@@ -639,11 +644,28 @@ public class AudioDeviceInventory {
             mGroupId = groupId;
             mPeerDeviceAddress = TextUtils.emptyIfNull(peerAddress);
             mPeerIdentityDeviceAddress = TextUtils.emptyIfNull(peerIdentityAddress);
+            mAudioProfiles = profiles;
+            mAudioDescriptors = descriptors;
+        }
+
+        DeviceInfo(int deviceType, String deviceName, String address,
+                   String identityAddress, int codecFormat,
+                   int groupId, String peerAddress, String peerIdentityAddress) {
+            this(deviceType, deviceName, address, identityAddress, codecFormat,
+                    groupId, peerAddress, peerIdentityAddress,
+                    new ArrayList<>(), new ArrayList<>());
         }
 
         /** Constructor for all devices except A2DP sink and LE Audio */
         DeviceInfo(int deviceType, String deviceName, String address) {
             this(deviceType, deviceName, address, null, AudioSystem.AUDIO_FORMAT_DEFAULT);
+        }
+
+        /** Constructor for HDMI OUT, HDMI ARC/EARC sink devices */
+        DeviceInfo(int deviceType, String deviceName, String address,
+            List<AudioProfile> profiles, List<AudioDescriptor> descriptors) {
+            this(deviceType, deviceName, address, null, AudioSystem.AUDIO_FORMAT_DEFAULT,
+                BluetoothLeAudio.GROUP_ID_INVALID, null, null, profiles, descriptors);
         }
 
         /** Constructor for A2DP sink devices */
@@ -771,6 +793,7 @@ public class AudioDeviceInventory {
      * (see AudioService.onAudioServerDied() method)
      */
     // Always executed on AudioDeviceBroker message queue
+    @GuardedBy("mDeviceBroker.mDeviceStateLock")
     /*package*/ void onRestoreDevices() {
         synchronized (mDevicesLock) {
             int res;
@@ -793,6 +816,9 @@ public class AudioDeviceInventory {
                             "Device inventory restore failed to reconnect " + di,
                             EventLogger.Event.ALOGE, TAG);
                     mConnectedDevices.remove(di.getKey(), di);
+                    if (AudioSystem.isBluetoothScoDevice(di.mDeviceType)) {
+                        mDeviceBroker.onSetBtScoActiveDevice(null);
+                    }
                 }
             }
             mAppliedStrategyRolesInt.clear();
@@ -1194,27 +1220,31 @@ public class AudioDeviceInventory {
     }
 
     /*package*/ void onToggleHdmi() {
-        MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "onToggleHdmi")
-                .set(MediaMetrics.Property.DEVICE,
-                        AudioSystem.getDeviceName(AudioSystem.DEVICE_OUT_HDMI));
+        final int[] hdmiDevices = { AudioSystem.DEVICE_OUT_HDMI,
+                AudioSystem.DEVICE_OUT_HDMI_ARC, AudioSystem.DEVICE_OUT_HDMI_EARC };
+
         synchronized (mDevicesLock) {
-            // Is HDMI connected?
-            final String key = DeviceInfo.makeDeviceListKey(AudioSystem.DEVICE_OUT_HDMI, "");
-            final DeviceInfo di = mConnectedDevices.get(key);
-            if (di == null) {
-                Log.e(TAG, "invalid null DeviceInfo in onToggleHdmi");
-                mmi.set(MediaMetrics.Property.EARLY_RETURN, "invalid null DeviceInfo").record();
-                return;
+            for (DeviceInfo di : mConnectedDevices.values()) {
+                boolean isHdmiDevice = Arrays.stream(hdmiDevices).anyMatch(device ->
+                    device == di.mDeviceType);
+                if (isHdmiDevice) {
+                    MediaMetrics.Item mmi = new MediaMetrics.Item(mMetricsId + "onToggleHdmi")
+                            .set(MediaMetrics.Property.DEVICE,
+                                    AudioSystem.getDeviceName(di.mDeviceType));
+                    AudioDeviceAttributes ada = new AudioDeviceAttributes(
+                            AudioDeviceAttributes.ROLE_OUTPUT,
+                            AudioDeviceInfo.convertInternalDeviceToDeviceType(di.mDeviceType),
+                            di.mDeviceAddress, di.mDeviceName, di.mAudioProfiles,
+                            di.mAudioDescriptors);
+                    // Toggle HDMI to retrigger broadcast with proper formats.
+                    setWiredDeviceConnectionState(ada,
+                            AudioSystem.DEVICE_STATE_UNAVAILABLE, "onToggleHdmi"); // disconnect
+                    setWiredDeviceConnectionState(ada,
+                            AudioSystem.DEVICE_STATE_AVAILABLE, "onToggleHdmi"); // reconnect
+                    mmi.record();
+                }
             }
-            // Toggle HDMI to retrigger broadcast with proper formats.
-            setWiredDeviceConnectionState(
-                    new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_HDMI, ""),
-                    AudioSystem.DEVICE_STATE_UNAVAILABLE, "android"); // disconnect
-            setWiredDeviceConnectionState(
-                    new AudioDeviceAttributes(AudioSystem.DEVICE_OUT_HDMI, ""),
-                    AudioSystem.DEVICE_STATE_AVAILABLE, "android"); // reconnect
         }
-        mmi.record();
     }
 
     @GuardedBy("mDevicesLock")
@@ -1818,7 +1848,15 @@ public class AudioDeviceInventory {
                             .printSlog(EventLogger.Event.ALOGE, TAG));
                     return false;
                 }
-                mConnectedDevices.put(deviceKey, new DeviceInfo(device, deviceName, address));
+
+                if (device == AudioSystem.DEVICE_OUT_HDMI ||
+                    device == AudioSystem.DEVICE_OUT_HDMI_ARC ||
+                    device == AudioSystem.DEVICE_OUT_HDMI_EARC) {
+                    mConnectedDevices.put(deviceKey, new DeviceInfo(device, deviceName,
+                        address, attributes.getAudioProfiles(), attributes.getAudioDescriptors()));
+                } else {
+                    mConnectedDevices.put(deviceKey, new DeviceInfo(device, deviceName, address));
+                }
                 mDeviceBroker.postAccessoryPlugMediaUnmute(device);
                 status = true;
             } else if (!connect && isConnected) {

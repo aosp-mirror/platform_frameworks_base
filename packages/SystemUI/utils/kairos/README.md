@@ -22,22 +22,21 @@ you can view the semantics for `Kairos` [here](docs/semantics.md).
 
 ## Usage
 
-First, stand up a new `FrpNetwork`. All reactive events and state is kept
+First, stand up a new `KairosNetwork`. All reactive events and state is kept
 consistent within a single network.
 
 ``` kotlin
 val coroutineScope: CoroutineScope = ...
-val frpNetwork = coroutineScope.newFrpNetwork()
+val network = coroutineScope.launchKairosNetwork()
 ```
 
-You can use the `FrpNetwork` to stand-up a network of reactive events and state.
-Events are modeled with `TFlow` (short for "transactional flow"), and state
-`TState` (short for "transactional state").
+You can use the `KairosNetwork` to stand-up a network of reactive events and
+state. Events are modeled with `Events`, and states with `State`.
 
 ``` kotlin
-suspend fun activate(network: FrpNetwork) {
+suspend fun activate(network: KairosNetwork) {
     network.activateSpec {
-        val input = network.mutableTFlow<Unit>()
+        val input = network.mutableEvents<Unit>()
         // Launch a long-running side-effect that emits to the network
         // every second.
         launchEffect {
@@ -47,7 +46,7 @@ suspend fun activate(network: FrpNetwork) {
             }
         }
         // Accumulate state
-        val count: TState<Int> = input.fold { _, i -> i + 1 }
+        val count: State<Int> = input.foldState { _, i -> i + 1 }
         // Observe events to perform side-effects in reaction to them
         input.observe {
             println("Got event ${count.sample()} at time: ${System.currentTimeMillis()}")
@@ -56,7 +55,7 @@ suspend fun activate(network: FrpNetwork) {
 }
 ```
 
-`FrpNetwork.activateSpec` will suspend indefinitely; cancelling the invocation
+`KairosNetwork.activateSpec` will suspend indefinitely; cancelling the invocation
 will tear-down all effects and obervers running within the lambda.
 
 ## Resources

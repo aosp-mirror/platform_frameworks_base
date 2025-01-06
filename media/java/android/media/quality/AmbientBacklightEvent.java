@@ -16,9 +16,11 @@
 
 package android.media.quality;
 
+import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -27,16 +29,17 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.Objects;
 
 /**
- * @hide
+ * Ambient backlight event
  */
+@FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
 public final class AmbientBacklightEvent implements Parcelable {
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
     @IntDef({AMBIENT_BACKLIGHT_EVENT_ENABLED, AMBIENT_BACKLIGHT_EVENT_DISABLED,
-            AMBIENT_BACKLIGHT_EVENT_METADATA,
+            AMBIENT_BACKLIGHT_EVENT_METADATA_AVAILABLE,
             AMBIENT_BACKLIGHT_EVENT_INTERRUPTED})
-    public @interface AmbientBacklightEventTypes {}
+    public @interface Type {}
 
     /**
      * Event type for ambient backlight events. The ambient backlight is enabled.
@@ -52,7 +55,7 @@ public final class AmbientBacklightEvent implements Parcelable {
      * Event type for ambient backlight events. The ambient backlight metadata is
      * available.
      */
-    public static final int AMBIENT_BACKLIGHT_EVENT_METADATA = 3;
+    public static final int AMBIENT_BACKLIGHT_EVENT_METADATA_AVAILABLE = 3;
 
     /**
      * Event type for ambient backlight events. The ambient backlight event is preempted by another
@@ -64,7 +67,10 @@ public final class AmbientBacklightEvent implements Parcelable {
     @Nullable
     private final AmbientBacklightMetadata mMetadata;
 
-    public AmbientBacklightEvent(int eventType,
+    /**
+     * Constructs AmbientBacklightEvent.
+     */
+    public AmbientBacklightEvent(@Type int eventType,
             @Nullable AmbientBacklightMetadata metadata) {
         mEventType = eventType;
         mMetadata = metadata;
@@ -75,10 +81,20 @@ public final class AmbientBacklightEvent implements Parcelable {
         mMetadata = in.readParcelable(AmbientBacklightMetadata.class.getClassLoader());
     }
 
+    /**
+     * Gets event type.
+     */
+    @Type
     public int getEventType() {
         return mEventType;
     }
 
+    /**
+     * Gets ambient backlight metadata.
+     *
+     * @return the metadata of the event. It's non-null only for
+     * {@link #AMBIENT_BACKLIGHT_EVENT_METADATA_AVAILABLE}.
+     */
     @Nullable
     public AmbientBacklightMetadata getMetadata() {
         return mMetadata;
@@ -95,7 +111,8 @@ public final class AmbientBacklightEvent implements Parcelable {
         return 0;
     }
 
-    public static final @NonNull Parcelable.Creator<AmbientBacklightEvent> CREATOR =
+    @NonNull
+    public static final Parcelable.Creator<AmbientBacklightEvent> CREATOR =
             new Parcelable.Creator<AmbientBacklightEvent>() {
                 public AmbientBacklightEvent createFromParcel(Parcel in) {
                     return new AmbientBacklightEvent(in);

@@ -56,6 +56,7 @@ import android.view.animation.Interpolator;
 import android.window.InputTransferToken;
 
 import androidx.annotation.NonNull;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.systemui.Flags;
@@ -77,6 +78,7 @@ import java.util.function.Supplier;
 @SmallTest
 @TestableLooper.RunWithLooper
 @RunWith(AndroidTestingRunner.class)
+@FlakyTest(bugId = 385115361)
 public class FullscreenMagnificationControllerTest extends SysuiTestCase {
     private static final long ANIMATION_DURATION_MS = 100L;
     private static final long WAIT_TIMEOUT_S = 5L * HW_TIMEOUT_MULTIPLIER;

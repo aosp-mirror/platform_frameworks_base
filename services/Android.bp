@@ -210,24 +210,65 @@ crashrecovery_java_defaults {
     },
 }
 
+soong_config_module_type {
+    name: "ondeviceintelligence_module_java_defaults",
+    module_type: "java_defaults",
+    config_namespace: "ANDROID",
+    bool_variables: [
+        "release_ondevice_intelligence_module",
+        "release_ondevice_intelligence_platform",
+    ],
+    properties: [
+        "libs",
+        "srcs",
+        "static_libs",
+    ],
+}
+
+// Conditionally add ondeviceintelligence stubs library
+ondeviceintelligence_module_java_defaults {
+    name: "ondeviceintelligence_conditionally",
+    soong_config_variables: {
+        release_ondevice_intelligence_module: {
+            libs: ["service-ondeviceintelligence.stubs.system_server"],
+        },
+        release_ondevice_intelligence_platform: {
+            srcs: [":service-ondeviceintelligence-sources-platform"],
+        },
+    },
+}
+
 // merge all required services into one jar
 // ============================================================
 soong_config_module_type {
     name: "system_java_library",
     module_type: "java_library",
     config_namespace: "system_services",
-    bool_variables: ["without_vibrator"],
+    variables: ["without_hal"],
     properties: ["vintf_fragment_modules"],
 }
 
+soong_config_string_variable {
+    name: "without_hal",
+    values: [
+        "vibrator",
+        "devicestate",
+    ],
+}
+
 vintf_fragment {
-    name: "manifest_services.xml",
-    src: "manifest_services.xml",
+    name: "manifest_services_android.frameworks.location.xml",
+    src: "manifest_services_android.frameworks.location.xml",
 }
 
 vintf_fragment {
     name: "manifest_services_android.frameworks.vibrator.xml",
     src: "manifest_services_android.frameworks.vibrator.xml",
+}
+
+vintf_fragment {
+    name: "manifest_services_android.frameworks.devicestate.xml",
+    src: "manifest_services_android.frameworks.devicestate.xml",
 }
 
 system_java_library {
@@ -236,6 +277,7 @@ system_java_library {
         "services_java_defaults",
         "art_profile_java_defaults",
         "services_crashrecovery_stubs_conditionally",
+        "ondeviceintelligence_conditionally",
     ],
     installable: true,
 
@@ -283,7 +325,10 @@ system_java_library {
         "service-blobstore",
         "service-jobscheduler",
         "android.hidl.base-V1.0-java",
-    ],
+    ] + select(release_flag("RELEASE_MOVE_VCN_TO_MAINLINE"), {
+        true: [],
+        default: ["service-connectivity-b-platform"],
+    }),
 
     libs: [
         "android.hidl.manager-V1.0-java",
@@ -296,14 +341,24 @@ system_java_library {
     ],
 
     soong_config_variables: {
-        without_vibrator: {
-            vintf_fragment_modules: [
-                "manifest_services.xml",
-            ],
+        without_hal: {
+            vibrator: {
+                vintf_fragment_modules: [
+                    "manifest_services_android.frameworks.location.xml",
+                    "manifest_services_android.frameworks.devicestate.xml",
+                ],
+            },
+            devicestate: {
+                vintf_fragment_modules: [
+                    "manifest_services_android.frameworks.location.xml",
+                    "manifest_services_android.frameworks.vibrator.xml",
+                ],
+            },
             conditions_default: {
                 vintf_fragment_modules: [
-                    "manifest_services.xml",
+                    "manifest_services_android.frameworks.location.xml",
                     "manifest_services_android.frameworks.vibrator.xml",
+                    "manifest_services_android.frameworks.devicestate.xml",
                 ],
             },
         },

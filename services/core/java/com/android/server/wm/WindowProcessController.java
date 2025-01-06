@@ -465,17 +465,22 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mCrashing = crashing;
     }
 
-    void handleAppCrash() {
+    boolean handleAppCrash() {
+        boolean hasVisibleActivity = false;
         ArrayList<ActivityRecord> activities = new ArrayList<>(mActivities);
         for (int i = activities.size() - 1; i >= 0; --i) {
             final ActivityRecord r = activities.get(i);
             Slog.w(TAG, "  Force finishing activity "
                     + r.mActivityComponent.flattenToShortString());
             r.detachFromProcess();
-            r.mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE,
-                    TRANSIT_FLAG_APP_CRASHED);
+            if (r.isVisibleRequested()) {
+                hasVisibleActivity = true;
+                r.mDisplayContent.requestTransitionAndLegacyPrepare(TRANSIT_CLOSE,
+                        TRANSIT_FLAG_APP_CRASHED);
+            }
             r.destroyIfPossible("handleAppCrashed");
         }
+        return hasVisibleActivity;
     }
 
     boolean isCrashing() {
@@ -1263,7 +1268,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                     if (windowingMode == WINDOWING_MODE_MULTI_WINDOW
                             && com.android.window.flags.Flags
                                     .processPriorityPolicyForMultiWindowMode()
-                            && task.getAdjacentTask() != null) {
+                            && task.hasAdjacentTask()) {
                         stateFlags |= ACTIVITY_STATE_FLAG_RESUMED_SPLIT_SCREEN;
                     } else if (windowingMode == WINDOWING_MODE_FREEFORM) {
                         hasResumedFreeform = true;

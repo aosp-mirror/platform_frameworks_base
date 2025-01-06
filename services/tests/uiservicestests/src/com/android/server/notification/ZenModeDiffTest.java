@@ -54,6 +54,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
+import platform.test.runner.parameterized.Parameters;
+
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
@@ -66,10 +69,6 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-
-import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
-import platform.test.runner.parameterized.Parameters;
-
 
 @SmallTest
 @RunWith(ParameterizedAndroidJunit4.class)
@@ -232,6 +231,7 @@ public class ZenModeDiffTest extends UiServiceTestCase {
                 + "mDisableTouch:true->false, "
                 + "mMinimizeRadioUsage:true->false, "
                 + "mMaximizeDoze:true->false, "
+                + "mNightLight:true->false, "
                 + "mExtraEffects:[effect1]->[effect2]}, "
                 + "triggerDescription:string1->string2, "
                 + "type:2->1, "
@@ -358,18 +358,21 @@ public class ZenModeDiffTest extends UiServiceTestCase {
         generateFieldDiffs(effects1, effects2, fieldsForDiff, expectedFrom, expectedTo);
 
         d = new ZenModeDiff.DeviceEffectsDiff(effects1, effects2);
-        assertThat(d.toString()).isEqualTo("ZenDeviceEffectsDiff{"
-                + "mGrayscale:true->false, "
-                + "mSuppressAmbientDisplay:true->false, "
-                + "mDimWallpaper:true->false, "
-                + "mNightMode:true->false, "
-                + "mDisableAutoBrightness:true->false, "
-                + "mDisableTapToWake:true->false, "
-                + "mDisableTiltToWake:true->false, "
-                + "mDisableTouch:true->false, "
-                + "mMinimizeRadioUsage:true->false, "
-                + "mMaximizeDoze:true->false, "
-                + "mExtraEffects:[effect1]->[effect2]}");
+        assertThat(d.toString())
+                .isEqualTo(
+                        "ZenDeviceEffectsDiff{"
+                                + "mGrayscale:true->false, "
+                                + "mSuppressAmbientDisplay:true->false, "
+                                + "mDimWallpaper:true->false, "
+                                + "mNightMode:true->false, "
+                                + "mDisableAutoBrightness:true->false, "
+                                + "mDisableTapToWake:true->false, "
+                                + "mDisableTiltToWake:true->false, "
+                                + "mDisableTouch:true->false, "
+                                + "mMinimizeRadioUsage:true->false, "
+                                + "mMaximizeDoze:true->false, "
+                                + "mNightLight:true->false, "
+                                + "mExtraEffects:[effect1]->[effect2]}");
     }
 
 

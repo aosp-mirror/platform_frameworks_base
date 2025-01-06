@@ -111,9 +111,8 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"画面の録画セッション中の通知"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"画面を録画しますか？"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"1 つのアプリを録画"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"画面全体を録画"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"この画面の録画"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"%s の録画"</string>
     <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"画面全体を録画すると、画面に表示されるものがすべて録画されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"アプリを録画すると、そのアプリで表示または再生される内容がすべて録画されます。パスワード、お支払いの詳細、メッセージ、写真、音声、動画などの情報にご注意ください。"</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"画面を録画"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"現在、<xliff:g id="APP_NAME">%1$s</xliff:g>を録画しています"</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"録画を停止"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"画面を共有しています"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"コンテンツの共有"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"画面の共有を停止しますか？"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"共有を停止しますか？"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"現在、画面全体を<xliff:g id="HOST_APP_NAME">%1$s</xliff:g>と共有しています"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"現在、画面全体をアプリと共有しています"</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"現在、<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>を共有しています"</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"現在、アプリを共有しています"</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"現在、アプリと共有しています"</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"共有を停止"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"画面をキャストしています"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"キャストを停止しますか？"</string>
@@ -310,11 +306,11 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Bluetooth を使用"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"接続しました"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"音声の共有"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"タップして音声の切り替えや共有を行えます"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"音声の共有に対応しています"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"保存済み"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"接続を解除"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"有効化"</string>
-    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"明日自動的に ON にする"</string>
+    <string name="turn_on_bluetooth_auto_tomorrow" msgid="3345758139235739006">"日付が変わったら自動的に ON にする"</string>
     <string name="turn_on_bluetooth_auto_info_disabled" msgid="682984290339848844">"Quick Share や「デバイスを探す」などの機能は Bluetooth を使用します"</string>
     <string name="turn_on_bluetooth_auto_info_enabled" msgid="7440944034584560279">"明日の朝に Bluetooth が ON になります"</string>
     <string name="quick_settings_bluetooth_audio_sharing_button" msgid="7545274861795853838">"音声を共有"</string>
@@ -330,6 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"入力"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"補聴器"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"ON にしています…"</string>
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"明るさはトップ アプリによって\n制御されているため、調整できません"</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"自動回転"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"画面を自動回転します"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"位置情報"</string>
@@ -417,7 +414,17 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"クリックすると、新しいデバイスをペア設定できます"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"プリセットを更新できませんでした"</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"プリセット"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"選択中"</string>
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"周囲の音"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"左"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"右"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"開く - 左右それぞれで制御する"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"閉じる - まとめて制御する"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"周囲の音をミュート"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"周囲の音のミュートを解除"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"ツール"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"自動字幕起こし"</string>
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"注"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"デバイスのマイクのブロックを解除しますか？"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"デバイスのカメラのブロックを解除しますか？"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"デバイスのカメラとマイクのブロックを解除しますか？"</string>
@@ -523,13 +530,15 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"ロック画面ウィジェット"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"タブレットがロックされていても、ロック画面のウィジェットは誰でも確認できます。"</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"ウィジェットの選択を解除する"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"高さを低くする"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"高さを高くする"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"ロック画面ウィジェット"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"ウィジェットを使用してアプリを起動するには、本人確認が必要です。タブレットがロックされた状態でも他のユーザーにウィジェットが表示されますので、注意してください。一部のウィジェットについてはロック画面での使用を想定していないため、ロック画面への追加は危険な場合があります。"</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"OK"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"ウィジェット"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"[ウィジェット] ショートカットを追加するには、設定で [ロック画面でのウィジェットの表示] が有効になっていることを確認してください。"</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"設定"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"スクリーンセーバー表示ボタン"</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"ユーザーを切り替える"</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"プルダウン メニュー"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"このセッションでのアプリとデータはすべて削除されます。"</string>
@@ -590,12 +599,13 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"通知"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"会話"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"サイレント通知がすべて消去されます"</string>
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"通知設定を開く"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"サイレント モードにより通知は一時停止中です"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{通知なし}=1{{mode} により通知は一時停止中です}=2{{mode} と他 1 個のモードにより通知は一時停止中です}other{{mode} と他 # 個のモードにより通知は一時停止中です}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"通知はありません"</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"新しい通知はありません"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"通知のクールダウンが ON になっています"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"通知のクールダウンを ON にしました"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"一度に多くの通知が届いた場合に、最長 2 分間自動的にデバイスの音量が小さくなりアラートも減ります。"</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"OFF にする"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"ロック解除して以前の通知を表示"</string>
@@ -703,6 +713,8 @@
     <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"固定"</string>
     <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"ヘ⁠ッ⁠ド ト⁠ラ⁠ッ⁠キ⁠ン⁠グ"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"タップすると、着信音のモードを変更できます"</string>
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"着信音のモード"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>、タップすると、着信音のモードを変更できます"</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"ミュート"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"ミュートを解除"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"バイブレーション"</string>
@@ -748,6 +760,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"衛生、接続利用可能"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"衛星 SOS"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"緊急通報または SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>、<xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>。"</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"圏外"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"レベル 1"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"レベル 2"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"レベル 3"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"レベル 4"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"電波フル"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"仕事用プロファイル"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"一部の方のみお楽しみいただける限定公開ツール"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"システムUI調整ツールでは、Androidユーザーインターフェースの調整やカスタマイズを行えます。これらの試験運用機能は今後のリリースで変更となったり、中止となったり、削除されたりする可能性がありますのでご注意ください。"</string>
@@ -866,16 +885,21 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"画面をロック"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"メモを入力する"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"マルチタスク"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"分割画面の使用（現在のアプリを右側に表示）"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"分割画面の使用（現在のアプリを左側に表示）"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"分割画面から全画面に切り替える"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"分割画面の使用（アプリを右側に表示）"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"分割画面の使用（アプリを左側に表示）"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"全画面表示に切り替える"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"分割画面の使用時に右側または下部のアプリに切り替える"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"分割画面の使用時に左側または上部のアプリに切り替える"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"分割画面中: アプリを順に置換する"</string>
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"アクティブなウィンドウをディスプレイ間で移動する"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"ウィンドウを左に移動する"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"ウィンドウを右に移動する"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"ウィンドウを最大化する"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"ウィンドウを最小化する"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"入力"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"次の言語に切り替える"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"前の言語に切り替える"</string>
-    <string name="input_access_emoji" msgid="8105642858900406351">"絵文字にアクセス"</string>
+    <string name="input_access_emoji" msgid="8105642858900406351">"絵文字にアクセスする"</string>
     <string name="input_access_voice_typing" msgid="7291201476395326141">"音声入力にアクセス"</string>
     <string name="keyboard_shortcut_group_applications" msgid="7386239431100651266">"アプリ"</string>
     <string name="keyboard_shortcut_group_applications_assist" msgid="6772492350416591448">"アシスタント"</string>
@@ -943,9 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"優先度の低い通知アイコンを表示"</string>
     <string name="other" msgid="429768510980739978">"その他"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"タイルを削除"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"タイルを最後に追加"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"タイルを最後の位置に追加する"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"タイルを移動"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"タイルを追加"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"タイルを目的の位置に追加する"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"<xliff:g id="POSITION">%1$d</xliff:g> に移動"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"ポジション <xliff:g id="POSITION">%1$d</xliff:g> に追加"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"位置が無効です。"</string>
@@ -961,11 +985,10 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"ユーザーを選択"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"インターネットに接続されていません"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"<xliff:g id="ID_1">%s</xliff:g> の設定を開きます。"</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"設定の順序を編集します。"</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"クイック設定の順序を編集します。"</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"電源ボタン メニュー"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"ページ <xliff:g id="ID_1">%1$d</xliff:g>/<xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"ロック画面"</string>
-    <string name="finder_active" msgid="7907846989716941952">"「デバイスを探す」を使うと、電源が OFF の状態でもこのスマートフォンの現在地を確認できます"</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"シャットダウン中…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"取り扱いに関する手順をご覧ください"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"取り扱いに関する手順をご覧ください"</string>
@@ -1193,7 +1216,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"（接続解除済み）"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"切り替えられません。タップしてやり直してください。"</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"デバイスを接続"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"このセッションをキャストするには、アプリを開いてください。"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"不明なアプリ"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"キャストを停止"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"音声出力ができるデバイスです。"</string>
@@ -1220,6 +1242,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"使用できる文字数は <xliff:g id="LENGTH">%1$d</xliff:g> 文字未満です"</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"ビルド番号"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"ビルド番号をクリップボードにコピーしました。"</string>
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"クリップボードにコピー。"</string>
     <string name="basic_status" msgid="2315371112182658176">"空の会話"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"会話ウィジェット"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"会話をタップするとホーム画面に追加されます"</string>
@@ -1260,13 +1283,14 @@
     <string name="battery_state_unknown_notification_text" msgid="13720937839460899">"タップすると詳細が表示されます"</string>
     <string name="qs_alarm_tile_no_alarm" msgid="4826472008616807923">"アラーム未設定"</string>
     <string name="accessibility_bouncer" msgid="5896923685673320070">"画面ロックを設定"</string>
-    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"指紋認証センサーに触れてください。スマートフォンの側面にある高さが低い方のボタンです。"</string>
+    <string name="accessibility_side_fingerprint_indicator_label" msgid="1673807833352363712">"指紋認証センサーに触れてください。スマートフォンの側面にあるボタンのうち、上側の短いボタンです。"</string>
     <string name="accessibility_fingerprint_label" msgid="5255731221854153660">"指紋認証センサー"</string>
     <string name="accessibility_authenticate_hint" msgid="798914151813205721">"認証"</string>
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"デバイスを入力"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"指紋を使って開いてください"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"認証が必要です。指紋認証センサーをタッチして認証してください。"</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"通話中"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"モバイルデータ"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"接続済み"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"一時的に接続されています"</string>
@@ -1355,6 +1379,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"高解像度で撮るにはスマートフォンを裏返してください"</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"折りたたみ式デバイスが広げられている"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"折りたたみ式デバイスがひっくり返されている"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"フロント画面が ON になりました"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"折りたたんだ状態"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"広げた状態"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1406,26 +1431,40 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"システム コントロール"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"システムアプリ"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"マルチタスク"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"最近使ったアプリ"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"分割画面"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"入力"</string>
     <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"アプリのショートカット"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"現在のアプリ"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"ユーザー補助"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"キーボード ショートカット"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"検索ショートカット"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"キーボード ショートカットのカスタマイズ"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"ショートカットを削除しますか？"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"デフォルトにリセットしますか？"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"ショートカットを割り当てるキーを押してください"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"この操作を行うと、カスタム ショートカットが完全に削除されます。"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"この操作を行うと、すべてのカスタム ショートカットが完全に削除されます。"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ショートカットの検索"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"検索結果がありません"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"閉じるアイコン"</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"アクションキーまたはメタキーのアイコン"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"プラスアイコン"</string>
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"カスタマイズ"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"リセット"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"完了"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"開くアイコン"</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"または"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"プラス"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"スラッシュ"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"ドラッグ ハンドル"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"キーボードの設定"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"ショートカットの設定"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"削除"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"リセット"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"キャンセル"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"キーを押してください"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"このキーの組み合わせはすでに使用されています。別のキーを試してください。"</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"ショートカットを設定できません。"</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"キーボードを使用して移動する"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"キーボード ショートカットの詳細"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"タッチパッドを使用して移動する"</string>
@@ -1436,22 +1475,28 @@
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ホームに移動"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"最近使ったアプリを表示する"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"完了"</string>
+    <string name="gesture_error_title" msgid="469064941635578511">"もう一度お試しください。"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"戻る"</string>
-    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"タッチパッドを 3 本の指で左右にスワイプします"</string>
+    <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"タッチパッドを 3 本の指で左または右にスワイプします"</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"その調子です！"</string>
-    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"「戻る」操作を学習しました。"</string>
+    <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"「戻る」ジェスチャーを学習しました。"</string>
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"タッチパッドを使用して戻るには、3 本の指で左または右にスワイプします"</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"ホームに移動"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"タッチパッドを 3 本の指で上にスワイプします"</string>
     <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"よくできました！"</string>
-    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"「ホームに移動」操作を学習しました"</string>
+    <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"「ホームに移動」ジェスチャーを学習しました"</string>
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"ホーム画面に移動するには、タッチパッドを 3 本の指で上にスワイプします"</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"最近使ったアプリを表示する"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"タッチパッドを 3 本の指で上にスワイプして長押しします"</string>
-    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"よくできました"</string>
-    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"「最近使ったアプリを表示する」操作を学習しました。"</string>
+    <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"よくできました！"</string>
+    <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"「最近使ったアプリを表示する」ジェスチャーを学習しました。"</string>
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"最近使ったアプリを表示するには、3 本の指でタッチパッドを上にスワイプして長押しします"</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"すべてのアプリを表示"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"キーボードのアクションキーを押します"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"完了です！"</string>
-    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"「すべてのアプリを表示する」操作を学習しました"</string>
+    <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"「すべてのアプリを表示する」ジェスチャーを学習しました"</string>
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"すべてのアプリを表示するには、キーボードのアクションキーを押します"</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"チュートリアルのアニメーションです。クリックすると一時停止、もう一度クリックすると再開します。"</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"キーボード バックライト"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"レベル %1$d/%2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"ホーム コントロール"</string>
@@ -1483,6 +1528,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"アプリから提供"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"ディスプレイ"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"不明"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"タイルのリセット"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"タイルを元の順序とサイズにリセットしますか？"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"すべてのタイルをリセットしますか？"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"すべてのクイック設定タイルがデバイスの元の設定にリセットされます"</string>
 </resources>

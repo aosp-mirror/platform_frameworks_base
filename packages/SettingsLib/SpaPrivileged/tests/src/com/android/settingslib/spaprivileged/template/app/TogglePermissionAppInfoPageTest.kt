@@ -160,23 +160,25 @@ class TogglePermissionAppInfoPageTest {
     @Test
     fun infoPage_whenChangeableAndClick() {
         val listModel = TestTogglePermissionAppListModel(isAllowed = false, isChangeable = true)
+        val switchTitle = context.getString(listModel.switchTitleResId)
 
         setTogglePermissionAppInfoPage(listModel)
-        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId)).performClick()
+        composeTestRule.waitUntilExists(hasText(switchTitle))
+        composeTestRule.onNodeWithText(switchTitle).performClick()
 
-        composeTestRule.waitUntilExists(
-            hasText(context.getString(listModel.switchTitleResId)) and isOn())
+        composeTestRule.waitUntilExists(hasText(switchTitle) and isOn())
     }
 
     @Test
     fun infoPage_whenNotChangeableAndClick() {
         val listModel = TestTogglePermissionAppListModel(isAllowed = false, isChangeable = false)
+        val switchTitle = context.getString(listModel.switchTitleResId)
 
         setTogglePermissionAppInfoPage(listModel)
-        composeTestRule.onNodeWithText(context.getString(listModel.switchTitleResId)).performClick()
+        composeTestRule.waitUntilExists(hasText(switchTitle))
+        composeTestRule.onNodeWithText(switchTitle).performClick()
 
-        composeTestRule.waitUntilExists(
-            hasText(context.getString(listModel.switchTitleResId)) and isOff())
+        composeTestRule.waitUntilExists(hasText(switchTitle) and isOff())
     }
 
     @Test

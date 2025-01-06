@@ -24,6 +24,7 @@ import static com.google.common.truth.Truth.assertThat;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -136,6 +137,18 @@ public class InputRouteManagerTest {
                 AudioDeviceAttributes.ROLE_INPUT,
                 AudioDeviceInfo.TYPE_WIRED_HEADSET,
                 /* address= */ "");
+    }
+
+    private AudioDeviceAttributes getUsbHeadsetDeviceAttributes() {
+        return new AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_INPUT,
+                AudioDeviceInfo.TYPE_USB_HEADSET,
+                /* address= */ "");
+    }
+
+    private AudioDeviceAttributes getHdmiDeviceAttributes() {
+        return new AudioDeviceAttributes(
+                AudioDeviceAttributes.ROLE_INPUT, AudioDeviceInfo.TYPE_HDMI, /* address= */ "");
     }
 
     private void onPreferredDevicesForCapturePresetChanged(InputRouteManager inputRouteManager) {
@@ -303,21 +316,67 @@ public class InputRouteManagerTest {
     }
 
     @Test
-    public void onAudioDevicesAdded_shouldApplyDefaultSelectedDeviceToAllPresets() {
+    public void onAudioDevicesAdded_shouldActivateAddedDevice() {
         final AudioManager audioManager = mock(AudioManager.class);
-        AudioDeviceAttributes wiredHeadsetDeviceAttributes = getWiredHeadsetDeviceAttributes();
-        when(audioManager.getDevicesForAttributes(INPUT_ATTRIBUTES))
-                .thenReturn(Collections.singletonList(wiredHeadsetDeviceAttributes));
-
         InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
         AudioDeviceInfo[] devices = {mockWiredHeadsetInfo()};
         inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
 
-        // Called twice, one after initiation, the other after onAudioDevicesAdded call.
-        verify(audioManager, atLeast(2)).getDevicesForAttributes(INPUT_ATTRIBUTES);
+        // The only added wired headset will be activated.
         for (@MediaRecorder.Source int preset : PRESETS) {
-            verify(audioManager, atLeast(2))
-                    .setPreferredDeviceForCapturePreset(preset, wiredHeadsetDeviceAttributes);
+            verify(audioManager, atLeast(1))
+                    .setPreferredDeviceForCapturePreset(preset, getWiredHeadsetDeviceAttributes());
+        }
+    }
+
+    @Test
+    public void onAudioDevicesAdded_shouldActivateLastAddedDevice() {
+        final AudioManager audioManager = mock(AudioManager.class);
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+        AudioDeviceInfo[] devices = {mockWiredHeadsetInfo(), mockUsbHeadsetInfo()};
+        inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
+
+        // When adding multiple valid input devices, the last added device (usb headset in this
+        // case) will be activated.
+        for (@MediaRecorder.Source int preset : PRESETS) {
+            verify(audioManager, never())
+                    .setPreferredDeviceForCapturePreset(preset, getWiredHeadsetDeviceAttributes());
+            verify(audioManager, atLeast(1))
+                    .setPreferredDeviceForCapturePreset(preset, getUsbHeadsetDeviceAttributes());
+        }
+    }
+
+    @Test
+    public void onAudioDevicesAdded_doNotActivateInvalidAddedDevice() {
+        final AudioManager audioManager = mock(AudioManager.class);
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+        AudioDeviceInfo[] devices = {mockHdmiInfo()};
+        inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
+
+        // Do not activate since HDMI is not a valid input device.
+        for (@MediaRecorder.Source int preset : PRESETS) {
+            verify(audioManager, never())
+                    .setPreferredDeviceForCapturePreset(preset, getHdmiDeviceAttributes());
+        }
+    }
+
+    @Test
+    public void onAudioDevicesAdded_doNotActivatePreexistingDevice() {
+        final AudioManager audioManager = mock(AudioManager.class);
+        InputRouteManager inputRouteManager = new InputRouteManager(mContext, audioManager);
+
+        final AudioDeviceInfo info = mockWiredHeadsetInfo();
+        InputMediaDevice device = createInputMediaDeviceFromDeviceInfo(info);
+        inputRouteManager.mInputMediaDevices.add(device);
+
+        // Trigger onAudioDevicesAdded with a device that already exists in the device list.
+        AudioDeviceInfo[] devices = {info};
+        inputRouteManager.mAudioDeviceCallback.onAudioDevicesAdded(devices);
+
+        // The device should not be activated.
+        for (@MediaRecorder.Source int preset : PRESETS) {
+            verify(audioManager, never())
+                    .setPreferredDeviceForCapturePreset(preset, getWiredHeadsetDeviceAttributes());
         }
     }
 

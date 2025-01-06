@@ -204,13 +204,13 @@ class TestDisplayContent extends DisplayContent {
             final DisplayPolicy displayPolicy = newDisplay.getDisplayPolicy();
             spyOn(displayPolicy);
             if (mSystemDecorations) {
-                doReturn(true).when(newDisplay).supportsSystemDecorations();
+                doReturn(true).when(newDisplay).isSystemDecorationsSupported();
                 doReturn(true).when(displayPolicy).hasNavigationBar();
                 doReturn(true).when(displayPolicy).hasBottomNavigationBar();
             } else {
                 doReturn(false).when(displayPolicy).hasNavigationBar();
                 doReturn(false).when(displayPolicy).hasStatusBar();
-                doReturn(false).when(newDisplay).supportsSystemDecorations();
+                doReturn(false).when(newDisplay).isSystemDecorationsSupported();
             }
             // Update the display policy to make the screen fully turned on so animation is allowed
             displayPolicy.screenTurningOn(null /* screenOnListener */);

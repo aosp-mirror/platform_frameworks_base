@@ -31,6 +31,8 @@ import android.os.UserManager
 import android.util.Log
 import androidx.annotation.GuardedBy
 import androidx.annotation.WorkerThread
+import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.app.tracing.traceSection
 import com.android.systemui.Dumpable
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
@@ -49,7 +51,6 @@ import kotlinx.coroutines.Job
 import kotlinx.coroutines.asCoroutineDispatcher
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.delay
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.sync.Mutex
 
 /**
@@ -314,7 +315,9 @@ internal constructor(
         list.forEach {
             val callback = it.callback.get()
             if (callback != null) {
-                it.executor.execute { action(callback) { latch.countDown() } }
+                it.executor.execute {
+                    traceSection({ "$callback" }) { action(callback) { latch.countDown() } }
+                }
             } else {
                 latch.countDown()
             }

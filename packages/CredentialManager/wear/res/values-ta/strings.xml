@@ -19,7 +19,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_name" msgid="7384524142163511792">"அனுமதிச் சான்று நிர்வாகி"</string>
     <string name="use_passkey_title" msgid="716598039340757817">"கடவுச்சாவியைப் பயன்படுத்தவா?"</string>
-    <string name="use_password_title" msgid="4655101984031246476">"கடவுச்சொல்லைப் பயன்படுத்தவா?"</string>
+    <string name="use_password_title" msgid="4655101984031246476">"கடவுச்சொல் பயன்படுத்தவா?"</string>
     <string name="dialog_dismiss_button" msgid="989567669882005067">"மூடு"</string>
     <string name="dialog_continue_button" msgid="8630290044077052145">"தொடர்க"</string>
     <string name="dialog_sign_in_options_button" msgid="448002958902615054">"உள்நுழைவு விருப்பங்கள்"</string>

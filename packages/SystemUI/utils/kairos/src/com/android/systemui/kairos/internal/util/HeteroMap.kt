@@ -17,17 +17,18 @@
 package com.android.systemui.kairos.internal.util
 
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.just
 import java.util.concurrent.ConcurrentHashMap
 
-internal interface Key<A>
-
 private object NULL
 
-internal class HeteroMap {
+internal class HeteroMap private constructor(private val store: ConcurrentHashMap<Key<*>, Any>) {
+    interface Key<A> {}
 
-    private val store = ConcurrentHashMap<Key<*>, Any>()
+    constructor() : this(ConcurrentHashMap())
+
+    constructor(capacity: Int) : this(ConcurrentHashMap(capacity))
 
     @Suppress("UNCHECKED_CAST")
     operator fun <A> get(key: Key<A>): Maybe<A> =
@@ -35,6 +36,17 @@ internal class HeteroMap {
 
     operator fun <A> set(key: Key<A>, value: A) {
         store[key] = value ?: NULL
+    }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <A : Any> getOrNull(key: Key<A>): A? =
+        store[key]?.let { (if (it === NULL) null else it) as A }
+
+    @Suppress("UNCHECKED_CAST")
+    fun <A> getOrError(key: Key<A>, block: () -> String): A {
+        store[key]?.let {
+            return (if (it === NULL) null else it) as A
+        } ?: error(block())
     }
 
     operator fun contains(key: Key<*>): Boolean = store.containsKey(key)

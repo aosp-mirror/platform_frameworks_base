@@ -81,10 +81,7 @@ constructor(
                     .padding(horizontal = dimensionResource(R.dimen.clock_padding_start))
                     .padding(top = { smallTopMargin })
                     .onTopPlacementChanged(onTopChanged)
-                    .burnInAware(
-                        viewModel = aodBurnInViewModel,
-                        params = burnInParams,
-                    )
+                    .burnInAware(viewModel = aodBurnInViewModel, params = burnInParams)
                     .element(smallClockElementKey),
         )
     }
@@ -114,10 +111,7 @@ constructor(
             val dir = if (transition.toContent == splitShadeLargeClockScene) -1f else 1f
             val distance = dir * getClockCenteringDistance()
             val largeClock = checkNotNull(currentClock).largeClock
-            largeClock.animations.onPositionUpdated(
-                distance = distance,
-                fraction = progress,
-            )
+            largeClock.animations.onPositionUpdated(distance = distance, fraction = progress)
         }
 
         Element(key = largeClockElementKey, modifier = modifier) {
@@ -125,6 +119,16 @@ constructor(
                 AndroidView(
                     factory = { context ->
                         FrameLayout(context).apply {
+                            // By default, ViewGroups like FrameLayout clip their children. Turning
+                            // off the clipping allows the child view to render outside of its
+                            // bounds - letting the step animation of the clock push the digits out
+                            // when needed.
+                            //
+                            // Note that, in Compose, clipping is actually disabled by default so
+                            // there's no need to propagate this up the composable hierarchy.
+                            clipChildren = false
+                            clipToPadding = false
+
                             ensureClockViewExists(checkNotNull(currentClock).largeClock.view)
                         }
                     },
@@ -136,8 +140,8 @@ constructor(
                             .burnInAware(
                                 viewModel = aodBurnInViewModel,
                                 params = burnInParams,
-                                isClock = true
-                            )
+                                isClock = true,
+                            ),
                 )
             }
         }

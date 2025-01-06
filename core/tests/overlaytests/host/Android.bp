@@ -28,14 +28,14 @@ java_test_host {
     test_suites: [
         "device-tests",
     ],
-    target_required: [
-        "OverlayHostTests_NonPlatformSignatureOverlay",
-        "OverlayHostTests_PlatformSignatureStaticOverlay",
-        "OverlayHostTests_PlatformSignatureOverlay",
-        "OverlayHostTests_UpdateOverlay",
-        "OverlayHostTests_FrameworkOverlayV1",
-        "OverlayHostTests_FrameworkOverlayV2",
-        "OverlayHostTests_AppOverlayV1",
-        "OverlayHostTests_AppOverlayV2",
+    device_common_data: [
+        ":OverlayHostTests_NonPlatformSignatureOverlay",
+        ":OverlayHostTests_PlatformSignatureStaticOverlay",
+        ":OverlayHostTests_PlatformSignatureOverlay",
+        ":OverlayHostTests_UpdateOverlay",
+        ":OverlayHostTests_FrameworkOverlayV1",
+        ":OverlayHostTests_FrameworkOverlayV2",
+        ":OverlayHostTests_AppOverlayV1",
+        ":OverlayHostTests_AppOverlayV2",
     ],
 }

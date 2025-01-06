@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.events
 
+import android.util.Log
 import android.view.Display
 import android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM
 import android.view.DisplayCutout.BOUNDS_POSITION_LEFT
@@ -23,6 +24,7 @@ import android.view.DisplayCutout.BOUNDS_POSITION_RIGHT
 import android.view.DisplayCutout.BOUNDS_POSITION_TOP
 import android.view.LayoutInflater
 import android.view.View
+import android.view.WindowManager.InvalidDisplayException
 import android.view.WindowManager.LayoutParams.WRAP_CONTENT
 import android.widget.FrameLayout
 import com.android.app.viewcapture.ViewCaptureAwareWindowManager
@@ -97,7 +99,17 @@ constructor(
         // PrivacyDotViewController expects the dot view to have a FrameLayout parent.
         val rootView = FrameLayout(context)
         rootView.addView(this)
-        viewCaptureAwareWindowManager.addView(rootView, params)
+        try {
+            // Wrapping this in a try/catch to avoid crashes when a display is instantly removed
+            // after being added, and initialization hasn't finished yet.
+            viewCaptureAwareWindowManager.addView(rootView, params)
+        } catch (e: InvalidDisplayException) {
+            Log.e(
+                TAG,
+                "Unable to add view to WM. Display with id $displayId does not exist anymore",
+                e,
+            )
+        }
     }
 
     @AssistedFactory
@@ -108,5 +120,9 @@ constructor(
             viewCaptureAwareWindowManager: ViewCaptureAwareWindowManager,
             inflater: LayoutInflater,
         ): PrivacyDotWindowController
+    }
+
+    private companion object {
+        const val TAG = "PrivacyDotWindowController"
     }
 }

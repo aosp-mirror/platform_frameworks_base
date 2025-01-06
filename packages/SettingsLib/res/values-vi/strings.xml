@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Đang hoạt động (chỉ tai trái)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Đang hoạt động (chỉ tai phải)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Đang hoạt động (cả tai phải và tai trái)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Không cập nhật được âm lượng xung quanh"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Đang hoạt động (chỉ phát nội dung đa phương tiện). Còn <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> pin."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Đang hoạt động (chỉ phát nội dung đa phương tiện). Bên trái: Còn <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g> pin. Bên phải: Còn <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> pin."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Đã kết nối (có hỗ trợ tính năng chia sẻ âm thanh). Còn <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> pin."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Dòng lệnh cục bộ"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Bật ứng dụng dòng lệnh cung cấp quyền truy cập vỏ cục bộ"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Môi trường phát triển Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Chạy thiết bị đầu cuối Linux trên Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Thử nghiệm) Chạy cửa sổ dòng lệnh Linux trên Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Nếu bạn tắt, dữ liệu trên cửa sổ dòng lệnh Linux sẽ bị xoá"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Kiểm tra HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Đặt hành vi kiểm tra HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Gỡ lỗi"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Tỷ lệ hình động chuyển tiếp"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Tỷ lệ thời lượng của trình tạo hình động"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Mô phỏng màn hình phụ"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Vị trí hiển thị ngăn thông báo"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Ứng dụng"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Không lưu hoạt động"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Xoá mọi hoạt động ngay khi người dùng rời khỏi"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Điện thoại này"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Máy tính bảng này"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Máy tính này (nội bộ)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"TV này"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Loa có gắn đế"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Thiết bị bên ngoài"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Thiết bị đã kết nối"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Điện thoại này"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analog"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Không phát được trên thiết bị này"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Nâng cấp tài khoản để chuyển đổi"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Không thể phát các tệp đã tải xuống tại đây"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Đã kết nối qua ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Đã kết nối qua eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Chế độ mặc định của TV"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Đầu ra HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Các loa trong"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Loa tích hợp"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Âm thanh TV"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Sự cố kết nối. Hãy tắt thiết bị rồi bật lại"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Thiết bị âm thanh có dây"</string>
     <string name="help_label" msgid="3528360748637781274">"Trợ giúp và phản hồi"</string>

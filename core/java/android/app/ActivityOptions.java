@@ -1892,13 +1892,16 @@ public class ActivityOptions extends ComponentOptions {
      * app to pass through touch events to it when touches fall outside the content window.
      *
      * <p> By default, touches that fall on a translucent non-touchable area of an overlaying
-     * activity window are blocked from passing through to the activity below (source activity),
+     * activity window may be blocked from passing through to the activity below (source activity),
      * unless the overlaying activity is from the same UID as the source activity. The source
      * activity may use this method to opt in and allow the overlaying activities from the
      * to-be-launched app to pass through touches to itself. The source activity needs to ensure
      * that it trusts the overlaying activity and its content is not vulnerable to UI redressing
      * attacks. The flag is ignored if the context calling
      * {@link Context#startActivity(Intent, Bundle)} is not an activity.
+     *
+     * <p> Apps with target SDK 36 and above that depend on cross-uid pass-through touches must
+     * opt in to ensure that pass-through touches work correctly.
      *
      * <p> For backward compatibility, apps with target SDK 35 and below may still receive
      * pass-through touches without opt-in if the cross-uid activity is launched by the source

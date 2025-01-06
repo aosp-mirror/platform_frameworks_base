@@ -31,6 +31,7 @@ import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.scene.data.repository.sceneContainerRepository
+import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -109,6 +110,50 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
             assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
 
             sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Gone)
+            assertTransition(
+                step = currentStep!!,
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.UNDEFINED,
+                state = TransitionState.FINISHED,
+                progress = 1f,
+            )
+        }
+
+    /** STL: Ls -> overlay, then settle with Idle(overlay). */
+    @Test
+    fun transition_overlay_from_ls_scene_end_in_gone() =
+        testScope.runTest {
+            sceneTransitions.value =
+                ObservableTransitionState.Transition.ShowOrHideOverlay(
+                    overlay = Overlays.NotificationsShade,
+                    fromContent = Scenes.Lockscreen,
+                    toContent = Overlays.NotificationsShade,
+                    currentScene = Scenes.Lockscreen,
+                    currentOverlays = flowOf(emptySet()),
+                    progress,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
+
+            val currentStep by collectLastValue(kosmos.realKeyguardTransitionRepository.transitions)
+            assertTransition(
+                step = currentStep!!,
+                from = KeyguardState.LOCKSCREEN,
+                to = KeyguardState.UNDEFINED,
+                state = TransitionState.RUNNING,
+                progress = 0f,
+            )
+
+            progress.value = 0.4f
+            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+
+            sceneTransitions.value =
+                ObservableTransitionState.Idle(
+                    Scenes.Lockscreen,
+                    setOf(Overlays.NotificationsShade),
+                )
             assertTransition(
                 step = currentStep!!,
                 from = KeyguardState.LOCKSCREEN,
@@ -236,6 +281,47 @@ class LockscreenSceneTransitionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val currentStep by collectLastValue(kosmos.realKeyguardTransitionRepository.transitions)
             sceneTransitions.value = goneToLs
+
+            assertTransition(
+                step = currentStep!!,
+                from = KeyguardState.UNDEFINED,
+                to = KeyguardState.LOCKSCREEN,
+                state = TransitionState.RUNNING,
+                progress = 0f,
+            )
+
+            progress.value = 0.4f
+            assertTransition(step = currentStep!!, state = TransitionState.RUNNING, progress = 0.4f)
+
+            sceneTransitions.value = ObservableTransitionState.Idle(Scenes.Lockscreen)
+
+            assertTransition(
+                step = currentStep!!,
+                from = KeyguardState.UNDEFINED,
+                to = KeyguardState.LOCKSCREEN,
+                state = TransitionState.FINISHED,
+                progress = 1f,
+            )
+        }
+
+    /** STL: Ls with overlay, then settle with Idle(Ls). */
+    @Test
+    fun transition_overlay_to_ls_scene_end_in_ls() =
+        testScope.runTest {
+            val currentStep by collectLastValue(kosmos.realKeyguardTransitionRepository.transitions)
+            sceneTransitions.value =
+                ObservableTransitionState.Transition.ShowOrHideOverlay(
+                    overlay = Overlays.NotificationsShade,
+                    fromContent = Overlays.NotificationsShade,
+                    toContent = Scenes.Lockscreen,
+                    currentScene = Scenes.Lockscreen,
+                    currentOverlays = flowOf(setOf(Overlays.NotificationsShade)),
+                    progress,
+                    isInitiatedByUserInput = false,
+                    isUserInputOngoing = flowOf(false),
+                    previewProgress = flowOf(0f),
+                    isInPreviewStage = flowOf(false),
+                )
 
             assertTransition(
                 step = currentStep!!,

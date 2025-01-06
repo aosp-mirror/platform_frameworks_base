@@ -2,10 +2,10 @@ package: "com.android.window.flags"
 container: "system"
 
 flag {
-  name: "disable_thin_letterboxing_policy"
+  name: "ignore_aspect_ratio_restrictions_for_resizeable_freeform_activities"
   namespace: "large_screen_experiences_app_compat"
-  description: "Whether reachability is disabled in case of thin letterboxing"
-  bug: "341027847"
+  description: "If a resizeable activity enters freeform mode, ignore all aspect ratio constraints."
+  bug: "381866902"
   metadata {
     purpose: PURPOSE_BUGFIX
   }
@@ -58,13 +58,6 @@ flag {
 }
 
 flag {
-  name: "user_min_aspect_ratio_app_default"
-  namespace: "large_screen_experiences_app_compat"
-  description: "Whether the API PackageManager.USER_MIN_ASPECT_RATIO_APP_DEFAULT is available"
-  bug: "310816437"
-}
-
-flag {
   name: "allow_hide_scm_button"
   namespace: "large_screen_experiences_app_compat"
   description: "Whether we should allow hiding the size compat restart button"
@@ -77,16 +70,6 @@ flag {
   description: "Whether the font_scale is read from a device dependent configuration file"
   bug: "319808237"
   is_fixed_read_only: true
-}
-
-flag {
-  name: "immersive_app_repositioning"
-  namespace: "large_screen_experiences_app_compat"
-  description: "Fix immersive apps changing size when repositioning"
-  bug: "334076352"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
 }
 
 flag {
@@ -109,6 +92,18 @@ flag {
   namespace: "large_screen_experiences_app_compat"
   description: "Whether to enable app scrolling from gestures from letterbox area"
   bug: "353697519"
+}
+
+flag {
+  name: "app_compat_async_relayout"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether we use the SurfaceViewHost overload to apply a change in /n"
+               "position and size in a Transaction provided by a callback invoked /n"
+               "after the View relayout."
+  bug: "322463856"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -150,4 +145,14 @@ flag {
   description: "Whether the API for forcing apps to be universal resizable on virtual display is available"
   bug: "372848702"
   is_exported: true
+}
+
+flag {
+  name: "release_user_aspect_ratio_wm"
+  namespace: "large_screen_experiences_app_compat"
+  description: "Whether to release UserAspectRatioSettingsWindowManager when button is hidden"
+  bug: "385049711"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

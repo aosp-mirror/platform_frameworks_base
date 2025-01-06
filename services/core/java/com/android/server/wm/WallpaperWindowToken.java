@@ -33,6 +33,7 @@ import android.util.SparseArray;
 
 import com.android.internal.protolog.ProtoLog;
 
+import java.io.PrintWriter;
 import java.util.function.Consumer;
 
 /**
@@ -103,6 +104,7 @@ class WallpaperWindowToken extends WindowToken {
             return;
         }
         mShowWhenLocked = showWhenLocked;
+        stringName = null;
         // Move the window token to the front (private) or back (showWhenLocked). This is possible
         // because the DisplayArea underneath TaskDisplayArea only contains TYPE_WALLPAPER windows.
         final int position = showWhenLocked ? POSITION_BOTTOM : POSITION_TOP;
@@ -286,13 +288,18 @@ class WallpaperWindowToken extends WindowToken {
     }
 
     @Override
+    void dump(PrintWriter pw, String prefix, boolean dumpAll) {
+        super.dump(pw, prefix, dumpAll);
+        pw.print(prefix); pw.print("visibleRequested="); pw.print(mVisibleRequested);
+        pw.print(" visible="); pw.println(isVisible());
+    }
+
+    @Override
     public String toString() {
         if (stringName == null) {
-            StringBuilder sb = new StringBuilder();
-            sb.append("WallpaperWindowToken{");
-            sb.append(Integer.toHexString(System.identityHashCode(this)));
-            sb.append(" token="); sb.append(token); sb.append('}');
-            stringName = sb.toString();
+            stringName = "WallpaperWindowToken{"
+                    + Integer.toHexString(System.identityHashCode(this))
+                    + " showWhenLocked=" + mShowWhenLocked + '}';
         }
         return stringName;
     }

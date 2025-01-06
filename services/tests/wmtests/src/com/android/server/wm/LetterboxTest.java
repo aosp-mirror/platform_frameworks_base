@@ -70,6 +70,7 @@ public class LetterboxTest {
 
     private SurfaceControl mParentSurface = mock(SurfaceControl.class);
     private AppCompatLetterboxOverrides mLetterboxOverrides;
+    private WindowState mWindowState;
 
     @Before
     public void setUp() throws Exception {
@@ -81,6 +82,7 @@ public class LetterboxTest {
         doReturn(false).when(mLetterboxOverrides).hasWallpaperBackgroundForLetterbox();
         doReturn(0).when(mLetterboxOverrides).getLetterboxWallpaperBlurRadiusPx();
         doReturn(0.5f).when(mLetterboxOverrides).getLetterboxWallpaperDarkScrimAlpha();
+        mWindowState = mock(WindowState.class);
         mLetterbox = new Letterbox(mSurfaces, StubTransaction::new,
                 mock(AppCompatReachabilityPolicy.class), mLetterboxOverrides, () -> mParentSurface);
         mTransaction = spy(StubTransaction.class);
@@ -320,7 +322,7 @@ public class LetterboxTest {
 
     private void applySurfaceChanges() {
         mLetterbox.applySurfaceChanges(/* syncTransaction */ mTransaction,
-                /* pendingTransaction */ mTransaction);
+                /* pendingTransaction */ mTransaction, mWindowState);
     }
 
     static class SurfaceControlMocker implements Supplier<SurfaceControl.Builder> {

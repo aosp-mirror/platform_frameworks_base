@@ -16,6 +16,8 @@
 
 package com.android.server.rollback;
 
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SKIPPED;
+import static com.android.server.PackageWatchdog.MITIGATION_RESULT_SUCCESS;
 import static com.android.server.crashrecovery.CrashRecoveryUtils.logCrashRecoveryEvent;
 
 import android.annotation.AnyThread;
@@ -111,7 +113,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         dataDir.mkdirs();
         mLastStagedRollbackIdsFile = new File(dataDir, "last-staged-rollback-ids");
         mTwoPhaseRollbackEnabledFile = new File(dataDir, "two-phase-rollback-enabled");
-        PackageWatchdog.getInstance(mContext).registerHealthObserver(this);
+        PackageWatchdog.getInstance(mContext).registerHealthObserver(context.getMainExecutor(),
+                this);
 
         if (SystemProperties.getBoolean("sys.boot_completed", false)) {
             // Load the value from the file if system server has crashed and restarted
@@ -171,7 +174,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean onExecuteHealthCheckMitigation(@Nullable VersionedPackage failedPackage,
+    public int onExecuteHealthCheckMitigation(@Nullable VersionedPackage failedPackage,
             @FailureReasons int rollbackReason, int mitigationCount) {
         Slog.i(TAG, "Executing remediation."
                 + " failedPackage: "
@@ -182,7 +185,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
             List<RollbackInfo> availableRollbacks = getAvailableRollbacks();
             if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
                 mHandler.post(() -> rollbackAllLowImpact(availableRollbacks, rollbackReason));
-                return true;
+                return MITIGATION_RESULT_SUCCESS;
             }
 
             List<RollbackInfo> lowImpactRollbacks = getRollbacksAvailableForImpactLevel(
@@ -197,7 +200,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         } else {
             if (rollbackReason == PackageWatchdog.FAILURE_REASON_NATIVE_CRASH) {
                 mHandler.post(() -> rollbackAll(rollbackReason));
-                return true;
+                return MITIGATION_RESULT_SUCCESS;
             }
 
             RollbackInfo rollback = getAvailableRollback(failedPackage);
@@ -209,7 +212,7 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         }
 
         // Assume rollbacks executed successfully
-        return true;
+        return MITIGATION_RESULT_SUCCESS;
     }
 
     @Override
@@ -225,15 +228,15 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
     }
 
     @Override
-    public boolean onExecuteBootLoopMitigation(int mitigationCount) {
+    public int onExecuteBootLoopMitigation(int mitigationCount) {
         if (Flags.recoverabilityDetection()) {
             List<RollbackInfo> availableRollbacks = getAvailableRollbacks();
 
             triggerLeastImpactLevelRollback(availableRollbacks,
                     PackageWatchdog.FAILURE_REASON_BOOT_LOOP);
-            return true;
+            return MITIGATION_RESULT_SUCCESS;
         }
-        return false;
+        return MITIGATION_RESULT_SKIPPED;
     }
 
     @Override
@@ -271,16 +274,6 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
 
     private void assertInWorkerThread() {
         Preconditions.checkState(mHandler.getLooper().isCurrentThread());
-    }
-
-    /**
-     * Start observing health of {@code packages} for {@code durationMs}.
-     * This may cause {@code packages} to be rolled back if they crash too freqeuntly.
-     */
-    @AnyThread
-    @NonNull
-    public void startObservingHealth(@NonNull List<String> packages, @NonNull long durationMs) {
-        PackageWatchdog.getInstance(mContext).startObservingHealth(this, packages, durationMs);
     }
 
     @AnyThread
@@ -499,8 +492,8 @@ public final class RollbackPackageHealthObserver implements PackageHealthObserve
         // Check if the package is listed among the system modules or is an
         // APK inside an updatable APEX.
         try {
-            final PackageInfo pkg = mContext.getPackageManager()
-                    .getPackageInfo(packageName, 0 /* flags */);
+            PackageManager pm = mContext.getPackageManager();
+            final PackageInfo pkg = pm.getPackageInfo(packageName, 0 /* flags */);
             String apexPackageName = pkg.getApexPackageName();
             if (apexPackageName != null) {
                 packageName = apexPackageName;

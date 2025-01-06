@@ -37,6 +37,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.LifecycleRegistry
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
 import com.android.systemui.Flags
@@ -44,6 +45,7 @@ import com.android.systemui.ambient.touch.TouchMonitor
 import com.android.systemui.ambient.touch.dagger.AmbientTouchComponent
 import com.android.systemui.communal.dagger.Communal
 import com.android.systemui.communal.domain.interactor.CommunalInteractor
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.ui.compose.CommunalContainer
 import com.android.systemui.communal.ui.compose.CommunalContent
 import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
@@ -65,12 +67,12 @@ import com.android.systemui.shade.domain.interactor.ShadeInteractor
 import com.android.systemui.statusbar.lockscreen.LockscreenSmartspaceController
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.util.kotlin.BooleanFlowOperators.anyOf
+import com.android.systemui.util.kotlin.Quad
 import com.android.systemui.util.kotlin.collectFlow
 import java.util.function.Consumer
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Controller that's responsible for the glanceable hub container view and its touch handling.
@@ -82,6 +84,7 @@ class GlanceableHubContainerController
 @Inject
 constructor(
     private val communalInteractor: CommunalInteractor,
+    private val communalSettingsInteractor: CommunalSettingsInteractor,
     private val communalViewModel: CommunalViewModel,
     private val keyguardInteractor: KeyguardInteractor,
     private val keyguardTransitionInteractor: KeyguardTransitionInteractor,
@@ -407,11 +410,12 @@ constructor(
                 shadeInteractor.isAnyFullyExpanded,
                 shadeInteractor.isUserInteracting,
                 shadeInteractor.isShadeFullyCollapsed,
-                ::Triple,
+                shadeInteractor.isQsExpanded,
+                ::Quad,
             ),
-            { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed) ->
+            { (isFullyExpanded, isUserInteracting, isShadeFullyCollapsed, isQsExpanded) ->
                 shadeConsumingTouches = isUserInteracting
-                shadeShowing = !isShadeFullyCollapsed
+                shadeShowing = isQsExpanded || !isShadeFullyCollapsed
                 val expandedAndNotInteractive = isFullyExpanded && !isUserInteracting
 
                 // If we ever are fully expanded and not interacting, capture this state as we
@@ -513,14 +517,19 @@ constructor(
         val touchOnUmo = keyguardMediaController.isWithinMediaViewBounds(ev.x.toInt(), ev.y.toInt())
         val touchOnSmartspace =
             lockscreenSmartspaceController.isWithinSmartspaceBounds(ev.x.toInt(), ev.y.toInt())
-        if (!hubShowing && (touchOnNotifications || touchOnUmo || touchOnSmartspace)) {
+        val glanceableHubV2 = communalSettingsInteractor.isV2FlagEnabled()
+        if (
+            !hubShowing &&
+                (touchOnNotifications || touchOnUmo || touchOnSmartspace || glanceableHubV2)
+        ) {
             logger.d({
                 "Lockscreen touch ignored: touchOnNotifications: $bool1, touchOnUmo: $bool2, " +
-                    "touchOnSmartspace: $bool3"
+                    "touchOnSmartspace: $bool3, glanceableHubV2: $bool4"
             }) {
                 bool1 = touchOnNotifications
                 bool2 = touchOnUmo
                 bool3 = touchOnSmartspace
+                bool4 = glanceableHubV2
             }
             return false
         }

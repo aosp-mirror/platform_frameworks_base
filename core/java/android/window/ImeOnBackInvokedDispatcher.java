@@ -203,6 +203,34 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
         mImeCallbacks.remove(callback);
     }
 
+    /**
+     * Unregisters all callbacks on the receiving dispatcher but keeps a reference of the callbacks
+     * in case the clearance is reverted in
+     * {@link ImeOnBackInvokedDispatcher#undoPreliminaryClear()}.
+     */
+    public void preliminaryClear() {
+        // Unregister previously registered callbacks if there's any.
+        if (getReceivingDispatcher() != null) {
+            for (ImeOnBackInvokedCallback callback : mImeCallbacks) {
+                getReceivingDispatcher().unregisterOnBackInvokedCallback(callback);
+            }
+        }
+    }
+
+    /**
+     * Reregisters all callbacks on the receiving dispatcher that have previously been cleared by
+     * calling {@link ImeOnBackInvokedDispatcher#preliminaryClear()}. This can happen if an IME hide
+     * animation is interrupted causing the IME to reappear.
+     */
+    public void undoPreliminaryClear() {
+        if (getReceivingDispatcher() != null) {
+            for (ImeOnBackInvokedCallback callback : mImeCallbacks) {
+                getReceivingDispatcher().registerOnBackInvokedCallbackUnchecked(callback,
+                        callback.mPriority);
+            }
+        }
+    }
+
     /** Clears all registered callbacks on the instance. */
     public void clear() {
         // Unregister previously registered callbacks if there's any.
@@ -361,6 +389,11 @@ public class ImeOnBackInvokedDispatcher implements OnBackInvokedDispatcher, Parc
 
         @Override
         public void setTriggerBack(boolean triggerBack) {
+            // no-op
+        }
+
+        @Override
+        public void setHandoffHandler(IBackAnimationHandoffHandler handoffHandler) {
             // no-op
         }
 

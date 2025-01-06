@@ -18,6 +18,9 @@ package com.android.internal.app;
 
 import static android.os.VibrationEffect.Composition.PRIMITIVE_SPIN;
 
+import static java.lang.Math.hypot;
+import static java.lang.Math.max;
+
 import android.animation.ObjectAnimator;
 import android.animation.TimeAnimator;
 import android.annotation.SuppressLint;
@@ -26,9 +29,11 @@ import android.app.Activity;
 import android.content.ActivityNotFoundException;
 import android.content.ContentResolver;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.ColorFilter;
+import android.graphics.ColorSpace;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
@@ -72,7 +77,7 @@ public class PlatLogoActivity extends Activity {
     private static final String EGG_UNLOCK_SETTING = "egg_mode_v";
 
     private static final float MIN_WARP = 1f;
-    private static final float MAX_WARP = 10f; // after all these years
+    private static final float MAX_WARP = 16f; // must go faster
     private static final boolean FINISH_AFTER_NEXT_STAGE_LAUNCH = false;
 
     private ImageView mLogo;
@@ -200,6 +205,9 @@ public class PlatLogoActivity extends Activity {
         getWindow().setNavigationBarColor(0);
         getWindow().setStatusBarColor(0);
         getWindow().getDecorView().getWindowInsetsController().hide(WindowInsets.Type.systemBars());
+
+        // This will be silently ignored on displays that don't support HDR color, which is fine
+        getWindow().setColorMode(ActivityInfo.COLOR_MODE_HDR);
 
         final ActionBar ab = getActionBar();
         if (ab != null) ab.hide();
@@ -364,7 +372,7 @@ public class PlatLogoActivity extends Activity {
                 mPressureMin = Math.min(mPressureMin, touchData.getDouble("min"));
             }
             if (touchData.has("max")) {
-                mPressureMax = Math.max(mPressureMax, touchData.getDouble("max"));
+                mPressureMax = max(mPressureMax, touchData.getDouble("max"));
             }
             if (mPressureMax >= 0) {
                 touchData.put("min", mPressureMin);
@@ -392,9 +400,11 @@ public class PlatLogoActivity extends Activity {
     }
 
     private static class Starfield extends Drawable {
-        private static final int NUM_STARS = 34; // Build.VERSION_CODES.UPSIDE_DOWN_CAKE
+        private static final int NUM_STARS = 128;
 
-        private static final int NUM_PLANES = 2;
+        private static final int NUM_PLANES = 4;
+
+        private static final float ROTATION = 45;
         private final float[] mStars = new float[NUM_STARS * 4];
         private float mVx, mVy;
         private long mDt = 0;
@@ -403,7 +413,7 @@ public class PlatLogoActivity extends Activity {
         private final Random mRng;
         private final float mSize;
 
-        private final Rect mSpace = new Rect();
+        private float mRadius = 0f;
         private float mWarp = 1f;
 
         private float mBuffer;
@@ -426,14 +436,15 @@ public class PlatLogoActivity extends Activity {
 
         @Override
         public void onBoundsChange(Rect bounds) {
-            mSpace.set(bounds);
             mBuffer = mSize * NUM_PLANES * 2 * MAX_WARP;
-            mSpace.inset(-(int) mBuffer, -(int) mBuffer);
-            final float w = mSpace.width();
-            final float h = mSpace.height();
+            mRadius = ((float) hypot(bounds.width(), bounds.height()) / 2f) + mBuffer;
+            // I didn't clarify this the last time, but we store both the beginning and
+            // end of each star's trail in this data structure. When we're not in warp that means
+            // that we've got each star in there twice. It's fine, we're gonna move it off-screen
             for (int i = 0; i < NUM_STARS; i++) {
-                mStars[4 * i] = mRng.nextFloat() * w;
-                mStars[4 * i + 1] = mRng.nextFloat() * h;
+                mStars[4 * i] = mRng.nextFloat() * 2 * mRadius - mRadius;
+                mStars[4 * i + 1] = mRng.nextFloat() * 2 * mRadius - mRadius;
+                // duplicate copy (for now)
                 mStars[4 * i + 2] = mStars[4 * i];
                 mStars[4 * i + 3] = mStars[4 * i + 1];
             }
@@ -452,30 +463,46 @@ public class PlatLogoActivity extends Activity {
 
             final boolean inWarp = mWarp > 1f;
 
-            canvas.drawColor(Color.BLACK); // 0xFF16161D);
+            final float diameter = mRadius * 2f;
+            final float triameter = mRadius * 3f;
+
+            canvas.drawColor(Color.BLACK);
+
+            final float cx = getBounds().width() / 2f;
+            final float cy = getBounds().height() / 2f;
+            canvas.translate(cx, cy);
+
+            canvas.rotate(ROTATION);
 
             if (mDt > 0 && mDt < 1000) {
                 canvas.translate(
-                        -(mBuffer) + mRng.nextFloat() * (mWarp - 1f),
-                        -(mBuffer) + mRng.nextFloat() * (mWarp - 1f)
+                        mRng.nextFloat() * (mWarp - 1f),
+                        mRng.nextFloat() * (mWarp - 1f)
                 );
-                final float w = mSpace.width();
-                final float h = mSpace.height();
                 for (int i = 0; i < NUM_STARS; i++) {
                     final int plane = (int) ((((float) i) / NUM_STARS) * NUM_PLANES) + 1;
-                    mStars[4 * i + 2] = (mStars[4 * i + 2] + dx * plane + w) % w;
-                    mStars[4 * i + 3] = (mStars[4 * i + 3] + dy * plane + h) % h;
-                    mStars[4 * i + 0] = inWarp ? mStars[4 * i + 2] - dx * mWarp * 2 * plane : -100;
-                    mStars[4 * i + 1] = inWarp ? mStars[4 * i + 3] - dy * mWarp * 2 * plane : -100;
+                    mStars[4 * i + 2] = (mStars[4 * i + 2] + dx * plane + triameter) % diameter
+                            - mRadius;
+                    mStars[4 * i + 3] = (mStars[4 * i + 3] + dy * plane + triameter) % diameter
+                            - mRadius;
+                    mStars[4 * i + 0] = inWarp ? mStars[4 * i + 2] - dx * mWarp * plane : -10000;
+                    mStars[4 * i + 1] = inWarp ? mStars[4 * i + 3] - dy * mWarp * plane : -10000;
                 }
             }
             final int slice = (mStars.length / NUM_PLANES / 4) * 4;
             for (int p = 0; p < NUM_PLANES; p++) {
+                final float value = (p + 1f) / (NUM_PLANES - 1);
+                mStarPaint.setColor(packHdrColor(value, 1.0f));
                 mStarPaint.setStrokeWidth(mSize * (p + 1));
                 if (inWarp) {
                     canvas.drawLines(mStars, p * slice, slice, mStarPaint);
                 }
                 canvas.drawPoints(mStars, p * slice, slice, mStarPaint);
+            }
+
+            if (inWarp) {
+                final float frac = (mWarp - MIN_WARP) / (MAX_WARP - MIN_WARP);
+                canvas.drawColor(packHdrColor(2.0f, frac * frac));
             }
         }
 
@@ -496,6 +523,11 @@ public class PlatLogoActivity extends Activity {
 
         public void update(long dt) {
             mDt = dt;
+        }
+
+        private static final ColorSpace sSrgbExt = ColorSpace.get(ColorSpace.Named.EXTENDED_SRGB);
+        public static long packHdrColor(float value, float alpha) {
+            return Color.valueOf(value, value, value, alpha, sSrgbExt).pack();
         }
     }
 }

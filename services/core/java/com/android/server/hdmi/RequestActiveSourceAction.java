@@ -25,8 +25,8 @@ import com.android.internal.annotations.VisibleForTesting;
  * Feature action that sends <Request Active Source> message and waits for <Active Source>.
  *
  * For TV panels, this action has a delay before sending <Request Active Source>. This is because it
- * should wait for a possible request from LauncherX and can be cancelled if an <Active Source>
- * message was received or the TV switched to another input.
+ * should wait for a possible request from LauncherX or TIF (TV Input Framework) and can be
+ * cancelled if an <Active Source> message was received or the TV switched to another input.
  */
 public class RequestActiveSourceAction extends HdmiCecFeatureAction {
     private static final String TAG = "RequestActiveSourceAction";
@@ -40,9 +40,9 @@ public class RequestActiveSourceAction extends HdmiCecFeatureAction {
     // Number of retries <Request Active Source> is sent if no device answers this message.
     private static final int MAX_SEND_RETRY_COUNT = 1;
 
-    // Timeout to wait for the LauncherX API call to be completed.
+    // Timeout to wait for LauncherX or TIF to call the CEC API.
     @VisibleForTesting
-    protected static final int TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS = 10000;
+    protected static final int TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS = 15000;
 
     private int mSendRetryCount = 0;
 
@@ -67,7 +67,7 @@ public class RequestActiveSourceAction extends HdmiCecFeatureAction {
         // We wait for default timeout to allow the message triggered by the LauncherX API call to
         // be sent by the TV and another default timeout in case the message has to be answered
         // (e.g. TV sent a <Set Stream Path> or <Routing Change>).
-        addTimer(mState, TIMEOUT_WAIT_FOR_LAUNCHERX_API_CALL_MS);
+        addTimer(mState, TIMEOUT_WAIT_FOR_TV_ASSERT_ACTIVE_SOURCE_MS);
         return true;
     }
 

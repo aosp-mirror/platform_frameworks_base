@@ -13,5 +13,13 @@ filegroup {
         "**/*.java",
         "**/*.aidl",
     ],
+    exclude_srcs: select(release_flag("RELEASE_ATTEST_MODULES"), {
+        true: [
+            "android/security/KeyStore2HalCurrent.java",
+        ],
+        default: [
+            "android/security/KeyStore2HalLatest.java",
+        ],
+    }),
     visibility: ["//frameworks/base"],
 }

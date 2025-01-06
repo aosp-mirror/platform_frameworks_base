@@ -159,7 +159,7 @@ public class QRCodeScannerController implements
      * Returns true if lock screen entry point for QR Code Scanner is to be enabled.
      */
     public boolean isEnabledForLockScreenButton() {
-        return mQRCodeScannerEnabled && isAbleToLaunchScannerActivity() && isAllowedOnLockScreen();
+        return isAbleToLaunchScannerActivity() && isAllowedOnLockScreen();
     }
 
     /** Returns whether the QR scanner button is allowed on lockscreen. */

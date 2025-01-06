@@ -56,12 +56,13 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testTransparentControlTargetWindowCanShowIme() {
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).build();
         makeWindowVisibleAndDrawn(ime);
         mImeProvider.setWindowContainer(ime, null, null);
 
-        final WindowState appWin = createWindow(null, TYPE_APPLICATION, "app");
-        final WindowState popup = createWindow(appWin, TYPE_APPLICATION, "popup");
+        final WindowState appWin = newWindowBuilder("app", TYPE_APPLICATION).build();
+        final WindowState popup = newWindowBuilder("popup", TYPE_APPLICATION).setParent(
+                appWin).build();
         popup.mAttrs.format = PixelFormat.TRANSPARENT;
         mDisplayContent.setImeLayeringTarget(appWin);
         mDisplayContent.updateImeInputAndControlTarget(popup);
@@ -77,11 +78,11 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     @Test
     @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testScheduleShowIme() {
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).build();
         makeWindowVisibleAndDrawn(ime);
         mImeProvider.setWindowContainer(ime, null, null);
 
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState target = newWindowBuilder("app", TYPE_APPLICATION).build();
         mDisplayContent.setImeLayeringTarget(target);
         mDisplayContent.updateImeInputAndControlTarget(target);
         performSurfacePlacementAndWaitForWindowAnimator();
@@ -105,14 +106,14 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     @Test
     @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testScheduleShowIme_noInitialState() {
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState target = newWindowBuilder("app", TYPE_APPLICATION).build();
 
         // Schedule before anything is ready.
         mImeProvider.scheduleShowImePostLayout(target, ImeTracker.Token.empty());
         assertFalse(mImeProvider.isScheduledAndReadyToShowIme());
         assertFalse(mImeProvider.isImeShowing());
 
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).build();
         makeWindowVisibleAndDrawn(ime);
         mImeProvider.setWindowContainer(ime, null, null);
 
@@ -133,11 +134,11 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     @Test
     @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testScheduleShowIme_delayedAfterPrepareSurfaces() {
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).build();
         makeWindowVisibleAndDrawn(ime);
         mImeProvider.setWindowContainer(ime, null, null);
 
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState target = newWindowBuilder("app", TYPE_APPLICATION).build();
         mDisplayContent.setImeLayeringTarget(target);
         mDisplayContent.updateImeInputAndControlTarget(target);
 
@@ -166,11 +167,11 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
     @Test
     @RequiresFlagsDisabled(Flags.FLAG_REFACTOR_INSETS_CONTROLLER)
     public void testScheduleShowIme_delayedSurfacePlacement() {
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).build();
         makeWindowVisibleAndDrawn(ime);
         mImeProvider.setWindowContainer(ime, null, null);
 
-        final WindowState target = createWindow(null, TYPE_APPLICATION, "app");
+        final WindowState target = newWindowBuilder("app", TYPE_APPLICATION).build();
         mDisplayContent.setImeLayeringTarget(target);
         mDisplayContent.updateImeInputAndControlTarget(target);
 
@@ -191,7 +192,7 @@ public class ImeInsetsSourceProviderTest extends WindowTestsBase {
 
     @Test
     public void testSetFrozen() {
-        final WindowState ime = createWindow(null, TYPE_INPUT_METHOD, "ime");
+        final WindowState ime = newWindowBuilder("ime", TYPE_INPUT_METHOD).build();
         makeWindowVisibleAndDrawn(ime);
         mImeProvider.setWindowContainer(ime, null, null);
         mImeProvider.setServerVisible(true);

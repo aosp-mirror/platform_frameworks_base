@@ -27,6 +27,7 @@ import com.android.compose.animation.scene.ObservableTransitionState.Transition.
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionState
@@ -192,6 +193,24 @@ class SceneContainerOcclusionInteractorTest : SysuiTestCase() {
             assertWithMessage("Should become unoccluded once the occluding activity is hidden")
                 .that(invisibleDueToOcclusion)
                 .isFalse()
+        }
+
+    @Test
+    fun invisibleDueToOcclusion_isDreaming_emitsTrue() =
+        testScope.runTest {
+            val invisibleDueToOcclusion by collectLastValue(underTest.invisibleDueToOcclusion)
+
+            // Verify that we start with unoccluded
+            assertWithMessage("Should start unoccluded").that(invisibleDueToOcclusion).isFalse()
+
+            // Start dreaming, which is an occluding activity
+            showOccludingActivity()
+            kosmos.keyguardInteractor.setDreaming(true)
+
+            // Verify not invisible when dreaming
+            assertWithMessage("Should be invisible when dreaming")
+                .that(invisibleDueToOcclusion)
+                .isTrue()
         }
 
     /** Simulates the appearance of a show-when-locked `Activity` in the foreground. */

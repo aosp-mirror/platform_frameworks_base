@@ -67,6 +67,7 @@ flag {
     name: "aapm_api"
     namespace: "responsible_apis"
     description: "Android Advanced Protection Mode Service and Manager"
+    is_exported: true
     bug: "352420507"
     is_fixed_read_only: true
 }
@@ -77,6 +78,7 @@ flag {
     description: "Prevent intent redirect attacks"
     bug: "361143368"
     is_fixed_read_only: true
+    is_exported: true
 }
 
 flag {
@@ -95,10 +97,52 @@ flag {
 }
 
 flag {
+    name: "prevent_intent_redirect_show_toast_if_nested_keys_not_collected_r_w"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks by showing a toast if not yet collected"
+    bug: "361143368"
+}
+
+flag {
+    name: "prevent_intent_redirect_throw_exception_if_nested_keys_not_collected"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks by throwing exception if the intent does not collect nested keys"
+    bug: "361143368"
+}
+
+flag {
+    name: "prevent_intent_redirect_collect_nested_keys_on_server_if_not_collected"
+    namespace: "responsible_apis"
+    description: "Prevent intent redirect attacks by collecting nested keys on server if not yet collected"
+    bug: "361143368"
+    is_fixed_read_only: true
+}
+
+flag {
     name: "enable_intent_matching_flags"
     is_exported: true
     namespace: "permissions"
     is_fixed_read_only: true
     description: "Applies intentMatchingFlags while matching intents to application components"
     bug: "364354494"
+}
+
+flag {
+    name: "aapm_feature_disable_install_unknown_sources"
+    namespace: "responsible_apis"
+    description: "Android Advanced Protection Mode Feature: Disable Install Unknown Sources"
+    bug: "369361373"
+}
+
+flag {
+    name: "aapm_feature_memory_tagging_extension"
+    namespace: "responsible_apis"
+    description: "Android Advanced Protection Mode Feature: Memory Tagging Extension"
+    bug: "378931989"
+}
+flag {
+    name: "aapm_feature_disable_cellular_2g"
+    namespace: "responsible_apis"
+    description: "Android Advanced Protection Mode Feature: Disable Cellular 2G"
+    bug: "377748286"
 }

@@ -142,6 +142,10 @@ abstract class CentralSurfacesEmptyImpl : CentralSurfaces {
 
     override fun setLaunchCameraOnFinishedWaking(launch: Boolean) {}
 
+    override fun setLaunchWalletOnFinishedGoingToSleep(launch: Boolean) {}
+
+    override fun setLaunchWalletOnFinishedWaking(launch: Boolean) {}
+
     override fun setLaunchEmergencyActionOnFinishedGoingToSleep(launch: Boolean) {}
 
     override fun setLaunchEmergencyActionOnFinishedWaking(launch: Boolean) {}

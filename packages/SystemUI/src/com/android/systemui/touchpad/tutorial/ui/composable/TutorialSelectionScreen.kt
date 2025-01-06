@@ -18,6 +18,7 @@ package com.android.systemui.touchpad.tutorial.ui.composable
 
 import android.content.res.Configuration
 import androidx.compose.foundation.background
+import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -36,8 +37,12 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -49,6 +54,7 @@ import com.android.systemui.inputdevice.tutorial.ui.composable.DoneButton
 import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.gesture.isFourFingerTouchpadSwipe
 import com.android.systemui.touchpad.tutorial.ui.gesture.isThreeFingerTouchpadSwipe
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen
 
 @Composable
 fun TutorialSelectionScreen(
@@ -56,6 +62,7 @@ fun TutorialSelectionScreen(
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
     onDoneButtonClicked: () -> Unit,
+    lastSelectedScreen: Screen,
 ) {
     Column(
         verticalArrangement = Arrangement.Center,
@@ -80,6 +87,7 @@ fun TutorialSelectionScreen(
                     onHomeTutorialClicked = onHomeTutorialClicked,
                     onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
                     modifier = Modifier.weight(1f).padding(60.dp),
+                    lastSelectedScreen,
                 )
             }
             else -> {
@@ -88,6 +96,7 @@ fun TutorialSelectionScreen(
                     onHomeTutorialClicked = onHomeTutorialClicked,
                     onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
                     modifier = Modifier.weight(1f).padding(60.dp),
+                    lastSelectedScreen,
                 )
             }
         }
@@ -105,6 +114,7 @@ private fun HorizontalSelectionButtons(
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    lastSelectedScreen: Screen,
 ) {
     Row(
         horizontalArrangement = Arrangement.spacedBy(20.dp),
@@ -116,6 +126,7 @@ private fun HorizontalSelectionButtons(
             onHomeTutorialClicked,
             onRecentAppsTutorialClicked,
             modifier = Modifier.weight(1f).fillMaxSize(),
+            lastSelectedScreen,
         )
     }
 }
@@ -126,6 +137,7 @@ private fun VerticalSelectionButtons(
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    lastSelectedScreen: Screen,
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(20.dp),
@@ -137,6 +149,7 @@ private fun VerticalSelectionButtons(
             onHomeTutorialClicked,
             onRecentAppsTutorialClicked,
             modifier = Modifier.weight(1f).fillMaxSize(),
+            lastSelectedScreen,
         )
     }
 }
@@ -147,14 +160,26 @@ private fun ThreeTutorialButtons(
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
     modifier: Modifier = Modifier,
+    lastSelectedScreen: Screen,
 ) {
+    val homeFocusRequester = remember { FocusRequester() }
+    val backFocusRequester = remember { FocusRequester() }
+    val recentAppsFocusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) {
+        when (lastSelectedScreen) {
+            Screen.HOME_GESTURE -> homeFocusRequester.requestFocus()
+            Screen.BACK_GESTURE -> backFocusRequester.requestFocus()
+            Screen.RECENT_APPS_GESTURE -> recentAppsFocusRequester.requestFocus()
+            else -> {} // No-Op.
+        }
+    }
     TutorialButton(
         text = stringResource(R.string.touchpad_tutorial_home_gesture_button),
         icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_home_icon),
         iconColor = MaterialTheme.colorScheme.onPrimary,
         onClick = onHomeTutorialClicked,
         backgroundColor = MaterialTheme.colorScheme.primary,
-        modifier = modifier,
+        modifier = modifier.focusRequester(homeFocusRequester).focusable(),
     )
     TutorialButton(
         text = stringResource(R.string.touchpad_tutorial_back_gesture_button),
@@ -162,7 +187,7 @@ private fun ThreeTutorialButtons(
         iconColor = MaterialTheme.colorScheme.onTertiary,
         onClick = onBackTutorialClicked,
         backgroundColor = MaterialTheme.colorScheme.tertiary,
-        modifier = modifier,
+        modifier = modifier.focusRequester(backFocusRequester).focusable(),
     )
     TutorialButton(
         text = stringResource(R.string.touchpad_tutorial_recent_apps_gesture_button),
@@ -170,7 +195,7 @@ private fun ThreeTutorialButtons(
         iconColor = MaterialTheme.colorScheme.onSecondary,
         onClick = onRecentAppsTutorialClicked,
         backgroundColor = MaterialTheme.colorScheme.secondary,
-        modifier = modifier,
+        modifier = modifier.focusRequester(recentAppsFocusRequester).focusable(),
     )
 }
 

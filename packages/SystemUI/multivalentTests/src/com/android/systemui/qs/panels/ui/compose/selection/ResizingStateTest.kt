@@ -19,7 +19,9 @@ package com.android.systemui.qs.panels.ui.compose.selection
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.qs.pipeline.shared.TileSpec
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -27,36 +29,32 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class ResizingStateTest : SysuiTestCase() {
 
+    private val underTest =
+        ResizingState(TileSpec.create("a"), startsAsIcon = true).apply { updateAnchors(10f, 20f) }
+
     @Test
-    fun drag_updatesStateCorrectly() {
-        var resized = false
-        val underTest =
-            ResizingState(TileWidths(base = 0, min = 0, max = 10)) { resized = !resized }
-
-        assertThat(underTest.width).isEqualTo(0)
-
-        underTest.onDrag(2f)
-        assertThat(underTest.width).isEqualTo(2)
-
-        underTest.onDrag(1f)
-        assertThat(underTest.width).isEqualTo(3)
-        assertThat(resized).isTrue()
-
-        underTest.onDrag(-1f)
-        assertThat(underTest.width).isEqualTo(2)
-        assertThat(resized).isFalse()
+    fun newResizingState_setInitialValueCorrectly() {
+        assertThat(underTest.anchoredDraggableState.currentValue).isEqualTo(QSDragAnchor.Icon)
     }
 
     @Test
-    fun dragOutOfBounds_isClampedCorrectly() {
-        val underTest = ResizingState(TileWidths(base = 0, min = 0, max = 10)) {}
+    fun updateAnchors_setBoundsCorrectly() {
+        assertThat(underTest.bounds).isEqualTo(10f to 20f)
+    }
 
-        assertThat(underTest.width).isEqualTo(0)
+    @Test
+    fun dragOverThreshold_resizesToLarge() = runTest {
+        underTest.anchoredDraggableState.anchoredDrag { dragTo(16f) }
 
-        underTest.onDrag(100f)
-        assertThat(underTest.width).isEqualTo(10)
+        assertThat(underTest.temporaryResizeOperation.spec).isEqualTo(TileSpec.create("a"))
+        assertThat(underTest.temporaryResizeOperation.toIcon).isFalse()
+    }
 
-        underTest.onDrag(-200f)
-        assertThat(underTest.width).isEqualTo(0)
+    @Test
+    fun dragUnderThreshold_staysIcon() = runTest {
+        underTest.anchoredDraggableState.anchoredDrag { dragTo(12f) }
+
+        assertThat(underTest.temporaryResizeOperation.spec).isEqualTo(TileSpec.create("a"))
+        assertThat(underTest.temporaryResizeOperation.toIcon).isTrue()
     }
 }

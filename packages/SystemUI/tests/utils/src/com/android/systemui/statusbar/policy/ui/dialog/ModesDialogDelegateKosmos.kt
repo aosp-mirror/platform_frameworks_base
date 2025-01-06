@@ -20,6 +20,7 @@ import com.android.systemui.animation.dialogTransitionAnimator
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.mainCoroutineContext
 import com.android.systemui.plugins.activityStarter
+import com.android.systemui.shade.data.repository.shadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.systemUIDialogFactory
 import com.android.systemui.statusbar.policy.ui.dialog.viewmodel.modesDialogViewModel
 import com.android.systemui.util.mockito.mock
@@ -35,5 +36,6 @@ var Kosmos.modesDialogDelegate: ModesDialogDelegate by
             { modesDialogViewModel },
             modesDialogEventLogger,
             mainCoroutineContext,
+            shadeDialogContextInteractor,
         )
     }

@@ -24,13 +24,9 @@ import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.qs.panels.ui.viewmodel.TileGridViewModel
 
 @Composable
-fun SceneScope.TileGrid(
-    viewModel: TileGridViewModel,
-    modifier: Modifier = Modifier,
-    editModeStart: () -> Unit,
-) {
+fun SceneScope.TileGrid(viewModel: TileGridViewModel, modifier: Modifier = Modifier) {
     val gridLayout by viewModel.gridLayout.collectAsStateWithLifecycle()
     val tiles by viewModel.tileViewModels.collectAsStateWithLifecycle(emptyList())
 
-    with(gridLayout) { TileGrid(tiles, modifier, editModeStart) }
+    with(gridLayout) { TileGrid(tiles, modifier) }
 }

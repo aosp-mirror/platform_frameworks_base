@@ -49,6 +49,7 @@ import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
+import static android.media.audio.Flags.concurrentAudioRecordBypassPermission;
 import static android.media.audio.Flags.featureSpatialAudioHeadtrackingLowLatency;
 import static android.media.audio.Flags.focusFreezeTestApi;
 import static android.media.audio.Flags.roForegroundAudioControl;
@@ -94,6 +95,7 @@ import android.app.AppOpsManager;
 import android.app.BroadcastOptions;
 import android.app.IUidObserver;
 import android.app.NotificationManager;
+import android.app.PropertyInvalidatedCache;
 import android.app.UidObserver;
 import android.app.role.OnRoleHoldersChangedListener;
 import android.app.role.RoleManager;
@@ -247,6 +249,7 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
@@ -4687,6 +4690,12 @@ public class AudioService extends IAudioService.Stub
         switch (mode) {
             case AudioSystem.MODE_IN_COMMUNICATION:
             case AudioSystem.MODE_IN_CALL:
+                // TODO(b/382704431): remove to allow STREAM_VOICE_CALL to drive abs volume
+                //  over A2DP
+                if (getDeviceForStream(AudioSystem.STREAM_VOICE_CALL)
+                        == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                    return AudioSystem.STREAM_MUSIC;
+                }
                 return AudioSystem.STREAM_VOICE_CALL;
             case AudioSystem.MODE_CALL_SCREENING:
             case AudioSystem.MODE_COMMUNICATION_REDIRECT:
@@ -4698,15 +4707,20 @@ public class AudioService extends IAudioService.Stub
                 // other conditions will influence the stream type choice, read on...
                 break;
         }
-        if (voiceActivityCanOverride
-                && mVoicePlaybackActive.get()) {
+
+        if (voiceActivityCanOverride && mVoicePlaybackActive.get()) {
+            // TODO(b/382704431): remove to allow STREAM_VOICE_CALL to drive abs volume over A2DP
+            if (getDeviceForStream(AudioSystem.STREAM_VOICE_CALL)
+                    == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
+                return AudioSystem.STREAM_MUSIC;
+            }
             return AudioSystem.STREAM_VOICE_CALL;
         }
         return AudioSystem.STREAM_MUSIC;
     }
 
-    private AtomicBoolean mVoicePlaybackActive = new AtomicBoolean(false);
-    private AtomicBoolean mMediaPlaybackActive = new AtomicBoolean(false);
+    private final AtomicBoolean mVoicePlaybackActive = new AtomicBoolean(false);
+    private final AtomicBoolean mMediaPlaybackActive = new AtomicBoolean(false);
 
     private final IPlaybackConfigDispatcher mPlaybackActivityMonitor =
             new IPlaybackConfigDispatcher.Stub() {
@@ -4888,6 +4902,8 @@ public class AudioService extends IAudioService.Stub
                 + equalScoLeaVcIndexRange());
         pw.println("\tcom.android.media.audio.ringMyCar:"
                 + ringMyCar());
+        pw.println("\tandroid.media.audio.Flags.concurrentAudioRecordBypassPermission:"
+                + concurrentAudioRecordBypassPermission());
     }
 
     private void dumpAudioMode(PrintWriter pw) {
@@ -4924,7 +4940,7 @@ public class AudioService extends IAudioService.Stub
     private void onUpdateContextualVolumes() {
         final int streamType = getBluetoothContextualVolumeStream();
 
-        Log.i(TAG,
+        Slog.i(TAG,
                 "onUpdateContextualVolumes: absolute volume driving streams " + streamType
                 + " avrcp supported: " + mAvrcpAbsVolSupported);
         synchronized (mCachedAbsVolDrivingStreamsLock) {
@@ -4933,7 +4949,7 @@ public class AudioService extends IAudioService.Stub
                 if (absDev == AudioSystem.DEVICE_OUT_BLUETOOTH_A2DP) {
                     enabled = mAvrcpAbsVolSupported;
                     if (!enabled) {
-                        Log.w(TAG, "Updating avrcp not supported in onUpdateContextualVolumes");
+                        Slog.w(TAG, "Updating avrcp not supported in onUpdateContextualVolumes");
                     }
                 }
                 if (stream != streamType) {
@@ -4951,26 +4967,28 @@ public class AudioService extends IAudioService.Stub
         }
 
         final Set<Integer> deviceTypes = getDeviceSetForStreamDirect(streamType);
-        final Set<Integer> absVolumeMultiModeCaseDevices =
-                AudioSystem.intersectionAudioDeviceTypes(
-                        mAbsVolumeMultiModeCaseDevices, deviceTypes);
-        if (absVolumeMultiModeCaseDevices.isEmpty()) {
+        Set<Integer> absVolumeDeviceTypes = new ArraySet<>(
+                AudioSystem.DEVICE_OUT_ALL_A2DP_SET);
+        absVolumeDeviceTypes.addAll(mAbsVolumeMultiModeCaseDevices);
+
+        final Set<Integer> absVolumeDevices =
+                AudioSystem.intersectionAudioDeviceTypes(absVolumeDeviceTypes, deviceTypes);
+        if (absVolumeDevices.isEmpty()) {
             return;
         }
-        if (absVolumeMultiModeCaseDevices.size() > 1) {
-            Log.w(TAG, "onUpdateContextualVolumes too many active devices: "
-                    + absVolumeMultiModeCaseDevices.stream().map(AudioSystem::getOutputDeviceName)
+        if (absVolumeDevices.size() > 1) {
+            Slog.w(TAG, "onUpdateContextualVolumes too many active devices: "
+                    + absVolumeDevices.stream().map(AudioSystem::getOutputDeviceName)
                         .collect(Collectors.joining(","))
                     + ", for stream: " + streamType);
             return;
         }
 
-        final int device = absVolumeMultiModeCaseDevices.toArray(new Integer[0])[0].intValue();
-
+        final int device = absVolumeDevices.toArray(new Integer[0])[0].intValue();
         final int index = getStreamVolume(streamType, device);
 
         if (DEBUG_VOL) {
-            Log.i(TAG, "onUpdateContextualVolumes streamType: " + streamType
+            Slog.i(TAG, "onUpdateContextualVolumes streamType: " + streamType
                     + ", device: " + AudioSystem.getOutputDeviceName(device)
                     + ", index: " + index);
         }
@@ -4980,6 +4998,8 @@ public class AudioService extends IAudioService.Stub
                     getVssForStreamOrDefault(streamType).getMaxIndex(), streamType);
         } else if (device == AudioSystem.DEVICE_OUT_HEARING_AID) {
             mDeviceBroker.postSetHearingAidVolumeIndex(index * 10, streamType);
+        } else if (AudioSystem.DEVICE_OUT_ALL_A2DP_SET.contains(device)) {
+            mDeviceBroker.postSetAvrcpAbsoluteVolumeIndex(index);
         } else {
             return;
         }
@@ -9193,16 +9213,6 @@ public class AudioService extends IAudioService.Stub
             mIndexMin = MIN_STREAM_VOLUME[streamType] * 10;
             mIndexMax = MAX_STREAM_VOLUME[streamType] * 10;
 
-            final int status = AudioSystem.initStreamVolume(
-                    streamType, MIN_STREAM_VOLUME[streamType], MAX_STREAM_VOLUME[streamType]);
-            if (status != AudioSystem.AUDIO_STATUS_OK) {
-                sLifecycleLogger.enqueue(new EventLogger.StringEvent(
-                         "VSS() stream:" + streamType + " initStreamVolume=" + status)
-                        .printLog(ALOGE, TAG));
-                sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
-                        "VSS()" /*obj*/, 2 * INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
-            }
-
             updateIndexFactors();
             mIndexMinNoPerm = mIndexMin; // may be overwritten later in updateNoPermMinIndex()
 
@@ -9234,6 +9244,9 @@ public class AudioService extends IAudioService.Stub
                 return;
             }
 
+            // index values sent to APM are in the stream type SDK range, not *10
+            int indexMinVolCurve = MIN_STREAM_VOLUME[mStreamType];
+            int indexMaxVolCurve = MAX_STREAM_VOLUME[mStreamType];
             synchronized (this) {
                 if (mStreamType == AudioSystem.STREAM_VOICE_CALL) {
                     if (MAX_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO]
@@ -9244,11 +9257,15 @@ public class AudioService extends IAudioService.Stub
                     if (!equalScoLeaVcIndexRange() && isStreamBluetoothSco(mStreamType)) {
                         // SCO devices have a different min index
                         mIndexMin = MIN_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO] * 10;
+                        indexMinVolCurve = MIN_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO];
+                        indexMaxVolCurve = MAX_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO];
                         mIndexStepFactor = 1.f;
                     } else if (equalScoLeaVcIndexRange() && isStreamBluetoothComm(mStreamType)) {
                         // For non SCO devices the stream state does not change the min index
                         if (mBtCommDeviceActive.get() == BT_COMM_DEVICE_ACTIVE_SCO) {
                             mIndexMin = MIN_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO] * 10;
+                            indexMinVolCurve = MIN_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO];
+                            indexMaxVolCurve = MAX_STREAM_VOLUME[AudioSystem.STREAM_BLUETOOTH_SCO];
                         } else {
                             mIndexMin = MIN_STREAM_VOLUME[mStreamType] * 10;
                         }
@@ -9266,6 +9283,19 @@ public class AudioService extends IAudioService.Stub
 
                     mIndexMinNoPerm = mIndexMin;
                 }
+            }
+
+            final int status = AudioSystem.initStreamVolume(
+                    mStreamType, indexMinVolCurve, indexMaxVolCurve);
+            sVolumeLogger.enqueue(new EventLogger.StringEvent(
+                    "updateIndexFactors() stream:" + mStreamType + " index min/max:"
+                            + mIndexMin / 10 + "/" + mIndexMax / 10 + " indexStepFactor:"
+                            + mIndexStepFactor).printSlog(ALOGI, TAG));
+            if (status != AudioSystem.AUDIO_STATUS_OK) {
+                sVolumeLogger.enqueue(new EventLogger.StringEvent(
+                        "Failed initStreamVolume with status=" + status).printSlog(ALOGE, TAG));
+                sendMsg(mAudioHandler, MSG_REINIT_VOLUMES, SENDMSG_NOOP, 0, 0,
+                        "updateIndexFactors()" /*obj*/, 2 * INDICATE_SYSTEM_READY_RETRY_DELAY_MS);
             }
         }
 
@@ -9537,9 +9567,11 @@ public class AudioService extends IAudioService.Stub
                             index = (mIndexMap.valueAt(i) + 5)/10;
                         }
 
-                        sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION,
-                                SENDMSG_REPLACE, device,  isAbsoluteVolume ? 1 : 0, this,
-                                /*delay=*/0);
+                        if (mStreamType == AudioSystem.STREAM_MUSIC) {
+                            sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION,
+                                    SENDMSG_QUEUE, device, isAbsoluteVolume ? 1 : 0, this,
+                                    /*delay=*/0);
+                        }
 
                         setStreamVolumeIndex(index, device);
                     }
@@ -10086,7 +10118,7 @@ public class AudioService extends IAudioService.Stub
     /*package*/ void setDeviceVolume(VolumeStreamState streamState, int device) {
 
         synchronized (VolumeStreamState.class) {
-            sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION, SENDMSG_REPLACE,
+            sendMsg(mAudioHandler, SoundDoseHelper.MSG_CSD_UPDATE_ATTENUATION, SENDMSG_QUEUE,
                     device, (isAbsoluteVolumeDevice(device) || isA2dpAbsoluteVolumeDevice(device)
                             || AudioSystem.isLeAudioDeviceType(device) ? 1 : 0),
                     streamState, /*delay=*/0);
@@ -10922,13 +10954,121 @@ public class AudioService extends IAudioService.Stub
                 }
             };
             mSysPropListenerNativeHandle = mAudioSystem.listenForSystemPropertyChange(
-                    PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY,
                     task);
         } else {
             mAudioSystem.listenForSystemPropertyChange(
-                    PermissionManager.CACHE_KEY_PACKAGE_INFO,
+                    PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY,
                     () -> mAudioServerLifecycleExecutor.execute(
                                 mPermissionProvider::onPermissionStateChanged));
+        }
+
+        if (PropertyInvalidatedCache.separatePermissionNotificationsEnabled()) {
+            new PackageInfoTransducer().start();
+        }
+    }
+
+    /**
+     * A transducer that converts high-speed changes in the CACHE_KEY_PACKAGE_INFO_CACHE
+     * PropertyInvalidatedCache into low-speed changes in the CACHE_KEY_PACKAGE_INFO_NOTIFY system
+     * property.  This operates on the popcorn principle: changes in the source are done when the
+     * source has been quiet for the soak interval.
+     *
+     * TODO(b/381097912) This is a temporary measure to support migration away from sysprop
+     * sniffing.  It should be cleaned up.
+     */
+    private static class PackageInfoTransducer extends Thread {
+
+        // The run/stop signal.
+        private final AtomicBoolean mRunning = new AtomicBoolean(false);
+
+        // The source of change information.
+        private final PropertyInvalidatedCache.NonceWatcher mWatcher;
+
+        // The handler for scheduling delayed reactions to changes.
+        private final Handler mHandler;
+
+        // How long to soak changes: 50ms is the legacy choice.
+        private final static long SOAK_TIME_MS = 50;
+
+        // The ubiquitous lock.
+        private final Object mLock = new Object();
+
+        // If positive, this is the soak expiration time.
+        @GuardedBy("mLock")
+        private long mSoakDeadlineMs = -1;
+
+        // A source of unique long values.
+        @GuardedBy("mLock")
+        private long mToken = 0;
+
+        PackageInfoTransducer() {
+            mWatcher = PropertyInvalidatedCache
+                       .getNonceWatcher(PermissionManager.CACHE_KEY_PACKAGE_INFO_CACHE);
+            mHandler = new Handler(BackgroundThread.getHandler().getLooper()) {
+                    @Override
+                    public void handleMessage(Message msg) {
+                        PackageInfoTransducer.this.handleMessage(msg);
+                    }};
+        }
+
+        public void run() {
+            mRunning.set(true);
+            while (mRunning.get()) {
+                try {
+                    final int changes = mWatcher.waitForChange();
+                    if (changes == 0 || !mRunning.get()) {
+                        continue;
+                    }
+                } catch (InterruptedException e) {
+                    // We don't know why the exception occurred but keep running until told to
+                    // stop.
+                    continue;
+                }
+                trigger();
+            }
+        }
+
+        @GuardedBy("mLock")
+        private void updateLocked() {
+            String n = Long.toString(mToken++);
+            SystemProperties.set(PermissionManager.CACHE_KEY_PACKAGE_INFO_NOTIFY, n);
+        }
+
+        private void trigger() {
+            synchronized (mLock) {
+                boolean alreadyQueued = mSoakDeadlineMs >= 0;
+                final long nowMs = SystemClock.uptimeMillis();
+                mSoakDeadlineMs = nowMs + SOAK_TIME_MS;
+                if (!alreadyQueued) {
+                    mHandler.sendEmptyMessageAtTime(0, mSoakDeadlineMs);
+                    updateLocked();
+                }
+            }
+        }
+
+        private void handleMessage(Message msg) {
+            synchronized (mLock) {
+                if (mSoakDeadlineMs < 0) {
+                    return;  // ???
+                }
+                final long nowMs = SystemClock.uptimeMillis();
+                if (mSoakDeadlineMs > nowMs) {
+                    mSoakDeadlineMs = nowMs + SOAK_TIME_MS;
+                    mHandler.sendEmptyMessageAtTime(0, mSoakDeadlineMs);
+                    return;
+                }
+                mSoakDeadlineMs = -1;
+                updateLocked();
+            }
+        }
+
+        /**
+         * Cause the thread to exit.  Running is set to false and the watcher is awakened.
+         */
+        public void done() {
+            mRunning.set(false);
+            mWatcher.wakeUp();
         }
     }
 
@@ -11412,6 +11552,10 @@ public class AudioService extends IAudioService.Stub
         return mSpatializerHelper.canBeSpatialized(attributes, format);
     }
 
+    public @NonNull List<Integer> getSpatializedChannelMasks() {
+        return mSpatializerHelper.getSpatializedChannelMasks();
+    }
+
     /** @see Spatializer.SpatializerInfoDispatcherStub */
     public void registerSpatializerCallback(
             @NonNull ISpatializerCallback cb) {
@@ -11701,7 +11845,7 @@ public class AudioService extends IAudioService.Stub
 
     private AudioDeviceAttributes anonymizeAudioDeviceAttributesUnchecked(
             AudioDeviceAttributes ada) {
-        if (!AudioSystem.isBluetoothDevice(ada.getInternalType())) {
+        if (ada == null || !AudioSystem.isBluetoothDevice(ada.getInternalType())) {
             return ada;
         }
         AudioDeviceAttributes res = new AudioDeviceAttributes(ada);
@@ -14156,10 +14300,10 @@ public class AudioService extends IAudioService.Stub
      * Update player event
      * @param piid Player id to update
      * @param event The new player event
-     * @param eventValue The value associated with this event
+     * @param eventValues The values associated with this event
      */
-    public void playerEvent(int piid, int event, int eventValue) {
-        mPlaybackMonitor.playerEvent(piid, event, eventValue, Binder.getCallingUid());
+    public void playerEvent(int piid, int event, int[] eventValues) {
+        mPlaybackMonitor.playerEvent(piid, event, eventValues, Binder.getCallingUid());
     }
 
     /**

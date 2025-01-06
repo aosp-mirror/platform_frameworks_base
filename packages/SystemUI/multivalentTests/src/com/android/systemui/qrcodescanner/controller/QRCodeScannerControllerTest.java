@@ -300,7 +300,7 @@ public class QRCodeScannerControllerTest extends SysuiTestCase {
         mSecureSettings.putStringForUser(LOCK_SCREEN_SHOW_QR_CODE_SCANNER, "0",
                 UserHandle.USER_CURRENT);
         verifyActivityDetails("abc/.def");
-        assertThat(mController.isEnabledForLockScreenButton()).isFalse();
+        assertThat(mController.isEnabledForLockScreenButton()).isTrue();
         assertThat(mController.isAllowedOnLockScreen()).isTrue();
         assertThat(mController.isAbleToLaunchScannerActivity()).isTrue();
 

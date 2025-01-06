@@ -43,6 +43,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.focusable
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -66,6 +68,7 @@ import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.LazyHorizontalGrid
 import androidx.compose.foundation.lazy.grid.itemsIndexed
@@ -73,6 +76,8 @@ import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.AutoSize
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -107,6 +112,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -141,6 +147,7 @@ import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.clearAndSetSemantics
 import androidx.compose.ui.semantics.contentDescription
 import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.heading
 import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.paneTitle
 import androidx.compose.ui.semantics.semantics
@@ -149,6 +156,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
@@ -163,10 +171,12 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
+import com.android.compose.animation.scene.SceneScope
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
 import com.android.systemui.Flags
+import com.android.systemui.Flags.communalResponsiveGrid
 import com.android.systemui.Flags.communalTimerFlickerFix
 import com.android.systemui.Flags.communalWidgetResizing
 import com.android.systemui.communal.domain.model.CommunalContentModel
@@ -183,14 +193,16 @@ import com.android.systemui.communal.ui.viewmodel.CommunalViewModel
 import com.android.systemui.communal.ui.viewmodel.ResizeInfo
 import com.android.systemui.communal.ui.viewmodel.ResizeableItemFrameViewModel
 import com.android.systemui.communal.util.DensityUtils.Companion.adjustedDp
+import com.android.systemui.communal.util.ResizeUtils.resizeOngoingItems
 import com.android.systemui.communal.widgets.SmartspaceAppWidgetHostView
 import com.android.systemui.communal.widgets.WidgetConfigurator
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.res.R
+import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import kotlin.math.max
 import kotlin.math.min
-import kotlin.math.roundToInt
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
@@ -205,12 +217,14 @@ fun CommunalHub(
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
     onEditDone: (() -> Unit)? = null,
+    sceneScope: SceneScope? = null,
 ) {
     val communalContent by
         viewModel.communalContent.collectAsStateWithLifecycle(initialValue = emptyList())
     var removeButtonCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
     var toolbarSize: IntSize? by remember { mutableStateOf(null) }
     var gridCoordinates: LayoutCoordinates? by remember { mutableStateOf(null) }
+    var contentOffset: Offset by remember { mutableStateOf(Offset.Zero) }
 
     val gridState =
         rememberLazyGridState(viewModel.savedFirstScrollIndex, viewModel.savedFirstScrollOffset)
@@ -233,9 +247,7 @@ fun CommunalHub(
             initialValue = !viewModel.isEditMode
         )
 
-    val contentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
-    val contentOffset = beforeContentPadding(contentPadding).toOffset()
-
+    val minContentPadding = gridContentPadding(viewModel.isEditMode, toolbarSize)
     ObserveScrollEffect(gridState, viewModel)
 
     val context = LocalContext.current
@@ -287,9 +299,19 @@ fun CommunalHub(
                                     offset.y,
                                 ) - contentOffset
                             val index = firstIndexAtOffset(gridState, adjustedOffset)
-                            val key =
+                            val tappedKey =
                                 index?.let { keyAtIndexIfEditable(contentListState.list, index) }
-                            viewModel.setSelectedKey(key)
+
+                            viewModel.setSelectedKey(
+                                if (
+                                    Flags.hubEditModeTouchAdjustments() &&
+                                        selectedKey.value == tappedKey
+                                ) {
+                                    null
+                                } else {
+                                    tappedKey
+                                }
+                            )
                         }
                     }
                 }
@@ -361,7 +383,7 @@ fun CommunalHub(
     ) {
         AccessibilityContainer(viewModel) {
             if (!viewModel.isEditMode && isEmptyState) {
-                EmptyStateCta(contentPadding = contentPadding, viewModel = viewModel)
+                EmptyStateCta(contentPadding = minContentPadding, viewModel = viewModel)
             } else {
                 val slideOffsetInPx =
                     with(LocalDensity.current) { Dimensions.SlideOffsetY.toPx().toInt() }
@@ -390,10 +412,11 @@ fun CommunalHub(
                         CommunalHubLazyGrid(
                             communalContent = communalContent,
                             viewModel = viewModel,
-                            contentPadding = contentPadding,
+                            minContentPadding = minContentPadding,
                             contentOffset = contentOffset,
                             screenWidth = screenWidth,
                             setGridCoordinates = { gridCoordinates = it },
+                            setContentOffset = { contentOffset = it },
                             updateDragPositionForRemove = { boundingBox ->
                                 val gridOffset = gridCoordinates?.positionInWindow()
                                 val removeButtonCenter =
@@ -414,6 +437,7 @@ fun CommunalHub(
                             widgetConfigurator = widgetConfigurator,
                             interactionHandler = interactionHandler,
                             widgetSection = widgetSection,
+                            sceneScope = sceneScope,
                         )
                     }
                 }
@@ -687,7 +711,12 @@ private fun ResizableItemFrameWrapper(
             onResize = onResize,
             minHeightPx = minHeightPx,
             maxHeightPx = maxHeightPx,
-            resizeMultiple = CommunalContentSize.HALF.span,
+            resizeMultiple =
+                if (communalResponsiveGrid()) {
+                    1
+                } else {
+                    CommunalContentSize.FixedSize.HALF.span
+                },
         ) {
             content(Modifier)
         }
@@ -695,14 +724,22 @@ private fun ResizableItemFrameWrapper(
 }
 
 @Composable
-fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): WidgetSizeInfo {
+fun calculateWidgetSize(
+    cellHeight: Dp?,
+    availableHeight: Dp?,
+    item: CommunalContentModel,
+    isResizable: Boolean,
+): WidgetSizeInfo {
     val density = LocalDensity.current
+
+    val minHeight = cellHeight ?: CommunalContentSize.FixedSize.HALF.dp()
+    val maxHeight = availableHeight ?: CommunalContentSize.FixedSize.FULL.dp()
 
     return if (isResizable && item is CommunalContentModel.WidgetContent.Widget) {
         with(density) {
             val minHeightPx =
                 (min(item.providerInfo.minResizeHeight, item.providerInfo.minHeight)
-                    .coerceAtLeast(CommunalContentSize.HALF.dp().toPx().roundToInt()))
+                    .coerceAtLeast(minHeight.roundToPx()))
 
             val maxHeightPx =
                 (if (item.providerInfo.maxResizeHeight > 0) {
@@ -710,7 +747,7 @@ fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): Widge
                     } else {
                         Int.MAX_VALUE
                     })
-                    .coerceIn(minHeightPx, CommunalContentSize.FULL.dp().toPx().roundToInt())
+                    .coerceIn(minHeightPx, maxHeight.roundToPx())
 
             WidgetSizeInfo(minHeightPx, maxHeightPx)
         }
@@ -719,22 +756,78 @@ fun calculateWidgetSize(item: CommunalContentModel, isResizable: Boolean): Widge
     }
 }
 
+@Composable
+private fun HorizontalGridWrapper(
+    minContentPadding: PaddingValues,
+    gridState: LazyGridState,
+    dragDropState: GridDragDropState?,
+    setContentOffset: (offset: Offset) -> Unit,
+    modifier: Modifier = Modifier,
+    content: LazyGridScope.(sizeInfo: SizeInfo?) -> Unit,
+) {
+    val isDragging = dragDropState?.draggingItemKey != null
+    if (communalResponsiveGrid()) {
+        val flingBehavior =
+            rememberSnapFlingBehavior(lazyGridState = gridState, snapPosition = SnapPosition.Start)
+        ResponsiveLazyHorizontalGrid(
+            cellAspectRatio = 1.5f,
+            modifier = modifier,
+            state = gridState,
+            flingBehavior = flingBehavior,
+            minContentPadding = minContentPadding,
+            minHorizontalArrangement = Dimensions.ItemSpacing,
+            minVerticalArrangement = Dimensions.ItemSpacing,
+            setContentOffset = setContentOffset,
+            // Temporarily disable user gesture scrolling while dragging a widget to prevent
+            // conflicts between the drag and scroll gestures. Programmatic scrolling remains
+            // enabled to allow dragging a widget beyond the visible boundaries.
+            userScrollEnabled = !isDragging,
+            content = content,
+        )
+    } else {
+        val layoutDirection = LocalLayoutDirection.current
+        val density = LocalDensity.current
+
+        val minStartPadding = minContentPadding.calculateStartPadding(layoutDirection)
+        val minTopPadding = minContentPadding.calculateTopPadding()
+
+        with(density) { setContentOffset(Offset(minStartPadding.toPx(), minTopPadding.toPx())) }
+
+        LazyHorizontalGrid(
+            modifier = modifier,
+            state = gridState,
+            rows = GridCells.Fixed(CommunalContentSize.FixedSize.FULL.span),
+            contentPadding = minContentPadding,
+            horizontalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
+            verticalArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing),
+            // Temporarily disable user gesture scrolling while dragging a widget to prevent
+            // conflicts between the drag and scroll gestures. Programmatic scrolling remains
+            // enabled to allow dragging a widget beyond the visible boundaries.
+            userScrollEnabled = !isDragging,
+        ) {
+            content(null)
+        }
+    }
+}
+
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 private fun BoxScope.CommunalHubLazyGrid(
     communalContent: List<CommunalContentModel>,
     viewModel: BaseCommunalViewModel,
-    contentPadding: PaddingValues,
+    minContentPadding: PaddingValues,
     selectedKey: State<String?>,
     screenWidth: Int,
     contentOffset: Offset,
     gridState: LazyGridState,
     contentListState: ContentListState,
     setGridCoordinates: (coordinates: LayoutCoordinates) -> Unit,
+    setContentOffset: (offset: Offset) -> Unit,
     updateDragPositionForRemove: (boundingBox: IntRect) -> Boolean,
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
+    sceneScope: SceneScope?,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -771,28 +864,42 @@ private fun BoxScope.CommunalHubLazyGrid(
         // Since the grid has its own listener for in-grid drag events, we use a separate element
         // for android drag events.
         Box(Modifier.fillMaxSize().dragAndDropTarget(dragAndDropTargetState)) {}
+    } else if (communalResponsiveGrid()) {
+        gridModifier = gridModifier.fillMaxSize()
     } else {
         gridModifier = gridModifier.height(hubDimensions.GridHeight)
     }
 
-    val itemArrangement = Arrangement.spacedBy(Dimensions.ItemSpacing)
-    LazyHorizontalGrid(
+    HorizontalGridWrapper(
         modifier = gridModifier,
-        state = gridState,
-        rows = GridCells.Fixed(CommunalContentSize.FULL.span),
-        contentPadding = contentPadding,
-        horizontalArrangement = itemArrangement,
-        verticalArrangement = itemArrangement,
-    ) {
+        gridState = gridState,
+        dragDropState = dragDropState,
+        minContentPadding = minContentPadding,
+        setContentOffset = setContentOffset,
+    ) { sizeInfo ->
+        /** Override spans based on the responsive grid size */
+        val finalizedList =
+            if (sizeInfo != null) {
+                resizeOngoingItems(list, sizeInfo.gridSize.height)
+            } else {
+                list
+            }
+
         itemsIndexed(
-            items = list,
+            items = finalizedList,
             key = { _, item -> item.key },
             contentType = { _, item -> item.key },
-            span = { _, item -> GridItemSpan(item.size.span) },
+            span = { _, item -> GridItemSpan(item.getSpanOrMax(sizeInfo?.gridSize?.height)) },
         ) { index, item ->
-            val size = SizeF(Dimensions.CardWidth.value, item.size.dp().value)
+            val currentItemSpan = item.getSpanOrMax(sizeInfo?.gridSize?.height)
+            val dpSize =
+                if (sizeInfo != null) {
+                    DpSize(sizeInfo.cellSize.width, sizeInfo.calculateHeight(currentItemSpan))
+                } else {
+                    DpSize(Dimensions.CardWidth, (item.size as CommunalContentSize.FixedSize).dp())
+                }
+            val size = SizeF(dpSize.width.value, dpSize.height.value)
             val selected = item.key == selectedKey.value
-            val dpSize = DpSize(size.width.dp, size.height.dp)
             val isResizable =
                 if (item is CommunalContentModel.WidgetContent.Widget) {
                     item.providerInfo.resizeMode and AppWidgetProviderInfo.RESIZE_VERTICAL != 0
@@ -802,12 +909,11 @@ private fun BoxScope.CommunalHubLazyGrid(
 
             val resizeableItemFrameViewModel =
                 rememberViewModel(
-                    key = item.size.span,
+                    key = currentItemSpan,
                     traceName = "ResizeableItemFrame.viewModel.$index",
                 ) {
                     ResizeableItemFrameViewModel()
                 }
-
             if (viewModel.isEditMode && dragDropState != null) {
                 val isItemDragging = dragDropState.draggingItemKey == item.key
                 val outlineAlpha by
@@ -816,20 +922,32 @@ private fun BoxScope.CommunalHubLazyGrid(
                         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                         label = "Widget resizing outline alpha",
                     )
-                val widgetSizeInfo = calculateWidgetSize(item, isResizable)
+
+                val widgetSizeInfo =
+                    calculateWidgetSize(
+                        cellHeight = sizeInfo?.cellSize?.height,
+                        availableHeight = sizeInfo?.availableHeight,
+                        item = item,
+                        isResizable = isResizable,
+                    )
                 ResizableItemFrameWrapper(
                     key = item.key,
-                    currentSpan = GridItemSpan(item.size.span),
+                    currentSpan = GridItemSpan(currentItemSpan),
                     gridState = gridState,
-                    gridContentPadding = contentPadding,
-                    verticalArrangement = itemArrangement,
-                    enabled = selected,
+                    gridContentPadding = sizeInfo?.contentPadding ?: minContentPadding,
+                    verticalArrangement =
+                        Arrangement.spacedBy(
+                            sizeInfo?.verticalArrangement ?: Dimensions.ItemSpacing
+                        ),
+                    enabled = selected && !isItemDragging,
                     alpha = { outlineAlpha },
                     modifier =
                         Modifier.requiredSize(dpSize)
                             .thenIf(!isItemDragging) {
                                 Modifier.animateItem(
-                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                                    placementSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                    // See b/376495198 - not supported with AndroidView
+                                    fadeOutSpec = null,
                                 )
                             }
                             .thenIf(isItemDragging) { Modifier.zIndex(1f) },
@@ -861,17 +979,37 @@ private fun BoxScope.CommunalHubLazyGrid(
                     }
                 }
             } else {
+                val itemAlpha =
+                    if (communalResponsiveGrid()) {
+                        val percentVisible by
+                            remember(gridState, index) {
+                                derivedStateOf { calculatePercentVisible(gridState, index) }
+                            }
+                        animateFloatAsState(percentVisible)
+                    } else {
+                        null
+                    }
+
                 CommunalContent(
                     model = item,
                     viewModel = viewModel,
                     size = size,
                     selected = false,
-                    modifier = Modifier.requiredSize(dpSize).animateItem(),
+                    modifier =
+                        Modifier.requiredSize(dpSize)
+                            .animateItem(
+                                // See b/376495198 - not supported with AndroidView
+                                fadeOutSpec = null
+                            )
+                            .thenIf(communalResponsiveGrid()) {
+                                Modifier.graphicsLayer { alpha = itemAlpha?.value ?: 1f }
+                            },
                     index = index,
                     contentListState = contentListState,
                     interactionHandler = interactionHandler,
                     widgetSection = widgetSection,
                     resizeableItemFrameViewModel = resizeableItemFrameViewModel,
+                    sceneScope = sceneScope,
                 )
             }
         }
@@ -886,8 +1024,11 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
     val colors = MaterialTheme.colorScheme
     Card(
         modifier = Modifier.height(hubDimensions.GridHeight).padding(contentPadding),
-        colors = CardDefaults.cardColors(containerColor = Color.Transparent),
-        border = BorderStroke(3.adjustedDp, colors.secondary),
+        colors =
+            CardDefaults.cardColors(
+                containerColor = colors.primary,
+                contentColor = colors.onPrimary,
+            ),
         shape = RoundedCornerShape(size = 80.adjustedDp),
     ) {
         Column(
@@ -896,19 +1037,29 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
                 Arrangement.spacedBy(Dimensions.Spacing, Alignment.CenterVertically),
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
-            Text(
-                text = stringResource(R.string.title_for_empty_state_cta),
-                style = MaterialTheme.typography.displaySmall,
-                textAlign = TextAlign.Center,
-                color = colors.secondary,
+            val titleForEmptyStateCTA = stringResource(R.string.title_for_empty_state_cta)
+            BasicText(
+                text = titleForEmptyStateCTA,
+                style =
+                    MaterialTheme.typography.displaySmall.merge(
+                        color = colors.onPrimary,
+                        textAlign = TextAlign.Center,
+                    ),
+                autoSize = AutoSize.StepBased(maxFontSize = 36.sp, stepSize = 0.1.sp),
+                modifier =
+                    Modifier.focusable().semantics(mergeDescendants = true) {
+                        contentDescription = titleForEmptyStateCTA
+                        heading()
+                    },
             )
+
             Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
                 Button(
                     modifier = Modifier.height(56.dp),
                     colors =
                         ButtonDefaults.buttonColors(
-                            containerColor = colors.primary,
-                            contentColor = colors.onPrimary,
+                            containerColor = colors.primaryContainer,
+                            contentColor = colors.onPrimaryContainer,
                         ),
                     onClick = { viewModel.onOpenWidgetEditor(shouldOpenWidgetPickerOnStart = true) },
                 ) {
@@ -965,17 +1116,27 @@ private fun Toolbar(
                 .onSizeChanged { setToolbarSize(it) }
     ) {
         val addWidgetText = stringResource(R.string.hub_mode_add_widget_button_text)
-        ToolbarButton(
-            isPrimary = !removeEnabled,
-            modifier = Modifier.align(Alignment.CenterStart),
-            onClick = onOpenWidgetPicker,
-        ) {
-            Icon(Icons.Default.Add, null)
-            Text(text = addWidgetText)
+
+        if (!(Flags.hubEditModeTouchAdjustments() && removeEnabled)) {
+            ToolbarButton(
+                isPrimary = !removeEnabled,
+                modifier = Modifier.align(Alignment.CenterStart),
+                onClick = onOpenWidgetPicker,
+            ) {
+                Icon(Icons.Default.Add, null)
+                Text(text = addWidgetText)
+            }
         }
 
         AnimatedVisibility(
-            modifier = Modifier.align(Alignment.Center),
+            modifier =
+                Modifier.align(
+                    if (Flags.hubEditModeTouchAdjustments()) {
+                        Alignment.CenterStart
+                    } else {
+                        Alignment.Center
+                    }
+                ),
             visible = removeEnabled,
             enter = fadeIn(),
             exit = fadeOut(),
@@ -998,7 +1159,11 @@ private fun Toolbar(
                     horizontalArrangement =
                         Arrangement.spacedBy(
                             ButtonDefaults.IconSpacing,
-                            Alignment.CenterHorizontally,
+                            if (Flags.hubEditModeTouchAdjustments()) {
+                                Alignment.Start
+                            } else {
+                                Alignment.CenterHorizontally
+                            },
                         ),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
@@ -1096,6 +1261,7 @@ private fun CommunalContent(
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
     resizeableItemFrameViewModel: ResizeableItemFrameViewModel,
+    sceneScope: SceneScope? = null,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -1119,7 +1285,8 @@ private fun CommunalContent(
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
-        is CommunalContentModel.Umo -> Umo(viewModel, modifier)
+        is CommunalContentModel.Umo -> Umo(viewModel, sceneScope, modifier)
+        is CommunalContentModel.Spacer -> Box(Modifier.fillMaxSize())
     }
 }
 
@@ -1257,6 +1424,7 @@ private fun WidgetContent(
     val shrinkWidgetLabel = stringResource(R.string.accessibility_action_label_shrink_widget)
     val expandWidgetLabel = stringResource(R.string.accessibility_action_label_expand_widget)
 
+    val isFocusable by viewModel.isFocusable.collectAsStateWithLifecycle(initialValue = false)
     val selectedKey by viewModel.selectedKey.collectAsStateWithLifecycle()
     val selectedIndex =
         selectedKey?.let { key -> contentListState.list.indexOfFirst { it.key == key } }
@@ -1370,7 +1538,8 @@ private fun WidgetContent(
     ) {
         with(widgetSection) {
             Widget(
-                viewModel = viewModel,
+                isFocusable = isFocusable,
+                openWidgetEditor = { viewModel.onOpenWidgetEditor() },
                 model = model,
                 size = size,
                 modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
@@ -1530,26 +1699,50 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 }
 
 @Composable
-private fun Umo(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
+private fun Umo(
+    viewModel: BaseCommunalViewModel,
+    sceneScope: SceneScope?,
+    modifier: Modifier = Modifier,
+) {
+    if (SceneContainerFlag.isEnabled && sceneScope != null) {
+        sceneScope.MediaCarousel(
+            modifier = modifier.fillMaxSize(),
+            isVisible = true,
+            mediaHost = viewModel.mediaHost,
+            carouselController = viewModel.mediaCarouselController,
+        )
+    } else {
+        UmoLegacy(viewModel, modifier)
+    }
+}
+
+@Composable
+private fun UmoLegacy(viewModel: BaseCommunalViewModel, modifier: Modifier = Modifier) {
     AndroidView(
         modifier =
-            modifier.pointerInput(Unit) {
-                detectHorizontalDragGestures { change, _ ->
-                    change.consume()
-                    val upTime = SystemClock.uptimeMillis()
-                    val event =
-                        MotionEvent.obtain(
-                            upTime,
-                            upTime,
-                            MotionEvent.ACTION_MOVE,
-                            change.position.x,
-                            change.position.y,
-                            0,
-                        )
-                    viewModel.mediaHost.hostView.dispatchTouchEvent(event)
-                    event.recycle()
-                }
-            },
+            modifier
+                .clip(
+                    shape =
+                        RoundedCornerShape(dimensionResource(system_app_widget_background_radius))
+                )
+                .background(MaterialTheme.colorScheme.primary)
+                .pointerInput(Unit) {
+                    detectHorizontalDragGestures { change, _ ->
+                        change.consume()
+                        val upTime = SystemClock.uptimeMillis()
+                        val event =
+                            MotionEvent.obtain(
+                                upTime,
+                                upTime,
+                                MotionEvent.ACTION_MOVE,
+                                change.position.x,
+                                change.position.y,
+                                0,
+                            )
+                        viewModel.mediaHost.hostView.dispatchTouchEvent(event)
+                        event.recycle()
+                    }
+                },
         factory = { _ ->
             viewModel.mediaHost.hostView.apply {
                 layoutParams =
@@ -1632,33 +1825,31 @@ private fun gridContentPadding(isEditMode: Boolean, toolbarSize: IntSize?): Padd
     val windowMetrics = WindowMetricsCalculator.getOrCreate().computeCurrentWindowMetrics(context)
     val screenHeight = with(density) { windowMetrics.bounds.height().toDp() }
     val toolbarHeight = with(density) { Dimensions.ToolbarPaddingTop + toolbarSize.height.toDp() }
-    val verticalPadding =
-        ((screenHeight - toolbarHeight - hubDimensions.GridHeight + hubDimensions.GridTopSpacing) /
-                2)
-            .coerceAtLeast(Dimensions.Spacing)
-    return PaddingValues(
-        start = Dimensions.ToolbarPaddingHorizontal,
-        end = Dimensions.ToolbarPaddingHorizontal,
-        top = verticalPadding + toolbarHeight,
-        bottom = verticalPadding,
-    )
-}
-
-@Composable
-private fun beforeContentPadding(paddingValues: PaddingValues): ContentPaddingInPx {
-    return with(LocalDensity.current) {
-        ContentPaddingInPx(
-            start = paddingValues.calculateStartPadding(LocalLayoutDirection.current).toPx(),
-            top = paddingValues.calculateTopPadding().toPx(),
+    return if (communalResponsiveGrid()) {
+        PaddingValues(
+            start = Dimensions.ToolbarPaddingHorizontal,
+            end = Dimensions.ToolbarPaddingHorizontal,
+            top = hubDimensions.GridTopSpacing,
+        )
+    } else {
+        val verticalPadding =
+            ((screenHeight - toolbarHeight - hubDimensions.GridHeight +
+                    hubDimensions.GridTopSpacing) / 2)
+                .coerceAtLeast(Dimensions.Spacing)
+        PaddingValues(
+            start = Dimensions.ToolbarPaddingHorizontal,
+            end = Dimensions.ToolbarPaddingHorizontal,
+            top = verticalPadding + toolbarHeight,
+            bottom = verticalPadding,
         )
     }
 }
 
-private fun CommunalContentSize.dp(): Dp {
+private fun CommunalContentSize.FixedSize.dp(): Dp {
     return when (this) {
-        CommunalContentSize.FULL -> Dimensions.CardHeightFull
-        CommunalContentSize.HALF -> Dimensions.CardHeightHalf
-        CommunalContentSize.THIRD -> Dimensions.CardHeightThird
+        CommunalContentSize.FixedSize.FULL -> Dimensions.CardHeightFull
+        CommunalContentSize.FixedSize.HALF -> Dimensions.CardHeightHalf
+        CommunalContentSize.FixedSize.THIRD -> Dimensions.CardHeightThird
     }
 }
 
@@ -1669,15 +1860,14 @@ private fun firstIndexAtOffset(gridState: LazyGridState, offset: Offset): Int? =
 private fun keyAtIndexIfEditable(list: List<CommunalContentModel>, index: Int): String? =
     if (index in list.indices && list[index].isWidgetContent()) list[index].key else null
 
-data class ContentPaddingInPx(val start: Float, val top: Float) {
-    fun toOffset(): Offset = Offset(start, top)
-}
-
 class Dimensions(val context: Context, val config: Configuration) {
     val GridTopSpacing: Dp
         get() {
             val result =
-                if (config.orientation == Configuration.ORIENTATION_LANDSCAPE) {
+                if (
+                    communalResponsiveGrid() ||
+                        config.orientation == Configuration.ORIENTATION_LANDSCAPE
+                ) {
                     114.dp
                 } else {
                     val windowMetrics =
@@ -1697,7 +1887,7 @@ class Dimensions(val context: Context, val config: Configuration) {
             get() = 530.adjustedDp
 
         val ItemSpacing
-            get() = 50.adjustedDp
+            get() = if (communalResponsiveGrid()) 32.adjustedDp else 50.adjustedDp
 
         val CardHeightHalf
             get() = (CardHeightFull - ItemSpacing) / 2
@@ -1738,6 +1928,51 @@ class Dimensions(val context: Context, val config: Configuration) {
 }
 
 data class WidgetSizeInfo(val minHeightPx: Int, val maxHeightPx: Int)
+
+private fun CommunalContentModel.getSpanOrMax(maxSpan: Int?) =
+    if (maxSpan != null) {
+        size.span.coerceAtMost(maxSpan)
+    } else {
+        size.span
+    }
+
+private fun IntRect.percentOverlap(other: IntRect): Float {
+    val intersection = intersect(other)
+    if (intersection.width < 0 || intersection.height < 0) {
+        return 0f
+    }
+    val overlapArea = intersection.width * intersection.height
+    val area = width * height
+    return overlapArea.toFloat() / area.toFloat()
+}
+
+private fun calculatePercentVisible(state: LazyGridState, index: Int): Float {
+    val viewportSize = state.layoutInfo.viewportSize
+    val visibleRect =
+        IntRect(
+            offset =
+                IntOffset(
+                    state.layoutInfo.viewportStartOffset + state.layoutInfo.beforeContentPadding,
+                    0,
+                ),
+            size =
+                IntSize(
+                    width =
+                        viewportSize.width -
+                            state.layoutInfo.beforeContentPadding -
+                            state.layoutInfo.afterContentPadding,
+                    height = viewportSize.height,
+                ),
+        )
+
+    val itemInfo = state.layoutInfo.visibleItemsInfo.find { it.index == index }
+    return if (itemInfo != null) {
+        val boundingBox = IntRect(itemInfo.offset, itemInfo.size)
+        boundingBox.percentOverlap(visibleRect)
+    } else {
+        0f
+    }
+}
 
 private object Colors {
     val DisabledColorFilter by lazy { disabledColorMatrix() }

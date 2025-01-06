@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core.operations;
 
+import android.annotation.NonNull;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.PaintContext;
@@ -25,11 +27,13 @@ import com.android.internal.widget.remotecompose.core.WireBuffer;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentationBuilder;
 import com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.ImageScaling;
+import com.android.internal.widget.remotecompose.core.semantics.AccessibleComponent;
 
 import java.util.List;
 
 /** Operation to draw a given cached bitmap */
-public class DrawBitmapScaled extends PaintOperation implements VariableSupport {
+public class DrawBitmapScaled extends PaintOperation
+        implements VariableSupport, AccessibleComponent {
     private static final int OP_CODE = Operations.DRAW_BITMAP_SCALED;
     private static final String CLASS_NAME = "DrawBitmapScaled";
     int mImageId;
@@ -44,8 +48,9 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
     int mContentDescId;
     float mScaleFactor, mOutScaleFactor;
     int mScaleType;
+    int mMode;
 
-    ImageScaling mScaling = new ImageScaling();
+    @NonNull ImageScaling mScaling = new ImageScaling();
     public static final int SCALE_NONE = ImageScaling.SCALE_NONE;
     public static final int SCALE_INSIDE = ImageScaling.SCALE_INSIDE;
     public static final int SCALE_FILL_WIDTH = ImageScaling.SCALE_FILL_WIDTH;
@@ -77,13 +82,14 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
         mOutDstTop = mDstTop = dstTop;
         mOutDstRight = mDstRight = dstRight;
         mOutDstBottom = mDstBottom = dstBottom;
-        mScaleType = type;
+        mScaleType = type & 0xFF;
+        mMode = type >> 8;
         mOutScaleFactor = mScaleFactor = scale;
         this.mContentDescId = cdId;
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         mOutSrcLeft =
                 Float.isNaN(mSrcLeft) ? context.getFloat(Utils.idFromNan(mSrcLeft)) : mSrcLeft;
         mOutSrcTop = Float.isNaN(mSrcTop) ? context.getFloat(Utils.idFromNan(mSrcTop)) : mSrcTop;
@@ -109,7 +115,7 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         register(context, mSrcLeft);
         register(context, mSrcTop);
         register(context, mSrcRight);
@@ -121,12 +127,13 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
         register(context, mScaleFactor);
     }
 
-    private void register(RemoteContext context, float value) {
+    private void register(@NonNull RemoteContext context, float value) {
         if (Float.isNaN(value)) {
             context.listensTo(Utils.idFromNan(value), this);
         }
     }
 
+    @NonNull
     static String str(float v) {
         String s = "  " + (int) v;
         return s.substring(s.length() - 3);
@@ -140,7 +147,7 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(
                 buffer,
                 mImageId,
@@ -157,6 +164,7 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
                 mContentDescId);
     }
 
+    @NonNull
     @Override
     public String toString() {
         return "DrawBitmapScaled "
@@ -185,16 +193,32 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
                 + Utils.floatToString(mScaleFactor, mOutScaleFactor);
     }
 
+    @Override
+    public Integer getContentDescriptionId() {
+        return mContentDescId;
+    }
+
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
 
     public static void apply(
-            WireBuffer buffer,
+            @NonNull WireBuffer buffer,
             int imageId,
             float srcLeft,
             float srcTop,
@@ -225,7 +249,13 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
         buffer.writeInt(cdId);
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int imageId = buffer.readInt();
 
         float sLeft = buffer.readFloat();
@@ -258,7 +288,12 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
         operations.add(op);
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Draw Operations", OP_CODE, CLASS_NAME)
                 .description("Draw a bitmap using integer coordinates")
                 .field(DocumentedOperation.INT, "id", "id of bitmap")
@@ -289,7 +324,7 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
     //    }
 
     @Override
-    public void paint(PaintContext context) {
+    public void paint(@NonNull PaintContext context) {
         mScaling.setup(
                 mOutSrcLeft,
                 mOutSrcTop,
@@ -303,8 +338,14 @@ public class DrawBitmapScaled extends PaintOperation implements VariableSupport 
                 mOutScaleFactor);
         context.save();
         context.clipRect(mOutDstLeft, mOutDstTop, mOutDstRight, mOutDstBottom);
+
+        int imageId = mImageId;
+        if ((mMode & 0x1) != 0) {
+            imageId = context.getContext().getInteger(imageId);
+        }
+
         context.drawBitmap(
-                mImageId,
+                imageId,
                 (int) mOutSrcLeft,
                 (int) mOutSrcTop,
                 (int) mOutSrcRight,

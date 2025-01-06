@@ -19,10 +19,11 @@ package com.android.systemui.qs.panels.ui.compose.selection
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.animateIntAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectHorizontalDragGestures
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.anchoredDraggable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.size
@@ -30,7 +31,9 @@ import androidx.compose.foundation.systemGestureExclusion
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
@@ -40,16 +43,16 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.toSize
 import androidx.compose.ui.zIndex
-import com.android.compose.modifiers.thenIf
 import com.android.systemui.qs.panels.ui.compose.infinitegrid.CommonTileDefaults.InactiveCornerRadius
 import com.android.systemui.qs.panels.ui.compose.selection.SelectionDefaults.ResizingDotSize
 import com.android.systemui.qs.panels.ui.compose.selection.SelectionDefaults.SelectedBorderWidth
+import kotlin.math.roundToInt
+import kotlinx.coroutines.launch
 
 /**
  * Places a dot to handle resizing drag events. Use this on tiles to resize.
@@ -58,31 +61,24 @@ import com.android.systemui.qs.panels.ui.compose.selection.SelectionDefaults.Sel
  * selected.
  *
  * @param selected whether resizing drag events should be handled
- * @param selectionState the [MutableSelectionState] on the grid
+ * @param state the [ResizingState] for the tile
  * @param selectionAlpha the animated value for the dot and border alpha
  * @param selectionColor the [Color] of the dot and border
- * @param tileWidths the [TileWidths] of the selected tile
  */
 @Composable
 fun ResizableTileContainer(
     selected: Boolean,
-    selectionState: MutableSelectionState,
+    state: ResizingState,
     selectionAlpha: () -> Float,
     selectionColor: Color,
-    tileWidths: () -> TileWidths?,
     modifier: Modifier = Modifier,
     content: @Composable BoxScope.() -> Unit = {},
 ) {
-    Box(
-        modifier
-            .resizable(selected, selectionState, tileWidths)
-            .selectionBorder(selectionColor, selectionAlpha)
-    ) {
+    Box(modifier.resizable(selected, state).selectionBorder(selectionColor, selectionAlpha)) {
         content()
         ResizingHandle(
             enabled = selected,
-            selectionState = selectionState,
-            tileWidths = tileWidths,
+            state = state,
             modifier =
                 // Higher zIndex to make sure the handle is drawn above the content
                 Modifier.zIndex(2f),
@@ -91,15 +87,11 @@ fun ResizableTileContainer(
 }
 
 @Composable
-private fun ResizingHandle(
-    enabled: Boolean,
-    selectionState: MutableSelectionState,
-    tileWidths: () -> TileWidths?,
-    modifier: Modifier = Modifier,
-) {
+private fun ResizingHandle(enabled: Boolean, state: ResizingState, modifier: Modifier = Modifier) {
     // Manually creating the touch target around the resizing dot to ensure that the next tile
     // does not receive the touch input accidentally.
     val minTouchTargetSize = LocalMinimumInteractiveComponentSize.current
+    val scope = rememberCoroutineScope()
     Box(
         modifier
             .layout { measurable, constraints ->
@@ -112,20 +104,14 @@ private fun ResizingHandle(
                     )
                 }
             }
-            .thenIf(enabled) {
-                Modifier.systemGestureExclusion { Rect(Offset.Zero, it.size.toSize()) }
-                    .pointerInput(Unit) {
-                        detectHorizontalDragGestures(
-                            onHorizontalDrag = { _, offset ->
-                                selectionState.onResizingDrag(offset)
-                            },
-                            onDragStart = {
-                                tileWidths()?.let { selectionState.onResizingDragStart(it) }
-                            },
-                            onDragEnd = selectionState::onResizingDragEnd,
-                            onDragCancel = selectionState::onResizingDragEnd,
-                        )
-                    }
+            .systemGestureExclusion { Rect(Offset.Zero, it.size.toSize()) }
+            .anchoredDraggable(
+                enabled = enabled,
+                state = state.anchoredDraggableState,
+                orientation = Orientation.Horizontal,
+            )
+            .clickable(enabled = enabled, interactionSource = null, indication = null) {
+                scope.launch { state.toggleCurrentValue() }
             }
     ) {
         ResizingDot(enabled = enabled, modifier = Modifier.align(Alignment.Center))
@@ -165,23 +151,15 @@ private fun Modifier.selectionBorder(
 }
 
 @Composable
-private fun Modifier.resizable(
-    selected: Boolean,
-    selectionState: MutableSelectionState,
-    tileWidths: () -> TileWidths?,
-): Modifier {
+private fun Modifier.resizable(selected: Boolean, state: ResizingState): Modifier {
     if (!selected) return zIndex(1f)
 
-    // Animated diff between the current width and the resized width of the tile. We can't use
-    // animateContentSize here as the tile is sometimes unbounded.
-    val remainingOffset by
-        animateIntAsState(
-            selectionState.resizingState?.let { tileWidths()?.base?.minus(it.width) ?: 0 } ?: 0,
-            label = "QSEditTileWidthOffset",
-        )
     return zIndex(2f).layout { measurable, constraints ->
+        val isIdle by derivedStateOf { state.progress().let { it == 0f || it == 1f } }
         // Grab the width from the resizing state if a resize is in progress
-        val width = selectionState.resizingState?.width ?: (constraints.maxWidth - remainingOffset)
+        val width =
+            state.anchoredDraggableState.requireOffset().roundToInt().takeIf { !isIdle }
+                ?: constraints.maxWidth
         val placeable = measurable.measure(constraints.copy(minWidth = width, maxWidth = width))
         layout(constraints.maxWidth, placeable.height) { placeable.place(0, 0) }
     }

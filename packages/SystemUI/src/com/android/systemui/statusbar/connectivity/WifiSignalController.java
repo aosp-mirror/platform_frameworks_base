@@ -36,11 +36,13 @@ import com.android.settingslib.mobile.TelephonyIcons;
 import com.android.settingslib.wifi.WifiStatusTracker;
 import com.android.systemui.dagger.qualifiers.Background;
 import com.android.systemui.res.R;
+import com.android.systemui.statusbar.pipeline.wifi.domain.interactor.WifiInteractor;
 
 import java.io.PrintWriter;
 import java.util.BitSet;
 
-/** */
+/** @deprecated use {@link WifiInteractor} instead. */
+@Deprecated
 public class WifiSignalController extends SignalController<WifiState, IconGroup> {
     private final boolean mHasMobileDataFeature;
     private final WifiStatusTracker mWifiTracker;

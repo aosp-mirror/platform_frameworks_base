@@ -112,23 +112,10 @@ public final class PhantomProcessList {
     private final ActivityManagerService mService;
     private final Handler mKillHandler;
 
-    private static final int CGROUP_V1 = 0;
-    private static final int CGROUP_V2 = 1;
-    private static final String[] CGROUP_PATH_PREFIXES = {
-        "/acct/uid_" /* cgroup v1 */,
-        "/sys/fs/cgroup/uid_" /* cgroup v2 */
-    };
-    private static final String CGROUP_PID_PREFIX = "/pid_";
-    private static final String CGROUP_PROCS = "/cgroup.procs";
-
-    @VisibleForTesting
-    int mCgroupVersion = CGROUP_V1;
-
     PhantomProcessList(final ActivityManagerService service) {
         mService = service;
         mKillHandler = service.mProcessList.sKillHandler;
         mInjector = new Injector();
-        probeCgroupVersion();
     }
 
     @VisibleForTesting
@@ -157,9 +144,15 @@ public final class PhantomProcessList {
         final int appPid = app.getPid();
         InputStream input = mCgroupProcsFds.get(appPid);
         if (input == null) {
-            final String path = getCgroupFilePath(app.info.uid, appPid);
+            String path = null;
             try {
+                path = getCgroupFilePath(app.info.uid, appPid);
                 input = mInjector.openCgroupProcs(path);
+            } catch (IllegalArgumentException e) {
+                if (DEBUG_PROCESSES) {
+                    Slog.w(TAG, "Unable to obtain cgroup.procs path ", e);
+                }
+                return;
             } catch (FileNotFoundException | SecurityException e) {
                 if (DEBUG_PROCESSES) {
                     Slog.w(TAG, "Unable to open " + path, e);
@@ -207,18 +200,9 @@ public final class PhantomProcessList {
         }
     }
 
-    private void probeCgroupVersion() {
-        for (int i = CGROUP_PATH_PREFIXES.length - 1; i >= 0; i--) {
-            if ((new File(CGROUP_PATH_PREFIXES[i] + Process.SYSTEM_UID)).exists()) {
-                mCgroupVersion = i;
-                break;
-            }
-        }
-    }
-
     @VisibleForTesting
     String getCgroupFilePath(int uid, int pid) {
-        return CGROUP_PATH_PREFIXES[mCgroupVersion] + uid + CGROUP_PID_PREFIX + pid + CGROUP_PROCS;
+        return nativeGetCgroupProcsPath(uid, pid);
     }
 
     static String getProcessName(int pid) {
@@ -548,6 +532,7 @@ public final class PhantomProcessList {
      */
     void setProcessGroupForPhantomProcessOfApp(final ProcessRecord app, final int group) {
         synchronized (mLock) {
+            lookForPhantomProcessesLocked(app);
             final SparseArray<PhantomProcessRecord> array = getPhantomProcessOfAppLocked(app);
             if (array == null) {
                 return;
@@ -629,4 +614,7 @@ public final class PhantomProcessList {
             return PhantomProcessList.getProcessName(pid);
         }
     }
+
+    private static native String nativeGetCgroupProcsPath(int uid, int pid)
+            throws IllegalArgumentException;
 }

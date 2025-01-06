@@ -28,10 +28,14 @@ import androidx.annotation.ColorInt
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController
+import com.android.systemui.statusbar.data.repository.StatusBarConfigurationControllerStore
+import com.android.systemui.statusbar.data.repository.SysuiDarkIconDispatcherStore
 import com.android.systemui.statusbar.phone.SysuiDarkIconDispatcher.DarkChange
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
@@ -40,18 +44,18 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 class StatusOverlayHoverListenerFactory
 @Inject
 constructor(
     @Main private val resources: Resources,
     private val configurationController: ConfigurationController,
-    private val darkIconDispatcher: SysuiDarkIconDispatcher,
+    private val darkIconDispatcherStore: SysuiDarkIconDispatcherStore,
+    private val statusBarConfigurationControllerStore: StatusBarConfigurationControllerStore,
 ) {
 
     /** Creates listener always using the same light color for overlay */
-    fun createListener(view: View) =
+    fun createListener(view: View): StatusOverlayHoverListener =
         StatusOverlayHoverListener(
             view,
             configurationController,
@@ -62,8 +66,10 @@ constructor(
     /**
      * Creates listener using [DarkIconDispatcher] to determine light or dark color of the overlay
      */
-    fun createDarkAwareListener(view: View) =
-        createDarkAwareListener(view, darkIconDispatcher.darkChangeFlow())
+    fun createDarkAwareListener(view: View): StatusOverlayHoverListener? {
+        val darkIconDispatcher = view.darkIconDispatcher ?: return null
+        return createDarkAwareListener(view, darkIconDispatcher.darkChangeFlow())
+    }
 
     /**
      * Creates listener using [DarkIconDispatcher] to determine light or dark color of the overlay
@@ -75,8 +81,9 @@ constructor(
         rightHoverMargin: Int = 0,
         topHoverMargin: Int = 0,
         bottomHoverMargin: Int = 0,
-    ) =
-        createDarkAwareListener(
+    ): StatusOverlayHoverListener? {
+        val darkIconDispatcher = view.darkIconDispatcher ?: return null
+        return createDarkAwareListener(
             view,
             darkIconDispatcher.darkChangeFlow(),
             leftHoverMargin,
@@ -84,18 +91,24 @@ constructor(
             topHoverMargin,
             bottomHoverMargin,
         )
+    }
 
     /**
      * Creates listener using provided [DarkChange] producer to determine light or dark color of the
      * overlay
      */
-    fun createDarkAwareListener(view: View, darkFlow: StateFlow<DarkChange>) =
-        StatusOverlayHoverListener(
+    fun createDarkAwareListener(
+        view: View,
+        darkFlow: StateFlow<DarkChange>,
+    ): StatusOverlayHoverListener? {
+        val configurationController = view.statusBarConfigurationController ?: return null
+        return StatusOverlayHoverListener(
             view,
             configurationController,
-            resources,
+            view.resources,
             darkFlow.map { toHoverTheme(view, it) },
         )
+    }
 
     private fun createDarkAwareListener(
         view: View,
@@ -104,17 +117,25 @@ constructor(
         rightHoverMargin: Int = 0,
         topHoverMargin: Int = 0,
         bottomHoverMargin: Int = 0,
-    ) =
-        StatusOverlayHoverListener(
+    ): StatusOverlayHoverListener? {
+        val configurationController = view.statusBarConfigurationController ?: return null
+        return StatusOverlayHoverListener(
             view,
             configurationController,
-            resources,
+            view.resources,
             darkFlow.map { toHoverTheme(view, it) },
             leftHoverMargin,
             rightHoverMargin,
             topHoverMargin,
             bottomHoverMargin,
         )
+    }
+
+    private val View.statusBarConfigurationController: StatusBarConfigurationController?
+        get() = statusBarConfigurationControllerStore.forDisplay(context.displayId)
+
+    private val View.darkIconDispatcher: SysuiDarkIconDispatcher?
+        get() = darkIconDispatcherStore.forDisplay(context.displayId)
 
     private fun toHoverTheme(view: View, darkChange: DarkChange): HoverTheme {
         val calculatedTint = DarkIconDispatcher.getTint(darkChange.areas, view, darkChange.tint)

@@ -88,7 +88,7 @@ public class BiometricDisplayListenerTest extends SysuiTestCase {
 
         listener.enable();
         verify(mDisplayManager).registerDisplayListener(any(), same(mHandler),
-                eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED));
+                eq(DisplayManager.EVENT_TYPE_DISPLAY_CHANGED));
     }
 
     @Test
@@ -112,7 +112,7 @@ public class BiometricDisplayListenerTest extends SysuiTestCase {
 
         // The listener should register a display listener.
         verify(mDisplayManager).registerDisplayListener(mDisplayListenerCaptor.capture(),
-                same(mHandler), eq(DisplayManager.EVENT_FLAG_DISPLAY_CHANGED));
+                same(mHandler), eq(DisplayManager.EVENT_TYPE_DISPLAY_CHANGED));
 
         // mOnChangedCallback should be invoked for all calls to onDisplayChanged.
         mDisplayListenerCaptor.getValue().onDisplayChanged(123);

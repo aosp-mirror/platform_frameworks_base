@@ -17,6 +17,7 @@
 package com.android.systemui.qs.tiles.base.interactor
 
 import android.annotation.WorkerThread
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 
 interface QSTileUserActionInteractor<DATA_TYPE> {
     /**
@@ -27,4 +28,17 @@ interface QSTileUserActionInteractor<DATA_TYPE> {
      * It's safe to run long running computations inside this function.
      */
     @WorkerThread suspend fun handleInput(input: QSTileInput<DATA_TYPE>)
+
+    /**
+     * Provides the [TileDetailsViewModel] for constructing the corresponding details view.
+     *
+     * This property is defined here to reuse the business logic. For example, reusing the user
+     * long-click as the go-to-settings callback in the details view.
+     * Subclasses can override this property to provide a specific [TileDetailsViewModel]
+     * implementation.
+     *
+     * @return The [TileDetailsViewModel] instance, or null if not implemented.
+     */
+    val detailsViewModel: TileDetailsViewModel?
+        get() = null
 }

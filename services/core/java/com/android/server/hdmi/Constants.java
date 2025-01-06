@@ -524,6 +524,13 @@ final class Constants {
     static final String PROPERTY_DISABLE_CEC_ON_STANDBY_IN_LOW_ENERGY_MODE =
             "persist.sys.hdmi.property_disable_cec_on_standby_in_low_energy_mode";
 
+    /**
+     * Property that checks if CEC was manually enabled by the user in offline mode. With the help
+     * of this property we avoid turning off CEC when the device goes to sleep and if the device
+     * is in low energy mode.
+     */
+    static final String PROPERTY_USER_ACTION_KEEP_CEC_ENABLED_IN_OFFLINE_MODE =
+            "persist.sys.hdmi.property_user_action_keep_cec_enabled_in_offline_mode";
     static final int RECORDING_TYPE_DIGITAL_RF = 1;
     static final int RECORDING_TYPE_ANALOGUE_RF = 2;
     static final int RECORDING_TYPE_EXTERNAL_PHYSICAL_ADDRESS = 3;

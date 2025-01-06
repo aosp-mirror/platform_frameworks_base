@@ -75,12 +75,6 @@ interface KeyguardRepository {
      */
     val animateBottomAreaDozingTransitions: StateFlow<Boolean>
 
-    /**
-     * Observable for the current amount of alpha that should be used for rendering the bottom area.
-     * UI.
-     */
-    val bottomAreaAlpha: StateFlow<Float>
-
     val keyguardAlpha: StateFlow<Float>
 
     val panelAlpha: MutableStateFlow<Float>
@@ -283,9 +277,6 @@ interface KeyguardRepository {
     /** Sets whether the bottom area UI should animate the transition out of doze state. */
     fun setAnimateDozingTransitions(animate: Boolean)
 
-    /** Sets the current amount of alpha that should be used for rendering the bottom area. */
-    @Deprecated("Deprecated as part of b/278057014") fun setBottomAreaAlpha(alpha: Float)
-
     /** Sets the current amount of alpha that should be used for rendering the keyguard. */
     fun setKeyguardAlpha(alpha: Float)
 
@@ -391,9 +382,6 @@ constructor(
     private val _animateBottomAreaDozingTransitions = MutableStateFlow(false)
     override val animateBottomAreaDozingTransitions =
         _animateBottomAreaDozingTransitions.asStateFlow()
-
-    private val _bottomAreaAlpha = MutableStateFlow(1f)
-    override val bottomAreaAlpha = _bottomAreaAlpha.asStateFlow()
 
     private val _keyguardAlpha = MutableStateFlow(1f)
     override val keyguardAlpha = _keyguardAlpha.asStateFlow()
@@ -673,10 +661,6 @@ constructor(
 
     override fun setAnimateDozingTransitions(animate: Boolean) {
         _animateBottomAreaDozingTransitions.value = animate
-    }
-
-    override fun setBottomAreaAlpha(alpha: Float) {
-        _bottomAreaAlpha.value = alpha
     }
 
     override fun setKeyguardAlpha(alpha: Float) {

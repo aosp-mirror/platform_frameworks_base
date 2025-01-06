@@ -45,6 +45,7 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.Expandable
+import com.android.systemui.Flags
 import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.volume.panel.component.button.ui.viewmodel.ButtonViewModel
@@ -56,7 +57,7 @@ import kotlinx.coroutines.flow.StateFlow
 /** [ComposeVolumePanelUiComponent] implementing a clickable button from a bottom row. */
 class ButtonComponent(
     private val viewModelFlow: StateFlow<ButtonViewModel?>,
-    private val onClick: (expandable: Expandable, horizontalGravity: Int) -> Unit
+    private val onClick: (expandable: Expandable, horizontalGravity: Int) -> Unit,
 ) : ComposeVolumePanelUiComponent {
 
     @Composable
@@ -84,14 +85,26 @@ class ButtonComponent(
                         },
                     color =
                         if (viewModel.isActive) {
-                            MaterialTheme.colorScheme.tertiaryContainer
+                            if (Flags.volumeRedesign()) {
+                                MaterialTheme.colorScheme.primary
+                            } else {
+                                MaterialTheme.colorScheme.tertiaryContainer
+                            }
                         } else {
-                            MaterialTheme.colorScheme.surface
+                            if (Flags.volumeRedesign()) {
+                                MaterialTheme.colorScheme.surfaceContainerHigh
+                            } else {
+                                MaterialTheme.colorScheme.surface
+                            }
                         },
                     shape = RoundedCornerShape(20.dp),
                     contentColor =
                         if (viewModel.isActive) {
-                            MaterialTheme.colorScheme.onTertiaryContainer
+                            if (Flags.volumeRedesign()) {
+                                MaterialTheme.colorScheme.onPrimary
+                            } else {
+                                MaterialTheme.colorScheme.onTertiaryContainer
+                            }
                         } else {
                             MaterialTheme.colorScheme.onSurface
                         },

@@ -492,8 +492,8 @@ final class InputMethodBindingController {
         }
 
         if (getCurToken() != null) {
-            removeCurrentToken();
             mService.resetSystemUiLocked(this);
+            removeCurrentToken();
             mAutofillController.onResetSystemUi();
         }
 

@@ -20,7 +20,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
-import static com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP;
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP;
 import static com.android.wm.shell.transition.Transitions.TransitionObserver;
 
 import android.annotation.NonNull;
@@ -30,7 +30,6 @@ import android.os.IBinder;
 import android.view.SurfaceControl;
 import android.window.TransitionInfo;
 
-import com.android.window.flags.Flags;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SingleInstanceRemoteListener;
@@ -73,19 +72,12 @@ public class HomeTransitionObserver implements TransitionObserver,
             final int mode = change.getMode();
             final boolean isBackGesture = change.hasFlags(FLAG_BACK_GESTURE_ANIMATED);
             if (taskInfo.getActivityType() == ACTIVITY_TYPE_HOME) {
-                if (Flags.migratePredictiveBackTransition()) {
-                    final boolean gestureToHomeTransition = isBackGesture
-                            && TransitionUtil.isClosingType(info.getType());
-                    if (gestureToHomeTransition
-                            || (!isBackGesture && TransitionUtil.isOpenOrCloseMode(mode))) {
-                        notifyHomeVisibilityChanged(gestureToHomeTransition
-                                || TransitionUtil.isOpeningType(mode));
-                    }
-                } else {
-                    if (TransitionUtil.isOpenOrCloseMode(mode) || isBackGesture) {
-                        notifyHomeVisibilityChanged(TransitionUtil.isOpeningType(mode)
-                                || isBackGesture);
-                    }
+                final boolean gestureToHomeTransition = isBackGesture
+                        && TransitionUtil.isClosingType(info.getType());
+                if (gestureToHomeTransition || TransitionUtil.isClosingMode(mode)
+                        || (!isBackGesture && TransitionUtil.isOpeningMode(mode))) {
+                    notifyHomeVisibilityChanged(gestureToHomeTransition
+                            || TransitionUtil.isOpeningType(mode));
                 }
             }
         }

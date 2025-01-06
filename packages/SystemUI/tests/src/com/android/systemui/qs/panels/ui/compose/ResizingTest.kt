@@ -23,6 +23,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.test.ExperimentalTestApi
+import androidx.compose.ui.test.click
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onNodeWithContentDescription
 import androidx.compose.ui.test.performClick
@@ -62,6 +63,7 @@ class ResizingTest : SysuiTestCase() {
             listState = listState,
             otherTiles = listOf(),
             columns = 4,
+            largeTilesSpan = 4,
             modifier = Modifier.fillMaxSize(),
             onRemoveTile = {},
             onSetTiles = {},
@@ -72,9 +74,9 @@ class ResizingTest : SysuiTestCase() {
     }
 
     @Test
-    fun toggleIconTile_shouldBeLarge() {
+    fun toggleIconTileWithA11yAction_shouldBeLarge() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
         }
@@ -88,9 +90,9 @@ class ResizingTest : SysuiTestCase() {
     }
 
     @Test
-    fun toggleLargeTile_shouldBeIcon() {
+    fun toggleLargeTileWithA11yAction_shouldBeIcon() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
         }
@@ -104,9 +106,9 @@ class ResizingTest : SysuiTestCase() {
     }
 
     @Test
-    fun resizedLarge_shouldBeIcon() {
+    fun tapOnIconResizingHandle_shouldBeLarge() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
         }
@@ -115,18 +117,58 @@ class ResizingTest : SysuiTestCase() {
         composeRule
             .onNodeWithContentDescription("tileA")
             .performClick() // Select
-            .performTouchInput { // Resize down
-                swipeRight()
+            .performTouchInput { // Tap on resizing handle
+                click(centerRight)
             }
         composeRule.waitForIdle()
 
-        assertThat(tiles.find { it.tile.tileSpec.spec == "tileA" }?.width).isEqualTo(1)
+        assertThat(tiles.find { it.tile.tileSpec.spec == "tileA" }?.width).isEqualTo(2)
+    }
+
+    @Test
+    fun tapOnLargeResizingHandle_shouldBeIcon() {
+        var tiles by mutableStateOf(TestEditTiles)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
+        composeRule.setContent {
+            EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
+        }
+        composeRule.waitForIdle()
+
+        composeRule
+            .onNodeWithContentDescription("tileD_large")
+            .performClick() // Select
+            .performTouchInput { // Tap on resizing handle
+                click(centerRight)
+            }
+        composeRule.waitForIdle()
+
+        assertThat(tiles.find { it.tile.tileSpec.spec == "tileD_large" }?.width).isEqualTo(1)
     }
 
     @Test
     fun resizedIcon_shouldBeLarge() {
         var tiles by mutableStateOf(TestEditTiles)
-        val listState = EditTileListState(tiles, 4)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
+        composeRule.setContent {
+            EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
+        }
+        composeRule.waitForIdle()
+
+        composeRule
+            .onNodeWithContentDescription("tileA")
+            .performClick() // Select
+            .performTouchInput { // Resize up
+                swipeRight(startX = right, endX = right * 2)
+            }
+        composeRule.waitForIdle()
+
+        assertThat(tiles.find { it.tile.tileSpec.spec == "tileA" }?.width).isEqualTo(2)
+    }
+
+    @Test
+    fun resizedLarge_shouldBeIcon() {
+        var tiles by mutableStateOf(TestEditTiles)
+        val listState = EditTileListState(tiles, columns = 4, largeTilesSpan = 2)
         composeRule.setContent {
             EditTileGridUnderTest(listState) { spec, toIcon -> tiles = tiles.resize(spec, toIcon) }
         }

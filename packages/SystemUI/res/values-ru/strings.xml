@@ -111,11 +111,10 @@
     <string name="screenrecord_channel_description" msgid="4147077128486138351">"Текущее уведомление для записи видео с экрана"</string>
     <string name="screenrecord_permission_dialog_title" msgid="7415261783188749730">"Начать запись экрана?"</string>
     <string name="screenrecord_permission_dialog_option_text_single_app" msgid="1996450687814647583">"Записывать одно приложение"</string>
-    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="2794896384693120020">"Записывать весь экран"</string>
-    <!-- no translation found for screenrecord_permission_dialog_option_text_entire_screen_for_display (3754611651558838691) -->
-    <skip />
-    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"Во время записи всего экрана все данные и действия, которые на нем показываются, попадают на видео. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
-    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"Во время записи приложения все данные и действия, которые показываются в его окне, попадают на видео. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen" msgid="4882406311415082016">"Записывать этот экран"</string>
+    <string name="screenrecord_permission_dialog_option_text_entire_screen_for_display" msgid="4169494703993148253">"Записывать экран \"%s\""</string>
+    <string name="screenrecord_permission_dialog_warning_entire_screen" msgid="1321758636709366068">"На видео попадет все, что будет происходить на экране. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
+    <string name="screenrecord_permission_dialog_warning_single_app" msgid="3738199712880063924">"На видео попадет все, что происходит в выбранном приложении. Поэтому будьте осторожны с паролями, сведениями о способах оплаты, сообщениями, фотографиями, аудио- и видеозаписями."</string>
     <string name="screenrecord_permission_dialog_continue_entire_screen" msgid="5557974446773486600">"Запись экрана"</string>
     <string name="screenrecord_app_selector_title" msgid="3854492366333954736">"Выбор приложения для записи экрана"</string>
     <string name="screenrecord_audio_label" msgid="6183558856175159629">"Записывать аудио"</string>
@@ -138,17 +137,14 @@
     <string name="screenrecord_stop_dialog_message_specific_app" msgid="5995770227684523244">"Вы записываете экран приложения \"<xliff:g id="APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="screenrecord_stop_dialog_button" msgid="2883812564938194350">"Остановить запись"</string>
     <string name="share_to_app_chip_accessibility_label" msgid="4210256229976947065">"Демонстрация экрана"</string>
-    <!-- no translation found for share_to_app_chip_accessibility_label_generic (5517431657924536133) -->
-    <skip />
+    <string name="share_to_app_chip_accessibility_label_generic" msgid="5517431657924536133">"Вы делитесь контентом"</string>
     <string name="share_to_app_stop_dialog_title" msgid="9212915050910250438">"Прекратить показ экрана?"</string>
-    <!-- no translation found for share_to_app_stop_dialog_title_generic (9079161538135843648) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_title_generic" msgid="9079161538135843648">"Закрыть доступ?"</string>
     <string name="share_to_app_stop_dialog_message_entire_screen_with_host_app" msgid="522823522115375414">"Вы демонстрируете свой экран в приложении \"<xliff:g id="HOST_APP_NAME">%1$s</xliff:g>\"."</string>
     <string name="share_to_app_stop_dialog_message_entire_screen" msgid="5090115386271179270">"Вы демонстрируете свой экран в приложении."</string>
     <string name="share_to_app_stop_dialog_message_single_app_specific" msgid="5923772039347985172">"Вы демонстрируете экран приложения \"<xliff:g id="APP_BEING_SHARED_NAME">%1$s</xliff:g>\"."</string>
     <string name="share_to_app_stop_dialog_message_single_app_generic" msgid="6681016774654578261">"Вы демонстрируете экран приложения."</string>
-    <!-- no translation found for share_to_app_stop_dialog_message_generic (7622174291691249392) -->
-    <skip />
+    <string name="share_to_app_stop_dialog_message_generic" msgid="7622174291691249392">"Сейчас вы делитесь контентом с приложением."</string>
     <string name="share_to_app_stop_dialog_button" msgid="6334056916284230217">"Прекратить показ"</string>
     <string name="cast_screen_to_other_device_chip_accessibility_label" msgid="4687917476203009885">"Трансляция экрана"</string>
     <string name="cast_to_other_device_stop_dialog_title" msgid="7836517190930357326">"Прекратить трансляцию?"</string>
@@ -310,7 +306,7 @@
     <string name="turn_on_bluetooth" msgid="5681370462180289071">"Использовать"</string>
     <string name="quick_settings_bluetooth_device_connected" msgid="7884777006729260996">"Подключено"</string>
     <string name="quick_settings_bluetooth_device_audio_sharing" msgid="1496358082943301670">"Передача аудио"</string>
-    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="3227408556754456024">"Нажмите, чтобы переключить аудио или поделиться им"</string>
+    <string name="quick_settings_bluetooth_device_audio_sharing_or_switch_active" msgid="8680997711431098238">"Поддерживает передачу аудио"</string>
     <string name="quick_settings_bluetooth_device_saved" msgid="7549938728928069477">"Сохранено"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_disconnect" msgid="415980329093277342">"отключить"</string>
     <string name="accessibility_quick_settings_bluetooth_device_tap_to_activate" msgid="3724301751036877403">"активировать"</string>
@@ -330,6 +326,7 @@
     <string name="quick_settings_bluetooth_secondary_label_input" msgid="3887552721233148132">"Устройство ввода"</string>
     <string name="quick_settings_bluetooth_secondary_label_hearing_aids" msgid="5553051568867097111">"Слуховые аппараты"</string>
     <string name="quick_settings_bluetooth_secondary_label_transient" msgid="3882884317600669650">"Включение…"</string>
+    <string name="quick_settings_brightness_unable_adjust_msg" msgid="786478497970492300">"Невозможно изменить яркость,\nтак как она регулируется общими настройками."</string>
     <string name="quick_settings_rotation_unlocked_label" msgid="2359922767950346112">"Автоповорот"</string>
     <string name="accessibility_quick_settings_rotation" msgid="4800050198392260738">"Автоповорот экрана"</string>
     <string name="quick_settings_location_label" msgid="2621868789013389163">"Геолокация"</string>
@@ -417,7 +414,17 @@
     <string name="accessibility_hearing_device_pair_new_device" msgid="8440082580186130090">"Нажмите, чтобы подключить новое устройство"</string>
     <string name="hearing_devices_presets_error" msgid="350363093458408536">"Не удалось обновить набор настроек."</string>
     <string name="hearing_devices_preset_label" msgid="7878267405046232358">"Набор настроек"</string>
+    <string name="hearing_devices_spinner_item_selected" msgid="3137083889662762383">"Выбрано"</string>
+    <string name="hearing_devices_ambient_label" msgid="629440938614895797">"Окружающие звуки"</string>
+    <string name="hearing_devices_ambient_control_left" msgid="3586965448230412600">"Левый"</string>
+    <string name="hearing_devices_ambient_control_right" msgid="6192137602448918383">"Правый"</string>
+    <string name="hearing_devices_ambient_expand_controls" msgid="2131816068187709200">"Разделить на левый и правый элемент управления"</string>
+    <string name="hearing_devices_ambient_collapse_controls" msgid="2261097656446201581">"Объединить в один элемент управления"</string>
+    <string name="hearing_devices_ambient_mute" msgid="1836882837647429416">"Заглушить окружающие звуки"</string>
+    <string name="hearing_devices_ambient_unmute" msgid="2187938085943876814">"Не заглушать окружающие звуки"</string>
+    <string name="hearing_devices_tools_label" msgid="1929081464316074476">"Инструменты"</string>
     <string name="quick_settings_hearing_devices_live_caption_title" msgid="1054814050932225451">"Автоматические субтитры"</string>
+    <string name="quick_settings_notes_label" msgid="1028004078001002623">"Заметка"</string>
     <string name="sensor_privacy_start_use_mic_dialog_title" msgid="563796653825944944">"Разблокировать микрофон устройства?"</string>
     <string name="sensor_privacy_start_use_camera_dialog_title" msgid="8807639852654305227">"Разблокировать камеру устройства?"</string>
     <string name="sensor_privacy_start_use_mic_camera_dialog_title" msgid="4316471859905020023">"Разблокировать камеру и микрофон устройства?"</string>
@@ -454,7 +461,7 @@
     <string name="zen_mode_off" msgid="1736604456618147306">"Отключено"</string>
     <string name="zen_mode_set_up" msgid="8231201163894922821">"Не задано"</string>
     <string name="zen_mode_no_manual_invocation" msgid="1769975741344633672">"Открыть настройки"</string>
-    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{Включено 0 режимов}=1{Включен режим \"{mode}\"}one{Включен # режим}few{Включено # режима}many{Включено # режимов}other{Включено # режима}}"</string>
+    <string name="zen_mode_active_modes" msgid="1625850411578488856">"{count,plural, =0{0 режимов}=1{Режим \"{mode}\"}one{# режим}few{# режима}many{# режимов}other{# режима}}"</string>
     <string name="zen_priority_introduction" msgid="3159291973383796646">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника, напоминаний, уведомлений о мероприятиях и звонков от помеченных контактов. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
     <string name="zen_alarms_introduction" msgid="3987266042682300470">"Вас не будут отвлекать звуки и вибрация, за исключением сигналов будильника. Вы по-прежнему будете слышать включенную вами музыку, видео, игры и т. д."</string>
     <string name="zen_priority_customize_button" msgid="4119213187257195047">"Настроить"</string>
@@ -523,13 +530,15 @@
     <string name="communal_widget_picker_title" msgid="1953369090475731663">"Виджеты на заблокированном экране"</string>
     <string name="communal_widget_picker_description" msgid="490515450110487871">"Они видны всем, даже если планшет заблокирован."</string>
     <string name="accessibility_action_label_unselect_widget" msgid="1041811747619468698">"отменить выбор виджета"</string>
-    <!-- no translation found for accessibility_action_label_shrink_widget (8259511040536438771) -->
-    <skip />
-    <!-- no translation found for accessibility_action_label_expand_widget (9190524260912211759) -->
-    <skip />
+    <string name="accessibility_action_label_shrink_widget" msgid="8259511040536438771">"Уменьшить высоту"</string>
+    <string name="accessibility_action_label_expand_widget" msgid="9190524260912211759">"Увеличить высоту"</string>
     <string name="communal_widgets_disclaimer_title" msgid="1150954395585308868">"Виджеты на заблокированном экране"</string>
     <string name="communal_widgets_disclaimer_text" msgid="1423545475160506349">"Чтобы открыть приложение, используя виджет, вам нужно будет подтвердить свою личность. Обратите внимание, что виджеты видны всем, даже если планшет заблокирован. Некоторые виджеты не предназначены для использования на заблокированном экране. Добавлять их туда может быть небезопасно."</string>
     <string name="communal_widgets_disclaimer_button" msgid="4423059765740780753">"ОК"</string>
+    <string name="glanceable_hub_lockscreen_affordance_label" msgid="1461611028615752141">"Виджеты"</string>
+    <string name="glanceable_hub_lockscreen_affordance_disabled_text" msgid="599170482297578735">"Чтобы создать ярлык \"Виджеты\", убедитесь, что в настройках включена функция \"Показывать виджеты на заблокированном экране\"."</string>
+    <string name="glanceable_hub_lockscreen_affordance_action_button_label" msgid="7636151133344609375">"Настройки"</string>
+    <string name="accessibility_glanceable_hub_to_dream_button" msgid="7552776300297055307">"Кнопка \"Показать заставку\""</string>
     <string name="accessibility_multi_user_switch_switcher" msgid="5330448341251092660">"Сменить пользователя."</string>
     <string name="accessibility_multi_user_list_switcher" msgid="8574105376229857407">"раскрывающееся меню"</string>
     <string name="guest_exit_guest_dialog_message" msgid="8183450985628495709">"Все приложения и данные этого профиля будут удалены."</string>
@@ -590,12 +599,13 @@
     <string name="notification_section_header_alerting" msgid="5581175033680477651">"Уведомления"</string>
     <string name="notification_section_header_conversations" msgid="821834744538345661">"Разговоры"</string>
     <string name="accessibility_notification_section_header_gentle_clear_all" msgid="6490207897764933919">"Отклонить все беззвучные уведомления"</string>
+    <string name="accessibility_notification_section_header_open_settings" msgid="6235202417954844004">"Открыть настройки уведомлений"</string>
     <string name="dnd_suppressing_shade_text" msgid="5588252250634464042">"В режиме \"Не беспокоить\" уведомления заблокированы"</string>
     <string name="modes_suppressing_shade_text" msgid="6037581130837903239">"{count,plural,offset:1 =0{Уведомлений нет}=1{Режим \"{mode}\" приостанавливает уведомления}=2{Режим \"{mode}\" и ещё один режим приостанавливают уведомления}one{Режим \"{mode}\" и ещё # режим приостанавливают уведомления}few{Режим \"{mode}\" и ещё # режима приостанавливают уведомления}many{Режим \"{mode}\" и ещё # режимов приостанавливают уведомления}other{Режим \"{mode}\" и ещё # режима приостанавливают уведомления}}"</string>
     <string name="media_projection_action_text" msgid="3634906766918186440">"Начать"</string>
     <string name="empty_shade_text" msgid="8935967157319717412">"Нет уведомлений."</string>
     <string name="no_unseen_notif_text" msgid="395512586119868682">"Новых уведомлений нет"</string>
-    <string name="adaptive_notification_edu_hun_title" msgid="7790738150177329960">"Снижение громкости уведомлений включено"</string>
+    <string name="adaptive_notification_edu_hun_title" msgid="2594042455998795122">"Снижение громкости уведомлений включено"</string>
     <string name="adaptive_notification_edu_hun_text" msgid="7743367744129536610">"Если придет слишком много уведомлений, на две минуты громкость и количество оповещений уменьшатся."</string>
     <string name="go_to_adaptive_notification_settings" msgid="2423690125178298479">"Отключить"</string>
     <string name="unlock_to_see_notif_text" msgid="7439033907167561227">"Разблокируйте, чтобы увидеть уведомления"</string>
@@ -700,9 +710,11 @@
     <string name="volume_panel_noise_control_title" msgid="7413949943872304474">"Контроль шума"</string>
     <string name="volume_panel_spatial_audio_title" msgid="3367048857932040660">"Пространственное звучание"</string>
     <string name="volume_panel_spatial_audio_off" msgid="4177490084606772989">"Отключено"</string>
-    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Без отсле­живания"</string>
-    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"С отсле­живанием"</string>
+    <string name="volume_panel_spatial_audio_fixed" msgid="3136080137827746046">"Статичное"</string>
+    <string name="volume_panel_spatial_audio_tracking" msgid="5711115234001762974">"Динамичное"</string>
     <string name="volume_ringer_change" msgid="3574969197796055532">"Нажмите, чтобы изменить режим звонка."</string>
+    <string name="volume_ringer_mode" msgid="6867838048430807128">"режим звонка"</string>
+    <string name="volume_ringer_drawer_closed_content_description" msgid="4737792429808781745">"<xliff:g id="VOLUME_RINGER_STATUS">%1$s</xliff:g>. Нажмите, чтобы изменить режим звонка."</string>
     <string name="volume_ringer_hint_mute" msgid="4263821214125126614">"отключить звук"</string>
     <string name="volume_ringer_hint_unmute" msgid="6119086890306456976">"включить звук"</string>
     <string name="volume_ringer_hint_vibrate" msgid="6211609047099337509">"включить вибрацию"</string>
@@ -748,6 +760,13 @@
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Доступно соединение по спутниковой связи"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Спутниковый SOS"</string>
     <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Экстренные вызовы или спутниковый SOS"</string>
+    <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
+    <string name="accessibility_no_signal" msgid="7052827511409250167">"нет сигнала"</string>
+    <string name="accessibility_one_bar" msgid="5342012847647834506">"одно деление"</string>
+    <string name="accessibility_two_bars" msgid="122628483354508429">"два деления"</string>
+    <string name="accessibility_three_bars" msgid="5143286602926069024">"три деления"</string>
+    <string name="accessibility_four_bars" msgid="8838495563822541844">"четыре деления"</string>
+    <string name="accessibility_signal_full" msgid="1519655809806462972">"надежный сигнал"</string>
     <string name="accessibility_managed_profile" msgid="4703836746209377356">"Рабочий профиль"</string>
     <string name="tuner_warning_title" msgid="7721976098452135267">"Внимание!"</string>
     <string name="tuner_warning" msgid="1861736288458481650">"System UI Tuner позволяет настраивать интерфейс устройства Android по вашему вкусу. В будущем эта экспериментальная функция может измениться, перестать работать или исчезнуть."</string>
@@ -836,11 +855,11 @@
     <string name="keyboard_shortcut_group_system_recents" msgid="8628108256824616927">"Недавние"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"Назад"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"Уведомления"</string>
-    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Быстрые клавиши"</string>
+    <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"Сочетания клавиш"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"Переключение раскладки"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"или"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"Удалить поисковый запрос"</string>
-    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Быстрые клавиши"</string>
+    <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"Сочетания клавиш"</string>
     <string name="keyboard_shortcut_search_list_hint" msgid="5982623262974326746">"Поиск сочетаний клавиш"</string>
     <string name="keyboard_shortcut_search_list_no_result" msgid="6819302191660875501">"Нет сочетаний клавиш."</string>
     <string name="keyboard_shortcut_search_category_system" msgid="1151182120757052669">"Система"</string>
@@ -866,12 +885,17 @@
     <string name="group_system_lock_screen" msgid="7391191300363416543">"Заблокировать экран"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Создать заметку"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Многозадачность"</string>
-    <string name="system_multitasking_rhs" msgid="8714224917276297810">"Разделить экран и поместить это приложение справа"</string>
-    <string name="system_multitasking_lhs" msgid="8402954791206308783">"Разделить экран и поместить это приложение слева"</string>
-    <string name="system_multitasking_full_screen" msgid="336048080383640562">"Изменить режим разделения экрана на полноэкранный режим"</string>
+    <string name="system_multitasking_rhs" msgid="8779289852395243004">"Разделить экран и поместить открытое приложение справа"</string>
+    <string name="system_multitasking_lhs" msgid="7348595296208696452">"Разделить экран и поместить открытое приложение слева"</string>
+    <string name="system_multitasking_full_screen" msgid="4940465971687159429">"Включить полноэкранный режим"</string>
     <string name="system_multitasking_splitscreen_focus_rhs" msgid="3838578650313318508">"Перейти к приложению справа или внизу на разделенном экране"</string>
     <string name="system_multitasking_splitscreen_focus_lhs" msgid="3164261844398662518">"Перейти к приложению слева или вверху на разделенном экране"</string>
     <string name="system_multitasking_replace" msgid="7410071959803642125">"В режиме разделения экрана заменить одно приложение другим"</string>
+    <string name="system_multitasking_move_to_next_display" msgid="6169737557526976997">"Переместить активное окно между экранами"</string>
+    <string name="system_desktop_mode_snap_left_window" msgid="8636204689945162298">"Переместить окно влево"</string>
+    <string name="system_desktop_mode_snap_right_window" msgid="2162560187639411929">"Переместить окно вправо"</string>
+    <string name="system_desktop_mode_toggle_maximize_window" msgid="4084100093691768239">"Развернуть окно"</string>
+    <string name="system_desktop_mode_minimize_window" msgid="1248714536732927092">"Свернуть окно"</string>
     <string name="keyboard_shortcut_group_input" msgid="6888282716546625610">"Ввод"</string>
     <string name="input_switch_input_language_next" msgid="3782155659868227855">"Выбрать следующий язык"</string>
     <string name="input_switch_input_language_previous" msgid="6043341362202336623">"Выбрать предыдущий язык"</string>
@@ -943,9 +967,9 @@
     <string name="tuner_low_priority" msgid="8412666814123009820">"Показывать значки уведомлений с низким приоритетом"</string>
     <string name="other" msgid="429768510980739978">"Другое"</string>
     <string name="accessibility_qs_edit_remove_tile_action" msgid="775511891457193480">"удалить панель"</string>
-    <string name="accessibility_qs_edit_tile_add_action" msgid="5051211910345301833">"добавить панель в конец"</string>
+    <string name="accessibility_qs_edit_tile_add_action" msgid="8311378984458545661">"добавить параметр в конец"</string>
     <string name="accessibility_qs_edit_tile_start_move" msgid="2009373939914517817">"Переместить панель"</string>
-    <string name="accessibility_qs_edit_tile_start_add" msgid="7560798153975555772">"Добавить панель"</string>
+    <string name="accessibility_qs_edit_tile_start_add" msgid="8141710006899065161">"Выбрать, куда добавить параметр"</string>
     <string name="accessibility_qs_edit_tile_move_to_position" msgid="5198161544045930556">"Переместить на позицию <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibility_qs_edit_tile_add_to_position" msgid="9029163095148274690">"Добавить на позицию <xliff:g id="POSITION">%1$d</xliff:g>"</string>
     <string name="accessibilit_qs_edit_tile_add_move_invalid_position" msgid="2858467994472624487">"Недопустимое расположение."</string>
@@ -961,11 +985,10 @@
     <string name="accessibility_quick_settings_choose_user_action" msgid="4554388498186576087">"выбрать пользователя"</string>
     <string name="data_connection_no_internet" msgid="691058178914184544">"Нет подключения к Интернету."</string>
     <string name="accessibility_quick_settings_open_settings" msgid="536838345505030893">"Открыть настройки <xliff:g id="ID_1">%s</xliff:g>."</string>
-    <string name="accessibility_quick_settings_edit" msgid="1523745183383815910">"Изменить порядок быстрых настроек."</string>
+    <string name="accessibility_quick_settings_edit" msgid="6544873823850165">"Изменить порядок быстрых настроек."</string>
     <string name="accessibility_quick_settings_power_menu" msgid="6820426108301758412">"Меню кнопки питания"</string>
     <string name="accessibility_quick_settings_page" msgid="7506322631645550961">"Страница <xliff:g id="ID_1">%1$d</xliff:g> из <xliff:g id="ID_2">%2$d</xliff:g>"</string>
     <string name="tuner_lock_screen" msgid="2267383813241144544">"Заблокированный экран"</string>
-    <string name="finder_active" msgid="7907846989716941952">"С помощью приложения \"Найти устройство\" вы можете узнать местоположение телефона, даже когда он выключен."</string>
     <string name="shutdown_progress" msgid="5464239146561542178">"Выключение…"</string>
     <string name="thermal_shutdown_dialog_help_text" msgid="6413474593462902901">"Подробнее о действиях при перегреве…"</string>
     <string name="high_temp_dialog_help_text" msgid="7380171287943345858">"Подробнее о действиях при перегреве…"</string>
@@ -1004,7 +1027,7 @@
     <string name="mobile_data_text_format" msgid="6806501540022589786">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="mobile_carrier_text_format" msgid="8912204177152950766">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="MOBILE_DATA_TYPE">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="5389597396308001471">"Модуль Wi-Fi отключен"</string>
-    <string name="bt_is_off" msgid="7436344904889461591">"Модуль Bluetooth отключен."</string>
+    <string name="bt_is_off" msgid="7436344904889461591">"Bluetooth отключен"</string>
     <string name="dnd_is_off" msgid="3185706903793094463">"Режим \"Не беспокоить\" отключен"</string>
     <string name="dnd_is_on" msgid="7009368176361546279">"Режим \"Не беспокоить\" включен"</string>
     <string name="qs_dnd_prompt_auto_rule" msgid="3535469468310002616">"Режим \"Не беспокоить\" был включен специальным правилом (<xliff:g id="ID_1">%s</xliff:g>)."</string>
@@ -1193,7 +1216,6 @@
     <string name="media_output_dialog_disconnected" msgid="7090512852817111185">"(нет подключения)"</string>
     <string name="media_output_dialog_connect_failed" msgid="3080972621975339387">"Не удается переключиться. Нажмите, чтобы повторить попытку."</string>
     <string name="media_output_dialog_pairing_new" msgid="5098212763195577270">"Подключить устройство"</string>
-    <string name="media_output_dialog_launch_app_text" msgid="1527413319632586259">"Чтобы начать трансляцию сеанса, откройте приложение"</string>
     <string name="media_output_dialog_unknown_launch_app_name" msgid="1084899329829371336">"Неизвестное приложение"</string>
     <string name="media_output_dialog_button_stop_casting" msgid="6581379537930199189">"Остановить трансляцию"</string>
     <string name="media_output_dialog_accessibility_title" msgid="4681741064190167888">"Доступные устройства для вывода звука."</string>
@@ -1220,6 +1242,7 @@
     <string name="media_output_broadcast_edit_hint_no_more_than_max" msgid="3923625800037673922">"Максимальное количество символов – <xliff:g id="LENGTH">%1$d</xliff:g>."</string>
     <string name="build_number_clip_data_label" msgid="3623176728412560914">"Номер сборки"</string>
     <string name="build_number_copy_toast" msgid="877720921605503046">"Номер сборки скопирован в буфер обмена."</string>
+    <string name="copy_to_clipboard_a11y_action" msgid="4312789069718446749">"скопировать в буфер обмена."</string>
     <string name="basic_status" msgid="2315371112182658176">"Открытый чат"</string>
     <string name="select_conversation_title" msgid="6716364118095089519">"Виджеты разговоров"</string>
     <string name="select_conversation_text" msgid="3376048251434956013">"Нажмите на разговор, чтобы добавить его на главный экран"</string>
@@ -1266,7 +1289,8 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"указать устройство"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Используйте отпечаток пальца для входа."</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Требуется аутентификация. Приложите палец к сканеру отпечатков."</string>
-    <string name="ongoing_phone_call_content_description" msgid="5332334388483099947">"Текущий вызов"</string>
+    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
+    <skip />
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Мобильный интернет"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Подключено"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Временное подключение"</string>
@@ -1355,6 +1379,7 @@
     <string name="rear_display_unfolded_bottom_sheet_description" msgid="7229961336309960201">"Переверните телефон и используйте основную камеру, чтобы делать снимки с более высоким разрешением."</string>
     <string name="rear_display_accessibility_folded_animation" msgid="1538121649587978179">"Складное устройство в разложенном виде"</string>
     <string name="rear_display_accessibility_unfolded_animation" msgid="1946153682258289040">"Перевернутое складное устройство"</string>
+    <string name="rear_display_unfolded_front_screen_on" msgid="5946436677205643170">"Передний экран включен"</string>
     <string name="quick_settings_rotation_posture_folded" msgid="2430280856312528289">"устройство сложено"</string>
     <string name="quick_settings_rotation_posture_unfolded" msgid="6372316273574167114">"устройство разложено"</string>
     <string name="rotation_tile_with_posture_secondary_label_template" msgid="7648496484163318886">"%1$s/%2$s"</string>
@@ -1386,7 +1411,7 @@
     <string name="connected_display_icon_desc" msgid="6373560639989971997">"Экран подключен"</string>
     <string name="privacy_dialog_title" msgid="7839968133469098311">"Микрофон и камера"</string>
     <string name="privacy_dialog_summary" msgid="2458769652125995409">"Недавнее использование приложениями"</string>
-    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"Посмотреть недавний доступ"</string>
+    <string name="privacy_dialog_more_button" msgid="7610604080293562345">"История доступа"</string>
     <string name="privacy_dialog_done_button" msgid="4504330708531434263">"Готово"</string>
     <string name="privacy_dialog_expand_action" msgid="9129262348628331377">"Развернуть и показать параметры"</string>
     <string name="privacy_dialog_collapse_action" msgid="277419962019466347">"Свернуть"</string>
@@ -1406,52 +1431,72 @@
     <string name="shortcut_helper_category_system_controls" msgid="3153344561395751020">"Управление системой"</string>
     <string name="shortcut_helper_category_system_apps" msgid="6001757545472556810">"Системные приложения"</string>
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Многозадачность"</string>
-    <string name="shortcutHelper_category_recent_apps" msgid="7918731953612377145">"Недавние приложения"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Разделение экрана"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Ввод"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Ярлыки приложений"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Приложения"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Это приложение"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Специальные возможности"</string>
-    <string name="shortcut_helper_title" msgid="8567500639300970049">"Быстрые клавиши"</string>
-    <!-- no translation found for shortcut_helper_customize_mode_title (1467657117101096033) -->
-    <skip />
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Найти быстрые клавиши"</string>
+    <string name="shortcut_helper_title" msgid="8567500639300970049">"Сочетания клавиш"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Настройки сочетаний клавиш"</string>
+    <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Удалить сочетание клавиш?"</string>
+    <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Сбросить настройки?"</string>
+    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Нажмите клавишу, чтобы назначить сочетание клавиш."</string>
+    <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Настроенное сочетание будет безвозвратно удалено."</string>
+    <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Все настроенные сочетания клавиш будут безвозвратно удалены."</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Найти"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Ничего не найдено"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Значок \"Свернуть\""</string>
-    <!-- no translation found for shortcut_helper_customize_button_text (3124983502748069338) -->
-    <skip />
-    <!-- no translation found for shortcut_helper_done_button_text (7249905942125386191) -->
-    <skip />
+    <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"Значок клавиши Meta для выполнения действия"</string>
+    <string name="shortcut_helper_content_description_plus_icon" msgid="6152683734278299020">"Значок плюса"</string>
+    <string name="shortcut_helper_customize_button_text" msgid="3124983502748069338">"Настроить"</string>
+    <string name="shortcut_helper_reset_button_text" msgid="2548243844050633472">"Сбросить"</string>
+    <string name="shortcut_helper_done_button_text" msgid="7249905942125386191">"Готово"</string>
     <string name="shortcut_helper_content_description_expand_icon" msgid="1084435697860417390">"Значок \"Развернуть\""</string>
     <string name="shortcut_helper_key_combinations_or_separator" msgid="7082902112102125540">"или"</string>
+    <string name="shortcut_helper_key_combinations_and_conjunction" msgid="6138186504075880224">"плюс"</string>
+    <string name="shortcut_helper_key_combinations_forward_slash" msgid="1238652537199346970">"косая черта"</string>
     <string name="shortcut_helper_content_description_drag_handle" msgid="5092426406009848110">"Маркер перемещения"</string>
     <string name="shortcut_helper_keyboard_settings_buttons_label" msgid="6720967595915985259">"Настройки клавиатуры"</string>
+    <string name="shortcut_helper_customize_dialog_set_shortcut_button_label" msgid="4754492225010429382">"Задать сочетание клавиш"</string>
+    <string name="shortcut_helper_customize_dialog_remove_button_label" msgid="6546386970440176552">"Удалить"</string>
+    <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"Сбросить"</string>
+    <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"Отмена"</string>
+    <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"Нажмите клавишу"</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Это сочетание клавиш уже используется. Попробуйте другое."</string>
+    <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Это сочетание клавиш выбрать нельзя."</string>
+    <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Навигация с помощью клавиатуры"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Узнайте о сочетаниях клавиш."</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Навигация с помощью сенсорной панели"</string>
     <string name="launch_touchpad_tutorial_notification_content" msgid="7931085031240753226">"Узнайте о жестах на сенсорной панели."</string>
     <string name="launch_keyboard_touchpad_tutorial_notification_title" msgid="1940023776496198762">"Навигация с помощью клавиатуры и сенсорной панели"</string>
-    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Узнайте о жестах на сенсорной панели, сочетаниях клавиш и многом другом."</string>
+    <string name="launch_keyboard_touchpad_tutorial_notification_content" msgid="1780725168171929365">"Выучите жесты на сенсорной панели, сочетания клавиш и другие варианты навигации."</string>
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"Назад"</string>
-    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"На главную"</string>
-    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Жест \"Просмотр недавних приложений\""</string>
+    <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"На главный экран"</string>
+    <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"Просмотр недавних приложений"</string>
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"Готово"</string>
+    <string name="gesture_error_title" msgid="469064941635578511">"Попробуйте ещё раз"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"Назад"</string>
     <string name="touchpad_back_gesture_guidance" msgid="5352221087725906542">"Проведите тремя пальцами влево или вправо по сенсорной панели."</string>
     <string name="touchpad_back_gesture_success_title" msgid="7370719098633023496">"Отлично!"</string>
     <string name="touchpad_back_gesture_success_body" msgid="2324724953720741719">"Вы выполнили жест для перехода назад."</string>
+    <string name="touchpad_back_gesture_error_body" msgid="7112668207481458792">"Чтобы перейти назад с помощью сенсорной панели, проведите влево или вправо тремя пальцами."</string>
     <string name="touchpad_home_gesture_action_title" msgid="8885107349719257882">"На главный экран"</string>
     <string name="touchpad_home_gesture_guidance" msgid="4178219118381915899">"Проведите тремя пальцами вверх по сенсорной панели."</string>
-    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Отличная работа!"</string>
+    <string name="touchpad_home_gesture_success_title" msgid="3648264553645798470">"Отлично!"</string>
     <string name="touchpad_home_gesture_success_body" msgid="2590690589194027059">"Вы выполнили жест для перехода на главный экран."</string>
+    <string name="touchpad_home_gesture_error_body" msgid="3810674109999513073">"Чтобы перейти на главный экран, проведите тремя пальцами вверх по сенсорной панели."</string>
     <string name="touchpad_recent_apps_gesture_action_title" msgid="934906836867137906">"Просмотр недавних приложений"</string>
     <string name="touchpad_recent_apps_gesture_guidance" msgid="6304446013842271822">"Проведите вверх по сенсорной панели тремя пальцами и удерживайте."</string>
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"Отлично!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"Вы выполнили жест для просмотра недавних приложений."</string>
+    <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"Чтобы увидеть недавние приложения, проведите по сенсорной панели тремя пальцами вверх и удерживайте."</string>
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"Все приложения"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"Нажмите клавишу действия на клавиатуре."</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"Блестяще!"</string>
     <string name="tutorial_action_key_success_body" msgid="1688986269491357832">"Вы выполнили жест для просмотра всех приложений."</string>
+    <string name="touchpad_action_key_error_body" msgid="8685502040091860903">"Чтобы увидеть все свои приложения, нажмите клавишу действия на клавиатуре."</string>
+    <string name="tutorial_animation_content_description" msgid="2698816574982370184">"Анимация в руководстве. Нажмите, чтобы приостановить или продолжить воспроизведение."</string>
     <string name="keyboard_backlight_dialog_title" msgid="8273102932345564724">"Подсветка клавиатуры"</string>
     <string name="keyboard_backlight_value" msgid="7336398765584393538">"Уровень %1$d из %2$d"</string>
     <string name="home_controls_dream_label" msgid="6567105701292324257">"Управление домом"</string>
@@ -1483,6 +1528,6 @@
     <string name="qs_edit_mode_category_providedByApps" msgid="8346112074897919019">"Приложения"</string>
     <string name="qs_edit_mode_category_display" msgid="4749511439121053942">"Экран"</string>
     <string name="qs_edit_mode_category_unknown" msgid="509314252124053550">"Неизвестно"</string>
-    <string name="qs_edit_mode_reset_dialog_title" msgid="8841270491554460726">"Сброс параметров"</string>
-    <string name="qs_edit_mode_reset_dialog_content" msgid="8626426097929954027">"Сбросить порядок и размер параметров?"</string>
+    <string name="qs_edit_mode_reset_dialog_title" msgid="5344853290033761627">"Сбросить все параметры?"</string>
+    <string name="qs_edit_mode_reset_dialog_content" msgid="7474773130622653653">"Для всех параметров быстрых настроек будут восстановлены значения по умолчанию."</string>
 </resources>

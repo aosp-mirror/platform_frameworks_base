@@ -19,7 +19,6 @@ package com.android.compose.animation.scene.transformation
 import androidx.compose.ui.geometry.Offset
 import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.Scale
 import com.android.compose.animation.scene.content.state.TransitionState
 
@@ -27,19 +26,25 @@ import com.android.compose.animation.scene.content.state.TransitionState
  * Scales the draw size of an element. Note this will only scale the draw inside of an element,
  * therefore it won't impact layout of elements around it.
  */
-internal class DrawScale(
-    override val matcher: ElementMatcher,
+internal class DrawScale
+private constructor(
     private val scaleX: Float,
     private val scaleY: Float,
-    private val pivot: Offset = Offset.Unspecified,
-) : PropertyTransformation<Scale> {
+    private val pivot: Offset,
+) : InterpolatedPropertyTransformation<Scale> {
+    override val property = PropertyTransformation.Property.Scale
 
     override fun PropertyTransformationScope.transform(
         content: ContentKey,
         element: ElementKey,
         transition: TransitionState.Transition,
-        value: Scale,
+        idleValue: Scale,
     ): Scale {
         return Scale(scaleX, scaleY, pivot)
+    }
+
+    class Factory(private val scaleX: Float, private val scaleY: Float, private val pivot: Offset) :
+        Transformation.Factory {
+        override fun create(): Transformation = DrawScale(scaleX, scaleY, pivot)
     }
 }

@@ -23,12 +23,13 @@ import android.os.IBinder;
 import com.android.internal.util.Preconditions;
 
 import java.util.List;
+import java.util.Objects;
 
 /**
  * Privileges granted to a Process that allows it to execute starts from the background.
  * @hide
  */
-public class BackgroundStartPrivileges {
+public final class BackgroundStartPrivileges {
     /** No privileges. */
     public static final BackgroundStartPrivileges NONE = new BackgroundStartPrivileges(
             false, false, null);
@@ -189,5 +190,23 @@ public class BackgroundStartPrivileges {
                 + mAllowsBackgroundForegroundServiceStarts
                 + ", originatingToken=" + mOriginatingToken
                 + ']';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        BackgroundStartPrivileges that = (BackgroundStartPrivileges) o;
+        return mAllowsBackgroundActivityStarts == that.mAllowsBackgroundActivityStarts
+                && mAllowsBackgroundForegroundServiceStarts
+                == that.mAllowsBackgroundForegroundServiceStarts
+                && Objects.equals(mOriginatingToken, that.mOriginatingToken);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(mAllowsBackgroundActivityStarts,
+                mAllowsBackgroundForegroundServiceStarts,
+                mOriginatingToken);
     }
 }

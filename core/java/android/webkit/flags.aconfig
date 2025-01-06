@@ -36,9 +36,25 @@ flag {
 }
 
 flag {
+    name: "enable_chips"
+    is_exported: true
+    namespace: "webview"
+    description: "New feature enable CHIPS for webview"
+    bug: "359448044"
+}
+
+flag {
     name: "file_system_access"
     is_exported: true
     namespace: "webview"
     description: "New APIs required by File System Access"
     bug: "40101963"
+}
+
+flag {
+    name: "use_b_entry_point"
+    namespace: "webview"
+    description: "Use B-specific entry point to WebView APK"
+    bug: "373617389"
+    is_fixed_read_only: true
 }

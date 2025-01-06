@@ -103,10 +103,10 @@
                         android:gravity="center_vertical|start"
                     />
 
-                    <include layout="@layout/ongoing_activity_chip"
+                    <include layout="@layout/ongoing_activity_chip_primary"
                         android:id="@+id/ongoing_activity_chip_primary"/>
 
-                    <include layout="@layout/ongoing_activity_chip"
+                    <include layout="@layout/ongoing_activity_chip_secondary"
                         android:id="@+id/ongoing_activity_chip_secondary"
                         android:visibility="gone"/>
 

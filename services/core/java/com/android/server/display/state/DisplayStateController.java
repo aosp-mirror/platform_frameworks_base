@@ -31,14 +31,17 @@ import java.io.PrintWriter;
  * clients about the changes
  */
 public class DisplayStateController {
-    private DisplayPowerProximityStateController mDisplayPowerProximityStateController;
+    private final DisplayPowerProximityStateController mDisplayPowerProximityStateController;
+    private final boolean mShouldSkipScreenOffTransition;
     private boolean mPerformScreenOffTransition = false;
     private int mDozeStateOverride = Display.STATE_UNKNOWN;
     private int mDozeStateOverrideReason = Display.STATE_REASON_UNKNOWN;
 
-    public DisplayStateController(DisplayPowerProximityStateController
-            displayPowerProximityStateController) {
+    public DisplayStateController(
+            DisplayPowerProximityStateController displayPowerProximityStateController,
+            boolean shouldSkipScreenOffTransition) {
         this.mDisplayPowerProximityStateController = displayPowerProximityStateController;
+        this.mShouldSkipScreenOffTransition = shouldSkipScreenOffTransition;
     }
 
     /**
@@ -65,7 +68,7 @@ public class DisplayStateController {
         switch (displayPowerRequest.policy) {
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_OFF:
                 state = Display.STATE_OFF;
-                mPerformScreenOffTransition = true;
+                mPerformScreenOffTransition = !mShouldSkipScreenOffTransition;
                 break;
             case DisplayManagerInternal.DisplayPowerRequest.POLICY_DOZE:
                 if (mDozeStateOverride != Display.STATE_UNKNOWN) {
@@ -117,7 +120,8 @@ public class DisplayStateController {
     public void dump(PrintWriter pw) {
         pw.println("DisplayStateController:");
         pw.println("-----------------------");
-        pw.println("  mPerformScreenOffTransition:" + mPerformScreenOffTransition);
+        pw.println("  mShouldSkipScreenOffTransition=" + mShouldSkipScreenOffTransition);
+        pw.println("  mPerformScreenOffTransition=" + mPerformScreenOffTransition);
         pw.println("  mDozeStateOverride=" + mDozeStateOverride);
 
         IndentingPrintWriter ipw = new IndentingPrintWriter(pw, " ");

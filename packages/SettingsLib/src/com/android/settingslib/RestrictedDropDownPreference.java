@@ -22,12 +22,18 @@ import androidx.annotation.NonNull;
 import androidx.preference.DropDownPreference;
 import androidx.preference.PreferenceViewHolder;
 
-public class RestrictedDropDownPreference extends DropDownPreference {
-    RestrictedPreferenceHelper mHelper;
+public class RestrictedDropDownPreference extends DropDownPreference implements
+        RestrictedPreferenceHelperProvider {
+    private final RestrictedPreferenceHelper mHelper;
 
     public RestrictedDropDownPreference(@NonNull Context context) {
         super(context);
         mHelper = new RestrictedPreferenceHelper(context, this, null);
+    }
+
+    @Override
+    public @NonNull RestrictedPreferenceHelper getRestrictedPreferenceHelper() {
+        return mHelper;
     }
 
     /**

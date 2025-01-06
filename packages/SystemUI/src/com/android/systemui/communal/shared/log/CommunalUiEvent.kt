@@ -67,7 +67,9 @@ enum class CommunalUiEvent(private val id: Int) : UiEventEnum {
     @UiEvent(doc = "User cancels the swipe gesture to exit the Communal Hub to go to Dream")
     COMMUNAL_HUB_TO_DREAM_SWIPE_CANCEL(1865),
     @UiEvent(doc = "A transition from Dream to Communal Hub starts due to dream awakening")
-    DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START(1866);
+    DREAM_TO_COMMUNAL_HUB_DREAM_AWAKE_START(1866),
+    @UiEvent(doc = "User tapped the button on Communal Hub to go to Dream")
+    COMMUNAL_HUB_SHOW_DREAM_BUTTON_TAP(2065);
 
     override fun getId(): Int {
         return id

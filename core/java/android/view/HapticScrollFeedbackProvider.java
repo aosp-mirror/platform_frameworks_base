@@ -16,6 +16,8 @@
 
 package android.view;
 
+import static android.view.flags.Flags.dynamicViewRotaryHapticsConfiguration;
+
 import android.annotation.NonNull;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -41,13 +43,8 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
 
     private final View mView;
     private final ViewConfiguration mViewConfig;
-    /**
-     * Flag to disable the logic in this class if the View-based scroll haptics implementation is
-     * enabled. If {@code false}, this class will continue to run despite the View's scroll
-     * haptics implementation being enabled. This value should be set to {@code true} when this
-     * class is directly used by the View class.
-     */
-    private final boolean mDisabledIfViewPlaysScrollHaptics;
+    /** Whether or not this provider is being used directly by the View class. */
+    private final boolean mIsFromView;
 
 
     // Info about the cause of the latest scroll event.
@@ -65,17 +62,23 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
     private boolean mHapticScrollFeedbackEnabled = false;
 
     public HapticScrollFeedbackProvider(@NonNull View view) {
-        this(view, ViewConfiguration.get(view.getContext()),
-                /* disabledIfViewPlaysScrollHaptics= */ true);
+        this(view, ViewConfiguration.get(view.getContext()), /* isFromView= */ false);
     }
 
     /** @hide */
     @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     public HapticScrollFeedbackProvider(
-            View view, ViewConfiguration viewConfig, boolean disabledIfViewPlaysScrollHaptics) {
+            View view, ViewConfiguration viewConfig, boolean isFromView) {
         mView = view;
         mViewConfig = viewConfig;
-        mDisabledIfViewPlaysScrollHaptics = disabledIfViewPlaysScrollHaptics;
+        mIsFromView = isFromView;
+        if (dynamicViewRotaryHapticsConfiguration() && !isFromView) {
+            // Disable the View class's rotary scroll feedback logic if this provider is not being
+            // directly used by the View class. This is to avoid double rotary scroll feedback:
+            // one from the View class, and one from this provider instance (i.e. mute the View
+            // class's rotary feedback and enable this provider).
+            view.disableRotaryScrollFeedback();
+        }
     }
 
     @Override
@@ -151,7 +154,8 @@ public class HapticScrollFeedbackProvider implements ScrollFeedbackProvider {
             mAxis = axis;
             mDeviceId = deviceId;
 
-            if (mDisabledIfViewPlaysScrollHaptics
+            if (!dynamicViewRotaryHapticsConfiguration()
+                    && !mIsFromView
                     && (source == InputDevice.SOURCE_ROTARY_ENCODER)
                     && mViewConfig.isViewBasedRotaryEncoderHapticScrollFeedbackEnabled()) {
                 mHapticScrollFeedbackEnabled = false;

@@ -17,13 +17,14 @@
 package com.android.systemui.keyguard.ui.viewmodel
 
 import android.content.Context
-import com.android.internal.policy.SystemBarUtils
+import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.shared.model.ClockSizeSetting
-import com.android.systemui.res.R
+import com.android.systemui.plugins.clocks.ClockPreviewConfig
+import com.android.systemui.statusbar.ui.SystemBarUtilsProxy
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.map
 
@@ -34,57 +35,51 @@ constructor(
     interactor: KeyguardClockInteractor,
     val smartspaceViewModel: KeyguardSmartspaceViewModel,
     val clockViewModel: KeyguardClockViewModel,
+    private val systemBarUtils: SystemBarUtilsProxy,
 ) {
-
-    val selectedClockSize: StateFlow<ClockSizeSetting> = interactor.selectedClockSize
+    // overrideClockSize will override the clock size that is currently set to the system.
+    private val overrideClockSize: MutableStateFlow<ClockSizeSetting?> = MutableStateFlow(null)
+    val previewingClockSize =
+        combine(overrideClockSize, interactor.selectedClockSize) {
+            overrideClockSize,
+            selectedClockSize ->
+            overrideClockSize ?: selectedClockSize
+        }
 
     val shouldHideSmartspace: Flow<Boolean> =
-        combine(
-                interactor.selectedClockSize,
-                interactor.currentClockId,
-                ::Pair,
-            )
-            .map { (size, currentClockId) ->
-                when (size) {
-                    // TODO (b/284122375) This is temporary. We should use clockController
-                    //      .largeClock.config.hasCustomWeatherDataDisplay instead, but
-                    //      ClockRegistry.createCurrentClock is not reliable.
-                    ClockSizeSetting.DYNAMIC -> currentClockId == "DIGITAL_CLOCK_WEATHER"
-                    ClockSizeSetting.SMALL -> false
-                }
+        combine(previewingClockSize, interactor.currentClockId, ::Pair).map { (size, clockId) ->
+            when (size) {
+                // TODO (b/284122375) This is temporary. We should use clockController
+                //      .largeClock.config.hasCustomWeatherDataDisplay instead, but
+                //      ClockRegistry.createCurrentClock is not reliable.
+                ClockSizeSetting.DYNAMIC -> clockId == "DIGITAL_CLOCK_WEATHER"
+                ClockSizeSetting.SMALL -> false
             }
+        }
 
-    fun getSmartspaceStartPadding(context: Context): Int {
-        return KeyguardSmartspaceViewModel.getSmartspaceStartMargin(context)
+    fun setOverrideClockSize(clockSize: ClockSizeSetting) {
+        overrideClockSize.value = clockSize
     }
 
-    fun getSmartspaceEndPadding(context: Context): Int {
-        return KeyguardSmartspaceViewModel.getSmartspaceEndMargin(context)
+    fun getDateWeatherStartPadding(context: Context): Int {
+        return KeyguardSmartspaceViewModel.getDateWeatherStartMargin(context)
     }
 
-    fun getSmallClockSmartspaceTopPadding(splitShadePreview: Boolean, context: Context): Int {
-        return getSmallClockTopPadding(splitShadePreview, context) +
-            context.resources.getDimensionPixelSize(
-                com.android.systemui.customization.R.dimen.small_clock_height
-            )
-    }
-
-    fun getLargeClockSmartspaceTopPadding(splitShadePreview: Boolean, context: Context): Int {
-        return getSmallClockTopPadding(splitShadePreview, context)
+    fun getDateWeatherEndPadding(context: Context): Int {
+        return KeyguardSmartspaceViewModel.getDateWeatherEndMargin(context)
     }
 
     /*
      * SmallClockTopPadding decides the top position of smartspace
      */
-    private fun getSmallClockTopPadding(splitShadePreview: Boolean, context: Context): Int {
-        return with(context.resources) {
-            if (splitShadePreview) {
-                getDimensionPixelSize(R.dimen.keyguard_split_shade_top_margin)
-            } else {
-                getDimensionPixelSize(R.dimen.keyguard_clock_top_margin) +
-                    SystemBarUtils.getStatusBarHeight(context) +
-                    getDimensionPixelSize(R.dimen.keyguard_smartspace_top_offset)
-            }
-        }
+    fun getSmallClockSmartspaceTopPadding(config: ClockPreviewConfig): Int {
+        return config.getSmallClockTopPadding(systemBarUtils.getStatusBarHeaderHeightKeyguard()) +
+            config.context.resources.getDimensionPixelSize(customR.dimen.small_clock_height)
+    }
+
+    fun getLargeClockSmartspaceTopPadding(clockPreviewConfig: ClockPreviewConfig): Int {
+        return clockPreviewConfig.getSmallClockTopPadding(
+            systemBarUtils.getStatusBarHeaderHeightKeyguard()
+        )
     }
 }

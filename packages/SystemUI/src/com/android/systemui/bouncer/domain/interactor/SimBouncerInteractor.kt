@@ -37,6 +37,7 @@ import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.pipeline.mobile.data.repository.MobileConnectionsRepository
 import com.android.systemui.util.icuMessageFormat
 import javax.inject.Inject
@@ -62,7 +63,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     private val repository: SimBouncerRepository,
     private val telephonyManager: TelephonyManager,
-    @Main private val resources: Resources,
+    @ShadeDisplayAware private val resources: Resources,
     private val keyguardUpdateMonitor: KeyguardUpdateMonitor,
     private val euiccManager: EuiccManager?,
     // TODO(b/307977401): Replace this with `MobileConnectionsInteractor` when available.

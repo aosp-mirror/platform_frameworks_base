@@ -18,26 +18,28 @@ package com.android.systemui.qs.tiles.impl.qr.ui
 
 import android.content.res.Resources
 import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataToStateMapper
 import com.android.systemui.qs.tiles.impl.qr.domain.model.QRCodeScannerTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileConfig
 import com.android.systemui.qs.tiles.viewmodel.QSTileState
 import com.android.systemui.res.R
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 
 /** Maps [QRCodeScannerTileModel] to [QSTileState]. */
 class QRCodeScannerTileMapper
 @Inject
-constructor(@Main private val resources: Resources, private val theme: Resources.Theme) :
-    QSTileDataToStateMapper<QRCodeScannerTileModel> {
+constructor(
+    @ShadeDisplayAware private val resources: Resources,
+    private val theme: Resources.Theme,
+) : QSTileDataToStateMapper<QRCodeScannerTileModel> {
 
     override fun map(config: QSTileConfig, data: QRCodeScannerTileModel): QSTileState =
         QSTileState.build(resources, theme, config.uiConfig) {
             label = resources.getString(R.string.qr_code_scanner_title)
             contentDescription = label
-            iconRes = R.drawable.ic_qr_code_scanner
-            icon = Icon.Loaded(resources.getDrawable(iconRes!!, theme), null)
+            val iconRes = R.drawable.ic_qr_code_scanner
+            icon = Icon.Loaded(resources.getDrawable(iconRes, theme), null, iconRes)
             sideViewIcon = QSTileState.SideViewIcon.Chevron
             supportedActions = setOf(QSTileState.UserAction.CLICK)
 

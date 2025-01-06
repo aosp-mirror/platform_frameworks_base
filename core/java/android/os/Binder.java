@@ -313,7 +313,10 @@ public class Binder implements IBinder {
      * If the current thread is not currently executing an incoming transaction,
      * then its own PID is returned.
      *
-     * Warning: oneway transactions do not receive PID. Even if you expect
+     * Warning do not use this as a security identifier! PID is unreliable
+     * as it may be re-used. This should mostly be used for debugging.
+     *
+     * oneway transactions do not receive PID. Even if you expect
      * a transaction to be synchronous, a misbehaving client could send it
      * as a asynchronous call and result in a 0 PID here. Additionally, if
      * there is a race and the calling process dies, the PID may still be

@@ -16,98 +16,132 @@
 
 package com.android.systemui.communal.ui.view.layout.sections
 
+import android.os.Bundle
 import android.util.SizeF
+import android.view.View
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_AUTO
 import android.view.View.IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
-import android.widget.FrameLayout
+import android.view.accessibility.AccessibilityNodeInfo
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.viewinterop.AndroidView
-import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.systemui.Flags.communalWidgetResizing
+import com.android.systemui.Flags.communalHubUseThreadPoolForWidgets
 import com.android.systemui.communal.domain.model.CommunalContentModel
-import com.android.systemui.communal.ui.binder.CommunalAppWidgetHostViewBinder
-import com.android.systemui.communal.ui.viewmodel.BaseCommunalViewModel
-import com.android.systemui.communal.util.WidgetViewFactory
-import com.android.systemui.dagger.qualifiers.Application
-import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.communal.ui.viewmodel.CommunalAppWidgetViewModel
+import com.android.systemui.communal.widgets.CommunalAppWidgetHostView
+import com.android.systemui.communal.widgets.WidgetInteractionHandler
 import com.android.systemui.dagger.qualifiers.UiBackground
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R
+import java.util.concurrent.Executor
+import java.util.concurrent.LinkedBlockingQueue
+import java.util.concurrent.ThreadPoolExecutor
+import java.util.concurrent.TimeUnit
 import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.DisposableHandle
 
 class CommunalAppWidgetSection
 @Inject
 constructor(
-    @Application private val applicationScope: CoroutineScope,
-    @Main private val mainContext: CoroutineContext,
-    @UiBackground private val backgroundContext: CoroutineContext,
-    private val factory: WidgetViewFactory,
+    @UiBackground private val uiBgExecutor: Executor,
+    private val interactionHandler: WidgetInteractionHandler,
+    private val viewModelFactory: CommunalAppWidgetViewModel.Factory,
 ) {
 
     private companion object {
-        val DISPOSABLE_TAG = R.id.communal_widget_disposable_tag
+        const val TAG = "CommunalAppWidgetSection"
+        val LISTENER_TAG = R.id.communal_widget_listener_tag
+
+        val poolSize by lazy { Runtime.getRuntime().availableProcessors().coerceAtLeast(2) }
+
+        /**
+         * This executor is used for widget inflation. Parameters match what launcher uses. See
+         * [com.android.launcher3.util.Executors.THREAD_POOL_EXECUTOR].
+         */
+        val widgetExecutor by lazy {
+            ThreadPoolExecutor(
+                /*corePoolSize*/ poolSize,
+                /*maxPoolSize*/ poolSize,
+                /*keepAlive*/ 1,
+                /*unit*/ TimeUnit.SECONDS,
+                /*workQueue*/ LinkedBlockingQueue(),
+            )
+        }
     }
 
     @Composable
     fun Widget(
-        viewModel: BaseCommunalViewModel,
+        isFocusable: Boolean,
+        openWidgetEditor: () -> Unit,
         model: CommunalContentModel.WidgetContent.Widget,
         size: SizeF,
         modifier: Modifier = Modifier,
     ) {
-        val isFocusable by viewModel.isFocusable.collectAsStateWithLifecycle(initialValue = false)
+        val viewModel = rememberViewModel("$TAG#viewModel") { viewModelFactory.create() }
+        val longClickLabel = stringResource(R.string.accessibility_action_label_edit_widgets)
+        val accessibilityDelegate =
+            remember(longClickLabel, openWidgetEditor) {
+                WidgetAccessibilityDelegate(longClickLabel, openWidgetEditor)
+            }
 
         AndroidView(
             factory = { context ->
-                FrameLayout(context).apply {
-                    layoutParams =
-                        FrameLayout.LayoutParams(
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                            FrameLayout.LayoutParams.MATCH_PARENT,
-                        )
-
-                    // Need to attach the disposable handle to the view here instead of storing
-                    // the state in the composable in order to properly support lazy lists. In a
-                    // lazy list, when the composable is no longer in view - it will exit
-                    // composition and any state inside the composable will be lost. However,
-                    // the View instance will be re-used. Therefore we can store data on the view
-                    // in order to preserve it.
-                    setTag(
-                        DISPOSABLE_TAG,
-                        CommunalAppWidgetHostViewBinder.bind(
-                            context = context,
-                            container = this,
-                            model = model,
-                            size = if (!communalWidgetResizing()) size else null,
-                            factory = factory,
-                            applicationScope = applicationScope,
-                            mainContext = mainContext,
-                            backgroundContext = backgroundContext,
-                        ),
-                    )
-
-                    accessibilityDelegate = viewModel.widgetAccessibilityDelegate
+                CommunalAppWidgetHostView(context, interactionHandler).apply {
+                    if (communalHubUseThreadPoolForWidgets()) {
+                        setExecutor(widgetExecutor)
+                    } else {
+                        setExecutor(uiBgExecutor)
+                    }
                 }
             },
-            update = { container ->
-                container.importantForAccessibility =
+            update = { view ->
+                view.accessibilityDelegate = accessibilityDelegate
+                view.importantForAccessibility =
                     if (isFocusable) {
                         IMPORTANT_FOR_ACCESSIBILITY_AUTO
                     } else {
                         IMPORTANT_FOR_ACCESSIBILITY_NO_HIDE_DESCENDANTS
                     }
-            },
-            onRelease = { view ->
-                val disposable = (view.getTag(DISPOSABLE_TAG) as? DisposableHandle)
-                disposable?.dispose()
+                view.setAppWidget(model.appWidgetId, model.providerInfo)
+                // To avoid calling the expensive setListener method on every recomposition if
+                // the appWidgetId hasn't changed, we store the current appWidgetId of the view in
+                // a tag.
+                if ((view.getTag(LISTENER_TAG) as? Int) != model.appWidgetId) {
+                    viewModel.setListener(model.appWidgetId, view)
+                    view.setTag(LISTENER_TAG, model.appWidgetId)
+                }
+                viewModel.updateSize(size, view)
             },
             modifier = modifier,
             // For reusing composition in lazy lists.
             onReset = {},
         )
+    }
+
+    private class WidgetAccessibilityDelegate(
+        private val longClickLabel: String,
+        private val longClickAction: () -> Unit,
+    ) : View.AccessibilityDelegate() {
+        override fun onInitializeAccessibilityNodeInfo(host: View, info: AccessibilityNodeInfo) {
+            super.onInitializeAccessibilityNodeInfo(host, info)
+            // Hint user to long press in order to enter edit mode
+            info.addAction(
+                AccessibilityNodeInfo.AccessibilityAction(
+                    AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id,
+                    longClickLabel.lowercase(),
+                )
+            )
+        }
+
+        override fun performAccessibilityAction(host: View, action: Int, args: Bundle?): Boolean {
+            when (action) {
+                AccessibilityNodeInfo.AccessibilityAction.ACTION_LONG_CLICK.id -> {
+                    longClickAction()
+                    return true
+                }
+            }
+            return super.performAccessibilityAction(host, action, args)
+        }
     }
 }

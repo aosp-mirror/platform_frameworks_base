@@ -18,18 +18,20 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/list_item"
     android:layout_width="match_parent"
-    android:layout_height="72dp"
+    android:layout_height="wrap_content"
+    android:minHeight="72dp"
     android:background="@drawable/input_method_switch_item_background"
     android:gravity="center_vertical"
     android:orientation="horizontal"
     android:layout_marginHorizontal="16dp"
     android:layout_marginBottom="8dp"
     android:paddingStart="20dp"
-    android:paddingEnd="24dp">
+    android:paddingEnd="24dp"
+    android:paddingVertical="8dp">
 
     <LinearLayout
         android:layout_width="0dp"
-        android:layout_height="match_parent"
+        android:layout_height="wrap_content"
         android:layout_weight="1"
         android:gravity="start|center_vertical"
         android:orientation="vertical">
@@ -39,10 +41,25 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:ellipsize="marquee"
+            android:marqueeRepeatLimit="1"
             android:singleLine="true"
             android:fontFamily="google-sans-text"
             android:textColor="@color/input_method_switch_on_item"
             android:textAppearance="?attr/textAppearanceListItem"/>
+
+        <TextView
+            android:id="@+id/text2"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:ellipsize="marquee"
+            android:marqueeRepeatLimit="1"
+            android:singleLine="true"
+            android:fontFamily="google-sans-text"
+            android:textColor="@color/materialColorOnSurfaceVariant"
+            android:textAppearance="?attr/textAppearanceListItemSecondary"
+            android:textAllCaps="true"
+            android:visibility="gone"/>
 
     </LinearLayout>
 

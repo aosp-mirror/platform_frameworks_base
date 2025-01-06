@@ -108,14 +108,16 @@ class WakelockPowerStatsCollector extends PowerStatsCollector {
 
         mWakelockDurationRetriever.retrieveUidWakelockDuration((uid, durationMs) -> {
             if (!mFirstCollection) {
-                long[] uidStats = mPowerStats.uidStats.get(uid);
-                if (uidStats == null) {
-                    uidStats = new long[mDescriptor.uidStatsArrayLength];
-                    mPowerStats.uidStats.put(uid, uidStats);
-                }
+                long diffMs = Math.max(0, durationMs - mLastUidWakelockDurations.get(uid));
+                if (diffMs != 0) {
+                    long[] uidStats = mPowerStats.uidStats.get(uid);
+                    if (uidStats == null) {
+                        uidStats = new long[mDescriptor.uidStatsArrayLength];
+                        mPowerStats.uidStats.put(uid, uidStats);
+                    }
 
-                mStatsLayout.setUidUsageDuration(uidStats,
-                        Math.max(0, durationMs - mLastUidWakelockDurations.get(uid)));
+                    mStatsLayout.setUidUsageDuration(uidStats, diffMs);
+                }
             }
             mLastUidWakelockDurations.put(uid, durationMs);
         });

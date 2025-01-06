@@ -51,10 +51,12 @@ import com.android.app.viewcapture.ViewCaptureAwareWindowManager;
 import com.android.internal.policy.SystemBarUtils;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.animation.DelegateTransitionAnimatorController;
+import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays;
+import com.android.systemui.statusbar.core.StatusBarRootModernization;
 import com.android.systemui.statusbar.data.repository.StatusBarConfigurationController;
 import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider;
 import com.android.systemui.statusbar.window.StatusBarWindowModule.InternalWindowViewInflater;
@@ -66,6 +68,7 @@ import dagger.assisted.AssistedFactory;
 import dagger.assisted.AssistedInject;
 
 import java.util.Optional;
+import java.util.concurrent.Executor;
 
 /**
  * Encapsulates all logic for the status bar window state management.
@@ -79,6 +82,7 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
     private final StatusBarConfigurationController mStatusBarConfigurationController;
     private final IWindowManager mIWindowManager;
     private final StatusBarContentInsetsProvider mContentInsetsProvider;
+    private final Executor mMainExecutor;
     private int mBarHeight = -1;
     private final State mCurrentState = new State();
     private boolean mIsAttached;
@@ -101,12 +105,14 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
             IWindowManager iWindowManager,
             @Assisted StatusBarContentInsetsProvider contentInsetsProvider,
             FragmentService fragmentService,
-            Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider) {
+            Optional<UnfoldTransitionProgressProvider> unfoldTransitionProgressProvider,
+            @Main Executor mainExecutor) {
         mContext = context;
         mWindowManager = viewCaptureAwareWindowManager;
         mStatusBarConfigurationController = statusBarConfigurationController;
         mIWindowManager = iWindowManager;
         mContentInsetsProvider = contentInsetsProvider;
+        mMainExecutor = mainExecutor;
         mStatusBarWindowView = statusBarWindowViewInflater.inflate(context);
         mFragmentService = fragmentService;
         mLaunchAnimationContainer = mStatusBarWindowView.findViewById(
@@ -157,13 +163,45 @@ public class StatusBarWindowControllerImpl implements StatusBarWindowController 
         mLp = getBarLayoutParams(mContext.getDisplay().getRotation());
         Trace.endSection();
 
-        mWindowManager.addView(mStatusBarWindowView, mLp);
+        try {
+            mWindowManager.addView(mStatusBarWindowView, mLp);
+        } catch (WindowManager.InvalidDisplayException e) {
+            // Wrapping this in a try/catch to avoid crashes when a display is instantly removed
+            // after being added, and initialization hasn't finished yet.
+            Log.e(
+                    TAG,
+                    "Unable to add view to WindowManager. Display with id "
+                            + mContext.getDisplayId()
+                            + " doesn't exist anymore.",
+                    e);
+        }
         mLpChanged.copyFrom(mLp);
 
         mContentInsetsProvider.addCallback(this::calculateStatusBarLocationsForAllRotations);
         calculateStatusBarLocationsForAllRotations();
         mIsAttached = true;
         apply(mCurrentState);
+    }
+
+    @Override
+    public void stop() {
+        StatusBarConnectedDisplays.assertInNewMode();
+
+        try {
+            mWindowManager.removeView(mStatusBarWindowView);
+        } catch (IllegalArgumentException e) {
+            // Wrapping this in a try/catch to avoid crashes when a display is instantly removed
+            // after being added, and initialization hasn't finished yet.
+            // When that happens, adding the View to WindowManager fails, and therefore removing
+            // it here will fail too, since it wasn't added in the first place.
+            Log.e(TAG, "Failed to remove View from WindowManager. View was not attached", e);
+        }
+
+        if (StatusBarRootModernization.isEnabled()) {
+            return;
+        }
+        // Fragment transactions need to happen on the main thread.
+        mMainExecutor.execute(() -> mFragmentService.removeAndDestroy(mStatusBarWindowView));
     }
 
     @Override

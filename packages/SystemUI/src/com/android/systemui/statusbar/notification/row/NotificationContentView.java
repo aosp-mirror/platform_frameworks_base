@@ -573,8 +573,29 @@ public class NotificationContentView extends FrameLayout implements Notification
             return;
         }
 
-        mUiEventLogger.log(
-                NotificationCompactHeadsUpEvent.NOTIFICATION_COMPACT_HUN_SHOWN);
+        final StatusBarNotification containingRowSbn = getContainingRowSbn();
+        if (containingRowSbn == null) {
+            return;
+        }
+
+        mUiEventLogger.logWithInstanceId(
+                NotificationCompactHeadsUpEvent.NOTIFICATION_COMPACT_HUN_SHOWN,
+                containingRowSbn.getUid(),
+                containingRowSbn.getPackageName(),
+                containingRowSbn.getInstanceId());
+    }
+
+    @Nullable
+    private StatusBarNotification getContainingRowSbn() {
+        if (mContainingNotification == null) {
+            return null;
+        }
+        final NotificationEntry entry = mContainingNotification.getEntry();
+        if (entry == null) {
+            return null;
+        }
+
+        return entry.getSbn();
     }
 
     /**

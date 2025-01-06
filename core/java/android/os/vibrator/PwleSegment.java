@@ -44,16 +44,16 @@ public final class PwleSegment extends VibrationEffectSegment {
     private final float mStartFrequencyHz;
     private final float mEndAmplitude;
     private final float mEndFrequencyHz;
-    private final int mDuration;
+    private final long mDuration;
 
     PwleSegment(@android.annotation.NonNull Parcel in) {
-        this(in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat(), in.readInt());
+        this(in.readFloat(), in.readFloat(), in.readFloat(), in.readFloat(), in.readLong());
     }
 
     /** @hide */
     @FlaggedApi(Flags.FLAG_NORMALIZED_PWLE_EFFECTS)
     public PwleSegment(float startAmplitude, float endAmplitude, float startFrequencyHz,
-            float endFrequencyHz, int duration) {
+            float endFrequencyHz, long duration) {
         mStartAmplitude = startAmplitude;
         mEndAmplitude = endAmplitude;
         mStartFrequencyHz = startFrequencyHz;
@@ -213,7 +213,7 @@ public final class PwleSegment extends VibrationEffectSegment {
         dest.writeFloat(mEndAmplitude);
         dest.writeFloat(mStartFrequencyHz);
         dest.writeFloat(mEndFrequencyHz);
-        dest.writeInt(mDuration);
+        dest.writeLong(mDuration);
     }
 
     @android.annotation.NonNull

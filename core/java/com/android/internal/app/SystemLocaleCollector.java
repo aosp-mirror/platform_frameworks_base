@@ -24,7 +24,7 @@ import java.util.HashSet;
 import java.util.Set;
 
 /** The Locale data collector for System language. */
-class SystemLocaleCollector implements LocalePickerWithRegion.LocaleCollectorBase {
+public class SystemLocaleCollector implements LocaleCollectorBase {
     private final Context mContext;
     private LocaleList mExplicitLocales;
 
@@ -32,14 +32,14 @@ class SystemLocaleCollector implements LocalePickerWithRegion.LocaleCollectorBas
         this(context, null);
     }
 
-    SystemLocaleCollector(Context context, LocaleList explicitLocales) {
+    public SystemLocaleCollector(Context context, LocaleList explicitLocales) {
         mContext = context;
         mExplicitLocales = explicitLocales;
     }
 
     @Override
-    public HashSet<String> getIgnoredLocaleList(boolean translatedOnly) {
-        HashSet<String> ignoreList = new HashSet<>();
+    public Set<String> getIgnoredLocaleList(boolean translatedOnly) {
+        Set<String> ignoreList = new HashSet<>();
         if (!translatedOnly) {
             final LocaleList userLocales = LocalePicker.getLocales();
             final String[] langTags = userLocales.toLanguageTags().split(",");

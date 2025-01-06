@@ -16,194 +16,147 @@
 
 package com.android.systemui.kairos.internal
 
-import com.android.systemui.kairos.CoalescingMutableTFlow
-import com.android.systemui.kairos.FrpBuildScope
-import com.android.systemui.kairos.FrpCoalescingProducerScope
-import com.android.systemui.kairos.FrpDeferredValue
-import com.android.systemui.kairos.FrpEffectScope
-import com.android.systemui.kairos.FrpNetwork
-import com.android.systemui.kairos.FrpProducerScope
-import com.android.systemui.kairos.FrpSpec
-import com.android.systemui.kairos.FrpStateScope
-import com.android.systemui.kairos.FrpTransactionScope
-import com.android.systemui.kairos.GroupedTFlow
-import com.android.systemui.kairos.LocalFrpNetwork
-import com.android.systemui.kairos.MutableTFlow
-import com.android.systemui.kairos.TFlow
-import com.android.systemui.kairos.TFlowInit
+import com.android.systemui.kairos.BuildScope
+import com.android.systemui.kairos.BuildSpec
+import com.android.systemui.kairos.CoalescingEventProducerScope
+import com.android.systemui.kairos.CoalescingMutableEvents
+import com.android.systemui.kairos.DeferredValue
+import com.android.systemui.kairos.EffectScope
+import com.android.systemui.kairos.EventProducerScope
+import com.android.systemui.kairos.Events
+import com.android.systemui.kairos.EventsInit
+import com.android.systemui.kairos.GroupedEvents
+import com.android.systemui.kairos.KairosNetwork
+import com.android.systemui.kairos.LocalNetwork
+import com.android.systemui.kairos.MutableEvents
+import com.android.systemui.kairos.TransactionScope
 import com.android.systemui.kairos.groupByKey
 import com.android.systemui.kairos.init
 import com.android.systemui.kairos.internal.util.childScope
-import com.android.systemui.kairos.internal.util.launchOnCancel
-import com.android.systemui.kairos.internal.util.mapValuesParallel
+import com.android.systemui.kairos.internal.util.launchImmediate
 import com.android.systemui.kairos.launchEffect
-import com.android.systemui.kairos.util.Just
+import com.android.systemui.kairos.mergeLeft
 import com.android.systemui.kairos.util.Maybe
-import com.android.systemui.kairos.util.None
+import com.android.systemui.kairos.util.Maybe.Just
+import com.android.systemui.kairos.util.Maybe.None
 import com.android.systemui.kairos.util.just
 import com.android.systemui.kairos.util.map
 import java.util.concurrent.atomic.AtomicReference
-import kotlin.coroutines.Continuation
 import kotlin.coroutines.CoroutineContext
-import kotlin.coroutines.EmptyCoroutineContext
-import kotlin.coroutines.startCoroutine
-import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.CompletableJob
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.DisposableHandle
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.cancel
-import kotlinx.coroutines.completeWith
 import kotlinx.coroutines.job
 
 internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope: CoroutineScope) :
-    BuildScope, StateScope by stateScope {
+    InternalBuildScope, InternalStateScope by stateScope {
 
     private val job: Job
         get() = coroutineScope.coroutineContext.job
 
-    override val frpScope: FrpBuildScope = FrpBuildScopeImpl()
-
-    override suspend fun <R> runInBuildScope(block: suspend FrpBuildScope.() -> R): R {
-        val complete = CompletableDeferred<R>(parent = coroutineContext.job)
-        block.startCoroutine(
-            frpScope,
-            object : Continuation<R> {
-                override val context: CoroutineContext
-                    get() = EmptyCoroutineContext
-
-                override fun resumeWith(result: Result<R>) {
-                    complete.completeWith(result)
-                }
-            },
-        )
-        return complete.await()
+    override val kairosNetwork: KairosNetwork by lazy {
+        LocalNetwork(network, coroutineScope, endSignal)
     }
 
-    private fun <A, T : TFlow<A>, S> buildTFlow(
-        constructFlow: (InputNode<A>) -> Pair<T, S>,
-        builder: suspend S.() -> Unit,
-    ): TFlow<A> {
-        var job: Job? = null
-        val stopEmitter = newStopEmitter()
-        val handle = this.job.invokeOnCompletion { stopEmitter.emit(Unit) }
-        // Create a child scope that will be kept alive beyond the end of this transaction.
-        val childScope = coroutineScope.childScope()
-        lateinit var emitter: Pair<T, S>
-        val inputNode =
-            InputNode<A>(
-                activate = {
-                    check(job == null) { "already activated" }
-                    job =
-                        reenterBuildScope(this@BuildScopeImpl, childScope).runInBuildScope {
-                            launchEffect {
-                                builder(emitter.second)
-                                handle.dispose()
-                                stopEmitter.emit(Unit)
-                            }
-                        }
-                },
-                deactivate = {
-                    checkNotNull(job) { "already deactivated" }.cancel()
-                    job = null
-                },
-            )
-        emitter = constructFlow(inputNode)
-        return with(frpScope) { emitter.first.takeUntil(stopEmitter) }
-    }
-
-    private fun <T> tFlowInternal(builder: suspend FrpProducerScope<T>.() -> Unit): TFlow<T> =
-        buildTFlow(
-            constructFlow = { inputNode ->
-                val flow = MutableTFlow(network, inputNode)
-                flow to
-                    object : FrpProducerScope<T> {
+    override fun <T> events(
+        name: String?,
+        builder: suspend EventProducerScope<T>.() -> Unit,
+    ): Events<T> =
+        buildEvents(
+            name,
+            constructEvents = { inputNode ->
+                val events = MutableEvents(network, inputNode)
+                events to
+                    object : EventProducerScope<T> {
                         override suspend fun emit(value: T) {
-                            flow.emit(value)
+                            events.emit(value)
                         }
                     }
             },
             builder = builder,
         )
 
-    private fun <In, Out> coalescingTFlowInternal(
+    override fun <In, Out> coalescingEvents(
         getInitialValue: () -> Out,
         coalesce: (old: Out, new: In) -> Out,
-        builder: suspend FrpCoalescingProducerScope<In>.() -> Unit,
-    ): TFlow<Out> =
-        buildTFlow(
-            constructFlow = { inputNode ->
-                val flow = CoalescingMutableTFlow(coalesce, network, getInitialValue, inputNode)
-                flow to
-                    object : FrpCoalescingProducerScope<In> {
+        builder: suspend CoalescingEventProducerScope<In>.() -> Unit,
+    ): Events<Out> =
+        buildEvents(
+            constructEvents = { inputNode ->
+                val events =
+                    CoalescingMutableEvents(
+                        null,
+                        coalesce = { old, new: In -> coalesce(old.value, new) },
+                        network,
+                        getInitialValue,
+                        inputNode,
+                    )
+                events to
+                    object : CoalescingEventProducerScope<In> {
                         override fun emit(value: In) {
-                            flow.emit(value)
+                            events.emit(value)
                         }
                     }
             },
             builder = builder,
         )
 
-    private fun <A> asyncScopeInternal(block: FrpSpec<A>): Pair<FrpDeferredValue<A>, Job> {
+    override fun <A> asyncScope(block: BuildSpec<A>): Pair<DeferredValue<A>, Job> {
         val childScope = mutableChildBuildScope()
-        return FrpDeferredValue(deferAsync { childScope.runInBuildScope(block) }) to childScope.job
+        return DeferredValue(deferAsync { block(childScope) }) to childScope.job
     }
 
-    private fun <R> deferredInternal(block: suspend FrpBuildScope.() -> R): FrpDeferredValue<R> =
-        FrpDeferredValue(deferAsync { runInBuildScope(block) })
+    override fun <R> deferredBuildScope(block: BuildScope.() -> R): DeferredValue<R> =
+        DeferredValue(deferAsync { block() })
 
-    private fun deferredActionInternal(block: suspend FrpBuildScope.() -> Unit) {
-        deferAction { runInBuildScope(block) }
+    override fun deferredBuildScopeAction(block: BuildScope.() -> Unit) {
+        deferAction { block() }
     }
 
-    private fun <A> TFlow<A>.observeEffectInternal(
-        context: CoroutineContext,
-        block: suspend FrpEffectScope.(A) -> Unit,
-    ): Job {
+    override fun <A> Events<A>.observe(
+        coroutineContext: CoroutineContext,
+        block: EffectScope.(A) -> Unit,
+    ): DisposableHandle {
         val subRef = AtomicReference<Maybe<Output<A>>>(null)
         val childScope = coroutineScope.childScope()
-        // When our scope is cancelled, deactivate this observer.
-        childScope.launchOnCancel(CoroutineName("TFlow.observeEffect")) {
+        lateinit var cancelHandle: DisposableHandle
+        val handle = DisposableHandle {
             subRef.getAndSet(None)?.let { output ->
+                cancelHandle.dispose()
                 if (output is Just) {
                     @Suppress("DeferredResultUnused")
-                    network.transaction { scheduleDeactivation(output.value) }
+                    network.transaction("observeEffect cancelled") {
+                        scheduleDeactivation(output.value)
+                    }
                 }
             }
         }
-        // Defer so that we don't suspend the caller
+        // When our scope is cancelled, deactivate this observer.
+        cancelHandle = childScope.coroutineContext.job.invokeOnCompletion { handle.dispose() }
+        val localNetwork = LocalNetwork(network, childScope, endSignal)
+        val outputNode =
+            Output<A>(
+                context = coroutineContext,
+                onDeath = { subRef.set(None) },
+                onEmit = { output ->
+                    if (subRef.get() is Just) {
+                        // Not cancelled, safe to emit
+                        val scope =
+                            object : EffectScope, TransactionScope by this {
+                                override val effectCoroutineScope: CoroutineScope = childScope
+                                override val kairosNetwork: KairosNetwork = localNetwork
+                            }
+                        scope.block(output)
+                    }
+                },
+            )
+        // Defer, in case any EventsLoops / StateLoops still need to be set
         deferAction {
-            val outputNode =
-                Output<A>(
-                    context = context,
-                    onDeath = { subRef.getAndSet(None)?.let { childScope.cancel() } },
-                    onEmit = { output ->
-                        if (subRef.get() is Just) {
-                            // Not cancelled, safe to emit
-                            val coroutine: suspend FrpEffectScope.() -> Unit = { block(output) }
-                            val complete = CompletableDeferred<Unit>(parent = coroutineContext.job)
-                            coroutine.startCoroutine(
-                                object : FrpEffectScope, FrpTransactionScope by frpScope {
-                                    override val frpCoroutineScope: CoroutineScope = childScope
-                                    override val frpNetwork: FrpNetwork =
-                                        LocalFrpNetwork(network, childScope, endSignal)
-                                },
-                                completion =
-                                    object : Continuation<Unit> {
-                                        override val context: CoroutineContext
-                                            get() = EmptyCoroutineContext
-
-                                        override fun resumeWith(result: Result<Unit>) {
-                                            complete.completeWith(result)
-                                        }
-                                    },
-                            )
-                            complete.await()
-                        }
-                    },
-                )
-            with(frpScope) { this@observeEffectInternal.takeUntil(endSignal) }
+            // Check for immediate cancellation
+            if (subRef.get() != null) return@deferAction
+            this@observe.takeUntil(endSignal)
                 .init
                 .connect(evalScope = stateScope.evalScope)
                 .activate(evalScope = stateScope.evalScope, outputNode.schedulable)
@@ -213,73 +166,110 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                         // Job's already been cancelled, schedule deactivation
                         scheduleDeactivation(outputNode)
                     } else if (needsEval) {
-                        outputNode.schedule(evalScope = stateScope.evalScope)
+                        outputNode.schedule(0, evalScope = stateScope.evalScope)
                     }
-                } ?: childScope.cancel()
+                } ?: run { childScope.cancel() }
         }
-        return childScope.coroutineContext.job
+        return handle
     }
 
-    private fun <A, B> TFlow<A>.mapBuildInternal(
-        transform: suspend FrpBuildScope.(A) -> B
-    ): TFlow<B> {
+    override fun <A, B> Events<A>.mapBuild(transform: BuildScope.(A) -> B): Events<B> {
         val childScope = coroutineScope.childScope()
-        return TFlowInit(
+        return EventsInit(
             constInit(
                 "mapBuild",
-                mapImpl({ init.connect(evalScope = this) }) { spec ->
+                mapImpl({ init.connect(evalScope = this) }) { spec, _ ->
                         reenterBuildScope(outerScope = this@BuildScopeImpl, childScope)
-                            .runInBuildScope {
-                                val (result, _) = asyncScope { transform(spec) }
-                                result.get()
-                            }
+                            .transform(spec)
                     }
                     .cached(),
             )
         )
     }
 
-    private fun <K, A, B> TFlow<Map<K, Maybe<FrpSpec<A>>>>.applyLatestForKeyInternal(
-        init: FrpDeferredValue<Map<K, FrpSpec<B>>>,
+    override fun <K, A, B> Events<Map<K, Maybe<BuildSpec<A>>>>.applyLatestSpecForKey(
+        initialSpecs: DeferredValue<Map<K, BuildSpec<B>>>,
         numKeys: Int?,
-    ): Pair<TFlow<Map<K, Maybe<A>>>, FrpDeferredValue<Map<K, B>>> {
-        val eventsByKey: GroupedTFlow<K, Maybe<FrpSpec<A>>> = groupByKey(numKeys)
-        val initOut: Deferred<Map<K, B>> = deferAsync {
-            init.unwrapped.await().mapValuesParallel { (k, spec) ->
-                val newEnd = with(frpScope) { eventsByKey[k].skipNext() }
+    ): Pair<Events<Map<K, Maybe<A>>>, DeferredValue<Map<K, B>>> {
+        val eventsByKey: GroupedEvents<K, Maybe<BuildSpec<A>>> = groupByKey(numKeys)
+        val initOut: Lazy<Map<K, B>> = deferAsync {
+            initialSpecs.unwrapped.value.mapValues { (k, spec) ->
+                val newEnd = eventsByKey[k]
                 val newScope = childBuildScope(newEnd)
-                newScope.runInBuildScope(spec)
+                newScope.spec()
             }
         }
         val childScope = coroutineScope.childScope()
-        val changesNode: TFlowImpl<Map<K, Maybe<A>>> =
-            mapImpl(upstream = { this@applyLatestForKeyInternal.init.connect(evalScope = this) }) {
-                upstreamMap ->
+        val changesNode: EventsImpl<Map<K, Maybe<A>>> =
+            mapImpl(upstream = { this@applyLatestSpecForKey.init.connect(evalScope = this) }) {
+                upstreamMap,
+                _ ->
                 reenterBuildScope(this@BuildScopeImpl, childScope).run {
-                    upstreamMap.mapValuesParallel { (k: K, ma: Maybe<FrpSpec<A>>) ->
+                    upstreamMap.mapValues { (k: K, ma: Maybe<BuildSpec<A>>) ->
                         ma.map { spec ->
-                            val newEnd = with(frpScope) { eventsByKey[k].skipNext() }
+                            val newEnd = eventsByKey[k].skipNext()
                             val newScope = childBuildScope(newEnd)
-                            newScope.runInBuildScope(spec)
+                            newScope.spec()
                         }
                     }
                 }
             }
-        val changes: TFlow<Map<K, Maybe<A>>> =
-            TFlowInit(constInit("applyLatestForKey", changesNode.cached()))
+        val changes: Events<Map<K, Maybe<A>>> =
+            EventsInit(constInit("applyLatestForKey", changesNode.cached()))
         // Ensure effects are observed; otherwise init will stay alive longer than expected
-        changes.observeEffectInternal(EmptyCoroutineContext) {}
-        return changes to FrpDeferredValue(initOut)
+        changes.observe()
+        return changes to DeferredValue(initOut)
     }
 
-    private fun newStopEmitter(): CoalescingMutableTFlow<Unit, Unit> =
-        CoalescingMutableTFlow(
+    private fun <A, T : Events<A>, S> buildEvents(
+        name: String? = null,
+        constructEvents: (InputNode<A>) -> Pair<T, S>,
+        builder: suspend S.() -> Unit,
+    ): Events<A> {
+        var job: Job? = null
+        val stopEmitter = newStopEmitter("buildEvents[$name]")
+        // Create a child scope that will be kept alive beyond the end of this transaction.
+        val childScope = coroutineScope.childScope()
+        lateinit var emitter: Pair<T, S>
+        val inputNode =
+            InputNode<A>(
+                activate = {
+                    // It's possible that activation occurs after all effects have been run, due
+                    // to a MuxDeferred switch-in. For this reason, we need to activate in a new
+                    // transaction.
+                    check(job == null) { "[$name] already activated" }
+                    job =
+                        childScope.launchImmediate {
+                            network
+                                .transaction("buildEvents") {
+                                    reenterBuildScope(this@BuildScopeImpl, childScope)
+                                        .launchEffect {
+                                            builder(emitter.second)
+                                            stopEmitter.emit(Unit)
+                                        }
+                                }
+                                .await()
+                                .join()
+                        }
+                },
+                deactivate = {
+                    checkNotNull(job) { "[$name] already deactivated" }.cancel()
+                    job = null
+                },
+            )
+        emitter = constructEvents(inputNode)
+        return emitter.first.takeUntil(mergeLeft(stopEmitter, endSignal))
+    }
+
+    private fun newStopEmitter(name: String): CoalescingMutableEvents<Unit, Unit> =
+        CoalescingMutableEvents(
+            name = name,
             coalesce = { _, _: Unit -> },
             network = network,
             getInitialValue = {},
         )
 
-    private suspend fun childBuildScope(newEnd: TFlow<Any>): BuildScopeImpl {
+    private fun childBuildScope(newEnd: Events<Any>): BuildScopeImpl {
         val newCoroutineScope: CoroutineScope = coroutineScope.childScope()
         return BuildScopeImpl(
                 stateScope = stateScope.childStateScope(newEnd),
@@ -294,62 +284,28 @@ internal class BuildScopeImpl(val stateScope: StateScopeImpl, val coroutineScope
                         (newCoroutineScope.coroutineContext.job as CompletableJob).complete()
                     }
                 )
-                runInBuildScope { endSignal.nextOnly().observe { newCoroutineScope.cancel() } }
+                endSignalOnce.observe { newCoroutineScope.cancel() }
             }
     }
 
     private fun mutableChildBuildScope(): BuildScopeImpl {
-        val stopEmitter = newStopEmitter()
+        val stopEmitter = newStopEmitter("mutableChildBuildScope")
         val childScope = coroutineScope.childScope()
         childScope.coroutineContext.job.invokeOnCompletion { stopEmitter.emit(Unit) }
         // Ensure that once this transaction is done, the new child scope enters the completing
         // state (kept alive so long as there are child jobs).
-        scheduleOutput(
-            OneShot {
-                // TODO: don't like this cast
-                (childScope.coroutineContext.job as CompletableJob).complete()
-            }
-        )
+        // TODO: need to keep the scope alive if it's used to accumulate state.
+        //  Otherwise, stopEmitter will emit early, due to the call to complete().
+        //        scheduleOutput(
+        //            OneShot {
+        //                // TODO: don't like this cast
+        //                (childScope.coroutineContext.job as CompletableJob).complete()
+        //            }
+        //        )
         return BuildScopeImpl(
             stateScope = StateScopeImpl(evalScope = stateScope.evalScope, endSignal = stopEmitter),
             coroutineScope = childScope,
         )
-    }
-
-    private inner class FrpBuildScopeImpl : FrpBuildScope, FrpStateScope by stateScope.frpScope {
-
-        override fun <T> tFlow(builder: suspend FrpProducerScope<T>.() -> Unit): TFlow<T> =
-            tFlowInternal(builder)
-
-        override fun <In, Out> coalescingTFlow(
-            getInitialValue: () -> Out,
-            coalesce: (old: Out, new: In) -> Out,
-            builder: suspend FrpCoalescingProducerScope<In>.() -> Unit,
-        ): TFlow<Out> = coalescingTFlowInternal(getInitialValue, coalesce, builder)
-
-        override fun <A> asyncScope(block: FrpSpec<A>): Pair<FrpDeferredValue<A>, Job> =
-            asyncScopeInternal(block)
-
-        override fun <R> deferredBuildScope(
-            block: suspend FrpBuildScope.() -> R
-        ): FrpDeferredValue<R> = deferredInternal(block)
-
-        override fun deferredBuildScopeAction(block: suspend FrpBuildScope.() -> Unit) =
-            deferredActionInternal(block)
-
-        override fun <A> TFlow<A>.observe(
-            coroutineContext: CoroutineContext,
-            block: suspend FrpEffectScope.(A) -> Unit,
-        ): Job = observeEffectInternal(coroutineContext, block)
-
-        override fun <A, B> TFlow<A>.mapBuild(transform: suspend FrpBuildScope.(A) -> B): TFlow<B> =
-            mapBuildInternal(transform)
-
-        override fun <K, A, B> TFlow<Map<K, Maybe<FrpSpec<A>>>>.applyLatestSpecForKey(
-            initialSpecs: FrpDeferredValue<Map<K, FrpSpec<B>>>,
-            numKeys: Int?,
-        ): Pair<TFlow<Map<K, Maybe<A>>>, FrpDeferredValue<Map<K, B>>> =
-            applyLatestForKeyInternal(initialSpecs, numKeys)
     }
 }
 

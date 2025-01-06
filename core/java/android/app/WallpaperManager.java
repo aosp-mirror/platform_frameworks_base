@@ -19,9 +19,10 @@ package android.app;
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT;
+import static android.app.Flags.FLAG_CUSTOMIZATION_PACKS_APIS;
+import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
-import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 
 import static com.android.window.flags.Flags.FLAG_MULTI_CROP;
 import static com.android.window.flags.Flags.multiCrop;
@@ -342,24 +343,32 @@ public class WallpaperManager {
      * Portrait orientation of most screens
      * @hide
      */
+    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
+    @SystemApi
     public static final int ORIENTATION_PORTRAIT = 0;
 
     /**
      * Landscape orientation of most screens
      * @hide
      */
+    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
+    @SystemApi
     public static final int ORIENTATION_LANDSCAPE = 1;
 
     /**
      * Portrait orientation with similar width and height (e.g. the inner screen of a foldable)
      * @hide
      */
+    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
+    @SystemApi
     public static final int ORIENTATION_SQUARE_PORTRAIT = 2;
 
     /**
      * Landscape orientation with similar width and height (e.g. the inner screen of a foldable)
      * @hide
      */
+    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
+    @SystemApi
     public static final int ORIENTATION_SQUARE_LANDSCAPE = 3;
 
     /**
@@ -368,7 +377,9 @@ public class WallpaperManager {
      * @return the corresponding {@link ScreenOrientation}.
      * @hide
      */
-    public static @ScreenOrientation int getOrientation(Point screenSize) {
+    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
+    @SystemApi
+    public static @ScreenOrientation int getOrientation(@NonNull Point screenSize) {
         float ratio = ((float) screenSize.x) / screenSize.y;
         // ratios between 3/4 and 4/3 are considered square
         return ratio >= 4 / 3f ? ORIENTATION_LANDSCAPE
@@ -1623,14 +1634,15 @@ public class WallpaperManager {
      *                   If false, return areas relative to the cropped bitmap.
      * @return A List of Rect where the Rect is within the cropped/original bitmap, and corresponds
      *          to what is displayed. The Rect may have a larger width/height ratio than the screen
-     *          due to parallax. Return {@code null} if the wallpaper is not an ImageWallpaper.
-     *          Also return {@code null} when called with which={@link #FLAG_LOCK} if there is a
+     *          due to parallax. Return an empty list if the wallpaper is not an ImageWallpaper.
+     *          Also return an empty list when called with which={@link #FLAG_LOCK} if there is a
      *          shared home + lock wallpaper.
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
+    @TestApi
     @RequiresPermission(READ_WALLPAPER_INTERNAL)
-    @Nullable
+    @NonNull
     public List<Rect> getBitmapCrops(@NonNull List<Point> displaySizes,
             @SetWallpaperFlags int which, boolean originalBitmap) {
         checkExactlyOneWallpaperFlagSet(which);
@@ -1653,6 +1665,52 @@ public class WallpaperManager {
     }
 
     /**
+     * For the current user, if the wallpaper of the specified destination is an ImageWallpaper,
+     * return the custom crops of the wallpaper, that have been provided for example via
+     * {@link #setStreamWithCrops}. These crops are relative to the original bitmap.
+     * <p>
+     * This method helps apps that change wallpapers provide an undo option. Calling
+     * {@link #setStreamWithCrops(InputStream, SparseArray, boolean, int)} with this SparseArray and
+     * the current original bitmap file, that can be obtained with {@link #getWallpaperFile(int,
+     * boolean)} with {@code getCropped=false}, will exactly lead to the current wallpaper state.
+     *
+     * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
+     * @return A map from {{@link #ORIENTATION_PORTRAIT}, {@link #ORIENTATION_LANDSCAPE},
+     *          {@link #ORIENTATION_SQUARE_PORTRAIT}, {{@link #ORIENTATION_SQUARE_LANDSCAPE}}} to
+     *          Rect, representing the custom cropHints. The map can be empty and will only contains
+     *          entries for screen orientations for which a custom crop was provided. If no custom
+     *          crop is provided for an orientation, the system will infer the crop based on the
+     *          custom crops of the other orientations; or center-align the full image if no custom
+     *          crops are provided at all.
+     *          <p>
+     *          Return an empty map if the wallpaper is not an ImageWallpaper. Also return
+     *          an empty map when called with which={@link #FLAG_LOCK} if there is a shared
+     *          home + lock wallpaper.
+     *
+     * @hide
+     */
+    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
+    @SystemApi
+    @RequiresPermission(READ_WALLPAPER_INTERNAL)
+    @NonNull
+    public SparseArray<Rect> getBitmapCrops(@SetWallpaperFlags int which) {
+        checkExactlyOneWallpaperFlagSet(which);
+        try {
+            Bundle bundle = sGlobals.mService.getCurrentBitmapCrops(which, mContext.getUserId());
+            SparseArray<Rect> result = new SparseArray<>();
+            if (bundle == null) return result;
+            for (String key : bundle.keySet()) {
+                int intKey = Integer.parseInt(key);
+                Rect rect = bundle.getParcelable(key, Rect.class);
+                result.put(intKey, rect);
+            }
+            return result;
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * For preview purposes.
      * Return how a bitmap of a given size would be cropped for a given list of display sizes, if
      * it was set as wallpaper via {@link #setBitmapWithCrops(Bitmap, Map, boolean, int)} or
@@ -1664,7 +1722,8 @@ public class WallpaperManager {
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
-    @Nullable
+    @TestApi
+    @NonNull
     public List<Rect> getBitmapCrops(@NonNull Point bitmapSize, @NonNull List<Point> displaySizes,
             @Nullable Map<Point, Rect> cropHints) {
         try {
@@ -1890,9 +1949,14 @@ public class WallpaperManager {
      *    defined kind of wallpaper, either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
      * @param getCropped If true the cropped file will be retrieved, if false the original will
      *                   be retrieved.
-     *
+     * @return A ParcelFileDescriptor for the wallpaper bitmap of the given destination, if it's an
+     *                   ImageWallpaper wallpaper. Return {@code null} if the wallpaper is not an
+     *                   ImageWallpaper. Also return {@code null} when called with
+     *                   which={@link #FLAG_LOCK} if there is a shared home + lock wallpaper.
      * @hide
      */
+    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
+    @SystemApi
     @Nullable
     public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which, boolean getCropped) {
         return getWallpaperFile(which, mContext.getUserId(), getCropped);
@@ -2028,7 +2092,7 @@ public class WallpaperManager {
 
     /**
      * Returns the description of the designated wallpaper. Returns null if the lock screen
-     * wallpaper is requested lock screen wallpaper is not set.
+     * wallpaper is requested and lock screen wallpaper is not set.
 
      * @param which Specifies wallpaper to request (home or lock).
      * @throws IllegalArgumentException if {@code which} is not exactly one of
@@ -2371,7 +2435,6 @@ public class WallpaperManager {
     /**
      * Version of setBitmap that defines how the wallpaper will be positioned for different
      * display sizes.
-     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
      * @param cropHints map from screen dimensions to a sub-region of the image to display for those
      *                  dimensions. The {@code Rect} sub-region may have a larger width/height ratio
      *                  than the screen dimensions to apply a horizontal parallax effect. If the
@@ -2380,6 +2443,7 @@ public class WallpaperManager {
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
+    @TestApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
     public int setBitmapWithCrops(@Nullable Bitmap fullImage, @NonNull Map<Point, Rect> cropHints,
             boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
@@ -2425,6 +2489,27 @@ public class WallpaperManager {
             throw e.rethrowFromSystemServer();
         }
         return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
+    }
+
+    /**
+     * Version of setBitmap that allows specification of wallpaper metadata including how the
+     * wallpaper will be positioned for different display sizes.
+     *
+     * @param fullImage   A bitmap that will supply the wallpaper imagery.
+     * @param description Wallpaper metadata including desired cropping
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *                    image for restore to a future device; {@code false} otherwise.
+     * @param which       Flags indicating which wallpaper(s) to configure with the new imagery.
+     * @hide
+     */
+    @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+    @TestApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    public int setBitmapWithDescription(@Nullable Bitmap fullImage,
+            @NonNull WallpaperDescription description, boolean allowBackup,
+            @SetWallpaperFlags int which) throws IOException {
+        return setBitmapWithCrops(fullImage, description.getCropHints(), allowBackup, which,
+                mContext.getUserId());
     }
 
     private final void validateRect(Rect rect) {
@@ -2562,7 +2647,6 @@ public class WallpaperManager {
     /**
      * Version of setStream that defines how the wallpaper will be positioned for different
      * display sizes.
-     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
      * @param cropHints map from screen dimensions to a sub-region of the image to display for those
      *                  dimensions. The {@code Rect} sub-region may have a larger width/height ratio
      *                  than the screen dimensions to apply a horizontal parallax effect. If the
@@ -2571,9 +2655,11 @@ public class WallpaperManager {
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
+    @TestApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
-    public int setStreamWithCrops(InputStream bitmapData, @NonNull Map<Point, Rect> cropHints,
-            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+    public int setStreamWithCrops(@NonNull InputStream bitmapData,
+            @NonNull Map<Point, Rect> cropHints, boolean allowBackup, @SetWallpaperFlags int which)
+            throws IOException {
         SparseArray<Rect> crops = new SparseArray<>();
         cropHints.forEach((k, v) -> crops.put(getOrientation(k), v));
         return setStreamWithCrops(bitmapData, crops, allowBackup, which);
@@ -2583,15 +2669,21 @@ public class WallpaperManager {
      * Similar to {@link #setStreamWithCrops(InputStream, Map, boolean, int)}, but using
      * {@link ScreenOrientation} as keys of the cropHints map. Used for backup & restore, since
      * WallpaperBackupAgent stores orientations rather than the exact display size.
-     * Requires permission {@link android.Manifest.permission#SET_WALLPAPER}.
+     * @param bitmapData A stream containing the raw data to install as a wallpaper. This
+     *                  data can be in any format handled by {@link BitmapRegionDecoder}.
      * @param cropHints map from {@link ScreenOrientation} to a sub-region of the image to display
      *                  for that screen orientation.
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *     image for restore to a future device; {@code false} otherwise.
+     * @param which Flags indicating which wallpaper(s) to configure with the new imagery.
      * @hide
      */
     @FlaggedApi(FLAG_MULTI_CROP)
+    @SystemApi
     @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
-    public int setStreamWithCrops(InputStream bitmapData, @NonNull SparseArray<Rect> cropHints,
-            boolean allowBackup, @SetWallpaperFlags int which) throws IOException {
+    public int setStreamWithCrops(@NonNull InputStream bitmapData,
+            @NonNull SparseArray<Rect> cropHints, boolean allowBackup, @SetWallpaperFlags int which)
+            throws IOException {
         if (sGlobals.mService == null) {
             Log.w(TAG, "WallpaperService not running");
             throw new RuntimeException(new DeadSystemException());
@@ -2626,6 +2718,28 @@ public class WallpaperManager {
             throw e.rethrowFromSystemServer();
         }
         return result.getInt(EXTRA_NEW_WALLPAPER_ID, 0);
+    }
+
+    /**
+     * Version of setStream that allows specification of wallpaper metadata including how the
+     * wallpaper will be positioned for different display sizes.
+     *
+     * @param bitmapData  A stream containing the raw data to install as a wallpaper. This
+     *                    data can be in any format handled by {@link BitmapRegionDecoder}.
+     * @param description Wallpaper metadata including desired cropping
+     * @param allowBackup {@code true} if the OS is permitted to back up this wallpaper
+     *                    image for restore to a future device; {@code false} otherwise.
+     * @param which       Flags indicating which wallpaper(s) to configure with the new imagery.
+     * @return An integer ID assigned to the newly active wallpaper; or zero on failure.
+     * @hide
+     */
+    @FlaggedApi(FLAG_LIVE_WALLPAPER_CONTENT_HANDLING)
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.SET_WALLPAPER)
+    public int setStreamWithDescription(@NonNull InputStream bitmapData,
+            @NonNull WallpaperDescription description, boolean allowBackup,
+            @SetWallpaperFlags int which) throws IOException {
+        return setStreamWithCrops(bitmapData, description.getCropHints(), allowBackup, which);
     }
 
     /**

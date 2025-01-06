@@ -21,10 +21,8 @@ import static android.os.UserManager.USER_TYPE_FULL_SECONDARY;
 import static android.os.UserManager.USER_TYPE_PROFILE_CLONE;
 import static android.os.UserManager.USER_TYPE_PROFILE_MANAGED;
 import static android.os.UserManager.USER_TYPE_PROFILE_PRIVATE;
-import static android.platform.test.flag.junit.SetFlagsRule.DefaultInitValueType.DEVICE_DEFAULT;
 import static android.service.notification.NotificationListenerService.META_DATA_DEFAULT_AUTOBIND;
 
-import static com.android.server.notification.Flags.FLAG_NOTIFICATION_NLS_REBIND;
 import static com.android.server.notification.ManagedServices.APPROVAL_BY_COMPONENT;
 import static com.android.server.notification.ManagedServices.APPROVAL_BY_PACKAGE;
 import static com.android.server.notification.NotificationManagerService.privateSpaceFlagsEnabled;
@@ -65,14 +63,11 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.IInterface;
-import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.platform.test.annotations.EnableFlags;
-import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.Settings;
-import android.testing.TestableLooper;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -87,9 +82,7 @@ import com.android.server.UiServiceTestCase;
 
 import com.google.android.collect.Lists;
 
-import org.junit.After;
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
@@ -110,10 +103,7 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 
-
 public class ManagedServicesTest extends UiServiceTestCase {
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
     @Mock
     private IPackageManager mIpm;
@@ -125,7 +115,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
     private ManagedServices.UserProfiles mUserProfiles;
     @Mock private DevicePolicyManager mDpm;
     Object mLock = new Object();
-    private TestableLooper mTestableLooper;
 
     UserInfo mZero = new UserInfo(0, "zero", 0);
     UserInfo mTen = new UserInfo(10, "ten", 0);
@@ -153,7 +142,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        mTestableLooper = new TestableLooper(Looper.getMainLooper());
 
         mContext.setMockPackageManager(mPm);
         mContext.addMockSystemService(Context.USER_SERVICE, mUm);
@@ -209,11 +197,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
         mExpectedSecondary.put(APPROVAL_BY_COMPONENT, mExpectedSecondaryComponentNames);
         mService = new TestManagedServices(getContext(), mLock, mUserProfiles,
                 mIpm, APPROVAL_BY_COMPONENT);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        mTestableLooper.destroy();
     }
 
     @Test
@@ -905,7 +888,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             return true;
         });
 
-        mockServiceInfoWithMetaData(List.of(cn), service, pm, new ArrayMap<>());
+        mockServiceInfoWithMetaData(List.of(cn), service, new ArrayMap<>());
         service.addApprovedList("a", 0, true);
 
         service.reregisterService(cn, 0);
@@ -936,7 +919,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             return true;
         });
 
-        mockServiceInfoWithMetaData(List.of(cn), service, pm, new ArrayMap<>());
+        mockServiceInfoWithMetaData(List.of(cn), service, new ArrayMap<>());
         service.addApprovedList("a", 0, false);
 
         service.reregisterService(cn, 0);
@@ -967,7 +950,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             return true;
         });
 
-        mockServiceInfoWithMetaData(List.of(cn), service, pm, new ArrayMap<>());
+        mockServiceInfoWithMetaData(List.of(cn), service, new ArrayMap<>());
         service.addApprovedList("a/a", 0, true);
 
         service.reregisterService(cn, 0);
@@ -998,7 +981,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
             return true;
         });
 
-        mockServiceInfoWithMetaData(List.of(cn), service, pm, new ArrayMap<>());
+        mockServiceInfoWithMetaData(List.of(cn), service, new ArrayMap<>());
         service.addApprovedList("a/a", 0, false);
 
         service.reregisterService(cn, 0);
@@ -1067,78 +1050,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertFalse(service.isBound(cn, 0));
         assertFalse(service.isBound(cn, 10));
         assertTrue(service.isBound(cn, 11));
-    }
-
-    @Test
-    @EnableFlags(FLAG_NOTIFICATION_NLS_REBIND)
-    public void registerService_bindingDied_rebindIsClearedOnUserSwitch() throws Exception {
-        Context context = mock(Context.class);
-        PackageManager pm = mock(PackageManager.class);
-        ApplicationInfo ai = new ApplicationInfo();
-        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
-
-        when(context.getPackageName()).thenReturn(mPkg);
-        when(context.getUserId()).thenReturn(mUser.getIdentifier());
-        when(context.getPackageManager()).thenReturn(pm);
-        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
-
-        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
-                APPROVAL_BY_PACKAGE);
-        service = spy(service);
-        ComponentName cn = ComponentName.unflattenFromString("a/a");
-
-        // Trigger onBindingDied for component when registering
-        //  => will schedule a rebind in 10 seconds
-        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ServiceConnection sc = (ServiceConnection) args[1];
-            sc.onBindingDied(cn);
-            return true;
-        });
-        service.registerService(cn, 0);
-        assertThat(service.isBound(cn, 0)).isFalse();
-
-        // Switch to user 10
-        service.onUserSwitched(10);
-
-        // Check that the scheduled rebind for user 0 was cleared
-        mTestableLooper.moveTimeForward(ManagedServices.ON_BINDING_DIED_REBIND_DELAY_MS);
-        mTestableLooper.processAllMessages();
-        verify(service, never()).reregisterService(any(), anyInt());
-    }
-
-    @Test
-    public void registerService_bindingDied_rebindIsExecutedAfterTimeout() throws Exception {
-        Context context = mock(Context.class);
-        PackageManager pm = mock(PackageManager.class);
-        ApplicationInfo ai = new ApplicationInfo();
-        ai.targetSdkVersion = Build.VERSION_CODES.CUR_DEVELOPMENT;
-
-        when(context.getPackageName()).thenReturn(mPkg);
-        when(context.getUserId()).thenReturn(mUser.getIdentifier());
-        when(context.getPackageManager()).thenReturn(pm);
-        when(pm.getApplicationInfo(anyString(), anyInt())).thenReturn(ai);
-
-        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles, mIpm,
-                APPROVAL_BY_PACKAGE);
-        service = spy(service);
-        ComponentName cn = ComponentName.unflattenFromString("a/a");
-
-        // Trigger onBindingDied for component when registering
-        //  => will schedule a rebind in 10 seconds
-        when(context.bindServiceAsUser(any(), any(), anyInt(), any())).thenAnswer(invocation -> {
-            Object[] args = invocation.getArguments();
-            ServiceConnection sc = (ServiceConnection) args[1];
-            sc.onBindingDied(cn);
-            return true;
-        });
-        service.registerService(cn, 0);
-        assertThat(service.isBound(cn, 0)).isFalse();
-
-        // Check that the scheduled rebind is run
-        mTestableLooper.moveTimeForward(ManagedServices.ON_BINDING_DIED_REBIND_DELAY_MS);
-        mTestableLooper.processAllMessages();
-        verify(service, times(1)).reregisterService(eq(cn), eq(0));
     }
 
     @Test
@@ -1300,65 +1211,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     @Test
-    @EnableFlags(FLAG_NOTIFICATION_NLS_REBIND)
-    public void testUpgradeAppNoIntentFilterNoRebind() throws Exception {
-        Context context = spy(getContext());
-        doReturn(true).when(context).bindServiceAsUser(any(), any(), anyInt(), any());
-
-        ManagedServices service = new TestManagedServices(context, mLock, mUserProfiles,
-                mIpm, APPROVAL_BY_COMPONENT);
-
-        List<String> packages = new ArrayList<>();
-        packages.add("package");
-        addExpectedServices(service, packages, 0);
-
-        final ComponentName unapprovedComponent = ComponentName.unflattenFromString("package/C1");
-        final ComponentName approvedComponent = ComponentName.unflattenFromString("package/C2");
-
-        // Both components are approved initially
-        mExpectedPrimaryComponentNames.clear();
-        mExpectedPrimaryPackages.clear();
-        mExpectedPrimaryComponentNames.put(0, "package/C1:package/C2");
-        mExpectedSecondaryComponentNames.clear();
-        mExpectedSecondaryPackages.clear();
-
-        loadXml(service);
-
-        //Component package/C1 loses serviceInterface intent filter
-        ManagedServices.Config config = service.getConfig();
-        when(mPm.queryIntentServicesAsUser(any(), anyInt(), anyInt()))
-                .thenAnswer(new Answer<List<ResolveInfo>>() {
-                    @Override
-                    public List<ResolveInfo> answer(InvocationOnMock invocationOnMock)
-                            throws Throwable {
-                        Object[] args = invocationOnMock.getArguments();
-                        Intent invocationIntent = (Intent) args[0];
-                        if (invocationIntent != null) {
-                            if (invocationIntent.getAction().equals(config.serviceInterface)
-                                    && packages.contains(invocationIntent.getPackage())) {
-                                List<ResolveInfo> dummyServices = new ArrayList<>();
-                                ResolveInfo resolveInfo = new ResolveInfo();
-                                ServiceInfo serviceInfo = new ServiceInfo();
-                                serviceInfo.packageName = invocationIntent.getPackage();
-                                serviceInfo.name = approvedComponent.getClassName();
-                                serviceInfo.permission = service.getConfig().bindPermission;
-                                resolveInfo.serviceInfo = serviceInfo;
-                                dummyServices.add(resolveInfo);
-                                return dummyServices;
-                            }
-                        }
-                        return new ArrayList<>();
-                    }
-                });
-
-        // Trigger package update
-        service.onPackagesChanged(false, new String[]{"package"}, new int[]{0});
-
-        assertFalse(service.isComponentEnabledForCurrentProfiles(unapprovedComponent));
-        assertTrue(service.isComponentEnabledForCurrentProfiles(approvedComponent));
-    }
-
-    @Test
     public void testSetPackageOrComponentEnabled() throws Exception {
         for (int approvalLevel : new int[] {APPROVAL_BY_COMPONENT, APPROVAL_BY_PACKAGE}) {
             ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
@@ -1370,21 +1222,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     Lists.newArrayList(new String[]{"user10package/B", "user10/Component",
                             "user10package1/K", "user10.3/Component", "user10package2/L",
                             "user10.4/Component"}));
-
-            // mock permissions for services
-            PackageManager pm = mock(PackageManager.class);
-            when(getContext().getPackageManager()).thenReturn(pm);
-            List<ComponentName> enabledComponents = List.of(
-                    ComponentName.unflattenFromString("package/Comp"),
-                    ComponentName.unflattenFromString("package/C2"),
-                    ComponentName.unflattenFromString("again/M4"),
-                    ComponentName.unflattenFromString("user10package/B"),
-                    ComponentName.unflattenFromString("user10/Component"),
-                    ComponentName.unflattenFromString("user10package1/K"),
-                    ComponentName.unflattenFromString("user10.3/Component"),
-                    ComponentName.unflattenFromString("user10package2/L"),
-                    ComponentName.unflattenFromString("user10.4/Component"));
-            mockServiceInfoWithMetaData(enabledComponents, service, pm, new ArrayMap<>());
 
             for (int userId : expectedEnabled.keySet()) {
                 ArrayList<String> expectedForUser = expectedEnabled.get(userId);
@@ -1444,90 +1281,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
                 }
             }
         }
-    }
-
-    @Test
-    @EnableFlags(FLAG_NOTIFICATION_NLS_REBIND)
-    public void testSetPackageOrComponentEnabled_pkgInstalledAfterEnabling() throws Exception {
-        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
-                mIpm, APPROVAL_BY_COMPONENT);
-
-        final int userId = 0;
-        final String validComponent = "again/M4";
-        ArrayList<String> expectedEnabled = Lists.newArrayList("package/Comp", "package/C2",
-                validComponent);
-
-        PackageManager pm = mock(PackageManager.class);
-        when(getContext().getPackageManager()).thenReturn(pm);
-        service = spy(service);
-
-        // Component again/M4 is a valid service and the package is available
-        doReturn(true).when(service)
-                .isValidService(ComponentName.unflattenFromString(validComponent), userId);
-        when(pm.isPackageAvailable("again")).thenReturn(true);
-
-        // "package" is not available and its services are not valid
-        doReturn(false).when(service)
-                .isValidService(ComponentName.unflattenFromString("package/Comp"), userId);
-        doReturn(false).when(service)
-                .isValidService(ComponentName.unflattenFromString("package/C2"), userId);
-        when(pm.isPackageAvailable("package")).thenReturn(false);
-
-        // Enable all components
-        for (String component: expectedEnabled) {
-            service.setPackageOrComponentEnabled(component, userId, true, true);
-        }
-
-        // Verify everything added is approved
-        for (String component: expectedEnabled) {
-            assertTrue("Not allowed: user: " + userId + " entry: " + component
-                    + " for approval level " + APPROVAL_BY_COMPONENT,
-                    service.isPackageOrComponentAllowed(component, userId));
-        }
-
-        // Add missing package "package"
-        service.onPackagesChanged(false, new String[]{"package"}, new int[]{0});
-
-        // Check that component of "package" are not enabled
-        assertFalse(service.isComponentEnabledForCurrentProfiles(
-                ComponentName.unflattenFromString("package/Comp")));
-        assertFalse(service.isPackageOrComponentAllowed("package/Comp", userId));
-
-        assertFalse(service.isComponentEnabledForCurrentProfiles(
-                ComponentName.unflattenFromString("package/C2")));
-        assertFalse(service.isPackageOrComponentAllowed("package/C2", userId));
-
-        // Check that the valid components are still enabled
-        assertTrue(service.isComponentEnabledForCurrentProfiles(
-                ComponentName.unflattenFromString(validComponent)));
-        assertTrue(service.isPackageOrComponentAllowed(validComponent, userId));
-    }
-
-    @Test
-    @EnableFlags(FLAG_NOTIFICATION_NLS_REBIND)
-    public void testSetPackageOrComponentEnabled_invalidComponent() throws Exception {
-        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles,
-                mIpm, APPROVAL_BY_COMPONENT);
-
-        final int userId = 0;
-        final String invalidComponent = "package/Comp";
-
-        PackageManager pm = mock(PackageManager.class);
-        when(getContext().getPackageManager()).thenReturn(pm);
-        service = spy(service);
-
-        // Component is an invalid service and the package is available
-        doReturn(false).when(service)
-                .isValidService(ComponentName.unflattenFromString(invalidComponent), userId);
-        when(pm.isPackageAvailable("package")).thenReturn(true);
-        service.setPackageOrComponentEnabled(invalidComponent, userId, true, true);
-
-        // Verify that the component was not enabled
-        assertFalse("Not allowed: user: " + userId + " entry: " + invalidComponent
-                    + " for approval level " + APPROVAL_BY_COMPONENT,
-                service.isPackageOrComponentAllowed(invalidComponent, userId));
-        assertFalse(service.isComponentEnabledForCurrentProfiles(
-                ComponentName.unflattenFromString(invalidComponent)));
     }
 
     @Test
@@ -1731,7 +1484,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertTrue(componentsToUnbind.get(0).contains(ComponentName.unflattenFromString("c/c")));
     }
 
-    @SuppressWarnings("GuardedBy")
     @Test
     public void populateComponentsToBind() {
         ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
@@ -1755,8 +1507,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
 
         SparseArray<Set<ComponentName>> componentsToBind = new SparseArray<>();
 
-        service.populateComponentsToBind(componentsToBind, users, approvedComponentsByUser,
-                /* isVisibleBackgroundUser= */ false);
+        service.populateComponentsToBind(componentsToBind, users, approvedComponentsByUser);
 
         assertEquals(2, componentsToBind.size());
         assertEquals(1, componentsToBind.get(0).size());
@@ -1764,33 +1515,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
         assertEquals(2, componentsToBind.get(10).size());
         assertTrue(componentsToBind.get(10).contains(ComponentName.unflattenFromString("b/b")));
         assertTrue(componentsToBind.get(10).contains(ComponentName.unflattenFromString("c/c")));
-    }
-
-    @SuppressWarnings("GuardedBy")
-    @Test
-    public void populateComponentsToBind_isVisibleBackgroundUser_addComponentsToBindButNotAddToEnabledComponent() {
-        ManagedServices service = new TestManagedServices(getContext(), mLock, mUserProfiles, mIpm,
-                APPROVAL_BY_COMPONENT);
-
-        SparseArray<ArraySet<ComponentName>> approvedComponentsByUser = new SparseArray<>();
-        ArraySet<ComponentName> allowed = new ArraySet<>();
-        allowed.add(ComponentName.unflattenFromString("pkg1/cmp1"));
-        approvedComponentsByUser.put(11, allowed);
-        IntArray users = new IntArray();
-        users.add(11);
-
-        SparseArray<Set<ComponentName>> componentsToBind = new SparseArray<>();
-
-        service.populateComponentsToBind(componentsToBind, users, approvedComponentsByUser,
-                /* isVisibleBackgroundUser= */ true);
-
-        assertEquals(1, componentsToBind.size());
-        assertEquals(1, componentsToBind.get(11).size());
-        assertTrue(componentsToBind.get(11).contains(ComponentName.unflattenFromString(
-                "pkg1/cmp1")));
-        assertThat(service.isComponentEnabledForCurrentProfiles(
-                new ComponentName("pkg1", "cmp1"))).isFalse();
-        assertThat(service.isComponentEnabledForPackage("pkg1")).isFalse();
     }
 
     @Test
@@ -2191,7 +1915,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         metaDataAutobindAllow.putBoolean(META_DATA_DEFAULT_AUTOBIND, true);
         metaDatas.put(cn_allowed, metaDataAutobindAllow);
 
-        mockServiceInfoWithMetaData(componentNames, service, pm, metaDatas);
+        mockServiceInfoWithMetaData(componentNames, service, metaDatas);
 
         service.addApprovedList(cn_allowed.flattenToString(), 0, true);
         service.addApprovedList(cn_disallowed.flattenToString(), 0, true);
@@ -2236,7 +1960,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         metaDataAutobindDisallow.putBoolean(META_DATA_DEFAULT_AUTOBIND, false);
         metaDatas.put(cn_disallowed, metaDataAutobindDisallow);
 
-        mockServiceInfoWithMetaData(componentNames, service, pm, metaDatas);
+        mockServiceInfoWithMetaData(componentNames, service, metaDatas);
 
         service.addApprovedList(cn_disallowed.flattenToString(), 0, true);
 
@@ -2275,7 +1999,7 @@ public class ManagedServicesTest extends UiServiceTestCase {
         metaDataAutobindDisallow.putBoolean(META_DATA_DEFAULT_AUTOBIND, false);
         metaDatas.put(cn_disallowed, metaDataAutobindDisallow);
 
-        mockServiceInfoWithMetaData(componentNames, service, pm, metaDatas);
+        mockServiceInfoWithMetaData(componentNames, service, metaDatas);
 
         service.addApprovedList(cn_disallowed.flattenToString(), 0, true);
 
@@ -2346,8 +2070,8 @@ public class ManagedServicesTest extends UiServiceTestCase {
     }
 
     private void mockServiceInfoWithMetaData(List<ComponentName> componentNames,
-            ManagedServices service, PackageManager packageManager,
-            ArrayMap<ComponentName, Bundle> metaDatas) throws RemoteException {
+            ManagedServices service, ArrayMap<ComponentName, Bundle> metaDatas)
+            throws RemoteException {
         when(mIpm.getServiceInfo(any(), anyLong(), anyInt())).thenAnswer(
                 (Answer<ServiceInfo>) invocation -> {
                     ComponentName invocationCn = invocation.getArgument(0);
@@ -2362,39 +2086,6 @@ public class ManagedServicesTest extends UiServiceTestCase {
                     return null;
                 }
         );
-
-        // add components to queryIntentServicesAsUser response
-        final List<String> packages = new ArrayList<>();
-        for (ComponentName cn: componentNames) {
-            packages.add(cn.getPackageName());
-        }
-        ManagedServices.Config config = service.getConfig();
-        when(packageManager.queryIntentServicesAsUser(any(), anyInt(), anyInt())).
-                thenAnswer(new Answer<List<ResolveInfo>>() {
-                @Override
-                public List<ResolveInfo> answer(InvocationOnMock invocationOnMock)
-                    throws Throwable {
-                    Object[] args = invocationOnMock.getArguments();
-                    Intent invocationIntent = (Intent) args[0];
-                    if (invocationIntent != null) {
-                        if (invocationIntent.getAction().equals(config.serviceInterface)
-                            && packages.contains(invocationIntent.getPackage())) {
-                            List<ResolveInfo> dummyServices = new ArrayList<>();
-                            for (ComponentName cn: componentNames) {
-                                ResolveInfo resolveInfo = new ResolveInfo();
-                                ServiceInfo serviceInfo = new ServiceInfo();
-                                serviceInfo.packageName = invocationIntent.getPackage();
-                                serviceInfo.name = cn.getClassName();
-                                serviceInfo.permission = service.getConfig().bindPermission;
-                                resolveInfo.serviceInfo = serviceInfo;
-                                dummyServices.add(resolveInfo);
-                            }
-                            return dummyServices;
-                        }
-                    }
-                    return new ArrayList<>();
-                }
-            });
     }
 
     private void resetComponentsAndPackages() {

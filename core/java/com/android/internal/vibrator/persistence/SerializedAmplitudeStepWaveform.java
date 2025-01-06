@@ -35,6 +35,7 @@ import com.android.modules.utils.TypedXmlSerializer;
 
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.function.BiConsumer;
 
 /**
  * Serialized representation of a waveform effect created via
@@ -144,7 +145,7 @@ final class SerializedAmplitudeStepWaveform implements SerializedSegment {
             // Read all nested tag that is not a repeating tag as a waveform entry.
             while (XmlReader.readNextTagWithin(parser, outerDepth)
                     && !TAG_REPEATING.equals(parser.getName())) {
-                parseWaveformEntry(parser, waveformBuilder);
+                parseWaveformEntry(parser, waveformBuilder::addDurationAndAmplitude);
             }
 
             // If found a repeating tag, read its content.
@@ -162,29 +163,8 @@ final class SerializedAmplitudeStepWaveform implements SerializedSegment {
             return waveformBuilder.build();
         }
 
-        private static void parseRepeating(TypedXmlPullParser parser, Builder waveformBuilder)
-                throws XmlParserException, IOException {
-            XmlValidator.checkStartTag(parser, TAG_REPEATING);
-            XmlValidator.checkTagHasNoUnexpectedAttributes(parser);
-
-            waveformBuilder.setRepeatIndexToCurrentEntry();
-
-            boolean hasEntry = false;
-            int outerDepth = parser.getDepth();
-            while (XmlReader.readNextTagWithin(parser, outerDepth)) {
-                parseWaveformEntry(parser, waveformBuilder);
-                hasEntry = true;
-            }
-
-            // Check schema assertions about <repeating>
-            XmlValidator.checkParserCondition(hasEntry, "Unexpected empty %s tag", TAG_REPEATING);
-
-            // Consume tag
-            XmlReader.readEndTag(parser, TAG_REPEATING, outerDepth);
-        }
-
-        private static void parseWaveformEntry(TypedXmlPullParser parser, Builder waveformBuilder)
-                throws XmlParserException, IOException {
+        static void parseWaveformEntry(TypedXmlPullParser parser,
+                BiConsumer<Integer, Integer> builder) throws XmlParserException, IOException {
             XmlValidator.checkStartTag(parser, TAG_WAVEFORM_ENTRY);
             XmlValidator.checkTagHasNoUnexpectedAttributes(
                     parser, ATTRIBUTE_DURATION_MS, ATTRIBUTE_AMPLITUDE);
@@ -196,10 +176,31 @@ final class SerializedAmplitudeStepWaveform implements SerializedSegment {
                             parser, ATTRIBUTE_AMPLITUDE, 0, VibrationEffect.MAX_AMPLITUDE);
             int durationMs = XmlReader.readAttributeIntNonNegative(parser, ATTRIBUTE_DURATION_MS);
 
-            waveformBuilder.addDurationAndAmplitude(durationMs, amplitude);
+            builder.accept(durationMs, amplitude);
 
             // Consume tag
             XmlReader.readEndTag(parser);
+        }
+
+        private static void parseRepeating(TypedXmlPullParser parser, Builder waveformBuilder)
+                throws XmlParserException, IOException {
+            XmlValidator.checkStartTag(parser, TAG_REPEATING);
+            XmlValidator.checkTagHasNoUnexpectedAttributes(parser);
+
+            waveformBuilder.setRepeatIndexToCurrentEntry();
+
+            boolean hasEntry = false;
+            int outerDepth = parser.getDepth();
+            while (XmlReader.readNextTagWithin(parser, outerDepth)) {
+                parseWaveformEntry(parser, waveformBuilder::addDurationAndAmplitude);
+                hasEntry = true;
+            }
+
+            // Check schema assertions about <repeating>
+            XmlValidator.checkParserCondition(hasEntry, "Unexpected empty %s tag", TAG_REPEATING);
+
+            // Consume tag
+            XmlReader.readEndTag(parser, TAG_REPEATING, outerDepth);
         }
     }
 }

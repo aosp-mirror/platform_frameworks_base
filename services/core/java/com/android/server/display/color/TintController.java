@@ -19,6 +19,7 @@ package com.android.server.display.color;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.util.Slog;
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.PrintWriter;
 
@@ -29,23 +30,33 @@ abstract class TintController {
      */
     private static final long TRANSITION_DURATION = 3000L;
 
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private ValueAnimator mAnimator;
+    @GuardedBy("mLock")
     private Boolean mIsActivated;
 
     public ValueAnimator getAnimator() {
-        return mAnimator;
+        synchronized (mLock) {
+            return mAnimator;
+        }
     }
 
     public void setAnimator(ValueAnimator animator) {
-        mAnimator = animator;
+        synchronized (mLock) {
+            mAnimator = animator;
+        }
     }
 
     /**
      * Cancel the animator if it's still running.
      */
     public void cancelAnimator() {
-        if (mAnimator != null) {
-            mAnimator.cancel();
+        synchronized (mLock) {
+            if (mAnimator != null) {
+                mAnimator.cancel();
+            }
         }
     }
 
@@ -53,22 +64,30 @@ abstract class TintController {
      * End the animator if it's still running, jumping to the end state.
      */
     public void endAnimator() {
-        if (mAnimator != null) {
-            mAnimator.end();
-            mAnimator = null;
+        synchronized (mLock) {
+            if (mAnimator != null) {
+                mAnimator.end();
+                mAnimator = null;
+            }
         }
     }
 
     public void setActivated(Boolean isActivated) {
-        mIsActivated = isActivated;
+        synchronized (mLock) {
+            mIsActivated = isActivated;
+        }
     }
 
     public boolean isActivated() {
-        return mIsActivated != null && mIsActivated;
+        synchronized (mLock) {
+            return mIsActivated != null && mIsActivated;
+        }
     }
 
     public boolean isActivatedStateNotSet() {
-        return mIsActivated == null;
+        synchronized (mLock) {
+            return mIsActivated == null;
+        }
     }
 
     public long getTransitionDurationMilliseconds() {

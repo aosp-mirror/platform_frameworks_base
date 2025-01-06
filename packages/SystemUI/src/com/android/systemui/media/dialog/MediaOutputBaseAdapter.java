@@ -20,7 +20,6 @@ import static com.android.systemui.media.dialog.MediaOutputSeekbar.VOLUME_PERCEN
 
 import android.animation.Animator;
 import android.animation.ValueAnimator;
-import android.annotation.DrawableRes;
 import android.app.WallpaperColors;
 import android.content.Context;
 import android.content.res.ColorStateList;
@@ -59,10 +58,6 @@ import java.util.List;
  */
 public abstract class MediaOutputBaseAdapter extends
         RecyclerView.Adapter<RecyclerView.ViewHolder> {
-
-    static final int CUSTOMIZED_ITEM_PAIR_NEW = 1;
-    static final int CUSTOMIZED_ITEM_GROUP = 2;
-    static final int CUSTOMIZED_ITEM_DYNAMIC_GROUP = 3;
 
     protected final MediaSwitchingController mController;
 
@@ -196,8 +191,6 @@ public abstract class MediaOutputBaseAdapter extends
             mSeekBar.setProgressTintList(
                     ColorStateList.valueOf(mController.getColorSeekbarProgress()));
         }
-
-        abstract void onBind(int customizedItem);
 
         void setSingleLineLayout(CharSequence title) {
             setSingleLineLayout(title, false, false, false, false);
@@ -366,7 +359,6 @@ public abstract class MediaOutputBaseAdapter extends
                                     / (double) seekBar.getMax());
                     mVolumeValueText.setText(mContext.getResources().getString(
                             R.string.media_output_dialog_volume_percentage, percentage));
-                    mVolumeValueText.setVisibility(View.VISIBLE);
                     if (mStartFromMute) {
                         updateUnmutedVolumeIcon(device);
                         mStartFromMute = false;
@@ -455,32 +447,6 @@ public abstract class MediaOutputBaseAdapter extends
                     ColorStateList.valueOf(mController.getColorConnectedItemBackground()));
             mIconAreaLayout.setBackgroundTintList(
                     ColorStateList.valueOf(mController.getColorConnectedItemBackground()));
-        }
-
-        private void animateCornerAndVolume(int fromProgress, int toProgress) {
-            final GradientDrawable layoutBackgroundDrawable =
-                    (GradientDrawable) mItemLayout.getBackground();
-            final ClipDrawable clipDrawable =
-                    (ClipDrawable) ((LayerDrawable) mSeekBar.getProgressDrawable())
-                            .findDrawableByLayerId(android.R.id.progress);
-            final GradientDrawable targetBackgroundDrawable =
-                    (GradientDrawable) (mIconAreaLayout.getBackground());
-            mCornerAnimator.addUpdateListener(animation -> {
-                float value = (float) animation.getAnimatedValue();
-                layoutBackgroundDrawable.setCornerRadius(value);
-                if (toProgress == 0) {
-                    targetBackgroundDrawable.setCornerRadius(value);
-                } else {
-                    targetBackgroundDrawable.setCornerRadii(new float[]{
-                            value,
-                            value,
-                            0, 0, 0, 0, value, value
-                    });
-                }
-            });
-            mVolumeAnimator.setIntValues(fromProgress, toProgress);
-            mVolumeAnimator.start();
-            mCornerAnimator.start();
         }
 
         private void initAnimator() {

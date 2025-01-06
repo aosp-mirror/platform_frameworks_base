@@ -24,9 +24,9 @@ import android.os.UserHandle
 import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.internal.logging.UiEventLogger
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.screenshot.ui.viewmodel.PreviewAction
+import com.android.systemui.shared.Flags
 import com.google.common.truth.Truth.assertThat
 import java.util.UUID
 import kotlin.test.Test

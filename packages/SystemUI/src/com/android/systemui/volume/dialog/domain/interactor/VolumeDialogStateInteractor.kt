@@ -23,6 +23,7 @@ import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPlugin
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.data.repository.VolumeDialogStateRepository
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
+import com.android.systemui.volume.dialog.shared.model.VolumeDialogSafetyWarningModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStateModel
 import com.android.systemui.volume.dialog.shared.model.VolumeDialogStreamModel
 import javax.inject.Inject
@@ -61,6 +62,9 @@ constructor(
                             oldState.copy(shouldShowA11ySlider = event.showA11yStream)
                         }
                     }
+                    is VolumeDialogEventModel.ShowSafetyWarning -> {
+                        setSafetyWarning(VolumeDialogSafetyWarningModel.Visible(event.flags))
+                    }
                     else -> {
                         // do nothing
                     }
@@ -71,6 +75,10 @@ constructor(
     }
 
     val volumeDialogState: Flow<VolumeDialogStateModel> = volumeDialogStateRepository.state
+
+    fun setSafetyWarning(model: VolumeDialogSafetyWarningModel) {
+        volumeDialogStateRepository.updateState { it.copy(isShowingSafetyWarning = model) }
+    }
 
     /** Returns a copy of [model] filled with the values from [VolumeDialogController.State]. */
     private fun VolumeDialogController.State.copyIntoModel(

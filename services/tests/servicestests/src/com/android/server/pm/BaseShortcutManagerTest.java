@@ -52,6 +52,7 @@ import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -272,6 +273,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         @Override
         public String getPackageName() {
             return SYSTEM_PACKAGE_NAME;
+        }
+
+        @Override
+        public ContentResolver getContentResolver() {
+            return mContentResolver;
         }
     }
 
@@ -665,6 +671,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
     protected ServiceContext mServiceContext;
     protected ClientContext mClientContext;
+    protected ContentResolver mContentResolver;
 
     protected ShortcutServiceTestable mService;
     protected ShortcutManagerTestable mManager;
@@ -714,53 +721,55 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     protected static final String SYSTEM_PACKAGE_NAME = "android";
 
     protected static final String CALLING_PACKAGE_1 = "com.android.test.1";
-    protected static final int CALLING_UID_1 = 10001;
+    protected static final int CALLING_UID_1 = 1000001;
 
     protected static final String CALLING_PACKAGE_2 = "com.android.test.2";
-    protected static final int CALLING_UID_2 = 10002;
+    protected static final int CALLING_UID_2 = 1000002;
 
     protected static final String CALLING_PACKAGE_3 = "com.android.test.3";
-    protected static final int CALLING_UID_3 = 10003;
+    protected static final int CALLING_UID_3 = 1000003;
 
     protected static final String CALLING_PACKAGE_4 = "com.android.test.4";
-    protected static final int CALLING_UID_4 = 10004;
+    protected static final int CALLING_UID_4 = 1000004;
 
     protected static final String LAUNCHER_1 = "com.android.launcher.1";
-    protected static final int LAUNCHER_UID_1 = 10011;
+    protected static final int LAUNCHER_UID_1 = 1000011;
 
     protected static final String LAUNCHER_2 = "com.android.launcher.2";
-    protected static final int LAUNCHER_UID_2 = 10012;
+    protected static final int LAUNCHER_UID_2 = 1000012;
 
     protected static final String LAUNCHER_3 = "com.android.launcher.3";
-    protected static final int LAUNCHER_UID_3 = 10013;
+    protected static final int LAUNCHER_UID_3 = 1000013;
 
     protected static final String LAUNCHER_4 = "com.android.launcher.4";
-    protected static final int LAUNCHER_UID_4 = 10014;
+    protected static final int LAUNCHER_UID_4 = 1000014;
 
     protected static final String CHOOSER_ACTIVITY_PACKAGE = "com.android.intentresolver";
-    protected static final int CHOOSER_ACTIVITY_UID = 10015;
+    protected static final int CHOOSER_ACTIVITY_UID = 1000015;
 
-    protected static final int USER_0 = UserHandle.USER_SYSTEM;
+    // Shifting primary user to 10 to support HSUM
     protected static final int USER_10 = 10;
     protected static final int USER_11 = 11;
+    protected static final int USER_12 = 12;
     protected static final int USER_P0 = 20; // profile of user 0 (MANAGED_PROFILE *not* set)
     protected static final int USER_P1 = 21; // another profile of user 0 (MANAGED_PROFILE set)
 
-    protected static final UserHandle HANDLE_USER_0 = UserHandle.of(USER_0);
     protected static final UserHandle HANDLE_USER_10 = UserHandle.of(USER_10);
     protected static final UserHandle HANDLE_USER_11 = UserHandle.of(USER_11);
+    protected static final UserHandle HANDLE_USER_12 = UserHandle.of(USER_12);
     protected static final UserHandle HANDLE_USER_P0 = UserHandle.of(USER_P0);
     protected static final UserHandle HANDLE_USER_P1 = UserHandle.of(USER_P1);
 
-    protected static final UserInfo USER_INFO_0 = withProfileGroupId(
-            new UserInfo(USER_0, "user0",
-                    UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED), 0);
-
-    protected static final UserInfo USER_INFO_10 =
-            new UserInfo(USER_10, "user10", UserInfo.FLAG_INITIALIZED);
+    protected static final UserInfo USER_INFO_10 = withProfileGroupId(
+            new UserInfo(USER_10, "user10",
+                    UserInfo.FLAG_ADMIN | UserInfo.FLAG_PRIMARY | UserInfo.FLAG_INITIALIZED),
+            USER_10);
 
     protected static final UserInfo USER_INFO_11 =
             new UserInfo(USER_11, "user11", UserInfo.FLAG_INITIALIZED);
+
+    protected static final UserInfo USER_INFO_12 =
+            new UserInfo(USER_12, "user12", UserInfo.FLAG_INITIALIZED);
 
     /*
      * Cheat: USER_P0 is a sub profile of USER_0, but it doesn't have the MANAGED_PROFILE flag set.
@@ -771,11 +780,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
      * can't access main profile's shortcuts.)
      */
     protected static final UserInfo USER_INFO_P0 = withProfileGroupId(
-            new UserInfo(USER_P0, "userP0", UserInfo.FLAG_INITIALIZED), 0);
+            new UserInfo(USER_P0, "userP0", UserInfo.FLAG_INITIALIZED), USER_10);
 
     protected static final UserInfo USER_INFO_P1 = withProfileGroupId(
             new UserInfo(USER_P1, "userP1",
-                    UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_MANAGED_PROFILE), 0);
+                    UserInfo.FLAG_INITIALIZED | UserInfo.FLAG_MANAGED_PROFILE), USER_10);
 
     protected static final UserProperties USER_PROPERTIES_0 =
             new UserProperties.Builder().setItemsRestrictedOnHomeScreen(false).build();
@@ -861,6 +870,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         mServiceContext = spy(new ServiceContext());
         mClientContext = new ClientContext();
+        mContentResolver = mock(ContentResolver.class);
 
         mMockPackageManager = mock(PackageManager.class);
         mMockPackageManagerInternal = mock(PackageManagerInternal.class);
@@ -917,14 +927,14 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         deleteAllSavedFiles();
 
         // Set up users.
-        mUserInfos.put(USER_0, USER_INFO_0);
         mUserInfos.put(USER_10, USER_INFO_10);
         mUserInfos.put(USER_11, USER_INFO_11);
+        mUserInfos.put(USER_12, USER_INFO_12);
         mUserInfos.put(USER_P0, USER_INFO_P0);
         mUserInfos.put(USER_P1, USER_INFO_P1);
-        mUserProperties.put(USER_0, USER_PROPERTIES_0);
-        mUserProperties.put(USER_10, USER_PROPERTIES_10);
-        mUserProperties.put(USER_11, USER_PROPERTIES_11);
+        mUserProperties.put(USER_10, USER_PROPERTIES_0);
+        mUserProperties.put(USER_11, USER_PROPERTIES_10);
+        mUserProperties.put(USER_12, USER_PROPERTIES_11);
 
         when(mMockUserManagerInternal.isUserUnlockingOrUnlocked(anyInt()))
                 .thenAnswer(inv -> {
@@ -982,18 +992,20 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     }
                     return userProperties;
                 });
+        when(mMockUserManagerInternal.getUserInfos()).thenReturn(
+                mUserInfos.values().toArray(new UserInfo[0]));
 
         // User 0 and P0 are always running
-        mRunningUsers.put(USER_0, true);
-        mRunningUsers.put(USER_10, false);
+        mRunningUsers.put(USER_10, true);
         mRunningUsers.put(USER_11, false);
+        mRunningUsers.put(USER_12, false);
         mRunningUsers.put(USER_P0, true);
         mRunningUsers.put(USER_P1, true);
 
         // Unlock all users by default.
-        mUnlockedUsers.put(USER_0, true);
         mUnlockedUsers.put(USER_10, true);
         mUnlockedUsers.put(USER_11, true);
+        mUnlockedUsers.put(USER_12, true);
         mUnlockedUsers.put(USER_P0, true);
         mUnlockedUsers.put(USER_P1, true);
 
@@ -1381,7 +1393,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     protected void setCaller(String packageName) {
-        setCaller(packageName, UserHandle.USER_SYSTEM);
+        setCaller(packageName, USER_10);
     }
 
     protected String getCallingPackage() {
@@ -2033,18 +2045,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         return p == null ? null : p.getAllShareTargetsForTest();
     }
 
-    protected void resetPersistedShortcuts() {
-        final ShortcutPackage p = mService.getPackageShortcutForTest(
-                getCallingPackage(), getCallingUserId());
-        p.removeAllShortcutsAsync();
-    }
-
-    protected void getPersistedShortcut(AndroidFuture<List<ShortcutInfo>> cb) {
-        final ShortcutPackage p = mService.getPackageShortcutForTest(
-                getCallingPackage(), getCallingUserId());
-        p.getTopShortcutsFromPersistence(cb);
-    }
-
     /**
      * @return the number of shortcuts stored internally for the caller that can be used as a share
      * target in the ShareSheet. Such shortcuts have a matching category with at least one of the
@@ -2213,7 +2213,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
 
         dumpsysOnLogcat("Before backup");
 
-        final byte[] payload =  mService.getBackupPayload(USER_0);
+        final byte[] payload =  mService.getBackupPayload(USER_10);
         if (ENABLE_DUMP) {
             final String xml = new String(payload);
             Log.v(TAG, "Backup payload:");
@@ -2223,7 +2223,7 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         }
 
         // Before doing anything else, uninstall all packages.
-        for (int userId : list(USER_0, USER_P0)) {
+        for (int userId : list(USER_10, USER_P0)) {
             for (String pkg : list(CALLING_PACKAGE_1, CALLING_PACKAGE_2, CALLING_PACKAGE_3,
                     LAUNCHER_1, LAUNCHER_2, LAUNCHER_3)) {
                 uninstallPackage(userId, pkg);
@@ -2235,11 +2235,11 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
         deleteAllSavedFiles();
 
         initService();
-        mService.applyRestore(payload, USER_0);
+        mService.applyRestore(payload, USER_10);
 
         // handleUnlockUser will perform the gone package check, but it shouldn't remove
         // shadow information.
-        mService.handleUnlockUser(USER_0);
+        mService.handleUnlockUser(USER_10);
 
         dumpsysOnLogcat("After restore");
 
@@ -2247,24 +2247,24 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
     }
 
     protected void prepareCrossProfileDataSet() {
-        mRunningUsers.put(USER_10, true); // this test needs user 10.
+        mRunningUsers.put(USER_11, true); // this test needs user 10.
 
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
                     makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
                     makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
                     makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list()));
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
@@ -2272,79 +2272,79 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"),
                     makeShortcut("s4"), makeShortcut("s5"), makeShortcut("s6"))));
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("x1"), makeShortcut("x2"), makeShortcut("x3"),
                     makeShortcut("x4"), makeShortcut("x5"), makeShortcut("x6"))));
         });
 
-        runWithCaller(LAUNCHER_1, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s1", "s2"), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s1", "s2", "s3"), HANDLE_USER_0);
+        runWithCaller(LAUNCHER_1, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s1", "s2"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s1", "s2", "s3"), HANDLE_USER_10);
 
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s1", "s4"), HANDLE_USER_P0);
         });
-        runWithCaller(LAUNCHER_2, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s2"), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s2", "s3"), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s2", "s3", "s4"), HANDLE_USER_0);
+        runWithCaller(LAUNCHER_2, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s2"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s2", "s3"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s2", "s3", "s4"), HANDLE_USER_10);
 
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s2", "s5"), HANDLE_USER_P0);
         });
 
         // Note LAUNCHER_3 has allowBackup=false.
-        runWithCaller(LAUNCHER_3, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3"), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s3", "s4"), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s3", "s4", "s5"), HANDLE_USER_0);
+        runWithCaller(LAUNCHER_3, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s3", "s4"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s3", "s4", "s5"), HANDLE_USER_10);
 
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3", "s6"), HANDLE_USER_P0);
         });
-        runWithCaller(LAUNCHER_4, USER_0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list(), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list(), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list(), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_4, list(), HANDLE_USER_0);
+        runWithCaller(LAUNCHER_4, USER_10, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list(), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list(), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list(), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_4, list(), HANDLE_USER_10);
         });
 
         // Launcher on a managed profile is referring ot user 0!
         runWithCaller(LAUNCHER_1, USER_P0, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3", "s4"), HANDLE_USER_0);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s3", "s4", "s5"), HANDLE_USER_0);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s3", "s4"), HANDLE_USER_10);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("s3", "s4", "s5"), HANDLE_USER_10);
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("s3", "s4", "s5", "s6"),
-                    HANDLE_USER_0);
+                    HANDLE_USER_10);
 
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("s4", "s1"), HANDLE_USER_P0);
         });
-        runWithCaller(LAUNCHER_1, USER_10, () -> {
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("x4", "x5"), HANDLE_USER_10);
-            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("x4", "x5", "x6"), HANDLE_USER_10);
+        runWithCaller(LAUNCHER_1, USER_11, () -> {
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_1, list("x4", "x5"), HANDLE_USER_11);
+            mLauncherApps.pinShortcuts(CALLING_PACKAGE_2, list("x4", "x5", "x6"), HANDLE_USER_11);
             mLauncherApps.pinShortcuts(CALLING_PACKAGE_3, list("x4", "x5", "x6", "x1"),
-                    HANDLE_USER_10);
+                    HANDLE_USER_11);
         });
 
         // Then remove some dynamic shortcuts.
-        runWithCaller(CALLING_PACKAGE_1, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
         });
-        runWithCaller(CALLING_PACKAGE_2, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_2, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
         });
-        runWithCaller(CALLING_PACKAGE_3, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_3, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
         });
-        runWithCaller(CALLING_PACKAGE_4, USER_0, () -> {
+        runWithCaller(CALLING_PACKAGE_4, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list()));
         });
         runWithCaller(CALLING_PACKAGE_1, USER_P0, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"), makeShortcut("s2"), makeShortcut("s3"))));
         });
-        runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
+        runWithCaller(CALLING_PACKAGE_1, USER_11, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("x1"), makeShortcut("x2"), makeShortcut("x3"))));
         });

@@ -191,4 +191,9 @@
     <item msgid="3079622119444911877">"অফ আছে"</item>
     <item msgid="3028994095749238254">"অন আছে"</item>
   </string-array>
+  <string-array name="tile_states_notes">
+    <item msgid="5894333929299989301">"উপলব্ধ নহয়"</item>
+    <item msgid="6419996398343291862">"অফ আছে"</item>
+    <item msgid="5908720590832378783">"অন আছে"</item>
+  </string-array>
 </resources>

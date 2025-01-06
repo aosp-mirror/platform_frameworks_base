@@ -16,6 +16,10 @@
 
 package com.android.server.accounts;
 
+import static android.Manifest.permission.COPY_ACCOUNTS;
+import static android.Manifest.permission.REMOVE_ACCOUNTS;
+import static android.app.admin.flags.Flags.splitCreateManagedProfileEnabled;
+
 import android.Manifest;
 import android.accounts.AbstractAccountAuthenticator;
 import android.accounts.Account;
@@ -1739,9 +1743,11 @@ public class AccountManagerService
     public void copyAccountToUser(final IAccountManagerResponse response, final Account account,
             final int userFrom, int userTo) {
         int callingUid = Binder.getCallingUid();
-        if (isCrossUser(callingUid, UserHandle.USER_ALL)) {
+        if (isCrossUser(callingUid, UserHandle.USER_ALL)
+                && !hasCopyAccountsPermission()) {
             throw new SecurityException("Calling copyAccountToUser requires "
-                    + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL);
+                    + android.Manifest.permission.INTERACT_ACROSS_USERS_FULL
+                    + " or " + COPY_ACCOUNTS);
         }
         final UserAccounts fromAccounts = getUserAccounts(userFrom);
         final UserAccounts toAccounts = getUserAccounts(userTo);
@@ -1791,6 +1797,12 @@ public class AccountManagerService
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private boolean hasCopyAccountsPermission() {
+        return splitCreateManagedProfileEnabled()
+                && mContext.checkCallingOrSelfPermission(COPY_ACCOUNTS)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -2346,7 +2358,8 @@ public class AccountManagerService
         UserHandle user = UserHandle.of(userId);
         if (!isAccountManagedByCaller(account.type, callingUid, user.getIdentifier())
                 && !isSystemUid(callingUid)
-                && !isProfileOwner(callingUid)) {
+                && !isProfileOwner(callingUid)
+                && !hasRemoveAccountsPermission()) {
             String msg = String.format(
                     "uid %s cannot remove accounts of type: %s",
                     callingUid,
@@ -2406,6 +2419,12 @@ public class AccountManagerService
         } finally {
             restoreCallingIdentity(identityToken);
         }
+    }
+
+    private boolean hasRemoveAccountsPermission() {
+        return splitCreateManagedProfileEnabled()
+                && mContext.checkCallingOrSelfPermission(REMOVE_ACCOUNTS)
+                == PackageManager.PERMISSION_GRANTED;
     }
 
     @Override
@@ -2827,6 +2846,14 @@ public class AccountManagerService
                                 : AccountsDb.DEBUG_ACTION_SET_PASSWORD;
                         logRecord(action, AccountsDb.TABLE_ACCOUNTS, accountId, accounts,
                                 callingUid);
+
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                                account.type,
+                                callingUid,
+                                TextUtils.isEmpty(password)
+                                ? FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__PASSWORD_REMOVED
+                                : FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__PASSWORD_CHANGED);
                     }
                 } finally {
                     accounts.accountsDb.endTransaction();
@@ -2893,7 +2920,7 @@ public class AccountManagerService
             if (!accountExistsCache(accounts, account)) {
                 return;
             }
-            setUserdataInternal(accounts, account, key, value);
+            setUserdataInternal(accounts, account, key, value, callingUid);
         } finally {
             restoreCallingIdentity(identityToken);
         }
@@ -2913,7 +2940,7 @@ public class AccountManagerService
     }
 
     private void setUserdataInternal(UserAccounts accounts, Account account, String key,
-            String value) {
+            String value, int callingUid) {
         synchronized (accounts.dbLock) {
             accounts.accountsDb.beginTransaction();
             try {
@@ -2939,6 +2966,11 @@ public class AccountManagerService
                 AccountManager.invalidateLocalAccountUserDataCaches();
             }
         }
+        FrameworkStatsLog.write(
+                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT,
+                account.type,
+                callingUid,
+                FrameworkStatsLog.ACCOUNT_MANAGER_EVENT__EVENT_TYPE__USER_DATA_CHANGED);
     }
 
     private void onResult(IAccountManagerResponse response, Bundle result) {
@@ -3195,6 +3227,12 @@ public class AccountManagerService
                                         "the type and name should not be empty");
                                 return;
                             }
+                            if (!type.equals(mAccountType)) {
+                                onError(AccountManager.ERROR_CODE_INVALID_RESPONSE,
+                                        "incorrect account type");
+                                return;
+                            }
+
                             Account resultAccount = new Account(name, type);
                             if (!customTokens) {
                                 saveAuthTokenToDatabase(
@@ -5228,6 +5266,22 @@ public class AccountManagerService
                 } catch (RemoteException e) {
                     if (Log.isLoggable(TAG, Log.VERBOSE)) {
                         Log.v(TAG, "Session.onServiceDisconnected: "
+                                + "caught RemoteException while responding", e);
+                    }
+                }
+            }
+        }
+
+        @Override
+        public void onNullBinding(ComponentName name) {
+            IAccountManagerResponse response = getResponseAndClose();
+            if (response != null) {
+                try {
+                    response.onError(AccountManager.ERROR_CODE_REMOTE_EXCEPTION,
+                            "disconnected");
+                } catch (RemoteException e) {
+                    if (Log.isLoggable(TAG, Log.VERBOSE)) {
+                        Log.v(TAG, "Session.onNullBinding: "
                                 + "caught RemoteException while responding", e);
                     }
                 }

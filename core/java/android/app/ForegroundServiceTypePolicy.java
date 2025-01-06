@@ -62,6 +62,7 @@ import android.content.pm.ServiceInfo.ForegroundServiceType;
 import android.hardware.usb.UsbAccessory;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbManager;
+import android.health.connect.HealthPermissions;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
@@ -398,6 +399,7 @@ public abstract class ForegroundServiceTypePolicy {
                 new RegularPermission(Manifest.permission.NFC),
                 new RegularPermission(Manifest.permission.TRANSMIT_IR),
                 new RegularPermission(Manifest.permission.UWB_RANGING),
+                new RegularPermission(Manifest.permission.RANGING),
                 new UsbDevicePermission(),
                 new UsbAccessoryPermission(),
             }, false),
@@ -483,21 +485,35 @@ public abstract class ForegroundServiceTypePolicy {
      */
     public static final @NonNull ForegroundServiceTypePolicyInfo FGS_TYPE_POLICY_HEALTH =
             new ForegroundServiceTypePolicyInfo(
-            FOREGROUND_SERVICE_TYPE_HEALTH,
-            ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
-            ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
-            new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
-                new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_HEALTH)
-            }, true),
-            new ForegroundServiceTypePermissions(new ForegroundServiceTypePermission[] {
-                new RegularPermission(Manifest.permission.ACTIVITY_RECOGNITION),
-                new RegularPermission(Manifest.permission.BODY_SENSORS),
-                new RegularPermission(Manifest.permission.HIGH_SAMPLING_RATE_SENSORS),
-            }, false),
-            FGS_TYPE_PERM_ENFORCEMENT_FLAG_HEALTH /* permissionEnforcementFlag */,
-            true /* permissionEnforcementFlagDefaultValue */,
-            false /* foregroundOnlyPermission */
-    );
+                    FOREGROUND_SERVICE_TYPE_HEALTH,
+                    ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
+                    ForegroundServiceTypePolicyInfo.INVALID_CHANGE_ID,
+                    new ForegroundServiceTypePermissions(
+                            new ForegroundServiceTypePermission[] {
+                                new RegularPermission(Manifest.permission.FOREGROUND_SERVICE_HEALTH)
+                            },
+                            true),
+                    new ForegroundServiceTypePermissions(getAllowedHealthPermissions(), false),
+                    FGS_TYPE_PERM_ENFORCEMENT_FLAG_HEALTH /* permissionEnforcementFlag */,
+                    true /* permissionEnforcementFlagDefaultValue */,
+                    false /* foregroundOnlyPermission */);
+
+    /** Returns the permissions needed for the policy of the health foreground service type. */
+    private static ForegroundServiceTypePermission[] getAllowedHealthPermissions() {
+        final ArrayList<ForegroundServiceTypePermission> permissions = new ArrayList<>();
+        permissions.add(new RegularPermission(Manifest.permission.ACTIVITY_RECOGNITION));
+        permissions.add(new RegularPermission(Manifest.permission.HIGH_SAMPLING_RATE_SENSORS));
+
+        if (android.permission.flags.Flags.replaceBodySensorPermissionEnabled()) {
+            permissions.add(new RegularPermission(HealthPermissions.READ_HEART_RATE));
+            permissions.add(new RegularPermission(HealthPermissions.READ_SKIN_TEMPERATURE));
+            permissions.add(new RegularPermission(HealthPermissions.READ_OXYGEN_SATURATION));
+        } else {
+            permissions.add(new RegularPermission(Manifest.permission.BODY_SENSORS));
+        }
+
+        return permissions.toArray(new ForegroundServiceTypePermission[permissions.size()]);
+    }
 
     /**
      * The policy for the {@link ServiceInfo#FOREGROUND_SERVICE_TYPE_REMOTE_MESSAGING}.

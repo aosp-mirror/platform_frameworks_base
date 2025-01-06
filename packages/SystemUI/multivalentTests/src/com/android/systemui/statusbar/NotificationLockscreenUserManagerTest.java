@@ -31,6 +31,10 @@ import static android.os.UserHandle.USER_ALL;
 import static android.provider.Settings.Secure.LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS;
 import static android.provider.Settings.Secure.LOCK_SCREEN_SHOW_NOTIFICATIONS;
 
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_NONE;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_PUBLIC;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager.REDACTION_TYPE_SENSITIVE_CONTENT;
+
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
@@ -280,8 +284,10 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         mBackgroundExecutor.runAllReady();
 
-        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
-        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mSecondaryUserNotif));
     }
 
     @Test
@@ -357,7 +363,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
 
         // THEN current user's notification is redacted
-        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
     }
 
     @Test
@@ -368,7 +375,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
 
         // THEN current user's notification isn't redacted
-        assertFalse(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_NONE,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
     }
 
     @Test
@@ -385,7 +393,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 .setChannel(channel)
                 .setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build());
         // THEN the notification is redacted
-        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
     }
 
     @Test
@@ -399,7 +408,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 .setChannel(null)
                 .setVisibilityOverride(VISIBILITY_NO_OVERRIDE).build());
         // THEN the notification is not redacted
-        assertFalse(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_NONE,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
     }
 
     @Test
@@ -410,7 +420,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
 
         // THEN work profile notification is redacted
-        assertTrue(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mWorkProfileNotif));
         assertFalse(mLockscreenUserManager.allowsManagedPrivateNotificationsInPublic());
     }
 
@@ -422,7 +433,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
 
         // THEN work profile notification isn't redacted
-        assertFalse(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+        assertEquals(REDACTION_TYPE_NONE,
+                mLockscreenUserManager.getRedactionType(mWorkProfileNotif));
         assertTrue(mLockscreenUserManager.allowsManagedPrivateNotificationsInPublic());
     }
 
@@ -440,11 +452,14 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
 
         // THEN the work profile notification doesn't need to be redacted
-        assertFalse(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+        assertEquals(REDACTION_TYPE_NONE,
+                mLockscreenUserManager.getRedactionType(mWorkProfileNotif));
 
         // THEN the current user and secondary user notifications do need to be redacted
-        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
-        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mSecondaryUserNotif));
     }
 
     @Test
@@ -461,11 +476,14 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
 
         // THEN the work profile notification needs to be redacted
-        assertTrue(mLockscreenUserManager.needsRedaction(mWorkProfileNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mWorkProfileNotif));
 
         // THEN the current user and secondary user notifications don't need to be redacted
-        assertFalse(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
-        assertFalse(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+        assertEquals(REDACTION_TYPE_NONE,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_NONE,
+                mLockscreenUserManager.getRedactionType(mSecondaryUserNotif));
     }
 
     @Test
@@ -481,18 +499,20 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         // THEN the secondary profile notification still needs to be redacted because the current
         // user's setting takes precedence
-        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mSecondaryUserNotif));
     }
 
     @Test
     public void testHasSensitiveContent_redacted() {
         // Allow private notifications for this user
-        mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 0,
+        mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
                 mCurrentUser.id);
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
 
         // Sensitive Content notifications are always redacted
-        assertTrue(mLockscreenUserManager.needsRedaction(mSensitiveContentNotif));
+        assertEquals(REDACTION_TYPE_SENSITIVE_CONTENT,
+                mLockscreenUserManager.getRedactionType(mSensitiveContentNotif));
     }
 
     @Test
@@ -707,9 +727,11 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 new Intent(ACTION_KEYGUARD_PRIVATE_NOTIFICATIONS_CHANGED)
                         .putExtra(EXTRA_KM_PRIVATE_NOTIFS_ALLOWED, true));
 
-        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
         // it's a global field, confirm secondary too
-        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mSecondaryUserNotif));
         assertFalse(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(mCurrentUser.id));
         assertFalse(mLockscreenUserManager.userAllowsPrivateNotificationsInPublic(
                 mSecondaryUser.id));
@@ -732,7 +754,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
                 new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
 
-        assertTrue(mLockscreenUserManager.needsRedaction(mCurrentUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mCurrentUserNotif));
 
         verify(mDevicePolicyManager, atMost(1)).getKeyguardDisabledFeatures(any(), anyInt());
     }
@@ -763,7 +786,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.mAllUsersReceiver.onReceive(mContext,
                 new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
 
-        assertTrue(mLockscreenUserManager.needsRedaction(notifEntry));
+        assertEquals(REDACTION_TYPE_PUBLIC, mLockscreenUserManager.getRedactionType(notifEntry));
     }
 
     @Test
@@ -784,7 +807,8 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
                 new Intent(ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED));
 
         mLockscreenUserManager.mUserChangedCallback.onUserChanging(mSecondaryUser.id, mContext);
-        assertTrue(mLockscreenUserManager.needsRedaction(mSecondaryUserNotif));
+        assertEquals(REDACTION_TYPE_PUBLIC,
+                mLockscreenUserManager.getRedactionType(mSecondaryUserNotif));
 
         verify(mDevicePolicyManager, atMost(1)).getKeyguardDisabledFeatures(any(), anyInt());
     }

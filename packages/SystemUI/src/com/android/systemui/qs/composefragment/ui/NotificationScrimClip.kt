@@ -17,14 +17,16 @@
 package com.android.systemui.qs.composefragment.ui
 
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.ClipOp
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.asAndroidPath
-import androidx.compose.ui.graphics.drawscope.ContentDrawScope
-import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.node.DrawModifierNode
-import androidx.compose.ui.node.ModifierNodeElement
-import androidx.compose.ui.platform.InspectorInfo
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.drawscope.clipRect
+import androidx.compose.ui.graphics.graphicsLayer
 
 /**
  * Clipping modifier for clipping out the notification scrim as it slides over QS. It will clip out
@@ -32,65 +34,27 @@ import androidx.compose.ui.platform.InspectorInfo
  * from the QS container.
  */
 fun Modifier.notificationScrimClip(clipParams: () -> NotificationScrimClipParams): Modifier {
-    return this then NotificationScrimClipElement(clipParams)
-}
-
-private class NotificationScrimClipNode(var clipParams: () -> NotificationScrimClipParams) :
-    DrawModifierNode, Modifier.Node() {
-    private val path = Path()
-
-    private var lastClipParams = NotificationScrimClipParams()
-
-    override fun ContentDrawScope.draw() {
-        val newClipParams = clipParams()
-        if (newClipParams != lastClipParams) {
-            lastClipParams = newClipParams
-            applyClipParams(path, lastClipParams)
+    return this.graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+        .drawWithContent {
+            drawContent()
+            val params = clipParams()
+            val left = -params.leftInset.toFloat()
+            val right = size.width + params.rightInset.toFloat()
+            val top = params.top.toFloat()
+            val bottom = params.bottom.toFloat()
+            val clipSize = Size(right - left, bottom - top)
+            if (!clipSize.isEmpty()) {
+                clipRect {
+                    drawRoundRect(
+                        color = Color.Black,
+                        cornerRadius = CornerRadius(params.radius.toFloat()),
+                        blendMode = BlendMode.Clear,
+                        topLeft = Offset(left, top),
+                        size = Size(right - left, bottom - top),
+                    )
+                }
+            }
         }
-        clipPath(path, ClipOp.Difference) { this@draw.drawContent() }
-    }
-
-    private fun ContentDrawScope.applyClipParams(
-        path: Path,
-        clipParams: NotificationScrimClipParams,
-    ) {
-        with(clipParams) {
-            path.rewind()
-            path
-                .asAndroidPath()
-                .addRoundRect(
-                    -leftInset.toFloat(),
-                    top.toFloat(),
-                    size.width + rightInset,
-                    bottom.toFloat(),
-                    radius.toFloat(),
-                    radius.toFloat(),
-                    android.graphics.Path.Direction.CW,
-                )
-        }
-    }
-}
-
-private data class NotificationScrimClipElement(val clipParams: () -> NotificationScrimClipParams) :
-    ModifierNodeElement<NotificationScrimClipNode>() {
-    override fun create(): NotificationScrimClipNode {
-        return NotificationScrimClipNode(clipParams)
-    }
-
-    override fun update(node: NotificationScrimClipNode) {
-        node.clipParams = clipParams
-    }
-
-    override fun InspectorInfo.inspectableProperties() {
-        name = "notificationScrimClip"
-        with(clipParams()) {
-            properties["leftInset"] = leftInset
-            properties["top"] = top
-            properties["rightInset"] = rightInset
-            properties["bottom"] = bottom
-            properties["radius"] = radius
-        }
-    }
 }
 
 /** Params for [notificationScrimClip]. */

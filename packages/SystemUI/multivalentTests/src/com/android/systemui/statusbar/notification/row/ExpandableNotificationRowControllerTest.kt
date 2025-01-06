@@ -28,7 +28,7 @@ import com.android.internal.logging.MetricsLogger
 import com.android.internal.logging.UiEventLogger
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FeatureFlags
+import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.plugins.PluginManager
@@ -42,6 +42,7 @@ import com.android.systemui.statusbar.notification.collection.provider.Notificat
 import com.android.systemui.statusbar.notification.collection.render.FakeNodeController
 import com.android.systemui.statusbar.notification.collection.render.GroupExpansionManager
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.people.PeopleNotificationIdentifier
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRowController.BUBBLES_SETTING_URI
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer
@@ -49,7 +50,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationRowStatsLogger
 import com.android.systemui.statusbar.phone.KeyguardBypassController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.SmartReplyConstants
 import com.android.systemui.statusbar.policy.dagger.RemoteInputViewSubcomponent
 import com.android.systemui.util.mockito.any
@@ -57,9 +57,7 @@ import com.android.systemui.util.mockito.eq
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.SystemClock
-import com.android.systemui.wmshell.BubblesManager
 import com.google.android.msdl.domain.MSDLPlayer
-import java.util.Optional
 import junit.framework.Assert
 import org.junit.After
 import org.junit.Before
@@ -103,9 +101,8 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
     private val gutsManager: NotificationGutsManager = mock()
     private val onUserInteractionCallback: OnUserInteractionCallback = mock()
     private val falsingManager: FalsingManager = mock()
-    private val featureFlags: FeatureFlags = mock()
+    private val featureFlags: FeatureFlagsClassic = mock()
     private val peopleNotificationIdentifier: PeopleNotificationIdentifier = mock()
-    private val bubblesManager: BubblesManager = mock()
     private val settingsController: NotificationSettingsController = mock()
     private val dragController: ExpandableNotificationRowDragController = mock()
     private val dismissibilityProvider: NotificationDismissibilityProvider = mock()
@@ -147,7 +144,6 @@ class ExpandableNotificationRowControllerTest : SysuiTestCase() {
                 falsingManager,
                 featureFlags,
                 peopleNotificationIdentifier,
-                Optional.of(bubblesManager),
                 settingsController,
                 dragController,
                 dismissibilityProvider,

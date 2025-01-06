@@ -69,6 +69,11 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(
                                 Settings.System.MOUSE_SWAP_PRIMARY_BUTTON),
                         (reason) -> updateMouseSwapPrimaryButton()),
+                Map.entry(Settings.System.getUriFor(Settings.System.MOUSE_SCROLLING_ACCELERATION),
+                        (reason) -> updateMouseScrollingAcceleration()),
+                Map.entry(Settings.System.getUriFor(
+                                Settings.System.MOUSE_POINTER_ACCELERATION_ENABLED),
+                        (reason) -> updateMouseAccelerationEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_POINTER_SPEED),
                         (reason) -> updateTouchpadPointerSpeed()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_NATURAL_SCROLLING),
@@ -81,6 +86,8 @@ class InputSettingsObserver extends ContentObserver {
                         (reason) -> updateTouchpadHardwareStateNotificationsEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_RIGHT_CLICK_ZONE),
                         (reason) -> updateTouchpadRightClickZoneEnabled()),
+                Map.entry(Settings.System.getUriFor(Settings.System.TOUCHPAD_SYSTEM_GESTURES),
+                        (reason) -> updateTouchpadSystemGesturesEnabled()),
                 Map.entry(Settings.System.getUriFor(Settings.System.SHOW_TOUCHES),
                         (reason) -> updateShowTouches()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_LOCATION),
@@ -117,7 +124,10 @@ class InputSettingsObserver extends ContentObserver {
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_STROKE_STYLE),
                         (reason) -> updatePointerStrokeStyleFromSettings()),
                 Map.entry(Settings.System.getUriFor(Settings.System.POINTER_SCALE),
-                        (reason) -> updatePointerScaleFromSettings()));
+                        (reason) -> updatePointerScaleFromSettings()),
+                Map.entry(Settings.System.getUriFor(
+                                Settings.System.TOUCHPAD_THREE_FINGER_TAP_CUSTOMIZATION),
+                        (reason) -> updateTouchpadThreeFingerTapShortcutEnabled()));
     }
 
     /**
@@ -142,10 +152,6 @@ class InputSettingsObserver extends ContentObserver {
         for (Consumer<String> observer : mObservers.values()) {
             observer.accept("just booted");
         }
-
-        // TODO(b/365063048): add an entry to mObservers that calls this instead, once we have a
-        //   setting that can be observed.
-        updateTouchpadThreeFingerTapShortcutEnabled();
 
         configureUserActivityPokeInterval();
     }
@@ -183,6 +189,16 @@ class InputSettingsObserver extends ContentObserver {
                 InputSettings.isMouseSwapPrimaryButtonEnabled(mContext));
     }
 
+    private void updateMouseScrollingAcceleration() {
+        mNative.setMouseScrollingAccelerationEnabled(
+                InputSettings.isMouseScrollingAccelerationEnabled(mContext));
+    }
+
+    private void updateMouseAccelerationEnabled() {
+        mNative.setMouseAccelerationEnabled(
+                InputSettings.isMousePointerAccelerationEnabled(mContext));
+    }
+
     private void updateTouchpadPointerSpeed() {
         mNative.setTouchpadPointerSpeed(
                 constrainPointerSpeedValue(InputSettings.getTouchpadPointerSpeed(mContext)));
@@ -212,6 +228,10 @@ class InputSettingsObserver extends ContentObserver {
     private void updateTouchpadThreeFingerTapShortcutEnabled() {
         mNative.setTouchpadThreeFingerTapShortcutEnabled(
                 InputSettings.useTouchpadThreeFingerTapShortcut(mContext));
+    }
+
+    private void updateTouchpadSystemGesturesEnabled() {
+        mNative.setTouchpadSystemGesturesEnabled(InputSettings.useTouchpadSystemGestures(mContext));
     }
 
     private void updateShowTouches() {

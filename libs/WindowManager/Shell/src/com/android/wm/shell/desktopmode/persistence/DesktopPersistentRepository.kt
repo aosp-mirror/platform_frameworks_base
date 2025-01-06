@@ -40,9 +40,7 @@ import kotlinx.coroutines.flow.first
  *
  * The main constructor is public only for testing purposes.
  */
-class DesktopPersistentRepository(
-    private val dataStore: DataStore<DesktopPersistentRepositories>,
-) {
+class DesktopPersistentRepository(private val dataStore: DataStore<DesktopPersistentRepositories>) {
     constructor(
         context: Context,
         @ShellBackgroundThread bgCoroutineScope: CoroutineScope,
@@ -51,7 +49,7 @@ class DesktopPersistentRepository(
             serializer = DesktopPersistentRepositoriesSerializer,
             produceFile = { context.dataStoreFile(DESKTOP_REPOSITORIES_DATASTORE_FILE) },
             scope = bgCoroutineScope,
-        ),
+        )
     )
 
     /** Provides `dataStore.data` flow and handles exceptions thrown during collection */
@@ -63,7 +61,8 @@ class DesktopPersistentRepository(
                     TAG,
                     "Error in reading desktop mode related data from datastore, data is " +
                         "stored in a file named $DESKTOP_REPOSITORIES_DATASTORE_FILE",
-                    exception)
+                    exception,
+                )
             } else {
                 throw exception
             }
@@ -73,13 +72,17 @@ class DesktopPersistentRepository(
      * Reads and returns the [DesktopRepositoryState] proto object from the DataStore for a user. If
      * the DataStore is empty or there's an error reading, it returns the default value of Proto.
      */
-    private suspend fun getDesktopRepositoryState(
-        userId: Int = DEFAULT_USER_ID
-    ): DesktopRepositoryState? =
+    suspend fun getDesktopRepositoryState(userId: Int): DesktopRepositoryState? =
         try {
-            dataStoreFlow
-                .first()
-                .desktopRepoByUserMap[userId]
+            dataStoreFlow.first().desktopRepoByUserMap[userId]
+        } catch (e: Exception) {
+            Log.e(TAG, "Unable to read from datastore", e)
+            null
+        }
+
+    suspend fun getUserDesktopRepositoryMap(): Map<Int, DesktopRepositoryState>? =
+        try {
+            dataStoreFlow.first().desktopRepoByUserMap
         } catch (e: Exception) {
             Log.e(TAG, "Unable to read from datastore", e)
             null
@@ -89,10 +92,7 @@ class DesktopPersistentRepository(
      * Reads the [Desktop] of a desktop filtering by the [userId] and [desktopId]. Executes the
      * [callback] using the [mainCoroutineScope].
      */
-    suspend fun readDesktop(
-        userId: Int = DEFAULT_USER_ID,
-        desktopId: Int = DEFAULT_DESKTOP_ID,
-    ): Desktop? =
+    suspend fun readDesktop(userId: Int, desktopId: Int = DEFAULT_DESKTOP_ID): Desktop? =
         try {
             val repository = getDesktopRepositoryState(userId)
             repository?.getDesktopOrThrow(desktopId)
@@ -103,7 +103,7 @@ class DesktopPersistentRepository(
 
     /** Adds or updates a desktop stored in the datastore */
     suspend fun addOrUpdateDesktop(
-        userId: Int = DEFAULT_USER_ID,
+        userId: Int,
         desktopId: Int = 0,
         visibleTasks: ArraySet<Int> = ArraySet(),
         minimizedTasks: ArraySet<Int> = ArraySet(),
@@ -111,36 +111,33 @@ class DesktopPersistentRepository(
     ) {
         // TODO: b/367609270 - Improve the API to support multi-user
         try {
-            dataStore.updateData { desktopPersistentRepositories: DesktopPersistentRepositories ->
+            dataStore.updateData { persistentRepositories: DesktopPersistentRepositories ->
                 val currentRepository =
-                    desktopPersistentRepositories.getDesktopRepoByUserOrDefault(
-                        userId, DesktopRepositoryState.getDefaultInstance())
+                    persistentRepositories.getDesktopRepoByUserOrDefault(
+                        userId,
+                        DesktopRepositoryState.getDefaultInstance(),
+                    )
                 val desktop =
                     getDesktop(currentRepository, desktopId)
                         .toBuilder()
-                        .updateTaskStates(
-                            visibleTasks,
-                            minimizedTasks,
-                            freeformTasksInZOrder,
-                        )
+                        .updateTaskStates(visibleTasks, minimizedTasks, freeformTasksInZOrder)
                         .updateZOrder(freeformTasksInZOrder)
 
-                desktopPersistentRepositories
+                persistentRepositories
                     .toBuilder()
                     .putDesktopRepoByUser(
                         userId,
-                        currentRepository
-                            .toBuilder()
-                            .putDesktop(desktopId, desktop.build())
-                            .build())
+                        currentRepository.toBuilder().putDesktop(desktopId, desktop.build()).build(),
+                    )
                     .build()
             }
-        } catch (exception: IOException) {
+        } catch (exception: Exception) {
             Log.e(
                 TAG,
                 "Error in updating desktop mode related data, data is " +
                     "stored in a file named $DESKTOP_REPOSITORIES_DATASTORE_FILE",
-                exception)
+                exception,
+            )
         }
     }
 
@@ -148,13 +145,13 @@ class DesktopPersistentRepository(
         // If there are no desktops set up, create one on the default display
         currentRepository.getDesktopOrDefault(
             desktopId,
-            Desktop.newBuilder().setDesktopId(desktopId).setDisplayId(DEFAULT_DISPLAY).build())
+            Desktop.newBuilder().setDesktopId(desktopId).setDisplayId(DEFAULT_DISPLAY).build(),
+        )
 
     companion object {
         private const val TAG = "DesktopPersistenceRepo"
         private const val DESKTOP_REPOSITORIES_DATASTORE_FILE = "desktop_persistent_repositories.pb"
 
-        private const val DEFAULT_USER_ID = 1000
         private const val DEFAULT_DESKTOP_ID = 0
 
         object DesktopPersistentRepositoriesSerializer : Serializer<DesktopPersistentRepositories> {
@@ -185,19 +182,22 @@ class DesktopPersistentRepository(
             // visible, they will be marked as not visible afterwards. This ensures that they are
             // still persisted as visible.
             // TODO - b/350476823: Remove this logic once repository holds expanded tasks
-            if (freeformTasksInZOrder.size > visibleTasks.size + minimizedTasks.size &&
-                visibleTasks.isEmpty()
+            if (
+                freeformTasksInZOrder.size > visibleTasks.size + minimizedTasks.size &&
+                    visibleTasks.isEmpty()
             ) {
                 visibleTasks.addAll(freeformTasksInZOrder.filterNot { it in minimizedTasks })
             }
             putAllTasksByTaskId(
                 visibleTasks.associateWith {
                     createDesktopTask(it, state = DesktopTaskState.VISIBLE)
-                })
+                }
+            )
             putAllTasksByTaskId(
                 minimizedTasks.associateWith {
                     createDesktopTask(it, state = DesktopTaskState.MINIMIZED)
-                })
+                }
+            )
             return this
         }
 
@@ -211,7 +211,7 @@ class DesktopPersistentRepository(
 
         private fun createDesktopTask(
             taskId: Int,
-            state: DesktopTaskState = DesktopTaskState.VISIBLE
+            state: DesktopTaskState = DesktopTaskState.VISIBLE,
         ): DesktopTask =
             DesktopTask.newBuilder().setTaskId(taskId).setDesktopTaskState(state).build()
     }

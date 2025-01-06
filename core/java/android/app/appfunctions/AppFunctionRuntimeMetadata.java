@@ -213,9 +213,7 @@ public class AppFunctionRuntimeMetadata extends GenericDocument {
             setEnabled(original.getEnabled());
         }
 
-        /**
-         * Sets an indicator specifying the function enabled state.
-         */
+        /** Sets an indicator specifying the function enabled state. */
         @NonNull
         public Builder setEnabled(@EnabledState int enabledState) {
             if (enabledState != APP_FUNCTION_STATE_DEFAULT

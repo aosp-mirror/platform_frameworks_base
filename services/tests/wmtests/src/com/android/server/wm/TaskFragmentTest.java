@@ -51,6 +51,8 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertThrows;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.clearInvocations;
@@ -62,6 +64,7 @@ import android.content.res.Configuration;
 import android.graphics.Color;
 import android.graphics.Rect;
 import android.os.Binder;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.View;
@@ -129,8 +132,8 @@ public class TaskFragmentTest extends WindowTestsBase {
         final int parentSw = parentConfig.smallestScreenWidthDp;
         final Rect bounds = new Rect(parentBounds);
         bounds.inset(100, 100);
-        mTaskFragment.setBounds(bounds);
         mTaskFragment.setWindowingMode(WINDOWING_MODE_MULTI_WINDOW);
+        mTaskFragment.setBounds(bounds);
         // Calculate its own sw with smaller bounds in multi-window mode.
         assertNotEquals(parentSw, mTaskFragment.getConfiguration().smallestScreenWidthDp);
 
@@ -363,7 +366,7 @@ public class TaskFragmentTest extends WindowTestsBase {
 
         assertEquals(taskFragmentBounds, activity.getBounds());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, activity.getWindowingMode());
-        assertEquals(taskFragment1, taskFragment0.getAdjacentTaskFragment());
+        assertTrue(taskFragment0.isAdjacentTo(taskFragment1));
         assertEquals(taskFragment1, taskFragment0.getCompanionTaskFragment());
         assertNotEquals(TaskFragmentAnimationParams.DEFAULT, taskFragment0.getAnimationParams());
 
@@ -379,7 +382,7 @@ public class TaskFragmentTest extends WindowTestsBase {
         assertEquals(taskBounds, taskFragment0.getBounds());
         assertEquals(taskBounds, activity.getBounds());
         assertEquals(Configuration.EMPTY, taskFragment0.getRequestedOverrideConfiguration());
-        assertNull(taskFragment0.getAdjacentTaskFragment());
+        assertFalse(taskFragment0.hasAdjacentTaskFragment());
         assertNull(taskFragment0.getCompanionTaskFragment());
         assertEquals(TaskFragmentAnimationParams.DEFAULT, taskFragment0.getAnimationParams());
         // Because the whole Task is entering PiP, no need to record for future reparent.
@@ -1064,6 +1067,110 @@ public class TaskFragmentTest extends WindowTestsBase {
         taskFragment.computeConfigResourceOverrides(outConfig, task.getConfiguration());
         assertEquals(outConfig.smallestScreenWidthDp,
                 Math.min(outConfig.screenWidthDp, outConfig.screenHeightDp));
+    }
+
+    @EnableFlags(Flags.FLAG_ALLOW_MULTIPLE_ADJACENT_TASK_FRAGMENTS)
+    @Test
+    public void testAdjacentSetForTaskFragments() {
+        final Task task = createTask(mDisplayContent);
+        final TaskFragment tf0 = createTaskFragmentWithActivity(task);
+        final TaskFragment tf1 = createTaskFragmentWithActivity(task);
+        final TaskFragment tf2 = createTaskFragmentWithActivity(task);
+
+        // Can have two TFs adjacent,
+        new TaskFragment.AdjacentSet(tf0, tf1);
+
+        // 3+ TFs adjacent is not yet supported.
+        assertThrows(IllegalArgumentException.class,
+                () -> new TaskFragment.AdjacentSet(tf0, tf1, tf2));
+    }
+
+    @EnableFlags(Flags.FLAG_ALLOW_MULTIPLE_ADJACENT_TASK_FRAGMENTS)
+    @Test
+    public void testSetAdjacentTaskFragments() {
+        final Task task0 = createTask(mDisplayContent);
+        final Task task1 = createTask(mDisplayContent);
+        final Task task2 = createTask(mDisplayContent);
+        final TaskFragment.AdjacentSet adjTasks = new TaskFragment.AdjacentSet(task0, task1, task2);
+        assertFalse(task0.hasAdjacentTaskFragment());
+
+        task0.setAdjacentTaskFragments(adjTasks);
+
+        assertSame(adjTasks, task0.getAdjacentTaskFragments());
+        assertSame(adjTasks, task1.getAdjacentTaskFragments());
+        assertSame(adjTasks, task2.getAdjacentTaskFragments());
+        assertTrue(task0.hasAdjacentTaskFragment());
+        assertTrue(task1.hasAdjacentTaskFragment());
+        assertTrue(task2.hasAdjacentTaskFragment());
+
+        final TaskFragment.AdjacentSet adjTasks2 = new TaskFragment.AdjacentSet(task0, task1);
+        task0.setAdjacentTaskFragments(adjTasks2);
+
+        assertSame(adjTasks2, task0.getAdjacentTaskFragments());
+        assertSame(adjTasks2, task1.getAdjacentTaskFragments());
+        assertNull(task2.getAdjacentTaskFragments());
+        assertTrue(task0.hasAdjacentTaskFragment());
+        assertTrue(task1.hasAdjacentTaskFragment());
+        assertFalse(task2.hasAdjacentTaskFragment());
+    }
+
+    @EnableFlags(Flags.FLAG_ALLOW_MULTIPLE_ADJACENT_TASK_FRAGMENTS)
+    @Test
+    public void testClearAdjacentTaskFragments() {
+        final Task task0 = createTask(mDisplayContent);
+        final Task task1 = createTask(mDisplayContent);
+        final Task task2 = createTask(mDisplayContent);
+        final TaskFragment.AdjacentSet adjTasks = new TaskFragment.AdjacentSet(task0, task1, task2);
+        task0.setAdjacentTaskFragments(adjTasks);
+
+        task0.clearAdjacentTaskFragments();
+
+        assertNull(task0.getAdjacentTaskFragments());
+        assertNull(task1.getAdjacentTaskFragments());
+        assertNull(task2.getAdjacentTaskFragments());
+        assertFalse(task0.hasAdjacentTaskFragment());
+        assertFalse(task1.hasAdjacentTaskFragment());
+        assertFalse(task2.hasAdjacentTaskFragment());
+    }
+
+    @EnableFlags(Flags.FLAG_ALLOW_MULTIPLE_ADJACENT_TASK_FRAGMENTS)
+    @Test
+    public void testRemoveFromAdjacentTaskFragments() {
+        final Task task0 = createTask(mDisplayContent);
+        final Task task1 = createTask(mDisplayContent);
+        final Task task2 = createTask(mDisplayContent);
+        final TaskFragment.AdjacentSet adjTasks = new TaskFragment.AdjacentSet(task0, task1, task2);
+        task0.setAdjacentTaskFragments(adjTasks);
+
+        task0.removeFromAdjacentTaskFragments();
+
+        assertNull(task0.getAdjacentTaskFragments());
+        assertSame(adjTasks, task1.getAdjacentTaskFragments());
+        assertSame(adjTasks, task2.getAdjacentTaskFragments());
+        assertFalse(adjTasks.contains(task0));
+        assertTrue(task1.isAdjacentTo(task2));
+        assertTrue(task2.isAdjacentTo(task1));
+        assertFalse(task1.isAdjacentTo(task0));
+        assertFalse(task0.isAdjacentTo(task1));
+        assertFalse(task0.isAdjacentTo(task0));
+        assertFalse(task1.isAdjacentTo(task1));
+    }
+
+    @EnableFlags(Flags.FLAG_ALLOW_MULTIPLE_ADJACENT_TASK_FRAGMENTS)
+    @Test
+    public void testRemoveFromAdjacentTaskFragmentsWhenRemove() {
+        final Task task0 = createTask(mDisplayContent);
+        final Task task1 = createTask(mDisplayContent);
+        final Task task2 = createTask(mDisplayContent);
+        final TaskFragment.AdjacentSet adjTasks = new TaskFragment.AdjacentSet(task0, task1, task2);
+        task0.setAdjacentTaskFragments(adjTasks);
+
+        task0.removeImmediately();
+
+        assertNull(task0.getAdjacentTaskFragments());
+        assertSame(adjTasks, task1.getAdjacentTaskFragments());
+        assertSame(adjTasks, task2.getAdjacentTaskFragments());
+        assertFalse(adjTasks.contains(task0));
     }
 
     private WindowState createAppWindow(ActivityRecord app, String name) {

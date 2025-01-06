@@ -1788,4 +1788,17 @@ public abstract class WebSettings {
      * @see #setDisabledActionModeMenuItems
      */
     public static final int MENU_ITEM_PROCESS_TEXT = 1 << 2;
+
+    /**
+     * Enable CHIPS for webview.
+     * This provides a means to check if partitioned cookies are enabled by default.
+     * CHIPS will only be enabled by default for apps targeting Android B or above.
+     *
+     * @hide
+     */
+    @ChangeId
+    @EnabledAfter(targetSdkVersion = android.os.Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    @FlaggedApi(android.webkit.Flags.FLAG_ENABLE_CHIPS)
+    @SystemApi
+    public static final long ENABLE_CHIPS = 380890146L;
 }

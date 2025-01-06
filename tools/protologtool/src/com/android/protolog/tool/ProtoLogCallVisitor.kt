@@ -20,5 +20,11 @@ import com.android.internal.protolog.common.LogLevel
 import com.github.javaparser.ast.expr.MethodCallExpr
 
 interface ProtoLogCallVisitor {
-    fun processCall(call: MethodCallExpr, messageString: String, level: LogLevel, group: LogGroup)
+    fun processCall(
+        call: MethodCallExpr,
+        messageString: String,
+        level: LogLevel,
+        group: LogGroup,
+        lineNumber: Int
+    )
 }

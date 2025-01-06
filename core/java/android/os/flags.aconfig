@@ -4,11 +4,29 @@ container: "system"
 
 # keep-sorted start block=yes newline_separated=yes
 flag {
+     # Holdback study for concurrent MessageQueue.
+     # Do not promote beyond trunkfood.
+     namespace: "system_performance"
+     name: "message_queue_force_legacy"
+     description: "Whether to holdback concurrent MessageQueue (force legacy)."
+     bug: "336880969"
+}
+
+flag {
     name: "adpf_gpu_report_actual_work_duration"
     is_exported: true
     namespace: "game"
     description: "Guards the ADPF GPU APIs."
     bug: "284324521"
+}
+
+flag {
+    name: "adpf_graphics_pipeline"
+    is_exported: true
+    namespace: "game"
+    description: "Guards use of SessionCreationConfig and Graphics Pipeline mode"
+    is_fixed_read_only: true
+    bug: "367803904"
 }
 
 flag {
@@ -66,10 +84,19 @@ flag {
 }
 
 flag {
+    name: "adpf_use_load_hints"
+    namespace: "game"
+    description: "Guards use of the ADPF public load hints behind a readonly flag"
+    is_fixed_read_only: true
+    bug: "367803904"
+}
+
+flag {
     name: "allow_consentless_bugreport_delegated_consent"
     namespace: "crumpet"
     description: "Allow privileged apps to call bugreport generation without enforcing user consent and delegate it to the calling app instead"
     bug: "324046728"
+    is_exported: true
 }
 
 # This flag guards the private space feature, its APIs, and some of the feature implementations. The flag android.multiuser.Flags.enable_private_space_features exclusively guards all the implementations.
@@ -148,6 +175,14 @@ flag {
 }
 
 flag {
+    name: "cpu_gpu_headrooms"
+    namespace: "game"
+    description: "Feature flag for adding CPU/GPU headroom API"
+    bug: "346604998"
+    is_exported: true
+}
+
+flag {
     name: "disallow_cellular_null_ciphers_restriction"
     namespace: "cellular_security"
     description: "Guards a new UserManager user restriction that admins can use to require cellular encryption on their managed devices."
@@ -179,11 +214,47 @@ flag {
 }
 
 flag {
+    name: "material_colors_10_2024"
+    namespace: "systemui"
+    description: "Adding new Material Tokens as of October 2024"
+    bug: "376195115"
+    is_exported: true
+    metadata {
+        purpose: PURPOSE_FEATURE
+    }
+}
+
+flag {
+    name: "material_motion_tokens"
+    namespace: "systemui"
+    description: "Adding new Material Tokens for M3 Motion Spec"
+    bug: "324922198"
+    is_exported: true
+}
+
+flag {
+    name: "material_shape_tokens"
+    namespace: "systemui"
+    description: "Adding new Material Tokens for M3 Shape (corner radius) Spec"
+    bug: "324928718"
+    is_exported: true
+}
+
+flag {
     name: "message_queue_tail_tracking"
     namespace: "system_performance"
     description: "track tail of message queue."
     bug: "305311707"
     is_fixed_read_only: true
+}
+
+flag {
+     name: "message_queue_testability"
+     namespace: "system_performance"
+     is_exported: true
+     description: "Whether MessageQueue implements test APIs."
+     bug: "379472827"
+     is_fixed_read_only: true
 }
 
 flag {
@@ -243,9 +314,34 @@ flag {
 }
 
 flag {
+    name: "update_engine_api"
+    namespace: "art_mainline"
+    description: "Update Engine APIs for ART"
+    is_exported: true
+    is_fixed_read_only: true
+    bug: "377557749"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "enable_has_binders"
+     is_exported: true
+     description: "Add hasBinders to Public API under a flag."
+     is_fixed_read_only: true
+     bug: "330345513"
+}
+
+flag {
      namespace: "system_performance"
      name: "perfetto_sdk_tracing"
      description: "Tracing using Perfetto SDK."
+     bug: "303199244"
+}
+
+flag {
+     namespace: "system_performance"
+     name: "perfetto_sdk_tracing_v2"
+     description: "Tracing using Perfetto SDK API."
      bug: "303199244"
 }
 

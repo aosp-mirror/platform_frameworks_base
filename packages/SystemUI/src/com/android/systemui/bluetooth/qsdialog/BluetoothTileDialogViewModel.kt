@@ -26,10 +26,10 @@ import android.view.ViewGroup
 import androidx.annotation.DimenRes
 import androidx.annotation.StringRes
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.internal.logging.UiEventLogger
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
-import com.android.settingslib.flags.Flags.audioSharingQsDialogImprovement
 import com.android.systemui.Prefs
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
@@ -56,7 +56,6 @@ import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.merge
 import kotlinx.coroutines.flow.onEach
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 /** ViewModel for Bluetooth Dialog after clicking on the Bluetooth QS tile. */
@@ -145,7 +144,7 @@ constructor(
                         bluetoothDeviceMetadataInteractor.metadataUpdate,
                         if (
                             audioSharingInteractor.audioSharingAvailable() &&
-                                audioSharingQsDialogImprovement()
+                                audioSharingInteractor.qsDialogImprovementAvailable()
                         ) {
                             audioSharingInteractor.audioSourceStateUpdate
                         } else {
@@ -165,7 +164,7 @@ constructor(
                     .launchIn(this)
 
                 if (audioSharingInteractor.audioSharingAvailable()) {
-                    if (audioSharingQsDialogImprovement()) {
+                    if (audioSharingInteractor.qsDialogImprovementAvailable()) {
                         launch { audioSharingInteractor.handleAudioSourceWhenReady() }
                     }
 

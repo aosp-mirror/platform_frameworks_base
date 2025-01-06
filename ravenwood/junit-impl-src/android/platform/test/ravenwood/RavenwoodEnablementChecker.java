@@ -27,8 +27,6 @@ import org.junit.runner.Description;
  * Calculates which tests need to be executed on Ravenwood.
  */
 public class RavenwoodEnablementChecker {
-    private static final String TAG = "RavenwoodDisablementChecker";
-
     private RavenwoodEnablementChecker() {
     }
 

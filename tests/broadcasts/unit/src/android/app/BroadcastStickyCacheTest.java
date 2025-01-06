@@ -13,246 +13,236 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.app;
 
-import static android.content.Intent.ACTION_BATTERY_CHANGED;
-import static android.content.Intent.ACTION_DEVICE_STORAGE_LOW;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doNothing;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
+import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
 
-import static com.google.common.truth.Truth.assertThat;
-import static com.google.common.truth.Truth.assertWithMessage;
-
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.junit.Assert.assertFalse;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.os.BatteryManager;
-import android.os.Bundle;
-import android.os.SystemProperties;
+import android.media.AudioManager;
+import android.os.IpcDataCache;
+import android.os.RemoteException;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
-import android.util.ArrayMap;
 
-import androidx.annotation.GuardedBy;
-import androidx.test.ext.junit.runners.AndroidJUnit4;
-import androidx.test.filters.SmallTest;
-
+import com.android.dx.mockito.inline.extended.ExtendedMockito;
+import com.android.internal.annotations.Keep;
 import com.android.modules.utils.testing.ExtendedMockitoRule;
 
-import org.junit.After;
+import junitparams.JUnitParamsRunner;
+import junitparams.Parameters;
+
 import org.junit.Before;
-import org.junit.ClassRule;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mockito;
+import org.mockito.Mock;
 
-@EnableFlags(Flags.FLAG_USE_STICKY_BCAST_CACHE)
-@RunWith(AndroidJUnit4.class)
-@SmallTest
+@RunWith(JUnitParamsRunner.class)
 public class BroadcastStickyCacheTest {
-    @ClassRule
-    public static final SetFlagsRule.ClassRule mClassRule = new SetFlagsRule.ClassRule();
-    @Rule
-    public final SetFlagsRule mSetFlagsRule = mClassRule.createSetFlagsRule();
 
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
     @Rule
     public final ExtendedMockitoRule mExtendedMockitoRule = new ExtendedMockitoRule.Builder(this)
-            .mockStatic(SystemProperties.class)
+            .mockStatic(IpcDataCache.class)
+            .mockStatic(ActivityManager.class)
             .build();
 
-    private static final String PROP_KEY_BATTERY_CHANGED = BroadcastStickyCache.getKey(
-            ACTION_BATTERY_CHANGED);
+    @Mock
+    private IActivityManager mActivityManagerMock;
 
-    private final TestSystemProps mTestSystemProps = new TestSystemProps();
+    @Mock
+    private IApplicationThread mIApplicationThreadMock;
+
+    @Keep
+    private static Object stickyBroadcastList() {
+        return BroadcastStickyCache.STICKY_BROADCAST_ACTIONS;
+    }
 
     @Before
     public void setUp() {
-        doAnswer(invocation -> {
-            final String name = invocation.getArgument(0);
-            final long value = Long.parseLong(invocation.getArgument(1));
-            mTestSystemProps.add(name, value);
-            return null;
-        }).when(() -> SystemProperties.set(anyString(), anyString()));
-        doAnswer(invocation -> {
-            final String name = invocation.getArgument(0);
-            final TestSystemProps.Handle testHandle = mTestSystemProps.query(name);
-            if (testHandle == null) {
-                return null;
-            }
-            final SystemProperties.Handle handle = Mockito.mock(SystemProperties.Handle.class);
-            doAnswer(handleInvocation -> testHandle.getLong(-1)).when(handle).getLong(anyLong());
-            return handle;
-        }).when(() -> SystemProperties.find(anyString()));
-    }
+        BroadcastStickyCache.clearCacheForTest();
 
-    @After
-    public void tearDown() {
-        mTestSystemProps.clear();
-        BroadcastStickyCache.clearForTest();
+        doNothing().when(() -> IpcDataCache.invalidateCache(anyString(), anyString()));
     }
 
     @Test
-    public void testUseCache_nullFilter() {
-        assertThat(BroadcastStickyCache.useCache(null)).isEqualTo(false);
+    @DisableFlags(Flags.FLAG_USE_STICKY_BCAST_CACHE)
+    public void useCache_flagDisabled_returnsFalse() {
+        assertFalse(BroadcastStickyCache.useCache(new IntentFilter(Intent.ACTION_BATTERY_CHANGED)));
     }
 
     @Test
-    public void testUseCache_noActions() {
-        final IntentFilter filter = new IntentFilter();
-        assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(false);
+    @EnableFlags(Flags.FLAG_USE_STICKY_BCAST_CACHE)
+    public void useCache_nullFilter_returnsFalse() {
+        assertFalse(BroadcastStickyCache.useCache(null));
     }
 
     @Test
-    public void testUseCache_multipleActions() {
-        final IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_DEVICE_STORAGE_LOW);
-        filter.addAction(ACTION_BATTERY_CHANGED);
-        assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(false);
+    @EnableFlags(Flags.FLAG_USE_STICKY_BCAST_CACHE)
+    public void useCache_filterWithoutAction_returnsFalse() {
+        assertFalse(BroadcastStickyCache.useCache(new IntentFilter()));
     }
 
     @Test
-    public void testUseCache_valueNotSet() {
-        final IntentFilter filter = new IntentFilter(ACTION_BATTERY_CHANGED);
-        assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(false);
+    @EnableFlags(Flags.FLAG_USE_STICKY_BCAST_CACHE)
+    public void useCache_filterWithoutStickyBroadcastAction_returnsFalse() {
+        assertFalse(BroadcastStickyCache.useCache(new IntentFilter(Intent.ACTION_BOOT_COMPLETED)));
     }
 
     @Test
-    public void testUseCache() {
-        final IntentFilter filter = new IntentFilter(ACTION_BATTERY_CHANGED);
-        final Intent intent = new Intent(ACTION_BATTERY_CHANGED)
-                .putExtra(BatteryManager.EXTRA_LEVEL, 90);
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
-        BroadcastStickyCache.add(filter, intent);
-        assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(true);
+    @DisableFlags(Flags.FLAG_USE_STICKY_BCAST_CACHE)
+    public void invalidateCache_flagDisabled_cacheNotInvalidated() {
+        final String apiName = BroadcastStickyCache.sActionApiNameMap.get(
+                AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
+
+        BroadcastStickyCache.invalidateCache(
+                AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION);
+
+        ExtendedMockito.verify(
+                () -> IpcDataCache.invalidateCache(eq(IpcDataCache.MODULE_SYSTEM), eq(apiName)),
+                times(0));
     }
 
     @Test
-    public void testUseCache_versionMismatch() {
-        final IntentFilter filter = new IntentFilter(ACTION_BATTERY_CHANGED);
-        final Intent intent = new Intent(ACTION_BATTERY_CHANGED)
-                .putExtra(BatteryManager.EXTRA_LEVEL, 90);
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
-        BroadcastStickyCache.add(filter, intent);
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
+    @EnableFlags(Flags.FLAG_USE_STICKY_BCAST_CACHE)
+    public void invalidateCache_broadcastNotSticky_cacheNotInvalidated() {
+        BroadcastStickyCache.invalidateCache(Intent.ACTION_AIRPLANE_MODE_CHANGED);
 
-        assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(false);
+        ExtendedMockito.verify(
+                () -> IpcDataCache.invalidateCache(eq(IpcDataCache.MODULE_SYSTEM), anyString()),
+                times(0));
     }
 
     @Test
-    public void testAdd() {
-        final IntentFilter filter = new IntentFilter(ACTION_BATTERY_CHANGED);
-        Intent intent = new Intent(ACTION_BATTERY_CHANGED)
-                .putExtra(BatteryManager.EXTRA_LEVEL, 90);
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
-        BroadcastStickyCache.add(filter, intent);
-        assertThat(BroadcastStickyCache.useCache(filter)).isEqualTo(true);
-        Intent actualIntent = BroadcastStickyCache.getIntentUnchecked(filter);
-        assertThat(actualIntent).isNotNull();
-        assertEquals(actualIntent, intent);
+    @EnableFlags(Flags.FLAG_USE_STICKY_BCAST_CACHE)
+    public void invalidateCache_withStickyBroadcast_cacheInvalidated() {
+        final String apiName = BroadcastStickyCache.sActionApiNameMap.get(
+                Intent.ACTION_BATTERY_CHANGED);
 
-        intent = new Intent(ACTION_BATTERY_CHANGED)
-                .putExtra(BatteryManager.EXTRA_LEVEL, 99);
-        BroadcastStickyCache.add(filter, intent);
-        actualIntent = BroadcastStickyCache.getIntentUnchecked(filter);
-        assertThat(actualIntent).isNotNull();
-        assertEquals(actualIntent, intent);
+        BroadcastStickyCache.invalidateCache(Intent.ACTION_BATTERY_CHANGED);
+
+        ExtendedMockito.verify(
+                () -> IpcDataCache.invalidateCache(eq(IpcDataCache.MODULE_SYSTEM), eq(apiName)),
+                times(1));
     }
 
     @Test
-    public void testIncrementVersion_propExists() {
-        SystemProperties.set(PROP_KEY_BATTERY_CHANGED, String.valueOf(100));
+    public void invalidateAllCaches_cacheInvalidated() {
+        BroadcastStickyCache.invalidateAllCaches();
 
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(101);
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(102);
-    }
-
-    @Test
-    public void testIncrementVersion_propNotExists() {
-        // Verify that the property doesn't exist
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(-1);
-
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(1);
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(2);
-    }
-
-    @Test
-    public void testIncrementVersionIfExists_propExists() {
-        BroadcastStickyCache.incrementVersion(ACTION_BATTERY_CHANGED);
-
-        BroadcastStickyCache.incrementVersionIfExists(ACTION_BATTERY_CHANGED);
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(2);
-        BroadcastStickyCache.incrementVersionIfExists(ACTION_BATTERY_CHANGED);
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(3);
-    }
-
-    @Test
-    public void testIncrementVersionIfExists_propNotExists() {
-        // Verify that the property doesn't exist
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(-1);
-
-        BroadcastStickyCache.incrementVersionIfExists(ACTION_BATTERY_CHANGED);
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(-1);
-        // Verify that property is not added as part of the querying.
-        BroadcastStickyCache.incrementVersionIfExists(ACTION_BATTERY_CHANGED);
-        assertThat(mTestSystemProps.get(PROP_KEY_BATTERY_CHANGED, -1 /* def */)).isEqualTo(-1);
-    }
-
-    private void assertEquals(Intent actualIntent, Intent expectedIntent) {
-        assertThat(actualIntent.getAction()).isEqualTo(expectedIntent.getAction());
-        assertEquals(actualIntent.getExtras(), expectedIntent.getExtras());
-    }
-
-    private void assertEquals(Bundle actualExtras, Bundle expectedExtras) {
-        assertWithMessage("Extras expected=%s, actual=%s", expectedExtras, actualExtras)
-                .that(actualExtras.kindofEquals(expectedExtras)).isTrue();
-    }
-
-    private static final class TestSystemProps {
-        @GuardedBy("mSysProps")
-        private final ArrayMap<String, Long> mSysProps = new ArrayMap<>();
-
-        public void add(String name, long value) {
-            synchronized (mSysProps) {
-                mSysProps.put(name, value);
-            }
+        for (int i = BroadcastStickyCache.sActionApiNameMap.size() - 1; i > -1; i--) {
+            final String apiName = BroadcastStickyCache.sActionApiNameMap.valueAt(i);
+            ExtendedMockito.verify(() -> IpcDataCache.invalidateCache(anyString(),
+                    eq(apiName)), times(1));
         }
+    }
 
-        public long get(String name, long defaultValue) {
-            synchronized (mSysProps) {
-                final int idx = mSysProps.indexOfKey(name);
-                return idx >= 0 ? mSysProps.valueAt(idx) : defaultValue;
-            }
-        }
+    @Test
+    @Parameters(method = "stickyBroadcastList")
+    public void getIntent_createNewCache_verifyRegisterReceiverIsCalled(String action)
+            throws RemoteException {
+        setActivityManagerMock(action);
+        final IntentFilter filter = new IntentFilter(action);
+        final Intent intent = queryIntent(filter);
 
-        public Handle query(String name) {
-            synchronized (mSysProps) {
-                return mSysProps.containsKey(name) ? new Handle(name) : null;
-            }
-        }
+        assertNotNull(intent);
+        assertEquals(intent.getAction(), action);
+        verify(mActivityManagerMock, times(1)).registerReceiverWithFeature(
+                eq(mIApplicationThreadMock), anyString(), anyString(), anyString(), any(),
+                eq(filter), anyString(), anyInt(), anyInt());
+    }
 
-        public void clear() {
-            synchronized (mSysProps) {
-                mSysProps.clear();
-            }
-        }
+    @Test
+    public void getIntent_querySameValueTwice_verifyRegisterReceiverIsCalledOnce()
+            throws RemoteException {
+        setActivityManagerMock(Intent.ACTION_DEVICE_STORAGE_LOW);
+        final Intent intent = queryIntent(new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW));
+        final Intent cachedIntent = queryIntent(new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW));
 
-        public class Handle {
-            private final String mName;
+        assertNotNull(intent);
+        assertEquals(intent.getAction(), Intent.ACTION_DEVICE_STORAGE_LOW);
+        assertNotNull(cachedIntent);
+        assertEquals(cachedIntent.getAction(), Intent.ACTION_DEVICE_STORAGE_LOW);
 
-            Handle(String name) {
-                mName = name;
-            }
+        verify(mActivityManagerMock, times(1)).registerReceiverWithFeature(
+                eq(mIApplicationThreadMock), anyString(), anyString(), anyString(), any(),
+                any(), anyString(), anyInt(), anyInt());
+    }
 
-            public long getLong(long defaultValue) {
-                return get(mName, defaultValue);
-            }
-        }
+    @Test
+    public void getIntent_queryActionTwiceWithNullResult_verifyRegisterReceiverIsCalledOnce()
+            throws RemoteException {
+        setActivityManagerMock(null);
+        final Intent intent = queryIntent(new IntentFilter(Intent.ACTION_DEVICE_STORAGE_FULL));
+        final Intent cachedIntent = queryIntent(
+                new IntentFilter(Intent.ACTION_DEVICE_STORAGE_FULL));
+
+        assertNull(intent);
+        assertNull(cachedIntent);
+
+        verify(mActivityManagerMock, times(1)).registerReceiverWithFeature(
+                eq(mIApplicationThreadMock), anyString(), anyString(), anyString(), any(),
+                any(), anyString(), anyInt(), anyInt());
+    }
+
+    @Test
+    public void getIntent_querySameActionWithDifferentFilter_verifyRegisterReceiverCalledTwice()
+            throws RemoteException {
+        setActivityManagerMock(Intent.ACTION_DEVICE_STORAGE_LOW);
+        final IntentFilter filter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
+        final Intent intent = queryIntent(filter);
+
+        final IntentFilter newFilter = new IntentFilter(Intent.ACTION_DEVICE_STORAGE_LOW);
+        newFilter.addDataScheme("file");
+        final Intent newIntent = queryIntent(newFilter);
+
+        assertNotNull(intent);
+        assertEquals(intent.getAction(), Intent.ACTION_DEVICE_STORAGE_LOW);
+        assertNotNull(newIntent);
+        assertEquals(newIntent.getAction(), Intent.ACTION_DEVICE_STORAGE_LOW);
+
+        verify(mActivityManagerMock, times(1)).registerReceiverWithFeature(
+                eq(mIApplicationThreadMock), anyString(), anyString(), anyString(), any(),
+                eq(filter), anyString(), anyInt(), anyInt());
+
+        verify(mActivityManagerMock, times(1)).registerReceiverWithFeature(
+                eq(mIApplicationThreadMock), anyString(), anyString(), anyString(), any(),
+                eq(newFilter), anyString(), anyInt(), anyInt());
+    }
+
+    private Intent queryIntent(IntentFilter filter) {
+        return BroadcastStickyCache.getIntent(
+                mIApplicationThreadMock,
+                "android",
+                "android",
+                filter,
+                "system",
+                0,
+                0
+        );
+    }
+
+    private void setActivityManagerMock(String action) throws RemoteException {
+        when(ActivityManager.getService()).thenReturn(mActivityManagerMock);
+        when(mActivityManagerMock.registerReceiverWithFeature(any(), anyString(),
+                anyString(), anyString(), any(), any(), anyString(), anyInt(),
+                anyInt())).thenReturn(action != null ? new Intent(action) : null);
     }
 }

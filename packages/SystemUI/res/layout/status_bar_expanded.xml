@@ -31,12 +31,6 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 
-    <ViewStub
-        android:id="@+id/keyguard_qs_user_switch_stub"
-        android:layout="@layout/keyguard_qs_user_switch"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent" />
-
     <include layout="@layout/status_bar_expanded_plugin_frame"/>
 
     <com.android.systemui.shade.NotificationsQuickSettingsContainer
@@ -46,10 +40,6 @@
         android:id="@+id/notification_container_parent"
         android:clipToPadding="false"
         android:clipChildren="false">
-
-        <include
-            layout="@layout/keyguard_status_view"
-            android:visibility="gone"/>
 
         <include layout="@layout/dock_info_overlay"/>
 
@@ -119,12 +109,6 @@
             android:visibility="gone"
         />
     </com.android.systemui.shade.NotificationsQuickSettingsContainer>
-
-    <ViewStub
-        android:id="@+id/keyguard_user_switcher_stub"
-        android:layout="@layout/keyguard_user_switcher"
-        android:layout_height="match_parent"
-        android:layout_width="match_parent" />
 
     <include layout="@layout/dock_info_bottom_area_overlay" />
 

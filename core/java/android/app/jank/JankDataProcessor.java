@@ -59,7 +59,6 @@ public class JankDataProcessor {
      * @param appUid the uid of the app.
      */
     public void processJankData(List<JankData> jankData, String activityName, int appUid) {
-        mCurrentBatchCount++;
         // add all the previous and active states to the pending states list.
         mStateTracker.retrieveAllStates(mPendingStates);
 
@@ -70,8 +69,8 @@ public class JankDataProcessor {
             for (int j = 0; j < mPendingStates.size(); j++) {
                 StateData pendingState = mPendingStates.get(j);
                 // This state was active during the frame
-                if (frame.frameVsyncId >= pendingState.mVsyncIdStart
-                        && frame.frameVsyncId <= pendingState.mVsyncIdEnd) {
+                if (frame.getVsyncId() >= pendingState.mVsyncIdStart
+                        && frame.getVsyncId() <= pendingState.mVsyncIdEnd) {
                     recordFrameCount(frame, pendingState, activityName, appUid);
 
                     pendingState.mProcessed = true;
@@ -79,11 +78,84 @@ public class JankDataProcessor {
             }
         }
         // At this point we have attributed all frames to a state.
+        incrementBatchCountAndMaybeLogStats();
+
+        // return the StatData object back to the pool to be reused.
+        jankDataProcessingComplete();
+    }
+
+    /**
+     * Merges app jank stats reported by components outside the platform to the current pending
+     * stats
+     */
+    public void mergeJankStats(AppJankStats jankStats, String activityName) {
+        // Each state has a key which is a combination of widget category, widget id and widget
+        // state, this key is also used to identify pending stats, a pending stat is essentially a
+        // state with frames associated with it.
+        String stateKey = mStateTracker.getStateKey(jankStats.getWidgetCategory(),
+                jankStats.getWidgetId(), jankStats.getWidgetState());
+
+        if (mPendingJankStats.containsKey(stateKey)) {
+            mergeExistingStat(stateKey, jankStats);
+        } else {
+            mergeNewStat(stateKey, activityName, jankStats);
+        }
+
+        incrementBatchCountAndMaybeLogStats();
+    }
+
+    private void mergeExistingStat(String stateKey, AppJankStats jankStat) {
+        PendingJankStat pendingStat = mPendingJankStats.get(stateKey);
+
+        pendingStat.mJankyFrames += jankStat.getJankyFrameCount();
+        pendingStat.mTotalFrames += jankStat.getTotalFrameCount();
+
+        mergeOverrunHistograms(pendingStat.mFrameOverrunBuckets,
+                jankStat.getRelativeFrameTimeHistogram().getBucketCounters());
+    }
+
+    private void mergeNewStat(String stateKey, String activityName, AppJankStats jankStats) {
+        // Check if we have space for a new stat
+        if (mPendingJankStats.size() > MAX_IN_MEMORY_STATS) {
+            return;
+        }
+
+        PendingJankStat pendingStat = mPendingJankStatsPool.acquire();
+        if (pendingStat == null) {
+            pendingStat = new PendingJankStat();
+
+        }
+        pendingStat.clearStats();
+
+        pendingStat.mActivityName = activityName;
+        pendingStat.mUid = jankStats.getUid();
+        pendingStat.mWidgetId = jankStats.getWidgetId();
+        pendingStat.mWidgetCategory = jankStats.getWidgetCategory();
+        pendingStat.mWidgetState = jankStats.getWidgetState();
+        pendingStat.mTotalFrames = jankStats.getTotalFrameCount();
+        pendingStat.mJankyFrames = jankStats.getJankyFrameCount();
+
+        mergeOverrunHistograms(pendingStat.mFrameOverrunBuckets,
+                jankStats.getRelativeFrameTimeHistogram().getBucketCounters());
+
+        mPendingJankStats.put(stateKey, pendingStat);
+    }
+
+    private void mergeOverrunHistograms(int[] mergeTarget, int[] mergeSource) {
+        // The length of each histogram should be identical, if they are not then its possible the
+        // buckets are not in sync, these records should not be recorded.
+        if (mergeTarget.length != mergeSource.length) return;
+
+        for (int i = 0; i < mergeTarget.length; i++) {
+            mergeTarget[i] += mergeSource[i];
+        }
+    }
+
+    private void incrementBatchCountAndMaybeLogStats() {
+        mCurrentBatchCount++;
         if (mCurrentBatchCount >= LOG_BATCH_FREQUENCY) {
             logMetricCounts();
         }
-        // return the StatData object back to the pool to be reused.
-        jankDataProcessingComplete();
     }
 
     /**
@@ -123,14 +195,14 @@ public class JankDataProcessor {
             mPendingJankStats.put(stateData.mStateDataKey, jankStats);
         }
         // This state has already been accounted for
-        if (jankStats.processedVsyncId == frameData.frameVsyncId) return;
+        if (jankStats.processedVsyncId == frameData.getVsyncId()) return;
 
         jankStats.mTotalFrames += 1;
-        if (frameData.jankType == JankData.JANK_APPLICATION) {
+        if ((frameData.getJankType() & JankData.JANK_APPLICATION) != 0) {
             jankStats.mJankyFrames += 1;
         }
-        jankStats.recordFrameOverrun(frameData.actualAppFrameTimeNs);
-        jankStats.processedVsyncId = frameData.frameVsyncId;
+        jankStats.recordFrameOverrun(frameData.getActualAppFrameTimeNanos());
+        jankStats.processedVsyncId = frameData.getVsyncId();
 
     }
 
@@ -143,7 +215,8 @@ public class JankDataProcessor {
 
         try {
             mPendingJankStats.values().forEach(stat -> {
-                        FrameworkStatsLog.write(FrameworkStatsLog.JANK_FRAME_COUNT_BY_WIDGET,
+                        FrameworkStatsLog.write(
+                                FrameworkStatsLog.JANK_FRAME_COUNT_BY_WIDGET_REPORTED,
                                 /*app uid*/ stat.getUid(),
                                 /*activity name*/ stat.getActivityName(),
                                 /*widget id*/ stat.getWidgetId(),
@@ -198,7 +271,8 @@ public class JankDataProcessor {
         private static final int[] sFrameOverrunHistogramBounds =  {
                 Integer.MIN_VALUE, -200, -150, -100, -90, -80, -70, -60, -50, -40, -30, -25, -20,
                 -18, -16, -14, -12, -10, -8, -6, -4, -2, 0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 25,
-                30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900, 1000
+                30, 40, 50, 60, 70, 80, 90, 100, 150, 200, 300, 400, 500, 600, 700, 800, 900, 1000,
+                Integer.MAX_VALUE
         };
         private final int[] mFrameOverrunBuckets = new int[sFrameOverrunHistogramBounds.length];
 
@@ -341,7 +415,7 @@ public class JankDataProcessor {
             if (overrunTime < 200) {
                 return (overrunTime - 50) / 100 + 41;
             }
-            if (overrunTime < 1000) {
+            if (overrunTime <= 1000) {
                 return (overrunTime - 200) / 100 + 43;
             }
             return sFrameOverrunHistogramBounds.length - 1;

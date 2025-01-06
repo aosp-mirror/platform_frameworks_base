@@ -16,14 +16,14 @@
 
 package com.android.systemui.display.data.repository
 
+import android.util.Log
 import android.view.Display
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.CoreStartable
 import com.android.systemui.dagger.qualifiers.Background
 import java.io.PrintWriter
 import java.util.concurrent.ConcurrentHashMap
-import kotlinx.coroutines.CoroutineName
 import kotlinx.coroutines.CoroutineScope
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Provides per display instances of [T]. */
 interface PerDisplayStore<T> {
@@ -37,12 +37,10 @@ interface PerDisplayStore<T> {
     val defaultDisplay: T
 
     /**
-     * Returns an instance for a specific display id.
-     *
-     * @throws IllegalArgumentException if [displayId] doesn't match the id of any existing
-     *   displays.
+     * Returns an instance for a specific display id, or null if [displayId] doesn't match the id of
+     * any existing displays.
      */
-    fun forDisplay(displayId: Int): T
+    fun forDisplay(displayId: Int): T?
 }
 
 abstract class PerDisplayStoreImpl<T>(
@@ -59,7 +57,7 @@ abstract class PerDisplayStoreImpl<T>(
      * Note that the id of the default display is [Display.DEFAULT_DISPLAY].
      */
     override val defaultDisplay: T
-        get() = forDisplay(Display.DEFAULT_DISPLAY)
+        get() = forDisplay(Display.DEFAULT_DISPLAY)!!
 
     /**
      * Returns an instance for a specific display id.
@@ -67,16 +65,30 @@ abstract class PerDisplayStoreImpl<T>(
      * @throws IllegalArgumentException if [displayId] doesn't match the id of any existing
      *   displays.
      */
-    override fun forDisplay(displayId: Int): T {
+    override fun forDisplay(displayId: Int): T? {
         if (displayRepository.getDisplay(displayId) == null) {
-            throw IllegalArgumentException("Display with id $displayId doesn't exist.")
+            Log.e(TAG, "<${instanceClass.simpleName}>: Display with id $displayId doesn't exist.")
+            return null
         }
-        return perDisplayInstances.computeIfAbsent(displayId) {
-            createInstanceForDisplay(displayId)
+        synchronized(perDisplayInstances) {
+            val existingInstance = perDisplayInstances[displayId]
+            if (existingInstance != null) {
+                return existingInstance
+            }
+            val newInstance = createInstanceForDisplay(displayId)
+            if (newInstance == null) {
+                Log.e(
+                    TAG,
+                    "<${instanceClass.simpleName}> returning null because createInstanceForDisplay($displayId) returned null.",
+                )
+            } else {
+                perDisplayInstances[displayId] = newInstance
+            }
+            return newInstance
         }
     }
 
-    protected abstract fun createInstanceForDisplay(displayId: Int): T
+    protected abstract fun createInstanceForDisplay(displayId: Int): T?
 
     override fun start() {
         val instanceType = instanceClass.simpleName
@@ -98,6 +110,10 @@ abstract class PerDisplayStoreImpl<T>(
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println(perDisplayInstances)
+    }
+
+    private companion object {
+        const val TAG = "PerDisplayStore"
     }
 }
 

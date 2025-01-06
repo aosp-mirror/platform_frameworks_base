@@ -75,8 +75,8 @@ android_test {
     ],
     static_libs: ["WMShellFlickerTestsBase"],
     test_suites: [
-        "device-tests",
         "csuite",
+        "device-tests",
     ],
     data: ["trace_config/*"],
 }
@@ -115,6 +115,13 @@ test_module_config {
         "com.android.wm.shell.flicker.pip.PipPinchInTest",
         "com.android.wm.shell.flicker.pip.SetRequestedOrientationWhilePinned",
         "com.android.wm.shell.flicker.pip.ShowPipAndRotateDisplay",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfAutoEnterPipOnGoToHomeTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipOnUserLeaveHintTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipToOtherOrientation",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipViaAppUiButtonTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaExpandButtonTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaIntentTest",
+        "com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfSetRequestedOrientationWhilePinned",
     ],
     test_suites: ["device-tests"],
 }
@@ -263,6 +270,57 @@ test_module_config {
     name: "WMShellFlickerTestsPip-ShowPipAndRotateDisplay",
     base: "WMShellFlickerTestsPip",
     include_filters: ["com.android.wm.shell.flicker.pip.ShowPipAndRotateDisplay"],
+    test_suites: ["device-tests"],
+}
+
+// Not-match Parent test cases
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfExitPipToAppViaExpandButtonTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaExpandButtonTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfExitPipToAppViaIntentTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfExitPipToAppViaIntentTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfAutoEnterPipOnGoToHomeTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfAutoEnterPipOnGoToHomeTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfEnterPipOnUserLeaveHintTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipOnUserLeaveHintTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfEnterPipViaAppUiButtonTest",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipViaAppUiButtonTest"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfEnterPipToOtherOrientation",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfEnterPipToOtherOrientation"],
+    test_suites: ["device-tests"],
+}
+
+test_module_config {
+    name: "WMShellFlickerTestsPip-BottomHalfSetRequestedOrientationWhilePinned",
+    base: "WMShellFlickerTestsPip",
+    include_filters: ["com.android.wm.shell.flicker.pip.nonmatchparent.BottomHalfSetRequestedOrientationWhilePinned"],
     test_suites: ["device-tests"],
 }
 

@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"既定: 発信者番号非通知、次の発信: 通知"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"既定: 発信者番号通知、次の発信: 非通知"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"既定: 発信者番号通知、次の発信: 通知"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"このアプリは 16 KB アライメントではありません。APK のアライメント チェックが失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"このアプリは 16 KB アライメントではありません。ELF のアライメント チェックに失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"このアプリは 16 KB アライメントではありません。APK と ELF のアライメント チェックに失敗しました。このアプリはページサイズ互換モードを使用して実行されます。最適な互換性を実現するには、16 KB をサポートするようにアプリケーションを再コンパイルしてください。詳しくは、&lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt; をご覧ください。"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"提供可能なサービスがありません。"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"発信者番号の設定は変更できません。"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"データが <xliff:g id="CARRIERDISPLAY">%s</xliff:g> に切り替わりました"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"モバイル ネットワークにアクセスできません"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"タップして、優先ネットワークを変更してください。"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"緊急通報は利用できません"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"緊急通報にはモバイル ネットワークが必要です"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"通知"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"電話の転送"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"付近の Ultra Wideband デバイス間の相対位置の特定をアプリに許可します"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"付近の Wi-Fi デバイスとの通信"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"付近の Wi-Fi デバイスについて、情報の表示、接続、相対位置の確認をアプリに許可します"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"付近のデバイス間の相対位置の特定"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"付近のデバイス間の相対位置の特定をアプリに許可します"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"優先される NFC お支払いサービスの情報"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"登録されている支援やルートの目的地など、優先される NFC お支払いサービスの情報を取得することをアプリに許可します。"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"NFCの管理"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"<xliff:g id="COUNT">%d</xliff:g> 時間後"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"<xliff:g id="COUNT">%d</xliff:g> 日後"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"<xliff:g id="COUNT">%d</xliff:g> 年後"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> 分前"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> 時間前"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> 日前"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> 年前"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> 分"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> 時間"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> 日"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> 年"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"あと <xliff:g id="COUNT">%d</xliff:g> 分"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"あと <xliff:g id="COUNT">%d</xliff:g> 時間"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"あと <xliff:g id="COUNT">%d</xliff:g> 日"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"あと <xliff:g id="COUNT">%d</xliff:g> 年"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> 分前"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> 時間前"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> 日前"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> 年前"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# 分前}other{# 分前}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# 時間前}other{# 時間前}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# 日前}other{# 日前}}"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"片手モード"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"さらに輝度を下げる"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"補聴器"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が ON になりました。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"音量ボタンを長押ししました。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> が OFF になりました。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"音量ボタンを離してください。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> を有効にするには音量大と音量小の両方のボタンを 3 秒ほど長押ししてください。"</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"週末"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"予定モード"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"おやすみモード"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"サイレント モード（<xliff:g id="APP_NAME">%1$s</xliff:g>）"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"<xliff:g id="APP_NAME">%1$s</xliff:g> によって管理されています"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"ON"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"OFF"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"、 "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g>～<xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g>～<xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>、<xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"すべてのカレンダー"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> により一部の音はミュートに設定"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"デバイスで内部的な問題が発生しました。データが初期化されるまで不安定になる可能性があります。"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"モバイル ネットワークや Wi-Fi ネットワークがなくてもメッセージを送受信できます"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"メッセージ アプリを開く"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"仕組み"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"[ネットワークを自動的に選択] を ON にする"</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"設定で [ネットワークを自動的に選択] を ON にすると、衛星と通信可能なネットワークをスマートフォンが検出できるようになります"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"ON にする"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"戻る"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"保留中..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"衛星 SOS を利用できるようになりました"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"モバイル ネットワークや Wi-Fi ネットワークがなくても、緊急サービスにメッセージを送信できます。Google メッセージがデフォルトのメッセージ アプリに設定されている必要があります。"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"衛星 SOS に対応していません"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"このデバイスは衛星 SOS に対応していません"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"衛星 SOS が設定されていません"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"インターネットに接続していることを確認してから、もう一度設定してみてください"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"衛星 SOS を利用できません"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"この国または地域では衛星 SOS を利用できません"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"衛星 SOS が設定されていません"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"衛星経由でメッセージを送受信するには、Google メッセージをデフォルトのメッセージ アプリに設定してください"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"衛星 SOS を利用できません"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"この国または地域で衛星 SOS を利用できるかどうかを確認するには、位置情報の設定を ON にしてください"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"衛星通信メッセージを利用できます"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"モバイル ネットワークや Wi-Fi ネットワークがなくても、衛星経由でメッセージを送受信できます。Google メッセージがデフォルトのメッセージ アプリに設定されている必要があります。"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"衛星通信メッセージに対応していません"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"このデバイスは衛星通信メッセージに対応していません"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"衛星通信メッセージが設定されていません"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"インターネットに接続していることを確認してから、もう一度設定してみてください"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"衛星通信メッセージを利用できません"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"この国または地域では衛星通信メッセージを利用できません"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"衛星通信メッセージが設定されていません"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"衛星経由でメッセージを送受信するには、Google メッセージをデフォルトのメッセージ アプリに設定してください"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"衛星通信メッセージを利用できません"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"この国または地域で衛星通信メッセージを利用できるかどうかを確認するには、位置情報の設定を ON にしてください"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"指紋認証をもう一度設定してください"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"<xliff:g id="FINGERPRINT">%s</xliff:g>を認識できなくなりました。"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"<xliff:g id="FINGERPRINT_0">%1$s</xliff:g>と<xliff:g id="FINGERPRINT_1">%2$s</xliff:g>を認識できなくなりました。"</string>

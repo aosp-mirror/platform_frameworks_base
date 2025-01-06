@@ -18,6 +18,7 @@ package com.android.systemui.qs.panels.ui.viewmodel
 
 import android.content.res.Resources
 import android.content.res.mainResources
+import android.graphics.drawable.TestStubDrawable
 import android.service.quicksettings.Tile
 import android.widget.Button
 import android.widget.Switch
@@ -26,9 +27,12 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.plugins.qs.QSTile
+import com.android.systemui.qs.tileimpl.QSTileImpl
+import com.android.systemui.qs.tileimpl.QSTileImpl.ResourceIcon
 import com.android.systemui.res.R
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
+import java.util.function.Supplier
 import org.junit.Test
 import org.junit.runner.RunWith
 
@@ -261,6 +265,45 @@ class TileUiStateTest : SysuiTestCase() {
         val uiState = state.toUiState()
         assertThat(uiState.accessibilityUiState.stateDescription)
             .contains(resources.getString(R.string.tile_unavailable))
+    }
+
+    @Test
+    fun iconAndSupplier_prefersIcon() {
+        val state =
+            QSTile.State().apply {
+                icon = ResourceIcon.get(R.drawable.android)
+                iconSupplier = Supplier { QSTileImpl.DrawableIcon(TestStubDrawable()) }
+            }
+        val uiState = state.toUiState()
+
+        assertThat(uiState.icon).isEqualTo(state.icon)
+    }
+
+    @Test
+    fun iconOnly_hasIcon() {
+        val state = QSTile.State().apply { icon = ResourceIcon.get(R.drawable.android) }
+        val uiState = state.toUiState()
+
+        assertThat(uiState.icon).isEqualTo(state.icon)
+    }
+
+    @Test
+    fun supplierOnly_hasIcon() {
+        val state =
+            QSTile.State().apply {
+                iconSupplier = Supplier { ResourceIcon.get(R.drawable.android) }
+            }
+        val uiState = state.toUiState()
+
+        assertThat(uiState.icon).isEqualTo(state.iconSupplier.get())
+    }
+
+    @Test
+    fun noIconOrSupplier_iconNull() {
+        val state = QSTile.State()
+        val uiState = state.toUiState()
+
+        assertThat(uiState.icon).isNull()
     }
 
     private fun QSTile.State.toUiState() = toUiState(resources)

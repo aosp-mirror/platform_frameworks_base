@@ -24,7 +24,6 @@ import android.view.Choreographer;
 import android.view.SurfaceControl;
 
 import com.android.wm.shell.R;
-import com.android.wm.shell.transition.Transitions;
 
 /**
  * Abstracts the common operations on {@link SurfaceControl.Transaction} for PiP transition.
@@ -180,8 +179,7 @@ public class PipSurfaceTransactionHelper {
         // destination are different.
         final float scale = srcW <= srcH ? (float) destW / srcW : (float) destH / srcH;
         final Rect crop = mTmpDestinationRect;
-        crop.set(0, 0, Transitions.SHELL_TRANSITIONS_ROTATION ? destH
-                : destW, Transitions.SHELL_TRANSITIONS_ROTATION ? destW : destH);
+        crop.set(0, 0, destW, destH);
         // Inverse scale for crop to fit in screen coordinates.
         crop.scale(1 / scale);
         crop.offset(insets.left, insets.top);
@@ -200,8 +198,8 @@ public class PipSurfaceTransactionHelper {
             }
         }
         mTmpTransform.setScale(scale, scale);
-        mTmpTransform.postRotate(degrees);
         mTmpTransform.postTranslate(positionX, positionY);
+        mTmpTransform.postRotate(degrees);
         tx.setMatrix(leash, mTmpTransform, mTmpFloat9).setCrop(leash, crop);
         return this;
     }

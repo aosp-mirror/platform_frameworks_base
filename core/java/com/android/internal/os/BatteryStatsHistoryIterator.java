@@ -45,6 +45,8 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
     private boolean mNextItemReady;
     private boolean mTimeInitialized;
     private boolean mClosed;
+    private long mBaseMonotonicTime;
+    private long mBaseTimeUtc;
 
     public BatteryStatsHistoryIterator(@NonNull BatteryStatsHistory history, long startTimeMs,
             long endTimeMs) {
@@ -84,24 +86,25 @@ public class BatteryStatsHistoryIterator implements Iterator<BatteryStats.Histor
             }
 
             if (!mTimeInitialized) {
-                mHistoryItem.time = mBatteryStatsHistory.getHistoryBufferStartTime(p);
+                mBaseMonotonicTime = mBatteryStatsHistory.getHistoryBufferStartTime(p);
+                mHistoryItem.time = mBaseMonotonicTime;
                 mTimeInitialized = true;
             }
 
-            final long lastMonotonicTimeMs = mHistoryItem.time;
-            final long lastWalltimeMs = mHistoryItem.currentTime;
             try {
                 readHistoryDelta(p, mHistoryItem);
             } catch (Throwable t) {
                 Slog.wtf(TAG, "Corrupted battery history", t);
                 break;
             }
-            if (mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_CURRENT_TIME
-                    && mHistoryItem.cmd != BatteryStats.HistoryItem.CMD_RESET
-                    && lastWalltimeMs != 0) {
-                mHistoryItem.currentTime =
-                        lastWalltimeMs + (mHistoryItem.time - lastMonotonicTimeMs);
+
+            if (mHistoryItem.cmd == BatteryStats.HistoryItem.CMD_CURRENT_TIME
+                    || mHistoryItem.cmd == BatteryStats.HistoryItem.CMD_RESET) {
+                mBaseTimeUtc = mHistoryItem.currentTime - (mHistoryItem.time - mBaseMonotonicTime);
             }
+
+            mHistoryItem.currentTime = mBaseTimeUtc + (mHistoryItem.time - mBaseMonotonicTime);
+
             if (mEndTimeMs != 0 && mHistoryItem.time >= mEndTimeMs) {
                 break;
             }

@@ -17,6 +17,6 @@
 package com.android.systemui.plugins
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.util.mockito.mock
+import org.mockito.kotlin.mock
 
 var Kosmos.activityStarter by Kosmos.Fixture { mock<ActivityStarter>() }

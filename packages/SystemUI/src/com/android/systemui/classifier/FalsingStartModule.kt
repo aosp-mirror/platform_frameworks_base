@@ -27,5 +27,5 @@ interface FalsingStartModule {
     @Binds
     @IntoMap
     @ClassKey(FalsingCoreStartable::class)
-    fun bindFalsingCoreStartable(falsingCoreStartable: FalsingCoreStartable?): CoreStartable?
+    fun bindFalsingCoreStartable(falsingCoreStartable: FalsingCoreStartable): CoreStartable
 }

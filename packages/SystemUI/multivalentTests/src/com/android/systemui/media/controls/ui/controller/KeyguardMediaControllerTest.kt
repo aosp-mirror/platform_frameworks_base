@@ -16,7 +16,6 @@
 
 package com.android.systemui.media.controls.ui.controller
 
-import android.provider.Settings
 import android.testing.TestableLooper
 import android.view.View.GONE
 import android.view.View.VISIBLE
@@ -88,7 +87,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
                 configurationController,
                 ResourcesSplitShadeStateController(),
                 mock<KeyguardMediaControllerLogger>(),
-                mock<DumpManager>()
+                mock<DumpManager>(),
             )
         keyguardMediaController.attachSinglePaneContainer(mediaContainerView)
         keyguardMediaController.useSplitShade = false
@@ -142,7 +141,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
 
         assertTrue(
             "HostView wasn't attached to the split pane container",
-            splitShadeContainer.childCount == 1
+            splitShadeContainer.childCount == 1,
         )
     }
 
@@ -153,7 +152,7 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
 
         assertTrue(
             "HostView wasn't attached to the single pane container",
-            mediaContainerView.childCount == 1
+            mediaContainerView.childCount == 1,
         )
     }
 
@@ -174,34 +173,12 @@ class KeyguardMediaControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun dozeWakeUpAnimationWaiting_inSplitShade_mediaIsHidden() {
-        val splitShadeContainer = FrameLayout(context)
-        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
-        keyguardMediaController.useSplitShade = true
-
-        keyguardMediaController.isDozeWakeUpAnimationWaiting = true
-
-        assertThat(splitShadeContainer.visibility).isEqualTo(GONE)
-    }
-
-    @Test
     fun dozing_inSingleShade_mediaIsVisible() {
         val splitShadeContainer = FrameLayout(context)
         keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
         keyguardMediaController.useSplitShade = false
 
         setDozing()
-
-        assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
-    }
-
-    @Test
-    fun dozeWakeUpAnimationWaiting_inSingleShade_mediaIsVisible() {
-        val splitShadeContainer = FrameLayout(context)
-        keyguardMediaController.attachSplitShadeContainer(splitShadeContainer)
-        keyguardMediaController.useSplitShade = false
-
-        keyguardMediaController.isDozeWakeUpAnimationWaiting = true
 
         assertThat(mediaContainerView.visibility).isEqualTo(VISIBLE)
     }

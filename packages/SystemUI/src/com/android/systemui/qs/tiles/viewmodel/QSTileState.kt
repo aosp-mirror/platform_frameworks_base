@@ -36,7 +36,6 @@ import kotlin.reflect.KClass
  */
 data class QSTileState(
     val icon: Icon?,
-    val iconRes: Int?,
     val label: CharSequence,
     val activationState: ActivationState,
     val secondaryLabel: CharSequence?,
@@ -58,7 +57,7 @@ data class QSTileState(
         ): QSTileState {
             val iconDrawable = resources.getDrawable(config.iconRes, theme)
             return build(
-                Icon.Loaded(iconDrawable, null),
+                Icon.Loaded(iconDrawable, null, config.iconRes),
                 resources.getString(config.labelRes),
                 builder,
             )
@@ -115,7 +114,6 @@ data class QSTileState(
     }
 
     class Builder(var icon: Icon?, var label: CharSequence) {
-        var iconRes: Int? = null
         var activationState: ActivationState = ActivationState.INACTIVE
         var secondaryLabel: CharSequence? = null
         var supportedActions: Set<UserAction> = setOf(UserAction.CLICK)
@@ -128,7 +126,6 @@ data class QSTileState(
         fun build(): QSTileState =
             QSTileState(
                 icon,
-                iconRes,
                 label,
                 activationState,
                 secondaryLabel,

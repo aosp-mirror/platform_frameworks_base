@@ -29,6 +29,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.CameraCompatTaskInfo.FreeformCameraCompatMode;
 import android.app.TaskInfo;
+import android.graphics.Rect;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
@@ -198,6 +199,34 @@ public class AppCompatUtilsTest extends WindowTestsBase {
         });
     }
 
+    @Test
+    public void testTopActivityLetterboxed_hasBounds() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.checkTopActivityInSizeCompatMode(/* inScm */ false);
+                a.setIgnoreOrientationRequest(true);
+                a.configureTopActivityBounds(new Rect(20, 30, 520, 630));
+            });
+            robot.setIsLetterboxedForAspectRatioOnly(/* forAspectRatio */ true);
+
+
+            robot.checkTaskInfoTopActivityHasBounds(/* expected */ new Rect(20, 30, 520, 630));
+        });
+    }
+
+    @Test
+    public void testTopActivityNotLetterboxed_hasNoBounds() {
+        runTestScenario((robot) -> {
+            robot.applyOnActivity((a) -> {
+                a.createActivityWithComponent();
+                a.setIgnoreOrientationRequest(true);
+            });
+
+            robot.checkTaskInfoTopActivityHasBounds(/* expected */ null);
+        });
+    }
+
     /**
      * Runs a test scenario providing a Robot.
      */
@@ -280,6 +309,11 @@ public class AppCompatUtilsTest extends WindowTestsBase {
         void checkTaskInfoFreeformCameraCompatMode(@FreeformCameraCompatMode int mode) {
             Assert.assertEquals(mode, getTopTaskInfo().appCompatTaskInfo
                     .cameraCompatTaskInfo.freeformCameraCompatMode);
+        }
+
+        void checkTaskInfoTopActivityHasBounds(Rect bounds) {
+            Assert.assertEquals(bounds, getTopTaskInfo().appCompatTaskInfo
+                    .topActivityLetterboxBounds);
         }
 
         void setCameraCompatTreatmentEnabledForActivity(boolean enabled) {

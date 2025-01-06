@@ -22,7 +22,7 @@ import android.telephony.TelephonyCallback
 import android.telephony.TelephonyManager
 import android.telephony.satellite.NtnSignalStrength
 import android.telephony.satellite.NtnSignalStrengthCallback
-import android.telephony.satellite.SatelliteCommunicationAllowedStateCallback
+import android.telephony.satellite.SatelliteCommunicationAccessStateCallback
 import android.telephony.satellite.SatelliteManager
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_CONNECTED
 import android.telephony.satellite.SatelliteManager.SATELLITE_MODEM_STATE_DATAGRAM_RETRYING
@@ -37,7 +37,6 @@ import android.telephony.satellite.SatelliteManager.SATELLITE_RESULT_ERROR
 import android.telephony.satellite.SatelliteManager.SatelliteException
 import android.telephony.satellite.SatelliteModemStateCallback
 import android.telephony.satellite.SatelliteProvisionStateCallback
-import android.telephony.satellite.SatelliteSupportedStateCallback
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -52,6 +51,7 @@ import com.android.systemui.util.mockito.withArgCaptor
 import com.android.systemui.util.time.FakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import java.util.Optional
+import java.util.function.Consumer
 import kotlin.test.Test
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -193,19 +193,19 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             val callback =
-                withArgCaptor<SatelliteCommunicationAllowedStateCallback> {
+                withArgCaptor<SatelliteCommunicationAccessStateCallback> {
                     verify(satelliteManager)
-                        .registerForCommunicationAllowedStateChanged(any(), capture())
+                        .registerForCommunicationAccessStateChanged(any(), capture())
                 }
 
             // WHEN satellite manager says it's not available
-            callback.onSatelliteCommunicationAllowedStateChanged(false)
+            callback.onAccessAllowedStateChanged(false)
 
             // THEN it's not!
             assertThat(latest).isFalse()
 
             // WHEN satellite manager says it's changed to available
-            callback.onSatelliteCommunicationAllowedStateChanged(true)
+            callback.onAccessAllowedStateChanged(true)
 
             // THEN it is!
             assertThat(latest).isTrue()
@@ -219,7 +219,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             // GIVEN SatelliteManager gon' throw exceptions when we ask to register the callback
             doThrow(RuntimeException("Test exception"))
                 .`when`(satelliteManager)
-                .registerForCommunicationAllowedStateChanged(any(), any())
+                .registerForCommunicationAccessStateChanged(any(), any())
 
             // WHEN the latest value is requested (and thus causes an exception to be thrown)
             val latest by collectLastValue(underTest.isSatelliteAllowedForCurrentLocation)
@@ -236,9 +236,9 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             val callback =
-                withArgCaptor<SatelliteCommunicationAllowedStateCallback> {
+                withArgCaptor<SatelliteCommunicationAccessStateCallback> {
                     verify(satelliteManager)
-                        .registerForCommunicationAllowedStateChanged(any(), capture())
+                        .registerForCommunicationAccessStateChanged(any(), capture())
                 }
 
             val telephonyCallback =
@@ -249,7 +249,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
                 )
 
             // GIVEN satellite is currently provisioned
-            callback.onSatelliteCommunicationAllowedStateChanged(true)
+            callback.onAccessAllowedStateChanged(true)
 
             assertThat(latest).isTrue()
 
@@ -261,7 +261,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
 
             // THEN listener is re-registered
             verify(satelliteManager, times(2))
-                .registerForCommunicationAllowedStateChanged(any(), any())
+                .registerForCommunicationAccessStateChanged(any(), any())
         }
 
     @Test
@@ -535,7 +535,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             val callback =
-                withArgCaptor<SatelliteSupportedStateCallback> {
+                withArgCaptor<Consumer<Boolean>> {
                     verify(satelliteManager).registerForSupportedStateChanged(any(), capture())
                 }
 
@@ -548,7 +548,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             verify(satelliteManager, times(1)).registerForNtnSignalStrengthChanged(any(), any())
 
             // WHEN satellite support turns off
-            callback.onSatelliteSupportedStateChanged(false)
+            callback.accept(false)
             runCurrent()
 
             // THEN listeners are unregistered
@@ -564,7 +564,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             runCurrent()
 
             val callback =
-                withArgCaptor<SatelliteSupportedStateCallback> {
+                withArgCaptor<Consumer<Boolean>> {
                     verify(satelliteManager).registerForSupportedStateChanged(any(), capture())
                 }
 
@@ -577,7 +577,7 @@ class DeviceBasedSatelliteRepositoryImplTest : SysuiTestCase() {
             verify(satelliteManager, times(0)).registerForNtnSignalStrengthChanged(any(), any())
 
             // WHEN satellite support turns on
-            callback.onSatelliteSupportedStateChanged(true)
+            callback.accept(true)
             runCurrent()
 
             // THEN listeners are registered

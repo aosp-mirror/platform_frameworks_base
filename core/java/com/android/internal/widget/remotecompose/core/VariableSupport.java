@@ -15,6 +15,8 @@
  */
 package com.android.internal.widget.remotecompose.core;
 
+import android.annotation.NonNull;
+
 /**
  * Interface for operators that interact with variables Through this they register to listen to
  * particular variables and are notified when they change
@@ -26,12 +28,15 @@ public interface VariableSupport {
      *
      * @param context
      */
-    void registerListening(RemoteContext context);
+    void registerListening(@NonNull RemoteContext context);
 
     /**
      * Called to be notified that the variables you are interested have changed.
      *
      * @param context
      */
-    void updateVariables(RemoteContext context);
+    void updateVariables(@NonNull RemoteContext context);
+
+    /** Mark the operation as dirty to indicate that the variables it references are out of date. */
+    void markDirty();
 }

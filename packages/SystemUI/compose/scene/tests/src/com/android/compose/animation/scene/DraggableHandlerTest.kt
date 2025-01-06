@@ -18,19 +18,18 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.overscroll
 import androidx.compose.material3.Text
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource.Companion.UserInput
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Velocity
 import androidx.test.ext.junit.runners.AndroidJUnit4
-import com.android.compose.animation.scene.NestedScrollBehavior.EdgeAlways
-import com.android.compose.animation.scene.NestedScrollBehavior.EdgeNoPreview
-import com.android.compose.animation.scene.NestedScrollBehavior.EdgeWithPreview
 import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestOverlays.OverlayB
 import com.android.compose.animation.scene.TestScenes.SceneA
@@ -41,15 +40,28 @@ import com.android.compose.animation.scene.content.state.TransitionState.Transit
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest
-import com.android.compose.test.transition
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Deferred
+import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import org.junit.Test
 import org.junit.runner.RunWith
 
 private const val SCREEN_SIZE = 100f
 private val LAYOUT_SIZE = IntSize(SCREEN_SIZE.toInt(), SCREEN_SIZE.toInt())
+
+private fun pointersDown(
+    startedPosition: Offset = Offset.Zero,
+    pointersDown: Int = 1,
+    pointersDownByType: Map<PointerType, Int> = mapOf(PointerType.Touch to pointersDown),
+): PointersInfo.PointersDown {
+    return PointersInfo.PointersDown(
+        startedPosition = startedPosition,
+        count = pointersDown,
+        countByType = pointersDownByType,
+    )
+}
 
 @RunWith(AndroidJUnit4::class)
 class DraggableHandlerTest {
@@ -86,12 +98,9 @@ class DraggableHandlerTest {
             scene(
                 key = SceneC,
                 userActions =
-                    mapOf(
-                        Swipe.Up to SceneB,
-                        Swipe(SwipeDirection.Up, fromSource = Edge.Bottom) to SceneA,
-                    ),
+                    mapOf(Swipe.Up to SceneB, Swipe.Up(fromSource = Edge.Bottom) to SceneA),
             ) {
-                Text("SceneC")
+                Text("SceneC", Modifier.overscroll(verticalOverscrollEffect))
             }
             overlay(
                 key = OverlayA,
@@ -123,23 +132,14 @@ class DraggableHandlerTest {
                 )
                 .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 
-        val draggableHandler = layoutImpl.draggableHandler(Orientation.Vertical)
-        val horizontalDraggableHandler = layoutImpl.draggableHandler(Orientation.Horizontal)
+        val draggableHandler = layoutImpl.verticalDraggableHandler
+        val horizontalDraggableHandler = layoutImpl.horizontalDraggableHandler
 
-        var pointerInfoOwner: () -> PointersInfo = {
-            PointersInfo(startedPosition = Offset.Zero, pointersDown = 1, isMouseWheel = false)
-        }
+        var pointerInfoOwner: () -> PointersInfo = { pointersDown() }
 
-        fun nestedScrollConnection(
-            nestedScrollBehavior: NestedScrollBehavior,
-            isExternalOverscrollGesture: Boolean = false,
-        ) =
+        fun nestedScrollConnection() =
             NestedScrollHandlerImpl(
-                    layoutImpl = layoutImpl,
-                    orientation = draggableHandler.orientation,
-                    topOrLeftBehavior = nestedScrollBehavior,
-                    bottomOrRightBehavior = nestedScrollBehavior,
-                    isExternalOverscrollGesture = { isExternalOverscrollGesture },
+                    draggableHandler = draggableHandler,
                     pointersInfoOwner = { pointerInfoOwner() },
                 )
                 .connection
@@ -211,42 +211,28 @@ class DraggableHandlerTest {
         }
 
         fun onDragStarted(
-            startedPosition: Offset = Offset.Zero,
+            pointersInfo: PointersInfo.PointersDown = pointersDown(),
             overSlop: Float,
-            pointersDown: Int = 1,
             expectedConsumedOverSlop: Float = overSlop,
         ): DragController {
             // overSlop should be 0f only if the drag gesture starts with startDragImmediately
             if (overSlop == 0f) error("Consider using onDragStartedImmediately()")
             return onDragStarted(
                 draggableHandler = draggableHandler,
-                startedPosition = startedPosition,
+                pointersInfo = pointersInfo,
                 overSlop = overSlop,
-                pointersDown = pointersDown,
                 expectedConsumedOverSlop = expectedConsumedOverSlop,
             )
         }
 
-        fun onDragStartedImmediately(
-            startedPosition: Offset = Offset.Zero,
-            pointersDown: Int = 1,
-        ): DragController {
-            return onDragStarted(draggableHandler, startedPosition, overSlop = 0f, pointersDown)
-        }
-
         fun onDragStarted(
             draggableHandler: DraggableHandler,
-            startedPosition: Offset = Offset.Zero,
+            pointersInfo: PointersInfo.PointersDown = pointersDown(),
             overSlop: Float = 0f,
-            pointersDown: Int = 1,
             expectedConsumedOverSlop: Float = overSlop,
         ): DragController {
             val dragController =
-                draggableHandler.onDragStarted(
-                    startedPosition = startedPosition,
-                    overSlop = overSlop,
-                    pointersDown = pointersDown,
-                )
+                draggableHandler.onDragStarted(pointersDown = pointersInfo, overSlop = overSlop)
 
             // MultiPointerDraggable will always call onDelta with the initial overSlop right after
             dragController.onDragDelta(pixels = overSlop, expectedConsumedOverSlop)
@@ -267,27 +253,28 @@ class DraggableHandlerTest {
         ) {
             val velocityConsumed = onDragStoppedAnimateLater(velocity, canChangeScene)
             onAnimationStart()
-            onAnimationEnd(velocityConsumed.invoke())
+            onAnimationEnd(velocityConsumed.await())
         }
 
         suspend fun DragController.onDragStoppedAnimateNow(
             velocity: Float,
             canChangeScene: Boolean = true,
             onAnimationStart: () -> Unit,
-            expectedConsumedVelocity: Float,
         ) =
             onDragStoppedAnimateNow(
                 velocity = velocity,
                 canChangeScene = canChangeScene,
                 onAnimationStart = onAnimationStart,
-                onAnimationEnd = { assertThat(it).isEqualTo(expectedConsumedVelocity) },
+                onAnimationEnd = {},
             )
 
         fun DragController.onDragStoppedAnimateLater(
             velocity: Float,
             canChangeScene: Boolean = true,
-        ): SuspendedValue<Float> {
-            return onStop(velocity, canChangeScene)
+        ): Deferred<Float> {
+            val velocityConsumed = testScope.async { onStop(velocity, canChangeScene) }
+            testScope.testScheduler.runCurrent()
+            return velocityConsumed
         }
 
         fun NestedScrollConnection.scroll(
@@ -360,7 +347,6 @@ class DraggableHandlerTest {
         dragController.onDragStoppedAnimateNow(
             velocity = velocityThreshold - 0.01f,
             onAnimationStart = { assertTransition(currentScene = SceneA) },
-            expectedConsumedVelocity = velocityThreshold - 0.01f,
         )
 
         assertIdle(currentScene = SceneA)
@@ -388,7 +374,6 @@ class DraggableHandlerTest {
                         progress = 0f,
                     )
                 },
-                expectedConsumedVelocity = velocityThreshold - 0.01f,
             )
 
             assertIdle(currentScene = SceneA)
@@ -402,7 +387,6 @@ class DraggableHandlerTest {
         dragController.onDragStoppedAnimateNow(
             velocity = velocityThreshold,
             onAnimationStart = { assertTransition(currentScene = SceneC) },
-            expectedConsumedVelocity = velocityThreshold,
         )
         assertIdle(currentScene = SceneC)
     }
@@ -415,40 +399,8 @@ class DraggableHandlerTest {
         dragController.onDragStoppedAnimateNow(
             velocity = 0f,
             onAnimationStart = { assertTransition(currentScene = SceneA) },
-            expectedConsumedVelocity = 0f,
         )
         assertIdle(currentScene = SceneA)
-    }
-
-    @Test
-    fun onDragReversedDirection_changeToScene() = runGestureTest {
-        // Drag A -> B with progress 0.6
-        val dragController = onDragStarted(overSlop = -60f)
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneB,
-            progress = 0.6f,
-        )
-
-        // Reverse direction such that A -> C now with 0.4
-        dragController.onDragDelta(pixels = 100f)
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneC,
-            progress = 0.4f,
-        )
-
-        // After the drag stopped scene C should be committed
-        dragController.onDragStoppedAnimateNow(
-            velocity = velocityThreshold,
-            onAnimationStart = {
-                assertTransition(currentScene = SceneC, fromScene = SceneA, toScene = SceneC)
-            },
-            expectedConsumedVelocity = velocityThreshold,
-        )
-        assertIdle(currentScene = SceneC)
     }
 
     @Test
@@ -469,66 +421,22 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun onDragIntoNoAction_startTransitionToOppositeDirection() = runGestureTest {
+    fun onDragIntoNoAction_stayIdle() = runGestureTest {
         navigateToSceneC()
 
         // We are on SceneC which has no action in Down direction
-        val dragController = onDragStarted(overSlop = 10f)
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneB,
-            progress = -0.1f,
-        )
-
-        // Reverse drag direction, it will consume the previous drag
-        dragController.onDragDelta(pixels = -10f)
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneB,
-            progress = 0.0f,
-        )
-
-        // Continue reverse drag direction, it should record progress to Scene B
-        dragController.onDragDelta(pixels = -10f)
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneB,
-            progress = 0.1f,
-        )
-    }
-
-    @Test
-    fun onDragWithActionsInBothDirections_dragToOppositeDirectionReplacesAction() = runGestureTest {
-        // We are on SceneA. UP -> B, DOWN-> C.
-        val dragController = onDragStarted(overSlop = up(fractionOfScreen = 0.2f))
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneB,
-            progress = 0.2f,
-        )
-
-        // Reverse drag direction, it will replace the previous transition
-        dragController.onDragDelta(pixels = down(fractionOfScreen = 0.5f))
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneC,
-            progress = 0.3f,
-        )
+        onDragStarted(overSlop = 10f, expectedConsumedOverSlop = 0f)
+        assertIdle(currentScene = SceneC)
     }
 
     @Test
     fun onDragWithActionsInBothDirections_dragToOppositeDirectionNotReplaceable() = runGestureTest {
         // We are on SceneA. UP -> B, DOWN-> C. The up swipe is not replaceable though.
-        mutableUserActionsA =
-            mapOf(Swipe.Up to UserActionResult(SceneB, isIrreversible = true), Swipe.Down to SceneC)
+        mutableUserActionsA = mapOf(Swipe.Up to UserActionResult(SceneB), Swipe.Down to SceneC)
         val dragController =
             onDragStarted(
-                startedPosition = Offset(SCREEN_SIZE * 0.5f, SCREEN_SIZE * 0.5f),
+                pointersInfo =
+                    pointersDown(startedPosition = Offset(SCREEN_SIZE * 0.5f, SCREEN_SIZE * 0.5f)),
                 overSlop = up(fractionOfScreen = 0.2f),
             )
         assertTransition(
@@ -538,14 +446,12 @@ class DraggableHandlerTest {
             progress = 0.2f,
         )
 
-        // Reverse drag direction, it cannot replace the previous transition
-        dragController.onDragDelta(pixels = down(fractionOfScreen = 0.5f))
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneB,
-            progress = -0.3f,
+        // Reverse drag direction, it does not replace the previous transition.
+        dragController.onDragDelta(
+            pixels = down(fractionOfScreen = 0.5f),
+            expectedConsumed = down(0.2f),
         )
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneB, progress = 0f)
     }
 
     @Test
@@ -554,7 +460,7 @@ class DraggableHandlerTest {
 
         // Start dragging from the bottom
         onDragStarted(
-            startedPosition = Offset(SCREEN_SIZE * 0.5f, SCREEN_SIZE),
+            pointersInfo = pointersDown(startedPosition = Offset(SCREEN_SIZE * 0.5f, SCREEN_SIZE)),
             overSlop = up(fractionOfScreen = 0.1f),
         )
         assertTransition(
@@ -592,85 +498,8 @@ class DraggableHandlerTest {
             onAnimationStart = {
                 assertTransition(currentScene = SceneC, fromScene = SceneA, toScene = SceneC)
             },
-            expectedConsumedVelocity = 0f,
         )
         assertIdle(currentScene = SceneC)
-    }
-
-    @Test
-    fun onAcceleratedScroll_scrollToThirdScene() = runGestureTest {
-        // Drag A -> B with progress 0.2
-        val dragController1 = onDragStarted(overSlop = up(fractionOfScreen = 0.2f))
-        assertTransition(
-            currentScene = SceneA,
-            fromScene = SceneA,
-            toScene = SceneB,
-            progress = 0.2f,
-        )
-
-        // Start animation A -> B with progress 0.2 -> 1.0
-        dragController1.onDragStoppedAnimateLater(velocity = -velocityThreshold)
-        assertTransition(currentScene = SceneB, fromScene = SceneA, toScene = SceneB)
-
-        // While at A -> B do a 100% screen drag (progress 1.2). This should go past B and change
-        // the transition to B -> C with progress 0.2
-        val dragController2 = onDragStartedImmediately()
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 1f))
-        assertTransition(
-            currentScene = SceneB,
-            fromScene = SceneB,
-            toScene = SceneC,
-            progress = 0.2f,
-        )
-
-        // After the drag stopped scene C should be committed
-        dragController2.onDragStoppedAnimateNow(
-            velocity = -velocityThreshold,
-            onAnimationStart = {
-                assertTransition(currentScene = SceneC, fromScene = SceneB, toScene = SceneC)
-            },
-            expectedConsumedVelocity = -velocityThreshold,
-        )
-        assertIdle(currentScene = SceneC)
-    }
-
-    @Test
-    fun onAcceleratedScrollBothTargetsBecomeNull_settlesToIdle() = runGestureTest {
-        val dragController1 = onDragStarted(overSlop = up(fractionOfScreen = 0.2f))
-        dragController1.onDragDelta(pixels = up(fractionOfScreen = 0.2f))
-        dragController1.onDragStoppedAnimateLater(velocity = -velocityThreshold)
-        assertTransition(currentScene = SceneB, fromScene = SceneA, toScene = SceneB)
-
-        mutableUserActionsA = emptyMap()
-        mutableUserActionsB = emptyMap()
-
-        // start accelaratedScroll and scroll over to B -> null
-        val dragController2 = onDragStartedImmediately()
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
-
-        // here onDragStopped is already triggered, but subsequent onDelta/onDragStopped calls may
-        // still be called. Make sure that they don't crash or change the scene
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
-        dragController2.onDragStoppedAnimateNow(
-            velocity = 0f,
-            onAnimationStart = {
-                assertTransition(currentScene = SceneB, fromScene = SceneA, toScene = SceneB)
-            },
-            expectedConsumedVelocity = 0f,
-        )
-
-        advanceUntilIdle()
-        assertIdle(SceneB)
-
-        // These events can still come in after the animation has settled
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.5f), expectedConsumed = 0f)
-        dragController2.onDragStoppedAnimateNow(
-            velocity = 0f,
-            onAnimationStart = { assertIdle(SceneB) },
-            expectedConsumedVelocity = 0f,
-        )
-        assertIdle(SceneB)
     }
 
     @Test
@@ -688,7 +517,6 @@ class DraggableHandlerTest {
             onAnimationStart = {
                 assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.2f)
             },
-            expectedConsumedVelocity = down(fractionOfScreen = 0.1f),
         )
         assertIdle(SceneA)
 
@@ -707,9 +535,8 @@ class DraggableHandlerTest {
         dragController1.onDragStoppedAnimateLater(velocity = down(fractionOfScreen = 0.1f))
 
         // now target changed to C for new drag that started before previous drag settled to Idle
-        val dragController2 = onDragStartedImmediately()
-        dragController2.onDragDelta(pixels = up(fractionOfScreen = 0.1f))
-        assertTransition(fromScene = SceneA, toScene = SceneC, progress = 0.3f)
+        onDragStarted(overSlop = up(fractionOfScreen = 0.1f))
+        assertTransition(fromScene = SceneA, toScene = SceneC, progress = 0.1f)
     }
 
     @Test
@@ -724,376 +551,8 @@ class DraggableHandlerTest {
         assertThat(isUserInputOngoing).isFalse()
 
         // Start a new gesture while the offset is animating
-        onDragStartedImmediately()
+        onDragStarted(overSlop = up(fractionOfScreen = 0.1f))
         assertThat(isUserInputOngoing).isTrue()
-    }
-
-    @Test
-    fun onInitialPreScroll_EdgeWithOverscroll_doNotChangeState() = runGestureTest {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
-        nestedScroll.onPreScroll(
-            available = downOffset(fractionOfScreen = 0.1f),
-            source = UserInput,
-        )
-        assertIdle(currentScene = SceneA)
-    }
-
-    @Test
-    fun onPostScrollWithNothingAvailable_EdgeWithOverscroll_doNotChangeState() = runGestureTest {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
-        val consumed =
-            nestedScroll.onPostScroll(
-                consumed = Offset.Zero,
-                available = Offset.Zero,
-                source = UserInput,
-            )
-
-        assertIdle(currentScene = SceneA)
-        assertThat(consumed).isEqualTo(Offset.Zero)
-    }
-
-    @Test
-    fun onPostScrollWithSomethingAvailable_startSceneTransition() = runGestureTest {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
-        val consumed =
-            nestedScroll.onPostScroll(
-                consumed = Offset.Zero,
-                available = downOffset(fractionOfScreen = 0.1f),
-                source = UserInput,
-            )
-
-        assertTransition(currentScene = SceneA)
-        assertThat(progress).isEqualTo(0.1f)
-        assertThat(consumed).isEqualTo(downOffset(fractionOfScreen = 0.1f))
-    }
-
-    @Test
-    fun afterSceneTransitionIsStarted_interceptPreScrollEvents() = runGestureTest {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-        assertTransition(currentScene = SceneA)
-
-        assertThat(progress).isEqualTo(0.1f)
-
-        // start intercept preScroll
-        val consumed =
-            nestedScroll.onPreScroll(
-                available = downOffset(fractionOfScreen = 0.1f),
-                source = UserInput,
-            )
-        assertThat(progress).isEqualTo(0.2f)
-
-        // do nothing on postScroll
-        nestedScroll.onPostScroll(consumed = consumed, available = Offset.Zero, source = UserInput)
-        assertThat(progress).isEqualTo(0.2f)
-
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-        assertThat(progress).isEqualTo(0.3f)
-        assertTransition(currentScene = SceneA)
-    }
-
-    private fun TestGestureScope.preScrollAfterSceneTransition(
-        firstScroll: Float,
-        secondScroll: Float,
-    ) {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
-        // start scene transition
-        nestedScroll.scroll(available = Offset(0f, firstScroll))
-
-        // stop scene transition (start the "stop animation")
-        nestedScroll.preFling(available = Velocity.Zero)
-
-        // a pre scroll event, that could be intercepted by DraggableHandlerImpl
-        nestedScroll.onPreScroll(available = Offset(0f, secondScroll), source = UserInput)
-    }
-
-    @Test
-    fun scrollAndFling_scrollLessThanInterceptable_goToIdleOnCurrentScene() = runGestureTest {
-        val firstScroll = (transitionInterceptionThreshold - 0.0001f) * SCREEN_SIZE
-        val secondScroll = 1f
-
-        preScrollAfterSceneTransition(firstScroll = firstScroll, secondScroll = secondScroll)
-
-        assertIdle(SceneA)
-    }
-
-    @Test
-    fun scrollAndFling_scrollMinInterceptable_interceptPreScrollEvents() = runGestureTest {
-        val firstScroll = (transitionInterceptionThreshold + 0.0001f) * SCREEN_SIZE
-        val secondScroll = 1f
-
-        preScrollAfterSceneTransition(firstScroll = firstScroll, secondScroll = secondScroll)
-
-        assertTransition(progress = (firstScroll + secondScroll) / SCREEN_SIZE)
-    }
-
-    @Test
-    fun scrollAndFling_scrollMaxInterceptable_interceptPreScrollEvents() = runGestureTest {
-        val firstScroll = -(1f - transitionInterceptionThreshold - 0.0001f) * SCREEN_SIZE
-        val secondScroll = -1f
-
-        preScrollAfterSceneTransition(firstScroll = firstScroll, secondScroll = secondScroll)
-
-        assertTransition(progress = -(firstScroll + secondScroll) / SCREEN_SIZE)
-    }
-
-    @Test
-    fun scrollAndFling_scrollMoreThanInterceptable_goToIdleOnNextScene() = runGestureTest {
-        val firstScroll = -(1f - transitionInterceptionThreshold + 0.0001f) * SCREEN_SIZE
-        val secondScroll = -0.01f
-
-        preScrollAfterSceneTransition(firstScroll = firstScroll, secondScroll = secondScroll)
-
-        advanceUntilIdle()
-        assertIdle(SceneB)
-    }
-
-    @Test
-    fun duringATransition_aNewScrollGesture_shouldTakeControl() = runGestureTest {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
-        // First gesture
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-        assertTransition(currentScene = SceneA)
-        nestedScroll.preFling(available = Velocity.Zero)
-        assertTransition(currentScene = SceneA)
-
-        // Second gesture, it starts during onStop() animation
-        nestedScroll.scroll(downOffset(0.1f))
-        assertTransition(currentScene = SceneA)
-
-        // Allows onStop() to complete or cancel
-        advanceUntilIdle()
-
-        // Second gesture continues
-        nestedScroll.scroll(downOffset(0.1f))
-        assertTransition(currentScene = SceneA)
-
-        // Second gesture ends
-        nestedScroll.preFling(available = Velocity.Zero)
-        assertTransition(currentScene = SceneA)
-
-        advanceUntilIdle()
-        assertIdle(currentScene = SceneA)
-    }
-
-    @Test
-    fun onPreFling_velocityLowerThanThreshold_remainSameScene() = runGestureTest {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-        assertTransition(currentScene = SceneA)
-
-        nestedScroll.preFling(available = Velocity.Zero)
-        assertTransition(currentScene = SceneA)
-
-        // wait for the stop animation
-        advanceUntilIdle()
-        assertIdle(currentScene = SceneA)
-    }
-
-    private fun TestGestureScope.flingAfterScroll(
-        use: NestedScrollBehavior,
-        idleAfterScroll: Boolean,
-    ) {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = use)
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-        if (idleAfterScroll) assertIdle(SceneA) else assertTransition(SceneA)
-
-        nestedScroll.preFling(available = Velocity(0f, velocityThreshold))
-    }
-
-    @Test
-    fun flingAfterScroll_EdgeNoOverscroll_goToNextScene() = runGestureTest {
-        flingAfterScroll(use = EdgeNoPreview, idleAfterScroll = false)
-
-        assertTransition(currentScene = SceneC)
-
-        // wait for the stop animation
-        advanceUntilIdle()
-        assertIdle(currentScene = SceneC)
-    }
-
-    @Test
-    fun flingAfterScroll_EdgeWithOverscroll_goToNextScene() = runGestureTest {
-        flingAfterScroll(use = EdgeWithPreview, idleAfterScroll = false)
-
-        assertTransition(currentScene = SceneC)
-
-        // wait for the stop animation
-        advanceUntilIdle()
-        assertIdle(currentScene = SceneC)
-    }
-
-    @Test
-    fun flingAfterScroll_Always_goToNextScene() = runGestureTest {
-        flingAfterScroll(use = EdgeAlways, idleAfterScroll = false)
-
-        assertTransition(currentScene = SceneC)
-
-        // wait for the stop animation
-        advanceUntilIdle()
-        assertIdle(currentScene = SceneC)
-    }
-
-    /** we started the scroll in the scene, then fling with the velocityThreshold */
-    private fun TestGestureScope.flingAfterScrollStartedInScene(
-        use: NestedScrollBehavior,
-        idleAfterScroll: Boolean,
-    ) {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = use)
-        // scroll consumed in child
-        nestedScroll.scroll(
-            available = downOffset(fractionOfScreen = 0.1f),
-            consumedByScroll = downOffset(fractionOfScreen = 0.1f),
-        )
-
-        // scroll offsetY10 is all available for parents
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-        if (idleAfterScroll) assertIdle(SceneA) else assertTransition(SceneA)
-
-        nestedScroll.preFling(available = Velocity(0f, velocityThreshold))
-    }
-
-    @Test
-    fun flingAfterScrollStartedInScene_EdgeNoOverscroll_doNothing() = runGestureTest {
-        flingAfterScrollStartedInScene(use = EdgeNoPreview, idleAfterScroll = true)
-
-        assertIdle(currentScene = SceneA)
-    }
-
-    @Test
-    fun flingAfterScrollStartedInScene_EdgeWithOverscroll_doOverscrollAnimation() = runGestureTest {
-        flingAfterScrollStartedInScene(use = EdgeWithPreview, idleAfterScroll = false)
-
-        assertTransition(currentScene = SceneA)
-
-        // wait for the stop animation
-        advanceUntilIdle()
-        assertIdle(currentScene = SceneA)
-    }
-
-    @Test
-    fun flingAfterScrollStartedInScene_Always_goToNextScene() = runGestureTest {
-        flingAfterScrollStartedInScene(use = EdgeAlways, idleAfterScroll = false)
-
-        assertTransition(currentScene = SceneC)
-
-        // wait for the stop animation
-        advanceUntilIdle()
-        assertIdle(currentScene = SceneC)
-    }
-
-    @Test
-    fun flingAfterScrollStartedByExternalOverscrollGesture() = runGestureTest {
-        val nestedScroll =
-            nestedScrollConnection(
-                nestedScrollBehavior = EdgeWithPreview,
-                isExternalOverscrollGesture = true,
-            )
-
-        // scroll not consumed in child
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-
-        // scroll offsetY10 is all available for parents
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-        assertTransition(SceneA)
-
-        nestedScroll.preFling(available = Velocity(0f, velocityThreshold))
-    }
-
-    @Test
-    fun beforeNestedScrollStart_stop_shouldBeIgnored() = runGestureTest {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeWithPreview)
-        nestedScroll.preFling(available = Velocity(0f, velocityThreshold))
-        assertIdle(currentScene = SceneA)
-    }
-
-    @Test
-    fun startNestedScrollWhileDragging() = runGestureTest {
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
-
-        val offsetY10 = downOffset(fractionOfScreen = 0.1f)
-
-        // Start a drag and then stop it, given that
-        val dragController = onDragStarted(overSlop = up(0.1f))
-
-        assertTransition(currentScene = SceneA)
-        assertThat(progress).isEqualTo(0.1f)
-
-        // now we can intercept the scroll events
-        nestedScroll.scroll(available = -offsetY10)
-        assertThat(progress).isEqualTo(0.2f)
-
-        // this should be ignored, we are scrolling now!
-        dragController.onDragStoppedAnimateNow(
-            velocity = -velocityThreshold,
-            onAnimationStart = { assertTransition(currentScene = SceneA) },
-            expectedConsumedVelocity = 0f,
-        )
-        assertTransition(currentScene = SceneA)
-
-        nestedScroll.scroll(available = -offsetY10)
-        assertThat(progress).isEqualTo(0.3f)
-
-        nestedScroll.scroll(available = -offsetY10)
-        assertThat(progress).isEqualTo(0.4f)
-
-        nestedScroll.preFling(available = Velocity(0f, -velocityThreshold))
-        assertTransition(currentScene = SceneB)
-
-        // wait for the stop animation
-        advanceUntilIdle()
-        assertIdle(currentScene = SceneB)
-    }
-
-    @Test
-    fun interceptTransition() = runGestureTest {
-        // Start at scene C.
-        navigateToSceneC()
-
-        // Swipe up from the middle to transition to scene B.
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        onDragStarted(startedPosition = middle, overSlop = up(0.1f))
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneB,
-            progress = 0.1f,
-            isUserInputOngoing = true,
-        )
-
-        val firstTransition = transitionState
-
-        // During the current gesture, start a new gesture, still in the middle of the screen. We
-        // should intercept it. Because it is intercepted, the overSlop passed to onDragStarted()
-        // should be 0f.
-        assertThat(draggableHandler.shouldImmediatelyIntercept(middle)).isTrue()
-        onDragStartedImmediately(startedPosition = middle)
-
-        // We should have intercepted the transition, so the transition should be the same object.
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneB,
-            progress = 0.1f,
-            isUserInputOngoing = true,
-        )
-        // We should have a new transition
-        assertThat(transitionState).isNotSameInstanceAs(firstTransition)
-
-        // Start a new gesture from the bottom of the screen. Because swiping up from the bottom of
-        // C leads to scene A (and not B), the previous transitions is *not* intercepted and we
-        // instead animate from C to A.
-        val bottom = Offset(SCREEN_SIZE / 2, SCREEN_SIZE)
-        assertThat(draggableHandler.shouldImmediatelyIntercept(bottom)).isFalse()
-        onDragStarted(startedPosition = bottom, overSlop = up(0.1f))
-
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            toScene = SceneA,
-            isUserInputOngoing = true,
-        )
-        assertThat(transitionState).isNotSameInstanceAs(firstTransition)
     }
 
     @Test
@@ -1102,32 +561,17 @@ class DraggableHandlerTest {
         navigateToSceneC()
 
         // Swipe up from the middle to transition to scene B.
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        onDragStarted(startedPosition = middle, overSlop = up(0.1f))
+        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
+        onDragStarted(pointersInfo = middle, overSlop = up(0.1f))
         assertTransition(fromScene = SceneC, toScene = SceneB, isUserInputOngoing = true)
-
-        // The current transition can be intercepted.
-        assertThat(draggableHandler.shouldImmediatelyIntercept(middle)).isTrue()
 
         // Freeze the transition.
         val transition = transitionState as Transition
         transition.freezeAndAnimateToCurrentState()
+        runCurrent()
         assertTransition(isUserInputOngoing = false)
         advanceUntilIdle()
         assertIdle(SceneC)
-    }
-
-    @Test
-    fun interruptedTransitionCanNotBeImmediatelyIntercepted() = runGestureTest {
-        assertThat(draggableHandler.shouldImmediatelyIntercept(startedPosition = null)).isFalse()
-        onDragStarted(overSlop = up(0.1f))
-        assertThat(draggableHandler.shouldImmediatelyIntercept(startedPosition = null)).isTrue()
-
-        layoutState.startTransitionImmediately(
-            animationScope = testScope.backgroundScope,
-            transition(SceneA, SceneB),
-        )
-        assertThat(draggableHandler.shouldImmediatelyIntercept(startedPosition = null)).isFalse()
     }
 
     @Test
@@ -1143,69 +587,39 @@ class DraggableHandlerTest {
         dragController.onDragStoppedAnimateNow(
             velocity = -velocityThreshold,
             onAnimationStart = { assertTransition(fromScene = SceneA, toScene = SceneB) },
-            expectedConsumedVelocity = -velocityThreshold,
         )
         assertIdle(SceneA)
     }
 
     @Test
-    fun blockInterceptedTransition() = runGestureTest {
+    fun blockTransition_animated() = runGestureTest {
         assertIdle(SceneA)
 
-        // Swipe up to B.
-        val dragController1 = onDragStarted(overSlop = up(0.1f))
-        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneB)
-        dragController1.onDragStoppedAnimateLater(velocity = -velocityThreshold)
-        assertTransition(currentScene = SceneB, fromScene = SceneA, toScene = SceneB)
-
-        // Intercept the transition and swipe down back to scene A.
-        assertThat(draggableHandler.shouldImmediatelyIntercept(startedPosition = null)).isTrue()
-        val dragController2 = onDragStartedImmediately()
+        // Swipe up to scene B. Overscroll 50%.
+        val dragController = onDragStarted(overSlop = up(1.5f), expectedConsumedOverSlop = up(1.0f))
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneB, progress = 1f)
 
         // Block the transition when the user release their finger.
         canChangeScene = { false }
-        dragController2.onDragStoppedAnimateNow(
-            velocity = velocityThreshold,
-            onAnimationStart = { assertTransition(fromScene = SceneA, toScene = SceneB) },
-            expectedConsumedVelocity = velocityThreshold,
-        )
-        assertIdle(SceneB)
-    }
+        val velocityConsumed =
+            dragController.onDragStoppedAnimateLater(velocity = -velocityThreshold)
 
-    @Test
-    fun scrollFromIdleWithNoTargetScene_shouldUseOverscrollSpecIfAvailable() = runGestureTest {
-        layoutState.transitions = transitions {
-            overscroll(SceneC, Orientation.Vertical) { fade(TestElements.Foo) }
-        }
-        // Start at scene C.
-        navigateToSceneC()
+        // Start an animation: overscroll and from 1f to 0f.
+        assertTransition(currentScene = SceneA, fromScene = SceneA, toScene = SceneB, progress = 1f)
 
-        val scene = layoutState.transitionState.currentScene
-        // We should have overscroll spec for scene C
-        assertThat(layoutState.transitions.overscrollSpec(scene, Orientation.Vertical)).isNotNull()
-        assertThat(layoutState.currentTransition?.currentOverscrollSpec).isNull()
-
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.1f))
-
-        // We scrolled down, under scene C there is nothing, so we can use the overscroll spec
-        assertThat(layoutState.currentTransition?.currentOverscrollSpec).isNotNull()
-        assertThat(layoutState.currentTransition?.currentOverscrollSpec?.content).isEqualTo(SceneC)
-        val transition = layoutState.currentTransition
-        assertThat(transition).isNotNull()
-        assertThat(transition!!.progress).isEqualTo(-0.1f)
+        val consumed = velocityConsumed.await()
+        assertThat(consumed).isNotEqualTo(0f)
+        assertIdle(SceneA)
     }
 
     @Test
     fun nestedScrollUseFromSourceInfo() = runGestureTest {
         // Start at scene C.
         navigateToSceneC()
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
+        val nestedScroll = nestedScrollConnection()
 
         // Drag from the **top** of the screen
-        pointerInfoOwner = {
-            PointersInfo(startedPosition = Offset(0f, 0f), pointersDown = 1, isMouseWheel = false)
-        }
+        pointerInfoOwner = { pointersDown() }
         assertIdle(currentScene = SceneC)
 
         nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
@@ -1222,20 +636,14 @@ class DraggableHandlerTest {
         advanceUntilIdle()
 
         // Drag from the **bottom** of the screen
-        pointerInfoOwner = {
-            PointersInfo(
-                startedPosition = Offset(0f, SCREEN_SIZE),
-                pointersDown = 1,
-                isMouseWheel = false,
-            )
-        }
+        pointerInfoOwner = { pointersDown(startedPosition = Offset(0f, SCREEN_SIZE)) }
         assertIdle(currentScene = SceneC)
 
         nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
         assertTransition(
             currentScene = SceneC,
             fromScene = SceneC,
-            // userAction: Swipe(SwipeDirection.Up, fromSource = Edge.Bottom) to SceneA
+            // userAction: Swipe.Up(fromSource = Edge.Bottom) to SceneA
             toScene = SceneA,
             progress = 0.1f,
         )
@@ -1245,12 +653,10 @@ class DraggableHandlerTest {
     fun ignoreMouseWheel() = runGestureTest {
         // Start at scene C.
         navigateToSceneC()
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
+        val nestedScroll = nestedScrollConnection()
 
         // Use mouse wheel
-        pointerInfoOwner = {
-            PointersInfo(startedPosition = Offset(0f, 0f), pointersDown = 1, isMouseWheel = true)
-        }
+        pointerInfoOwner = { PointersInfo.MouseWheel }
         assertIdle(currentScene = SceneC)
 
         nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
@@ -1260,8 +666,8 @@ class DraggableHandlerTest {
     @Test
     fun transitionIsImmediatelyUpdatedWhenReleasingFinger() = runGestureTest {
         // Swipe up from the middle to transition to scene B.
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        val dragController = onDragStarted(startedPosition = middle, overSlop = up(0.1f))
+        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
+        val dragController = onDragStarted(pointersInfo = middle, overSlop = up(0.1f))
         assertTransition(fromScene = SceneA, toScene = SceneB, isUserInputOngoing = true)
 
         dragController.onDragStoppedAnimateLater(velocity = 0f)
@@ -1269,44 +675,10 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun emptyOverscrollImmediatelyAbortsSettleAnimationWhenOverProgress() = runGestureTest {
-        // Overscrolling on scene B does nothing.
-        layoutState.transitions = transitions { overscrollDisabled(SceneB, Orientation.Vertical) }
-
-        // Swipe up to scene B at progress = 200%.
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        val dragController =
-            onDragStarted(
-                startedPosition = middle,
-                overSlop = up(2f),
-                // Overscroll is disabled, it will scroll up to 100%
-                expectedConsumedOverSlop = up(1f),
-            )
-
-        // The progress value is coerced in `[0..1]`
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
-
-        // Release the finger.
-        dragController.onDragStoppedAnimateNow(
-            velocity = -velocityThreshold,
-            onAnimationStart = { assertTransition(fromScene = SceneA, toScene = SceneB) },
-            expectedConsumedVelocity = 0f,
-        )
-
-        // Exhaust all coroutines *without advancing the clock*. Given that we are at progress >=
-        // 100% and that the overscroll on scene B is doing nothing, we are already idle.
-        runCurrent()
-        assertIdle(SceneB)
-    }
-
-    @Test
     fun emptyOverscrollAbortsSettleAnimationAndExposeTheConsumedVelocity() = runGestureTest {
-        // Overscrolling on scene B does nothing.
-        layoutState.transitions = transitions { overscrollDisabled(SceneB, Orientation.Vertical) }
-
         // Swipe up to scene B at progress = 200%.
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        val dragController = onDragStarted(startedPosition = middle, overSlop = up(0.99f))
+        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
+        val dragController = onDragStarted(pointersInfo = middle, overSlop = up(0.99f))
         assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.99f)
 
         // Release the finger.
@@ -1314,7 +686,7 @@ class DraggableHandlerTest {
             velocity = -velocityThreshold,
             onAnimationStart = { assertTransition(fromScene = SceneA, toScene = SceneB) },
             onAnimationEnd = { consumedVelocity ->
-                // Our progress value was 0.99f and it is coerced in `[0..1]` (overscrollDisabled).
+                // Our progress value was 0.99f and it is coerced in `[0..1]`.
                 // Some of the velocity will be used for animation, but not all of it.
                 assertThat(consumedVelocity).isLessThan(0f)
                 assertThat(consumedVelocity).isGreaterThan(-velocityThreshold)
@@ -1324,9 +696,7 @@ class DraggableHandlerTest {
 
     @Test
     fun scrollKeepPriorityEvenIfWeCanNoLongerScrollOnThatDirection() = runGestureTest {
-        // Overscrolling on scene B does nothing.
-        layoutState.transitions = transitions { overscrollDisabled(SceneB, Orientation.Vertical) }
-        val nestedScroll = nestedScrollConnection(nestedScrollBehavior = EdgeAlways)
+        val nestedScroll = nestedScrollConnection()
 
         // Overscroll is disabled, it will scroll up to 100%
         nestedScroll.scroll(available = upOffset(fractionOfScreen = 2f))
@@ -1348,12 +718,11 @@ class DraggableHandlerTest {
         layoutState.transitions = transitions {
             defaultSwipeSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy)
             from(SceneA, to = SceneB) {}
-            overscroll(SceneB, Orientation.Vertical) { fade(TestElements.Foo) }
         }
 
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
 
-        val dragController = onDragStarted(startedPosition = middle, overSlop = up(0.5f))
+        val dragController = onDragStarted(pointersInfo = middle, overSlop = up(0.5f))
         val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
@@ -1365,13 +734,11 @@ class DraggableHandlerTest {
             onAnimationStart = {
                 assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.5f)
             },
-            expectedConsumedVelocity = -velocityThreshold,
         )
 
         // We didn't overscroll at the end of the transition.
         assertIdle(SceneB)
         assertThat(transition).hasProgress(1f)
-        assertThat(transition).hasNoOverscrollSpec()
     }
 
     @Test
@@ -1380,12 +747,11 @@ class DraggableHandlerTest {
         layoutState.transitions = transitions {
             defaultSwipeSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy)
             from(SceneA, to = SceneC) {}
-            overscroll(SceneC, Orientation.Vertical) { fade(TestElements.Foo) }
         }
 
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
 
-        val dragController = onDragStarted(startedPosition = middle, overSlop = down(0.5f))
+        val dragController = onDragStarted(pointersInfo = middle, overSlop = down(0.5f))
         val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneC)
@@ -1397,13 +763,11 @@ class DraggableHandlerTest {
             onAnimationStart = {
                 assertTransition(fromScene = SceneA, toScene = SceneC, progress = 0.5f)
             },
-            expectedConsumedVelocity = velocityThreshold,
         )
 
         // We didn't overscroll at the end of the transition.
         assertIdle(SceneC)
         assertThat(transition).hasProgress(1f)
-        assertThat(transition).hasNoOverscrollSpec()
     }
 
     @Test
@@ -1411,31 +775,33 @@ class DraggableHandlerTest {
         // Make scene B overscrollable.
         layoutState.transitions = transitions {
             from(SceneA, to = SceneB) { spec = spring(dampingRatio = Spring.DampingRatioNoBouncy) }
-            overscroll(SceneB, Orientation.Vertical) { fade(TestElements.Foo) }
         }
 
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
 
-        val dragController = onDragStarted(startedPosition = middle, overSlop = up(1.5f))
+        val dragController =
+            onDragStarted(
+                pointersInfo = middle,
+                overSlop = up(1.5f),
+                expectedConsumedOverSlop = up(1f),
+            )
         val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneB)
-        assertThat(transition).hasProgress(1.5f)
+        assertThat(transition).hasProgress(1f)
 
         // Release to B.
         dragController.onDragStoppedAnimateNow(
             velocity = 0f,
             onAnimationStart = {
-                assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1.5f)
+                assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
             },
-            expectedConsumedVelocity = 0f,
         )
 
         // We kept the overscroll at 100% so that the placement logic didn't change at the end of
         // the animation.
         assertIdle(SceneB)
         assertThat(transition).hasProgress(1f)
-        assertThat(transition).hasOverscrollSpec()
     }
 
     @Test
@@ -1443,116 +809,33 @@ class DraggableHandlerTest {
         // Make scene C overscrollable.
         layoutState.transitions = transitions {
             from(SceneA, to = SceneC) { spec = spring(dampingRatio = Spring.DampingRatioNoBouncy) }
-            overscroll(SceneC, Orientation.Vertical) { fade(TestElements.Foo) }
         }
 
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
+        val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
 
-        val dragController = onDragStarted(startedPosition = middle, overSlop = down(1.5f))
+        val dragController =
+            onDragStarted(
+                pointersInfo = middle,
+                overSlop = down(1.5f),
+                expectedConsumedOverSlop = down(1f),
+            )
         val transition = assertThat(transitionState).isSceneTransition()
         assertThat(transition).hasFromScene(SceneA)
         assertThat(transition).hasToScene(SceneC)
-        assertThat(transition).hasProgress(1.5f)
+        assertThat(transition).hasProgress(1f)
 
         // Release to C.
         dragController.onDragStoppedAnimateNow(
             velocity = 0f,
             onAnimationStart = {
-                assertTransition(fromScene = SceneA, toScene = SceneC, progress = 1.5f)
+                assertTransition(fromScene = SceneA, toScene = SceneC, progress = 1f)
             },
-            expectedConsumedVelocity = 0f,
         )
 
         // We kept the overscroll at 100% so that the placement logic didn't change at the end of
         // the animation.
         assertIdle(SceneC)
         assertThat(transition).hasProgress(1f)
-        assertThat(transition).hasOverscrollSpec()
-    }
-
-    @Test
-    fun overscroll_releaseAtNegativePercent_up() = runGestureTest {
-        // Make Scene A overscrollable.
-        layoutState.transitions = transitions {
-            from(SceneA, to = SceneB) { spec = spring(dampingRatio = Spring.DampingRatioNoBouncy) }
-            overscroll(SceneA, Orientation.Vertical) { fade(TestElements.Foo) }
-        }
-
-        mutableUserActionsA = mapOf(Swipe.Up to UserActionResult(SceneB))
-
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        val dragController = onDragStarted(startedPosition = middle, overSlop = down(1f))
-        val transition = assertThat(transitionState).isSceneTransition()
-        assertThat(transition).hasFromScene(SceneA)
-        assertThat(transition).hasToScene(SceneB)
-        assertThat(transition).hasProgress(-1f)
-
-        // Release to A.
-        dragController.onDragStoppedAnimateNow(
-            velocity = 0f,
-            onAnimationStart = {
-                assertTransition(fromScene = SceneA, toScene = SceneB, progress = -1f)
-            },
-            expectedConsumedVelocity = 0f,
-        )
-
-        // We kept the overscroll at 100% so that the placement logic didn't change at the end of
-        // the animation.
-        assertIdle(SceneA)
-        assertThat(transition).hasProgress(0f)
-        assertThat(transition).hasOverscrollSpec()
-    }
-
-    @Test
-    fun overscroll_releaseAtNegativePercent_down() = runGestureTest {
-        // Make Scene A overscrollable.
-        layoutState.transitions = transitions {
-            from(SceneA, to = SceneC) { spec = spring(dampingRatio = Spring.DampingRatioNoBouncy) }
-            overscroll(SceneA, Orientation.Vertical) { fade(TestElements.Foo) }
-        }
-
-        mutableUserActionsA = mapOf(Swipe.Down to UserActionResult(SceneC))
-
-        val middle = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f)
-        val dragController = onDragStarted(startedPosition = middle, overSlop = up(1f))
-        val transition = assertThat(transitionState).isSceneTransition()
-        assertThat(transition).hasFromScene(SceneA)
-        assertThat(transition).hasToScene(SceneC)
-        assertThat(transition).hasProgress(-1f)
-
-        // Release to A.
-        dragController.onDragStoppedAnimateNow(
-            velocity = 0f,
-            onAnimationStart = {
-                assertTransition(fromScene = SceneA, toScene = SceneC, progress = -1f)
-            },
-            expectedConsumedVelocity = 0f,
-        )
-
-        // We kept the overscroll at 100% so that the placement logic didn't change at the end of
-        // the animation.
-        assertIdle(SceneA)
-        assertThat(transition).hasProgress(0f)
-        assertThat(transition).hasOverscrollSpec()
-    }
-
-    @Test
-    fun interceptingTransitionKeepsDistance() = runGestureTest {
-        var swipeDistance = 75f
-        layoutState.transitions = transitions {
-            from(SceneA, to = SceneB) { distance = UserActionDistance { _, _ -> swipeDistance } }
-        }
-
-        // Start transition.
-        val controller = onDragStarted(overSlop = -50f)
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 50f / 75f)
-
-        // Intercept the transition and change the swipe distance. The original distance and
-        // progress should be the same.
-        swipeDistance = 50f
-        controller.onDragStoppedAnimateLater(0f)
-        onDragStartedImmediately()
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 50f / 75f)
     }
 
     @Test
@@ -1568,7 +851,6 @@ class DraggableHandlerTest {
             onAnimationStart = {
                 assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.9f)
             },
-            expectedConsumedVelocity = 0f,
         )
         assertIdle(SceneA)
 
@@ -1579,22 +861,8 @@ class DraggableHandlerTest {
             onAnimationStart = {
                 assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
             },
-            expectedConsumedVelocity = 0f,
         )
         assertIdle(SceneB)
-    }
-
-    @Test
-    fun interceptingTransitionReplacesCurrentTransition() = runGestureTest {
-        val controller = onDragStarted(overSlop = up(fractionOfScreen = 0.5f))
-        val transition = assertThat(layoutState.transitionState).isSceneTransition()
-        controller.onDragStoppedAnimateLater(velocity = 0f)
-
-        // Intercept the transition.
-        onDragStartedImmediately()
-        val newTransition = assertThat(layoutState.transitionState).isSceneTransition()
-        assertThat(newTransition).isNotSameInstanceAs(transition)
-        assertThat(newTransition.replacedTransition).isSameInstanceAs(transition)
     }
 
     @Test
@@ -1619,7 +887,6 @@ class DraggableHandlerTest {
         controller.onDragStoppedAnimateNow(
             velocity = velocityThreshold,
             onAnimationStart = { assertThat(transition).hasCurrentOverlays(OverlayA) },
-            expectedConsumedVelocity = velocityThreshold,
         )
         assertThat(layoutState.transitionState).isIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
@@ -1649,7 +916,6 @@ class DraggableHandlerTest {
         controller.onDragStoppedAnimateNow(
             velocity = -velocityThreshold,
             onAnimationStart = { assertThat(transition).hasCurrentOverlays(/* empty */ ) },
-            expectedConsumedVelocity = -velocityThreshold,
         )
         assertThat(layoutState.transitionState).isIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
@@ -1679,8 +945,36 @@ class DraggableHandlerTest {
         controller.onDragStoppedAnimateNow(
             velocity = velocityThreshold,
             onAnimationStart = { assertThat(transition).hasCurrentOverlays(OverlayB) },
-            expectedConsumedVelocity = velocityThreshold,
         )
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayB)
+    }
+
+    @Test
+    fun replaceOverlayNestedScroll() = runGestureTest {
+        layoutState.showOverlay(OverlayA, animationScope = testScope)
+        advanceUntilIdle()
+
+        // Initial state.
+        assertThat(layoutState.transitionState).isIdle()
+        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
+        assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayA)
+
+        // Swipe down to replace overlay A by overlay B.
+
+        val nestedScroll = nestedScrollConnection()
+        nestedScroll.scroll(downOffset(0.1f))
+        val transition = assertThat(layoutState.transitionState).isReplaceOverlayTransition()
+        assertThat(transition).hasCurrentScene(SceneA)
+        assertThat(transition).hasFromOverlay(OverlayA)
+        assertThat(transition).hasToOverlay(OverlayB)
+        assertThat(transition).hasCurrentOverlays(OverlayA)
+        assertThat(transition).hasProgress(0.1f)
+
+        nestedScroll.preFling(Velocity(0f, velocityThreshold))
+        advanceUntilIdle()
+        // Commit the gesture. The overlays are instantly swapped in the set of current overlays.
         assertThat(layoutState.transitionState).isIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
         assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayB)

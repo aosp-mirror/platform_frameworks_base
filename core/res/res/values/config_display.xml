@@ -29,5 +29,10 @@
 
     <!-- Whether even dimmer feature is enabled. -->
     <bool name="config_evenDimmerEnabled">false</bool>
-
+    <!-- Jar file path to look for PluginProvider -->
+    <string name="config_pluginsProviderJarPath"/>
+    <!-- Indicate available EM_VALUE options -->
+    <integer-array name="config_availableEMValueOptions">
+        <item>0</item> <!-- DEFAULT -->
+    </integer-array>
 </resources>

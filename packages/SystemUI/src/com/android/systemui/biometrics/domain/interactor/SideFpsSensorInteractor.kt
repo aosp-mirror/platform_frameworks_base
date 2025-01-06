@@ -26,6 +26,7 @@ import com.android.systemui.biometrics.shared.model.DisplayRotation
 import com.android.systemui.biometrics.shared.model.FingerprintSensorType
 import com.android.systemui.biometrics.shared.model.isDefaultOrientation
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
 import com.android.systemui.keyguard.shared.model.KeyguardState
@@ -48,9 +49,9 @@ import kotlinx.coroutines.flow.onEach
 class SideFpsSensorInteractor
 @Inject
 constructor(
-    private val context: Context,
+    @Main private val context: Context,
     fingerprintPropertyRepository: FingerprintPropertyRepository,
-    windowManager: WindowManager,
+    @Main windowManager: WindowManager,
     displayStateInteractor: DisplayStateInteractor,
     fingerprintInteractiveToAuthProvider: Optional<FingerprintInteractiveToAuthProvider>,
     biometricSettingsRepository: BiometricSettingsRepository,

@@ -28,6 +28,7 @@ import android.annotation.BinderThread;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.app.admin.DevicePolicyManager;
+import android.app.admin.DevicePolicyManager.AppFunctionsPolicy;
 import android.app.appsearch.AppSearchBatchResult;
 import android.app.appsearch.AppSearchManager;
 import android.app.appsearch.AppSearchManager.SearchContext;
@@ -39,7 +40,6 @@ import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Process;
 import android.os.UserHandle;
-import android.os.UserManager;
 
 import com.android.internal.infra.AndroidFuture;
 
@@ -124,8 +124,7 @@ class CallerValidatorImpl implements CallerValidator {
         FutureAppSearchSession futureAppSearchSession =
                 new FutureAppSearchSessionImpl(
                         Objects.requireNonNull(
-                                mContext
-                                        .createContextAsUser(targetUser, 0)
+                                mContext.createContextAsUser(targetUser, 0)
                                         .getSystemService(AppSearchManager.class)),
                         THREAD_POOL_EXECUTOR,
                         new SearchContext.Builder(APP_FUNCTION_STATIC_METADATA_DB).build());
@@ -168,13 +167,16 @@ class CallerValidatorImpl implements CallerValidator {
     }
 
     @Override
-    public boolean isUserOrganizationManaged(@NonNull UserHandle targetUser) {
-        if (Objects.requireNonNull(mContext.getSystemService(DevicePolicyManager.class))
-                .isDeviceManaged()) {
-            return true;
-        }
-        return Objects.requireNonNull(mContext.getSystemService(UserManager.class))
-                .isManagedProfile(targetUser.getIdentifier());
+    public boolean verifyEnterprisePolicyIsAllowed(
+            @NonNull UserHandle callingUser, @NonNull UserHandle targetUser) {
+        @AppFunctionsPolicy
+        int callingUserPolicy = getDevicePolicyManagerAsUser(callingUser).getAppFunctionsPolicy();
+        @AppFunctionsPolicy
+        int targetUserPolicy = getDevicePolicyManagerAsUser(targetUser).getAppFunctionsPolicy();
+        boolean isSameUser = callingUser.equals(targetUser);
+
+        return isAppFunctionPolicyAllowed(targetUserPolicy, isSameUser)
+                && isAppFunctionPolicyAllowed(callingUserPolicy, isSameUser);
     }
 
     /**
@@ -263,5 +265,19 @@ class CallerValidatorImpl implements CallerValidator {
         } catch (PackageManager.NameNotFoundException e) {
             return Process.INVALID_UID;
         }
+    }
+
+    private boolean isAppFunctionPolicyAllowed(
+            @AppFunctionsPolicy int userPolicy, boolean isSameUser) {
+        return switch (userPolicy) {
+            case DevicePolicyManager.APP_FUNCTIONS_NOT_CONTROLLED_BY_POLICY -> true;
+            case DevicePolicyManager.APP_FUNCTIONS_DISABLED_CROSS_PROFILE -> isSameUser;
+            default -> false;
+        };
+    }
+
+    private DevicePolicyManager getDevicePolicyManagerAsUser(@NonNull UserHandle targetUser) {
+        return mContext.createContextAsUser(targetUser, /* flags= */ 0)
+                .getSystemService(DevicePolicyManager.class);
     }
 }

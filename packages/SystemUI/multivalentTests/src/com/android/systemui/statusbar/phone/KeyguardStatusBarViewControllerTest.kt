@@ -560,7 +560,6 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
         updateStateToKeyguard()
 
         controller.setDozing(true)
-        controller.updateViewState()
 
         Truth.assertThat(keyguardStatusBarView.visibility).isEqualTo(View.INVISIBLE)
     }
@@ -573,7 +572,6 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
         updateStateToKeyguard()
 
         controller.setDozing(false)
-        controller.updateViewState()
 
         Truth.assertThat(keyguardStatusBarView.visibility).isEqualTo(View.VISIBLE)
     }
@@ -633,7 +631,6 @@ class KeyguardStatusBarViewControllerTest : SysuiTestCase() {
         Truth.assertThat(keyguardStatusBarView.visibility).isEqualTo(View.VISIBLE)
 
         controller.setDozing(true)
-        controller.updateViewState()
 
         // setDozing(true) should typically cause the view to hide. But since the flag is on, we
         // should ignore these set dozing calls and stay the same visibility.

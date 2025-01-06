@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.phone.ongoingcall.data.repository
 
+import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_STATUS_BAR_CHIPS_MODERNIZATION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
 import com.google.common.truth.Truth.assertThat
@@ -28,6 +31,7 @@ import org.junit.runner.RunWith
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
+@DisableFlags(StatusBarChipsModernization.FLAG_NAME)
 class OngoingCallRepositoryTest : SysuiTestCase() {
     private val kosmos = Kosmos()
     private val underTest = kosmos.ongoingCallRepository

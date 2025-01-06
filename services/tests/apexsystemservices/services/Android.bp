@@ -17,4 +17,5 @@ java_library {
     ],
     visibility: ["//frameworks/base/services/tests/apexsystemservices:__subpackages__"],
     apex_available: ["//apex_available:anyapex"],
+    compile_dex: true,
 }

@@ -19,6 +19,8 @@ package com.android.wm.shell.splitscreen;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.wm.shell.splitscreen.SplitScreen.STAGE_TYPE_UNDEFINED;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
@@ -93,7 +95,8 @@ public final class StageTaskListenerTests extends ShellTestCase {
                 mCallbacks,
                 mSyncQueue,
                 mIconProvider,
-                Optional.of(mWindowDecorViewModel));
+                Optional.of(mWindowDecorViewModel),
+                STAGE_TYPE_UNDEFINED);
         mRootTask = new TestRunningTaskInfoBuilder().build();
         mRootTask.parentTaskId = INVALID_TASK_ID;
         mSurfaceControl = new SurfaceControl.Builder().setName("test").build();

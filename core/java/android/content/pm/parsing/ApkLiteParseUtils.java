@@ -38,11 +38,13 @@ import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
+import android.util.EmptyArray;
 import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.pm.pkg.component.flags.Flags;
 import com.android.internal.util.ArrayUtils;
+import com.android.internal.util.XmlUtils;
 
 import libcore.io.IoUtils;
 import libcore.util.HexEncoding;
@@ -464,6 +466,7 @@ public class ApkLiteParseUtils {
         boolean hasDeviceAdminReceiver = false;
 
         boolean isSdkLibrary = false;
+        boolean isStaticLibrary = false;
         List<String> usesSdkLibraries = new ArrayList<>();
         long[] usesSdkLibrariesVersionsMajor = new long[0];
         String[][] usesSdkLibrariesCertDigests = new String[0][0];
@@ -538,8 +541,13 @@ public class ApkLiteParseUtils {
                         case TAG_USES_SDK_LIBRARY:
                             String usesSdkLibName = parser.getAttributeValue(
                                     ANDROID_RES_NAMESPACE, "name");
-                            long usesSdkLibVersionMajor = parser.getAttributeIntValue(
-                                    ANDROID_RES_NAMESPACE, "versionMajor", -1);
+                            // TODO(b/379219371): Due to a bug in bundletool, some apps can use
+                            //  versionMajor as string. Until it is resolved, we are adding a
+                            //  workaround here.
+                            String usesSdkLibVersionMajorString = parser.getAttributeValue(
+                                    ANDROID_RES_NAMESPACE, "versionMajor");
+                            long usesSdkLibVersionMajor = XmlUtils.convertValueToInt(
+                                    usesSdkLibVersionMajorString, -1);
                             String usesSdkCertDigest = parser.getAttributeValue(
                                      ANDROID_RES_NAMESPACE, "certDigest");
 
@@ -565,10 +573,7 @@ public class ApkLiteParseUtils {
                                     usesSdkLibrariesVersionsMajor, usesSdkLibVersionMajor,
                                     /*allowDuplicates=*/ true);
 
-                            // We allow ":" delimiters in the SHA declaration as this is the format
-                            // emitted by the certtool making it easy for developers to copy/paste.
-                            // TODO(372862145): Add test for this replacement
-                            usesSdkCertDigest = usesSdkCertDigest.replace(":", "").toLowerCase();
+                            usesSdkCertDigest = normalizeCertDigest(usesSdkCertDigest);
 
                             if ("".equals(usesSdkCertDigest)) {
                                 // Test-only uses-sdk-library empty certificate digest override.
@@ -618,18 +623,23 @@ public class ApkLiteParseUtils {
                                     usesStaticLibrariesVersions, usesStaticLibVersion,
                                     /*allowDuplicates=*/ true);
 
-                            // We allow ":" delimiters in the SHA declaration as this is the format
-                            // emitted by the certtool making it easy for developers to copy/paste.
-                            // TODO(372862145): Add test for this replacement
-                            usesStaticLibCertDigest =
-                                    usesStaticLibCertDigest.replace(":", "").toLowerCase();
+                            usesStaticLibCertDigest = normalizeCertDigest(usesStaticLibCertDigest);
 
-                            // TODO(372862145): Add support for multiple signer for app targeting
-                            //  O-MR1
+                            ParseResult<String[]> certResult =
+                                    parseAdditionalCertificates(input, parser);
+                            if (certResult.isError()) {
+                                return input.error(certResult);
+                            }
+                            String[] additionalCertSha256Digests = certResult.getResult();
+                            String[] certSha256Digests =
+                                    new String[additionalCertSha256Digests.length + 1];
+                            certSha256Digests[0] = usesStaticLibCertDigest;
+                            System.arraycopy(additionalCertSha256Digests, 0, certSha256Digests,
+                                    1, additionalCertSha256Digests.length);
+
                             usesStaticLibrariesCertDigests = ArrayUtils.appendElement(
                                     String[].class, usesStaticLibrariesCertDigests,
-                                    new String[]{usesStaticLibCertDigest},
-                                    /*allowDuplicates=*/ true);
+                                    certSha256Digests, /*allowDuplicates=*/ true);
                             break;
                         case TAG_SDK_LIBRARY:
                             isSdkLibrary = true;
@@ -650,6 +660,7 @@ public class ApkLiteParseUtils {
                                     SharedLibraryInfo.TYPE_SDK_PACKAGE));
                             break;
                         case TAG_STATIC_LIBRARY:
+                            isStaticLibrary = true;
                             // Mirrors ParsingPackageUtils#parseStaticLibrary until lite and full
                             // parsing are combined
                             String staticLibName = parser.getAttributeValue(
@@ -803,10 +814,47 @@ public class ApkLiteParseUtils {
                         requiredSystemPropertyValue, minSdkVersion, targetSdkVersion,
                         rollbackDataPolicy, requiredSplitTypes.first, requiredSplitTypes.second,
                         hasDeviceAdminReceiver, isSdkLibrary, usesSdkLibraries,
-                        usesSdkLibrariesVersionsMajor, usesSdkLibrariesCertDigests,
+                        usesSdkLibrariesVersionsMajor, usesSdkLibrariesCertDigests, isStaticLibrary,
                         usesStaticLibraries, usesStaticLibrariesVersions,
                         usesStaticLibrariesCertDigests, updatableSystem, emergencyInstaller,
                         declaredLibraries));
+    }
+
+    private static ParseResult<String[]> parseAdditionalCertificates(ParseInput input,
+            XmlResourceParser parser) throws XmlPullParserException, IOException {
+        String[] certSha256Digests = EmptyArray.STRING;
+        final int depth = parser.getDepth();
+        int type;
+        while ((type = parser.next()) != XmlPullParser.END_DOCUMENT
+                && (type != XmlPullParser.END_TAG
+                || parser.getDepth() > depth)) {
+            if (type != XmlPullParser.START_TAG) {
+                continue;
+            }
+            final String nodeName = parser.getName();
+            if (nodeName.equals("additional-certificate")) {
+                String certSha256Digest = parser.getAttributeValue(
+                        ANDROID_RES_NAMESPACE, "certDigest");
+                if (TextUtils.isEmpty(certSha256Digest)) {
+                    return input.error("Bad additional-certificate declaration with empty"
+                            + " certDigest:" + certSha256Digest);
+                }
+
+                certSha256Digest = normalizeCertDigest(certSha256Digest);
+                certSha256Digests = ArrayUtils.appendElement(String.class,
+                        certSha256Digests, certSha256Digest);
+            }
+        }
+
+        return input.success(certSha256Digests);
+    }
+
+    /**
+     * We allow ":" delimiters in the SHA declaration as this is the format emitted by the
+     * certtool making it easy for developers to copy/paste.
+     */
+    private static String normalizeCertDigest(String certDigest) {
+        return certDigest.replace(":", "").toLowerCase();
     }
 
     private static boolean isDeviceAdminReceiver(

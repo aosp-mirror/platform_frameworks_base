@@ -34,6 +34,8 @@ import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.os.Process;
 import android.os.UserHandle;
+import android.platform.test.annotations.EnableFlags;
+import android.platform.test.flag.junit.SetFlagsRule;
 import android.telephony.NetworkRegistrationInfo;
 import android.util.AtomicFile;
 import android.util.Log;
@@ -46,6 +48,7 @@ import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerStats;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
@@ -61,13 +64,22 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Test BatteryStatsHistory.
  */
 @RunWith(AndroidJUnit4.class)
+@EnableFlags({com.android.server.power.optimization.Flags
+        .FLAG_EXTENDED_BATTERY_HISTORY_CONTINUOUS_COLLECTION_ENABLED})
 public class BatteryStatsHistoryTest {
     private static final String TAG = "BatteryStatsHistoryTest";
+
+    private static final int MAX_HISTORY_BUFFER_SIZE = 1024;
+
+    @Rule
+    public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
+
     private final Parcel mHistoryBuffer = Parcel.obtain();
     private File mSystemDir;
     private File mHistoryDir;
@@ -97,14 +109,18 @@ public class BatteryStatsHistoryTest {
         mHistoryDir.delete();
 
         mClock.realtime = 123;
+        mClock.currentTime = 1743645660000L;    //  2025-04-03, 2:01:00 AM
 
-        mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32, 1024,
-                mStepDetailsCalculator, mClock, mMonotonicClock, mTracer, mEventLogger);
+        mHistory = new BatteryStatsHistory(mHistoryBuffer, mSystemDir, 32768,
+                MAX_HISTORY_BUFFER_SIZE, mStepDetailsCalculator, mClock, mMonotonicClock, mTracer,
+                mEventLogger);
+        mHistory.forceRecordAllHistory();
+        mHistory.startRecordingHistory(mClock.realtime, mClock.uptime, false);
 
         when(mStepDetailsCalculator.getHistoryStepDetails())
                 .thenReturn(new BatteryStats.HistoryStepDetails());
 
-        mHistoryPrinter = new BatteryStats.HistoryPrinter();
+        mHistoryPrinter = new BatteryStats.HistoryPrinter(TimeZone.getTimeZone("GMT"));
     }
 
     @Test
@@ -143,8 +159,6 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void testAtraceExcludedState() {
-        mHistory.forceRecordAllHistory();
-
         Mockito.when(mTracer.tracingEnabled()).thenReturn(true);
 
         mHistory.recordStateStartEvent(mClock.elapsedRealtime(),
@@ -196,12 +210,15 @@ public class BatteryStatsHistoryTest {
     }
 
     @Test
-    public void testStartNextFile() {
+    public void testStartNextFile() throws Exception {
+        mHistory.forceRecordAllHistory();
+
         mClock.realtime = 123;
 
         List<String> fileList = new ArrayList<>();
         fileList.add("123.bh");
         createActiveFile(mHistory);
+        fillActiveFile(mHistory);
 
         // create file 1 to 31.
         for (int i = 1; i < 32; i++) {
@@ -210,6 +227,8 @@ public class BatteryStatsHistoryTest {
 
             mHistory.startNextFile(mClock.realtime);
             createActiveFile(mHistory);
+            fillActiveFile(mHistory);
+
             verifyFileNames(mHistory, fileList);
             verifyActiveFile(mHistory, mClock.realtime + ".bh");
         }
@@ -224,6 +243,8 @@ public class BatteryStatsHistoryTest {
         verifyFileDeleted("123.bh");
         verifyFileNames(mHistory, fileList);
         verifyActiveFile(mHistory, "32000.bh");
+
+        fillActiveFile(mHistory);
 
         // create file 33
         mClock.realtime = 1000 * 33;
@@ -345,8 +366,6 @@ public class BatteryStatsHistoryTest {
     }
 
     private void prepareMultiFileHistory() {
-        mHistory.forceRecordAllHistory();
-
         mClock.realtime = 1000;
         mClock.uptime = 1000;
         mHistory.recordEvent(mClock.realtime, mClock.uptime,
@@ -401,6 +420,14 @@ public class BatteryStatsHistoryTest {
         }
     }
 
+    private void fillActiveFile(BatteryStatsHistory history) {
+        // Create roughly 1K of history
+        int initialSize = history.getHistoryUsedSize();
+        while (history.getHistoryUsedSize() < initialSize + 1000) {
+            history.recordCurrentTimeChange(mClock.realtime, mClock.uptime, 0xFFFFFFFFL);
+        }
+    }
+
     @Test
     public void recordPowerStats() {
         PowerStats.Descriptor descriptor = new PowerStats.Descriptor(42, "foo", 1, null, 0, 2,
@@ -411,7 +438,8 @@ public class BatteryStatsHistoryTest {
         powerStats.uidStats.put(300, new long[]{400, 500});
         powerStats.uidStats.put(600, new long[]{700, 800});
 
-        mHistory.recordPowerStats(200, 200, powerStats);
+        mClock.advance(200);
+        mHistory.recordPowerStats(mClock.realtime, mClock.uptime, powerStats);
 
         BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
         BatteryStats.HistoryItem item;
@@ -420,7 +448,7 @@ public class BatteryStatsHistoryTest {
         assertThat(item = iterator.next()).isNotNull();
 
         String dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+200ms");
+        assertThat(dump).contains("04-03 02:01:00.200");
         assertThat(dump).contains("duration=100");
         assertThat(dump).contains("foo=[200]");
         assertThat(dump).contains("300: [400, 500]");
@@ -429,49 +457,49 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void testNrState_dump() {
-        mHistory.forceRecordAllHistory();
-        mHistory.startRecordingHistory(0, 0, /* reset */ true);
         mHistory.setBatteryState(true /* charging */, BatteryManager.BATTERY_STATUS_CHARGING, 80,
                 1234);
 
-        mHistory.recordNrStateChangeEvent(200, 200,
+        mClock.advance(200);
+        mHistory.recordNrStateChangeEvent(mClock.realtime, mClock.uptime,
                 NetworkRegistrationInfo.NR_STATE_RESTRICTED);
-        mHistory.recordNrStateChangeEvent(300, 300,
+        mClock.advance(100);
+        mHistory.recordNrStateChangeEvent(mClock.realtime, mClock.uptime,
                 NetworkRegistrationInfo.NR_STATE_NOT_RESTRICTED);
-        mHistory.recordNrStateChangeEvent(400, 400,
+        mClock.advance(100);
+        mHistory.recordNrStateChangeEvent(mClock.realtime, mClock.uptime,
                 NetworkRegistrationInfo.NR_STATE_CONNECTED);
-        mHistory.recordNrStateChangeEvent(500, 500,
+        mClock.advance(100);
+        mHistory.recordNrStateChangeEvent(mClock.realtime, mClock.uptime,
                 NetworkRegistrationInfo.NR_STATE_NONE);
 
         BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
         assertThat(item = iterator.next()).isNotNull();
         String dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+200ms");
+        assertThat(dump).contains("04-03 02:01:00.200");
         assertThat(dump).contains("nr_state=restricted");
 
         assertThat(item = iterator.next()).isNotNull();
         dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+300ms");
+        assertThat(dump).contains("04-03 02:01:00.300");
         assertThat(dump).contains("nr_state=not_restricted");
 
         assertThat(item = iterator.next()).isNotNull();
         dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+400ms");
+        assertThat(dump).contains("04-03 02:01:00.400");
         assertThat(dump).contains("nr_state=connected");
 
         assertThat(item = iterator.next()).isNotNull();
         dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+500ms");
+        assertThat(dump).contains("04-03 02:01:00.500");
         assertThat(dump).contains("nr_state=none");
     }
 
     @Test
     public void testNrState_checkin() {
-        mHistory.forceRecordAllHistory();
-        mHistory.startRecordingHistory(0, 0, /* reset */ true);
         mHistory.setBatteryState(true /* charging */, BatteryManager.BATTERY_STATUS_CHARGING, 80,
                 1234);
 
@@ -485,7 +513,7 @@ public class BatteryStatsHistoryTest {
                 NetworkRegistrationInfo.NR_STATE_NONE);
 
         BatteryStatsHistoryIterator iterator = mHistory.iterate(0, MonotonicClock.UNDEFINED);
-        BatteryStats.HistoryItem item = new BatteryStats.HistoryItem();
+        BatteryStats.HistoryItem item;
         assertThat(item = iterator.next()).isNotNull(); // First item contains current time only
 
         assertThat(item = iterator.next()).isNotNull();
@@ -616,10 +644,17 @@ public class BatteryStatsHistoryTest {
 
     @Test
     public void recordProcStateChange() {
-        mHistory.recordProcessStateChange(200, 200, 42, BatteryConsumer.PROCESS_STATE_BACKGROUND);
-        mHistory.recordProcessStateChange(300, 300, 42, BatteryConsumer.PROCESS_STATE_FOREGROUND);
+        mClock.advance(200);
+        mHistory.recordProcessStateChange(mClock.realtime, mClock.uptime, 42,
+                BatteryConsumer.PROCESS_STATE_BACKGROUND);
+
+        mClock.advance(100);
+        mHistory.recordProcessStateChange(mClock.realtime, mClock.uptime, 42,
+                BatteryConsumer.PROCESS_STATE_FOREGROUND);
+
+        mClock.advance(100);
         // Large UID, > 0xFFFFFF
-        mHistory.recordProcessStateChange(400, 400,
+        mHistory.recordProcessStateChange(mClock.realtime, mClock.uptime,
                 UserHandle.getUid(777, Process.LAST_ISOLATED_UID),
                 BatteryConsumer.PROCESS_STATE_FOREGROUND_SERVICE);
 
@@ -630,17 +665,17 @@ public class BatteryStatsHistoryTest {
         assertThat(item = iterator.next()).isNotNull();
 
         String dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+200ms");
+        assertThat(dump).contains("04-03 02:01:00.200");
         assertThat(dump).contains("procstate: 42: bg");
 
         assertThat(item = iterator.next()).isNotNull();
         dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+300ms");
+        assertThat(dump).contains("04-03 02:01:00.300");
         assertThat(dump).contains("procstate: 42: fg");
 
         assertThat(item = iterator.next()).isNotNull();
         dump = toString(item, /* checkin */ false);
-        assertThat(dump).contains("+400ms");
+        assertThat(dump).contains("04-03 02:01:00.400");
         assertThat(dump).contains("procstate: u777i999: fgs");
     }
 
@@ -655,7 +690,6 @@ public class BatteryStatsHistoryTest {
     @Test
     public void getMonotonicHistorySize() {
         long lastHistorySize = mHistory.getMonotonicHistorySize();
-        mHistory.forceRecordAllHistory();
 
         mClock.realtime = 1000;
         mClock.uptime = 1000;

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- 
+    Copyright (C) 2024 The Android Open Source Project
+
+    Licensed under the Apache License, Version 2.0 (the "License");
+    you may not use this file except in compliance with the License.
+    You may obtain a copy of the License at
+
+         http://www.apache.org/licenses/LICENSE-2.0
+
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS,
+    WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+    See the License for the specific language governing permissions and
+    limitations under the License
+   -->
+
+<resources xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
+    <string name="user_image_choose_photo" msgid="5630717762469961028">"Pilih imej"</string>
+    <string name="user_image_take_photo" msgid="3147097821937166738">"Ambil foto"</string>
+    <string name="avatar_picker_title" msgid="7478146965334560463">"Pilih gambar profil"</string>
+    <string name="default_user_icon_description" msgid="6018582161341388812">"Ikon pengguna lalai"</string>
+    <string name="done" msgid="3587741621903511576">"Selesai"</string>
+</resources>

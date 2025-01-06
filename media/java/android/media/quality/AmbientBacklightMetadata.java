@@ -16,17 +16,44 @@
 
 package android.media.quality;
 
+import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
+import android.annotation.IntRange;
+import android.graphics.PixelFormat;
+import android.media.tv.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 
 import androidx.annotation.NonNull;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.Arrays;
 
 /**
- * @hide
+ * Metadata of ambient backlight.
+ *
+ * <p>A metadata instance is sent from ambient backlight hardware in a {@link AmbientBacklightEvent}
+ * with {@link AmbientBacklightEvent#AMBIENT_BACKLIGHT_EVENT_METADATA_AVAILABLE}.
  */
-public class AmbientBacklightMetadata implements Parcelable {
+@FlaggedApi(Flags.FLAG_MEDIA_QUALITY_FW)
+public final class AmbientBacklightMetadata implements Parcelable {
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({ALGORITHM_NONE, ALGORITHM_RLE})
+    public @interface CompressionAlgorithm {}
+
+    /**
+     * The compress algorithm is disabled.
+     */
+    public static final int ALGORITHM_NONE = 0;
+
+    /**
+     * The compress algorithm is run length encoding (RLE).
+     */
+    public static final int ALGORITHM_RLE = 1;
+
     @NonNull
     private final String mPackageName;
     private final int mCompressAlgorithm;
@@ -37,8 +64,16 @@ public class AmbientBacklightMetadata implements Parcelable {
     @NonNull
     private final int[] mZonesColors;
 
-    public AmbientBacklightMetadata(@NonNull String packageName, int compressAlgorithm,
-            int source, int colorFormat, int horizontalZonesNumber, int verticalZonesNumber,
+    /**
+     * Constructs AmbientBacklightMetadata.
+     */
+    public AmbientBacklightMetadata(
+            @NonNull String packageName,
+            @CompressionAlgorithm int compressAlgorithm,
+            @AmbientBacklightSettings.Source int source,
+            @PixelFormat.Format int colorFormat,
+            int horizontalZonesNumber,
+            int verticalZonesNumber,
             @NonNull int[] zonesColors) {
         mPackageName = packageName;
         mCompressAlgorithm = compressAlgorithm;
@@ -59,33 +94,73 @@ public class AmbientBacklightMetadata implements Parcelable {
         mZonesColors = in.createIntArray();
     }
 
+    /**
+     * Gets package name of the metadata.
+     */
     @NonNull
     public String getPackageName() {
         return mPackageName;
     }
 
-    public int getCompressAlgorithm() {
+    /**
+     * Gets compress algorithm.
+     */
+    @CompressionAlgorithm
+    public int getCompressionAlgorithm() {
         return mCompressAlgorithm;
     }
 
+    /**
+     * Gets source of ambient backlight detection.
+     */
+    @AmbientBacklightSettings.Source
     public int getSource() {
         return mSource;
     }
 
+    /**
+     * Gets color format.
+     */
+    @PixelFormat.Format
     public int getColorFormat() {
         return mColorFormat;
     }
 
-    public int getHorizontalZonesNumber() {
+    /**
+     * Gets the number of horizontal color zones.
+     *
+     * <p>A color zone is represented by one single aggregated color. The number should not be
+     * larger than 128.
+     */
+    @IntRange(from = 0, to = 128)
+    public int getHorizontalZonesCount() {
         return mHorizontalZonesNumber;
     }
 
-    public int getVerticalZonesNumber() {
+    /**
+     * Gets the number of vertical color zones.
+     *
+     * <p>A color zone is represented by one single aggregated color. The number should not be
+     * larger than 80.
+     */
+    @IntRange(from = 0, to = 80)
+    public int getVerticalZonesCount() {
         return mVerticalZonesNumber;
     }
 
+    /**
+     * Gets color data of all available color zones.
+     *
+     * <p>The format of the color data can be found at {@link #getColorFormat()}.
+     *
+     * @return an array of color data, in row by row (left-to-right then top-to-bottom) order of the
+     * color zones.
+     *
+     * @see #getHorizontalZonesCount()
+     * @see #getVerticalZonesCount()
+     */
     @NonNull
-    public int[] getZonesColors() {
+    public int[] getZoneColors() {
         return mZonesColors;
     }
 

@@ -24,7 +24,10 @@ import android.bluetooth.le.ScanFilter;
 import android.content.Context;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.settingslib.flags.Flags;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -46,7 +49,7 @@ public class CachedBluetoothDeviceManager {
     private final LocalBluetoothManager mBtManager;
 
     @VisibleForTesting
-    final List<CachedBluetoothDevice> mCachedDevices = new ArrayList<CachedBluetoothDevice>();
+    final List<CachedBluetoothDevice> mCachedDevices = new ArrayList<>();
     @VisibleForTesting
     HearingAidDeviceManager mHearingAidDeviceManager;
     @VisibleForTesting
@@ -153,7 +156,7 @@ public class CachedBluetoothDeviceManager {
     /**
      * Returns device summary of the pair of the hearing aid / CSIP passed as the parameter.
      *
-     * @param CachedBluetoothDevice device
+     * @param device the remote device
      * @return Device summary, or if the pair does not exist or if it is not a hearing aid or
      * a CSIP set member, then {@code null}.
      */
@@ -189,6 +192,20 @@ public class CachedBluetoothDeviceManager {
                 mHearingAidDeviceManager.syncDeviceIfNeeded(device);
             }
         }
+    }
+
+    /**
+     * Notifies the connection status if device is hearing device.
+     *
+     * @param device The {@link CachedBluetoothDevice} need to be hearing device
+     */
+    public synchronized void notifyHearingDevicesConnectionStatusChangedIfNeeded(
+            @NonNull CachedBluetoothDevice device) {
+        if (!device.isHearingDevice()) {
+            return;
+        }
+
+        mHearingAidDeviceManager.notifyDevicesConnectionStatusChanged();
     }
 
     /**
@@ -388,12 +405,19 @@ public class CachedBluetoothDeviceManager {
 
     /** Handles when the device been set as active/inactive. */
     public synchronized void onActiveDeviceChanged(CachedBluetoothDevice cachedBluetoothDevice) {
-        if (cachedBluetoothDevice.isHearingAidDevice()) {
+        if (cachedBluetoothDevice == null) {
+            return;
+        }
+        if (cachedBluetoothDevice.isHearingDevice()) {
             mHearingAidDeviceManager.onActiveDeviceChanged(cachedBluetoothDevice);
+            if (Flags.hearingDeviceSetConnectionStatusReport()) {
+                mHearingAidDeviceManager.notifyDevicesConnectionStatusChanged();
+            }
         }
     }
 
     public synchronized void onDeviceUnpaired(CachedBluetoothDevice device) {
+        mHearingAidDeviceManager.clearLocalDataIfNeeded(device);
         device.setGroupId(BluetoothCsipSetCoordinator.GROUP_ID_INVALID);
         CachedBluetoothDevice mainDevice = mCsipDeviceManager.findMainDevice(device);
         // Should iterate through the cloned set to avoid ConcurrentModificationException
@@ -419,6 +443,14 @@ public class CachedBluetoothDeviceManager {
             // Sub device unpaired, to unpair main device
             mainDevice.unpair();
             mainDevice.setSubDevice(null);
+        }
+
+        // TODO: b/386121967 - Should change to use isHearingDevice but mProfile get clear here.
+        //  Need to consider where to put this logic when using isHearingDevice()
+        if (device.isHearingAidDevice()) {
+            if (Flags.hearingDeviceSetConnectionStatusReport()) {
+                mHearingAidDeviceManager.notifyDevicesConnectionStatusChanged();
+            }
         }
     }
 
@@ -576,6 +608,11 @@ public class CachedBluetoothDeviceManager {
      */
     public boolean isOngoingPairByCsip(BluetoothDevice device) {
         return mOngoingSetMemberPair != null && mOngoingSetMemberPair.equals(device);
+    }
+
+    @NonNull
+    public HearingAidDeviceManager getHearingAidDeviceManager() {
+        return mHearingAidDeviceManager;
     }
 
     private void log(String msg) {

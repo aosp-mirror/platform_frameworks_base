@@ -60,7 +60,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
      * Only keep a weak reference to the controller instance here to allow for it to be cleaned
      * up when its TaskView is no longer used.
      */
-    private final Map<TaskViewTaskController, TaskViewRequestedState> mTaskViews;
+    private final Map<TaskViewTaskController, TaskViewRepository.TaskViewState> mTaskViews;
+    private final TaskViewRepository mTaskViewRepo;
     private final ArrayList<PendingTransition> mPending = new ArrayList<>();
     private final Transitions mTransitions;
     private final boolean[] mRegistered = new boolean[]{false};
@@ -95,24 +96,27 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
     }
 
-    /**
-     * Visibility and bounds state that has been requested for a {@link TaskViewTaskController}.
-     */
-    private static class TaskViewRequestedState {
-        boolean mVisible;
-        Rect mBounds = new Rect();
-    }
-
-    public TaskViewTransitions(Transitions transitions) {
+    public TaskViewTransitions(Transitions transitions, TaskViewRepository repository) {
         mTransitions = transitions;
-        if (Flags.enableTaskViewControllerCleanup()) {
+        if (useRepo()) {
+            mTaskViews = null;
+        } else if (Flags.enableTaskViewControllerCleanup()) {
             mTaskViews = new WeakHashMap<>();
         } else {
             mTaskViews = new ArrayMap<>();
         }
+        mTaskViewRepo = repository;
         // Defer registration until the first TaskView because we want this to be the "first" in
         // priority when handling requests.
         // TODO(210041388): register here once we have an explicit ordering mechanism.
+    }
+
+    static boolean useRepo() {
+        return Flags.taskViewRepository() || Flags.enableBubbleAnything();
+    }
+
+    public TaskViewRepository getRepository() {
+        return mTaskViewRepo;
     }
 
     void addTaskView(TaskViewTaskController tv) {
@@ -122,11 +126,19 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                 mTransitions.addHandler(this);
             }
         }
-        mTaskViews.put(tv, new TaskViewRequestedState());
+        if (useRepo()) {
+            mTaskViewRepo.add(tv);
+        } else {
+            mTaskViews.put(tv, new TaskViewRepository.TaskViewState(null));
+        }
     }
 
     void removeTaskView(TaskViewTaskController tv) {
-        mTaskViews.remove(tv);
+        if (useRepo()) {
+            mTaskViewRepo.remove(tv);
+        } else {
+            mTaskViews.remove(tv);
+        }
         // Note: Don't unregister handler since this is a singleton with lifetime bound to Shell
     }
 
@@ -223,6 +235,10 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     }
 
     private TaskViewTaskController findTaskView(ActivityManager.RunningTaskInfo taskInfo) {
+        if (useRepo()) {
+            final TaskViewRepository.TaskViewState state = mTaskViewRepo.byToken(taskInfo.token);
+            return state != null ? state.getTaskView() : null;
+        }
         if (Flags.enableTaskViewControllerCleanup()) {
             for (TaskViewTaskController controller : mTaskViews.keySet()) {
                 if (controller.getTaskInfo() == null) continue;
@@ -231,8 +247,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                 }
             }
         } else {
-            ArrayMap<TaskViewTaskController, TaskViewRequestedState> taskViews =
-                    (ArrayMap<TaskViewTaskController, TaskViewRequestedState>) mTaskViews;
+            ArrayMap<TaskViewTaskController, TaskViewRepository.TaskViewState> taskViews =
+                    (ArrayMap<TaskViewTaskController, TaskViewRepository.TaskViewState>) mTaskViews;
             for (int i = 0; i < taskViews.size(); ++i) {
                 if (taskViews.keyAt(i).getTaskInfo() == null) continue;
                 if (taskInfo.token.equals(taskViews.keyAt(i).getTaskInfo().token)) {
@@ -279,23 +295,26 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
      *
      * @param taskView the task view which the visibility is being changed for
      * @param visible  the new visibility of the task view
-     * @param reorder  whether to reorder the task or not. If this is {@code true}, the task will be
-     *                 reordered as per the given {@code visible}. For {@code visible = true}, task
-     *                 will be reordered to top. For {@code visible = false}, task will be reordered
-     *                 to the bottom
+     * @param reorder  whether to reorder the task or not. If this is {@code true}, the task will
+     *                 be reordered as per the given {@code visible}. For {@code visible = true},
+     *                 task will be reordered to top. For {@code visible = false}, task will be
+     *                 reordered to the bottom
      */
     public void setTaskViewVisible(TaskViewTaskController taskView, boolean visible,
             boolean reorder) {
-        if (mTaskViews.get(taskView) == null) return;
-        if (mTaskViews.get(taskView).mVisible == visible) return;
+        final TaskViewRepository.TaskViewState state = useRepo()
+                ? mTaskViewRepo.byTaskView(taskView)
+                : mTaskViews.get(taskView);
+        if (state == null) return;
+        if (state.mVisible == visible) return;
         if (taskView.getTaskInfo() == null) {
             // Nothing to update, task is not yet available
             return;
         }
-        mTaskViews.get(taskView).mVisible = visible;
+        state.mVisible = visible;
         final WindowContainerTransaction wct = new WindowContainerTransaction();
         wct.setHidden(taskView.getTaskInfo().token, !visible /* hidden */);
-        wct.setBounds(taskView.getTaskInfo().token, mTaskViews.get(taskView).mBounds);
+        wct.setBounds(taskView.getTaskInfo().token, state.mBounds);
         if (reorder) {
             wct.reorder(taskView.getTaskInfo().token, visible /* onTop */);
         }
@@ -308,7 +327,10 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
 
     /** Starts a new transition to reorder the given {@code taskView}'s task. */
     public void reorderTaskViewTask(TaskViewTaskController taskView, boolean onTop) {
-        if (mTaskViews.get(taskView) == null) return;
+        final TaskViewRepository.TaskViewState state = useRepo()
+                ? mTaskViewRepo.byTaskView(taskView)
+                : mTaskViews.get(taskView);
+        if (state == null) return;
         if (taskView.getTaskInfo() == null) {
             // Nothing to update, task is not yet available
             return;
@@ -323,19 +345,24 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
     }
 
     void updateBoundsState(TaskViewTaskController taskView, Rect boundsOnScreen) {
-        TaskViewRequestedState state = mTaskViews.get(taskView);
+        if (useRepo()) return;
+        final TaskViewRepository.TaskViewState state = mTaskViews.get(taskView);
         if (state == null) return;
         state.mBounds.set(boundsOnScreen);
     }
 
     void updateVisibilityState(TaskViewTaskController taskView, boolean visible) {
-        TaskViewRequestedState state = mTaskViews.get(taskView);
+        final TaskViewRepository.TaskViewState state = useRepo()
+                ? mTaskViewRepo.byTaskView(taskView)
+                : mTaskViews.get(taskView);
         if (state == null) return;
         state.mVisible = visible;
     }
 
     void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
-        TaskViewRequestedState state = mTaskViews.get(taskView);
+        final TaskViewRepository.TaskViewState state = useRepo()
+                ? mTaskViewRepo.byTaskView(taskView)
+                : mTaskViews.get(taskView);
         if (state == null || Objects.equals(boundsOnScreen, state.mBounds)) {
             return;
         }
@@ -385,7 +412,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         if (pending != null) {
             mPending.remove(pending);
         }
-        if (mTaskViews.isEmpty()) {
+        if (useRepo() ? mTaskViewRepo.isEmpty() : mTaskViews.isEmpty()) {
             if (pending != null) {
                 Slog.e(TAG, "Pending taskview transition but no task-views");
             }

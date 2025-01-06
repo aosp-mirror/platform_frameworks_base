@@ -79,6 +79,9 @@ private fun buildScreenConfig() =
                 bodyResId = R.string.tutorial_action_key_guidance,
                 titleSuccessResId = R.string.tutorial_action_key_success_title,
                 bodySuccessResId = R.string.tutorial_action_key_success_body,
+                // error state for action key is not implemented yet so below should never appear
+                titleErrorResId = R.string.gesture_error_title,
+                bodyErrorResId = R.string.touchpad_action_key_error_body,
             ),
         animations = TutorialScreenConfig.Animations(educationResId = R.raw.action_key_edu),
     )

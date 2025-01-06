@@ -21,7 +21,6 @@ import static androidx.constraintlayout.core.widgets.Optimizer.OPTIMIZATION_GRAP
 import android.app.Fragment;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.graphics.Canvas;
 import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.view.MotionEvent;
@@ -33,13 +32,10 @@ import androidx.constraintlayout.widget.ConstraintLayout;
 import androidx.constraintlayout.widget.ConstraintSet;
 
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
-import com.android.systemui.keyguard.MigrateClocksToBlueprint;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.notification.AboveShelfObserver;
 
-import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.function.Consumer;
 
 /**
@@ -50,11 +46,7 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
 
     private View mQsFrame;
     private View mStackScroller;
-    private View mKeyguardStatusBar;
 
-    private final ArrayList<View> mDrawingOrderedChildren = new ArrayList<>();
-    private final ArrayList<View> mLayoutDrawingOrder = new ArrayList<>();
-    private final Comparator<View> mIndexComparator = Comparator.comparingInt(this::indexOfChild);
     private Consumer<WindowInsets> mInsetsChangedListener = insets -> {};
     private Consumer<QS> mQSFragmentAttachedListener = qs -> {};
     private QS mQs;
@@ -80,7 +72,6 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     protected void onFinishInflate() {
         super.onFinishInflate();
         mQsFrame = findViewById(R.id.qs_frame);
-        mKeyguardStatusBar = findViewById(R.id.keyguard_header);
     }
 
     void setStackScroller(View stackScroller) {
@@ -160,44 +151,9 @@ public class NotificationsQuickSettingsContainer extends ConstraintLayout
     }
 
     @Override
-    protected void dispatchDraw(Canvas canvas) {
-        mDrawingOrderedChildren.clear();
-        mLayoutDrawingOrder.clear();
-        if (mKeyguardStatusBar.getVisibility() == View.VISIBLE) {
-            mDrawingOrderedChildren.add(mKeyguardStatusBar);
-            mLayoutDrawingOrder.add(mKeyguardStatusBar);
-        }
-        if (mQsFrame.getVisibility() == View.VISIBLE) {
-            mDrawingOrderedChildren.add(mQsFrame);
-            mLayoutDrawingOrder.add(mQsFrame);
-        }
-        if (mStackScroller.getVisibility() == View.VISIBLE) {
-            mDrawingOrderedChildren.add(mStackScroller);
-            mLayoutDrawingOrder.add(mStackScroller);
-        }
-
-        // Let's now find the order that the view has when drawing regularly by sorting
-        mLayoutDrawingOrder.sort(mIndexComparator);
-        super.dispatchDraw(canvas);
-    }
-
-    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         return TouchLogger.logDispatchTouch("NotificationsQuickSettingsContainer", ev,
                 super.dispatchTouchEvent(ev));
-    }
-
-    @Override
-    protected boolean drawChild(Canvas canvas, View child, long drawingTime) {
-        if (MigrateClocksToBlueprint.isEnabled()) {
-            return super.drawChild(canvas, child, drawingTime);
-        }
-        int layoutIndex = mLayoutDrawingOrder.indexOf(child);
-        if (layoutIndex >= 0) {
-            return super.drawChild(canvas, mDrawingOrderedChildren.get(layoutIndex), drawingTime);
-        } else {
-            return super.drawChild(canvas, child, drawingTime);
-        }
     }
 
     public void applyConstraints(ConstraintSet constraintSet) {

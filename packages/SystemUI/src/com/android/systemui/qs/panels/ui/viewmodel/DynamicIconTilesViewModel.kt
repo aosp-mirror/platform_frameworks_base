@@ -17,9 +17,13 @@
 package com.android.systemui.qs.panels.ui.viewmodel
 
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.qs.panels.domain.interactor.DynamicIconTilesInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
+import kotlinx.coroutines.awaitCancellation
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 
 /** View model to resize QS tiles down to icons when removed from the current tiles. */
 class DynamicIconTilesViewModel
@@ -28,10 +32,21 @@ constructor(
     interactorFactory: DynamicIconTilesInteractor.Factory,
     iconTilesViewModel: IconTilesViewModel,
 ) : IconTilesViewModel by iconTilesViewModel, ExclusiveActivatable() {
+    private val hydrator = Hydrator("DynamicIconTilesViewModel")
     private val interactor = interactorFactory.create()
 
+    val largeTilesSpanState =
+        hydrator.hydratedStateOf(
+            traceName = "largeTilesSpan",
+            source = iconTilesViewModel.largeTilesSpan,
+        )
+
     override suspend fun onActivated(): Nothing {
-        interactor.activate()
+        coroutineScope {
+            launch { hydrator.activate() }
+            launch { interactor.activate() }
+            awaitCancellation()
+        }
     }
 
     @AssistedFactory

@@ -23,14 +23,11 @@ import android.graphics.Rect
 import android.os.Bundle
 import android.view.Display
 import android.view.Gravity
-import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup.LayoutParams.WRAP_CONTENT
 import android.view.WindowManager
 import android.widget.FrameLayout
 import android.widget.FrameLayout.LayoutParams
-import com.android.keyguard.dagger.KeyguardStatusViewComponent
-import com.android.systemui.keyguard.MigrateClocksToBlueprint
 import com.android.systemui.plugins.clocks.ClockController
 import com.android.systemui.plugins.clocks.ClockFaceController
 import com.android.systemui.res.R
@@ -45,7 +42,6 @@ class ConnectedDisplayKeyguardPresentation
 constructor(
     @Assisted display: Display,
     context: Context,
-    private val keyguardStatusViewComponentFactory: KeyguardStatusViewComponent.Factory,
     private val clockRegistry: ClockRegistry,
     private val clockEventController: ClockEventController,
 ) :
@@ -53,12 +49,11 @@ constructor(
         context,
         display,
         R.style.Theme_SystemUI_KeyguardPresentation,
-        WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG
+        WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG,
     ) {
 
     private lateinit var rootView: FrameLayout
     private var clock: View? = null
-    private lateinit var keyguardStatusViewController: KeyguardStatusViewController
     private lateinit var faceController: ClockFaceController
     private lateinit var clockFrame: FrameLayout
 
@@ -82,7 +77,7 @@ constructor(
                 oldLeft: Int,
                 oldTop: Int,
                 oldRight: Int,
-                oldBottom: Int
+                oldBottom: Int,
             ) {
                 clock?.let {
                     faceController.events.onTargetRegionChanged(
@@ -95,11 +90,7 @@ constructor(
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
-        if (MigrateClocksToBlueprint.isEnabled) {
-            onCreateV2()
-        } else {
-            onCreate()
-        }
+        onCreateV2()
     }
 
     fun onCreateV2() {
@@ -112,39 +103,15 @@ constructor(
         setClock(clockRegistry.createCurrentClock())
     }
 
-    fun onCreate() {
-        setContentView(
-            LayoutInflater.from(context)
-                .inflate(R.layout.keyguard_clock_presentation, /* root= */ null)
-        )
-
-        setFullscreen()
-
-        clock = requireViewById(R.id.clock)
-        keyguardStatusViewController =
-            keyguardStatusViewComponentFactory
-                .build(clock as KeyguardStatusView, display)
-                .keyguardStatusViewController
-                .apply {
-                    setDisplayedOnSecondaryDisplay()
-                    init()
-                }
-    }
-
     override fun onAttachedToWindow() {
-        if (MigrateClocksToBlueprint.isEnabled) {
-            clockRegistry.registerClockChangeListener(clockChangedListener)
-            clockEventController.registerListeners(clock!!)
-
-            faceController.animations.enter()
-        }
+        clockRegistry.registerClockChangeListener(clockChangedListener)
+        clockEventController.registerListeners(clock!!)
+        faceController.animations.enter()
     }
 
     override fun onDetachedFromWindow() {
-        if (MigrateClocksToBlueprint.isEnabled) {
-            clockEventController.unregisterListeners()
-            clockRegistry.unregisterClockChangeListener(clockChangedListener)
-        }
+        clockEventController.unregisterListeners()
+        clockRegistry.unregisterClockChangeListener(clockChangedListener)
 
         super.onDetachedFromWindow()
     }
@@ -166,7 +133,7 @@ constructor(
                 context.resources.getDimensionPixelSize(R.dimen.keyguard_presentation_width),
                 WRAP_CONTENT,
                 Gravity.CENTER,
-            )
+            ),
         )
 
         clockEventController.clock = clockController
@@ -190,8 +157,6 @@ constructor(
     @AssistedFactory
     interface Factory {
         /** Creates a new [Presentation] for the given [display]. */
-        fun create(
-            display: Display,
-        ): ConnectedDisplayKeyguardPresentation
+        fun create(display: Display): ConnectedDisplayKeyguardPresentation
     }
 }

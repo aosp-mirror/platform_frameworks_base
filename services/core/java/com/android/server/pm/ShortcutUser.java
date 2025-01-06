@@ -18,8 +18,6 @@ package com.android.server.pm;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.appsearch.AppSearchManager;
-import android.app.appsearch.AppSearchSession;
 import android.content.pm.ShortcutManager;
 import android.content.pm.UserPackage;
 import android.metrics.LogMaker;
@@ -34,7 +32,6 @@ import android.util.Slog;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.infra.AndroidFuture;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -83,7 +80,6 @@ class ShortcutUser {
     private static final String KEY_PACKAGES = "packages";
 
     final ShortcutService mService;
-    final AppSearchManager mAppSearchManager;
     final Executor mExecutor;
 
     @UserIdInt
@@ -105,14 +101,9 @@ class ShortcutUser {
 
     private final Object mLock = new Object();
 
-    @GuardedBy("mLock")
-    private final ArrayList<AndroidFuture<AppSearchSession>> mInFlightSessions = new ArrayList<>();
-
     public ShortcutUser(ShortcutService service, int userId) {
         mService = service;
         mUserId = userId;
-        mAppSearchManager = service.mContext.createContextAsUser(UserHandle.of(userId), 0)
-                .getSystemService(AppSearchManager.class);
         mExecutor = FgThread.getExecutor();
     }
 
@@ -154,12 +145,7 @@ class ShortcutUser {
 
     public ShortcutPackage removePackage(@NonNull String packageName) {
         final ShortcutPackage removed = mPackages.remove(packageName);
-
-        if (removed != null) {
-            removed.removeAllShortcutsAsync();
-        }
         mService.cleanupBitmapsForPackage(mUserId, packageName);
-
         return removed;
     }
 
@@ -524,7 +510,6 @@ class ShortcutUser {
                 Log.w(TAG, "Shortcuts for package " + sp.getPackageName() + " are being restored."
                         + " Existing non-manifeset shortcuts will be overwritten.");
             }
-            sp.removeAllShortcutsAsync();
             addPackage(sp);
             restoredPackages[0]++;
             restoredShortcuts[0] += sp.getShortcutCount();
@@ -659,48 +644,5 @@ class ShortcutUser {
                 .setSubtype(packageWithShareTargetsCount));
         logger.write(logMaker.setType(MetricsEvent.SHORTCUTS_CHANGED_SHORTCUT_COUNT)
                 .setSubtype(totalSharingShortcutCount));
-    }
-
-    @NonNull
-    AndroidFuture<AppSearchSession> getAppSearch(
-            @NonNull final AppSearchManager.SearchContext searchContext) {
-        final AndroidFuture<AppSearchSession> future = new AndroidFuture<>();
-        synchronized (mLock) {
-            mInFlightSessions.removeIf(CompletableFuture::isDone);
-            mInFlightSessions.add(future);
-        }
-        if (mAppSearchManager == null) {
-            future.completeExceptionally(new RuntimeException("app search manager is null"));
-            return future;
-        }
-        if (!mService.mUserManagerInternal.isUserUnlockingOrUnlocked(getUserId())) {
-            // In rare cases the user might be stopped immediate after it started, in these cases
-            // any on-going session will need to be abandoned.
-            future.completeExceptionally(new RuntimeException("User " + getUserId() + " is "));
-            return future;
-        }
-        final long callingIdentity = Binder.clearCallingIdentity();
-        try {
-            mAppSearchManager.createSearchSession(searchContext, mExecutor, result -> {
-                if (!result.isSuccess()) {
-                    future.completeExceptionally(
-                            new RuntimeException(result.getErrorMessage()));
-                    return;
-                }
-                future.complete(result.getResultValue());
-            });
-        } finally {
-            Binder.restoreCallingIdentity(callingIdentity);
-        }
-        return future;
-    }
-
-    void cancelAllInFlightTasks() {
-        synchronized (mLock) {
-            for (AndroidFuture<AppSearchSession> session : mInFlightSessions) {
-                session.cancel(true);
-            }
-            mInFlightSessions.clear();
-        }
     }
 }

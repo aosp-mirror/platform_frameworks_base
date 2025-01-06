@@ -40,12 +40,16 @@ import com.android.systemui.statusbar.policy.domain.model.ZenModeInfo
 import java.time.Duration
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 /**
  * An interactor that performs business logic related to the status and configuration of Zen Mode
@@ -58,6 +62,7 @@ constructor(
     private val zenModeRepository: ZenModeRepository,
     private val notificationSettingsRepository: NotificationSettingsRepository,
     @Background private val bgDispatcher: CoroutineDispatcher,
+    @Background private val backgroundScope: CoroutineScope,
     private val iconLoader: ZenIconLoader,
     deviceProvisioningRepository: DeviceProvisioningRepository,
     userSetupRepository: UserSetupRepository,
@@ -101,13 +106,16 @@ constructor(
     /**
      * Returns the special "manual DND" mode.
      *
-     * This is only meant as a temporary solution for "legacy" UI pieces that handle DND
-     * specifically; any new or migrated features should use modes more generally, through [modes]
-     * or [activeModes].
+     * This should only be used when there is a strong reason to handle DND specifically (such as
+     * legacy UI pieces that haven't been updated to use modes more generally, or if the user
+     * explicitly wants a shortcut to DND). Please prefer using [modes] or [activeModes] in all
+     * other scenarios.
      */
-    val dndMode: Flow<ZenMode?> by lazy {
+    val dndMode: StateFlow<ZenMode?> by lazy {
         ModesUi.assertInNewMode()
-        zenModeRepository.modes.map { modes -> modes.singleOrNull { it.isManualDnd } }
+        zenModeRepository.modes
+            .map { modes -> modes.singleOrNull { it.isManualDnd } }
+            .stateIn(scope = backgroundScope, started = SharingStarted.Eagerly, initialValue = null)
     }
 
     /** Flow returning the currently active mode(s), if any. */
@@ -199,6 +207,14 @@ constructor(
 
     fun deactivateMode(zenMode: ZenMode) {
         zenModeRepository.deactivateMode(zenMode)
+    }
+
+    fun deactivateAllModes() {
+        for (mode in zenModeRepository.getModes()) {
+            if (mode.isActive) {
+                deactivateMode(mode)
+            }
+        }
     }
 
     private val zenDuration

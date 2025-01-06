@@ -57,7 +57,6 @@ import android.view.Display;
 import android.view.Window;
 
 import com.android.systemui.flags.FeatureFlags;
-import com.android.systemui.flags.Flags;
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.mediaprojection.MediaProjectionServiceHelper;
 import com.android.systemui.mediaprojection.MediaProjectionUtils;
@@ -123,21 +122,20 @@ public class MediaProjectionPermissionActivity extends Activity {
         final Intent launchingIntent = getIntent();
         mReviewGrantedConsentRequired = launchingIntent.getBooleanExtra(
                 EXTRA_USER_REVIEW_GRANTED_CONSENT, false);
-        if (com.android.systemui.Flags.mediaProjectionRequestAttributionFix()) {
-            mPackageName = getLaunchedFromPackage();
-        } else {
-            mPackageName = getCallingPackage();
-        }
 
-        // This activity is launched directly by an app, or system server. System server provides
-        // the package name through the intent if so.
-        if (mPackageName == null || (
-                com.android.systemui.Flags.mediaProjectionRequestAttributionFix()
-                        && getCallingPackage() == null)) {
+        // The original requester of this activity start
+        mPackageName = getLaunchedFromPackage();
+
+        // This activity is launched directly by using startActivity(),
+        // thus getCallingPackage() will be null.
+        if (getCallingPackage() == null) {
+            // System server provides the package name through the intent if so and is able to get
+            // the result back. Other applications can't.
             if (launchingIntent.hasExtra(EXTRA_PACKAGE_REUSING_GRANTED_CONSENT)) {
                 mPackageName = launchingIntent.getStringExtra(
                         EXTRA_PACKAGE_REUSING_GRANTED_CONSENT);
             } else {
+                // The activity was not launched for result, we abort here
                 finishAsCancelled();
                 return;
             }
@@ -187,11 +185,9 @@ public class MediaProjectionPermissionActivity extends Activity {
             return;
         }
 
-        if (mFeatureFlags.isEnabled(Flags.WM_ENABLE_PARTIAL_SCREEN_SHARING_ENTERPRISE_POLICIES)) {
-            if (showScreenCaptureDisabledDialogIfNeeded()) {
-                finishAsCancelled();
-                return;
-            }
+        if (showScreenCaptureDisabledDialogIfNeeded()) {
+            finishAsCancelled();
+            return;
         }
 
         final String appName = extractAppName(aInfo, packageManager);

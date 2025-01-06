@@ -19,19 +19,21 @@ package com.android.systemui.qs
 import android.content.ComponentName
 import android.content.Context
 import androidx.annotation.GuardedBy
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.qs.external.TileServiceRequestController
+import com.android.systemui.qs.flags.QsInCompose
 import com.android.systemui.qs.pipeline.data.repository.TileSpecRepository.Companion.POSITION_AT_END
 import com.android.systemui.qs.pipeline.domain.interactor.CurrentTilesInteractor
 import com.android.systemui.qs.pipeline.shared.QSPipelineFlagsRepository
 import com.android.systemui.qs.pipeline.shared.TileSpec
+import com.android.systemui.shade.ShadeDisplayAware
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Adapter to determine what real class to use for classes that depend on [QSHost].
@@ -48,7 +50,7 @@ class QSHostAdapter
 @Inject
 constructor(
     private val interactor: CurrentTilesInteractor,
-    private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val tileServiceRequestControllerBuilder: TileServiceRequestController.Builder,
     @Application private val scope: CoroutineScope,
     dumpManager: DumpManager,
@@ -133,5 +135,13 @@ constructor(
 
     override fun indexOf(tileSpec: String): Int {
         return specs.indexOf(tileSpec)
+    }
+
+    override fun clickTile(tile: ComponentName) {
+        if (QsInCompose.isUnexpectedlyInLegacyMode()) {
+            return
+        }
+        val spec = TileSpec.create(tile)
+        interactor.currentTiles.value.firstOrNull { it.spec == spec }?.tile?.click(null)
     }
 }

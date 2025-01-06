@@ -309,6 +309,7 @@ public class BluetoothEventManagerTest {
 
     private void setUpAudioSharing(boolean enableFlag, boolean enableFeature,
             boolean enableProfile, boolean workProfile) {
+        mSetFlagsRule.disableFlags(Flags.FLAG_DISABLE_AUDIO_SHARING_AUTO_PICK_FALLBACK_IN_UI);
         if (enableFlag) {
             mSetFlagsRule.enableFlags(Flags.FLAG_ENABLE_LE_AUDIO_SHARING);
         } else {

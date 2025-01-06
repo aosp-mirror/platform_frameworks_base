@@ -148,8 +148,23 @@ flag {
 
 flag {
     namespace: "virtual_devices"
+    name: "notifications_for_device_streaming"
+    description: "Add notifications permissions to device streaming role"
+    bug: "375240276"
+    is_exported: true
+}
+
+flag {
+    namespace: "virtual_devices"
     name: "default_device_camera_access_policy"
     description: "API for default device camera access policy"
     bug: "371173368"
     is_exported: true
+}
+
+flag {
+    name: "vdm_settings"
+    namespace: "virtual_devices"
+    description: "Show virtual devices in Settings"
+    bug: "338974320"
 }

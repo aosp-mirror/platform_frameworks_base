@@ -14,59 +14,26 @@
   ~ limitations under the License.
   -->
 
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:androidprv="http://schemas.android.com/apk/prv/res/android"
-    android:id="@+id/volume_ringer_and_drawer_container"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:gravity="center"
-    android:paddingLeft="@dimen/volume_dialog_ringer_horizontal_padding"
-    android:paddingRight="@dimen/volume_dialog_ringer_horizontal_padding"
-    android:layoutDirection="ltr"
-    android:clipToPadding="false"
+<androidx.constraintlayout.motion.widget.MotionLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/volume_ringer_drawer"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
     android:clipChildren="false"
-    android:background="@drawable/volume_background_top">
+    android:clipToPadding="false"
+    android:gravity="center"
+    android:layoutDirection="ltr"
+    app:layoutDescription="@xml/volume_dialog_ringer_drawer_motion_scene">
 
-    <!-- Drawer view, invisible by default. -->
-    <FrameLayout
-        android:id="@+id/volume_drawer_container"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical">
+    <View
+        android:id="@+id/ringer_buttons_background"
+        android:layout_width="@dimen/volume_dialog_width"
+        android:layout_height="0dp"
+        android:visibility="gone"
+        android:layout_marginTop="@dimen/volume_dialog_background_vertical_margin"
+        android:layout_marginBottom="@dimen/volume_dialog_background_vertical_margin"
+        android:background="@drawable/volume_dialog_ringer_background" />
 
-        <!-- View that is animated to a tapped ringer selection, so it appears selected. -->
-        <FrameLayout
-            android:id="@+id/volume_drawer_selection_background"
-            android:alpha="0.0"
-            android:layout_width="@dimen/volume_dialog_ringer_drawer_button_size"
-            android:layout_height="@dimen/volume_dialog_ringer_drawer_button_size"
-            android:layout_gravity="bottom|right"
-            android:background="@drawable/volume_drawer_selection_bg" />
+    <!-- add ringer buttons here -->
 
-        <LinearLayout
-            android:id="@+id/volume_drawer_options"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="vertical">
-
-            <!-- add ringer buttons here -->
-
-        </LinearLayout>
-
-    </FrameLayout>
-
-    <!-- The current ringer selection. When the drawer is opened, this animates to the corresponding
-         position in the drawer. When the drawer is closed, it animates back. -->
-    <ImageButton
-        android:id="@+id/volume_new_ringer_active_button"
-        android:layout_width="@dimen/volume_dialog_ringer_drawer_button_size"
-        android:layout_height="@dimen/volume_dialog_ringer_drawer_button_size"
-        android:layout_marginBottom="@dimen/volume_dialog_components_spacing"
-        android:background="@drawable/volume_drawer_selection_bg"
-        android:contentDescription="@string/volume_ringer_change"
-        android:gravity="center"
-        android:padding="10dp"
-        android:src="@drawable/ic_volume_media"
-        android:tint="?androidprv:attr/materialColorOnPrimary" />
-
-</FrameLayout>
+</androidx.constraintlayout.motion.widget.MotionLayout>

@@ -16,8 +16,6 @@
 
 package android.app.compat;
 
-import static android.app.PropertyInvalidatedCache.createSystemCacheKey;
-
 import android.annotation.NonNull;
 import android.app.PropertyInvalidatedCache;
 import android.content.Context;
@@ -31,16 +29,35 @@ import com.android.internal.compat.IPlatformCompat;
  * Handles caching of calls to {@link com.android.internal.compat.IPlatformCompat}
  * @hide
  */
+@android.ravenwood.annotation.RavenwoodKeepWholeClass
 public final class ChangeIdStateCache
         extends PropertyInvalidatedCache<ChangeIdStateQuery, Boolean> {
-    private static final String CACHE_KEY = createSystemCacheKey("is_compat_change_enabled");
+
+    private static final String CACHE_MODULE = PropertyInvalidatedCache.MODULE_SYSTEM;
+    private static final String CACHE_API = "is_compat_change_enabled";
+
     private static final int MAX_ENTRIES = 2048;
-    private static boolean sDisabled = false;
+    private static boolean sDisabled = getDefaultDisabled();
     private volatile IPlatformCompat mPlatformCompat;
+
+
+    @android.ravenwood.annotation.RavenwoodReplace
+    private static boolean getDefaultDisabled() {
+        return false;
+    }
+
+    private static boolean getDefaultDisabled$ravenwood() {
+        return true; // TODO(b/376676753) Disable the cache for now.
+    }
 
     /** @hide */
     public ChangeIdStateCache() {
-        super(MAX_ENTRIES, CACHE_KEY);
+        super(new PropertyInvalidatedCache.Args(CACHE_MODULE)
+                .maxEntries(MAX_ENTRIES)
+                .isolateUids(false)
+                .cacheNulls(false)
+                .api(CACHE_API),
+                CACHE_API, null);
     }
 
     /**
@@ -61,7 +78,7 @@ public final class ChangeIdStateCache
      */
     public static void invalidate() {
         if (!sDisabled) {
-            PropertyInvalidatedCache.invalidateCache(CACHE_KEY);
+            PropertyInvalidatedCache.invalidateCache(CACHE_MODULE, CACHE_API);
         }
     }
 

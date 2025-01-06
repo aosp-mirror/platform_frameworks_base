@@ -17,30 +17,24 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
+import static com.android.server.wm.SnapshotPersistQueue.MAX_STORE_QUEUE_DEPTH;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.argThat;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 
-import android.content.ComponentName;
-import android.graphics.ColorSpace;
-import android.graphics.Point;
-import android.graphics.Rect;
-import android.hardware.HardwareBuffer;
 import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
-import android.view.Surface;
 import android.window.TaskSnapshot;
 
 import androidx.test.filters.SmallTest;
@@ -61,14 +55,20 @@ import java.util.Arrays;
 @SmallTest
 @Presubmit
 @RunWith(WindowTestRunner.class)
-public class ActivitySnapshotControllerTests extends WindowTestsBase {
+public class ActivitySnapshotControllerTests extends TaskSnapshotPersisterTestBase {
 
     private ActivitySnapshotController mActivitySnapshotController;
 
+    public ActivitySnapshotControllerTests() {
+        super(0.8f /* highResScale */, 0.5f /* lowResScale */);
+    }
+
+    @Override
     @Before
-    public void setUp() throws Exception {
-        spyOn(mWm.mSnapshotController.mActivitySnapshotController);
-        mActivitySnapshotController = mWm.mSnapshotController.mActivitySnapshotController;
+    public void setUp() {
+        super.setUp();
+        mActivitySnapshotController = new ActivitySnapshotController(mWm, mSnapshotPersistQueue);
+        spyOn(mActivitySnapshotController);
         doReturn(false).when(mActivitySnapshotController).shouldDisableSnapshots();
         mActivitySnapshotController.resetTmpFields();
     }
@@ -92,12 +92,11 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
         assertEquals(0, mActivitySnapshotController.mPendingRemoveActivity.size());
         mActivitySnapshotController.resetTmpFields();
 
-        // simulate three activity
+        // simulate three activity, the bottom activity won't participate in transition
         final WindowState belowClose = createAppWindow(task, ACTIVITY_TYPE_STANDARD,
                 "belowClose");
         belowClose.mActivityRecord.commitVisibility(
                 false /* visible */, true /* performLayout */);
-        windows.add(belowClose.mActivityRecord);
         mActivitySnapshotController.handleTransitionFinish(windows);
         assertEquals(1, mActivitySnapshotController.mPendingRemoveActivity.size());
         assertEquals(belowClose.mActivityRecord,
@@ -249,15 +248,32 @@ public class ActivitySnapshotControllerTests extends WindowTestsBase {
         assertEquals(taskSnapshot, mActivitySnapshotController.getSnapshot(activities));
     }
 
-    private TaskSnapshot createSnapshot() {
-        HardwareBuffer buffer = mock(HardwareBuffer.class);
-        doReturn(100).when(buffer).getWidth();
-        doReturn(100).when(buffer).getHeight();
-        return new TaskSnapshot(1, 0 /* captureTime */, new ComponentName("", ""), buffer,
-                ColorSpace.get(ColorSpace.Named.SRGB), ORIENTATION_PORTRAIT,
-                Surface.ROTATION_0, new Point(100, 100), new Rect() /* contentInsets */,
-                new Rect() /* letterboxInsets*/, false /* isLowResolution */,
-                true /* isRealSnapshot */, WINDOWING_MODE_FULLSCREEN, 0 /* mSystemUiVisibility */,
-                false /* isTranslucent */, false /* hasImeSurface */, 0 /* uiMode */);
+    /**
+     * Verifies that activity snapshot is skipped if the persister queue has too many pending write
+     * items.
+     */
+    @Test
+    public void testSkipRecordActivity() {
+        final AbsAppSnapshotController.SnapshotSupplier supplier =
+                new AbsAppSnapshotController.SnapshotSupplier();
+        supplier.setSupplier(this::createSnapshot);
+        doReturn(supplier).when(mActivitySnapshotController).recordSnapshotInner(
+                any(), anyBoolean(), any());
+        final Task task = createTask(mDisplayContent);
+
+        mSnapshotPersistQueue.setPaused(true);
+        final ArrayList<ActivityRecord> tmpList = new ArrayList<>();
+        for (int i = 0; i < MAX_STORE_QUEUE_DEPTH; ++i) {
+            tmpList.clear();
+            final ActivityRecord activity = createActivityRecord(task);
+            tmpList.add(activity);
+            mActivitySnapshotController.recordSnapshot(tmpList);
+            assertNotNull(mActivitySnapshotController.findSavedFile(activity));
+        }
+        tmpList.clear();
+        final ActivityRecord activity = createActivityRecord(task);
+        tmpList.add(activity);
+        mActivitySnapshotController.recordSnapshot(tmpList);
+        assertNull(mActivitySnapshotController.findSavedFile(activity));
     }
 }

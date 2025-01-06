@@ -16,13 +16,35 @@
 
 package com.android.systemui.statusbar.notification.data.repository
 
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import kotlinx.coroutines.flow.MutableStateFlow
 
 class FakeHeadsUpRowRepository(override val key: String, override val elementKey: Any = Any()) :
     HeadsUpRowRepository {
-    constructor(key: String, isPinned: Boolean) : this(key = key) {
-        this.isPinned.value = isPinned
+    constructor(
+        key: String,
+        elementKey: Any = Any(),
+        isPinned: Boolean,
+    ) : this(key = key, elementKey = elementKey) {
+        this.pinnedStatus.value =
+            if (isPinned) PinnedStatus.PinnedBySystem else PinnedStatus.NotPinned
     }
 
-    override val isPinned: MutableStateFlow<Boolean> = MutableStateFlow(false)
+    constructor(
+        key: String,
+        elementKey: Any = Any(),
+        pinnedStatus: PinnedStatus,
+    ) : this(key = key, elementKey = elementKey) {
+        this.pinnedStatus.value = pinnedStatus
+    }
+
+    override val pinnedStatus: MutableStateFlow<PinnedStatus> =
+        MutableStateFlow(PinnedStatus.NotPinned)
 }
+
+/** Use this fake if you're using [UnconfinedTestDispatcher]. See b/383528592 for reasoning. */
+class UnconfinedFakeHeadsUpRowRepository(
+    override val key: String,
+    override val elementKey: Any = Any(),
+    override val pinnedStatus: MutableStateFlow<PinnedStatus>,
+) : HeadsUpRowRepository

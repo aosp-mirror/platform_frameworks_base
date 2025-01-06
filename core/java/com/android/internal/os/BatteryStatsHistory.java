@@ -250,23 +250,22 @@ public class BatteryStatsHistory {
     private static class BatteryHistoryDirectory {
         private final File mDirectory;
         private final MonotonicClock mMonotonicClock;
-        private int mMaxHistoryFiles;
+        private int mMaxHistorySize;
         private final List<BatteryHistoryFile> mHistoryFiles = new ArrayList<>();
         private final ReentrantLock mLock = new ReentrantLock();
         private boolean mCleanupNeeded;
 
-        BatteryHistoryDirectory(File directory, MonotonicClock monotonicClock,
-                int maxHistoryFiles) {
+        BatteryHistoryDirectory(File directory, MonotonicClock monotonicClock, int maxHistorySize) {
             mDirectory = directory;
             mMonotonicClock = monotonicClock;
-            mMaxHistoryFiles = maxHistoryFiles;
-            if (mMaxHistoryFiles == 0) {
-                Slog.wtf(TAG, "mMaxHistoryFiles should not be zero when writing history");
+            mMaxHistorySize = maxHistorySize;
+            if (mMaxHistorySize == 0) {
+                Slog.w(TAG, "mMaxHistorySize should not be zero when writing history");
             }
         }
 
-        void setMaxHistoryFiles(int maxHistoryFiles) {
-            mMaxHistoryFiles = maxHistoryFiles;
+        void setMaxHistorySize(int maxHistorySize) {
+            mMaxHistorySize = maxHistorySize;
             cleanup();
         }
 
@@ -500,13 +499,14 @@ public class BatteryStatsHistory {
                     oldest.atomicFile.delete();
                 }
 
-                // if there are more history files than allowed, delete oldest history files.
-                // mMaxHistoryFiles comes from Constants.MAX_HISTORY_FILES and
-                // can be updated by DeviceConfig at run time.
-                while (mHistoryFiles.size() > mMaxHistoryFiles) {
+                // if there is more history stored than allowed, delete oldest history files.
+                int size = getSize();
+                while (size > mMaxHistorySize) {
                     BatteryHistoryFile oldest = mHistoryFiles.get(0);
+                    int length = (int) oldest.atomicFile.getBaseFile().length();
                     oldest.atomicFile.delete();
                     mHistoryFiles.remove(0);
+                    size -= length;
                 }
             } finally {
                 unlock();
@@ -595,19 +595,19 @@ public class BatteryStatsHistory {
      * Constructor
      *
      * @param systemDir            typically /data/system
-     * @param maxHistoryFiles      the largest number of history buffer files to keep
+     * @param maxHistorySize       the largest amount of battery history to keep on disk
      * @param maxHistoryBufferSize the most amount of RAM to used for buffering of history steps
      */
     public BatteryStatsHistory(Parcel historyBuffer, File systemDir,
-            int maxHistoryFiles, int maxHistoryBufferSize,
+            int maxHistorySize, int maxHistoryBufferSize,
             HistoryStepDetailsCalculator stepDetailsCalculator, Clock clock,
             MonotonicClock monotonicClock, TraceDelegate tracer, EventLogger eventLogger) {
-        this(historyBuffer, systemDir, maxHistoryFiles, maxHistoryBufferSize, stepDetailsCalculator,
+        this(historyBuffer, systemDir, maxHistorySize, maxHistoryBufferSize, stepDetailsCalculator,
                 clock, monotonicClock, tracer, eventLogger, null);
     }
 
     private BatteryStatsHistory(@Nullable Parcel historyBuffer, @Nullable File systemDir,
-            int maxHistoryFiles, int maxHistoryBufferSize,
+            int maxHistorySize, int maxHistoryBufferSize,
             @NonNull HistoryStepDetailsCalculator stepDetailsCalculator, @NonNull Clock clock,
             @NonNull MonotonicClock monotonicClock, @NonNull TraceDelegate tracer,
             @NonNull EventLogger eventLogger, @Nullable BatteryStatsHistory writableHistory) {
@@ -634,7 +634,7 @@ public class BatteryStatsHistory {
             mHistoryDir = writableHistory.mHistoryDir;
         } else if (systemDir != null) {
             mHistoryDir = new BatteryHistoryDirectory(new File(systemDir, HISTORY_DIR),
-                    monotonicClock, maxHistoryFiles);
+                    monotonicClock, maxHistorySize);
             mHistoryDir.load();
             BatteryHistoryFile activeFile = mHistoryDir.getLastFile();
             if (activeFile == null) {
@@ -690,11 +690,11 @@ public class BatteryStatsHistory {
     }
 
     /**
-     * Changes the maximum number of history files to be kept.
+     * Changes the maximum amount of history to be kept on disk.
      */
-    public void setMaxHistoryFiles(int maxHistoryFiles) {
+    public void setMaxHistorySize(int maxHistorySize) {
         if (mHistoryDir != null) {
-            mHistoryDir.setMaxHistoryFiles(maxHistoryFiles);
+            mHistoryDir.setMaxHistorySize(maxHistorySize);
         }
     }
 
@@ -1172,6 +1172,13 @@ public class BatteryStatsHistory {
     @VisibleForTesting
     public AtomicFile getActiveFile() {
         return mActiveFile;
+    }
+
+    /**
+     * Returns the maximum storage size allocated to battery history.
+     */
+    public int getMaxHistorySize() {
+        return mHistoryDir.mMaxHistorySize;
     }
 
     /**

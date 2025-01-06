@@ -22,6 +22,7 @@ import android.content.Intent
 import android.content.IntentFilter
 import android.view.accessibility.AccessibilityManager
 import androidx.annotation.VisibleForTesting
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.UiEvent
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.broadcast.BroadcastDispatcher
@@ -29,11 +30,11 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.deviceentry.domain.interactor.DeviceEntryFaceAuthInteractor
 import com.android.systemui.flags.FeatureFlags
-import com.android.systemui.flags.Flags
 import com.android.systemui.keyguard.data.repository.KeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.res.R
 import com.android.systemui.shade.PulsingGestureListener
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
@@ -50,7 +51,6 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Business logic for use-cases related to top-level touch handling in the lock screen. */
 @OptIn(ExperimentalCoroutinesApi::class)
@@ -58,7 +58,7 @@ import com.android.app.tracing.coroutines.launchTraced as launch
 class KeyguardTouchHandlingInteractor
 @Inject
 constructor(
-    @Application private val appContext: Context,
+    @ShadeDisplayAware private val context: Context,
     @Application private val scope: CoroutineScope,
     transitionInteractor: KeyguardTransitionInteractor,
     repository: KeyguardRepository,
@@ -120,9 +120,7 @@ constructor(
     init {
         if (isFeatureEnabled()) {
             broadcastDispatcher
-                .broadcastFlow(
-                    IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS),
-                )
+                .broadcastFlow(IntentFilter(Intent.ACTION_CLOSE_SYSTEM_DIALOGS))
                 .onEach { hideMenu() }
                 .launchIn(scope)
         }
@@ -187,8 +185,7 @@ constructor(
     }
 
     private fun isFeatureEnabled(): Boolean {
-        return featureFlags.isEnabled(Flags.LOCK_SCREEN_LONG_PRESS_ENABLED) &&
-            appContext.resources.getBoolean(R.bool.long_press_keyguard_customize_lockscreen_enabled)
+        return context.resources.getBoolean(R.bool.long_press_keyguard_customize_lockscreen_enabled)
     }
 
     /** Updates application state to ask to show the menu. */
@@ -229,14 +226,11 @@ constructor(
             .toLong()
     }
 
-    enum class LogEvents(
-        private val _id: Int,
-    ) : UiEventLogger.UiEventEnum {
+    enum class LogEvents(private val _id: Int) : UiEventLogger.UiEventEnum {
         @UiEvent(doc = "The lock screen was long-pressed and we showed the settings popup menu.")
         LOCK_SCREEN_LONG_PRESS_POPUP_SHOWN(1292),
         @UiEvent(doc = "The lock screen long-press popup menu was clicked.")
-        LOCK_SCREEN_LONG_PRESS_POPUP_CLICKED(1293),
-        ;
+        LOCK_SCREEN_LONG_PRESS_POPUP_CLICKED(1293);
 
         override fun getId() = _id
     }

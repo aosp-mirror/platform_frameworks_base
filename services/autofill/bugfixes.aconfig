@@ -9,6 +9,16 @@ flag {
 }
 
 flag {
+  name: "improve_fill_dialog_aconfig"
+  namespace: "autofill"
+  description: "Improvements for Fill Dialog. Guard DeviceConfig rollout "
+  bug: "382493181"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "fill_fields_from_current_session_only"
   namespace: "autofill"
   description: "Only fill autofill fields that are part of the current session."
@@ -20,6 +30,16 @@ flag {
   namespace: "autofill"
   description: "Mitigation for relayout issue"
   bug: "294330426"
+}
+
+flag {
+  name: "relayout_fix"
+  namespace: "autofill"
+  description: "Fixing relayout issue. Guarding enabling device config flags"
+  bug: "381226145"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
@@ -44,6 +64,36 @@ flag {
 }
 
 flag {
+  name: "fix_get_autofill_component"
+  namespace: "autofill"
+  description: "Fix getAutofillComponent returning null, even when user has selected provider"
+  bug: "319503432"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "test_flag"
+  namespace: "autofill"
+  description: "Test flag "
+  bug: "377868687"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "multiple_fill_history"
+  namespace: "autofill"
+  description: "Allows tracking per Session FillEventHistory. As a bugfix flag to guard against DeviceConfig flag"
+  bug: "365630157"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "add_session_id_to_client_state"
   namespace: "autofill"
   description: "Include the session id into the FillEventHistory events as part of ClientState"
@@ -55,4 +105,24 @@ flag {
   namespace: "autofill"
   description: "Highlight single field after autofill selection"
   bug: "41496744"
+}
+
+flag {
+  name: "metrics_fixes"
+  namespace: "autofill"
+  description: "Fixes various framework reported metrics"
+  bug: "362581326, 363011343"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
+  name: "add_accessibility_title_for_augmented_autofill_dropdown"
+  namespace: "autofill"
+  description: "Add accessibility title for augmented autofill dropdown"
+  bug: "375284244"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }

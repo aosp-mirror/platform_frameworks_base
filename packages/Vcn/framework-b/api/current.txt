@@ -1,0 +1,123 @@
+// Signature format: 2.0
+package android.net.vcn {
+
+  public final class VcnCellUnderlyingNetworkTemplate extends android.net.vcn.VcnUnderlyingNetworkTemplate {
+    method public int getCbs();
+    method public int getDun();
+    method public int getIms();
+    method public int getInternet();
+    method public int getMms();
+    method @NonNull public java.util.Set<java.lang.String> getOperatorPlmnIds();
+    method public int getOpportunistic();
+    method public int getRcs();
+    method public int getRoaming();
+    method @NonNull public java.util.Set<java.lang.Integer> getSimSpecificCarrierIds();
+  }
+
+  public static final class VcnCellUnderlyingNetworkTemplate.Builder {
+    ctor public VcnCellUnderlyingNetworkTemplate.Builder();
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate build();
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setCbs(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setDun(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setIms(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setInternet(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMetered(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinDownstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMinUpstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setMms(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOperatorPlmnIds(@NonNull java.util.Set<java.lang.String>);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setOpportunistic(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRcs(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setRoaming(int);
+    method @NonNull public android.net.vcn.VcnCellUnderlyingNetworkTemplate.Builder setSimSpecificCarrierIds(@NonNull java.util.Set<java.lang.Integer>);
+  }
+
+  public final class VcnConfig implements android.os.Parcelable {
+    method public int describeContents();
+    method @NonNull public java.util.Set<android.net.vcn.VcnGatewayConnectionConfig> getGatewayConnectionConfigs();
+    method @NonNull public java.util.Set<java.lang.Integer> getRestrictedUnderlyingNetworkTransports();
+    method public void writeToParcel(@NonNull android.os.Parcel, int);
+    field @NonNull public static final android.os.Parcelable.Creator<android.net.vcn.VcnConfig> CREATOR;
+  }
+
+  public static final class VcnConfig.Builder {
+    ctor public VcnConfig.Builder(@NonNull android.content.Context);
+    method @NonNull public android.net.vcn.VcnConfig.Builder addGatewayConnectionConfig(@NonNull android.net.vcn.VcnGatewayConnectionConfig);
+    method @NonNull public android.net.vcn.VcnConfig build();
+    method @NonNull public android.net.vcn.VcnConfig.Builder setRestrictedUnderlyingNetworkTransports(@NonNull java.util.Set<java.lang.Integer>);
+  }
+
+  public final class VcnGatewayConnectionConfig {
+    method @NonNull public int[] getExposedCapabilities();
+    method @NonNull public String getGatewayConnectionName();
+    method @IntRange(from=0x500) public int getMaxMtu();
+    method public int getMinUdpPort4500NatTimeoutSeconds();
+    method @NonNull public long[] getRetryIntervalsMillis();
+    method @NonNull public java.util.List<android.net.vcn.VcnUnderlyingNetworkTemplate> getVcnUnderlyingNetworkPriorities();
+    method public boolean hasGatewayOption(int);
+    method @FlaggedApi("android.net.vcn.safe_mode_config") public boolean isSafeModeEnabled();
+    field @FlaggedApi("android.net.vcn.mainline_vcn_module_api") public static final int MIN_UDP_PORT_4500_NAT_TIMEOUT_UNSET = -1; // 0xffffffff
+    field public static final int VCN_GATEWAY_OPTION_ENABLE_DATA_STALL_RECOVERY_WITH_MOBILITY = 0; // 0x0
+  }
+
+  public static final class VcnGatewayConnectionConfig.Builder {
+    ctor public VcnGatewayConnectionConfig.Builder(@NonNull String, @NonNull android.net.ipsec.ike.IkeTunnelConnectionParams);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addExposedCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder addGatewayOption(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig build();
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeExposedCapability(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder removeGatewayOption(int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMaxMtu(@IntRange(from=0x500) int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setMinUdpPort4500NatTimeoutSeconds(@IntRange(from=0x78) int);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setRetryIntervalsMillis(@NonNull long[]);
+    method @FlaggedApi("android.net.vcn.safe_mode_config") @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setSafeModeEnabled(boolean);
+    method @NonNull public android.net.vcn.VcnGatewayConnectionConfig.Builder setVcnUnderlyingNetworkPriorities(@NonNull java.util.List<android.net.vcn.VcnUnderlyingNetworkTemplate>);
+  }
+
+  public class VcnManager {
+    method @RequiresPermission("carrier privileges") public void clearVcnConfig(@NonNull android.os.ParcelUuid) throws java.io.IOException;
+    method @NonNull public java.util.List<android.os.ParcelUuid> getConfiguredSubscriptionGroups();
+    method public void registerVcnStatusCallback(@NonNull android.os.ParcelUuid, @NonNull java.util.concurrent.Executor, @NonNull android.net.vcn.VcnManager.VcnStatusCallback);
+    method @RequiresPermission("carrier privileges") public void setVcnConfig(@NonNull android.os.ParcelUuid, @NonNull android.net.vcn.VcnConfig) throws java.io.IOException;
+    method public void unregisterVcnStatusCallback(@NonNull android.net.vcn.VcnManager.VcnStatusCallback);
+    field public static final int VCN_ERROR_CODE_CONFIG_ERROR = 1; // 0x1
+    field public static final int VCN_ERROR_CODE_INTERNAL_ERROR = 0; // 0x0
+    field public static final int VCN_ERROR_CODE_NETWORK_ERROR = 2; // 0x2
+    field public static final int VCN_STATUS_CODE_ACTIVE = 2; // 0x2
+    field public static final int VCN_STATUS_CODE_INACTIVE = 1; // 0x1
+    field public static final int VCN_STATUS_CODE_NOT_CONFIGURED = 0; // 0x0
+    field public static final int VCN_STATUS_CODE_SAFE_MODE = 3; // 0x3
+  }
+
+  public abstract static class VcnManager.VcnStatusCallback {
+    ctor public VcnManager.VcnStatusCallback();
+    method public abstract void onGatewayConnectionError(@NonNull String, int, @Nullable Throwable);
+    method public abstract void onStatusChanged(int);
+  }
+
+  public abstract class VcnUnderlyingNetworkTemplate {
+    method public int getMetered();
+    method public int getMinEntryDownstreamBandwidthKbps();
+    method public int getMinEntryUpstreamBandwidthKbps();
+    method public int getMinExitDownstreamBandwidthKbps();
+    method public int getMinExitUpstreamBandwidthKbps();
+    field public static final int MATCH_ANY = 0; // 0x0
+    field public static final int MATCH_FORBIDDEN = 2; // 0x2
+    field public static final int MATCH_REQUIRED = 1; // 0x1
+  }
+
+  public final class VcnWifiUnderlyingNetworkTemplate extends android.net.vcn.VcnUnderlyingNetworkTemplate {
+    method @NonNull public java.util.Set<java.lang.String> getSsids();
+  }
+
+  public static final class VcnWifiUnderlyingNetworkTemplate.Builder {
+    ctor public VcnWifiUnderlyingNetworkTemplate.Builder();
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate build();
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMetered(int);
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMinDownstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setMinUpstreamBandwidthKbps(int, int);
+    method @NonNull public android.net.vcn.VcnWifiUnderlyingNetworkTemplate.Builder setSsids(@NonNull java.util.Set<java.lang.String>);
+  }
+
+}
+

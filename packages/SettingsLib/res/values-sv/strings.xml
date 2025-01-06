@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktiv (endast vänster)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktiv (endast höger)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktiv (vänster och höger)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Det gick inte att uppdatera omgivningsläget"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktiv (endast media). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktiv (endast media). V: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, H: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> batteri."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Ansluten (ljuddelning stöds). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> batteri."</string>
@@ -235,7 +236,7 @@
     <item msgid="6946761421234586000">"400 %"</item>
   </string-array>
     <string name="choose_profile" msgid="343803890897657450">"Välj profil"</string>
-    <string name="category_personal" msgid="6236798763159385225">"Privat"</string>
+    <string name="category_personal" msgid="6236798763159385225">"Personlig"</string>
     <string name="category_work" msgid="4014193632325996115">"Jobb"</string>
     <string name="category_private" msgid="4244892185452788977">"Privat"</string>
     <string name="category_clone" msgid="1554511758987195974">"Klon"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Lokal terminal"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Aktivera en terminalapp som ger åtkomst till hyllor lokalt"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux-utvecklingsmiljö"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Kör Linux-terminalen på Android"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Experimentellt) Kör Linux-terminalen på Android"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Om du inaktiverar detta rensas data i Linux-terminalen"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP-kontroll"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Konfigurera HDCP-kontroll"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Felsökning"</string>
@@ -422,6 +424,8 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala – övergångsanimering"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Längdskala för Animator"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Simulera sekundär skärm"</string>
+    <!-- no translation found for shade_display_awareness_title (8000009404669495876) -->
+    <skip />
     <string name="debug_applications_category" msgid="5394089406638954196">"Appar"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Behåll inte aktiviteter"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Förstör aktiviteter så fort användaren lämnar dem"</string>
@@ -585,12 +589,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Den här telefonen"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Den här surfplattan"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Den här datorn (intern)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Den här tv:n"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Dockningsstationens högtalare"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Extern enhet"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Ansluten enhet"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Den här telefonen"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analog"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Kan inte spelas på denna enhet"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Uppgradera kontot för att byta"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Det går inte att spela upp nedladdningar här"</string>
@@ -603,9 +609,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Ansluten via ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Ansluten via eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Standardutgång för tv:n"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI-utgång"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Interna högtalare"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Inbyggd högtalare"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Tv-ljud"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Det gick inte att ansluta. Stäng av enheten och slå på den igen"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Ljudenhet med kabelanslutning"</string>
     <string name="help_label" msgid="3528360748637781274">"Hjälp och feedback"</string>

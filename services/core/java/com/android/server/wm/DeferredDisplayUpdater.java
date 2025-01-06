@@ -193,7 +193,7 @@ class DeferredDisplayUpdater {
             final Rect startBounds = new Rect(0, 0, mDisplayContent.mInitialDisplayWidth,
                     mDisplayContent.mInitialDisplayHeight);
             final int fromRotation = mDisplayContent.getRotation();
-            if (Flags.blastSyncNotificationShadeOnDisplaySwitch() && physicalDisplayUpdated) {
+            if (physicalDisplayUpdated) {
                 final WindowState notificationShade =
                         mDisplayContent.getDisplayPolicy().getNotificationShade();
                 if (notificationShade != null && notificationShade.isVisible()
@@ -403,6 +403,7 @@ class DeferredDisplayUpdater {
                 || first.renderFrameRate != second.renderFrameRate
                 || first.hasArrSupport != second.hasArrSupport
                 || !Objects.equals(first.frameRateCategoryRate, second.frameRateCategoryRate)
+                || !Arrays.equals(first.supportedRefreshRates, second.supportedRefreshRates)
                 || first.defaultModeId != second.defaultModeId
                 || first.userPreferredModeId != second.userPreferredModeId
                 || !Arrays.equals(first.supportedModes, second.supportedModes)
@@ -423,6 +424,7 @@ class DeferredDisplayUpdater {
                 || first.brightnessMinimum != second.brightnessMinimum
                 || first.brightnessMaximum != second.brightnessMaximum
                 || first.brightnessDefault != second.brightnessDefault
+                || first.brightnessDim != second.brightnessDim
                 || first.installOrientation != second.installOrientation
                 || first.isForceSdr != second.isForceSdr
                 || !Objects.equals(first.layoutLimitedRefreshRate, second.layoutLimitedRefreshRate)
@@ -430,7 +432,8 @@ class DeferredDisplayUpdater {
                 || !first.thermalRefreshRateThrottling.contentEquals(
                 second.thermalRefreshRateThrottling)
                 || !Objects.equals(first.thermalBrightnessThrottlingDataId,
-                second.thermalBrightnessThrottlingDataId)) {
+                second.thermalBrightnessThrottlingDataId)
+                || first.canHostTasks != second.canHostTasks) {
             diff |= DIFF_NOT_WM_DEFERRABLE;
         }
 

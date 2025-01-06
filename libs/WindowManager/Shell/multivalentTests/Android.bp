@@ -55,6 +55,7 @@ android_robolectric_test {
         "truth",
         "flag-junit-base",
         "flag-junit",
+        "testables",
     ],
     auto_gen_config: true,
 }
@@ -77,6 +78,7 @@ android_test {
         "truth",
         "platform-test-annotations",
         "platform-test-rules",
+        "testables",
     ],
     libs: [
         "android.test.base.stubs.system",

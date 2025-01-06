@@ -18,5 +18,8 @@ package android.content.res
 
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import org.mockito.Mockito.mock
 
 var Kosmos.mainResources: Resources by Kosmos.Fixture { applicationContext.resources }
+
+var Kosmos.mockResources: Resources by Kosmos.Fixture { mock(Resources::class.java) }

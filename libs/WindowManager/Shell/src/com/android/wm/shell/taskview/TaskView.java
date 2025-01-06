@@ -186,6 +186,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void setObscuredTouchRect(Rect obscuredRect) {
         mObscuredTouchRegion = obscuredRect != null ? new Region(obscuredRect) : null;
+        invalidate();
     }
 
     /**

@@ -38,6 +38,7 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qrcodescanner.controller.QRCodeScannerController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
@@ -112,7 +113,7 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
 
         assertEquals(state.label, mContext.getString(R.string.qr_code_scanner_title));
         assertEquals(state.contentDescription, mContext.getString(R.string.qr_code_scanner_title));
-        assertEquals(state.icon, QSTileImpl.ResourceIcon.get(R.drawable.ic_qr_code_scanner));
+        assertEquals(state.icon, createExpectedIcon(R.drawable.ic_qr_code_scanner));
     }
 
     @Test
@@ -132,5 +133,13 @@ public class QRCodeScannerTileTest extends SysuiTestCase {
         mTile.handleUpdateState(state, null);
         assertEquals(state.state, Tile.STATE_INACTIVE);
         assertNull(state.secondaryLabel);
+    }
+
+    private QSTile.Icon createExpectedIcon(int resId) {
+        if (QsInCompose.isEnabled()) {
+            return new QSTileImpl.DrawableIconWithRes(mContext.getDrawable(resId), resId);
+        } else {
+            return QSTileImpl.ResourceIcon.get(resId);
+        }
     }
 }

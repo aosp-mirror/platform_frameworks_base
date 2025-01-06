@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"Aktywne (tylko lewa strona)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"Aktywne (tylko prawa strona)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"Aktywne (lewa i prawa strona)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"Nie udało się zaktualizować otoczenia"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"Aktywne (tylko multimedia). <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> naładowania baterii."</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"Aktywne (tylko multimedia), lewa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, prawa: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> naładowania baterii."</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"Połączone (obsługa udostępniania dźwięku), <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> naładowania baterii."</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"Terminal lokalny"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"Włącz terminal, który umożliwia dostęp do powłoki lokalnej"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Środowisko programistyczne Linux"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Uruchom terminal Linux na Androidzie"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(Wersja eksperymentalna) Uruchom terminal Linuxa na Androidzie"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"Jeśli wyłączysz tę funkcję, dane terminala Linuxa będą usunięte"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"Sprawdzanie HDCP"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"Ustaw sprawdzanie HDCP"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"Debugowanie"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"Skala animacji przejścia"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"Skala długości animacji"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"Symuluj ekrany dodatkowe"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"Pozycja wyświetlania cienia"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"Aplikacje"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"Nie zachowuj działań"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"Przerwij każde działanie, gdy użytkownik je porzuci"</string>
@@ -520,7 +523,7 @@
     <string name="battery_info_status_charging_fast_v2" msgid="1825439848151256589">"Szybkie ładowanie"</string>
     <string name="disabled_by_admin_summary_text" msgid="5343911767402923057">"Kontrolowane przez administratora"</string>
     <string name="disabled_by_app_ops_text" msgid="8373595926549098012">"Obowiązują ustawienia z ograniczonym dostępem"</string>
-    <string name="disabled" msgid="8017887509554714950">"Wyłączone"</string>
+    <string name="disabled" msgid="8017887509554714950">"Wyłączona"</string>
     <string name="external_source_trusted" msgid="1146522036773132905">"Dozwolone"</string>
     <string name="external_source_untrusted" msgid="5037891688911672227">"Niedozwolone"</string>
     <string name="install_other_apps" msgid="3232595082023199454">"Instalowanie nieznanych aplikacji"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"Ten telefon"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"Ten tablet"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"Ten komputer (wewnętrzny)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"Ten telewizor"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"Głośnik ze stacją dokującą"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"Urządzenie zewnętrzne"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"Połączone urządzenie"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"Ten telefon"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"Analogowe"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"Nie można odtworzyć na tym urządzeniu"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"Aby przełączyć, potrzebujesz konta premium"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"Tutaj nie można odtworzyć pobranych plików"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"Połączono przez ARC"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"Połączono przez eARC"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"Ustawienie domyślne telewizora"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"Wyjście HDMI"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"Głośniki wewnętrzne"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"Wbudowany głośnik"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"Telewizyjne urządzenie audio"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"Problem z połączeniem. Wyłącz i ponownie włącz urządzenie"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"Przewodowe urządzenie audio"</string>
     <string name="help_label" msgid="3528360748637781274">"Pomoc i opinie"</string>

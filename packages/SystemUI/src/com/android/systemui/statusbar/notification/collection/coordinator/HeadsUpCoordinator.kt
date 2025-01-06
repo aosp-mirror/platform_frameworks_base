@@ -41,13 +41,14 @@ import com.android.systemui.statusbar.notification.collection.notifcollection.No
 import com.android.systemui.statusbar.notification.collection.provider.LaunchFullScreenIntentProvider
 import com.android.systemui.statusbar.notification.collection.render.NodeController
 import com.android.systemui.statusbar.notification.dagger.IncomingHeader
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
+import com.android.systemui.statusbar.notification.headsup.OnHeadsUpChangedListener
+import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.interruption.HeadsUpViewBinder
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionDecisionProvider
 import com.android.systemui.statusbar.notification.logKey
 import com.android.systemui.statusbar.notification.shared.GroupHunAnimationFix
 import com.android.systemui.statusbar.notification.stack.BUCKET_HEADS_UP
-import com.android.systemui.statusbar.policy.HeadsUpManager
-import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.time.SystemClock
 import java.util.function.Consumer
@@ -140,11 +141,9 @@ constructor(
                 wasAdded = false,
                 wasUpdated = false,
                 // Force-set this notification to show heads-up.
-                // TODO(b/364653005): This means that if you tap on the second notification chip,
-                // then it moves to become the first chip because whatever notification is showing
-                // heads-up is considered to be the top notification.
                 shouldHeadsUpEver = true,
                 shouldHeadsUpAgain = true,
+                isPinnedByUser = true,
                 isHeadsUpEntry = mHeadsUpManager.isHeadsUpEntry(entry.key),
                 isBinding = isEntryBinding(entry),
             )
@@ -155,8 +154,8 @@ constructor(
         }
     }
 
-    private fun onHeadsUpViewBound(entry: NotificationEntry) {
-        mHeadsUpManager.showNotification(entry)
+    private fun onHeadsUpViewBound(entry: NotificationEntry, isPinnedByUser: Boolean) {
+        mHeadsUpManager.showNotification(entry, isPinnedByUser)
         mEntriesBindingUntil.remove(entry.key)
     }
 
@@ -424,6 +423,7 @@ constructor(
 
     private fun handlePostedEntry(posted: PostedEntry, hunMutator: HunMutator, scenario: String) {
         mLogger.logPostedEntryWillEvaluate(posted, scenario)
+
         if (posted.wasAdded) {
             if (posted.shouldHeadsUpEver) {
                 bindForAsyncHeadsUp(posted)
@@ -437,7 +437,17 @@ constructor(
                     // If showing heads up, we need to post an update. Otherwise we're still
                     // binding, and we can just let that finish.
                     if (posted.isHeadsUpEntry) {
-                        hunMutator.updateNotification(posted.key, posted.shouldHeadsUpAgain)
+                        val pinnedStatus =
+                            if (posted.shouldHeadsUpAgain) {
+                                if (StatusBarNotifChips.isEnabled && posted.isPinnedByUser) {
+                                    PinnedStatus.PinnedByUser
+                                } else {
+                                    PinnedStatus.PinnedBySystem
+                                }
+                            } else {
+                                PinnedStatus.NotPinned
+                            }
+                        hunMutator.updateNotification(posted.key, pinnedStatus)
                     }
                 } else {
                     if (posted.isHeadsUpEntry) {
@@ -461,10 +471,11 @@ constructor(
     }
 
     private fun bindForAsyncHeadsUp(posted: PostedEntry) {
+        val isPinnedByUser = StatusBarNotifChips.isEnabled && posted.isPinnedByUser
         // TODO: Add a guarantee to bindHeadsUpView of some kind of callback if the bind is
         //  cancelled so that we don't need to have this sad timeout hack.
         mEntriesBindingUntil[posted.key] = mNow + BIND_TIMEOUT
-        mHeadsUpViewBinder.bindHeadsUpView(posted.entry, this::onHeadsUpViewBound)
+        mHeadsUpViewBinder.bindHeadsUpView(posted.entry, isPinnedByUser, this::onHeadsUpViewBound)
     }
 
     private val mNotifCollectionListener =
@@ -906,6 +917,7 @@ constructor(
         var wasUpdated: Boolean,
         var shouldHeadsUpEver: Boolean,
         var shouldHeadsUpAgain: Boolean,
+        var isPinnedByUser: Boolean = false,
         var isHeadsUpEntry: Boolean,
         var isBinding: Boolean,
     ) {
@@ -943,7 +955,7 @@ private fun <R> HeadsUpManager.modifyHuns(block: (HunMutator) -> R): R {
 
 /** Mutates the HeadsUp state of notifications. */
 private interface HunMutator {
-    fun updateNotification(key: String, shouldHeadsUpAgain: Boolean)
+    fun updateNotification(key: String, requestedPinnedStatus: PinnedStatus)
 
     fun removeNotification(key: String, releaseImmediately: Boolean)
 }
@@ -955,8 +967,8 @@ private interface HunMutator {
 private class HunMutatorImpl(private val headsUpManager: HeadsUpManager) : HunMutator {
     private val deferred = mutableListOf<Pair<String, Boolean>>()
 
-    override fun updateNotification(key: String, shouldHeadsUpAgain: Boolean) {
-        headsUpManager.updateNotification(key, shouldHeadsUpAgain)
+    override fun updateNotification(key: String, requestedPinnedStatus: PinnedStatus) {
+        headsUpManager.updateNotification(key, requestedPinnedStatus)
     }
 
     override fun removeNotification(key: String, releaseImmediately: Boolean) {

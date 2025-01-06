@@ -8,3 +8,11 @@ flag {
     description: "Enables PiP UI state callback on entering"
     bug: "303718131"
 }
+
+flag {
+    name: "enable_tv_implicit_enter_pip_restriction"
+    is_exported: true
+    namespace: "tv_system_ui"
+    description: "Enables restrictions to PiP entry on TV for setAutoEnterEnabled and lifecycle methods"
+    bug: "283115999"
+}

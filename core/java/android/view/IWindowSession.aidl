@@ -372,4 +372,14 @@ interface IWindowSession {
      */
     oneway void notifyImeWindowVisibilityChangedFromClient(IWindow window, boolean visible,
             in ImeTracker.Token statsToken);
+
+    /**
+     * Notifies WindowState whether inset animations are currently running within the Window.
+     * This value is used by the server to vote for refresh rate.
+     * see {@link com.android.server.wm.WindowState#mInsetsAnimationRunning).
+     *
+     * @param window The window that is insets animaiton is running.
+     * @param running Indicates the insets animation state.
+     */
+    oneway void notifyInsetsAnimationRunningStateChanged(IWindow window, boolean running);
 }

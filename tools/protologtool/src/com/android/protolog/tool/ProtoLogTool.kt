@@ -16,6 +16,7 @@
 
 package com.android.protolog.tool
 
+import com.android.internal.protolog.common.IProtoLog
 import com.android.internal.protolog.common.LogLevel
 import com.android.internal.protolog.common.ProtoLogToolInjected
 import com.android.protolog.tool.CommandOptions.Companion.USAGE
@@ -68,7 +69,8 @@ object ProtoLogTool {
         val messageString: String,
         val logLevel: LogLevel,
         val logGroup: LogGroup,
-        val position: String
+        val position: String,
+        val lineNumber: Int,
     )
 
     private fun showHelpAndExit() {
@@ -319,6 +321,7 @@ object ProtoLogTool {
                             MethodCallExpr()
                                 .setName("isEnabled")
                                 .setArguments(NodeList(
+                                    NameExpr("protoLogInstance"),
                                     FieldAccessExpr()
                                         .setScope(NameExpr(protoLogGroupsClassName))
                                         .setName(group.value.name),
@@ -332,6 +335,7 @@ object ProtoLogTool {
         }
 
         cacheClass.addMethod("update").setPrivate(true).setStatic(true)
+            .addParameter(IProtoLog::class.java, "protoLogInstance")
             .setBody(updateBlockStmt)
 
         classDeclaration.addMember(cacheClass)
@@ -432,9 +436,10 @@ object ProtoLogTool {
                 call: MethodCallExpr,
                 messageString: String,
                 level: LogLevel,
-                group: LogGroup
+                group: LogGroup,
+                lineNumber: Int,
             ) {
-                val logCall = LogCall(messageString, level, group, packagePath)
+                val logCall = LogCall(messageString, level, group, packagePath, lineNumber)
                 calls.add(logCall)
             }
         }

@@ -16,11 +16,14 @@
 
 package com.android.settingslib.applications;
 
+import static android.content.ComponentCallbacks2.TRIM_MEMORY_BACKGROUND;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.Mockito.doReturn;
 
 import android.graphics.drawable.Drawable;
+import android.util.Log;
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,9 +33,12 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RobolectricTestRunner;
 
+import java.util.concurrent.atomic.AtomicInteger;
+
 @RunWith(RobolectricTestRunner.class)
 public class AppIconCacheManagerTest {
 
+    private static final String TAG = "AppIconCacheManagerTest";
     private static final String APP_PACKAGE_NAME = "com.test.app";
     private static final String APP_PACKAGE_NAME1 = "com.test.app1";
     private static final String APP_PACKAGE_NAME2 = "com.test.app2";
@@ -175,5 +181,29 @@ public class AppIconCacheManagerTest {
         assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME1, APP_UID)).isNotNull();
         assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME2, APP_UID)).isNull();
         assertThat(mAppIconCacheManager.get(APP_PACKAGE_NAME3, APP_UID)).isNull();
+    }
+
+    @Test
+    public void trimMemory_multiThread_shouldNotCrash() {
+        int numberOfTasks = 10;
+        AtomicInteger completedTasks = new AtomicInteger(0);
+
+        Runnable task =
+                () -> {
+                    String threadName = Thread.currentThread().getName();
+                    Log.i(TAG, "Starting thread: " + threadName);
+                    AppIconCacheManager.getInstance().trimMemory(TRIM_MEMORY_BACKGROUND);
+                    completedTasks.incrementAndGet();
+                    Log.i(TAG, "Ending thread: " + threadName);
+                };
+
+        for (Integer i = 0; i < numberOfTasks; i++) {
+            Thread thread = new Thread(task);
+            thread.start();
+        }
+
+        while (completedTasks.get() < numberOfTasks) {
+            // Wait until all threads are finished.
+        }
     }
 }

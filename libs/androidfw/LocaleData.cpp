@@ -23,39 +23,18 @@
 #include <unordered_set>
 
 #include <androidfw/LocaleData.h>
+#include <androidfw/LocaleDataLookup.h>
 
 namespace android {
 
-#include "LocaleDataTables.cpp"
-
-inline uint32_t packLocale(const char* language, const char* region) {
-    return (((uint8_t) language[0]) << 24u) | (((uint8_t) language[1]) << 16u) |
-           (((uint8_t) region[0]) << 8u) | ((uint8_t) region[1]);
-}
-
-inline uint32_t dropRegion(uint32_t packed_locale) {
-    return packed_locale & 0xFFFF0000LU;
-}
-
-inline bool hasRegion(uint32_t packed_locale) {
-    return (packed_locale & 0x0000FFFFLU) != 0;
-}
-
-const size_t SCRIPT_LENGTH = 4;
-const size_t SCRIPT_PARENTS_COUNT = sizeof(SCRIPT_PARENTS)/sizeof(SCRIPT_PARENTS[0]);
 const uint32_t PACKED_ROOT = 0; // to represent the root locale
+const uint32_t MAX_PARENT_DEPTH = getMaxAncestorTreeDepth();
 
 uint32_t findParent(uint32_t packed_locale, const char* script) {
     if (hasRegion(packed_locale)) {
-        for (size_t i = 0; i < SCRIPT_PARENTS_COUNT; i++) {
-            if (memcmp(script, SCRIPT_PARENTS[i].script, SCRIPT_LENGTH) == 0) {
-                auto map = SCRIPT_PARENTS[i].map;
-                auto lookup_result = map->find(packed_locale);
-                if (lookup_result != map->end()) {
-                    return lookup_result->second;
-                }
-                break;
-            }
+        auto parent_key = findParentLocalePackedKey(script, packed_locale);
+        if (parent_key != 0) {
+            return parent_key;
         }
         return dropRegion(packed_locale);
     }
@@ -109,17 +88,6 @@ size_t findDistance(uint32_t supported,
     // written for 'supported' minus 1) plus the distance of 'request' to the
     // lowest common ancestor (the index of the ancestor in request_ancestors).
     return supported_ancestor_count + request_ancestors_index - 1;
-}
-
-inline bool isRepresentative(uint32_t language_and_region, const char* script) {
-    const uint64_t packed_locale = (
-            (((uint64_t) language_and_region) << 32u) |
-            (((uint64_t) script[0]) << 24u) |
-            (((uint64_t) script[1]) << 16u) |
-            (((uint64_t) script[2]) <<  8u) |
-            ((uint64_t) script[3]));
-
-    return (REPRESENTATIVE_LOCALES.count(packed_locale) != 0);
 }
 
 const uint32_t US_SPANISH = 0x65735553LU; // es-US
@@ -185,8 +153,8 @@ int localeDataCompareRegions(
 
     // If we are here, left and right are equidistant from the request. We will
     // try and see if any of them is a representative locale.
-    const bool left_is_representative = isRepresentative(left, requested_script);
-    const bool right_is_representative = isRepresentative(right, requested_script);
+    const bool left_is_representative = isLocaleRepresentative(left, requested_script);
+    const bool right_is_representative = isLocaleRepresentative(right, requested_script);
     if (left_is_representative != right_is_representative) {
         return (int) left_is_representative - (int) right_is_representative;
     }
@@ -204,14 +172,14 @@ void localeDataComputeScript(char out[4], const char* language, const char* regi
         return;
     }
     uint32_t lookup_key = packLocale(language, region);
-    auto lookup_result = LIKELY_SCRIPTS.find(lookup_key);
-    if (lookup_result == LIKELY_SCRIPTS.end()) {
+    auto lookup_result = lookupLikelyScript(lookup_key);
+    if (lookup_result == nullptr) {
         // We couldn't find the locale. Let's try without the region
         if (region[0] != '\0') {
             lookup_key = dropRegion(lookup_key);
-            lookup_result = LIKELY_SCRIPTS.find(lookup_key);
-            if (lookup_result != LIKELY_SCRIPTS.end()) {
-                memcpy(out, SCRIPT_CODES[lookup_result->second], SCRIPT_LENGTH);
+            lookup_result = lookupLikelyScript(lookup_key);
+            if (lookup_result != nullptr) {
+                memcpy(out, lookup_result, SCRIPT_LENGTH);
                 return;
             }
         }
@@ -220,7 +188,7 @@ void localeDataComputeScript(char out[4], const char* language, const char* regi
         return;
     } else {
         // We found the locale.
-        memcpy(out, SCRIPT_CODES[lookup_result->second], SCRIPT_LENGTH);
+        memcpy(out, lookup_result, SCRIPT_LENGTH);
     }
 }
 

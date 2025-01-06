@@ -295,7 +295,7 @@ public class DisplayRotation {
                 && mDeviceStateController
                         .shouldMatchBuiltInDisplayOrientationToReverseDefaultDisplay()) {
             mDisplayRotationCoordinator.setDefaultDisplayRotationChangedCallback(
-                    mDefaultDisplayRotationChangedCallback);
+                    displayContent.getDisplayId(), mDefaultDisplayRotationChangedCallback);
         }
 
         if (isDefaultDisplay) {
@@ -445,7 +445,8 @@ public class DisplayRotation {
         final boolean isTv = mContext.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_LEANBACK);
         mDefaultFixedToUserRotation =
-                (isCar || isTv || mService.mIsPc || mDisplayContent.forceDesktopMode()
+                (isCar || isTv || mService.mIsPc
+                        || mDisplayContent.isPublicSecondaryDisplayWithDesktopModeForceEnabled()
                         || !mDisplayContent.shouldRotateWithContent())
                 // For debug purposes the next line turns this feature off with:
                 // $ adb shell setprop config.override_forced_orient true
@@ -485,6 +486,9 @@ public class DisplayRotation {
             if (isDefaultDisplay) {
                 updateOrientationListenerLw();
             }
+        } else if (mCompatPolicyForImmersiveApps != null
+                && mCompatPolicyForImmersiveApps.deferOrientationUpdate()) {
+            return false;
         }
         return updateRotationUnchecked(forceUpdate);
     }
@@ -1656,7 +1660,8 @@ public class DisplayRotation {
 
     void removeDefaultDisplayRotationChangedCallback() {
         if (DisplayRotationCoordinator.isSecondaryInternalDisplay(mDisplayContent)) {
-            mDisplayRotationCoordinator.removeDefaultDisplayRotationChangedCallback();
+            mDisplayRotationCoordinator.removeDefaultDisplayRotationChangedCallback(
+                    mDefaultDisplayRotationChangedCallback);
         }
     }
 

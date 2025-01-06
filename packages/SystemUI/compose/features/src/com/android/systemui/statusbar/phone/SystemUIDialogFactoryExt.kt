@@ -59,6 +59,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.hideFromAccessibility
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -98,19 +99,20 @@ fun SystemUIDialogFactory.create(
     theme: Int = SystemUIDialog.DEFAULT_THEME,
     dismissOnDeviceLock: Boolean = SystemUIDialog.DEFAULT_DISMISS_ON_DEVICE_LOCK,
     @GravityInt dialogGravity: Int? = null,
+    dialogDelegate: DialogDelegate<SystemUIDialog> =
+        object : DialogDelegate<SystemUIDialog> {
+            override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
+                super.onCreate(dialog, savedInstanceState)
+                dialogGravity?.let { dialog.window?.setGravity(it) }
+            }
+        },
     content: @Composable (SystemUIDialog) -> Unit,
 ): ComponentSystemUIDialog {
     return create(
         context = context,
         theme = theme,
         dismissOnDeviceLock = dismissOnDeviceLock,
-        delegate =
-            object : DialogDelegate<SystemUIDialog> {
-                override fun onCreate(dialog: SystemUIDialog, savedInstanceState: Bundle?) {
-                    super.onCreate(dialog, savedInstanceState)
-                    dialogGravity?.let { dialog.window?.setGravity(it) }
-                }
-            },
+        delegate = dialogDelegate,
         content = content,
     )
 }
@@ -285,9 +287,12 @@ private fun DragHandle(dialog: Dialog) {
     Surface(
         modifier =
             Modifier.padding(top = 16.dp, bottom = 6.dp)
-                .semantics { contentDescription = dragHandleContentDescription }
+                .semantics {
+                    contentDescription = dragHandleContentDescription
+                    hideFromAccessibility()
+                }
                 .clickable { dialog.dismiss() },
-        color = MaterialTheme.colorScheme.outlineVariant,
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
         shape = MaterialTheme.shapes.extraLarge,
     ) {
         Box(Modifier.size(width = 32.dp, height = 4.dp))
@@ -302,6 +307,6 @@ private fun draggableTopPadding(): Dp {
 
 private object DraggableBottomSheet {
     val DefaultTopPadding = 64.dp
-    val LargeScreenTopPadding = 72.dp
+    val LargeScreenTopPadding = 56.dp
     val MaxWidth = 640.dp
 }

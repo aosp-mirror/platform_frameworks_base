@@ -22,7 +22,9 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
+import com.android.systemui.keyguard.ui.transitions.BlurConfig
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
+import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.transitions.TO_BOUNCER_FADE_FRACTION
@@ -40,9 +42,10 @@ import kotlinx.coroutines.flow.Flow
 class LockscreenToPrimaryBouncerTransitionViewModel
 @Inject
 constructor(
+    private val blurConfig: BlurConfig,
     shadeDependentFlows: ShadeDependentFlows,
     animationFlow: KeyguardTransitionAnimationFlow,
-) : DeviceEntryIconTransition {
+) : DeviceEntryIconTransition, PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
             .setup(
@@ -77,5 +80,21 @@ constructor(
                     onFinish = { 0f },
                 ),
             flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(0f),
+        )
+    override val windowBlurRadius: Flow<Float> =
+        shadeDependentFlows.transitionFlow(
+            flowWhenShadeIsExpanded =
+                transitionAnimation.immediatelyTransitionTo(blurConfig.maxBlurRadiusPx),
+            flowWhenShadeIsNotExpanded =
+                transitionAnimation.sharedFlow(
+                    duration = FromLockscreenTransitionInteractor.TO_PRIMARY_BOUNCER_DURATION,
+                    onStep = {
+                        transitionProgressToBlurRadius(
+                            starBlurRadius = blurConfig.minBlurRadiusPx,
+                            endBlurRadius = blurConfig.maxBlurRadiusPx,
+                            transitionProgress = it,
+                        )
+                    },
+                ),
         )
 }

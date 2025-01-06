@@ -16,6 +16,7 @@
 
 package com.android.systemui.back.domain.interactor
 
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.annotations.RequiresFlagsDisabled
 import android.platform.test.annotations.RequiresFlagsEnabled
 import android.platform.test.flag.junit.DeviceFlagsValueProvider
@@ -31,6 +32,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.statusbar.IStatusBarService
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.communal.domain.interactor.CommunalBackActionInteractor
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
@@ -48,8 +50,8 @@ import com.android.systemui.shade.domain.interactor.ShadeBackActionInteractor
 import com.android.systemui.statusbar.NotificationShadeWindowController
 import com.android.systemui.statusbar.StatusBarState
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.util.concurrency.FakeExecutor
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
@@ -93,6 +95,7 @@ class BackActionInteractorTest : SysuiTestCase() {
     @Mock private lateinit var onBackInvokedDispatcher: WindowOnBackInvokedDispatcher
     @Mock private lateinit var iStatusBarService: IStatusBarService
     @Mock private lateinit var headsUpManager: HeadsUpManager
+    @Mock private lateinit var communalBackActionInteractor: CommunalBackActionInteractor
 
     private val keyguardRepository = FakeKeyguardRepository()
     private val windowRootViewVisibilityInteractor: WindowRootViewVisibilityInteractor by lazy {
@@ -117,6 +120,7 @@ class BackActionInteractorTest : SysuiTestCase() {
             windowRootViewVisibilityInteractor,
             shadeBackActionInteractor,
             qsController,
+            communalBackActionInteractor,
         )
     }
 
@@ -161,17 +165,6 @@ class BackActionInteractorTest : SysuiTestCase() {
         assertTrue(result)
         verify(shadeBackActionInteractor, atLeastOnce()).animateCollapseQs(anyBoolean())
         verify(statusBarKeyguardViewManager, never()).onBackPressed()
-    }
-
-    @Test
-    fun testOnBackRequested_closeUserSwitcherIfOpen() {
-        whenever(shadeBackActionInteractor.closeUserSwitcherIfOpen()).thenReturn(true)
-
-        val result = backActionInteractor.onBackRequested()
-
-        assertTrue(result)
-        verify(statusBarKeyguardViewManager, never()).onBackPressed()
-        verify(shadeBackActionInteractor, never()).animateCollapseQs(anyBoolean())
     }
 
     @Test
@@ -304,6 +297,19 @@ class BackActionInteractorTest : SysuiTestCase() {
         callback.onBackProgressed(createBackEvent(0.4f))
 
         verify(shadeBackActionInteractor).onBackProgressed(0.4f)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_GLANCEABLE_HUB_BACK_ACTION)
+    fun onBackAction_communalCanBeDismissed_communalBackActionInteractorCalled() {
+        backActionInteractor.start()
+        windowRootViewVisibilityInteractor.setIsLockscreenOrShadeVisible(true)
+        powerInteractor.setAwakeForTest()
+        val callback = getBackInvokedCallback()
+        whenever(communalBackActionInteractor.canBeDismissed()).thenReturn(true)
+        callback.onBackInvoked()
+
+        verify(communalBackActionInteractor).onBackPressed()
     }
 
     private fun getBackInvokedCallback(): OnBackInvokedCallback {

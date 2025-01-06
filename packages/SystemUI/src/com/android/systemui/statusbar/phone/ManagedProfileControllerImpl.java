@@ -31,6 +31,7 @@ import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.Executor;
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -63,17 +64,21 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
 
     @Override
     public void addCallback(@NonNull Callback callback) {
-        mCallbacks.add(callback);
-        if (mCallbacks.size() == 1) {
-            setListening(true);
+        synchronized (mCallbacks) {
+            mCallbacks.add(callback);
+            if (mCallbacks.size() == 1) {
+                setListening(true);
+            }
+            callback.onManagedProfileChanged();
         }
-        callback.onManagedProfileChanged();
     }
 
     @Override
     public void removeCallback(@NonNull Callback callback) {
-        if (mCallbacks.remove(callback) && mCallbacks.size() == 0) {
-            setListening(false);
+        synchronized (mCallbacks) {
+            if (mCallbacks.remove(callback) && mCallbacks.size() == 0) {
+                setListening(false);
+            }
         }
     }
 
@@ -109,10 +114,7 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
     }
 
     private void notifyManagedProfileRemoved() {
-        ArrayList<Callback> copy = new ArrayList<>(mCallbacks);
-        for (Callback callback : copy) {
-            callback.onManagedProfileRemoved();
-        }
+        notifyCallbacks(Callback::onManagedProfileRemoved);
     }
 
     public boolean hasActiveProfile() {
@@ -136,6 +138,16 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
         }
     }
 
+    private void notifyCallbacks(Consumer<Callback> method) {
+        ArrayList<Callback> copy;
+        synchronized (mCallbacks) {
+            copy = new ArrayList<>(mCallbacks);
+        }
+        for (Callback callback : copy) {
+            method.accept(callback);
+        }
+    }
+
     private void setListening(boolean listening) {
         if (mListening == listening) {
             return;
@@ -154,19 +166,13 @@ public class ManagedProfileControllerImpl implements ManagedProfileController {
         @Override
         public void onUserChanged(int newUser, @NonNull Context userContext) {
             reloadManagedProfiles();
-            ArrayList<Callback> copy = new ArrayList<>(mCallbacks);
-            for (Callback callback : copy) {
-                callback.onManagedProfileChanged();
-            }
+            notifyCallbacks(Callback::onManagedProfileChanged);
         }
 
         @Override
         public void onProfilesChanged(@NonNull List<UserInfo> profiles) {
             reloadManagedProfiles();
-            ArrayList<Callback> copy = new ArrayList<>(mCallbacks);
-            for (Callback callback : copy) {
-                callback.onManagedProfileChanged();
-            }
+            notifyCallbacks(Callback::onManagedProfileChanged);
         }
     }
 }

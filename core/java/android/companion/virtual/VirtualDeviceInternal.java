@@ -166,6 +166,20 @@ public class VirtualDeviceInternal {
                         Binder.restoreCallingIdentity(token);
                     }
                 }
+
+                @Override
+                public void onSecureWindowHidden(int displayId) {
+                    final long token = Binder.clearCallingIdentity();
+                    try {
+                        synchronized (mActivityListenersLock) {
+                            for (int i = 0; i < mActivityListeners.size(); i++) {
+                                mActivityListeners.valueAt(i).onSecureWindowHidden(displayId);
+                            }
+                        }
+                    } finally {
+                        Binder.restoreCallingIdentity(token);
+                    }
+                }
             };
 
     private final IVirtualDeviceSoundEffectListener mSoundEffectListener =
@@ -616,6 +630,10 @@ public class VirtualDeviceInternal {
                 UserHandle user) {
             mExecutor.execute(() ->
                     mActivityListener.onSecureWindowShown(displayId, componentName, user));
+        }
+
+        public void onSecureWindowHidden(int displayId) {
+            mExecutor.execute(() -> mActivityListener.onSecureWindowHidden(displayId));
         }
     }
 

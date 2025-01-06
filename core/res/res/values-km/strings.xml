@@ -71,6 +71,9 @@
     <string name="CLIRDefaultOnNextCallOff" msgid="5036749051007098105">"មិន​បាន​ដាក់កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។ ការ​ហៅ​បន្ទាប់៖ មិន​បាន​ដាក់​កម្រិត។"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="1022781126694885017">"មិន​បាន​ដាក់​កម្រិត​លេខ​សម្គាល់​អ្នក​ហៅ​លំនាំ​ដើម។ ការ​ហៅ​បន្ទាប់៖​ បាន​ដាក់កម្រិត"</string>
     <string name="CLIRDefaultOffNextCallOff" msgid="2491576172356463443">"មិន​បាន​ដាក់កម្រិត​លំនាំដើម​លេខ​សម្គាល់​អ្នក​ហៅ។ ការ​ហៅ​បន្ទាប់៖ មិន​បាន​ដាក់​កម្រិត។"</string>
+    <string name="page_size_compat_apk_warning" msgid="2982396798449041224">"កម្មវិធីនេះមិនត្រូវគ្នានឹង 16 KB ទេ។ ការត្រួតពិនិត្យការតម្រឹម APK មិនបានសម្រេចទេ។ កម្មវិធីនេះនឹងត្រូវបានដំណើរការដោយប្រើមុខងារដែលត្រូវគ្នានឹងទំហំទំព័រ។ ដើម្បីទទួលបានភាពត្រូវគ្នាល្អបំផុត សូមចងក្រងកម្មវិធីឡើងវិញដោយប្រើជំនួយ 16 KB។ ដើម្បីទទួលបានព័ត៌មានបន្ថែម សូមមើល &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_elf_warning" msgid="6753874059564812651">"កម្មវិធីនេះមិនត្រូវគ្នានឹង 16 KB ទេ។ ការត្រួតពិនិត្យការតម្រឹម ELF មិនបានសម្រេចទេ។ កម្មវិធីនេះនឹងត្រូវបានដំណើរការដោយប្រើមុខងារដែលត្រូវគ្នានឹងទំហំទំព័រ។ ដើម្បីទទួលបានភាពត្រូវគ្នាល្អបំផុត សូមចងក្រងកម្មវិធីឡើងវិញដោយប្រើជំនួយ 16 KB។ ដើម្បីទទួលបានព័ត៌មានបន្ថែម សូមមើល &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
+    <string name="page_size_compat_apk_and_elf_warning" msgid="7628675779500605390">"កម្មវិធីនេះមិនត្រូវគ្នានឹង 16 KB ទេ។ ការត្រួតពិនិត្យការតម្រឹម APK និង ELF មិនបានសម្រេចទេ។ កម្មវិធីនេះនឹងត្រូវបានដំណើរការដោយប្រើមុខងារដែលត្រូវគ្នានឹងទំហំទំព័រ។ ដើម្បីទទួលបានភាពត្រូវគ្នាល្អបំផុត សូមចងក្រងកម្មវិធីឡើងវិញដោយប្រើជំនួយ 16 KB។ ដើម្បីទទួលបានព័ត៌មានបន្ថែម សូមមើល &lt;a href=\"https://developer.android.com/16kb-page-size\"&gt;https://developer.android.com/16kb-page-size&lt;/a&gt;"</string>
     <string name="serviceNotProvisioned" msgid="8289333510236766193">"មិន​បាន​ផ្ដល់​សេវាកម្ម។"</string>
     <string name="CLIRPermanent" msgid="166443681876381118">"អ្នក​មិន​អាច​ប្ដូរ​ការ​កំណត់​លេខ​សម្គាល់​អ្នក​ហៅ​បានទេ។"</string>
     <string name="auto_data_switch_title" msgid="3286350716870518297">"បានប្ដូរទិន្នន័យទៅ <xliff:g id="CARRIERDISPLAY">%s</xliff:g>"</string>
@@ -84,6 +87,8 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"មិន​អាច​ភ្ជាប់​បណ្ដាញ​ទូរសព្ទ​ចល័តបានទេ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"សាកល្បង​ប្ដូរ​ទៅបណ្ដាញ​ដែល​ចង់ប្រើ។ សូមចុច​ដើម្បីផ្លាស់​ប្ដូរ។"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"មិន​អាច​ប្រើ​ការ​ហៅ​បន្ទាន់​បានទេ"</string>
+    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
+    <skip />
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ការហៅទៅលេខសង្គ្រោះបន្ទាន់តម្រូវឱ្យមានបណ្ដាញ​ទូរសព្ទ​ចល័ត"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ការជូនដំណឹង"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ការបញ្ជូន​ការហៅ​ទូរសព្ទ​បន្ត"</string>
@@ -612,6 +617,8 @@
     <string name="permdesc_uwb_ranging" msgid="2519723069604307055">"អនុញ្ញាតឱ្យ​កម្មវិធី​កំណត់ចម្ងាយ​ពាក់ព័ន្ធ​រវាងឧបករណ៍ Ultra-Wideband ដែលនៅជិត"</string>
     <string name="permlab_nearby_wifi_devices" msgid="392774237063608500">"ធ្វើអន្តរកម្ម​ជាមួយឧបករណ៍ Wi‑Fi ដែលនៅជិត"</string>
     <string name="permdesc_nearby_wifi_devices" msgid="3054307728646332906">"អនុញ្ញាតឱ្យ​កម្មវិធី​ផ្សាយពាណិជ្ជកម្ម ភ្ជាប់ និងកំណត់ទីតាំង​ពាក់ព័ន្ធរបស់​ឧបករណ៍ Wi‑Fi ដែលនៅជិត"</string>
+    <string name="permlab_ranging" msgid="2854543350668593390">"កំណត់ទីតាំងធៀបរវាងឧបករណ៍នៅជិត"</string>
+    <string name="permdesc_ranging" msgid="6703905535621521710">"អនុញ្ញាតឱ្យកម្មវិធីកំណត់ទីតាំងធៀបរវាងឧបករណ៍នៅជិត"</string>
     <string name="permlab_preferredPaymentInfo" msgid="5274423844767445054">"ព័ត៌មានអំពី​សេវាបង់ប្រាក់តាម NFC ជាអាទិភាព"</string>
     <string name="permdesc_preferredPaymentInfo" msgid="8583552469807294967">"អនុញ្ញាតឱ្យ​កម្មវិធី​ទទួលបាន​ព័ត៌មានអំពី​សេវាបង់ប្រាក់តាម nfc ជាអាទិភាព​ដូចជា គោលដៅផ្លូវ និង​ព័ត៌មាន​កំណត់អត្តសញ្ញាណ​កម្មវិធី ដែលបានចុះឈ្មោះ​ជាដើម។"</string>
     <string name="permlab_nfc" msgid="1904455246837674977">"ពិនិត្យ​ការ​ទាក់ទង​នៅ​ក្បែរ (NFC)"</string>
@@ -1153,6 +1160,22 @@
     <string name="duration_hours_shortest_future" msgid="2979276794547981674">"ក្នុងរយៈពេល <xliff:g id="COUNT">%d</xliff:g>ម៉"</string>
     <string name="duration_days_shortest_future" msgid="3392722163935571543">"ក្នុងរយៈពេល <xliff:g id="COUNT">%d</xliff:g>ថ"</string>
     <string name="duration_years_shortest_future" msgid="5537464088352970388">"ក្នុងរយៈពេល <xliff:g id="COUNT">%d</xliff:g>ឆ"</string>
+    <string name="duration_minutes_shortest_past" msgid="1740022450020492407">"<xliff:g id="COUNT">%d</xliff:g> នាទីមុន"</string>
+    <string name="duration_hours_shortest_past" msgid="2098397414186628489">"<xliff:g id="COUNT">%d</xliff:g> ម៉ោងមុន"</string>
+    <string name="duration_days_shortest_past" msgid="1832006037955897625">"<xliff:g id="COUNT">%d</xliff:g> ថ្ងៃមុន"</string>
+    <string name="duration_years_shortest_past" msgid="6168256514200469291">"<xliff:g id="COUNT">%d</xliff:g> ឆ្នាំមុន"</string>
+    <string name="duration_minutes_medium" msgid="5891933490342643944">"<xliff:g id="COUNT">%d</xliff:g> ន"</string>
+    <string name="duration_hours_medium" msgid="1465359726485910115">"<xliff:g id="COUNT">%d</xliff:g> ម៉"</string>
+    <string name="duration_days_medium" msgid="5994225628248661388">"<xliff:g id="COUNT">%d</xliff:g> ថ្ងៃ"</string>
+    <string name="duration_years_medium" msgid="734023884353592526">"<xliff:g id="COUNT">%d</xliff:g> ឆ្នាំ"</string>
+    <string name="duration_minutes_medium_future" msgid="2750894988731934402">"ក្នុងរយៈពេល <xliff:g id="COUNT">%d</xliff:g> នាទី"</string>
+    <string name="duration_hours_medium_future" msgid="6050833881463849764">"ក្នុងរយៈពេល <xliff:g id="COUNT">%d</xliff:g> ម៉ោង"</string>
+    <string name="duration_days_medium_future" msgid="1700821545602729963">"ក្នុងរយៈពេល <xliff:g id="COUNT">%d</xliff:g> ថ្ងៃ"</string>
+    <string name="duration_years_medium_future" msgid="3281018940397120166">"ក្នុងរយៈពេល <xliff:g id="COUNT">%d</xliff:g> ឆ្នាំ"</string>
+    <string name="duration_minutes_medium_past" msgid="7400424340181947714">"<xliff:g id="COUNT">%d</xliff:g> នាទីមុន"</string>
+    <string name="duration_hours_medium_past" msgid="6709441336035202617">"<xliff:g id="COUNT">%d</xliff:g> ម៉ោងមុន"</string>
+    <string name="duration_days_medium_past" msgid="5748156261134344532">"<xliff:g id="COUNT">%d</xliff:g> ថ្ងៃមុន"</string>
+    <string name="duration_years_medium_past" msgid="893797065424596243">"<xliff:g id="COUNT">%d</xliff:g> ឆ្នាំមុន"</string>
     <string name="duration_minutes_relative" msgid="8620337701051015593">"{count,plural, =1{# នាទី​មុន}other{# នាទីមុន}}"</string>
     <string name="duration_hours_relative" msgid="4836449961693180253">"{count,plural, =1{# ម៉ោងមុន}other{# ម៉ោងមុន}}"</string>
     <string name="duration_days_relative" msgid="621965767567258302">"{count,plural, =1{# ថ្ងៃមុន}other{# ថ្ងៃមុន}}"</string>
@@ -1216,7 +1239,7 @@
     <string name="rating_label" msgid="1837085249662154601">"{rating,plural, =1{ផ្កាយមួយ​ក្នុងចំណោមផ្កាយ {max}}other{ផ្កាយ # ក្នុងចំណោមផ្កាយ {max}}}"</string>
     <string name="in_progress" msgid="2149208189184319441">"កំពុងដំណើរការ"</string>
     <string name="whichApplication" msgid="5432266899591255759">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ"</string>
-    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %%1$s"</string>
+    <string name="whichApplicationNamed" msgid="6969946041713975681">"បញ្ចប់​សកម្មភាព​ដោយ​ប្រើ​ %1$s"</string>
     <string name="whichApplicationLabel" msgid="7852182961472531728">"បញ្ចប់សកម្មភាព"</string>
     <string name="whichViewApplication" msgid="5733194231473132945">"បើក​ជា​មួយ"</string>
     <string name="whichViewApplicationNamed" msgid="415164730629690105">"បើក​ជាមួយ %1$s"</string>
@@ -1757,6 +1780,14 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"មុខងារប្រើដៃម្ខាង"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ងងឹតខ្លាំង"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ឧបករណ៍ជំនួយការស្ដាប់"</string>
+    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
+    <skip />
+    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
+    <skip />
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"បានសង្កត់​គ្រាប់ចុច​កម្រិតសំឡេង​ជាប់។ បាន​បិទ <xliff:g id="SERVICE_NAME">%1$s</xliff:g>។"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"លែង​គ្រាប់ចុចកម្រិតសំឡេង។ ដើម្បីបើក <xliff:g id="SERVICE_NAME">%1$s</xliff:g> សូមចុច​គ្រាប់ចុចកម្រិតសំឡេងទាំងពីរឱ្យជាប់ម្ដងទៀត​រយៈពេល 3 វិនាទី។"</string>
@@ -1938,13 +1969,14 @@
     <string name="zen_mode_default_weekends_name" msgid="4707200272709377930">"ចុងសប្ដាហ៍"</string>
     <string name="zen_mode_default_events_name" msgid="2280682960128512257">"ព្រឹត្តិការណ៍"</string>
     <string name="zen_mode_default_every_night_name" msgid="1467765312174275823">"កំពុងដេក"</string>
+    <string name="zen_mode_implicit_name" msgid="177586786232302019">"កុំ​រំខាន (<xliff:g id="APP_NAME">%1$s</xliff:g>)"</string>
     <string name="zen_mode_implicit_trigger_description" msgid="5714956693073007111">"គ្រប់គ្រងដោយ <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"បើក"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"បិទ"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">", "</string>
     <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
-    <!-- no translation found for zen_mode_trigger_summary_range_words (7228261413029290750) -->
-    <skip />
+    <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> ដល់ <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>, <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"ប្រតិទិនណាមួយ"</string>
     <string name="muted_by" msgid="91464083490094950">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> កំពុង​បិទសំឡេង​មួយចំនួន"</string>
     <string name="system_error_wipe_data" msgid="5910572292172208493">"មានបញ្ហាខាងក្នុងឧបករណ៍របស់អ្នក ហើយវាអ្នកមិនមានស្ថេរភាព រហូតទាល់តែអ្នកកំណត់ដូចដើមវិញទាំងស្រុង។"</string>
@@ -2426,15 +2458,35 @@
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ផ្ញើ និងទទួលសារដោយគ្មានបណ្ដាញ Wi-Fi ឬបណ្ដាញទូរសព្ទចល័ត"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"បើក​កម្មវិធី Messages"</string>
     <string name="satellite_notification_how_it_works" msgid="3132069321977520519">"របៀបដែលវាដំណើរការ"</string>
-    <!-- no translation found for satellite_manual_selection_state_popup_title (8545991934926661974) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_message (1928101658551382450) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_ok (2459664752624985095) -->
-    <skip />
-    <!-- no translation found for satellite_manual_selection_state_popup_cancel (973605633339469252) -->
-    <skip />
+    <string name="satellite_manual_selection_state_popup_title" msgid="8545991934926661974">"បើក \"ជ្រើសរើស​បណ្ដាញ​ដោយស្វ័យប្រវត្តិ\""</string>
+    <string name="satellite_manual_selection_state_popup_message" msgid="1928101658551382450">"បើក \"ជ្រើសរើស​បណ្ដាញ​ដោយស្វ័យប្រវត្តិ\" នៅក្នុង​ការកំណត់​ ដើម្បីឱ្យ​ទូរសព្ទ​របស់អ្នកអាចស្វែងរកបណ្ដាញ ដែល​ដំណើរការតាមរយៈផ្កាយរណប"</string>
+    <string name="satellite_manual_selection_state_popup_ok" msgid="2459664752624985095">"បើក"</string>
+    <string name="satellite_manual_selection_state_popup_cancel" msgid="973605633339469252">"ថយ​ក្រោយ"</string>
     <string name="unarchival_session_app_label" msgid="6811856981546348205">"កំពុងរង់ចាំ..."</string>
+    <string name="satellite_sos_available_notification_title" msgid="5396708154268096124">"ឥឡូវនេះ អាចប្រើការប្រកាសអាសន្នតាមផ្កាយរណបបានហើយ"</string>
+    <string name="satellite_sos_available_notification_summary" msgid="1727088812951848330">"អ្នកអាចផ្ញើសារទៅសេវាសង្គ្រោះបន្ទាន់ ប្រសិនបើមិនមានបណ្ដាញឧបករណ៍​ចល័ត ឬ Wi-Fi ទេ។ Google Messages ត្រូវតែជាកម្មវិធី​ផ្ញើសារលំនាំដើមរបស់អ្នក។"</string>
+    <string name="satellite_sos_not_supported_notification_title" msgid="2659100983227637285">"មិនអាចប្រើការប្រកាសអាសន្នតាមផ្កាយរណបបានទេ"</string>
+    <string name="satellite_sos_not_supported_notification_summary" msgid="1071762454665310549">"មិនអាចប្រើការប្រកាសអាសន្នតាមផ្កាយរណបនៅលើឧបករណ៍នេះបានទេ"</string>
+    <string name="satellite_sos_not_provisioned_notification_title" msgid="8564738683795406715">"ការប្រកាសអាសន្នតាមផ្កាយរណបមិនត្រូវបានរៀបចំទេ"</string>
+    <string name="satellite_sos_not_provisioned_notification_summary" msgid="3127320958911180629">"សូមប្រាកដថា អ្នកបានភ្ជាប់អ៊ីនធឺណិត រួចសាកល្បងរៀបចំម្ដងទៀត"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_title" msgid="3164093193467075926">"មិនអាចប្រើការប្រកាសអាសន្នតាមផ្កាយរណបបានទេ"</string>
+    <string name="satellite_sos_not_in_allowed_region_notification_summary" msgid="7686947667515679672">"មិនអាចប្រើការប្រកាសអាសន្នតាមផ្កាយរណនៅក្នុងប្រទេស ឬតំបន់នេះបានទេ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_title" msgid="292528603128702080">"មិនបានរៀបចំការប្រកាសអាសន្នតាមផ្កាយរណបទេ"</string>
+    <string name="satellite_sos_unsupported_default_sms_app_notification_summary" msgid="3165168393504548437">"ដើម្បីផ្ញើសារតាមផ្កាយរណប សូមកំណត់ Google Messages ជាកម្មវិធីផ្ញើសារលំនាំដើមរបស់អ្នក"</string>
+    <string name="satellite_sos_location_disabled_notification_title" msgid="5427987916850950591">"មិនអាចប្រើការប្រកាសអាសន្នតាមផ្កាយរណបបានទេ"</string>
+    <string name="satellite_sos_location_disabled_notification_summary" msgid="1544937460641058567">"ដើម្បីពិនិត្យមើលថាតើអាចប្រើការប្រកាសអាសន្នតាមផ្កាយរណបនៅក្នុងប្រទេស ឬតំបន់នេះបានឬអត់ សូមបើកការ​កំណត់​ទីតាំង​"</string>
+    <string name="satellite_messaging_available_notification_title" msgid="3366657987618784706">"អាចផ្ញើ​សារតាមផ្កាយរណបបាន"</string>
+    <string name="satellite_messaging_available_notification_summary" msgid="7573949038500243670">"អ្នកអាចផ្ញើសារតាមផ្កាយរណប ប្រសិនបើមិនមានបណ្ដាញឧបករណ៍​ចល័ត ឬ Wi-Fi ទេ។ Google Messages ត្រូវតែជាកម្មវិធី​ផ្ញើសារលំនាំដើមរបស់អ្នក។"</string>
+    <string name="satellite_messaging_not_supported_notification_title" msgid="8202139632766878610">"មិនអាចផ្ញើ​សារតាមផ្កាយរណបបានទេ"</string>
+    <string name="satellite_messaging_not_supported_notification_summary" msgid="61629858627638545">"មិនអាចផ្ញើ​សារតាមផ្កាយរណបនៅលើឧបករណ៍នេះបានទេ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_title" msgid="961909101918169727">"មិនបានរៀបចំការ​ផ្ញើ​សារតាមផ្កាយរណបទេ"</string>
+    <string name="satellite_messaging_not_provisioned_notification_summary" msgid="1060961852174442155">"សូមប្រាកដថា អ្នកបានភ្ជាប់អ៊ីនធឺណិត រួចសាកល្បងរៀបចំម្ដងទៀត"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_title" msgid="2035303593479031655">"មិនអាចផ្ញើ​សារតាមផ្កាយរណបបានទេ"</string>
+    <string name="satellite_messaging_not_in_allowed_region_notification_summary" msgid="5270294879531815854">"មិនអាចផ្ញើ​សារតាមផ្កាយរណបនៅក្នុងប្រទេស ឬតំបន់នេះបានទេ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_title" msgid="1004808759472360189">"មិនបានរៀបចំការ​ផ្ញើ​សារតាមផ្កាយរណបទេ"</string>
+    <string name="satellite_messaging_unsupported_default_sms_app_notification_summary" msgid="17084124893763593">"ដើម្បីផ្ញើសារតាមផ្កាយរណប សូមកំណត់ Google Messages ជាកម្មវិធីផ្ញើសារលំនាំដើមរបស់អ្នក"</string>
+    <string name="satellite_messaging_location_disabled_notification_title" msgid="7270641894250928494">"មិនអាចផ្ញើ​សារតាមផ្កាយរណបបានទេ"</string>
+    <string name="satellite_messaging_location_disabled_notification_summary" msgid="1450824950686221810">"ដើម្បីពិនិត្យមើលថាតើអាចផ្ញើ​សារតាមផ្កាយរណបនៅក្នុងប្រទេស ឬតំបន់នេះបានឬអត់ សូមបើកការ​កំណត់​ទីតាំង​"</string>
     <string name="fingerprint_dangling_notification_title" msgid="7362075195588639989">"រៀបចំការដោះសោ​ដោយស្កេន​ស្នាមម្រាមដៃម្ដងទៀត"</string>
     <string name="fingerprint_dangling_notification_msg_1" msgid="5851784577768803510">"លែងអាចសម្គាល់ <xliff:g id="FINGERPRINT">%s</xliff:g> បានទៀតហើយ។"</string>
     <string name="fingerprint_dangling_notification_msg_2" msgid="7925203589860744456">"លែងអាចសម្គាល់ <xliff:g id="FINGERPRINT_0">%1$s</xliff:g> និង <xliff:g id="FINGERPRINT_1">%2$s</xliff:g> បានទៀតហើយ។"</string>

@@ -25,6 +25,7 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.hardware.devicestate.feature.flags.Flags;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArraySet;
@@ -49,7 +50,7 @@ import java.util.Set;
  * @see DeviceStateManager
  */
 @SystemApi
-@FlaggedApi(android.hardware.devicestate.feature.flags.Flags.FLAG_DEVICE_STATE_PROPERTY_API)
+@FlaggedApi(Flags.FLAG_DEVICE_STATE_PROPERTY_API)
 public final class DeviceState {
     /**
      * Property that indicates that a fold-in style foldable device is currently in a fully closed
@@ -172,6 +173,20 @@ public final class DeviceState {
      */
     public static final int PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT = 17;
 
+    /**
+     * Property that indicates that this state corresponds to the device state for rear display
+     * mode, where both the inner and outer displays are on. In this state, the outer display
+     * is the default display where the app is shown, and the inner display is used by the system to
+     * show a UI affordance for exiting the mode.
+     *
+     * Clients should strongly consider relying on {@link #PROPERTY_FEATURE_REAR_DISPLAY} instead.
+     *
+     * @hide
+     */
+    @TestApi
+    @FlaggedApi(Flags.FLAG_DEVICE_STATE_RDM_V2)
+    public static final int PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT = 1001;
+
     /** @hide */
     @IntDef(prefix = {"PROPERTY_"}, flag = false, value = {
             PROPERTY_FOLDABLE_HARDWARE_CONFIGURATION_FOLD_IN_CLOSED,
@@ -190,7 +205,8 @@ public final class DeviceState {
             PROPERTY_POWER_CONFIGURATION_TRIGGER_WAKE,
             PROPERTY_EXTENDED_DEVICE_STATE_EXTERNAL_DISPLAY,
             PROPERTY_FEATURE_REAR_DISPLAY,
-            PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT
+            PROPERTY_FEATURE_DUAL_DISPLAY_INTERNAL_DEFAULT,
+            PROPERTY_FEATURE_REAR_DISPLAY_OUTER_DEFAULT
     })
     @Retention(RetentionPolicy.SOURCE)
     @Target({ElementType.TYPE_PARAMETER, ElementType.TYPE_USE})

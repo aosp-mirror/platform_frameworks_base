@@ -28,12 +28,14 @@ import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.StatusBarChipLogTags.pad
 import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.call.domain.interactor.CallChipInteractor
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -58,15 +60,24 @@ constructor(
         interactor.ongoingCallState
             .map { state ->
                 when (state) {
-                    is OngoingCallModel.NoCall -> OngoingActivityChipModel.Hidden()
+                    is OngoingCallModel.NoCall,
+                    is OngoingCallModel.InCallWithVisibleApp -> OngoingActivityChipModel.Hidden()
                     is OngoingCallModel.InCall -> {
                         val icon =
                             if (
                                 Flags.statusBarCallChipNotificationIcon() &&
                                     state.notificationIconView != null
                             ) {
+                                StatusBarConnectedDisplays.assertInLegacyMode()
                                 OngoingActivityChipModel.ChipIcon.StatusBarView(
                                     state.notificationIconView
+                                )
+                            } else if (
+                                StatusBarConnectedDisplays.isEnabled &&
+                                    Flags.statusBarCallChipNotificationIcon()
+                            ) {
+                                OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon(
+                                    state.notificationKey
                                 )
                             } else {
                                 OngoingActivityChipModel.ChipIcon.SingleColorIcon(phoneIcon)
@@ -112,7 +123,7 @@ constructor(
                 ActivityTransitionAnimator.Controller.fromView(
                     backgroundView,
                     InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-                )
+                ),
             )
         }
     }
@@ -121,10 +132,8 @@ constructor(
         private val phoneIcon =
             Icon.Resource(
                 com.android.internal.R.drawable.ic_phone,
-                ContentDescription.Resource(
-                    R.string.ongoing_phone_call_content_description,
-                ),
+                ContentDescription.Resource(R.string.ongoing_call_content_description),
             )
-        private const val TAG = "CallVM"
+        private val TAG = "CallVM".pad()
     }
 }

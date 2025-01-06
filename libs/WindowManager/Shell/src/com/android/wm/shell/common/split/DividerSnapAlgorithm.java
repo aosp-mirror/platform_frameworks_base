@@ -352,8 +352,8 @@ public class DividerSnapAlgorithm {
                 ? mPinnedTaskbarInsets.right : mPinnedTaskbarInsets.bottom;
 
         float ratio = areOffscreenRatiosSupported()
-                ? SplitLayout.OFFSCREEN_ASYMMETRIC_RATIO
-                : SplitLayout.ONSCREEN_ONLY_ASYMMETRIC_RATIO;
+                ? SplitSpec.OFFSCREEN_ASYMMETRIC_RATIO
+                : SplitSpec.ONSCREEN_ONLY_ASYMMETRIC_RATIO;
         int size = (int) (ratio * (end - start)) - mDividerSize / 2;
 
         int leftTopPosition = start + pinnedTaskbarShiftStart + size;

@@ -16,7 +16,7 @@ import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.whenever
 import com.android.wm.shell.recents.RecentTasks
-import com.android.wm.shell.shared.GroupedRecentTaskInfo
+import com.android.wm.shell.shared.GroupedTaskInfo
 import com.android.wm.shell.shared.split.SplitBounds
 import com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50
 import com.google.common.truth.Truth.assertThat
@@ -219,9 +219,9 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
     }
 
     @Suppress("UNCHECKED_CAST")
-    private fun givenRecentTasks(vararg tasks: GroupedRecentTaskInfo) {
+    private fun givenRecentTasks(vararg tasks: GroupedTaskInfo) {
         whenever(recentTasks.getRecentTasks(any(), any(), any(), any(), any())).thenAnswer {
-            val consumer = it.arguments.last() as Consumer<List<GroupedRecentTaskInfo>>
+            val consumer = it.arguments.last() as Consumer<List<GroupedTaskInfo>>
             consumer.accept(tasks.toList())
         }
     }
@@ -247,7 +247,7 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
         userId: Int = 0,
         isVisible: Boolean = false,
         userType: RecentTask.UserType = STANDARD,
-    ): GroupedRecentTaskInfo {
+    ): GroupedTaskInfo {
         val userInfo =
             mock<UserInfo> {
                 whenever(isCloneProfile).thenReturn(userType == CLONED)
@@ -255,7 +255,7 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
                 whenever(isPrivateProfile).thenReturn(userType == PRIVATE)
             }
         whenever(userManager.getUserInfo(userId)).thenReturn(userInfo)
-        return GroupedRecentTaskInfo.forSingleTask(createTaskInfo(taskId, userId, isVisible))
+        return GroupedTaskInfo.forFullscreenTasks(createTaskInfo(taskId, userId, isVisible))
     }
 
     private fun createTaskPair(
@@ -263,9 +263,9 @@ class ShellRecentTaskListProviderTest : SysuiTestCase() {
         userId1: Int = 0,
         taskId2: Int,
         userId2: Int = 0,
-        isVisible: Boolean = false
-    ): GroupedRecentTaskInfo =
-        GroupedRecentTaskInfo.forSplitTasks(
+        isVisible: Boolean = false,
+    ): GroupedTaskInfo =
+        GroupedTaskInfo.forSplitTasks(
             createTaskInfo(taskId1, userId1, isVisible),
             createTaskInfo(taskId2, userId2, isVisible),
             SplitBounds(Rect(), Rect(), taskId1, taskId2, SNAP_TO_2_50_50)

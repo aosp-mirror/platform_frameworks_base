@@ -23,6 +23,7 @@ import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardSurfaceBehindModel
 import com.android.systemui.scene.shared.model.Scenes
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.kotlin.toPx
@@ -45,7 +46,7 @@ class KeyguardSurfaceBehindInteractor
 @Inject
 constructor(
     private val repository: KeyguardSurfaceBehindRepository,
-    context: Context,
+    @ShadeDisplayAware context: Context,
     transitionInteractor: KeyguardTransitionInteractor,
     inWindowLauncherUnlockAnimationInteractor: Lazy<InWindowLauncherUnlockAnimationInteractor>,
     swipeToDismissInteractor: SwipeToDismissInteractor,

@@ -38,6 +38,7 @@ public class InputMediaDeviceTest {
     private final int WIRED_HEADSET_ID = 2;
     private final int USB_HEADSET_ID = 3;
     private final int BT_HEADSET_ID = 4;
+    private final int BLE_HEADSET_ID = 5;
     private final int MAX_VOLUME = 1;
     private final int CURRENT_VOLUME = 0;
     private final boolean IS_VOLUME_FIXED = true;
@@ -45,6 +46,7 @@ public class InputMediaDeviceTest {
     private static final String PRODUCT_NAME_WIRED_HEADSET = "My Wired Headset";
     private static final String PRODUCT_NAME_USB_HEADSET = "My USB Headset";
     private static final String PRODUCT_NAME_BT_HEADSET = "My Bluetooth Headset";
+    private static final String PRODUCT_NAME_BLE_HEADSET = "My BLE Headset";
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
@@ -161,6 +163,37 @@ public class InputMediaDeviceTest {
                         null);
         assertThat(btMediaDevice).isNotNull();
         assertThat(btMediaDevice.getName())
+                .isEqualTo(mContext.getString(R.string.media_transfer_bt_device_mic_name));
+    }
+
+    @Test
+    public void getName_returnCorrectName_bleHeadset() {
+        InputMediaDevice bleMediaDevice =
+                InputMediaDevice.create(
+                        mContext,
+                        String.valueOf(BLE_HEADSET_ID),
+                        AudioDeviceInfo.TYPE_BLE_HEADSET,
+                        MAX_VOLUME,
+                        CURRENT_VOLUME,
+                        IS_VOLUME_FIXED,
+                        PRODUCT_NAME_BLE_HEADSET);
+        assertThat(bleMediaDevice).isNotNull();
+        assertThat(bleMediaDevice.getName()).isEqualTo(PRODUCT_NAME_BLE_HEADSET);
+    }
+
+    @Test
+    public void getName_returnCorrectName_bleHeadset_nullProductName() {
+        InputMediaDevice bleMediaDevice =
+                InputMediaDevice.create(
+                        mContext,
+                        String.valueOf(BLE_HEADSET_ID),
+                        AudioDeviceInfo.TYPE_BLE_HEADSET,
+                        MAX_VOLUME,
+                        CURRENT_VOLUME,
+                        IS_VOLUME_FIXED,
+                        null);
+        assertThat(bleMediaDevice).isNotNull();
+        assertThat(bleMediaDevice.getName())
                 .isEqualTo(mContext.getString(R.string.media_transfer_bt_device_mic_name));
     }
 }

@@ -36,9 +36,28 @@ import java.util.concurrent.Executor;
  */
 final class WindowManagerConstants {
 
-    /** The orientation of activity will be always "unspecified" except for game apps. */
+    /**
+     * The orientation of activity will be always "unspecified" except for game apps.
+     * <p>Possible values:
+     * <ul>
+     * <li>false: applies to no apps (default)</li>
+     * <li>true: applies to all apps</li>
+     * </ul>
+     */
     private static final String KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST =
             "ignore_activity_orientation_request";
+
+    /**
+     * The orientation of activity will be always "unspecified" except for game apps.
+     * <p>Possible values:
+     * <ul>
+     * <li>none: applies to no apps (default)</li>
+     * <li>all: applies to all apps ({@see #KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST})</li>
+     * <li>large: applies to all apps but only on large screens</li>
+     * </ul>
+     */
+    private static final String KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST_SCREENS =
+            "ignore_activity_orientation_request_screens";
 
     /** The packages that ignore {@link #KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST}. */
     private static final String KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST =
@@ -69,7 +88,8 @@ final class WindowManagerConstants {
     boolean mSystemGestureExcludedByPreQStickyImmersive;
 
     /** @see #KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST */
-    boolean mIgnoreActivityOrientationRequest;
+    boolean mIgnoreActivityOrientationRequestLargeScreen;
+    boolean mIgnoreActivityOrientationRequestSmallScreen;
 
     /** @see #KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST */
     private ArraySet<String> mOptOutIgnoreActivityOrientationRequestPackages;
@@ -146,6 +166,7 @@ final class WindowManagerConstants {
                         updateSystemGestureExclusionLogDebounceMillis();
                         break;
                     case KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST:
+                    case KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST_SCREENS:
                         updateIgnoreActivityOrientationRequest();
                         break;
                     case KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST:
@@ -177,9 +198,16 @@ final class WindowManagerConstants {
     }
 
     private void updateIgnoreActivityOrientationRequest() {
-        mIgnoreActivityOrientationRequest = mDeviceConfig.getBoolean(
+        boolean allScreens = mDeviceConfig.getBoolean(
                 DeviceConfig.NAMESPACE_WINDOW_MANAGER,
                 KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST, false);
+        String whichScreens = mDeviceConfig.getProperty(
+                DeviceConfig.NAMESPACE_WINDOW_MANAGER,
+                KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST_SCREENS);
+        allScreens |= ("all".equalsIgnoreCase(whichScreens));
+        boolean largeScreens = allScreens || ("large".equalsIgnoreCase(whichScreens));
+        mIgnoreActivityOrientationRequestSmallScreen = allScreens;
+        mIgnoreActivityOrientationRequestLargeScreen = largeScreens;
     }
 
     private void updateOptOutIgnoreActivityOrientationRequestList() {
@@ -196,8 +224,7 @@ final class WindowManagerConstants {
     }
 
     boolean isPackageOptOutIgnoreActivityOrientationRequest(String packageName) {
-        return mIgnoreActivityOrientationRequest
-                && mOptOutIgnoreActivityOrientationRequestPackages != null
+        return mOptOutIgnoreActivityOrientationRequestPackages != null
                 && mOptOutIgnoreActivityOrientationRequestPackages.contains(packageName);
     }
 
@@ -210,8 +237,9 @@ final class WindowManagerConstants {
         pw.print("="); pw.println(mSystemGestureExclusionLimitDp);
         pw.print("  "); pw.print(KEY_SYSTEM_GESTURES_EXCLUDED_BY_PRE_Q_STICKY_IMMERSIVE);
         pw.print("="); pw.println(mSystemGestureExcludedByPreQStickyImmersive);
-        pw.print("  "); pw.print(KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST);
-        pw.print("="); pw.println(mIgnoreActivityOrientationRequest);
+        pw.print("  "); pw.print(KEY_IGNORE_ACTIVITY_ORIENTATION_REQUEST_SCREENS);
+        pw.print("="); pw.println(mIgnoreActivityOrientationRequestSmallScreen ? "all"
+                : mIgnoreActivityOrientationRequestLargeScreen ? "large" : "none");
         if (mOptOutIgnoreActivityOrientationRequestPackages != null) {
             pw.print("  "); pw.print(KEY_OPT_OUT_IGNORE_ACTIVITY_ORIENTATION_REQUEST_LIST);
             pw.print("="); pw.println(mOptOutIgnoreActivityOrientationRequestPackages);

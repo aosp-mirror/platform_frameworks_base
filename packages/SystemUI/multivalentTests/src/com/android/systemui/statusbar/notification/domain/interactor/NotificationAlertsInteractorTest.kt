@@ -21,8 +21,8 @@ import com.android.systemui.SysUITestComponent
 import com.android.systemui.SysUITestModule
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.disableflags.data.model.DisableFlagsModel
 import com.android.systemui.statusbar.disableflags.data.repository.FakeDisableFlagsRepository
+import com.android.systemui.statusbar.disableflags.shared.model.DisableFlagsModel
 import com.google.common.truth.Truth.assertThat
 import dagger.BindsInstance
 import dagger.Component
@@ -51,10 +51,7 @@ class NotificationAlertsInteractorTest : SysuiTestCase() {
     fun disableFlags_notifAlertsNotDisabled_notifAlertsEnabledTrue() =
         with(testComponent) {
             disableFlags.disableFlags.value =
-                DisableFlagsModel(
-                    StatusBarManager.DISABLE_NONE,
-                    StatusBarManager.DISABLE2_NONE,
-                )
+                DisableFlagsModel(StatusBarManager.DISABLE_NONE, StatusBarManager.DISABLE2_NONE)
             assertThat(underTest.areNotificationAlertsEnabled()).isTrue()
         }
 

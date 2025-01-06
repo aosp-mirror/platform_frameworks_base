@@ -49,11 +49,6 @@ constructor(
         return shadeInteractor.isAnyExpanded.value && !shadeInteractor.isUserInteracting.value
     }
 
-    @Deprecated("Only supported by very old devices that will not adopt scenes.")
-    override fun closeUserSwitcherIfOpen(): Boolean {
-        return false
-    }
-
     override fun onBackPressed() {
         animateCollapseQs(false)
     }

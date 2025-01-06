@@ -15,11 +15,15 @@ package com.android.systemui.plugins.annotations
 
 /**
  * This annotation marks denotes that an interface should use a proxy layer to protect the plugin
- * host from crashing due to [LinkageError]s originating within the plugin's implementation.
+ * host from crashing due to the [Exception] types originating within the plugin's implementation.
  */
 @Target(AnnotationTarget.CLASS)
 @Retention(AnnotationRetention.BINARY)
-annotation class ProtectedInterface
+annotation class ProtectedInterface(vararg val exTypes: String) {
+    companion object {
+        val Default = ProtectedInterface("java.lang.Exception", "java.lang.LinkageError")
+    }
+}
 
 /**
  * This annotation specifies any additional imports that the processor will require when generating
@@ -32,9 +36,9 @@ annotation class ProtectedInterface
 annotation class GeneratedImport(val extraImport: String)
 
 /**
- * This annotation provides default values to return when the proxy implementation catches a
- * [LinkageError]. The string specified should be a simple but valid java statement. In most cases
- * it should be a return statement of the appropriate type, but in some cases throwing a known
+ * This annotation provides default values to return when the proxy implementation catches a target
+ * [Exception]. The string specified should be a simple but valid java statement. In most cases it
+ * should be a return statement of the appropriate type, but in some cases throwing a known
  * exception type may be preferred.
  *
  * This annotation is not required for methods that return void, but will behave the same way.

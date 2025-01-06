@@ -379,7 +379,11 @@ private fun SceneScope.QuickSettingsScene(
                             mediaHost = mediaHost,
                             modifier =
                                 Modifier.fillMaxWidth()
-                                    .layoutId(QSMediaMeasurePolicy.LayoutId.Media),
+                                    .layoutId(QSMediaMeasurePolicy.LayoutId.Media)
+                                    .padding(
+                                        horizontal =
+                                            dimensionResource(id = R.dimen.qs_horizontal_margin)
+                                    ),
                             carouselController = mediaCarouselController,
                         )
                     }
@@ -428,12 +432,15 @@ private fun SceneScope.QuickSettingsScene(
         // A 1 pixel is added to compensate for any kind of rounding errors to make sure 100% that
         // the notification stack is entirely "below" the entire screen.
         val minNotificationStackTop = screenHeight.roundToInt() + 1
+        val notificationStackPadding = dimensionResource(id = R.dimen.notification_side_paddings)
         NotificationScrollingStack(
             shadeSession = shadeSession,
             stackScrollView = notificationStackScrollView,
             viewModel = notificationsPlaceholderViewModel,
             maxScrimTop = { minNotificationStackTop.toFloat() },
             shouldPunchHoleBehindScrim = shouldPunchHoleBehindScrim,
+            stackTopPadding = notificationStackPadding,
+            stackBottomPadding = navBarBottomHeight,
             shouldIncludeHeadsUpSpace = false,
             supportNestedScrolling = true,
             modifier =
@@ -448,7 +455,12 @@ private fun SceneScope.QuickSettingsScene(
                 Modifier.align(Alignment.BottomCenter)
                     .navigationBarsPadding()
                     .offset { IntOffset(x = 0, y = minNotificationStackTop) }
-                    .padding(horizontal = shadeHorizontalPadding),
+                    .padding(
+                        start = shadeHorizontalPadding,
+                        top = 0.dp,
+                        end = shadeHorizontalPadding,
+                        bottom = navBarBottomHeight,
+                    ),
         )
     }
 }

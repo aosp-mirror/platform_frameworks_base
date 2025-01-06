@@ -31,7 +31,6 @@ import android.util.ArraySet;
 import android.util.SparseArray;
 import android.util.SparseIntArray;
 
-import com.android.internal.R;
 import com.android.internal.pm.parsing.pkg.ParsedPackage;
 import com.android.internal.pm.pkg.component.ParsedActivity;
 import com.android.internal.pm.pkg.component.ParsedApexSystemService;
@@ -280,6 +279,9 @@ public interface ParsingPackage {
     ParsingPackage setNativeHeapZeroInitialized(
             @ApplicationInfo.NativeHeapZeroInitialized int nativeHeapZeroInitialized);
 
+    /** Manifest option pageSizeCompat will populate this field */
+    ParsingPackage setPageSizeAppCompatFlags(@ApplicationInfo.PageSizeAppCompatFlags int value);
+
     ParsingPackage setRequestRawExternalStorageAccess(
             @Nullable Boolean requestRawExternalStorageAccess);
 
@@ -412,6 +414,18 @@ public interface ParsingPackage {
     ParsingPackage setKnownActivityEmbeddingCerts(Set<String> knownActivityEmbeddingCerts);
 
     ParsingPackage setOnBackInvokedCallbackEnabled(boolean enableOnBackInvokedCallback);
+
+    /**
+     * Set the drawable resources id array of the alternate icons that are parsing from the
+     * AndroidManifest file
+     */
+    ParsingPackage setAlternateLauncherIconResIds(int[] alternateLauncherIconResIds);
+
+    /**
+     * Set the string resources id array of the alternate labels that are parsing from the
+     * AndroidManifest file
+     */
+    ParsingPackage setAlternateLauncherLabelResIds(int[] alternateLauncherLabelResIds);
 
     @CallSuper
     ParsedPackage hideAsParsed();

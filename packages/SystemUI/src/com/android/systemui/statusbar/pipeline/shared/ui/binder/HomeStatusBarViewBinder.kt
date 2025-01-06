@@ -19,7 +19,9 @@ package com.android.systemui.statusbar.pipeline.shared.ui.binder
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
 import android.view.View
+import androidx.core.view.isVisible
 import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
 import com.android.systemui.Flags
@@ -30,13 +32,19 @@ import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.binder.OngoingActivityChipBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
-import com.android.systemui.statusbar.core.StatusBarSimpleFragment
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.core.StatusBarRootModernization
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimatingIn
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.AnimatingOut
+import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.RunningChipAnim
+import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ConnectedDisplaysStatusBarNotificationIconViewStore
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
-import com.android.app.tracing.coroutines.launchTraced as launch
+import kotlinx.coroutines.launch
 
 /**
  * Interface to assist with binding the [CollapsedStatusBarFragment] to [HomeStatusBarViewModel].
@@ -46,23 +54,45 @@ interface HomeStatusBarViewBinder {
     /**
      * Binds the view to the view-model. [listener] will be notified whenever an event that may
      * change the status bar visibility occurs.
+     *
+     * Null chip animations are used when [StatusBarRootModernization] is off (i.e., when we are
+     * binding from the fragment). If non-null, they control the animation of the system icon area
+     * to support the chip animations.
      */
     fun bind(
+        displayId: Int,
         view: View,
         viewModel: HomeStatusBarViewModel,
+        systemEventChipAnimateIn: ((View) -> Unit)?,
+        systemEventChipAnimateOut: ((View) -> Unit)?,
         listener: StatusBarVisibilityChangeListener,
     )
 }
 
 @SysUISingleton
-class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinder {
+class HomeStatusBarViewBinderImpl
+@Inject
+constructor(
+    private val viewStoreFactory: ConnectedDisplaysStatusBarNotificationIconViewStore.Factory
+) : HomeStatusBarViewBinder {
     override fun bind(
+        displayId: Int,
         view: View,
         viewModel: HomeStatusBarViewModel,
+        systemEventChipAnimateIn: ((View) -> Unit)?,
+        systemEventChipAnimateOut: ((View) -> Unit)?,
         listener: StatusBarVisibilityChangeListener,
     ) {
         view.repeatWhenAttached {
             repeatOnLifecycle(Lifecycle.State.CREATED) {
+                val iconViewStore =
+                    if (StatusBarConnectedDisplays.isEnabled) {
+                        viewStoreFactory.create(displayId).also {
+                            lifecycleScope.launch { it.activate() }
+                        }
+                    } else {
+                        null
+                    }
                 launch {
                     viewModel.isTransitioningFromLockscreenToOccluded.collect {
                         listener.onStatusBarVisibilityMaybeChanged()
@@ -90,11 +120,16 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                         view.requireViewById(R.id.ongoing_activity_chip_primary)
                     launch {
                         viewModel.primaryOngoingActivityChip.collect { primaryChipModel ->
-                            OngoingActivityChipBinder.bind(primaryChipModel, primaryChipView)
-                            if (StatusBarSimpleFragment.isEnabled) {
+                            OngoingActivityChipBinder.bind(
+                                primaryChipModel,
+                                primaryChipView,
+                                iconViewStore,
+                            )
+                            if (StatusBarRootModernization.isEnabled) {
                                 when (primaryChipModel) {
                                     is OngoingActivityChipModel.Shown ->
                                         primaryChipView.show(shouldAnimateChange = true)
+
                                     is OngoingActivityChipModel.Hidden ->
                                         primaryChipView.hide(
                                             state = View.GONE,
@@ -109,6 +144,7 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                                             hasSecondaryOngoingActivity = false,
                                             shouldAnimate = true,
                                         )
+
                                     is OngoingActivityChipModel.Hidden ->
                                         listener.onOngoingActivityStatusChanged(
                                             hasPrimaryOngoingActivity = false,
@@ -128,12 +164,20 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                         view.requireViewById(R.id.ongoing_activity_chip_secondary)
                     launch {
                         viewModel.ongoingActivityChips.collect { chips ->
-                            OngoingActivityChipBinder.bind(chips.primary, primaryChipView)
+                            OngoingActivityChipBinder.bind(
+                                chips.primary,
+                                primaryChipView,
+                                iconViewStore,
+                            )
                             // TODO(b/364653005): Don't show the secondary chip if there isn't
                             // enough space for it.
-                            OngoingActivityChipBinder.bind(chips.secondary, secondaryChipView)
+                            OngoingActivityChipBinder.bind(
+                                chips.secondary,
+                                secondaryChipView,
+                                iconViewStore,
+                            )
 
-                            if (StatusBarSimpleFragment.isEnabled) {
+                            if (StatusBarRootModernization.isEnabled) {
                                 primaryChipView.adjustVisibility(chips.primary.toVisibilityModel())
                                 secondaryChipView.adjustVisibility(
                                     chips.secondary.toVisibilityModel()
@@ -160,7 +204,19 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                     }
                 }
 
-                if (StatusBarSimpleFragment.isEnabled) {
+                if (StatusBarRootModernization.isEnabled) {
+                    val operatorNameView = view.requireViewById<View>(R.id.operator_name_frame)
+                    StatusBarOperatorNameViewBinder.bind(
+                        operatorNameView,
+                        viewModel.operatorNameViewModel,
+                        viewModel::areaTint,
+                    )
+                    launch {
+                        viewModel.shouldShowOperatorNameView.collect {
+                            operatorNameView.isVisible = it
+                        }
+                    }
+
                     val clockView = view.requireViewById<View>(R.id.clock)
                     launch { viewModel.isClockVisible.collect { clockView.adjustVisibility(it) } }
 
@@ -175,16 +231,44 @@ class HomeStatusBarViewBinderImpl @Inject constructor() : HomeStatusBarViewBinde
                         view.requireViewById<View>(R.id.status_bar_end_side_content)
                     // TODO(b/364360986): Also handle operator name view.
                     launch {
-                        viewModel.isSystemInfoVisible.collect {
-                            systemInfoView.adjustVisibility(it)
-                            // TODO(b/364360986): The system info view has a custom alpha controller
-                            // in CollapsedStatusBarFragment.
+                        viewModel.systemInfoCombinedVis.collect { (baseVis, animState) ->
+                            // Broadly speaking, the baseVis controls the view.visibility, and
+                            // the animation state uses only alpha to achieve its effect. This
+                            // means that we can always modify the visibility, and if we're
+                            // animating we can use the animState to handle it. If we are not
+                            // animating, then we can use the baseVis default animation
+                            if (animState.isAnimatingChip()) {
+                                // Just apply the visibility of the view, but don't animate
+                                systemInfoView.visibility = baseVis.visibility
+                                // Now apply the animation state, with its animator
+                                when (animState) {
+                                    AnimatingIn -> {
+                                        systemEventChipAnimateIn?.invoke(systemInfoView)
+                                    }
+                                    AnimatingOut -> {
+                                        systemEventChipAnimateOut?.invoke(systemInfoView)
+                                    }
+                                    else -> {
+                                        // Nothing to do here
+                                    }
+                                }
+                            } else {
+                                systemInfoView.adjustVisibility(baseVis)
+                            }
                         }
                     }
                 }
             }
         }
     }
+
+    private fun SystemEventAnimationState.isAnimatingChip() =
+        when (this) {
+            AnimatingIn,
+            AnimatingOut,
+            RunningChipAnim -> true
+            else -> false
+        }
 
     private fun OngoingActivityChipModel.toVisibilityModel(): VisibilityModel {
         return VisibilityModel(

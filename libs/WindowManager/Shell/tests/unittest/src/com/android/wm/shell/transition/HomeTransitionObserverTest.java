@@ -25,7 +25,7 @@ import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.window.TransitionInfo.FLAG_BACK_GESTURE_ANIMATED;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP;
+import static com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_START_DRAG_TO_DESKTOP;
 
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.mock;
@@ -39,8 +39,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
-import android.platform.test.annotations.RequiresFlagsDisabled;
-import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.view.SurfaceControl;
@@ -51,7 +49,6 @@ import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 import androidx.test.platform.app.InstrumentationRegistry;
 
-import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
@@ -197,27 +194,6 @@ public class HomeTransitionObserverTest extends ShellTestCase {
     }
 
     @Test
-    @RequiresFlagsDisabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
-    public void testHomeActivityWithBackGestureNotifiesHomeIsVisible() throws RemoteException {
-        TransitionInfo info = mock(TransitionInfo.class);
-        TransitionInfo.Change change = mock(TransitionInfo.Change.class);
-        ActivityManager.RunningTaskInfo taskInfo = mock(ActivityManager.RunningTaskInfo.class);
-        when(change.getTaskInfo()).thenReturn(taskInfo);
-        when(info.getChanges()).thenReturn(new ArrayList<>(List.of(change)));
-
-        when(change.hasFlags(FLAG_BACK_GESTURE_ANIMATED)).thenReturn(true);
-        setupTransitionInfo(taskInfo, change, ACTIVITY_TYPE_HOME, TRANSIT_CHANGE, true);
-
-        mHomeTransitionObserver.onTransitionReady(mock(IBinder.class),
-                info,
-                mock(SurfaceControl.Transaction.class),
-                mock(SurfaceControl.Transaction.class));
-
-        verify(mListener, times(1)).onHomeVisibilityChanged(true);
-    }
-
-    @Test
-    @RequiresFlagsEnabled(Flags.FLAG_MIGRATE_PREDICTIVE_BACK_TRANSITION)
     public void testHomeActivityWithBackGestureNotifiesHomeIsVisibleAfterClose()
             throws RemoteException {
         TransitionInfo info = mock(TransitionInfo.class);

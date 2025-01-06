@@ -16,11 +16,15 @@
 
 package com.android.systemui.qs.panels.ui.viewmodel
 
-import androidx.compose.runtime.State
 import androidx.compose.runtime.getValue
+import com.android.systemui.classifier.Classifier.QS_SWIPE_SIDE
+import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.development.ui.viewmodel.BuildNumberViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.lifecycle.Hydrator
+import com.android.systemui.media.controls.ui.controller.MediaHierarchyManager.Companion.LOCATION_QS
 import com.android.systemui.qs.panels.domain.interactor.PaginatedGridInteractor
+import com.android.systemui.qs.panels.ui.viewmodel.toolbar.EditModeButtonViewModel
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.awaitCancellation
@@ -31,12 +35,16 @@ class PaginatedGridViewModel
 @AssistedInject
 constructor(
     iconTilesViewModel: IconTilesViewModel,
-    private val gridSizeViewModel: QSColumnsViewModel,
+    columnsWithMediaViewModelFactory: QSColumnsViewModel.Factory,
     paginatedGridInteractor: PaginatedGridInteractor,
     inFirstPageViewModel: InFirstPageViewModel,
+    val buildNumberViewModelFactory: BuildNumberViewModel.Factory,
+    val editModeButtonViewModelFactory: EditModeButtonViewModel.Factory,
+    private val falsingInteractor: FalsingInteractor,
 ) : IconTilesViewModel by iconTilesViewModel, ExclusiveActivatable() {
 
     private val hydrator = Hydrator("PaginatedGridViewModel")
+    private val columnsWithMediaViewModel = columnsWithMediaViewModelFactory.create(LOCATION_QS)
 
     val rows by
         hydrator.hydratedStateOf(
@@ -47,13 +55,17 @@ constructor(
 
     var inFirstPage by inFirstPageViewModel::inFirstPage
 
-    val columns: State<Int>
-        get() = gridSizeViewModel.columns
+    val columns: Int
+        get() = columnsWithMediaViewModel.columns
+
+    fun registerSideSwipeGesture() {
+        falsingInteractor.isFalseTouch(QS_SWIPE_SIDE)
+    }
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
             launch { hydrator.activate() }
-            launch { gridSizeViewModel.activate() }
+            launch { columnsWithMediaViewModel.activate() }
             awaitCancellation()
         }
     }

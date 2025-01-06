@@ -14,7 +14,6 @@
 
 package com.android.systemui.plugins.qs;
 
-import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -22,6 +21,7 @@ import android.metrics.LogMaker;
 import android.service.quicksettings.Tile;
 import android.text.TextUtils;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import com.android.internal.logging.InstanceId;
@@ -33,6 +33,7 @@ import com.android.systemui.plugins.qs.QSTile.Icon;
 import com.android.systemui.plugins.qs.QSTile.State;
 
 import java.util.Objects;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 @ProvidesInterface(version = QSTile.VERSION)
@@ -92,6 +93,7 @@ public interface QSTile {
 
     CharSequence getTileLabel();
 
+    @NonNull
     State getState();
 
     default LogMaker populate(LogMaker logMaker) {
@@ -119,6 +121,34 @@ public interface QSTile {
      * refreshes from controllers
      */
     boolean isListening();
+
+    /**
+     * Get this tile's {@link TileDetailsViewModel} through a callback.
+     *
+     * Please only override this method if the tile can't get its {@link TileDetailsViewModel}
+     * synchronously and thus need a callback to defer it.
+     *
+     * @return a boolean indicating whether this tile has a {@link TileDetailsViewModel}. The tile's
+     * {@link TileDetailsViewModel} will be passed to the callback. Please always return true when
+     * overriding this method. Return false will make the tile display its dialog instead of details
+     * view, and it will not wait for the callback to be returned before proceeding to show the
+     * dialog.
+     */
+    default boolean getDetailsViewModel(Consumer<TileDetailsViewModel> callback) {
+        TileDetailsViewModel tileDetailsViewModel = getDetailsViewModel();
+        callback.accept(tileDetailsViewModel);
+        return tileDetailsViewModel != null;
+    }
+
+    /**
+     * Return this tile's {@link TileDetailsViewModel} to be used to render the TileDetailsView.
+     *
+     * Please only override this method if the tile doesn't need a callback to set its
+     * {@link TileDetailsViewModel}.
+     */
+    default TileDetailsViewModel getDetailsViewModel() {
+        return null;
+    }
 
     @ProvidesInterface(version = Callback.VERSION)
     interface Callback {
@@ -264,6 +294,7 @@ public interface QSTile {
             return sb.append(']');
         }
 
+        @NonNull
         public State copy() {
             State state = new State();
             copyTo(state);
@@ -299,6 +330,7 @@ public interface QSTile {
             return rt;
         }
 
+        @androidx.annotation.NonNull
         @Override
         public State copy() {
             AdapterState state = new AdapterState();
@@ -311,6 +343,7 @@ public interface QSTile {
     class BooleanState extends AdapterState {
         public static final int VERSION = 1;
 
+        @androidx.annotation.NonNull
         @Override
         public State copy() {
             BooleanState state = new BooleanState();

@@ -63,7 +63,7 @@ public class FrontendStatus {
             FRONTEND_STATUS_TYPE_DVBT_CELL_IDS, FRONTEND_STATUS_TYPE_ATSC3_ALL_PLP_INFO,
             FRONTEND_STATUS_TYPE_IPTV_CONTENT_URL, FRONTEND_STATUS_TYPE_IPTV_PACKETS_LOST,
             FRONTEND_STATUS_TYPE_IPTV_PACKETS_RECEIVED, FRONTEND_STATUS_TYPE_IPTV_WORST_JITTER_MS,
-            FRONTEND_STATUS_TYPE_IPTV_AVERAGE_JITTER_MS, FRONTEND_STATUS_TYPE_STANDARD_EXT})
+            FRONTEND_STATUS_TYPE_IPTV_AVERAGE_JITTER_MS, FRONTEND_STATUS_TYPE_STANDARD_EXTENSION})
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrontendStatusType {}
 
@@ -317,7 +317,7 @@ public class FrontendStatus {
      * Standard extension.
      */
     @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
-    public static final int FRONTEND_STATUS_TYPE_STANDARD_EXT =
+    public static final int FRONTEND_STATUS_TYPE_STANDARD_EXTENSION =
             android.hardware.tv.tuner.FrontendStatusType.STANDARD_EXT;
 
     /** @hide */
@@ -567,7 +567,7 @@ public class FrontendStatus {
     private Long mIptvPacketsReceived;
     private Integer mIptvWorstJitterMs;
     private Integer mIptvAverageJitterMs;
-    private StandardExt mStandardExt;
+    private StandardExtension mStandardExtension;
 
     // Constructed and fields set by JNI code.
     private FrontendStatus() {
@@ -1298,12 +1298,12 @@ public class FrontendStatus {
      */
     @NonNull
     @FlaggedApi(Flags.FLAG_TUNER_W_APIS)
-    public StandardExt getStandardExt() {
+    public StandardExtension getStandardExtension() {
         TunerVersionChecker.checkHigherOrEqualVersionTo(
-                TunerVersionChecker.TUNER_VERSION_4_0, "StandardExt status");
-        if (mStandardExt == null) {
-            throw new IllegalStateException("StandardExt status is empty");
+                TunerVersionChecker.TUNER_VERSION_4_0, "StandardExtension status");
+        if (mStandardExtension == null) {
+            throw new IllegalStateException("StandardExtension status is empty");
         }
-        return mStandardExt;
+        return mStandardExtension;
     }
 }

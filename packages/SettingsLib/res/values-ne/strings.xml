@@ -110,6 +110,7 @@
     <string name="bluetooth_hearing_aid_left_active" msgid="8330226430756799572">"सक्रिय छ (बायाँ मात्र)"</string>
     <string name="bluetooth_hearing_aid_right_active" msgid="2244728507170385397">"सक्रिय छ (दायाँ मात्र)"</string>
     <string name="bluetooth_hearing_aid_left_and_right_active" msgid="4294571497939983181">"सक्रिय छ (दायाँ र बायाँ)"</string>
+    <string name="bluetooth_hearing_device_ambient_error" msgid="6035857289108813878">"वरपरका आवाजसम्बन्धी सेटिङ अपडेट गर्न सकिएन"</string>
     <string name="bluetooth_active_media_only_battery_level" msgid="7772517511061834073">"सक्रिय छ (मिडिया मात्र)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ब्याट्री।"</string>
     <string name="bluetooth_active_media_only_battery_level_untethered" msgid="7444753133664620926">"सक्रिय छ (मिडिया मात्र)। बायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_0">%1$s</xliff:g>, दायाँ: <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE_1">%2$s</xliff:g> ब्याट्री।"</string>
     <string name="bluetooth_battery_level_lea_support" msgid="5968584103507988820">"कनेक्ट गरिएको छ (अडियो सेयर गर्न मिल्छ)। <xliff:g id="BATTERY_LEVEL_AS_PERCENTAGE">%1$s</xliff:g> ब्याट्री।"</string>
@@ -167,7 +168,7 @@
     <string name="bluetooth_talkback_computer" msgid="3736623135703893773">"कम्प्युटर"</string>
     <string name="bluetooth_talkback_headset" msgid="3406852564400882682">"हेडसेट"</string>
     <string name="bluetooth_talkback_phone" msgid="868393783858123880">"फोन"</string>
-    <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"छवि सम्बन्धी"</string>
+    <string name="bluetooth_talkback_imaging" msgid="8781682986822514331">"फोटो सम्बन्धी"</string>
     <string name="bluetooth_talkback_headphone" msgid="8613073829180337091">"हेडफोन"</string>
     <string name="bluetooth_talkback_input_peripheral" msgid="5133944817800149942">"इनपुट सम्बन्धी बाह्य यन्त्र"</string>
     <string name="bluetooth_talkback_hearing_aids" msgid="3983279945542595479">"हियरिङ डिभाइसहरू"</string>
@@ -184,7 +185,7 @@
     <string name="process_kernel_label" msgid="950292573930336765">"Android OS"</string>
     <string name="data_usage_uninstalled_apps" msgid="1933665711856171491">"हटाइएका एपहरू"</string>
     <string name="data_usage_uninstalled_apps_users" msgid="5533981546921913295">"एपहरू र प्रयोगकर्ताहरू हटाइयो।"</string>
-    <string name="data_usage_ota" msgid="7984667793701597001">"प्रणालीसम्बन्धी अद्यावधिकहरू"</string>
+    <string name="data_usage_ota" msgid="7984667793701597001">"प्रणालीसम्बन्धी अपडेटहरू"</string>
     <string name="tether_settings_title_usb" msgid="3728686573430917722">"USB टेदरिङ"</string>
     <string name="tether_settings_title_wifi" msgid="4803402057533895526">"पोर्टेबल हटस्पट"</string>
     <string name="tether_settings_title_bluetooth" msgid="916519902721399656">"ब्लुटुथ टेदर गर्दै"</string>
@@ -237,7 +238,7 @@
     <string name="choose_profile" msgid="343803890897657450">"प्रोफाइल रोज्नुहोस्"</string>
     <string name="category_personal" msgid="6236798763159385225">"व्यक्तिगत"</string>
     <string name="category_work" msgid="4014193632325996115">"काम"</string>
-    <string name="category_private" msgid="4244892185452788977">"निजी"</string>
+    <string name="category_private" msgid="4244892185452788977">"निजी स्पेस"</string>
     <string name="category_clone" msgid="1554511758987195974">"क्लोन"</string>
     <string name="development_settings_title" msgid="140296922921597393">"विकासकर्ताका विकल्पहरू"</string>
     <string name="development_settings_enable" msgid="4285094651288242183">"विकासकर्ता विकल्प सक्रिया गर्नुहोस्"</string>
@@ -358,7 +359,8 @@
     <string name="enable_terminal_title" msgid="3834790541986303654">"स्थानीय टर्मिनल"</string>
     <string name="enable_terminal_summary" msgid="2481074834856064500">"स्थानीय सेल पहुँच प्रदान गर्ने टर्मिनल एप सक्षम गर्नुहोस्"</string>
     <string name="enable_linux_terminal_title" msgid="5076044866895670637">"Linux डेभलप्मेन्ट इन्भायरमेन्ट"</string>
-    <string name="enable_linux_terminal_summary" msgid="5893216510985145320">"Android मा Linux टर्मिनल एप प्रयोग गर्नुहोस्"</string>
+    <string name="enable_linux_terminal_summary" msgid="2029479880888108902">"(परीक्षणको चरणमा रहेको) Android मा Linux टर्मिनल रन गर्नुहोस्"</string>
+    <string name="disable_linux_terminal_disclaimer" msgid="3054320531778388231">"तपाईंले Linux टर्मिनल डिसएबल गर्नुभयो भने त्यसमा भएको डेटा मेटिने छ"</string>
     <string name="hdcp_checking_title" msgid="3155692785074095986">"HDCP जाँच"</string>
     <string name="hdcp_checking_dialog_title" msgid="7691060297616217781">"HDCP जाँच व्यवहार सेट गर्नुहोस्"</string>
     <string name="debug_debugging_category" msgid="535341063709248842">"डिबग गरिँदै छ"</string>
@@ -422,6 +424,7 @@
     <string name="transition_animation_scale_title" msgid="1278477690695439337">"संक्रमण एनिमेसन स्केल"</string>
     <string name="animator_duration_scale_title" msgid="7082913931326085176">"एनिमेसनको अवधि मापन"</string>
     <string name="overlay_display_devices_title" msgid="5411894622334469607">"सहायक डिस्प्लेको नक्कल गर्नुहोस्"</string>
+    <string name="shade_display_awareness_title" msgid="8000009404669495876">"सेड देखाइने स्थिति"</string>
     <string name="debug_applications_category" msgid="5394089406638954196">"एपहरू"</string>
     <string name="immediately_destroy_activities" msgid="1826287490705167403">"गतिविधि नराखियोस्"</string>
     <string name="immediately_destroy_activities_summary" msgid="6289590341144557614">"प्रयोगकर्ता कुनै गतिविधिबाट बाहिरिने बित्तिकै उक्त गतिविधि अन्त्य गर्नुहोस्"</string>
@@ -585,12 +588,14 @@
     <string name="media_transfer_this_device_name" msgid="2357329267148436433">"यो फोन"</string>
     <string name="media_transfer_this_device_name_tablet" msgid="2975593806278422086">"यो ट्याब्लेट"</string>
     <string name="media_transfer_this_device_name_desktop" msgid="7912386128141470452">"यो कम्प्युटर (आन्तरिक)"</string>
-    <!-- no translation found for media_transfer_this_device_name_tv (5285685336836896535) -->
-    <skip />
+    <string name="media_transfer_this_device_name_tv" msgid="8508713779441163887">"यो टिभी"</string>
     <string name="media_transfer_dock_speaker_device_name" msgid="2856219597113881950">"डक स्पिकर"</string>
     <string name="media_transfer_external_device_name" msgid="2588672258721846418">"बाह्य डिभाइस"</string>
     <string name="media_transfer_default_device_name" msgid="4315604017399871828">"कनेक्ट गरिएको डिभाइस"</string>
     <string name="media_transfer_this_phone" msgid="7194341457812151531">"यो फोन"</string>
+    <string name="media_transfer_digital_line_name" msgid="312091711951124301">"S/PDIF"</string>
+    <string name="media_transfer_analog_line_name" msgid="1841163866716302104">"एनालग"</string>
+    <string name="media_transfer_aux_line_name" msgid="894135835967856689">"AUX"</string>
     <string name="media_output_status_unknown_error" msgid="5098565887497902222">"यो डिभाइसमा मिडिया प्ले गर्न मिल्दैन"</string>
     <string name="media_output_status_require_premium" msgid="8411255800047014822">"आफूले प्रयोग गर्न चाहेको खाता अपग्रेड गर्नुहोस्"</string>
     <string name="media_output_status_not_support_downloads" msgid="4523828729240373315">"डाउनलोड गरिएका सामग्री यसमा प्ले गर्न मिल्दैन"</string>
@@ -603,9 +608,8 @@
     <string name="tv_media_transfer_earc_fallback_title" msgid="3098685494578519940">"HDMI eARC"</string>
     <string name="tv_media_transfer_arc_subtitle" msgid="1040017851325069082">"ARC मार्फत कनेक्ट गरिएका"</string>
     <string name="tv_media_transfer_earc_subtitle" msgid="645191413103303077">"eARC मार्फत कनेक्ट गरिएका"</string>
-    <string name="tv_media_transfer_default" msgid="5403053145185843843">"टिभीको डिफल्ट अडियो आउटपुट"</string>
-    <string name="tv_media_transfer_hdmi" msgid="692569220956829921">"HDMI आउटपुट"</string>
-    <string name="tv_media_transfer_internal_speakers" msgid="8181494402866565865">"आन्तरिक स्पिकरहरू"</string>
+    <string name="tv_media_transfer_internal_speakers" msgid="4662765121700213785">"अन्तर्निर्मित स्पिकर"</string>
+    <string name="tv_media_transfer_hdmi_title" msgid="6715658310934507444">"टिभीको अडियो"</string>
     <string name="profile_connect_timeout_subtext" msgid="4043408193005851761">"जोड्ने क्रममा समस्या भयो। यन्त्रलाई निष्क्रिय पारेर फेरि अन गर्नुहोस्"</string>
     <string name="media_transfer_wired_device_name" msgid="4447880899964056007">"तारयुक्त अडियो यन्त्र"</string>
     <string name="help_label" msgid="3528360748637781274">"मद्दत र प्रतिक्रिया"</string>
@@ -707,7 +711,7 @@
     <string name="data_connection_lte" msgid="7675461204366364124">"LTE"</string>
     <string name="data_connection_lte_plus" msgid="6643158654804916653">"LTE+"</string>
     <string name="data_connection_carrier_wifi" msgid="8932949159370130465">"W+"</string>
-    <string name="cell_data_off_content_description" msgid="2280700839891636498">"मोबाइल डेटा निष्क्रिय छ"</string>
+    <string name="cell_data_off_content_description" msgid="2280700839891636498">"मोबाइल डेटा अफ छ"</string>
     <string name="not_default_data_content_description" msgid="6517068332106592887">"डेटा प्रयोग गर्ने गरी सेट गरिएन"</string>
     <string name="accessibility_no_phone" msgid="2687419663127582503">"फोन छैन्।"</string>
     <string name="accessibility_phone_one_bar" msgid="5719721147018970063">"फोन एउटा पट्टि।"</string>

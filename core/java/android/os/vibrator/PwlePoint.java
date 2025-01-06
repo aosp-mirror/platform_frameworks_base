@@ -63,4 +63,12 @@ public final class PwlePoint {
     public int hashCode() {
         return Objects.hash(mAmplitude, mFrequencyHz, mTimeMillis);
     }
+
+    @Override
+    public String toString() {
+        return "PwlePoint{amplitude=" + mAmplitude
+                + ", frequency=" + mFrequencyHz
+                + ", time=" + mTimeMillis
+                + "}";
+    }
 }

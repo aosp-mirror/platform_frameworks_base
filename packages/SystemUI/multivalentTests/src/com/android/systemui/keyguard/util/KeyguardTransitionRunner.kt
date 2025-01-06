@@ -21,6 +21,7 @@ import android.animation.ValueAnimator
 import android.view.Choreographer.FrameCallback
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.TransitionInfo
+import java.util.function.Consumer
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -35,9 +36,8 @@ import org.junit.Assert.fail
  * Gives direct control over ValueAnimator, in order to make transition tests deterministic. See
  * [AnimationHandler]. Animators are required to be run on the main thread, so dispatch accordingly.
  */
-class KeyguardTransitionRunner(
-    val repository: KeyguardTransitionRepository,
-) : AnimationFrameCallbackProvider {
+class KeyguardTransitionRunner(val repository: KeyguardTransitionRepository) :
+    AnimationFrameCallbackProvider {
 
     private var frameCount = 1L
     private var frames = MutableStateFlow(Pair<Long, FrameCallback?>(0L, null))
@@ -48,7 +48,12 @@ class KeyguardTransitionRunner(
      * For transitions being directed by an animator. Will control the number of frames being
      * generated so the values are deterministic.
      */
-    suspend fun startTransition(scope: CoroutineScope, info: TransitionInfo, maxFrames: Int = 100) {
+    suspend fun startTransition(
+        scope: CoroutineScope,
+        info: TransitionInfo,
+        maxFrames: Int = 100,
+        frameCallback: Consumer<Long>? = null,
+    ) {
         // AnimationHandler uses ThreadLocal storage, and ValueAnimators MUST start from main
         // thread
         withContext(Dispatchers.Main) {
@@ -62,7 +67,12 @@ class KeyguardTransitionRunner(
 
                     isTerminated = frameNumber >= maxFrames
                     if (!isTerminated) {
-                        withContext(Dispatchers.Main) { callback?.doFrame(frameNumber) }
+                        try {
+                            withContext(Dispatchers.Main) { callback?.doFrame(frameNumber) }
+                            frameCallback?.accept(frameNumber)
+                        } catch (e: IllegalStateException) {
+                            e.printStackTrace()
+                        }
                     }
                 }
             }
@@ -90,9 +100,13 @@ class KeyguardTransitionRunner(
     override fun postFrameCallback(cb: FrameCallback) {
         frames.value = Pair(frameCount++, cb)
     }
+
     override fun postCommitCallback(runnable: Runnable) {}
+
     override fun getFrameTime() = frameCount
+
     override fun getFrameDelay() = 1L
+
     override fun setFrameDelay(delay: Long) {}
 
     companion object {

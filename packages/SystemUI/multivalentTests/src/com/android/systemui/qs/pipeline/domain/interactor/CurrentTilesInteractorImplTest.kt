@@ -30,6 +30,7 @@ import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.dump.nano.SystemUIProtoDump
 import com.android.systemui.plugins.qs.QSTile
 import com.android.systemui.plugins.qs.QSTile.BooleanState
+import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.qs.FakeQSFactory
 import com.android.systemui.qs.FakeQSTile
 import com.android.systemui.qs.external.CustomTile
@@ -154,7 +155,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
                     TileSpec.create("e"),
                     CUSTOM_TILE_SPEC,
                     TileSpec.create("d"),
-                    TileSpec.create("non_existent")
+                    TileSpec.create("non_existent"),
                 )
             tileSpecRepository.setTiles(USER_INFO_0.id, specs)
 
@@ -190,11 +191,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     @Test
     fun logTileCreated() =
         testScope.runTest(USER_INFO_0) {
-            val specs =
-                listOf(
-                    TileSpec.create("a"),
-                    CUSTOM_TILE_SPEC,
-                )
+            val specs = listOf(TileSpec.create("a"), CUSTOM_TILE_SPEC)
             tileSpecRepository.setTiles(USER_INFO_0.id, specs)
             runCurrent()
 
@@ -204,10 +201,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     @Test
     fun logTileNotFoundInFactory() =
         testScope.runTest(USER_INFO_0) {
-            val specs =
-                listOf(
-                    TileSpec.create("non_existing"),
-                )
+            val specs = listOf(TileSpec.create("non_existing"))
             tileSpecRepository.setTiles(USER_INFO_0.id, specs)
             runCurrent()
 
@@ -218,10 +212,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     @Test
     fun tileNotAvailableDestroyed_logged() =
         testScope.runTest(USER_INFO_0) {
-            val specs =
-                listOf(
-                    TileSpec.create("e"),
-                )
+            val specs = listOf(TileSpec.create("e"))
             tileSpecRepository.setTiles(USER_INFO_0.id, specs)
             runCurrent()
 
@@ -229,7 +220,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             verify(logger)
                 .logTileDestroyed(
                     specs[0],
-                    QSPipelineLogger.TileDestroyedReason.NEW_TILE_NOT_AVAILABLE
+                    QSPipelineLogger.TileDestroyedReason.NEW_TILE_NOT_AVAILABLE,
                 )
         }
 
@@ -238,11 +229,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
         testScope.runTest(USER_INFO_0) {
             val tiles by collectLastValue(tileSpecRepository.tilesSpecs(USER_INFO_0.id))
 
-            val specs =
-                listOf(
-                    TileSpec.create("a"),
-                    TileSpec.create("e"),
-                )
+            val specs = listOf(TileSpec.create("a"), TileSpec.create("e"))
             tileSpecRepository.setTiles(USER_INFO_0.id, specs)
 
             assertThat(tiles).isEqualTo(listOf(TileSpec.create("a")))
@@ -266,10 +253,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
         testScope.runTest(USER_INFO_0) {
             val tiles by collectLastValue(underTest.currentTiles)
 
-            val specs =
-                listOf(
-                    TileSpec.create("a"),
-                )
+            val specs = listOf(TileSpec.create("a"))
 
             tileSpecRepository.setTiles(USER_INFO_0.id, specs)
             val originalTileA = tiles!![0].tile
@@ -299,7 +283,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             verify(logger)
                 .logTileDestroyed(
                     TileSpec.create("c"),
-                    QSPipelineLogger.TileDestroyedReason.TILE_REMOVED
+                    QSPipelineLogger.TileDestroyedReason.TILE_REMOVED,
                 )
         }
 
@@ -325,7 +309,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             verify(logger)
                 .logTileDestroyed(
                     TileSpec.create("a"),
-                    QSPipelineLogger.TileDestroyedReason.EXISTING_TILE_NOT_AVAILABLE
+                    QSPipelineLogger.TileDestroyedReason.EXISTING_TILE_NOT_AVAILABLE,
                 )
 
             assertThat(tiles?.size).isEqualTo(1)
@@ -370,7 +354,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             verify(logger)
                 .logTileDestroyed(
                     specs0[0],
-                    QSPipelineLogger.TileDestroyedReason.TILE_NOT_PRESENT_IN_NEW_USER
+                    QSPipelineLogger.TileDestroyedReason.TILE_NOT_PRESENT_IN_NEW_USER,
                 )
         }
 
@@ -418,21 +402,12 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
         testScope.runTest(USER_INFO_0) {
             val tiles by collectLastValue(tileSpecRepository.tilesSpecs(USER_INFO_0.id))
             val spec = TileSpec.create("a")
-            val currentSpecs =
-                listOf(
-                    TileSpec.create("b"),
-                    TileSpec.create("c"),
-                )
+            val currentSpecs = listOf(TileSpec.create("b"), TileSpec.create("c"))
             tileSpecRepository.setTiles(USER_INFO_0.id, currentSpecs)
 
             underTest.addTile(spec, position = 1)
 
-            val expectedSpecs =
-                listOf(
-                    TileSpec.create("b"),
-                    spec,
-                    TileSpec.create("c"),
-                )
+            val expectedSpecs = listOf(TileSpec.create("b"), spec, TileSpec.create("c"))
             assertThat(tiles).isEqualTo(expectedSpecs)
         }
 
@@ -442,11 +417,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             val tiles0 by collectLastValue(tileSpecRepository.tilesSpecs(USER_INFO_0.id))
             val tiles1 by collectLastValue(tileSpecRepository.tilesSpecs(USER_INFO_1.id))
             val spec = TileSpec.create("a")
-            val currentSpecs =
-                listOf(
-                    TileSpec.create("b"),
-                    TileSpec.create("c"),
-                )
+            val currentSpecs = listOf(TileSpec.create("b"), TileSpec.create("c"))
             tileSpecRepository.setTiles(USER_INFO_0.id, currentSpecs)
             tileSpecRepository.setTiles(USER_INFO_1.id, currentSpecs)
 
@@ -455,12 +426,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
             assertThat(tiles0).isEqualTo(currentSpecs)
 
-            val expectedSpecs =
-                listOf(
-                    TileSpec.create("b"),
-                    spec,
-                    TileSpec.create("c"),
-                )
+            val expectedSpecs = listOf(TileSpec.create("b"), spec, TileSpec.create("c"))
             assertThat(tiles1).isEqualTo(expectedSpecs)
         }
 
@@ -515,11 +481,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             val tiles0 by collectLastValue(tileSpecRepository.tilesSpecs(USER_INFO_0.id))
             val tiles1 by collectLastValue(tileSpecRepository.tilesSpecs(USER_INFO_1.id))
             val currentSpecs =
-                listOf(
-                    TileSpec.create("a"),
-                    TileSpec.create("b"),
-                    TileSpec.create("c"),
-                )
+                listOf(TileSpec.create("a"), TileSpec.create("b"), TileSpec.create("c"))
             tileSpecRepository.setTiles(USER_INFO_0.id, currentSpecs)
             tileSpecRepository.setTiles(USER_INFO_1.id, currentSpecs)
 
@@ -557,11 +519,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             tileSpecRepository.setTiles(USER_INFO_0.id, currentSpecs)
             runCurrent()
 
-            val newSpecs =
-                listOf(
-                    otherCustomTileSpec,
-                    TileSpec.create("a"),
-                )
+            val newSpecs = listOf(otherCustomTileSpec, TileSpec.create("a"))
 
             underTest.setTiles(newSpecs)
             runCurrent()
@@ -615,7 +573,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
             tileSpecRepository.setTiles(
                 USER_INFO_0.id,
-                listOf(TileSpec.create("a"), CUSTOM_TILE_SPEC)
+                listOf(TileSpec.create("a"), CUSTOM_TILE_SPEC),
             )
             val newTileA = tiles!![0].tile
             assertThat(tileA).isSameInstanceAs(newTileA)
@@ -650,7 +608,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
 
             installedTilesPackageRepository.setInstalledPackagesForUser(
                 USER_INFO_0.id,
-                setOf(TEST_COMPONENT)
+                setOf(TEST_COMPONENT),
             )
 
             assertThat(tiles!!.size).isEqualTo(3)
@@ -676,10 +634,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
     @Test
     fun changeInPackagesTiles_doesntTriggerUserChange_logged() =
         testScope.runTest(USER_INFO_0) {
-            val specs =
-                listOf(
-                    TileSpec.create("a"),
-                )
+            val specs = listOf(TileSpec.create("a"))
             tileSpecRepository.setTiles(USER_INFO_0.id, specs)
             runCurrent()
             // Settled on the same list of tiles.
@@ -689,6 +644,39 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
             runCurrent()
 
             verify(logger, never()).logTileUserChanged(TileSpec.create("a"), 0)
+        }
+
+    @Test
+    fun getTileDetails() =
+        testScope.runTest(USER_INFO_0) {
+            val tiles by collectLastValue(underTest.currentTiles)
+            val tileA = TileSpec.create("a")
+            val tileB = TileSpec.create("b")
+            val tileNoDetails = TileSpec.create("NoDetails")
+
+            val specs = listOf(tileA, tileB, tileNoDetails)
+
+            assertThat(tiles!!.isEmpty()).isTrue()
+
+            tileSpecRepository.setTiles(USER_INFO_0.id, specs)
+            assertThat(tiles!!.size).isEqualTo(3)
+
+            // The third tile doesn't have a details view.
+            assertThat(tiles!![2].spec).isEqualTo(tileNoDetails)
+            (tiles!![2].tile as FakeQSTile).hasDetailsViewModel = false
+
+            var currentModel: TileDetailsViewModel? = null
+            val setCurrentModel = { model: TileDetailsViewModel? -> currentModel = model }
+            tiles!![0].tile.getDetailsViewModel(setCurrentModel)
+            assertThat(currentModel?.getTitle()).isEqualTo("a")
+
+            currentModel = null
+            tiles!![1].tile.getDetailsViewModel(setCurrentModel)
+            assertThat(currentModel?.getTitle()).isEqualTo("b")
+
+            currentModel = null
+            tiles!![2].tile.getDetailsViewModel(setCurrentModel)
+            assertThat(currentModel).isNull()
         }
 
     private fun QSTile.State.fillIn(state: Int, label: CharSequence, secondaryLabel: CharSequence) {
@@ -719,7 +707,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
                     customTileAddedRepository.setTileAdded(
                         CUSTOM_TILE_SPEC.componentName,
                         currentUser,
-                        true
+                        true,
                     )
                 }
             in VALID_TILES -> FakeQSTile(currentUser, available = spec !in unavailableTiles)
@@ -770,7 +758,7 @@ class CurrentTilesInteractorImplTest : SysuiTestCase() {
         private val USER_INFO_0 = UserInfo().apply { id = 0 }
         private val USER_INFO_1 = UserInfo().apply { id = 1 }
 
-        private val VALID_TILES = setOf("a", "b", "c", "d", "e")
+        private val VALID_TILES = setOf("a", "b", "c", "d", "e", "NoDetails")
         private val TEST_COMPONENT = ComponentName("pkg", "cls")
         private val CUSTOM_TILE_SPEC = TileSpec.Companion.create(TEST_COMPONENT)
     }

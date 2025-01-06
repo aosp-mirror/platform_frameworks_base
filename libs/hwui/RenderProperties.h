@@ -545,7 +545,8 @@ public:
     bool fitsOnLayer() const {
         const DeviceInfo* deviceInfo = DeviceInfo::get();
         return mPrimitiveFields.mWidth <= deviceInfo->maxTextureSize() &&
-               mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize();
+               mPrimitiveFields.mHeight <= deviceInfo->maxTextureSize() &&
+               mPrimitiveFields.mWidth > 0 && mPrimitiveFields.mHeight > 0;
     }
 
     bool promotedToLayer() const {

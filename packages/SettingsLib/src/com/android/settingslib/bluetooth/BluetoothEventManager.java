@@ -224,7 +224,7 @@ public class BluetoothEventManager {
         // audio sharing is enabled.
         if (bluetoothProfile == BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
                 && state == BluetoothAdapter.STATE_DISCONNECTED
-                && BluetoothUtils.isAudioSharingEnabled()) {
+                && BluetoothUtils.isAudioSharingUIAvailable(mContext)) {
             LocalBluetoothProfileManager profileManager = mBtManager.getProfileManager();
             if (profileManager != null
                     && profileManager.getLeAudioBroadcastProfile() != null

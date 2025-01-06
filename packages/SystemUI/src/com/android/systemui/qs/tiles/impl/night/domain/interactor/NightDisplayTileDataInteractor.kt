@@ -20,10 +20,10 @@ import android.content.Context
 import android.hardware.display.ColorDisplayManager
 import android.os.UserHandle
 import com.android.systemui.accessibility.data.repository.NightDisplayRepository
-import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.qs.tiles.base.interactor.DataUpdateTrigger
 import com.android.systemui.qs.tiles.base.interactor.QSTileDataInteractor
 import com.android.systemui.qs.tiles.impl.night.domain.model.NightDisplayTileModel
+import com.android.systemui.shade.ShadeDisplayAware
 import com.android.systemui.util.time.DateFormatUtil
 import java.time.LocalTime
 import javax.inject.Inject
@@ -35,14 +35,14 @@ import kotlinx.coroutines.flow.map
 class NightDisplayTileDataInteractor
 @Inject
 constructor(
-    @Application private val context: Context,
+    @ShadeDisplayAware private val context: Context,
     private val dateFormatUtil: DateFormatUtil,
     private val nightDisplayRepository: NightDisplayRepository,
 ) : QSTileDataInteractor<NightDisplayTileModel> {
 
     override fun tileData(
         user: UserHandle,
-        triggers: Flow<DataUpdateTrigger>
+        triggers: Flow<DataUpdateTrigger>,
     ): Flow<NightDisplayTileModel> =
         nightDisplayRepository.nightDisplayState(user).map {
             generateModel(
@@ -51,7 +51,7 @@ constructor(
                 it.startTime,
                 it.endTime,
                 it.shouldForceAutoMode,
-                it.locationEnabled
+                it.locationEnabled,
             )
         }
 

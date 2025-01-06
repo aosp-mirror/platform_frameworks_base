@@ -5,7 +5,7 @@ import android.testing.TestableLooper.RunWithLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.flags.FakeFeatureFlags
+import com.android.systemui.flags.FakeFeatureFlagsClassic
 import com.android.systemui.statusbar.notification.row.NotificationTestHelper
 import com.android.systemui.util.mockito.mock
 import junit.framework.Assert.assertEquals
@@ -18,7 +18,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
 class NotificationTargetsHelperTest : SysuiTestCase() {
-    private val featureFlags = FakeFeatureFlags()
+    private val featureFlags = FakeFeatureFlagsClassic()
     lateinit var notificationTestHelper: NotificationTestHelper
     private val sectionsManager: NotificationSectionsManager = mock()
     private val stackScrollLayout: NotificationStackScrollLayout = mock()
@@ -90,11 +90,7 @@ class NotificationTargetsHelperTest : SysuiTestCase() {
                 )
 
         val expected =
-            RoundableTargets(
-                before = children.attachedChildren[1],
-                swiped = swiped,
-                after = null,
-            )
+            RoundableTargets(before = children.attachedChildren[1], swiped = swiped, after = null)
         assertEquals(expected, actual)
     }
 }

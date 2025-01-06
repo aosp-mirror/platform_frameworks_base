@@ -21,11 +21,13 @@ import android.content.res.Configuration.UI_MODE_NIGHT_NO
 import android.content.res.Configuration.UI_MODE_NIGHT_YES
 import android.content.res.Configuration.UI_MODE_TYPE_CAR
 import android.os.LocaleList
+import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener
 import com.google.common.truth.Truth.assertThat
+import java.util.Locale
 import org.junit.Before
 import org.junit.Ignore
 import org.junit.Test
@@ -34,7 +36,6 @@ import org.mockito.Mockito.doAnswer
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
-import java.util.Locale
 
 @RunWith(AndroidJUnit4::class)
 @SmallTest
@@ -64,9 +65,11 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
         mConfigurationController.addCallback(listener2)
 
         doAnswer {
-            mConfigurationController.removeCallback(listener2)
-            null
-        }.`when`(listener).onThemeChanged()
+                mConfigurationController.removeCallback(listener2)
+                null
+            }
+            .`when`(listener)
+            .onThemeChanged()
 
         mConfigurationController.notifyThemeChanged()
         verify(listener).onThemeChanged()
@@ -208,7 +211,6 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
         assertThat(listener.maxBoundsChanged).isTrue()
     }
 
-
     @Test
     fun localeListChanged_listenerNotified() {
         val config = mContext.resources.configuration
@@ -289,7 +291,6 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
         assertThat(listener.orientationChanged).isTrue()
     }
 
-
     @Test
     fun multipleUpdates_listenerNotifiedOfAll() {
         val config = mContext.resources.configuration
@@ -310,6 +311,17 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
         assertThat(listener.densityOrFontScaleChanged).isTrue()
         assertThat(listener.maxBoundsChanged).isTrue()
         assertThat(listener.uiModeChanged).isTrue()
+    }
+
+    @Test
+    fun onMovedToDisplay_dispatchedToChildren() {
+        val config = mContext.resources.configuration
+        val listener = createAndAddListener()
+
+        mConfigurationController.dispatchOnMovedToDisplay(newDisplayId = 1, config)
+
+        assertThat(listener.display).isEqualTo(1)
+        assertThat(listener.changedConfig).isEqualTo(config)
     }
 
     @Test
@@ -343,33 +355,47 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
         var localeListChanged = false
         var layoutDirectionChanged = false
         var orientationChanged = false
+        var display = Display.DEFAULT_DISPLAY
 
         override fun onConfigChanged(newConfig: Configuration?) {
             changedConfig = newConfig
         }
+
         override fun onDensityOrFontScaleChanged() {
             densityOrFontScaleChanged = true
         }
+
         override fun onSmallestScreenWidthChanged() {
             smallestScreenWidthChanged = true
         }
+
         override fun onMaxBoundsChanged() {
             maxBoundsChanged = true
         }
+
         override fun onUiModeChanged() {
             uiModeChanged = true
         }
+
         override fun onThemeChanged() {
             themeChanged = true
         }
+
         override fun onLocaleListChanged() {
             localeListChanged = true
         }
+
         override fun onLayoutDirectionChanged(isLayoutRtl: Boolean) {
             layoutDirectionChanged = true
         }
+
         override fun onOrientationChanged(orientation: Int) {
             orientationChanged = true
+        }
+
+        override fun onMovedToDisplay(newDisplayId: Int, newConfiguration: Configuration?) {
+            display = newDisplayId
+            changedConfig = newConfiguration
         }
 
         fun assertNoMethodsCalled() {
@@ -391,6 +417,7 @@ class ConfigurationControllerImplTest : SysuiTestCase() {
             themeChanged = false
             localeListChanged = false
             layoutDirectionChanged = false
+            display = Display.DEFAULT_DISPLAY
         }
     }
 }

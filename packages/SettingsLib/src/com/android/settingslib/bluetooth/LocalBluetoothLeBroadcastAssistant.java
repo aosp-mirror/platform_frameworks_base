@@ -32,7 +32,9 @@ import android.content.Context;
 import android.os.Build;
 import android.util.Log;
 
+import androidx.annotation.IntRange;
 import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
 import androidx.annotation.RequiresApi;
 
 import com.android.settingslib.R;
@@ -369,6 +371,27 @@ public class LocalBluetoothLeBroadcastAssistant implements LocalBluetoothProfile
             return new ArrayList<BluetoothLeBroadcastReceiveState>();
         }
         return mService.getAllSources(sink);
+    }
+
+    /**
+     * Gets the {@link BluetoothLeBroadcastMetadata} of a specified source added to this sink.
+     *
+     * @param sink Broadcast Sink device
+     * @param sourceId Broadcast source id
+     * @return metadata {@link BluetoothLeBroadcastMetadata} associated with the specified source.
+     */
+    public @Nullable BluetoothLeBroadcastMetadata getSourceMetadata(
+            @NonNull BluetoothDevice sink, @IntRange(from = 0x00, to = 0xFF) int sourceId) {
+        if (mService == null) {
+            Log.d(TAG, "The BluetoothLeBroadcastAssistant is null");
+            return null;
+        }
+        try {
+            return mService.getSourceMetadata(sink, sourceId);
+        } catch (IllegalArgumentException | NoSuchMethodError e) {
+            Log.w(TAG, "Error calling getSourceMetadata()", e);
+        }
+        return null;
     }
 
     /**

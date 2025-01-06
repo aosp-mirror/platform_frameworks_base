@@ -16,8 +16,10 @@
 
 package com.android.systemui.shared.system
 
+import android.platform.test.annotations.DisableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_BACK_ACTION
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BOUNCER_SHOWING
 import com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_COMMUNAL_HUB_SHOWING
@@ -30,6 +32,7 @@ import org.junit.runner.RunWith
 @RunWith(AndroidJUnit4::class)
 class QuickStepContractTest : SysuiTestCase() {
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BACK_ACTION)
     fun isBackGestureDisabled_hubShowing() {
         val sysuiStateFlags = SYSUI_STATE_COMMUNAL_HUB_SHOWING
 

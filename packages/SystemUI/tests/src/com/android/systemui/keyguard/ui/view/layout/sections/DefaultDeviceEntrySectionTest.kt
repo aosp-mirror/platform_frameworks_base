@@ -23,7 +23,6 @@ import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags as AConfigFlags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.flags.FakeFeatureFlags
@@ -66,8 +65,6 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     fun setup() {
         MockitoAnnotations.initMocks(this)
 
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-
         featureFlags =
             FakeFeatureFlagsClassic().apply { set(Flags.LOCKSCREEN_ENABLE_LANDSCAPE, false) }
         underTest =
@@ -88,16 +85,7 @@ class DefaultDeviceEntrySectionTest : SysuiTestCase() {
     }
 
     @Test
-    fun addViewsConditionally_migrateFlagOn() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
-        val constraintLayout = ConstraintLayout(context, null)
-        underTest.addViews(constraintLayout)
-        assertThat(constraintLayout.childCount).isGreaterThan(0)
-    }
-
-    @Test
-    fun addViewsConditionally_migrateAndRefactorFlagsOn() {
-        mSetFlagsRule.enableFlags(AConfigFlags.FLAG_KEYGUARD_BOTTOM_AREA_REFACTOR)
+    fun addViewsConditionally() {
         val constraintLayout = ConstraintLayout(context, null)
         underTest.addViews(constraintLayout)
         assertThat(constraintLayout.childCount).isGreaterThan(0)

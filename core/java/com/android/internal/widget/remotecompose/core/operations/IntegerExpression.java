@@ -18,6 +18,9 @@ package com.android.internal.widget.remotecompose.core.operations;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT;
 import static com.android.internal.widget.remotecompose.core.documentation.DocumentedOperation.INT_ARRAY;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+
 import com.android.internal.widget.remotecompose.core.Operation;
 import com.android.internal.widget.remotecompose.core.Operations;
 import com.android.internal.widget.remotecompose.core.RemoteContext;
@@ -35,26 +38,26 @@ import java.util.List;
  * like injecting the width of the component int draw rect As well as supporting generalized
  * animation floats. The floats represent a RPN style calculator
  */
-public class IntegerExpression implements Operation, VariableSupport {
+public class IntegerExpression extends Operation implements VariableSupport {
     private static final int OP_CODE = Operations.INTEGER_EXPRESSION;
     private static final String CLASS_NAME = "IntegerExpression";
     public int mId;
     private int mMask;
     private int mPreMask;
-    public int[] mSrcValue;
-    public int[] mPreCalcValue;
+    @NonNull public final int[] mSrcValue;
+    @Nullable public int[] mPreCalcValue;
     private float mLastChange = Float.NaN;
     public static final int MAX_SIZE = 320;
-    IntegerExpressionEvaluator mExp = new IntegerExpressionEvaluator();
+    @NonNull IntegerExpressionEvaluator mExp = new IntegerExpressionEvaluator();
 
-    public IntegerExpression(int id, int mask, int[] value) {
+    public IntegerExpression(int id, int mask, @NonNull int[] value) {
         this.mId = id;
         this.mMask = mask;
         this.mSrcValue = value;
     }
 
     @Override
-    public void updateVariables(RemoteContext context) {
+    public void updateVariables(@NonNull RemoteContext context) {
         if (mPreCalcValue == null || mPreCalcValue.length != mSrcValue.length) {
             mPreCalcValue = new int[mSrcValue.length];
         }
@@ -70,7 +73,7 @@ public class IntegerExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void registerListening(RemoteContext context) {
+    public void registerListening(@NonNull RemoteContext context) {
         for (int i = 0; i < mSrcValue.length; i++) {
             if (isId(mMask, i, mSrcValue[i])) {
                 context.listensTo(mSrcValue[i], this);
@@ -79,7 +82,7 @@ public class IntegerExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void apply(RemoteContext context) {
+    public void apply(@NonNull RemoteContext context) {
         updateVariables(context);
         float t = context.getAnimationTime();
         if (Float.isNaN(mLastChange)) {
@@ -95,7 +98,7 @@ public class IntegerExpression implements Operation, VariableSupport {
      * @param context current context
      * @return the resulting value
      */
-    public int evaluate(RemoteContext context) {
+    public int evaluate(@NonNull RemoteContext context) {
         updateVariables(context);
         float t = context.getAnimationTime();
         if (Float.isNaN(mLastChange)) {
@@ -105,10 +108,11 @@ public class IntegerExpression implements Operation, VariableSupport {
     }
 
     @Override
-    public void write(WireBuffer buffer) {
+    public void write(@NonNull WireBuffer buffer) {
         apply(buffer, mId, mMask, mSrcValue);
     }
 
+    @NonNull
     @Override
     public String toString() {
         StringBuilder s = new StringBuilder();
@@ -132,10 +136,21 @@ public class IntegerExpression implements Operation, VariableSupport {
         return "IntegerExpression[" + mId + "] = (" + s + ")";
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
+    @NonNull
     public static String name() {
         return CLASS_NAME;
     }
 
+    /**
+     * The OP_CODE for this command
+     *
+     * @return the opcode
+     */
     public static int id() {
         return OP_CODE;
     }
@@ -148,7 +163,7 @@ public class IntegerExpression implements Operation, VariableSupport {
      * @param mask the mask bits of ints & operators or variables
      * @param value array of integers to be evaluated
      */
-    public static void apply(WireBuffer buffer, int id, int mask, int[] value) {
+    public static void apply(@NonNull WireBuffer buffer, int id, int mask, @NonNull int[] value) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
         buffer.writeInt(mask);
@@ -158,7 +173,13 @@ public class IntegerExpression implements Operation, VariableSupport {
         }
     }
 
-    public static void read(WireBuffer buffer, List<Operation> operations) {
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param buffer the buffer to read
+     * @param operations the list of operations that will be added to
+     */
+    public static void read(@NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         int id = buffer.readInt();
         int mask = buffer.readInt();
         int len = buffer.readInt();
@@ -173,7 +194,12 @@ public class IntegerExpression implements Operation, VariableSupport {
         operations.add(new IntegerExpression(id, mask, values));
     }
 
-    public static void documentation(DocumentationBuilder doc) {
+    /**
+     * Populate the documentation with a description of this operation
+     *
+     * @param doc to append the description to.
+     */
+    public static void documentation(@NonNull DocumentationBuilder doc) {
         doc.operation("Data Operations", OP_CODE, CLASS_NAME)
                 .description("Expression that computes an integer")
                 .field(DocumentedOperation.INT, "id", "id of integer")
@@ -182,8 +208,9 @@ public class IntegerExpression implements Operation, VariableSupport {
                 .field(INT_ARRAY, "values", "length", "Array of ints");
     }
 
+    @NonNull
     @Override
-    public String deepToString(String indent) {
+    public String deepToString(@NonNull String indent) {
         return indent + toString();
     }
 

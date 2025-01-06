@@ -42,6 +42,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
 import com.android.systemui.res.R;
+import com.android.systemui.shade.ShadeDisplayAware;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.LocationController;
@@ -78,7 +79,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
             StatusBarStateController statusBarStateController,
             ActivityStarter activityStarter,
             QSLogger qsLogger,
-            ConfigurationController configurationController,
+            @ShadeDisplayAware ConfigurationController configurationController,
             BatteryController batteryController,
             LocationController locationController
     ) {
@@ -166,7 +167,7 @@ public class UiModeNightTile extends QSTileImpl<QSTile.BooleanState> implements
         } else {
             state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         }
-        state.icon = ResourceIcon.get(state.state == Tile.STATE_ACTIVE
+        state.icon = maybeLoadResourceIcon(state.state == Tile.STATE_ACTIVE
                 ? R.drawable.qs_light_dark_theme_icon_on
                 : R.drawable.qs_light_dark_theme_icon_off);
         state.expandedAccessibilityClassName = Switch.class.getName();

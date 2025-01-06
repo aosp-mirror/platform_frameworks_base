@@ -7,6 +7,15 @@ aconfig_declarations {
     ],
 }
 
+aconfig_declarations {
+    name: "adpf_flags",
+    package: "android.adpf",
+    container: "system",
+    srcs: [
+        "adpf_flags.aconfig",
+    ],
+}
+
 java_aconfig_library {
     name: "power_hint_flags_lib",
     aconfig_declarations: "power_hint_flags",

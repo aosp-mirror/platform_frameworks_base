@@ -27,9 +27,9 @@ import com.android.systemui.plugins.statusbar.StatusBarStateController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.shared.notifications.domain.interactor.NotificationSettingsInteractor
 import com.android.systemui.statusbar.notification.NotifPipelineFlags
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
-import com.android.systemui.statusbar.policy.HeadsUpManager
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.util.EventLog
 import com.android.systemui.util.settings.GlobalSettings
@@ -63,7 +63,7 @@ object VisualInterruptionDecisionProviderTestUtil {
         bubbles: Optional<Bubbles>,
         context: Context,
         notificationManager: NotificationManager,
-        settingsInteractor: NotificationSettingsInteractor
+        settingsInteractor: NotificationSettingsInteractor,
     ): VisualInterruptionDecisionProvider {
         return if (VisualInterruptionRefactor.isEnabled) {
             VisualInterruptionDecisionProviderImpl(
@@ -88,7 +88,7 @@ object VisualInterruptionDecisionProviderTestUtil {
                 bubbles,
                 context,
                 notificationManager,
-                settingsInteractor
+                settingsInteractor,
             )
         } else {
             NotificationInterruptStateProviderWrapper(
@@ -109,7 +109,7 @@ object VisualInterruptionDecisionProviderTestUtil {
                     systemClock,
                     globalSettings,
                     eventLog,
-                    bubbles
+                    bubbles,
                 )
             )
         }

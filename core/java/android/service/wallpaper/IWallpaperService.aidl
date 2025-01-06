@@ -28,6 +28,6 @@ oneway interface IWallpaperService {
     void attach(IWallpaperConnection connection,
             IBinder windowToken, int windowType, boolean isPreview,
             int reqWidth, int reqHeight, in Rect padding, int displayId, int which,
-            in WallpaperInfo info, in @nullable WallpaperDescription description);
+            in WallpaperInfo info, in WallpaperDescription description);
     void detach(IBinder windowToken);
 }
