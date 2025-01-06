@@ -50,6 +50,7 @@ import android.window.TrustedPresentationThresholds;
 
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.policy.PhoneWindow;
 import com.android.internal.util.FastPrintWriter;
 
 import java.io.FileDescriptor;
@@ -375,7 +376,8 @@ public final class WindowManagerGlobal {
 
         if (context != null && wparams.type > LAST_APPLICATION_WINDOW) {
             final TypedArray styles = context.obtainStyledAttributes(R.styleable.Window);
-            if (styles.getBoolean(R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false)) {
+            if (PhoneWindow.isOptingOutEdgeToEdgeEnforcement(
+                    context.getApplicationInfo(), true /* local */, styles)) {
                 wparams.privateFlags |= PRIVATE_FLAG_OPT_OUT_EDGE_TO_EDGE;
             }
             styles.recycle();
