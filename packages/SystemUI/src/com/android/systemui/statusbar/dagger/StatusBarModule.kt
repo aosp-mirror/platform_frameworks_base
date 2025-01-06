@@ -27,12 +27,12 @@ import com.android.systemui.log.LogBufferFactory
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.data.repository.LightBarControllerStore
-import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider
-import com.android.systemui.statusbar.layout.StatusBarContentInsetsProviderImpl
 import com.android.systemui.statusbar.phone.AutoHideController
 import com.android.systemui.statusbar.phone.AutoHideControllerImpl
 import com.android.systemui.statusbar.phone.LightBarController
 import com.android.systemui.statusbar.phone.LightBarControllerImpl
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProvider
+import com.android.systemui.statusbar.phone.StatusBarContentInsetsProviderImpl
 import com.android.systemui.statusbar.phone.StatusBarSignalPolicy
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallController
 import com.android.systemui.statusbar.phone.ongoingcall.OngoingCallLog
@@ -91,7 +91,9 @@ interface StatusBarModule {
         @SysUISingleton
         @IntoMap
         @ClassKey(OngoingCallController::class)
-        fun ongoingCallController(controller: OngoingCallController): CoreStartable =
+        fun ongoingCallController(
+            controller: OngoingCallController
+        ): CoreStartable =
             if (StatusBarChipsModernization.isEnabled) {
                 CoreStartable.NOP
             } else {
@@ -102,7 +104,9 @@ interface StatusBarModule {
         @SysUISingleton
         @IntoMap
         @ClassKey(OngoingCallInteractor::class)
-        fun ongoingCallInteractor(interactor: OngoingCallInteractor): CoreStartable =
+        fun ongoingCallInteractor(
+            interactor: OngoingCallInteractor
+        ): CoreStartable =
             if (StatusBarChipsModernization.isEnabled) {
                 interactor
             } else {

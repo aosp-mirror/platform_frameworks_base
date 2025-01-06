@@ -44,7 +44,6 @@ import com.android.systemui.statusbar.data.model.StatusBarAppearance;
 import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore;
 import com.android.systemui.statusbar.data.repository.StatusBarModePerDisplayRepository;
 import com.android.systemui.statusbar.data.repository.StatusBarModeRepositoryStore;
-import com.android.systemui.statusbar.layout.BoundsPair;
 import com.android.systemui.statusbar.policy.BatteryController;
 import com.android.systemui.util.Compile;
 import com.android.systemui.util.kotlin.JavaAdapterKt;

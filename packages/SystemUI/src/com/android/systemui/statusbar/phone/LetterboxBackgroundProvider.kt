@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.statusbar.layout
+package com.android.systemui.statusbar.phone
 
 import android.annotation.ColorInt
 import android.app.WallpaperManager
@@ -49,7 +49,9 @@ constructor(
         private set
 
     private val wallpaperColorsListener =
-        WallpaperManager.OnColorsChangedListener { _, _ -> fetchBackgroundColorInfo() }
+        WallpaperManager.OnColorsChangedListener { _, _ ->
+            fetchBackgroundColorInfo()
+        }
 
     override fun start() {
         fetchBackgroundColorInfo()
@@ -73,8 +75,6 @@ constructor(
             """
            letterboxBackgroundColor: ${Color.valueOf(letterboxBackgroundColor)}
            isLetterboxBackgroundMultiColored: $isLetterboxBackgroundMultiColored
-       """
-                .trimIndent()
-        )
+       """.trimIndent())
     }
 }

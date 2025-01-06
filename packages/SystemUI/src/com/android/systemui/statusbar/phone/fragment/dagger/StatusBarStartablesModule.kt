@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone.fragment.dagger
 
-import com.android.systemui.statusbar.layout.StatusBarBoundsProvider
+import com.android.systemui.statusbar.phone.StatusBarBoundsProvider
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
