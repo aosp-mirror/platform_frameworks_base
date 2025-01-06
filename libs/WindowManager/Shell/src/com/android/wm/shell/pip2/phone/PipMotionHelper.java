@@ -43,19 +43,19 @@ import com.android.wm.shell.R;
 import com.android.wm.shell.animation.FloatProperties;
 import com.android.wm.shell.common.FloatingContentCoordinator;
 import com.android.wm.shell.common.pip.PipAppOpsListener;
-import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipPerfHintController;
 import com.android.wm.shell.common.pip.PipSnapAlgorithm;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.pip2.animation.PipResizeAnimator;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
 import com.android.wm.shell.shared.animation.PhysicsAnimator;
 import com.android.wm.shell.shared.magnetictarget.MagnetizedObject;
 
+import java.util.Optional;
+
 import kotlin.Unit;
 import kotlin.jvm.functions.Function0;
-
-import java.util.Optional;
 
 /**
  * A helper to animate and manipulate the PiP.
@@ -80,12 +80,12 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
     private static final float DISMISS_CIRCLE_PERCENT = 0.85f;
 
     private final Context mContext;
-    private @NonNull PipBoundsState mPipBoundsState;
-    private @NonNull PipBoundsAlgorithm mPipBoundsAlgorithm;
-    private @NonNull PipScheduler mPipScheduler;
-    private @NonNull PipTransitionState mPipTransitionState;
-    private PhonePipMenuController mMenuController;
-    private PipSnapAlgorithm mSnapAlgorithm;
+    @NonNull private final PipBoundsState mPipBoundsState;
+    @NonNull private final PipScheduler mPipScheduler;
+    @NonNull private final PipTransitionState mPipTransitionState;
+    @NonNull private final PipUiEventLogger mPipUiEventLogger;
+    private final PhonePipMenuController mMenuController;
+    private final PipSnapAlgorithm mSnapAlgorithm;
 
     /** The region that all of PIP must stay within. */
     private final Rect mFloatingAllowedArea = new Rect();
@@ -168,10 +168,9 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
             PhonePipMenuController menuController, PipSnapAlgorithm snapAlgorithm,
             FloatingContentCoordinator floatingContentCoordinator, PipScheduler pipScheduler,
             Optional<PipPerfHintController> pipPerfHintControllerOptional,
-            PipBoundsAlgorithm pipBoundsAlgorithm, PipTransitionState pipTransitionState) {
+            PipTransitionState pipTransitionState, PipUiEventLogger pipUiEventLogger) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
-        mPipBoundsAlgorithm = pipBoundsAlgorithm;
         mPipScheduler = pipScheduler;
         mMenuController = menuController;
         mSnapAlgorithm = snapAlgorithm;
@@ -185,6 +184,7 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         };
         mPipTransitionState = pipTransitionState;
         mPipTransitionState.addPipTransitionStateChangedListener(this);
+        mPipUiEventLogger = pipUiEventLogger;
     }
 
     void init() {
@@ -850,9 +850,11 @@ public class PipMotionHelper implements PipAppOpsListener.Callback,
         if (mPipBoundsState.getBounds().left < 0
                 && mPipBoundsState.getStashedState() != STASH_TYPE_LEFT) {
             mPipBoundsState.setStashed(STASH_TYPE_LEFT);
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_LEFT);
         } else if (mPipBoundsState.getBounds().left >= 0
                 && mPipBoundsState.getStashedState() != STASH_TYPE_RIGHT) {
             mPipBoundsState.setStashed(STASH_TYPE_RIGHT);
+            mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_STASH_RIGHT);
         }
         mMenuController.hideMenu();
     }
