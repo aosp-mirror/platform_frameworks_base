@@ -30,7 +30,8 @@ import java.lang.annotation.RetentionPolicy;
  * @hide
  */
 public interface WindowManagerPolicyConstants {
-    // Policy flags.  These flags are also defined in frameworks/base/include/ui/Input.h and
+    // Policy flags. These flags are also defined in
+    // frameworks/native/include/input/Input.h and
     // frameworks/native/libs/input/android/os/IInputConstants.aidl
     int FLAG_WAKE = 0x00000001;
     int FLAG_VIRTUAL = 0x00000002;
