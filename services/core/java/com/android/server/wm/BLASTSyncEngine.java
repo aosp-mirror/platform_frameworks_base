@@ -95,6 +95,7 @@ class BLASTSyncEngine {
 
     interface TransactionReadyListener {
         void onTransactionReady(int mSyncId, SurfaceControl.Transaction transaction);
+        default void onTransactionCommitted() {}
         default void onTransactionCommitTimeout() {}
         default void onReadyTimeout() {}
 
@@ -224,20 +225,19 @@ class BLASTSyncEngine {
             if (mOrphanTransaction != null) {
                 merged.merge(mOrphanTransaction);
             }
-            for (WindowContainer wc : mRootMembers) {
-                wc.finishSync(merged, this, false /* cancel */);
-            }
-
-            final ArraySet<WindowContainer> wcAwaitingCommit = new ArraySet<>();
-            for (WindowContainer wc : mRootMembers) {
-                wc.waitForSyncTransactionCommit(wcAwaitingCommit);
-            }
 
             final long mergedTxId = merged.getId();
             class CommitCallback implements Runnable {
+                final ArraySet<WindowContainer> mWcAwaitingCommit = new ArraySet<>();
+
                 // Can run a second time if the action completes after the timeout.
                 boolean ran = false;
                 public void onCommitted(SurfaceControl.Transaction t) {
+                    mListener.onTransactionCommitted();
+                    if (mTraceName != null) {
+                        Trace.instant(TRACE_TAG_WINDOW_MANAGER,
+                                mSyncName + "#" + mSyncId + "-committed");
+                    }
                     // Don't wait to hold the global lock to remove the timeout runnable
                     mHandler.removeCallbacks(this);
                     synchronized (mWm.mGlobalLock) {
@@ -245,11 +245,11 @@ class BLASTSyncEngine {
                             return;
                         }
                         ran = true;
-                        for (WindowContainer wc : wcAwaitingCommit) {
-                            wc.onSyncTransactionCommitted(t);
+                        for (int i = mWcAwaitingCommit.size() - 1; i >= 0; --i) {
+                            mWcAwaitingCommit.valueAt(i).onSyncTransactionCommitted(t);
                         }
                         t.apply();
-                        wcAwaitingCommit.clear();
+                        mWcAwaitingCommit.clear();
                     }
                 }
 
@@ -272,6 +272,12 @@ class BLASTSyncEngine {
                 }
             };
             CommitCallback callback = new CommitCallback();
+            for (int i = mRootMembers.size() - 1; i >= 0; --i) {
+                final WindowContainer<?> wc = mRootMembers.valueAt(i);
+                wc.finishSync(merged, this, false /* cancel */);
+                wc.waitForSyncTransactionCommit(callback.mWcAwaitingCommit);
+            }
+
             merged.addTransactionCommittedListener(Runnable::run,
                     () -> callback.onCommitted(new SurfaceControl.Transaction()));
             mHandler.postDelayed(callback, BLAST_TIMEOUT_DURATION);
