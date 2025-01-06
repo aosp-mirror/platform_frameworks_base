@@ -784,7 +784,11 @@ constructor(
 
     private fun updateLongPressEffect(handlesLongClick: Boolean) {
         // The long press effect in the tile can't be updated if it is still running
-        if (longPressEffect?.state != QSLongPressEffect.State.IDLE) return
+        if (
+            longPressEffect?.state != QSLongPressEffect.State.IDLE &&
+                longPressEffect?.state != QSLongPressEffect.State.CLICKED
+        )
+            return
 
         longPressEffect.qsTile?.state?.handlesLongClick = handlesLongClick
         if (handlesLongClick && longPressEffect.initializeEffect(longPressEffectDuration)) {
