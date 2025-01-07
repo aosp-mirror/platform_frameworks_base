@@ -386,6 +386,15 @@ public class BaseBundle implements Parcel.ClassLoaderProvider {
     }
 
     /**
+     * return true if the value corresponding to this key is still parceled.
+     * @hide
+     */
+    public boolean isValueParceled(String key) {
+        if (mMap == null) return true;
+        int i = mMap.indexOfKey(key);
+        return (mMap.valueAt(i) instanceof BiFunction<?, ?, ?>);
+    }
+    /**
      * Returns the value for a certain position in the array map for expected return type {@code
      * clazz} (or pass {@code null} for no type check).
      *
