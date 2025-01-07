@@ -114,9 +114,7 @@ import java.io.PrintWriter;
 import javax.inject.Inject;
 import javax.inject.Provider;
 
-/** Handles QuickSettings touch handling, expansion and animation state
- * TODO (b/264460656) make this dumpable
- */
+/** Handles QuickSettings touch handling, expansion and animation state. */
 @SysUISingleton
 public class QuickSettingsControllerImpl implements QuickSettingsController, Dumpable {
     public static final String TAG = "QuickSettingsController";
@@ -294,7 +292,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     private ValueAnimator mSizeChangeAnimator;
 
     private ExpansionHeightListener mExpansionHeightListener;
-    private QsStateUpdateListener mQsStateUpdateListener;
     private ApplyClippingImmediatelyListener mApplyClippingImmediatelyListener;
     private FlingQsWithoutClickListener mFlingQsWithoutClickListener;
     private ExpansionHeightSetToMaxListener mExpansionHeightSetToMaxListener;
@@ -399,10 +396,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
     void setExpansionHeightListener(ExpansionHeightListener listener) {
         mExpansionHeightListener = listener;
-    }
-
-    void setQsStateUpdateListener(QsStateUpdateListener listener) {
-        mQsStateUpdateListener = listener;
     }
 
     void setApplyClippingImmediatelyListener(ApplyClippingImmediatelyListener listener) {
@@ -562,7 +555,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         }
         // TODO (b/265193930): remove dependency on NPVC
         // Let's reject anything at the very bottom around the home handle in gesture nav
-        if (mPanelViewControllerLazy.get().isInGestureNavHomeHandleArea(x, y)) {
+        if (mPanelViewControllerLazy.get().isInGestureNavHomeHandleArea(y)) {
             return false;
         }
         return y <= mNotificationStackScrollLayoutController.getBottomMostNotificationBottom()
@@ -804,7 +797,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
         if (changed) {
             mShadeRepository.setLegacyIsQsExpanded(expanded);
             updateQsState();
-            mPanelViewControllerLazy.get().onQsExpansionChanged(expanded);
+            mPanelViewControllerLazy.get().onQsExpansionChanged();
             mShadeLog.logQsExpansionChanged("QS Expansion Changed.", expanded,
                     getMinExpansionHeight(), getMaxExpansionHeight(),
                     mStackScrollerOverscrolling, mAnimatorExpand, mAnimating);
@@ -1021,10 +1014,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     }
 
     void updateQsState() {
-        if (mQsStateUpdateListener != null) {
-            mQsStateUpdateListener.onQsStateUpdated(getExpanded(), mStackScrollerOverscrolling);
-        }
-
         if (mQs == null) return;
         mQs.setExpanded(getExpanded());
     }
@@ -1203,7 +1192,7 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
     /**
      * Applies clipping to quick settings, notifications layout and
      * updates bounds of the notifications background (notifications scrim).
-     *
+     * <p>
      * The parameters are bounds of the notifications area rectangle, this function
      * calculates bounds for the QS clipping based on the notifications bounds.
      */
@@ -2393,10 +2382,6 @@ public class QuickSettingsControllerImpl implements QuickSettingsController, Dum
 
     interface ExpansionHeightListener {
         void onQsSetExpansionHeightCalled(boolean qsFullyExpanded);
-    }
-
-    interface QsStateUpdateListener {
-        void onQsStateUpdated(boolean qsExpanded, boolean isStackScrollerOverscrolling);
     }
 
     interface ApplyClippingImmediatelyListener {

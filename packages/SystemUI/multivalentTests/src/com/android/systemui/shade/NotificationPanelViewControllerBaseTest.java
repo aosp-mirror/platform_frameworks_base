@@ -531,9 +531,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
 
         mNotificationPanelViewController = new NotificationPanelViewController(
                 mView,
-                mMainHandler,
-                mLayoutInflater,
-                mFeatureFlags,
                 coordinator, expansionHandler, mDynamicPrivacyController, mKeyguardBypassController,
                 mFalsingManager, new FalsingCollectorFake(),
                 mKeyguardStateController,
@@ -553,7 +550,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardStatusBarViewComponentFactory,
                 mLockscreenShadeTransitionController,
                 mScrimController,
-                mUserManager,
                 mMediaDataManager,
                 mNotificationShadeDepthController,
                 mAmbientState,
@@ -564,7 +560,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mQsController,
                 mFragmentService,
                 mStatusBarService,
-                mContentResolver,
                 mShadeHeaderController,
                 mScreenOffAnimationController,
                 mLockscreenGestureLogger,
@@ -575,7 +570,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 mKeyguardUnlockAnimationController,
                 mKeyguardIndicationController,
                 mNotificationListContainer,
-                mNotificationStackSizeCalculator,
                 mUnlockedScreenOffAnimationController,
                 systemClock,
                 mKeyguardClockInteractor,
@@ -594,7 +588,6 @@ public class NotificationPanelViewControllerBaseTest extends SysuiTestCase {
                 new ResourcesSplitShadeStateController(),
                 mPowerInteractor,
                 mKeyguardClockPositionAlgorithm,
-                mNaturalScrollingSettingObserver,
                 mMSDLPlayer,
                 mBrightnessMirrorShowingInteractor);
         mNotificationPanelViewController.initDependencies(
