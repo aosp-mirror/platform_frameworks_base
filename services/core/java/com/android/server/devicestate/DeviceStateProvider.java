@@ -91,6 +91,11 @@ public interface DeviceStateProvider extends Dumpable {
     @interface SupportedStatesUpdatedReason {}
 
     /**
+     * Called when the system boot phase advances to PHASE_SYSTEM_SERVICES_READY.
+     */
+    default void onSystemReady() {};
+
+    /**
      * Registers a listener for changes in provider state.
      * <p>
      * It is <b>required</b> that
