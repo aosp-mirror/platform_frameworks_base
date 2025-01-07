@@ -2166,7 +2166,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         wct.setForceTranslucent(mRootTaskInfo.token, translucent);
     }
 
-    /** Callback when split roots visiblility changed. */
+    /** Callback when split roots visiblility changed.
+     * NOTICE: This only be called on legacy transition. */
     @Override
     public void onStageVisibilityChanged(StageTaskListener stageListener) {
         // If split didn't active, just ignore this callback because we should already did these
