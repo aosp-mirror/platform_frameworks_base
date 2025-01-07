@@ -35,6 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.LayoutDirection
+import com.android.compose.gesture.NestedScrollableBound
 import com.android.compose.gesture.effect.ContentOverscrollEffect
 
 /**
@@ -236,6 +237,18 @@ interface BaseContentScope : ElementStateScope {
      * lists keep a constant size during transitions even if its elements are growing/shrinking.
      */
     fun Modifier.noResizeDuringTransitions(): Modifier
+
+    /**
+     * Temporarily disable this content swipe actions when any scrollable below this modifier has
+     * consumed any amount of scroll delta, until the scroll gesture is finished.
+     *
+     * This can for instance be used to ensure that a scrollable list is overscrolled once it
+     * reached its bounds instead of directly starting a scene transition from the same scroll
+     * gesture.
+     */
+    fun Modifier.disableSwipesWhenScrolling(
+        bounds: NestedScrollableBound = NestedScrollableBound.Any
+    ): Modifier
 
     /**
      * A [NestedSceneTransitionLayout] will share its elements with its ancestor STLs therefore

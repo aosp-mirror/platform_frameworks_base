@@ -56,7 +56,10 @@ import com.android.compose.animation.scene.effect.GestureEffect
 import com.android.compose.animation.scene.effect.VisualEffect
 import com.android.compose.animation.scene.element
 import com.android.compose.animation.scene.modifiers.noResizeDuringTransitions
+import com.android.compose.gesture.NestedScrollControlState
+import com.android.compose.gesture.NestedScrollableBound
 import com.android.compose.gesture.effect.OffsetOverscrollEffect
+import com.android.compose.gesture.nestedScrollController
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.ContainerState
 import com.android.compose.ui.graphics.container
@@ -70,7 +73,8 @@ internal sealed class Content(
     actions: Map<UserAction.Resolved, UserActionResult>,
     zIndex: Float,
 ) {
-    internal val scope = ContentScopeImpl(layoutImpl, content = this)
+    private val nestedScrollControlState = NestedScrollControlState()
+    internal val scope = ContentScopeImpl(layoutImpl, content = this, nestedScrollControlState)
     val containerState = ContainerState()
 
     var content by mutableStateOf(content)
@@ -101,11 +105,14 @@ internal sealed class Content(
             scope.content()
         }
     }
+
+    fun areSwipesAllowed(): Boolean = nestedScrollControlState.isOuterScrollAllowed
 }
 
 internal class ContentScopeImpl(
     private val layoutImpl: SceneTransitionLayoutImpl,
     private val content: Content,
+    private val nestedScrollControlState: NestedScrollControlState,
 ) : ContentScope, ElementStateScope by layoutImpl.elementStateScope {
     override val contentKey: ContentKey
         get() = content.key
@@ -174,6 +181,10 @@ internal class ContentScopeImpl(
 
     override fun Modifier.noResizeDuringTransitions(): Modifier {
         return noResizeDuringTransitions(layoutState = layoutImpl.state)
+    }
+
+    override fun Modifier.disableSwipesWhenScrolling(bounds: NestedScrollableBound): Modifier {
+        return nestedScrollController(nestedScrollControlState, bounds)
     }
 
     @Composable
