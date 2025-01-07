@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.data.repository
 
+import android.animation.AnimationHandler
 import android.animation.Animator
 import android.animation.ValueAnimator
 import android.platform.test.annotations.EnableFlags
@@ -36,6 +37,7 @@ import com.android.systemui.keyguard.shared.model.TransitionInfo
 import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.keyguard.shared.model.TransitionState
 import com.android.systemui.keyguard.shared.model.TransitionStep
+import com.android.systemui.keyguard.util.FrameCallbackProvider
 import com.android.systemui.keyguard.util.KeyguardTransitionRunner
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
@@ -52,9 +54,12 @@ import kotlinx.coroutines.flow.dropWhile
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.test.advanceTimeBy
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import kotlinx.coroutines.withContext
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -70,13 +75,29 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
 
     private lateinit var underTest: KeyguardTransitionRepository
     private lateinit var runner: KeyguardTransitionRunner
+    private lateinit var callbackProvider: FrameCallbackProvider
 
     private val animatorListener = mock<Animator.AnimatorListener>()
 
     @Before
     fun setUp() {
         underTest = KeyguardTransitionRepositoryImpl(Dispatchers.Main)
-        runner = KeyguardTransitionRunner(underTest)
+        runBlocking {
+            callbackProvider = FrameCallbackProvider(testScope.backgroundScope)
+            withContext(Dispatchers.Main) {
+                // AnimationHandler uses ThreadLocal storage, and ValueAnimators MUST start from
+                // main thread
+                AnimationHandler.getInstance().setProvider(callbackProvider)
+            }
+            runner = KeyguardTransitionRunner(callbackProvider.frames, underTest)
+        }
+    }
+
+    @After
+    fun tearDown() {
+        runBlocking {
+            withContext(Dispatchers.Main) { AnimationHandler.getInstance().setProvider(null) }
+        }
     }
 
     @Test
@@ -84,13 +105,11 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
         testScope.runTest {
             val steps = mutableListOf<TransitionStep>()
             val job = underTest.transition(AOD, LOCKSCREEN).onEach { steps.add(it) }.launchIn(this)
-
             runner.startTransition(
                 this,
                 TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, getAnimator()),
                 maxFrames = 100,
             )
-
             assertSteps(steps, listWithStep(BigDecimal(.1)), AOD, LOCKSCREEN)
             job.cancel()
         }
@@ -119,12 +138,12 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 ),
             )
 
-            val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
-            assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
+            val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.2))
+            assertSteps(steps.subList(0, 5), firstTransitionSteps, AOD, LOCKSCREEN)
 
-            // Second transition starts from .1 (LAST_VALUE)
-            val secondTransitionSteps = listWithStep(step = BigDecimal(.1), start = BigDecimal(.1))
-            assertSteps(steps.subList(4, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
+            // Second transition starts from .2 (LAST_VALUE)
+            val secondTransitionSteps = listWithStep(step = BigDecimal(.1), start = BigDecimal(.2))
+            assertSteps(steps.subList(5, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
 
             job.cancel()
             job2.cancel()
@@ -154,12 +173,12 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
                 ),
             )
 
-            val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.1))
-            assertSteps(steps.subList(0, 4), firstTransitionSteps, AOD, LOCKSCREEN)
+            val firstTransitionSteps = listWithStep(step = BigDecimal(.1), stop = BigDecimal(.2))
+            assertSteps(steps.subList(0, 5), firstTransitionSteps, AOD, LOCKSCREEN)
 
             // Second transition starts from 0 (RESET)
             val secondTransitionSteps = listWithStep(start = BigDecimal(0), step = BigDecimal(.1))
-            assertSteps(steps.subList(4, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
+            assertSteps(steps.subList(5, steps.size), secondTransitionSteps, LOCKSCREEN, AOD)
 
             job.cancel()
             job2.cancel()
@@ -173,7 +192,7 @@ class KeyguardTransitionRepositoryTest : SysuiTestCase() {
             runner.startTransition(
                 this,
                 TransitionInfo(OWNER_NAME, AOD, LOCKSCREEN, getAnimator()),
-                maxFrames = 3,
+                maxFrames = 2,
             )
 
             // Now start 2nd transition, which will interrupt the first
