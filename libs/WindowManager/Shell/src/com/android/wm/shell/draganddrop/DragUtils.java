@@ -49,7 +49,7 @@ public class DragUtils {
      * Returns whether we can handle this particular drag.
      */
     public static boolean canHandleDrag(DragEvent event) {
-        if (event.getClipData().getItemCount() <= 0) {
+        if (event.getClipData() == null || event.getClipData().getItemCount() <= 0) {
             // No clip data, ignore this drag
             return false;
         }
