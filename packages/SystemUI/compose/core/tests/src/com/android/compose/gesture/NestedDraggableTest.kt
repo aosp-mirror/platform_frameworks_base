@@ -33,10 +33,12 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerInputChange
+import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeLeft
@@ -653,6 +655,61 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         assertThat(flingIsDone).isTrue()
     }
 
+    @Test
+    fun pointerType() {
+        val draggable = TestDraggable()
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation))
+            }
+
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy(touchSlop.toOffset())
+        }
+
+        assertThat(draggable.onDragStartedPointerType).isEqualTo(PointerType.Touch)
+    }
+
+    @Test
+    fun pointerType_mouse() {
+        val draggable = TestDraggable()
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation))
+            }
+
+        rule.onRoot().performMouseInput {
+            moveTo(center)
+            press()
+            moveBy(touchSlop.toOffset())
+            release()
+        }
+
+        assertThat(draggable.onDragStartedPointerType).isEqualTo(PointerType.Mouse)
+    }
+
+    @Test
+    fun pointersDown_clearedWhenDisabled() {
+        val draggable = TestDraggable()
+        var enabled by mutableStateOf(true)
+        rule.setContent {
+            Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation, enabled = enabled))
+        }
+
+        rule.onRoot().performTouchInput { down(center) }
+
+        enabled = false
+        rule.waitForIdle()
+
+        rule.onRoot().performTouchInput { up() }
+
+        enabled = true
+        rule.waitForIdle()
+
+        rule.onRoot().performTouchInput { down(center) }
+    }
+
     private fun ComposeContentTestRule.setContentWithTouchSlop(
         content: @Composable () -> Unit
     ): Float {
@@ -688,6 +745,7 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         var onDragStartedPosition = Offset.Zero
         var onDragStartedSign = 0f
         var onDragStartedPointersDown = 0
+        var onDragStartedPointerType: PointerType? = null
         var onDragDelta = 0f
 
         override fun shouldStartDrag(change: PointerInputChange): Boolean = shouldStartDrag
@@ -696,11 +754,13 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
             position: Offset,
             sign: Float,
             pointersDown: Int,
+            pointerType: PointerType?,
         ): NestedDraggable.Controller {
             onDragStartedCalled = true
             onDragStartedPosition = position
             onDragStartedSign = sign
             onDragStartedPointersDown = pointersDown
+            onDragStartedPointerType = pointerType
             onDragDelta = 0f
 
             onDragStarted.invoke(position, sign)
