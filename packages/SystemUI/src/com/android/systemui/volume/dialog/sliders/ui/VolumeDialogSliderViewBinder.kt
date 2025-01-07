@@ -23,6 +23,7 @@ import androidx.dynamicanimation.animation.SpringAnimation
 import androidx.dynamicanimation.animation.SpringForce
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
+import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderInputEventsViewModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderStateModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
 import com.google.android.material.slider.Slider
@@ -35,7 +36,10 @@ import kotlinx.coroutines.flow.onEach
 @VolumeDialogSliderScope
 class VolumeDialogSliderViewBinder
 @Inject
-constructor(private val viewModel: VolumeDialogSliderViewModel) {
+constructor(
+    private val viewModel: VolumeDialogSliderViewModel,
+    private val inputViewModel: VolumeDialogSliderInputEventsViewModel,
+) {
 
     private val sliderValueProperty =
         object : FloatPropertyCompat<Slider>("value") {
@@ -51,12 +55,16 @@ constructor(private val viewModel: VolumeDialogSliderViewModel) {
             dampingRatio = SpringForce.DAMPING_RATIO_NO_BOUNCY
         }
 
+    @SuppressLint("ClickableViewAccessibility")
     fun CoroutineScope.bind(view: View) {
         var isInitialUpdate = true
         val sliderView: Slider = view.requireViewById(R.id.volume_dialog_slider)
         val animation = SpringAnimation(sliderView, sliderValueProperty)
         animation.spring = springForce
-
+        sliderView.setOnTouchListener { _, event ->
+            inputViewModel.onTouchEvent(event)
+            false
+        }
         sliderView.addOnChangeListener { _, value, fromUser ->
             viewModel.setStreamVolume(value.roundToInt(), fromUser)
         }

@@ -66,7 +66,8 @@ constructor(
     private val model: Flow<VolumeDialogStreamModel> =
         interactor.slider
             .filter {
-                val lastVolumeUpdateTime = userVolumeUpdates.value?.timestampMillis ?: 0
+                val currentVolumeUpdate = userVolumeUpdates.value ?: return@filter true
+                val lastVolumeUpdateTime = currentVolumeUpdate.timestampMillis
                 getTimestampMillis() - lastVolumeUpdateTime > VOLUME_UPDATE_GRACE_PERIOD
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)

@@ -46,7 +46,7 @@ class VolumeDialogCallbacksInteractor
 constructor(
     private val volumeDialogController: VolumeDialogController,
     @VolumeDialogPlugin private val coroutineScope: CoroutineScope,
-    @Background private val bgHandler: Handler,
+    @Background private val bgHandler: Handler?,
 ) {
 
     @SuppressLint("SharedFlowCreation") // event-bus needed
