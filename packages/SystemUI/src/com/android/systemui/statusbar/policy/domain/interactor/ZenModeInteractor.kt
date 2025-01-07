@@ -16,8 +16,8 @@
 
 package com.android.systemui.statusbar.policy.domain.interactor
 
-import android.app.NotificationManager.INTERRUPTION_FILTER_NONE
 import android.content.Context
+import android.media.AudioManager
 import android.provider.Settings
 import android.provider.Settings.Secure.ZEN_DURATION_FOREVER
 import android.provider.Settings.Secure.ZEN_DURATION_PROMPT
@@ -29,6 +29,7 @@ import com.android.settingslib.notification.data.repository.ZenModeRepository
 import com.android.settingslib.notification.modes.ZenIcon
 import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
+import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
@@ -67,6 +68,17 @@ constructor(
     deviceProvisioningRepository: DeviceProvisioningRepository,
     userSetupRepository: UserSetupRepository,
 ) {
+    /**
+     * List of predicates to determine if the [ZenMode] blocks an audio stream. Typical use case
+     * would be: `zenModeByStreamPredicates[stream](zenMode)`
+     */
+    private val zenModeByStreamPredicates =
+        mapOf<Int, (ZenMode) -> Boolean>(
+            AudioManager.STREAM_MUSIC to { it.policy.priorityCategoryMedia == STATE_DISALLOW },
+            AudioManager.STREAM_ALARM to { it.policy.priorityCategoryAlarms == STATE_DISALLOW },
+            AudioManager.STREAM_SYSTEM to { it.policy.priorityCategorySystem == STATE_DISALLOW },
+        )
+
     val isZenAvailable: Flow<Boolean> =
         combine(
             deviceProvisioningRepository.isDeviceProvisioned,
@@ -125,21 +137,16 @@ constructor(
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
 
-    val activeModesBlockingEverything: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
-        mode.interruptionFilter == INTERRUPTION_FILTER_NONE
-    }
+    fun canBeBlockedByZenMode(stream: AudioStream): Boolean =
+        zenModeByStreamPredicates.containsKey(stream.value)
 
-    val activeModesBlockingMedia: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
-        mode.policy.priorityCategoryMedia == STATE_DISALLOW
-    }
-
-    val activeModesBlockingAlarms: Flow<ActiveZenModes> = getFilteredActiveModesFlow { mode ->
-        mode.policy.priorityCategoryAlarms == STATE_DISALLOW
-    }
-
-    private fun getFilteredActiveModesFlow(predicate: (ZenMode) -> Boolean): Flow<ActiveZenModes> {
+    fun activeModesBlockingStream(stream: AudioStream): Flow<ActiveZenModes> {
+        val isBlockingStream = zenModeByStreamPredicates[stream.value]
+        require(isBlockingStream != null) {
+            "$stream is unsupported. Use canBeBlockedByZenMode to check if the stream can be affected by the Zen Mode."
+        }
         return modes
-            .map { modes -> modes.filter { mode -> predicate(mode) } }
+            .map { modes -> modes.filter { isBlockingStream(it) } }
             .map { modes -> buildActiveZenModes(modes) }
             .flowOn(bgDispatcher)
             .distinctUntilChanged()
@@ -194,7 +201,6 @@ constructor(
                         )
                         null
                     }
-
                     ZEN_DURATION_FOREVER -> null
                     else -> Duration.ofMinutes(zenDuration.toLong())
                 }

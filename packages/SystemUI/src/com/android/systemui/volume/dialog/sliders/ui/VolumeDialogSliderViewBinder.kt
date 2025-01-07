@@ -82,7 +82,7 @@ constructor(private val viewModel: VolumeDialogSliderViewModel) {
         // coerce the current value to the new value range before animating it. This prevents
         // animating from the value that is outside of current [valueFrom, valueTo].
         value = value.coerceIn(valueFrom, valueTo)
-        setTrackIconActiveStart(model.iconRes)
+        trackIconActiveStart = model.icon
         if (isInitialUpdate) {
             value = model.value
         } else {
