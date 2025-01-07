@@ -25,7 +25,7 @@ import com.android.server.wm.flicker.testapp.ActivityOptions.BottomHalfPip
 class BottomHalfPipAppHelper(
     instrumentation: Instrumentation,
     private val useLaunchingActivity: Boolean = false,
-    private val fillTaskOnCreate: Boolean = true,
+    private val fillTaskOnCreate: Boolean = false,
 ) : PipAppHelper(
     instrumentation,
     appName = BottomHalfPip.LABEL,

@@ -31,7 +31,7 @@ import androidx.annotation.NonNull;
 
 public class BottomHalfPipActivity extends PipActivity {
 
-    private boolean mUseBottomHalfLayout;
+    private boolean mUseBottomHalfLayout = true;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
