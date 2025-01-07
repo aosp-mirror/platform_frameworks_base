@@ -274,7 +274,7 @@ public class DesktopModeVisualIndicator {
         lp.inputFeatures |= INPUT_FEATURE_NO_INPUT_CHANNEL;
         final WindowlessWindowManager windowManager = new WindowlessWindowManager(
                 mTaskInfo.configuration, mLeash,
-                null /* hostInputToken */);
+                /* hostInputToken= */ null);
         mViewHost = new SurfaceControlViewHost(mContext,
                 mDisplayController.getDisplay(mTaskInfo.displayId), windowManager,
                 "DesktopModeVisualIndicator");
@@ -338,7 +338,7 @@ public class DesktopModeVisualIndicator {
         if (mCurrentType == NO_INDICATOR) {
             fadeInIndicator(newType);
         } else if (newType == NO_INDICATOR) {
-            fadeOutIndicator(null /* finishCallback */);
+            fadeOutIndicator(/* finishCallback= */ null);
         } else {
             final VisualIndicatorAnimator animator = VisualIndicatorAnimator.animateIndicatorType(
                     mView, mDisplayController.getDisplayLayout(mTaskInfo.displayId), mCurrentType,

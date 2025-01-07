@@ -762,7 +762,7 @@ class DesktopTasksController(
             return
         }
         val wct = WindowContainerTransaction()
-        wct.reorder(taskInfo.token, true /* onTop */, true /* includingParents */)
+        wct.reorder(taskInfo.token, /* onTop= */ true, /* includingParents= */ true)
         startLaunchTransition(
             transitionType = TRANSIT_TO_FRONT,
             wct = wct,
@@ -884,7 +884,7 @@ class DesktopTasksController(
         } else if (Flags.enableMoveToNextDisplayShortcut()) {
             applyFreeformDisplayChange(wct, task, displayId)
         }
-        wct.reparent(task.token, displayAreaInfo.token, true /* onTop */)
+        wct.reparent(task.token, displayAreaInfo.token, /* onTop= */ true)
         if (Flags.enableDisplayFocusInShellTransitions()) {
             // Bring the destination display to top with includingParents=true, so that the
             // destination display gains the display focus, which makes the top task in the display
@@ -896,7 +896,7 @@ class DesktopTasksController(
             performDesktopExitCleanupIfNeeded(task.taskId, task.displayId, wct)
         }
 
-        transitions.startTransition(TRANSIT_CHANGE, wct, null /* handler */)
+        transitions.startTransition(TRANSIT_CHANGE, wct, /* handler= */ null)
     }
 
     /**
@@ -1672,7 +1672,7 @@ class DesktopTasksController(
                 requestedTaskId,
                 splitPosition,
                 options.toBundle(),
-                null, /* hideTaskToken */
+                /* hideTaskToken= */ null,
             )
         }
     }
@@ -1709,8 +1709,8 @@ class DesktopTasksController(
                     fillIn,
                     splitPosition,
                     options.toBundle(),
-                    null /* hideTaskToken */,
-                    true /* forceLaunchNewTask */,
+                    /* hideTaskToken= */ null,
+                    /* forceLaunchNewTask= */ true,
                     splitIndex,
                 )
             }
@@ -1961,7 +1961,7 @@ class DesktopTasksController(
             wct.setBounds(taskInfo.token, initialBounds)
         }
         wct.setWindowingMode(taskInfo.token, targetWindowingMode)
-        wct.reorder(taskInfo.token, true /* onTop */)
+        wct.reorder(taskInfo.token, /* onTop= */ true)
         if (useDesktopOverrideDensity()) {
             wct.setDensityDpi(taskInfo.token, DESKTOP_DENSITY_OVERRIDE)
         }
@@ -2796,7 +2796,7 @@ class DesktopTasksController(
                 controller,
                 "visibleTaskCount",
                 { controller -> result[0] = controller.visibleTaskCount(displayId) },
-                true, /* blocking */
+                /* blocking= */ true,
             )
             return result[0]
         }

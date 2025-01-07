@@ -305,7 +305,7 @@ class DesktopTasksTransitionObserverTest {
         type: Int = TRANSIT_TO_BACK,
         withWallpaper: Boolean = false,
     ): TransitionInfo {
-        return TransitionInfo(type, 0 /* flags */).apply {
+        return TransitionInfo(type, /* flags= */ 0).apply {
             addChange(
                 Change(mock(), mock()).apply {
                     mode = type
@@ -331,7 +331,7 @@ class DesktopTasksTransitionObserverTest {
         task: RunningTaskInfo?,
         type: Int = TRANSIT_OPEN,
     ): TransitionInfo {
-        return TransitionInfo(TRANSIT_OPEN, 0 /* flags */).apply {
+        return TransitionInfo(TRANSIT_OPEN, /* flags= */ 0).apply {
             addChange(
                 Change(mock(), mock()).apply {
                     mode = TRANSIT_OPEN
@@ -344,7 +344,7 @@ class DesktopTasksTransitionObserverTest {
     }
 
     private fun createCloseTransition(task: RunningTaskInfo?): TransitionInfo {
-        return TransitionInfo(TRANSIT_CLOSE, 0 /* flags */).apply {
+        return TransitionInfo(TRANSIT_CLOSE, /* flags= */ 0).apply {
             addChange(
                 Change(mock(), mock()).apply {
                     mode = TRANSIT_CLOSE
@@ -357,7 +357,7 @@ class DesktopTasksTransitionObserverTest {
     }
 
     private fun createToBackTransition(task: RunningTaskInfo?): TransitionInfo {
-        return TransitionInfo(TRANSIT_TO_BACK, 0 /* flags */).apply {
+        return TransitionInfo(TRANSIT_TO_BACK, /* flags= */ 0).apply {
             addChange(
                 Change(mock(), mock()).apply {
                     mode = TRANSIT_TO_BACK

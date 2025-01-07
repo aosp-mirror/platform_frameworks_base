@@ -193,10 +193,10 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         desktopTasksLimiter
             .getTransitionObserver()
             .onTransitionReady(
-                Binder() /* transition */,
+                /* transition= */ Binder(),
                 TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isFalse()
@@ -217,10 +217,10 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         desktopTasksLimiter
             .getTransitionObserver()
             .onTransitionReady(
-                taskTransition /* transition */,
+                /* transition= */ taskTransition,
                 TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isFalse()
@@ -242,8 +242,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .onTransitionReady(
                 transition,
                 TransitionInfoBuilder(TRANSIT_OPEN).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isFalse()
@@ -265,8 +265,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .onTransitionReady(
                 transition,
                 TransitionInfoBuilder(TRANSIT_OPEN).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isTrue()
@@ -287,8 +287,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .onTransitionReady(
                 transition,
                 TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isTrue()
@@ -316,8 +316,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .onTransitionReady(
                 transition,
                 TransitionInfo(TRANSIT_OPEN, TransitionInfo.FLAG_NONE).apply { addChange(change) },
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isTrue()
@@ -344,8 +344,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .onTransitionReady(
                 newTransition,
                 TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isTrue()
@@ -552,8 +552,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .onTransitionReady(
                 transition,
                 TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         desktopTasksLimiter.getTransitionObserver().onTransitionStarting(transition)
@@ -584,8 +584,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .onTransitionReady(
                 transition,
                 TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         desktopTasksLimiter.getTransitionObserver().onTransitionStarting(transition)
@@ -617,8 +617,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
             .onTransitionReady(
                 mergedTransition,
                 TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build(),
-                StubTransaction() /* startTransaction */,
-                StubTransaction(), /* finishTransaction */
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
             )
 
         desktopTasksLimiter.getTransitionObserver().onTransitionStarting(mergedTransition)

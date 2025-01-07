@@ -677,7 +677,7 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
     }
 
     private fun createTransitionInfo(type: Int, draggedTask: RunningTaskInfo): TransitionInfo {
-        return TransitionInfo(type, 0 /* flags */).apply {
+        return TransitionInfo(type, /* flags= */ 0).apply {
             addChange( // Home.
                 TransitionInfo.Change(mock(), homeTaskLeash).apply {
                     parent = null

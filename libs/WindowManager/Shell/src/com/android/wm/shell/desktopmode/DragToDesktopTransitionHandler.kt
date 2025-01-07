@@ -131,7 +131,7 @@ sealed class DragToDesktopTransitionHandler(
         val pendingIntent =
             PendingIntent.getActivityAsUser(
                 context.createContextAsUser(taskUser, /* flags= */ 0),
-                0 /* requestCode */,
+                /* requestCode= */ 0,
                 launchHomeIntent,
                 FLAG_MUTABLE or FLAG_ALLOW_UNSAFE_IMPLICIT_INTENT or FILL_IN_COMPONENT,
                 options.toBundle(),
@@ -234,7 +234,7 @@ sealed class DragToDesktopTransitionHandler(
             val wct = WindowContainerTransaction()
             restoreWindowOrder(wct, state)
             state.startTransitionFinishTransaction?.apply()
-            state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
+            state.startTransitionFinishCb?.onTransitionFinished(/* wct= */ null)
             requestSplitFromScaledTask(splitPosition, wct)
             clearState()
         } else {
@@ -440,7 +440,7 @@ sealed class DragToDesktopTransitionHandler(
             val wct = WindowContainerTransaction()
             restoreWindowOrder(wct)
             state.startTransitionFinishTransaction?.apply()
-            state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
+            state.startTransitionFinishCb?.onTransitionFinished(/* wct= */ null)
             requestSplitSelect(wct, taskInfo, splitPosition)
         }
         return true
@@ -492,7 +492,7 @@ sealed class DragToDesktopTransitionHandler(
                 finishTransaction = startTransactionFinishT,
             )
             // Call finishCallback to merge animation before startTransitionFinishCb is called
-            finishCallback.onTransitionFinished(null /* wct */)
+            finishCallback.onTransitionFinished(/* wct= */ null)
             animateEndDragToDesktop(startTransaction = t, startTransitionFinishCb)
         } else if (isCancelTransition) {
             info.changes.forEach { change ->
@@ -500,8 +500,8 @@ sealed class DragToDesktopTransitionHandler(
                 startTransactionFinishT.show(change.leash)
             }
             t.apply()
-            finishCallback.onTransitionFinished(null /* wct */)
-            startTransitionFinishCb.onTransitionFinished(null /* wct */)
+            finishCallback.onTransitionFinished(/* wct= */ null)
+            startTransitionFinishCb.onTransitionFinished(/* wct= */ null)
             clearState()
         }
     }
@@ -653,7 +653,7 @@ sealed class DragToDesktopTransitionHandler(
             interactionJankMonitor.cancel(CUJ_DESKTOP_MODE_ENTER_APP_HANDLE_DRAG_HOLD)
         } else if (state.cancelTransitionToken == transition) {
             state.draggedTaskChange?.leash?.let { state.startTransitionFinishTransaction?.show(it) }
-            state.startTransitionFinishCb?.onTransitionFinished(null /* wct */)
+            state.startTransitionFinishCb?.onTransitionFinished(/* wct= */ null)
             clearState()
         } else {
             // This transition being aborted is neither the start, nor the cancel transition, so
@@ -741,19 +741,19 @@ sealed class DragToDesktopTransitionHandler(
                         // TODO(b/322852244): investigate why even though these "other" tasks are
                         //  reordered in front of home and behind the translucent dragged task, its
                         //  surface is not visible on screen.
-                        wct.reorder(wc, true /* toTop */)
+                        wct.reorder(wc, /* onTop= */ true)
                     }
                 val wc =
                     state.draggedTaskChange?.container
                         ?: error("Dragged task should be non-null before cancelling")
                 // Then the dragged task a the very top.
-                wct.reorder(wc, true /* toTop */)
+                wct.reorder(wc, /* onTop= */ true)
             }
             is TransitionState.FromSplit -> {
                 val wc =
                     state.splitRootChange?.container
                         ?: error("Split root should be non-null before cancelling")
-                wct.reorder(wc, true /* toTop */)
+                wct.reorder(wc, /* onTop= */ true)
             }
         }
         val homeWc =
