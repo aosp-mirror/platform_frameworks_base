@@ -45,3 +45,10 @@ flag {
     description: "If true, the APIs to manage content protection device policy will be enabled."
     bug: "319477846"
 }
+
+flag {
+    name: "exported_settings_activity_enabled"
+    namespace: "content_protection"
+    description: "If true, the content protection Settings Activity will be exported for launching externally."
+    bug: "385310141"
+}
