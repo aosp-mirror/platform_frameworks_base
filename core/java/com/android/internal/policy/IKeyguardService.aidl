@@ -53,21 +53,21 @@ oneway interface IKeyguardService {
      *
      * @param pmSleepReason One of PowerManager.GO_TO_SLEEP_REASON_*, detailing the specific reason
      * we're going to sleep, such as GO_TO_SLEEP_REASON_POWER_BUTTON or GO_TO_SLEEP_REASON_TIMEOUT.
-     * @param cameraGestureTriggered whether the camera gesture was triggered between
-     *                               {@link #onStartedGoingToSleep} and this method; if it's been
-     *                               triggered, we shouldn't lock the device.
+     * @param powerButtonLaunchGestureTriggered whether the power button double tap gesture was
+     *                               triggered between {@link #onStartedGoingToSleep} and this
+     *                               method; if it's been triggered, we shouldn't lock the device.
      */
-    void onFinishedGoingToSleep(int pmSleepReason, boolean cameraGestureTriggered);
+    void onFinishedGoingToSleep(int pmSleepReason, boolean powerButtonLaunchGestureTriggered);
 
     /**
      * Called when the device has started waking up.
 
      * @param pmWakeReason One of PowerManager.WAKE_REASON_*, detailing the reason we're waking up,
      * such as WAKE_REASON_POWER_BUTTON or WAKE_REASON_GESTURE.
-     * @param cameraGestureTriggered Whether we're waking up due to a power button double tap
-     * gesture.
+     * @param powerButtonLaunchGestureTriggered Whether we're waking up due to a power button
+     * double tap gesture.
      */
-    void onStartedWakingUp(int pmWakeReason,  boolean cameraGestureTriggered);
+    void onStartedWakingUp(int pmWakeReason,  boolean powerButtonLaunchGestureTriggered);
 
     /**
      * Called when the device has finished waking up.
