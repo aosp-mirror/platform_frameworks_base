@@ -689,6 +689,27 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         assertThat(draggable.onDragStartedPointerType).isEqualTo(PointerType.Mouse)
     }
 
+    @Test
+    fun pointersDown_clearedWhenDisabled() {
+        val draggable = TestDraggable()
+        var enabled by mutableStateOf(true)
+        rule.setContent {
+            Box(Modifier.fillMaxSize().nestedDraggable(draggable, orientation, enabled = enabled))
+        }
+
+        rule.onRoot().performTouchInput { down(center) }
+
+        enabled = false
+        rule.waitForIdle()
+
+        rule.onRoot().performTouchInput { up() }
+
+        enabled = true
+        rule.waitForIdle()
+
+        rule.onRoot().performTouchInput { down(center) }
+    }
+
     private fun ComposeContentTestRule.setContentWithTouchSlop(
         content: @Composable () -> Unit
     ): Float {

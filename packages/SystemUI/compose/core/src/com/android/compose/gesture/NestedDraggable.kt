@@ -459,20 +459,24 @@ private class NestedDraggableNode(
 
     private suspend fun PointerInputScope.trackDownPosition() {
         awaitEachGesture {
-            val down = awaitFirstDown(requireUnconsumed = false)
-            lastFirstDown = down.position
-            pointersDown[down.id] = down.type
+            try {
+                val down = awaitFirstDown(requireUnconsumed = false)
+                lastFirstDown = down.position
+                pointersDown[down.id] = down.type
 
-            do {
-                awaitPointerEvent().changes.forEach { change ->
-                    when {
-                        change.changedToDownIgnoreConsumed() -> {
-                            pointersDown[change.id] = change.type
+                do {
+                    awaitPointerEvent().changes.forEach { change ->
+                        when {
+                            change.changedToDownIgnoreConsumed() -> {
+                                pointersDown[change.id] = change.type
+                            }
+                            change.changedToUpIgnoreConsumed() -> pointersDown.remove(change.id)
                         }
-                        change.changedToUpIgnoreConsumed() -> pointersDown.remove(change.id)
                     }
-                }
-            } while (pointersDown.size > 0)
+                } while (pointersDown.size > 0)
+            } finally {
+                pointersDown.clear()
+            }
         }
     }
 
