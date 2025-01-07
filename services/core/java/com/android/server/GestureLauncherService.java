@@ -66,8 +66,7 @@ import com.android.server.wm.WindowManagerInternal;
 /**
  * The service that listens for gestures detected in sensor firmware and starts the intent
  * accordingly.
- * <p>For now, only camera launch gesture is supported, and in the future, more gestures can be
- * added.</p>
+ *
  * @hide
  */
 public class GestureLauncherService extends SystemService {
@@ -109,10 +108,22 @@ public class GestureLauncherService extends SystemService {
     @VisibleForTesting
     static final int EMERGENCY_GESTURE_POWER_BUTTON_COOLDOWN_PERIOD_MS_MAX = 5000;
 
-    /** Indicates camera should be launched on power double tap. */
+    /** Configuration value indicating double tap power gesture is disabled. */
+    @VisibleForTesting static final int DOUBLE_TAP_POWER_DISABLED_MODE = 0;
+
+    /** Configuration value indicating double tap power gesture should launch camera. */
+    @VisibleForTesting static final int DOUBLE_TAP_POWER_LAUNCH_CAMERA_MODE = 1;
+
+    /**
+     * Configuration value indicating double tap power gesture should launch one of many target
+     * actions.
+     */
+    @VisibleForTesting static final int DOUBLE_TAP_POWER_MULTI_TARGET_MODE = 2;
+
+    /** Indicates camera launch is selected as target action for multi target double tap power. */
     @VisibleForTesting static final int LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER = 0;
 
-    /** Indicates wallet should be launched on power double tap. */
+    /** Indicates wallet launch is selected as target action for multi target double tap power. */
     @VisibleForTesting static final int LAUNCH_WALLET_ON_DOUBLE_TAP_POWER = 1;
 
     /** Number of taps required to launch the double tap shortcut (either camera or wallet). */
@@ -228,6 +239,7 @@ public class GestureLauncherService extends SystemService {
             return mId;
         }
     }
+
     public GestureLauncherService(Context context) {
         this(context, new MetricsLogger(),
                 QuickAccessWalletClient.create(context), new UiEventLoggerImpl());
@@ -289,15 +301,14 @@ public class GestureLauncherService extends SystemService {
                     Settings.Secure.getUriFor(
                             Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE),
                     false, mSettingObserver, mUserId);
-        } else {
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(Settings.Secure.CAMERA_GESTURE_DISABLED),
-                    false, mSettingObserver, mUserId);
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Secure.getUriFor(
-                            Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED),
-                    false, mSettingObserver, mUserId);
         }
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(Settings.Secure.CAMERA_GESTURE_DISABLED),
+                false, mSettingObserver, mUserId);
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(
+                        Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED),
+                false, mSettingObserver, mUserId);
         mContext.getContentResolver().registerContentObserver(
                 Settings.Secure.getUriFor(Settings.Secure.CAMERA_LIFT_TRIGGER_ENABLED),
                 false, mSettingObserver, mUserId);
@@ -468,23 +479,27 @@ public class GestureLauncherService extends SystemService {
                         Settings.Secure.CAMERA_GESTURE_DISABLED, 0, userId) == 0);
     }
 
-
     /** Checks if camera should be launched on double press of the power button. */
     public static boolean isCameraDoubleTapPowerSettingEnabled(Context context, int userId) {
-        boolean res;
-
-        if (launchWalletOptionOnPowerDoubleTap()) {
-            res = isDoubleTapPowerGestureSettingEnabled(context, userId)
-                    && getDoubleTapPowerGestureAction(context, userId)
-                    == LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER;
-        } else {
-            // These are legacy settings that will be deprecated once the option to launch both
-            // wallet and camera has been created.
-            res = isCameraDoubleTapPowerEnabled(context.getResources())
+        if (!launchWalletOptionOnPowerDoubleTap()) {
+            return isCameraDoubleTapPowerEnabled(context.getResources())
                     && (Settings.Secure.getIntForUser(context.getContentResolver(),
                     Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED, 0, userId) == 0);
         }
-        return res;
+
+        final int doubleTapPowerGestureSettingMode = getDoubleTapPowerGestureMode(
+                context.getResources());
+
+        return switch (doubleTapPowerGestureSettingMode) {
+            case DOUBLE_TAP_POWER_LAUNCH_CAMERA_MODE -> Settings.Secure.getIntForUser(
+                    context.getContentResolver(),
+                    Settings.Secure.CAMERA_DOUBLE_TAP_POWER_GESTURE_DISABLED, 0, userId) == 0;
+            case DOUBLE_TAP_POWER_MULTI_TARGET_MODE ->
+                    isMultiTargetDoubleTapPowerGestureSettingEnabled(context, userId)
+                            && getDoubleTapPowerGestureAction(context, userId)
+                            == LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER;
+            default -> false;
+        };
     }
 
     /** Checks if wallet should be launched on double tap of the power button. */
@@ -493,7 +508,9 @@ public class GestureLauncherService extends SystemService {
             return false;
         }
 
-        return isDoubleTapPowerGestureSettingEnabled(context, userId)
+        return getDoubleTapPowerGestureMode(context.getResources())
+                == DOUBLE_TAP_POWER_MULTI_TARGET_MODE
+                && isMultiTargetDoubleTapPowerGestureSettingEnabled(context, userId)
                 && getDoubleTapPowerGestureAction(context, userId)
                 == LAUNCH_WALLET_ON_DOUBLE_TAP_POWER;
     }
@@ -515,26 +532,40 @@ public class GestureLauncherService extends SystemService {
                 isDefaultEmergencyGestureEnabled(context.getResources()) ? 1 : 0, userId) != 0;
     }
 
+    /** Gets the double tap power gesture mode. */
+    private static int getDoubleTapPowerGestureMode(Resources resources) {
+        return resources.getInteger(R.integer.config_doubleTapPowerGestureMode);
+    }
+
+    /**
+     * Whether the setting for multi target double tap power gesture is enabled.
+     *
+     * <p>Multi target double tap power gesture allows the user to choose one of many target actions
+     * when double tapping the power button.
+     * </p>
+     */
+    private static boolean isMultiTargetDoubleTapPowerGestureSettingEnabled(Context context,
+            int userId) {
+        return Settings.Secure.getIntForUser(
+                context.getContentResolver(),
+                Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED,
+                getDoubleTapPowerGestureMode(context.getResources())
+                        == DOUBLE_TAP_POWER_MULTI_TARGET_MODE ? 1 : 0,
+                userId)
+                == 1;
+    }
+
+    /** Gets the selected target action for the multi target double tap power gesture.
+     *
+     * <p>The target actions are defined in {@link Settings.Secure#DOUBLE_TAP_POWER_BUTTON_GESTURE}.
+     * </p>
+     */
     private static int getDoubleTapPowerGestureAction(Context context, int userId) {
         return Settings.Secure.getIntForUser(
                 context.getContentResolver(),
                 Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE,
                 LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER,
                 userId);
-    }
-
-    /** Whether the shortcut to launch app on power double press is enabled. */
-    private static boolean isDoubleTapPowerGestureSettingEnabled(Context context, int userId) {
-        return Settings.Secure.getIntForUser(
-                context.getContentResolver(),
-                Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE_ENABLED,
-                isDoubleTapConfigEnabled(context.getResources()) ? 1 : 0,
-                userId)
-                == 1;
-    }
-
-    private static boolean isDoubleTapConfigEnabled(Resources resources) {
-        return resources.getBoolean(R.bool.config_doubleTapPowerGestureEnabled);
     }
 
     /**
@@ -595,7 +626,7 @@ public class GestureLauncherService extends SystemService {
                         || isCameraLiftTriggerEnabled(resources)
                         || isEmergencyGestureEnabled(resources);
         if (launchWalletOptionOnPowerDoubleTap()) {
-            res |= isDoubleTapConfigEnabled(resources);
+            res |= getDoubleTapPowerGestureMode(resources) != DOUBLE_TAP_POWER_DISABLED_MODE;
         } else {
             res |= isCameraDoubleTapPowerEnabled(resources);
         }

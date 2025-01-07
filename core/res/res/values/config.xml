@@ -4244,12 +4244,19 @@
          is non-interactive. -->
     <bool name="config_cameraDoubleTapPowerGestureEnabled">true</bool>
 
-    <!-- Allow the gesture to double tap the power button to trigger a target action. -->
-    <bool name="config_doubleTapPowerGestureEnabled">true</bool>
-    <!-- Default target action for double tap of the power button gesture.
+    <!-- Controls the double tap power button gesture to trigger a target action.
+         0: Gesture is disabled
+         1: Launch camera mode, allowing the user to disable/enable the double tap power gesture
+            from launching the camera application.
+         2: Multi target mode, allowing the user to select one of the targets defined in
+            config_doubleTapPowerGestureMultiTargetDefaultAction and to disable/enable the double
+            tap power gesture from triggering the selected target action.
+    -->
+    <integer name="config_doubleTapPowerGestureMode">2</integer>
+    <!-- Default target action for double tap of the power button gesture in multi target mode.
          0: Launch camera
          1: Launch wallet -->
-    <integer name="config_defaultDoubleTapPowerGestureAction">0</integer>
+    <integer name="config_doubleTapPowerGestureMultiTargetDefaultAction">0</integer>
 
     <!-- Allow the gesture to quick tap the power button multiple times to start the emergency sos
          experience while the device is non-interactive. -->

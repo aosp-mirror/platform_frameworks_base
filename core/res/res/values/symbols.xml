@@ -3167,8 +3167,8 @@
   <java-symbol type="integer" name="config_cameraLiftTriggerSensorType" />
   <java-symbol type="string" name="config_cameraLiftTriggerSensorStringType" />
   <java-symbol type="bool" name="config_cameraDoubleTapPowerGestureEnabled" />
-  <java-symbol type="bool" name="config_doubleTapPowerGestureEnabled" />
-  <java-symbol type="integer" name="config_defaultDoubleTapPowerGestureAction" />
+  <java-symbol type="integer" name="config_doubleTapPowerGestureMode" />
+  <java-symbol type="integer" name="config_doubleTapPowerGestureMultiTargetDefaultAction" />
   <java-symbol type="bool" name="config_emergencyGestureEnabled" />
   <java-symbol type="bool" name="config_defaultEmergencyGestureEnabled" />
   <java-symbol type="bool" name="config_defaultEmergencyGestureSoundEnabled" />
