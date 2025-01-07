@@ -28,7 +28,7 @@ import com.android.systemui.keyguard.data.repository.fakeDeviceEntryFingerprintA
 import com.android.systemui.keyguard.shared.model.SuccessFingerprintAuthenticationStatus
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.runCurrent
-import com.android.systemui.kosmos.runTestWithSnapshots
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
 import com.android.systemui.scene.shared.model.Scenes
@@ -59,7 +59,7 @@ class SceneJankMonitorTest : SysuiTestCase() {
 
     @Test
     fun onTransitionStart_withProvidedCuj_beginsThatCuj() =
-        kosmos.runTestWithSnapshots {
+        kosmos.runTest {
             val cuj = 1337
             underTest.onTransitionStart(
                 view = mock(),
@@ -73,7 +73,7 @@ class SceneJankMonitorTest : SysuiTestCase() {
 
     @Test
     fun onTransitionEnd_withProvidedCuj_endsThatCuj() =
-        kosmos.runTestWithSnapshots {
+        kosmos.runTest {
             val cuj = 1337
             underTest.onTransitionEnd(from = Scenes.Communal, to = Scenes.Dream, cuj = cuj)
             verify(interactionJankMonitor, never()).begin(any(), anyInt())
@@ -82,7 +82,7 @@ class SceneJankMonitorTest : SysuiTestCase() {
 
     @Test
     fun bouncer_authMethodPin() =
-        kosmos.runTestWithSnapshots {
+        kosmos.runTest {
             bouncer(
                 authenticationMethod = AuthenticationMethodModel.Pin,
                 appearCuj = Cuj.CUJ_LOCKSCREEN_PIN_APPEAR,
@@ -92,7 +92,7 @@ class SceneJankMonitorTest : SysuiTestCase() {
 
     @Test
     fun bouncer_authMethodSim() =
-        kosmos.runTestWithSnapshots {
+        kosmos.runTest {
             bouncer(
                 authenticationMethod = AuthenticationMethodModel.Sim,
                 appearCuj = Cuj.CUJ_LOCKSCREEN_PIN_APPEAR,
@@ -109,7 +109,7 @@ class SceneJankMonitorTest : SysuiTestCase() {
 
     @Test
     fun bouncer_authMethodPattern() =
-        kosmos.runTestWithSnapshots {
+        kosmos.runTest {
             bouncer(
                 authenticationMethod = AuthenticationMethodModel.Pattern,
                 appearCuj = Cuj.CUJ_LOCKSCREEN_PATTERN_APPEAR,
@@ -119,7 +119,7 @@ class SceneJankMonitorTest : SysuiTestCase() {
 
     @Test
     fun bouncer_authMethodPassword() =
-        kosmos.runTestWithSnapshots {
+        kosmos.runTest {
             bouncer(
                 authenticationMethod = AuthenticationMethodModel.Password,
                 appearCuj = Cuj.CUJ_LOCKSCREEN_PASSWORD_APPEAR,
