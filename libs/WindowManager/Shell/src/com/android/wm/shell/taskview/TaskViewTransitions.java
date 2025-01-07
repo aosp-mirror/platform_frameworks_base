@@ -17,6 +17,7 @@
 package com.android.wm.shell.taskview;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
 import static android.view.WindowManager.TRANSIT_OPEN;
@@ -41,6 +42,7 @@ import android.view.SurfaceControl;
 import android.view.WindowManager;
 import android.window.TransitionInfo;
 import android.window.TransitionRequestInfo;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.annotation.VisibleForTesting;
@@ -155,7 +157,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return mTaskViewRepo;
     }
 
-    void addTaskView(TaskViewTaskController tv) {
+    void registerTaskView(TaskViewTaskController tv) {
         synchronized (mRegistered) {
             if (!mRegistered[0]) {
                 mRegistered[0] = true;
@@ -169,7 +171,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
     }
 
-    void removeTaskView(TaskViewTaskController tv) {
+    void unregisterTaskView(TaskViewTaskController tv) {
         if (useRepo()) {
             mTaskViewRepo.remove(tv);
         } else {
@@ -397,17 +399,47 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         startNextTransition();
     }
 
-    void closeTaskView(@NonNull WindowContainerTransaction wct,
-            @NonNull TaskViewTaskController taskView) {
+    /**
+     * Removes a taskview and also removes it's task from window manager. This task will not appear
+     * in recents.
+     */
+    public void removeTaskView(@NonNull TaskViewTaskController taskView,
+            @Nullable WindowContainerToken taskToken) {
+        final WindowContainerToken token = taskToken != null ? taskToken : taskView.getTaskToken();
+        if (token == null) {
+            // We don't have a task yet, so just clean up records
+            if (!Flags.enableTaskViewControllerCleanup()) {
+                // Call to remove task before we have one, do nothing
+                Slog.w(TAG, "Trying to remove a task that was never added? (no taskToken)");
+                return;
+            }
+            unregisterTaskView(taskView);
+            return;
+        }
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.removeTask(token);
         updateVisibilityState(taskView, false /* visible */);
-        mPending.add(new PendingTransition(TRANSIT_CLOSE, wct, taskView, null /* cookie */));
-        startNextTransition();
+        mShellExecutor.execute(() -> {
+            mPending.add(new PendingTransition(TRANSIT_CLOSE, wct, taskView, null /* cookie */));
+            startNextTransition();
+        });
     }
 
-    void moveTaskViewToFullscreen(@NonNull WindowContainerTransaction wct,
-            @NonNull TaskViewTaskController taskView) {
-        mPending.add(new PendingTransition(TRANSIT_CHANGE, wct, taskView, null /* cookie */));
-        startNextTransition();
+    /**
+     * Moves the current task in TaskView out of the view and back to fullscreen.
+     */
+    public void moveTaskViewToFullscreen(@NonNull TaskViewTaskController taskView) {
+        final WindowContainerToken taskToken = taskView.getTaskToken();
+        if (taskToken == null) return;
+        final WindowContainerTransaction wct = new WindowContainerTransaction();
+        wct.setWindowingMode(taskToken, WINDOWING_MODE_UNDEFINED);
+        wct.setAlwaysOnTop(taskToken, false);
+        mShellExecutor.execute(() -> {
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(taskToken, false);
+            mPending.add(new PendingTransition(TRANSIT_CHANGE, wct, taskView, null /* cookie */));
+            startNextTransition();
+            taskView.notifyTaskRemovalStarted(taskView.getTaskInfo());
+        });
     }
 
     /** Starts a new transition to make the given {@code taskView} visible. */

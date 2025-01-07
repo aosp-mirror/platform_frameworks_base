@@ -424,7 +424,7 @@ public class TaskViewTest extends ShellTestCase {
         verify(mOrganizer).removeListener(eq(mTaskViewTaskController));
         verify(mViewListener).onReleased();
         assertThat(mTaskView.isInitialized()).isFalse();
-        verify(mTaskViewTransitions).removeTaskView(eq(mTaskViewTaskController));
+        verify(mTaskViewTransitions).unregisterTaskView(eq(mTaskViewTaskController));
     }
 
     @Test
@@ -620,7 +620,7 @@ public class TaskViewTest extends ShellTestCase {
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
 
         mTaskView.removeTask();
-        verify(mTaskViewTransitions, never()).closeTaskView(any(), any());
+        assertFalse(mTaskViewTransitions.hasPending());
     }
 
     @Test
@@ -636,7 +636,7 @@ public class TaskViewTest extends ShellTestCase {
         verify(mViewListener).onTaskCreated(eq(mTaskInfo.taskId), any());
 
         mTaskView.removeTask();
-        verify(mTaskViewTransitions).closeTaskView(any(), eq(mTaskViewTaskController));
+        verify(mTaskViewTransitions).removeTaskView(eq(mTaskViewTaskController), any());
     }
 
     @Test
@@ -647,7 +647,7 @@ public class TaskViewTest extends ShellTestCase {
         mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
 
         assertNull(mTaskViewTaskController.getTaskInfo());
-        verify(mTaskViewTransitions).closeTaskView(any(), eq(mTaskViewTaskController));
+        verify(mTaskViewTransitions).removeTaskView(eq(mTaskViewTaskController), any());
     }
 
     @Test
@@ -656,7 +656,7 @@ public class TaskViewTest extends ShellTestCase {
 
         mTaskViewTaskController.onTaskAppeared(mTaskInfo, mLeash);
         assertEquals(mTaskInfo, mTaskViewTaskController.getPendingInfo());
-        verify(mTaskViewTransitions, never()).closeTaskView(any(), any());
+        verify(mTaskViewTransitions, never()).removeTaskView(any(), any());
     }
 
     @Test
@@ -778,7 +778,7 @@ public class TaskViewTest extends ShellTestCase {
                 new SurfaceControl.Transaction(), new SurfaceControl.Transaction(), mTaskInfo,
                 mLeash, wct);
         mTaskView.surfaceCreated(mock(SurfaceHolder.class));
-        mTaskViewTaskController.moveToFullscreen();
+        mTaskViewTransitions.moveTaskViewToFullscreen(mTaskViewTaskController);
 
         verify(mViewListener).onTaskRemovalStarted(eq(mTaskInfo.taskId));
     }
