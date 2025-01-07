@@ -14669,7 +14669,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
     @Override
     public void setSecondaryLockscreenEnabled(ComponentName who, boolean enabled,
             PersistableBundle options) {
-        if (Flags.secondaryLockscreenApiEnabled()) {
+        if (Flags.secondaryLockscreenApiEnabled() && mSupervisionManagerInternal != null) {
             final CallerIdentity caller = getCallerIdentity();
             final boolean isRoleHolder = isCallerSystemSupervisionRoleHolder(caller);
             synchronized (getLockObject()) {
@@ -14680,16 +14680,8 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                         caller.getUserId());
             }
 
-            if (mSupervisionManagerInternal != null) {
-                mSupervisionManagerInternal.setSupervisionLockscreenEnabledForUser(
-                        caller.getUserId(), enabled, options);
-            } else {
-                synchronized (getLockObject()) {
-                    DevicePolicyData policy = getUserData(caller.getUserId());
-                    policy.mSecondaryLockscreenEnabled = enabled;
-                    saveSettingsLocked(caller.getUserId());
-                }
-            }
+            mSupervisionManagerInternal.setSupervisionLockscreenEnabledForUser(
+                    caller.getUserId(), enabled, options);
         } else {
             Objects.requireNonNull(who, "ComponentName is null");
 
