@@ -28,7 +28,10 @@ import static android.app.AppOpsManager.OP_MONITOR_LOCATION;
 import static android.app.AppOpsManager.OP_PHONE_CALL_CAMERA;
 import static android.app.AppOpsManager.OP_PHONE_CALL_MICROPHONE;
 import static android.app.AppOpsManager.OP_PROCESS_OUTGOING_CALLS;
+import static android.app.AppOpsManager.OP_READ_HEART_RATE;
 import static android.app.AppOpsManager.OP_READ_ICC_SMS;
+import static android.app.AppOpsManager.OP_READ_OXYGEN_SATURATION;
+import static android.app.AppOpsManager.OP_READ_SKIN_TEMPERATURE;
 import static android.app.AppOpsManager.OP_READ_SMS;
 import static android.app.AppOpsManager.OP_RECEIVE_AMBIENT_TRIGGER_AUDIO;
 import static android.app.AppOpsManager.OP_RECEIVE_SANDBOX_TRIGGER_AUDIO;
@@ -102,7 +105,8 @@ abstract class DiscreteOpsRegistry {
             + "," + OP_EMERGENCY_LOCATION + "," + OP_CAMERA + "," + OP_RECORD_AUDIO + ","
             + OP_PHONE_CALL_MICROPHONE + "," + OP_PHONE_CALL_CAMERA + ","
             + OP_RECEIVE_AMBIENT_TRIGGER_AUDIO + "," + OP_RECEIVE_SANDBOX_TRIGGER_AUDIO
-            + "," + OP_RESERVED_FOR_TESTING;
+            + "," + OP_READ_HEART_RATE + "," + OP_READ_OXYGEN_SATURATION + ","
+            + OP_READ_SKIN_TEMPERATURE + "," + OP_RESERVED_FOR_TESTING;
     static final int[] sDiscreteOpsToLog =
             new int[]{OP_FINE_LOCATION, OP_COARSE_LOCATION, OP_EMERGENCY_LOCATION, OP_CAMERA,
                     OP_RECORD_AUDIO, OP_PHONE_CALL_MICROPHONE, OP_PHONE_CALL_CAMERA,
