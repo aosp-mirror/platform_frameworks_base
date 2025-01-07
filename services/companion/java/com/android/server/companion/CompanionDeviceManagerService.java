@@ -109,6 +109,8 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 @SuppressLint("LongLogTag")
 public class CompanionDeviceManagerService extends SystemService {
@@ -226,7 +228,8 @@ public class CompanionDeviceManagerService extends SystemService {
         if (associations.isEmpty()) return;
 
         mCompanionExemptionProcessor.updateAtm(userId, associations);
-        mCompanionExemptionProcessor.updateAutoRevokeExemptions();
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(mCompanionExemptionProcessor::updateAutoRevokeExemptions);
     }
 
     @Override
