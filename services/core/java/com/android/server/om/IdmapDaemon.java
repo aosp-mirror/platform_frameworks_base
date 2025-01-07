@@ -28,6 +28,7 @@ import android.os.IBinder;
 import android.os.IIdmap2;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.StrictMode;
 import android.os.SystemClock;
 import android.os.SystemService;
 import android.text.TextUtils;
@@ -181,6 +182,8 @@ class IdmapDaemon {
     }
 
     boolean idmapExists(String overlayPath, int userId) {
+        // The only way to verify an idmap is to read its state on disk.
+        final StrictMode.ThreadPolicy oldPolicy = StrictMode.allowThreadDiskReads();
         try (Connection c = connect()) {
             final IIdmap2 idmap2 = c.getIdmap2();
             if (idmap2 == null) {
@@ -193,6 +196,8 @@ class IdmapDaemon {
         } catch (Exception e) {
             Slog.wtf(TAG, "failed to check if idmap exists for " + overlayPath, e);
             return false;
+        } finally {
+            StrictMode.setThreadPolicy(oldPolicy);
         }
     }
 
