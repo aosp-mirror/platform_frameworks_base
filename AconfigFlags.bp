@@ -65,13 +65,13 @@ aconfig_declarations_group {
         "android.sdk.flags-aconfig-java",
         "android.security.flags-aconfig-java",
         "android.server.app.flags-aconfig-java",
+        "android.service.appprediction.flags-aconfig-java",
         "android.service.autofill.flags-aconfig-java",
         "android.service.chooser.flags-aconfig-java",
         "android.service.compat.flags-aconfig-java",
         "android.service.controls.flags-aconfig-java",
         "android.service.dreams.flags-aconfig-java",
         "android.service.notification.flags-aconfig-java",
-        "android.service.appprediction.flags-aconfig-java",
         "android.service.quickaccesswallet.flags-aconfig-java",
         "android.service.voice.flags-aconfig-java",
         "android.speech.flags-aconfig-java",
@@ -523,7 +523,10 @@ aconfig_declarations {
     package: "android.companion.virtualdevice.flags",
     container: "system",
     exportable: true,
-    srcs: ["core/java/android/companion/virtual/flags/*.aconfig"],
+    srcs: [
+        "core/java/android/companion/virtual/flags/flags.aconfig",
+        "core/java/android/companion/virtual/flags/launched_flags.aconfig",
+    ],
 }
 
 java_aconfig_library {
@@ -548,7 +551,7 @@ aconfig_declarations {
     name: "android.companion.virtual.flags-aconfig",
     package: "android.companion.virtual.flags",
     container: "system",
-    srcs: ["core/java/android/companion/virtual/*.aconfig"],
+    srcs: ["core/java/android/companion/virtual/flags/deprecated_flags_do_not_edit.aconfig"],
 }
 
 // InputMethod
@@ -828,8 +831,8 @@ java_aconfig_library {
     min_sdk_version: "30",
     apex_available: [
         "//apex_available:platform",
-        "com.android.permission",
         "com.android.nfcservices",
+        "com.android.permission",
     ],
 }
 
