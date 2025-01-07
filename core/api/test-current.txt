@@ -4538,7 +4538,6 @@ package android.window {
     field public final int displayId;
     field public final boolean isDuplicateTouchToWallpaper;
     field public final boolean isFocusable;
-    field public final boolean isPreventSplitting;
     field public final boolean isTouchable;
     field public final boolean isTrustedOverlay;
     field public final boolean isVisible;

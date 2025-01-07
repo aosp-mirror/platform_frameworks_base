@@ -103,12 +103,6 @@ public class WindowInfosListenerForTest {
         public final boolean isFocusable;
 
         /**
-         * True if the window is preventing splitting
-         */
-        @SuppressLint("UnflaggedApi") // The API is only used for tests.
-        public final boolean isPreventSplitting;
-
-        /**
          * True if the window duplicates touches received to wallpaper.
          */
         @SuppressLint("UnflaggedApi") // The API is only used for tests.
@@ -133,8 +127,6 @@ public class WindowInfosListenerForTest {
             this.transform = transform;
             this.isTouchable = (inputConfig & InputConfig.NOT_TOUCHABLE) == 0;
             this.isFocusable = (inputConfig & InputConfig.NOT_FOCUSABLE) == 0;
-            this.isPreventSplitting = (inputConfig
-                            & InputConfig.PREVENT_SPLITTING) != 0;
             this.isDuplicateTouchToWallpaper = (inputConfig
                             & InputConfig.DUPLICATE_TOUCH_TO_WALLPAPER) != 0;
             this.isWatchOutsideTouch = (inputConfig

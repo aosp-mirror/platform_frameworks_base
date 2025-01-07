@@ -1001,7 +1001,6 @@ public class WindowStateTests extends WindowTestsBase {
 
         assertTrue(handleWrapper.isChanged());
         assertTrue(testFlag(handle.inputConfig, InputConfig.WATCH_OUTSIDE_TOUCH));
-        assertFalse(testFlag(handle.inputConfig, InputConfig.PREVENT_SPLITTING));
         assertTrue(testFlag(handle.inputConfig, InputConfig.DISABLE_USER_ACTIVITY));
         // The window of standard resizable task should not use surface crop as touchable region.
         assertFalse(handle.replaceTouchableRegionWithCrop);
