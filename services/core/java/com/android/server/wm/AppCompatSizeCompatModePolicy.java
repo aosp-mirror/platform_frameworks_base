@@ -223,7 +223,10 @@ class AppCompatSizeCompatModePolicy {
         int rotation = newParentConfiguration.windowConfiguration.getRotation();
         final boolean isFixedToUserRotation = mActivityRecord.mDisplayContent == null
                 || mActivityRecord.mDisplayContent.getDisplayRotation().isFixedToUserRotation();
-        if (!isFixedToUserRotation && !appCompatDisplayInsets.mIsFloating) {
+        // Ignore parent rotation for floating tasks as window rotation is independent of its parent
+        // and thus will remain, and so should be reconfigured, in its original rotation.
+        if (!isFixedToUserRotation
+                && !newParentConfiguration.windowConfiguration.tasksAreFloating()) {
             // Use parent rotation because the original display can be rotated.
             resolvedConfig.windowConfiguration.setRotation(rotation);
         } else {
