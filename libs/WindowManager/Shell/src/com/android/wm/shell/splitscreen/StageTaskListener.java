@@ -379,6 +379,13 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void doForAllChildTaskInfos(Consumer<ActivityManager.RunningTaskInfo> consumer) {
+        for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {
+            final ActivityManager.RunningTaskInfo taskInfo = mChildrenTaskInfo.valueAt(i);
+            consumer.accept(taskInfo);
+        }
+    }
+
     /** Collects all the current child tasks and prepares transaction to evict them to display. */
     void evictAllChildren(WindowContainerTransaction wct) {
         for (int i = mChildrenTaskInfo.size() - 1; i >= 0; i--) {

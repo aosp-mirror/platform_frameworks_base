@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 
 import com.android.launcher3.icons.IconProvider;
+import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -55,11 +56,11 @@ public class TvStageCoordinator extends StageCoordinator
             Optional<RecentTasksController> recentTasks,
             LaunchAdjacentController launchAdjacentController,
             SplitState splitState,
-            SystemWindows systemWindows) {
+            SystemWindows systemWindows, RootTaskDisplayAreaOrganizer rootTDAOrganizer) {
         super(context, displayId, syncQueue, taskOrganizer, displayController, displayImeController,
                 displayInsetsController, transitions, transactionPool, iconProvider,
                 mainExecutor, mainHandler, recentTasks, launchAdjacentController,
-                Optional.empty(), splitState, Optional.empty());
+                Optional.empty(), splitState, Optional.empty(), rootTDAOrganizer);
 
         mTvSplitMenuController = new TvSplitMenuController(context, this,
                 systemWindows, mainHandler);

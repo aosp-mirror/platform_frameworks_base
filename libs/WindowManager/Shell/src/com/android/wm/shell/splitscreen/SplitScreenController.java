@@ -300,7 +300,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
                 mTaskOrganizer, mDisplayController, mDisplayImeController,
                 mDisplayInsetsController, mTransitions, mTransactionPool, mIconProvider,
                 mMainExecutor, mMainHandler, mRecentTasksOptional, mLaunchAdjacentController,
-                mWindowDecorViewModel, mSplitState, mDesktopTasksController);
+                mWindowDecorViewModel, mSplitState, mDesktopTasksController, mRootTDAOrganizer);
     }
 
     @Override
@@ -441,7 +441,7 @@ public class SplitScreenController implements SplitDragPolicy.Starter,
      */
     public void prepareExitSplitScreen(WindowContainerTransaction wct,
             @StageType int stageToTop, @ExitReason int reason) {
-        mStageCoordinator.prepareExitSplitScreen(stageToTop, wct);
+        mStageCoordinator.prepareExitSplitScreen(stageToTop, wct, reason);
         mStageCoordinator.clearSplitPairedInRecents(reason);
     }
 
