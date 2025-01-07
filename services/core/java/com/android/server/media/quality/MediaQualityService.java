@@ -373,14 +373,14 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public SoundProfile getSoundProfile(int type, String id, Bundle options,
+        public SoundProfile getSoundProfile(int type, String name, Bundle options,
                 UserHandle user) {
             boolean includeParams =
                     options.getBoolean(MediaQualityManager.OPTION_INCLUDE_PARAMETERS, false);
             String selection = BaseParameters.PARAMETER_TYPE + " = ? AND "
-                    + BaseParameters.PARAMETER_ID + " = ? AND "
+                    + BaseParameters.PARAMETER_NAME + " = ? AND "
                     + BaseParameters.PARAMETER_PACKAGE + " = ?";
-            String[] selectionArguments = {String.valueOf(type), id, getPackageOfCallingUid()};
+            String[] selectionArguments = {String.valueOf(type), name, getPackageOfCallingUid()};
 
             try (
                     Cursor cursor = getCursorAfterQuerying(
@@ -393,7 +393,7 @@ public class MediaQualityService extends SystemService {
                 }
                 if (count > 1) {
                     Log.wtf(TAG, String.format(Locale.US, "%d entries found for id=%s"
-                                    + " in %s. Should only ever be 0 or 1.", count, id,
+                                    + " in %s. Should only ever be 0 or 1.", count, name,
                             mMediaQualityDbHelper.SOUND_QUALITY_TABLE_NAME));
                     return null;
                 }
