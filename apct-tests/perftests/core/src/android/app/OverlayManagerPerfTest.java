@@ -20,7 +20,6 @@ import static org.junit.Assert.assertTrue;
 
 import android.content.Context;
 import android.content.om.OverlayManager;
-import android.os.UserHandle;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.perftests.utils.TestPackageInstaller;
@@ -127,7 +126,7 @@ public class OverlayManagerPerfTest {
     private void assertSetEnabled(boolean enabled, Context context, Stream<String> packagesStream) {
         final var overlayPackages = packagesStream.toList();
         overlayPackages.forEach(
-                name -> sOverlayManager.setEnabled(name, enabled, UserHandle.SYSTEM));
+                name -> sOverlayManager.setEnabled(name, enabled, context.getUser()));
 
         // Wait for the overlay changes to propagate
         final var endTime = System.nanoTime() + TimeUnit.SECONDS.toNanos(20);
@@ -174,7 +173,7 @@ public class OverlayManagerPerfTest {
             // Disable the overlay and remove the idmap for the next iteration of the test
             state.pauseTiming();
             assertSetEnabled(false, sContext, packageName);
-            sOverlayManager.invalidateCachesForOverlay(packageName, UserHandle.SYSTEM);
+            sOverlayManager.invalidateCachesForOverlay(packageName, sContext.getUser());
             state.resumeTiming();
         }
     }
@@ -189,7 +188,7 @@ public class OverlayManagerPerfTest {
             // Disable the overlay and remove the idmap for the next iteration of the test
             state.pauseTiming();
             assertSetEnabled(false, sContext, packageName);
-            sOverlayManager.invalidateCachesForOverlay(packageName, UserHandle.SYSTEM);
+            sOverlayManager.invalidateCachesForOverlay(packageName, sContext.getUser());
             state.resumeTiming();
         }
     }
