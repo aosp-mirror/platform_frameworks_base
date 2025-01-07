@@ -1715,6 +1715,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                 SecureSettingsProto.Accessibility.ENABLED_ACCESSIBILITY_SERVICES);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_AUTOCLICK_CURSOR_AREA_SIZE,
+                SecureSettingsProto.Accessibility.AUTOCLICK_CURSOR_AREA_SIZE);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED,
                 SecureSettingsProto.Accessibility.AUTOCLICK_ENABLED);
         dumpSetting(s, p,

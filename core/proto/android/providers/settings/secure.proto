@@ -107,6 +107,8 @@ message SecureSettingsProto {
         optional SettingProto accessibility_key_gesture_targets = 59 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto hct_rect_prompt_status = 60 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto em_value = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Settings for accessibility autoclick
+        optional SettingProto autoclick_cursor_area_size = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }
     optional Accessibility accessibility = 2;

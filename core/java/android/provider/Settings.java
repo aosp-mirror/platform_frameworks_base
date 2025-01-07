@@ -9305,6 +9305,16 @@ public final class Settings {
                 "accessibility_autoclick_delay";
 
         /**
+         * Integer setting specifying the autoclick cursor area size (the radius of the autoclick
+         * ring indicator) when {@link #ACCESSIBILITY_AUTOCLICK_ENABLED} is set.
+         *
+         * @see #ACCESSIBILITY_AUTOCLICK_ENABLED
+         * @hide
+         */
+        public static final String ACCESSIBILITY_AUTOCLICK_CURSOR_AREA_SIZE =
+                "accessibility_autoclick_cursor_area_size";
+
+        /**
          * Whether or not larger size icons are used for the pointer of mouse/trackpad for
          * accessibility.
          * (0 = false, 1 = true)
