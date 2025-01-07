@@ -247,32 +247,26 @@ class DraggableHandlerTest {
 
         suspend fun DragController.onDragStoppedAnimateNow(
             velocity: Float,
-            canChangeScene: Boolean = true,
             onAnimationStart: () -> Unit,
             onAnimationEnd: (Float) -> Unit,
         ) {
-            val velocityConsumed = onDragStoppedAnimateLater(velocity, canChangeScene)
+            val velocityConsumed = onDragStoppedAnimateLater(velocity)
             onAnimationStart()
             onAnimationEnd(velocityConsumed.await())
         }
 
         suspend fun DragController.onDragStoppedAnimateNow(
             velocity: Float,
-            canChangeScene: Boolean = true,
             onAnimationStart: () -> Unit,
         ) =
             onDragStoppedAnimateNow(
                 velocity = velocity,
-                canChangeScene = canChangeScene,
                 onAnimationStart = onAnimationStart,
                 onAnimationEnd = {},
             )
 
-        fun DragController.onDragStoppedAnimateLater(
-            velocity: Float,
-            canChangeScene: Boolean = true,
-        ): Deferred<Float> {
-            val velocityConsumed = testScope.async { onStop(velocity, canChangeScene) }
+        fun DragController.onDragStoppedAnimateLater(velocity: Float): Deferred<Float> {
+            val velocityConsumed = testScope.async { onStop(velocity) }
             testScope.testScheduler.runCurrent()
             return velocityConsumed
         }

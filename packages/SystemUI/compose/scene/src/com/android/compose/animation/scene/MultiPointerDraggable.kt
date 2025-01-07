@@ -307,13 +307,13 @@ internal class MultiPointerDraggableNode(
                                             velocityTracker.calculateVelocity(maxVelocity)
                                         }
                                         .toFloat(),
-                                onFling = { controller.onStop(it, canChangeContent = true) },
+                                onFling = { controller.onStop(it) },
                             )
                         },
                         onDragCancel = { controller ->
                             startFlingGesture(
                                 initialVelocity = 0f,
-                                onFling = { controller.onStop(it, canChangeContent = true) },
+                                onFling = { controller.onStop(it) },
                             )
                         },
                         swipeDetector = swipeDetector,

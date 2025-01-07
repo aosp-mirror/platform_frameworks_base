@@ -60,17 +60,12 @@ internal interface DragController {
      * Stop the current drag with the given [velocity].
      *
      * @param velocity The velocity of the drag when it stopped.
-     * @param canChangeContent Whether the content can be changed as a result of this drag.
      * @return the consumed [velocity] when the animation complete
      */
-    suspend fun onStop(velocity: Float, canChangeContent: Boolean): Float
+    suspend fun onStop(velocity: Float): Float
 
-    /**
-     * Cancels the current drag.
-     *
-     * @param canChangeContent Whether the content can be changed as a result of this drag.
-     */
-    fun onCancel(canChangeContent: Boolean)
+    /** Cancels the current drag. */
+    fun onCancel()
 }
 
 internal class DraggableHandlerImpl(
@@ -295,17 +290,16 @@ private class DragControllerImpl(
         return newOffset - previousOffset
     }
 
-    override suspend fun onStop(velocity: Float, canChangeContent: Boolean): Float {
+    override suspend fun onStop(velocity: Float): Float {
         // To ensure that any ongoing animation completes gracefully and avoids an undefined state,
         // we execute the actual `onStop` logic in a non-cancellable context. This prevents the
         // coroutine from being cancelled prematurely, which could interrupt the animation.
         // TODO(b/378470603) Remove this check once NestedDraggable is used to handle drags.
-        return withContext(NonCancellable) { onStop(velocity, canChangeContent, swipeAnimation) }
+        return withContext(NonCancellable) { onStop(velocity, swipeAnimation) }
     }
 
     private suspend fun <T : ContentKey> onStop(
         velocity: Float,
-        canChangeContent: Boolean,
 
         // Important: Make sure that this has the same name as [this.swipeAnimation] so that all the
         // code here references the current animation when [onDragStopped] is called, otherwise the
@@ -319,35 +313,27 @@ private class DragControllerImpl(
         }
 
         val fromContent = swipeAnimation.fromContent
+        // If we are halfway between two contents, we check what the target will be based on
+        // the velocity and offset of the transition, then we launch the animation.
+
+        val toContent = swipeAnimation.toContent
+
+        // Compute the destination content (and therefore offset) to settle in.
+        val offset = swipeAnimation.dragOffset
+        val distance = swipeAnimation.distance()
         val targetContent =
-            if (canChangeContent) {
-                // If we are halfway between two contents, we check what the target will be based on
-                // the velocity and offset of the transition, then we launch the animation.
-
-                val toContent = swipeAnimation.toContent
-
-                // Compute the destination content (and therefore offset) to settle in.
-                val offset = swipeAnimation.dragOffset
-                val distance = swipeAnimation.distance()
-                if (
-                    distance != DistanceUnspecified &&
-                        shouldCommitSwipe(
-                            offset = offset,
-                            distance = distance,
-                            velocity = velocity,
-                            wasCommitted = swipeAnimation.currentContent == toContent,
-                            requiresFullDistanceSwipe = swipeAnimation.requiresFullDistanceSwipe,
-                        )
-                ) {
-                    toContent
-                } else {
-                    fromContent
-                }
+            if (
+                distance != DistanceUnspecified &&
+                    shouldCommitSwipe(
+                        offset = offset,
+                        distance = distance,
+                        velocity = velocity,
+                        wasCommitted = swipeAnimation.currentContent == toContent,
+                        requiresFullDistanceSwipe = swipeAnimation.requiresFullDistanceSwipe,
+                    )
+            ) {
+                toContent
             } else {
-                // We are doing an overscroll preview animation between scenes.
-                check(fromContent == swipeAnimation.currentContent) {
-                    "canChangeContent is false but currentContent != fromContent"
-                }
                 fromContent
             }
 
@@ -423,10 +409,8 @@ private class DragControllerImpl(
         }
     }
 
-    override fun onCancel(canChangeContent: Boolean) {
-        swipeAnimation.contentTransition.coroutineScope.launch {
-            onStop(velocity = 0f, canChangeContent = canChangeContent)
-        }
+    override fun onCancel() {
+        swipeAnimation.contentTransition.coroutineScope.launch { onStop(velocity = 0f) }
     }
 }
 
@@ -519,11 +503,11 @@ private fun scrollController(
         }
 
         override suspend fun OnStopScope.onStop(initialVelocity: Float): Float {
-            return dragController.onStop(velocity = initialVelocity, canChangeContent = true)
+            return dragController.onStop(velocity = initialVelocity)
         }
 
         override fun onCancel() {
-            dragController.onCancel(canChangeContent = true)
+            dragController.onCancel()
         }
 
         /**
@@ -547,9 +531,9 @@ internal const val OffsetVisibilityThreshold = 0.5f
 private object NoOpDragController : DragController {
     override fun onDrag(delta: Float) = 0f
 
-    override suspend fun onStop(velocity: Float, canChangeContent: Boolean) = 0f
+    override suspend fun onStop(velocity: Float) = 0f
 
-    override fun onCancel(canChangeContent: Boolean) {
+    override fun onCancel() {
         /* do nothing */
     }
 }
