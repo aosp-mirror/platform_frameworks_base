@@ -61,9 +61,7 @@ import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
-import android.provider.Settings;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableContentResolver;
 import android.testing.TestableLooper;
 import android.view.IRemoteAnimationRunner;
 import android.view.KeyEvent;
@@ -84,7 +82,6 @@ import android.window.WindowContainerToken;
 import androidx.annotation.Nullable;
 import androidx.test.filters.SmallTest;
 
-import com.android.internal.util.test.FakeSettingsProvider;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTestCase;
 import com.android.wm.shell.TestShellExecutor;
@@ -109,7 +106,6 @@ import org.mockito.MockitoAnnotations;
 @RunWith(AndroidTestingRunner.class)
 public class BackAnimationControllerTest extends ShellTestCase {
 
-    private static final String ANIMATION_ENABLED = "1";
     private final TestShellExecutor mShellExecutor = new TestShellExecutor();
 
     private ShellInit mShellInit;
@@ -148,8 +144,6 @@ public class BackAnimationControllerTest extends ShellTestCase {
     private Transitions.TransitionHandler mTakeoverHandler;
 
     private BackAnimationController mController;
-    private TestableContentResolver mContentResolver;
-    private TestableLooper mTestableLooper;
 
     private DefaultCrossActivityBackAnimation mDefaultCrossActivityBackAnimation;
     private CrossTaskBackAnimation mCrossTaskBackAnimation;
@@ -166,11 +160,6 @@ public class BackAnimationControllerTest extends ShellTestCase {
         MockitoAnnotations.initMocks(this);
         mContext.addMockSystemService(InputManager.class, mInputManager);
         mContext.getApplicationInfo().privateFlags |= ApplicationInfo.PRIVATE_FLAG_PRIVILEGED;
-        mContentResolver = new TestableContentResolver(mContext);
-        mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
-        Settings.Global.putString(mContentResolver, Settings.Global.ENABLE_BACK_ANIMATION,
-                ANIMATION_ENABLED);
-        mTestableLooper = TestableLooper.get(this);
         mShellInit = spy(new ShellInit(mShellExecutor));
         mDefaultCrossActivityBackAnimation = new DefaultCrossActivityBackAnimation(mContext,
                 mAnimationBackground, mRootTaskDisplayAreaOrganizer, mHandler);
@@ -187,10 +176,8 @@ public class BackAnimationControllerTest extends ShellTestCase {
                         mShellInit,
                         mShellController,
                         mShellExecutor,
-                        new Handler(mTestableLooper.getLooper()),
                         mActivityTaskManager,
                         mContext,
-                        mContentResolver,
                         mAnimationBackground,
                         mShellBackAnimationRegistry,
                         mShellCommandHandler,
@@ -339,47 +326,6 @@ public class BackAnimationControllerTest extends ShellTestCase {
         mController.setTriggerBack(true);   // Fake trigger back
         doMotionEvent(MotionEvent.ACTION_UP, 0);
         verify(mAnimatorCallback).onBackInvoked();
-    }
-
-    @Test
-    public void animationDisabledFromSettings() throws RemoteException {
-        // Toggle the setting off
-        Settings.Global.putString(mContentResolver, Settings.Global.ENABLE_BACK_ANIMATION, "0");
-        ShellInit shellInit = new ShellInit(mShellExecutor);
-        mController =
-                new BackAnimationController(
-                        shellInit,
-                        mShellController,
-                        mShellExecutor,
-                        new Handler(mTestableLooper.getLooper()),
-                        mActivityTaskManager,
-                        mContext,
-                        mContentResolver,
-                        mAnimationBackground,
-                        mShellBackAnimationRegistry,
-                        mShellCommandHandler,
-                        mTransitions,
-                        mHandler);
-        shellInit.init();
-        registerAnimation(BackNavigationInfo.TYPE_RETURN_TO_HOME);
-
-        ArgumentCaptor<BackMotionEvent> backEventCaptor =
-                ArgumentCaptor.forClass(BackMotionEvent.class);
-
-        createNavigationInfo(BackNavigationInfo.TYPE_RETURN_TO_HOME,
-                /* enableAnimation = */ false,
-                /* isAnimationCallback = */ false);
-
-        triggerBackGesture();
-        releaseBackGesture();
-
-        verify(mAppCallback, times(1)).onBackInvoked();
-
-        verify(mAnimatorCallback, never()).onBackStarted(any());
-        verify(mAnimatorCallback, never()).onBackProgressed(backEventCaptor.capture());
-        verify(mAnimatorCallback, never()).onBackInvoked();
-        verify(mBackAnimationRunner, never()).onAnimationStart(
-                anyInt(), any(), any(), any(), any());
     }
 
     @Test

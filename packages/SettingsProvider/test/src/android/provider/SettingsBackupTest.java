@@ -564,7 +564,6 @@ public class SettingsBackupTest {
                     Settings.Global.WATCHDOG_TIMEOUT_MILLIS,
                     Settings.Global.MANAGED_PROVISIONING_DEFER_PROVISIONING_TO_ROLE_HOLDER,
                     Settings.Global.REVIEW_PERMISSIONS_NOTIFICATION_STATE,
-                    Settings.Global.ENABLE_BACK_ANIMATION, // Temporary for T, dev option only
                     Settings.Global.HEARING_DEVICE_LOCAL_AMBIENT_VOLUME, // cache per hearing device
                     Settings.Global.HEARING_DEVICE_LOCAL_NOTIFICATION, // cache per hearing device
                     Settings.Global.Wearable.COMBINED_LOCATION_ENABLE,

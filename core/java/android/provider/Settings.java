@@ -17395,13 +17395,6 @@ public final class Settings {
 
 
         /**
-         * Whether back preview animations are played when user does a back gesture or presses
-         * the back button.
-         * @hide
-         */
-        public static final String ENABLE_BACK_ANIMATION = "enable_back_animation";
-
-        /**
          * An allow list of packages for which the user has granted the permission to communicate
          * across profiles.
          *

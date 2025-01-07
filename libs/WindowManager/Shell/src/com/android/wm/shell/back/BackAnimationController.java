@@ -28,7 +28,6 @@ import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
 import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 
 import static com.android.internal.jank.InteractionJankMonitor.CUJ_PREDICTIVE_BACK_HOME;
-import static com.android.window.flags.Flags.predictiveBackSystemAnims;
 import static com.android.window.flags.Flags.unifyBackNavigationTransition;
 import static com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_BACK_PREVIEW;
 
@@ -40,23 +39,17 @@ import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.TaskInfo;
 import android.content.ComponentName;
-import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.Configuration;
-import android.database.ContentObserver;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.input.InputManager;
-import android.net.Uri;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.RemoteCallback;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
-import android.os.UserHandle;
-import android.provider.Settings.Global;
 import android.util.Log;
 import android.view.IRemoteAnimationRunner;
 import android.view.InputDevice;
@@ -92,7 +85,6 @@ import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.shared.TransitionUtil;
-import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ConfigurationChangeListener;
 import com.android.wm.shell.sysui.ShellCommandHandler;
@@ -102,7 +94,6 @@ import com.android.wm.shell.transition.Transitions;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.Predicate;
 
 /**
@@ -111,14 +102,7 @@ import java.util.function.Predicate;
 public class BackAnimationController implements RemoteCallable<BackAnimationController>,
         ConfigurationChangeListener {
     private static final String TAG = "ShellBackPreview";
-    private static final int SETTING_VALUE_OFF = 0;
-    private static final int SETTING_VALUE_ON = 1;
-    public static final boolean IS_ENABLED =
-            SystemProperties.getInt("persist.wm.debug.predictive_back",
-                    SETTING_VALUE_ON) == SETTING_VALUE_ON;
 
-    /** Predictive back animation developer option */
-    private final AtomicBoolean mEnableAnimations = new AtomicBoolean(false);
     /**
      * Max duration to wait for an animation to finish before triggering the real back.
      */
@@ -148,11 +132,9 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private boolean mReceivedNullNavigationInfo = false;
     private final IActivityTaskManager mActivityTaskManager;
     private final Context mContext;
-    private final ContentResolver mContentResolver;
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
     private final ShellExecutor mShellExecutor;
-    private final Handler mBgHandler;
     private final WindowManager mWindowManager;
     private final Transitions mTransitions;
     @VisibleForTesting
@@ -245,7 +227,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
-            @NonNull @ShellBackgroundThread Handler backgroundHandler,
             Context context,
             @NonNull BackAnimationBackground backAnimationBackground,
             ShellBackAnimationRegistry shellBackAnimationRegistry,
@@ -256,10 +237,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
                 shellInit,
                 shellController,
                 shellExecutor,
-                backgroundHandler,
                 ActivityTaskManager.getService(),
                 context,
-                context.getContentResolver(),
                 backAnimationBackground,
                 shellBackAnimationRegistry,
                 shellCommandHandler,
@@ -272,10 +251,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
             @NonNull ShellInit shellInit,
             @NonNull ShellController shellController,
             @NonNull @ShellMainThread ShellExecutor shellExecutor,
-            @NonNull @ShellBackgroundThread Handler bgHandler,
             @NonNull IActivityTaskManager activityTaskManager,
             Context context,
-            ContentResolver contentResolver,
             @NonNull BackAnimationBackground backAnimationBackground,
             ShellBackAnimationRegistry shellBackAnimationRegistry,
             ShellCommandHandler shellCommandHandler,
@@ -285,10 +262,8 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
         mShellExecutor = shellExecutor;
         mActivityTaskManager = activityTaskManager;
         mContext = context;
-        mContentResolver = contentResolver;
         mRequirePointerPilfer =
                 context.getResources().getBoolean(R.bool.config_backAnimationRequiresPointerPilfer);
-        mBgHandler = bgHandler;
         shellInit.addInitCallback(this::onInit, this);
         mAnimationBackground = backAnimationBackground;
         mShellBackAnimationRegistry = shellBackAnimationRegistry;
@@ -305,49 +280,11 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private void onInit() {
-        setupAnimationDeveloperSettingsObserver(mContentResolver, mBgHandler);
-        updateEnableAnimationFromFlags();
         createAdapter();
         mShellController.addExternalInterface(IBackAnimation.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
         mShellController.addConfigurationChangeListener(this);
-    }
-
-    private void setupAnimationDeveloperSettingsObserver(
-            @NonNull ContentResolver contentResolver,
-            @NonNull @ShellBackgroundThread final Handler backgroundHandler) {
-        if (predictiveBackSystemAnims()) {
-            ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation aconfig flag is enabled, therefore "
-                    + "developer settings flag is ignored and no content observer registered");
-            return;
-        }
-        ContentObserver settingsObserver = new ContentObserver(backgroundHandler) {
-            @Override
-            public void onChange(boolean selfChange, Uri uri) {
-                updateEnableAnimationFromFlags();
-            }
-        };
-        contentResolver.registerContentObserver(
-                Global.getUriFor(Global.ENABLE_BACK_ANIMATION),
-                false, settingsObserver, UserHandle.USER_SYSTEM
-        );
-    }
-
-    /**
-     * Updates {@link BackAnimationController#mEnableAnimations} based on the current values of the
-     * aconfig flag and the developer settings flag
-     */
-    @ShellBackgroundThread
-    private void updateEnableAnimationFromFlags() {
-        boolean isEnabled = predictiveBackSystemAnims() || isDeveloperSettingEnabled();
-        mEnableAnimations.set(isEnabled);
-        ProtoLog.d(WM_SHELL_BACK_PREVIEW, "Back animation enabled=%s", isEnabled);
-    }
-
-    private boolean isDeveloperSettingEnabled() {
-        return Global.getInt(mContext.getContentResolver(),
-                Global.ENABLE_BACK_ANIMATION, SETTING_VALUE_OFF) == SETTING_VALUE_ON;
     }
 
     public BackAnimation getBackAnimationImpl() {
@@ -617,14 +554,13 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     private void startBackNavigation(@NonNull BackTouchTracker touchTracker) {
         try {
             startLatencyTracking();
-            final BackAnimationAdapter adapter = mEnableAnimations.get()
-                    ? mBackAnimationAdapter : null;
-            if (adapter != null && mShellBackAnimationRegistry.hasSupportedAnimatorsChanged()) {
-                adapter.updateSupportedAnimators(
+            if (mBackAnimationAdapter != null
+                    && mShellBackAnimationRegistry.hasSupportedAnimatorsChanged()) {
+                mBackAnimationAdapter.updateSupportedAnimators(
                         mShellBackAnimationRegistry.getSupportedAnimators());
             }
             mBackNavigationInfo = mActivityTaskManager.startBackNavigation(
-                    mNavigationObserver, adapter);
+                    mNavigationObserver, mBackAnimationAdapter);
             onBackNavigationInfoReceived(mBackNavigationInfo, touchTracker);
         } catch (RemoteException remoteException) {
             Log.e(TAG, "Failed to initAnimation", remoteException);
@@ -696,9 +632,7 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
     }
 
     private boolean shouldDispatchToAnimator() {
-        return mEnableAnimations.get()
-                && mBackNavigationInfo != null
-                && mBackNavigationInfo.isPrepareRemoteAnimation();
+        return mBackNavigationInfo != null && mBackNavigationInfo.isPrepareRemoteAnimation();
     }
 
     private void tryPilferPointers() {
@@ -1194,7 +1128,6 @@ public class BackAnimationController implements RemoteCallable<BackAnimationCont
      */
     private void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "BackAnimationController state:");
-        pw.println(prefix + "  mEnableAnimations=" + mEnableAnimations.get());
         pw.println(prefix + "  mBackGestureStarted=" + mBackGestureStarted);
         pw.println(prefix + "  mPostCommitAnimationInProgress=" + mPostCommitAnimationInProgress);
         pw.println(prefix + "  mShouldStartOnNextMoveEvent=" + mShouldStartOnNextMoveEvent);

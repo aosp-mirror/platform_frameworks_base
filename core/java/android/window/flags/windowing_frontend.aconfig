@@ -113,13 +113,6 @@ flag {
 }
 
 flag {
-    name: "predictive_back_system_anims"
-    namespace: "systemui"
-    description: "Predictive back for system animations"
-    bug: "320510464"
-}
-
-flag {
     name: "remove_activity_starter_dream_callback"
     namespace: "windowing_frontend"
     description: "Avoid a race with DreamManagerService callbacks for isDreaming by checking Activity state directly"
