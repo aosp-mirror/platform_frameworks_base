@@ -1183,7 +1183,6 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
     private void updateKeyguardStatusViewAlignment(boolean animate) {
         boolean shouldBeCentered = shouldKeyguardStatusViewBeCentered();
         mKeyguardUnfoldTransition.ifPresent(t -> t.setStatusViewCentered(shouldBeCentered));
-        mKeyguardInteractor.setClockShouldBeCentered(shouldBeCentered);
     }
 
     private boolean shouldKeyguardStatusViewBeCentered() {

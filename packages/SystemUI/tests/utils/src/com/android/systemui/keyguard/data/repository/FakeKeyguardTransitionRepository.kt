@@ -402,6 +402,12 @@ class FakeKeyguardTransitionRepository(
             )
         )
     }
+
+    suspend fun transitionTo(from: KeyguardState, to: KeyguardState) {
+        sendTransitionStep(TransitionStep(from, to, 0f, TransitionState.STARTED))
+        sendTransitionStep(TransitionStep(from, to, 0.5f, TransitionState.RUNNING))
+        sendTransitionStep(TransitionStep(from, to, 1f, TransitionState.FINISHED))
+    }
 }
 
 @Module

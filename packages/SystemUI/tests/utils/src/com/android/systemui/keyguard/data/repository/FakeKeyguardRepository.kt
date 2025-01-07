@@ -46,9 +46,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
         MutableSharedFlow(extraBufferCapacity = 1)
     override val keyguardDoneAnimationsFinished: Flow<Unit> = _keyguardDoneAnimationsFinished
 
-    private val _clockShouldBeCentered = MutableStateFlow<Boolean>(true)
-    override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered
-
     private val _dismissAction = MutableStateFlow<DismissAction>(DismissAction.None)
     override val dismissAction: StateFlow<DismissAction> = _dismissAction
 
@@ -190,10 +187,6 @@ class FakeKeyguardRepository @Inject constructor() : KeyguardRepository {
 
     override fun keyguardDoneAnimationsFinished() {
         _keyguardDoneAnimationsFinished.tryEmit(Unit)
-    }
-
-    override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
-        _clockShouldBeCentered.value = shouldBeCentered
     }
 
     override fun setKeyguardEnabled(enabled: Boolean) {

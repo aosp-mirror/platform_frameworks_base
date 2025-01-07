@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.data.repository
 
 import android.graphics.Point
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.widget.LockPatternUtils
 import com.android.keyguard.KeyguardUpdateMonitor
 import com.android.keyguard.KeyguardUpdateMonitorCallback
@@ -64,7 +65,6 @@ import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.stateIn
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Defines interface for classes that encapsulate application state for the keyguard. */
 interface KeyguardRepository {
@@ -248,13 +248,6 @@ interface KeyguardRepository {
     val keyguardDoneAnimationsFinished: Flow<Unit>
 
     /**
-     * Receive whether clock should be centered on lockscreen.
-     *
-     * @deprecated When scene container flag is on use clockShouldBeCentered from domain level.
-     */
-    val clockShouldBeCentered: Flow<Boolean>
-
-    /**
      * Whether the primary authentication is required for the given user due to lockdown or
      * encryption after reboot.
      */
@@ -305,8 +298,6 @@ interface KeyguardRepository {
     fun setDismissAction(dismissAction: DismissAction)
 
     suspend fun setKeyguardDone(keyguardDoneType: KeyguardDone)
-
-    fun setClockShouldBeCentered(shouldBeCentered: Boolean)
 
     /**
      * Updates signal that the keyguard done animations are finished
@@ -389,9 +380,6 @@ constructor(
     override val onCameraLaunchDetected = MutableStateFlow(CameraLaunchSourceModel())
 
     override val panelAlpha: MutableStateFlow<Float> = MutableStateFlow(1f)
-
-    private val _clockShouldBeCentered = MutableStateFlow(true)
-    override val clockShouldBeCentered: Flow<Boolean> = _clockShouldBeCentered.asStateFlow()
 
     override val topClippingBounds = MutableStateFlow<Int?>(null)
 
@@ -679,10 +667,6 @@ constructor(
 
     override fun setQuickSettingsVisible(isVisible: Boolean) {
         _isQuickSettingsVisible.value = isVisible
-    }
-
-    override fun setClockShouldBeCentered(shouldBeCentered: Boolean) {
-        _clockShouldBeCentered.value = shouldBeCentered
     }
 
     override fun setKeyguardEnabled(enabled: Boolean) {
