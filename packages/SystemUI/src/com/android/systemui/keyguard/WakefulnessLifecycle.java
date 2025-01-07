@@ -24,11 +24,11 @@ import android.graphics.Point;
 import android.os.Bundle;
 import android.os.PowerManager;
 import android.os.RemoteException;
-import android.os.Trace;
 import android.util.DisplayMetrics;
 
 import androidx.annotation.Nullable;
 
+import com.android.app.tracing.coroutines.TrackTracer;
 import com.android.systemui.Dumpable;
 import com.android.systemui.dagger.SysUISingleton;
 import com.android.systemui.dump.DumpManager;
@@ -197,7 +197,7 @@ public class WakefulnessLifecycle extends Lifecycle<WakefulnessLifecycle.Observe
 
     private void setWakefulness(@Wakefulness int wakefulness) {
         mWakefulness = wakefulness;
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "wakefulness", wakefulness);
+        TrackTracer.instantForGroup("screen", "wakefulness", wakefulness);
     }
 
     private void updateLastWakeOriginLocation() {

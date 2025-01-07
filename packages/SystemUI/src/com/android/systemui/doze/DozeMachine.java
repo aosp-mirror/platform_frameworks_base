@@ -22,10 +22,10 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAK
 import android.annotation.MainThread;
 import android.content.res.Configuration;
 import android.hardware.display.AmbientDisplayConfiguration;
-import android.os.Trace;
 import android.util.Log;
 import android.view.Display;
 
+import com.android.app.tracing.coroutines.TrackTracer;
 import com.android.internal.util.Preconditions;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.doze.dagger.DozeScope;
@@ -314,7 +314,7 @@ public class DozeMachine {
         mState = newState;
 
         mDozeLog.traceState(newState);
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "doze_machine_state", newState.ordinal());
+        TrackTracer.instantForGroup("keyguard", "doze_machine_state", newState.ordinal());
 
         updatePulseReason(newState, oldState, pulseReason);
         performTransitionOnComponents(oldState, newState);

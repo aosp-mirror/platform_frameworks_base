@@ -32,6 +32,7 @@ import android.os.Trace;
 
 import androidx.annotation.VisibleForTesting;
 
+import com.android.app.tracing.coroutines.TrackTracer;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.KeyguardUpdateMonitorCallback;
@@ -241,7 +242,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController {
 
     private void setKeyguardFadingAway(boolean keyguardFadingAway) {
         if (mKeyguardFadingAway != keyguardFadingAway) {
-            Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardFadingAway",
+            TrackTracer.instantForGroup("keyguard", "FadingAway",
                     keyguardFadingAway ? 1 : 0);
             mKeyguardFadingAway = keyguardFadingAway;
             invokeForEachCallback(Callback::onKeyguardFadingAwayChanged);
@@ -356,7 +357,7 @@ public class KeyguardStateControllerImpl implements KeyguardStateController {
     @Override
     public void notifyKeyguardGoingAway(boolean keyguardGoingAway) {
         if (mKeyguardGoingAway != keyguardGoingAway) {
-            Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguardGoingAway",
+            Trace.traceCounter(Trace.TRACE_TAG_APP, "keyguard##GoingAway",
                     keyguardGoingAway ? 1 : 0);
             mKeyguardGoingAway = keyguardGoingAway;
             mKeyguardInteractorLazy.get().setIsKeyguardGoingAway(keyguardGoingAway);

@@ -109,6 +109,7 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.app.animation.Interpolators;
+import com.android.app.tracing.coroutines.TrackTracer;
 import com.android.internal.foldables.FoldGracePeriodProvider;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.jank.InteractionJankMonitor.Configuration;
@@ -3983,7 +3984,7 @@ public class KeyguardViewMediator implements CoreStartable, Dumpable,
 
     public void setPendingLock(boolean hasPendingLock) {
         mPendingLock = hasPendingLock;
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "pendingLock", mPendingLock ? 1 : 0);
+        TrackTracer.instantForGroup("keyguard", "pendingLock", mPendingLock ? 1 : 0);
     }
 
     private boolean isViewRootReady() {
