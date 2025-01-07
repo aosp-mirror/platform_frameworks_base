@@ -164,11 +164,19 @@ fun StatusBarRoot(
                         statusBarViewModel.iconBlockList,
                     )
 
-                    if (!StatusBarChipsModernization.isEnabled) {
+                    if (StatusBarChipsModernization.isEnabled) {
+                        // Make sure the primary chip is hidden when StatusBarChipsModernization is
+                        // enabled. OngoingActivityChips will be shown in a composable container
+                        // when this flag is enabled.
+                        phoneStatusBarView
+                            .requireViewById<View>(R.id.ongoing_activity_chip_primary)
+                            .visibility = View.GONE
+                    } else {
                         ongoingCallController.setChipView(
                             phoneStatusBarView.requireViewById(R.id.ongoing_activity_chip_primary)
                         )
                     }
+
                     // For notifications, first inflate the [NotificationIconContainer]
                     val notificationIconArea =
                         phoneStatusBarView.requireViewById<ViewGroup>(R.id.notification_icon_area)
