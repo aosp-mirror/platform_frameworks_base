@@ -5547,6 +5547,13 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     void assignLayer(Transaction t, int layer) {
         if (mStartingData != null) {
+            if (Flags.useSelfSyncTransactionForLayer() && mSyncState != SYNC_STATE_NONE) {
+                // When this container needs to be synced, assign layer with its own sync
+                // transaction to avoid out of ordering when merge.
+                // Still use the passed-in transaction for non-sync case, such as building finish
+                // transaction.
+                t = getSyncTransaction();
+            }
             // The starting window should cover the task.
             t.setLayer(mSurfaceControl, Integer.MAX_VALUE);
             return;

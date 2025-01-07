@@ -1267,6 +1267,7 @@ public class WindowContainerTests extends WindowTestsBase {
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
         spyOn(container);
         spyOn(surfaceAnimator);
+        doReturn(t).when(container).getSyncTransaction();
 
         // Trigger for first relative layer call.
         container.assignRelativeLayer(t, relativeParent, 1 /* layer */);
@@ -1293,6 +1294,7 @@ public class WindowContainerTests extends WindowTestsBase {
         spyOn(container);
         spyOn(surfaceAnimator);
         spyOn(surfaceFreezer);
+        doReturn(t).when(container).getSyncTransaction();
 
         container.setLayer(t, 1);
         container.setRelativeLayer(t, relativeParent, 2);
