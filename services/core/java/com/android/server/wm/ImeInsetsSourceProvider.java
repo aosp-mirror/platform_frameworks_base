@@ -103,6 +103,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // again, so that the control with leash can be eventually dispatched
             if (!mGivenInsetsReady && isServerVisible() && !givenInsetsPending
                     && mControlTarget != null) {
+                ProtoLog.d(WM_DEBUG_IME,
+                        "onPostLayout: IME control ready to be dispatched, ws=%s", ws);
                 mGivenInsetsReady = true;
                 ImeTracker.forLogging().onProgress(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
@@ -118,6 +120,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStatsToken = null;
             } else if (wasServerVisible && !isServerVisible()) {
+                ProtoLog.d(WM_DEBUG_IME, "onPostLayout: setImeShowing(false) was: %s, ws=%s",
+                        isImeShowing(), ws);
                 setImeShowing(false);
             }
         }
@@ -621,6 +625,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // request (cancelling the initial show) or hide request (aborting the initial show).
             logIsScheduledAndReadyToShowIme(!visible /* aborted */);
         }
+        ProtoLog.d(WM_DEBUG_IME, "receiveImeStatsToken: visible=%s", visible);
         if (visible) {
             ImeTracker.forLogging().onCancelled(
                     mStatsToken, ImeTracker.PHASE_WM_ABORT_SHOW_IME_POST_LAYOUT);
