@@ -1,0 +1,9 @@
+package: "com.android.server.print"
+container: "system"
+
+flag {
+    name: "do_not_include_capabilities"
+    namespace: "print"
+    description: "Do not use the flag Context.BIND_INCLUDE_CAPABILITIES when binding to the service"
+    bug: "291281543"
+}
