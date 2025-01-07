@@ -342,8 +342,8 @@ public class AppTransitionTests extends WindowTestsBase {
     public void testCancelRemoteAnimationWhenFreeze() {
         final DisplayContent dc = createNewDisplay(Display.STATE_ON);
         doReturn(false).when(dc).onDescendantOrientationChanged(any());
-        final WindowState exitingAppWindow = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
-                dc, "exiting app");
+        final WindowState exitingAppWindow = newWindowBuilder("exiting app",
+                TYPE_BASE_APPLICATION).setDisplay(dc).build();
         final ActivityRecord exitingActivity = exitingAppWindow.mActivityRecord;
         // Wait until everything in animation handler get executed to prevent the exiting window
         // from being removed during WindowSurfacePlacer Traversal.

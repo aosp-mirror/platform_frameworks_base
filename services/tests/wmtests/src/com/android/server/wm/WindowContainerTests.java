@@ -504,8 +504,8 @@ public class WindowContainerTests extends WindowTestsBase {
         assertTrue(child.isAnimating(PARENTS, ANIMATION_TYPE_APP_TRANSITION));
         assertFalse(child.isAnimating(PARENTS, ANIMATION_TYPE_SCREEN_ROTATION));
 
-        final WindowState windowState = createWindow(null /* parent */, TYPE_BASE_APPLICATION,
-                mDisplayContent, "TestWindowState");
+        final WindowState windowState = newWindowBuilder("TestWindowState",
+                TYPE_BASE_APPLICATION).setDisplay(mDisplayContent).build();
         WindowContainer parent = windowState.getParent();
         spyOn(windowState.mSurfaceAnimator);
         doReturn(true).when(windowState.mSurfaceAnimator).isAnimating();
@@ -1045,8 +1045,8 @@ public class WindowContainerTests extends WindowTestsBase {
 
         // An animating window with mRemoveOnExit can be removed by handleCompleteDeferredRemoval
         // once it no longer animates.
-        final WindowState exitingWindow = createWindow(null, TYPE_APPLICATION_OVERLAY,
-                displayContent, "exiting window");
+        final WindowState exitingWindow = newWindowBuilder("exiting window",
+                TYPE_APPLICATION_OVERLAY).setDisplay(displayContent).build();
         exitingWindow.startAnimation(exitingWindow.getPendingTransaction(),
                 mock(AnimationAdapter.class), false /* hidden */,
                 SurfaceAnimator.ANIMATION_TYPE_WINDOW_ANIMATION);
@@ -1063,7 +1063,7 @@ public class WindowContainerTests extends WindowTestsBase {
         final ActivityRecord r = new TaskBuilder(mSupervisor).setCreateActivity(true)
                 .setDisplay(displayContent).build().getTopMostActivity();
         // Add a window and make the activity animating so the removal of activity is deferred.
-        createWindow(null, TYPE_BASE_APPLICATION, r, "win");
+        newWindowBuilder("win", TYPE_BASE_APPLICATION).setWindowToken(r).build();
         doReturn(true).when(r).isAnimating(anyInt(), anyInt());
 
         displayContent.remove();
@@ -1216,7 +1216,8 @@ public class WindowContainerTests extends WindowTestsBase {
     public void testFreezeInsets() {
         final Task task = createTask(mDisplayContent);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        final WindowState win = newWindowBuilder("win", TYPE_BASE_APPLICATION).setWindowToken(
+                activity).build();
 
         // Set visibility to false, verify the main window of the task will be set the frozen
         // insets state immediately.
@@ -1233,7 +1234,8 @@ public class WindowContainerTests extends WindowTestsBase {
         final Task rootTask = createTask(mDisplayContent);
         final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
         final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, activity, "win");
+        final WindowState win = newWindowBuilder("win", TYPE_BASE_APPLICATION).setWindowToken(
+                activity).build();
         task.getDisplayContent().prepareAppTransition(TRANSIT_CLOSE);
         spyOn(win);
         doReturn(true).when(task).okToAnimate();
