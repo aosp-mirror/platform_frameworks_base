@@ -203,6 +203,7 @@ class ShadeTestUtilSceneImpl(
     val isUserInputOngoing = MutableStateFlow(true)
 
     override fun setShadeAndQsExpansion(shadeExpansion: Float, qsExpansion: Float) {
+        shadeRepository.setLegacyIsQsExpanded(qsExpansion > 0f)
         if (shadeExpansion == 1f) {
             setIdleScene(Scenes.Shade)
         } else if (qsExpansion == 1f) {

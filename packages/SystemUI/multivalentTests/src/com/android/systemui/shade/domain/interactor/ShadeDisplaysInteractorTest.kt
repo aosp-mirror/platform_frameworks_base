@@ -22,10 +22,13 @@ import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.scene.ui.view.mockShadeRootView
 import com.android.systemui.shade.data.repository.fakeShadeDisplaysRepository
 import com.android.systemui.testKosmos
+import kotlinx.coroutines.test.advanceUntilIdle
+import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -41,6 +44,7 @@ import org.mockito.kotlin.whenever
 class ShadeDisplaysInteractorTest : SysuiTestCase() {
     val kosmos = testKosmos().useUnconfinedTestDispatcher()
 
+    private val testScope = kosmos.testScope
     private val shadeRootview = kosmos.mockShadeRootView
     private val positionRepository = kosmos.fakeShadeDisplaysRepository
     private val shadeContext = kosmos.mockedWindowContext
@@ -49,7 +53,7 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
     private val configuration = mock<Configuration>()
     private val display = mock<Display>()
 
-    private val underTest = kosmos.shadeDisplaysInteractor
+    private val underTest by lazy { kosmos.shadeDisplaysInteractor }
 
     @Before
     fun setup() {
@@ -84,12 +88,14 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun start_shadeInWrongPosition_logsStartToLatencyTracker() {
-        whenever(display.displayId).thenReturn(0)
-        positionRepository.setDisplayId(1)
+    fun start_shadeInWrongPosition_logsStartToLatencyTracker() =
+        testScope.runTest {
+            whenever(display.displayId).thenReturn(0)
+            positionRepository.setDisplayId(1)
 
-        underTest.start()
+            underTest.start()
+            advanceUntilIdle()
 
-        verify(latencyTracker).onShadeDisplayChanging(eq(1))
-    }
+            verify(latencyTracker).onShadeDisplayChanging(eq(1))
+        }
 }

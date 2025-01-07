@@ -32,6 +32,7 @@ import com.android.systemui.shade.ShadeTraceLogger.traceReparenting
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.window.flags.Flags
+import java.util.Optional
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.CoroutineScope
@@ -47,7 +48,18 @@ constructor(
     @Background private val bgScope: CoroutineScope,
     @Main private val mainThreadContext: CoroutineContext,
     private val shadeDisplayChangeLatencyTracker: ShadeDisplayChangeLatencyTracker,
+    shadeExpandedInteractor: Optional<ShadeExpandedStateInteractor>,
 ) : CoreStartable {
+
+    private val shadeExpandedInteractor =
+        shadeExpandedInteractor.orElse(null)
+            ?: error(
+                """
+            ShadeExpandedStateInteractor must be provided for ShadeDisplaysInteractor to work.
+            If it is not, it means this is being instantiated in a SystemUI variant that shouldn't.
+            """
+                    .trimIndent()
+            )
 
     override fun start() {
         ShadeWindowGoesAround.isUnexpectedlyInLegacyMode()
@@ -78,9 +90,12 @@ constructor(
             withContext(mainThreadContext) {
                 traceReparenting {
                     shadeDisplayChangeLatencyTracker.onShadeDisplayChanging(destinationId)
+                    val expandedElement = shadeExpandedInteractor.currentlyExpandedElement.value
+                    expandedElement?.collapse(reason = "Shade window move")
                     reparentToDisplayId(id = destinationId)
+                    expandedElement?.expand(reason = "Shade window move")
+                    checkContextDisplayMatchesExpected(destinationId)
                 }
-                checkContextDisplayMatchesExpected(destinationId)
             }
         } catch (e: IllegalStateException) {
             Log.e(

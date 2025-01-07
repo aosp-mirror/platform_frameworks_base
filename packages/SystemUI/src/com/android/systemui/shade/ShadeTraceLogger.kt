@@ -27,7 +27,7 @@ import com.android.app.tracing.coroutines.TrackTracer
  * them across various threads' logs.
  */
 object ShadeTraceLogger {
-    private val t = TrackTracer(trackName = "ShadeTraceLogger", trackGroup = "shade")
+    val t = TrackTracer(trackName = "ShadeTraceLogger", trackGroup = "shade")
 
     @JvmStatic
     fun logOnMovedToDisplay(displayId: Int, config: Configuration) {
@@ -44,8 +44,11 @@ object ShadeTraceLogger {
         t.instant { "moveShadeWindowTo(displayId=$displayId)" }
     }
 
-    @JvmStatic
-    fun traceReparenting(r: () -> Unit) {
+    suspend fun traceReparenting(r: suspend () -> Unit) {
         t.traceAsync({ "reparenting" }) { r() }
+    }
+
+    inline fun traceWaitForExpansion(expansion: Float, r: () -> Unit) {
+        t.traceAsync({ "waiting for shade expansion to match $expansion" }) { r() }
     }
 }
