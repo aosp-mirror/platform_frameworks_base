@@ -104,7 +104,6 @@ class ScreenRecordPermissionDialogDelegate(
             mediaProjectionMetricsLogger,
             defaultSelectedMode,
             displayManager,
-            dialog,
             controller,
             activityStarter,
             userContextProvider,
