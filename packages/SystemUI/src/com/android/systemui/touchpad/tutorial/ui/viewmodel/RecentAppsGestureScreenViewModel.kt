@@ -17,9 +17,8 @@
 package com.android.systemui.touchpad.tutorial.ui.viewmodel
 
 import android.view.MotionEvent
+import com.android.systemui.inputdevice.tutorial.ui.composable.TutorialActionState
 import com.android.systemui.res.R
-import com.android.systemui.touchpad.tutorial.ui.composable.GestureUiState
-import com.android.systemui.touchpad.tutorial.ui.composable.toGestureUiState
 import com.android.systemui.touchpad.tutorial.ui.gesture.handleTouchpadMotionEvent
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
@@ -27,14 +26,17 @@ import kotlinx.coroutines.flow.map
 class RecentAppsGestureScreenViewModel(private val gestureRecognizer: GestureRecognizerAdapter) :
     TouchpadTutorialScreenViewModel {
 
-    override val gestureUiState: Flow<GestureUiState> =
-        gestureRecognizer.gestureState.map {
-            it.toGestureUiState(
-                progressStartMarker = "drag with gesture",
-                progressEndMarker = "onPause",
-                successAnimation = R.raw.trackpad_recent_apps_success,
-            )
-        }
+    override val tutorialState: Flow<TutorialActionState> =
+        gestureRecognizer.gestureState
+            .map {
+                it to
+                    TutorialAnimationProperties(
+                        progressStartMarker = "drag with gesture",
+                        progressEndMarker = "onPause",
+                        successAnimation = R.raw.trackpad_recent_apps_success,
+                    )
+            }
+            .mapToTutorialState()
 
     override fun handleEvent(event: MotionEvent): Boolean {
         return gestureRecognizer.handleTouchpadMotionEvent(event)

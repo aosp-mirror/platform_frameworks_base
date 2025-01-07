@@ -49,7 +49,7 @@ fun HomeGestureTutorialScreen(
         )
     GestureTutorialScreen(
         screenConfig = screenConfig,
-        gestureUiStateFlow = viewModel.gestureUiState,
+        tutorialStateFlow = viewModel.tutorialState,
         motionEventConsumer = {
             easterEggGestureViewModel.accept(it)
             viewModel.handleEvent(it)
