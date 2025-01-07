@@ -1344,6 +1344,13 @@ flag {
 }
 
 flag {
+  name: "output_switcher_redesign"
+  namespace: "systemui"
+  description: "Enables visual update for Media Output Switcher"
+  bug: "388296370"
+}
+
+flag {
   namespace: "systemui"
   name: "enable_view_capture_tracing"
   description: "Enables view capture tracing in System UI."
