@@ -30,7 +30,6 @@ import android.util.AttributeSet
 import android.util.Log
 import android.util.MathUtils
 import android.util.TypedValue
-import android.view.View.MeasureSpec.AT_MOST
 import android.view.View.MeasureSpec.EXACTLY
 import android.view.animation.Interpolator
 import android.widget.TextView
@@ -77,7 +76,6 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     var maxSingleDigitWidth = -1
     var digitTranslateAnimator: DigitTranslateAnimator? = null
     var aodFontSizePx: Float = -1F
-    var isVertical: Boolean = false
 
     // Store the font size when there's no height constraint as a reference when adjusting font size
     private var lastUnconstrainedTextSize: Float = Float.MAX_VALUE
@@ -148,16 +146,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
 
     override fun onMeasure(widthMeasureSpec: Int, heightMeasureSpec: Int) {
         logger.d("onMeasure()")
-        if (isVertical) {
-            // use at_most to avoid apply measuredWidth from last measuring to measuredHeight
-            // cause we use max to setMeasuredDimension
-            super.onMeasure(
-                MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(widthMeasureSpec), AT_MOST),
-                MeasureSpec.makeMeasureSpec(MeasureSpec.getSize(heightMeasureSpec), AT_MOST),
-            )
-        } else {
-            super.onMeasure(widthMeasureSpec, heightMeasureSpec)
-        }
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec)
 
         val layout = this.layout
         if (layout != null) {
@@ -213,18 +202,10 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
                 )
         }
 
-        if (isVertical) {
-            expectedWidth = expectedHeight.also { expectedHeight = expectedWidth }
-        }
         setMeasuredDimension(expectedWidth, expectedHeight)
     }
 
     override fun onDraw(canvas: Canvas) {
-        if (isVertical) {
-            canvas.save()
-            canvas.translate(0F, measuredHeight.toFloat())
-            canvas.rotate(-90F)
-        }
         logger.d({ "onDraw(); ls: $str1" }) { str1 = textAnimator.textInterpolator.shapedText }
         val translation = getLocalTranslation()
         canvas.translate(translation.x.toFloat(), translation.y.toFloat())
@@ -238,9 +219,6 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
             canvas.translate(-it.updatedTranslate.x.toFloat(), -it.updatedTranslate.y.toFloat())
         }
         canvas.translate(-translation.x.toFloat(), -translation.y.toFloat())
-        if (isVertical) {
-            canvas.restore()
-        }
     }
 
     override fun invalidate() {
@@ -353,18 +331,20 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     }
 
     private fun updateXtranslation(inPoint: Point, interpolatedTextBounds: Rect): Point {
-        val viewWidth = if (isVertical) measuredHeight else measuredWidth
         when (horizontalAlignment) {
             HorizontalAlignment.LEFT -> {
                 inPoint.x = lockScreenPaint.strokeWidth.toInt() - interpolatedTextBounds.left
             }
             HorizontalAlignment.RIGHT -> {
                 inPoint.x =
-                    viewWidth - interpolatedTextBounds.right - lockScreenPaint.strokeWidth.toInt()
+                    measuredWidth -
+                        interpolatedTextBounds.right -
+                        lockScreenPaint.strokeWidth.toInt()
             }
             HorizontalAlignment.CENTER -> {
                 inPoint.x =
-                    (viewWidth - interpolatedTextBounds.width()) / 2 - interpolatedTextBounds.left
+                    (measuredWidth - interpolatedTextBounds.width()) / 2 -
+                        interpolatedTextBounds.left
             }
         }
         return inPoint
@@ -373,7 +353,6 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
     // translation of reference point of text
     // used for translation when calling textInterpolator
     private fun getLocalTranslation(): Point {
-        val viewHeight = if (isVertical) measuredWidth else measuredHeight
         val interpolatedTextBounds = updateInterpolatedTextBounds()
         val localTranslation = Point(0, 0)
         val correctedBaseline = if (baseline != -1) baseline else baselineFromMeasure
@@ -381,7 +360,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
         when (verticalAlignment) {
             VerticalAlignment.CENTER -> {
                 localTranslation.y =
-                    ((viewHeight - interpolatedTextBounds.height()) / 2 -
+                    ((measuredHeight - interpolatedTextBounds.height()) / 2 -
                         interpolatedTextBounds.top -
                         correctedBaseline)
             }
@@ -392,7 +371,7 @@ open class SimpleDigitalClockTextView(clockCtx: ClockContext, attrs: AttributeSe
             }
             VerticalAlignment.BOTTOM -> {
                 localTranslation.y =
-                    viewHeight -
+                    measuredHeight -
                         interpolatedTextBounds.bottom -
                         lockScreenPaint.strokeWidth.toInt() -
                         correctedBaseline
