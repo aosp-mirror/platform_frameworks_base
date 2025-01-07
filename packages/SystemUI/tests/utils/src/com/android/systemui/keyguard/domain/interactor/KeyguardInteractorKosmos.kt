@@ -21,7 +21,6 @@ import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
-import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
 
@@ -29,7 +28,6 @@ val Kosmos.keyguardInteractor: KeyguardInteractor by
     Kosmos.Fixture {
         KeyguardInteractor(
             repository = keyguardRepository,
-            powerInteractor = powerInteractor,
             bouncerRepository = keyguardBouncerRepository,
             configurationInteractor = configurationInteractor,
             shadeRepository = shadeRepository,

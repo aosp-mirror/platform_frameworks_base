@@ -28,9 +28,11 @@ import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND_INA
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.Flags
+import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
-import com.android.systemui.keyguard.domain.interactor.KeyguardInteractorFactory
+import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionInteractor
+import com.android.systemui.keyguard.domain.interactor.keyguardInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
@@ -159,14 +161,12 @@ class ClockEventControllerTest : SysuiTestCase() {
         dndModeId = MANUAL_DND_INACTIVE.id
         zenModeRepository.addMode(MANUAL_DND_INACTIVE)
 
-        repository = FakeKeyguardRepository()
+        repository = kosmos.fakeKeyguardRepository
 
-        val withDeps = KeyguardInteractorFactory.create(repository = repository)
-
-        withDeps.featureFlags.apply { set(Flags.REGION_SAMPLING, false) }
+        kosmos.fakeFeatureFlagsClassic.set(Flags.REGION_SAMPLING, false)
         underTest =
             ClockEventController(
-                withDeps.keyguardInteractor,
+                kosmos.keyguardInteractor,
                 keyguardTransitionInteractor,
                 broadcastDispatcher,
                 batteryController,
@@ -177,7 +177,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 mainExecutor,
                 bgExecutor,
                 clockBuffers,
-                withDeps.featureFlags,
+                kosmos.fakeFeatureFlagsClassic,
                 zenModeController,
                 kosmos.zenModeInteractor,
                 userTracker,
