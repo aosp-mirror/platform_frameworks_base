@@ -1183,6 +1183,18 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(prev, mDisplayContent.getLastOrientationSource());
         // The top will use the rotation from "prev" with fixed rotation.
         assertTrue(top.hasFixedRotationTransform());
+
+        mDisplayContent.continueUpdateOrientationForDiffOrienLaunchingApp();
+        assertFalse(top.hasFixedRotationTransform());
+
+        // Assume that the requested orientation of "prev" is landscape. And the display is also
+        // rotated to landscape. The activities from bottom to top are TaskB{"prev, "behindTop"},
+        // TaskB{"top"}. Then "behindTop" should also get landscape according to ORIENTATION_BEHIND
+        // instead of resolving as undefined which causes to unexpected fixed portrait rotation.
+        final ActivityRecord behindTop = new ActivityBuilder(mAtm).setTask(prev.getTask())
+                .setOnTop(false).setScreenOrientation(SCREEN_ORIENTATION_BEHIND).build();
+        mDisplayContent.applyFixedRotationForNonTopVisibleActivityIfNeeded(behindTop);
+        assertFalse(behindTop.hasFixedRotationTransform());
     }
 
     @Test

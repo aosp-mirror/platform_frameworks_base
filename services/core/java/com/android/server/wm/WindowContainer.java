@@ -1659,6 +1659,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         return ORIENTATION_UNDEFINED;
     }
 
+    @Nullable
+    ActivityRecord getActivityBelowForDefiningOrientation(ActivityRecord from) {
+        return getActivity(ActivityRecord::canDefineOrientationForActivitiesAbove,
+                from /* boundary */, false /* includeBoundary */, true /* traverseTopToBottom */);
+    }
+
     /**
      * Calls {@link #setOrientation(int, WindowContainer)} with {@code null} to the last 2
      * parameters.
