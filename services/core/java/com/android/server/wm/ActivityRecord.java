@@ -3209,7 +3209,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 true /* forActivity */)) {
             return false;
         }
-        if (mAppCompatController.getAppCompatResizeOverrides().allowRestrictedResizability()) {
+        if (mAppCompatController.getResizeOverrides().allowRestrictedResizability()) {
             return false;
         }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
@@ -8435,8 +8435,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      */
     @ActivityInfo.SizeChangesSupportMode
     private int supportsSizeChanges() {
-        if (mAppCompatController.getAppCompatResizeOverrides()
-                .shouldOverrideForceNonResizeApp()) {
+        final AppCompatResizeOverrides resizeOverrides = mAppCompatController.getResizeOverrides();
+        if (resizeOverrides.shouldOverrideForceNonResizeApp()) {
             return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
         }
 
@@ -8444,8 +8444,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return SIZE_CHANGES_SUPPORTED_METADATA;
         }
 
-        if (mAppCompatController.getAppCompatResizeOverrides()
-                .shouldOverrideForceResizeApp()) {
+        if (resizeOverrides.shouldOverrideForceResizeApp()) {
             return SIZE_CHANGES_SUPPORTED_OVERRIDE;
         }
 
@@ -10221,7 +10220,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 mAppCompatController.getAppCompatOrientationOverrides()
                         .shouldIgnoreOrientationRequestLoop());
         proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
-                mAppCompatController.getAppCompatResizeOverrides().shouldOverrideForceResizeApp());
+                mAppCompatController.getResizeOverrides().shouldOverrideForceResizeApp());
         proto.write(SHOULD_ENABLE_USER_ASPECT_RATIO_SETTINGS,
                 mAppCompatController.getAppCompatAspectRatioOverrides()
                         .shouldEnableUserAspectRatioSettings());
