@@ -53,6 +53,7 @@ import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import java.io.PrintWriter
 import java.lang.Math.max
+import java.util.concurrent.CopyOnWriteArraySet
 
 /**
  * Encapsulates logic that can solve for the left/right insets required for the status bar contents.
@@ -163,7 +164,7 @@ constructor(
     // Limit cache size as potentially we may connect large number of displays
     // (e.g. network displays)
     private val insetsCache = LruCache<CacheKey, Rect>(MAX_CACHE_SIZE)
-    private val listeners = mutableSetOf<StatusBarContentInsetsChangedListener>()
+    private val listeners = CopyOnWriteArraySet<StatusBarContentInsetsChangedListener>()
     private val isPrivacyDotEnabled: Boolean by
         lazy(LazyThreadSafetyMode.PUBLICATION) {
             context.resources.getBoolean(R.bool.config_enablePrivacyDot)
