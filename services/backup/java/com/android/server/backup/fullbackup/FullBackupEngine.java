@@ -17,7 +17,6 @@
 package com.android.server.backup.fullbackup;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_MANIFEST_FILENAME;
 import static com.android.server.backup.UserBackupManagerService.BACKUP_METADATA_FILENAME;
@@ -111,7 +110,7 @@ public class FullBackupEngine {
                         shouldWriteApk(mPackage.applicationInfo, mIncludeApks, isSharedStorage);
 
                 if (!isSharedStorage) {
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.d(TAG, "Writing manifest for " + packageName);
                     }
 
@@ -137,9 +136,7 @@ public class FullBackupEngine {
                     appMetadataBackupWriter.backupObb(mUserId, mPackage);
                 }
 
-                if (DEBUG) {
-                    Slog.d(TAG, "Calling doFullBackup() on " + packageName);
-                }
+                Slog.d(TAG, "Calling doFullBackup() on " + packageName);
 
                 long timeout =
                         isSharedStorage
@@ -216,14 +213,14 @@ public class FullBackupEngine {
 
     public int preflightCheck() throws RemoteException {
         if (mPreflightHook == null) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "No preflight check");
             }
             return BackupTransport.TRANSPORT_OK;
         }
         if (initializeAgent()) {
             int result = mPreflightHook.preflightFullBackup(mPkg, mAgent);
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "preflight returned " + result);
             }
 
@@ -262,7 +259,7 @@ public class FullBackupEngine {
                 if (!backupManagerService.waitUntilOperationComplete(mOpToken)) {
                     Slog.e(TAG, "Full backup failed on package " + mPkg.packageName);
                 } else {
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.d(TAG, "Full package backup success: " + mPkg.packageName);
                     }
                     result = BackupTransport.TRANSPORT_OK;
@@ -310,7 +307,7 @@ public class FullBackupEngine {
 
     private boolean initializeAgent() {
         if (mAgent == null) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.d(TAG, "Binding to full backup agent : " + mPkg.packageName);
             }
             mAgent =

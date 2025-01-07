@@ -94,9 +94,7 @@ import java.util.Set;
  */
 public class BackupManagerService extends IBackupManager.Stub implements BackupManagerInternal {
     public static final String TAG = "BackupManagerService";
-    public static final boolean DEBUG = true;
-    public static final boolean MORE_DEBUG = false;
-    public static final boolean DEBUG_SCHEDULING = true;
+    public static final boolean DEBUG = false;
 
     @VisibleForTesting
     static final String DUMP_RUNNING_USERS_MESSAGE = "Backup Manager is running for users:";
@@ -187,9 +185,7 @@ public class BackupManagerService extends IBackupManager.Stub implements BackupM
                 mUserRemovedReceiver, new IntentFilter(Intent.ACTION_USER_REMOVED));
         UserHandle mainUser = getUserManager().getMainUser();
         mDefaultBackupUserId = mainUser == null ? UserHandle.USER_SYSTEM : mainUser.getIdentifier();
-        if (DEBUG) {
-            Slog.d(TAG, "Default backup user id = " + mDefaultBackupUserId);
-        }
+        Slog.d(TAG, "Default backup user id = " + mDefaultBackupUserId);
     }
 
     @VisibleForTesting

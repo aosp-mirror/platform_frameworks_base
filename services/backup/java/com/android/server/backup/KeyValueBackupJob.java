@@ -16,7 +16,6 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.BackupManagerService.DEBUG_SCHEDULING;
 import static com.android.server.pm.PackageManagerService.PLATFORM_PACKAGE_NAME;
 
 import android.app.AlarmManager;
@@ -92,9 +91,7 @@ public class KeyValueBackupJob extends JobService {
             if (delay <= 0) {
                 delay = interval + new Random().nextInt((int) fuzz);
             }
-            if (DEBUG_SCHEDULING) {
-                Slog.v(TAG, "Scheduling k/v pass in " + (delay / 1000 / 60) + " minutes");
-            }
+            Slog.d(TAG, "Scheduling k/v pass in " + (delay / 1000 / 60) + " minutes");
 
             JobInfo.Builder builder = new JobInfo.Builder(getJobIdForUserId(userId),
                     sKeyValueJobService)

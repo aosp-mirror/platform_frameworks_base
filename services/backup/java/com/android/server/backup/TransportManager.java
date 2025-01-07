@@ -62,7 +62,7 @@ import java.util.function.Predicate;
 /** Handles in-memory bookkeeping of all BackupTransport objects. */
 public class TransportManager {
     private static final String TAG = "BackupTransportManager";
-    private static final boolean MORE_DEBUG = false;
+    private static final boolean DEBUG = false;
 
     @VisibleForTesting
     public static final String SERVICE_ACTION_TRANSPORT_HOST = "android.backup.TRANSPORT_HOST";
@@ -155,7 +155,7 @@ public class TransportManager {
                 enabled = mPackageManager.getApplicationEnabledSetting(packageName);
             } catch (IllegalArgumentException ex) {
                 // packageName doesn't exist: likely due to a race with it being uninstalled.
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
                             + " was changed, but no longer exists."));
                 }
@@ -163,7 +163,7 @@ public class TransportManager {
             }
             switch (enabled) {
                 case COMPONENT_ENABLED_STATE_ENABLED: {
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
                                 + " was enabled."));
                     }
@@ -174,7 +174,7 @@ public class TransportManager {
                     // Package is set to its default enabled state (as specified in its manifest).
                     // Unless explicitly specified in manifest, the default enabled state
                     // is 'enabled'. Here, we assume that default state always means enabled.
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
                                 + " was put in default enabled state."));
                     }
@@ -182,7 +182,7 @@ public class TransportManager {
                     return;
                 }
                 case COMPONENT_ENABLED_STATE_DISABLED: {
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
                                 + " was disabled."));
                     }
@@ -190,7 +190,7 @@ public class TransportManager {
                     return;
                 }
                 case COMPONENT_ENABLED_STATE_DISABLED_USER: {
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.d(TAG, addUserIdToLogMessage(mUserId, "Package " + packageName
                                 + " was disabled by user."));
                     }

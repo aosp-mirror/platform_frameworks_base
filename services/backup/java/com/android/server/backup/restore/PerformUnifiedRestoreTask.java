@@ -19,7 +19,6 @@ package com.android.server.backup.restore;
 import static android.app.backup.BackupAnnotations.OperationType.RESTORE;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.KEY_WIDGET_STATE;
 import static com.android.server.backup.UserBackupManagerService.PACKAGE_MANAGER_SENTINEL;
@@ -253,9 +252,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                                 mUserId,
                                 backupEligibilityRules);
                 filterSet = packagesToNames(apps);
-                if (DEBUG) {
-                    Slog.i(TAG, "Full restore; asking about " + filterSet.length + " apps");
-                }
+                Slog.i(TAG, "Full restore; asking about " + filterSet.length + " apps");
             }
 
             mAcceptSet = new ArrayList<>(filterSet.length);
@@ -315,7 +312,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             }
         }
 
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(TAG, "Restore; accept set size is " + mAcceptSet.size());
             for (PackageInfo info : mAcceptSet) {
                 Slog.v(TAG, "   " + info.packageName);
@@ -335,7 +332,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     // Execute one tick of whatever state machine the task implements
     @Override
     public void execute() {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(TAG, "*** Executing restore step " + mState);
         }
         switch (mState) {
@@ -517,7 +514,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
             mCurrentPackage.applicationInfo.uid = Process.SYSTEM_UID;
             mPmAgent = backupManagerService.makeMetadataAgent(null);
             mAgent = IBackupAgent.Stub.asInterface(mPmAgent.onBind());
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "initiating restore for PMBA");
             }
             initiateOneRestore(mCurrentPackage, 0);
@@ -596,9 +593,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 return;
             } else if (mRestoreDescription == RestoreDescription.NO_MORE_PACKAGES) {
                 // Yay we've reached the end cleanly
-                if (DEBUG) {
-                    Slog.v(TAG, "No more packages; finishing restore");
-                }
+                Slog.d(TAG, "No more packages; finishing restore");
                 int millis = (int) (SystemClock.elapsedRealtime() - mStartRealtime);
                 EventLog.writeEvent(
                         EventLogTags.RESTORE_SUCCESS, mRestoreAttemptedAppsCount, millis);
@@ -606,9 +601,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 return;
             }
 
-            if (DEBUG) {
-                Slog.i(TAG, "Next restore package: " + mRestoreDescription);
-            }
+            Slog.i(TAG, "Next restore package: " + mRestoreDescription);
             mRestoreAttemptedAppsCount++;
             sendOnRestorePackage(mRestoreAttemptedAppsCount, pkgName);
 
@@ -715,7 +708,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 }
             }
 
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(
                         TAG,
                         "Package "
@@ -776,7 +769,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 /* extras= */ addRestoreOperationTypeToEvent(/* extras= */ null));
         if (mCurrentPackage.applicationInfo.backupAgentName == null
                 || "".equals(mCurrentPackage.applicationInfo.backupAgentName)) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(
                         TAG,
                         "Data exists for package "
@@ -852,9 +845,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     private void initiateOneRestore(PackageInfo app, long appVersionCode) {
         final String packageName = app.packageName;
 
-        if (DEBUG) {
-            Slog.d(TAG, "initiateOneRestore packageName=" + packageName);
-        }
+        Slog.d(TAG, "initiateOneRestore packageName=" + packageName);
 
         // !!! TODO: get the dirs from the transport
         mBackupDataName = new File(backupManagerService.getDataDir(), packageName + ".restore");
@@ -1010,9 +1001,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
             // is this a special key?
             if (key.equals(KEY_WIDGET_STATE)) {
-                if (DEBUG) {
-                    Slog.i(TAG, "Restoring widget state for " + packageName);
-                }
+                Slog.i(TAG, "Restoring widget state for " + packageName);
                 mWidgetData = new byte[size];
                 in.readEntityData(mWidgetData, 0, size);
             } else {
@@ -1044,7 +1033,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                 /* extras= */ addRestoreOperationTypeToEvent(/* extras= */ null));
         try {
             StreamFeederThread feeder = new StreamFeederThread();
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(
                         TAG,
                         "Spinning threads for stream restore of " + mCurrentPackage.packageName);
@@ -1070,9 +1059,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     // state RESTORE_FINISHED : provide the "no more data" signpost callback at the end
     private void restoreFinished() {
-        if (DEBUG) {
-            Slog.d(TAG, "restoreFinished packageName=" + mCurrentPackage.packageName);
-        }
+        Slog.d(TAG, "restoreFinished packageName=" + mCurrentPackage.packageName);
         try {
             long restoreAgentFinishedTimeoutMillis =
                     mAgentTimeoutParameters.getRestoreAgentFinishedTimeoutMillis();
@@ -1167,7 +1154,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                     if (result > 0) {
                         // The transport wrote this many bytes of restore data to the
                         // pipe, so pass it along to the engine.
-                        if (MORE_DEBUG) {
+                        if (DEBUG) {
                             Slog.v(TAG, "  <- transport provided chunk size " + result);
                         }
                         if (result > bufferSize) {
@@ -1179,13 +1166,13 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                             int n = transportIn.read(buffer, 0, toCopy);
                             engineOut.write(buffer, 0, n);
                             toCopy -= n;
-                            if (MORE_DEBUG) {
+                            if (DEBUG) {
                                 Slog.v(TAG, "  -> wrote " + n + " to engine, left=" + toCopy);
                             }
                         }
                     } else if (result == BackupTransport.NO_MORE_DATA) {
                         // Clean finish.  Wind up and we're done!
-                        if (MORE_DEBUG) {
+                        if (DEBUG) {
                             Slog.i(
                                     TAG,
                                     "Got clean full-restore EOF for "
@@ -1213,7 +1200,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
                         status = result;
                     }
                 }
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.v(TAG, "Done copying to engine, falling through");
                 }
             } catch (IOException e) {
@@ -1322,9 +1309,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         @Override
         public void handleCancel(boolean cancelAll) {
             mOperationStorage.removeOperation(mEphemeralOpToken);
-            if (DEBUG) {
-                Slog.w(TAG, "Full-data restore target timed out; shutting down");
-            }
+            Slog.w(TAG, "Full-data restore target timed out; shutting down");
             Bundle monitoringExtras = addRestoreOperationTypeToEvent(/* extras= */ null);
             mBackupManagerMonitorEventSender.monitorEvent(
                     BackupManagerMonitor.LOG_EVENT_ID_FULL_RESTORE_TIMEOUT,
@@ -1342,7 +1327,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     // state FINAL : tear everything down and we're done.
     private void finalizeRestore() {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.d(TAG, "finishing restore mObserver=" + mObserver);
         }
 
@@ -1366,7 +1351,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         // If we have a PM token, we must under all circumstances be sure to
         // handshake when we've finished.
         if (mPmToken > 0) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "finishing PM token " + mPmToken);
             }
             try {
@@ -1404,9 +1389,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
         synchronized (backupManagerService.getPendingRestores()) {
             if (backupManagerService.getPendingRestores().size() > 0) {
-                if (DEBUG) {
-                    Slog.d(TAG, "Starting next pending restore.");
-                }
+                Slog.d(TAG, "Starting next pending restore.");
                 PerformUnifiedRestoreTask task = backupManagerService.getPendingRestores().remove();
                 backupManagerService
                         .getBackupHandler()
@@ -1417,7 +1400,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
             } else {
                 backupManagerService.setRestoreInProgress(false);
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.d(TAG, "No pending restores.");
                 }
             }
@@ -1499,7 +1482,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
     public void operationComplete(long unusedResult) {
         mOperationStorage.removeOperation(mEphemeralOpToken);
 
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(
                     TAG,
                     "operationComplete() during restore: target="
@@ -1590,7 +1573,7 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
 
     @VisibleForTesting
     void executeNextState(UnifiedRestoreState nextState) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(TAG, " => executing next step on " + this + " nextState=" + nextState);
         }
         mState = nextState;
@@ -1689,25 +1672,19 @@ public class PerformUnifiedRestoreTask implements BackupRestoreTask {
         //      (and not in the denylist)
         //    - The package has restoreAnyVersion set to true and is not part of the denylist
         if (mVToUDenylist.contains(mCurrentPackage.packageName)){
-            if (DEBUG) {
-                Slog.i(TAG, mCurrentPackage.packageName + " : Package is in V to U denylist");
-            }
+            Slog.i(TAG, mCurrentPackage.packageName + " : Package is in V to U denylist");
             return false;
         } else if ((mCurrentPackage.applicationInfo.flags
                 & ApplicationInfo.FLAG_RESTORE_ANY_VERSION)
                 == 0) {
             // package has restoreAnyVersion set to false
-            if (DEBUG) {
-                Slog.i(TAG, mCurrentPackage.packageName
+            Slog.i(TAG, mCurrentPackage.packageName
                         + " : Package has restoreAnyVersion=false and is in V to U allowlist");
-            }
             return mVToUAllowlist.contains(mCurrentPackage.packageName);
         } else {
             // package has restoreAnyVersion set to true and is nor in denylist
-            if (DEBUG) {
-                Slog.i(TAG, mCurrentPackage.packageName
+            Slog.i(TAG, mCurrentPackage.packageName
                         + " : Package has restoreAnyVersion=true and is not in V to U denylist");
-            }
             return true;
         }
     }

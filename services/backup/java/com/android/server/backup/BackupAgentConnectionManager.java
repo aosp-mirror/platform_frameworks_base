@@ -16,7 +16,7 @@
 
 package com.android.server.backup;
 
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.annotation.Nullable;
@@ -302,7 +302,7 @@ public class BackupAgentConnectionManager {
                 // that the package being backed up doesn't get stuck in restricted mode until the
                 // backup time-out elapses.
                 for (int token : mOperationStorage.operationTokensForPackage(packageName)) {
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.d(TAG,
                                 mUserIdMsg + "agentDisconnected: will handleCancel(all) for token:"
                                         + Integer.toHexString(token));

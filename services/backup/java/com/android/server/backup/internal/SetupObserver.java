@@ -16,7 +16,7 @@
 
 package com.android.server.backup.internal;
 
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 import static com.android.server.backup.UserBackupManagerService.getSetupCompleteSettingForUser;
 
@@ -57,7 +57,7 @@ public class SetupObserver extends ContentObserver {
 
         boolean resolvedSetupComplete = previousSetupComplete || newSetupComplete;
         mUserBackupManagerService.setSetupComplete(resolvedSetupComplete);
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.d(
                     TAG,
                     "Setup complete change: was="
@@ -73,7 +73,7 @@ public class SetupObserver extends ContentObserver {
             if (resolvedSetupComplete
                     && !previousSetupComplete
                     && mUserBackupManagerService.isEnabled()) {
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.d(TAG, "Setup complete so starting backups");
                 }
                 KeyValueBackupJob.schedule(mUserBackupManagerService.getUserId(), mContext,

@@ -17,7 +17,6 @@
 package com.android.server.backup.internal;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.BackupAnnotations.BackupDestination;
@@ -136,7 +135,7 @@ public class BackupHandler extends Handler {
 
     public void handleMessage(Message msg) {
         if (msg.what == MSG_STOP) {
-            Slog.v(TAG, "Stopping backup handler");
+            Slog.d(TAG, "Stopping backup handler");
             backupManagerService.getWakelock().quit();
             mBackupThread.quitSafely();
         }
@@ -163,7 +162,7 @@ public class BackupHandler extends Handler {
                         transportManager
                                 .disposeOfTransportClient(transportConnection, callerLogString);
                     }
-                    Slog.v(TAG, "Backup requested but no transport available");
+                    Slog.d(TAG, "Backup requested but no transport available");
                     break;
                 }
 
@@ -177,9 +176,7 @@ public class BackupHandler extends Handler {
                         return;
                     }
 
-                    if (DEBUG) {
-                        Slog.v(TAG, "Running a backup pass");
-                    }
+                    Slog.d(TAG, "Running a backup pass");
 
                     // Acquire the wakelock and pass it to the backup thread. It will be released
                     // once backup concludes.
@@ -193,9 +190,7 @@ public class BackupHandler extends Handler {
                         for (BackupRequest b : backupManagerService.getPendingBackups().values()) {
                             queue.add(b.packageName);
                         }
-                        if (DEBUG) {
-                            Slog.v(TAG, "clearing pending backups");
-                        }
+                        Slog.d(TAG, "clearing pending backups");
                         backupManagerService.getPendingBackups().clear();
 
                         // Start a new backup-queue journal file too
@@ -249,7 +244,7 @@ public class BackupHandler extends Handler {
                         staged = false;
                     }
                 } else {
-                    Slog.v(TAG, "Backup requested but nothing pending");
+                    Slog.d(TAG, "Backup requested but nothing pending");
                     staged = false;
                 }
 
@@ -267,7 +262,7 @@ public class BackupHandler extends Handler {
             case MSG_BACKUP_RESTORE_STEP: {
                 try {
                     BackupRestoreTask task = (BackupRestoreTask) msg.obj;
-                    if (MORE_DEBUG) {
+                    if (DEBUG) {
                         Slog.v(TAG, "Got next step for " + task + ", executing");
                     }
                     task.execute();
@@ -324,16 +319,12 @@ public class BackupHandler extends Handler {
 
                 synchronized (backupManagerService.getPendingRestores()) {
                     if (backupManagerService.isRestoreInProgress()) {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Restore in progress, queueing.");
-                        }
+                        Slog.d(TAG, "Restore in progress, queueing.");
                         backupManagerService.getPendingRestores().add(task);
                         // This task will be picked up and executed when the the currently running
                         // restore task finishes.
                     } else {
-                        if (DEBUG) {
-                            Slog.d(TAG, "Starting restore.");
-                        }
+                        Slog.d(TAG, "Starting restore.");
                         backupManagerService.setRestoreInProgress(true);
                         Message restoreMsg = obtainMessage(MSG_BACKUP_RESTORE_STEP, task);
                         sendMessage(restoreMsg);
@@ -471,7 +462,7 @@ public class BackupHandler extends Handler {
 
             case MSG_REQUEST_BACKUP: {
                 BackupParams params = (BackupParams) msg.obj;
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.d(TAG, "MSG_REQUEST_BACKUP observer=" + params.observer);
                 }
                 backupManagerService.setBackupRunning(true);
@@ -496,7 +487,7 @@ public class BackupHandler extends Handler {
 
             case MSG_SCHEDULE_BACKUP_PACKAGE: {
                 String pkgName = (String) msg.obj;
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.d(TAG, "MSG_SCHEDULE_BACKUP_PACKAGE " + pkgName);
                 }
                 backupManagerService.dataChangedImpl(pkgName);
