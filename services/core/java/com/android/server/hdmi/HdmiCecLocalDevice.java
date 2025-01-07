@@ -1030,10 +1030,20 @@ abstract class HdmiCecLocalDevice extends HdmiLocalDevice {
     }
 
     @ServiceThreadOnly
+    void addAndStartAction(final HdmiCecFeatureAction action, final boolean remove) {
+        assertRunOnServiceThread();
+        if (hasAction(action.getClass()) && remove) {
+            // If the action is currently running, remove it and restart it.
+            Slog.i(TAG, action.getClass().getName() + " is in progress. Restarting.");
+            removeAction(action.getClass());
+        }
+        addAndStartAction(action);
+    }
+
+    @ServiceThreadOnly
     void startNewAvbAudioStatusAction(int targetAddress) {
         assertRunOnServiceThread();
-        removeAction(AbsoluteVolumeAudioStatusAction.class);
-        addAndStartAction(new AbsoluteVolumeAudioStatusAction(this, targetAddress));
+        addAndStartAction(new AbsoluteVolumeAudioStatusAction(this, targetAddress), true);
     }
 
     @ServiceThreadOnly
