@@ -231,6 +231,7 @@ internal class AppHandleViewHolder(
     fun disposeStatusBarInputLayer() {
         if (!statusBarInputLayerExists) return
         statusBarInputLayerExists = false
+        statusBarInputLayer?.view?.setOnTouchListener(null)
         handler.post {
             statusBarInputLayer?.releaseView()
             statusBarInputLayer = null
