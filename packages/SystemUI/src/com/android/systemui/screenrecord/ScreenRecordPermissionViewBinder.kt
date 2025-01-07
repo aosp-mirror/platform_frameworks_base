@@ -18,7 +18,6 @@ package com.android.systemui.screenrecord
 
 import android.annotation.SuppressLint
 import android.app.Activity
-import android.app.AlertDialog
 import android.app.PendingIntent
 import android.content.Intent
 import android.hardware.display.DisplayManager
@@ -57,7 +56,6 @@ class ScreenRecordPermissionViewBinder(
     mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
     @ScreenShareMode defaultSelectedMode: Int,
     displayManager: DisplayManager,
-    private val dialog: AlertDialog,
     private val controller: RecordingController,
     private val activityStarter: ActivityStarter,
     private val userContextProvider: UserContextProvider,
@@ -69,15 +67,14 @@ class ScreenRecordPermissionViewBinder(
         hostUid = hostUid,
         mediaProjectionMetricsLogger,
         defaultSelectedMode,
-        dialog,
     ) {
     private lateinit var tapsSwitch: Switch
     private lateinit var audioSwitch: Switch
     private lateinit var tapsView: View
     private lateinit var options: Spinner
 
-    override fun bind() {
-        super.bind()
+    override fun bind(view: View) {
+        super.bind(view)
         initRecordOptionsView()
         setStartButtonOnClickListener { startButtonOnClicked() }
     }
@@ -91,7 +88,8 @@ class ScreenRecordPermissionViewBinder(
             )
         }
         if (selectedScreenShareOption.mode == SINGLE_APP) {
-            val intent = Intent(dialog.context, MediaProjectionAppSelectorActivity::class.java)
+            val intent =
+                Intent(containerView.context, MediaProjectionAppSelectorActivity::class.java)
             intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
             // We can't start activity for result here so we use result receiver to get
@@ -116,10 +114,10 @@ class ScreenRecordPermissionViewBinder(
 
     @SuppressLint("ClickableViewAccessibility")
     private fun initRecordOptionsView() {
-        audioSwitch = dialog.requireViewById(R.id.screenrecord_audio_switch)
-        tapsSwitch = dialog.requireViewById(R.id.screenrecord_taps_switch)
+        audioSwitch = containerView.requireViewById(R.id.screenrecord_audio_switch)
+        tapsSwitch = containerView.requireViewById(R.id.screenrecord_taps_switch)
 
-        tapsView = dialog.requireViewById(R.id.show_taps)
+        tapsView = containerView.requireViewById(R.id.show_taps)
         updateTapsViewVisibility()
 
         // Add these listeners so that the switch only responds to movement
@@ -127,10 +125,10 @@ class ScreenRecordPermissionViewBinder(
         audioSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
         tapsSwitch.setOnTouchListener { _, event -> event.action == ACTION_MOVE }
 
-        options = dialog.requireViewById(R.id.screen_recording_options)
+        options = containerView.requireViewById(R.id.screen_recording_options)
         val a: ArrayAdapter<*> =
             ScreenRecordingAdapter(
-                dialog.context,
+                containerView.context,
                 android.R.layout.simple_spinner_dropdown_item,
                 MODES,
             )
