@@ -753,7 +753,7 @@ public class UiModeManager {
      * <p>
      * The mode can be one of:
      * <ul>
-     *   <li><em>{@link #MODE_NIGHT_NO}<em> sets the device into
+     *   <li><em>{@link #MODE_NIGHT_NO}</em> sets the device into
      *       {@code notnight} mode</li>
      *   <li><em>{@link #MODE_NIGHT_YES}</em> sets the device into
      *       {@code night} mode</li>
@@ -889,7 +889,7 @@ public class UiModeManager {
      * <p>
      * The mode can be one of:
      * <ul>
-     *   <li><em>{@link #MODE_NIGHT_NO}<em> sets the device into
+     *   <li><em>{@link #MODE_NIGHT_NO}</em> sets the device into
      *       {@code notnight} mode</li>
      *   <li><em>{@link #MODE_NIGHT_YES}</em> sets the device into
      *       {@code night} mode</li>
