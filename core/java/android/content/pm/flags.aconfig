@@ -383,3 +383,11 @@ flag {
     bug: "334024639"
     description: "Feature flag to check whether a given UID can access a content provider"
 }
+
+flag {
+    name: "optimize_parsing_in_registered_services_cache"
+    namespace: "package_manager_service"
+    description: "Feature flag to optimize RegisteredServicesCache ServiceInfo parsing by using caches."
+    bug: "319137634"
+    is_fixed_read_only: true
+}
