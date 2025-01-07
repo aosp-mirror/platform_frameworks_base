@@ -2116,6 +2116,11 @@
     <dimen name="volume_dialog_button_size">40dp</dimen>
     <dimen name="volume_dialog_slider_width">52dp</dimen>
     <dimen name="volume_dialog_slider_height">254dp</dimen>
+    <!--
+        A primary goal of this margin is to vertically constraint slider height in the landscape
+        orientation when the vertical space is limited
+    -->
+    <dimen name="volume_dialog_slider_vertical_margin">124dp</dimen>
 
     <fraction name="volume_dialog_half_opened_bias">0.2</fraction>
 
