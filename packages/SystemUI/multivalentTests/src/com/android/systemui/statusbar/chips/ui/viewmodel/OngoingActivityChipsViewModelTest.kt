@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.Me
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
@@ -169,29 +170,35 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
     @Test
     fun primaryChip_screenRecordAndShareToAppAndCastToOtherHideAndCallShown_callShown() =
         testScope.runTest {
+            val notificationKey = "call"
             screenRecordState.value = ScreenRecordModel.DoingNothing
             // MediaProjection covers both share-to-app and cast-to-other-device
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = notificationKey)
+            )
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertIsCallChip(latest)
+            assertIsCallChip(latest, notificationKey)
         }
 
     @Test
     fun primaryChip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
         testScope.runTest {
             // Start with just the lowest priority chip shown
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            val callNotificationKey = "call"
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
             // And everything else hidden
             mediaProjectionState.value = MediaProjectionState.NotProjecting
             screenRecordState.value = ScreenRecordModel.DoingNothing
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertIsCallChip(latest)
+            assertIsCallChip(latest, callNotificationKey)
 
             // WHEN the higher priority media projection chip is added
             mediaProjectionState.value =
@@ -218,7 +225,10 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            val callNotificationKey = "call"
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
 
             val latest by collectLastValue(underTest.primaryChip)
 
@@ -235,7 +245,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             // THEN the lower priority call is used
-            assertIsCallChip(latest)
+            assertIsCallChip(latest, callNotificationKey)
         }
 
     /** Regression test for b/347726238. */
@@ -364,13 +374,27 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
             assertThat(icon.res).isEqualTo(R.drawable.ic_present_to_all)
         }
 
-        fun assertIsCallChip(latest: OngoingActivityChipModel?) {
-            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+        fun assertIsCallChip(latest: OngoingActivityChipModel?, notificationKey: String) {
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            if (StatusBarConnectedDisplays.isEnabled) {
+                assertNotificationIcon(latest, notificationKey)
+                return
+            }
             val icon =
                 (((latest as OngoingActivityChipModel.Shown).icon)
                         as OngoingActivityChipModel.ChipIcon.SingleColorIcon)
                     .impl as Icon.Resource
             assertThat(icon.res).isEqualTo(com.android.internal.R.drawable.ic_phone)
+        }
+
+        private fun assertNotificationIcon(
+            latest: OngoingActivityChipModel?,
+            notificationKey: String,
+        ) {
+            val shown = latest as OngoingActivityChipModel.Shown
+            val notificationIcon =
+                shown.icon as OngoingActivityChipModel.ChipIcon.StatusBarNotificationIcon
+            assertThat(notificationIcon.notificationKey).isEqualTo(notificationKey)
         }
     }
 }

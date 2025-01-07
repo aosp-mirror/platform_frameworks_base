@@ -34,7 +34,7 @@ import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager
 import com.android.systemui.res.R
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel
 import com.android.systemui.screenrecord.data.repository.screenRecordRepository
-import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.chips.call.ui.viewmodel.CallChipViewModelTest.Companion.createStatusBarIconViewOrNull
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
 import com.android.systemui.statusbar.chips.notification.domain.interactor.statusBarNotificationChipsInteractor
@@ -186,13 +186,16 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     fun chips_screenRecordShowAndCallShow_primaryIsScreenRecordSecondaryIsCall() =
         testScope.runTest {
+            val callNotificationKey = "call"
             screenRecordState.value = ScreenRecordModel.Recording
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
 
             val latest by collectLastValue(underTest.chips)
 
             assertIsScreenRecordChip(latest!!.primary)
-            assertIsCallChip(latest!!.secondary)
+            assertIsCallChip(latest!!.secondary, callNotificationKey)
         }
 
     @Test
@@ -240,15 +243,18 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     fun chips_shareToAppShowAndCallShow_primaryIsShareToAppSecondaryIsCall() =
         testScope.runTest {
+            val callNotificationKey = "call"
             screenRecordState.value = ScreenRecordModel.DoingNothing
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
 
             val latest by collectLastValue(underTest.chips)
 
             assertIsShareToAppChip(latest!!.primary)
-            assertIsCallChip(latest!!.secondary)
+            assertIsCallChip(latest!!.secondary, callNotificationKey)
         }
 
     @Test
@@ -258,25 +264,31 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             // MediaProjection covers both share-to-app and cast-to-other-device
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            val callNotificationKey = "call"
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertIsCallChip(latest)
+            assertIsCallChip(latest, callNotificationKey)
         }
 
     @Test
     fun chips_onlyCallShown_primaryIsCallSecondaryIsHidden() =
         testScope.runTest {
+            val callNotificationKey = "call"
             screenRecordState.value = ScreenRecordModel.DoingNothing
             // MediaProjection covers both share-to-app and cast-to-other-device
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
 
             val latest by collectLastValue(underTest.chips)
 
-            assertIsCallChip(latest!!.primary)
+            assertIsCallChip(latest!!.primary, callNotificationKey)
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
@@ -285,7 +297,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chips)
 
-            val icon = mock<StatusBarIconView>()
+            val icon = createStatusBarIconViewOrNull()
             setNotifs(
                 listOf(
                     activeNotificationModel(
@@ -296,7 +308,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertIsNotifChip(latest!!.primary, icon)
+            assertIsNotifChip(latest!!.primary, icon, "notif")
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
@@ -305,8 +317,8 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chips)
 
-            val firstIcon = mock<StatusBarIconView>()
-            val secondIcon = mock<StatusBarIconView>()
+            val firstIcon = createStatusBarIconViewOrNull()
+            val secondIcon = createStatusBarIconViewOrNull()
             setNotifs(
                 listOf(
                     activeNotificationModel(
@@ -324,8 +336,8 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertIsNotifChip(latest!!.primary, firstIcon)
-            assertIsNotifChip(latest!!.secondary, secondIcon)
+            assertIsNotifChip(latest!!.primary, firstIcon, "firstNotif")
+            assertIsNotifChip(latest!!.secondary, secondIcon, "secondNotif")
         }
 
     @Test
@@ -333,9 +345,9 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chips)
 
-            val firstIcon = mock<StatusBarIconView>()
-            val secondIcon = mock<StatusBarIconView>()
-            val thirdIcon = mock<StatusBarIconView>()
+            val firstIcon = createStatusBarIconViewOrNull()
+            val secondIcon = createStatusBarIconViewOrNull()
+            val thirdIcon = createStatusBarIconViewOrNull()
             setNotifs(
                 listOf(
                     activeNotificationModel(
@@ -359,8 +371,8 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 )
             )
 
-            assertIsNotifChip(latest!!.primary, firstIcon)
-            assertIsNotifChip(latest!!.secondary, secondIcon)
+            assertIsNotifChip(latest!!.primary, firstIcon, "firstNotif")
+            assertIsNotifChip(latest!!.secondary, secondIcon, "secondNotif")
         }
 
     @Test
@@ -368,8 +380,12 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chips)
 
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
-            val firstIcon = mock<StatusBarIconView>()
+            val callNotificationKey = "call"
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
+
+            val firstIcon = createStatusBarIconViewOrNull()
             setNotifs(
                 listOf(
                     activeNotificationModel(
@@ -380,43 +396,47 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                     ),
                     activeNotificationModel(
                         key = "secondNotif",
-                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        statusBarChipIcon = createStatusBarIconViewOrNull(),
                         promotedContent =
                             PromotedNotificationContentModel.Builder("secondNotif").build(),
                     ),
                 )
             )
 
-            assertIsCallChip(latest!!.primary)
-            assertIsNotifChip(latest!!.secondary, firstIcon)
+            assertIsCallChip(latest!!.primary, callNotificationKey)
+            assertIsNotifChip(latest!!.secondary, firstIcon, "firstNotif")
         }
 
     @Test
     fun chips_screenRecordAndCallAndPromotedNotifs_notifsNotShown() =
         testScope.runTest {
+            val callNotificationKey = "call"
             val latest by collectLastValue(underTest.chips)
 
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
             screenRecordState.value = ScreenRecordModel.Recording
             setNotifs(
                 listOf(
                     activeNotificationModel(
                         key = "notif",
-                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        statusBarChipIcon = createStatusBarIconViewOrNull(),
                         promotedContent = PromotedNotificationContentModel.Builder("notif").build(),
                     )
                 )
             )
 
             assertIsScreenRecordChip(latest!!.primary)
-            assertIsCallChip(latest!!.secondary)
+            assertIsCallChip(latest!!.secondary, callNotificationKey)
         }
 
     @Test
     fun primaryChip_higherPriorityChipAdded_lowerPriorityChipReplaced() =
         testScope.runTest {
+            val callNotificationKey = "call"
             // Start with just the lowest priority chip shown
-            val notifIcon = mock<StatusBarIconView>()
+            val notifIcon = createStatusBarIconViewOrNull()
             setNotifs(
                 listOf(
                     activeNotificationModel(
@@ -433,13 +453,15 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.primaryChip)
 
-            assertIsNotifChip(latest, notifIcon)
+            assertIsNotifChip(latest, notifIcon, "notif")
 
             // WHEN the higher priority call chip is added
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
 
             // THEN the higher priority call chip is used
-            assertIsCallChip(latest)
+            assertIsCallChip(latest, callNotificationKey)
 
             // WHEN the higher priority media projection chip is added
             mediaProjectionState.value =
@@ -462,12 +484,15 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
     @Test
     fun primaryChip_highestPriorityChipRemoved_showsNextPriorityChip() =
         testScope.runTest {
+            val callNotificationKey = "call"
             // WHEN all chips are active
             screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
-            val notifIcon = mock<StatusBarIconView>()
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
+            val notifIcon = createStatusBarIconViewOrNull()
             setNotifs(
                 listOf(
                     activeNotificationModel(
@@ -493,20 +518,21 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             // THEN the lower priority call is used
-            assertIsCallChip(latest)
+            assertIsCallChip(latest, callNotificationKey)
 
             // WHEN the higher priority call is removed
             callRepo.setOngoingCallState(OngoingCallModel.NoCall)
 
             // THEN the lower priority notif is used
-            assertIsNotifChip(latest, notifIcon)
+            assertIsNotifChip(latest, notifIcon, "notif")
         }
 
     @Test
     fun chips_movesChipsAroundAccordingToPriority() =
         testScope.runTest {
+            val callNotificationKey = "call"
             // Start with just the lowest priority chip shown
-            val notifIcon = mock<StatusBarIconView>()
+            val notifIcon = createStatusBarIconViewOrNull()
             setNotifs(
                 listOf(
                     activeNotificationModel(
@@ -523,16 +549,18 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             val latest by collectLastValue(underTest.chips)
 
-            assertIsNotifChip(latest!!.primary, notifIcon)
+            assertIsNotifChip(latest!!.primary, notifIcon, "notif")
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
 
             // WHEN the higher priority call chip is added
-            callRepo.setOngoingCallState(inCallModel(startTimeMs = 34))
+            callRepo.setOngoingCallState(
+                inCallModel(startTimeMs = 34, notificationKey = callNotificationKey)
+            )
 
             // THEN the higher priority call chip is used as primary and notif is demoted to
             // secondary
-            assertIsCallChip(latest!!.primary)
-            assertIsNotifChip(latest!!.secondary, notifIcon)
+            assertIsCallChip(latest!!.primary, callNotificationKey)
+            assertIsNotifChip(latest!!.secondary, notifIcon, "notif")
 
             // WHEN the higher priority media projection chip is added
             mediaProjectionState.value =
@@ -545,7 +573,7 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
             // THEN the higher priority media projection chip is used as primary and call is demoted
             // to secondary (and notif is dropped altogether)
             assertIsShareToAppChip(latest!!.primary)
-            assertIsCallChip(latest!!.secondary)
+            assertIsCallChip(latest!!.secondary, callNotificationKey)
 
             // WHEN the higher priority screen record chip is added
             screenRecordState.value = ScreenRecordModel.Recording
@@ -559,13 +587,13 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             // THEN media projection and notif remain
             assertIsShareToAppChip(latest!!.primary)
-            assertIsNotifChip(latest!!.secondary, notifIcon)
+            assertIsNotifChip(latest!!.secondary, notifIcon, "notif")
 
             // WHEN media projection is dropped
             mediaProjectionState.value = MediaProjectionState.NotProjecting
 
             // THEN notif is promoted to primary
-            assertIsNotifChip(latest!!.primary, notifIcon)
+            assertIsNotifChip(latest!!.primary, notifIcon, "notif")
             assertThat(latest!!.secondary).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
         }
 
