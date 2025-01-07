@@ -723,6 +723,7 @@ private fun AddShortcutButton(onClick: () -> Unit) {
         contentColor = MaterialTheme.colorScheme.primary,
         contentPaddingVertical = 0.dp,
         contentPaddingHorizontal = 0.dp,
+        contentDescription = stringResource(R.string.shortcut_helper_add_shortcut_button_label),
     )
 }
 
@@ -743,6 +744,7 @@ private fun DeleteShortcutButton(onClick: () -> Unit) {
         contentColor = MaterialTheme.colorScheme.primary,
         contentPaddingVertical = 0.dp,
         contentPaddingHorizontal = 0.dp,
+        contentDescription = stringResource(R.string.shortcut_helper_delete_shortcut_button_label),
     )
 }
 

@@ -230,6 +230,7 @@ fun ShortcutHelperButton(
     contentPaddingVertical: Dp = 10.dp,
     enabled: Boolean = true,
     border: BorderStroke? = null,
+    contentDescription: String? = null,
 ) {
     ShortcutHelperButtonSurface(
         onClick = onClick,
@@ -254,8 +255,7 @@ fun ShortcutHelperButton(
                 Icon(
                     tint = contentColor,
                     imageVector = iconSource.imageVector,
-                    contentDescription =
-                        null, // TODO this probably should not be null for accessibility.
+                    contentDescription = contentDescription,
                     modifier = Modifier.size(20.dp).wrapContentSize(Alignment.Center),
                 )
             }
