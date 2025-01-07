@@ -73,6 +73,7 @@ constructor(
             .stateIn(coroutineScope, SharingStarted.Eagerly, null)
             .filterNotNull()
 
+    val isDisabledByZenMode: Flow<Boolean> = interactor.isDisabledByZenMode
     val state: Flow<VolumeDialogSliderStateModel> =
         model
             .flatMapLatest { streamModel ->
@@ -82,7 +83,7 @@ constructor(
                             level = level,
                             levelMin = levelMin,
                             levelMax = levelMax,
-                            isMuted = muted,
+                            isMuted = muteSupported && muted,
                             isRoutedToBluetooth = routedToBluetooth,
                         )
                     }
