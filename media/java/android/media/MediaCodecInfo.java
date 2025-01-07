@@ -4312,288 +4312,6 @@ public final class MediaCodecInfo {
      * A class that supports querying the encoding capabilities of a codec.
      */
     public static final class EncoderCapabilities {
-        private static final String TAG = "EncoderCapabilities";
-
-        /** Constant quality mode */
-        public static final int BITRATE_MODE_CQ = 0;
-        /** Variable bitrate mode */
-        public static final int BITRATE_MODE_VBR = 1;
-        /** Constant bitrate mode */
-        public static final int BITRATE_MODE_CBR = 2;
-        /** Constant bitrate mode with frame drops */
-        public static final int BITRATE_MODE_CBR_FD =  3;
-
-        /* package private */ interface EncoderCapsIntf {
-            public Range<Integer> getQualityRange();
-
-            public Range<Integer> getComplexityRange();
-
-            public boolean isBitrateModeSupported(int mode);
-
-            public void getDefaultFormat(MediaFormat format);
-
-            public boolean supportsFormat(MediaFormat format);
-        }
-
-        /* package private */ static final class EncoderCapsLegacyImpl implements EncoderCapsIntf {
-            private CodecCapabilities mParent;
-
-            private Range<Integer> mQualityRange;
-            private Range<Integer> mComplexityRange;
-
-            public Range<Integer> getQualityRange() {
-                return mQualityRange;
-            }
-
-            public Range<Integer> getComplexityRange() {
-                return mComplexityRange;
-            }
-
-            private static final Feature[] bitrates = new Feature[] {
-                new Feature("VBR", BITRATE_MODE_VBR, true),
-                new Feature("CBR", BITRATE_MODE_CBR, false),
-                new Feature("CQ",  BITRATE_MODE_CQ,  false),
-                new Feature("CBR-FD", BITRATE_MODE_CBR_FD, false)
-            };
-
-            private static int parseBitrateMode(String mode) {
-                for (Feature feat: bitrates) {
-                    if (feat.mName.equalsIgnoreCase(mode)) {
-                        return feat.mValue;
-                    }
-                }
-                return 0;
-            }
-
-            public boolean isBitrateModeSupported(int mode) {
-                for (Feature feat: bitrates) {
-                    if (mode == feat.mValue) {
-                        return (mBitControl & (1 << mode)) != 0;
-                    }
-                }
-                return false;
-            }
-
-            /* no public constructor */
-            private EncoderCapsLegacyImpl() { }
-
-            /** @hide */
-            public static EncoderCapsLegacyImpl create(
-                    MediaFormat info, CodecCapabilities parent) {
-                if (GetFlag(() -> android.media.codec.Flags.nativeCapabilites())) {
-                    Log.d(TAG, "Legacy implementation is called while native flag is on.");
-                }
-
-                EncoderCapsLegacyImpl caps = new EncoderCapsLegacyImpl();
-                caps.init(info, parent);
-                return caps;
-            }
-
-            private void init(MediaFormat info, CodecCapabilities parent) {
-                // no support for complexity or quality yet
-                mParent = parent;
-                mComplexityRange = Range.create(0, 0);
-                mQualityRange = Range.create(0, 0);
-                mBitControl = (1 << BITRATE_MODE_VBR);
-
-                applyLevelLimits();
-                parseFromInfo(info);
-            }
-
-            private void applyLevelLimits() {
-                String mime = mParent.getMimeType();
-                if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
-                    mComplexityRange = Range.create(0, 8);
-                    mBitControl = (1 << BITRATE_MODE_CQ);
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_NB)
-                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_WB)
-                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_ALAW)
-                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_MLAW)
-                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MSGSM)) {
-                    mBitControl = (1 << BITRATE_MODE_CBR);
-                }
-            }
-
-            private int mBitControl;
-            private Integer mDefaultComplexity;
-            private Integer mDefaultQuality;
-            private String mQualityScale;
-
-            private void parseFromInfo(MediaFormat info) {
-                Map<String, Object> map = info.getMap();
-
-                if (info.containsKey("complexity-range")) {
-                    mComplexityRange = Utils
-                            .parseIntRange(info.getString("complexity-range"), mComplexityRange);
-                    // TODO should we limit this to level limits?
-                }
-                if (info.containsKey("quality-range")) {
-                    mQualityRange = Utils
-                            .parseIntRange(info.getString("quality-range"), mQualityRange);
-                }
-                if (info.containsKey("feature-bitrate-modes")) {
-                    mBitControl = 0;
-                    for (String mode: info.getString("feature-bitrate-modes").split(",")) {
-                        mBitControl |= (1 << parseBitrateMode(mode));
-                    }
-                }
-
-                try {
-                    mDefaultComplexity = Integer.parseInt((String)map.get("complexity-default"));
-                } catch (NumberFormatException e) { }
-
-                try {
-                    mDefaultQuality = Integer.parseInt((String)map.get("quality-default"));
-                } catch (NumberFormatException e) { }
-
-                mQualityScale = (String)map.get("quality-scale");
-            }
-
-            private boolean supports(
-                    Integer complexity, Integer quality, Integer profile) {
-                boolean ok = true;
-                if (ok && complexity != null) {
-                    ok = mComplexityRange.contains(complexity);
-                }
-                if (ok && quality != null) {
-                    ok = mQualityRange.contains(quality);
-                }
-                if (ok && profile != null) {
-                    for (CodecProfileLevel pl: mParent.profileLevels) {
-                        if (pl.profile == profile) {
-                            profile = null;
-                            break;
-                        }
-                    }
-                    ok = profile == null;
-                }
-                return ok;
-            }
-
-            /** @hide */
-            public void getDefaultFormat(MediaFormat format) {
-                // don't list trivial quality/complexity as default for now
-                if (!mQualityRange.getUpper().equals(mQualityRange.getLower())
-                        && mDefaultQuality != null) {
-                    format.setInteger(MediaFormat.KEY_QUALITY, mDefaultQuality);
-                }
-                if (!mComplexityRange.getUpper().equals(mComplexityRange.getLower())
-                        && mDefaultComplexity != null) {
-                    format.setInteger(MediaFormat.KEY_COMPLEXITY, mDefaultComplexity);
-                }
-                // bitrates are listed in order of preference
-                for (Feature feat: bitrates) {
-                    if ((mBitControl & (1 << feat.mValue)) != 0) {
-                        format.setInteger(MediaFormat.KEY_BITRATE_MODE, feat.mValue);
-                        break;
-                    }
-                }
-            }
-
-            /** @hide */
-            public boolean supportsFormat(MediaFormat format) {
-                final Map<String, Object> map = format.getMap();
-                final String mime = mParent.getMimeType();
-
-                Integer mode = (Integer)map.get(MediaFormat.KEY_BITRATE_MODE);
-                if (mode != null && !isBitrateModeSupported(mode)) {
-                    return false;
-                }
-
-                Integer complexity = (Integer)map.get(MediaFormat.KEY_COMPLEXITY);
-                if (MediaFormat.MIMETYPE_AUDIO_FLAC.equalsIgnoreCase(mime)) {
-                    Integer flacComplexity =
-                            (Integer)map.get(MediaFormat.KEY_FLAC_COMPRESSION_LEVEL);
-                    if (complexity == null) {
-                        complexity = flacComplexity;
-                    } else if (flacComplexity != null && !complexity.equals(flacComplexity)) {
-                        throw new IllegalArgumentException(
-                                "conflicting values for complexity and "
-                                + "flac-compression-level");
-                    }
-                }
-
-                // other audio parameters
-                Integer profile = (Integer)map.get(MediaFormat.KEY_PROFILE);
-                if (MediaFormat.MIMETYPE_AUDIO_AAC.equalsIgnoreCase(mime)) {
-                    Integer aacProfile = (Integer)map.get(MediaFormat.KEY_AAC_PROFILE);
-                    if (profile == null) {
-                        profile = aacProfile;
-                    } else if (aacProfile != null && !aacProfile.equals(profile)) {
-                        throw new IllegalArgumentException(
-                                "conflicting values for profile and aac-profile");
-                    }
-                }
-
-                Integer quality = (Integer)map.get(MediaFormat.KEY_QUALITY);
-
-                return supports(complexity, quality, profile);
-            }
-        }
-
-        /* package private */ static final class EncoderCapsNativeImpl implements EncoderCapsIntf {
-            private long mNativeContext; // accessed by native methods
-
-            private Range<Integer> mQualityRange;
-            private Range<Integer> mComplexityRange;
-
-            /* no public constructor */
-            private EncoderCapsNativeImpl() { }
-
-            // Constructor called from native
-            /* package private */ EncoderCapsNativeImpl(Range<Integer> qualityRange,
-                    Range<Integer> complexityRange) {
-                mQualityRange = qualityRange;
-                mComplexityRange = complexityRange;
-            }
-
-            public Range<Integer> getQualityRange() {
-                return mQualityRange;
-            }
-
-            public Range<Integer> getComplexityRange() {
-                return mComplexityRange;
-            }
-
-            public boolean isBitrateModeSupported(int mode) {
-                return native_isBitrateModeSupported(mode);
-            }
-
-            // This API is for internal Java implementation only. Should not be called.
-            public void getDefaultFormat(MediaFormat format) {
-                throw new UnsupportedOperationException(
-                    "Java Implementation should not call native implemenatation");
-            }
-
-            // This API is for internal Java implementation only. Should not be called.
-            public boolean supportsFormat(MediaFormat format) {
-                throw new UnsupportedOperationException(
-                    "Java Implementation should not call native implemenatation");
-            }
-
-            private native boolean native_isBitrateModeSupported(int mode);
-            private static native void native_init();
-
-            static {
-                System.loadLibrary("media_jni");
-                native_init();
-            }
-        }
-
-        private EncoderCapsIntf mImpl;
-
-        /** @hide */
-        public static EncoderCapabilities create(
-                MediaFormat info, CodecCapabilities parent) {
-            EncoderCapsLegacyImpl impl = EncoderCapsLegacyImpl.create(info, parent);
-            EncoderCapabilities caps = new EncoderCapabilities(impl);
-            return caps;
-        }
-
-        /* package private */ EncoderCapabilities(EncoderCapsIntf impl) {
-            mImpl = impl;
-        }
-
         /**
          * Returns the supported range of quality values.
          *
@@ -4601,7 +4319,7 @@ public final class MediaCodecInfo {
          * setting results in a better image quality and a lower compression ratio.
          */
         public Range<Integer> getQualityRange() {
-            return mImpl.getQualityRange();
+            return mQualityRange;
         }
 
         /**
@@ -4613,24 +4331,200 @@ public final class MediaCodecInfo {
          * ratio.  Use a lower value to save power and/or time.
          */
         public Range<Integer> getComplexityRange() {
-            return mImpl.getComplexityRange();
+            return mComplexityRange;
+        }
+
+        /** Constant quality mode */
+        public static final int BITRATE_MODE_CQ = 0;
+        /** Variable bitrate mode */
+        public static final int BITRATE_MODE_VBR = 1;
+        /** Constant bitrate mode */
+        public static final int BITRATE_MODE_CBR = 2;
+        /** Constant bitrate mode with frame drops */
+        public static final int BITRATE_MODE_CBR_FD =  3;
+
+        private static final Feature[] bitrates = new Feature[] {
+            new Feature("VBR", BITRATE_MODE_VBR, true),
+            new Feature("CBR", BITRATE_MODE_CBR, false),
+            new Feature("CQ",  BITRATE_MODE_CQ,  false),
+            new Feature("CBR-FD", BITRATE_MODE_CBR_FD, false)
+        };
+
+        private static int parseBitrateMode(String mode) {
+            for (Feature feat: bitrates) {
+                if (feat.mName.equalsIgnoreCase(mode)) {
+                    return feat.mValue;
+                }
+            }
+            return 0;
         }
 
         /**
          * Query whether a bitrate mode is supported.
          */
         public boolean isBitrateModeSupported(int mode) {
-            return mImpl.isBitrateModeSupported(mode);
+            for (Feature feat: bitrates) {
+                if (mode == feat.mValue) {
+                    return (mBitControl & (1 << mode)) != 0;
+                }
+            }
+            return false;
+        }
+
+        private Range<Integer> mQualityRange;
+        private Range<Integer> mComplexityRange;
+        private CodecCapabilities mParent;
+
+        /* no public constructor */
+        private EncoderCapabilities() { }
+
+        /** @hide */
+        public static EncoderCapabilities create(
+                MediaFormat info, CodecCapabilities parent) {
+            EncoderCapabilities caps = new EncoderCapabilities();
+            caps.init(info, parent);
+            return caps;
+        }
+
+        private void init(MediaFormat info, CodecCapabilities parent) {
+            // no support for complexity or quality yet
+            mParent = parent;
+            mComplexityRange = Range.create(0, 0);
+            mQualityRange = Range.create(0, 0);
+            mBitControl = (1 << BITRATE_MODE_VBR);
+
+            applyLevelLimits();
+            parseFromInfo(info);
+        }
+
+        private void applyLevelLimits() {
+            String mime = mParent.getMimeType();
+            if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
+                mComplexityRange = Range.create(0, 8);
+                mBitControl = (1 << BITRATE_MODE_CQ);
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_NB)
+                    || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_WB)
+                    || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_ALAW)
+                    || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_MLAW)
+                    || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MSGSM)) {
+                mBitControl = (1 << BITRATE_MODE_CBR);
+            }
+        }
+
+        private int mBitControl;
+        private Integer mDefaultComplexity;
+        private Integer mDefaultQuality;
+        private String mQualityScale;
+
+        private void parseFromInfo(MediaFormat info) {
+            Map<String, Object> map = info.getMap();
+
+            if (info.containsKey("complexity-range")) {
+                mComplexityRange = Utils
+                        .parseIntRange(info.getString("complexity-range"), mComplexityRange);
+                // TODO should we limit this to level limits?
+            }
+            if (info.containsKey("quality-range")) {
+                mQualityRange = Utils
+                        .parseIntRange(info.getString("quality-range"), mQualityRange);
+            }
+            if (info.containsKey("feature-bitrate-modes")) {
+                mBitControl = 0;
+                for (String mode: info.getString("feature-bitrate-modes").split(",")) {
+                    mBitControl |= (1 << parseBitrateMode(mode));
+                }
+            }
+
+            try {
+                mDefaultComplexity = Integer.parseInt((String)map.get("complexity-default"));
+            } catch (NumberFormatException e) { }
+
+            try {
+                mDefaultQuality = Integer.parseInt((String)map.get("quality-default"));
+            } catch (NumberFormatException e) { }
+
+            mQualityScale = (String)map.get("quality-scale");
+        }
+
+        private boolean supports(
+                Integer complexity, Integer quality, Integer profile) {
+            boolean ok = true;
+            if (ok && complexity != null) {
+                ok = mComplexityRange.contains(complexity);
+            }
+            if (ok && quality != null) {
+                ok = mQualityRange.contains(quality);
+            }
+            if (ok && profile != null) {
+                for (CodecProfileLevel pl: mParent.profileLevels) {
+                    if (pl.profile == profile) {
+                        profile = null;
+                        break;
+                    }
+                }
+                ok = profile == null;
+            }
+            return ok;
         }
 
         /** @hide */
         public void getDefaultFormat(MediaFormat format) {
-            mImpl.getDefaultFormat(format);
+            // don't list trivial quality/complexity as default for now
+            if (!mQualityRange.getUpper().equals(mQualityRange.getLower())
+                    && mDefaultQuality != null) {
+                format.setInteger(MediaFormat.KEY_QUALITY, mDefaultQuality);
+            }
+            if (!mComplexityRange.getUpper().equals(mComplexityRange.getLower())
+                    && mDefaultComplexity != null) {
+                format.setInteger(MediaFormat.KEY_COMPLEXITY, mDefaultComplexity);
+            }
+            // bitrates are listed in order of preference
+            for (Feature feat: bitrates) {
+                if ((mBitControl & (1 << feat.mValue)) != 0) {
+                    format.setInteger(MediaFormat.KEY_BITRATE_MODE, feat.mValue);
+                    break;
+                }
+            }
         }
 
         /** @hide */
         public boolean supportsFormat(MediaFormat format) {
-            return mImpl.supportsFormat(format);
+            final Map<String, Object> map = format.getMap();
+            final String mime = mParent.getMimeType();
+
+            Integer mode = (Integer)map.get(MediaFormat.KEY_BITRATE_MODE);
+            if (mode != null && !isBitrateModeSupported(mode)) {
+                return false;
+            }
+
+            Integer complexity = (Integer)map.get(MediaFormat.KEY_COMPLEXITY);
+            if (MediaFormat.MIMETYPE_AUDIO_FLAC.equalsIgnoreCase(mime)) {
+                Integer flacComplexity =
+                    (Integer)map.get(MediaFormat.KEY_FLAC_COMPRESSION_LEVEL);
+                if (complexity == null) {
+                    complexity = flacComplexity;
+                } else if (flacComplexity != null && !complexity.equals(flacComplexity)) {
+                    throw new IllegalArgumentException(
+                            "conflicting values for complexity and " +
+                            "flac-compression-level");
+                }
+            }
+
+            // other audio parameters
+            Integer profile = (Integer)map.get(MediaFormat.KEY_PROFILE);
+            if (MediaFormat.MIMETYPE_AUDIO_AAC.equalsIgnoreCase(mime)) {
+                Integer aacProfile = (Integer)map.get(MediaFormat.KEY_AAC_PROFILE);
+                if (profile == null) {
+                    profile = aacProfile;
+                } else if (aacProfile != null && !aacProfile.equals(profile)) {
+                    throw new IllegalArgumentException(
+                            "conflicting values for profile and aac-profile");
+                }
+            }
+
+            Integer quality = (Integer)map.get(MediaFormat.KEY_QUALITY);
+
+            return supports(complexity, quality, profile);
         }
     };
 
