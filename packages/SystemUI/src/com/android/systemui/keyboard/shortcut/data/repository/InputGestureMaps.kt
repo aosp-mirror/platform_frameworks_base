@@ -27,14 +27,19 @@ import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_ASSISTANT
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_SYSTEM_SETTINGS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_LOCK_SCREEN
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_NOTES
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.AppCategories
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
@@ -66,6 +71,11 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
             KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION to MultiTasking,
             KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT to MultiTasking,
             KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT to MultiTasking,
+            KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW to MultiTasking,
+            KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW to MultiTasking,
+            KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW to MultiTasking,
+            KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW to MultiTasking,
+            KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY to MultiTasking,
 
             // App Category
             KEY_GESTURE_TYPE_LAUNCH_APPLICATION to AppCategories,
@@ -102,15 +112,23 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
                 R.string.shortcutHelper_category_split_screen,
             KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT to
                 R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW to
+                R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW to
+                R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW to
+                R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW to
+                R.string.shortcutHelper_category_split_screen,
+            KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY to R.string.shortcutHelper_category_split_screen,
 
             // App Category
-            KEY_GESTURE_TYPE_LAUNCH_APPLICATION to
-                R.string.keyboard_shortcut_group_applications,
+            KEY_GESTURE_TYPE_LAUNCH_APPLICATION to R.string.keyboard_shortcut_group_applications,
         )
 
     /**
-     * App Category shortcut labels are mapped dynamically based on intent
-     * see [InputGestureDataAdapter.fetchShortcutLabelByAppLaunchData]
+     * App Category shortcut labels are mapped dynamically based on intent see
+     * [InputGestureDataAdapter.fetchShortcutLabelByAppLaunchData]
      */
     val gestureToInternalKeyboardShortcutInfoLabelResIdMap =
         mapOf(
@@ -136,6 +154,16 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to R.string.system_multitasking_lhs,
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT to R.string.system_multitasking_rhs,
             KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION to R.string.system_multitasking_full_screen,
+            KEY_GESTURE_TYPE_SNAP_LEFT_FREEFORM_WINDOW to
+                R.string.system_desktop_mode_snap_left_window,
+            KEY_GESTURE_TYPE_SNAP_RIGHT_FREEFORM_WINDOW to
+                R.string.system_desktop_mode_snap_right_window,
+            KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW to
+                R.string.system_desktop_mode_minimize_window,
+            KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW to
+                R.string.system_desktop_mode_toggle_maximize_window,
+            KEY_GESTURE_TYPE_MOVE_TO_NEXT_DISPLAY to
+                R.string.system_multitasking_move_to_next_display,
         )
 
     val shortcutLabelToKeyGestureTypeMap: Map<String, Int>
