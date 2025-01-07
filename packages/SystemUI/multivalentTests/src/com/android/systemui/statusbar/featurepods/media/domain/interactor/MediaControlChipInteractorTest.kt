@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.featurepods.media.domain.interactor
 
+import android.graphics.drawable.Drawable
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -23,12 +24,15 @@ import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.media.controls.data.repository.mediaFilterRepository
+import com.android.systemui.media.controls.shared.model.MediaAction
+import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaData
 import com.android.systemui.media.controls.shared.model.MediaDataLoadingModel
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -101,5 +105,71 @@ class MediaControlChipInteractorTest : SysuiTestCase() {
             mediaFilterRepository.addSelectedUserMediaEntry(updatedUserMedia)
 
             assertThat(model?.songName).isEqualTo(newSongName)
+        }
+
+    @Test
+    fun mediaControlModel_playPauseActionChanges_emitsUpdatedModel() =
+        kosmos.runTest {
+            val model by collectLastValue(underTest.mediaControlModel)
+
+            val mockDrawable = mock<Drawable>()
+
+            val initialAction =
+                MediaAction(
+                    icon = mockDrawable,
+                    action = {},
+                    contentDescription = "Initial Action",
+                    background = mockDrawable,
+                )
+            val mediaButton = MediaButton(playOrPause = initialAction)
+            val userMedia = MediaData(active = true, semanticActions = mediaButton)
+            val instanceId = userMedia.instanceId
+            mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+            mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
+
+            assertThat(model).isNotNull()
+            assertThat(model?.playOrPause).isEqualTo(initialAction)
+
+            val newAction =
+                MediaAction(
+                    icon = mockDrawable,
+                    action = {},
+                    contentDescription = "New Action",
+                    background = mockDrawable,
+                )
+            val updatedMediaButton = MediaButton(playOrPause = newAction)
+            val updatedUserMedia = userMedia.copy(semanticActions = updatedMediaButton)
+            mediaFilterRepository.addSelectedUserMediaEntry(updatedUserMedia)
+
+            assertThat(model?.playOrPause).isEqualTo(newAction)
+        }
+
+    @Test
+    fun mediaControlModel_playPauseActionRemoved_playPauseNull() =
+        kosmos.runTest {
+            val model by collectLastValue(underTest.mediaControlModel)
+
+            val mockDrawable = mock<Drawable>()
+
+            val initialAction =
+                MediaAction(
+                    icon = mockDrawable,
+                    action = {},
+                    contentDescription = "Initial Action",
+                    background = mockDrawable,
+                )
+            val mediaButton = MediaButton(playOrPause = initialAction)
+            val userMedia = MediaData(active = true, semanticActions = mediaButton)
+            val instanceId = userMedia.instanceId
+            mediaFilterRepository.addSelectedUserMediaEntry(userMedia)
+            mediaFilterRepository.addMediaDataLoadingState(MediaDataLoadingModel.Loaded(instanceId))
+
+            assertThat(model).isNotNull()
+            assertThat(model?.playOrPause).isEqualTo(initialAction)
+
+            val updatedUserMedia = userMedia.copy(semanticActions = MediaButton())
+            mediaFilterRepository.addSelectedUserMediaEntry(updatedUserMedia)
+
+            assertThat(model?.playOrPause).isNull()
         }
 }

@@ -17,10 +17,12 @@
 package com.android.systemui.statusbar.featurepods.media.shared.model
 
 import android.graphics.drawable.Icon
+import com.android.systemui.media.controls.shared.model.MediaAction
 
 /** Model used to display a media control chip in the status bar. */
 data class MediaControlChipModel(
     val appIcon: Icon?,
     val appName: String?,
     val songName: CharSequence?,
+    val playOrPause: MediaAction?,
 )

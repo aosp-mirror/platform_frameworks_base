@@ -26,6 +26,18 @@ sealed class PopupChipId(val value: String) {
     data object MediaControl : PopupChipId("MediaControl")
 }
 
+/** Defines the behavior of the chip when hovered over. */
+sealed interface HoverBehavior {
+    /** No specific hover behavior. The default icon will be shown. */
+    data object None : HoverBehavior
+
+    /**
+     * Shows a button on hover with the given [icon] and executes [onIconPressed] when the icon is
+     * pressed.
+     */
+    data class Button(val icon: Icon, val onIconPressed: () -> Unit) : HoverBehavior
+}
+
 /** Model for individual status bar popup chips. */
 sealed class PopupChipModel {
     abstract val logName: String
@@ -40,15 +52,10 @@ sealed class PopupChipModel {
         override val chipId: PopupChipId,
         /** Default icon displayed on the chip */
         val icon: Icon,
-        /**
-         * Icon to be displayed if the chip is hovered. i.e. the mouse pointer is inside the bounds
-         * of the chip.
-         */
-        val hoverIcon: Icon,
         val chipText: String,
         val isToggled: Boolean = false,
         val onToggle: () -> Unit,
-        val onIconPressed: () -> Unit,
+        val hoverBehavior: HoverBehavior = HoverBehavior.None,
     ) : PopupChipModel() {
         override val logName = "Shown(id=$chipId, toggled=$isToggled)"
     }
