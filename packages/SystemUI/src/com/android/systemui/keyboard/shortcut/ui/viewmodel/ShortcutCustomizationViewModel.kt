@@ -46,6 +46,7 @@ constructor(
     private val context: Context,
     private val shortcutCustomizationInteractor: ShortcutCustomizationInteractor,
 ) {
+    private var keyDownEventCache: KeyEvent? = null
     private val _shortcutCustomizationUiState =
         MutableStateFlow<ShortcutCustomizationUiState>(ShortcutCustomizationUiState.Inactive)
 
@@ -94,9 +95,16 @@ constructor(
         shortcutCustomizationInteractor.updateUserSelectedKeyCombination(null)
     }
 
-    fun onKeyPressed(keyEvent: KeyEvent): Boolean {
-        if ((keyEvent.isMetaPressed && keyEvent.type == KeyEventType.KeyDown)) {
-            updatePressedKeys(keyEvent)
+    fun onShortcutKeyCombinationSelected(keyEvent: KeyEvent): Boolean {
+        if (isModifier(keyEvent)) {
+            return false
+        }
+        if (keyEvent.isMetaPressed && keyEvent.type == KeyEventType.KeyDown) {
+            keyDownEventCache = keyEvent
+            return true
+        } else if (keyEvent.type == KeyEventType.KeyUp && keyEvent.key == keyDownEventCache?.key) {
+            updatePressedKeys(keyDownEventCache!!)
+            clearKeyDownEventCache()
             return true
         }
         return false
@@ -157,14 +165,19 @@ constructor(
         return (uiState as? AddShortcutDialog)?.copy(errorMessage = errorMessage) ?: uiState
     }
 
+    private fun isModifier(keyEvent: KeyEvent) = SUPPORTED_MODIFIERS.contains(keyEvent.key)
+
     private fun updatePressedKeys(keyEvent: KeyEvent) {
-        val isModifier = SUPPORTED_MODIFIERS.contains(keyEvent.key)
         val keyCombination =
             KeyCombination(
                 modifiers = keyEvent.nativeKeyEvent.modifiers,
-                keyCode = if (!isModifier) keyEvent.key.nativeKeyCode else null,
+                keyCode = if (!isModifier(keyEvent)) keyEvent.key.nativeKeyCode else null,
             )
         shortcutCustomizationInteractor.updateUserSelectedKeyCombination(keyCombination)
+    }
+
+    private fun clearKeyDownEventCache() {
+        keyDownEventCache = null
     }
 
     @AssistedFactory
