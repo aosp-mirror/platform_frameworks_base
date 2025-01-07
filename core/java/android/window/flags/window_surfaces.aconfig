@@ -91,6 +91,14 @@ flag {
 }
 
 flag {
+  name: "ignore_corner_radius_and_shadows"
+  namespace: "window_surfaces"
+  description: "Ignore the corner radius and shadows of a SurfaceControl"
+  bug: "375624570"
+  is_fixed_read_only: true
+} # ignore_corner_radius_and_shadows
+
+flag {
     name: "jank_api"
     namespace: "window_surfaces"
     description: "Adds the jank data listener to AttachedSurfaceControl"
