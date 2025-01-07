@@ -22,7 +22,6 @@ import static com.android.internal.util.Preconditions.checkArgumentPositive;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.TestApi;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.Looper;
@@ -76,7 +75,6 @@ import java.util.concurrent.atomic.AtomicLong;
  * @param <Result> The class holding cache entries; use a boxed primitive if possible
  * @hide
  */
-@TestApi
 @android.ravenwood.annotation.RavenwoodKeepWholeClass
 public class PropertyInvalidatedCache<Query, Result> {
     /**
@@ -94,7 +92,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * This is a configuration class that customizes a cache instance.
      * @hide
      */
-    @TestApi
     public static abstract class QueryHandler<Q,R> {
         /**
          * Compute a result given a query.  The semantics are those of Functor.
@@ -133,7 +130,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * the system has permissions to write properties with this module.
      * @hide
      */
-    @TestApi
     public static final String MODULE_TEST = "test";
 
     /**
@@ -141,18 +137,17 @@ public class PropertyInvalidatedCache<Query, Result> {
      * the system processes.
      * @hide
      */
-    @TestApi
     public static final String MODULE_SYSTEM = "system_server";
 
     /**
      * The module used for bluetooth caches.
      * @hide
      */
-    @TestApi
     public static final String MODULE_BLUETOOTH = "bluetooth";
 
     /**
      * The module used for telephony caches.
+     * @hide
      */
     public static final String MODULE_TELEPHONY = "telephony";
 
@@ -185,7 +180,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * error message.
      * @hide
      */
-    @TestApi
     public static @NonNull String createPropertyName(@NonNull String module,
             @NonNull String apiName) {
         char[] api = apiName.toCharArray();
@@ -1425,7 +1419,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * @param computer The code to compute values that are not in the cache.
      * @hide
      */
-    @TestApi
     public PropertyInvalidatedCache(int maxEntries, @NonNull String module, @NonNull String api,
             @NonNull String cacheName, @NonNull QueryHandler<Query, Result> computer) {
         this(new Args(module).maxEntries(maxEntries).api(api), cacheName, computer);
@@ -1452,7 +1445,7 @@ public class PropertyInvalidatedCache<Query, Result> {
      * current logic does not care.
      * @hide
      */
-    @TestApi
+    @VisibleForTesting
     public static void setTestMode(boolean mode) {
         synchronized (sGlobalLock) {
             if (sTestMode == mode) {
@@ -1493,7 +1486,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * must be true when this method is called.
      * @hide
      */
-    @TestApi
     public void testPropertyName() {
         synchronized (sGlobalLock) {
             if (sTestMode == false) {
@@ -1585,8 +1577,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * be re-enabled.
      * @hide
      */
-    @TestApi
-    public final void disableInstance() {
+    @VisibleForTesting
+    public void disableInstance() {
         synchronized (mLock) {
             mDisabled = true;
             clear();
@@ -1622,8 +1614,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * found in the list of disabled caches.
      * @hide
      */
-    @TestApi
-    public final void forgetDisableLocal() {
+    @VisibleForTesting
+    public void forgetDisableLocal() {
         synchronized (sGlobalLock) {
             sDisabledKeys.remove(mCacheName);
         }
@@ -1646,13 +1638,11 @@ public class PropertyInvalidatedCache<Query, Result> {
      * property.  Once disabled, a cache cannot be reenabled.
      * @hide
      */
-    @TestApi
     public void disableForCurrentProcess() {
         disableLocal(mCacheName);
     }
 
     /** @hide */
-    @TestApi
     public static void disableForCurrentProcess(@NonNull String cacheName) {
         disableLocal(cacheName);
     }
@@ -1661,8 +1651,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Return whether a cache instance is disabled.
      * @hide
      */
-    @TestApi
-    public final boolean isDisabled() {
+    @VisibleForTesting
+    public boolean isDisabled() {
         return mDisabled || !sEnabled;
     }
 
@@ -1670,7 +1660,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Get a value from the cache or recompute it.
      * @hide
      */
-    @TestApi
     public @Nullable Result query(@NonNull Query query) {
         // Let access to mDisabled race: it's atomic anyway.
         long currentNonce = (!isDisabled()) ? getCurrentNonce() : NONCE_DISABLED;
@@ -1810,8 +1799,8 @@ public class PropertyInvalidatedCache<Query, Result> {
      * just use the static version of this function.
      * @hide
      */
-    @TestApi
-    public final void disableSystemWide() {
+    @VisibleForTesting
+    public void disableSystemWide() {
         disableSystemWide(mPropertyName);
     }
 
@@ -1831,7 +1820,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * to look up the NonceHandler for a given property name.
      * @hide
      */
-    @TestApi
     public void invalidateCache() {
         mNonce.invalidate();
     }
@@ -1860,7 +1848,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * Invalidate caches in all processes that are keyed for the module and api.
      * @hide
      */
-    @TestApi
     public static void invalidateCache(@NonNull String module, @NonNull String api) {
         invalidateCache(createPropertyName(module, api));
     }
@@ -2102,7 +2089,6 @@ public class PropertyInvalidatedCache<Query, Result> {
      * temporarily disable caching, use the corking mechanism.
      * @hide
      */
-    @TestApi
     public static void disableForTestMode() {
         Log.d(TAG, "disabling all caches in the process");
         sEnabled = false;
@@ -2111,10 +2097,8 @@ public class PropertyInvalidatedCache<Query, Result> {
     /**
      * Report the disabled status of this cache instance.  The return value does not
      * reflect status of the property key.
-     * @hide
      */
-    @TestApi
-    public boolean getDisabledState() {
+    private boolean getDisabledState() {
         return isDisabled();
     }
 
