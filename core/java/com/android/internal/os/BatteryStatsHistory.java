@@ -19,6 +19,7 @@ package com.android.internal.os;
 import static android.os.BatteryStats.HistoryItem.EVENT_FLAG_FINISH;
 import static android.os.BatteryStats.HistoryItem.EVENT_FLAG_START;
 import static android.os.BatteryStats.HistoryItem.EVENT_STATE_CHANGE;
+import static android.os.Trace.TRACE_TAG_SYSTEM_SERVER;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -215,6 +216,7 @@ public class BatteryStatsHistory {
     private final ArraySet<PowerStats.Descriptor> mWrittenPowerStatsDescriptors = new ArraySet<>();
     private byte mLastHistoryStepLevel = 0;
     private boolean mMutable = true;
+    private int mIteratorCookie;
     private final BatteryStatsHistory mWritableHistory;
 
     private static class BatteryHistoryFile implements Comparable<BatteryHistoryFile> {
@@ -289,6 +291,7 @@ public class BatteryStatsHistory {
         }
 
         void load() {
+            Trace.asyncTraceBegin(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.load", 0);
             mDirectory.mkdirs();
             if (!mDirectory.exists()) {
                 Slog.wtf(TAG, "HistoryDir does not exist:" + mDirectory.getPath());
@@ -325,8 +328,11 @@ public class BatteryStatsHistory {
                         }
                     } finally {
                         unlock();
+                        Trace.asyncTraceEnd(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.load", 0);
                     }
                 });
+            } else {
+                Trace.asyncTraceEnd(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.load", 0);
             }
         }
 
@@ -418,6 +424,7 @@ public class BatteryStatsHistory {
         }
 
         void writeToParcel(Parcel out, boolean useBlobs) {
+            Trace.traceBegin(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.writeToParcel");
             lock();
             try {
                 final long start = SystemClock.uptimeMillis();
@@ -443,6 +450,7 @@ public class BatteryStatsHistory {
                 }
             } finally {
                 unlock();
+                Trace.traceEnd(TRACE_TAG_SYSTEM_SERVER);
             }
         }
 
@@ -482,34 +490,39 @@ public class BatteryStatsHistory {
         }
 
         private void cleanup() {
-            if (mDirectory == null) {
-                return;
-            }
-
-            if (!tryLock()) {
-                mCleanupNeeded = true;
-                return;
-            }
-
-            mCleanupNeeded = false;
+            Trace.traceBegin(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.cleanup");
             try {
-                // if free disk space is less than 100MB, delete oldest history file.
-                if (!hasFreeDiskSpace(mDirectory)) {
-                    BatteryHistoryFile oldest = mHistoryFiles.remove(0);
-                    oldest.atomicFile.delete();
+                if (mDirectory == null) {
+                    return;
                 }
 
-                // if there is more history stored than allowed, delete oldest history files.
-                int size = getSize();
-                while (size > mMaxHistorySize) {
-                    BatteryHistoryFile oldest = mHistoryFiles.get(0);
-                    int length = (int) oldest.atomicFile.getBaseFile().length();
-                    oldest.atomicFile.delete();
-                    mHistoryFiles.remove(0);
-                    size -= length;
+                if (!tryLock()) {
+                    mCleanupNeeded = true;
+                    return;
+                }
+
+                mCleanupNeeded = false;
+                try {
+                    // if free disk space is less than 100MB, delete oldest history file.
+                    if (!hasFreeDiskSpace(mDirectory)) {
+                        BatteryHistoryFile oldest = mHistoryFiles.remove(0);
+                        oldest.atomicFile.delete();
+                    }
+
+                    // if there is more history stored than allowed, delete oldest history files.
+                    int size = getSize();
+                    while (size > mMaxHistorySize) {
+                        BatteryHistoryFile oldest = mHistoryFiles.get(0);
+                        int length = (int) oldest.atomicFile.getBaseFile().length();
+                        oldest.atomicFile.delete();
+                        mHistoryFiles.remove(0);
+                        size -= length;
+                    }
+                } finally {
+                    unlock();
                 }
             } finally {
-                unlock();
+                Trace.traceEnd(TRACE_TAG_SYSTEM_SERVER);
             }
         }
     }
@@ -710,13 +723,18 @@ public class BatteryStatsHistory {
      * in the system directory, so it is not safe while actively writing history.
      */
     public BatteryStatsHistory copy() {
-        synchronized (this) {
-            // Make a copy of battery history to avoid concurrent modification.
-            Parcel historyBufferCopy = Parcel.obtain();
-            historyBufferCopy.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
+        Trace.traceBegin(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.copy");
+        try {
+            synchronized (this) {
+                // Make a copy of battery history to avoid concurrent modification.
+                Parcel historyBufferCopy = Parcel.obtain();
+                historyBufferCopy.appendFrom(mHistoryBuffer, 0, mHistoryBuffer.dataSize());
 
-            return new BatteryStatsHistory(historyBufferCopy, mSystemDir, 0, 0, null, null, null,
-                    null, mEventLogger, this);
+                return new BatteryStatsHistory(historyBufferCopy, mSystemDir, 0, 0, null, null,
+                        null, null, mEventLogger, this);
+            }
+        } finally {
+            Trace.traceEnd(TRACE_TAG_SYSTEM_SERVER);
         }
     }
 
@@ -826,7 +844,7 @@ public class BatteryStatsHistory {
      */
     @NonNull
     public BatteryStatsHistoryIterator iterate(long startTimeMs, long endTimeMs) {
-        if (mMutable) {
+        if (mMutable || mIteratorCookie != 0) {
             return copy().iterate(startTimeMs, endTimeMs);
         }
 
@@ -837,7 +855,12 @@ public class BatteryStatsHistory {
         mCurrentParcel = null;
         mCurrentParcelEnd = 0;
         mParcelIndex = 0;
-        return new BatteryStatsHistoryIterator(this, startTimeMs, endTimeMs);
+        BatteryStatsHistoryIterator iterator = new BatteryStatsHistoryIterator(
+                this, startTimeMs, endTimeMs);
+        mIteratorCookie = System.identityHashCode(iterator);
+        Trace.asyncTraceBegin(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.iterate",
+                mIteratorCookie);
+        return iterator;
     }
 
     /**
@@ -848,6 +871,9 @@ public class BatteryStatsHistory {
         if (mHistoryDir != null) {
             mHistoryDir.unlock();
         }
+        Trace.asyncTraceEnd(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.iterate",
+                mIteratorCookie);
+        mIteratorCookie = 0;
     }
 
     /**
@@ -949,28 +975,33 @@ public class BatteryStatsHistory {
      * @return true if success, false otherwise.
      */
     public boolean readFileToParcel(Parcel out, AtomicFile file) {
-        byte[] raw = null;
+        Trace.traceBegin(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.read");
         try {
-            final long start = SystemClock.uptimeMillis();
-            raw = file.readFully();
-            if (DEBUG) {
-                Slog.d(TAG, "readFileToParcel:" + file.getBaseFile().getPath()
-                        + " duration ms:" + (SystemClock.uptimeMillis() - start));
+            byte[] raw = null;
+            try {
+                final long start = SystemClock.uptimeMillis();
+                raw = file.readFully();
+                if (DEBUG) {
+                    Slog.d(TAG, "readFileToParcel:" + file.getBaseFile().getPath()
+                            + " duration ms:" + (SystemClock.uptimeMillis() - start));
+                }
+            } catch (Exception e) {
+                Slog.e(TAG, "Error reading file " + file.getBaseFile().getPath(), e);
+                return false;
             }
-        } catch (Exception e) {
-            Slog.e(TAG, "Error reading file " + file.getBaseFile().getPath(), e);
-            return false;
+            out.unmarshall(raw, 0, raw.length);
+            out.setDataPosition(0);
+            if (!verifyVersion(out)) {
+                return false;
+            }
+            // skip monotonic time field.
+            out.readLong();
+            // skip monotonic size field
+            out.readLong();
+            return true;
+        } finally {
+            Trace.traceEnd(TRACE_TAG_SYSTEM_SERVER);
         }
-        out.unmarshall(raw, 0, raw.length);
-        out.setDataPosition(0);
-        if (!verifyVersion(out)) {
-            return false;
-        }
-        // skip monotonic time field.
-        out.readLong();
-        // skip monotonic size field
-        out.readLong();
-        return true;
     }
 
     /**
