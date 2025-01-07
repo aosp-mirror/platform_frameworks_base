@@ -236,7 +236,7 @@ class DesktopTasksTransitionObserver(
         if (transitionToCloseWallpaper == transition) {
             // TODO: b/362469671 - Handle merging the animation when desktop is also closing.
             desktopWallpaperActivityTokenProvider.getToken()?.let { wallpaperActivityToken ->
-                if (Flags.enableDesktopWallpaperActivityOnSystemUser()) {
+                if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
                     transitions.startTransition(
                         TRANSIT_TO_BACK,
                         WindowContainerTransaction()

@@ -1497,7 +1497,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun moveToFullscreen_tdaFullscreen_windowingModeUndefined_removesWallpaperActivity() {
         val task = setUpFreeformTask()
         assertNotNull(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY))
@@ -1530,7 +1530,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun moveToFullscreen_tdaFreeform_windowingModeFullscreen_removesWallpaperActivity() {
         val task = setUpFreeformTask()
 
@@ -1973,7 +1973,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun onDesktopWindowClose_singleActiveTask_hasWallpaperActivityToken() {
         val task = setUpFreeformTask()
 
@@ -2019,7 +2019,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun onDesktopWindowClose_multipleActiveTasks_isOnlyNonClosingTask() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
@@ -2033,7 +2033,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun onDesktopWindowClose_multipleActiveTasks_hasMinimized() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
@@ -2103,7 +2103,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun onTaskMinimize_singleActiveTask_hasWallpaperActivityToken_removesWallpaper() {
         val task = setUpFreeformTask()
         val transition = Binder()
@@ -2155,7 +2155,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun onDesktopWindowMinimize_multipleActiveTasks_minimizesTheOnlyVisibleTask_removesWallpaper() {
         val task1 = setUpFreeformTask(active = true)
         val task2 = setUpFreeformTask(active = true)
@@ -2816,7 +2816,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     @EnableFlags(
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
-        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER,
+        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER,
     )
     fun handleRequest_backTransition_singleTaskWithToken_removesWallpaper() {
         val task = setUpFreeformTask()
@@ -2857,7 +2857,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @EnableFlags(
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION,
-        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER,
+        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER,
     )
     fun handleRequest_backTransition_multipleTasksSingleNonClosing_removesWallpaperAndTask() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
@@ -2875,7 +2875,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     @EnableFlags(
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
-        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER,
+        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER,
     )
     fun handleRequest_backTransition_multipleTasksSingleNonMinimized_removesWallpaperAndTask() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
@@ -2942,7 +2942,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     @EnableFlags(
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
-        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER,
+        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER,
     )
     fun handleRequest_closeTransition_singleTaskWithToken_withWallpaper_removesWallpaper() {
         val task = setUpFreeformTask()
@@ -2982,7 +2982,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     @EnableFlags(
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
-        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER,
+        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER,
     )
     fun handleRequest_closeTransition_multipleTasksSingleNonClosing_removesWallpaper() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
@@ -3000,7 +3000,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Test
     @EnableFlags(
         Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
-        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER,
+        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER,
     )
     fun handleRequest_closeTransition_multipleTasksSingleNonMinimized_removesWallpaper() {
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
@@ -3092,7 +3092,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun moveFocusedTaskToFullscreen_onlyVisibleNonMinimizedTask_removesWallpaperActivity() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()
@@ -3604,7 +3604,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun enterSplit_onlyVisibleNonMinimizedTask_removesWallpaperActivity() {
         val task1 = setUpFreeformTask()
         val task2 = setUpFreeformTask()

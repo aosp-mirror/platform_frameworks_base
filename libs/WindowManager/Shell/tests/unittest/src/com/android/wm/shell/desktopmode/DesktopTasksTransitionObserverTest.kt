@@ -239,7 +239,7 @@ class DesktopTasksTransitionObserverTest {
     }
 
     @Test
-    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_ON_SYSTEM_USER)
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
     fun closeLastTask_wallpaperTokenExists_wallpaperIsRemoved() {
         val mockTransition = Mockito.mock(IBinder::class.java)
         val task = createTaskInfo(1, WINDOWING_MODE_FREEFORM)

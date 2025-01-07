@@ -531,8 +531,11 @@ flag {
 }
 
 flag {
-    name: "enable_desktop_wallpaper_activity_on_system_user"
+    name: "enable_desktop_wallpaper_activity_for_system_user"
     namespace: "lse_desktop_experience"
     description: "Enables starting DesktopWallpaperActivity on system user."
     bug: "385294350"
+    metadata {
+       purpose: PURPOSE_BUGFIX
+    }
 }
