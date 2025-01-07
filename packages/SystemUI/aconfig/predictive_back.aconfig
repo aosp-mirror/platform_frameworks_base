@@ -9,13 +9,6 @@ flag {
 }
 
 flag {
-    name: "predictive_back_animate_bouncer"
-    namespace: "systemui"
-    description: "Enable Predictive Back Animation in Bouncer"
-    bug: "327733487"
-}
-
-flag {
     name: "predictive_back_animate_dialogs"
     namespace: "systemui"
     description: "Enable Predictive Back Animation for SysUI dialogs"
