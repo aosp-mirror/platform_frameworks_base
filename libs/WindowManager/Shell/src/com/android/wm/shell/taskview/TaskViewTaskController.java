@@ -54,7 +54,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     private final ShellTaskOrganizer mTaskOrganizer;
     private final Executor mShellExecutor;
     private final SyncTransactionQueue mSyncQueue;
-    private final TaskViewTransitions mTaskViewTransitions;
+    private final TaskViewController mTaskViewController;
     private final Context mContext;
 
     /**
@@ -81,15 +81,15 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     private Rect mCaptionInsets;
 
     public TaskViewTaskController(Context context, ShellTaskOrganizer organizer,
-            TaskViewTransitions taskViewTransitions, SyncTransactionQueue syncQueue) {
+            TaskViewController taskViewController, SyncTransactionQueue syncQueue) {
         mContext = context;
         mTaskOrganizer = organizer;
         mShellExecutor = organizer.getExecutor();
         mSyncQueue = syncQueue;
-        mTaskViewTransitions = taskViewTransitions;
+        mTaskViewController = taskViewController;
         mShellExecutor.execute(() -> {
-            if (mTaskViewTransitions != null) {
-                mTaskViewTransitions.registerTaskView(this);
+            if (mTaskViewController != null) {
+                mTaskViewController.registerTaskView(this);
             }
         });
         mGuard.open("release");
@@ -172,8 +172,8 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
 
     private void performRelease() {
         mShellExecutor.execute(() -> {
-            if (mTaskViewTransitions != null) {
-                mTaskViewTransitions.unregisterTaskView(this);
+            if (mTaskViewController != null) {
+                mTaskViewController.unregisterTaskView(this);
             }
             mTaskOrganizer.removeListener(this);
             resetTaskInfo();
@@ -227,7 +227,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo,
             SurfaceControl leash) {
-        if (mTaskViewTransitions.isUsingShellTransitions()) {
+        if (mTaskViewController.isUsingShellTransitions()) {
             mPendingInfo = taskInfo;
             if (mTaskNotFound) {
                 // If we were already notified by shell transit that we don't have the
@@ -347,8 +347,8 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                 // Nothing to update, task is not yet available
                 return;
             }
-            if (mTaskViewTransitions.isUsingShellTransitions()) {
-                mTaskViewTransitions.setTaskViewVisible(this, true /* visible */);
+            if (mTaskViewController.isUsingShellTransitions()) {
+                mTaskViewController.setTaskViewVisible(this, true /* visible */);
                 return;
             }
             // Reparent the task when this surface is created
@@ -396,8 +396,8 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
                 return;
             }
 
-            if (mTaskViewTransitions.isUsingShellTransitions()) {
-                mTaskViewTransitions.setTaskViewVisible(this, false /* visible */);
+            if (mTaskViewController.isUsingShellTransitions()) {
+                mTaskViewController.setTaskViewVisible(this, false /* visible */);
                 return;
             }
 
@@ -465,7 +465,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             handleAndNotifyTaskRemoval(pendingInfo);
 
             // Make sure the task is removed
-            mTaskViewTransitions.removeTaskView(this, pendingInfo.token);
+            mTaskViewController.removeTaskView(this, pendingInfo.token);
         }
         resetTaskInfo();
     }

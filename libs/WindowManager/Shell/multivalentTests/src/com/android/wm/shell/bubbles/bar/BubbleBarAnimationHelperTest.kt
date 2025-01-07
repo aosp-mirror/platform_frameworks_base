@@ -47,8 +47,8 @@ import com.android.wm.shell.bubbles.DeviceConfig
 import com.android.wm.shell.bubbles.FakeBubbleExpandedViewManager
 import com.android.wm.shell.bubbles.FakeBubbleFactory
 import com.android.wm.shell.taskview.TaskView
+import com.android.wm.shell.taskview.TaskViewController
 import com.android.wm.shell.taskview.TaskViewTaskController
-import com.android.wm.shell.taskview.TaskViewTransitions
 import com.google.common.truth.Truth.assertThat
 import java.util.concurrent.Semaphore
 import java.util.concurrent.TimeUnit
@@ -167,8 +167,8 @@ class BubbleBarAnimationHelperTest {
     fun animateSwitch_bubbleToBubble_updateTaskBounds() {
         val fromBubble = createBubble("from").initialize(container)
         val toBubbleTaskController = mock<TaskViewTaskController>()
-        val taskTransitions = mock<TaskViewTransitions>()
-        val toBubble = createBubble("to", taskTransitions, toBubbleTaskController).initialize(
+        val taskController = mock<TaskViewController>()
+        val toBubble = createBubble("to", taskController, toBubbleTaskController).initialize(
             container)
 
         activityScenario.onActivity {
@@ -178,11 +178,11 @@ class BubbleBarAnimationHelperTest {
         }
         getInstrumentation().waitForIdleSync()
         // Clear invocations to ensure that bounds update happens after animation ends
-        clearInvocations(taskTransitions)
+        clearInvocations(taskController)
         getInstrumentation().runOnMainSync { animatorTestRule.advanceTimeBy(900) }
         getInstrumentation().waitForIdleSync()
 
-        verify(taskTransitions).setTaskBounds(eq(toBubbleTaskController), any())
+        verify(taskController).setTaskBounds(eq(toBubbleTaskController), any())
     }
 
     @Test
@@ -234,8 +234,8 @@ class BubbleBarAnimationHelperTest {
     @Test
     fun animateToRestPosition_updateTaskBounds() {
         val taskView = mock<TaskViewTaskController>()
-        val tvTransitions = mock<TaskViewTransitions>()
-        val bubble = createBubble("key", tvTransitions, taskView).initialize(container)
+        val controller = mock<TaskViewController>()
+        val bubble = createBubble("key", controller, taskView).initialize(container)
 
         val semaphore = Semaphore(0)
         val after = Runnable { semaphore.release() }
@@ -252,11 +252,11 @@ class BubbleBarAnimationHelperTest {
             animatorTestRule.advanceTimeBy(100)
         }
         // Clear invocations to ensure that bounds update happens after animation ends
-        clearInvocations(tvTransitions)
+        clearInvocations(controller)
         getInstrumentation().runOnMainSync { animatorTestRule.advanceTimeBy(900) }
         getInstrumentation().waitForIdleSync()
 
-        verify(tvTransitions).setTaskBounds(eq(taskView), any())
+        verify(controller).setTaskBounds(eq(taskView), any())
     }
 
     @Test
@@ -334,10 +334,10 @@ class BubbleBarAnimationHelperTest {
 
     private fun createBubble(
         key: String,
-        taskViewTransitions: TaskViewTransitions = mock<TaskViewTransitions>(),
+        taskViewController: TaskViewController = mock<TaskViewController>(),
         taskViewTaskController: TaskViewTaskController = mock<TaskViewTaskController>(),
     ): Bubble {
-        val taskView = TaskView(context, taskViewTransitions, taskViewTaskController)
+        val taskView = TaskView(context, taskViewController, taskViewTaskController)
         val taskInfo = mock<ActivityManager.RunningTaskInfo>()
         whenever(taskViewTaskController.taskInfo).thenReturn(taskInfo)
         val bubbleTaskView = BubbleTaskView(taskView, mainExecutor)

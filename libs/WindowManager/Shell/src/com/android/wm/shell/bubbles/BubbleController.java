@@ -117,6 +117,7 @@ import com.android.wm.shell.sysui.ShellCommandHandler;
 import com.android.wm.shell.sysui.ShellController;
 import com.android.wm.shell.sysui.ShellInit;
 import com.android.wm.shell.taskview.TaskView;
+import com.android.wm.shell.taskview.TaskViewController;
 import com.android.wm.shell.taskview.TaskViewRepository;
 import com.android.wm.shell.taskview.TaskViewTaskController;
 import com.android.wm.shell.taskview.TaskViewTransitions;
@@ -193,7 +194,7 @@ public class BubbleController implements ConfigurationChangeListener,
     private final TaskStackListenerImpl mTaskStackListener;
     private final ShellTaskOrganizer mTaskOrganizer;
     private final DisplayController mDisplayController;
-    private final TaskViewTransitions mTaskViewTransitions;
+    private final TaskViewController mTaskViewController;
     private final Transitions mTransitions;
     private final SyncTransactionQueue mSyncQueue;
     private final ShellController mShellController;
@@ -350,10 +351,10 @@ public class BubbleController implements ConfigurationChangeListener,
                         com.android.internal.R.dimen.importance_ring_stroke_width));
         mDisplayController = displayController;
         if (TaskViewTransitions.useRepo()) {
-            mTaskViewTransitions = new TaskViewTransitions(transitions, taskViewRepository,
+            mTaskViewController = new TaskViewTransitions(transitions, taskViewRepository,
                     organizer, syncQueue);
         } else {
-            mTaskViewTransitions = taskViewTransitions;
+            mTaskViewController = taskViewTransitions;
         }
         mTransitions = transitions;
         mOneHandedOptional = oneHandedOptional;
@@ -366,8 +367,8 @@ public class BubbleController implements ConfigurationChangeListener,
             @Override
             public BubbleTaskView create() {
                 TaskViewTaskController taskViewTaskController = new TaskViewTaskController(
-                        context, organizer, mTaskViewTransitions, syncQueue);
-                TaskView taskView = new TaskView(context, mTaskViewTransitions,
+                        context, organizer, mTaskViewController, syncQueue);
+                TaskView taskView = new TaskView(context, mTaskViewController,
                         taskViewTaskController);
                 return new BubbleTaskView(taskView, mainExecutor);
             }
