@@ -1227,19 +1227,6 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
         }
 
         @Override
-        public TaskSnapshot screenshotTask(int taskId) {
-            try {
-                ProtoLog.v(ShellProtoLogGroup.WM_SHELL_RECENTS_TRANSITION,
-                        "[%d] RecentsController.screenshotTask: taskId=%d", mInstanceId, taskId);
-                return ActivityTaskManager.getService().takeTaskSnapshot(taskId,
-                        true /* updateCache */);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to screenshot task", e);
-            }
-            return null;
-        }
-
-        @Override
         public void setInputConsumerEnabled(boolean enabled) {
             mExecutor.execute(() -> {
                 if (mFinishCB == null || !enabled) {
