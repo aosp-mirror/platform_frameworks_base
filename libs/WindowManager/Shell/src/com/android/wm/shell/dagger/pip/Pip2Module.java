@@ -117,6 +117,7 @@ public abstract class Pip2Module {
             PipTouchHandler pipTouchHandler,
             PipAppOpsListener pipAppOpsListener,
             PhonePipMenuController pipMenuController,
+            PipUiEventLogger pipUiEventLogger,
             @ShellMainThread ShellExecutor mainExecutor) {
         if (!PipUtils.isPip2ExperimentEnabled()) {
             return Optional.empty();
@@ -126,7 +127,7 @@ public abstract class Pip2Module {
                     displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
                     pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
                     pipTransitionState, pipTouchHandler, pipAppOpsListener, pipMenuController,
-                    mainExecutor));
+                    pipUiEventLogger, mainExecutor));
         }
     }
 
@@ -188,11 +189,11 @@ public abstract class Pip2Module {
             FloatingContentCoordinator floatingContentCoordinator,
             PipScheduler pipScheduler,
             Optional<PipPerfHintController> pipPerfHintControllerOptional,
-            PipBoundsAlgorithm pipBoundsAlgorithm,
-            PipTransitionState pipTransitionState) {
+            PipTransitionState pipTransitionState,
+            PipUiEventLogger pipUiEventLogger) {
         return new PipMotionHelper(context, pipBoundsState, menuController, pipSnapAlgorithm,
                 floatingContentCoordinator, pipScheduler, pipPerfHintControllerOptional,
-                pipBoundsAlgorithm, pipTransitionState);
+                pipTransitionState, pipUiEventLogger);
     }
 
     @WMSingleton

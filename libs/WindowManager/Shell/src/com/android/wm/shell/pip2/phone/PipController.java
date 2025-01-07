@@ -59,6 +59,7 @@ import com.android.wm.shell.common.pip.PipAppOpsListener;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
+import com.android.wm.shell.common.pip.PipUiEventLogger;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.pip.Pip;
 import com.android.wm.shell.protolog.ShellProtoLogGroup;
@@ -98,6 +99,7 @@ public class PipController implements ConfigurationChangeListener,
     private final PipTouchHandler mPipTouchHandler;
     private final PipAppOpsListener mPipAppOpsListener;
     private final PhonePipMenuController mPipMenuController;
+    private final PipUiEventLogger mPipUiEventLogger;
     private final ShellExecutor mMainExecutor;
     private final PipImpl mImpl;
     private final List<Consumer<Boolean>> mOnIsInPipStateChangedListeners = new ArrayList<>();
@@ -143,6 +145,7 @@ public class PipController implements ConfigurationChangeListener,
             PipTouchHandler pipTouchHandler,
             PipAppOpsListener pipAppOpsListener,
             PhonePipMenuController pipMenuController,
+            PipUiEventLogger pipUiEventLogger,
             ShellExecutor mainExecutor) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
@@ -160,6 +163,7 @@ public class PipController implements ConfigurationChangeListener,
         mPipTouchHandler = pipTouchHandler;
         mPipAppOpsListener = pipAppOpsListener;
         mPipMenuController = pipMenuController;
+        mPipUiEventLogger = pipUiEventLogger;
         mMainExecutor = mainExecutor;
         mImpl = new PipImpl();
 
@@ -187,6 +191,7 @@ public class PipController implements ConfigurationChangeListener,
             PipTouchHandler pipTouchHandler,
             PipAppOpsListener pipAppOpsListener,
             PhonePipMenuController pipMenuController,
+            PipUiEventLogger pipUiEventLogger,
             ShellExecutor mainExecutor) {
         if (!context.getPackageManager().hasSystemFeature(FEATURE_PICTURE_IN_PICTURE)) {
             ProtoLog.w(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
@@ -197,7 +202,7 @@ public class PipController implements ConfigurationChangeListener,
                 displayController, displayInsetsController, pipBoundsState, pipBoundsAlgorithm,
                 pipDisplayLayoutState, pipScheduler, taskStackListener, shellTaskOrganizer,
                 pipTransitionState, pipTouchHandler, pipAppOpsListener, pipMenuController,
-                mainExecutor);
+                pipUiEventLogger, mainExecutor);
     }
 
     public PipImpl getPipImpl() {
@@ -238,18 +243,6 @@ public class PipController implements ConfigurationChangeListener,
         });
 
         mPipAppOpsListener.setCallback(mPipTouchHandler.getMotionHelper());
-        mPipTransitionState.addPipTransitionStateChangedListener(
-                (oldState, newState, extra) -> {
-                    if (newState == PipTransitionState.ENTERED_PIP) {
-                        final TaskInfo taskInfo = mPipTransitionState.getPipTaskInfo();
-                        if (taskInfo != null && taskInfo.topActivity != null) {
-                            mPipAppOpsListener.onActivityPinned(
-                                    taskInfo.topActivity.getPackageName());
-                        }
-                    } else if (newState == PipTransitionState.EXITED_PIP) {
-                        mPipAppOpsListener.onActivityUnpinned();
-                    }
-                });
     }
 
     private ExternalInterfaceBinder createExternalInterface() {
@@ -446,14 +439,25 @@ public class PipController implements ConfigurationChangeListener,
                 mPipTransitionState.setSwipePipToHomeState(overlay, appBounds);
                 break;
             case PipTransitionState.ENTERED_PIP:
+                final TaskInfo taskInfo = mPipTransitionState.getPipTaskInfo();
+                if (taskInfo != null && taskInfo.topActivity != null) {
+                    mPipAppOpsListener.onActivityPinned(taskInfo.topActivity.getPackageName());
+                    mPipUiEventLogger.setTaskInfo(taskInfo);
+                }
                 if (mPipTransitionState.isInSwipePipToHomeTransition()) {
+                    mPipUiEventLogger.log(
+                            PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_AUTO_ENTER);
                     mPipTransitionState.resetSwipePipToHomeState();
+                } else {
+                    mPipUiEventLogger.log(PipUiEventLogger.PipUiEventEnum.PICTURE_IN_PICTURE_ENTER);
                 }
                 for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
                     listener.accept(true /* inPip */);
                 }
                 break;
             case PipTransitionState.EXITED_PIP:
+                mPipAppOpsListener.onActivityUnpinned();
+                mPipUiEventLogger.setTaskInfo(null);
                 for (Consumer<Boolean> listener : mOnIsInPipStateChangedListeners) {
                     listener.accept(false /* inPip */);
                 }
