@@ -210,7 +210,7 @@ public class ActivityRecordTests extends WindowTestsBase {
     }
 
     private TestStartingWindowOrganizer registerTestStartingWindowOrganizer() {
-        return new TestStartingWindowOrganizer(mAtm);
+        return new TestStartingWindowOrganizer(mAtm, mDisplayContent);
     }
 
     @Test
