@@ -1690,7 +1690,7 @@ public class WallpaperManager {
      * @hide
      */
     @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
-    @SystemApi
+    @TestApi
     @RequiresPermission(READ_WALLPAPER_INTERNAL)
     @NonNull
     public SparseArray<Rect> getBitmapCrops(@SetWallpaperFlags int which) {

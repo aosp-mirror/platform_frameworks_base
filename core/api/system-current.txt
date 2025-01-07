@@ -1290,7 +1290,6 @@ package android.app {
 
   public class WallpaperManager {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public void clearWallpaper(int, int);
-    method @FlaggedApi("android.app.customization_packs_apis") @NonNull @RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL) public android.util.SparseArray<android.graphics.Rect> getBitmapCrops(int);
     method @FlaggedApi("android.app.customization_packs_apis") public static int getOrientation(@NonNull android.graphics.Point);
     method @FloatRange(from=0.0f, to=1.0f) @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT) public float getWallpaperDimAmount();
     method @FlaggedApi("android.app.customization_packs_apis") @Nullable public android.os.ParcelFileDescriptor getWallpaperFile(int, boolean);
