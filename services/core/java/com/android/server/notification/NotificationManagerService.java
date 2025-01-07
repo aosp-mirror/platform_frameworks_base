@@ -5903,8 +5903,9 @@ public class NotificationManagerService extends SystemService {
         // TODO: b/310620812 - Remove getZenRules() when MODES_API is inlined.
         @Override
         public List<ZenModeConfig.ZenRule> getZenRules() throws RemoteException {
-            enforcePolicyAccess(Binder.getCallingUid(), "getZenRules");
-            return mZenModeHelper.getZenRules(getCallingZenUser());
+            int callingUid = Binder.getCallingUid();
+            enforcePolicyAccess(callingUid, "getZenRules");
+            return mZenModeHelper.getZenRules(getCallingZenUser(), callingUid);
         }
 
         @Override
@@ -5912,15 +5913,17 @@ public class NotificationManagerService extends SystemService {
             if (!android.app.Flags.modesApi()) {
                 throw new IllegalStateException("getAutomaticZenRules called with flag off!");
             }
-            enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRules");
-            return mZenModeHelper.getAutomaticZenRules(getCallingZenUser());
+            int callingUid = Binder.getCallingUid();
+            enforcePolicyAccess(callingUid, "getAutomaticZenRules");
+            return mZenModeHelper.getAutomaticZenRules(getCallingZenUser(), callingUid);
         }
 
         @Override
         public AutomaticZenRule getAutomaticZenRule(String id) throws RemoteException {
             Objects.requireNonNull(id, "Id is null");
-            enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRule");
-            return mZenModeHelper.getAutomaticZenRule(getCallingZenUser(), id);
+            int callingUid = Binder.getCallingUid();
+            enforcePolicyAccess(callingUid, "getAutomaticZenRule");
+            return mZenModeHelper.getAutomaticZenRule(getCallingZenUser(), id, callingUid);
         }
 
         @Override
@@ -6065,8 +6068,9 @@ public class NotificationManagerService extends SystemService {
         @Condition.State
         public int getAutomaticZenRuleState(@NonNull String id) {
             Objects.requireNonNull(id, "id is null");
-            enforcePolicyAccess(Binder.getCallingUid(), "getAutomaticZenRuleState");
-            return mZenModeHelper.getAutomaticZenRuleState(getCallingZenUser(), id);
+            int callingUid = Binder.getCallingUid();
+            enforcePolicyAccess(callingUid, "getAutomaticZenRuleState");
+            return mZenModeHelper.getAutomaticZenRuleState(getCallingZenUser(), id, callingUid);
         }
 
         @Override

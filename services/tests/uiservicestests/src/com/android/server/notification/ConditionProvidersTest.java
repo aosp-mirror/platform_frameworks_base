@@ -101,9 +101,12 @@ public class ConditionProvidersTest extends UiServiceTestCase {
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);
 
-        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]));
-        verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[1]));
-        verify(mCallback).onConditionChanged(eq(Uri.parse("c")), eq(conditionsToNotify[2]));
+        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]),
+                eq(100));
+        verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[1]),
+                eq(100));
+        verify(mCallback).onConditionChanged(eq(Uri.parse("c")), eq(conditionsToNotify[2]),
+                eq(100));
         verifyNoMoreInteractions(mCallback);
     }
 
@@ -121,8 +124,10 @@ public class ConditionProvidersTest extends UiServiceTestCase {
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);
 
-        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]));
-        verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[1]));
+        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]),
+                eq(100));
+        verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[1]),
+                eq(100));
 
         verifyNoMoreInteractions(mCallback);
     }
@@ -141,8 +146,10 @@ public class ConditionProvidersTest extends UiServiceTestCase {
 
         mProviders.notifyConditions("package", msi, conditionsToNotify);
 
-        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]));
-        verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[3]));
+        verify(mCallback).onConditionChanged(eq(Uri.parse("a")), eq(conditionsToNotify[0]),
+                eq(100));
+        verify(mCallback).onConditionChanged(eq(Uri.parse("b")), eq(conditionsToNotify[3]),
+                eq(100));
         verifyNoMoreInteractions(mCallback);
     }
 

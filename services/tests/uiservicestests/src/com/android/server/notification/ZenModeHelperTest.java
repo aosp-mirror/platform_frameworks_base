@@ -291,7 +291,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
-        return FlagsParameterization.allCombinationsOf(FLAG_MODES_UI, FLAG_BACKUP_RESTORE_LOGGING);
+        return FlagsParameterization.allCombinationsOf(FLAG_MODES_UI, FLAG_BACKUP_RESTORE_LOGGING,
+                com.android.server.notification.Flags.FLAG_FIX_CALLING_UID_FROM_CPS);
     }
 
     public ZenModeHelperTest(FlagsParameterization flags) {
@@ -2617,7 +2618,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testSetAutomaticZenRuleState_nullPkg() {
+    public void testSetAutomaticZenRuleStateFromConditionProvider_nullPkg() {
         AutomaticZenRule zenRule = new AutomaticZenRule("name",
                 null,
                 new ComponentName(mContext.getPackageName(), "ScheduleConditionProvider"),
@@ -2627,10 +2628,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         String id = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT, null, zenRule,
                 ORIGIN_APP, "test", CUSTOM_PKG_UID);
-        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, zenRule.getConditionId(),
-                new Condition(zenRule.getConditionId(), "", STATE_TRUE),
-                ORIGIN_APP,
-                CUSTOM_PKG_UID);
+        mZenModeHelper.setAutomaticZenRuleStateFromConditionProvider(UserHandle.CURRENT,
+                zenRule.getConditionId(), new Condition(zenRule.getConditionId(), "", STATE_TRUE),
+                ORIGIN_APP, CUSTOM_PKG_UID);
 
         ZenModeConfig.ZenRule ruleInConfig = mZenModeHelper.mConfig.automaticRules.get(id);
         assertEquals(STATE_TRUE, ruleInConfig.condition.state);
@@ -2726,8 +2726,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ORIGIN_SYSTEM, "test", SYSTEM_UID);
 
         Condition condition = new Condition(sharedUri, "", STATE_TRUE);
-        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, sharedUri, condition,
-                ORIGIN_SYSTEM, SYSTEM_UID);
+        mZenModeHelper.setAutomaticZenRuleStateFromConditionProvider(UserHandle.CURRENT, sharedUri,
+                condition, ORIGIN_SYSTEM, SYSTEM_UID);
 
         for (ZenModeConfig.ZenRule rule : mZenModeHelper.mConfig.automaticRules.values()) {
             if (rule.id.equals(id)) {
@@ -2741,8 +2741,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         }
 
         condition = new Condition(sharedUri, "", STATE_FALSE);
-        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, sharedUri, condition,
-                ORIGIN_SYSTEM, SYSTEM_UID);
+        mZenModeHelper.setAutomaticZenRuleStateFromConditionProvider(UserHandle.CURRENT, sharedUri,
+                condition, ORIGIN_SYSTEM, SYSTEM_UID);
 
         for (ZenModeConfig.ZenRule rule : mZenModeHelper.mConfig.automaticRules.values()) {
             if (rule.id.equals(id)) {
@@ -2780,9 +2780,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .setOwner(OWNER)
                         .setDeviceEffects(zde)
                         .build(),
-                ORIGIN_APP, "reasons", 0);
+                ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
 
-        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
         assertThat(savedRule.getDeviceEffects()).isEqualTo(
                 new ZenDeviceEffects.Builder()
                         .setShouldDisplayGrayscale(true)
@@ -2814,9 +2815,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .setOwner(OWNER)
                         .setDeviceEffects(zde)
                         .build(),
-                ORIGIN_SYSTEM, "reasons", 0);
+                ORIGIN_SYSTEM, "reasons", SYSTEM_UID);
 
-        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         assertThat(savedRule.getDeviceEffects()).isEqualTo(zde);
     }
 
@@ -2845,7 +2847,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ORIGIN_USER_IN_SYSTEMUI,
                 "reasons", 0);
 
-        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
 
         assertThat(savedRule.getDeviceEffects()).isEqualTo(zde);
     }
@@ -2863,7 +2866,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .setOwner(OWNER)
                         .setDeviceEffects(original)
                         .build(),
-                ORIGIN_SYSTEM, "reasons", 0);
+                ORIGIN_SYSTEM, "reasons", SYSTEM_UID);
 
         ZenDeviceEffects updateFromApp = new ZenDeviceEffects.Builder()
                 .setShouldUseNightMode(true) // Good
@@ -2875,9 +2878,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .setOwner(OWNER)
                         .setDeviceEffects(updateFromApp)
                         .build(),
-                ORIGIN_APP, "reasons", 0);
+                ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
 
-        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
         assertThat(savedRule.getDeviceEffects()).isEqualTo(
                 new ZenDeviceEffects.Builder()
                         .setShouldUseNightMode(true) // From update.
@@ -2898,7 +2902,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .setOwner(OWNER)
                         .setDeviceEffects(original)
                         .build(),
-                ORIGIN_SYSTEM, "reasons", 0);
+                ORIGIN_SYSTEM, "reasons", SYSTEM_UID);
 
         ZenDeviceEffects updateFromSystem = new ZenDeviceEffects.Builder()
                 .setShouldUseNightMode(true) // Good
@@ -2908,9 +2912,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new AutomaticZenRule.Builder("Rule", CONDITION_ID)
                         .setDeviceEffects(updateFromSystem)
                         .build(),
-                ORIGIN_SYSTEM, "reasons", 0);
+                ORIGIN_SYSTEM, "reasons", SYSTEM_UID);
 
-        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         assertThat(savedRule.getDeviceEffects()).isEqualTo(updateFromSystem);
     }
 
@@ -2926,7 +2931,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .setOwner(OWNER)
                         .setDeviceEffects(original)
                         .build(),
-                ORIGIN_SYSTEM, "reasons", 0);
+                ORIGIN_SYSTEM, "reasons", SYSTEM_UID);
 
         ZenDeviceEffects updateFromUser = new ZenDeviceEffects.Builder()
                 .setShouldUseNightMode(true)
@@ -2939,9 +2944,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new AutomaticZenRule.Builder("Rule", CONDITION_ID)
                         .setDeviceEffects(updateFromUser)
                         .build(),
-                ORIGIN_USER_IN_SYSTEMUI, "reasons", 0);
+                ORIGIN_USER_IN_SYSTEMUI, "reasons", SYSTEM_UID);
 
-        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
 
         assertThat(savedRule.getDeviceEffects()).isEqualTo(updateFromUser);
     }
@@ -2959,15 +2965,16 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                                 .allowCalls(ZenPolicy.PEOPLE_TYPE_NONE) // default is stars
                                 .build())
                         .build(),
-                ORIGIN_APP, "reasons", 0);
+                ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
 
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId,
                 new AutomaticZenRule.Builder("Rule", CONDITION_ID)
                         // no zen policy
                         .build(),
-                ORIGIN_APP, "reasons", 0);
+                ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
 
-        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
         assertThat(savedRule.getZenPolicy().getPriorityCategoryCalls())
                 .isEqualTo(STATE_DISALLOW);
     }
@@ -2988,7 +2995,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                                 .allowReminders(true)
                                 .build())
                         .build(),
-                ORIGIN_SYSTEM, "reasons", 0);
+                ORIGIN_SYSTEM, "reasons", SYSTEM_UID);
 
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId,
                 new AutomaticZenRule.Builder("Rule", CONDITION_ID)
@@ -2996,9 +3003,10 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                                 .allowCalls(ZenPolicy.PEOPLE_TYPE_CONTACTS)
                                 .build())
                         .build(),
-                ORIGIN_APP, "reasons", 0);
+                ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
 
-        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule savedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
         assertThat(savedRule.getZenPolicy().getPriorityCategoryCalls())
                 .isEqualTo(STATE_ALLOW);  // from update
         assertThat(savedRule.getZenPolicy().getPriorityCallSenders())
@@ -4441,7 +4449,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         rule.triggerDescription = TRIGGER_DESC;
 
         mZenModeHelper.mConfig.automaticRules.put(rule.id, rule);
-        AutomaticZenRule actual = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, rule.id);
+        AutomaticZenRule actual = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, rule.id,
+                SYSTEM_UID);
 
         assertEquals(NAME, actual.getName());
         assertEquals(OWNER, actual.getOwner());
@@ -4508,16 +4517,17 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .setInterruptionFilter(INTERRUPTION_FILTER_PRIORITY)
                 .build();
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         // Checks the name can be changed by the app because the user has not modified it.
         AutomaticZenRule azrUpdate = new AutomaticZenRule.Builder(rule)
                 .setName("NewName")
                 .build();
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azrUpdate, ORIGIN_APP,
-                "reason", SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                "reason", CUSTOM_PKG_UID);
+        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID);
         assertThat(rule.getName()).isEqualTo("NewName");
 
         // The user modifies some other field in the rule, which makes the rule as a whole not
@@ -4534,8 +4544,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .setName("NewAppName")
                 .build();
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azrUpdate, ORIGIN_APP,
-                "reason", SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                "reason", CUSTOM_PKG_UID);
+        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID);
         assertThat(rule.getName()).isEqualTo("NewAppName");
 
         // The user modifies the name.
@@ -4544,7 +4554,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azrUpdate,
                 ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID);
         assertThat(rule.getName()).isEqualTo("UserProvidedName");
 
         // The app is no longer able to modify the name.
@@ -4552,8 +4562,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .setName("NewAppName")
                 .build();
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azrUpdate, ORIGIN_APP,
-                "reason", SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                "reason", CUSTOM_PKG_UID);
+        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID);
         assertThat(rule.getName()).isEqualTo("UserProvidedName");
     }
 
@@ -4568,8 +4578,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         // Adds the rule using the app, to avoid having any user modified bits set.
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         // Modifies the filter, icon, zen policy, and device effects
         ZenPolicy policy = new ZenPolicy.Builder(rule.getZenPolicy())
@@ -4589,7 +4600,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Update the rule with the AZR from origin user.
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azrUpdate,
                 ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID);
 
         // UPDATE_ORIGIN_USER should change the bitmask and change the values.
         assertThat(rule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_PRIORITY);
@@ -4625,8 +4636,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         // Adds the rule using the app, to avoid having any user modified bits set.
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         // Modifies the icon, zen policy and device effects
         ZenPolicy policy = new ZenPolicy.Builder(rule.getZenPolicy())
@@ -4646,7 +4658,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Update the rule with the AZR from origin systemUI.
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azrUpdate, ORIGIN_SYSTEM,
                 "reason", SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID);
 
         // UPDATE_ORIGIN_SYSTEM_OR_SYSTEMUI should change the value but NOT update the bitmask.
         assertThat(rule.getIconResId()).isEqualTo(ICON_RES_ID);
@@ -4675,8 +4687,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         // Adds the rule using the app, to avoid having any user modified bits set.
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         ZenPolicy policy = new ZenPolicy.Builder()
                 .allowReminders(true)
@@ -4693,7 +4706,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Since the rule is not already user modified, UPDATE_ORIGIN_APP can modify the rule.
         // The bitmask is not modified.
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azrUpdate, ORIGIN_APP,
-                "reason", SYSTEM_UID);
+                "reason", CUSTOM_PKG_UID);
 
         ZenRule storedRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
         assertThat(storedRule.userModifiedFields).isEqualTo(0);
@@ -4717,9 +4730,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Zen rule update coming from the app again. This cannot fully update the rule, because
         // the rule is already considered user modified.
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleIdUser, azrUpdate, ORIGIN_APP,
-                "reason", SYSTEM_UID);
+                "reason", CUSTOM_PKG_UID);
         AutomaticZenRule ruleUser = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                ruleIdUser);
+                ruleIdUser, CUSTOM_PKG_UID);
 
         // The app can only change the value if the rule is not already user modified,
         // so the rule is not changed, and neither is the bitmask.
@@ -4749,8 +4762,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                         .build())
                 .build();
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         // The values are modified but the bitmask is not.
         assertThat(rule.getZenPolicy().getPriorityCategoryReminders())
@@ -4771,7 +4785,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         // Adds the rule using the app, to avoid having any user modified bits set.
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
 
         AutomaticZenRule azr = new AutomaticZenRule.Builder(azrBase)
                 // Sets Device Effects to null
@@ -4781,8 +4795,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Zen rule update coming from app, but since the rule isn't already
         // user modified, it can be updated.
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azr, ORIGIN_APP, "reason",
-                SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                CUSTOM_PKG_UID);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         // When AZR's ZenDeviceEffects is null, the updated rule's device effects are kept.
         assertThat(rule.getDeviceEffects()).isEqualTo(zde);
@@ -4797,8 +4812,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         // Adds the rule using the app, to avoid having any user modified bits set.
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
 
         AutomaticZenRule azr = new AutomaticZenRule.Builder(azrBase)
                 // Set zen policy to null
@@ -4808,8 +4822,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Zen rule update coming from app, but since the rule isn't already
         // user modified, it can be updated.
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azr, ORIGIN_APP, "reason",
-                SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                CUSTOM_PKG_UID);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         // When AZR's ZenPolicy is null, we expect the updated rule's policy to be unchanged
         // (equivalent to the provided policy, with additional fields filled in with defaults).
@@ -4829,8 +4844,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         // Adds the rule using the app, to avoid having any user modified bits set.
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
 
         // Create a fully populated ZenPolicy.
         ZenPolicy policy = new ZenPolicy.Builder()
@@ -4860,7 +4874,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Default config defined in getDefaultConfigParser() is used as the original rule.
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azr,
                 ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         // New ZenPolicy differs from the default config
         assertThat(rule.getZenPolicy()).isNotNull();
@@ -4890,8 +4905,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         // Adds the rule using the app, to avoid having any user modified bits set.
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
-                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", SYSTEM_UID);
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+                mContext.getPackageName(), azrBase, ORIGIN_APP, "reason", CUSTOM_PKG_UID);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
 
         ZenDeviceEffects deviceEffects = new ZenDeviceEffects.Builder()
                 .setShouldDisplayGrayscale(true)
@@ -4903,7 +4919,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Applies the update to the rule.
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, azr,
                 ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
-        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID);
 
         // New ZenDeviceEffects is used; all fields considered set, since previously were null.
         assertThat(rule.getDeviceEffects()).isNotNull();
@@ -5286,7 +5302,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, update,
                 ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
 
-        AutomaticZenRule result = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule result = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         assertThat(result).isNotNull();
         assertThat(result.getOwner().getClassName()).isEqualTo("brand.new.cps");
     }
@@ -5306,7 +5323,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId, update,
                 ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
 
-        AutomaticZenRule result = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule result = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID);
         assertThat(result).isNotNull();
         assertThat(result.getOwner().getClassName()).isEqualTo("old.third.party.cps");
     }
@@ -5518,8 +5536,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
                 mContext.getPackageName(), rule, ORIGIN_APP, "add it", CUSTOM_PKG_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId).getCreationTime())
-                .isEqualTo(1000);
+        assertThat(mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID).getCreationTime()).isEqualTo(1000);
 
         // User customizes it.
         AutomaticZenRule userUpdate = new AutomaticZenRule.Builder(rule)
@@ -5546,7 +5564,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // - ZenPolicy is the one that the user had set.
         // - rule still has the user-modified fields.
         AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                newRuleId);
+                newRuleId, CUSTOM_PKG_UID);
         assertThat(finalRule.getCreationTime()).isEqualTo(1000); // And not 3000.
         assertThat(newRuleId).isEqualTo(ruleId);
         assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
@@ -5575,8 +5593,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
                 mContext.getPackageName(), rule, ORIGIN_APP, "add it", CUSTOM_PKG_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId).getCreationTime())
-                .isEqualTo(1000);
+        assertThat(mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID).getCreationTime()).isEqualTo(1000);
 
         // App deletes it.
         mTestClock.advanceByMillis(1000);
@@ -5592,7 +5610,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // Verify that the rule was recreated. This means id and creation time are new.
         AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                newRuleId);
+                newRuleId, CUSTOM_PKG_UID);
         assertThat(finalRule.getCreationTime()).isEqualTo(3000);
         assertThat(newRuleId).isNotEqualTo(ruleId);
     }
@@ -5609,8 +5627,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
                 mContext.getPackageName(), rule, ORIGIN_APP, "add it", CUSTOM_PKG_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId).getCreationTime())
-                .isEqualTo(1000);
+        assertThat(mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID)
+                .getCreationTime()).isEqualTo(1000);
 
         // User customizes it.
         mTestClock.advanceByMillis(1000);
@@ -5637,7 +5655,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Verify that the rule was recreated. This means id and creation time are new, and the rule
         // matches the latest data supplied to addAZR.
         AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                newRuleId);
+                newRuleId, CUSTOM_PKG_UID);
         assertThat(finalRule.getCreationTime()).isEqualTo(4000);
         assertThat(newRuleId).isNotEqualTo(ruleId);
         assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_PRIORITY);
@@ -5660,8 +5678,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .build();
         String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT,
                 mContext.getPackageName(), rule, ORIGIN_APP, "add it", CUSTOM_PKG_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId).getCreationTime())
-                .isEqualTo(1000);
+        assertThat(mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                CUSTOM_PKG_UID).getCreationTime()).isEqualTo(1000);
 
         // User customizes it.
         mTestClock.advanceByMillis(1000);
@@ -5686,7 +5704,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
         // Verify that the rule was recreated. This means id and creation time are new.
         AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                newRuleId);
+                newRuleId, CUSTOM_PKG_UID);
         assertThat(finalRule.getCreationTime()).isEqualTo(4000);
         assertThat(newRuleId).isNotEqualTo(ruleId);
     }
@@ -5728,7 +5746,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Verify that the rule was NOT restored:
         assertThat(newRuleId).isNotEqualTo(ruleId);
         AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                newRuleId);
+                newRuleId, CUSTOM_PKG_UID);
         assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
         assertThat(finalRule.getOwner()).isEqualTo(new ComponentName("second", "owner"));
 
@@ -5869,7 +5887,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // The rule is restored...
         assertThat(newRuleId).isEqualTo(ruleId);
         AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                newRuleId);
+                newRuleId, CUSTOM_PKG_UID);
         assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
 
         // ... but it is NOT active
@@ -5923,7 +5941,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // The rule is restored...
         assertThat(newRuleId).isEqualTo(ruleId);
         AutomaticZenRule finalRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                newRuleId);
+                newRuleId, CUSTOM_PKG_UID);
         assertThat(finalRule.getInterruptionFilter()).isEqualTo(INTERRUPTION_FILTER_ALARMS);
 
         // ... but it is NEITHER active NOR snoozed.
@@ -6005,22 +6023,22 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ORIGIN_APP, "reasons", CUSTOM_PKG_UID);
 
         // Null condition -> STATE_FALSE
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, id))
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, id, CUSTOM_PKG_UID))
                 .isEqualTo(Condition.STATE_FALSE);
 
         mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, id, CONDITION_TRUE, ORIGIN_APP,
                 CUSTOM_PKG_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, id))
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, id, CUSTOM_PKG_UID))
                 .isEqualTo(Condition.STATE_TRUE);
 
         mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, id, CONDITION_FALSE, ORIGIN_APP,
                 CUSTOM_PKG_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, id))
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, id, CUSTOM_PKG_UID))
                 .isEqualTo(Condition.STATE_FALSE);
 
         mZenModeHelper.removeAutomaticZenRule(UserHandle.CURRENT, id, ORIGIN_APP, "",
                 CUSTOM_PKG_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, id))
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, id, CUSTOM_PKG_UID))
                 .isEqualTo(Condition.STATE_UNKNOWN);
     }
 
@@ -6036,8 +6054,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.setConfig(config, null, ORIGIN_INIT, "", SYSTEM_UID);
         assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
 
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, "systemRule"))
-                .isEqualTo(Condition.STATE_UNKNOWN);
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, "systemRule",
+                CUSTOM_PKG_UID)).isEqualTo(Condition.STATE_UNKNOWN);
     }
 
     @Test
@@ -6063,7 +6081,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
 
     @Test
     @EnableFlags(FLAG_MODES_API)
-    public void setAutomaticZenRuleState_conditionForNotOwnedRule_ignored() {
+    public void setAutomaticZenRuleStateFromConditionProvider_conditionForNotOwnedRule_ignored() {
         // Assume existence of an other-package-owned rule that is currently ACTIVE.
         assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_OFF);
         ZenRule otherRule = newZenRule("another.package", Instant.now(), null);
@@ -6075,7 +6093,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(mZenModeHelper.getZenMode()).isEqualTo(ZEN_MODE_ALARMS);
 
         // Should be ignored.
-        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, otherRule.conditionId,
+        mZenModeHelper.setAutomaticZenRuleStateFromConditionProvider(UserHandle.CURRENT,
+                otherRule.conditionId,
                 new Condition(otherRule.conditionId, "off", Condition.STATE_FALSE),
                 ORIGIN_APP, CUSTOM_PKG_UID);
 
@@ -6182,7 +6201,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
         // From user, update that rule's interruption filter.
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         AutomaticZenRule userUpdateRule = new AutomaticZenRule.Builder(rule)
                 .setInterruptionFilter(INTERRUPTION_FILTER_ALARMS)
                 .build();
@@ -6214,7 +6234,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .isEqualTo(ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
         // From user, update something in that rule, but not the interruption filter.
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         AutomaticZenRule userUpdateRule = new AutomaticZenRule.Builder(rule)
                 .setName("Renamed")
                 .build();
@@ -6315,7 +6336,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         String ruleId = ZenModeConfig.implicitRuleId(mContext.getPackageName());
 
         // User chooses a new name.
-        AutomaticZenRule azr = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule azr = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId,
                 new AutomaticZenRule.Builder(azr).setName("User chose this").build(),
                 ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
@@ -6414,7 +6436,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 mZenModeHelper.mConfig.getZenPolicy()).allowMedia(true).build();
 
         // From user, update that rule's policy.
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         ZenPolicy userUpdateZenPolicy = new ZenPolicy.Builder().disallowAllSounds()
                 .allowAlarms(true).build();
         AutomaticZenRule userUpdateRule = new AutomaticZenRule.Builder(rule)
@@ -6456,7 +6479,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 mZenModeHelper.mConfig.getZenPolicy()).allowMedia(true).build();
 
         // From user, update something in that rule, but not the ZenPolicy.
-        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule rule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         AutomaticZenRule userUpdateRule = new AutomaticZenRule.Builder(rule)
                 .setName("Rule renamed, not touching policy")
                 .build();
@@ -6509,7 +6533,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         String ruleId = ZenModeConfig.implicitRuleId(mContext.getPackageName());
 
         // User chooses a new name.
-        AutomaticZenRule azr = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId);
+        AutomaticZenRule azr = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT, ruleId,
+                SYSTEM_UID);
         mZenModeHelper.updateAutomaticZenRule(UserHandle.CURRENT, ruleId,
                 new AutomaticZenRule.Builder(azr).setName("User chose this").build(),
                 ORIGIN_USER_IN_SYSTEMUI, "reason", SYSTEM_UID);
@@ -6645,7 +6670,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 new AutomaticZenRule.Builder("Rule", CONDITION_ID).setIconResId(resourceId).build(),
                 ORIGIN_APP, "reason", CUSTOM_PKG_UID);
         AutomaticZenRule storedRule = mZenModeHelper.getAutomaticZenRule(UserHandle.CURRENT,
-                ruleId);
+                ruleId, CUSTOM_PKG_UID);
 
         assertThat(storedRule.getIconResId()).isEqualTo(0);
     }
@@ -7087,8 +7112,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
 
         implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id))
-                .isEqualTo(STATE_TRUE);
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id,
+                CUSTOM_PKG_UID)).isEqualTo(STATE_TRUE);
         assertThat(implicitRule.isActive()).isTrue();
         assertThat(implicitRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
     }
@@ -7108,8 +7133,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
 
         implicitRule = getZenRule(implicitRuleId(CUSTOM_PKG_NAME));
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id))
-                .isEqualTo(STATE_FALSE);
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, implicitRule.id,
+                CUSTOM_PKG_UID)).isEqualTo(STATE_FALSE);
         assertThat(implicitRule.isActive()).isFalse();
         assertThat(implicitRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
     }
@@ -7177,7 +7202,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, ruleId,
                 new Condition(rule.getConditionId(), "manual-on", STATE_TRUE, SOURCE_USER_ACTION),
                 ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId))
+        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId, SYSTEM_UID))
                 .isEqualTo(STATE_TRUE);
         ZenRule zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
         assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_ACTIVATE);
@@ -7192,14 +7217,14 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL, null);
 
         if (Flags.modesUi()) {
-            assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId))
-                    .isEqualTo(STATE_TRUE);
+            assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId,
+                    SYSTEM_UID)).isEqualTo(STATE_TRUE);
             zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
             assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_ACTIVATE);
             assertThat(zenRule.condition).isNull();
         } else {
-            assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId))
-                    .isEqualTo(STATE_FALSE);
+            assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId,
+                    SYSTEM_UID)).isEqualTo(STATE_FALSE);
         }
     }
 
@@ -7218,7 +7243,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, ruleId,
                 new Condition(rule.getConditionId(), "snooze", STATE_FALSE, SOURCE_USER_ACTION),
                 ORIGIN_USER_IN_SYSTEMUI, SYSTEM_UID);
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId))
+        assertThat(
+                mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID))
                 .isEqualTo(STATE_FALSE);
         ZenRule zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
         assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_DEACTIVATE);
@@ -7232,7 +7258,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         TypedXmlPullParser parser = getParserForByteStream(xmlBytes);
         mZenModeHelper.readXml(parser, false, UserHandle.USER_ALL, null);
 
-        assertThat(mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId))
+        assertThat(
+                mZenModeHelper.getAutomaticZenRuleState(UserHandle.CURRENT, ruleId, CUSTOM_PKG_UID))
                 .isEqualTo(STATE_TRUE);
         zenRule = mZenModeHelper.mConfig.automaticRules.get(ruleId);
         assertThat(zenRule.getConditionOverride()).isEqualTo(OVERRIDE_NONE);
