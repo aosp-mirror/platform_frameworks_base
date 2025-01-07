@@ -79,37 +79,38 @@ class ScreenRecordPermissionViewBinder(
     override fun bind() {
         super.bind()
         initRecordOptionsView()
-        setStartButtonOnClickListener { _: View? ->
-            onStartRecordingClicked?.run()
-            if (selectedScreenShareOption.mode == ENTIRE_SCREEN) {
-                requestScreenCapture(
-                    captureTarget = null,
-                    displayId = selectedScreenShareOption.displayId,
-                )
-            }
-            if (selectedScreenShareOption.mode == SINGLE_APP) {
-                val intent = Intent(dialog.context, MediaProjectionAppSelectorActivity::class.java)
-                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        setStartButtonOnClickListener { startButtonOnClicked() }
+    }
 
-                // We can't start activity for result here so we use result receiver to get
-                // the selected target to capture
-                intent.putExtra(
-                    MediaProjectionAppSelectorActivity.EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
-                    CaptureTargetResultReceiver(),
-                )
+    fun startButtonOnClicked() {
+        onStartRecordingClicked?.run()
+        if (selectedScreenShareOption.mode == ENTIRE_SCREEN) {
+            requestScreenCapture(
+                captureTarget = null,
+                displayId = selectedScreenShareOption.displayId,
+            )
+        }
+        if (selectedScreenShareOption.mode == SINGLE_APP) {
+            val intent = Intent(dialog.context, MediaProjectionAppSelectorActivity::class.java)
+            intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
 
-                intent.putExtra(
-                    MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
-                    hostUserHandle,
-                )
-                intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID, hostUid)
-                intent.putExtra(
-                    MediaProjectionAppSelectorActivity.EXTRA_SCREEN_SHARE_TYPE,
-                    MediaProjectionAppSelectorActivity.ScreenShareType.ScreenRecord.name,
-                )
-                activityStarter.startActivity(intent, /* dismissShade= */ true)
-            }
-            dialog.dismiss()
+            // We can't start activity for result here so we use result receiver to get
+            // the selected target to capture
+            intent.putExtra(
+                MediaProjectionAppSelectorActivity.EXTRA_CAPTURE_REGION_RESULT_RECEIVER,
+                CaptureTargetResultReceiver(),
+            )
+
+            intent.putExtra(
+                MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_USER_HANDLE,
+                hostUserHandle,
+            )
+            intent.putExtra(MediaProjectionAppSelectorActivity.EXTRA_HOST_APP_UID, hostUid)
+            intent.putExtra(
+                MediaProjectionAppSelectorActivity.EXTRA_SCREEN_SHARE_TYPE,
+                MediaProjectionAppSelectorActivity.ScreenShareType.ScreenRecord.name,
+            )
+            activityStarter.startActivity(intent, /* dismissShade= */ true)
         }
     }
 

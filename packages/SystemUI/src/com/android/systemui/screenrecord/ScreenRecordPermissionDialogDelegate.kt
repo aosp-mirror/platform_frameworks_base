@@ -19,6 +19,7 @@ import android.content.Context
 import android.hardware.display.DisplayManager
 import android.os.Bundle
 import android.os.UserHandle
+import android.view.View
 import androidx.annotation.StyleRes
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger
@@ -119,6 +120,12 @@ class ScreenRecordPermissionDialogDelegate(
         super<BaseMediaProjectionPermissionDialogDelegate>.onCreate(dialog, savedInstanceState)
         setDialogTitle(R.string.screenrecord_permission_dialog_title)
         dialog.setTitle(R.string.screenrecord_title)
+        setStartButtonOnClickListener { v: View? ->
+            val screenRecordViewBinder: ScreenRecordPermissionViewBinder? =
+                viewBinder as ScreenRecordPermissionViewBinder?
+            screenRecordViewBinder?.startButtonOnClicked()
+            dialog.dismiss()
+        }
         setCancelButtonOnClickListener { dialog.dismiss() }
     }
 }
