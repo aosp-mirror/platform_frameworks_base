@@ -201,6 +201,8 @@ class TestPhoneWindowManager {
     private boolean mIsTalkBackEnabled;
     private boolean mIsTalkBackShortcutGestureEnabled;
 
+    private boolean mIsVoiceAccessEnabled;
+
     private Intent mBrowserIntent;
     private Intent mSmsIntent;
 
@@ -222,6 +224,18 @@ class TestPhoneWindowManager {
         @Override
         boolean isTalkBackShortcutGestureEnabled() {
             return mIsTalkBackShortcutGestureEnabled;
+        }
+    }
+
+    private class TestVoiceAccessShortcutController extends VoiceAccessShortcutController {
+        TestVoiceAccessShortcutController(Context context) {
+            super(context);
+        }
+
+        @Override
+        boolean toggleVoiceAccess(int currentUserId) {
+            mIsVoiceAccessEnabled = !mIsVoiceAccessEnabled;
+            return mIsVoiceAccessEnabled;
         }
     }
 
@@ -258,6 +272,10 @@ class TestPhoneWindowManager {
 
         TalkbackShortcutController getTalkbackShortcutController() {
             return new TestTalkbackShortcutController(mContext);
+        }
+
+        VoiceAccessShortcutController getVoiceAccessShortcutController() {
+            return new TestVoiceAccessShortcutController(mContext);
         }
 
         WindowWakeUpPolicy getWindowWakeUpPolicy() {
@@ -1022,6 +1040,11 @@ class TestPhoneWindowManager {
     void assertTalkBack(boolean expectEnabled) {
         mTestLooper.dispatchAll();
         Assert.assertEquals(expectEnabled, mIsTalkBackEnabled);
+    }
+
+    void assertVoiceAccess(boolean expectEnabled) {
+        mTestLooper.dispatchAll();
+        Assert.assertEquals(expectEnabled, mIsVoiceAccessEnabled);
     }
 
     void assertKeyGestureEventSentToKeyGestureController(int gestureType) {

@@ -19,6 +19,7 @@ package com.android.server.input;
 import static android.hardware.input.InputGestureData.createKeyTrigger;
 
 import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
+import static com.android.hardware.input.Flags.enableVoiceAccessKeyGestures;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
 import static com.android.window.flags.Flags.enableMoveToNextDisplayShortcut;
@@ -239,6 +240,13 @@ final class InputGestureManager {
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_S,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                     KeyGestureEvent.KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK));
+        }
+        if (enableVoiceAccessKeyGestures()) {
+            systemShortcuts.add(
+                    createKeyGesture(
+                            KeyEvent.KEYCODE_V,
+                            KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
+                            KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS));
         }
         if (enableTaskResizingKeyboardShortcuts()) {
             systemShortcuts.add(createKeyGesture(
