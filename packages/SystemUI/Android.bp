@@ -85,6 +85,9 @@ filegroup {
 filegroup {
     name: "SystemUI-tests-broken-robofiles-run",
     srcs: [
+        "tests/src/**/systemui/keyguard/data/repository/KeyguardTransitionRepositoryTest.kt",
+        "tests/src/**/systemui/power/PowerNotificationWarningsTest.java",
+        "tests/src/**/systemui/user/domain/interactor/RefreshUsersSchedulerTest.kt",
         "tests/src/**/systemui/dreams/touch/CommunalTouchHandlerTest.java",
         "tests/src/**/systemui/shade/NotificationShadeWindowViewControllerTest.kt",
         "tests/src/**/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorSceneContainerTest.kt",
