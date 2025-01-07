@@ -1104,11 +1104,10 @@ public final class MediaCodecInfo {
                 // does not contain features and bitrate specific keys, keep only keys relevant for
                 // a level check.
                 Map<String, Object> levelCriticalFormatMap = new HashMap<>(map);
-                final Set<String> criticalKeys = isVideo()
-                        ? VideoCapabilities.VIDEO_LEVEL_CRITICAL_FORMAT_KEYS
-                        : isAudio()
-                        ? AudioCapabilities.AudioCapsLegacyImpl.AUDIO_LEVEL_CRITICAL_FORMAT_KEYS
-                        : null;
+                final Set<String> criticalKeys =
+                    isVideo() ? VideoCapabilities.VIDEO_LEVEL_CRITICAL_FORMAT_KEYS :
+                    isAudio() ? AudioCapabilities.AUDIO_LEVEL_CRITICAL_FORMAT_KEYS :
+                    null;
 
                 // critical keys will always contain KEY_MIME, but should also contain others to be
                 // meaningful
@@ -1411,516 +1410,20 @@ public final class MediaCodecInfo {
      */
     public static final class AudioCapabilities {
         private static final String TAG = "AudioCapabilities";
+        private CodecCapabilities mParent;
+        private Range<Integer> mBitrateRange;
 
-        /* package private */ interface AudioCapsIntf {
-            public Range<Integer> getBitrateRange();
+        private int[] mSampleRates;
+        private Range<Integer>[] mSampleRateRanges;
+        private Range<Integer>[] mInputChannelRanges;
 
-            public int[] getSupportedSampleRates();
-
-            public Range<Integer>[] getSupportedSampleRateRanges();
-
-            public int getMaxInputChannelCount();
-
-            public int getMinInputChannelCount();
-
-            public Range<Integer>[] getInputChannelCountRanges();
-
-            public boolean isSampleRateSupported(int sampleRate);
-
-            public void getDefaultFormat(MediaFormat format);
-
-            public boolean supportsFormat(MediaFormat format);
-        }
-
-        /* package private */ static final class AudioCapsLegacyImpl implements AudioCapsIntf {
-            private CodecCapabilities mParent;
-            private Range<Integer> mBitrateRange;
-
-            private int[] mSampleRates;
-            private Range<Integer>[] mSampleRateRanges;
-            private Range<Integer>[] mInputChannelRanges;
-
-            private static final int MAX_INPUT_CHANNEL_COUNT = 30;
-
-            public Range<Integer> getBitrateRange() {
-                return mBitrateRange;
-            }
-
-            public int[] getSupportedSampleRates() {
-                return mSampleRates != null ? Arrays.copyOf(mSampleRates, mSampleRates.length)
-                        : null;
-            }
-
-            public Range<Integer>[] getSupportedSampleRateRanges() {
-                return Arrays.copyOf(mSampleRateRanges, mSampleRateRanges.length);
-            }
-
-            public int getMaxInputChannelCount() {
-                int overall_max = 0;
-                for (int i = mInputChannelRanges.length - 1; i >= 0; i--) {
-                    int lmax = mInputChannelRanges[i].getUpper();
-                    if (lmax > overall_max) {
-                        overall_max = lmax;
-                    }
-                }
-                return overall_max;
-            }
-
-            public int getMinInputChannelCount() {
-                int overall_min = MAX_INPUT_CHANNEL_COUNT;
-                for (int i = mInputChannelRanges.length - 1; i >= 0; i--) {
-                    int lmin = mInputChannelRanges[i].getLower();
-                    if (lmin < overall_min) {
-                        overall_min = lmin;
-                    }
-                }
-                return overall_min;
-            }
-
-            public Range<Integer>[] getInputChannelCountRanges() {
-                return Arrays.copyOf(mInputChannelRanges, mInputChannelRanges.length);
-            }
-
-            /* no public constructor */
-            private AudioCapsLegacyImpl() { }
-
-            public static AudioCapsLegacyImpl create(
-                    MediaFormat info, CodecCapabilities parent) {
-                if (GetFlag(() -> android.media.codec.Flags.nativeCapabilites())) {
-                    Log.d(TAG, "Legacy implementation is called while native flag is on.");
-                }
-
-                AudioCapsLegacyImpl caps = new AudioCapsLegacyImpl();
-                caps.init(info, parent);
-                return caps;
-            }
-
-            private void init(MediaFormat info, CodecCapabilities parent) {
-                mParent = parent;
-                initWithPlatformLimits();
-                applyLevelLimits();
-                parseFromInfo(info);
-            }
-
-            private void initWithPlatformLimits() {
-                mBitrateRange = Range.create(0, Integer.MAX_VALUE);
-                mInputChannelRanges = new Range[] {Range.create(1, MAX_INPUT_CHANNEL_COUNT)};
-                // mBitrateRange = Range.create(1, 320000);
-                final int minSampleRate = SystemProperties
-                        .getInt("ro.mediacodec.min_sample_rate", 7350);
-                final int maxSampleRate = SystemProperties
-                        .getInt("ro.mediacodec.max_sample_rate", 192000);
-                mSampleRateRanges = new Range[] { Range.create(minSampleRate, maxSampleRate) };
-                mSampleRates = null;
-            }
-
-            private boolean supports(Integer sampleRate, Integer inputChannels) {
-                // channels and sample rates are checked orthogonally
-                if (inputChannels != null) {
-                    int ix = Utils.binarySearchDistinctRanges(
-                            mInputChannelRanges, inputChannels);
-                    if (ix < 0) {
-                        return false;
-                    }
-                }
-                if (sampleRate != null) {
-                    int ix = Utils.binarySearchDistinctRanges(
-                            mSampleRateRanges, sampleRate);
-                    if (ix < 0) {
-                        return false;
-                    }
-                }
-                return true;
-            }
-
-            public boolean isSampleRateSupported(int sampleRate) {
-                return supports(sampleRate, null);
-            }
-
-            /** modifies rates */
-            private void limitSampleRates(int[] rates) {
-                Arrays.sort(rates);
-                ArrayList<Range<Integer>> ranges = new ArrayList<Range<Integer>>();
-                for (int rate: rates) {
-                    if (supports(rate, null /* channels */)) {
-                        ranges.add(Range.create(rate, rate));
-                    }
-                }
-                mSampleRateRanges = ranges.toArray(new Range[ranges.size()]);
-                createDiscreteSampleRates();
-            }
-
-            private void createDiscreteSampleRates() {
-                mSampleRates = new int[mSampleRateRanges.length];
-                for (int i = 0; i < mSampleRateRanges.length; i++) {
-                    mSampleRates[i] = mSampleRateRanges[i].getLower();
-                }
-            }
-
-            /** modifies rateRanges */
-            private void limitSampleRates(Range<Integer>[] rateRanges) {
-                sortDistinctRanges(rateRanges);
-                mSampleRateRanges = intersectSortedDistinctRanges(mSampleRateRanges, rateRanges);
-
-                // check if all values are discrete
-                for (Range<Integer> range: mSampleRateRanges) {
-                    if (!range.getLower().equals(range.getUpper())) {
-                        mSampleRates = null;
-                        return;
-                    }
-                }
-                createDiscreteSampleRates();
-            }
-
-            private void applyLevelLimits() {
-                int[] sampleRates = null;
-                Range<Integer> sampleRateRange = null, bitRates = null;
-                int maxChannels = MAX_INPUT_CHANNEL_COUNT;
-                CodecProfileLevel[] profileLevels = mParent.profileLevels;
-                String mime = mParent.getMimeType();
-
-                if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
-                    sampleRates = new int[] {
-                            8000, 11025, 12000,
-                            16000, 22050, 24000,
-                            32000, 44100, 48000 };
-                    bitRates = Range.create(8000, 320000);
-                    maxChannels = 2;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_NB)) {
-                    sampleRates = new int[] { 8000 };
-                    bitRates = Range.create(4750, 12200);
-                    maxChannels = 1;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_WB)) {
-                    sampleRates = new int[] { 16000 };
-                    bitRates = Range.create(6600, 23850);
-                    maxChannels = 1;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AAC)) {
-                    sampleRates = new int[] {
-                            7350, 8000,
-                            11025, 12000, 16000,
-                            22050, 24000, 32000,
-                            44100, 48000, 64000,
-                            88200, 96000 };
-                    bitRates = Range.create(8000, 510000);
-                    maxChannels = 48;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_VORBIS)) {
-                    bitRates = Range.create(32000, 500000);
-                    sampleRateRange = Range.create(8000, 192000);
-                    maxChannels = 255;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_OPUS)) {
-                    bitRates = Range.create(6000, 510000);
-                    sampleRates = new int[] { 8000, 12000, 16000, 24000, 48000 };
-                    maxChannels = 255;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_RAW)) {
-                    sampleRateRange = Range.create(1, 192000);
-                    bitRates = Range.create(1, 10000000);
-                    maxChannels = AudioSystem.OUT_CHANNEL_COUNT_MAX;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
-                    sampleRateRange = Range.create(1, 655350);
-                    // lossless codec, so bitrate is ignored
-                    maxChannels = 255;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_ALAW)
-                        || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_MLAW)) {
-                    sampleRates = new int[] { 8000 };
-                    bitRates = Range.create(64000, 64000);
-                    // platform allows multiple channels for this format
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MSGSM)) {
-                    sampleRates = new int[] { 8000 };
-                    bitRates = Range.create(13000, 13000);
-                    maxChannels = 1;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AC3)) {
-                    maxChannels = 6;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_EAC3)) {
-                    maxChannels = 16;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_EAC3_JOC)) {
-                    sampleRates = new int[] { 48000 };
-                    bitRates = Range.create(32000, 6144000);
-                    maxChannels = 16;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AC4)) {
-                    sampleRates = new int[] { 44100, 48000, 96000, 192000 };
-                    bitRates = Range.create(16000, 2688000);
-                    maxChannels = 24;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS)) {
-                    sampleRates = new int[] { 44100, 48000 };
-                    bitRates = Range.create(96000, 1524000);
-                    maxChannels = 6;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS_HD)) {
-                    for (CodecProfileLevel profileLevel: profileLevels) {
-                        switch (profileLevel.profile) {
-                            case CodecProfileLevel.DTS_HDProfileLBR:
-                                sampleRates = new int[]{ 22050, 24000, 44100, 48000 };
-                                bitRates = Range.create(32000, 768000);
-                                break;
-                            case CodecProfileLevel.DTS_HDProfileHRA:
-                            case CodecProfileLevel.DTS_HDProfileMA:
-                                sampleRates =
-                                        new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
-                                bitRates = Range.create(96000, 24500000);
-                                break;
-                            default:
-                                Log.w(TAG, "Unrecognized profile "
-                                        + profileLevel.profile + " for " + mime);
-                                mParent.mError |= ERROR_UNRECOGNIZED;
-                                sampleRates =
-                                        new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
-                                bitRates = Range.create(96000, 24500000);
-                        }
-                    }
-                    maxChannels = 8;
-                } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS_UHD)) {
-                    for (CodecProfileLevel profileLevel: profileLevels) {
-                        switch (profileLevel.profile) {
-                            case CodecProfileLevel.DTS_UHDProfileP2:
-                                sampleRates = new int[]{ 48000 };
-                                bitRates = Range.create(96000, 768000);
-                                maxChannels = 10;
-                                break;
-                            case CodecProfileLevel.DTS_UHDProfileP1:
-                                sampleRates =
-                                        new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
-                                bitRates = Range.create(96000, 24500000);
-                                maxChannels = 32;
-                                break;
-                            default:
-                                Log.w(TAG, "Unrecognized profile "
-                                        + profileLevel.profile + " for " + mime);
-                                mParent.mError |= ERROR_UNRECOGNIZED;
-                                sampleRates =
-                                        new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
-                                bitRates = Range.create(96000, 24500000);
-                                maxChannels = 32;
-                        }
-                    }
-                } else {
-                    Log.w(TAG, "Unsupported mime " + mime);
-                    mParent.mError |= ERROR_UNSUPPORTED;
-                }
-
-                // restrict ranges
-                if (sampleRates != null) {
-                    limitSampleRates(sampleRates);
-                } else if (sampleRateRange != null) {
-                    limitSampleRates(new Range[] { sampleRateRange });
-                }
-
-                Range<Integer> channelRange = Range.create(1, maxChannels);
-
-                applyLimits(new Range[] { channelRange }, bitRates);
-            }
-
-            private void applyLimits(Range<Integer>[] inputChannels, Range<Integer> bitRates) {
-
-                // clamp & make a local copy
-                Range<Integer>[] myInputChannels = new Range[inputChannels.length];
-                for (int i = 0; i < inputChannels.length; i++) {
-                    int lower = inputChannels[i].clamp(1);
-                    int upper = inputChannels[i].clamp(MAX_INPUT_CHANNEL_COUNT);
-                    myInputChannels[i] = Range.create(lower, upper);
-                }
-
-                // sort, intersect with existing, & save channel list
-                sortDistinctRanges(myInputChannels);
-                Range<Integer>[] joinedChannelList =
-                                intersectSortedDistinctRanges(myInputChannels, mInputChannelRanges);
-                mInputChannelRanges = joinedChannelList;
-
-                if (bitRates != null) {
-                    mBitrateRange = mBitrateRange.intersect(bitRates);
-                }
-            }
-
-            private void parseFromInfo(MediaFormat info) {
-                int maxInputChannels = MAX_INPUT_CHANNEL_COUNT;
-                Range<Integer>[] channels = new Range[] { Range.create(1, maxInputChannels)};
-                Range<Integer> bitRates = POSITIVE_INTEGERS;
-
-                if (info.containsKey("sample-rate-ranges")) {
-                    String[] rateStrings = info.getString("sample-rate-ranges").split(",");
-                    Range<Integer>[] rateRanges = new Range[rateStrings.length];
-                    for (int i = 0; i < rateStrings.length; i++) {
-                        rateRanges[i] = Utils.parseIntRange(rateStrings[i], null);
-                    }
-                    limitSampleRates(rateRanges);
-                }
-
-                // we will prefer channel-ranges over max-channel-count
-                if (info.containsKey("channel-ranges")) {
-                    String[] channelStrings = info.getString("channel-ranges").split(",");
-                    Range<Integer>[] channelRanges = new Range[channelStrings.length];
-                    for (int i = 0; i < channelStrings.length; i++) {
-                        channelRanges[i] = Utils.parseIntRange(channelStrings[i], null);
-                    }
-                    channels = channelRanges;
-                } else if (info.containsKey("channel-range")) {
-                    Range<Integer> oneRange = Utils.parseIntRange(info.getString("channel-range"),
-                                                                null);
-                    channels = new Range[] { oneRange };
-                } else if (info.containsKey("max-channel-count")) {
-                    maxInputChannels = Utils.parseIntSafely(
-                            info.getString("max-channel-count"), maxInputChannels);
-                    if (maxInputChannels == 0) {
-                        channels = new Range[] {Range.create(0, 0)};
-                    } else {
-                        channels = new Range[] {Range.create(1, maxInputChannels)};
-                    }
-                } else if ((mParent.mError & ERROR_UNSUPPORTED) != 0) {
-                    maxInputChannels = 0;
-                    channels = new Range[] {Range.create(0, 0)};
-                }
-
-                if (info.containsKey("bitrate-range")) {
-                    bitRates = bitRates.intersect(
-                            Utils.parseIntRange(info.getString("bitrate-range"), bitRates));
-                }
-
-                applyLimits(channels, bitRates);
-            }
-
-            /** @hide */
-            public void getDefaultFormat(MediaFormat format) {
-                // report settings that have only a single choice
-                if (mBitrateRange.getLower().equals(mBitrateRange.getUpper())) {
-                    format.setInteger(MediaFormat.KEY_BIT_RATE, mBitrateRange.getLower());
-                }
-                if (getMaxInputChannelCount() == 1) {
-                    // mono-only format
-                    format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
-                }
-                if (mSampleRates != null && mSampleRates.length == 1) {
-                    format.setInteger(MediaFormat.KEY_SAMPLE_RATE, mSampleRates[0]);
-                }
-            }
-
-            /* package private */
-            // must not contain KEY_PROFILE
-            static final Set<String> AUDIO_LEVEL_CRITICAL_FORMAT_KEYS = Set.of(
-                    // We don't set level-specific limits for audio codecs today. Key candidates
-                    // would be sample rate, bit rate or channel count.
-                    // MediaFormat.KEY_SAMPLE_RATE,
-                    // MediaFormat.KEY_CHANNEL_COUNT,
-                    // MediaFormat.KEY_BIT_RATE,
-                    MediaFormat.KEY_MIME);
-
-            /** @hide */
-            public boolean supportsFormat(MediaFormat format) {
-                Map<String, Object> map = format.getMap();
-                Integer sampleRate = (Integer)map.get(MediaFormat.KEY_SAMPLE_RATE);
-                Integer channels = (Integer)map.get(MediaFormat.KEY_CHANNEL_COUNT);
-
-                if (!supports(sampleRate, channels)) {
-                    return false;
-                }
-
-                if (!CodecCapabilities.supportsBitrate(mBitrateRange, format)) {
-                    return false;
-                }
-
-                // nothing to do for:
-                // KEY_CHANNEL_MASK: codecs don't get this
-                // KEY_IS_ADTS:      required feature for all AAC decoders
-                return true;
-            }
-        }
-
-        /* package private */ static final class AudioCapsNativeImpl implements AudioCapsIntf {
-            private long mNativeContext; // accessed by native methods
-
-            private Range<Integer> mBitrateRange;
-            private int[] mSampleRates;
-            private Range<Integer>[] mSampleRateRanges;
-            private Range<Integer>[] mInputChannelRanges;
-
-            /**
-             * Constructor used by JNI.
-             *
-             * The Java AudioCapabilities object keeps these subobjects to avoid recontruction.
-             */
-            /* package private */ AudioCapsNativeImpl(Range<Integer> bitrateRange,
-                    int[] sampleRates, Range<Integer>[] sampleRateRanges,
-                    Range<Integer>[] inputChannelRanges) {
-                mBitrateRange = bitrateRange;
-                mSampleRates = sampleRates;
-                mSampleRateRanges = sampleRateRanges;
-                mInputChannelRanges = inputChannelRanges;
-            }
-
-            /* no public constructor */
-            private AudioCapsNativeImpl() { }
-
-            public Range<Integer> getBitrateRange() {
-                return mBitrateRange;
-            }
-
-            public int[] getSupportedSampleRates() {
-                return mSampleRates != null ? Arrays.copyOf(mSampleRates, mSampleRates.length)
-                        : null;
-            }
-
-            public Range<Integer>[] getSupportedSampleRateRanges() {
-                return Arrays.copyOf(mSampleRateRanges, mSampleRateRanges.length);
-            }
-
-            public Range<Integer>[] getInputChannelCountRanges() {
-                return Arrays.copyOf(mInputChannelRanges, mInputChannelRanges.length);
-            }
-
-            public int getMaxInputChannelCount() {
-                return native_getMaxInputChannelCount();
-            }
-
-            public int getMinInputChannelCount() {
-                return native_getMinInputChannelCount();
-            }
-
-            public boolean isSampleRateSupported(int sampleRate) {
-                return native_isSampleRateSupported(sampleRate);
-            }
-
-            // This API is for internal Java implementation only. Should not be called.
-            public void getDefaultFormat(MediaFormat format) {
-                throw new UnsupportedOperationException(
-                    "Java Implementation should not call native implemenatation");
-            }
-
-            // This API is for internal Java implementation only. Should not be called.
-            public boolean supportsFormat(MediaFormat format) {
-                throw new UnsupportedOperationException(
-                    "Java Implementation should not call native implemenatation");
-            }
-
-            private native int native_getMaxInputChannelCount();
-            private native int native_getMinInputChannelCount();
-            private native boolean native_isSampleRateSupported(int sampleRate);
-            private static native void native_init();
-
-            static {
-                System.loadLibrary("media_jni");
-                native_init();
-            }
-        }
-
-        private AudioCapsIntf mImpl;
-
-        /** @hide */
-        public static AudioCapabilities create(
-                MediaFormat info, CodecCapabilities parent) {
-            AudioCapsLegacyImpl impl = AudioCapsLegacyImpl.create(info, parent);
-            AudioCapabilities caps = new AudioCapabilities(impl);
-            return caps;
-        }
-
-        /* package private */ AudioCapabilities(AudioCapsIntf impl) {
-            mImpl = impl;
-        }
-
-        /* no public constructor */
-        private AudioCapabilities() { }
+        private static final int MAX_INPUT_CHANNEL_COUNT = 30;
 
         /**
          * Returns the range of supported bitrates in bits/second.
          */
         public Range<Integer> getBitrateRange() {
-            return mImpl.getBitrateRange();
+            return mBitrateRange;
         }
 
         /**
@@ -1929,7 +1432,7 @@ public final class MediaCodecInfo {
          * {@code null}.  The array is sorted in ascending order.
          */
         public int[] getSupportedSampleRates() {
-            return mImpl.getSupportedSampleRates();
+            return mSampleRates != null ? Arrays.copyOf(mSampleRates, mSampleRates.length) : null;
         }
 
         /**
@@ -1938,21 +1441,7 @@ public final class MediaCodecInfo {
          * distinct.
          */
         public Range<Integer>[] getSupportedSampleRateRanges() {
-            return mImpl.getSupportedSampleRateRanges();
-        }
-
-        /*
-         * Returns an array of ranges representing the number of input channels supported.
-         * The codec supports any number of input channels within this range.
-         *
-         * This supersedes the {@link #getMaxInputChannelCount} method.
-         *
-         * For many codecs, this will be a single range [1..N], for some N.
-         */
-        @SuppressLint("ArrayReturn")
-        @NonNull
-        public Range<Integer>[] getInputChannelCountRanges() {
-            return mImpl.getInputChannelCountRanges();
+            return Arrays.copyOf(mSampleRateRanges, mSampleRateRanges.length);
         }
 
         /**
@@ -1972,7 +1461,14 @@ public final class MediaCodecInfo {
          */
         @IntRange(from = 1, to = 255)
         public int getMaxInputChannelCount() {
-            return mImpl.getMaxInputChannelCount();
+            int overall_max = 0;
+            for (int i = mInputChannelRanges.length - 1; i >= 0; i--) {
+                int lmax = mInputChannelRanges[i].getUpper();
+                if (lmax > overall_max) {
+                    overall_max = lmax;
+                }
+            }
+            return overall_max;
         }
 
         /**
@@ -1984,24 +1480,364 @@ public final class MediaCodecInfo {
          */
         @IntRange(from = 1, to = 255)
         public int getMinInputChannelCount() {
-            return mImpl.getMinInputChannelCount();
+            int overall_min = MAX_INPUT_CHANNEL_COUNT;
+            for (int i = mInputChannelRanges.length - 1; i >= 0; i--) {
+                int lmin = mInputChannelRanges[i].getLower();
+                if (lmin < overall_min) {
+                    overall_min = lmin;
+                }
+            }
+            return overall_min;
+        }
+
+        /*
+         * Returns an array of ranges representing the number of input channels supported.
+         * The codec supports any number of input channels within this range.
+         *
+         * This supersedes the {@link #getMaxInputChannelCount} method.
+         *
+         * For many codecs, this will be a single range [1..N], for some N.
+         */
+        @SuppressLint("ArrayReturn")
+        @NonNull
+        public Range<Integer>[] getInputChannelCountRanges() {
+            return Arrays.copyOf(mInputChannelRanges, mInputChannelRanges.length);
+        }
+
+        /* no public constructor */
+        private AudioCapabilities() { }
+
+        /** @hide */
+        public static AudioCapabilities create(
+                MediaFormat info, CodecCapabilities parent) {
+            AudioCapabilities caps = new AudioCapabilities();
+            caps.init(info, parent);
+            return caps;
+        }
+
+        private void init(MediaFormat info, CodecCapabilities parent) {
+            mParent = parent;
+            initWithPlatformLimits();
+            applyLevelLimits();
+            parseFromInfo(info);
+        }
+
+        private void initWithPlatformLimits() {
+            mBitrateRange = Range.create(0, Integer.MAX_VALUE);
+            mInputChannelRanges = new Range[] {Range.create(1, MAX_INPUT_CHANNEL_COUNT)};
+            // mBitrateRange = Range.create(1, 320000);
+            final int minSampleRate = SystemProperties.
+                getInt("ro.mediacodec.min_sample_rate", 7350);
+            final int maxSampleRate = SystemProperties.
+                getInt("ro.mediacodec.max_sample_rate", 192000);
+            mSampleRateRanges = new Range[] { Range.create(minSampleRate, maxSampleRate) };
+            mSampleRates = null;
+        }
+
+        private boolean supports(Integer sampleRate, Integer inputChannels) {
+            // channels and sample rates are checked orthogonally
+            if (inputChannels != null) {
+                int ix = Utils.binarySearchDistinctRanges(
+                        mInputChannelRanges, inputChannels);
+                if (ix < 0) {
+                    return false;
+                }
+            }
+            if (sampleRate != null) {
+                int ix = Utils.binarySearchDistinctRanges(
+                        mSampleRateRanges, sampleRate);
+                if (ix < 0) {
+                    return false;
+                }
+            }
+            return true;
         }
 
         /**
          * Query whether the sample rate is supported by the codec.
          */
         public boolean isSampleRateSupported(int sampleRate) {
-            return mImpl.isSampleRateSupported(sampleRate);
+            return supports(sampleRate, null);
+        }
+
+        /** modifies rates */
+        private void limitSampleRates(int[] rates) {
+            Arrays.sort(rates);
+            ArrayList<Range<Integer>> ranges = new ArrayList<Range<Integer>>();
+            for (int rate: rates) {
+                if (supports(rate, null /* channels */)) {
+                    ranges.add(Range.create(rate, rate));
+                }
+            }
+            mSampleRateRanges = ranges.toArray(new Range[ranges.size()]);
+            createDiscreteSampleRates();
+        }
+
+        private void createDiscreteSampleRates() {
+            mSampleRates = new int[mSampleRateRanges.length];
+            for (int i = 0; i < mSampleRateRanges.length; i++) {
+                mSampleRates[i] = mSampleRateRanges[i].getLower();
+            }
+        }
+
+        /** modifies rateRanges */
+        private void limitSampleRates(Range<Integer>[] rateRanges) {
+            sortDistinctRanges(rateRanges);
+            mSampleRateRanges = intersectSortedDistinctRanges(mSampleRateRanges, rateRanges);
+
+            // check if all values are discrete
+            for (Range<Integer> range: mSampleRateRanges) {
+                if (!range.getLower().equals(range.getUpper())) {
+                    mSampleRates = null;
+                    return;
+                }
+            }
+            createDiscreteSampleRates();
+        }
+
+        private void applyLevelLimits() {
+            int[] sampleRates = null;
+            Range<Integer> sampleRateRange = null, bitRates = null;
+            int maxChannels = MAX_INPUT_CHANNEL_COUNT;
+            CodecProfileLevel[] profileLevels = mParent.profileLevels;
+            String mime = mParent.getMimeType();
+
+            if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MPEG)) {
+                sampleRates = new int[] {
+                        8000, 11025, 12000,
+                        16000, 22050, 24000,
+                        32000, 44100, 48000 };
+                bitRates = Range.create(8000, 320000);
+                maxChannels = 2;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_NB)) {
+                sampleRates = new int[] { 8000 };
+                bitRates = Range.create(4750, 12200);
+                maxChannels = 1;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AMR_WB)) {
+                sampleRates = new int[] { 16000 };
+                bitRates = Range.create(6600, 23850);
+                maxChannels = 1;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AAC)) {
+                sampleRates = new int[] {
+                        7350, 8000,
+                        11025, 12000, 16000,
+                        22050, 24000, 32000,
+                        44100, 48000, 64000,
+                        88200, 96000 };
+                bitRates = Range.create(8000, 510000);
+                maxChannels = 48;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_VORBIS)) {
+                bitRates = Range.create(32000, 500000);
+                sampleRateRange = Range.create(8000, 192000);
+                maxChannels = 255;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_OPUS)) {
+                bitRates = Range.create(6000, 510000);
+                sampleRates = new int[] { 8000, 12000, 16000, 24000, 48000 };
+                maxChannels = 255;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_RAW)) {
+                sampleRateRange = Range.create(1, 192000);
+                bitRates = Range.create(1, 10000000);
+                maxChannels = AudioSystem.OUT_CHANNEL_COUNT_MAX;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_FLAC)) {
+                sampleRateRange = Range.create(1, 655350);
+                // lossless codec, so bitrate is ignored
+                maxChannels = 255;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_ALAW)
+                    || mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_G711_MLAW)) {
+                sampleRates = new int[] { 8000 };
+                bitRates = Range.create(64000, 64000);
+                // platform allows multiple channels for this format
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_MSGSM)) {
+                sampleRates = new int[] { 8000 };
+                bitRates = Range.create(13000, 13000);
+                maxChannels = 1;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AC3)) {
+                maxChannels = 6;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_EAC3)) {
+                maxChannels = 16;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_EAC3_JOC)) {
+                sampleRates = new int[] { 48000 };
+                bitRates = Range.create(32000, 6144000);
+                maxChannels = 16;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_AC4)) {
+                sampleRates = new int[] { 44100, 48000, 96000, 192000 };
+                bitRates = Range.create(16000, 2688000);
+                maxChannels = 24;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS)) {
+                sampleRates = new int[] { 44100, 48000 };
+                bitRates = Range.create(96000, 1524000);
+                maxChannels = 6;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS_HD)) {
+                for (CodecProfileLevel profileLevel: profileLevels) {
+                    switch (profileLevel.profile) {
+                        case CodecProfileLevel.DTS_HDProfileLBR:
+                            sampleRates = new int[]{ 22050, 24000, 44100, 48000 };
+                            bitRates = Range.create(32000, 768000);
+                            break;
+                        case CodecProfileLevel.DTS_HDProfileHRA:
+                        case CodecProfileLevel.DTS_HDProfileMA:
+                            sampleRates = new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
+                            bitRates = Range.create(96000, 24500000);
+                            break;
+                        default:
+                            Log.w(TAG, "Unrecognized profile "
+                                    + profileLevel.profile + " for " + mime);
+                            mParent.mError |= ERROR_UNRECOGNIZED;
+                            sampleRates = new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
+                            bitRates = Range.create(96000, 24500000);
+                    }
+                }
+                maxChannels = 8;
+            } else if (mime.equalsIgnoreCase(MediaFormat.MIMETYPE_AUDIO_DTS_UHD)) {
+                for (CodecProfileLevel profileLevel: profileLevels) {
+                    switch (profileLevel.profile) {
+                        case CodecProfileLevel.DTS_UHDProfileP2:
+                            sampleRates = new int[]{ 48000 };
+                            bitRates = Range.create(96000, 768000);
+                            maxChannels = 10;
+                            break;
+                        case CodecProfileLevel.DTS_UHDProfileP1:
+                            sampleRates = new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
+                            bitRates = Range.create(96000, 24500000);
+                            maxChannels = 32;
+                            break;
+                        default:
+                            Log.w(TAG, "Unrecognized profile "
+                                    + profileLevel.profile + " for " + mime);
+                            mParent.mError |= ERROR_UNRECOGNIZED;
+                            sampleRates = new int[]{ 44100, 48000, 88200, 96000, 176400, 192000 };
+                            bitRates = Range.create(96000, 24500000);
+                            maxChannels = 32;
+                    }
+                }
+            } else {
+                Log.w(TAG, "Unsupported mime " + mime);
+                mParent.mError |= ERROR_UNSUPPORTED;
+            }
+
+            // restrict ranges
+            if (sampleRates != null) {
+                limitSampleRates(sampleRates);
+            } else if (sampleRateRange != null) {
+                limitSampleRates(new Range[] { sampleRateRange });
+            }
+
+            Range<Integer> channelRange = Range.create(1, maxChannels);
+
+            applyLimits(new Range[] { channelRange }, bitRates);
+        }
+
+        private void applyLimits(Range<Integer>[] inputChannels, Range<Integer> bitRates) {
+
+            // clamp & make a local copy
+            Range<Integer>[] myInputChannels = new Range[inputChannels.length];
+            for (int i = 0; i < inputChannels.length; i++) {
+                int lower = inputChannels[i].clamp(1);
+                int upper = inputChannels[i].clamp(MAX_INPUT_CHANNEL_COUNT);
+                myInputChannels[i] = Range.create(lower, upper);
+            }
+
+            // sort, intersect with existing, & save channel list
+            sortDistinctRanges(myInputChannels);
+            Range<Integer>[] joinedChannelList =
+                            intersectSortedDistinctRanges(myInputChannels, mInputChannelRanges);
+            mInputChannelRanges = joinedChannelList;
+
+            if (bitRates != null) {
+                mBitrateRange = mBitrateRange.intersect(bitRates);
+            }
+        }
+
+        private void parseFromInfo(MediaFormat info) {
+            int maxInputChannels = MAX_INPUT_CHANNEL_COUNT;
+            Range<Integer>[] channels = new Range[] { Range.create(1, maxInputChannels)};
+            Range<Integer> bitRates = POSITIVE_INTEGERS;
+
+            if (info.containsKey("sample-rate-ranges")) {
+                String[] rateStrings = info.getString("sample-rate-ranges").split(",");
+                Range<Integer>[] rateRanges = new Range[rateStrings.length];
+                for (int i = 0; i < rateStrings.length; i++) {
+                    rateRanges[i] = Utils.parseIntRange(rateStrings[i], null);
+                }
+                limitSampleRates(rateRanges);
+            }
+
+            // we will prefer channel-ranges over max-channel-count
+            if (info.containsKey("channel-ranges")) {
+                String[] channelStrings = info.getString("channel-ranges").split(",");
+                Range<Integer>[] channelRanges = new Range[channelStrings.length];
+                for (int i = 0; i < channelStrings.length; i++) {
+                    channelRanges[i] = Utils.parseIntRange(channelStrings[i], null);
+                }
+                channels = channelRanges;
+            } else if (info.containsKey("channel-range")) {
+                Range<Integer> oneRange = Utils.parseIntRange(info.getString("channel-range"),
+                                                              null);
+                channels = new Range[] { oneRange };
+            } else if (info.containsKey("max-channel-count")) {
+                maxInputChannels = Utils.parseIntSafely(
+                        info.getString("max-channel-count"), maxInputChannels);
+                if (maxInputChannels == 0) {
+                    channels = new Range[] {Range.create(0, 0)};
+                } else {
+                    channels = new Range[] {Range.create(1, maxInputChannels)};
+                }
+            } else if ((mParent.mError & ERROR_UNSUPPORTED) != 0) {
+                maxInputChannels = 0;
+                channels = new Range[] {Range.create(0, 0)};
+            }
+
+            if (info.containsKey("bitrate-range")) {
+                bitRates = bitRates.intersect(
+                        Utils.parseIntRange(info.getString("bitrate-range"), bitRates));
+            }
+
+            applyLimits(channels, bitRates);
         }
 
         /** @hide */
         public void getDefaultFormat(MediaFormat format) {
-            mImpl.getDefaultFormat(format);
+            // report settings that have only a single choice
+            if (mBitrateRange.getLower().equals(mBitrateRange.getUpper())) {
+                format.setInteger(MediaFormat.KEY_BIT_RATE, mBitrateRange.getLower());
+            }
+            if (getMaxInputChannelCount() == 1) {
+                // mono-only format
+                format.setInteger(MediaFormat.KEY_CHANNEL_COUNT, 1);
+            }
+            if (mSampleRates != null && mSampleRates.length == 1) {
+                format.setInteger(MediaFormat.KEY_SAMPLE_RATE, mSampleRates[0]);
+            }
         }
+
+        /* package private */
+        // must not contain KEY_PROFILE
+        static final Set<String> AUDIO_LEVEL_CRITICAL_FORMAT_KEYS = Set.of(
+                // We don't set level-specific limits for audio codecs today. Key candidates would
+                // be sample rate, bit rate or channel count.
+                // MediaFormat.KEY_SAMPLE_RATE,
+                // MediaFormat.KEY_CHANNEL_COUNT,
+                // MediaFormat.KEY_BIT_RATE,
+                MediaFormat.KEY_MIME);
 
         /** @hide */
         public boolean supportsFormat(MediaFormat format) {
-            return mImpl.supportsFormat(format);
+            Map<String, Object> map = format.getMap();
+            Integer sampleRate = (Integer)map.get(MediaFormat.KEY_SAMPLE_RATE);
+            Integer channels = (Integer)map.get(MediaFormat.KEY_CHANNEL_COUNT);
+
+            if (!supports(sampleRate, channels)) {
+                return false;
+            }
+
+            if (!CodecCapabilities.supportsBitrate(mBitrateRange, format)) {
+                return false;
+            }
+
+            // nothing to do for:
+            // KEY_CHANNEL_MASK: codecs don't get this
+            // KEY_IS_ADTS:      required feature for all AAC decoders
+            return true;
         }
     }
 
@@ -4989,11 +4825,5 @@ public final class MediaCodecInfo {
         return new MediaCodecInfo(
                 mName, mCanonicalName, mFlags,
                 caps.toArray(new CodecCapabilities[caps.size()]));
-    }
-
-    /* package private */ class GenericHelper {
-        private static Range<Integer> constructIntegerRange(int lower, int upper) {
-            return Range.create(Integer.valueOf(lower), Integer.valueOf(upper));
-        }
     }
 }
