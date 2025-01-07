@@ -346,6 +346,7 @@ public:
     void setMousePointerAccelerationEnabled(ui::LogicalDisplayId displayId, bool enabled);
     void setMouseReverseVerticalScrollingEnabled(bool enabled);
     void setMouseScrollingAccelerationEnabled(bool enabled);
+    void setMouseScrollingSpeed(int32_t speed);
     void setMouseSwapPrimaryButtonEnabled(bool enabled);
     void setMouseAccelerationEnabled(bool enabled);
     void setTouchpadPointerSpeed(int32_t speed);
@@ -499,6 +500,9 @@ private:
 
         // True if mouse scrolling acceleration is enabled.
         bool mouseScrollingAccelerationEnabled{true};
+
+        // The mouse scrolling speed, as a number from -7 (slowest) to 7 (fastest).
+        int32_t mouseScrollingSpeed{0};
 
         // True if mouse vertical scrolling is reversed.
         bool mouseReverseVerticalScrollingEnabled{false};
@@ -843,6 +847,9 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
                 mLocked.mouseScrollingAccelerationEnabled
                 ? android::os::IInputConstants::DEFAULT_MOUSE_WHEEL_ACCELERATION
                 : 1;
+        outConfig->wheelVelocityControlParameters.scale = mLocked.mouseScrollingAccelerationEnabled
+                ? 1
+                : exp2f(mLocked.mouseScrollingSpeed * POINTER_SPEED_EXPONENT);
         outConfig->pointerGesturesEnabled = mLocked.pointerGesturesEnabled;
 
         outConfig->pointerCaptureRequest = mLocked.pointerCaptureRequest;
@@ -1445,6 +1452,21 @@ void NativeInputManager::setMouseScrollingAccelerationEnabled(bool enabled) {
         }
 
         mLocked.mouseScrollingAccelerationEnabled = enabled;
+    } // release lock
+
+    mInputManager->getReader().requestRefreshConfiguration(
+            InputReaderConfiguration::Change::POINTER_SPEED);
+}
+
+void NativeInputManager::setMouseScrollingSpeed(int32_t speed) {
+    { // acquire lock
+        std::scoped_lock _l(mLock);
+
+        if (mLocked.mouseScrollingSpeed == speed) {
+            return;
+        }
+
+        mLocked.mouseScrollingSpeed = speed;
     } // release lock
 
     mInputManager->getReader().requestRefreshConfiguration(
@@ -3243,6 +3265,11 @@ static void nativeSetMouseScrollingAccelerationEnabled(JNIEnv* env, jobject nati
     im->setMouseScrollingAccelerationEnabled(enabled);
 }
 
+static void nativeSetMouseScrollingSpeed(JNIEnv* env, jobject nativeImplObj, jint speed) {
+    NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
+    im->setMouseScrollingSpeed(speed);
+}
+
 static void nativeSetMouseReverseVerticalScrollingEnabled(JNIEnv* env, jobject nativeImplObj,
                                                           bool enabled) {
     NativeInputManager* im = getNativeInputManager(env, nativeImplObj);
@@ -3319,6 +3346,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
          (void*)nativeSetMouseReverseVerticalScrollingEnabled},
         {"setMouseScrollingAccelerationEnabled", "(Z)V",
          (void*)nativeSetMouseScrollingAccelerationEnabled},
+        {"setMouseScrollingSpeed", "(I)V", (void*)nativeSetMouseScrollingSpeed},
         {"setMouseSwapPrimaryButtonEnabled", "(Z)V", (void*)nativeSetMouseSwapPrimaryButtonEnabled},
         {"setMouseAccelerationEnabled", "(Z)V", (void*)nativeSetMouseAccelerationEnabled},
         {"setTouchpadPointerSpeed", "(I)V", (void*)nativeSetTouchpadPointerSpeed},

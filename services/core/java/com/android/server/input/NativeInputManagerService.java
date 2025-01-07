@@ -136,6 +136,8 @@ interface NativeInputManagerService {
 
     void setMouseScrollingAccelerationEnabled(boolean enabled);
 
+    void setMouseScrollingSpeed(int speed);
+
     void setMouseSwapPrimaryButtonEnabled(boolean enabled);
 
     void setMouseAccelerationEnabled(boolean enabled);
@@ -426,6 +428,9 @@ interface NativeInputManagerService {
 
         @Override
         public native void setMouseScrollingAccelerationEnabled(boolean enabled);
+
+        @Override
+        public native void setMouseScrollingSpeed(int speed);
 
         @Override
         public native void setMouseSwapPrimaryButtonEnabled(boolean enabled);
