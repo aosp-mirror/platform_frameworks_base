@@ -26,8 +26,8 @@ package {
 java_library {
     name: "wm_shell_protolog-groups",
     srcs: [
-        "src/com/android/wm/shell/protolog/ShellProtoLogGroup.java",
         ":protolog-common-src",
+        "src/com/android/wm/shell/protolog/ShellProtoLogGroup.java",
     ],
 }
 
@@ -61,8 +61,8 @@ java_genrule {
     name: "wm_shell_protolog_src",
     srcs: [
         ":protolog-impl",
-        ":wm_shell_protolog-groups",
         ":wm_shell-sources",
+        ":wm_shell_protolog-groups",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) transform-protolog-calls " +
@@ -80,8 +80,8 @@ java_genrule {
 java_genrule {
     name: "generate-wm_shell_protolog.json",
     srcs: [
-        ":wm_shell_protolog-groups",
         ":wm_shell-sources",
+        ":wm_shell_protolog-groups",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
@@ -97,8 +97,8 @@ java_genrule {
 java_genrule {
     name: "gen-wmshell.protolog.pb",
     srcs: [
-        ":wm_shell_protolog-groups",
         ":wm_shell-sources",
+        ":wm_shell_protolog-groups",
     ],
     tools: ["protologtool"],
     cmd: "$(location protologtool) generate-viewer-config " +
@@ -159,38 +159,39 @@ java_library {
 android_library {
     name: "WindowManager-Shell",
     srcs: [
-        "src/com/android/wm/shell/EventLogTags.logtags",
         ":wm_shell_protolog_src",
         // TODO(b/168581922) protologtool do not support kotlin(*.kt)
-        ":wm_shell-sources-kt",
+        "src/com/android/wm/shell/EventLogTags.logtags",
         ":wm_shell-aidls",
         ":wm_shell-shared-aidls",
+        ":wm_shell-sources-kt",
     ],
     resource_dirs: [
         "res",
     ],
     static_libs: [
-        "androidx.appcompat_appcompat",
-        "androidx.core_core-ktx",
-        "androidx.arch.core_core-runtime",
-        "androidx.datastore_datastore",
-        "androidx.compose.material3_material3",
-        "androidx-constraintlayout_constraintlayout",
-        "androidx.dynamicanimation_dynamicanimation",
-        "androidx.recyclerview_recyclerview",
-        "kotlinx-coroutines-android",
-        "kotlinx-coroutines-core",
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "//frameworks/libs/systemui:iconloader_base",
+        "//packages/apps/Car/SystemUI/aconfig:com_android_systemui_car_flags_lib",
+        "PlatformAnimationLib",
+        "WindowManager-Shell-lite-proto",
+        "WindowManager-Shell-proto",
+        "WindowManager-Shell-shared",
+        "androidx-constraintlayout_constraintlayout",
+        "androidx.appcompat_appcompat",
+        "androidx.arch.core_core-runtime",
+        "androidx.compose.material3_material3",
+        "androidx.core_core-ktx",
+        "androidx.datastore_datastore",
+        "androidx.dynamicanimation_dynamicanimation",
+        "androidx.recyclerview_recyclerview",
         "com_android_launcher3_flags_lib",
         "com_android_wm_shell_flags_lib",
-        "PlatformAnimationLib",
-        "WindowManager-Shell-proto",
-        "WindowManager-Shell-lite-proto",
-        "WindowManager-Shell-shared",
-        "perfetto_trace_java_protos",
         "dagger2",
         "jsr330",
+        "kotlinx-coroutines-android",
+        "kotlinx-coroutines-core",
+        "perfetto_trace_java_protos",
     ],
     libs: [
         // Soong fails to automatically add this dependency because all the
