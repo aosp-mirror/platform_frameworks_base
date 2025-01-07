@@ -21907,7 +21907,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
                     accountToMigrate,
                     sourceUser,
                     targetUser,
-                    /* callback= */ null, /* handler= */ null)
+                    /* handler= */ null, /* callback= */ null)
                     .getResult(60 * 3, TimeUnit.SECONDS);
             if (copySucceeded) {
                 logCopyAccountStatus(COPY_ACCOUNT_SUCCEEDED, callerPackage);
