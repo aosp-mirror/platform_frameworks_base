@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.annotation.NonNull;
+import android.content.pm.PackageManager;
 
 import com.android.server.wm.utils.OptPropFactory;
 
@@ -41,6 +42,7 @@ public class AppCompatOverrides {
     private final AppCompatLetterboxOverrides mAppCompatLetterboxOverrides;
 
     AppCompatOverrides(@NonNull ActivityRecord activityRecord,
+            @NonNull PackageManager packageManager,
             @NonNull AppCompatConfiguration appCompatConfiguration,
             @NonNull OptPropFactory optPropBuilder,
             @NonNull AppCompatDeviceStateQuery appCompatDeviceStateQuery) {
@@ -55,7 +57,8 @@ public class AppCompatOverrides {
                 mAppCompatReachabilityOverrides);
         mAppCompatFocusOverrides = new AppCompatFocusOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder);
-        mAppCompatResizeOverrides = new AppCompatResizeOverrides(activityRecord, optPropBuilder);
+        mAppCompatResizeOverrides = new AppCompatResizeOverrides(activityRecord, packageManager,
+                optPropBuilder);
         mAppCompatLetterboxOverrides = new AppCompatLetterboxOverrides(activityRecord,
                 appCompatConfiguration);
     }

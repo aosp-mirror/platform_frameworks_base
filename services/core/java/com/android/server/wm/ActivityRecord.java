@@ -3209,7 +3209,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 true /* forActivity */)) {
             return false;
         }
-        if (mAppCompatController.mAllowRestrictedResizability.getAsBoolean()) {
+        if (mAppCompatController.getAppCompatResizeOverrides().allowRestrictedResizability()) {
             return false;
         }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
@@ -3240,8 +3240,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // The caller will check both application and activity level property.
             return true;
         }
-        return !AppCompatController.allowRestrictedResizability(wms.mContext.getPackageManager(),
-                appInfo.packageName);
+        return !AppCompatResizeOverrides.allowRestrictedResizability(
+                wms.mContext.getPackageManager(), appInfo.packageName);
     }
 
     boolean isResizeable() {
