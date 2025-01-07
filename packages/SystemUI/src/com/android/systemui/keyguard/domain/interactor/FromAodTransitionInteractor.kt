@@ -132,6 +132,8 @@ constructor(
                             if (SceneContainerFlag.isEnabled) return@collect
                             startTransitionTo(
                                 toState = KeyguardState.GONE,
+                                modeOnCanceled = TransitionModeOnCanceled.REVERSE,
+                                ownerReason = "canWakeDirectlyToGone = true",
                             )
                         } else if (shouldTransitionToLockscreen) {
                             val modeOnCanceled =
@@ -146,7 +148,7 @@ constructor(
                             startTransitionTo(
                                 toState = KeyguardState.LOCKSCREEN,
                                 modeOnCanceled = modeOnCanceled,
-                                ownerReason = "listen for aod to awake"
+                                ownerReason = "listen for aod to awake",
                             )
                         } else if (shouldTransitionToOccluded) {
                             startTransitionTo(
