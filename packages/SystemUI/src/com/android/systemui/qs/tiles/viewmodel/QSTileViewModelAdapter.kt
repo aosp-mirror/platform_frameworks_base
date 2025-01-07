@@ -118,7 +118,8 @@ constructor(
     override fun addCallback(callback: QSTile.Callback?) {
         callback ?: return
         callbacks.add(callback)
-        state?.let(callback::onStateChanged)
+        state.copyTo(cachedState)
+        state.let(callback::onStateChanged)
     }
 
     override fun removeCallback(callback: QSTile.Callback?) {
@@ -212,9 +213,9 @@ constructor(
         qsTileViewModel.destroy()
     }
 
-    override fun getState(): QSTile.State =
+    override fun getState(): QSTile.AdapterState =
         qsTileViewModel.currentState?.let { mapState(context, it, qsTileViewModel.config) }
-            ?: QSTile.State()
+            ?: QSTile.AdapterState()
 
     override fun getInstanceId(): InstanceId = qsTileViewModel.config.instanceId
 
@@ -241,7 +242,7 @@ constructor(
             context: Context,
             viewModelState: QSTileState,
             config: QSTileConfig,
-        ): QSTile.State =
+        ): QSTile.AdapterState =
             // we have to use QSTile.BooleanState to support different side icons
             // which are bound to instanceof QSTile.BooleanState in QSTileView.
             QSTile.AdapterState().apply {
