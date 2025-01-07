@@ -359,7 +359,7 @@ public class AppOpsService extends IAppOpsService.Stub {
     private static final Duration RATE_LIMITER_WINDOW = Duration.ofMillis(10);
     private final RateLimiter mRateLimiter = new RateLimiter(RATE_LIMITER_WINDOW);
 
-    volatile @NonNull HistoricalRegistry mHistoricalRegistry = new HistoricalRegistry(this);
+    volatile @NonNull HistoricalRegistry mHistoricalRegistry;
 
     /*
      * These are app op restrictions imposed per user from various parties.
@@ -1039,6 +1039,8 @@ public class AppOpsService extends IAppOpsService.Stub {
         // will not exist and the nonce will be UNSET.
         AppOpsManager.invalidateAppOpModeCache();
         AppOpsManager.disableAppOpModeCache();
+
+        mHistoricalRegistry = new HistoricalRegistry(this, context);
     }
 
     public void publish() {
