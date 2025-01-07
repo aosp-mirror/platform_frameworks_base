@@ -23,6 +23,7 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.coroutines.newTracingContext
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
+import com.android.systemui.qs.flags.QsDetailedView
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
@@ -42,21 +43,24 @@ constructor(
     @Background private val bgDispatcher: CoroutineDispatcher,
 ) {
     private lateinit var coroutineScope: CoroutineScope
+
     companion object {
         private const val INTERACTION_JANK_TAG = "internet"
         var dialog: SystemUIDialog? = null
     }
 
     /**
-     * Creates a [InternetDialogDelegateLegacy]. The dialog will be animated from [expandable] if
-     * it is not null.
+     * Creates a [InternetDialogDelegateLegacy]. The dialog will be animated from [expandable] if it
+     * is not null.
      */
     fun create(
         aboveStatusBar: Boolean,
         canConfigMobileData: Boolean,
         canConfigWifi: Boolean,
-        expandable: Expandable?
+        expandable: Expandable?,
     ) {
+        // If `QsDetailedView` is enabled, it should show the details view.
+        QsDetailedView.assertInLegacyMode()
         if (dialog != null) {
             if (DEBUG) {
                 Log.d(TAG, "InternetDialog is showing, do not create it twice.")
@@ -64,11 +68,11 @@ constructor(
             return
         } else {
             coroutineScope = CoroutineScope(bgDispatcher + newTracingContext("InternetDialogScope"))
-            // TODO: b/377388104 check the QsDetailedView flag to use the correct dialogFactory
             dialog =
                 dialogFactory
                     .create(aboveStatusBar, canConfigMobileData, canConfigWifi, coroutineScope)
                     .createDialog()
+
             val controller =
                 expandable?.dialogTransitionController(
                     DialogCuj(InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN, INTERACTION_JANK_TAG)
@@ -77,10 +81,9 @@ constructor(
                 dialogTransitionAnimator.show(
                     dialog!!,
                     controller,
-                    animateBackgroundBoundsChange = true
+                    animateBackgroundBoundsChange = true,
                 )
-            }
-                ?: dialog?.show()
+            } ?: dialog?.show()
         }
     }
 

@@ -373,7 +373,6 @@ public class InternetDetailsContentController implements AccessPointController.A
         mConnectivityManager.setAirplaneMode(false);
     }
 
-    @VisibleForTesting
     protected int getDefaultDataSubscriptionId() {
         return mSubscriptionManager.getDefaultDataSubscriptionId();
     }
