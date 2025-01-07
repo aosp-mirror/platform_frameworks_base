@@ -16,7 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static android.view.View.GONE;
 import static android.view.WindowInsets.Type.ime;
 
 import static com.android.systemui.flags.SceneContainerFlagParameterizationKt.parameterizeSceneContainerFlag;
@@ -28,17 +27,14 @@ import static com.google.common.truth.Truth.assertThat;
 import static com.google.common.truth.Truth.assertWithMessage;
 
 import static junit.framework.Assert.assertEquals;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.junit.Assert.assertFalse;
-import static org.mockito.AdditionalMatchers.not;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
@@ -64,7 +60,6 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.WindowInsets;
 import android.view.WindowInsetsAnimation;
-import android.widget.TextView;
 
 import androidx.test.filters.SmallTest;
 
@@ -92,8 +87,6 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix;
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView;
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
-import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.headsup.AvalancheController;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -603,158 +596,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    public void manageNotifications_visible() {
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        when(view.willBeGone()).thenReturn(true);
-
-        mStackScroller.updateFooterView(true, false, true);
-
-        verify(view).setVisible(eq(true), anyBoolean());
-        verify(view).setClearAllButtonVisible(eq(false), anyBoolean());
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    public void clearAll_visible() {
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        when(view.willBeGone()).thenReturn(true);
-
-        mStackScroller.updateFooterView(true, true, true);
-
-        verify(view).setVisible(eq(true), anyBoolean());
-        verify(view).setClearAllButtonVisible(eq(true), anyBoolean());
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    public void testInflateFooterView() {
-        mStackScroller.inflateFooterView();
-        ArgumentCaptor<FooterView> captor = ArgumentCaptor.forClass(FooterView.class);
-        verify(mStackScroller).setFooterView(captor.capture());
-
-        assertNotNull(captor.getValue().findViewById(R.id.manage_text));
-        assertNotNull(captor.getValue().findViewById(R.id.dismiss_text));
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    public void testUpdateFooter_noNotifications() {
-        setBarStateForTest(StatusBarState.SHADE);
-        mStackScroller.setCurrentUserSetup(true);
-
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        mStackScroller.updateFooter();
-        verify(mStackScroller, atLeastOnce()).updateFooterView(false, false, true);
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    @DisableSceneContainer
-    public void testUpdateFooter_remoteInput() {
-        setBarStateForTest(StatusBarState.SHADE);
-        mStackScroller.setCurrentUserSetup(true);
-
-        mStackScroller.setIsRemoteInputActive(true);
-        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
-                .thenReturn(true);
-
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        mStackScroller.updateFooter();
-        verify(mStackScroller, atLeastOnce()).updateFooterView(false, true, true);
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    public void testUpdateFooter_withoutNotifications() {
-        setBarStateForTest(StatusBarState.SHADE);
-        mStackScroller.setCurrentUserSetup(true);
-
-        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(0);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
-                .thenReturn(false);
-
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        mStackScroller.updateFooter();
-        verify(mStackScroller, atLeastOnce()).updateFooterView(false, false, true);
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    @DisableSceneContainer
-    public void testUpdateFooter_oneClearableNotification() {
-        setBarStateForTest(StatusBarState.SHADE);
-        mStackScroller.setCurrentUserSetup(true);
-
-        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
-                .thenReturn(true);
-
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        mStackScroller.updateFooter();
-        verify(mStackScroller, atLeastOnce()).updateFooterView(true, true, true);
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    @DisableSceneContainer
-    public void testUpdateFooter_withoutHistory() {
-        setBarStateForTest(StatusBarState.SHADE);
-        mStackScroller.setCurrentUserSetup(true);
-
-        when(mStackScrollLayoutController.isHistoryEnabled()).thenReturn(false);
-        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
-                .thenReturn(true);
-
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        mStackScroller.updateFooter();
-        verify(mStackScroller, atLeastOnce()).updateFooterView(true, true, false);
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    public void testUpdateFooter_oneClearableNotification_beforeUserSetup() {
-        setBarStateForTest(StatusBarState.SHADE);
-        mStackScroller.setCurrentUserSetup(false);
-
-        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
-                .thenReturn(true);
-
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        mStackScroller.updateFooter();
-        verify(mStackScroller, atLeastOnce()).updateFooterView(false, true, true);
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    @DisableSceneContainer
-    public void testUpdateFooter_oneNonClearableNotification() {
-        setBarStateForTest(StatusBarState.SHADE);
-        mStackScroller.setCurrentUserSetup(true);
-
-        when(mStackScrollLayoutController.getVisibleNotificationCount()).thenReturn(1);
-        when(mStackScrollLayoutController.hasActiveClearableNotifications(eq(ROWS_ALL)))
-                .thenReturn(false);
-        when(mEmptyShadeView.getVisibility()).thenReturn(GONE);
-
-        FooterView view = mock(FooterView.class);
-        mStackScroller.setFooterView(view);
-        mStackScroller.updateFooter();
-        verify(mStackScroller, atLeastOnce()).updateFooterView(true, false, true);
-    }
-
-    @Test
     public void testFooterPosition_atEnd() {
         // add footer
         FooterView view = mock(FooterView.class);
@@ -772,19 +613,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     }
 
     @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME,
-        ModesEmptyShadeFix.FLAG_NAME,
-        NotifRedesignFooter.FLAG_NAME})
-    public void testReInflatesFooterViews() {
-        when(mEmptyShadeView.getTextResource()).thenReturn(R.string.empty_shade_text);
-        clearInvocations(mStackScroller);
-        mStackScroller.reinflateViews();
-        verify(mStackScroller).setFooterView(any());
-        verify(mStackScroller).setEmptyShadeView(any());
-    }
-
-    @Test
-    @EnableFlags(FooterViewRefactor.FLAG_NAME)
     @DisableFlags(ModesEmptyShadeFix.FLAG_NAME)
     public void testReInflatesEmptyShadeView() {
         when(mEmptyShadeView.getTextResource()).thenReturn(R.string.empty_shade_text);
@@ -1228,31 +1056,6 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         // NotificationPanelViewController and not in NotificationStackScrollLayout. Therefore
         // mAmbientState must have stackY set to 0
         assertEquals(0f, mAmbientState.getStackY());
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, NotifRedesignFooter.FLAG_NAME})
-    public void hasFilteredOutSeenNotifs_updateFooter() {
-        mStackScroller.setCurrentUserSetup(true);
-
-        // add footer
-        mStackScroller.inflateFooterView();
-        TextView footerLabel =
-                mStackScroller.mFooterView.requireViewById(R.id.unlock_prompt_footer);
-
-        mStackScroller.setHasFilteredOutSeenNotifications(true);
-        mStackScroller.updateFooter();
-
-        assertThat(footerLabel.getVisibility()).isEqualTo(View.VISIBLE);
-    }
-
-    @Test
-    @DisableFlags({FooterViewRefactor.FLAG_NAME, ModesEmptyShadeFix.FLAG_NAME})
-    public void hasFilteredOutSeenNotifs_updateEmptyShadeView() {
-        mStackScroller.setHasFilteredOutSeenNotifications(true);
-        mStackScroller.updateEmptyShadeView(true, false);
-
-        verify(mEmptyShadeView).setFooterText(not(eq(0)));
     }
 
     @Test

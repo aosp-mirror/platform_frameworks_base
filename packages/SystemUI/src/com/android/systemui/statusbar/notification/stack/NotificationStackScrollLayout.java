@@ -108,7 +108,6 @@ import com.android.systemui.statusbar.notification.collection.render.GroupExpans
 import com.android.systemui.statusbar.notification.collection.render.GroupMembershipManager;
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix;
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView;
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor;
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.notification.headsup.HeadsUpUtil;
@@ -703,9 +702,6 @@ public class NotificationStackScrollLayout
         if (!ModesEmptyShadeFix.isEnabled()) {
             inflateEmptyShadeView();
         }
-        if (!FooterViewRefactor.isEnabled()) {
-            inflateFooterView();
-        }
     }
 
     /**
@@ -741,20 +737,10 @@ public class NotificationStackScrollLayout
     }
 
     void reinflateViews() {
-        if (!FooterViewRefactor.isEnabled()) {
-            inflateFooterView();
-            updateFooter();
-        }
         if (!ModesEmptyShadeFix.isEnabled()) {
             inflateEmptyShadeView();
         }
         mSectionsManager.reinflateViews();
-    }
-
-    public void setIsRemoteInputActive(boolean isActive) {
-        FooterViewRefactor.assertInLegacyMode();
-        mIsRemoteInputActive = isActive;
-        updateFooter();
     }
 
     void sendRemoteInputRowBottomBound(Float bottom) {
@@ -764,43 +750,6 @@ public class NotificationStackScrollLayout
                     com.android.internal.R.dimen.notification_content_margin);
         }
         mScrollViewFields.sendRemoteInputRowBottomBound(bottom);
-    }
-
-    /** Setter for filtered notifs, to be removed with the FooterViewRefactor flag. */
-    public void setHasFilteredOutSeenNotifications(boolean hasFilteredOutSeenNotifications) {
-        FooterViewRefactor.assertInLegacyMode();
-        mHasFilteredOutSeenNotifications = hasFilteredOutSeenNotifications;
-    }
-
-    @VisibleForTesting
-    public void updateFooter() {
-        FooterViewRefactor.assertInLegacyMode();
-        if (mFooterView == null || mController == null) {
-            return;
-        }
-        final boolean showHistory = mController.isHistoryEnabled();
-        final boolean showDismissView = shouldShowDismissView();
-
-        updateFooterView(shouldShowFooterView(showDismissView)/* visible */,
-                showDismissView /* showDismissView */,
-                showHistory/* showHistory */);
-    }
-
-    private boolean shouldShowDismissView() {
-        FooterViewRefactor.assertInLegacyMode();
-        return mController.hasActiveClearableNotifications(ROWS_ALL);
-    }
-
-    private boolean shouldShowFooterView(boolean showDismissView) {
-        FooterViewRefactor.assertInLegacyMode();
-        return (showDismissView || mController.getVisibleNotificationCount() > 0)
-                && mIsCurrentUserSetup // see: b/193149550
-                && !onKeyguard()
-                && mUpcomingStatusBarState != StatusBarState.KEYGUARD
-                // quick settings don't affect notifications when not in full screen
-                && (getQsExpansionFraction() != 1 || !mQsFullScreen)
-                && !mScreenOffAnimationController.shouldHideNotificationsFooter()
-                && !mIsRemoteInputActive;
     }
 
     void updateBgColor() {
@@ -1861,41 +1810,12 @@ public class NotificationStackScrollLayout
      */
     private float getAppearEndPosition() {
         SceneContainerFlag.assertInLegacyMode();
-        if (FooterViewRefactor.isUnexpectedlyInLegacyMode()) {
-            return getAppearEndPositionLegacy();
-        }
 
         int appearPosition = mAmbientState.getStackTopMargin();
         if (mEmptyShadeView.getVisibility() == GONE) {
             if (isHeadsUpTransition()
                     || (mInHeadsUpPinnedMode && !mAmbientState.isDozing())) {
                 if (mShelf.getVisibility() != GONE) {
-                    appearPosition += mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
-                }
-                appearPosition += getTopHeadsUpPinnedHeight()
-                        + getPositionInLinearLayout(mAmbientState.getTrackedHeadsUpRow());
-            } else if (mShelf.getVisibility() != GONE) {
-                appearPosition += mShelf.getIntrinsicHeight();
-            }
-        } else {
-            appearPosition = mEmptyShadeView.getHeight();
-        }
-        return appearPosition + (onKeyguard() ? getTopPadding() : getIntrinsicPadding());
-    }
-
-    /**
-     * The version of {@code getAppearEndPosition} that uses the notif count. The view shouldn't
-     * need to know about that, so we want to phase this out with the footer view refactor.
-     */
-    private float getAppearEndPositionLegacy() {
-        FooterViewRefactor.assertInLegacyMode();
-
-        int appearPosition = mAmbientState.getStackTopMargin();
-        int visibleNotifCount = mController.getVisibleNotificationCount();
-        if (mEmptyShadeView.getVisibility() == GONE && visibleNotifCount > 0) {
-            if (isHeadsUpTransition()
-                    || (mInHeadsUpPinnedMode && !mAmbientState.isDozing())) {
-                if (mShelf.getVisibility() != GONE && visibleNotifCount > 1) {
                     appearPosition += mShelf.getIntrinsicHeight() + mPaddingBetweenElements;
                 }
                 appearPosition += getTopHeadsUpPinnedHeight()
@@ -1928,8 +1848,7 @@ public class NotificationStackScrollLayout
             // This can't use expansion fraction as that goes only from 0 to 1. Also when
             // appear fraction for HUN is 0, expansion fraction will be already around 0.2-0.3
             // and that makes translation jump immediately.
-            float appearEndPosition = FooterViewRefactor.isEnabled() ? getAppearEndPosition()
-                    : getAppearEndPositionLegacy();
+            float appearEndPosition = getAppearEndPosition();
             float appearStartPosition = getAppearStartPosition();
             float hunAppearFraction = (height - appearStartPosition)
                     / (appearEndPosition - appearStartPosition);
@@ -4848,15 +4767,6 @@ public class NotificationStackScrollLayout
         }
     }
 
-    /**
-     * Returns whether or not a History button is shown in the footer. If there is no footer, then
-     * this will return false.
-     **/
-    public boolean isHistoryShown() {
-        FooterViewRefactor.assertInLegacyMode();
-        return mFooterView != null && mFooterView.isHistoryShown();
-    }
-
     /** Bind the {@link FooterView} to the NSSL. */
     public void setFooterView(@NonNull FooterView footerView) {
         int index = -1;
@@ -4866,18 +4776,6 @@ public class NotificationStackScrollLayout
         }
         mFooterView = footerView;
         addView(mFooterView, index);
-        if (!FooterViewRefactor.isEnabled()) {
-            if (mManageButtonClickListener != null) {
-                mFooterView.setManageButtonClickListener(mManageButtonClickListener);
-            }
-            mFooterView.setClearAllButtonClickListener(v -> {
-                if (mFooterClearAllListener != null) {
-                    mFooterClearAllListener.onClearAll();
-                }
-                clearNotifications(ROWS_ALL, true /* closeShade */);
-                footerView.setClearAllButtonVisible(false /* visible */, true /* animate */);
-            });
-        }
     }
 
     public void setEmptyShadeView(EmptyShadeView emptyShadeView) {
@@ -4888,13 +4786,6 @@ public class NotificationStackScrollLayout
         }
         mEmptyShadeView = emptyShadeView;
         addView(mEmptyShadeView, index);
-    }
-
-    /** Legacy version, should be removed with the footer refactor flag. */
-    public void updateEmptyShadeView(boolean visible, boolean areNotificationsHiddenInShade) {
-        FooterViewRefactor.assertInLegacyMode();
-        updateEmptyShadeView(visible, areNotificationsHiddenInShade,
-                mHasFilteredOutSeenNotifications);
     }
 
     /** Trigger an update for the empty shade resources and visibility. */
@@ -4947,18 +4838,6 @@ public class NotificationStackScrollLayout
             return false;
         }
         return mEmptyShadeView.isVisible();
-    }
-
-    public void updateFooterView(boolean visible, boolean showDismissView, boolean showHistory) {
-        FooterViewRefactor.assertInLegacyMode();
-        if (mFooterView == null || mNotificationStackSizeCalculator == null) {
-            return;
-        }
-        boolean animate = mIsExpanded && mAnimationsEnabled;
-        mFooterView.setVisible(visible, animate);
-        mFooterView.showHistory(showHistory);
-        mFooterView.setClearAllButtonVisible(showDismissView, animate);
-        mFooterView.setFooterLabelVisible(mHasFilteredOutSeenNotifications);
     }
 
     @VisibleForTesting
@@ -5244,10 +5123,8 @@ public class NotificationStackScrollLayout
 
     public void setQsFullScreen(boolean qsFullScreen) {
         SceneContainerFlag.assertInLegacyMode();
-        if (FooterViewRefactor.isEnabled()) {
-            if (qsFullScreen == mQsFullScreen) {
-                return;  // no change
-            }
+        if (qsFullScreen == mQsFullScreen) {
+            return;  // no change
         }
         mQsFullScreen = qsFullScreen;
         updateAlgorithmLayoutMinHeight();
@@ -5266,8 +5143,6 @@ public class NotificationStackScrollLayout
 
     public void setQsExpansionFraction(float qsExpansionFraction) {
         SceneContainerFlag.assertInLegacyMode();
-        boolean footerAffected = getQsExpansionFraction() != qsExpansionFraction
-                && (getQsExpansionFraction() == 1 || qsExpansionFraction == 1);
         mQsExpansionFraction = qsExpansionFraction;
         updateUseRoundedRectClipping();
 
@@ -5275,9 +5150,6 @@ public class NotificationStackScrollLayout
         // clear out scrollY by the time we push notifications offscreen
         if (getOwnScrollY() > 0) {
             setOwnScrollY((int) MathUtils.lerp(getOwnScrollY(), 0, getQsExpansionFraction()));
-        }
-        if (!FooterViewRefactor.isEnabled() && footerAffected) {
-            updateFooter();
         }
     }
 
@@ -5456,14 +5328,6 @@ public class NotificationStackScrollLayout
         requestChildrenUpdate();
     }
 
-    void setUpcomingStatusBarState(int upcomingStatusBarState) {
-        FooterViewRefactor.assertInLegacyMode();
-        mUpcomingStatusBarState = upcomingStatusBarState;
-        if (mUpcomingStatusBarState != mStatusBarState) {
-            updateFooter();
-        }
-    }
-
     void onStatePostChange(boolean fromShadeLocked) {
         boolean onKeyguard = onKeyguard();
 
@@ -5472,9 +5336,6 @@ public class NotificationStackScrollLayout
         }
 
         setExpandingEnabled(!onKeyguard);
-        if (!FooterViewRefactor.isEnabled()) {
-            updateFooter();
-        }
         requestChildrenUpdate();
         onUpdateRowStates();
         updateVisibility();
@@ -5490,8 +5351,7 @@ public class NotificationStackScrollLayout
         if (mEmptyShadeView == null || mEmptyShadeView.getVisibility() == GONE) {
             return getMinExpansionHeight();
         } else {
-            return FooterViewRefactor.isEnabled() ? getAppearEndPosition()
-                    : getAppearEndPositionLegacy();
+            return getAppearEndPosition();
         }
     }
 
@@ -5583,12 +5443,6 @@ public class NotificationStackScrollLayout
                     for (int i = 0; i < childCount; i++) {
                         ExpandableView child = getChildAtIndex(i);
                         child.dump(pw, args);
-                        if (!FooterViewRefactor.isEnabled()) {
-                            if (child instanceof FooterView) {
-                                DumpUtilsKt.withIncreasedIndent(pw,
-                                        () -> dumpFooterViewVisibility(pw));
-                            }
-                        }
                         pw.println();
                     }
                     int transientViewCount = getTransientViewCount();
@@ -5613,45 +5467,6 @@ public class NotificationStackScrollLayout
         pw.append(" +y=").print(mRoundedRectClippingYTranslation);
         pw.append("} topRadius=").print(mBgCornerRadii[0]);
         pw.append(" bottomRadius=").println(mBgCornerRadii[4]);
-    }
-
-    private void dumpFooterViewVisibility(IndentingPrintWriter pw) {
-        FooterViewRefactor.assertInLegacyMode();
-        final boolean showDismissView = shouldShowDismissView();
-
-        pw.println("showFooterView: " + shouldShowFooterView(showDismissView));
-        DumpUtilsKt.withIncreasedIndent(
-                pw,
-                () -> {
-                    pw.println("showDismissView: " + showDismissView);
-                    DumpUtilsKt.withIncreasedIndent(
-                            pw,
-                            () -> {
-                                pw.println(
-                                        "hasActiveClearableNotifications: "
-                                                + mController.hasActiveClearableNotifications(
-                                                        ROWS_ALL));
-                            });
-                    pw.println();
-                    pw.println("showHistory: " + mController.isHistoryEnabled());
-                    pw.println();
-                    pw.println(
-                            "visibleNotificationCount: "
-                                    + mController.getVisibleNotificationCount());
-                    pw.println("mIsCurrentUserSetup: " + mIsCurrentUserSetup);
-                    pw.println("onKeyguard: " + onKeyguard());
-                    pw.println("mUpcomingStatusBarState: " + mUpcomingStatusBarState);
-                    if (!SceneContainerFlag.isEnabled()) {
-                        pw.println("QsExpansionFraction: " + getQsExpansionFraction());
-                    }
-                    pw.println("mQsFullScreen: " + mQsFullScreen);
-                    pw.println(
-                            "mScreenOffAnimationController"
-                                    + ".shouldHideNotificationsFooter: "
-                                    + mScreenOffAnimationController
-                                            .shouldHideNotificationsFooter());
-                    pw.println("mIsRemoteInputActive: " + mIsRemoteInputActive);
-                });
     }
 
     public boolean isFullyHidden() {
@@ -5764,14 +5579,6 @@ public class NotificationStackScrollLayout
         clearNotifications(ROWS_GENTLE, closeShade, hideSilentSection);
     }
 
-    /** Legacy version of clearNotifications below. Uses the old data source for notif stats. */
-    void clearNotifications(@SelectedRows int selection, boolean closeShade) {
-        FooterViewRefactor.assertInLegacyMode();
-        final boolean hideSilentSection = !mController.hasNotifications(
-                ROWS_GENTLE, false /* clearable */);
-        clearNotifications(selection, closeShade, hideSilentSection);
-    }
-
     /**
      * Collects a list of visible rows, and animates them away in a staggered fashion as if they
      * were dismissed. Notifications are dismissed in the backend via onClearAllAnimationsEnd.
@@ -5824,25 +5631,6 @@ public class NotificationStackScrollLayout
             ExpandableNotificationRow row,
             @SelectedRows int selection) {
         return canChildBeCleared(row) && matchesSelection(row, selection);
-    }
-
-    /**
-     * Register a {@link View.OnClickListener} to be invoked when the Manage button is clicked.
-     */
-    public void setManageButtonClickListener(@Nullable OnClickListener listener) {
-        FooterViewRefactor.assertInLegacyMode();
-        mManageButtonClickListener = listener;
-        if (mFooterView != null) {
-            mFooterView.setManageButtonClickListener(mManageButtonClickListener);
-        }
-    }
-
-    @VisibleForTesting
-    protected void inflateFooterView() {
-        FooterViewRefactor.assertInLegacyMode();
-        FooterView footerView = (FooterView) LayoutInflater.from(mContext).inflate(
-                R.layout.status_bar_notification_footer, this, false);
-        setFooterView(footerView);
     }
 
     private void inflateEmptyShadeView() {
@@ -6089,11 +5877,6 @@ public class NotificationStackScrollLayout
 
     public void setHighPriorityBeforeSpeedBump(boolean highPriorityBeforeSpeedBump) {
         mHighPriorityBeforeSpeedBump = highPriorityBeforeSpeedBump;
-    }
-
-    void setFooterClearAllListener(FooterClearAllListener listener) {
-        FooterViewRefactor.assertInLegacyMode();
-        mFooterClearAllListener = listener;
     }
 
     void setClearAllFinishedWhilePanelExpandedRunnable(Runnable runnable) {
@@ -6391,17 +6174,6 @@ public class NotificationStackScrollLayout
      */
     public void animateNextTopPaddingChange() {
         mAnimateNextTopPaddingChange = true;
-    }
-
-    /**
-     * Sets whether the current user is set up, which is required to show the footer (b/193149550)
-     */
-    public void setCurrentUserSetup(boolean isCurrentUserSetup) {
-        FooterViewRefactor.assertInLegacyMode();
-        if (mIsCurrentUserSetup != isCurrentUserSetup) {
-            mIsCurrentUserSetup = isCurrentUserSetup;
-            updateFooter();
-        }
     }
 
     /**

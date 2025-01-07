@@ -28,11 +28,11 @@ import com.android.systemui.statusbar.notification.collection.ShadeListBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderEntryListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderGroupListener
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
+import com.android.systemui.util.mockito.withArgCaptor
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.inOrder
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
@@ -59,10 +59,9 @@ class RenderStageManagerTest : SysuiTestCase() {
     fun setUp() {
         renderStageManager = RenderStageManager()
         renderStageManager.attach(shadeListBuilder)
-
-        val captor = argumentCaptor<ShadeListBuilder.OnRenderListListener>()
-        verify(shadeListBuilder).setOnRenderListListener(captor.capture())
-        onRenderListListener = captor.lastValue
+        onRenderListListener = withArgCaptor {
+            verify(shadeListBuilder).setOnRenderListListener(capture())
+        }
     }
 
     private fun setUpRenderer() {

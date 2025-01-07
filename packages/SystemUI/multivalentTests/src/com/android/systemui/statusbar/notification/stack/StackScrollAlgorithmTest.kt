@@ -2,12 +2,10 @@ package com.android.systemui.statusbar.notification.stack
 
 import android.annotation.DimenRes
 import android.content.pm.PackageManager
-import android.platform.test.annotations.DisableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import android.widget.FrameLayout
 import androidx.test.filters.SmallTest
 import com.android.keyguard.BouncerPanelExpansionCalculator.aboutToShowBouncerProgress
-import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.ShadeInterpolation.getContentAlpha
 import com.android.systemui.dump.DumpManager
@@ -733,20 +731,6 @@ class StackScrollAlgorithmTest(flags: FlagsParameterization) : SysuiTestCase() {
         ambientState.isClearAllInProgress = true
         ambientState.isShadeExpanded = true
         ambientState.stackEndHeight = maxPanelHeight // plenty space for the footer in the stack
-        hostView.addView(footerView)
-
-        stackScrollAlgorithm.resetViewStates(ambientState, 0)
-
-        assertThat((footerView.viewState as FooterViewState).hideContent).isTrue()
-    }
-
-    @DisableFlags(Flags.FLAG_NOTIFICATIONS_FOOTER_VIEW_REFACTOR)
-    @Test
-    fun resetViewStates_clearAllInProgress_allRowsRemoved_emptyShade_footerHidden() {
-        ambientState.isClearAllInProgress = true
-        ambientState.isShadeExpanded = true
-        ambientState.stackEndHeight = maxPanelHeight // plenty space for the footer in the stack
-        hostView.removeAllViews() // remove all rows
         hostView.addView(footerView)
 
         stackScrollAlgorithm.resetViewStates(ambientState, 0)

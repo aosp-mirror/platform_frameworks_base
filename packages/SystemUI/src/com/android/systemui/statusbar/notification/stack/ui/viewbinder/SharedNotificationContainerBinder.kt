@@ -28,7 +28,6 @@ import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.keyguard.ui.viewmodel.ViewStateAccessor
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayoutController
 import com.android.systemui.statusbar.notification.stack.NotificationStackSizeCalculator
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -81,9 +80,6 @@ constructor(
 
                             controller.setOverExpansion(0f)
                             controller.setOverScrollAmount(0)
-                            if (!FooterViewRefactor.isEnabled) {
-                                controller.updateFooter()
-                            }
                         }
                     }
                 }

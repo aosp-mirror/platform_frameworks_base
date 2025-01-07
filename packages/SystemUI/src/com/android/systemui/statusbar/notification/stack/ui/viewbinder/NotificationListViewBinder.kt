@@ -40,7 +40,6 @@ import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyS
 import com.android.systemui.statusbar.notification.emptyshade.ui.view.EmptyShadeView
 import com.android.systemui.statusbar.notification.emptyshade.ui.viewbinder.EmptyShadeViewBinder
 import com.android.systemui.statusbar.notification.emptyshade.ui.viewmodel.EmptyShadeViewModel
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.shared.NotifRedesignFooter
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.statusbar.notification.footer.ui.viewbinder.FooterViewBinder
@@ -108,25 +107,20 @@ constructor(
                 launch { bindShelf(shelf) }
                 bindHideList(viewController, viewModel, hiderTracker)
 
-                if (FooterViewRefactor.isEnabled) {
-                    val hasNonClearableSilentNotifications: StateFlow<Boolean> =
-                        viewModel.hasNonClearableSilentNotifications.stateIn(this)
-                    launch { reinflateAndBindFooter(view, hasNonClearableSilentNotifications) }
-                    launch {
-                        if (ModesEmptyShadeFix.isEnabled) {
-                            reinflateAndBindEmptyShade(view)
-                        } else {
-                            bindEmptyShadeLegacy(viewModel.emptyShadeViewFactory.create(), view)
-                        }
+                val hasNonClearableSilentNotifications: StateFlow<Boolean> =
+                    viewModel.hasNonClearableSilentNotifications.stateIn(this)
+                launch { reinflateAndBindFooter(view, hasNonClearableSilentNotifications) }
+                launch {
+                    if (ModesEmptyShadeFix.isEnabled) {
+                        reinflateAndBindEmptyShade(view)
+                    } else {
+                        bindEmptyShadeLegacy(viewModel.emptyShadeViewFactory.create(), view)
                     }
-                    launch {
-                        bindSilentHeaderClickListener(view, hasNonClearableSilentNotifications)
-                    }
-                    launch {
-                        viewModel.isImportantForAccessibility.collect { isImportantForAccessibility
-                            ->
-                            view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
-                        }
+                }
+                launch { bindSilentHeaderClickListener(view, hasNonClearableSilentNotifications) }
+                launch {
+                    viewModel.isImportantForAccessibility.collect { isImportantForAccessibility ->
+                        view.setImportantForAccessibilityYesNo(isImportantForAccessibility)
                     }
                 }
 

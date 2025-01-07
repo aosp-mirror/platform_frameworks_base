@@ -1487,8 +1487,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mActivityTransitionAnimator.setCallback(mActivityTransitionAnimatorCallback);
         mActivityTransitionAnimator.addListener(mActivityTransitionAnimatorListener);
         mRemoteInputManager.addControllerCallback(mNotificationShadeWindowController);
-        mStackScrollerController.setNotificationActivityStarter(
-                mNotificationActivityStarterLazy.get());
         mGutsManager.setNotificationActivityStarter(mNotificationActivityStarterLazy.get());
         mShadeController.setNotificationPresenter(mPresenterLazy.get());
         mNotificationsController.initialize(

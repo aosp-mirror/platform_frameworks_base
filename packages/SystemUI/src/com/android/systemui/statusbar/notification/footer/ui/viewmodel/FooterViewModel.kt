@@ -27,7 +27,6 @@ import com.android.systemui.statusbar.notification.NotificationActivityStarter.S
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.SeenNotificationsInteractor
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
-import com.android.systemui.statusbar.notification.footer.shared.FooterViewRefactor
 import com.android.systemui.statusbar.notification.footer.ui.view.FooterView
 import com.android.systemui.util.kotlin.sample
 import com.android.systemui.util.ui.AnimatableEvent
@@ -144,6 +143,7 @@ class FooterViewModel(
         )
 }
 
+// TODO: b/293167744 - remove this, use new viewmodel style
 @Module
 object FooterViewModelModule {
     @Provides
@@ -153,18 +153,13 @@ object FooterViewModelModule {
         notificationSettingsInteractor: Provider<NotificationSettingsInteractor>,
         seenNotificationsInteractor: Provider<SeenNotificationsInteractor>,
         shadeInteractor: Provider<ShadeInteractor>,
-    ): Optional<FooterViewModel> {
-        return if (FooterViewRefactor.isEnabled) {
-            Optional.of(
-                FooterViewModel(
-                    activeNotificationsInteractor.get(),
-                    notificationSettingsInteractor.get(),
-                    seenNotificationsInteractor.get(),
-                    shadeInteractor.get(),
-                )
+    ): Optional<FooterViewModel> =
+        Optional.of(
+            FooterViewModel(
+                activeNotificationsInteractor.get(),
+                notificationSettingsInteractor.get(),
+                seenNotificationsInteractor.get(),
+                shadeInteractor.get(),
             )
-        } else {
-            Optional.empty()
-        }
-    }
+        )
 }
