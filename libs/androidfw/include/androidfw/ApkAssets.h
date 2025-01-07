@@ -116,7 +116,7 @@ class ApkAssets : public RefBase {
     return resources_asset_ != nullptr && resources_asset_->isAllocated();
   }
 
-  bool IsUpToDate() const;
+  UpToDate IsUpToDate() const;
 
   // DANGER!
   // This is a destructive method that rips the assets provider out of ApkAssets object.

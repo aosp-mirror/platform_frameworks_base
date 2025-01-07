@@ -47,6 +47,8 @@
 
 namespace android {
 
+constexpr const bool kDeviceEndiannessSame = dtohs(0x1001) == 0x1001;
+
 constexpr const uint32_t kIdmapMagic = 0x504D4449u;
 constexpr const uint32_t kIdmapCurrentVersion = 0x0000000Au;
 
@@ -408,7 +410,16 @@ struct Res_value
     typedef uint32_t data_type;
     data_type data;
 
-    void copyFrom_dtoh(const Res_value& src);
+    void copyFrom_dtoh(const Res_value& src) {
+      if constexpr (kDeviceEndiannessSame) {
+        *this = src;
+      } else {
+        copyFrom_dtoh_slow(src);
+      }
+    }
+
+   private:
+    void copyFrom_dtoh_slow(const Res_value& src);
 };
 
 /**
@@ -1254,11 +1265,32 @@ struct ResTable_config
     // Varies in length from 3 to 8 chars. Zero-filled value.
     char localeNumberingSystem[8];
 
-    void copyFromDeviceNoSwap(const ResTable_config& o);
-    
-    void copyFromDtoH(const ResTable_config& o);
-    
-    void swapHtoD();
+    void copyFromDeviceNoSwap(const ResTable_config& o) {
+      const auto o_size = dtohl(o.size);
+      if (o_size >= sizeof(ResTable_config)) [[likely]] {
+        *this = o;
+      } else {
+        memcpy(this, &o, o_size);
+        memset(((uint8_t*)this) + o_size, 0, sizeof(ResTable_config) - o_size);
+      }
+      this->size = sizeof(*this);
+    }
+
+    void copyFromDtoH(const ResTable_config& o) {
+      if constexpr (kDeviceEndiannessSame) {
+        copyFromDeviceNoSwap(o);
+      } else {
+        copyFromDtoH_slow(o);
+      }
+    }
+
+    void swapHtoD() {
+      if constexpr (kDeviceEndiannessSame) {
+        ;  // noop
+      } else {
+        swapHtoD_slow();
+      }
+    }
 
     int compare(const ResTable_config& o) const;
     int compareLogical(const ResTable_config& o) const;
@@ -1384,6 +1416,10 @@ struct ResTable_config
     bool isBetterThanBeforeLocale(const ResTable_config& o, const ResTable_config* requested) const;
 
     String8 toString() const;
+
+   private:
+    void copyFromDtoH_slow(const ResTable_config& o);
+    void swapHtoD_slow();
 };
 
 /**

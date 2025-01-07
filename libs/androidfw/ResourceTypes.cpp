@@ -152,12 +152,11 @@ static void fill9patchOffsets(Res_png_9patch* patch) {
     patch->colorsOffset = patch->yDivsOffset + (patch->numYDivs * sizeof(int32_t));
 }
 
-void Res_value::copyFrom_dtoh(const Res_value& src)
-{
-    size = dtohs(src.size);
-    res0 = src.res0;
-    dataType = src.dataType;
-    data = dtohl(src.data);
+void Res_value::copyFrom_dtoh_slow(const Res_value& src) {
+  size = dtohs(src.size);
+  res0 = src.res0;
+  dataType = src.dataType;
+  data = dtohl(src.data);
 }
 
 void Res_png_9patch::deviceToFile()
@@ -2031,16 +2030,6 @@ status_t ResXMLTree::validateNode(const ResXMLTree_node* node) const
 // --------------------------------------------------------------------
 // --------------------------------------------------------------------
 
-void ResTable_config::copyFromDeviceNoSwap(const ResTable_config& o) {
-    const size_t size = dtohl(o.size);
-    if (size >= sizeof(ResTable_config)) {
-        *this = o;
-    } else {
-        memcpy(this, &o, size);
-        memset(((uint8_t*)this)+size, 0, sizeof(ResTable_config)-size);
-    }
-}
-
 /* static */ size_t unpackLanguageOrRegion(const char in[2], const char base,
         char out[4]) {
   if (in[0] & 0x80) {
@@ -2105,34 +2094,33 @@ size_t ResTable_config::unpackRegion(char region[4]) const {
     return unpackLanguageOrRegion(this->country, '0', region);
 }
 
-
-void ResTable_config::copyFromDtoH(const ResTable_config& o) {
-    copyFromDeviceNoSwap(o);
-    size = sizeof(ResTable_config);
-    mcc = dtohs(mcc);
-    mnc = dtohs(mnc);
-    density = dtohs(density);
-    screenWidth = dtohs(screenWidth);
-    screenHeight = dtohs(screenHeight);
-    sdkVersion = dtohs(sdkVersion);
-    minorVersion = dtohs(minorVersion);
-    smallestScreenWidthDp = dtohs(smallestScreenWidthDp);
-    screenWidthDp = dtohs(screenWidthDp);
-    screenHeightDp = dtohs(screenHeightDp);
+void ResTable_config::copyFromDtoH_slow(const ResTable_config& o) {
+  copyFromDeviceNoSwap(o);
+  size = sizeof(ResTable_config);
+  mcc = dtohs(mcc);
+  mnc = dtohs(mnc);
+  density = dtohs(density);
+  screenWidth = dtohs(screenWidth);
+  screenHeight = dtohs(screenHeight);
+  sdkVersion = dtohs(sdkVersion);
+  minorVersion = dtohs(minorVersion);
+  smallestScreenWidthDp = dtohs(smallestScreenWidthDp);
+  screenWidthDp = dtohs(screenWidthDp);
+  screenHeightDp = dtohs(screenHeightDp);
 }
 
-void ResTable_config::swapHtoD() {
-    size = htodl(size);
-    mcc = htods(mcc);
-    mnc = htods(mnc);
-    density = htods(density);
-    screenWidth = htods(screenWidth);
-    screenHeight = htods(screenHeight);
-    sdkVersion = htods(sdkVersion);
-    minorVersion = htods(minorVersion);
-    smallestScreenWidthDp = htods(smallestScreenWidthDp);
-    screenWidthDp = htods(screenWidthDp);
-    screenHeightDp = htods(screenHeightDp);
+void ResTable_config::swapHtoD_slow() {
+  size = htodl(size);
+  mcc = htods(mcc);
+  mnc = htods(mnc);
+  density = htods(density);
+  screenWidth = htods(screenWidth);
+  screenHeight = htods(screenHeight);
+  sdkVersion = htods(sdkVersion);
+  minorVersion = htods(minorVersion);
+  smallestScreenWidthDp = htods(smallestScreenWidthDp);
+  screenWidthDp = htods(screenWidthDp);
+  screenHeightDp = htods(screenHeightDp);
 }
 
 /* static */ inline int compareLocales(const ResTable_config &l, const ResTable_config &r) {
@@ -2145,7 +2133,7 @@ void ResTable_config::swapHtoD() {
     // systems should happen very infrequently (if at all.)
     // The comparison code relies on memcmp low-level optimizations that make it
     // more efficient than strncmp.
-    const char emptyScript[sizeof(l.localeScript)] = {'\0', '\0', '\0', '\0'};
+    static constexpr char emptyScript[sizeof(l.localeScript)] = {'\0', '\0', '\0', '\0'};
     const char *lScript = l.localeScriptWasComputed ? emptyScript : l.localeScript;
     const char *rScript = r.localeScriptWasComputed ? emptyScript : r.localeScript;
 

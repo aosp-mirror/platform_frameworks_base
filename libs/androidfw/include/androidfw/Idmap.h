@@ -14,8 +14,7 @@
  * limitations under the License.
  */
 
-#ifndef IDMAP_H_
-#define IDMAP_H_
+#pragma once
 
 #include <memory>
 #include <string>
@@ -31,6 +30,31 @@
 #include "utils/ByteOrder.h"
 
 namespace android {
+
+// An enum that tracks more states than just 'up to date' or 'not' for a resources container:
+// there are several cases where we know for sure that the object can't change and won't get
+// out of date. Reporting those states to the managed layer allows it to stop checking here
+// completely, speeding up the cache lookups by dozens of milliseconds.
+enum class UpToDate : int { False, True, Always };
+
+// Combines two UpToDate values, and only accesses the second one if it matters to the result.
+template <class Getter>
+UpToDate combine(UpToDate first, Getter secondGetter) {
+  switch (first) {
+    case UpToDate::False:
+      return UpToDate::False;
+    case UpToDate::True: {
+      const auto second = secondGetter();
+      return second == UpToDate::False ? UpToDate::False : UpToDate::True;
+    }
+    case UpToDate::Always:
+      return secondGetter();
+  }
+}
+
+inline UpToDate fromBool(bool value) {
+  return value ? UpToDate::True : UpToDate::False;
+}
 
 class LoadedIdmap;
 class IdmapResMap;
@@ -196,7 +220,7 @@ class LoadedIdmap {
 
   // Returns whether the idmap file on disk has not been modified since the construction of this
   // LoadedIdmap.
-  bool IsUpToDate() const;
+  UpToDate IsUpToDate() const;
 
  protected:
   // Exposed as protected so that tests can subclass and mock this class out.
@@ -231,5 +255,3 @@ class LoadedIdmap {
 };
 
 }  // namespace android
-
-#endif  // IDMAP_H_
