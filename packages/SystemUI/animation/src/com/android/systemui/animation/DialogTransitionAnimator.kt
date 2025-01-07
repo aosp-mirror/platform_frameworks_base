@@ -59,13 +59,8 @@ constructor(
     private val mainExecutor: Executor,
     private val callback: Callback,
     private val interactionJankMonitor: InteractionJankMonitor,
-    private val featureFlags: AnimationFeatureFlags,
     private val transitionAnimator: TransitionAnimator =
-        TransitionAnimator(
-            mainExecutor,
-            TIMINGS,
-            INTERPOLATORS,
-        ),
+        TransitionAnimator(mainExecutor, TIMINGS, INTERPOLATORS),
     private val isForTesting: Boolean = false,
 ) {
     private companion object {
@@ -219,7 +214,7 @@ constructor(
         dialog: Dialog,
         view: View,
         cuj: DialogCuj? = null,
-        animateBackgroundBoundsChange: Boolean = false
+        animateBackgroundBoundsChange: Boolean = false,
     ) {
         val controller = Controller.fromView(view, cuj)
         if (controller == null) {
@@ -245,7 +240,7 @@ constructor(
     fun show(
         dialog: Dialog,
         controller: Controller,
-        animateBackgroundBoundsChange: Boolean = false
+        animateBackgroundBoundsChange: Boolean = false,
     ) {
         if (Looper.myLooper() != Looper.getMainLooper()) {
             throw IllegalStateException(
@@ -263,15 +258,14 @@ constructor(
         val controller =
             animatedParent?.dialogContentWithBackground?.let {
                 Controller.fromView(it, controller.cuj)
-            }
-                ?: controller
+            } ?: controller
 
         // Make sure we don't run the launch animation from the same source twice at the same time.
         if (openedDialogs.any { it.controller.sourceIdentity == controller.sourceIdentity }) {
             Log.e(
                 TAG,
                 "Not running dialog launch animation from source as it is already expanded into a" +
-                    " dialog"
+                    " dialog",
             )
             dialog.show()
             return
@@ -288,7 +282,6 @@ constructor(
                 animateBackgroundBoundsChange = animateBackgroundBoundsChange,
                 parentAnimatedDialog = animatedParent,
                 forceDisableSynchronization = isForTesting,
-                featureFlags = featureFlags,
             )
 
         openedDialogs.add(animatedDialog)
@@ -305,7 +298,7 @@ constructor(
         dialog: Dialog,
         animateFrom: Dialog,
         cuj: DialogCuj? = null,
-        animateBackgroundBoundsChange: Boolean = false
+        animateBackgroundBoundsChange: Boolean = false,
     ) {
         val view =
             openedDialogs.firstOrNull { it.dialog == animateFrom }?.dialogContentWithBackground
@@ -313,7 +306,7 @@ constructor(
             Log.w(
                 TAG,
                 "Showing dialog $dialog normally as the dialog it is shown from was not shown " +
-                    "using DialogTransitionAnimator"
+                    "using DialogTransitionAnimator",
             )
             dialog.show()
             return
@@ -323,7 +316,7 @@ constructor(
             dialog,
             view,
             animateBackgroundBoundsChange = animateBackgroundBoundsChange,
-            cuj = cuj
+            cuj = cuj,
         )
     }
 
@@ -346,8 +339,7 @@ constructor(
         val animatedDialog =
             openedDialogs.firstOrNull {
                 it.dialog.window?.decorView?.viewRootImpl == view.viewRootImpl
-            }
-                ?: return null
+            } ?: return null
         return createActivityTransitionController(animatedDialog, cujType)
     }
 
@@ -373,7 +365,7 @@ constructor(
 
     private fun createActivityTransitionController(
         animatedDialog: AnimatedDialog,
-        cujType: Int? = null
+        cujType: Int? = null,
     ): ActivityTransitionAnimator.Controller? {
         // At this point, we know that the intent of the caller is to dismiss the dialog to show
         // an app, so we disable the exit animation into the source because we will never want to
@@ -440,7 +432,7 @@ constructor(
             }
 
             private fun disableDialogDismiss() {
-                dialog.setDismissOverride { /* Do nothing */}
+                dialog.setDismissOverride { /* Do nothing */ }
             }
 
             private fun enableDialogDismiss() {
@@ -530,7 +522,6 @@ private class AnimatedDialog(
      * Whether synchronization should be disabled, which can be useful if we are running in a test.
      */
     private val forceDisableSynchronization: Boolean,
-    private val featureFlags: AnimationFeatureFlags,
 ) {
     /**
      * The DecorView of this dialog window.
@@ -643,8 +634,7 @@ private class AnimatedDialog(
         originalDialogBackgroundColor =
             GhostedViewTransitionAnimatorController.findGradientDrawable(background)
                 ?.color
-                ?.defaultColor
-                ?: Color.BLACK
+                ?.defaultColor ?: Color.BLACK
 
         // Make the background view invisible until we start the animation. We use the transition
         // visibility like GhostView does so that we don't mess up with the accessibility tree (see
@@ -700,7 +690,7 @@ private class AnimatedDialog(
                     oldLeft: Int,
                     oldTop: Int,
                     oldRight: Int,
-                    oldBottom: Int
+                    oldBottom: Int,
                 ) {
                     dialogContentWithBackground.removeOnLayoutChangeListener(this)
 
@@ -717,9 +707,7 @@ private class AnimatedDialog(
         // the dialog.
         dialog.setDismissOverride(this::onDialogDismissed)
 
-        if (featureFlags.isPredictiveBackQsDialogAnim) {
-            dialog.registerAnimationOnBackInvoked(targetView = dialogContentWithBackground)
-        }
+        dialog.registerAnimationOnBackInvoked(targetView = dialogContentWithBackground)
 
         // Show the dialog.
         dialog.show()
@@ -815,7 +803,7 @@ private class AnimatedDialog(
                 if (hasInstrumentedJank) {
                     interactionJankMonitor.end(controller.cuj!!.cujType)
                 }
-            }
+            },
         )
     }
 
@@ -888,14 +876,14 @@ private class AnimatedDialog(
                     onAnimationFinished(true /* instantDismiss */)
                     onDialogDismissed(this@AnimatedDialog)
                 }
-            }
+            },
         )
     }
 
     private fun startAnimation(
         isLaunching: Boolean,
         onLaunchAnimationStart: () -> Unit = {},
-        onLaunchAnimationEnd: () -> Unit = {}
+        onLaunchAnimationEnd: () -> Unit = {},
     ) {
         // Create 2 controllers to animate both the dialog and the source.
         val startController =
@@ -969,7 +957,7 @@ private class AnimatedDialog(
                 override fun onTransitionAnimationProgress(
                     state: TransitionAnimator.State,
                     progress: Float,
-                    linearProgress: Float
+                    linearProgress: Float,
                 ) {
                     startController.onTransitionAnimationProgress(state, progress, linearProgress)
 
@@ -1026,7 +1014,7 @@ private class AnimatedDialog(
             oldLeft: Int,
             oldTop: Int,
             oldRight: Int,
-            oldBottom: Int
+            oldBottom: Int,
         ) {
             // Don't animate if bounds didn't actually change.
             if (left == oldLeft && top == oldTop && right == oldRight && bottom == oldBottom) {
