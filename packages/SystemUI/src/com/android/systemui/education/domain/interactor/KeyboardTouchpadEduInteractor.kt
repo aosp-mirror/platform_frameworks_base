@@ -278,11 +278,11 @@ constructor(
         }
 
     private suspend fun hasInitialDelayElapsed(deviceType: DeviceType): Boolean {
-        val oobeLaunchTime =
-            tutorialRepository.getScheduledTutorialLaunchTime(deviceType) ?: return false
-        return clock
-            .instant()
-            .isAfter(oobeLaunchTime.plusSeconds(initialDelayDuration.inWholeSeconds))
+        val oobeTime =
+            tutorialRepository.getScheduledTutorialLaunchTime(deviceType)
+                ?: tutorialRepository.getNotifiedTime(deviceType)
+                ?: return false
+        return clock.instant().isAfter(oobeTime.plusSeconds(initialDelayDuration.inWholeSeconds))
     }
 
     private data class StatsUpdateRequest(
