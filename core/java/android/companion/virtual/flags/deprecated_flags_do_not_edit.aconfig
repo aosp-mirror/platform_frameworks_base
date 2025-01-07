@@ -1,11 +1,13 @@
-# Do not add new flags to this file.
+# Do not modify this file.
 #
-# Due to "virtual" keyword in the package name flags
-# added to this file cannot be accessed from C++
-# code.
+# Due to "virtual" keyword in the package name flags added to this file cannot
+# be accessed from C++ code.
 #
 # Use frameworks/base/core/java/android/companion/virtual/flags/flags.aconfig
-# instead.
+# instead for new flags.
+#
+# All of the remaining flags here have been used for API flagging and are
+# therefore exported and should not be deleted.
 
 package: "android.companion.virtual.flags"
 container: "system"

@@ -1,0 +1,6 @@
+# This file contains the launched VirtualDeviceManager flags from the
+# "android.companion.virtualdevice.flags" package that cannot be deleted because
+# they have been used for API flagging.
+
+package: "android.companion.virtualdevice.flags"
+container: "system"
