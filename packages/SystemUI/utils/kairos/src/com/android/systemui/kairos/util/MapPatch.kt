@@ -47,7 +47,7 @@ fun <K, V> Map<K, V>.applyPatch(patch: MapPatch<K, V>): Map<K, V> {
  * Returns a [MapPatch] that, when applied, includes all of the values from the original [Map].
  *
  * Shorthand for:
- * ``` kotlin
+ * ```
  *   mapValues { (key, value) -> Maybe.present(value) }
  * ```
  */

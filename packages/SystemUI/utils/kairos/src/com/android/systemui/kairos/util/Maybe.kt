@@ -69,7 +69,7 @@ object MaybeScope {
  *
  * This can be used instead of Kotlin's built-in nullability (`?.` and `?:`) operators when dealing
  * with complex combinations of nullables:
- * ``` kotlin
+ * ```
  * val aMaybe: Maybe<Any> = ...
  * val bMaybe: Maybe<Any> = ...
  * val result: String = maybe {

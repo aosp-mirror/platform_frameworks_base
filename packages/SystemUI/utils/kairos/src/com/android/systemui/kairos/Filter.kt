@@ -29,7 +29,7 @@ fun <A> Events<A>.filter(state: State<Boolean>): Events<A> = filter { state.samp
 /**
  * Returns an [Events] containing only values of the original [Events] that are not null.
  *
- * ``` kotlin
+ * ```
  *  fun <A> Events<A?>.filterNotNull(): Events<A> = mapNotNull { it }
  * ```
  *
@@ -41,7 +41,7 @@ fun <A> Events<A?>.filterNotNull(): Events<A> = mapCheap { it.toMaybe() }.filter
 /**
  * Returns an [Events] containing only values of the original [Events] that are instances of [A].
  *
- * ``` kotlin
+ * ```
  *   inline fun <reified A> Events<*>.filterIsInstance(): Events<A> =
  *       mapNotNull { it as? A }
  * ```
@@ -55,7 +55,7 @@ inline fun <reified A> Events<*>.filterIsInstance(): Events<A> =
 /**
  * Returns an [Events] containing only values of the original [Events] that are present.
  *
- * ``` kotlin
+ * ```
  *  fun <A> Events<Maybe<A>>.filterPresent(): Events<A> = mapMaybe { it }
  * ```
  *
@@ -69,7 +69,7 @@ fun <A> Events<Maybe<A>>.filterPresent(): Events<A> =
  * Returns an [Events] containing only values of the original [Events] that satisfy the given
  * [predicate].
  *
- * ``` kotlin
+ * ```
  *   fun <A> Events<A>.filter(predicate: TransactionScope.(A) -> Boolean): Events<A> =
  *       mapMaybe { if (predicate(it)) present(it) else absent }
  * ```

@@ -62,7 +62,7 @@ fun <K, V> incrementalOf(value: Map<K, V>): Incremental<K, V> {
  *
  * Useful for recursive definitions.
  *
- * ``` kotlin
+ * ```
  *   fun <A> Lazy<Incremental<K, V>>.defer() = deferredIncremental { value }
  * ```
  */
@@ -78,7 +78,7 @@ fun <K, V> Lazy<Incremental<K, V>>.defer(): Incremental<K, V> = deferInline { va
  *
  * Useful for recursive definitions.
  *
- * ``` kotlin
+ * ```
  *   fun <A> DeferredValue<Incremental<K, V>>.defer() = deferredIncremental { get() }
  * ```
  */

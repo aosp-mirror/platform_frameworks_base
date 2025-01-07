@@ -116,7 +116,7 @@ interface StateScope : TransactionScope {
      * [Events] emitted from this, following the patch rules outlined in
      * [Map.applyPatch][com.android.systemui.kairos.util.applyPatch].
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V> Events<MapPatch<K, Events<V>>>.mergeEventsIncrementally(
      *     initialEvents: DeferredValue<Map<K, Events<V>>>,
      *   ): Events<Map<K, V>> =
@@ -135,7 +135,7 @@ interface StateScope : TransactionScope {
      * [Events] emitted from this, following the patch rules outlined in
      * [Map.applyPatch][com.android.systemui.kairos.util.applyPatch].
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V> Events<MapPatch<K, Events<V>>>.mergeEventsIncrementallyPromptly(
      *     initialEvents: DeferredValue<Map<K, Events<V>>>,
      *   ): Events<Map<K, V>> =
@@ -155,7 +155,7 @@ interface StateScope : TransactionScope {
      * [Events] emitted from this, following the patch rules outlined in
      * [Map.applyPatch][com.android.systemui.kairos.util.applyPatch].
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V> Events<MapPatch<K, Events<V>>>.mergeEventsIncrementally(
      *     initialEvents: Map<K, Events<V>>,
      *   ): Events<Map<K, V>> =
@@ -174,7 +174,7 @@ interface StateScope : TransactionScope {
      * [Events] emitted from this, following the patch rules outlined in
      * [Map.applyPatch][com.android.systemui.kairos.util.applyPatch].
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V> Events<MapPatch<K, Events<V>>>.mergeEventsIncrementallyPromptly(
      *     initialEvents: Map<K, Events<V>>,
      *   ): Events<Map<K, V>> =
@@ -220,7 +220,7 @@ interface StateScope : TransactionScope {
      * [mapLatestStateful], accumulation is not stopped with each subsequent emission of the
      * original [Events].
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B> Events<A>.mapStateful(transform: StateScope.(A) -> B): Events<B> =
      *       map { statefully { transform(it) } }.applyStatefuls()
      * ```
@@ -234,7 +234,7 @@ interface StateScope : TransactionScope {
      *
      * Unlike [applyLatestStateful], state accumulation is not stopped with each state change.
      *
-     * ``` kotlin
+     * ```
      *   fun <A> State<Stateful<A>>.applyStatefuls(): State<A> =
      *       changes
      *           .applyStatefuls()
@@ -252,7 +252,7 @@ interface StateScope : TransactionScope {
      * Returns an [Events] that acts like the most recent [Events] to be emitted from the original
      * [Events].
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<Events<A>>.flatten() = holdState(emptyEvents).switchEvents()
      * ```
      *
@@ -267,7 +267,7 @@ interface StateScope : TransactionScope {
      * [transform] can perform state accumulation via its [StateScope] receiver. With each
      * invocation of [transform], state accumulation from previous invocation is stopped.
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B> Events<A>.mapLatestStateful(transform: StateScope.(A) -> B): Events<B> =
      *       map { statefully { transform(it) } }.applyLatestStateful()
      * ```
@@ -282,7 +282,7 @@ interface StateScope : TransactionScope {
      * [transform] can perform state accumulation via its [StateScope] receiver. With each
      * invocation of [transform], state accumulation from previous invocation is stopped.
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B> Events<A>.flatMapLatestStateful(
      *       transform: StateScope.(A) -> Events<B>
      *   ): Events<B> =
@@ -495,7 +495,7 @@ interface StateScope : TransactionScope {
      *
      * The optional [numKeys] argument is an optimization used to initialize the internal storage.
      *
-     * ``` kotlin
+     * ```
      *   fun <K, A, B> Events<MapPatch<K, A>>.mapLatestStatefulForKey(
      *       numKeys: Int? = null,
      *       transform: StateScope.(A) -> B,
@@ -516,7 +516,7 @@ interface StateScope : TransactionScope {
      * If the original [Events] is emitting an event at this exact time, then it will be the only
      * even emitted from the result [Events].
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<A>.nextOnly(): Events<A> =
      *       EventsLoop<A>().apply {
      *           loopback = map { emptyEvents }.holdState(this@nextOnly).switchEvents()
@@ -535,7 +535,7 @@ interface StateScope : TransactionScope {
     /**
      * Returns an [Events] that skips the next emission of the original [Events].
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<A>.skipNext(): Events<A> =
      *       nextOnly().map { this@skipNext }.holdState(emptyEvents).switchEvents()
      * ```
@@ -554,7 +554,7 @@ interface StateScope : TransactionScope {
      * If the original [Events] emits at the same time as [stop], then the returned [Events] will
      * emit that value.
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<A>.takeUntil(stop: Events<*>): Events<A> =
      *       stop.map { emptyEvents }.nextOnly().holdState(this).switchEvents()
      * ```
@@ -586,7 +586,7 @@ interface StateScope : TransactionScope {
      * Returns an [Events] that emits values from the original [Events] up to and including a value
      * is emitted that satisfies [predicate].
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<A>.takeUntil(predicate: TransactionScope.(A) -> Boolean): Events<A> =
      *       takeUntil(filter(predicate))
      * ```
@@ -602,7 +602,7 @@ interface StateScope : TransactionScope {
      * have been processed; this keeps the value of the [State] consistent during the entire Kairos
      * transaction.
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B> Events<A>.foldState(
      *       initialValue: B,
      *       transform: TransactionScope.(A, B) -> B,
@@ -630,7 +630,7 @@ interface StateScope : TransactionScope {
      * have been processed; this keeps the value of the [State] consistent during the entire Kairos
      * transaction.
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B> Events<A>.foldStateDeferred(
      *       initialValue: DeferredValue<B>,
      *       transform: TransactionScope.(A, B) -> B,
@@ -663,7 +663,7 @@ interface StateScope : TransactionScope {
      * have been processed; this keeps the value of the [State] consistent during the entire Kairos
      * transaction.
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<Stateful<A>>.holdLatestStateful(init: Stateful<A>): State<A> {
      *       val (changes, initApplied) = applyLatestStateful(init)
      *       return changes.holdStateDeferred(initApplied)
@@ -724,7 +724,7 @@ interface StateScope : TransactionScope {
      * Returns an [Events] that wraps each emission of the original [Events] into an [IndexedValue],
      * containing the emitted value and its index (starting from zero).
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<A>.withIndex(): Events<IndexedValue<A>> {
      *     val index = fold(0) { _, oldIdx -> oldIdx + 1 }
      *     return sample(index) { a, idx -> IndexedValue(idx, a) }
@@ -740,7 +740,7 @@ interface StateScope : TransactionScope {
      * Returns an [Events] containing the results of applying [transform] to each value of the
      * original [Events] and its index (starting from zero).
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<A>.mapIndexed(transform: TransactionScope.(Int, A) -> B): Events<B> {
      *       val index = foldState(0) { _, i -> i + 1 }
      *       return sample(index) { a, idx -> transform(idx, a) }
@@ -755,7 +755,7 @@ interface StateScope : TransactionScope {
     /**
      * Returns an [Events] where all subsequent repetitions of the same value are filtered out.
      *
-     * ``` kotlin
+     * ```
      *   fun <A> Events<A>.distinctUntilChanged(): Events<A> {
      *       val state: State<Any?> = holdState(Any())
      *       return filter { it != state.sample() }
@@ -774,7 +774,7 @@ interface StateScope : TransactionScope {
      * Note that the returned [Events] will not emit anything until [other] has emitted at least one
      * value.
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B, C> Events<A>.sample(
      *       other: Events<B>,
      *       transform: TransactionScope.(A, B) -> C,
@@ -796,7 +796,7 @@ interface StateScope : TransactionScope {
      * Returns a [State] that samples the [Transactional] held by the given [State] within the same
      * transaction that the state changes.
      *
-     * ``` kotlin
+     * ```
      *   fun <A> State<Transactional<A>>.sampleTransactionals(): State<A> =
      *       changes
      *           .sampleTransactionals()
@@ -815,7 +815,7 @@ interface StateScope : TransactionScope {
      * Note that this is less efficient than [State.map], which should be preferred if [transform]
      * does not need access to [TransactionScope].
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B> State<A>.mapTransactionally(transform: TransactionScope.(A) -> B): State<B> =
      *       map { transactionally { transform(it) } }.sampleTransactionals()
      * ```
@@ -830,7 +830,7 @@ interface StateScope : TransactionScope {
      * Note that this is less efficient than [combine], which should be preferred if [transform]
      * does not need access to [TransactionScope].
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B, Z> combineTransactionally(
      *       stateA: State<A>,
      *       stateB: State<B>,
@@ -895,7 +895,7 @@ interface StateScope : TransactionScope {
      * Note that this is less efficient than [flatMap], which should be preferred if [transform]
      * does not need access to [TransactionScope].
      *
-     * ``` kotlin
+     * ```
      *   fun <A, B> State<A>.flatMapTransactionally(
      *       transform: TransactionScope.(A) -> State<B>
      *   ): State<B> = map { transactionally { transform(it) } }.sampleTransactionals().flatten()
@@ -950,7 +950,7 @@ interface StateScope : TransactionScope {
      * Returns an [Incremental] that reflects the state of the original [Incremental], but also adds
      * / removes entries based on the state of the original's values.
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V> Incremental<K, State<Maybe<V>>>.applyStateIncrementally(): Incremental<K, V> =
      *       mapValues { (_, v) -> v.changes }
      *           .mergeEventsIncrementallyPromptly()
@@ -971,7 +971,7 @@ interface StateScope : TransactionScope {
      * / removes entries based on the [State] returned from applying [transform] to the original's
      * entries.
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V, U> Incremental<K, V>.mapIncrementalState(
      *       transform: KairosScope.(Map.Entry<K, V>) -> State<Maybe<U>>
      *   ): Incremental<K, U> = mapValues { transform(it) }.applyStateIncrementally()
@@ -986,7 +986,7 @@ interface StateScope : TransactionScope {
      * / removes entries based on the [State] returned from applying [transform] to the original's
      * entries, such that entries are added when that state is `true`, and removed when `false`.
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V> Incremental<K, V>.filterIncrementally(
      *       transform: KairosScope.(Map.Entry<K, V>) -> State<Boolean>
      *   ): Incremental<K, V> = mapIncrementalState { entry ->
@@ -1004,7 +1004,7 @@ interface StateScope : TransactionScope {
      * Returns an [Incremental] that samples the [Transactionals][Transactional] held by the
      * original within the same transaction that the incremental [updates].
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V> Incremental<K, Transactional<V>>.sampleTransactionals(): Incremental<K, V> =
      *       updates
      *           .map { patch -> patch.mapValues { (k, mv) -> mv.map { it.sample() } } }
@@ -1027,7 +1027,7 @@ interface StateScope : TransactionScope {
      * Note that this is less efficient than [mapValues], which should be preferred if [transform]
      * does not need access to [TransactionScope].
      *
-     * ``` kotlin
+     * ```
      *   fun <K, V, U> Incremental<K, V>.mapValuesTransactionally(
      *       transform: TransactionScope.(Map.Entry<K, V>) -> U
      *   ): Incremental<K, U> =
