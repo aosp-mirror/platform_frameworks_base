@@ -12401,19 +12401,23 @@ public class Intent implements Parcelable, Cloneable {
 
     private void collectNestedIntentKeysRecur(Set<Intent> visited) {
         addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
-        if (mExtras != null && !mExtras.isEmpty()) {
+        if (mExtras != null && !mExtras.isParcelled() && !mExtras.isEmpty()) {
             for (String key : mExtras.keySet()) {
                 Object value;
                 try {
-                    value = mExtras.get(key);
+                    // Do not unparcel any Parcelable objects. It may cause issues for app who would
+                    // change class loader before it reads a parceled value. b/382633789.
+                    // It is okay to not collect a parceled intent since it would have been
+                    // coming from another process and collected by its containing intent already
+                    // in that process.
+                    if (!mExtras.isValueParceled(key)) {
+                        value = mExtras.get(key);
+                    } else {
+                        value = null;
+                    }
                 } catch (BadParcelableException e) {
-                    // This could happen when the key points to a LazyValue whose class cannot be
-                    // found by the classLoader - A nested object more than 1 level deeper who is
-                    // of type of a custom class could trigger this situation. In such case, we
-                    // ignore it since it is not an intent. However, it could be a custom type that
-                    // extends from Intent. If such an object is retrieved later in another
-                    // component, then trying to launch such a custom class object will fail unless
-                    // removeLaunchSecurityProtection() is called before it is launched.
+                    // This probably would never happen. But just in case, simply ignore it since
+                    // it is not an intent anyway.
                     value = null;
                 }
                 if (value instanceof Intent intent) {
