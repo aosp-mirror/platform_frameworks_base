@@ -31,7 +31,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 class FakeHomeStatusBarViewModel(
     override val operatorNameViewModel: StatusBarOperatorNameViewModel
 ) : HomeStatusBarViewModel {
-    private val areNotificationLightsOut = MutableStateFlow(false)
+    override val areNotificationsLightsOut = MutableStateFlow(false)
 
     override val isTransitioningFromLockscreenToOccluded = MutableStateFlow(false)
 
@@ -77,14 +77,12 @@ class FakeHomeStatusBarViewModel(
 
     override val iconBlockList: MutableStateFlow<List<String>> = MutableStateFlow(listOf())
 
-    override fun areNotificationsLightsOut(displayId: Int): Flow<Boolean> = areNotificationLightsOut
-
     val darkRegions = mutableListOf<Rect>()
 
     var darkIconTint = Color.BLACK
     var lightIconTint = Color.WHITE
 
-    override fun areaTint(displayId: Int): Flow<StatusBarTintColor> =
+    override val areaTint: Flow<StatusBarTintColor> =
         MutableStateFlow(
             StatusBarTintColor { viewBounds ->
                 if (DarkIconDispatcher.isInAreas(darkRegions, viewBounds)) {

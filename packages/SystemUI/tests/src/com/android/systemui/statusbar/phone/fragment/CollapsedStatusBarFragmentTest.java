@@ -42,6 +42,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 
+import androidx.annotation.NonNull;
 import androidx.test.filters.SmallTest;
 
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -77,6 +78,8 @@ import com.android.systemui.statusbar.phone.ui.DarkIconManager;
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.FakeHomeStatusBarViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.HomeStatusBarViewModelFactory;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.StatusBarOperatorNameViewModel;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
@@ -1268,6 +1271,15 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mock(StatusBarOperatorNameViewModel.class));
         mCollapsedStatusBarViewBinder = new FakeHomeStatusBarViewBinder();
 
+        HomeStatusBarViewModelFactory homeStatusBarViewModelFactory =
+                new HomeStatusBarViewModelFactory() {
+            @NonNull
+            @Override
+            public HomeStatusBarViewModel create(int displayId) {
+                return mCollapsedStatusBarViewModel;
+            }
+        };
+
         return new CollapsedStatusBarFragment(
                 mStatusBarFragmentComponentFactory,
                 mOngoingCallController,
@@ -1275,7 +1287,7 @@ public class CollapsedStatusBarFragmentTest extends SysuiBaseFragmentTest {
                 mShadeExpansionStateManager,
                 mStatusBarIconController,
                 mIconManagerFactory,
-                mCollapsedStatusBarViewModel,
+                homeStatusBarViewModelFactory,
                 mCollapsedStatusBarViewBinder,
                 mStatusBarHideIconsForBouncerManager,
                 mKeyguardStateController,
