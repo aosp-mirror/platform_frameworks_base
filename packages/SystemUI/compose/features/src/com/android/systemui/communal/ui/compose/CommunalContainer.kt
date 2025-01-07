@@ -78,6 +78,18 @@ object TransitionDuration {
     const val EDIT_MODE_TO_HUB_GRID_END_MS =
         EDIT_MODE_TO_HUB_GRID_DELAY_MS + EDIT_MODE_TO_HUB_CONTENT_MS
     const val HUB_TO_EDIT_MODE_CONTENT_MS = 250
+    const val TO_GLANCEABLE_HUB_DURATION_MS = 1000
+}
+
+val sceneTransitionsV2 = transitions {
+    to(CommunalScenes.Communal) {
+        spec = tween(durationMillis = TransitionDuration.TO_GLANCEABLE_HUB_DURATION_MS)
+        fade(AllElements)
+    }
+    to(CommunalScenes.Blank) {
+        spec = tween(durationMillis = TO_GONE_DURATION.toInt(DurationUnit.MILLISECONDS))
+        fade(AllElements)
+    }
 }
 
 val sceneTransitions = transitions {
@@ -157,7 +169,7 @@ fun CommunalContainer(
         MutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
             canChangeScene = { _ -> viewModel.canChangeScene() },
-            transitions = sceneTransitions,
+            transitions = if (viewModel.v2FlagEnabled()) sceneTransitionsV2 else sceneTransitions,
         )
     }
     val isUiBlurred by viewModel.isUiBlurred.collectAsStateWithLifecycle()
