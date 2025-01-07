@@ -80,7 +80,9 @@ public class BluetoothUtilsTest {
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private CachedBluetoothDevice mCachedBluetoothDevice;
 
-    @Mock private BluetoothDevice mBluetoothDevice;
+    @Mock(answer = Answers.RETURNS_DEEP_STUBS)
+    private BluetoothDevice mBluetoothDevice;
+
     @Mock private AudioManager mAudioManager;
     @Mock private PackageManager mPackageManager;
     @Mock private LeAudioProfile mA2dpProfile;
@@ -396,6 +398,38 @@ public class BluetoothUtilsTest {
                 .thenReturn(BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET.getBytes());
 
         assertThat(BluetoothUtils.isAdvancedUntetheredDevice(mBluetoothDevice)).isFalse();
+    }
+
+    @Test
+    public void isHeadset_metadataMatched_returnTrue() {
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_DEVICE_TYPE))
+                .thenReturn(BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET.getBytes());
+
+        assertThat(BluetoothUtils.isHeadset(mBluetoothDevice)).isTrue();
+    }
+
+    @Test
+    public void isHeadset_metadataNotMatched_returnFalse() {
+        when(mBluetoothDevice.getMetadata(BluetoothDevice.METADATA_DEVICE_TYPE))
+                .thenReturn(BluetoothDevice.DEVICE_TYPE_CARKIT.getBytes());
+
+        assertThat(BluetoothUtils.isHeadset(mBluetoothDevice)).isFalse();
+    }
+
+    @Test
+    public void isHeadset_btClassMatched_returnTrue() {
+        when(mBluetoothDevice.getBluetoothClass().getDeviceClass())
+                .thenReturn(BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES);
+
+        assertThat(BluetoothUtils.isHeadset(mBluetoothDevice)).isTrue();
+    }
+
+    @Test
+    public void isHeadset_btClassNotMatched_returnFalse() {
+        when(mBluetoothDevice.getBluetoothClass().getDeviceClass())
+                .thenReturn(BluetoothClass.Device.AUDIO_VIDEO_LOUDSPEAKER);
+
+        assertThat(BluetoothUtils.isHeadset(mBluetoothDevice)).isFalse();
     }
 
     @Test

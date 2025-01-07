@@ -73,6 +73,10 @@ public class BluetoothUtils {
     private static final Set<Integer> SA_PROFILES =
             ImmutableSet.of(
                     BluetoothProfile.A2DP, BluetoothProfile.LE_AUDIO, BluetoothProfile.HEARING_AID);
+    private static final List<Integer> BLUETOOTH_DEVICE_CLASS_HEADSET =
+            List.of(
+                    BluetoothClass.Device.AUDIO_VIDEO_HEADPHONES,
+                    BluetoothClass.Device.AUDIO_VIDEO_WEARABLE_HEADSET);
 
     private static final String TEMP_BOND_TYPE = "TEMP_BOND_TYPE";
     private static final String TEMP_BOND_DEVICE_METADATA_VALUE = "le_audio_sharing";
@@ -388,6 +392,19 @@ public class BluetoothUtils {
             return true;
         }
         return false;
+    }
+
+    /** Checks whether the bluetooth device is a headset. */
+    public static boolean isHeadset(@NonNull BluetoothDevice bluetoothDevice) {
+        String deviceType =
+                BluetoothUtils.getStringMetaData(
+                        bluetoothDevice, BluetoothDevice.METADATA_DEVICE_TYPE);
+        if (!TextUtils.isEmpty(deviceType)) {
+            return BluetoothDevice.DEVICE_TYPE_HEADSET.equals(deviceType)
+                    || BluetoothDevice.DEVICE_TYPE_UNTETHERED_HEADSET.equals(deviceType);
+        }
+        BluetoothClass btClass = bluetoothDevice.getBluetoothClass();
+        return btClass != null && BLUETOOTH_DEVICE_CLASS_HEADSET.contains(btClass.getDeviceClass());
     }
 
     /** Create an Icon pointing to a drawable. */
