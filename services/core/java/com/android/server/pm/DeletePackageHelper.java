@@ -729,10 +729,13 @@ final class DeletePackageHelper {
         final String internalPackageName =
                 snapshot.resolveInternalPackageName(packageName, versionCode);
 
+        final boolean deleteAllUsers = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0;
+        final int[] users = deleteAllUsers ? mUserManagerInternal.getUserIds() : new int[]{userId};
+
         if (!isOrphaned(snapshot, internalPackageName)
                 && !allowSilentUninstall
-                && !isCallerAllowedToSilentlyUninstall(
-                        snapshot, callingUid, internalPackageName, userId)) {
+                && !isCallerAllowedToSilentlyUninstall(snapshot, callingUid, internalPackageName,
+                users)) {
             mPm.mHandler.post(() -> {
                 try {
                     final Intent intent = new Intent(Intent.ACTION_UNINSTALL_PACKAGE);
@@ -751,8 +754,7 @@ final class DeletePackageHelper {
             });
             return;
         }
-        final boolean deleteAllUsers = (deleteFlags & PackageManager.DELETE_ALL_USERS) != 0;
-        final int[] users = deleteAllUsers ? mUserManagerInternal.getUserIds() : new int[]{userId};
+
         if (UserHandle.getUserId(callingUid) != userId || (deleteAllUsers && users.length > 1)) {
             mPm.mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.INTERACT_ACROSS_USERS_FULL,
@@ -916,16 +918,24 @@ final class DeletePackageHelper {
     }
 
     private boolean isCallerAllowedToSilentlyUninstall(@NonNull Computer snapshot, int callingUid,
-            String pkgName, int userId) {
+            String pkgName, int[] targetUserIds) {
         if (PackageManagerServiceUtils.isRootOrShell(callingUid)
                 || UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
             return true;
         }
         final int callingUserId = UserHandle.getUserId(callingUid);
+
         // If the caller installed the pkgName, then allow it to silently uninstall.
-        if (callingUid == snapshot.getPackageUid(
-                snapshot.getInstallerPackageName(pkgName, userId), 0, callingUserId)) {
-            return true;
+        for (int user : targetUserIds) {
+            try {
+                if (callingUid == snapshot.getPackageUid(
+                        snapshot.getInstallerPackageName(pkgName, user), 0, callingUserId)) {
+                    return true;
+                }
+            } catch (Exception ignored) {
+                // The app to be uninstalled (`pkgName`) is not installed on this `user`. Continue
+                // looking for the installerPkgName in the next user
+            }
         }
 
         // Allow package verifier to silently uninstall.
