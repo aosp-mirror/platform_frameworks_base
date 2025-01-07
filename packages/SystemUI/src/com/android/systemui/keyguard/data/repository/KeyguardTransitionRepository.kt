@@ -212,8 +212,11 @@ constructor(@Main val mainDispatcher: CoroutineDispatcher) : KeyguardTransitionR
                 Log.i(TAG, "Duplicate call to start the transition, rejecting: $info")
                 return@withContext null
             }
+            val isAnimatorRunning = lastAnimator?.isRunning() ?: false
+            val isManualTransitionRunning =
+                updateTransitionId != null && lastStep.transitionState != TransitionState.FINISHED
             val startingValue =
-                if (lastStep.transitionState != TransitionState.FINISHED) {
+                if (isAnimatorRunning || isManualTransitionRunning) {
                     Log.i(TAG, "Transition still active: $lastStep, canceling")
                     when (info.modeOnCanceled) {
                         TransitionModeOnCanceled.LAST_VALUE -> lastStep.value
