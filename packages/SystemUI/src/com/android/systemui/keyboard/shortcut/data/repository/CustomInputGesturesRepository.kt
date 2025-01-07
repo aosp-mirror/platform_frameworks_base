@@ -25,6 +25,7 @@ import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_ERROR_RES
 import android.hardware.input.InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS
 import android.hardware.input.InputSettings
 import android.util.Log
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestResult
 import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestResult.ERROR_OTHER
@@ -37,6 +38,7 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
 
+@SysUISingleton
 class CustomInputGesturesRepository
 @Inject
 constructor(private val userTracker: UserTracker,
@@ -56,7 +58,7 @@ constructor(private val userTracker: UserTracker,
     val customInputGestures =
         _customInputGesture.onStart { refreshCustomInputGestures() }
 
-    private fun refreshCustomInputGestures() {
+    fun refreshCustomInputGestures() {
         setCustomInputGestures(inputGestures = retrieveCustomInputGestures())
     }
 
