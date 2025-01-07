@@ -453,6 +453,7 @@ public final class WindowManagerGlobal {
             try {
                 root.setView(view, wparams, panelParentView, userId);
             } catch (RuntimeException e) {
+                Log.e(TAG, "Couldn't add view: " + view, e);
                 final int viewIndex = (index >= 0) ? index : (mViews.size() - 1);
                 // BadTokenException or InvalidDisplayException, clean up.
                 if (viewIndex >= 0) {
