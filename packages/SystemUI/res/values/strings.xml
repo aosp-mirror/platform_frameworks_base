@@ -3798,7 +3798,7 @@
     <!-- Title at the top of the keyboard shortcut helper UI when in customize mode. The helper
          is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->
-    <string name="shortcut_helper_customize_mode_title">Customize keyboard shortcuts</string>
+    <string name="shortcut_helper_customize_mode_title">Customize shortcuts</string>
     <!-- Title at the top of the keyboard shortcut helper remove shortcut dialog.
          The helper is a component that shows the user which keyboard shortcuts they can use. Also
          allows the user to add/remove custom shortcuts.[CHAR LIMIT=NONE] -->
