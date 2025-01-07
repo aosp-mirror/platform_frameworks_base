@@ -315,16 +315,10 @@ internal class SwipeAnimation<T : ContentKey>(
         val skipAnimation =
             hasReachedTargetContent && !contentTransition.isWithinProgressRange(initialProgress)
 
-        val targetOffset =
-            if (targetContent == fromContent) {
-                0f
-            } else {
-                val distance = distance()
-                check(distance != DistanceUnspecified) {
-                    "distance is equal to $DistanceUnspecified"
-                }
-                distance
-            }
+        val distance = distance()
+        check(distance != DistanceUnspecified) { "distance is equal to $DistanceUnspecified" }
+
+        val targetOffset = if (targetContent == fromContent) 0f else distance
 
         // If the effective current content changed, it should be reflected right now in the
         // current state, even before the settle animation is ongoing. That way all the
@@ -343,7 +337,16 @@ internal class SwipeAnimation<T : ContentKey>(
             }
 
         val animatable =
-            Animatable(initialOffset, OffsetVisibilityThreshold).also { offsetAnimation = it }
+            Animatable(initialOffset, OffsetVisibilityThreshold).also {
+                offsetAnimation = it
+
+                // We should animate when the progress value is between [0, 1].
+                if (distance > 0) {
+                    it.updateBounds(0f, distance)
+                } else {
+                    it.updateBounds(distance, 0f)
+                }
+            }
 
         check(isAnimatingOffset())
 
@@ -370,41 +373,25 @@ internal class SwipeAnimation<T : ContentKey>(
         val velocityConsumed = CompletableDeferred<Float>()
 
         offsetAnimationRunnable.complete {
-            try {
+            val result =
                 animatable.animateTo(
                     targetValue = targetOffset,
                     animationSpec = swipeSpec,
                     initialVelocity = initialVelocity,
-                ) {
-                    // Immediately stop this transition if we are bouncing on a content that
-                    // does not bounce.
-                    if (!contentTransition.isWithinProgressRange(progress)) {
-                        // We are no longer able to consume the velocity, the rest can be
-                        // consumed by another component in the hierarchy.
-                        velocityConsumed.complete(initialVelocity - velocity)
-                        throw SnapException()
-                    }
-                }
-            } catch (_: SnapException) {
-                /* Ignore. */
-            } finally {
-                if (!velocityConsumed.isCompleted) {
-                    // The animation consumed the whole available velocity
-                    velocityConsumed.complete(initialVelocity)
-                }
+                )
 
-                // Wait for overscroll to finish so that the transition is removed from the STLState
-                // only after the overscroll is done, to avoid dropping frame right when the user
-                // lifts their finger and overscroll is animated to 0.
-                overscrollCompletable?.await()
-            }
+            // We are no longer able to consume the velocity, the rest can be consumed by another
+            // component in the hierarchy.
+            velocityConsumed.complete(initialVelocity - result.endState.velocity)
+
+            // Wait for overscroll to finish so that the transition is removed from the STLState
+            // only after the overscroll is done, to avoid dropping frame right when the user
+            // lifts their finger and overscroll is animated to 0.
+            overscrollCompletable?.await()
         }
 
         return velocityConsumed.await()
     }
-
-    /** An exception thrown during the animation to stop it immediately. */
-    private class SnapException : Exception()
 
     private fun canChangeContent(targetContent: ContentKey): Boolean {
         return when (val transition = contentTransition) {

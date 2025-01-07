@@ -21,6 +21,7 @@ import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
@@ -33,6 +34,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.SemanticsNodeInteraction
 import androidx.compose.ui.test.assertHeightIsEqualTo
@@ -43,6 +45,9 @@ import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onChild
 import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onNodeWithText
+import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performTouchInput
+import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.IntOffset
@@ -468,5 +473,42 @@ class SceneTransitionLayoutTest {
         }
 
         assertThat(layoutImpl.overlaysOrNullForTest()).isNull()
+    }
+
+    @Test
+    fun transitionProgressBoundedBetween0And1() {
+        val layoutWidth = 200.dp
+        val layoutHeight = 400.dp
+
+        // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
+        // detected as a drag event.
+        var touchSlop = 0f
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(initialScene = SceneA) }
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state, Modifier.size(layoutWidth, layoutHeight)) {
+                scene(SceneA, userActions = mapOf(Swipe.Down to SceneB)) {
+                    Spacer(Modifier.fillMaxSize())
+                }
+                scene(SceneB) { Spacer(Modifier.fillMaxSize()) }
+            }
+        }
+        assertThat(state.transitionState).isIdle()
+
+        rule.mainClock.autoAdvance = false
+
+        // Swipe the verticalSwipeDistance.
+        rule.onRoot().performTouchInput {
+            swipeDown(endY = bottom + touchSlop, durationMillis = 50)
+        }
+
+        rule.mainClock.advanceTimeBy(16)
+        val transition = assertThat(state.transitionState).isSceneTransition()
+        assertThat(transition).isNotNull()
+        assertThat(transition).hasProgress(1f, tolerance = 0.01f)
+
+        rule.mainClock.advanceTimeBy(16)
+        // Fling animation, we are overscrolling now. Progress should always be between [0, 1].
+        assertThat(transition).hasProgress(1f)
     }
 }
