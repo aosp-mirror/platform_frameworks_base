@@ -332,7 +332,9 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             dragSession = new DragSession(ActivityTaskManager.getInstance(),
                     mDisplayController.getDisplayLayout(displayId), event.getClipData(),
                     event.getDragFlags());
-            dragSession.initialize();
+            // Only update the running task for now to determine if we should defer to desktop to
+            // handle the drag
+            dragSession.updateRunningTask();
             final ActivityManager.RunningTaskInfo taskInfo = dragSession.runningTaskInfo;
             // Desktop tasks will have their own drag handling.
             final boolean isDesktopDrag = taskInfo != null && taskInfo.isFreeform()
@@ -340,7 +342,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
             pd.isHandlingDrag = DragUtils.canHandleDrag(event) && !isDesktopDrag;
             ProtoLog.v(ShellProtoLogGroup.WM_SHELL_DRAG_AND_DROP,
                     "Clip description: handlingDrag=%b itemCount=%d mimeTypes=%s flags=%s",
-                    pd.isHandlingDrag, event.getClipData().getItemCount(),
+                    pd.isHandlingDrag,
+                    event.getClipData() != null ? event.getClipData().getItemCount() : -1,
                     DragUtils.getMimeTypesConcatenated(description),
                     DragUtils.dragFlagsToString(event.getDragFlags()));
         }
@@ -355,6 +358,8 @@ public class DragAndDropController implements RemoteCallable<DragAndDropControll
                     Slog.w(TAG, "Unexpected drag start during an active drag");
                     return false;
                 }
+                // Only initialize the session after we've checked that we're handling the drag
+                dragSession.initialize(true /* skipUpdateRunningTask */);
                 pd.dragSession = dragSession;
                 pd.activeDragCount++;
                 pd.dragLayout.prepare(pd.dragSession, mLogger.logStart(pd.dragSession));

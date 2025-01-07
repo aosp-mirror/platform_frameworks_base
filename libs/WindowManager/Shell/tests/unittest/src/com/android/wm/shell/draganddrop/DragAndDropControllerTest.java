@@ -150,4 +150,25 @@ public class DragAndDropControllerTest extends ShellTestCase {
         mController.onDrag(dragLayout, event);
         verify(mDragAndDropListener, never()).onDragStarted();
     }
+
+    @Test
+    public void testOnDragStarted_withNoClipData() {
+        final View dragLayout = mock(View.class);
+        final Display display = mock(Display.class);
+        doReturn(display).when(dragLayout).getDisplay();
+        doReturn(DEFAULT_DISPLAY).when(display).getDisplayId();
+
+        final ClipData clipData = createAppClipData(MIMETYPE_APPLICATION_SHORTCUT);
+        final DragEvent event = mock(DragEvent.class);
+        doReturn(ACTION_DRAG_STARTED).when(event).getAction();
+        doReturn(null).when(event).getClipData();
+        doReturn(clipData.getDescription()).when(event).getClipDescription();
+
+        // Ensure there's a target so that onDrag will execute
+        mController.addDisplayDropTarget(0, mContext, mock(WindowManager.class),
+                mock(FrameLayout.class), mock(DragLayout.class));
+
+        // Verify the listener is called on a valid drag action.
+        mController.onDrag(dragLayout, event);
+    }
 }
