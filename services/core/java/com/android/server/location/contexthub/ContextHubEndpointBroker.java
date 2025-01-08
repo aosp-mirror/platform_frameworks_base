@@ -420,6 +420,25 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
     }
 
     /* package */ void onMessageReceived(int sessionId, HubMessage message) {
+        byte code = onMessageReceivedInternal(sessionId, message);
+        if (code != ErrorCode.OK && message.isResponseRequired()) {
+            sendMessageDeliveryStatus(
+                    sessionId, message.getMessageSequenceNumber(), code);
+        }
+    }
+
+    /* package */ void onMessageDeliveryStatusReceived(
+            int sessionId, int sequenceNumber, byte errorCode) {
+        mTransactionManager.onMessageDeliveryResponse(sequenceNumber, errorCode == ErrorCode.OK);
+    }
+
+    /* package */ boolean hasSessionId(int sessionId) {
+        synchronized (mOpenSessionLock) {
+            return mSessionInfoMap.contains(sessionId);
+        }
+    }
+
+    private byte onMessageReceivedInternal(int sessionId, HubMessage message) {
         HubEndpointInfo remote;
         synchronized (mOpenSessionLock) {
             if (!isSessionActive(sessionId)) {
@@ -429,9 +448,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
                                 + sessionId
                                 + ") with message: "
                                 + message);
-                sendMessageDeliveryStatus(
-                        sessionId, message.getMessageSequenceNumber(), ErrorCode.PERMANENT_ERROR);
-                return;
+                return ErrorCode.PERMANENT_ERROR;
             }
             remote = mSessionInfoMap.get(sessionId).getRemoteEndpointInfo();
         }
@@ -453,28 +470,12 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
                             + ". "
                             + mPackageName
                             + " doesn't have permission");
-            sendMessageDeliveryStatus(
-                    sessionId, message.getMessageSequenceNumber(), ErrorCode.PERMISSION_DENIED);
-            return;
+            return ErrorCode.PERMISSION_DENIED;
         }
 
         boolean success =
                 invokeCallback((consumer) -> consumer.onMessageReceived(sessionId, message));
-        if (!success) {
-            sendMessageDeliveryStatus(
-                    sessionId, message.getMessageSequenceNumber(), ErrorCode.TRANSIENT_ERROR);
-        }
-    }
-
-    /* package */ void onMessageDeliveryStatusReceived(
-            int sessionId, int sequenceNumber, byte errorCode) {
-        mTransactionManager.onMessageDeliveryResponse(sequenceNumber, errorCode == ErrorCode.OK);
-    }
-
-    /* package */ boolean hasSessionId(int sessionId) {
-        synchronized (mOpenSessionLock) {
-            return mSessionInfoMap.contains(sessionId);
-        }
+        return success ? ErrorCode.OK : ErrorCode.TRANSIENT_ERROR;
     }
 
     /**
