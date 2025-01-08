@@ -542,7 +542,8 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             MagnificationController magnificationController,
             @Nullable AccessibilityInputFilter inputFilter,
             ProxyManager proxyManager,
-            PermissionEnforcer permissionEnforcer) {
+            PermissionEnforcer permissionEnforcer,
+            HearingDevicePhoneCallNotificationController hearingDeviceNotificationController) {
         super(permissionEnforcer);
         mContext = context;
         mPowerManager =  (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
@@ -571,8 +572,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mVisibleBgUserIds = null;
         mInputManager = context.getSystemService(InputManager.class);
         if (com.android.settingslib.flags.Flags.hearingDevicesInputRoutingControl()) {
-            mHearingDeviceNotificationController = new HearingDevicePhoneCallNotificationController(
-                    context);
+            mHearingDeviceNotificationController = hearingDeviceNotificationController;
         } else {
             mHearingDeviceNotificationController = null;
         }
