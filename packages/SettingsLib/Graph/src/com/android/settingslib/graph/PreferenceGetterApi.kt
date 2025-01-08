@@ -18,7 +18,6 @@ package com.android.settingslib.graph
 
 import android.app.Application
 import androidx.annotation.IntDef
-import com.android.settingslib.graph.instrumentation.SettingslibStatsLog
 import com.android.settingslib.graph.proto.PreferenceProto
 import com.android.settingslib.ipc.ApiDescriptor
 import com.android.settingslib.ipc.ApiHandler
@@ -98,7 +97,6 @@ class PreferenceGetterApiHandler(
         val errors = mutableMapOf<PreferenceCoordinate, Int>()
         val preferences = mutableMapOf<PreferenceCoordinate, PreferenceProto>()
         val flags = request.flags
-        val callerPackage = application.packageManager.getNameForUid(callingUid)
         for ((screenKey, coordinates) in request.preferences.groupBy { it.screenKey }) {
             val screenMetadata = PreferenceScreenRegistry.create(application, screenKey)
             if (screenMetadata == null) {
@@ -118,12 +116,6 @@ class PreferenceGetterApiHandler(
                 val node = nodes[coordinate.key]
                 if (node == null) {
                     errors[coordinate] = PreferenceGetterErrorCode.NOT_FOUND
-                    MetricsLogger.logReadPreference(
-                        callerPackage,
-                        coordinate,
-                        SettingslibStatsLog
-                            .SETTINGS_EXT_API_REPORTED__RESULT__RESULT_FAILURE_UNAVAILABLE,
-                    )
                     continue
                 }
                 val metadata = node.metadata
@@ -139,29 +131,11 @@ class PreferenceGetterApiHandler(
                         )
                     if (flags == PreferenceGetterFlags.VALUE && !preferenceProto.hasValue()) {
                         errors[coordinate] = PreferenceGetterErrorCode.DISALLOW
-                        MetricsLogger.logReadPreference(
-                            callerPackage,
-                            coordinate,
-                            SettingslibStatsLog
-                                .SETTINGS_EXT_API_REPORTED__RESULT__RESULT_FAILURE_DISALLOW,
-                        )
                     } else {
                         preferences[coordinate] = preferenceProto
-                        MetricsLogger.logReadPreference(
-                            callerPackage,
-                            coordinate,
-                            SettingslibStatsLog
-                                .SETTINGS_EXT_API_REPORTED__RESULT__RESULT_OK,
-                        )
                     }
                 } catch (e: Exception) {
                     errors[coordinate] = PreferenceGetterErrorCode.INTERNAL_ERROR
-                    MetricsLogger.logReadPreference(
-                        callerPackage,
-                        coordinate,
-                        SettingslibStatsLog
-                            .SETTINGS_EXT_API_REPORTED__RESULT__RESULT_FAILURE_INTERNAL_ERROR,
-                    )
                 }
             }
         }
