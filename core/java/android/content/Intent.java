@@ -12394,14 +12394,30 @@ public class Intent implements Parcelable, Cloneable {
      * @hide
      */
     public void collectExtraIntentKeys() {
+        collectExtraIntentKeys(false);
+    }
+
+    /**
+     * Collects keys in the extra bundle whose value are intents.
+     * With these keys collected on the client side, the system server would only unparcel values
+     * of these keys and create IntentCreatorToken for them.
+     * This method could also be called from the system server side as a catch all safty net in case
+     * these keys are not collected on the client side. In that case, call it with forceUnparcel set
+     * to true since everything is parceled on the system server side.
+     *
+     * @param forceUnparcel if it is true, unparcel everything to determine if an object is an
+     *                      intent. Otherwise, do not unparcel anything.
+     * @hide
+     */
+    public void collectExtraIntentKeys(boolean forceUnparcel) {
         if (preventIntentRedirect()) {
-            collectNestedIntentKeysRecur(new ArraySet<>());
+            collectNestedIntentKeysRecur(new ArraySet<>(), forceUnparcel);
         }
     }
 
-    private void collectNestedIntentKeysRecur(Set<Intent> visited) {
+    private void collectNestedIntentKeysRecur(Set<Intent> visited, boolean forceUnparcel) {
         addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
-        if (mExtras != null && !mExtras.isParcelled() && !mExtras.isEmpty()) {
+        if (mExtras != null && (forceUnparcel || !mExtras.isParcelled()) && !mExtras.isEmpty()) {
             for (String key : mExtras.keySet()) {
                 Object value;
                 try {
@@ -12410,23 +12426,25 @@ public class Intent implements Parcelable, Cloneable {
                     // It is okay to not collect a parceled intent since it would have been
                     // coming from another process and collected by its containing intent already
                     // in that process.
-                    if (!mExtras.isValueParceled(key)) {
+                    if (forceUnparcel || !mExtras.isValueParceled(key)) {
                         value = mExtras.get(key);
                     } else {
                         value = null;
                     }
                 } catch (BadParcelableException e) {
-                    // This probably would never happen. But just in case, simply ignore it since
-                    // it is not an intent anyway.
+                    // This may still happen if the keys are collected on the system server side, in
+                    // which case, we will try to unparcel everything. If this happens, simply
+                    // ignore it since it is not an intent anyway.
                     value = null;
                 }
                 if (value instanceof Intent intent) {
                     handleNestedIntent(intent, visited, new NestedIntentKey(
-                            NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL, key, 0));
+                                    NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL, key, 0),
+                            forceUnparcel);
                 } else if (value instanceof Parcelable[] parcelables) {
-                    handleParcelableArray(parcelables, key, visited);
+                    handleParcelableArray(parcelables, key, visited, forceUnparcel);
                 } else if (value instanceof ArrayList<?> parcelables) {
-                    handleParcelableList(parcelables, key, visited);
+                    handleParcelableList(parcelables, key, visited, forceUnparcel);
                 }
             }
         }
@@ -12436,13 +12454,15 @@ public class Intent implements Parcelable, Cloneable {
                 Intent intent = mClipData.getItemAt(i).mIntent;
                 if (intent != null && !visited.contains(intent)) {
                     handleNestedIntent(intent, visited, new NestedIntentKey(
-                            NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA, null, i));
+                                    NestedIntentKey.NESTED_INTENT_KEY_TYPE_CLIP_DATA, null, i),
+                            forceUnparcel);
                 }
             }
         }
     }
 
-    private void handleNestedIntent(Intent intent, Set<Intent> visited, NestedIntentKey key) {
+    private void handleNestedIntent(Intent intent, Set<Intent> visited, NestedIntentKey key,
+            boolean forceUnparcel) {
         if (mCreatorTokenInfo == null) {
             mCreatorTokenInfo = new CreatorTokenInfo();
         }
@@ -12452,24 +12472,28 @@ public class Intent implements Parcelable, Cloneable {
         mCreatorTokenInfo.mNestedIntentKeys.add(key);
         if (!visited.contains(intent)) {
             visited.add(intent);
-            intent.collectNestedIntentKeysRecur(visited);
+            intent.collectNestedIntentKeysRecur(visited, forceUnparcel);
         }
     }
 
-    private void handleParcelableArray(Parcelable[] parcelables, String key, Set<Intent> visited) {
+    private void handleParcelableArray(Parcelable[] parcelables, String key, Set<Intent> visited,
+            boolean forceUnparcel) {
         for (int i = 0; i < parcelables.length; i++) {
             if (parcelables[i] instanceof Intent intent && !visited.contains(intent)) {
                 handleNestedIntent(intent, visited, new NestedIntentKey(
-                        NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY, key, i));
+                                NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_ARRAY, key, i),
+                        forceUnparcel);
             }
         }
     }
 
-    private void handleParcelableList(ArrayList<?> parcelables, String key, Set<Intent> visited) {
+    private void handleParcelableList(ArrayList<?> parcelables, String key, Set<Intent> visited,
+            boolean forceUnparcel) {
         for (int i = 0; i < parcelables.size(); i++) {
             if (parcelables.get(i) instanceof Intent intent && !visited.contains(intent)) {
                 handleNestedIntent(intent, visited, new NestedIntentKey(
-                        NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST, key, i));
+                                NestedIntentKey.NESTED_INTENT_KEY_TYPE_EXTRA_PARCEL_LIST, key, i),
+                        forceUnparcel);
             }
         }
     }
