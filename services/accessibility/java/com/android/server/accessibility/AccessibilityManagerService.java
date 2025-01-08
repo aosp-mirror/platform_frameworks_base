@@ -413,6 +413,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     private SparseArray<SurfaceControl> mA11yOverlayLayers = new SparseArray<>();
 
     private final FlashNotificationsController mFlashNotificationsController;
+    private final HearingDevicePhoneCallNotificationController mHearingDeviceNotificationController;
     private final UserManagerInternal mUmi;
 
     private AccessibilityUserState getCurrentUserStateLocked() {
@@ -569,6 +570,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         // TODO(b/255426725): not used on tests
         mVisibleBgUserIds = null;
         mInputManager = context.getSystemService(InputManager.class);
+        if (com.android.settingslib.flags.Flags.hearingDevicesInputRoutingControl()) {
+            mHearingDeviceNotificationController = new HearingDevicePhoneCallNotificationController(
+                    context);
+        } else {
+            mHearingDeviceNotificationController = null;
+        }
 
         init();
     }
@@ -618,6 +625,12 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         } else {
             mVisibleBgUserIds = null;
         }
+        if (com.android.settingslib.flags.Flags.hearingDevicesInputRoutingControl()) {
+            mHearingDeviceNotificationController = new HearingDevicePhoneCallNotificationController(
+                    context);
+        } else {
+            mHearingDeviceNotificationController = null;
+        }
 
         init();
     }
@@ -629,6 +642,11 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 mContext.getContentResolver());
         if (enableTalkbackAndMagnifierKeyGestures()) {
             mInputManager.registerKeyGestureEventHandler(mKeyGestureEventHandler);
+        }
+        if (com.android.settingslib.flags.Flags.hearingDevicesInputRoutingControl()) {
+            if (mHearingDeviceNotificationController != null) {
+                mHearingDeviceNotificationController.startListenForCallState();
+            }
         }
         disableAccessibilityMenuToMigrateIfNeeded();
     }
