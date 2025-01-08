@@ -3919,6 +3919,16 @@
          The helper is a component that shows the user which keyboard shortcuts they can use.
          [CHAR LIMIT=NONE] -->
     <string name="shortcut_helper_plus_symbol">+</string>
+    <!-- Accessibility label for the plus icon on a shortcut in shortcut helper that allows the user
+         to add a new custom shortcut.
+         The helper is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_add_shortcut_button_label">Add shortcut</string>
+    <!-- Accessibility label for the bin(trash) icon on a shortcut in shortcut helper that allows the
+         user to delete an existing custom shortcut.
+         The helper is a component that shows the user which keyboard shortcuts they can use.
+         [CHAR LIMIT=NONE] -->
+    <string name="shortcut_helper_delete_shortcut_button_label">Delete shortcut</string>
 
     <!-- Keyboard touchpad tutorial scheduler-->
     <!-- Notification title for launching keyboard tutorial [CHAR_LIMIT=100] -->
