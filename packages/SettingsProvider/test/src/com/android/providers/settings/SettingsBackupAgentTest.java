@@ -16,6 +16,7 @@
 
 package com.android.providers.settings;
 
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_WIFI_NEW_CONFIG;
 import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_SOFTAP_CONFIG;
 
 import static junit.framework.Assert.assertEquals;
@@ -28,6 +29,8 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.when;
 
 import android.annotation.Nullable;
@@ -69,6 +72,7 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
@@ -832,6 +836,74 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
         mAgentUnderTest.restoreSoftApConfiguration(data);
 
         assertNull(getLoggingResultForDatatype(KEY_SOFTAP_CONFIG, mAgentUnderTest));
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void getNewWifiConfigData_flagIsEnabled_numberOfSettingsInKeyAreRecorded() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.BACKUP);
+        when(mWifiManager.retrieveBackupData()).thenReturn(null);
+
+        mAgentUnderTest.getNewWifiConfigData();
+
+        assertEquals(mAgentUnderTest.getNumberOfSettingsPerKey(KEY_WIFI_NEW_CONFIG), 1);
+    }
+
+    @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void getNewWifiConfigData_flagIsNotEnabled_numberOfSettingsInKeyAreNotRecorded() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.BACKUP);
+        when(mWifiManager.retrieveBackupData()).thenReturn(null);
+
+        mAgentUnderTest.getNewWifiConfigData();
+
+        assertEquals(mAgentUnderTest.getNumberOfSettingsPerKey(KEY_WIFI_NEW_CONFIG), 0);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+        restoreNewWifiConfigData_flagIsEnabled_restoreIsSuccessful_successMetricsAreLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        doNothing().when(mWifiManager).restoreBackupData(any());
+
+        mAgentUnderTest.restoreNewWifiConfigData(new byte[] {});
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(KEY_WIFI_NEW_CONFIG, mAgentUnderTest);
+        assertNotNull(loggingResult);
+        assertEquals(loggingResult.getSuccessCount(), 1);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+        restoreNewWifiConfigData_flagIsEnabled_restoreIsNotSuccessful_failureMetricsAreLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        doThrow(new RuntimeException()).when(mWifiManager).restoreBackupData(any());
+
+        mAgentUnderTest.restoreNewWifiConfigData(new byte[] {});
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(KEY_WIFI_NEW_CONFIG, mAgentUnderTest);
+        assertNotNull(loggingResult);
+        assertEquals(loggingResult.getFailCount(), 1);
+    }
+
+    @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void restoreNewWifiConfigData_flagIsNotEnabled_metricsAreNotLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        doNothing().when(mWifiManager).restoreBackupData(any());
+
+        mAgentUnderTest.restoreNewWifiConfigData(new byte[] {});
+
+        assertNull(getLoggingResultForDatatype(KEY_WIFI_NEW_CONFIG, mAgentUnderTest));
     }
 
     private byte[] generateBackupData(Map<String, String> keyValueData) {
