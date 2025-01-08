@@ -49,8 +49,12 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusProperties
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.Key
 import androidx.compose.ui.input.key.KeyEvent
-import androidx.compose.ui.input.key.onKeyEvent
+import androidx.compose.ui.input.key.KeyEventType
+import androidx.compose.ui.input.key.key
+import androidx.compose.ui.input.key.onPreviewKeyEvent
+import androidx.compose.ui.input.key.type
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -65,7 +69,7 @@ import com.android.systemui.res.R
 fun ShortcutCustomizationDialog(
     uiState: ShortcutCustomizationUiState,
     modifier: Modifier = Modifier,
-    onKeyPress: (KeyEvent) -> Boolean,
+    onShortcutKeyCombinationSelected: (KeyEvent) -> Boolean,
     onCancel: () -> Unit,
     onConfirmSetShortcut: () -> Unit,
     onConfirmDeleteShortcut: () -> Unit,
@@ -73,7 +77,13 @@ fun ShortcutCustomizationDialog(
 ) {
     when (uiState) {
         is ShortcutCustomizationUiState.AddShortcutDialog -> {
-            AddShortcutDialog(modifier, uiState, onKeyPress, onCancel, onConfirmSetShortcut)
+            AddShortcutDialog(
+                modifier,
+                uiState,
+                onShortcutKeyCombinationSelected,
+                onCancel,
+                onConfirmSetShortcut,
+            )
         }
         is ShortcutCustomizationUiState.DeleteShortcutDialog -> {
             DeleteShortcutDialog(modifier, onCancel, onConfirmDeleteShortcut)
@@ -91,29 +101,27 @@ fun ShortcutCustomizationDialog(
 private fun AddShortcutDialog(
     modifier: Modifier,
     uiState: ShortcutCustomizationUiState.AddShortcutDialog,
-    onKeyPress: (KeyEvent) -> Boolean,
+    onShortcutKeyCombinationSelected: (KeyEvent) -> Boolean,
     onCancel: () -> Unit,
-    onConfirmSetShortcut: () -> Unit
-){
+    onConfirmSetShortcut: () -> Unit,
+) {
     Column(modifier = modifier) {
         Title(uiState.shortcutLabel)
         Description(
-            text =
-            stringResource(
-                id = R.string.shortcut_customize_mode_add_shortcut_description
-            )
+            text = stringResource(id = R.string.shortcut_customize_mode_add_shortcut_description)
         )
         PromptShortcutModifier(
             modifier =
-            Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
-                .width(131.dp)
-                .height(48.dp),
+                Modifier.padding(top = 24.dp, start = 116.5.dp, end = 116.5.dp)
+                    .width(131.dp)
+                    .height(48.dp),
             defaultModifierKey = uiState.defaultCustomShortcutModifierKey,
         )
         SelectedKeyCombinationContainer(
             shouldShowError = uiState.errorMessage.isNotEmpty(),
-            onKeyPress = onKeyPress,
+            onShortcutKeyCombinationSelected = onShortcutKeyCombinationSelected,
             pressedKeys = uiState.pressedKeys,
+            onConfirmSetShortcut = onConfirmSetShortcut,
         )
         ErrorMessageContainer(uiState.errorMessage)
         DialogButtons(
@@ -121,9 +129,7 @@ private fun AddShortcutDialog(
             isConfirmButtonEnabled = uiState.pressedKeys.isNotEmpty(),
             onConfirm = onConfirmSetShortcut,
             confirmButtonText =
-            stringResource(
-                R.string.shortcut_helper_customize_dialog_set_shortcut_button_label
-            ),
+                stringResource(R.string.shortcut_helper_customize_dialog_set_shortcut_button_label),
         )
     }
 }
@@ -132,20 +138,15 @@ private fun AddShortcutDialog(
 private fun DeleteShortcutDialog(
     modifier: Modifier,
     onCancel: () -> Unit,
-    onConfirmDeleteShortcut: () -> Unit
-){
+    onConfirmDeleteShortcut: () -> Unit,
+) {
     ConfirmationDialog(
         modifier = modifier,
-        title =
-        stringResource(
-            id = R.string.shortcut_customize_mode_remove_shortcut_dialog_title
-        ),
+        title = stringResource(id = R.string.shortcut_customize_mode_remove_shortcut_dialog_title),
         description =
-        stringResource(
-            id = R.string.shortcut_customize_mode_remove_shortcut_description
-        ),
+            stringResource(id = R.string.shortcut_customize_mode_remove_shortcut_description),
         confirmButtonText =
-        stringResource(R.string.shortcut_helper_customize_dialog_remove_button_label),
+            stringResource(R.string.shortcut_helper_customize_dialog_remove_button_label),
         onCancel = onCancel,
         onConfirm = onConfirmDeleteShortcut,
     )
@@ -155,20 +156,15 @@ private fun DeleteShortcutDialog(
 private fun ResetShortcutDialog(
     modifier: Modifier,
     onCancel: () -> Unit,
-    onConfirmResetShortcut: () -> Unit
-){
+    onConfirmResetShortcut: () -> Unit,
+) {
     ConfirmationDialog(
         modifier = modifier,
-        title =
-        stringResource(
-            id = R.string.shortcut_customize_mode_reset_shortcut_dialog_title
-        ),
+        title = stringResource(id = R.string.shortcut_customize_mode_reset_shortcut_dialog_title),
         description =
-        stringResource(
-            id = R.string.shortcut_customize_mode_reset_shortcut_description
-        ),
+            stringResource(id = R.string.shortcut_customize_mode_reset_shortcut_description),
         confirmButtonText =
-        stringResource(R.string.shortcut_helper_customize_dialog_reset_button_label),
+            stringResource(R.string.shortcut_helper_customize_dialog_reset_button_label),
         onCancel = onCancel,
         onConfirm = onConfirmResetShortcut,
     )
@@ -201,6 +197,9 @@ private fun DialogButtons(
     onConfirm: () -> Unit,
     confirmButtonText: String,
 ) {
+    val focusRequester = remember { FocusRequester() }
+    LaunchedEffect(Unit) { focusRequester.requestFocus() }
+
     Row(
         modifier =
             Modifier.padding(top = 24.dp, start = 24.dp, end = 24.dp)
@@ -218,6 +217,10 @@ private fun DialogButtons(
         )
         Spacer(modifier = Modifier.width(8.dp))
         ShortcutHelperButton(
+            modifier =
+                Modifier.focusRequester(focusRequester).focusProperties {
+                    canFocus = true
+                }, // enable focus on touch/click mode
             onClick = onConfirm,
             color = MaterialTheme.colorScheme.primary,
             width = 116.dp,
@@ -248,8 +251,9 @@ private fun ErrorMessageContainer(errorMessage: String) {
 @Composable
 private fun SelectedKeyCombinationContainer(
     shouldShowError: Boolean,
-    onKeyPress: (KeyEvent) -> Boolean,
+    onShortcutKeyCombinationSelected: (KeyEvent) -> Boolean,
     pressedKeys: List<ShortcutKey>,
+    onConfirmSetShortcut: () -> Unit,
 ) {
     val interactionSource = remember { MutableInteractionSource() }
     val isFocused by interactionSource.collectIsFocusedAsState()
@@ -269,7 +273,17 @@ private fun SelectedKeyCombinationContainer(
             Modifier.padding(all = 16.dp)
                 .sizeIn(minWidth = 332.dp, minHeight = 56.dp)
                 .border(width = 2.dp, color = outlineColor, shape = RoundedCornerShape(50.dp))
-                .onKeyEvent { onKeyPress(it) }
+                .onPreviewKeyEvent { keyEvent ->
+                    val keyEventProcessed = onShortcutKeyCombinationSelected(keyEvent)
+                    if (
+                        !keyEventProcessed &&
+                            keyEvent.key == Key.Enter &&
+                            keyEvent.type == KeyEventType.KeyUp
+                    ) {
+                        onConfirmSetShortcut()
+                        true
+                    } else keyEventProcessed
+                }
                 .focusProperties { canFocus = true } // enables keyboard focus when in touch mode
                 .focusRequester(focusRequester),
         interactionSource = interactionSource,

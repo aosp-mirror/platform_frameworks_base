@@ -53,11 +53,11 @@ constructor(
 
     override suspend fun onActivated(): Nothing {
         viewModel.shortcutCustomizationUiState.collect { uiState ->
-            when(uiState){
+            when (uiState) {
                 is AddShortcutDialog,
                 is DeleteShortcutDialog,
                 is ResetShortcutDialog -> {
-                    if (dialog == null){
+                    if (dialog == null) {
                         dialog = createDialog().also { it.show() }
                     }
                 }
@@ -85,7 +85,9 @@ constructor(
             ShortcutCustomizationDialog(
                 uiState = uiState,
                 modifier = Modifier.width(364.dp).wrapContentHeight().padding(vertical = 24.dp),
-                onKeyPress = { viewModel.onKeyPressed(it) },
+                onShortcutKeyCombinationSelected = {
+                    viewModel.onShortcutKeyCombinationSelected(it)
+                },
                 onCancel = { dialog.dismiss() },
                 onConfirmSetShortcut = { coroutineScope.launch { viewModel.onSetShortcut() } },
                 onConfirmDeleteShortcut = {

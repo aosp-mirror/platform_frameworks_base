@@ -92,13 +92,14 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
 
-            assertThat(uiState).isEqualTo(
-                AddShortcutDialog(
-                    shortcutLabel = "Standard shortcut",
-                    defaultCustomShortcutModifierKey =
-                    ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
+            assertThat(uiState)
+                .isEqualTo(
+                    AddShortcutDialog(
+                        shortcutLabel = "Standard shortcut",
+                        defaultCustomShortcutModifierKey =
+                            ShortcutKey.Icon.ResIdIcon(R.drawable.ic_ksh_key_meta),
+                    )
                 )
-            )
         }
     }
 
@@ -137,8 +138,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            assertThat((uiState as AddShortcutDialog).pressedKeys)
-                .isEmpty()
+            assertThat((uiState as AddShortcutDialog).pressedKeys).isEmpty()
         }
     }
 
@@ -161,8 +161,7 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
 
-            assertThat((uiState as AddShortcutDialog).errorMessage)
-                .isEmpty()
+            assertThat((uiState as AddShortcutDialog).errorMessage).isEmpty()
         }
     }
 
@@ -244,32 +243,34 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
     }
 
     @Test
-    fun onKeyPressed_handlesKeyEvents_whereActionKeyIsAlsoPressed() {
+    fun onShortcutKeyCombinationSelected_handlesKeyEvents_whereActionKeyIsAlsoPressed() {
         testScope.runTest {
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            val isHandled = viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
+            val isHandled =
+                viewModel.onShortcutKeyCombinationSelected(keyDownEventWithActionKeyPressed)
 
             assertThat(isHandled).isTrue()
         }
     }
 
     @Test
-    fun onKeyPressed_doesNotHandleKeyEvents_whenActionKeyIsNotAlsoPressed() {
+    fun onShortcutKeyCombinationSelected_doesNotHandleKeyEvents_whenActionKeyIsNotAlsoPressed() {
         testScope.runTest {
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            val isHandled = viewModel.onKeyPressed(keyDownEventWithoutActionKeyPressed)
+            val isHandled =
+                viewModel.onShortcutKeyCombinationSelected(keyDownEventWithoutActionKeyPressed)
 
             assertThat(isHandled).isFalse()
         }
     }
 
     @Test
-    fun onKeyPressed_convertsKeyEventsAndUpdatesUiStatesPressedKey() {
+    fun onShortcutKeyCombinationSelected_convertsKeyEventsAndUpdatesUiStatesPressedKey() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
-            viewModel.onKeyPressed(keyUpEventWithActionKeyPressed)
+            viewModel.onShortcutKeyCombinationSelected(keyDownEventWithActionKeyPressed)
+            viewModel.onShortcutKeyCombinationSelected(keyUpEventWithActionKeyPressed)
 
             // Note that Action Key is excluded as it's already displayed on the UI
             assertThat((uiState as AddShortcutDialog).pressedKeys)
@@ -282,8 +283,8 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val uiState by collectLastValue(viewModel.shortcutCustomizationUiState)
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
-            viewModel.onKeyPressed(keyUpEventWithActionKeyPressed)
+            viewModel.onShortcutKeyCombinationSelected(keyDownEventWithActionKeyPressed)
+            viewModel.onShortcutKeyCombinationSelected(keyUpEventWithActionKeyPressed)
 
             // Note that Action Key is excluded as it's already displayed on the UI
             assertThat((uiState as AddShortcutDialog).pressedKeys)
@@ -292,16 +293,15 @@ class ShortcutCustomizationViewModelTest : SysuiTestCase() {
             // Close the dialog and show it again
             viewModel.onDialogDismissed()
             viewModel.onShortcutCustomizationRequested(standardAddShortcutRequest)
-            assertThat((uiState as AddShortcutDialog).pressedKeys)
-                .isEmpty()
+            assertThat((uiState as AddShortcutDialog).pressedKeys).isEmpty()
         }
     }
 
     private suspend fun openAddShortcutDialogAndSetShortcut() {
         viewModel.onShortcutCustomizationRequested(allAppsShortcutAddRequest)
 
-        viewModel.onKeyPressed(keyDownEventWithActionKeyPressed)
-        viewModel.onKeyPressed(keyUpEventWithActionKeyPressed)
+        viewModel.onShortcutKeyCombinationSelected(keyDownEventWithActionKeyPressed)
+        viewModel.onShortcutKeyCombinationSelected(keyUpEventWithActionKeyPressed)
 
         viewModel.onSetShortcut()
     }
