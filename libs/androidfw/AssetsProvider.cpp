@@ -24,8 +24,9 @@
 #include <ziparchive/zip_archive.h>
 
 namespace android {
-
-static constexpr std::string_view kEmptyDebugString = "<empty>";
+namespace {
+constexpr const char* kEmptyDebugString = "<empty>";
+} // namespace
 
 std::unique_ptr<Asset> AssetsProvider::Open(const std::string& path, Asset::AccessMode mode,
                                             bool* file_exists) const {
@@ -355,14 +356,8 @@ MultiAssetsProvider::MultiAssetsProvider(std::unique_ptr<AssetsProvider>&& prima
 
 std::unique_ptr<AssetsProvider> MultiAssetsProvider::Create(
     std::unique_ptr<AssetsProvider>&& primary, std::unique_ptr<AssetsProvider>&& secondary) {
-  if (primary == nullptr && secondary == nullptr) {
-    return EmptyAssetsProvider::Create();
-  }
-  if (!primary) {
-    return secondary;
-  }
-  if (!secondary) {
-    return primary;
+  if (primary == nullptr || secondary == nullptr) {
+    return nullptr;
   }
   return std::unique_ptr<MultiAssetsProvider>(new MultiAssetsProvider(std::move(primary),
                                                                       std::move(secondary)));
@@ -430,7 +425,7 @@ const std::string& EmptyAssetsProvider::GetDebugName() const {
   if (path_.has_value()) {
     return *path_;
   }
-  constexpr static std::string kEmpty{kEmptyDebugString};
+  const static std::string kEmpty = kEmptyDebugString;
   return kEmpty;
 }
 

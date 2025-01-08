@@ -164,7 +164,7 @@ struct DirectoryAssetsProvider : public AssetsProvider {
 // `secondary` asset provider if the asset cannot be found in the `primary`.
 struct MultiAssetsProvider : public AssetsProvider {
   static std::unique_ptr<AssetsProvider> Create(std::unique_ptr<AssetsProvider>&& primary,
-                                                std::unique_ptr<AssetsProvider>&& secondary = {});
+                                                std::unique_ptr<AssetsProvider>&& secondary);
 
   bool ForEachFile(const std::string& root_path,
                    base::function_ref<void(StringPiece, FileType)> f) const override;
