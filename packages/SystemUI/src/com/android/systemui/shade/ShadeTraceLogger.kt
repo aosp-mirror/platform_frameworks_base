@@ -27,7 +27,7 @@ import com.android.app.tracing.coroutines.TrackTracer
  * them across various threads' logs.
  */
 object ShadeTraceLogger {
-    private val t = TrackTracer(trackName = "ShadeTraceLogger")
+    private val t = TrackTracer(trackName = "ShadeTraceLogger", trackGroup = "shade")
 
     @JvmStatic
     fun logOnMovedToDisplay(displayId: Int, config: Configuration) {

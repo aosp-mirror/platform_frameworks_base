@@ -37,6 +37,7 @@ import android.view.animation.Interpolator;
 import androidx.annotation.NonNull;
 
 import com.android.app.animation.Interpolators;
+import com.android.app.tracing.coroutines.TrackTracer;
 import com.android.compose.animation.scene.OverlayKey;
 import com.android.compose.animation.scene.SceneKey;
 import com.android.internal.annotations.GuardedBy;
@@ -671,7 +672,7 @@ public class StatusBarStateControllerImpl implements
     }
 
     private void recordHistoricalState(int newState, int lastState, boolean upcoming) {
-        Trace.traceCounter(Trace.TRACE_TAG_APP, "statusBarState", newState);
+        TrackTracer.instantForGroup("statusBar", "state", newState);
         mHistoryIndex = (mHistoryIndex + 1) % HISTORY_SIZE;
         HistoricalState state = mHistoricalRecords[mHistoryIndex];
         state.mNewState = newState;

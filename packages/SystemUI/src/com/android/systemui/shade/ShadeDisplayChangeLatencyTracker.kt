@@ -24,7 +24,6 @@ import com.android.systemui.common.ui.view.ChoreographerUtils
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.ui.view.WindowRootView
-import com.android.systemui.shade.ShadeDisplayChangeLatencyTracker.Companion.TIMEOUT
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.util.kotlin.getOrNull
 import java.util.Optional
@@ -33,7 +32,6 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.cancel
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
@@ -135,7 +133,7 @@ constructor(
 
     private companion object {
         const val TAG = "ShadeDisplayLatency"
-        val t = TrackTracer(trackName = TAG)
+        val t = TrackTracer(trackName = TAG, trackGroup = "shade")
         val TIMEOUT = 3.seconds
         const val SHADE_MOVE_ACTION = LatencyTracker.ACTION_SHADE_WINDOW_DISPLAY_CHANGE
     }

@@ -11,13 +11,13 @@ import android.graphics.PorterDuffColorFilter
 import android.graphics.PorterDuffXfermode
 import android.graphics.RadialGradient
 import android.graphics.Shader
-import android.os.Trace
 import android.util.AttributeSet
 import android.util.MathUtils.lerp
 import android.view.MotionEvent
 import android.view.View
 import android.view.animation.PathInterpolator
 import com.android.app.animation.Interpolators
+import com.android.app.tracing.coroutines.TrackTracer
 import com.android.keyguard.logging.ScrimLogger
 import com.android.systemui.shade.TouchLogger
 import com.android.systemui.statusbar.LightRevealEffect.Companion.getPercentPastThreshold
@@ -321,9 +321,8 @@ constructor(
                 }
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
-                Trace.traceCounter(
-                    Trace.TRACE_TAG_APP,
-                    "light_reveal_amount $logString",
+                TrackTracer.instantForGroup(
+                    "scrim", { "light_reveal_amount $logString" },
                     (field * 100).toInt()
                 )
                 invalidate()
