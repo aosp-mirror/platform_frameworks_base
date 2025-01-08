@@ -464,7 +464,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
      * Returns false if the legacy back behavior should be used.
      */
     public boolean isOnBackInvokedCallbackEnabled() {
-        return isOnBackInvokedCallbackEnabled(mChecker.getContext());
+        final Context hostContext = mChecker.getContext();
+        if (hostContext == null) {
+            Log.w(TAG, "OnBackInvokedCallback is disabled, host context is removed!");
+            return false;
+        }
+        return isOnBackInvokedCallbackEnabled(hostContext);
     }
 
     /**
@@ -695,7 +700,12 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
          */
         public boolean checkApplicationCallbackRegistration(int priority,
                 OnBackInvokedCallback callback) {
-            if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(getContext())
+            final Context hostContext = getContext();
+            if (hostContext == null) {
+                Log.w(TAG, "OnBackInvokedCallback is disabled, host context is removed!");
+                return false;
+            }
+            if (!WindowOnBackInvokedDispatcher.isOnBackInvokedCallbackEnabled(hostContext)
                     && !(callback instanceof CompatOnBackInvokedCallback)) {
                 Log.w(TAG,
                         "OnBackInvokedCallback is not enabled for the application."
@@ -720,7 +730,7 @@ public class WindowOnBackInvokedDispatcher implements OnBackInvokedDispatcher {
             return true;
         }
 
-        private Context getContext() {
+        @Nullable private Context getContext() {
             return mContext.get();
         }
     }
