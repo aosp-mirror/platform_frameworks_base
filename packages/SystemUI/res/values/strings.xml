@@ -588,6 +588,12 @@
     <!-- Content description of the cast label showing what we are connected to. [CHAR LIMIT=NONE] -->
     <string name="accessibility_cast_name">Connected to <xliff:g id="cast" example="TV">%s</xliff:g>.</string>
 
+    <!-- Content description of the button to expand the group of devices. [CHAR LIMIT=NONE] -->
+    <string name="accessibility_expand_group">Expand group.</string>
+
+    <!-- Content description of the button to open the application . [CHAR LIMIT=NONE] -->
+    <string name="accessibility_open_application">Open application.</string>
+
     <!-- Content description of an item with no signal and no connection for accessibility (not shown on the screen) [CHAR LIMIT=NONE] -->
     <string name="accessibility_not_connected">Not connected.</string>
     <!-- Content description of the roaming data connection type. [CHAR LIMIT=NONE] -->

@@ -42,6 +42,7 @@ import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.android.media.flags.Flags;
 import com.android.settingslib.media.InputMediaDevice;
 import com.android.settingslib.media.MediaDevice;
 import com.android.settingslib.utils.ThreadUtils;
@@ -211,6 +212,10 @@ public abstract class MediaOutputBaseAdapter extends
             mTitleText.setText(title);
             mCheckBox.setVisibility(showCheckBox ? View.VISIBLE : View.GONE);
             mEndTouchArea.setVisibility(showEndTouchArea ? View.VISIBLE : View.GONE);
+            if (Flags.enableOutputSwitcherSessionGrouping()) {
+                mEndClickIcon.setVisibility(
+                        !showCheckBox && showEndTouchArea ? View.VISIBLE : View.GONE);
+            }
             ViewGroup.MarginLayoutParams params =
                     (ViewGroup.MarginLayoutParams) mItemLayout.getLayoutParams();
             params.rightMargin = showEndTouchArea ? mController.getItemMarginEndSelectable()
@@ -265,14 +270,8 @@ public abstract class MediaOutputBaseAdapter extends
                             mController.getActiveRadius(), 0, 0});
         }
 
-        void initSeekbar(MediaDevice device, boolean isCurrentSeekbarInvisible) {
-            if (!mController.isVolumeControlEnabled(device)) {
-                disableSeekBar();
-            } else {
-                enableSeekBar(device);
-            }
-            mSeekBar.setMaxVolume(device.getMaxVolume());
-            final int currentVolume = device.getCurrentVolume();
+        private void initializeSeekbarVolume(
+                MediaDevice device, int currentVolume, boolean isCurrentSeekbarInvisible) {
             if (!mIsDragging) {
                 if (mSeekBar.getVolume() != currentVolume && (mLatestUpdateVolume == -1
                         || currentVolume == mLatestUpdateVolume)) {
@@ -307,54 +306,75 @@ public abstract class MediaOutputBaseAdapter extends
             if (mIsInitVolumeFirstTime) {
                 mIsInitVolumeFirstTime = false;
             }
-            mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-                boolean mStartFromMute = false;
+        }
+
+        void initSeekbar(MediaDevice device, boolean isCurrentSeekbarInvisible) {
+            SeekBarVolumeControl volumeControl = new SeekBarVolumeControl() {
                 @Override
-                public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-                    if (device == null || !fromUser) {
-                        return;
-                    }
-
-                    final String percentageString = mContext.getResources().getString(
-                            R.string.media_output_dialog_volume_percentage,
-                            mSeekBar.getPercentage());
-                    mVolumeValueText.setText(percentageString);
-
-                    if (mStartFromMute) {
-                        updateUnmutedVolumeIcon(device);
-                        mStartFromMute = false;
-                    }
-                    int seekBarVolume = MediaOutputSeekbar.scaleProgressToVolume(progress);
-                    if (seekBarVolume != device.getCurrentVolume()) {
-                        mLatestUpdateVolume = seekBarVolume;
-                        mController.adjustVolume(device, seekBarVolume);
-                    }
+                public int getVolume() {
+                    return device.getCurrentVolume();
+                }
+                @Override
+                public void setVolume(int volume) {
+                    mController.adjustVolume(device, volume);
                 }
 
                 @Override
-                public void onStartTrackingTouch(SeekBar seekBar) {
-                    mTitleIcon.setVisibility(View.INVISIBLE);
-                    mVolumeValueText.setVisibility(View.VISIBLE);
-                    int currentVolume = MediaOutputSeekbar.scaleProgressToVolume(
-                            seekBar.getProgress());
-                    mStartFromMute = (currentVolume == 0);
-                    mIsDragging = true;
+                public void onMute() {
+                    mController.logInteractionUnmuteDevice(device);
                 }
+            };
 
+            if (!mController.isVolumeControlEnabled(device)) {
+                disableSeekBar();
+            } else {
+                enableSeekBar(volumeControl);
+            }
+            mSeekBar.setMaxVolume(device.getMaxVolume());
+            final int currentVolume = device.getCurrentVolume();
+            initializeSeekbarVolume(device, currentVolume, isCurrentSeekbarInvisible);
+
+            mSeekBar.setOnSeekBarChangeListener(new MediaSeekBarChangedListener(
+                    device, volumeControl) {
                 @Override
-                public void onStopTrackingTouch(SeekBar seekBar) {
-                    int currentVolume = MediaOutputSeekbar.scaleProgressToVolume(
-                            seekBar.getProgress());
-                    if (currentVolume == 0) {
-                        seekBar.setProgress(0);
-                        updateMutedVolumeIcon(device);
-                    } else {
-                        updateUnmutedVolumeIcon(device);
-                    }
-                    mTitleIcon.setVisibility(View.VISIBLE);
-                    mVolumeValueText.setVisibility(View.GONE);
+                public void onStopTrackingTouch(SeekBar seekbar) {
+                    super.onStopTrackingTouch(seekbar);
                     mController.logInteractionAdjustVolume(device);
-                    mIsDragging = false;
+                }
+            });
+        }
+
+        // Initializes the seekbar for a group of devices.
+        void initGroupSeekbar(boolean isCurrentSeekbarInvisible) {
+            SeekBarVolumeControl volumeControl = new SeekBarVolumeControl() {
+                @Override
+                public int getVolume() {
+                    return mController.getSessionVolume();
+                }
+
+                @Override
+                public void setVolume(int volume) {
+                    mController.adjustSessionVolume(volume);
+                }
+
+                @Override
+                public void onMute() {}
+            };
+
+            if (!mController.isVolumeControlEnabledForSession()) {
+                disableSeekBar();
+            } else {
+                enableSeekBar(volumeControl);
+            }
+            mSeekBar.setMaxVolume(mController.getSessionVolumeMax());
+
+            final int currentVolume = mController.getSessionVolume();
+            initializeSeekbarVolume(null, currentVolume, isCurrentSeekbarInvisible);
+            mSeekBar.setOnSeekBarChangeListener(new MediaSeekBarChangedListener(
+                    null, volumeControl) {
+                @Override
+                protected boolean shouldHandleProgressChanged() {
+                    return true;
                 }
             });
         }
@@ -385,7 +405,7 @@ public abstract class MediaOutputBaseAdapter extends
         int getDrawableId(boolean isInputDevice, boolean isMutedVolumeIcon) {
             // Returns the microphone icon when the flag is enabled and the device is an input
             // device.
-            if (com.android.media.flags.Flags.enableAudioInputDeviceRoutingAndVolumeControl()
+            if (Flags.enableAudioInputDeviceRoutingAndVolumeControl()
                     && isInputDevice) {
                 return isMutedVolumeIcon ? R.drawable.ic_mic_off : R.drawable.ic_mic_26dp;
             }
@@ -452,27 +472,28 @@ public abstract class MediaOutputBaseAdapter extends
             updateIconAreaClickListener(null);
         }
 
-        private void enableSeekBar(MediaDevice device) {
+        private void enableSeekBar(SeekBarVolumeControl volumeControl) {
             mSeekBar.setEnabled(true);
+
             mSeekBar.setOnTouchListener((v, event) -> false);
             updateIconAreaClickListener((v) -> {
-                if (device.getCurrentVolume() == 0) {
-                    mController.logInteractionUnmuteDevice(device);
+                if (volumeControl.getVolume() == 0) {
                     mSeekBar.setVolume(UNMUTE_DEFAULT_VOLUME);
-                    mController.adjustVolume(device, UNMUTE_DEFAULT_VOLUME);
-                    updateUnmutedVolumeIcon(device);
+                    volumeControl.setVolume(UNMUTE_DEFAULT_VOLUME);
+                    updateUnmutedVolumeIcon(null);
                     mIconAreaLayout.setOnTouchListener(((iconV, event) -> false));
                 } else {
-                    mController.logInteractionMuteDevice(device);
+                    volumeControl.onMute();
                     mSeekBar.resetVolume();
-                    mController.adjustVolume(device, 0);
-                    updateMutedVolumeIcon(device);
+                    volumeControl.setVolume(0);
+                    updateMutedVolumeIcon(null);
                     mIconAreaLayout.setOnTouchListener(((iconV, event) -> {
                         mSeekBar.dispatchTouchEvent(event);
                         return false;
                     }));
                 }
             });
+
         }
 
         protected void setUpDeviceIcon(MediaDevice device) {
@@ -488,5 +509,74 @@ public abstract class MediaOutputBaseAdapter extends
                 });
             });
         }
+
+        interface SeekBarVolumeControl {
+            int getVolume();
+            void setVolume(int volume);
+            void onMute();
+        }
+
+        private abstract class MediaSeekBarChangedListener
+                implements SeekBar.OnSeekBarChangeListener {
+            boolean mStartFromMute = false;
+            private MediaDevice mMediaDevice;
+            private SeekBarVolumeControl mVolumeControl;
+
+            MediaSeekBarChangedListener(MediaDevice device, SeekBarVolumeControl volumeControl) {
+                mMediaDevice = device;
+                mVolumeControl = volumeControl;
+            }
+
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                if (!shouldHandleProgressChanged() || !fromUser) {
+                    return;
+                }
+
+                final String percentageString = mContext.getResources().getString(
+                        R.string.media_output_dialog_volume_percentage,
+                        mSeekBar.getPercentage());
+                mVolumeValueText.setText(percentageString);
+
+                if (mStartFromMute) {
+                    updateUnmutedVolumeIcon(mMediaDevice);
+                    mStartFromMute = false;
+                }
+
+                int seekBarVolume = MediaOutputSeekbar.scaleProgressToVolume(progress);
+                if (seekBarVolume != mVolumeControl.getVolume()) {
+                    mLatestUpdateVolume = seekBarVolume;
+                    mVolumeControl.setVolume(seekBarVolume);
+                }
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                mTitleIcon.setVisibility(View.INVISIBLE);
+                mVolumeValueText.setVisibility(View.VISIBLE);
+                int currentVolume = MediaOutputSeekbar.scaleProgressToVolume(
+                        seekBar.getProgress());
+                mStartFromMute = (currentVolume == 0);
+                mIsDragging = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                int currentVolume = MediaOutputSeekbar.scaleProgressToVolume(
+                        seekBar.getProgress());
+                if (currentVolume == 0) {
+                    seekBar.setProgress(0);
+                    updateMutedVolumeIcon(mMediaDevice);
+                } else {
+                    updateUnmutedVolumeIcon(mMediaDevice);
+                }
+                mTitleIcon.setVisibility(View.VISIBLE);
+                mVolumeValueText.setVisibility(View.GONE);
+                mIsDragging = false;
+            }
+            protected boolean shouldHandleProgressChanged() {
+                return mMediaDevice != null;
+            }
+        };
     }
 }

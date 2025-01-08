@@ -125,6 +125,13 @@ flag {
 }
 
 flag {
+    name: "enable_output_switcher_session_grouping"
+    namespace: "media_better_together"
+    description: "Enables selected items in Output Switcher to be grouped together."
+    bug: "388347018"
+}
+
+flag {
     name: "enable_prevention_of_keep_alive_route_providers"
     namespace: "media_solutions"
     description: "Enables mechanisms to prevent route providers from keeping malicious apps alive."

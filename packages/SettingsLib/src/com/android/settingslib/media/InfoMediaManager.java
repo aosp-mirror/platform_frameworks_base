@@ -658,12 +658,9 @@ public abstract class InfoMediaManager {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
             RouteListingPreference routeListingPreference = getRouteListingPreference();
             if (routeListingPreference != null) {
-                final List<RouteListingPreference.Item> preferenceRouteListing =
-                        Api34Impl.composePreferenceRouteListing(
-                                routeListingPreference);
                 availableRoutes = Api34Impl.arrangeRouteListByPreference(selectedRoutes,
                         getAvailableRoutesFromRouter(),
-                                preferenceRouteListing);
+                        routeListingPreference);
             }
             return Api34Impl.filterDuplicatedIds(availableRoutes);
         } else {
@@ -760,11 +757,15 @@ public abstract class InfoMediaManager {
         @DoNotInline
         static List<RouteListingPreference.Item> composePreferenceRouteListing(
                 RouteListingPreference routeListingPreference) {
+            boolean preferRouteListingOrdering =
+                    com.android.media.flags.Flags.enableOutputSwitcherSessionGrouping()
+                    && preferRouteListingOrdering(routeListingPreference);
             List<RouteListingPreference.Item> finalizedItemList = new ArrayList<>();
             List<RouteListingPreference.Item> itemList = routeListingPreference.getItems();
             for (RouteListingPreference.Item item : itemList) {
                 // Put suggested devices on the top first before further organization
-                if ((item.getFlags() & RouteListingPreference.Item.FLAG_SUGGESTED) != 0) {
+                if (!preferRouteListingOrdering
+                        && (item.getFlags() & RouteListingPreference.Item.FLAG_SUGGESTED) != 0) {
                     finalizedItemList.add(0, item);
                 } else {
                     finalizedItemList.add(item);
@@ -792,7 +793,7 @@ public abstract class InfoMediaManager {
          * Returns an ordered list of available devices based on the provided {@code
          * routeListingPreferenceItems}.
          *
-         * <p>The result has the following order:
+         * <p>The resulting order if enableOutputSwitcherSessionGrouping is disabled is:
          *
          * <ol>
          *   <li>Selected routes.
@@ -800,22 +801,54 @@ public abstract class InfoMediaManager {
          *   <li>Not-selected, non-system, available routes sorted by route listing preference.
          * </ol>
          *
+         * <p>The resulting order if enableOutputSwitcherSessionGrouping is enabled is:
+         *
+         * <ol>
+         *   <li>Selected routes sorted by route listing preference.
+         *   <li>Selected routes not defined by route listing preference.
+         *   <li>Not-selected system routes.
+         *   <li>Not-selected, non-system, available routes sorted by route listing preference.
+         * </ol>
+         *
+         *
          * @param selectedRoutes List of currently selected routes.
          * @param availableRoutes List of available routes that match the app's requested route
          *     features.
-         * @param routeListingPreferenceItems Ordered list of {@link RouteListingPreference.Item} to
-         *     sort routes with.
+         * @param routeListingPreference Preferences provided by the app to determine route order.
          */
         @DoNotInline
         static List<MediaRoute2Info> arrangeRouteListByPreference(
                 List<MediaRoute2Info> selectedRoutes,
                 List<MediaRoute2Info> availableRoutes,
-                List<RouteListingPreference.Item> routeListingPreferenceItems) {
+                RouteListingPreference routeListingPreference) {
+            final List<RouteListingPreference.Item> routeListingPreferenceItems =
+                    Api34Impl.composePreferenceRouteListing(routeListingPreference);
+
             Set<String> sortedRouteIds = new LinkedHashSet<>();
 
+            boolean addSelectedRlpItemsFirst =
+                    com.android.media.flags.Flags.enableOutputSwitcherSessionGrouping()
+                    && preferRouteListingOrdering(routeListingPreference);
+            Set<String> selectedRouteIds = new HashSet<>();
+
+            if (addSelectedRlpItemsFirst) {
+                // Add selected RLP items first
+                for (MediaRoute2Info selectedRoute : selectedRoutes) {
+                    selectedRouteIds.add(selectedRoute.getId());
+                }
+                for (RouteListingPreference.Item item: routeListingPreferenceItems) {
+                    if (selectedRouteIds.contains(item.getRouteId())) {
+                        sortedRouteIds.add(item.getRouteId());
+                    }
+                }
+            }
+
             // Add selected routes first.
-            for (MediaRoute2Info selectedRoute : selectedRoutes) {
-                sortedRouteIds.add(selectedRoute.getId());
+            if (com.android.media.flags.Flags.enableOutputSwitcherSessionGrouping()
+                    && sortedRouteIds.size() != selectedRoutes.size()) {
+                for (MediaRoute2Info selectedRoute : selectedRoutes) {
+                    sortedRouteIds.add(selectedRoute.getId());
+                }
             }
 
             // Add not-yet-added system routes.
