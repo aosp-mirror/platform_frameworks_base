@@ -3950,6 +3950,7 @@
   <java-symbol type="dimen" name="notification_progress_tracker_height" />
   <java-symbol type="dimen" name="notification_progress_segSeg_gap" />
   <java-symbol type="dimen" name="notification_progress_segPoint_gap" />
+  <java-symbol type="dimen" name="notification_progress_segments_min_width" />
   <java-symbol type="dimen" name="notification_progress_segments_height" />
   <java-symbol type="dimen" name="notification_progress_segments_faded_height" />
   <java-symbol type="dimen" name="notification_progress_segments_corner_radius" />

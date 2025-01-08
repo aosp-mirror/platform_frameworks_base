@@ -21,7 +21,6 @@ import android.content.res.Resources;
 import android.content.res.Resources.Theme;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
-import android.graphics.Color;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -49,7 +48,8 @@ import java.util.Objects;
 
 /**
  * This is used by NotificationProgressBar for displaying a custom background. It composes of
- * segments, which have non-zero length, and points, which have zero length.
+ * segments, which have non-zero length varying drawing width, and points, which have zero length
+ * and fixed size for drawing.
  *
  * @see Segment
  * @see Point
@@ -57,14 +57,15 @@ import java.util.Objects;
 public final class NotificationProgressDrawable extends Drawable {
     private static final String TAG = "NotifProgressDrawable";
 
+    @Nullable
+    private BoundsChangeListener mBoundsChangeListener = null;
+
     private State mState;
     private boolean mMutated;
 
     private final ArrayList<Part> mParts = new ArrayList<>();
-    private boolean mHasTrackerIcon;
 
     private final RectF mSegRectF = new RectF();
-    private final Rect mPointRect = new Rect();
     private final RectF mPointRectF = new RectF();
 
     private final Paint mFillPaint = new Paint();
@@ -80,27 +81,31 @@ public final class NotificationProgressDrawable extends Drawable {
     }
 
     /**
-     * <p>Set the segment default color for the drawable.</p>
-     * <p>Note: changing this property will affect all instances of a drawable loaded from a
-     * resource. It is recommended to invoke {@link #mutate()} before changing this property.</p>
-     *
-     * @param color The color of the stroke
-     * @see #mutate()
+     * Returns the gap between two segments.
      */
-    public void setSegmentDefaultColor(@ColorInt int color) {
-        mState.setSegmentColor(color);
+    public float getSegSegGap() {
+        return mState.mSegSegGap;
     }
 
     /**
-     * <p>Set the point rect default color for the drawable.</p>
-     * <p>Note: changing this property will affect all instances of a drawable loaded from a
-     * resource. It is recommended to invoke {@link #mutate()} before changing this property.</p>
-     *
-     * @param color The color of the point rect
-     * @see #mutate()
+     * Returns the gap between a segment and a point.
      */
-    public void setPointRectDefaultColor(@ColorInt int color) {
-        mState.setPointRectColor(color);
+    public float getSegPointGap() {
+        return mState.mSegPointGap;
+    }
+
+    /**
+     * Returns the gap between a segment and a point.
+     */
+    public float getSegmentMinWidth() {
+        return mState.mSegmentMinWidth;
+    }
+
+    /**
+     * Returns the radius for the points.
+     */
+    public float getPointRadius() {
+        return mState.mPointRadius;
     }
 
     /**
@@ -120,47 +125,18 @@ public final class NotificationProgressDrawable extends Drawable {
         setParts(Arrays.asList(parts));
     }
 
-    /**
-     * Set whether a tracker is drawn on top of this NotificationProgressDrawable.
-     */
-    public void setHasTrackerIcon(boolean hasTrackerIcon) {
-        if (mHasTrackerIcon != hasTrackerIcon) {
-            mHasTrackerIcon = hasTrackerIcon;
-            invalidateSelf();
-        }
-    }
-
     @Override
     public void draw(@NonNull Canvas canvas) {
-        final float pointRadius =
-                mState.mPointRadius; // how big the point icon will be, halved
-
-        // generally, we will start drawing at (x, y) and end at (x+w, y)
-        float x = (float) getBounds().left;
+        final float pointRadius = mState.mPointRadius;
+        final float left = (float) getBounds().left;
         final float centerY = (float) getBounds().centerY();
-        final float totalWidth = (float) getBounds().width();
-        float segPointGap = mState.mSegPointGap;
 
         final int numParts = mParts.size();
         for (int iPart = 0; iPart < numParts; iPart++) {
             final Part part = mParts.get(iPart);
-            final Part prevPart = iPart == 0 ? null : mParts.get(iPart - 1);
-            final Part nextPart = iPart + 1 == numParts ? null : mParts.get(iPart + 1);
+            final float start = left + part.mStart;
+            final float end = left + part.mEnd;
             if (part instanceof Segment segment) {
-                final float segWidth = segment.mFraction * totalWidth;
-                // Advance the start position to account for a point immediately prior.
-                final float startOffset = getSegStartOffset(prevPart, pointRadius, segPointGap, x);
-                final float start = x + startOffset;
-                // Retract the end position to account for the padding and a point immediately
-                // after.
-                final float endOffset = getSegEndOffset(segment, nextPart, pointRadius, segPointGap,
-                        mState.mSegSegGap, x + segWidth, totalWidth, mHasTrackerIcon);
-                final float end = x + segWidth - endOffset;
-
-                // Advance the current position to account for the segment's fraction of the total
-                // width (ignoring offset and padding)
-                x += segWidth;
-
                 // No space left to draw the segment
                 if (start > end) continue;
 
@@ -168,67 +144,23 @@ public final class NotificationProgressDrawable extends Drawable {
                         : mState.mSegmentHeight / 2F;
                 final float cornerRadius = mState.mSegmentCornerRadius;
 
-                mFillPaint.setColor(segment.mColor != Color.TRANSPARENT ? segment.mColor
-                        : (segment.mFaded ? mState.mFadedSegmentColor : mState.mSegmentColor));
+                mFillPaint.setColor(segment.mColor);
 
                 mSegRectF.set(start, centerY - radiusY, end, centerY + radiusY);
                 canvas.drawRoundRect(mSegRectF, cornerRadius, cornerRadius, mFillPaint);
             } else if (part instanceof Point point) {
-                final float pointWidth = 2 * pointRadius;
-                float start = x - pointRadius;
-                if (start < 0) start = 0;
-                float end = start + pointWidth;
-                if (end > totalWidth) {
-                    end = totalWidth;
-                    if (totalWidth > pointWidth) start = totalWidth - pointWidth;
-                }
-                mPointRect.set((int) start, (int) (centerY - pointRadius), (int) end,
-                        (int) (centerY + pointRadius));
+                // TODO: b/367804171 - actually use a vector asset for the default point
+                //  rather than drawing it as a box?
+                mPointRectF.set(start, centerY - pointRadius, end, centerY + pointRadius);
+                final float inset = mState.mPointRectInset;
+                final float cornerRadius = mState.mPointRectCornerRadius;
+                mPointRectF.inset(inset, inset);
 
-                if (point.mIcon != null) {
-                    point.mIcon.setBounds(mPointRect);
-                    point.mIcon.draw(canvas);
-                } else {
-                    // TODO: b/367804171 - actually use a vector asset for the default point
-                    //  rather than drawing it as a box?
-                    mPointRectF.set(start, centerY - pointRadius, end, centerY + pointRadius);
-                    final float inset = mState.mPointRectInset;
-                    final float cornerRadius = mState.mPointRectCornerRadius;
-                    mPointRectF.inset(inset, inset);
+                mFillPaint.setColor(point.mColor);
 
-                    mFillPaint.setColor(point.mColor != Color.TRANSPARENT ? point.mColor
-                            : (point.mFaded ? mState.mFadedPointRectColor
-                                    : mState.mPointRectColor));
-
-                    canvas.drawRoundRect(mPointRectF, cornerRadius, cornerRadius, mFillPaint);
-                }
+                canvas.drawRoundRect(mPointRectF, cornerRadius, cornerRadius, mFillPaint);
             }
         }
-    }
-
-    private static float getSegStartOffset(Part prevPart, float pointRadius, float segPointGap,
-            float startX) {
-        if (!(prevPart instanceof Point)) return 0F;
-        final float pointOffset = (startX < pointRadius) ? (pointRadius - startX) : 0;
-        return pointOffset + pointRadius + segPointGap;
-    }
-
-    private static float getSegEndOffset(Segment seg, Part nextPart, float pointRadius,
-            float segPointGap,
-            float segSegGap, float endX, float totalWidth, boolean hasTrackerIcon) {
-        if (nextPart == null) return 0F;
-        if (nextPart instanceof Segment nextSeg) {
-            if (!seg.mFaded && nextSeg.mFaded) {
-                // @see Segment#mFaded
-                return hasTrackerIcon ? 0F : segSegGap;
-            }
-            return segSegGap;
-        }
-
-        final float pointWidth = 2 * pointRadius;
-        final float pointOffset = (endX + pointRadius > totalWidth && totalWidth > pointWidth)
-                ? (endX + pointRadius - totalWidth) : 0;
-        return segPointGap + pointRadius + pointOffset;
     }
 
     @Override
@@ -258,6 +190,19 @@ public final class NotificationProgressDrawable extends Drawable {
     public int getOpacity() {
         // This method is deprecated. Hence we return UNKNOWN.
         return PixelFormat.UNKNOWN;
+    }
+
+    public void setBoundsChangeListener(BoundsChangeListener listener) {
+        mBoundsChangeListener = listener;
+    }
+
+    @Override
+    protected void onBoundsChange(Rect bounds) {
+        super.onBoundsChange(bounds);
+
+        if (mBoundsChangeListener != null) {
+            mBoundsChangeListener.onDrawableBoundsChanged();
+        }
     }
 
     @Override
@@ -384,6 +329,8 @@ public final class NotificationProgressDrawable extends Drawable {
         // Extract the theme attributes, if any.
         state.mThemeAttrsSegments = a.extractThemeAttrs();
 
+        state.mSegmentMinWidth = a.getDimension(
+                R.styleable.NotificationProgressDrawableSegments_minWidth, state.mSegmentMinWidth);
         state.mSegmentHeight = a.getDimension(
                 R.styleable.NotificationProgressDrawableSegments_height, state.mSegmentHeight);
         state.mFadedSegmentHeight = a.getDimension(
@@ -392,9 +339,6 @@ public final class NotificationProgressDrawable extends Drawable {
         state.mSegmentCornerRadius = a.getDimension(
                 R.styleable.NotificationProgressDrawableSegments_cornerRadius,
                 state.mSegmentCornerRadius);
-        final int color = a.getColor(R.styleable.NotificationProgressDrawableSegments_color,
-                state.mSegmentColor);
-        setSegmentDefaultColor(color);
     }
 
     private void updatePointsFromTypedArray(TypedArray a) {
@@ -413,9 +357,6 @@ public final class NotificationProgressDrawable extends Drawable {
         state.mPointRectCornerRadius = a.getDimension(
                 R.styleable.NotificationProgressDrawablePoints_cornerRadius,
                 state.mPointRectCornerRadius);
-        final int color = a.getColor(R.styleable.NotificationProgressDrawablePoints_color,
-                state.mPointRectColor);
-        setPointRectDefaultColor(color);
     }
 
     static int resolveDensity(@Nullable Resources r, int parentDensity) {
@@ -464,63 +405,56 @@ public final class NotificationProgressDrawable extends Drawable {
     }
 
     /**
-     * A part of the progress bar, which is either a S{@link Segment} with non-zero length, or a
-     * {@link Point} with zero length.
+     * Listener to receive updates about drawable bounds changing
      */
-    public interface Part {
+    public interface BoundsChangeListener {
+        /** Called when bounds have changed */
+        void onDrawableBoundsChanged();
     }
 
     /**
-     * A segment is a part of the progress bar with non-zero length. For example, it can
-     * represent a portion in a navigation journey with certain traffic condition.
-     *
+     * A part of the progress bar, which is either a {@link Segment} with non-zero length and
+     * varying drawing width, or a {@link Point} with zero length and fixed size for drawing.
      */
-    public static final class Segment implements Part {
-        private final float mFraction;
-        @ColorInt private final int mColor;
-        /** Whether the segment is faded or not.
-         * <p>
-         *     <pre>
-         *     When mFaded is set to true, a combination of the following is done to the segment:
-         *       1. The drawing color is mColor with opacity updated to 40%.
-         *       2. The gap between faded and non-faded segments is:
-         *          - the segment-segment gap, when there is no tracker icon
-         *          - 0, when there is tracker icon
-         *     </pre>
-         * </p>
-         */
-        private final boolean mFaded;
+    public abstract static class Part {
+        // TODO: b/372908709 - maybe rename start/end to left/right, to be consistent with the
+        //  bounds rect.
+        /** Start position for drawing (in pixels) */
+        protected float mStart;
+        /** End position for drawing (in pixels) */
+        protected float mEnd;
+        /** Drawing color. */
+        @ColorInt protected final int mColor;
 
-        public Segment(float fraction) {
-            this(fraction, Color.TRANSPARENT);
-        }
-
-        public Segment(float fraction, @ColorInt int color) {
-            this(fraction, color, false);
-        }
-
-        public Segment(float fraction, @ColorInt int color, boolean faded) {
-            mFraction = fraction;
+        protected Part(float start, float end, @ColorInt int color) {
+            mStart = start;
+            mEnd = end;
             mColor = color;
-            mFaded = faded;
         }
 
-        public float getFraction() {
-            return this.mFraction;
+        public float getStart() {
+            return this.mStart;
+        }
+
+        public void setStart(float start) {
+            mStart = start;
+        }
+
+        public float getEnd() {
+            return this.mEnd;
+        }
+
+        public void setEnd(float end) {
+            mEnd = end;
+        }
+
+        /** Returns the calculated drawing width of the part */
+        public float getWidth() {
+            return mEnd - mStart;
         }
 
         public int getColor() {
             return this.mColor;
-        }
-
-        public boolean getFaded() {
-            return this.mFaded;
-        }
-
-        @Override
-        public String toString() {
-            return "Segment(fraction=" + this.mFraction + ", color=" + this.mColor + ", faded="
-                    + this.mFaded + ')';
         }
 
         // Needed for unit tests
@@ -530,80 +464,79 @@ public final class NotificationProgressDrawable extends Drawable {
 
             if (other == null || getClass() != other.getClass()) return false;
 
-            Segment that = (Segment) other;
-            if (Float.compare(this.mFraction, that.mFraction) != 0) return false;
-            if (this.mColor != that.mColor) return false;
-            return this.mFaded == that.mFaded;
+            Part that = (Part) other;
+            if (Float.compare(this.mStart, that.mStart) != 0) return false;
+            if (Float.compare(this.mEnd, that.mEnd) != 0) return false;
+            return this.mColor == that.mColor;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mFraction, mColor, mFaded);
+            return Objects.hash(mStart, mEnd, mColor);
         }
     }
 
     /**
-     * A point is a part of the progress bar with zero length. Points are designated points within a
-     * progressbar to visualize distinct stages or milestones. For example, a stop in a multi-stop
-     * ride-share journey.
+     * A segment is a part of the progress bar with non-zero length. For example, it can
+     * represent a portion in a navigation journey with certain traffic condition.
+     * <p>
+     * The start and end positions for drawing a segment are assumed to have been adjusted for
+     * the Points and gaps neighboring the segment.
+     * </p>
      */
-    public static final class Point implements Part {
-        @Nullable
-        private final Drawable mIcon;
-        @ColorInt private final int mColor;
+    public static final class Segment extends Part {
+        /**
+         * Whether the segment is faded or not.
+         * <p>
+         * Faded segments and non-faded segments are drawn with different heights.
+         * </p>
+         */
         private final boolean mFaded;
 
-        public Point(@Nullable Drawable icon) {
-            this(icon, Color.TRANSPARENT, false);
+        public Segment(float start, float end, int color) {
+            this(start, end, color, false);
         }
 
-        public Point(@Nullable Drawable icon, @ColorInt int color) {
-            this(icon, color, false);
-
-        }
-
-        public Point(@Nullable Drawable icon, @ColorInt int color, boolean faded) {
-            mIcon = icon;
-            mColor = color;
+        public Segment(float start, float end, int color, boolean faded) {
+            super(start, end, color);
             mFaded = faded;
-        }
-
-        @Nullable
-        public Drawable getIcon() {
-            return this.mIcon;
-        }
-
-        public int getColor() {
-            return this.mColor;
-        }
-
-        public boolean getFaded() {
-            return this.mFaded;
         }
 
         @Override
         public String toString() {
-            return "Point(icon=" + this.mIcon + ", color=" + this.mColor + ", faded=" + this.mFaded
-                    + ")";
+            return "Segment(start=" + this.mStart + ", end=" + this.mEnd + ", color=" + this.mColor
+                    + ", faded=" + this.mFaded + ')';
         }
 
         // Needed for unit tests.
         @Override
         public boolean equals(@Nullable Object other) {
-            if (this == other) return true;
+            if (!super.equals(other)) return false;
 
-            if (other == null || getClass() != other.getClass()) return false;
-
-            Point that = (Point) other;
-
-            if (!Objects.equals(this.mIcon, that.mIcon)) return false;
-            if (this.mColor != that.mColor) return false;
+            Segment that = (Segment) other;
             return this.mFaded == that.mFaded;
         }
 
         @Override
         public int hashCode() {
-            return Objects.hash(mIcon, mColor, mFaded);
+            return Objects.hash(super.hashCode(), mFaded);
+        }
+    }
+
+    /**
+     * A point is a part of the progress bar with zero length. Points are designated points within a
+     * progress bar to visualize distinct stages or milestones. For example, a stop in a multi-stop
+     * ride-share journey.
+     */
+    public static final class Point extends Part {
+        public Point(float start, float end, int color) {
+            super(start, end, color);
+        }
+
+        @Override
+        public String toString() {
+            return "Point(start=" + this.mStart + ", end=" + this.mEnd + ", color=" + this.mColor
+                    + ")";
         }
     }
 
@@ -628,16 +561,14 @@ public final class NotificationProgressDrawable extends Drawable {
         int mChangingConfigurations;
         float mSegSegGap = 0.0f;
         float mSegPointGap = 0.0f;
+        float mSegmentMinWidth = 0.0f;
         float mSegmentHeight;
         float mFadedSegmentHeight;
         float mSegmentCornerRadius;
-        int mSegmentColor;
-        int mFadedSegmentColor;
+        // how big the point icon will be, halved
         float mPointRadius;
         float mPointRectInset;
         float mPointRectCornerRadius;
-        int mPointRectColor;
-        int mFadedPointRectColor;
 
         int[] mThemeAttrs;
         int[] mThemeAttrsSegments;
@@ -652,16 +583,13 @@ public final class NotificationProgressDrawable extends Drawable {
             mChangingConfigurations = orig.mChangingConfigurations;
             mSegSegGap = orig.mSegSegGap;
             mSegPointGap = orig.mSegPointGap;
+            mSegmentMinWidth = orig.mSegmentMinWidth;
             mSegmentHeight = orig.mSegmentHeight;
             mFadedSegmentHeight = orig.mFadedSegmentHeight;
             mSegmentCornerRadius = orig.mSegmentCornerRadius;
-            mSegmentColor = orig.mSegmentColor;
-            mFadedSegmentColor = orig.mFadedSegmentColor;
             mPointRadius = orig.mPointRadius;
             mPointRectInset = orig.mPointRectInset;
             mPointRectCornerRadius = orig.mPointRectCornerRadius;
-            mPointRectColor = orig.mPointRectColor;
-            mFadedPointRectColor = orig.mFadedPointRectColor;
 
             mThemeAttrs = orig.mThemeAttrs;
             mThemeAttrsSegments = orig.mThemeAttrsSegments;
@@ -674,6 +602,18 @@ public final class NotificationProgressDrawable extends Drawable {
         }
 
         private void applyDensityScaling(int sourceDensity, int targetDensity) {
+            if (mSegSegGap > 0) {
+                mSegSegGap = scaleFromDensity(
+                        mSegSegGap, sourceDensity, targetDensity);
+            }
+            if (mSegPointGap > 0) {
+                mSegPointGap = scaleFromDensity(
+                        mSegPointGap, sourceDensity, targetDensity);
+            }
+            if (mSegmentMinWidth > 0) {
+                mSegmentMinWidth = scaleFromDensity(
+                        mSegmentMinWidth, sourceDensity, targetDensity);
+            }
             if (mSegmentHeight > 0) {
                 mSegmentHeight = scaleFromDensity(
                         mSegmentHeight, sourceDensity, targetDensity);
@@ -740,28 +680,6 @@ public final class NotificationProgressDrawable extends Drawable {
                 applyDensityScaling(sourceDensity, targetDensity);
             }
         }
-
-        public void setSegmentColor(int color) {
-            mSegmentColor = color;
-            mFadedSegmentColor = getFadedColor(color);
-        }
-
-        public void setPointRectColor(int color) {
-            mPointRectColor = color;
-            mFadedPointRectColor = getFadedColor(color);
-        }
-    }
-
-    /**
-     * Get a color with an opacity that's 25% of the input color.
-     */
-    @ColorInt
-    static int getFadedColor(@ColorInt int color) {
-        return Color.argb(
-                (int) (Color.alpha(color) * 0.4f + 0.5f),
-                Color.red(color),
-                Color.green(color),
-                Color.blue(color));
     }
 
     @Override
