@@ -49,6 +49,7 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterRe
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
@@ -790,6 +791,38 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
                         instanceId = 2,
                         visibleTaskCount = 1,
                         minimizeReason = MinimizeReason.TASK_LIMIT,
+                    )
+                )
+            )
+    }
+
+    @Test
+    fun onTransitionReady_taskIsBeingUnminimized_logsTaskUnminimized() {
+        transitionObserver.isSessionActive = true
+        transitionObserver.addTaskInfosToCachedMap(createTaskInfo(WINDOWING_MODE_FREEFORM, id = 1))
+        val taskInfo2 = createTaskInfo(WINDOWING_MODE_FREEFORM, id = 2)
+        val transitionInfo =
+            TransitionInfoBuilder(TRANSIT_TO_FRONT, /* flags= */ 0)
+                .addChange(createChange(TRANSIT_TO_FRONT, taskInfo2))
+                .build()
+        `when`(desktopTasksLimiter.getUnminimizingTask(any()))
+            .thenReturn(
+                DesktopTasksLimiter.TaskDetails(
+                    taskInfo2.displayId,
+                    taskInfo2.taskId,
+                    unminimizeReason = UnminimizeReason.TASKBAR_MANAGE_WINDOW,
+                )
+            )
+
+        callOnTransitionReady(transitionInfo)
+
+        verify(desktopModeEventLogger, times(1))
+            .logTaskAdded(
+                eq(
+                    DEFAULT_TASK_UPDATE.copy(
+                        instanceId = 2,
+                        visibleTaskCount = 2,
+                        unminimizeReason = UnminimizeReason.TASKBAR_MANAGE_WINDOW,
                     )
                 )
             )

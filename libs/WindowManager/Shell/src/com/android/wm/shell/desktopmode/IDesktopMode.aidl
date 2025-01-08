@@ -22,6 +22,7 @@ import android.os.Bundle;
 import android.window.RemoteTransition;
 import com.android.wm.shell.desktopmode.IDesktopTaskListener;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
+import com.android.wm.shell.shared.desktopmode.DesktopTaskToFrontReason;
 
 /**
  * Interface that is exposed to remote callers to manipulate desktop mode features.
@@ -38,12 +39,13 @@ interface IDesktopMode {
     void hideStashedDesktopApps(int displayId);
 
     /**
-    * Bring task with the given id to front, using the given remote transition.
-    *
-    * <p> Note: beyond moving a task to the front, this method will minimize a task if we reach the
-    * Desktop task limit, so {@code remoteTransition} should also handle any such minimize change.
-    */
-    oneway void showDesktopApp(int taskId, in @nullable RemoteTransition remoteTransition);
+     * Bring task with the given id to front, using the given remote transition.
+     *
+     * <p> Note: beyond moving a task to the front, this method will minimize a task if we reach the
+     * Desktop task limit, so {@code remoteTransition} should also handle any such minimize change.
+     */
+    oneway void showDesktopApp(int taskId, in @nullable RemoteTransition remoteTransition,
+            in DesktopTaskToFrontReason toFrontReason);
 
     /** Get count of visible desktop tasks on the given display */
     int getVisibleTaskCount(int displayId);

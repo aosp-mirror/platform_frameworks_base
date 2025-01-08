@@ -41,6 +41,7 @@ import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterRe
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_DESKTOP_MODE_END_DRAG_TO_DESKTOP
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_FROM_OVERVIEW
 import com.android.wm.shell.desktopmode.DesktopModeTransitionTypes.TRANSIT_ENTER_DESKTOP_FROM_APP_HANDLE_MENU_BUTTON
@@ -297,7 +298,12 @@ class DesktopModeLoggerTransitionObserver(
             when {
                 // new tasks added
                 previousTaskInfo == null -> {
-                    desktopModeEventLogger.logTaskAdded(currentTaskUpdate)
+                    // The current task is now visible while before it wasn't - this might be the
+                    // result of an unminimize action.
+                    val unminimizeReason = getUnminimizeReason(transition, taskInfo)
+                    desktopModeEventLogger.logTaskAdded(
+                        currentTaskUpdate.copy(unminimizeReason = unminimizeReason)
+                    )
                     Trace.setCounter(
                         Trace.TRACE_TAG_WINDOW_MANAGER,
                         VISIBLE_TASKS_COUNTER_NAME,
@@ -359,13 +365,24 @@ class DesktopModeLoggerTransitionObserver(
         return null
     }
 
+    private fun getUnminimizeReason(transition: IBinder, taskInfo: TaskInfo): UnminimizeReason? {
+        val unminimizingTask = desktopTasksLimiter.getOrNull()?.getUnminimizingTask(transition)
+        if (unminimizingTask?.taskId == taskInfo.taskId) {
+            return unminimizingTask.unminimizeReason
+        }
+        return null
+    }
+
     private fun buildTaskUpdateForTask(
         taskInfo: TaskInfo,
         visibleTasks: Int,
         minimizeReason: MinimizeReason? = null,
+        unminimizeReason: UnminimizeReason? = null,
     ): TaskUpdate {
         val screenBounds = taskInfo.configuration.windowConfiguration.bounds
         val positionInParent = taskInfo.positionInParent
+        // We can't both minimize and unminimize the same task in one go.
+        assert(minimizeReason == null || unminimizeReason == null)
         return TaskUpdate(
             instanceId = taskInfo.taskId,
             uid = taskInfo.effectiveUid,
@@ -375,6 +392,7 @@ class DesktopModeLoggerTransitionObserver(
             taskY = positionInParent.y,
             visibleTaskCount = visibleTasks,
             minimizeReason = minimizeReason,
+            unminimizeReason = unminimizeReason,
         )
     }
 
