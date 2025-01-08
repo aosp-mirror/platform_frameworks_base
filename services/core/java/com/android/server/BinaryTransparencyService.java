@@ -1559,7 +1559,7 @@ public class BinaryTransparencyService extends SystemService {
     private class PackageUpdatedReceiver extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (!intent.getAction().equals(Intent.ACTION_PACKAGE_ADDED)) {
+            if (!Intent.ACTION_PACKAGE_ADDED.equals(intent.getAction())) {
                 return;
             }
 

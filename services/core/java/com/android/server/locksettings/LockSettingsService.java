@@ -369,16 +369,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onBootPhase(int phase) {
             super.onBootPhase(phase);
-            if (phase == PHASE_ACTIVITY_MANAGER_READY) {
-                mLockSettingsService.migrateOldDataAfterSystemReady();
-                mLockSettingsService.deleteRepairModePersistentDataIfNeeded();
-            } else if (phase == PHASE_BOOT_COMPLETED) {
-                // In the case of an upgrade, PHASE_BOOT_COMPLETED means that a rollback to the old
-                // build can no longer occur.  This is the time to destroy any migrated protectors.
-                mLockSettingsService.destroyMigratedProtectors();
-
-                mLockSettingsService.loadEscrowData();
-            }
+            mLockSettingsService.onBootPhase(phase);
         }
 
         @Override
@@ -394,6 +385,21 @@ public class LockSettingsService extends ILockSettings.Stub {
         @Override
         public void onUserStopped(@NonNull TargetUser user) {
             mLockSettingsService.onUserStopped(user.getUserIdentifier());
+        }
+    }
+
+    private void onBootPhase(int phase) {
+        if (phase == SystemService.PHASE_ACTIVITY_MANAGER_READY) {
+            migrateOldDataAfterSystemReady();
+            deleteRepairModePersistentDataIfNeeded();
+        } else if (phase == SystemService.PHASE_BOOT_COMPLETED) {
+            mHandler.post(() -> {
+                // In the case of an upgrade, PHASE_BOOT_COMPLETED means that a rollback to the old
+                // build can no longer occur.  This is the time to destroy any migrated protectors.
+                destroyMigratedProtectors();
+
+                loadEscrowData();
+            });
         }
     }
 
@@ -445,6 +451,7 @@ public class LockSettingsService extends ILockSettings.Stub {
      * @param profileUserId  profile user Id
      * @param profileUserPassword  profile original password (when it has separated lock).
      */
+    @GuardedBy("mSpManager")
     private void tieProfileLockIfNecessary(int profileUserId,
             LockscreenCredential profileUserPassword) {
         // Only for profiles that shares credential with parent
@@ -903,14 +910,8 @@ public class LockSettingsService extends ILockSettings.Stub {
                 // Hide notification first, as tie profile lock takes time
                 hideEncryptionNotification(new UserHandle(userId));
 
-                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
-                    synchronized (mSpManager) {
-                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
-                    }
-                } else {
-                    if (isCredentialSharableWithParent(userId)) {
-                        tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
-                    }
+                synchronized (mSpManager) {
+                    tieProfileLockIfNecessary(userId, LockscreenCredential.createNone());
                 }
             }
         });
@@ -1374,11 +1375,7 @@ public class LockSettingsService extends ILockSettings.Stub {
                 mStorage.removeChildProfileLock(userId);
                 removeKeystoreProfileKey(userId);
             } else {
-                if (android.app.admin.flags.Flags.fixRaceConditionInTieProfileLock()) {
-                    synchronized (mSpManager) {
-                        tieProfileLockIfNecessary(userId, profileUserPassword);
-                    }
-                } else {
+                synchronized (mSpManager) {
                     tieProfileLockIfNecessary(userId, profileUserPassword);
                 }
             }

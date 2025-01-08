@@ -379,7 +379,7 @@ class InsetsSourceProvider {
         final boolean serverVisibleChanged = mServerVisible != isServerVisible;
         setServerVisible(isServerVisible);
         final boolean positionChanged = updateInsetsControlPosition(windowState);
-        if (mControl != null && !positionChanged
+        if (mControl != null && mControlTarget != null && !positionChanged
                 // The insets hint would be updated if the position is changed. Here updates it for
                 // the possible change of the bounds or the server visibility.
                 && (updateInsetsHint()
