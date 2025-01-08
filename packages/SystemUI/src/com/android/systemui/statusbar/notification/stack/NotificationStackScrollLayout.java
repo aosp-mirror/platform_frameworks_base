@@ -1245,15 +1245,19 @@ public class NotificationStackScrollLayout
     @Override
     public void setHeadsUpTop(float headsUpTop) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
-        mAmbientState.setHeadsUpTop(headsUpTop);
-        requestChildrenUpdate();
+        if (mAmbientState.getHeadsUpTop() != headsUpTop) {
+            mAmbientState.setHeadsUpTop(headsUpTop);
+            requestChildrenUpdate();
+        }
     }
 
     @Override
     public void setHeadsUpBottom(float headsUpBottom) {
         if (SceneContainerFlag.isUnexpectedlyInLegacyMode()) return;
-        mAmbientState.setHeadsUpBottom(headsUpBottom);
-        mStateAnimator.setHeadsUpAppearHeightBottom(Math.round(headsUpBottom));
+        if (mAmbientState.getHeadsUpBottom() != headsUpBottom) {
+            mAmbientState.setHeadsUpBottom(headsUpBottom);
+            mStateAnimator.setHeadsUpAppearHeightBottom(Math.round(headsUpBottom));
+        }
     }
 
     @Override
