@@ -31,6 +31,7 @@ import androidx.media3.session.CommandButton
 import androidx.media3.session.MediaController as Media3Controller
 import androidx.media3.session.SessionCommand
 import androidx.media3.session.SessionToken
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
@@ -128,7 +129,11 @@ constructor(
                     drawable,
                     null, // no action to perform when clicked
                     context.getString(R.string.controls_media_button_connecting),
-                    context.getDrawable(R.drawable.ic_media_connecting_container),
+                    if (Flags.mediaControlsUiUpdate()) {
+                        context.getDrawable(R.drawable.ic_media_connecting_status_container)
+                    } else {
+                        context.getDrawable(R.drawable.ic_media_connecting_container)
+                    },
                     // Specify a rebind id to prevent the spinner from restarting on later binds.
                     com.android.internal.R.drawable.progress_small_material,
                 )
@@ -230,17 +235,33 @@ constructor(
                 Player.COMMAND_PLAY_PAUSE -> {
                     if (!controller.isPlaying) {
                         MediaAction(
-                            context.getDrawable(R.drawable.ic_media_play),
+                            if (Flags.mediaControlsUiUpdate()) {
+                                context.getDrawable(R.drawable.ic_media_play_button)
+                            } else {
+                                context.getDrawable(R.drawable.ic_media_play)
+                            },
                             { executeAction(packageName, token, Player.COMMAND_PLAY_PAUSE) },
                             context.getString(R.string.controls_media_button_play),
-                            context.getDrawable(R.drawable.ic_media_play_container),
+                            if (Flags.mediaControlsUiUpdate()) {
+                                context.getDrawable(R.drawable.ic_media_play_button_container)
+                            } else {
+                                context.getDrawable(R.drawable.ic_media_play_container)
+                            },
                         )
                     } else {
                         MediaAction(
-                            context.getDrawable(R.drawable.ic_media_pause),
+                            if (Flags.mediaControlsUiUpdate()) {
+                                context.getDrawable(R.drawable.ic_media_pause_button)
+                            } else {
+                                context.getDrawable(R.drawable.ic_media_pause)
+                            },
                             { executeAction(packageName, token, Player.COMMAND_PLAY_PAUSE) },
                             context.getString(R.string.controls_media_button_pause),
-                            context.getDrawable(R.drawable.ic_media_pause_container),
+                            if (Flags.mediaControlsUiUpdate()) {
+                                context.getDrawable(R.drawable.ic_media_pause_button_container)
+                            } else {
+                                context.getDrawable(R.drawable.ic_media_pause_container)
+                            },
                         )
                     }
                 }
