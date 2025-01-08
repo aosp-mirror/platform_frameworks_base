@@ -593,11 +593,11 @@ public final class Parcel {
      */
     public final void recycle() {
         if (mRecycled) {
-            Log.wtf(TAG, "Recycle called on unowned Parcel. (recycle twice?) Here: "
+            String error = "Recycle called on unowned Parcel. (recycle twice?) Here: "
                     + Log.getStackTraceString(new Throwable())
-                    + " Original recycle call (if DEBUG_RECYCLE): ", mStack);
-
-            return;
+                    + " Original recycle call (if DEBUG_RECYCLE): ";
+            Log.wtf(TAG, error, mStack);
+            throw new IllegalStateException(error, mStack);
         }
         mRecycled = true;
 
