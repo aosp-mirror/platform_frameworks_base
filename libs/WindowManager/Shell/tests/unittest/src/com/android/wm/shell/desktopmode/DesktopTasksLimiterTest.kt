@@ -20,6 +20,7 @@ import android.app.ActivityManager.RunningTaskInfo
 import android.graphics.Rect
 import android.os.Binder
 import android.os.Handler
+import android.os.IBinder
 import android.os.UserManager
 import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
@@ -43,6 +44,7 @@ import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGAT
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.persistence.DesktopPersistentRepository
 import com.android.wm.shell.desktopmode.persistence.DesktopRepositoryInitializer
@@ -180,7 +182,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         val task = setUpFreeformTask()
         markTaskHidden(task)
 
-        desktopTasksLimiter.addPendingMinimizeChange(Binder(), displayId = 1, taskId = task.taskId)
+        addPendingMinimizeChange(Binder(), displayId = 1, taskId = task.taskId)
 
         assertThat(desktopTaskRepo.isMinimizedTask(taskId = task.taskId)).isFalse()
     }
@@ -208,11 +210,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         val taskTransition = Binder()
         val task = setUpFreeformTask()
         markTaskHidden(task)
-        desktopTasksLimiter.addPendingMinimizeChange(
-            pendingTransition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(pendingTransition, taskId = task.taskId)
 
         desktopTasksLimiter
             .getTransitionObserver()
@@ -231,11 +229,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         val transition = Binder()
         val task = setUpFreeformTask()
         markTaskVisible(task)
-        desktopTasksLimiter.addPendingMinimizeChange(
-            transition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(transition, taskId = task.taskId)
 
         desktopTasksLimiter
             .getTransitionObserver()
@@ -254,11 +248,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         val transition = Binder()
         val task = setUpFreeformTask()
         markTaskHidden(task)
-        desktopTasksLimiter.addPendingMinimizeChange(
-            transition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(transition, taskId = task.taskId)
 
         desktopTasksLimiter
             .getTransitionObserver()
@@ -276,11 +266,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     fun onTransitionReady_pendingTransition_changeTaskToBack_taskIsMinimized() {
         val transition = Binder()
         val task = setUpFreeformTask()
-        desktopTasksLimiter.addPendingMinimizeChange(
-            transition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(transition, taskId = task.taskId)
 
         desktopTasksLimiter
             .getTransitionObserver()
@@ -299,11 +285,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         val bounds = Rect(0, 0, 200, 200)
         val transition = Binder()
         val task = setUpFreeformTask()
-        desktopTasksLimiter.addPendingMinimizeChange(
-            transition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(transition, taskId = task.taskId)
 
         val change =
             TransitionInfo.Change(task.token, mock(SurfaceControl::class.java)).apply {
@@ -330,11 +312,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         val mergedTransition = Binder()
         val newTransition = Binder()
         val task = setUpFreeformTask()
-        desktopTasksLimiter.addPendingMinimizeChange(
-            mergedTransition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(mergedTransition, taskId = task.taskId)
         desktopTasksLimiter
             .getTransitionObserver()
             .onTransitionMerged(mergedTransition, newTransition)
@@ -541,11 +519,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
         val transition = Binder()
         val task = setUpFreeformTask()
-        desktopTasksLimiter.addPendingMinimizeChange(
-            transition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(transition, taskId = task.taskId)
 
         desktopTasksLimiter
             .getTransitionObserver()
@@ -573,11 +547,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
         val transition = Binder()
         val task = setUpFreeformTask()
-        desktopTasksLimiter.addPendingMinimizeChange(
-            transition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(transition, taskId = task.taskId)
 
         desktopTasksLimiter
             .getTransitionObserver()
@@ -606,11 +576,7 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         val mergedTransition = Binder()
         val newTransition = Binder()
         val task = setUpFreeformTask()
-        desktopTasksLimiter.addPendingMinimizeChange(
-            mergedTransition,
-            displayId = DEFAULT_DISPLAY,
-            taskId = task.taskId,
-        )
+        addPendingMinimizeChange(mergedTransition, taskId = task.taskId)
 
         desktopTasksLimiter
             .getTransitionObserver()
@@ -633,12 +599,80 @@ class DesktopTasksLimiterTest : ShellTestCase() {
         verify(interactionJankMonitor).end(eq(CUJ_DESKTOP_MODE_MINIMIZE_WINDOW))
     }
 
+    @Test
+    fun getMinimizingTask_noPendingTransition_returnsNull() {
+        val transition = Binder()
+
+        assertThat(desktopTasksLimiter.getMinimizingTask(transition)).isNull()
+    }
+
+    @Test
+    fun getMinimizingTask_pendingTaskTransition_returnsTask() {
+        val transition = Binder()
+        val task = setUpFreeformTask()
+        addPendingMinimizeChange(
+            transition,
+            taskId = task.taskId,
+            minimizeReason = MinimizeReason.TASK_LIMIT,
+        )
+
+        assertThat(desktopTasksLimiter.getMinimizingTask(transition))
+            .isEqualTo(
+                createTaskDetails(taskId = task.taskId, minimizeReason = MinimizeReason.TASK_LIMIT)
+            )
+    }
+
+    @Test
+    fun getMinimizingTask_activeTaskTransition_returnsTask() {
+        val transition = Binder()
+        val task = setUpFreeformTask()
+        addPendingMinimizeChange(
+            transition,
+            taskId = task.taskId,
+            minimizeReason = MinimizeReason.TASK_LIMIT,
+        )
+        val transitionInfo =
+            TransitionInfoBuilder(TRANSIT_OPEN).addChange(TRANSIT_TO_BACK, task).build()
+
+        desktopTasksLimiter
+            .getTransitionObserver()
+            .onTransitionReady(
+                transition,
+                transitionInfo,
+                /* startTransaction= */ StubTransaction(),
+                /* finishTransaction= */ StubTransaction(),
+            )
+
+        assertThat(desktopTasksLimiter.getMinimizingTask(transition))
+            .isEqualTo(
+                createTaskDetails(
+                    taskId = task.taskId,
+                    transitionInfo = transitionInfo,
+                    minimizeReason = MinimizeReason.TASK_LIMIT,
+                )
+            )
+    }
+
     private fun setUpFreeformTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createFreeformTask(displayId)
         `when`(shellTaskOrganizer.getRunningTaskInfo(task.taskId)).thenReturn(task)
         desktopTaskRepo.addTask(displayId, task.taskId, task.isVisible)
         return task
     }
+
+    private fun createTaskDetails(
+        displayId: Int = DEFAULT_DISPLAY,
+        taskId: Int,
+        transitionInfo: TransitionInfo? = null,
+        minimizeReason: MinimizeReason? = null,
+    ) = DesktopTasksLimiter.TaskDetails(displayId, taskId, transitionInfo, minimizeReason)
+
+    fun addPendingMinimizeChange(
+        transition: IBinder,
+        displayId: Int = DEFAULT_DISPLAY,
+        taskId: Int,
+        minimizeReason: MinimizeReason = MinimizeReason.TASK_LIMIT,
+    ) = desktopTasksLimiter.addPendingMinimizeChange(transition, displayId, taskId, minimizeReason)
 
     private fun markTaskVisible(task: RunningTaskInfo) {
         desktopTaskRepo.updateTask(task.displayId, task.taskId, isVisible = true)

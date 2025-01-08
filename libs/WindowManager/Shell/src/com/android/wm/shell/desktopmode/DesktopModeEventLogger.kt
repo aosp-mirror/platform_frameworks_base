@@ -467,8 +467,12 @@ class DesktopModeEventLogger {
                 FrameworkStatsLog
                     .DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__MINIMIZE_TASK_LIMIT
             ),
-            MINIMIZE_BUTTON( // TODO(b/356843241): use this enum value
+            MINIMIZE_BUTTON(
                 FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__MINIMIZE_BUTTON
+            ),
+            KEY_GESTURE(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__MINIMIZE_REASON__MINIMIZE_KEY_GESTURE
             ),
         }
 

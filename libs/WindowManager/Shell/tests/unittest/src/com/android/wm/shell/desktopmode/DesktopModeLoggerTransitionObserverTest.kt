@@ -42,6 +42,7 @@ import android.window.WindowContainerToken
 import androidx.test.filters.SmallTest
 import com.android.dx.mockito.inline.extended.ExtendedMockito
 import com.android.modules.utils.testing.ExtendedMockitoRule
+import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
@@ -62,6 +63,7 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.TransitionInfoBuilder
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.transition.Transitions.TRANSIT_MINIMIZE
+import java.util.Optional
 import kotlin.test.assertFalse
 import kotlin.test.assertTrue
 import org.junit.Before
@@ -69,6 +71,7 @@ import org.junit.Rule
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
+import org.mockito.Mockito.`when`
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -102,6 +105,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
     private val mockShellInit = mock<ShellInit>()
     private val transitions = mock<Transitions>()
     private val context = mock<Context>()
+    private val shellTaskOrganizer = mock<ShellTaskOrganizer>()
+    private val desktopTasksLimiter = mock<DesktopTasksLimiter>()
 
     private lateinit var transitionObserver: DesktopModeLoggerTransitionObserver
     private lateinit var shellInit: ShellInit
@@ -119,6 +124,8 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
                 mockShellInit,
                 transitions,
                 desktopModeEventLogger,
+                Optional.of(desktopTasksLimiter),
+                shellTaskOrganizer,
             )
         val initRunnableCaptor = ArgumentCaptor.forClass(Runnable::class.java)
         verify(mockShellInit)
@@ -753,6 +760,39 @@ class DesktopModeLoggerTransitionObserverTest : ShellTestCase() {
         verify(desktopModeEventLogger, times(1))
             .logTaskRemoved(eq(DEFAULT_TASK_UPDATE.copy(instanceId = 2, visibleTaskCount = 1)))
         verify(desktopModeEventLogger, never()).logSessionExit(any())
+    }
+
+    @Test
+    fun onTransitionReady_taskIsBeingMinimized_logsTaskMinimized() {
+        transitionObserver.isSessionActive = true
+        transitionObserver.addTaskInfosToCachedMap(createTaskInfo(WINDOWING_MODE_FREEFORM, id = 1))
+        val taskInfo2 = createTaskInfo(WINDOWING_MODE_FREEFORM, id = 2)
+        transitionObserver.addTaskInfosToCachedMap(taskInfo2)
+        val transitionInfo =
+            TransitionInfoBuilder(TRANSIT_TO_BACK, 0)
+                .addChange(createChange(TRANSIT_TO_BACK, taskInfo2))
+                .build()
+        `when`(desktopTasksLimiter.getMinimizingTask(any()))
+            .thenReturn(
+                DesktopTasksLimiter.TaskDetails(
+                    taskInfo2.displayId,
+                    taskInfo2.taskId,
+                    minimizeReason = MinimizeReason.TASK_LIMIT,
+                )
+            )
+
+        callOnTransitionReady(transitionInfo)
+
+        verify(desktopModeEventLogger, times(1))
+            .logTaskRemoved(
+                eq(
+                    DEFAULT_TASK_UPDATE.copy(
+                        instanceId = 2,
+                        visibleTaskCount = 1,
+                        minimizeReason = MinimizeReason.TASK_LIMIT,
+                    )
+                )
+            )
     }
 
     /** Simulate calling the onTransitionReady() method */
