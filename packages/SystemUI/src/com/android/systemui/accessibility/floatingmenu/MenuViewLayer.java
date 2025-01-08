@@ -516,7 +516,7 @@ class MenuViewLayer extends FrameLayout implements
             return;
         }
         mMenuAnimationController.flingMenuThenSpringToEdge(
-                mMenuView.getMenuPosition().x, 100f, 0f);
+                mMenuView.getMenuPosition(), 100f, 0f);
 
         Intent intent = getIntentForEditScreen();
         PackageManager packageManager = getContext().getPackageManager();
