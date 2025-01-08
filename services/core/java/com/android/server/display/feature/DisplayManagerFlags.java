@@ -266,6 +266,11 @@ public class DisplayManagerFlags {
             Flags::subscribeGranularDisplayEvents
     );
 
+    private final FlagState mBaseDensityForExternalDisplays = new FlagState(
+            Flags.FLAG_BASE_DENSITY_FOR_EXTERNAL_DISPLAYS,
+            Flags::baseDensityForExternalDisplays
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -571,6 +576,14 @@ public class DisplayManagerFlags {
     }
 
     /**
+     * @return {@code true} if the flag for base density for external displays is enabled
+     */
+    public boolean isBaseDensityForExternalDisplaysEnabled() {
+        return mBaseDensityForExternalDisplays.isEnabled();
+    }
+
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -626,6 +639,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mDisplayListenerPerformanceImprovementsFlagState);
         pw.println(" " + mSubscribeGranularDisplayEvents);
         pw.println(" " + mEnableDisplayContentModeManagementFlagState);
+        pw.println(" " + mBaseDensityForExternalDisplays);
     }
 
     private static class FlagState {

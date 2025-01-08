@@ -487,3 +487,11 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "base_density_for_external_displays"
+    namespace: "lse_desktop_experience"
+    description: "Feature flag for setting a base density for external displays."
+    bug: "382954433"
+    is_fixed_read_only: true
+}
