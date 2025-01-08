@@ -21,6 +21,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.hardware.tv.mediaquality.IMediaQuality;
 import android.media.quality.AmbientBacklightSettings;
 import android.media.quality.IAmbientBacklightCallback;
 import android.media.quality.IMediaQualityManager;
@@ -35,9 +36,11 @@ import android.media.quality.SoundProfile;
 import android.media.quality.SoundProfileHandle;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Pair;
@@ -45,6 +48,7 @@ import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.server.SystemService;
+import com.android.server.utils.Slogf;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -74,6 +78,7 @@ public class MediaQualityService extends SystemService {
     private final BiMap<Long, String> mSoundProfileTempIdMap;
     private final PackageManager mPackageManager;
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
+    private IMediaQuality mMediaQuality;
 
     public MediaQualityService(Context context) {
         super(context);
@@ -88,6 +93,12 @@ public class MediaQualityService extends SystemService {
 
     @Override
     public void onStart() {
+        IBinder binder = ServiceManager.getService(IMediaQuality.DESCRIPTOR + "/default");
+        if (binder != null) {
+            Slogf.d(TAG, "binder is not null");
+            mMediaQuality = IMediaQuality.Stub.asInterface(binder);
+        }
+
         publishBinderService(Context.MEDIA_QUALITY_SERVICE, new BinderService());
     }
 
@@ -809,10 +820,29 @@ public class MediaQualityService extends SystemService {
             if (!hasGlobalPictureQualityServicePermission()) {
                 //TODO: error handling
             }
+
+            try {
+                if (mMediaQuality != null) {
+                    mMediaQuality.setAutoPqEnabled(enabled);
+                }
+            } catch (UnsupportedOperationException e) {
+                Slog.e(TAG, "The current device is not supported");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set auto picture quality", e);
+            }
         }
 
         @Override
         public boolean isAutoPictureQualityEnabled(UserHandle user) {
+            try {
+                if (mMediaQuality != null) {
+                    return mMediaQuality.getAutoPqEnabled();
+                }
+            } catch (UnsupportedOperationException e) {
+                Slog.e(TAG, "The current device is not supported");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get auto picture quality", e);
+            }
             return false;
         }
 
@@ -821,10 +851,29 @@ public class MediaQualityService extends SystemService {
             if (!hasGlobalPictureQualityServicePermission()) {
                 //TODO: error handling
             }
+
+            try {
+                if (mMediaQuality != null) {
+                    mMediaQuality.setAutoSrEnabled(enabled);
+                }
+            } catch (UnsupportedOperationException e) {
+                Slog.e(TAG, "The current device is not supported");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set auto super resolution", e);
+            }
         }
 
         @Override
         public boolean isSuperResolutionEnabled(UserHandle user) {
+            try {
+                if (mMediaQuality != null) {
+                    return mMediaQuality.getAutoSrEnabled();
+                }
+            } catch (UnsupportedOperationException e) {
+                Slog.e(TAG, "The current device is not supported");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get auto super resolution", e);
+            }
             return false;
         }
 
@@ -833,10 +882,29 @@ public class MediaQualityService extends SystemService {
             if (!hasGlobalSoundQualityServicePermission()) {
                 //TODO: error handling
             }
+
+            try {
+                if (mMediaQuality != null) {
+                    mMediaQuality.setAutoAqEnabled(enabled);
+                }
+            } catch (UnsupportedOperationException e) {
+                Slog.e(TAG, "The current device is not supported");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set auto audio quality", e);
+            }
         }
 
         @Override
         public boolean isAutoSoundQualityEnabled(UserHandle user) {
+            try {
+                if (mMediaQuality != null) {
+                    return mMediaQuality.getAutoAqEnabled();
+                }
+            } catch (UnsupportedOperationException e) {
+                Slog.e(TAG, "The current device is not supported");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to get auto audio quality", e);
+            }
             return false;
         }
 
