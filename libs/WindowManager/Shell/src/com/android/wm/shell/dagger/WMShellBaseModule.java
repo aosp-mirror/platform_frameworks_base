@@ -270,8 +270,7 @@ public abstract class WMShellBaseModule {
             @NonNull CompatUIState compatUIState,
             @NonNull CompatUIComponentIdGenerator componentIdGenerator,
             @NonNull CompatUIComponentFactory compatUIComponentFactory,
-            CompatUIStatusManager compatUIStatusManager,
-            @NonNull FocusTransitionObserver focusTransitionObserver) {
+            CompatUIStatusManager compatUIStatusManager) {
         if (!context.getResources().getBoolean(R.bool.config_enableCompatUIController)) {
             return Optional.empty();
         }
@@ -296,8 +295,7 @@ public abstract class WMShellBaseModule {
                         compatUIShellCommandHandler.get(),
                         accessibilityManager.get(),
                         compatUIStatusManager,
-                        desktopUserRepositories,
-                        focusTransitionObserver));
+                        desktopUserRepositories));
     }
 
     @WMSingleton
