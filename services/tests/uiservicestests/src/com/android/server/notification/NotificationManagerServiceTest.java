@@ -6341,6 +6341,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testOnlyAutogroupIfNeeded_channelChanged_ghUpdate() {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0,
+                "testOnlyAutogroupIfNeeded_channelChanged_ghUpdate", null, false);
+        mService.addNotification(r);
+
+        NotificationRecord update = generateNotificationRecord(mSilentChannel, 0,
+                "testOnlyAutogroupIfNeeded_channelChanged_ghUpdate", null, false);
+        mService.addEnqueuedNotification(update);
+
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(update.getKey(),
+                        update.getSbn().getPackageName(), update.getUid(),
+                        mPostNotificationTrackerFactory.newTracker(null));
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, times(1)).onNotificationPosted(any(), anyBoolean());
+    }
+
+    @Test
     public void testOnlyAutogroupIfGroupChanged_noValidChange_noGhUpdate() {
         NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0,
                 "testOnlyAutogroupIfGroupChanged_noValidChange_noGhUpdate", null, false);
