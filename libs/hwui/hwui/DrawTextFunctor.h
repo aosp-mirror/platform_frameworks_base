@@ -34,9 +34,6 @@
 namespace flags = com::android::graphics::hwui::flags;
 #else
 namespace flags {
-constexpr bool high_contrast_text_luminance() {
-    return false;
-}
 constexpr bool high_contrast_text_small_text_rect() {
     return false;
 }
@@ -114,15 +111,10 @@ public:
         if (CC_UNLIKELY(canvas->isHighContrastText() && paint.getAlpha() != 0)) {
             // high contrast draw path
             int color = paint.getColor();
-            bool darken;
-            // This equation should match the one in core/java/android/text/Layout.java
-            if (flags::high_contrast_text_luminance()) {
-                uirenderer::Lab lab = uirenderer::sRGBToLab(color);
-                darken = lab.L <= 50;
-            } else {
-                int channelSum = SkColorGetR(color) + SkColorGetG(color) + SkColorGetB(color);
-                darken = channelSum < (128 * 3);
-            }
+            // LINT.IfChange(hct_darken)
+            uirenderer::Lab lab = uirenderer::sRGBToLab(color);
+            bool darken = lab.L <= 50;
+            // LINT.ThenChange(/core/java/android/text/Layout.java:hct_darken)
 
             // outline
             gDrawTextBlobMode = DrawTextBlobMode::HctOutline;
