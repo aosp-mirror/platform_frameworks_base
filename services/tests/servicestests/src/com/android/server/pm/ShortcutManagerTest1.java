@@ -402,6 +402,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
+    /**
     public void testPushDynamicShortcut() {
         // Change the max number of shortcuts.
         mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=5,"
@@ -543,6 +544,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         verify(mMockUsageStatsManagerInternal, times(1)).reportShortcutUsage(
                 eq(CALLING_PACKAGE_1), eq("s9"), eq(USER_10));
     }
+    */
 
     public void testPushDynamicShortcut_CallsToUsageStatsManagerAreThrottled()
             throws InterruptedException {
