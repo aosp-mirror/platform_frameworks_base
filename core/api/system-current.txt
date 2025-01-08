@@ -15044,6 +15044,7 @@ package android.telephony {
     method public int getCellularIdentifier();
     method public int getNasProtocolMessage();
     method @NonNull public String getPlmn();
+    method @FlaggedApi("com.android.internal.telephony.flags.vendor_specific_cellular_identifier_disclosure_indications") public boolean isBenign();
     method public boolean isEmergency();
     method public void writeToParcel(@NonNull android.os.Parcel, int);
     field public static final int CELLULAR_IDENTIFIER_IMEI = 2; // 0x2
@@ -15061,6 +15062,8 @@ package android.telephony {
     field public static final int NAS_PROTOCOL_MESSAGE_IMSI_DETACH_INDICATION = 11; // 0xb
     field public static final int NAS_PROTOCOL_MESSAGE_LOCATION_UPDATE_REQUEST = 5; // 0x5
     field public static final int NAS_PROTOCOL_MESSAGE_REGISTRATION_REQUEST = 7; // 0x7
+    field @FlaggedApi("com.android.internal.telephony.flags.vendor_specific_cellular_identifier_disclosure_indications") public static final int NAS_PROTOCOL_MESSAGE_THREAT_IDENTIFIER_FALSE = 12; // 0xc
+    field @FlaggedApi("com.android.internal.telephony.flags.vendor_specific_cellular_identifier_disclosure_indications") public static final int NAS_PROTOCOL_MESSAGE_THREAT_IDENTIFIER_TRUE = 13; // 0xd
     field public static final int NAS_PROTOCOL_MESSAGE_TRACKING_AREA_UPDATE_REQUEST = 4; // 0x4
     field public static final int NAS_PROTOCOL_MESSAGE_UNKNOWN = 0; // 0x0
   }

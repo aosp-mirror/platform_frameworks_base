@@ -74,6 +74,14 @@ public final class CellularIdentifierDisclosure implements Parcelable {
     /** IMEI DETATCH INDICATION. Reference: 3GPP TS 24.008 9.2.14.
      * Applies to 2g and 3g networks. Used for circuit-switched detach. */
     public static final int NAS_PROTOCOL_MESSAGE_IMSI_DETACH_INDICATION = 11;
+    /** Vendor-specific enumeration to identify a disclosure as potentially benign.
+     * Enables vendors to semantically classify disclosures based on their own logic. */
+    @FlaggedApi(Flags.FLAG_VENDOR_SPECIFIC_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    public static final int NAS_PROTOCOL_MESSAGE_THREAT_IDENTIFIER_FALSE = 12;
+    /** Vendor-specific enumeration to identify a disclosure as potentially harmful.
+     * Enables vendors to semantically classify disclosures based on their own logic. */
+    @FlaggedApi(Flags.FLAG_VENDOR_SPECIFIC_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    public static final int NAS_PROTOCOL_MESSAGE_THREAT_IDENTIFIER_TRUE = 13;
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -84,7 +92,9 @@ public final class CellularIdentifierDisclosure implements Parcelable {
             NAS_PROTOCOL_MESSAGE_AUTHENTICATION_AND_CIPHERING_RESPONSE,
             NAS_PROTOCOL_MESSAGE_REGISTRATION_REQUEST, NAS_PROTOCOL_MESSAGE_DEREGISTRATION_REQUEST,
             NAS_PROTOCOL_MESSAGE_CM_REESTABLISHMENT_REQUEST,
-            NAS_PROTOCOL_MESSAGE_CM_SERVICE_REQUEST, NAS_PROTOCOL_MESSAGE_IMSI_DETACH_INDICATION})
+            NAS_PROTOCOL_MESSAGE_CM_SERVICE_REQUEST, NAS_PROTOCOL_MESSAGE_IMSI_DETACH_INDICATION,
+            NAS_PROTOCOL_MESSAGE_THREAT_IDENTIFIER_FALSE,
+            NAS_PROTOCOL_MESSAGE_THREAT_IDENTIFIER_TRUE})
     public @interface NasProtocolMessage {
     }
 
@@ -154,6 +164,14 @@ public final class CellularIdentifierDisclosure implements Parcelable {
      */
     public boolean isEmergency() {
         return mIsEmergency;
+    }
+
+    /**
+     * @return if the modem vendor classifies the disclosure as benign.
+     */
+    @FlaggedApi(Flags.FLAG_VENDOR_SPECIFIC_CELLULAR_IDENTIFIER_DISCLOSURE_INDICATIONS)
+    public boolean isBenign() {
+        return mNasProtocolMessage == NAS_PROTOCOL_MESSAGE_THREAT_IDENTIFIER_FALSE;
     }
 
     @Override
