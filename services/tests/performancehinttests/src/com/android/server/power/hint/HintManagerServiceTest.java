@@ -70,8 +70,6 @@ import android.os.PerformanceHintManager;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.SessionCreationConfig;
-import android.platform.test.annotations.DisableFlags;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
@@ -1388,7 +1386,6 @@ public class HintManagerServiceTest {
 
 
     @Test
-    @EnableFlags({Flags.FLAG_CPU_HEADROOM_AFFINITY_CHECK})
     public void testCpuHeadroomCache() throws Exception {
         CpuHeadroomParamsInternal params1 = new CpuHeadroomParamsInternal();
         CpuHeadroomParams halParams1 = new CpuHeadroomParams();
@@ -1476,8 +1473,7 @@ public class HintManagerServiceTest {
     }
 
     @Test
-    @EnableFlags({Flags.FLAG_CPU_HEADROOM_AFFINITY_CHECK})
-    public void testGetCpuHeadroomDifferentAffinity_flagOn() throws Exception {
+    public void testGetCpuHeadroomDifferentAffinity() throws Exception {
         CountDownLatch latch = new CountDownLatch(2);
         int[] tids = createThreads(2, latch);
         CpuHeadroomParamsInternal params = new CpuHeadroomParamsInternal();
@@ -1495,28 +1491,6 @@ public class HintManagerServiceTest {
         assertThrows("taskset cmd return: " + ret1 + "\n" + ret2, IllegalStateException.class,
                 () -> service.getBinderServiceInstance().getCpuHeadroom(params));
         verify(mIPowerMock, times(0)).getCpuHeadroom(any());
-    }
-
-    @Test
-    @DisableFlags({Flags.FLAG_CPU_HEADROOM_AFFINITY_CHECK})
-    public void testGetCpuHeadroomDifferentAffinity_flagOff() throws Exception {
-        CountDownLatch latch = new CountDownLatch(2);
-        int[] tids = createThreads(2, latch);
-        CpuHeadroomParamsInternal params = new CpuHeadroomParamsInternal();
-        params.tids = tids;
-        CpuHeadroomParams halParams = new CpuHeadroomParams();
-        halParams.tids = tids;
-        float headroom = 0.1f;
-        CpuHeadroomResult halRet = CpuHeadroomResult.globalHeadroom(headroom);
-        String ret1 = runAndWaitForCommand("taskset -p 1 " + tids[0]);
-        String ret2 = runAndWaitForCommand("taskset -p 3 " + tids[1]);
-
-        HintManagerService service = createService();
-        clearInvocations(mIPowerMock);
-        when(mIPowerMock.getCpuHeadroom(eq(halParams))).thenReturn(halRet);
-        assertEquals("taskset cmd return: " + ret1 + "\n" + ret2, halRet,
-                service.getBinderServiceInstance().getCpuHeadroom(params));
-        verify(mIPowerMock, times(1)).getCpuHeadroom(any());
     }
 
     private String runAndWaitForCommand(String command) throws Exception {

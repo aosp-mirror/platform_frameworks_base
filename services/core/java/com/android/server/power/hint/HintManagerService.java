@@ -20,7 +20,6 @@ import static android.os.Flags.adpfUseFmqChannel;
 
 import static com.android.internal.util.ConcurrentUtils.DIRECT_EXECUTOR;
 import static com.android.server.power.hint.Flags.adpfSessionTag;
-import static com.android.server.power.hint.Flags.cpuHeadroomAffinityCheck;
 import static com.android.server.power.hint.Flags.powerhintThreadCleanup;
 import static com.android.server.power.hint.Flags.resetOnForkEnabled;
 
@@ -1604,8 +1603,7 @@ public final class HintManagerService extends SystemService {
                         }
                     }
                 }
-                if (cpuHeadroomAffinityCheck() && mCheckHeadroomAffinity
-                        && params.tids.length > 1) {
+                if (mCheckHeadroomAffinity && params.tids.length > 1) {
                     checkThreadAffinityForTids(params.tids);
                 }
                 halParams.tids = params.tids;
