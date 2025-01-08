@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromAlternateBouncerTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
@@ -23,6 +24,7 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCE
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.transitions.BlurConfig
+import com.android.systemui.keyguard.ui.transitions.BlurConfig.Companion.maxBlurRadiusToNotificationPanelBlurRadius
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -73,7 +75,28 @@ constructor(
 
     val lockscreenAlpha: Flow<Float> = if (WindowBlurFlag.isEnabled) alphaFlow else emptyFlow()
 
-    val notificationAlpha: Flow<Float> = alphaFlow
+    val notificationAlpha: Flow<Float> =
+        if (Flags.bouncerUiRevamp()) {
+            shadeDependentFlows.transitionFlow(
+                flowWhenShadeIsNotExpanded = lockscreenAlpha,
+                flowWhenShadeIsExpanded = transitionAnimation.immediatelyTransitionTo(1f),
+            )
+        } else {
+            alphaFlow
+        }
+
+    override val notificationBlurRadius: Flow<Float> =
+        if (Flags.bouncerUiRevamp()) {
+            shadeDependentFlows.transitionFlow(
+                flowWhenShadeIsNotExpanded = emptyFlow(),
+                flowWhenShadeIsExpanded =
+                    transitionAnimation.immediatelyTransitionTo(
+                        blurConfig.maxBlurRadiusPx.maxBlurRadiusToNotificationPanelBlurRadius()
+                    ),
+            )
+        } else {
+            emptyFlow<Float>()
+        }
 
     override val deviceEntryParentViewAlpha: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)

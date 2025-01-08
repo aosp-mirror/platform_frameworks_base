@@ -35,6 +35,8 @@ import static com.android.systemui.statusbar.notification.stack.StackStateAnimat
 import android.animation.ObjectAnimator;
 import android.content.res.Configuration;
 import android.graphics.Point;
+import android.graphics.RenderEffect;
+import android.graphics.Shader;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -1235,6 +1237,22 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     public void setMaxAlphaFromView(float alpha) {
         mMaxAlphaFromView = alpha;
         updateAlpha();
+    }
+
+    /**
+     * Applies a blur effect to the view.
+     *
+     * @param blurRadius Radius of blur
+     */
+    public void setBlurRadius(float blurRadius) {
+        if (blurRadius > 0.0f) {
+            mView.setRenderEffect(RenderEffect.createBlurEffect(
+                    blurRadius,
+                    blurRadius,
+                    Shader.TileMode.CLAMP));
+        } else {
+            mView.setRenderEffect(null);
+        }
     }
 
     private void updateAlpha() {

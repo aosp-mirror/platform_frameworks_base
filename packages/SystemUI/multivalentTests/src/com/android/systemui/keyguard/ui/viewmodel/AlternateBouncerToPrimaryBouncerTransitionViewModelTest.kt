@@ -16,10 +16,13 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import android.platform.test.annotations.EnableFlags
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.systemui.Flags.FLAG_BOUNCER_UI_REVAMP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectValues
+import com.android.systemui.flags.BrokenWithSceneContainer
 import com.android.systemui.flags.Flags
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardTransitionRepository
@@ -72,6 +75,28 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
         }
 
     @Test
+    @EnableFlags(FLAG_BOUNCER_UI_REVAMP)
+    @BrokenWithSceneContainer(388068805)
+    fun notifications_areFullyVisible_whenShadeIsOpen() =
+        testScope.runTest {
+            val values by collectValues(underTest.notificationAlpha)
+            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+
+            keyguardTransitionRepository.sendTransitionSteps(
+                listOf(
+                    step(0f, TransitionState.STARTED),
+                    step(0.1f),
+                    step(0.2f),
+                    step(0.3f),
+                    step(1f),
+                ),
+                testScope,
+            )
+
+            values.forEach { assertThat(it).isEqualTo(1f) }
+        }
+
+    @Test
     fun blurRadiusGoesToMaximumWhenShadeIsExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
@@ -84,6 +109,25 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
                 checkInterpolatedValues = false,
                 transitionFactory = ::step,
                 actualValuesProvider = { values },
+            )
+        }
+
+    @Test
+    @EnableFlags(FLAG_BOUNCER_UI_REVAMP)
+    @BrokenWithSceneContainer(388068805)
+    fun notificationBlur_isNonZero_whenShadeIsExpanded() =
+        testScope.runTest {
+            val values by collectValues(underTest.notificationBlurRadius)
+
+            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+
+            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+                transitionProgress = listOf(0f, 0f, 0.1f, 0.2f, 0.3f, 1f),
+                startValue = kosmos.blurConfig.maxBlurRadiusPx / 3.0f,
+                endValue = kosmos.blurConfig.maxBlurRadiusPx / 3.0f,
+                transitionFactory = ::step,
+                actualValuesProvider = { values },
+                checkInterpolatedValues = false,
             )
         }
 

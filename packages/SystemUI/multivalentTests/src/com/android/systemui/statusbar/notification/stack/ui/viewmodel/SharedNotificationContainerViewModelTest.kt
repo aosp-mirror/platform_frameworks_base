@@ -70,6 +70,7 @@ import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.notification.stack.domain.interactor.sharedNotificationContainerInteractor
 import com.android.systemui.statusbar.notification.stack.ui.viewmodel.SharedNotificationContainerViewModel.HorizontalPosition
 import com.android.systemui.testKosmos
+import com.android.systemui.window.ui.viewmodel.fakeBouncerTransitions
 import com.google.common.collect.Range
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.assertIs
@@ -1393,6 +1394,19 @@ class SharedNotificationContainerViewModelTest(flags: FlagsParameterization) : S
             sharedNotificationContainerInteractor.notificationStackChanged()
             advanceTimeBy(50L)
             assertThat(stackAbsoluteBottom).isEqualTo(100F)
+        }
+
+    @Test
+    fun blurRadius_emitsValues_fromPrimaryBouncerTransitions() =
+        testScope.runTest {
+            val blurRadius by collectLastValue(underTest.blurRadius)
+            assertThat(blurRadius).isEqualTo(0.0f)
+
+            kosmos.fakeBouncerTransitions.first().notificationBlurRadius.value = 30.0f
+            assertThat(blurRadius).isEqualTo(30.0f)
+
+            kosmos.fakeBouncerTransitions.last().notificationBlurRadius.value = 40.0f
+            assertThat(blurRadius).isEqualTo(40.0f)
         }
 
     private suspend fun TestScope.showLockscreen() {

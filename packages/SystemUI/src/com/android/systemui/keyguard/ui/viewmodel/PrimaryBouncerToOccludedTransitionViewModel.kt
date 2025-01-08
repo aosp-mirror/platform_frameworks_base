@@ -42,4 +42,7 @@ constructor(private val blurConfig: BlurConfig, animationFlow: KeyguardTransitio
 
     override val windowBlurRadius: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(blurConfig.minBlurRadiusPx)
+
+    override val notificationBlurRadius: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(0.0f)
 }

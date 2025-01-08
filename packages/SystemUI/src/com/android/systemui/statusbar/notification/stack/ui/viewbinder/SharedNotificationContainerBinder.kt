@@ -179,6 +179,10 @@ constructor(
                         }
                     }
 
+                    if (Flags.bouncerUiRevamp()) {
+                        launch { viewModel.blurRadius.collect { controller.setBlurRadius(it) } }
+                    }
+
                     if (communalSettingsInteractor.isCommunalFlagEnabled()) {
                         launch {
                             viewModel.glanceableHubAlpha.collect {

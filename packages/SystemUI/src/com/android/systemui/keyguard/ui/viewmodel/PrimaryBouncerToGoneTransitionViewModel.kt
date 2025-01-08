@@ -166,6 +166,9 @@ constructor(
             createBouncerWindowBlurFlow(primaryBouncerInteractor::willRunDismissFromKeyguard)
         }
 
+    override val notificationBlurRadius: Flow<Float> =
+        transitionAnimation.immediatelyTransitionTo(0.0f)
+
     val scrimAlpha: Flow<ScrimAlpha> =
         bouncerToGoneFlows.scrimAlpha(TO_GONE_DURATION, PRIMARY_BOUNCER)
 }
