@@ -40,6 +40,7 @@ import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+import com.android.server.backup.BackupWakeLock;
 import com.android.server.backup.Flags;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
@@ -120,7 +121,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
             // comes in.
             mBackupManagerService.getBackupHandler().removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
-            UserBackupManagerService.BackupWakeLock wakelock = mBackupManagerService.getWakelock();
+            BackupWakeLock wakelock = mBackupManagerService.getWakeLock();
             wakelock.acquire();
 
             // Prevent lambda from leaking 'this'
@@ -420,7 +421,7 @@ public class ActiveRestoreSession extends IRestoreSession.Stub {
         Handler backupHandler = mBackupManagerService.getBackupHandler();
         backupHandler.removeMessages(MSG_RESTORE_SESSION_TIMEOUT);
 
-        UserBackupManagerService.BackupWakeLock wakelock = mBackupManagerService.getWakelock();
+        BackupWakeLock wakelock = mBackupManagerService.getWakeLock();
         wakelock.acquire();
         if (DEBUG) {
             Slog.d(TAG, callerLogString);

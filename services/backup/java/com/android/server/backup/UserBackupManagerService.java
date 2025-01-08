@@ -86,7 +86,6 @@ import android.os.RemoteException;
 import android.os.SELinux;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.WorkSource;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.ArraySet;
@@ -172,88 +171,6 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 /** System service that performs backup/restore operations. */
 public class UserBackupManagerService {
-    /**
-     * Wrapper over {@link PowerManager.WakeLock} to prevent double-free exceptions on release()
-     * after quit().
-     */
-    public static class BackupWakeLock {
-        private final PowerManager.WakeLock mPowerManagerWakeLock;
-        private boolean mHasQuit = false;
-        private final int mUserId;
-        private final BackupManagerConstants mBackupManagerConstants;
-
-        public BackupWakeLock(PowerManager.WakeLock powerManagerWakeLock, int userId,
-                BackupManagerConstants backupManagerConstants) {
-            mPowerManagerWakeLock = powerManagerWakeLock;
-            mUserId = userId;
-            mBackupManagerConstants = backupManagerConstants;
-        }
-
-        /** Acquires the {@link PowerManager.WakeLock} if hasn't been quit. */
-        public synchronized void acquire() {
-            if (mHasQuit) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Ignore wakelock acquire after quit: "
-                                        + mPowerManagerWakeLock.getTag()));
-                return;
-            }
-            // Set a timeout for the wakelock. Otherwise if we fail internally and never call
-            // release(), the device might stay awake and drain battery indefinitely.
-            mPowerManagerWakeLock.acquire(mBackupManagerConstants.getWakelockTimeoutMillis());
-            Slog.d(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Acquired wakelock:" + mPowerManagerWakeLock.getTag()));
-        }
-
-        /** Releases the {@link PowerManager.WakeLock} if hasn't been quit. */
-        public synchronized void release() {
-            if (mHasQuit) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId,
-                                "Ignore wakelock release after quit: "
-                                        + mPowerManagerWakeLock.getTag()));
-                return;
-            }
-
-            if (!mPowerManagerWakeLock.isHeld()) {
-                Slog.w(TAG, addUserIdToLogMessage(mUserId,
-                        "Wakelock not held: " + mPowerManagerWakeLock.getTag()));
-                return;
-            }
-
-            mPowerManagerWakeLock.release();
-            Slog.d(
-                    TAG,
-                    addUserIdToLogMessage(
-                            mUserId, "Released wakelock:" + mPowerManagerWakeLock.getTag()));
-        }
-
-        /**
-         * Returns true if the {@link PowerManager.WakeLock} has been acquired but not yet released.
-         */
-        public synchronized boolean isHeld() {
-            return mPowerManagerWakeLock.isHeld();
-        }
-
-        /** Release the {@link PowerManager.WakeLock} till it isn't held. */
-        public synchronized void quit() {
-            while (mPowerManagerWakeLock.isHeld()) {
-                Slog.d(
-                        TAG,
-                        addUserIdToLogMessage(
-                                mUserId, "Releasing wakelock: " + mPowerManagerWakeLock.getTag()));
-                mPowerManagerWakeLock.release();
-            }
-            mHasQuit = true;
-        }
-    }
-
     // Persistently track the need to do a full init.
     private static final String INIT_SENTINEL_FILE_NAME = "_need_init_";
 
@@ -756,18 +673,8 @@ public class UserBackupManagerService {
         mSetupComplete = setupComplete;
     }
 
-    public BackupWakeLock getWakelock() {
+    public BackupWakeLock getWakeLock() {
         return mWakelock;
-    }
-
-    /**
-     * Sets the {@link WorkSource} of the {@link PowerManager.WakeLock} returned by {@link
-     * #getWakelock()}.
-     */
-    @VisibleForTesting
-    public void setWorkSource(@Nullable WorkSource workSource) {
-        // TODO: This is for testing, unfortunately WakeLock is final and WorkSource is not exposed
-        mWakelock.mPowerManagerWakeLock.setWorkSource(workSource);
     }
 
     public Handler getBackupHandler() {

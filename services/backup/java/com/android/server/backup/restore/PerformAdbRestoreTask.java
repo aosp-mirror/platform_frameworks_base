@@ -141,7 +141,7 @@ public class PerformAdbRestoreTask implements Runnable {
             mObbConnection.tearDown();
             mObserver = FullBackupRestoreObserverUtils.sendEndRestore(mObserver);
             Slog.d(TAG, "Full restore pass complete.");
-            mBackupManagerService.getWakelock().release();
+            mBackupManagerService.getWakeLock().release();
         }
     }
 

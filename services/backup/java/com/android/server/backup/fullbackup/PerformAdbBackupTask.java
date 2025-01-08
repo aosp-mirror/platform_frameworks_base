@@ -468,7 +468,7 @@ public class PerformAdbBackupTask extends FullBackupTask implements BackupRestor
             sendEndBackup();
             obbConnection.tearDown();
             Slog.d(TAG, "Full backup pass complete.");
-            mUserBackupManagerService.getWakelock().release();
+            mUserBackupManagerService.getWakeLock().release();
         }
     }
 

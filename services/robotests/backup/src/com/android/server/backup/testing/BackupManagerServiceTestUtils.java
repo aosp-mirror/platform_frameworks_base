@@ -39,6 +39,7 @@ import android.util.Log;
 import com.android.server.backup.BackupAgentTimeoutParameters;
 import com.android.server.backup.BackupManagerConstants;
 import com.android.server.backup.BackupManagerService;
+import com.android.server.backup.BackupWakeLock;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
 
@@ -114,7 +115,7 @@ public class BackupManagerServiceTestUtils {
             TransportManager transportManager,
             PackageManager packageManager,
             Handler backupHandler,
-            UserBackupManagerService.BackupWakeLock wakeLock,
+            BackupWakeLock wakeLock,
             BackupAgentTimeoutParameters agentTimeoutParameters) {
 
         when(backupManagerService.getContext()).thenReturn(application);
@@ -123,7 +124,7 @@ public class BackupManagerServiceTestUtils {
         when(backupManagerService.getBackupHandler()).thenReturn(backupHandler);
         when(backupManagerService.getQueueLock()).thenReturn(new Object());
         when(backupManagerService.getActivityManager()).thenReturn(mock(IActivityManager.class));
-        when(backupManagerService.getWakelock()).thenReturn(wakeLock);
+        when(backupManagerService.getWakeLock()).thenReturn(wakeLock);
         when(backupManagerService.getAgentTimeoutParameters()).thenReturn(agentTimeoutParameters);
 
         AccessorMock backupEnabled = mockAccessor(false);
@@ -161,10 +162,12 @@ public class BackupManagerServiceTestUtils {
                 });
     }
 
-    public static UserBackupManagerService.BackupWakeLock createBackupWakeLock(
-            Application application) {
+    /**
+     * Creates a wakelock for testing.
+     */
+    public static BackupWakeLock createBackupWakeLock(Application application) {
         PowerManager powerManager = application.getSystemService(PowerManager.class);
-        return new UserBackupManagerService.BackupWakeLock(
+        return new BackupWakeLock(
                 powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*backup*"), 0,
                 new BackupManagerConstants(Handler.getMain(), application.getContentResolver()));
     }

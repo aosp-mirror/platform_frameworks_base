@@ -35,6 +35,7 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.backup.BackupAgentConnectionManager;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupWakeLock;
 import com.android.server.backup.OperationStorage;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
@@ -81,7 +82,7 @@ public class PerformFullTransportBackupTaskTest {
     @Mock
     TransportManager mTransportManager;
     @Mock
-    UserBackupManagerService.BackupWakeLock mWakeLock;
+    BackupWakeLock mWakeLock;
 
     private final List<String> mEligiblePackages = new ArrayList<>();
 
@@ -94,7 +95,7 @@ public class PerformFullTransportBackupTaskTest {
         when(mBackupManagerService.getPackageManager()).thenReturn(mPackageManager);
         when(mBackupManagerService.getQueueLock()).thenReturn("something!");
         when(mBackupManagerService.isEnabled()).thenReturn(true);
-        when(mBackupManagerService.getWakelock()).thenReturn(mWakeLock);
+        when(mBackupManagerService.getWakeLock()).thenReturn(mWakeLock);
         when(mBackupManagerService.isSetupComplete()).thenReturn(true);
         when(mBackupManagerService.getAgentTimeoutParameters()).thenReturn(
                 mBackupAgentTimeoutParameters);

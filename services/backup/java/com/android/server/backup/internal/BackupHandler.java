@@ -136,7 +136,7 @@ public class BackupHandler extends Handler {
     public void handleMessage(Message msg) {
         if (msg.what == MSG_STOP) {
             Slog.d(TAG, "Stopping backup handler");
-            backupManagerService.getWakelock().quit();
+            backupManagerService.getWakeLock().quit();
             mBackupThread.quitSafely();
         }
 
@@ -181,7 +181,7 @@ public class BackupHandler extends Handler {
                     // Acquire the wakelock and pass it to the backup thread. It will be released
                     // once backup concludes.
                     backupManagerService.setBackupRunning(true);
-                    backupManagerService.getWakelock().acquire();
+                    backupManagerService.getWakeLock().acquire();
 
                     // Do we have any work to do?  Construct the work queue
                     // then release the synchronization lock to actually run
@@ -254,7 +254,7 @@ public class BackupHandler extends Handler {
                     synchronized (backupManagerService.getQueueLock()) {
                         backupManagerService.setBackupRunning(false);
                     }
-                    backupManagerService.getWakelock().release();
+                    backupManagerService.getWakeLock().release();
                 }
                 break;
             }
@@ -466,7 +466,7 @@ public class BackupHandler extends Handler {
                     Slog.d(TAG, "MSG_REQUEST_BACKUP observer=" + params.observer);
                 }
                 backupManagerService.setBackupRunning(true);
-                backupManagerService.getWakelock().acquire();
+                backupManagerService.getWakeLock().acquire();
 
                 KeyValueBackupTask.start(
                         backupManagerService,

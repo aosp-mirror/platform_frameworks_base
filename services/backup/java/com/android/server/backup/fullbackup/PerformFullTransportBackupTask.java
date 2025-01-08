@@ -688,7 +688,7 @@ public class PerformFullTransportBackupTask extends FullBackupTask implements Ba
                     .getBackupAgentConnectionManager().clearNoRestrictedModePackages();
 
             Slog.i(TAG, "Full data backup pass finished.");
-            mUserBackupManagerService.getWakelock().release();
+            mUserBackupManagerService.getWakeLock().release();
         }
     }
 

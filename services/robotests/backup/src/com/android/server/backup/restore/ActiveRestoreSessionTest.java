@@ -51,6 +51,7 @@ import android.platform.test.annotations.Presubmit;
 
 import com.android.server.EventLogTags;
 import com.android.server.backup.BackupAgentTimeoutParameters;
+import com.android.server.backup.BackupWakeLock;
 import com.android.server.backup.OperationStorage;
 import com.android.server.backup.TransportManager;
 import com.android.server.backup.UserBackupManagerService;
@@ -103,7 +104,7 @@ public class ActiveRestoreSessionTest {
     @Mock private OperationStorage mOperationStorage;
     private ShadowLooper mShadowBackupLooper;
     private ShadowApplication mShadowApplication;
-    private UserBackupManagerService.BackupWakeLock mWakeLock;
+    private BackupWakeLock mWakeLock;
     private TransportData mTransport;
     private RestoreSet mRestoreSet1;
     private RestoreSet mRestoreSet2;

@@ -109,6 +109,7 @@ import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.backup.BackupAgentConnectionManager;
 import com.android.server.backup.BackupRestoreTask;
+import com.android.server.backup.BackupWakeLock;
 import com.android.server.backup.DataChangedJournal;
 import com.android.server.backup.KeyValueBackupJob;
 import com.android.server.backup.PackageManagerBackupAgent;
@@ -201,7 +202,7 @@ public class KeyValueBackupTaskTest  {
     private TransportData mTransport;
     private ShadowLooper mShadowBackupLooper;
     private Handler mBackupHandler;
-    private UserBackupManagerService.BackupWakeLock mWakeLock;
+    private BackupWakeLock mWakeLock;
     private KeyValueBackupReporter mReporter;
     private PackageManager mPackageManager;
     private ShadowPackageManager mShadowPackageManager;
@@ -238,7 +239,7 @@ public class KeyValueBackupTaskTest  {
         mPackageManager = mApplication.getPackageManager();
         mShadowPackageManager = shadowOf(mPackageManager);
 
-        mWakeLock = createBackupWakeLock(mApplication);
+        mWakeLock = spy(createBackupWakeLock(mApplication));
         mBackupManager = spy(FakeIBackupManager.class);
 
         // Needed to be able to use a real BMS instead of a mock
@@ -737,17 +738,16 @@ public class KeyValueBackupTaskTest  {
                     // In production (for non-system agents) the call is asynchronous, but here is
                     // synchronous, so it's fine to verify here.
                     // Verify has set work source and hasn't unset yet.
-                    verify(mBackupManagerService)
-                            .setWorkSource(
-                                    argThat(workSource -> workSource.getUid(0) == PACKAGE_1.uid));
-                    verify(mBackupManagerService, never()).setWorkSource(null);
+                    verify(mWakeLock).setWorkSource(
+                            argThat(workSource -> workSource.getUid(0) == PACKAGE_1.uid));
+                    verify(mWakeLock, never()).setWorkSource(null);
                 });
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
 
         runTask(task);
 
         // More verifications inside agent call above
-        verify(mBackupManagerService).setWorkSource(null);
+        verify(mWakeLock).setWorkSource(null);
     }
 
     /**
@@ -765,7 +765,7 @@ public class KeyValueBackupTaskTest  {
 
         runTask(task);
 
-        verify(mBackupManagerService).setWorkSource(null);
+        verify(mWakeLock).setWorkSource(null);
         verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
         verify(mObserver).backupFinished(SUCCESS);
         assertBackupPendingFor(PACKAGE_1);
@@ -798,7 +798,7 @@ public class KeyValueBackupTaskTest  {
 
         runTask(task);
 
-        verify(mBackupManagerService).setWorkSource(null);
+        verify(mWakeLock).setWorkSource(null);
         verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
         verify(mObserver).backupFinished(SUCCESS);
         assertBackupPendingFor(PACKAGE_1);
@@ -815,7 +815,7 @@ public class KeyValueBackupTaskTest  {
 
         runTask(task);
 
-        verify(mBackupManagerService).setWorkSource(null);
+        verify(mWakeLock).setWorkSource(null);
         verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
         verify(mObserver).backupFinished(SUCCESS);
         assertBackupPendingFor(PACKAGE_1);
@@ -833,7 +833,7 @@ public class KeyValueBackupTaskTest  {
 
         runTask(task);
 
-        verify(mBackupManagerService).setWorkSource(null);
+        verify(mWakeLock).setWorkSource(null);
         verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
         verify(mObserver).backupFinished(SUCCESS);
         assertBackupPendingFor(PACKAGE_1);
@@ -864,7 +864,7 @@ public class KeyValueBackupTaskTest  {
 
         runTask(task);
 
-        verify(mBackupManagerService).setWorkSource(null);
+        verify(mWakeLock).setWorkSource(null);
         verify(mBackupAgentConnectionManager).unbindAgent(argThat(applicationInfo(PACKAGE_1)),
                 eq(false));
     }
@@ -918,7 +918,7 @@ public class KeyValueBackupTaskTest  {
 
         runTask(task);
 
-        verify(mBackupManagerService).setWorkSource(null);
+        verify(mWakeLock).setWorkSource(null);
     }
 
     @Test

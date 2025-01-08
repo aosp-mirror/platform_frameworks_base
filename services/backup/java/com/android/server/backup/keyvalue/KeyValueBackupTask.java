@@ -826,7 +826,7 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
         }
         mTaskFinishedListener.onFinished(callerLogString);
         mReporter.onBackupFinished(getBackupFinishedStatus(mCancelled, status));
-        mBackupManagerService.getWakelock().release();
+        mBackupManagerService.getWakeLock().release();
     }
 
     private int getBackupFinishedStatus(boolean cancelled, int transportStatus) {
@@ -878,12 +878,13 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
      * the transport or not. It's the caller responsibility to do the clean-up or delegate it.
      */
     private void extractAgentData(PackageInfo packageInfo) throws AgentException, TaskException {
-        mBackupManagerService.setWorkSource(new WorkSource(packageInfo.applicationInfo.uid));
+        mBackupManagerService.getWakeLock().setWorkSource(
+                new WorkSource(packageInfo.applicationInfo.uid));
         try {
             mAgent = bindAgent(packageInfo);
             extractAgentData(packageInfo, mAgent);
         } finally {
-            mBackupManagerService.setWorkSource(null);
+            mBackupManagerService.getWakeLock().setWorkSource(null);
         }
     }
 
