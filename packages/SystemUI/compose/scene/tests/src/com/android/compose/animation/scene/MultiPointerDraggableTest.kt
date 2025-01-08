@@ -72,12 +72,12 @@ class MultiPointerDraggableTest {
             return delta
         }
 
-        override suspend fun onStop(velocity: Float, canChangeContent: Boolean): Float {
+        override suspend fun onStop(velocity: Float): Float {
             onStop.invoke(velocity)
             return velocity
         }
 
-        override fun onCancel(canChangeContent: Boolean) {
+        override fun onCancel() {
             error("MultiPointerDraggable never calls onCancel()")
         }
     }
