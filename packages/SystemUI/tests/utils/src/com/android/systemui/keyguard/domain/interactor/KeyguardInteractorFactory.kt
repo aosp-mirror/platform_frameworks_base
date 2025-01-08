@@ -24,8 +24,6 @@ import com.android.systemui.flags.FakeFeatureFlags
 import com.android.systemui.keyguard.data.repository.FakeKeyguardRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.TransitionStep
-import com.android.systemui.power.domain.interactor.PowerInteractor
-import com.android.systemui.power.domain.interactor.PowerInteractorFactory
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.shade.data.repository.FakeShadeRepository
 import com.android.systemui.util.mockito.mock
@@ -55,7 +53,6 @@ object KeyguardInteractorFactory {
         fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor = mock(),
         fromOccludedTransitionInteractor: FromOccludedTransitionInteractor = mock(),
         fromAlternateBouncerTransitionInteractor: FromAlternateBouncerTransitionInteractor = mock(),
-        powerInteractor: PowerInteractor = PowerInteractorFactory.create().powerInteractor,
         testScope: CoroutineScope = TestScope(),
     ): WithDependencies {
         // Mock these until they are replaced by kosmos
@@ -73,10 +70,8 @@ object KeyguardInteractorFactory {
             bouncerRepository = bouncerRepository,
             configurationRepository = configurationRepository,
             shadeRepository = shadeRepository,
-            powerInteractor = powerInteractor,
             KeyguardInteractor(
                 repository = repository,
-                powerInteractor = powerInteractor,
                 bouncerRepository = bouncerRepository,
                 configurationInteractor = ConfigurationInteractorImpl(configurationRepository),
                 shadeRepository = shadeRepository,
@@ -99,7 +94,6 @@ object KeyguardInteractorFactory {
         val bouncerRepository: FakeKeyguardBouncerRepository,
         val configurationRepository: FakeConfigurationRepository,
         val shadeRepository: FakeShadeRepository,
-        val powerInteractor: PowerInteractor,
         val keyguardInteractor: KeyguardInteractor,
     )
 }
