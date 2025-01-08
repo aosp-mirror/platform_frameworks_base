@@ -2714,16 +2714,18 @@ public final class SystemServer implements Dumpable {
             mSystemServiceManager.startService(AuthService.class);
             t.traceEnd();
 
-            if (android.security.Flags.secureLockdown()) {
-                t.traceBegin("StartSecureLockDeviceService.Lifecycle");
-                mSystemServiceManager.startService(SecureLockDeviceService.Lifecycle.class);
-                t.traceEnd();
-            }
+            if (!isWatch && !isTv && !isAutomotive) {
+                if (android.security.Flags.secureLockdown()) {
+                    t.traceBegin("StartSecureLockDeviceService.Lifecycle");
+                    mSystemServiceManager.startService(SecureLockDeviceService.Lifecycle.class);
+                    t.traceEnd();
+                }
 
-            if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
-                t.traceBegin("StartAuthenticationPolicyService");
-                mSystemServiceManager.startService(AuthenticationPolicyService.class);
-                t.traceEnd();
+                if (android.adaptiveauth.Flags.enableAdaptiveAuth()) {
+                    t.traceBegin("StartAuthenticationPolicyService");
+                    mSystemServiceManager.startService(AuthenticationPolicyService.class);
+                    t.traceEnd();
+                }
             }
 
             if (!isWatch) {
