@@ -88,5 +88,6 @@ public class ResourcesManagerShellCommand extends ShellCommand {
         out.println("    Print this help text.");
         out.println("  dump <PROCESS>");
         out.println("    Dump the Resources objects in use as well as the history of Resources");
+
     }
 }
