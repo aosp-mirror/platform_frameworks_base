@@ -581,7 +581,7 @@ package android.accessibilityservice {
 package android.accounts {
 
   public class AccountManager {
-    method @FlaggedApi("android.app.admin.flags.split_create_managed_profile_enabled") @NonNull @RequiresPermission(anyOf={android.Manifest.permission.COPY_ACCOUNTS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public android.accounts.AccountManagerFuture<java.lang.Boolean> copyAccountToUser(@NonNull android.accounts.Account, @NonNull android.os.UserHandle, @NonNull android.os.UserHandle, @Nullable android.accounts.AccountManagerCallback<java.lang.Boolean>, @Nullable android.os.Handler);
+    method @FlaggedApi("android.app.admin.flags.split_create_managed_profile_enabled") @NonNull @RequiresPermission(anyOf={android.Manifest.permission.COPY_ACCOUNTS, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}) public android.accounts.AccountManagerFuture<java.lang.Boolean> copyAccountToUser(@NonNull android.accounts.Account, @NonNull android.os.UserHandle, @NonNull android.os.UserHandle, @Nullable android.os.Handler, @Nullable android.accounts.AccountManagerCallback<java.lang.Boolean>);
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public android.accounts.AccountManagerFuture<android.os.Bundle> finishSessionAsUser(android.os.Bundle, android.app.Activity, android.os.UserHandle, android.accounts.AccountManagerCallback<android.os.Bundle>, android.os.Handler);
   }
 
