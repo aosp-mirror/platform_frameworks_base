@@ -26,6 +26,7 @@ import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.RingerMode
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -49,10 +50,10 @@ constructor(
         isRoutedToBluetooth: Boolean,
     ): Flow<Drawable> {
         return combine(
-            zenModeInteractor.activeModesBlockingStream(AudioStream(stream)),
+            zenModeInteractor.activeModesBlockingStream(stream),
             ringerModeForStream(stream),
         ) { activeModesBlockingStream, ringerMode ->
-            if (activeModesBlockingStream.mainMode?.icon != null) {
+            if (activeModesBlockingStream?.mainMode?.icon != null) {
                 return@combine activeModesBlockingStream.mainMode.icon.drawable
             } else {
                 context.getDrawable(
@@ -139,5 +140,18 @@ constructor(
         } else {
             flowOf(null)
         }
+    }
+}
+
+private fun ZenModeInteractor.activeModesBlockingStream(stream: Int): Flow<ActiveZenModes?> {
+    return if (AudioStream.supportedStreamTypes.contains(stream)) {
+        val audioStream = AudioStream(stream)
+        if (canBeBlockedByZenMode(audioStream)) {
+            activeModesBlockingStream(audioStream)
+        } else {
+            flowOf(null)
+        }
+    } else {
+        flowOf(null)
     }
 }

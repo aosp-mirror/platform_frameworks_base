@@ -52,4 +52,11 @@ sealed interface VolumeDialogEventModel {
         VolumeDialogEventModel
 
     data object VolumeChangedFromKey : VolumeDialogEventModel
+
+    /**
+     * Signals that the
+     * [com.android.systemui.volume.dialog.domain.interactor.VolumeDialogCallbacksInteractor] is
+     * ready to process the events.
+     */
+    data object SubscribedToEvents : VolumeDialogEventModel
 }

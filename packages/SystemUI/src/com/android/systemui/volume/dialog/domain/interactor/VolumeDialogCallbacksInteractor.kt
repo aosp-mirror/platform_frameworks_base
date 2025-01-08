@@ -25,6 +25,7 @@ import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogPluginScope
 import com.android.systemui.volume.dialog.domain.model.VolumeDialogEventModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.channels.ProducerScope
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
@@ -54,9 +55,10 @@ constructor(
         callbackFlow {
                 val producer = VolumeDialogEventModelProducer(this)
                 volumeDialogController.addCallback(producer, bgHandler)
+                send(VolumeDialogEventModel.SubscribedToEvents)
                 awaitClose { volumeDialogController.removeCallback(producer) }
             }
-            .buffer(BUFFER_CAPACITY)
+            .buffer(capacity = BUFFER_CAPACITY, onBufferOverflow = BufferOverflow.DROP_OLDEST)
             .shareIn(replay = 0, scope = coroutineScope, started = SharingStarted.WhileSubscribed())
 
     private class VolumeDialogEventModelProducer(

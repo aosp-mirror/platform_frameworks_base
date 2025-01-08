@@ -197,7 +197,7 @@ class FakeVolumeDialogController(private val audioManager: AudioManager) : Volum
     }
 }
 
-private inline fun CopyOnWriteArraySet<VolumeDialogController.Callbacks>.sendEvent(
+private inline fun Collection<VolumeDialogController.Callbacks>.sendEvent(
     event: (callback: VolumeDialogController.Callbacks) -> Unit
 ) {
     for (callback in this) {
