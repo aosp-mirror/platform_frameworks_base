@@ -157,6 +157,9 @@ public final class AccessibilityManager {
     /** @hide */
     public static final int AUTOCLICK_CURSOR_AREA_SIZE_MAX = 100;
 
+    /** @hide */
+    public static final int AUTOCLICK_CURSOR_AREA_INCREMENT_SIZE = 20;
+
     /**
      * Activity action: Launch UI to manage which accessibility service or feature is assigned
      * to the navigation bar Accessibility button.
