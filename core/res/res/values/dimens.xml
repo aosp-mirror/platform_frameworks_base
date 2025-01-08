@@ -608,11 +608,22 @@
     <!-- Size of the feedback indicator for notifications -->
     <dimen name="notification_feedback_size">20dp</dimen>
 
+    <!-- Size of the (work) profile badge for notifications -->
+    <dimen name="notification_badge_size">12dp</dimen>
+
+    <!-- Size of the (work) profile badge for notifications (2025 redesign version).
+         Scales with font size. Chosen to look good alongside notification_subtext_size text. -->
+    <dimen name="notification_2025_badge_size">14sp</dimen>
+
+    <!-- Baseline for aligning icons in the top line (like the work profile icon or alerting icon)
+         to the text properly. This is equal to notification_2025_badge_size - 2sp. -->
+    <dimen name="notification_2025_badge_baseline">12sp</dimen>
+
+    <!-- Spacing for the top line icons (e.g. the work profile badge). -->
+    <dimen name="notification_2025_badge_margin">4dp</dimen>
+
     <!-- Size of the phishing alert for notifications -->
     <dimen name="notification_phishing_alert_size">@dimen/notification_badge_size</dimen>
-
-    <!-- Size of the profile badge for notifications -->
-    <dimen name="notification_badge_size">12dp</dimen>
 
     <!-- Size of the alerted icon for notifications -->
     <dimen name="notification_alerted_size">@dimen/notification_badge_size</dimen>
