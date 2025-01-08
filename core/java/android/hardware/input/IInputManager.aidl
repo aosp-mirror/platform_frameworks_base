@@ -266,6 +266,11 @@ interface IInputManager {
     @PermissionManuallyEnforced
     @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
             + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
+    AidlInputGestureData getInputGesture(int userId, in AidlInputGestureData.Trigger trigger);
+
+    @PermissionManuallyEnforced
+    @JavaPassthrough(annotation="@android.annotation.RequiresPermission(value = "
+            + "android.Manifest.permission.MANAGE_KEY_GESTURES)")
     int addCustomInputGesture(int userId, in AidlInputGestureData data);
 
     @PermissionManuallyEnforced

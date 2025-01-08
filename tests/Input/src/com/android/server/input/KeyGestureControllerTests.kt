@@ -59,6 +59,7 @@ import junitparams.Parameters
 import org.junit.After
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Rule
@@ -1452,20 +1453,32 @@ class KeyGestureControllerTests {
     @Parameters(method = "customInputGesturesTestArguments")
     fun testCustomKeyGestures(test: TestData) {
         setupKeyGestureController()
+        val trigger = InputGestureData.createKeyTrigger(
+            test.expectedKeys[0],
+            test.expectedModifierState
+        )
         val builder = InputGestureData.Builder()
             .setKeyGestureType(test.expectedKeyGestureType)
-            .setTrigger(
-                InputGestureData.createKeyTrigger(
-                    test.expectedKeys[0],
-                    test.expectedModifierState
-                )
-            )
+            .setTrigger(trigger)
         if (test.expectedAppLaunchData != null) {
             builder.setAppLaunchData(test.expectedAppLaunchData)
         }
         val inputGestureData = builder.build()
 
-        keyGestureController.addCustomInputGesture(0, inputGestureData.aidlData)
+        assertNull(
+            test.toString(),
+            keyGestureController.getInputGesture(0, trigger.aidlTrigger)
+        )
+        assertEquals(
+            test.toString(),
+            InputManager.CUSTOM_INPUT_GESTURE_RESULT_SUCCESS,
+            keyGestureController.addCustomInputGesture(0, builder.build().aidlData)
+        )
+        assertEquals(
+            test.toString(),
+            inputGestureData.aidlData,
+            keyGestureController.getInputGesture(0, trigger.aidlTrigger)
+        )
         testKeyGestureInternal(test)
     }
 

@@ -43,6 +43,9 @@ public final class KeyGestureEvent {
     private static final int LOG_EVENT_UNSPECIFIED =
             FrameworkStatsLog.KEYBOARD_SYSTEMS_EVENT_REPORTED__KEYBOARD_SYSTEM_EVENT__UNSPECIFIED;
 
+    // Used as a placeholder to identify if a gesture is reserved for system
+    public static final int KEY_GESTURE_TYPE_SYSTEM_RESERVED = -1;
+
     // These values should not change and values should not be re-used as this data is persisted to
     // long term storage and must be kept backwards compatible.
     public static final int KEY_GESTURE_TYPE_UNSPECIFIED = 0;
@@ -143,6 +146,7 @@ public final class KeyGestureEvent {
     public static final int ACTION_GESTURE_COMPLETE = 2;
 
     @IntDef(prefix = "KEY_GESTURE_TYPE_", value = {
+            KEY_GESTURE_TYPE_SYSTEM_RESERVED,
             KEY_GESTURE_TYPE_UNSPECIFIED,
             KEY_GESTURE_TYPE_HOME,
             KEY_GESTURE_TYPE_RECENT_APPS,
@@ -643,6 +647,8 @@ public final class KeyGestureEvent {
 
     private static String keyGestureTypeToString(@KeyGestureType int value) {
         switch (value) {
+            case KEY_GESTURE_TYPE_SYSTEM_RESERVED:
+                return "KEY_GESTURE_TYPE_SYSTEM_RESERVED";
             case KEY_GESTURE_TYPE_UNSPECIFIED:
                 return "KEY_GESTURE_TYPE_UNSPECIFIED";
             case KEY_GESTURE_TYPE_HOME:

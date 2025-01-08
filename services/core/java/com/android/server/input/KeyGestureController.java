@@ -1069,6 +1069,18 @@ final class KeyGestureController {
     }
 
     @BinderThread
+    @Nullable
+    public AidlInputGestureData getInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData.Trigger trigger) {
+        InputGestureData gestureData = mInputGestureManager.getInputGesture(userId,
+                InputGestureData.createTriggerFromAidlTrigger(trigger));
+        if (gestureData == null) {
+            return null;
+        }
+        return gestureData.getAidlData();
+    }
+
+    @BinderThread
     @InputManager.CustomInputGestureResult
     public int addCustomInputGesture(@UserIdInt int userId,
             @NonNull AidlInputGestureData inputGestureData) {

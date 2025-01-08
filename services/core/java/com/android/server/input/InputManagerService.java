@@ -3061,6 +3061,16 @@ public class InputManagerService extends IInputManager.Stub
 
     @Override
     @PermissionManuallyEnforced
+    public AidlInputGestureData getInputGesture(@UserIdInt int userId,
+            @NonNull AidlInputGestureData.Trigger trigger) {
+        enforceManageKeyGesturePermission();
+
+        Objects.requireNonNull(trigger);
+        return mKeyGestureController.getInputGesture(userId, trigger);
+    }
+
+    @Override
+    @PermissionManuallyEnforced
     public int addCustomInputGesture(@UserIdInt int userId,
             @NonNull AidlInputGestureData inputGestureData) {
         enforceManageKeyGesturePermission();
