@@ -27,7 +27,7 @@ import com.android.server.wm.utils.OptPropFactory;
 public class AppCompatOverrides {
 
     @NonNull
-    private final AppCompatOrientationOverrides mAppCompatOrientationOverrides;
+    private final AppCompatOrientationOverrides mOrientationOverrides;
     @NonNull
     private final AppCompatCameraOverrides mAppCompatCameraOverrides;
     @NonNull
@@ -48,7 +48,7 @@ public class AppCompatOverrides {
             @NonNull AppCompatDeviceStateQuery appCompatDeviceStateQuery) {
         mAppCompatCameraOverrides = new AppCompatCameraOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder);
-        mAppCompatOrientationOverrides = new AppCompatOrientationOverrides(activityRecord,
+        mOrientationOverrides = new AppCompatOrientationOverrides(activityRecord,
                 appCompatConfiguration, optPropBuilder, mAppCompatCameraOverrides);
         mReachabilityOverrides = new AppCompatReachabilityOverrides(activityRecord,
                 appCompatConfiguration, appCompatDeviceStateQuery);
@@ -64,8 +64,8 @@ public class AppCompatOverrides {
     }
 
     @NonNull
-    AppCompatOrientationOverrides getAppCompatOrientationOverrides() {
-        return mAppCompatOrientationOverrides;
+    AppCompatOrientationOverrides getOrientationOverrides() {
+        return mOrientationOverrides;
     }
 
     @NonNull

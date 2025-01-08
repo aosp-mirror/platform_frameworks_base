@@ -94,7 +94,7 @@ class AppCompatOrientationPolicy {
             return SCREEN_ORIENTATION_PORTRAIT;
         }
 
-        if (mAppCompatOverrides.getAppCompatOrientationOverrides()
+        if (mAppCompatOverrides.getOrientationOverrides()
                 .isAllowOrientationOverrideOptOut()) {
             return candidate;
         }
@@ -108,7 +108,7 @@ class AppCompatOrientationPolicy {
         }
 
         final AppCompatOrientationOverrides.OrientationOverridesState capabilityState =
-                mAppCompatOverrides.getAppCompatOrientationOverrides()
+                mAppCompatOverrides.getOrientationOverrides()
                         .mOrientationOverridesState;
 
         if (capabilityState.mIsOverrideToReverseLandscapeOrientationEnabled
@@ -170,7 +170,7 @@ class AppCompatOrientationPolicy {
     boolean shouldIgnoreRequestedOrientation(
             @ActivityInfo.ScreenOrientation int requestedOrientation) {
         final AppCompatOrientationOverrides orientationOverrides =
-                mAppCompatOverrides.getAppCompatOrientationOverrides();
+                mAppCompatOverrides.getOrientationOverrides();
         if (orientationOverrides.shouldEnableIgnoreOrientationRequest()) {
             if (orientationOverrides.getIsRelaunchingAfterRequestedOrientationChanged()) {
                 Slog.w(TAG, "Ignoring orientation update to "

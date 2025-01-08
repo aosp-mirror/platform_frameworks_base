@@ -154,7 +154,7 @@ class AppCompatLetterboxPolicy {
 
     @VisibleForTesting
     boolean shouldShowLetterboxUi(@NonNull WindowState mainWindow) {
-        if (mActivityRecord.mAppCompatController.getAppCompatOrientationOverrides()
+        if (mActivityRecord.mAppCompatController.getOrientationOverrides()
                 .getIsRelaunchingAfterRequestedOrientationChanged()) {
             return mLastShouldShowLetterboxUi;
         }

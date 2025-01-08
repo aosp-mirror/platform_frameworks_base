@@ -335,7 +335,7 @@ public class AppCompatOrientationOverridesTest extends WindowTestsBase {
         }
 
         private AppCompatOrientationOverrides getTopOrientationOverrides() {
-            return activity().top().mAppCompatController.getAppCompatOrientationOverrides();
+            return activity().top().mAppCompatController.getOrientationOverrides();
         }
     }
 }
