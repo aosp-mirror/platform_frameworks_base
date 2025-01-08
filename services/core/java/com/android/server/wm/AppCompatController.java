@@ -119,8 +119,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatFocusOverrides getAppCompatFocusOverrides() {
-        return mAppCompatOverrides.getAppCompatFocusOverrides();
+    AppCompatFocusOverrides getFocusOverrides() {
+        return mAppCompatOverrides.getFocusOverrides();
     }
 
     @NonNull
