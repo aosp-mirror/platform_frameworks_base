@@ -21,7 +21,6 @@ import static android.Manifest.permission.ADD_TRUSTED_DISPLAY;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_ENABLED;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_NOT_CONTROLLED_BY_POLICY;
 import static android.app.admin.DevicePolicyManager.NEARBY_STREAMING_SAME_MANAGED_ACCOUNT_ONLY;
-import static android.companion.virtual.VirtualDeviceParams.ACTIVITY_POLICY_DEFAULT_ALLOWED;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM;
 import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_DEFAULT;
 import static android.companion.virtual.VirtualDeviceParams.NAVIGATION_POLICY_DEFAULT_ALLOWED;
@@ -492,17 +491,10 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                     this, getDeviceId(), getPersistentDeviceId(), mParams.getName());
         }
 
-        if (Flags.dynamicPolicy()) {
-            mActivityPolicyExemptions = new ArraySet<>(
-                    mParams.getDevicePolicy(POLICY_TYPE_ACTIVITY) == DEVICE_POLICY_DEFAULT
-                            ? mParams.getBlockedActivities()
-                            : mParams.getAllowedActivities());
-        } else {
-            mActivityPolicyExemptions =
-                    mParams.getDefaultActivityPolicy() == ACTIVITY_POLICY_DEFAULT_ALLOWED
-                            ? mParams.getBlockedActivities()
-                            : mParams.getAllowedActivities();
-        }
+        mActivityPolicyExemptions = new ArraySet<>(
+                mParams.getDevicePolicy(POLICY_TYPE_ACTIVITY) == DEVICE_POLICY_DEFAULT
+                        ? mParams.getBlockedActivities()
+                        : mParams.getAllowedActivities());
 
         if (Flags.vdmCustomIme() && mParams.getInputMethodComponent() != null) {
             final String imeId = mParams.getInputMethodComponent().flattenToShortString();
@@ -587,12 +579,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     @Override  // Binder call
     public @VirtualDeviceParams.DevicePolicy int getDevicePolicy(
             @VirtualDeviceParams.PolicyType int policyType) {
-        if (Flags.dynamicPolicy()) {
-            synchronized (mVirtualDeviceLock) {
-                return mDevicePolicies.get(policyType, DEVICE_POLICY_DEFAULT);
-            }
-        } else {
-            return mParams.getDevicePolicy(policyType);
+        synchronized (mVirtualDeviceLock) {
+            return mDevicePolicies.get(policyType, DEVICE_POLICY_DEFAULT);
         }
     }
 
@@ -891,9 +879,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     public void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
             @VirtualDeviceParams.DevicePolicy int devicePolicy) {
         checkCallerIsDeviceOwner();
-        if (!Flags.dynamicPolicy()) {
-            return;
-        }
 
         switch (policyType) {
             case POLICY_TYPE_RECENTS:
@@ -924,23 +909,21 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 }
                 break;
             case POLICY_TYPE_CLIPBOARD:
-                if (Flags.crossDeviceClipboard()) {
-                    if (devicePolicy == DEVICE_POLICY_CUSTOM
+                if (devicePolicy == DEVICE_POLICY_CUSTOM
                             && mContext.checkCallingOrSelfPermission(ADD_TRUSTED_DISPLAY)
                             != PackageManager.PERMISSION_GRANTED) {
-                        throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
-                                + "set a custom clipboard policy.");
-                    }
-                    synchronized (mVirtualDeviceLock) {
-                        for (int i = 0; i < mVirtualDisplays.size(); i++) {
-                            VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
-                            if (!wrapper.isTrusted() && !wrapper.isMirror()) {
-                                throw new SecurityException("All displays must be trusted for "
-                                        + "devices with custom clipboard policy.");
-                            }
+                    throw new SecurityException("Requires ADD_TRUSTED_DISPLAY permission to "
+                            + "set a custom clipboard policy.");
+                }
+                synchronized (mVirtualDeviceLock) {
+                    for (int i = 0; i < mVirtualDisplays.size(); i++) {
+                        VirtualDisplayWrapper wrapper = mVirtualDisplays.valueAt(i);
+                        if (!wrapper.isTrusted() && !wrapper.isMirror()) {
+                            throw new SecurityException("All displays must be trusted for "
+                                    + "devices with custom clipboard policy.");
                         }
-                        mDevicePolicies.put(policyType, devicePolicy);
                     }
+                    mDevicePolicies.put(policyType, devicePolicy);
                 }
                 break;
             case POLICY_TYPE_BLOCKED_ACTIVITY:
@@ -1443,9 +1426,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     private GenericWindowPolicyController createWindowPolicyControllerLocked(
             @NonNull Set<String> displayCategories) {
         final boolean activityLaunchAllowedByDefault =
-                Flags.dynamicPolicy()
-                    ? getDevicePolicy(POLICY_TYPE_ACTIVITY) == DEVICE_POLICY_DEFAULT
-                    : mParams.getDefaultActivityPolicy() == ACTIVITY_POLICY_DEFAULT_ALLOWED;
+                getDevicePolicy(POLICY_TYPE_ACTIVITY) == DEVICE_POLICY_DEFAULT;
         final boolean crossTaskNavigationAllowedByDefault =
                 mParams.getDefaultNavigationPolicy() == NAVIGATION_POLICY_DEFAULT_ALLOWED;
         final boolean showTasksInHostDeviceRecents =
