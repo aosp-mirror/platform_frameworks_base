@@ -320,9 +320,9 @@ public class DesktopModeLaunchParamsModifierTests extends
         final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
                 task, /* ignoreOrientationRequest */ true);
 
-        spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
+        spyOn(activity.mAppCompatController.getDesktopAspectRatioPolicy());
         doReturn(LETTERBOX_ASPECT_RATIO).when(activity.mAppCompatController
-                .getDesktopAppCompatAspectRatioPolicy()).calculateAspectRatio(any());
+                .getDesktopAspectRatioPolicy()).calculateAspectRatio(any());
 
         final int desiredWidth =
                 (int) ((LANDSCAPE_DISPLAY_BOUNDS.height() / LETTERBOX_ASPECT_RATIO) + 0.5f);
@@ -812,9 +812,9 @@ public class DesktopModeLaunchParamsModifierTests extends
         final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_PORTRAIT,
                 task, /* ignoreOrientationRequest */ true);
 
-        spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
+        spyOn(activity.mAppCompatController.getDesktopAspectRatioPolicy());
         doReturn(LETTERBOX_ASPECT_RATIO).when(activity.mAppCompatController
-                .getDesktopAppCompatAspectRatioPolicy()).calculateAspectRatio(any());
+                .getDesktopAspectRatioPolicy()).calculateAspectRatio(any());
 
         final int desiredHeight =
                 (int) (LANDSCAPE_DISPLAY_BOUNDS.height() * DESKTOP_MODE_INITIAL_BOUNDS_SCALE);
@@ -939,9 +939,9 @@ public class DesktopModeLaunchParamsModifierTests extends
         final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_LANDSCAPE,
                 task, /* ignoreOrientationRequest */ true);
 
-        spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
+        spyOn(activity.mAppCompatController.getDesktopAspectRatioPolicy());
         doReturn(LETTERBOX_ASPECT_RATIO).when(activity.mAppCompatController
-                .getDesktopAppCompatAspectRatioPolicy()).calculateAspectRatio(any());
+                .getDesktopAspectRatioPolicy()).calculateAspectRatio(any());
 
         final int desiredWidth = PORTRAIT_DISPLAY_BOUNDS.width()
                 - (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2);
@@ -989,9 +989,9 @@ public class DesktopModeLaunchParamsModifierTests extends
         final ActivityRecord activity = createActivity(display, SCREEN_ORIENTATION_LANDSCAPE,
                 task, /* ignoreOrientationRequest */ true);
 
-        spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
+        spyOn(activity.mAppCompatController.getDesktopAspectRatioPolicy());
         doReturn(LETTERBOX_ASPECT_RATIO).when(activity.mAppCompatController
-                .getDesktopAppCompatAspectRatioPolicy()).calculateAspectRatio(any());
+                .getDesktopAspectRatioPolicy()).calculateAspectRatio(any());
 
         final int desiredWidth = PORTRAIT_DISPLAY_BOUNDS.width()
                 - (DESKTOP_MODE_LANDSCAPE_APP_PADDING * 2);
@@ -1294,7 +1294,7 @@ public class DesktopModeLaunchParamsModifierTests extends
 
     private void setDesiredAspectRatio(ActivityRecord activity, float aspectRatio) {
         final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
-                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+                activity.mAppCompatController.getDesktopAspectRatioPolicy();
         spyOn(desktopAppCompatAspectRatioPolicy);
         doReturn(aspectRatio).when(desktopAppCompatAspectRatioPolicy)
                 .getDesiredAspectRatio(any());
@@ -1304,7 +1304,7 @@ public class DesktopModeLaunchParamsModifierTests extends
             float overrideValue) {
         // Set desired aspect ratio to be below minimum so override can take effect.
         final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
-                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+                activity.mAppCompatController.getDesktopAspectRatioPolicy();
         spyOn(desktopAppCompatAspectRatioPolicy);
         doReturn(1f).when(desktopAppCompatAspectRatioPolicy)
                 .getDesiredAspectRatio(any());

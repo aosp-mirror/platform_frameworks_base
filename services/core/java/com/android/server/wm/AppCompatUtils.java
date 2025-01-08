@@ -206,7 +206,7 @@ final class AppCompatUtils {
         appCompatTaskInfo.cameraCompatTaskInfo.freeformCameraCompatMode =
                 AppCompatCameraPolicy.getCameraCompatFreeformMode(top);
         appCompatTaskInfo.setHasMinAspectRatioOverride(top.mAppCompatController
-                .getDesktopAppCompatAspectRatioPolicy().hasMinAspectRatioOverride(task));
+                .getDesktopAspectRatioPolicy().hasMinAspectRatioOverride(task));
     }
 
     /**
