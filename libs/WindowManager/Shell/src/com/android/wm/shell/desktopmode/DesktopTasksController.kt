@@ -2162,7 +2162,7 @@ class DesktopTasksController(
     fun removeDesktop(displayId: Int) {
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
 
-        val tasksToRemove = taskRepository.removeDesktop(displayId)
+        val tasksToRemove = taskRepository.removeDesk(displayId)
         val wct = WindowContainerTransaction()
         tasksToRemove.forEach {
             val task = shellTaskOrganizer.getRunningTaskInfo(it)
