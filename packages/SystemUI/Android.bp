@@ -92,7 +92,6 @@ filegroup {
         "tests/src/**/systemui/shade/NotificationShadeWindowViewControllerTest.kt",
         "tests/src/**/systemui/keyguard/domain/interactor/KeyguardQuickAffordanceInteractorSceneContainerTest.kt",
         "tests/src/**/systemui/statusbar/pipeline/mobile/ui/model/SignalIconModelParameterizedTest.kt",
-        "tests/src/**/systemui/education/domain/interactor/KeyboardTouchpadEduInteractorTest.kt",
         "tests/src/**/systemui/biometrics/udfps/SinglePointerTouchProcessorTest.kt",
         "tests/src/**/systemui/animation/back/FlingOnBackAnimationCallbackTest.kt",
         "tests/src/**/systemui/education/domain/ui/view/ContextualEduDialogTest.kt",

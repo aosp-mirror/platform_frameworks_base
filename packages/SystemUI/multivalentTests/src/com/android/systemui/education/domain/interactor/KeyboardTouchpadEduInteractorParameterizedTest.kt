@@ -292,8 +292,7 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
-            val listener = getOverviewProxyListener()
-            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
 
             assertThat(model?.signalCount).isEqualTo(originalValue + 1)
         }
@@ -306,8 +305,7 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
-            val listener = getOverviewProxyListener()
-            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
 
             assertThat(model?.signalCount).isEqualTo(originalValue)
         }
@@ -321,8 +319,7 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
-            val listener = getOverviewProxyListener()
-            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
 
             assertThat(model?.signalCount).isEqualTo(originalValue + 1)
         }
@@ -335,8 +332,7 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
-            val listener = getOverviewProxyListener()
-            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
 
             assertThat(model?.signalCount).isEqualTo(originalValue)
         }
@@ -347,8 +343,7 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             assertThat(model?.lastShortcutTriggeredTime).isNull()
 
-            val listener = getOverviewProxyListener()
-            listener.updateContextualEduStats(/* isTrackpadGesture= */ true, gestureType)
+            updateContextualEduStats(/* isTrackpadGesture= */ true, gestureType)
 
             assertThat(model?.lastShortcutTriggeredTime).isEqualTo(kosmos.fakeEduClock.instant())
         }
@@ -358,15 +353,14 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
         testScope.runTest {
             setUpForDeviceConnection()
             tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
-                DeviceType.TOUCHPAD,
+                getTargetDevice(gestureType),
                 eduClock.instant(),
             )
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
             eduClock.offset(initialDelayElapsedDuration)
-            val listener = getOverviewProxyListener()
-            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
 
             assertThat(model?.signalCount).isEqualTo(originalValue + 1)
         }
@@ -376,31 +370,90 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
         testScope.runTest {
             setUpForDeviceConnection()
             tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
-                DeviceType.TOUCHPAD,
+                getTargetDevice(gestureType),
                 eduClock.instant(),
             )
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
             // No offset to the clock to simulate update before initial delay
-            val listener = getOverviewProxyListener()
-            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
 
             assertThat(model?.signalCount).isEqualTo(originalValue)
         }
 
     @Test
-    fun dataUnchangedOnIncrementSignalCountWithoutOobeLaunchTime() =
+    fun dataUnchangedOnIncrementSignalCountWithoutOobeLaunchOrNotifyTime() =
         testScope.runTest {
-            // No update to OOBE launch time to simulate no OOBE is launched yet
+            // No update to OOBE launch/notify time to simulate no OOBE is launched yet
             setUpForDeviceConnection()
 
             val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
             val originalValue = model!!.signalCount
-            val listener = getOverviewProxyListener()
-            listener.updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
 
             assertThat(model?.signalCount).isEqualTo(originalValue)
+        }
+
+    @Test
+    fun dataUpdatedOnIncrementSignalCountAfterNotifyTimeDelayWithoutLaunchTime() =
+        testScope.runTest {
+            setUpForDeviceConnection()
+            tutorialSchedulerRepository.setNotifiedTime(
+                getTargetDevice(gestureType),
+                eduClock.instant(),
+            )
+
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            eduClock.offset(initialDelayElapsedDuration)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue + 1)
+        }
+
+    @Test
+    fun dataUnchangedOnIncrementSignalCountBeforeLaunchTimeDelayWithNotifyTime() =
+        testScope.runTest {
+            setUpForDeviceConnection()
+            tutorialSchedulerRepository.setNotifiedTime(
+                getTargetDevice(gestureType),
+                eduClock.instant(),
+            )
+            eduClock.offset(initialDelayElapsedDuration)
+
+            tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
+                getTargetDevice(gestureType),
+                eduClock.instant(),
+            )
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            // No offset to the clock to simulate update before initial delay of launch time
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue)
+        }
+
+    @Test
+    fun dataUpdatedOnIncrementSignalCountAfterLaunchTimeDelayWithNotifyTime() =
+        testScope.runTest {
+            setUpForDeviceConnection()
+            tutorialSchedulerRepository.setNotifiedTime(
+                getTargetDevice(gestureType),
+                eduClock.instant(),
+            )
+            eduClock.offset(initialDelayElapsedDuration)
+
+            tutorialSchedulerRepository.setScheduledTutorialLaunchTime(
+                getTargetDevice(gestureType),
+                eduClock.instant(),
+            )
+            val model by collectLastValue(repository.readGestureEduModelFlow(gestureType))
+            val originalValue = model!!.signalCount
+            eduClock.offset(initialDelayElapsedDuration)
+            updateContextualEduStats(/* isTrackpadGesture= */ false, gestureType)
+
+            assertThat(model?.signalCount).isEqualTo(originalValue + 1)
         }
 
     private suspend fun setUpForInitialDelayElapse() {
@@ -465,11 +518,17 @@ class KeyboardTouchpadEduInteractorParameterizedTest(private val gestureType: Ge
         keyboardRepository.setIsAnyKeyboardConnected(true)
     }
 
-    private fun getOverviewProxyListener(): OverviewProxyListener {
+    private fun updateContextualEduStats(isTrackpadGesture: Boolean, gestureType: GestureType) {
         val listenerCaptor = argumentCaptor<OverviewProxyListener>()
         verify(overviewProxyService).addCallback(listenerCaptor.capture())
-        return listenerCaptor.firstValue
+        listenerCaptor.firstValue.updateContextualEduStats(isTrackpadGesture, gestureType)
     }
+
+    private fun getTargetDevice(gestureType: GestureType) =
+        when (gestureType) {
+            ALL_APPS -> DeviceType.KEYBOARD
+            else -> DeviceType.TOUCHPAD
+        }
 
     companion object {
         private val USER_INFOS = listOf(UserInfo(101, "Second User", 0))
