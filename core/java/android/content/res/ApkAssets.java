@@ -25,7 +25,6 @@ import android.content.res.loader.ResourcesProvider;
 import android.ravenwood.annotation.RavenwoodClassLoadHook;
 import android.ravenwood.annotation.RavenwoodKeepWholeClass;
 import android.text.TextUtils;
-import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
@@ -51,7 +50,6 @@ import java.util.Objects;
 @RavenwoodKeepWholeClass
 @RavenwoodClassLoadHook(RavenwoodClassLoadHook.LIBANDROID_LOADING_HOOK)
 public final class ApkAssets {
-    private static final boolean DEBUG = false;
 
     /**
      * The apk assets contains framework resource values specified by the system.
@@ -135,17 +133,6 @@ public final class ApkAssets {
 
     @Nullable
     private final AssetsProvider mAssets;
-
-    @NonNull
-    private String mName;
-
-    private static final int UPTODATE_FALSE = 0;
-    private static final int UPTODATE_TRUE = 1;
-    private static final int UPTODATE_ALWAYS_TRUE = 2;
-
-    // Start with the only value that may change later and would force a native call to
-    // double check it.
-    private int mPreviousUpToDateResult = UPTODATE_TRUE;
 
     /**
      * Creates a new ApkAssets instance from the given path on disk.
@@ -317,7 +304,7 @@ public final class ApkAssets {
 
     private ApkAssets(@FormatType int format, @NonNull String path, @PropertyFlags int flags,
             @Nullable AssetsProvider assets) throws IOException {
-        this(format, flags, assets, path);
+        this(format, flags, assets);
         Objects.requireNonNull(path, "path");
         mNativePtr = nativeLoad(format, path, flags, assets);
         mStringBlock = new StringBlock(nativeGetStringBlock(mNativePtr), true /*useSparse*/);
@@ -326,7 +313,7 @@ public final class ApkAssets {
     private ApkAssets(@FormatType int format, @NonNull FileDescriptor fd,
             @NonNull String friendlyName, @PropertyFlags int flags, @Nullable AssetsProvider assets)
             throws IOException {
-        this(format, flags, assets, friendlyName);
+        this(format, flags, assets);
         Objects.requireNonNull(fd, "fd");
         Objects.requireNonNull(friendlyName, "friendlyName");
         mNativePtr = nativeLoadFd(format, fd, friendlyName, flags, assets);
@@ -336,7 +323,7 @@ public final class ApkAssets {
     private ApkAssets(@FormatType int format, @NonNull FileDescriptor fd,
             @NonNull String friendlyName, long offset, long length, @PropertyFlags int flags,
             @Nullable AssetsProvider assets) throws IOException {
-        this(format, flags, assets, friendlyName);
+        this(format, flags, assets);
         Objects.requireNonNull(fd, "fd");
         Objects.requireNonNull(friendlyName, "friendlyName");
         mNativePtr = nativeLoadFdOffsets(format, fd, friendlyName, offset, length, flags, assets);
@@ -344,17 +331,16 @@ public final class ApkAssets {
     }
 
     private ApkAssets(@PropertyFlags int flags, @Nullable AssetsProvider assets) {
-        this(FORMAT_APK, flags, assets, "empty");
+        this(FORMAT_APK, flags, assets);
         mNativePtr = nativeLoadEmpty(flags, assets);
         mStringBlock = null;
     }
 
     private ApkAssets(@FormatType int format, @PropertyFlags int flags,
-            @Nullable AssetsProvider assets, @NonNull String name) {
+            @Nullable AssetsProvider assets) {
         mFlags = flags;
         mAssets = assets;
         mIsOverlay = format == FORMAT_IDMAP;
-        if (DEBUG) mName = name;
     }
 
     @UnsupportedAppUsage
@@ -435,41 +421,13 @@ public final class ApkAssets {
         }
     }
 
-    private static double intervalMs(long beginNs, long endNs) {
-        return (endNs - beginNs) / 1000000.0;
-    }
-
     /**
      * Returns false if the underlying APK was changed since this ApkAssets was loaded.
      */
     public boolean isUpToDate() {
-        // This function is performance-critical - it's called multiple times on every Resources
-        // object creation, and on few other cache accesses - so it's important to avoid the native
-        // call when we know for sure what it will return (which is the case for both ALWAYS_TRUE
-        // and FALSE).
-        if (mPreviousUpToDateResult != UPTODATE_TRUE) {
-            return mPreviousUpToDateResult == UPTODATE_ALWAYS_TRUE;
-        }
-        final long beforeTs, afterLockTs, afterNativeTs, afterUnlockTs;
-        if (DEBUG) beforeTs = System.nanoTime();
-        final int res;
         synchronized (this) {
-            if (DEBUG) afterLockTs = System.nanoTime();
-            res = nativeIsUpToDate(mNativePtr);
-            if (DEBUG) afterNativeTs = System.nanoTime();
+            return nativeIsUpToDate(mNativePtr);
         }
-        if (DEBUG) {
-            afterUnlockTs = System.nanoTime();
-            if (afterUnlockTs - beforeTs >= 10L * 1000000) {
-                Log.d("ApkAssets", "isUpToDate(" + mName + ") took "
-                        + intervalMs(beforeTs, afterUnlockTs)
-                        + " ms: " + intervalMs(beforeTs, afterLockTs)
-                        + " / " + intervalMs(afterLockTs, afterNativeTs)
-                        + " / " + intervalMs(afterNativeTs, afterUnlockTs));
-            }
-        }
-        mPreviousUpToDateResult = res;
-        return res != UPTODATE_FALSE;
     }
 
     public boolean isSystem() {
@@ -529,7 +487,7 @@ public final class ApkAssets {
     private static native @NonNull String nativeGetAssetPath(long ptr);
     private static native @NonNull String nativeGetDebugName(long ptr);
     private static native long nativeGetStringBlock(long ptr);
-    @CriticalNative private static native int nativeIsUpToDate(long ptr);
+    @CriticalNative private static native boolean nativeIsUpToDate(long ptr);
     private static native long nativeOpenXml(long ptr, @NonNull String fileName) throws IOException;
     private static native @Nullable OverlayableInfo nativeGetOverlayableInfo(long ptr,
             String overlayableName) throws IOException;

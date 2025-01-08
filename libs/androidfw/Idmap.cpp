@@ -22,10 +22,9 @@
 #include "android-base/logging.h"
 #include "android-base/stringprintf.h"
 #include "android-base/utf8.h"
-#include "androidfw/AssetManager.h"
+#include "androidfw/misc.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/Util.h"
-#include "androidfw/misc.h"
 #include "utils/ByteOrder.h"
 #include "utils/Trace.h"
 
@@ -269,16 +268,11 @@ LoadedIdmap::LoadedIdmap(const std::string& idmap_path, const Idmap_header* head
       configurations_(configs),
       overlay_entries_(overlay_entries),
       string_pool_(std::move(string_pool)),
+      idmap_fd_(
+          android::base::utf8::open(idmap_path.c_str(), O_RDONLY | O_CLOEXEC | O_BINARY | O_PATH)),
       overlay_apk_path_(overlay_apk_path),
       target_apk_path_(target_apk_path),
-      idmap_last_mod_time_(kInvalidModDate) {
-  if (!isReadonlyFilesystem(std::string(overlay_apk_path_).c_str()) ||
-      !(target_apk_path_ == AssetManager::TARGET_APK_PATH ||
-        isReadonlyFilesystem(std::string(target_apk_path_).c_str()))) {
-    idmap_fd_.reset(
-        android::base::utf8::open(idmap_path.c_str(), O_RDONLY | O_CLOEXEC | O_BINARY | O_PATH));
-    idmap_last_mod_time_ = getFileModDate(idmap_fd_);
-  }
+      idmap_last_mod_time_(getFileModDate(idmap_fd_.get())) {
 }
 
 std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPiece idmap_data) {
@@ -387,11 +381,8 @@ std::unique_ptr<LoadedIdmap> LoadedIdmap::Load(StringPiece idmap_path, StringPie
                       overlay_entries, std::move(idmap_string_pool), *overlay_path, *target_path));
 }
 
-UpToDate LoadedIdmap::IsUpToDate() const {
-  if (idmap_last_mod_time_ == kInvalidModDate) {
-    return UpToDate::Always;
-  }
-  return fromBool(idmap_last_mod_time_ == getFileModDate(idmap_fd_.get()));
+bool LoadedIdmap::IsUpToDate() const {
+  return idmap_last_mod_time_ == getFileModDate(idmap_fd_.get());
 }
 
 }  // namespace android

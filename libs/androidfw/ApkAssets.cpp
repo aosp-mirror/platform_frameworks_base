@@ -162,13 +162,10 @@ const std::string& ApkAssets::GetDebugName() const {
   return assets_provider_->GetDebugName();
 }
 
-UpToDate ApkAssets::IsUpToDate() const {
+bool ApkAssets::IsUpToDate() const {
   // Loaders are invalidated by the app, not the system, so assume they are up to date.
-  if (IsLoader()) {
-    return UpToDate::Always;
-  }
-  const auto idmap_res = loaded_idmap_ ? loaded_idmap_->IsUpToDate() : UpToDate::Always;
-  return combine(idmap_res, [this] { return assets_provider_->IsUpToDate(); });
+  return IsLoader() || ((!loaded_idmap_ || loaded_idmap_->IsUpToDate())
+                        && assets_provider_->IsUpToDate());
 }
 
 }  // namespace android

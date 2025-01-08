@@ -129,8 +129,8 @@ class LoaderAssetsProvider : public AssetsProvider {
     return debug_name_;
   }
 
-  UpToDate IsUpToDate() const override {
-      return UpToDate::Always;
+  bool IsUpToDate() const override {
+    return true;
   }
 
   ~LoaderAssetsProvider() override {
@@ -443,10 +443,10 @@ static jlong NativeGetStringBlock(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr) 
     return reinterpret_cast<jlong>(apk_assets->GetLoadedArsc()->GetStringPool());
 }
 
-static jint NativeIsUpToDate(CRITICAL_JNI_PARAMS_COMMA jlong ptr) {
+static jboolean NativeIsUpToDate(CRITICAL_JNI_PARAMS_COMMA jlong ptr) {
     auto scoped_apk_assets = ScopedLock(ApkAssetsFromLong(ptr));
     auto apk_assets = scoped_apk_assets->get();
-    return (jint)apk_assets->IsUpToDate();
+    return apk_assets->IsUpToDate() ? JNI_TRUE : JNI_FALSE;
 }
 
 static jlong NativeOpenXml(JNIEnv* env, jclass /*clazz*/, jlong ptr, jstring file_name) {
@@ -558,7 +558,7 @@ static const JNINativeMethod gApkAssetsMethods[] = {
         {"nativeGetDebugName", "(J)Ljava/lang/String;", (void*)NativeGetDebugName},
         {"nativeGetStringBlock", "(J)J", (void*)NativeGetStringBlock},
         // @CriticalNative
-        {"nativeIsUpToDate", "(J)I", (void*)NativeIsUpToDate},
+        {"nativeIsUpToDate", "(J)Z", (void*)NativeIsUpToDate},
         {"nativeOpenXml", "(JLjava/lang/String;)J", (void*)NativeOpenXml},
         {"nativeGetOverlayableInfo", "(JLjava/lang/String;)Landroid/content/om/OverlayableInfo;",
          (void*)NativeGetOverlayableInfo},
