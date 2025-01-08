@@ -497,6 +497,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         if (configDiff == 0) {
             return;
         }
+        if (Flags.updateWindowMagnifierBottomBoundary()) {
+            updateSystemGestureInsetsTop();
+        }
         if ((configDiff & ActivityInfo.CONFIG_ORIENTATION) != 0) {
             onRotate();
         }
@@ -542,8 +545,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         }
         mWindowBounds.set(currentWindowBounds);
         final Size windowFrameSize = restoreMagnificationWindowFrameIndexAndSizeIfPossible();
-        final float newCenterX = (getCenterX()) * mWindowBounds.width() / oldWindowBounds.width();
-        final float newCenterY = (getCenterY()) * mWindowBounds.height() / oldWindowBounds.height();
+        final float newCenterX =
+                (getMagnificationFrameCenterX()) * mWindowBounds.width() / oldWindowBounds.width();
+        final float newCenterY =
+                (getMagnificationFrameCenterY()) * mWindowBounds.height()
+                        / oldWindowBounds.height();
 
         setMagnificationFrame(windowFrameSize.getWidth(), windowFrameSize.getHeight(),
                 (int) newCenterX, (int) newCenterY);
@@ -672,8 +678,12 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private void onWindowInsetChanged() {
-        if (updateSystemGestureInsetsTop()) {
-            updateSystemUIStateIfNeeded();
+        if (Flags.updateWindowMagnifierBottomBoundary()) {
+            updateSystemGestureInsetsTop();
+        } else {
+            if (updateSystemGestureInsetsTop()) {
+                updateSystemUIStateIfNeeded();
+            }
         }
     }
 
@@ -939,7 +949,9 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
         final int x = MathUtils.clamp(mMagnificationFrame.left - mMirrorSurfaceMargin, minX, maxX);
 
         final int minY = -mOuterBorderSize;
-        final int maxY = mWindowBounds.bottom - height + mOuterBorderSize;
+        final int maxY = Flags.updateWindowMagnifierBottomBoundary()
+                ? mSystemGestureTop - height + mOuterBorderSize
+                : mWindowBounds.bottom - height + mOuterBorderSize;
         final int y = MathUtils.clamp(mMagnificationFrame.top - mMirrorSurfaceMargin, minY, maxY);
 
         if (computeWindowSize) {
@@ -1098,6 +1110,10 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     private void updateSysUIState(boolean force) {
+        if (Flags.updateWindowMagnifierBottomBoundary()) {
+            return;
+        }
+
         final boolean overlap = isActivated() && mSystemGestureTop > 0
                 && mMirrorViewBounds.bottom > mSystemGestureTop;
         if (force || overlap != mOverlapWithGestureInsets) {
@@ -1313,7 +1329,7 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      *
      * @return the X coordinate. {@link Float#NaN} if the window is invisible.
      */
-    float getCenterX() {
+    float getMagnificationFrameCenterX() {
         return isActivated() ? mMagnificationFrame.exactCenterX() : Float.NaN;
     }
 
@@ -1322,8 +1338,28 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
      *
      * @return the Y coordinate. {@link Float#NaN} if the window is invisible.
      */
-    float getCenterY() {
+    float getMagnificationFrameCenterY() {
         return isActivated() ? mMagnificationFrame.exactCenterY() : Float.NaN;
+    }
+
+    /**
+     * Returns the screen-relative X coordinate of the center of the magnifier window.
+     * This could be different from the position of the magnification frame since the magnification
+     * frame could overlap with the bottom inset, but the magnifier window would not.
+     * @return the Y coordinate. {@link Float#NaN} if the window is invisible.
+     */
+    float getMagnifierWindowX() {
+        return isActivated() ? (float) mMirrorViewBounds.left : Float.NaN;
+    }
+
+    /**
+     * Returns the screen-relative Y coordinate of the center of the magnifier window.
+     * This could be different from the position of the magnification frame since the magnification
+     * frame could overlap with the bottom inset, but the magnifier window would not.
+     * @return the Y coordinate. {@link Float#NaN} if the window is invisible.
+     */
+    float getMagnifierWindowY() {
+        return isActivated() ? (float) mMirrorViewBounds.top : Float.NaN;
     }
 
 

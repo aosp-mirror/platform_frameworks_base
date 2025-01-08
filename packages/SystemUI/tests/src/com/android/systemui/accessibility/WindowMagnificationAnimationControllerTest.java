@@ -242,8 +242,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
                     targetCenterX, targetCenterY, mAnimationCallback2);
             mCurrentScale.set(mController.getScale());
-            mCurrentCenterX.set(mController.getCenterX());
-            mCurrentCenterY.set(mController.getCenterY());
+            mCurrentCenterX.set(mController.getMagnificationFrameCenterX());
+            mCurrentCenterY.set(mController.getMagnificationFrameCenterY());
             advanceTimeBy(mWaitAnimationDuration);
         });
 
@@ -297,8 +297,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
                     targetCenterX, targetCenterY, mAnimationCallback);
             mCurrentScale.set(mController.getScale());
-            mCurrentCenterX.set(mController.getCenterX());
-            mCurrentCenterY.set(mController.getCenterY());
+            mCurrentCenterX.set(mController.getMagnificationFrameCenterX());
+            mCurrentCenterY.set(mController.getMagnificationFrameCenterY());
             advanceTimeBy(mWaitAnimationDuration);
         });
 
@@ -339,8 +339,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
                     targetCenterX, targetCenterY, mAnimationCallback);
             mCurrentScale.set(mController.getScale());
-            mCurrentCenterX.set(mController.getCenterX());
-            mCurrentCenterY.set(mController.getCenterY());
+            mCurrentCenterX.set(mController.getMagnificationFrameCenterX());
+            mCurrentCenterY.set(mController.getMagnificationFrameCenterY());
             advanceTimeBy(mWaitAnimationDuration);
         });
 
@@ -375,8 +375,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
                     targetCenterX, targetCenterY, mAnimationCallback);
             mCurrentScale.set(mController.getScale());
-            mCurrentCenterX.set(mController.getCenterX());
-            mCurrentCenterY.set(mController.getCenterY());
+            mCurrentCenterX.set(mController.getMagnificationFrameCenterX());
+            mCurrentCenterY.set(mController.getMagnificationFrameCenterY());
             advanceTimeBy(mWaitAnimationDuration);
         });
 
@@ -463,8 +463,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
                     targetCenterX, targetCenterY, mAnimationCallback2);
             mCurrentScale.set(mController.getScale());
-            mCurrentCenterX.set(mController.getCenterX());
-            mCurrentCenterY.set(mController.getCenterY());
+            mCurrentCenterX.set(mController.getMagnificationFrameCenterX());
+            mCurrentCenterY.set(mController.getMagnificationFrameCenterY());
         });
 
         // Current spec shouldn't match given spec.
@@ -548,8 +548,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.enableWindowMagnification(targetScale,
                     targetCenterX, targetCenterY, mAnimationCallback2);
             mCurrentScale.set(mController.getScale());
-            mCurrentCenterX.set(mController.getCenterX());
-            mCurrentCenterY.set(mController.getCenterY());
+            mCurrentCenterX.set(mController.getMagnificationFrameCenterX());
+            mCurrentCenterY.set(mController.getMagnificationFrameCenterY());
             advanceTimeBy(mWaitAnimationDuration);
         });
 
@@ -777,8 +777,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
             mWindowMagnificationAnimationController.deleteWindowMagnification(
                     mAnimationCallback2);
             mCurrentScale.set(mController.getScale());
-            mCurrentCenterX.set(mController.getCenterX());
-            mCurrentCenterY.set(mController.getCenterY());
+            mCurrentCenterX.set(mController.getMagnificationFrameCenterX());
+            mCurrentCenterY.set(mController.getMagnificationFrameCenterY());
             // ValueAnimator.reverse() could not work correctly with the AnimatorTestRule since it
             // is using SystemClock in reverse() (b/305731398). Therefore, we call end() on the
             // animator directly to verify the result of animation is correct instead of querying
@@ -940,8 +940,8 @@ public class WindowMagnificationAnimationControllerTest extends SysuiTestCase {
     private void verifyFinalSpec(float expectedScale, float expectedCenterX,
             float expectedCenterY) {
         assertEquals(expectedScale, mController.getScale(), 0f);
-        assertEquals(expectedCenterX, mController.getCenterX(), 0f);
-        assertEquals(expectedCenterY, mController.getCenterY(), 0f);
+        assertEquals(expectedCenterX, mController.getMagnificationFrameCenterX(), 0f);
+        assertEquals(expectedCenterY, mController.getMagnificationFrameCenterY(), 0f);
     }
 
     private void enableWindowMagnificationWithoutAnimation() {
