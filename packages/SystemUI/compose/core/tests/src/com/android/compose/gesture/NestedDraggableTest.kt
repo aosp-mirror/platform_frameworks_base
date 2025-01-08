@@ -18,6 +18,8 @@ package com.android.compose.gesture
 
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.rememberScrollableState
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
@@ -35,6 +37,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.test.ScrollWheel
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
 import androidx.compose.ui.test.onRoot
@@ -708,6 +711,33 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         rule.waitForIdle()
 
         rule.onRoot().performTouchInput { down(center) }
+    }
+
+    @Test
+    // TODO(b/388231324): Remove this.
+    fun nestedScrollWithMouseWheelIsIgnored() {
+        val draggable = TestDraggable()
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(
+                    Modifier.fillMaxSize()
+                        .nestedDraggable(draggable, orientation)
+                        .scrollable(rememberScrollableState { 0f }, orientation)
+                )
+            }
+
+        rule.onRoot().performMouseInput {
+            enter(center)
+            scroll(
+                touchSlop + 1f,
+                when (orientation) {
+                    Orientation.Horizontal -> ScrollWheel.Horizontal
+                    Orientation.Vertical -> ScrollWheel.Vertical
+                },
+            )
+        }
+
+        assertThat(draggable.onDragStartedCalled).isFalse()
     }
 
     private fun ComposeContentTestRule.setContentWithTouchSlop(
