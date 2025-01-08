@@ -132,6 +132,7 @@ java_library_static {
     srcs: [
         ":android.hardware.tv.hdmi.connection-V1-java-source",
         ":android.hardware.tv.hdmi.earc-V1-java-source",
+        ":android.hardware.tv.mediaquality-V1-java-source",
         ":statslog-art-java-gen",
         ":statslog-contexthub-java-gen",
         ":services.core-aidl-sources",
