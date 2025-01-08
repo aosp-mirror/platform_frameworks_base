@@ -23,6 +23,7 @@ import android.view.Surface
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.map
@@ -60,7 +61,7 @@ interface ConfigurationInteractor {
     val configurationValues: Flow<Configuration>
 
     /** Emits the current resolution scaling factor */
-    val scaleForResolution: Flow<Float>
+    val scaleForResolution: StateFlow<Float>
 
     /** Given [resourceId], emit the dimension pixel size on config change */
     fun dimensionPixelSize(resourceId: Int): Flow<Int>
@@ -121,5 +122,5 @@ class ConfigurationInteractorImpl(private val repository: ConfigurationRepositor
 
     override val configurationValues: Flow<Configuration> = repository.configurationValues
 
-    override val scaleForResolution: Flow<Float> = repository.scaleForResolution
+    override val scaleForResolution: StateFlow<Float> = repository.scaleForResolution
 }

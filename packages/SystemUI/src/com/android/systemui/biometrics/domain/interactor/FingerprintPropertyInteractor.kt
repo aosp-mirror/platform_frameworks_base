@@ -20,11 +20,11 @@ import android.content.Context
 import android.graphics.Rect
 import android.hardware.biometrics.SensorLocationInternal
 import com.android.systemui.biometrics.data.repository.FingerprintPropertyRepository
-import com.android.systemui.biometrics.shared.model.SensorLocation
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
+import com.android.systemui.shared.customization.data.SensorLocation
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
@@ -42,8 +42,8 @@ class FingerprintPropertyInteractor
 constructor(
     @Application private val applicationScope: CoroutineScope,
     @Application private val context: Context,
-    repository: FingerprintPropertyRepository,
-    @Main configurationInteractor: ConfigurationInteractor,
+    private val repository: FingerprintPropertyRepository,
+    @Main private val configurationInteractor: ConfigurationInteractor,
     displayStateInteractor: DisplayStateInteractor,
     udfpsOverlayInteractor: UdfpsOverlayInteractor,
 ) {
@@ -61,11 +61,16 @@ constructor(
      * Devices with multiple physical displays use unique display ids to determine which sensor is
      * on the active physical display. This value represents a unique physical display id.
      */
-    private val uniqueDisplayId: Flow<String> =
+    private val uniqueDisplayId: StateFlow<String> =
         displayStateInteractor.displayChanges
-            .map { context.display?.uniqueId }
+            .map { context.display.uniqueId }
             .filterNotNull()
             .distinctUntilChanged()
+            .stateIn(
+                scope = applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = EMPTY_DISPLAY_ID,
+            )
 
     /**
      * Sensor location for the:
@@ -73,13 +78,15 @@ constructor(
      * - device's natural screen resolution
      * - device's natural orientation
      */
-    private val unscaledSensorLocation: Flow<SensorLocationInternal> =
-        combine(repository.sensorLocations, uniqueDisplayId) { locations, displayId ->
+    private val unscaledSensorLocation: StateFlow<SensorLocationInternal> =
+        combineStates(repository.sensorLocations, uniqueDisplayId, applicationScope) {
+            locations,
+            displayId ->
             // Devices without multiple physical displays do not use the display id as the key;
             // instead, the key is an empty string.
             locations.getOrDefault(
                 displayId,
-                locations.getOrDefault("", SensorLocationInternal.DEFAULT),
+                locations.getOrDefault(EMPTY_DISPLAY_ID, SensorLocationInternal.DEFAULT),
             )
         }
 
@@ -89,18 +96,18 @@ constructor(
      * - current screen resolution
      * - device's natural orientation
      */
-    val sensorLocation: Flow<SensorLocation> =
-        combine(unscaledSensorLocation, configurationInteractor.scaleForResolution) {
+    val sensorLocation: StateFlow<SensorLocation> =
+        combineStates(
             unscaledSensorLocation,
-            scale ->
-            val sensorLocation =
-                SensorLocation(
-                    naturalCenterX = unscaledSensorLocation.sensorLocationX,
-                    naturalCenterY = unscaledSensorLocation.sensorLocationY,
-                    naturalRadius = unscaledSensorLocation.sensorRadius,
-                    scale = scale,
-                )
-            sensorLocation
+            configurationInteractor.scaleForResolution,
+            applicationScope,
+        ) { unscaledSensorLocation, scale ->
+            SensorLocation(
+                naturalCenterX = unscaledSensorLocation.sensorLocationX,
+                naturalCenterY = unscaledSensorLocation.sensorLocationY,
+                naturalRadius = unscaledSensorLocation.sensorRadius,
+                scale = scale,
+            )
         }
 
     /**
@@ -111,4 +118,19 @@ constructor(
      */
     val udfpsSensorBounds: Flow<Rect> =
         udfpsOverlayInteractor.udfpsOverlayParams.map { it.sensorBounds }.distinctUntilChanged()
+
+    companion object {
+
+        private const val EMPTY_DISPLAY_ID = ""
+
+        /** Combine two state flows to another state flow. */
+        private fun <T1, T2, R> combineStates(
+            flow1: StateFlow<T1>,
+            flow2: StateFlow<T2>,
+            scope: CoroutineScope,
+            transform: (T1, T2) -> R,
+        ): StateFlow<R> =
+            combine(flow1, flow2) { v1, v2 -> transform(v1, v2) }
+                .stateIn(scope, SharingStarted.Eagerly, transform(flow1.value, flow2.value))
+    }
 }

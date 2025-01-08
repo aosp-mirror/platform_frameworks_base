@@ -68,7 +68,7 @@ interface FingerprintPropertyRepository {
     val sensorType: StateFlow<FingerprintSensorType>
 
     /** The sensor location relative to each physical display. */
-    val sensorLocations: Flow<Map<String, SensorLocationInternal>>
+    val sensorLocations: StateFlow<Map<String, SensorLocationInternal>>
 }
 
 @SysUISingleton
@@ -128,12 +128,14 @@ constructor(
                 initialValue = props.value.sensorType.toSensorType(),
             )
 
-    override val sensorLocations: Flow<Map<String, SensorLocationInternal>> =
-        props.map {
-            it.allLocations.associateBy { sensorLocationInternal ->
-                sensorLocationInternal.displayId
-            }
-        }
+    override val sensorLocations: StateFlow<Map<String, SensorLocationInternal>> =
+        props
+            .map { props -> props.allLocations.associateBy { it.displayId } }
+            .stateIn(
+                applicationScope,
+                started = SharingStarted.Eagerly,
+                initialValue = props.value.allLocations.associateBy { it.displayId },
+            )
 
     override val propertiesInitialized: Flow<Boolean> =
         combine(
