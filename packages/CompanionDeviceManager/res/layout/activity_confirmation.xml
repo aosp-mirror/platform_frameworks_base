@@ -81,7 +81,9 @@
                     <androidx.recyclerview.widget.RecyclerView
                         android:id="@+id/device_list"
                         android:layout_width="match_parent"
-                        android:layout_height="200dp"
+                        android:layout_height="wrap_content"
+                        app:layout_constraintHeight_max="220dp"
+                        app:layout_constraintHeight_min="200dp"
                         android:scrollbars="vertical"
                         android:visibility="gone" />
 
