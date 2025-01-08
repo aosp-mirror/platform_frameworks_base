@@ -1806,16 +1806,6 @@ flag {
 }
 
 flag {
-  name: "disable_shade_expands_on_trackpad_two_finger_swipe"
-  namespace: "systemui"
-  description: "Disables expansion of the shade via two finger swipe on a trackpad"
-  bug: "356804470"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
     name: "keyboard_shortcut_helper_shortcut_customizer"
     namespace: "systemui"
     description: "An implementation of shortcut customizations through shortcut helper."
@@ -1913,6 +1903,16 @@ flag {
    namespace: "systemui"
    description: "Invokes edit mode directly from long press in glanceable hub"
    bug: "382531177"
+}
+
+flag {
+  name: "disable_shade_trackpad_two_finger_swipe"
+  namespace: "systemui"
+  description: "Disables expansion of the shade via two finger swipe on a trackpad"
+  bug: "356804470"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
 }
 
 flag {
