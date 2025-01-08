@@ -8909,11 +8909,15 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
         if (parent) {
             Preconditions.checkCallAuthorization(
-                    isProfileOwnerOfOrganizationOwnedDevice(getCallerIdentity().getUserId()));
+                    isProfileOwnerOfOrganizationOwnedDevice(caller.getUserId()));
+            // If a DPC is querying on the parent instance, make sure it's only querying the parent
+            // user of itself. Querying any other user is not allowed.
+            Preconditions.checkArgument(caller.getUserId() == userHandle);
         }
+        int affectedUserId = parent ? getProfileParentId(userHandle) : userHandle;
         Boolean disallowed = mDevicePolicyEngine.getResolvedPolicy(
                 PolicyDefinition.SCREEN_CAPTURE_DISABLED,
-                userHandle);
+                affectedUserId);
         return disallowed != null && disallowed;
     }
 
