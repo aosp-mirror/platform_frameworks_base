@@ -825,26 +825,6 @@ public class AccessibilityManagerServiceTest {
 
     @SmallTest
     @Test
-    @DisableFlags(com.android.systemui.Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
-    public void testPerformAccessibilityShortcut_hearingAids_startActivityWithExpectedComponent() {
-        final AccessibilityUserState userState = mA11yms.mUserStates.get(
-                mA11yms.getCurrentUserIdLocked());
-        mFakePermissionEnforcer.grant(Manifest.permission.MANAGE_ACCESSIBILITY);
-        userState.updateShortcutTargetsLocked(
-                Set.of(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString()), HARDWARE);
-
-        mA11yms.performAccessibilityShortcut(
-                Display.DEFAULT_DISPLAY, HARDWARE,
-                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
-        mTestableLooper.processAllMessages();
-
-        assertStartActivityWithExpectedComponentName(mTestableContext.getMockContext(),
-                ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME.flattenToString());
-    }
-
-    @SmallTest
-    @Test
-    @EnableFlags(com.android.systemui.Flags.FLAG_HEARING_AIDS_QS_TILE_DIALOG)
     public void testPerformAccessibilityShortcut_hearingAids_sendExpectedBroadcast() {
         final AccessibilityUserState userState = mA11yms.mUserStates.get(
                 mA11yms.getCurrentUserIdLocked());
