@@ -458,8 +458,8 @@ class DesktopTasksTransitionObserverTest {
         }
     }
 
-    private fun createCloseTransition(task: RunningTaskInfo?): TransitionInfo {
-        return TransitionInfo(TRANSIT_CLOSE, /* flags= */ 0).apply {
+    private fun createCloseTransition(task: RunningTaskInfo?) =
+        TransitionInfo(TRANSIT_CLOSE, /* flags= */ 0).apply {
             addChange(
                 Change(mock(), mock()).apply {
                     mode = TRANSIT_CLOSE
@@ -469,10 +469,9 @@ class DesktopTasksTransitionObserverTest {
                 }
             )
         }
-    }
 
-    private fun createToBackTransition(task: RunningTaskInfo?): TransitionInfo {
-        return TransitionInfo(TRANSIT_TO_BACK, /* flags= */ 0).apply {
+    private fun createToBackTransition(task: RunningTaskInfo?) =
+        TransitionInfo(TRANSIT_TO_BACK, /* flags= */ 0).apply {
             addChange(
                 Change(mock(), mock()).apply {
                     mode = TRANSIT_TO_BACK
@@ -482,7 +481,6 @@ class DesktopTasksTransitionObserverTest {
                 }
             )
         }
-    }
 
     private fun createToFrontTransition(task: RunningTaskInfo?): TransitionInfo {
         return TransitionInfo(TRANSIT_TO_FRONT, 0 /* flags */).apply {

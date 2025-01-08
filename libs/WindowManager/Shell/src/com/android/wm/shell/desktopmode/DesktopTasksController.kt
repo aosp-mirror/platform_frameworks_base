@@ -1470,13 +1470,9 @@ class DesktopTasksController(
         }
     }
 
-    override fun getContext(): Context {
-        return context
-    }
+    override fun getContext(): Context = context
 
-    override fun getRemoteCallExecutor(): ShellExecutor {
-        return mainExecutor
-    }
+    override fun getRemoteCallExecutor(): ShellExecutor = mainExecutor
 
     override fun startAnimation(
         transition: IBinder,
@@ -1662,11 +1658,10 @@ class DesktopTasksController(
         DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue() &&
             isTopActivityExemptFromDesktopWindowing(context, task)
 
-    private fun shouldHandleTaskClosing(request: TransitionRequestInfo): Boolean {
-        return ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue() &&
+    private fun shouldHandleTaskClosing(request: TransitionRequestInfo): Boolean =
+        ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue() &&
             TransitionUtil.isClosingType(request.type) &&
             request.triggerTask != null
-    }
 
     /** Open an existing instance of an app. */
     fun openInstance(callingTask: RunningTaskInfo, requestedTaskId: Int) {
@@ -2185,11 +2180,10 @@ class DesktopTasksController(
         getFocusedFreeformTask(displayId)?.let { requestSplit(it, leftOrTop) }
     }
 
-    private fun getFocusedFreeformTask(displayId: Int): RunningTaskInfo? {
-        return shellTaskOrganizer.getRunningTasks(displayId).find { taskInfo ->
+    private fun getFocusedFreeformTask(displayId: Int): RunningTaskInfo? =
+        shellTaskOrganizer.getRunningTasks(displayId).find { taskInfo ->
             taskInfo.isFocused && taskInfo.windowingMode == WINDOWING_MODE_FREEFORM
         }
-    }
 
     /**
      * Requests a task be transitioned from desktop to split select. Applies needed windowing
@@ -2237,14 +2231,10 @@ class DesktopTasksController(
         }
     }
 
-    private fun getDefaultDensityDpi(): Int {
-        return context.resources.displayMetrics.densityDpi
-    }
+    private fun getDefaultDensityDpi(): Int = context.resources.displayMetrics.densityDpi
 
     /** Creates a new instance of the external interface to pass to another process. */
-    private fun createExternalInterface(): ExternalInterfaceBinder {
-        return IDesktopModeImpl(this)
-    }
+    private fun createExternalInterface(): ExternalInterfaceBinder = IDesktopModeImpl(this)
 
     /** Get connection interface between sysui and shell */
     fun asDesktopMode(): DesktopMode {

@@ -676,8 +676,8 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
             }
     }
 
-    private fun createTransitionInfo(type: Int, draggedTask: RunningTaskInfo): TransitionInfo {
-        return TransitionInfo(type, /* flags= */ 0).apply {
+    private fun createTransitionInfo(type: Int, draggedTask: RunningTaskInfo) =
+        TransitionInfo(type, /* flags= */ 0).apply {
             addChange( // Home.
                 TransitionInfo.Change(mock(), homeTaskLeash).apply {
                     parent = null
@@ -700,7 +700,6 @@ class DragToDesktopTransitionHandlerTest : ShellTestCase() {
                 }
             )
         }
-    }
 
     private fun systemPropertiesKey(name: String) =
         "${SpringDragToDesktopTransitionHandler.SYSTEM_PROPERTIES_GROUP}.$name"
