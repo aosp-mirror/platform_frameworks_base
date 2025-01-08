@@ -78,7 +78,6 @@ class BottomHalfEnterPipToOtherOrientation(flicker: LegacyFlickerTest) :
     }
 
     @Ignore("TODO(b/356277166): enable the tablet test")
-    @Presubmit
     @Test
     override fun pipAppLayerPlusLetterboxCoversFullScreenOnStartTablet() {
         // Test app and pip app should covers the entire screen on start.
