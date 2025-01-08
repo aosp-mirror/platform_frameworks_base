@@ -77,3 +77,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    name: "allow_dream_when_postured"
+    namespace: "systemui"
+    description: "Allow dreaming when device is stationary and upright"
+    bug: "383208131"
+}

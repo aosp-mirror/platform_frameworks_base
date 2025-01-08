@@ -155,6 +155,7 @@ public class SecureSettings {
         Settings.Secure.SCREENSAVER_COMPONENTS,
         Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
         Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
+        Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
         Settings.Secure.SCREENSAVER_HOME_CONTROLS_ENABLED,
         Settings.Secure.SHOW_FIRST_CRASH_DIALOG_DEV_OPTION,
         Settings.Secure.VOLUME_DIALOG_DISMISS_TIMEOUT,

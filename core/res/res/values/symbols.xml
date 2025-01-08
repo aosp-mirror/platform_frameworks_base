@@ -2330,6 +2330,7 @@
   <java-symbol type="bool" name="config_dreamsEnabledOnBattery" />
   <java-symbol type="bool" name="config_dreamsActivatedOnDockByDefault" />
   <java-symbol type="bool" name="config_dreamsActivatedOnSleepByDefault" />
+  <java-symbol type="bool" name="config_dreamsActivatedOnPosturedByDefault" />
   <java-symbol type="integer" name="config_dreamsBatteryLevelMinimumWhenPowered" />
   <java-symbol type="integer" name="config_dreamsBatteryLevelMinimumWhenNotPowered" />
   <java-symbol type="integer" name="config_dreamsBatteryLevelDrainCutoff" />
