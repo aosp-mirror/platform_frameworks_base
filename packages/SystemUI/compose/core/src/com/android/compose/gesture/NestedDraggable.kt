@@ -34,6 +34,7 @@ import androidx.compose.ui.input.nestedscroll.nestedScrollModifierNode
 import androidx.compose.ui.input.pointer.AwaitPointerEventScope
 import androidx.compose.ui.input.pointer.PointerEvent
 import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.PointerId
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -168,6 +169,12 @@ private class NestedDraggableNode(
     CompositionLocalConsumerModifierNode,
     OrientationAware {
     private val nestedScrollDispatcher = NestedScrollDispatcher()
+    private var trackWheelScroll: SuspendingPointerInputModifierNode? = null
+        set(value) {
+            field?.let { undelegate(it) }
+            field = value?.also { delegate(it) }
+        }
+
     private var trackDownPositionDelegate: SuspendingPointerInputModifierNode? = null
         set(value) {
             field?.let { undelegate(it) }
@@ -189,6 +196,7 @@ private class NestedDraggableNode(
      * This is use to track the started position of a drag started on a nested scrollable.
      */
     private var lastFirstDown: Offset? = null
+    private var lastEventWasScrollWheel: Boolean = false
 
     /** The pointers currently down, in order of which they were done and mapping to their type. */
     private val pointersDown = linkedMapOf<PointerId, PointerType>()
@@ -218,8 +226,11 @@ private class NestedDraggableNode(
         nestedScrollController?.ensureOnDragStoppedIsCalled()
         nestedScrollController = null
 
-        if (!enabled && trackDownPositionDelegate != null) {
+        if (!enabled && trackWheelScroll != null) {
+            check(trackDownPositionDelegate != null)
             check(detectDragsDelegate != null)
+
+            trackWheelScroll = null
             trackDownPositionDelegate = null
             detectDragsDelegate = null
         }
@@ -232,17 +243,22 @@ private class NestedDraggableNode(
     ) {
         if (!enabled) return
 
-        if (trackDownPositionDelegate == null) {
+        if (trackWheelScroll == null) {
+            check(trackDownPositionDelegate == null)
             check(detectDragsDelegate == null)
+
+            trackWheelScroll = SuspendingPointerInputModifierNode { trackWheelScroll() }
             trackDownPositionDelegate = SuspendingPointerInputModifierNode { trackDownPosition() }
             detectDragsDelegate = SuspendingPointerInputModifierNode { detectDrags() }
         }
 
+        checkNotNull(trackWheelScroll).onPointerEvent(pointerEvent, pass, bounds)
         checkNotNull(trackDownPositionDelegate).onPointerEvent(pointerEvent, pass, bounds)
         checkNotNull(detectDragsDelegate).onPointerEvent(pointerEvent, pass, bounds)
     }
 
     override fun onCancelPointerInput() {
+        trackWheelScroll?.onCancelPointerInput()
         trackDownPositionDelegate?.onCancelPointerInput()
         detectDragsDelegate?.onCancelPointerInput()
     }
@@ -457,6 +473,13 @@ private class NestedDraggableNode(
      * ===============================
      */
 
+    private suspend fun PointerInputScope.trackWheelScroll() {
+        awaitEachGesture {
+            val event = awaitPointerEvent(pass = PointerEventPass.Initial)
+            lastEventWasScrollWheel = event.type == PointerEventType.Scroll
+        }
+    }
+
     private suspend fun PointerInputScope.trackDownPosition() {
         awaitEachGesture {
             try {
@@ -501,7 +524,12 @@ private class NestedDraggableNode(
         }
 
         val sign = offset.sign
-        if (nestedScrollController == null && draggable.shouldConsumeNestedScroll(sign)) {
+        if (
+            nestedScrollController == null &&
+                // TODO(b/388231324): Remove this.
+                !lastEventWasScrollWheel &&
+                draggable.shouldConsumeNestedScroll(sign)
+        ) {
             val startedPosition = checkNotNull(lastFirstDown) { "lastFirstDown is not set" }
 
             // TODO(b/382665591): Ensure that there is at least one pointer down.
