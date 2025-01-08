@@ -704,7 +704,8 @@ static void android_view_MotionEvent_nativeSetFlags(CRITICAL_JNI_PARAMS_COMMA jl
                                                     jint flags) {
     MotionEvent* event = reinterpret_cast<MotionEvent*>(nativePtr);
     // Prevent private flags from being used from Java.
-    event->setFlags(flags & ~AMOTION_EVENT_PRIVATE_FLAG_MASK);
+    const int32_t privateFlags = event->getFlags() & AMOTION_EVENT_PRIVATE_FLAG_MASK;
+    event->setFlags((flags & ~AMOTION_EVENT_PRIVATE_FLAG_MASK) | privateFlags);
 }
 
 static jint android_view_MotionEvent_nativeGetEdgeFlags(CRITICAL_JNI_PARAMS_COMMA jlong nativePtr) {
