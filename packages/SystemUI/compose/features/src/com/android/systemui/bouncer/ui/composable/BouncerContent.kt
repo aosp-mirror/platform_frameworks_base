@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-@file:OptIn(ExperimentalFoundationApi::class)
-
 package com.android.systemui.bouncer.ui.composable
 
 import android.app.AlertDialog
@@ -26,7 +24,6 @@ import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.tween
-import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.combinedClickable
@@ -99,7 +96,6 @@ import com.android.compose.animation.scene.transitions
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
 import com.android.systemui.bouncer.ui.BouncerDialogFactory
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout
 import com.android.systemui.bouncer.ui.viewmodel.AuthMethodBouncerViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerMessageViewModel
 import com.android.systemui.bouncer.ui.viewmodel.BouncerSceneContentViewModel

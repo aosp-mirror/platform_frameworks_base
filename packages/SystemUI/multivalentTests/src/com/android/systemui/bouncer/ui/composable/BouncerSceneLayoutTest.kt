@@ -14,14 +14,14 @@
  * limitations under the License.
  */
 
-package com.android.systemui.bouncer.ui.helper
+package com.android.systemui.bouncer.ui.composable
 
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.BELOW_USER_SWITCHER
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.BESIDE_USER_SWITCHER
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.SPLIT_BOUNCER
-import com.android.systemui.bouncer.ui.helper.BouncerSceneLayout.STANDARD_BOUNCER
+import com.android.systemui.bouncer.ui.composable.BouncerSceneLayout.BELOW_USER_SWITCHER
+import com.android.systemui.bouncer.ui.composable.BouncerSceneLayout.BESIDE_USER_SWITCHER
+import com.android.systemui.bouncer.ui.composable.BouncerSceneLayout.SPLIT_BOUNCER
+import com.android.systemui.bouncer.ui.composable.BouncerSceneLayout.STANDARD_BOUNCER
 import com.google.common.truth.Truth.assertThat
 import java.util.Locale
 import org.junit.Test
