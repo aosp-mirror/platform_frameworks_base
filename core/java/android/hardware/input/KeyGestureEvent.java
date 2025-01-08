@@ -129,6 +129,7 @@ public final class KeyGestureEvent {
     public static final int KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT = 79;
     public static final int KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP = 80;
     public static final int KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN = 81;
+    public static final int KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS = 82;
 
     public static final int FLAG_CANCELLED = 1;
 
@@ -225,6 +226,7 @@ public final class KeyGestureEvent {
             KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT,
             KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP,
             KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN,
+            KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface KeyGestureType {
@@ -807,6 +809,8 @@ public final class KeyGestureEvent {
                 return "KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP";
             case KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN:
                 return "KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN";
+            case KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS:
+                return "KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS";
             default:
                 return Integer.toHexString(value);
         }

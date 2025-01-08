@@ -29,6 +29,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.content.pm.ServiceInfo;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -350,5 +351,25 @@ public final class AccessibilityUtils {
             }
         }
         return result;
+    }
+
+    /** Returns the {@link ComponentName} of an installed accessibility service by label. */
+    @Nullable
+    public static ComponentName getInstalledAccessibilityServiceComponentNameByLabel(
+            Context context, String label) {
+        AccessibilityManager accessibilityManager =
+                context.getSystemService(AccessibilityManager.class);
+        List<AccessibilityServiceInfo> serviceInfos =
+                accessibilityManager.getInstalledAccessibilityServiceList();
+
+        for (AccessibilityServiceInfo service : serviceInfos) {
+            final ServiceInfo serviceInfo = service.getResolveInfo().serviceInfo;
+            if (label.equals(serviceInfo.loadLabel(context.getPackageManager()).toString())
+                    && (serviceInfo.applicationInfo.isSystemApp()
+                            || serviceInfo.applicationInfo.isUpdatedSystemApp())) {
+                return new ComponentName(serviceInfo.packageName, serviceInfo.name);
+            }
+        }
+        return null;
     }
 }

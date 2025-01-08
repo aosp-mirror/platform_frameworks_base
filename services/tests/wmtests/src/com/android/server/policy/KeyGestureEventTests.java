@@ -758,6 +758,18 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
+    @EnableFlags(com.android.hardware.input.Flags.FLAG_ENABLE_VOICE_ACCESS_KEY_GESTURES)
+    public void testKeyGestureToggleVoiceAccess() {
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS));
+        mPhoneWindowManager.assertVoiceAccess(true);
+
+        Assert.assertTrue(
+                sendKeyGestureEventComplete(KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS));
+        mPhoneWindowManager.assertVoiceAccess(false);
+    }
+
+    @Test
     public void testKeyGestureToggleDoNotDisturb() {
         mPhoneWindowManager.overrideZenMode(Settings.Global.ZEN_MODE_OFF);
         Assert.assertTrue(

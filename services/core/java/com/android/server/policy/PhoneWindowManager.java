@@ -85,15 +85,16 @@ import static android.view.contentprotection.flags.Flags.createAccessibilityOver
 
 import static com.android.hardware.input.Flags.enableNew25q2Keycodes;
 import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
+import static com.android.hardware.input.Flags.enableVoiceAccessKeyGestures;
 import static com.android.hardware.input.Flags.inputManagerLifecycleSupport;
 import static com.android.hardware.input.Flags.keyboardA11yShortcutControl;
 import static com.android.hardware.input.Flags.modifierShortcutDump;
 import static com.android.hardware.input.Flags.overridePowerKeyBehaviorInFocusedWindow;
 import static com.android.hardware.input.Flags.useKeyGestureEventHandler;
+import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
 import static com.android.server.GestureLauncherService.DOUBLE_POWER_TAP_COUNT_THRESHOLD;
 import static com.android.server.flags.Flags.modifierShortcutManagerMultiuser;
 import static com.android.server.flags.Flags.newBugreportKeyboardShortcut;
-import static com.android.internal.config.sysui.SystemUiDeviceConfigFlags.SCREENSHOT_KEYCHORD_DELAY;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVERED;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_COVER_ABSENT;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.CAMERA_LENS_UNCOVERED;
@@ -501,6 +502,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     private AccessibilityShortcutController mAccessibilityShortcutController;
 
     private TalkbackShortcutController mTalkbackShortcutController;
+
+    private VoiceAccessShortcutController mVoiceAccessShortcutController;
 
     private WindowWakeUpPolicy mWindowWakeUpPolicy;
 
@@ -2265,6 +2268,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             return new TalkbackShortcutController(mContext);
         }
 
+        VoiceAccessShortcutController getVoiceAccessShortcutController() {
+            return new VoiceAccessShortcutController(mContext);
+        }
+
         WindowWakeUpPolicy getWindowWakeUpPolicy() {
             return new WindowWakeUpPolicy(mContext);
         }
@@ -2512,6 +2519,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.integer.config_keyguardDrawnTimeout);
         mKeyguardDelegate = injector.getKeyguardServiceDelegate();
         mTalkbackShortcutController = injector.getTalkbackShortcutController();
+        mVoiceAccessShortcutController = injector.getVoiceAccessShortcutController();
         mWindowWakeUpPolicy = injector.getWindowWakeUpPolicy();
         initKeyCombinationRules();
         initSingleKeyGestureRules(injector.getLooper());
@@ -4262,6 +4270,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 .isAccessibilityShortcutAvailable(false);
                     case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK:
                         return enableTalkbackAndMagnifierKeyGestures();
+                    case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS:
+                        return enableVoiceAccessKeyGestures();
                     default:
                         return false;
                 }
@@ -4488,6 +4498,14 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     if (complete) {
                         mTalkbackShortcutController.toggleTalkback(mCurrentUserId,
                                 TalkbackShortcutController.ShortcutSource.KEYBOARD);
+                    }
+                    return true;
+                }
+                break;
+            case KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS:
+                if (enableVoiceAccessKeyGestures()) {
+                    if (complete) {
+                        mVoiceAccessShortcutController.toggleVoiceAccess(mCurrentUserId);
                     }
                     return true;
                 }
