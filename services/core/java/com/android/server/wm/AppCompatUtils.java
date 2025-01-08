@@ -156,7 +156,7 @@ final class AppCompatUtils {
                 .getAppCompatLetterboxOverrides().isLetterboxEducationEnabled());
 
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                top.mAppCompatController.getAppCompatAspectRatioOverrides();
+                top.mAppCompatController.getAspectRatioOverrides();
         appCompatTaskInfo.setUserFullscreenOverrideEnabled(
                 aspectRatioOverrides.shouldApplyUserFullscreenOverride());
         appCompatTaskInfo.setSystemFullscreenOverrideEnabled(

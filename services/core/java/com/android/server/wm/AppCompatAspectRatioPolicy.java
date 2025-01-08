@@ -76,7 +76,7 @@ class AppCompatAspectRatioPolicy {
     private float getDesiredAspectRatio(@NonNull Configuration newParentConfig,
             @NonNull Rect parentBounds) {
         final float letterboxAspectRatioOverride =
-                mAppCompatOverrides.getAppCompatAspectRatioOverrides()
+                mAppCompatOverrides.getAspectRatioOverrides()
                         .getFixedOrientationLetterboxAspectRatio(newParentConfig);
         // Aspect ratio as suggested by the system. Apps requested mix/max aspect ratio will
         // be respected in #applyAspectRatio.
@@ -127,7 +127,7 @@ class AppCompatAspectRatioPolicy {
         }
 
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                mAppCompatOverrides.getAppCompatAspectRatioOverrides();
+                mAppCompatOverrides.getAspectRatioOverrides();
         if (aspectRatioOverrides.shouldApplyUserMinAspectRatioOverride()) {
             return aspectRatioOverrides.getUserMinAspectRatio();
         }

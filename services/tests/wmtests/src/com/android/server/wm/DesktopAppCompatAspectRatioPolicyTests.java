@@ -407,7 +407,7 @@ public class DesktopAppCompatAspectRatioPolicyTests extends WindowTestsBase {
         @Override
         void onPostActivityCreation(@NonNull ActivityRecord activity) {
             super.onPostActivityCreation(activity);
-            spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
+            spyOn(activity.mAppCompatController.getAspectRatioOverrides());
             spyOn(activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy());
         }
 
@@ -430,7 +430,7 @@ public class DesktopAppCompatAspectRatioPolicyTests extends WindowTestsBase {
         }
 
         float getSplitScreenAspectRatio() {
-            return  getTopActivity().mAppCompatController.getAppCompatAspectRatioOverrides()
+            return  getTopActivity().mAppCompatController.getAspectRatioOverrides()
                     .getSplitScreenAspectRatio();
         }
 

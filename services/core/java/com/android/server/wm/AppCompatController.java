@@ -99,8 +99,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatAspectRatioOverrides getAppCompatAspectRatioOverrides() {
-        return mAppCompatOverrides.getAppCompatAspectRatioOverrides();
+    AppCompatAspectRatioOverrides getAspectRatioOverrides() {
+        return mAppCompatOverrides.getAspectRatioOverrides();
     }
 
     @NonNull

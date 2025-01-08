@@ -55,7 +55,7 @@ class AppCompatOrientationPolicy {
     @ActivityInfo.ScreenOrientation
     int overrideOrientationIfNeeded(@ActivityInfo.ScreenOrientation int candidate) {
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                mAppCompatOverrides.getAppCompatAspectRatioOverrides();
+                mAppCompatOverrides.getAspectRatioOverrides();
         // Ignore all orientation requests of activities for eligible virtual displays.
         if (aspectRatioOverrides.shouldIgnoreActivitySizeRestrictionsForDisplay()) {
             return SCREEN_ORIENTATION_USER;

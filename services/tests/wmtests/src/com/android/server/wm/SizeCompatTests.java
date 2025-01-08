@@ -1143,11 +1143,11 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Simulate the user selecting the fullscreen user aspect ratio override
         spyOn(activity.mWmService.mAppCompatConfiguration);
-        spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(activity.mAppCompatController.getAspectRatioOverrides());
         doReturn(true).when(activity.mWmService.mAppCompatConfiguration)
                 .isUserAppAspectRatioFullscreenEnabled();
         doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
-                .when(activity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                .when(activity.mAppCompatController.getAspectRatioOverrides())
                 .getUserMinAspectRatioOverrideCode();
         assertFalse(activity.shouldCreateAppCompatDisplayInsets());
     }
@@ -1165,9 +1165,9 @@ public class SizeCompatTests extends WindowTestsBase {
                 RESIZE_MODE_UNRESIZEABLE, ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
 
         // Simulate the user selecting the fullscreen user aspect ratio override
-        spyOn(activity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(activity.mAppCompatController.getAspectRatioOverrides());
         doReturn(true).when(
-                activity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                activity.mAppCompatController.getAspectRatioOverrides())
                     .isSystemOverrideToFullscreenEnabled();
         assertFalse(activity.shouldCreateAppCompatDisplayInsets());
     }
@@ -2199,9 +2199,9 @@ public class SizeCompatTests extends WindowTestsBase {
                 .isUserAppAspectRatioFullscreenEnabled();
 
         // Set user aspect ratio override
-        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(mActivity.mAppCompatController.getAspectRatioOverrides());
         doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
-                .when(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                .when(mActivity.mAppCompatController.getAspectRatioOverrides())
                     .getUserMinAspectRatioOverrideCode();
 
         prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_PORTRAIT);
@@ -2224,9 +2224,9 @@ public class SizeCompatTests extends WindowTestsBase {
                 .isUserAppAspectRatioFullscreenEnabled();
 
         // Set user aspect ratio override
-        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(mActivity.mAppCompatController.getAspectRatioOverrides());
         doReturn(USER_MIN_ASPECT_RATIO_FULLSCREEN)
-                .when(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                .when(mActivity.mAppCompatController.getAspectRatioOverrides())
                     .getUserMinAspectRatioOverrideCode();
 
         prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_LANDSCAPE);
@@ -2244,9 +2244,9 @@ public class SizeCompatTests extends WindowTestsBase {
         final int displayWidth = mDisplayContent.mBaseDisplayWidth;
         final int displayHeight = mDisplayContent.mBaseDisplayHeight;
 
-        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(mActivity.mAppCompatController.getAspectRatioOverrides());
         doReturn(true).when(
-                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                mActivity.mAppCompatController.getAspectRatioOverrides())
                     .isSystemOverrideToFullscreenEnabled();
 
         prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_PORTRAIT);
@@ -2264,9 +2264,9 @@ public class SizeCompatTests extends WindowTestsBase {
         final int displayWidth = mDisplayContent.mBaseDisplayWidth;
         final int displayHeight = mDisplayContent.mBaseDisplayHeight;
 
-        spyOn(mActivity.mAppCompatController.getAppCompatAspectRatioOverrides());
+        spyOn(mActivity.mAppCompatController.getAspectRatioOverrides());
         doReturn(true).when(
-                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides())
+                mActivity.mAppCompatController.getAspectRatioOverrides())
                     .isSystemOverrideToFullscreenEnabled();
 
         prepareMinAspectRatio(mActivity, 16 / 9f, SCREEN_ORIENTATION_LANDSCAPE);
@@ -2426,7 +2426,7 @@ public class SizeCompatTests extends WindowTestsBase {
         doReturn(enabled).when(activity.mWmService.mAppCompatConfiguration)
                 .isUserAppAspectRatioSettingsEnabled();
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                activity.mAppCompatController.getAppCompatAspectRatioOverrides();
+                activity.mAppCompatController.getAspectRatioOverrides();
         spyOn(aspectRatioOverrides);
         // Set user aspect ratio override.
         doReturn(aspectRatio).when(aspectRatioOverrides).getUserMinAspectRatioOverrideCode();
@@ -4357,7 +4357,7 @@ public class SizeCompatTests extends WindowTestsBase {
         Configuration parentConfig = mActivity.getParent().getConfiguration();
 
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides();
+                mActivity.mAppCompatController.getAspectRatioOverrides();
         float actual = aspectRatioOverrides.getFixedOrientationLetterboxAspectRatio(parentConfig);
         float expected = aspectRatioOverrides.getSplitScreenAspectRatio();
 
@@ -4497,7 +4497,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .isUserAppAspectRatioSettingsEnabled();
         final AppCompatController appCompatController = mActivity.mAppCompatController;
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                appCompatController.getAppCompatAspectRatioOverrides();
+                appCompatController.getAspectRatioOverrides();
         spyOn(aspectRatioOverrides);
         // Set user aspect ratio override.
         doReturn(USER_MIN_ASPECT_RATIO_16_9).when(aspectRatioOverrides)
@@ -4520,7 +4520,7 @@ public class SizeCompatTests extends WindowTestsBase {
                 .isUserAppAspectRatioSettingsEnabled();
         final AppCompatController appCompatController = mActivity.mAppCompatController;
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                appCompatController.getAppCompatAspectRatioOverrides();
+                appCompatController.getAspectRatioOverrides();
         spyOn(aspectRatioOverrides);
         // Set user aspect ratio override.
         doReturn(USER_MIN_ASPECT_RATIO_16_9).when(aspectRatioOverrides)
@@ -5011,7 +5011,7 @@ public class SizeCompatTests extends WindowTestsBase {
 
         // Compat override can still take effect.
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
-                mActivity.mAppCompatController.getAppCompatAspectRatioOverrides();
+                mActivity.mAppCompatController.getAspectRatioOverrides();
         spyOn(aspectRatioOverrides);
         doReturn(true).when(aspectRatioOverrides).shouldOverrideMinAspectRatio();
         assertEquals(minAspect, aspectRatioPolicy.getMinAspectRatio(), 0 /* delta */);
