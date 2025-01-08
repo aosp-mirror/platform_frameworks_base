@@ -420,9 +420,5 @@ message SystemMessage {
     // Notify the user that accessibility floating menu is hidden.
     // Package: com.android.systemui
     NOTE_A11Y_FLOATING_MENU_HIDDEN = 1009;
-
-    // Notify the hearing aid user that input device can be changed to builtin device or hearing device.
-    // Package: android
-    NOTE_HEARING_DEVICE_INPUT_SWITCH = 1012;
   }
 }
