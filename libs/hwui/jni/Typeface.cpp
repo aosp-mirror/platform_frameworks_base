@@ -354,6 +354,7 @@ static jlongArray Typeface_readTypefaces(JNIEnv* env, jobject, jobject buffer, j
         typeface->fStyle = minikin::FontStyle(&reader);
         typeface->fAPIStyle = reader.read<Typeface::Style>();
         typeface->fBaseWeight = reader.read<int>();
+        typeface->fIsVariationInstance = false;
         faceHandles.push_back(toJLong(typeface));
     }
     const jlongArray result = env->NewLongArray(typefaceCount);
