@@ -20,6 +20,7 @@ import android.app.Application
 import android.content.Context
 import android.os.Bundle
 import androidx.annotation.IntDef
+import com.android.settingslib.graph.instrumentation.SettingslibStatsLog
 import com.android.settingslib.graph.proto.PreferenceValueProto
 import com.android.settingslib.ipc.ApiDescriptor
 import com.android.settingslib.ipc.ApiHandler
@@ -115,15 +116,45 @@ class PreferenceSetterApiHandler(
             PreferenceScreenRegistry.create(application, request.screenKey)
                 ?: return PreferenceSetterResult.UNSUPPORTED
         val key = request.key
-        val metadata =
-            screenMetadata.getPreferenceHierarchy(application).find(key)
-                ?: return PreferenceSetterResult.UNSUPPORTED
-        if (metadata !is PersistentPreference<*>) return PreferenceSetterResult.UNSUPPORTED
-        if (!metadata.isEnabled(application)) return PreferenceSetterResult.DISABLED
+        val callerPackage = application.packageManager.getNameForUid(callingUid)
+        val preferenceCoordinate = with(request) {
+            PreferenceCoordinate(screenKey = screenKey, key = key)
+        }
+        val metadata = screenMetadata.getPreferenceHierarchy(application).find(key)
+        if (metadata == null || metadata !is PersistentPreference<*>) {
+            MetricsLogger.logWritePreference(
+                callerPackage,
+                preferenceCoordinate,
+                SettingslibStatsLog
+                    .SETTINGS_EXT_API_REPORTED__RESULT__RESULT_FAILURE_UNSUPPORTED,
+            )
+            return PreferenceSetterResult.UNSUPPORTED
+        }
+        if (!metadata.isEnabled(application)) {
+            MetricsLogger.logWritePreference(
+                callerPackage,
+                preferenceCoordinate,
+                SettingslibStatsLog
+                    .SETTINGS_EXT_API_REPORTED__RESULT__RESULT_FAILURE_DISABLED,
+            )
+            return PreferenceSetterResult.DISABLED
+        }
         if (metadata is PreferenceRestrictionProvider && metadata.isRestricted(application)) {
+            MetricsLogger.logWritePreference(
+                callerPackage,
+                preferenceCoordinate,
+                SettingslibStatsLog
+                    .SETTINGS_EXT_API_REPORTED__RESULT__RESULT_FAILURE_RESTRICTED,
+            )
             return PreferenceSetterResult.RESTRICTED
         }
         if (metadata is PreferenceAvailabilityProvider && !metadata.isAvailable(application)) {
+            MetricsLogger.logWritePreference(
+                callerPackage,
+                preferenceCoordinate,
+                SettingslibStatsLog
+                    .SETTINGS_EXT_API_REPORTED__RESULT__RESULT_FAILURE_UNAVAILABLE,
+            )
             return PreferenceSetterResult.UNAVAILABLE
         }
 

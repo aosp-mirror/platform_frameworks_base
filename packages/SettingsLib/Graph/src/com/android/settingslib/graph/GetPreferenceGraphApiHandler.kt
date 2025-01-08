@@ -18,6 +18,7 @@ package com.android.settingslib.graph
 
 import android.app.Application
 import android.os.Bundle
+import com.android.settingslib.graph.instrumentation.SettingslibStatsLog
 import com.android.settingslib.graph.proto.PreferenceGraphProto
 import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.MessageCodec
@@ -42,6 +43,10 @@ abstract class GetPreferenceGraphApiHandler(
         callingUid: Int,
         request: GetPreferenceGraphRequest,
     ): PreferenceGraphProto {
+        MetricsLogger.logGetPreferenceMetadata(
+            application.packageManager.getNameForUid(callingUid),
+            SettingslibStatsLog.SETTINGS_EXT_API_REPORTED__RESULT__RESULT_OK
+        )
         val builder = PreferenceGraphBuilder.of(application, callingPid, callingUid, request)
         if (request.screenKeys.isEmpty()) {
             PreferenceScreenRegistry.preferenceScreenMetadataFactories.forEachKeyAsync {
