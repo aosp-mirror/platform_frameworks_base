@@ -115,6 +115,7 @@ import android.content.IContentProvider;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.Signature;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
@@ -6758,6 +6759,41 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.deleteNotificationChannel(PKG_N_MR1, UID_N_MR1, "id", UID_N_MR1, false);
 
         assertThat(mHelper.hasCacheBeenInvalidated()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(android.app.Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void testGetNotificationChannels_createIfNeeded() {
+        // Test setup hasn't created any channels or read package preferences yet.
+        // If we ask for notification channels _without_ creating, we should get no result.
+        ParceledListSlice<NotificationChannel> channels = mHelper.getNotificationChannels(PKG_N_MR1,
+                UID_N_MR1, false, false, /* createPrefsIfNeeded= */ false);
+        assertThat(channels.getList().size()).isEqualTo(0);
+
+        // If we ask it to create package preferences, we expect the default channel to be created
+        // for N_MR1.
+        channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false,
+                false, /* createPrefsIfNeeded= */ true);
+        assertThat(channels.getList().size()).isEqualTo(1);
+        assertThat(channels.getList().getFirst().getId()).isEqualTo(
+                NotificationChannel.DEFAULT_CHANNEL_ID);
+    }
+
+    @Test
+    @DisableFlags(android.app.Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void testGetNotificationChannels_neverCreatesWhenFlagOff() {
+        ParceledListSlice<NotificationChannel> channels;
+        try {
+            channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false,
+                    false, /* createPrefsIfNeeded= */ true);
+        } catch (Exception e) {
+            // Slog.wtf kicks in, presumably
+        } finally {
+            channels = mHelper.getNotificationChannels(PKG_N_MR1, UID_N_MR1, false,
+                    false, /* createPrefsIfNeeded= */ false);
+            assertThat(channels.getList().size()).isEqualTo(0);
+        }
+
     }
 
     // Test version of PreferencesHelper whose only functional difference is that it does not

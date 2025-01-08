@@ -4931,6 +4931,12 @@ public class NotificationManagerService extends SystemService {
         @Override
         public ParceledListSlice<NotificationChannel> getNotificationChannels(
                 String callingPkg, String targetPkg, int userId) {
+            return getOrCreateNotificationChannels(callingPkg, targetPkg, userId, false);
+        }
+
+        @Override
+        public ParceledListSlice<NotificationChannel> getOrCreateNotificationChannels(
+                String callingPkg, String targetPkg, int userId, boolean createPrefsIfNeeded) {
             if (canNotifyAsPackage(callingPkg, targetPkg, userId)
                 || isCallingUidSystem()) {
                 int targetUid = -1;
@@ -4940,7 +4946,8 @@ public class NotificationManagerService extends SystemService {
                     /* ignore */
                 }
                 return mPreferencesHelper.getNotificationChannels(
-                        targetPkg, targetUid, false /* includeDeleted */, true);
+                        targetPkg, targetUid, false /* includeDeleted */, true,
+                        createPrefsIfNeeded);
             }
             throw new SecurityException("Pkg " + callingPkg
                     + " cannot read channels for " + targetPkg + " in " + userId);

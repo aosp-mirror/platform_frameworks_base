@@ -19,6 +19,7 @@ package android.app;
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
@@ -269,8 +270,9 @@ public class NotificationManagerTest {
 
         // It doesn't matter what the returned contents are, as long as we return a channel.
         // This setup must set up getNotificationChannels(), as that's the method called.
-        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(),
-                anyInt())).thenReturn(new ParceledListSlice<>(List.of(exampleChannel())));
+        when(mNotificationManager.mBackendService.getOrCreateNotificationChannels(any(), any(),
+                anyInt(), anyBoolean())).thenReturn(
+                    new ParceledListSlice<>(List.of(exampleChannel())));
 
         // ask for the same channel 100 times without invalidating the cache
         for (int i = 0; i < 100; i++) {
@@ -282,7 +284,7 @@ public class NotificationManagerTest {
         NotificationChannel unused = mNotificationManager.getNotificationChannel("id");
 
         verify(mNotificationManager.mBackendService, times(2))
-                .getNotificationChannels(any(), any(), anyInt());
+                .getOrCreateNotificationChannels(any(), any(), anyInt(), anyBoolean());
     }
 
     @Test
@@ -295,23 +297,24 @@ public class NotificationManagerTest {
         NotificationChannel c2 = new NotificationChannel("id2", "name2",
                 NotificationManager.IMPORTANCE_NONE);
 
-        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(),
-                anyInt())).thenReturn(new ParceledListSlice<>(List.of(c1, c2)));
+        when(mNotificationManager.mBackendService.getOrCreateNotificationChannels(any(), any(),
+                anyInt(), anyBoolean())).thenReturn(new ParceledListSlice<>(List.of(c1, c2)));
 
         assertThat(mNotificationManager.getNotificationChannel("id1")).isEqualTo(c1);
         assertThat(mNotificationManager.getNotificationChannel("id2")).isEqualTo(c2);
         assertThat(mNotificationManager.getNotificationChannel("id3")).isNull();
 
         verify(mNotificationManager.mBackendService, times(1))
-                .getNotificationChannels(any(), any(), anyInt());
+                .getOrCreateNotificationChannels(any(), any(), anyInt(), anyBoolean());
     }
 
     @Test
     @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
     public void getNotificationChannels_cachedUntilInvalidated() throws Exception {
         NotificationManager.invalidateNotificationChannelCache();
-        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(),
-                anyInt())).thenReturn(new ParceledListSlice<>(List.of(exampleChannel())));
+        when(mNotificationManager.mBackendService.getOrCreateNotificationChannels(any(), any(),
+                anyInt(), anyBoolean())).thenReturn(
+                    new ParceledListSlice<>(List.of(exampleChannel())));
 
         // ask for channels 100 times without invalidating the cache
         for (int i = 0; i < 100; i++) {
@@ -323,7 +326,7 @@ public class NotificationManagerTest {
         List<NotificationChannel> res = mNotificationManager.getNotificationChannels();
 
         verify(mNotificationManager.mBackendService, times(2))
-                .getNotificationChannels(any(), any(), anyInt());
+                .getOrCreateNotificationChannels(any(), any(), anyInt(), anyBoolean());
         assertThat(res).containsExactlyElementsIn(List.of(exampleChannel()));
     }
 
@@ -341,8 +344,9 @@ public class NotificationManagerTest {
         NotificationChannel c2 = new NotificationChannel("other", "name2",
                 NotificationManager.IMPORTANCE_DEFAULT);
 
-        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(), anyInt()))
-                .thenReturn(new ParceledListSlice<>(List.of(c1, conv1, c2)));
+        when(mNotificationManager.mBackendService.getOrCreateNotificationChannels(any(), any(),
+                anyInt(), anyBoolean())).thenReturn(
+                    new ParceledListSlice<>(List.of(c1, conv1, c2)));
 
         // Lookup for channel c1 and c2: returned as expected
         assertThat(mNotificationManager.getNotificationChannel("id")).isEqualTo(c1);
@@ -359,9 +363,9 @@ public class NotificationManagerTest {
         // Lookup of a nonexistent channel is null
         assertThat(mNotificationManager.getNotificationChannel("id3")).isNull();
 
-        // All of that should have been one call to getNotificationChannels()
+        // All of that should have been one call to getOrCreateNotificationChannels()
         verify(mNotificationManager.mBackendService, times(1))
-                .getNotificationChannels(any(), any(), anyInt());
+                .getOrCreateNotificationChannels(any(), any(), anyInt(), anyBoolean());
     }
 
     @Test
@@ -381,12 +385,12 @@ public class NotificationManagerTest {
         NotificationChannel channel3 = channel1.copy();
         channel3.setName("name3");
 
-        when(mNotificationManager.mBackendService.getNotificationChannels(any(), eq(pkg1),
-                eq(userId))).thenReturn(new ParceledListSlice<>(List.of(channel1)));
-        when(mNotificationManager.mBackendService.getNotificationChannels(any(), eq(pkg2),
-                eq(userId))).thenReturn(new ParceledListSlice<>(List.of(channel2)));
-        when(mNotificationManager.mBackendService.getNotificationChannels(any(), eq(pkg1),
-                eq(userId1))).thenReturn(new ParceledListSlice<>(List.of(channel3)));
+        when(mNotificationManager.mBackendService.getOrCreateNotificationChannels(any(), eq(pkg1),
+                eq(userId), anyBoolean())).thenReturn(new ParceledListSlice<>(List.of(channel1)));
+        when(mNotificationManager.mBackendService.getOrCreateNotificationChannels(any(), eq(pkg2),
+                eq(userId), anyBoolean())).thenReturn(new ParceledListSlice<>(List.of(channel2)));
+        when(mNotificationManager.mBackendService.getOrCreateNotificationChannels(any(), eq(pkg1),
+                eq(userId1), anyBoolean())).thenReturn(new ParceledListSlice<>(List.of(channel3)));
 
         // set our context to pretend to be from package 1 and userId 0
         mContext.setParameters(pkg1, pkg1, userId);
@@ -402,7 +406,7 @@ public class NotificationManagerTest {
 
         // Those should have been three different calls
         verify(mNotificationManager.mBackendService, times(3))
-                .getNotificationChannels(any(), any(), anyInt());
+                .getOrCreateNotificationChannels(any(), any(), anyInt(), anyBoolean());
     }
 
     private Notification exampleNotification() {
