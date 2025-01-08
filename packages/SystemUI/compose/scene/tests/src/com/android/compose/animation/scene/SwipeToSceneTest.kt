@@ -936,4 +936,45 @@ class SwipeToSceneTest {
         assertThat(state.transitionState).isIdle()
         assertThat(state.transitionState).hasCurrentScene(SceneC)
     }
+
+    @Test
+    fun swipeToSceneNodeIsKeptWhenDisabled() {
+        var hasHorizontalActions by mutableStateOf(false)
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state) {
+                scene(
+                    SceneA,
+                    userActions =
+                        buildList {
+                                add(Swipe.Down to SceneB)
+
+                                if (hasHorizontalActions) {
+                                    add(Swipe.Left to SceneC)
+                                }
+                            }
+                            .toMap(),
+                ) {
+                    Box(Modifier.fillMaxSize())
+                }
+                scene(SceneB) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        // Swipe down to start a transition to B.
+        rule.onRoot().performTouchInput {
+            down(middle)
+            moveBy(Offset(0f, touchSlop))
+        }
+
+        assertThat(state.transitionState).isSceneTransition()
+
+        // Add new horizontal user actions. This should not stop the current transition, even if a
+        // new horizontal Modifier.swipeToScene() handler is introduced where the vertical one was.
+        hasHorizontalActions = true
+        rule.waitForIdle()
+        assertThat(state.transitionState).isSceneTransition()
+    }
 }

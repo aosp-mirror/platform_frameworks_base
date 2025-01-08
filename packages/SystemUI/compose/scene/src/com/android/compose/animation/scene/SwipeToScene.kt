@@ -37,11 +37,7 @@ internal fun Modifier.swipeToScene(
     draggableHandler: DraggableHandlerImpl,
     swipeDetector: SwipeDetector,
 ): Modifier {
-    return if (draggableHandler.enabled()) {
-        this.then(SwipeToSceneElement(draggableHandler, swipeDetector))
-    } else {
-        this
-    }
+    return then(SwipeToSceneElement(draggableHandler, swipeDetector, draggableHandler.enabled()))
 }
 
 private fun DraggableHandlerImpl.enabled(): Boolean {
@@ -114,30 +110,58 @@ internal fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActio
 private data class SwipeToSceneElement(
     val draggableHandler: DraggableHandlerImpl,
     val swipeDetector: SwipeDetector,
+    val enabled: Boolean,
 ) : ModifierNodeElement<SwipeToSceneRootNode>() {
     override fun create(): SwipeToSceneRootNode =
-        SwipeToSceneRootNode(draggableHandler, swipeDetector)
+        SwipeToSceneRootNode(draggableHandler, swipeDetector, enabled)
 
     override fun update(node: SwipeToSceneRootNode) {
-        node.update(draggableHandler, swipeDetector)
+        node.update(draggableHandler, swipeDetector, enabled)
     }
 }
 
 private class SwipeToSceneRootNode(
     draggableHandler: DraggableHandlerImpl,
     swipeDetector: SwipeDetector,
+    enabled: Boolean,
 ) : DelegatingNode() {
-    private var delegateNode = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
+    private var delegateNode = if (enabled) create(draggableHandler, swipeDetector) else null
 
-    fun update(draggableHandler: DraggableHandlerImpl, swipeDetector: SwipeDetector) {
-        if (draggableHandler == delegateNode.draggableHandler) {
+    fun update(
+        draggableHandler: DraggableHandlerImpl,
+        swipeDetector: SwipeDetector,
+        enabled: Boolean,
+    ) {
+        // Disabled.
+        if (!enabled) {
+            delegateNode?.let { undelegate(it) }
+            delegateNode = null
+            return
+        }
+
+        // Disabled => Enabled.
+        val nullableDelegate = delegateNode
+        if (nullableDelegate == null) {
+            delegateNode = create(draggableHandler, swipeDetector)
+            return
+        }
+
+        // Enabled => Enabled (update).
+        if (draggableHandler == nullableDelegate.draggableHandler) {
             // Simple update, just update the swipe detector directly and keep the node.
-            delegateNode.swipeDetector = swipeDetector
+            nullableDelegate.swipeDetector = swipeDetector
         } else {
             // The draggableHandler changed, force recreate the underlying SwipeToSceneNode.
-            undelegate(delegateNode)
-            delegateNode = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
+            undelegate(nullableDelegate)
+            delegateNode = create(draggableHandler, swipeDetector)
         }
+    }
+
+    private fun create(
+        draggableHandler: DraggableHandlerImpl,
+        swipeDetector: SwipeDetector,
+    ): SwipeToSceneNode {
+        return delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
     }
 }
 
