@@ -10177,9 +10177,10 @@ public class WindowManagerService extends IWindowManager.Stub
             throw new SecurityException("Access denied to process: " + pid
                     + ", must have permission " + Manifest.permission.ACCESS_FPS_COUNTER);
         }
-
-        if (mRoot.anyTaskForId(taskId) == null) {
-            throw new IllegalArgumentException("no task with taskId: " + taskId);
+        synchronized (mGlobalLock) {
+            if (mRoot.anyTaskForId(taskId) == null) {
+                throw new IllegalArgumentException("no task with taskId: " + taskId);
+            }
         }
 
         mTaskFpsCallbackController.registerListener(taskId, callback);
