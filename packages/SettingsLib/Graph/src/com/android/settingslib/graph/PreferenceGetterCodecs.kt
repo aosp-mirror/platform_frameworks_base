@@ -20,6 +20,7 @@ import android.os.Bundle
 import android.os.Parcel
 import com.android.settingslib.graph.proto.PreferenceProto
 import com.android.settingslib.ipc.MessageCodec
+import com.android.settingslib.metadata.PreferenceCoordinate
 import java.util.Arrays
 
 /** Message codec for [PreferenceGetterRequest]. */
