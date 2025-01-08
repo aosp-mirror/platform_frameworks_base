@@ -98,6 +98,7 @@ import com.android.systemui.shade.QSHeaderBoundsProvider;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior;
 import com.android.systemui.statusbar.notification.ColorUpdateLogger;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.LaunchAnimationParameters;
@@ -5335,7 +5336,7 @@ public class NotificationStackScrollLayout
     void onStatePostChange(boolean fromShadeLocked) {
         boolean onKeyguard = onKeyguard();
 
-        if (mHeadsUpAppearanceController != null) {
+        if (mHeadsUpAppearanceController != null && !StatusBarNoHunBehavior.isEnabled()) {
             mHeadsUpAppearanceController.onStateChanged();
         }
 

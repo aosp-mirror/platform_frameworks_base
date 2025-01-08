@@ -43,6 +43,7 @@ import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationSt
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
 import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.StatusBarPopupChipsViewModel
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
 import com.android.systemui.statusbar.layout.ui.viewmodel.StatusBarContentInsetsViewModelStore
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
@@ -297,17 +298,32 @@ constructor(
             primaryOngoingActivityChip.map { it is OngoingActivityChipModel.Shown }
         }
 
+    /**
+     * True if we need to hide the usual start side content in order to show the heads up
+     * notification info.
+     */
+    private val hideStartSideContentForHeadsUp: Flow<Boolean> =
+        if (StatusBarNoHunBehavior.isEnabled) {
+            flowOf(false)
+        } else {
+            headsUpNotificationInteractor.statusBarHeadsUpStatus.map {
+                it == PinnedStatus.PinnedBySystem
+            }
+        }
+
     override val shouldShowOperatorNameView: Flow<Boolean> =
         combine(
             shouldHomeStatusBarBeVisible,
-            headsUpNotificationInteractor.statusBarHeadsUpStatus,
+            hideStartSideContentForHeadsUp,
             homeStatusBarInteractor.visibilityViaDisableFlags,
             homeStatusBarInteractor.shouldShowOperatorName,
-        ) { shouldStatusBarBeVisible, headsUpStatus, visibilityViaDisableFlags, shouldShowOperator
-            ->
-            val hideForHeadsUp = headsUpStatus == PinnedStatus.PinnedBySystem
+        ) {
+            shouldStatusBarBeVisible,
+            hideStartSideContentForHeadsUp,
+            visibilityViaDisableFlags,
+            shouldShowOperator ->
             shouldStatusBarBeVisible &&
-                !hideForHeadsUp &&
+                !hideStartSideContentForHeadsUp &&
                 visibilityViaDisableFlags.isSystemInfoAllowed &&
                 shouldShowOperator
         }
@@ -315,14 +331,13 @@ constructor(
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
             shouldHomeStatusBarBeVisible,
-            headsUpNotificationInteractor.statusBarHeadsUpStatus,
+            hideStartSideContentForHeadsUp,
             homeStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, headsUpStatus, visibilityViaDisableFlags ->
-            val hideClockForHeadsUp = headsUpStatus == PinnedStatus.PinnedBySystem
+        ) { shouldStatusBarBeVisible, hideStartSideContentForHeadsUp, visibilityViaDisableFlags ->
             val showClock =
                 shouldStatusBarBeVisible &&
                     visibilityViaDisableFlags.isClockAllowed &&
-                    !hideClockForHeadsUp
+                    !hideStartSideContentForHeadsUp
             // Always use View.INVISIBLE here, so that animations work
             VisibilityModel(showClock.toVisibleOrInvisible(), visibilityViaDisableFlags.animate)
         }

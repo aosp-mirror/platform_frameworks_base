@@ -493,6 +493,14 @@ flag {
 }
 
 flag {
+    name: "status_bar_no_hun_behavior"
+    namespace: "systemui"
+    description: "When there's a HUN, don't show the HUN text or icon in the status bar. Instead, "
+       "continue showing the usual status bar."
+    bug: "385740230"
+}
+
+flag {
     name: "promote_notifications_automatically"
     namespace: "systemui"
     description: "Flag to automatically turn certain notifications into promoted notifications so "
