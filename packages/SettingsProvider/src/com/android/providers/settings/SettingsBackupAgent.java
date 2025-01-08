@@ -214,6 +214,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         "failed_to_restore_softap_config";
     private static final String ERROR_FAILED_TO_RESTORE_WIFI_CONFIG =
         "failed_to_restore_wifi_config";
+    private static final String ERROR_FAILED_TO_RESTORE_SIM_SPECIFIC_SETTINGS =
+        "failed_to_restore_sim_specific_settings";
 
 
     // Name of the temporary file we use during full backup/restore.  This is
@@ -1592,7 +1594,8 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         return true;
     }
 
-    private byte[] getSimSpecificSettingsData() {
+    @VisibleForTesting
+    byte[] getSimSpecificSettingsData() {
         byte[] simSpecificData = new byte[0];
         PackageManager packageManager = getBaseContext().getPackageManager();
         if (packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY)) {
@@ -1600,17 +1603,36 @@ public class SettingsBackupAgent extends BackupAgentHelper {
             simSpecificData = subManager.getAllSimSpecificSettingsForBackup();
             Log.i(TAG, "sim specific data of length + " + simSpecificData.length
                 + " successfully retrieved");
+            if (areAgentMetricsEnabled) {
+                // We're unable to determine how many settings this includes, so we'll just log 1.
+                numberOfSettingsPerKey.put(KEY_SIM_SPECIFIC_SETTINGS_2, 1);
+            }
         }
 
         return simSpecificData;
     }
 
-    private void restoreSimSpecificSettings(byte[] data) {
+    @VisibleForTesting
+    void restoreSimSpecificSettings(byte[] data) {
         PackageManager packageManager = getBaseContext().getPackageManager();
         boolean hasTelephony = packageManager.hasSystemFeature(PackageManager.FEATURE_TELEPHONY);
         if (hasTelephony) {
             SubscriptionManager subManager = SubscriptionManager.from(getBaseContext());
-            subManager.restoreAllSimSpecificSettingsFromBackup(data);
+            if (areAgentMetricsEnabled) {
+                try {
+                    subManager.restoreAllSimSpecificSettingsFromBackup(data);
+                    mBackupRestoreEventLogger
+                        .logItemsRestored(KEY_SIM_SPECIFIC_SETTINGS_2, /* count= */ 1);
+                } catch (Exception e) {
+                    mBackupRestoreEventLogger
+                        .logItemsRestoreFailed(
+                            KEY_SIM_SPECIFIC_SETTINGS_2,
+                            /* count= */ 1,
+                            ERROR_FAILED_TO_RESTORE_SIM_SPECIFIC_SETTINGS);
+                }
+            } else {
+                subManager.restoreAllSimSpecificSettingsFromBackup(data);
+            }
         }
     }
 
