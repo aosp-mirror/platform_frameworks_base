@@ -16,6 +16,8 @@
 
 package com.android.server.accessibility;
 
+import static android.view.accessibility.AccessibilityManager.AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT;
+
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -35,8 +37,7 @@ public class AutoclickIndicatorView extends View {
 
     static final int MINIMAL_ANIMATION_DURATION = 50;
 
-    // TODO(b/383901288): allow users to customize the indicator area.
-    static final float RADIUS = 50;
+    private float mRadius = AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT;
 
     private final Paint mPaint;
 
@@ -84,10 +85,10 @@ public class AutoclickIndicatorView extends View {
 
         if (showIndicator) {
             mRingRect.set(
-                    /* left= */ mX - RADIUS,
-                    /* top= */ mY - RADIUS,
-                    /* right= */ mX + RADIUS,
-                    /* bottom= */ mY + RADIUS);
+                    /* left= */ mX - mRadius,
+                    /* top= */ mY - mRadius,
+                    /* right= */ mX + mRadius,
+                    /* bottom= */ mY + mRadius);
             canvas.drawArc(mRingRect, /* startAngle= */ -90, mSweepAngle, false, mPaint);
         }
     }
@@ -105,6 +106,10 @@ public class AutoclickIndicatorView extends View {
     public void setCoordination(float x, float y) {
         mX = x;
         mY = y;
+    }
+
+    public void setRadius(int radius) {
+        mRadius = radius;
     }
 
     public void redrawIndicator() {
