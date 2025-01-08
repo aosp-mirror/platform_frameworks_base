@@ -57,56 +57,6 @@ internal fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
     return userActions.keys.any { it is Swipe.Resolved && it.direction.orientation == orientation }
 }
 
-/**
- * Finds the best matching [UserActionResult] for the given [swipe] within this [Content].
- * Prioritizes actions with matching [Swipe.Resolved.fromSource].
- *
- * @param swipe The swipe to match against.
- * @return The best matching [UserActionResult], or `null` if no match is found.
- */
-internal fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActionResult? {
-    if (!areSwipesAllowed()) {
-        return null
-    }
-
-    var bestPoints = Int.MIN_VALUE
-    var bestMatch: UserActionResult? = null
-    userActions.forEach { (actionSwipe, actionResult) ->
-        if (
-            actionSwipe !is Swipe.Resolved ||
-                // The direction must match.
-                actionSwipe.direction != swipe.direction ||
-                // The number of pointers down must match.
-                actionSwipe.pointerCount != swipe.pointerCount ||
-                // The action requires a specific fromSource.
-                (actionSwipe.fromSource != null && actionSwipe.fromSource != swipe.fromSource) ||
-                // The action requires a specific pointerType.
-                (actionSwipe.pointersType != null && actionSwipe.pointersType != swipe.pointersType)
-        ) {
-            // This action is not eligible.
-            return@forEach
-        }
-
-        val sameFromSource = actionSwipe.fromSource == swipe.fromSource
-        val samePointerType = actionSwipe.pointersType == swipe.pointersType
-        // Prioritize actions with a perfect match.
-        if (sameFromSource && samePointerType) {
-            return actionResult
-        }
-
-        var points = 0
-        if (sameFromSource) points++
-        if (samePointerType) points++
-
-        // Otherwise, keep track of the best eligible action.
-        if (points > bestPoints) {
-            bestPoints = points
-            bestMatch = actionResult
-        }
-    }
-    return bestMatch
-}
-
 private data class SwipeToSceneElement(
     val draggableHandler: DraggableHandlerImpl,
     val swipeDetector: SwipeDetector,
