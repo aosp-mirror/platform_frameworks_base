@@ -20,6 +20,7 @@
 #include <private/performance_hint_private.h>
 
 #include <future>
+#include <memory>
 #include <optional>
 #include <vector>
 
