@@ -50,7 +50,7 @@ class RenderStageManager @Inject constructor() : PipelineDumpable {
         traceSection("RenderStageManager.onRenderList") {
             val viewRenderer = viewRenderer ?: return
             viewRenderer.onRenderList(notifList)
-            dispatchOnAfterRenderList(viewRenderer, notifList)
+            dispatchOnAfterRenderList(notifList)
             dispatchOnAfterRenderGroups(viewRenderer, notifList)
             dispatchOnAfterRenderEntries(viewRenderer, notifList)
             viewRenderer.onDispatchComplete()
@@ -85,15 +85,9 @@ class RenderStageManager @Inject constructor() : PipelineDumpable {
             dump("onAfterRenderEntryListeners", onAfterRenderEntryListeners)
         }
 
-    private fun dispatchOnAfterRenderList(
-        viewRenderer: NotifViewRenderer,
-        entries: List<ListEntry>,
-    ) {
+    private fun dispatchOnAfterRenderList(entries: List<ListEntry>) {
         traceSection("RenderStageManager.dispatchOnAfterRenderList") {
-            val stackController = viewRenderer.getStackController()
-            onAfterRenderListListeners.forEach { listener ->
-                listener.onAfterRenderList(entries, stackController)
-            }
+            onAfterRenderListListeners.forEach { listener -> listener.onAfterRenderList(entries) }
         }
     }
 

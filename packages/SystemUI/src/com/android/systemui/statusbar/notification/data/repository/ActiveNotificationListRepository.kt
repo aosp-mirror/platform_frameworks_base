@@ -16,7 +16,7 @@
 package com.android.systemui.statusbar.notification.data.repository
 
 import com.android.systemui.dagger.SysUISingleton
-import com.android.systemui.statusbar.notification.collection.render.NotifStats
+import com.android.systemui.statusbar.notification.data.model.NotifStats
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore.Key
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationEntryModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationGroupModel

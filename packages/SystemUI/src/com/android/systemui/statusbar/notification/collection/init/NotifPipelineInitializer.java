@@ -33,7 +33,6 @@ import com.android.systemui.statusbar.notification.collection.ShadeListBuilder;
 import com.android.systemui.statusbar.notification.collection.coalescer.GroupCoalescer;
 import com.android.systemui.statusbar.notification.collection.coordinator.NotifCoordinators;
 import com.android.systemui.statusbar.notification.collection.inflation.NotificationRowBinderImpl;
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController;
 import com.android.systemui.statusbar.notification.collection.render.RenderStageManager;
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManager;
 import com.android.systemui.statusbar.notification.collection.render.ShadeViewManagerFactory;
@@ -89,8 +88,7 @@ public class NotifPipelineInitializer implements Dumpable, PipelineDumpable {
     public void initialize(
             NotificationListener notificationService,
             NotificationRowBinderImpl rowBinder,
-            NotificationListContainer listContainer,
-            NotifStackController stackController) {
+            NotificationListContainer listContainer) {
         mDumpManager.registerDumpable("NotifPipeline", this);
 
         mNotificationService = notificationService;
@@ -102,7 +100,7 @@ public class NotifPipelineInitializer implements Dumpable, PipelineDumpable {
         mNotifPluggableCoordinators.attach(mPipelineWrapper);
 
         // Wire up pipeline
-        mShadeViewManager = mShadeViewManagerFactory.create(listContainer, stackController);
+        mShadeViewManager = mShadeViewManagerFactory.create(listContainer);
         mShadeViewManager.attach(mRenderStageManager);
         mRenderStageManager.attach(mListBuilder);
         mListBuilder.attach(mNotifCollection);

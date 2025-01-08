@@ -26,7 +26,6 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.collection.NotificationEntryBuilder
 import com.android.systemui.statusbar.notification.collection.listbuilder.NotifSection
 import com.android.systemui.statusbar.notification.collection.listbuilder.OnAfterRenderListListener
-import com.android.systemui.statusbar.notification.collection.render.NotifStackController
 import com.android.systemui.util.mockito.withArgCaptor
 import com.google.common.truth.Truth.assertThat
 import org.junit.Before
@@ -48,7 +47,6 @@ class DataStoreCoordinatorTest : SysuiTestCase() {
 
     private val pipeline: NotifPipeline = mock()
     private val notifLiveDataStoreImpl: NotifLiveDataStoreImpl = mock()
-    private val stackController: NotifStackController = mock()
     private val section: NotifSection = mock()
 
     @Before
@@ -63,7 +61,7 @@ class DataStoreCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testUpdateDataStore_withOneEntry() {
-        afterRenderListListener.onAfterRenderList(listOf(entry), stackController)
+        afterRenderListListener.onAfterRenderList(listOf(entry))
         verify(notifLiveDataStoreImpl).setActiveNotifList(eq(listOf(entry)))
         verifyNoMoreInteractions(notifLiveDataStoreImpl)
     }
@@ -86,8 +84,7 @@ class DataStoreCoordinatorTest : SysuiTestCase() {
                     .setSection(section)
                     .build(),
                 notificationEntry("baz", 1),
-            ),
-            stackController,
+            )
         )
         val list: List<NotificationEntry> = withArgCaptor {
             verify(notifLiveDataStoreImpl).setActiveNotifList(capture())
@@ -111,7 +108,7 @@ class DataStoreCoordinatorTest : SysuiTestCase() {
 
     @Test
     fun testUpdateDataStore_withZeroEntries_whenNewPipelineEnabled() {
-        afterRenderListListener.onAfterRenderList(listOf(), stackController)
+        afterRenderListListener.onAfterRenderList(listOf())
         verify(notifLiveDataStoreImpl).setActiveNotifList(eq(listOf()))
         verifyNoMoreInteractions(notifLiveDataStoreImpl)
     }

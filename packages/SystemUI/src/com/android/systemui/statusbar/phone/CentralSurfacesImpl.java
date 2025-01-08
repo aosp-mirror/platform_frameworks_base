@@ -1492,7 +1492,6 @@ public class CentralSurfacesImpl implements CoreStartable, CentralSurfaces {
         mNotificationsController.initialize(
                 mPresenterLazy.get(),
                 mNotifListContainer,
-                mStackScrollerController.getNotifStackController(),
                 mNotificationActivityStarterLazy.get());
         mWindowRootViewVisibilityInteractor.setUp(mPresenterLazy.get(), mNotificationsController);
     }

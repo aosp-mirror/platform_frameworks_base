@@ -37,12 +37,6 @@ interface NotifViewRenderer {
     fun onRenderList(notifList: List<ListEntry>)
 
     /**
-     * Provides an interface for the pipeline to update the overall shade. This will be called at
-     * most once for each time [onRenderList] is called.
-     */
-    fun getStackController(): NotifStackController
-
-    /**
      * Provides an interface for the pipeline to update individual groups. This will be called at
      * most once for each group in the most recent call to [onRenderList].
      */
