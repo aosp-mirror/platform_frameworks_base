@@ -116,9 +116,10 @@ constructor(
      * - We're wake and unlocking (fingerprint auth occurred while asleep).
      * - We're allowed to ignore auth and return to GONE, due to timeouts not elapsing.
      * - We're DREAMING and dismissible.
-     * - We're already GONE. Technically you're already awake when GONE, but this makes it easier to
-     *   reason about this state (for example, if canWakeDirectlyToGone, don't tell WM to pause the
-     *   top activity - something you should never do while GONE as well).
+     * - We're already GONE and not transitioning out of GONE. Technically you're already awake when
+     *   GONE, but this makes it easier to reason about this state (for example, if
+     *   canWakeDirectlyToGone, don't tell WM to pause the top activity - something you should never
+     *   do while GONE as well).
      */
     val canWakeDirectlyToGone =
         combine(
@@ -138,7 +139,8 @@ constructor(
                     canIgnoreAuthAndReturnToGone ||
                     (currentState == KeyguardState.DREAMING &&
                         keyguardInteractor.isKeyguardDismissible.value) ||
-                    currentState == KeyguardState.GONE
+                    (currentState == KeyguardState.GONE &&
+                        transitionInteractor.getStartedState() == KeyguardState.GONE)
             }
             .distinctUntilChanged()
 
