@@ -24,11 +24,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.view.ViewTreeObserver
 import android.view.ViewTreeObserver.InternalInsetsInfo
+import android.view.WindowInsets
 import androidx.constraintlayout.motion.widget.MotionLayout
+import androidx.core.view.updatePadding
 import com.android.internal.view.RotationPolicy
+import com.android.systemui.common.ui.view.onApplyWindowInsets
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.res.R
 import com.android.systemui.util.children
+import com.android.systemui.util.kotlin.awaitCancellationThenDispose
 import com.android.systemui.volume.SystemUIInterpolators
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
 import com.android.systemui.volume.dialog.ringer.ui.binder.VolumeDialogRingerViewBinder
@@ -43,6 +47,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.flow.onEach
@@ -71,6 +76,8 @@ constructor(
         resources.getInteger(R.integer.config_dialogHideAnimationDurationMs).toLong()
 
     fun CoroutineScope.bind(dialog: Dialog) {
+        val insets: MutableStateFlow<WindowInsets> =
+            MutableStateFlow(WindowInsets.Builder().build())
         // Root view of the Volume Dialog.
         val root: MotionLayout = dialog.requireViewById(R.id.volume_dialog_root)
         root.alpha = 0f
@@ -88,6 +95,22 @@ constructor(
 
         launch { root.viewTreeObserver.computeInternalInsetsListener(root) }
 
+        launch {
+            root
+                .onApplyWindowInsets { v, newInsets ->
+                    val insetsValues = newInsets.getInsets(WindowInsets.Type.displayCutout())
+                    v.updatePadding(
+                        left = insetsValues.left,
+                        top = insetsValues.top,
+                        right = insetsValues.right,
+                        bottom = insetsValues.bottom,
+                    )
+                    insets.value = newInsets
+                    WindowInsets.CONSUMED
+                }
+                .awaitCancellationThenDispose()
+        }
+
         with(volumeDialogRingerViewBinder) { bind(root) }
         with(slidersViewBinder) { bind(root) }
         with(settingsButtonViewBinder) { bind(root) }
@@ -103,8 +126,10 @@ constructor(
                 when (it) {
                     is VolumeDialogVisibilityModel.Visible -> {
                         tracer.traceVisibilityEnd(it)
-                        calculateTranslationX(view)?.let(view::setTranslationX)
-                        view.animateShow(dialogShowAnimationDurationMs)
+                        view.animateShow(
+                            duration = dialogShowAnimationDurationMs,
+                            translationX = calculateTranslationX(view),
+                        )
                     }
                     is VolumeDialogVisibilityModel.Dismissed -> {
                         tracer.traceVisibilityEnd(it)
@@ -134,24 +159,15 @@ constructor(
         }
     }
 
-    private suspend fun View.animateShow(duration: Long) {
+    private suspend fun View.animateShow(duration: Long, translationX: Float?) {
+        translationX?.let { setTranslationX(translationX) }
+        alpha = 0f
         animate()
             .alpha(1f)
             .translationX(0f)
             .setDuration(duration)
             .setInterpolator(SystemUIInterpolators.LogDecelerateInterpolator())
             .suspendAnimate(jankListenerFactory.show(this, duration))
-        /* TODO(b/369993851)
-        .withEndAction(Runnable {
-            if (!Prefs.getBoolean(mContext, Prefs.Key.TOUCHED_RINGER_TOGGLE, false)) {
-                if (mRingerIcon != null) {
-                    mRingerIcon.postOnAnimationDelayed(
-                        getSinglePressFor(mRingerIcon), 1500
-                    )
-                }
-            }
-        })
-         */
     }
 
     private suspend fun View.animateHide(duration: Long, translationX: Float?) {
@@ -160,22 +176,7 @@ constructor(
                 .alpha(0f)
                 .setDuration(duration)
                 .setInterpolator(SystemUIInterpolators.LogAccelerateInterpolator())
-        /*  TODO(b/369993851)
-        .withEndAction(
-            Runnable {
-                mHandler.postDelayed(
-                    Runnable {
-                        hideRingerDrawer()
-
-                    },
-                    50
-                )
-            }
-        )
-         */
-        if (translationX != null) {
-            animator.translationX(translationX)
-        }
+        translationX?.let { animator.translationX(it) }
         animator.suspendAnimate(jankListenerFactory.dismiss(this, duration))
     }
 
