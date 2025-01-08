@@ -478,10 +478,10 @@ flag {
 }
 
 flag {
-    name: "enable_multiple_desktops"
+    name: "enable_multiple_desktops_frontend"
     namespace: "lse_desktop_experience"
-    description: "Enable multiple desktop sessions for desktop windowing."
-    bug: "379158791"
+    description: "Enable multiple desktop sessions for desktop windowing (frontend)."
+    bug: "362720309"
 }
 
 flag {
