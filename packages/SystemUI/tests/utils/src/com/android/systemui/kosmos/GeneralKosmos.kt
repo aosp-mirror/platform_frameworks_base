@@ -1,7 +1,7 @@
 package com.android.systemui.kosmos
 
-import androidx.compose.runtime.snapshots.Snapshot
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.compose.runTestWithSnapshots
 import com.android.systemui.coroutines.FlowValue
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.coroutines.collectValues
@@ -17,7 +17,6 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runCurrent
-import kotlinx.coroutines.test.runTest
 import org.mockito.kotlin.verify
 
 var Kosmos.testDispatcher by Fixture { StandardTestDispatcher() }
@@ -53,26 +52,10 @@ var Kosmos.brightnessWarningToast: BrightnessWarningToast by
 
 /**
  * Run this test body with a [Kosmos] as receiver, and using the [testScope] currently installed in
- * that kosmos instance
+ * that Kosmos instance
  */
-fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) =
-    testScope.runTest testBody@{ this@runTest.testBody() }
-
-/**
- * Runs the given [Kosmos]-scoped test [block] in an environment where compose snapshot state is
- * settled eagerly. This is the compose equivalent to using an [UnconfinedTestDispatcher] or using
- * [runCurrent] a lot.
- *
- * Note that this shouldn't be needed or used in a compose test environment.
- */
-fun Kosmos.runTestWithSnapshots(block: suspend Kosmos.() -> Unit) {
-    val handle = Snapshot.registerGlobalWriteObserver { Snapshot.sendApplyNotifications() }
-
-    try {
-        testScope.runTest { block() }
-    } finally {
-        handle.dispose()
-    }
+fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) {
+    testScope.runTestWithSnapshots testBody@{ this@runTest.testBody() }
 }
 
 fun Kosmos.runCurrent() = testScope.runCurrent()
