@@ -478,7 +478,7 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
-        final WindowState win = createWindow(parent, type, name);
+        final WindowState win = newWindowBuilder(name, type).setParent(parent).build();
         // Prevent common windows from been IME targets.
         win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
         return win;
@@ -502,7 +502,8 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     WindowState createNavBarWithProvidedInsets(DisplayContent dc) {
-        final WindowState navbar = createWindow(null, TYPE_NAVIGATION_BAR, dc, "navbar");
+        final WindowState navbar = newWindowBuilder("navbar", TYPE_NAVIGATION_BAR).setDisplay(
+                dc).build();
         final Binder owner = new Binder();
         navbar.mAttrs.providedInsets = new InsetsFrameProvider[] {
                 new InsetsFrameProvider(owner, 0, WindowInsets.Type.navigationBars())
@@ -513,7 +514,8 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     }
 
     WindowState createStatusBarWithProvidedInsets(DisplayContent dc) {
-        final WindowState statusBar = createWindow(null, TYPE_STATUS_BAR, dc, "statusBar");
+        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_STATUS_BAR).setDisplay(
+                dc).build();
         final Binder owner = new Binder();
         statusBar.mAttrs.providedInsets = new InsetsFrameProvider[] {
                 new InsetsFrameProvider(owner, 0, WindowInsets.Type.statusBars())
@@ -575,92 +577,13 @@ public class WindowTestsBase extends SystemServiceTestsBase {
     WindowState createAppWindow(Task task, int type, String name) {
         final ActivityRecord activity = createNonAttachedActivityRecord(task.getDisplayContent());
         task.addChild(activity, 0);
-        return createWindow(null, type, activity, name);
+        return newWindowBuilder(name, type).setWindowToken(activity).build();
     }
 
-    WindowState createDreamWindow(WindowState parent, int type, String name) {
+    WindowState createDreamWindow(String name, int type) {
         final WindowToken token = createWindowToken(
                 mDisplayContent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_DREAM, type);
-        return createWindow(parent, type, token, name);
-    }
-
-    // TODO: Move these calls to a builder?
-    WindowState createWindow(WindowState parent, int type, String name) {
-        return (parent == null)
-                ? createWindow(parent, type, mDisplayContent, name)
-                : createWindow(parent, type, parent.mToken, name);
-    }
-
-    WindowState createWindow(WindowState parent, int type, String name, int ownerId) {
-        return (parent == null)
-                ? createWindow(parent, type, mDisplayContent, name, ownerId)
-                : createWindow(parent, type, parent.mToken, name, ownerId);
-    }
-
-    WindowState createWindow(WindowState parent, int windowingMode, int activityType,
-            int type, DisplayContent dc, String name) {
-        final WindowToken token = createWindowToken(dc, windowingMode, activityType, type);
-        return createWindow(parent, type, token, name);
-    }
-
-    WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name) {
-        return createWindow(
-                parent, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type, dc, name);
-    }
-
-    WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
-            int ownerId) {
-        final WindowToken token = createWindowToken(
-                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
-        return createWindow(parent, type, token, name, ownerId);
-    }
-
-    WindowState createWindow(WindowState parent, int type, DisplayContent dc, String name,
-            boolean ownerCanAddInternalSystemWindow) {
-        final WindowToken token = createWindowToken(
-                dc, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, type);
-        return createWindow(parent, type, token, name, 0 /* ownerId */,
-                ownerCanAddInternalSystemWindow);
-    }
-
-    WindowState createWindow(WindowState parent, int type, WindowToken token, String name) {
-        return createWindow(parent, type, token, name, 0 /* ownerId */,
-                false /* ownerCanAddInternalSystemWindow */);
-    }
-
-    WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
-            int ownerId) {
-        return createWindow(parent, type, token, name, ownerId,
-                false /* ownerCanAddInternalSystemWindow */);
-    }
-
-    WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
-            int ownerId, boolean ownerCanAddInternalSystemWindow) {
-        return createWindow(parent, type, token, name, ownerId, ownerCanAddInternalSystemWindow,
-                mIWindow);
-    }
-
-    WindowState createWindow(WindowState parent, int type, WindowToken token, String name,
-            int ownerId, boolean ownerCanAddInternalSystemWindow, IWindow iwindow) {
-        return createWindow(parent, type, token, name, ownerId, UserHandle.getUserId(ownerId),
-                ownerCanAddInternalSystemWindow, mWm, getTestSession(token), iwindow);
-    }
-
-    static WindowState createWindow(WindowState parent, int type, WindowToken token,
-            String name, int ownerId, int userId, boolean ownerCanAddInternalSystemWindow,
-            WindowManagerService service, Session session, IWindow iWindow) {
-        SystemServicesTestRule.checkHoldsLock(service.mGlobalLock);
-
-        final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(type);
-        attrs.setTitle(name);
-        attrs.packageName = "test";
-
-        final WindowState w = new WindowState(service, session, iWindow, token, parent,
-                OP_NONE, attrs, VISIBLE, ownerId, userId, ownerCanAddInternalSystemWindow);
-        // TODO: Probably better to make this call in the WindowState ctor to avoid errors with
-        // adding it to the token...
-        token.addWindow(w);
-        return w;
+        return newWindowBuilder(name, type).setWindowToken(token).build();
     }
 
     static void makeWindowVisible(WindowState... windows) {
@@ -1920,11 +1843,14 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         private final WindowManagerService mWMService;
         private final SparseArray<IBinder> mTaskAppMap = new SparseArray<>();
         private final HashMap<IBinder, WindowState> mAppWindowMap = new HashMap<>();
+        private final DisplayContent mDisplayContent;
 
-        TestStartingWindowOrganizer(ActivityTaskManagerService service) {
+        TestStartingWindowOrganizer(ActivityTaskManagerService service,
+                DisplayContent displayContent) {
             mAtm = service;
             mWMService = mAtm.mWindowManager;
             mAtm.mTaskOrganizerController.registerTaskOrganizer(this);
+            mDisplayContent = displayContent;
         }
 
         @Override
@@ -1933,10 +1859,11 @@ public class WindowTestsBase extends SystemServiceTestsBase {
                 final ActivityRecord activity = ActivityRecord.forTokenLocked(info.appToken);
                 IWindow iWindow = mock(IWindow.class);
                 doReturn(mock(IBinder.class)).when(iWindow).asBinder();
-                final WindowState window = WindowTestsBase.createWindow(null,
-                        TYPE_APPLICATION_STARTING, activity,
-                        "Starting window", 0 /* ownerId */, 0 /* userId*/,
-                        false /* internalWindows */, mWMService, createTestSession(mAtm), iWindow);
+                // WindowToken is already passed, windowTokenCreator is not needed here.
+                final WindowState window = new WindowTestsBase.WindowStateBuilder("Starting window",
+                        TYPE_APPLICATION_STARTING, mWMService, mDisplayContent, iWindow,
+                        (unused) -> createTestSession(mAtm),
+                        null /* windowTokenCreator */).setWindowToken(activity).build();
                 activity.mStartingWindow = window;
                 mAppWindowMap.put(info.appToken, window);
                 mTaskAppMap.put(info.taskInfo.taskId, info.appToken);
