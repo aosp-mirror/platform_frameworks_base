@@ -18,6 +18,7 @@ package com.android.server.timezonedetector;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.time.ITimeZoneDetectorListener;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
@@ -73,6 +74,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
         }
 
         @Override
+        @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL")
         public void onStart() {
             // Obtain / create the shared dependencies.
             Context context = getContext();
@@ -81,7 +83,7 @@ public final class TimeZoneDetectorService extends ITimeZoneDetectorService.Stub
             ServiceConfigAccessor serviceConfigAccessor =
                     ServiceConfigAccessorImpl.getInstance(context);
             TimeZoneDetectorStrategy timeZoneDetectorStrategy =
-                    TimeZoneDetectorStrategyImpl.create(handler, serviceConfigAccessor);
+                    TimeZoneDetectorStrategyImpl.create(context, handler, serviceConfigAccessor);
             DeviceActivityMonitor deviceActivityMonitor =
                     DeviceActivityMonitorImpl.create(context, handler);
 

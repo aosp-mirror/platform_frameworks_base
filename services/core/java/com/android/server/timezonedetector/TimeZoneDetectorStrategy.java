@@ -15,6 +15,7 @@
  */
 package com.android.server.timezonedetector;
 
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.time.TimeZoneCapabilitiesAndConfig;
@@ -23,6 +24,11 @@ import android.app.time.TimeZoneState;
 import android.app.timezonedetector.ManualTimeZoneSuggestion;
 import android.app.timezonedetector.TelephonyTimeZoneSuggestion;
 import android.util.IndentingPrintWriter;
+
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
  * The interface for the class that is responsible for setting the time zone on a device, used by
@@ -97,6 +103,22 @@ import android.util.IndentingPrintWriter;
  * @hide
  */
 public interface TimeZoneDetectorStrategy extends Dumpable {
+    @IntDef({ ORIGIN_UNKNOWN, ORIGIN_MANUAL, ORIGIN_TELEPHONY, ORIGIN_LOCATION })
+    @Retention(RetentionPolicy.SOURCE)
+    @Target({ ElementType.TYPE_USE, ElementType.TYPE_PARAMETER })
+    @interface Origin {}
+
+    /** Used when the origin of the time zone value cannot be inferred. */
+    @Origin int ORIGIN_UNKNOWN = 0;
+
+    /** Used when a time zone value originated from a user / manual settings. */
+    @Origin int ORIGIN_MANUAL = 1;
+
+    /** Used when a time zone value originated from a telephony signal. */
+    @Origin int ORIGIN_TELEPHONY = 2;
+
+    /** Used when a time zone value originated from a location signal. */
+    @Origin int ORIGIN_LOCATION = 3;
 
     /**
      * Adds a listener that will be triggered when something changes that could affect the result

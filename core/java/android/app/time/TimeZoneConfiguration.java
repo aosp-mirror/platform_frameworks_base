@@ -62,7 +62,8 @@ public final class TimeZoneConfiguration implements Parcelable {
      *
      * @hide
      */
-    @StringDef({ SETTING_AUTO_DETECTION_ENABLED, SETTING_GEO_DETECTION_ENABLED })
+    @StringDef({SETTING_AUTO_DETECTION_ENABLED, SETTING_GEO_DETECTION_ENABLED,
+            SETTING_NOTIFICATIONS_ENABLED})
     @Retention(RetentionPolicy.SOURCE)
     @interface Setting {}
 
@@ -73,6 +74,10 @@ public final class TimeZoneConfiguration implements Parcelable {
     /** See {@link TimeZoneConfiguration#isGeoDetectionEnabled()} for details. */
     @Setting
     private static final String SETTING_GEO_DETECTION_ENABLED = "geoDetectionEnabled";
+
+    /** See {@link TimeZoneConfiguration#areNotificationsEnabled()} for details. */
+    @Setting
+    private static final String SETTING_NOTIFICATIONS_ENABLED = "notificationsEnabled";
 
     @NonNull private final Bundle mBundle;
 
@@ -98,7 +103,8 @@ public final class TimeZoneConfiguration implements Parcelable {
      */
     public boolean isComplete() {
         return hasIsAutoDetectionEnabled()
-                && hasIsGeoDetectionEnabled();
+                && hasIsGeoDetectionEnabled()
+                && hasIsNotificationsEnabled();
     }
 
     /**
@@ -128,8 +134,7 @@ public final class TimeZoneConfiguration implements Parcelable {
     /**
      * Returns the value of the {@link #SETTING_GEO_DETECTION_ENABLED} setting. This
      * controls whether the device can use geolocation to determine time zone. This value may only
-     * be used by Android under some circumstances. For example, it is not used when
-     * {@link #isGeoDetectionEnabled()} is {@code false}.
+     * be used by Android under some circumstances.
      *
      * <p>See {@link TimeZoneCapabilities#getConfigureGeoDetectionEnabledCapability()} for how to
      * tell if the setting is meaningful for the current user at this time.
@@ -148,6 +153,32 @@ public final class TimeZoneConfiguration implements Parcelable {
      */
     public boolean hasIsGeoDetectionEnabled() {
         return mBundle.containsKey(SETTING_GEO_DETECTION_ENABLED);
+    }
+
+    /**
+     * Returns the value of the {@link #SETTING_NOTIFICATIONS_ENABLED} setting. This controls
+     * whether the device can send time and time zone related notifications. This value may only
+     * be used by Android under some circumstances.
+     *
+     * <p>See {@link TimeZoneCapabilities#getConfigureNotificationsEnabledCapability()} ()} for how
+     * to tell if the setting is meaningful for the current user at this time.
+     *
+     * @throws IllegalStateException if the setting is not present
+     *
+     * @hide
+     */
+    public boolean areNotificationsEnabled() {
+        enforceSettingPresent(SETTING_NOTIFICATIONS_ENABLED);
+        return mBundle.getBoolean(SETTING_NOTIFICATIONS_ENABLED);
+    }
+
+    /**
+     * Returns {@code true} if the {@link #areNotificationsEnabled()} setting is present.
+     *
+     * @hide
+     */
+    public boolean hasIsNotificationsEnabled() {
+        return mBundle.containsKey(SETTING_NOTIFICATIONS_ENABLED);
     }
 
     @Override
@@ -241,6 +272,17 @@ public final class TimeZoneConfiguration implements Parcelable {
         @NonNull
         public Builder setGeoDetectionEnabled(boolean enabled) {
             this.mBundle.putBoolean(SETTING_GEO_DETECTION_ENABLED, enabled);
+            return this;
+        }
+
+        /**
+         * Sets the state of the {@link #SETTING_NOTIFICATIONS_ENABLED} setting.         *
+         *
+         * @hide
+         */
+        @NonNull
+        public Builder setNotificationsEnabled(boolean enabled) {
+            this.mBundle.putBoolean(SETTING_NOTIFICATIONS_ENABLED, enabled);
             return this;
         }
 

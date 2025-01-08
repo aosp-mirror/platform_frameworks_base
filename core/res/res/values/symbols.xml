@@ -2377,6 +2377,9 @@
   <java-symbol type="string" name="config_secondaryLocationTimeZoneProviderPackageName" />
   <java-symbol type="bool" name="config_enableTelephonyTimeZoneDetection" />
   <java-symbol type="bool" name="config_supportTelephonyTimeZoneFallback" />
+  <java-symbol type="bool" name="config_enableTimeZoneNotificationsSupported" />
+  <java-symbol type="bool" name="config_enableTimeZoneNotificationsTrackingSupported" />
+  <java-symbol type="bool" name="config_enableTimeZoneManualChangeTrackingSupported" />
   <java-symbol type="bool" name="config_autoResetAirplaneMode" />
   <java-symbol type="string" name="config_notificationAccessConfirmationActivity" />
   <java-symbol type="bool" name="config_preventImeStartupUnlessTextEditor" />
@@ -4025,6 +4028,7 @@
   <java-symbol type="string" name="notification_channel_network_available" />
   <java-symbol type="array" name="config_defaultCloudSearchServices" />
   <java-symbol type="string" name="notification_channel_vpn" />
+  <java-symbol type="string" name="notification_channel_system_time" />
   <java-symbol type="string" name="notification_channel_device_admin" />
   <java-symbol type="string" name="notification_channel_alerts" />
   <java-symbol type="string" name="notification_channel_retail_mode" />
@@ -4035,6 +4039,8 @@
   <java-symbol type="string" name="notification_channel_accessibility_hearing_device" />
   <java-symbol type="string" name="notification_channel_accessibility_security_policy" />
   <java-symbol type="string" name="notification_channel_display" />
+  <java-symbol type="string" name="time_zone_change_notification_title" />
+  <java-symbol type="string" name="time_zone_change_notification_body" />
   <java-symbol type="string" name="config_defaultAutofillService" />
   <java-symbol type="string" name="config_defaultFieldClassificationService" />
   <java-symbol type="string" name="config_defaultOnDeviceSpeechRecognitionService" />

@@ -49,6 +49,7 @@ public class SystemNotificationChannels {
     public static final String NETWORK_ALERTS = "NETWORK_ALERTS";
     public static final String NETWORK_AVAILABLE = "NETWORK_AVAILABLE";
     public static final String VPN = "VPN";
+    public static final String TIME = "TIME";
     /**
      * @deprecated Legacy device admin channel with low importance which is no longer used,
      *  Use the high importance {@link #DEVICE_ADMIN} channel instead.
@@ -145,6 +146,12 @@ public class SystemNotificationChannels {
                 context.getString(R.string.notification_channel_vpn),
                 NotificationManager.IMPORTANCE_LOW);
         channelsList.add(vpn);
+
+        final NotificationChannel time = new NotificationChannel(
+                TIME,
+                context.getString(R.string.notification_channel_system_time),
+                NotificationManager.IMPORTANCE_DEFAULT);
+        channelsList.add(time);
 
         final NotificationChannel deviceAdmin = new NotificationChannel(
                 DEVICE_ADMIN,

@@ -43,9 +43,11 @@ public class TimeZoneConfigurationTest {
         TimeZoneConfiguration completeConfig = new TimeZoneConfiguration.Builder()
                 .setAutoDetectionEnabled(true)
                 .setGeoDetectionEnabled(true)
+                .setNotificationsEnabled(true)
                 .build();
         assertTrue(completeConfig.isComplete());
         assertTrue(completeConfig.hasIsGeoDetectionEnabled());
+        assertTrue(completeConfig.hasIsNotificationsEnabled());
     }
 
     @Test
