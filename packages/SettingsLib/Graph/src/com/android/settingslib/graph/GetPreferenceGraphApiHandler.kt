@@ -74,7 +74,6 @@ constructor(
     val visitedScreens: Set<String> = setOf(),
     val locale: Locale? = null,
     val flags: Int = PreferenceGetterFlags.ALL,
-    val includeValue: Boolean = true, // TODO: clean up
     val includeValueDescriptor: Boolean = true,
 )
 
