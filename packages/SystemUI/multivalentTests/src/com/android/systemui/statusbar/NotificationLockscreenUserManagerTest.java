@@ -526,7 +526,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mLockscreenUserManager.mLastLockTime
                 .set(mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
         // Device is not currently locked
-        when(mKeyguardManager.isDeviceLocked()).thenReturn(false);
+        mLockscreenUserManager.mLocked.set(false);
 
         // Sensitive Content notifications are always redacted
         assertEquals(REDACTION_TYPE_NONE,
@@ -540,7 +540,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         mSettings.putIntForUser(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS, 1,
                 mCurrentUser.id);
         changeSetting(LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS);
-        when(mKeyguardManager.isDeviceLocked()).thenReturn(true);
+        mLockscreenUserManager.mLocked.set(true);
         // Device was locked after this notification arrived
         mLockscreenUserManager.mLastLockTime
                 .set(mSensitiveNotifPostTime + TimeUnit.DAYS.toMillis(1));
@@ -560,7 +560,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         // Device has been locked for 1 second before the notification came in, which is too short
         mLockscreenUserManager.mLastLockTime
                 .set(mSensitiveNotifPostTime - TimeUnit.SECONDS.toMillis(1));
-        when(mKeyguardManager.isDeviceLocked()).thenReturn(true);
+        mLockscreenUserManager.mLocked.set(true);
 
         // Sensitive Content notifications are always redacted
         assertEquals(REDACTION_TYPE_NONE,
@@ -577,7 +577,7 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         // Claim the device was last locked 1 day ago
         mLockscreenUserManager.mLastLockTime
                 .set(mSensitiveNotifPostTime - TimeUnit.DAYS.toMillis(1));
-        when(mKeyguardManager.isDeviceLocked()).thenReturn(true);
+        mLockscreenUserManager.mLocked.set(true);
 
         // Sensitive Content notifications are always redacted
         assertEquals(REDACTION_TYPE_NONE,
