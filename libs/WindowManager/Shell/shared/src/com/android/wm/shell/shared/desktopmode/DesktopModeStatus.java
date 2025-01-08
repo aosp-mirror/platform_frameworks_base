@@ -233,6 +233,16 @@ public class DesktopModeStatus {
     }
 
     /**
+     * Returns whether the multiple desktops feature is enabled for this device (both backend and
+     * frontend implementations).
+     */
+    public static boolean enableMultipleDesktops(@NonNull Context context) {
+        return Flags.enableMultipleDesktopsBackend()
+                && Flags.enableMultipleDesktopsFrontend()
+                && canEnterDesktopMode(context);
+    }
+
+    /**
      * @return {@code true} if this device is requesting to show the app handle despite non
      * necessarily enabling desktop mode
      */
