@@ -40,6 +40,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
+import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.PipSurfaceTransactionHelper;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
@@ -59,6 +60,8 @@ public class PipScheduler {
     private final ShellExecutor mMainExecutor;
     private final PipTransitionState mPipTransitionState;
     private final Optional<DesktopUserRepositories> mDesktopUserRepositoriesOptional;
+    private final Optional<DesktopWallpaperActivityTokenProvider>
+            mDesktopWallpaperActivityTokenProviderOptional;
     private final RootTaskDisplayAreaOrganizer mRootTaskDisplayAreaOrganizer;
     private PipTransitionController mPipTransitionController;
     private PipSurfaceTransactionHelper.SurfaceControlTransactionFactory
@@ -73,12 +76,16 @@ public class PipScheduler {
             ShellExecutor mainExecutor,
             PipTransitionState pipTransitionState,
             Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
+            Optional<DesktopWallpaperActivityTokenProvider>
+                    desktopWallpaperActivityTokenProviderOptional,
             RootTaskDisplayAreaOrganizer rootTaskDisplayAreaOrganizer) {
         mContext = context;
         mPipBoundsState = pipBoundsState;
         mMainExecutor = mainExecutor;
         mPipTransitionState = pipTransitionState;
         mDesktopUserRepositoriesOptional = desktopUserRepositoriesOptional;
+        mDesktopWallpaperActivityTokenProviderOptional =
+                desktopWallpaperActivityTokenProviderOptional;
         mRootTaskDisplayAreaOrganizer = rootTaskDisplayAreaOrganizer;
 
         mSurfaceControlTransactionFactory =
@@ -260,10 +267,18 @@ public class PipScheduler {
 
     /** Returns whether PiP is exiting while we're in desktop mode. */
     private boolean isPipExitingToDesktopMode() {
-        return Flags.enableDesktopWindowingPip() && mDesktopUserRepositoriesOptional.isPresent()
-                && (mDesktopUserRepositoriesOptional.get().getCurrent().getVisibleTaskCount(
-                Objects.requireNonNull(mPipTransitionState.getPipTaskInfo()).displayId) > 0
-                || isDisplayInFreeform());
+        // Early return if PiP in Desktop Windowing is not supported.
+        if (!Flags.enableDesktopWindowingPip() || mDesktopUserRepositoriesOptional.isEmpty()
+                || mDesktopWallpaperActivityTokenProviderOptional.isEmpty()) {
+            return false;
+        }
+        final int displayId = Objects.requireNonNull(
+                mPipTransitionState.getPipTaskInfo()).displayId;
+        return mDesktopUserRepositoriesOptional.get().getCurrent().getVisibleTaskCount(displayId)
+                > 0
+                || mDesktopWallpaperActivityTokenProviderOptional.get().isWallpaperActivityVisible(
+                displayId)
+                || isDisplayInFreeform();
     }
 
     /**

@@ -82,6 +82,7 @@ import com.android.dx.mockito.inline.extended.StaticMockitoSession
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.window.flags.Flags
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODE
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PIP
 import com.android.window.flags.Flags.FLAG_ENABLE_DISPLAY_FOCUS_IN_SHELL_TRANSITIONS
 import com.android.window.flags.Flags.FLAG_ENABLE_FULLY_IMMERSIVE_IN_DESKTOP
 import com.android.window.flags.Flags.FLAG_ENABLE_MOVE_TO_NEXT_DISPLAY_SHORTCUT
@@ -566,6 +567,38 @@ class DesktopTasksControllerTest : ShellTestCase() {
         taskRepository.setTopTransparentFullscreenTaskId(DEFAULT_DISPLAY, topTransparentTask.taskId)
 
         assertThat(controller.isDesktopModeShowing(displayId = DEFAULT_DISPLAY)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun isDesktopModeShowing_minimizedPipTask_wallpaperVisible_returnsTrue() {
+        val pipTask = setUpPipTask(autoEnterEnabled = true)
+        whenever(desktopWallpaperActivityTokenProvider.isWallpaperActivityVisible())
+            .thenReturn(true)
+
+        taskRepository.setTaskInPip(DEFAULT_DISPLAY, pipTask.taskId, enterPip = true)
+
+        assertThat(controller.isDesktopModeShowing(displayId = DEFAULT_DISPLAY)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun isDesktopModeShowing_minimizedPipTask_wallpaperNotVisible_returnsFalse() {
+        val pipTask = setUpPipTask(autoEnterEnabled = true)
+        whenever(desktopWallpaperActivityTokenProvider.isWallpaperActivityVisible())
+            .thenReturn(false)
+
+        taskRepository.setTaskInPip(DEFAULT_DISPLAY, pipTask.taskId, enterPip = true)
+
+        assertThat(controller.isDesktopModeShowing(displayId = DEFAULT_DISPLAY)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun isDesktopModeShowing_pipTaskNotMinimizedNorVisible_returnsFalse() {
+        setUpPipTask(autoEnterEnabled = true)
+
+        assertThat(controller.isDesktopModeShowing(displayId = DEFAULT_DISPLAY)).isFalse()
     }
 
     @Test
@@ -2039,6 +2072,41 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun onDesktopWindowClose_minimizedPipPresent_doesNotExitDesktop() {
+        val freeformTask = setUpFreeformTask().apply { isFocused = true }
+        val pipTask = setUpPipTask(autoEnterEnabled = true)
+
+        taskRepository.setTaskInPip(DEFAULT_DISPLAY, pipTask.taskId, enterPip = true)
+        val wct = WindowContainerTransaction()
+        controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, freeformTask)
+
+        verifyExitDesktopWCTNotExecuted()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun onDesktopWindowClose_minimizedPipNotPresent_exitDesktop() {
+        val freeformTask = setUpFreeformTask()
+        val pipTask = setUpPipTask(autoEnterEnabled = true)
+        val handler = mock(TransitionHandler::class.java)
+        whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
+            .thenReturn(android.util.Pair(handler, WindowContainerTransaction()))
+
+        controller.minimizeTask(pipTask)
+        verifyExitDesktopWCTNotExecuted()
+
+        taskRepository.setTaskInPip(DEFAULT_DISPLAY, pipTask.taskId, enterPip = false)
+        val wct = WindowContainerTransaction()
+        controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, freeformTask)
+
+        // Remove wallpaper operation
+        wct.hierarchyOps.any { hop ->
+            hop.type == HIERARCHY_OP_TYPE_REMOVE_TASK && hop.container == wallpaperToken.asBinder()
+        }
+    }
+
+    @Test
     fun onDesktopWindowMinimize_noActiveTask_doesntRemoveWallpaper() {
         val task = setUpFreeformTask(active = false)
         val transition = Binder()
@@ -2055,10 +2123,9 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun onDesktopWindowMinimize_pipTask_autoEnterEnabled_startPipTransition() {
+    fun onPipTaskMinimize_autoEnterEnabled_startPipTransition() {
         val task = setUpPipTask(autoEnterEnabled = true)
         val handler = mock(TransitionHandler::class.java)
-        whenever(freeformTaskTransitionStarter.startPipTransition(any())).thenReturn(Binder())
         whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
             .thenReturn(android.util.Pair(handler, WindowContainerTransaction()))
 
@@ -2069,7 +2136,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun onDesktopWindowMinimize_pipTask_autoEnterDisabled_startMinimizeTransition() {
+    fun onPipTaskMinimize_autoEnterDisabled_startMinimizeTransition() {
         val task = setUpPipTask(autoEnterEnabled = false)
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(Binder())
@@ -2078,6 +2145,22 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
         verify(freeformTaskTransitionStarter).startMinimizedModeTransition(any())
         verify(freeformTaskTransitionStarter, never()).startPipTransition(any())
+    }
+
+    @Test
+    fun onPipTaskMinimize_doesntRemoveWallpaper() {
+        val task = setUpPipTask(autoEnterEnabled = true)
+        val handler = mock(TransitionHandler::class.java)
+        whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
+            .thenReturn(android.util.Pair(handler, WindowContainerTransaction()))
+
+        controller.minimizeTask(task)
+
+        val captor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
+        verify(freeformTaskTransitionStarter).startPipTransition(captor.capture())
+        captor.value.hierarchyOps.none { hop ->
+            hop.type == HIERARCHY_OP_TYPE_REMOVE_TASK && hop.container == wallpaperToken.asBinder()
+        }
     }
 
     @Test
@@ -3122,6 +3205,31 @@ class DesktopTasksControllerTest : ShellTestCase() {
             .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
         // Does not remove wallpaper activity, as desktop still has visible desktop tasks
         assertThat(wct.hierarchyOps).isEmpty()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun moveFocusedTaskToFullscreen_minimizedPipPresent_removeWallpaperActivity() {
+        val freeformTask = setUpFreeformTask()
+        val pipTask = setUpPipTask(autoEnterEnabled = true)
+        val handler = mock(TransitionHandler::class.java)
+        whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
+            .thenReturn(android.util.Pair(handler, WindowContainerTransaction()))
+
+        controller.minimizeTask(pipTask)
+        verifyExitDesktopWCTNotExecuted()
+
+        freeformTask.isFocused = true
+        controller.enterFullscreen(DEFAULT_DISPLAY, transitionSource = UNKNOWN)
+
+        val wct = getLatestExitDesktopWct()
+        val taskChange = assertNotNull(wct.changes[freeformTask.token.asBinder()])
+        assertThat(taskChange.windowingMode)
+            .isEqualTo(WINDOWING_MODE_UNDEFINED) // inherited FULLSCREEN
+        // Remove wallpaper operation
+        wct.hierarchyOps.any { hop ->
+            hop.type == HIERARCHY_OP_TYPE_REMOVE_TASK && hop.container == wallpaperToken.asBinder()
+        }
     }
 
     @Test
@@ -4851,7 +4959,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     private fun setUpPipTask(autoEnterEnabled: Boolean): RunningTaskInfo {
-        return setUpFreeformTask().apply {
+        // active = false marks the task as non-visible; PiP window doesn't count as visible tasks
+        return setUpFreeformTask(active = false).apply {
             pictureInPictureParams =
                 PictureInPictureParams.Builder().setAutoEnterEnabled(autoEnterEnabled).build()
         }

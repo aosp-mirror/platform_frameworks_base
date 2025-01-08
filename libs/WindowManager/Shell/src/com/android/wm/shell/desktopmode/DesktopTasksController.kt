@@ -225,7 +225,6 @@ class DesktopTasksController(
     // Launch cookie used to identify a drag and drop transition to fullscreen after it has begun.
     // Used to prevent handleRequest from moving the new fullscreen task to freeform.
     private var dragAndDropFullscreenCookie: Binder? = null
-    private var pendingPipTransitionAndTask: Pair<IBinder, Int>? = null
 
     init {
         desktopMode = DesktopModeImpl()
@@ -321,18 +320,29 @@ class DesktopTasksController(
     fun visibleTaskCount(displayId: Int): Int = taskRepository.getVisibleTaskCount(displayId)
 
     /**
-     * Returns true if any freeform tasks are visible or if a transparent fullscreen task exists on
-     * top in Desktop Mode.
+     * Returns true if any of the following is true:
+     * - Any freeform tasks are visible
+     * - A transparent fullscreen task exists on top in Desktop Mode
+     * - PiP on Desktop Windowing is enabled, there is an active PiP window and the desktop
+     *   wallpaper is visible.
      */
     fun isDesktopModeShowing(displayId: Int): Boolean {
+        val hasVisibleTasks = visibleTaskCount(displayId) > 0
+        val hasTopTransparentFullscreenTask =
+            taskRepository.getTopTransparentFullscreenTaskId(displayId) != null
+        val hasMinimizedPip =
+            Flags.enableDesktopWindowingPip() &&
+                taskRepository.isMinimizedPipPresentInDisplay(displayId) &&
+                desktopWallpaperActivityTokenProvider.isWallpaperActivityVisible(displayId)
         if (
             DesktopModeFlags.INCLUDE_TOP_TRANSPARENT_FULLSCREEN_TASK_IN_DESKTOP_HEURISTIC
                 .isTrue() && DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
         ) {
-            return visibleTaskCount(displayId) > 0 ||
-                taskRepository.getTopTransparentFullscreenTaskId(displayId) != null
+            return hasVisibleTasks || hasTopTransparentFullscreenTask || hasMinimizedPip
+        } else if (Flags.enableDesktopWindowingPip()) {
+            return hasVisibleTasks || hasMinimizedPip
         }
-        return visibleTaskCount(displayId) > 0
+        return hasVisibleTasks
     }
 
     /** Moves focused task to desktop mode for given [displayId]. */
@@ -592,7 +602,7 @@ class DesktopTasksController(
     ): ((IBinder) -> Unit)? {
         val taskId = taskInfo.taskId
         desktopTilingDecorViewModel.removeTaskIfTiled(displayId, taskId)
-        performDesktopExitCleanupIfNeeded(taskId, displayId, wct)
+        performDesktopExitCleanupIfNeeded(taskId, displayId, wct, forceToFullscreen = false)
         taskRepository.addClosingTask(displayId, taskId)
         taskbarDesktopTaskListener?.onTaskbarCornerRoundingUpdate(
             doesAnyTaskRequireTaskbarRounding(displayId, taskId)
@@ -624,8 +634,12 @@ class DesktopTasksController(
                 )
             val requestRes = transitions.dispatchRequest(Binder(), requestInfo, /* skip= */ null)
             wct.merge(requestRes.second, true)
-            pendingPipTransitionAndTask =
-                freeformTaskTransitionStarter.startPipTransition(wct) to taskInfo.taskId
+            freeformTaskTransitionStarter.startPipTransition(wct)
+            taskRepository.setTaskInPip(taskInfo.displayId, taskInfo.taskId, enterPip = true)
+            taskRepository.setOnPipAbortedCallback { displayId, taskId ->
+                minimizeTaskInner(shellTaskOrganizer.getRunningTaskInfo(taskId)!!)
+                taskRepository.setTaskInPip(displayId, taskId, enterPip = false)
+            }
             return
         }
 
@@ -636,7 +650,7 @@ class DesktopTasksController(
         val taskId = taskInfo.taskId
         val displayId = taskInfo.displayId
         val wct = WindowContainerTransaction()
-        performDesktopExitCleanupIfNeeded(taskId, displayId, wct)
+        performDesktopExitCleanupIfNeeded(taskId, displayId, wct, forceToFullscreen = false)
         // Notify immersive handler as it might need to exit immersive state.
         val exitResult =
             desktopImmersiveController.exitImmersiveIfApplicable(
@@ -898,7 +912,12 @@ class DesktopTasksController(
         }
 
         if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
-            performDesktopExitCleanupIfNeeded(task.taskId, task.displayId, wct)
+            performDesktopExitCleanupIfNeeded(
+                task.taskId,
+                task.displayId,
+                wct,
+                forceToFullscreen = false,
+            )
         }
 
         transitions.startTransition(TRANSIT_CHANGE, wct, /* handler= */ null)
@@ -1414,7 +1433,9 @@ class DesktopTasksController(
         taskId: Int,
         displayId: Int,
         wct: WindowContainerTransaction,
+        forceToFullscreen: Boolean,
     ) {
+        taskRepository.setPipShouldKeepDesktopActive(displayId, !forceToFullscreen)
         if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
             if (!taskRepository.isOnlyVisibleNonClosingTask(taskId, displayId)) {
                 return
@@ -1422,6 +1443,12 @@ class DesktopTasksController(
             if (displayId != DEFAULT_DISPLAY) {
                 return
             }
+        } else if (
+            Flags.enableDesktopWindowingPip() &&
+                taskRepository.isMinimizedPipPresentInDisplay(displayId) &&
+                !forceToFullscreen
+        ) {
+            return
         } else {
             if (!taskRepository.isOnlyVisibleNonClosingTask(taskId)) {
                 return
@@ -1460,21 +1487,6 @@ class DesktopTasksController(
     ): Boolean {
         // This handler should never be the sole handler, so should not animate anything.
         return false
-    }
-
-    override fun onTransitionConsumed(
-        transition: IBinder,
-        aborted: Boolean,
-        finishT: Transaction?,
-    ) {
-        pendingPipTransitionAndTask?.let { (pipTransition, taskId) ->
-            if (transition == pipTransition) {
-                if (aborted) {
-                    shellTaskOrganizer.getRunningTaskInfo(taskId)?.let { minimizeTaskInner(it) }
-                }
-                pendingPipTransitionAndTask = null
-            }
-        }
     }
 
     override fun handleRequest(
@@ -1926,7 +1938,12 @@ class DesktopTasksController(
         if (!isDesktopModeShowing(task.displayId)) return null
 
         val wct = WindowContainerTransaction()
-        performDesktopExitCleanupIfNeeded(task.taskId, task.displayId, wct)
+        performDesktopExitCleanupIfNeeded(
+            task.taskId,
+            task.displayId,
+            wct,
+            forceToFullscreen = false,
+        )
 
         if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) {
             taskRepository.addClosingTask(task.displayId, task.taskId)
@@ -2053,7 +2070,12 @@ class DesktopTasksController(
             wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
         }
 
-        performDesktopExitCleanupIfNeeded(taskInfo.taskId, taskInfo.displayId, wct)
+        performDesktopExitCleanupIfNeeded(
+            taskInfo.taskId,
+            taskInfo.displayId,
+            wct,
+            forceToFullscreen = true,
+        )
     }
 
     private fun cascadeWindow(bounds: Rect, displayLayout: DisplayLayout, displayId: Int) {
@@ -2087,7 +2109,12 @@ class DesktopTasksController(
         // want it overridden in multi-window.
         wct.setDensityDpi(taskInfo.token, getDefaultDensityDpi())
 
-        performDesktopExitCleanupIfNeeded(taskInfo.taskId, taskInfo.displayId, wct)
+        performDesktopExitCleanupIfNeeded(
+            taskInfo.taskId,
+            taskInfo.displayId,
+            wct,
+            forceToFullscreen = false,
+        )
     }
 
     /** Returns the ID of the Task that will be minimized, or null if no task will be minimized. */

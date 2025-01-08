@@ -91,6 +91,7 @@ import com.android.wm.shell.compatui.impl.DefaultComponentIdGenerator;
 import com.android.wm.shell.desktopmode.DesktopMode;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
+import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelper;
 import com.android.wm.shell.displayareahelper.DisplayAreaHelperController;
 import com.android.wm.shell.freeform.FreeformComponents;
@@ -1029,6 +1030,24 @@ public abstract class WMShellBaseModule {
             }
             return Optional.empty();
         });
+    }
+
+    @WMSingleton
+    @Provides
+    static DesktopWallpaperActivityTokenProvider provideDesktopWallpaperActivityTokenProvider() {
+        return new DesktopWallpaperActivityTokenProvider();
+    }
+
+    @WMSingleton
+    @Provides
+    static Optional<DesktopWallpaperActivityTokenProvider>
+            provideOptionalDesktopWallpaperActivityTokenProvider(
+            Context context,
+            DesktopWallpaperActivityTokenProvider desktopWallpaperActivityTokenProvider) {
+        if (DesktopModeStatus.canEnterDesktopMode(context)) {
+            return Optional.of(desktopWallpaperActivityTokenProvider);
+        }
+        return Optional.empty();
     }
 
     //

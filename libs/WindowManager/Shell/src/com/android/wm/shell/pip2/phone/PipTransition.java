@@ -63,7 +63,9 @@ import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
 import com.android.wm.shell.common.split.SplitScreenUtils;
+import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
+import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
 import com.android.wm.shell.pip.PipTransitionController;
 import com.android.wm.shell.pip2.animation.PipAlphaAnimator;
 import com.android.wm.shell.pip2.animation.PipEnterAnimator;
@@ -110,6 +112,8 @@ public class PipTransition extends PipTransitionController implements
     private final PipTransitionState mPipTransitionState;
     private final PipDisplayLayoutState mPipDisplayLayoutState;
     private final Optional<DesktopUserRepositories> mDesktopUserRepositoriesOptional;
+    private final Optional<DesktopWallpaperActivityTokenProvider>
+            mDesktopWallpaperActivityTokenProviderOptional;
 
     //
     // Transition caches
@@ -145,7 +149,9 @@ public class PipTransition extends PipTransitionController implements
             PipTransitionState pipTransitionState,
             PipDisplayLayoutState pipDisplayLayoutState,
             PipUiStateChangeController pipUiStateChangeController,
-            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional) {
+            Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
+            Optional<DesktopWallpaperActivityTokenProvider>
+                    desktopWallpaperActivityTokenProviderOptional) {
         super(shellInit, shellTaskOrganizer, transitions, pipBoundsState, pipMenuController,
                 pipBoundsAlgorithm);
 
@@ -157,6 +163,8 @@ public class PipTransition extends PipTransitionController implements
         mPipTransitionState.addPipTransitionStateChangedListener(this);
         mPipDisplayLayoutState = pipDisplayLayoutState;
         mDesktopUserRepositoriesOptional = desktopUserRepositoriesOptional;
+        mDesktopWallpaperActivityTokenProviderOptional =
+                desktopWallpaperActivityTokenProviderOptional;
     }
 
     @Override
@@ -826,13 +834,14 @@ public class PipTransition extends PipTransitionController implements
             return false;
         }
 
-
         // Since opening a new task while in Desktop Mode always first open in Fullscreen
         // until DesktopMode Shell code resolves it to Freeform, PipTransition will get a
         // possibility to handle it also. In this case return false to not have it enter PiP.
         final boolean isInDesktopSession = !mDesktopUserRepositoriesOptional.isEmpty()
-                && mDesktopUserRepositoriesOptional.get().getCurrent().getVisibleTaskCount(
-                pipTask.displayId) > 0;
+                && (mDesktopUserRepositoriesOptional.get().getCurrent().getVisibleTaskCount(
+                        pipTask.displayId) > 0
+                    || mDesktopUserRepositoriesOptional.get().getCurrent()
+                        .isMinimizedPipPresentInDisplay(pipTask.displayId));
         if (isInDesktopSession) {
             return false;
         }
@@ -968,6 +977,27 @@ public class PipTransition extends PipTransitionController implements
                         "Unexpected bundle for " + mPipTransitionState);
                 break;
             case PipTransitionState.EXITED_PIP:
+                final TaskInfo pipTask = mPipTransitionState.getPipTaskInfo();
+                final boolean desktopPipEnabled = Flags.enableDesktopWindowingPip()
+                        && mDesktopUserRepositoriesOptional.isPresent()
+                        && mDesktopWallpaperActivityTokenProviderOptional.isPresent();
+                if (desktopPipEnabled && pipTask != null) {
+                    final DesktopRepository desktopRepository =
+                            mDesktopUserRepositoriesOptional.get().getCurrent();
+                    final boolean wallpaperIsVisible =
+                            mDesktopWallpaperActivityTokenProviderOptional.get()
+                                    .isWallpaperActivityVisible(pipTask.displayId);
+                    if (desktopRepository.getVisibleTaskCount(pipTask.displayId) == 0
+                            && wallpaperIsVisible) {
+                        mTransitions.startTransition(
+                                TRANSIT_TO_BACK,
+                                new WindowContainerTransaction().reorder(
+                                        mDesktopWallpaperActivityTokenProviderOptional.get()
+                                                .getToken(pipTask.displayId), /* onTop= */ false),
+                                null
+                        );
+                    }
+                }
                 mPipTransitionState.setPinnedTaskLeash(null);
                 mPipTransitionState.setPipTaskInfo(null);
                 break;

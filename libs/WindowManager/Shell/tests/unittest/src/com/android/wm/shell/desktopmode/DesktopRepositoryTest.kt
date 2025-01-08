@@ -25,6 +25,7 @@ import android.view.Display.DEFAULT_DISPLAY
 import android.view.Display.INVALID_DISPLAY
 import androidx.test.filters.SmallTest
 import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE
+import com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PIP
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.ShellExecutor
@@ -1065,6 +1066,67 @@ class DesktopRepositoryTest : ShellTestCase() {
 
         assertThat(repo.getTaskInFullImmersiveState(DEFAULT_DESKTOP_ID)).isEqualTo(1)
         assertThat(repo.getTaskInFullImmersiveState(DEFAULT_DESKTOP_ID + 1)).isEqualTo(2)
+    }
+
+    @Test
+    fun setTaskInPip_savedAsMinimizedPipInDisplay() {
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isFalse()
+
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isTrue()
+    }
+
+    @Test
+    fun removeTaskInPip_removedAsMinimizedPipInDisplay() {
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isTrue()
+
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = false)
+
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isFalse()
+    }
+
+    @Test
+    fun setTaskInPip_multipleDisplays_bothAreInPip() {
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID + 1, taskId = 2, enterPip = true)
+
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID, taskId = 1)).isTrue()
+        assertThat(repo.isTaskMinimizedPipInDisplay(DEFAULT_DESKTOP_ID + 1, taskId = 2)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun setPipShouldKeepDesktopActive_shouldKeepDesktopActive() {
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isFalse()
+
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        repo.setPipShouldKeepDesktopActive(DEFAULT_DESKTOP_ID, keepActive = true)
+
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun setPipShouldNotKeepDesktopActive_shouldNotKeepDesktopActive() {
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isTrue()
+
+        repo.setPipShouldKeepDesktopActive(DEFAULT_DESKTOP_ID, keepActive = false)
+
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isFalse()
+    }
+
+    @Test
+    @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_PIP)
+    fun removeTaskInPip_shouldNotKeepDesktopActive() {
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = true)
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isTrue()
+
+        repo.setTaskInPip(DEFAULT_DESKTOP_ID, taskId = 1, enterPip = false)
+
+        assertThat(repo.shouldDesktopBeActiveForPip(DEFAULT_DESKTOP_ID)).isFalse()
     }
 
     class TestListener : DesktopRepository.ActiveTasksListener {
