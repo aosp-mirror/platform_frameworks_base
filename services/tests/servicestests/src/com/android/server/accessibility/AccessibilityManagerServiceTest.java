@@ -220,6 +220,9 @@ public class AccessibilityManagerServiceTest {
     @Mock private ProxyManager mProxyManager;
     @Mock private StatusBarManagerInternal mStatusBarManagerInternal;
     @Mock private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private HearingDevicePhoneCallNotificationController
+            mMockHearingDevicePhoneCallNotificationController;
     @Spy private IUserInitializationCompleteCallback mUserInitializationCompleteCallback;
     @Captor private ArgumentCaptor<Intent> mIntentArgumentCaptor;
     private IAccessibilityManager mA11yManagerServiceOnDevice;
@@ -289,7 +292,8 @@ public class AccessibilityManagerServiceTest {
                 mMockMagnificationController,
                 mInputFilter,
                 mProxyManager,
-                mFakePermissionEnforcer);
+                mFakePermissionEnforcer,
+                mMockHearingDevicePhoneCallNotificationController);
         mA11yms.switchUser(mTestableContext.getUserId());
         mTestableLooper.processAllMessages();
 
