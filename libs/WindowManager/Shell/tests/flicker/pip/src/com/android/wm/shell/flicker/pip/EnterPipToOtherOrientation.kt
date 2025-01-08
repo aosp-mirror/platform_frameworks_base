@@ -176,7 +176,6 @@ open class EnterPipToOtherOrientation(flicker: LegacyFlickerTest) : PipTransitio
      * transition
      */
     @Ignore("TODO(b/356277166): enable the tablet test")
-    @Postsubmit
     @Test
     open fun pipAppLayerPlusLetterboxCoversFullScreenOnStartTablet() {
         assumeTrue(tapl.isTablet)
