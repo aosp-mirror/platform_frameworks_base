@@ -41,6 +41,7 @@ import android.view.ViewGroup
 import android.view.accessibility.AccessibilityNodeInfo
 import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction
 import android.widget.Button
+import com.android.systemui.Flags
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.shared.system.ActivityManagerWrapper
@@ -52,6 +53,7 @@ import com.android.systemui.statusbar.SmartReplyController
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.headsup.HeadsUpManager
 import com.android.systemui.statusbar.notification.logging.NotificationLogger
+import com.android.systemui.statusbar.notification.row.MagicActionBackgroundDrawable
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil
 import com.android.systemui.statusbar.policy.InflatedSmartReplyState.SuppressedActions
 import com.android.systemui.statusbar.policy.SmartReplyView.SmartActions
@@ -399,6 +401,15 @@ constructor(
                 as Button)
             .apply {
                 text = action.title
+
+                if (Flags.notificationMagicActionsTreatment()) {
+                    if (
+                        smartActions.fromAssistant &&
+                            action.extras.getBoolean(Notification.Action.EXTRA_IS_MAGIC, false)
+                    ) {
+                        background = MagicActionBackgroundDrawable(parent.context)
+                    }
+                }
 
                 // We received the Icon from the application - so use the Context of the application
                 // to
