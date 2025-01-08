@@ -216,7 +216,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         final Rect activityBounds = new Rect(mFirstActivity.getBounds());
 
         // DAG is portrait (860x1200), so Task and Activity fill DAG.
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
         assertThat(taskBounds).isEqualTo(dagBounds);
@@ -241,7 +241,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
                 new Rect(mFirstActivity.getConfiguration().windowConfiguration.getBounds());
 
         // DAG is landscape (1200x860), no fixed orientation letterbox
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isTrue();
         assertThat(newDagBounds.width()).isEqualTo(dagBounds.height());
@@ -266,12 +266,12 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_NOSENSOR);
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
 
         rotateDisplay(mDisplay, ROTATION_90);
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
     }
@@ -289,7 +289,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
 
         // DAG is portrait (860x1200), and activity is letterboxed for fixed orientation
         // (860x[860x860/1200=616]). Task fills DAG.
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isTrue();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
         assertThat(taskBounds).isEqualTo(dagBounds);
@@ -307,7 +307,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_NOSENSOR);
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
     }
 
@@ -318,7 +318,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         mDisplay.onLastFocusedTaskDisplayAreaChanged(mFirstTda);
 
         prepareUnresizable(mFirstActivity, SCREEN_ORIENTATION_LOCKED);
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
     }
 
@@ -338,7 +338,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         final Rect newActivityBounds = new Rect(mFirstActivity.getBounds());
 
         // DAG is landscape (1200x860), no fixed orientation letterbox
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isTrue();
         assertThat(newDagBounds.width()).isEqualTo(dagBounds.height());
@@ -364,7 +364,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
 
         rotateDisplay(mDisplay, ROTATION_90);
 
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
     }
@@ -527,7 +527,7 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(mDisplay.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_LANDSCAPE);
         assertThat(mFirstRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
         assertThat(mFirstActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
 
@@ -540,14 +540,14 @@ public class DualDisplayAreaGroupPolicyTest extends WindowTestsBase {
         assertThat(mDisplay.getLastOrientation()).isEqualTo(SCREEN_ORIENTATION_PORTRAIT);
         assertThat(mSecondRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
         assertThat(mSecondActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
-        assertThat(mSecondActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mSecondActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isFalse();
         assertThat(mSecondActivity.inSizeCompatMode()).isFalse();
 
         // First activity is letterboxed in portrait as requested.
         assertThat(mFirstRoot.getConfiguration().orientation).isEqualTo(ORIENTATION_LANDSCAPE);
         assertThat(mFirstActivity.getConfiguration().orientation).isEqualTo(ORIENTATION_PORTRAIT);
-        assertThat(mFirstActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+        assertThat(mFirstActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio()).isTrue();
         assertThat(mFirstActivity.inSizeCompatMode()).isFalse();
 

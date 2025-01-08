@@ -8436,7 +8436,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             newParentConfiguration = mTmpConfig;
         }
 
-        mAppCompatController.getAppCompatAspectRatioPolicy().reset();
+        mAppCompatController.getAspectRatioPolicy().reset();
         mIsEligibleForFixedOrientationLetterbox = false;
         mResolveConfigHint.resolveTmpOverrides(mDisplayContent, newParentConfiguration,
                 isFixedRotationTransforming());
@@ -8467,7 +8467,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
         // are already calculated in resolveFixedOrientationConfiguration.
         // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
-        if (!mAppCompatController.getAppCompatAspectRatioPolicy()
+        if (!mAppCompatController.getAspectRatioPolicy()
                     .isLetterboxedForFixedOrientationAndAspectRatio()
                 && !mAppCompatController.getAppCompatAspectRatioOverrides()
                     .hasFullscreenOverride()) {
@@ -8504,7 +8504,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                 // Fixed orientation letterboxing is possible on both large screen devices
                 // with ignoreOrientationRequest enabled and on phones in split screen even with
                 // ignoreOrientationRequest disabled.
-                && (mAppCompatController.getAppCompatAspectRatioPolicy()
+                && (mAppCompatController.getAspectRatioPolicy()
                     .isLetterboxedForFixedOrientationAndAspectRatio()
                         // Limiting check for aspect ratio letterboxing to devices with enabled
                         // ignoreOrientationRequest. This avoids affecting phones where apps may
@@ -8513,7 +8513,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                         // accurate on phones shouldn't make the big difference and is expected
                         // to be already well-tested by apps.
                         || (isIgnoreOrientationRequest
-                && mAppCompatController.getAppCompatAspectRatioPolicy().isAspectRatioApplied()))) {
+                && mAppCompatController.getAspectRatioPolicy().isAspectRatioApplied()))) {
             // TODO(b/264034555): Use mDisplayContent to calculate smallestScreenWidthDp from all
             // rotations and only re-calculate if parent bounds have non-orientation size change.
             resolvedConfig.smallestScreenWidthDp =
@@ -8633,13 +8633,13 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // letterboxed for fixed orientation. Aspect ratio restrictions are also applied if
         // present. But this doesn't return true when the activity is letterboxed only because
         // of aspect ratio restrictions.
-        if (mAppCompatController.getAppCompatAspectRatioPolicy()
-                .isLetterboxedForFixedOrientationAndAspectRatio()) {
+        final AppCompatAspectRatioPolicy aspectRatioPolicy =
+                mAppCompatController.getAspectRatioPolicy();
+        if (aspectRatioPolicy.isLetterboxedForFixedOrientationAndAspectRatio()) {
             return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_FIXED_ORIENTATION;
         }
         // Letterbox for limited aspect ratio.
-        if (mAppCompatController.getAppCompatAspectRatioPolicy()
-                .isLetterboxedForAspectRatioOnly()) {
+        if (aspectRatioPolicy.isLetterboxedForAspectRatioOnly()) {
             return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_ASPECT_RATIO;
         }
 
@@ -8966,8 +8966,10 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Rect prevResolvedBounds = new Rect(resolvedBounds);
         resolvedBounds.set(containingBounds);
 
-        mAppCompatController.getAppCompatAspectRatioPolicy()
-                .applyDesiredAspectRatio(newParentConfig, parentBounds, resolvedBounds,
+        final AppCompatAspectRatioPolicy aspectRatioPolicy = mAppCompatController
+                .getAspectRatioPolicy();
+
+        aspectRatioPolicy.applyDesiredAspectRatio(newParentConfig, parentBounds, resolvedBounds,
                         containingBoundsWithInsets, containingBounds);
 
         if (appCompatDisplayInsets != null) {
@@ -8996,8 +8998,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // for comparison with size compat app bounds in {@link resolveSizeCompatModeConfiguration}.
         mResolveConfigHint.mTmpCompatInsets = appCompatDisplayInsets;
         computeConfigByResolveHint(getResolvedOverrideConfiguration(), newParentConfig);
-        mAppCompatController.getAppCompatAspectRatioPolicy()
-                .setLetterboxBoundsForFixedOrientationAndAspectRatio(new Rect(resolvedBounds));
+        aspectRatioPolicy.setLetterboxBoundsForFixedOrientationAndAspectRatio(
+                new Rect(resolvedBounds));
     }
 
     /**
@@ -9014,8 +9016,9 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Use tmp bounds to calculate aspect ratio so we can know whether the activity should use
         // restricted size (resolved bounds may be the requested override bounds).
         mTmpBounds.setEmpty();
-        mAppCompatController.getAppCompatAspectRatioPolicy()
-                .applyAspectRatioForLetterbox(mTmpBounds, parentAppBounds, parentBounds);
+        final AppCompatAspectRatioPolicy aspectRatioPolicy = mAppCompatController
+                .getAspectRatioPolicy();
+        aspectRatioPolicy.applyAspectRatioForLetterbox(mTmpBounds, parentAppBounds, parentBounds);
         // If the out bounds is not empty, it means the activity cannot fill parent's app bounds,
         // then they should be aligned later in #updateResolvedBoundsPosition()
         if (!mTmpBounds.isEmpty()) {
@@ -9026,8 +9029,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             // restrict, the bounds should be the requested override bounds.
             mResolveConfigHint.mTmpOverrideDisplayInfo = getFixedRotationTransformDisplayInfo();
             computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
-            mAppCompatController.getAppCompatAspectRatioPolicy()
-                    .setLetterboxBoundsForAspectRatio(new Rect(resolvedBounds));
+            aspectRatioPolicy.setLetterboxBoundsForAspectRatio(new Rect(resolvedBounds));
         }
     }
 
@@ -9277,11 +9279,11 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      * Returns the min aspect ratio of this activity.
      */
     float getMinAspectRatio() {
-        return mAppCompatController.getAppCompatAspectRatioPolicy().getMinAspectRatio();
+        return mAppCompatController.getAspectRatioPolicy().getMinAspectRatio();
     }
 
     float getMaxAspectRatio() {
-        return mAppCompatController.getAppCompatAspectRatioPolicy().getMaxAspectRatio();
+        return mAppCompatController.getAspectRatioPolicy().getMaxAspectRatio();
     }
 
     /**

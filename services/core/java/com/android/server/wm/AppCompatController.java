@@ -31,7 +31,7 @@ class AppCompatController {
     @NonNull
     private final AppCompatOrientationPolicy mOrientationPolicy;
     @NonNull
-    private final AppCompatAspectRatioPolicy mAppCompatAspectRatioPolicy;
+    private final AppCompatAspectRatioPolicy mAspectRatioPolicy;
     @NonNull
     private final AppCompatReachabilityPolicy mReachabilityPolicy;
     @NonNull
@@ -56,7 +56,7 @@ class AppCompatController {
         mAppCompatOverrides = new AppCompatOverrides(activityRecord, packageManager,
                 wmService.mAppCompatConfiguration, optPropBuilder, mAppCompatDeviceStateQuery);
         mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord, mAppCompatOverrides);
-        mAppCompatAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
+        mAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
                 mTransparentPolicy, mAppCompatOverrides);
         mReachabilityPolicy = new AppCompatReachabilityPolicy(activityRecord,
                 wmService.mAppCompatConfiguration);
@@ -79,8 +79,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatAspectRatioPolicy getAppCompatAspectRatioPolicy() {
-        return mAppCompatAspectRatioPolicy;
+    AppCompatAspectRatioPolicy getAspectRatioPolicy() {
+        return mAspectRatioPolicy;
     }
 
     @NonNull
