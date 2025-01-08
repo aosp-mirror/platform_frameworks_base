@@ -35,6 +35,7 @@ import static org.mockito.Mockito.when;
 import android.app.Dialog;
 import android.media.projection.StopReason;
 import android.os.Handler;
+import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.FlagsParameterization;
 import android.service.quicksettings.Tile;
 import android.testing.TestableLooper;
@@ -52,6 +53,7 @@ import com.android.systemui.plugins.qs.QSTile;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
+import com.android.systemui.qs.flags.QsDetailedView;
 import com.android.systemui.qs.flags.QsInCompose;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
@@ -63,6 +65,7 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 
 import org.junit.After;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -70,10 +73,10 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.List;
-
 import platform.test.runner.parameterized.ParameterizedAndroidJunit4;
 import platform.test.runner.parameterized.Parameters;
+
+import java.util.List;
 
 @RunWith(ParameterizedAndroidJunit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -82,7 +85,8 @@ public class ScreenRecordTileTest extends SysuiTestCase {
 
     @Parameters(name = "{0}")
     public static List<FlagsParameterization> getParams() {
-        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX);
+        return allCombinationsOf(FLAG_QS_CUSTOM_TILE_CLICK_GUARANTEED_BUG_FIX,
+                QsDetailedView.FLAG_NAME);
     }
 
     @Mock
@@ -334,6 +338,30 @@ public class ScreenRecordTileTest extends SysuiTestCase {
         verify(mPermissionDialogPrompt).show();
         verify(mMediaProjectionMetricsLogger)
                 .notifyPermissionRequestDisplayed(mContext.getUserId());
+    }
+
+    @Test
+    @EnableFlags(QsDetailedView.FLAG_NAME)
+    public void testNotStartingAndRecording_returnDetailsViewModel() {
+        when(mController.isStarting()).thenReturn(false);
+        when(mController.isRecording()).thenReturn(false);
+        mTile.getDetailsViewModel(Assert::assertNotNull);
+    }
+
+    @Test
+    @EnableFlags(QsDetailedView.FLAG_NAME)
+    public void testStarting_notReturnDetailsViewModel() {
+        when(mController.isStarting()).thenReturn(true);
+        when(mController.isRecording()).thenReturn(false);
+        mTile.getDetailsViewModel(Assert::assertNull);
+    }
+
+    @Test
+    @EnableFlags(QsDetailedView.FLAG_NAME)
+    public void testRecording_notReturnDetailsViewModel() {
+        when(mController.isStarting()).thenReturn(false);
+        when(mController.isRecording()).thenReturn(true);
+        mTile.getDetailsViewModel(Assert::assertNull);
     }
 
     private QSTile.Icon createExpectedIcon(int resId) {

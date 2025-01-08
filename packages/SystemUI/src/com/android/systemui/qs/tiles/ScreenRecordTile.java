@@ -41,18 +41,22 @@ import com.android.systemui.mediaprojection.MediaProjectionMetricsLogger;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.FalsingManager;
 import com.android.systemui.plugins.qs.QSTile;
+import com.android.systemui.plugins.qs.TileDetailsViewModel;
 import com.android.systemui.plugins.statusbar.StatusBarStateController;
 import com.android.systemui.qs.QSHost;
 import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.pipeline.domain.interactor.PanelInteractor;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
+import com.android.systemui.qs.tiles.dialog.ScreenRecordDetailsViewModel;
 import com.android.systemui.res.R;
 import com.android.systemui.screenrecord.RecordingController;
 import com.android.systemui.screenrecord.data.model.ScreenRecordModel;
 import com.android.systemui.settings.UserContextProvider;
 import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
+
+import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
@@ -122,14 +126,75 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
 
     @Override
     protected void handleClick(@Nullable Expandable expandable) {
+        handleClick(() -> showDialog(expandable));
+    }
+
+    private void showDialog(@Nullable Expandable expandable) {
+        final Dialog dialog = mController.createScreenRecordDialog(
+                this::onStartRecordingClicked);
+
+        executeWhenUnlockedKeyguard(() -> {
+            // We animate from the touched view only if we are not on the keyguard, given that if we
+            // are we will dismiss it which will also collapse the shade.
+            boolean shouldAnimateFromExpandable =
+                    expandable != null && !mKeyguardStateController.isShowing();
+
+            if (shouldAnimateFromExpandable) {
+                DialogTransitionAnimator.Controller controller =
+                        expandable.dialogTransitionController(new DialogCuj(
+                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
+                                INTERACTION_JANK_TAG));
+                if (controller != null) {
+                    mDialogTransitionAnimator.show(dialog,
+                            controller, /* animateBackgroundBoundsChange= */ true);
+                } else {
+                    dialog.show();
+                }
+            } else {
+                dialog.show();
+            }
+        });
+    }
+
+    private void onStartRecordingClicked() {
+        // We dismiss the shade. Since starting the recording will also dismiss the dialog (if
+        // there is one showing), we disable the exit animation which looks weird when it happens
+        // at the same time as the shade collapsing.
+        mDialogTransitionAnimator.disableAllCurrentDialogsExitAnimations();
+        mPanelInteractor.collapsePanels();
+    }
+
+    private void executeWhenUnlockedKeyguard(Runnable dismissActionCallback) {
+        ActivityStarter.OnDismissAction dismissAction = () -> {
+            dismissActionCallback.run();
+
+            int uid = mUserContextProvider.getUserContext().getUserId();
+            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(uid);
+
+            return false;
+        };
+
+        mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false /* requiresShadeOpen */,
+                true /* afterKeyguardDone */);
+    }
+
+    private void handleClick(Runnable showPromptCallback) {
         if (mController.isStarting()) {
             cancelCountdown();
         } else if (mController.isRecording()) {
             stopRecording();
         } else {
-            mUiHandler.post(() -> showPrompt(expandable));
+            mUiHandler.post(showPromptCallback);
         }
         refreshState();
+    }
+
+    @Override
+    public boolean getDetailsViewModel(Consumer<TileDetailsViewModel> callback) {
+        handleClick(() ->
+                callback.accept(new ScreenRecordDetailsViewModel())
+        );
+        return true;
     }
 
     @Override
@@ -176,49 +241,6 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
     @Override
     public CharSequence getTileLabel() {
         return mContext.getString(R.string.quick_settings_screen_record_label);
-    }
-
-    private void showPrompt(@Nullable Expandable expandable) {
-        // We animate from the touched view only if we are not on the keyguard, given that if we
-        // are we will dismiss it which will also collapse the shade.
-        boolean shouldAnimateFromExpandable =
-                expandable != null && !mKeyguardStateController.isShowing();
-
-        // Create the recording dialog that will collapse the shade only if we start the recording.
-        Runnable onStartRecordingClicked = () -> {
-            // We dismiss the shade. Since starting the recording will also dismiss the dialog, we
-            // disable the exit animation which looks weird when it happens at the same time as the
-            // shade collapsing.
-            mDialogTransitionAnimator.disableAllCurrentDialogsExitAnimations();
-            mPanelInteractor.collapsePanels();
-        };
-
-        final Dialog dialog = mController.createScreenRecordDialog(onStartRecordingClicked);
-
-        ActivityStarter.OnDismissAction dismissAction = () -> {
-            if (shouldAnimateFromExpandable) {
-                DialogTransitionAnimator.Controller controller =
-                        expandable.dialogTransitionController(new DialogCuj(
-                                InteractionJankMonitor.CUJ_SHADE_DIALOG_OPEN,
-                                INTERACTION_JANK_TAG));
-                if (controller != null) {
-                    mDialogTransitionAnimator.show(dialog,
-                            controller, /* animateBackgroundBoundsChange= */ true);
-                } else {
-                    dialog.show();
-                }
-            } else {
-                dialog.show();
-            }
-
-            int uid = mUserContextProvider.getUserContext().getUserId();
-            mMediaProjectionMetricsLogger.notifyPermissionRequestDisplayed(uid);
-
-            return false;
-        };
-
-        mKeyguardDismissUtil.executeWhenUnlocked(dismissAction, false /* requiresShadeOpen */,
-                true /* afterKeyguardDone */);
     }
 
     private void cancelCountdown() {
