@@ -16,6 +16,8 @@
 
 package android.app;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
@@ -25,8 +27,12 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.pm.ParceledListSlice;
+import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
@@ -35,6 +41,7 @@ import androidx.test.core.app.ApplicationProvider;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -42,6 +49,7 @@ import org.junit.runner.RunWith;
 
 import java.time.Instant;
 import java.time.InstantSource;
+import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
 @SmallTest
@@ -50,14 +58,24 @@ public class NotificationManagerTest {
     @Rule
     public final SetFlagsRule mSetFlagsRule = new SetFlagsRule();
 
-    private Context mContext;
     private NotificationManagerWithMockService mNotificationManager;
     private final FakeClock mClock = new FakeClock();
 
+    private PackageTestableContext mContext;
+
     @Before
     public void setUp() {
-        mContext = ApplicationProvider.getApplicationContext();
+        mContext = new PackageTestableContext(ApplicationProvider.getApplicationContext());
         mNotificationManager = new NotificationManagerWithMockService(mContext, mClock);
+
+        // Caches must be in test mode in order to be used in tests.
+        PropertyInvalidatedCache.setTestMode(true);
+        mNotificationManager.setChannelCacheToTestMode();
+    }
+
+    @After
+    public void tearDown() {
+        PropertyInvalidatedCache.setTestMode(false);
     }
 
     @Test
@@ -243,10 +261,159 @@ public class NotificationManagerTest {
                 anyInt(), any(), anyInt());
     }
 
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void getNotificationChannel_cachedUntilInvalidated() throws Exception {
+        // Invalidate the cache first because the cache won't do anything until then
+        NotificationManager.invalidateNotificationChannelCache();
+
+        // It doesn't matter what the returned contents are, as long as we return a channel.
+        // This setup must set up getNotificationChannels(), as that's the method called.
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(),
+                anyInt())).thenReturn(new ParceledListSlice<>(List.of(exampleChannel())));
+
+        // ask for the same channel 100 times without invalidating the cache
+        for (int i = 0; i < 100; i++) {
+            NotificationChannel unused = mNotificationManager.getNotificationChannel("id");
+        }
+
+        // invalidate the cache; then ask again
+        NotificationManager.invalidateNotificationChannelCache();
+        NotificationChannel unused = mNotificationManager.getNotificationChannel("id");
+
+        verify(mNotificationManager.mBackendService, times(2))
+                .getNotificationChannels(any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void getNotificationChannel_sameApp_oneCall() throws Exception {
+        NotificationManager.invalidateNotificationChannelCache();
+
+        NotificationChannel c1 = new NotificationChannel("id1", "name1",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel c2 = new NotificationChannel("id2", "name2",
+                NotificationManager.IMPORTANCE_NONE);
+
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(),
+                anyInt())).thenReturn(new ParceledListSlice<>(List.of(c1, c2)));
+
+        assertThat(mNotificationManager.getNotificationChannel("id1")).isEqualTo(c1);
+        assertThat(mNotificationManager.getNotificationChannel("id2")).isEqualTo(c2);
+        assertThat(mNotificationManager.getNotificationChannel("id3")).isNull();
+
+        verify(mNotificationManager.mBackendService, times(1))
+                .getNotificationChannels(any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void getNotificationChannels_cachedUntilInvalidated() throws Exception {
+        NotificationManager.invalidateNotificationChannelCache();
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(),
+                anyInt())).thenReturn(new ParceledListSlice<>(List.of(exampleChannel())));
+
+        // ask for channels 100 times without invalidating the cache
+        for (int i = 0; i < 100; i++) {
+            List<NotificationChannel> unused = mNotificationManager.getNotificationChannels();
+        }
+
+        // invalidate the cache; then ask again
+        NotificationManager.invalidateNotificationChannelCache();
+        List<NotificationChannel> res = mNotificationManager.getNotificationChannels();
+
+        verify(mNotificationManager.mBackendService, times(2))
+                .getNotificationChannels(any(), any(), anyInt());
+        assertThat(res).containsExactlyElementsIn(List.of(exampleChannel()));
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void getNotificationChannel_channelAndConversationLookup() throws Exception {
+        NotificationManager.invalidateNotificationChannelCache();
+
+        // Full list of channels: c1; conv1 = child of c1; c2 is unrelated
+        NotificationChannel c1 = new NotificationChannel("id", "name",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel conv1 = new NotificationChannel("", "name_conversation",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        conv1.setConversationId("id", "id_conversation");
+        NotificationChannel c2 = new NotificationChannel("other", "name2",
+                NotificationManager.IMPORTANCE_DEFAULT);
+
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(), anyInt()))
+                .thenReturn(new ParceledListSlice<>(List.of(c1, conv1, c2)));
+
+        // Lookup for channel c1 and c2: returned as expected
+        assertThat(mNotificationManager.getNotificationChannel("id")).isEqualTo(c1);
+        assertThat(mNotificationManager.getNotificationChannel("other")).isEqualTo(c2);
+
+        // Lookup for conv1 should return conv1
+        assertThat(mNotificationManager.getNotificationChannel("id", "id_conversation")).isEqualTo(
+                conv1);
+
+        // Lookup for a different conversation channel that doesn't exist, whose parent channel id
+        // is "id", should return c1
+        assertThat(mNotificationManager.getNotificationChannel("id", "nonexistent")).isEqualTo(c1);
+
+        // Lookup of a nonexistent channel is null
+        assertThat(mNotificationManager.getNotificationChannel("id3")).isNull();
+
+        // All of that should have been one call to getNotificationChannels()
+        verify(mNotificationManager.mBackendService, times(1))
+                .getNotificationChannels(any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void getNotificationChannel_differentPackages() throws Exception {
+        NotificationManager.invalidateNotificationChannelCache();
+        final String pkg1 = "one";
+        final String pkg2 = "two";
+        final int userId = 0;
+        final int userId1 = 1;
+
+        // multiple channels with the same ID, but belonging to different packages/users
+        NotificationChannel channel1 = new NotificationChannel("id", "name1",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        NotificationChannel channel2 = channel1.copy();
+        channel2.setName("name2");
+        NotificationChannel channel3 = channel1.copy();
+        channel3.setName("name3");
+
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), eq(pkg1),
+                eq(userId))).thenReturn(new ParceledListSlice<>(List.of(channel1)));
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), eq(pkg2),
+                eq(userId))).thenReturn(new ParceledListSlice<>(List.of(channel2)));
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), eq(pkg1),
+                eq(userId1))).thenReturn(new ParceledListSlice<>(List.of(channel3)));
+
+        // set our context to pretend to be from package 1 and userId 0
+        mContext.setParameters(pkg1, pkg1, userId);
+        assertThat(mNotificationManager.getNotificationChannel("id")).isEqualTo(channel1);
+
+        // now package 2
+        mContext.setParameters(pkg2, pkg2, userId);
+        assertThat(mNotificationManager.getNotificationChannel("id")).isEqualTo(channel2);
+
+        // now pkg1 for a different user
+        mContext.setParameters(pkg1, pkg1, userId1);
+        assertThat(mNotificationManager.getNotificationChannel("id")).isEqualTo(channel3);
+
+        // Those should have been three different calls
+        verify(mNotificationManager.mBackendService, times(3))
+                .getNotificationChannels(any(), any(), anyInt());
+    }
+
     private Notification exampleNotification() {
         return new Notification.Builder(mContext, "channel")
                 .setSmallIcon(android.R.drawable.star_big_on)
                 .build();
+    }
+
+    private NotificationChannel exampleChannel() {
+        return new NotificationChannel("id", "channel_name",
+                NotificationManager.IMPORTANCE_DEFAULT);
     }
 
     private static class NotificationManagerWithMockService extends NotificationManager {
@@ -261,6 +428,48 @@ public class NotificationManagerTest {
         @Override
         public INotificationManager service() {
             return mBackendService;
+        }
+    }
+
+    // Helper context wrapper class where we can control just the return values of getPackageName,
+    // getOpPackageName, and getUserId (used in getNotificationChannels).
+    private static class PackageTestableContext extends ContextWrapper {
+        private String mPackage;
+        private String mOpPackage;
+        private Integer mUserId;
+
+        PackageTestableContext(Context base) {
+            super(base);
+        }
+
+        void setParameters(String packageName, String opPackageName, int userId) {
+            mPackage = packageName;
+            mOpPackage = opPackageName;
+            mUserId = userId;
+        }
+
+        @Override
+        public String getPackageName() {
+            if (mPackage != null) return mPackage;
+            return super.getPackageName();
+        }
+
+        @Override
+        public String getOpPackageName() {
+            if (mOpPackage != null) return mOpPackage;
+            return super.getOpPackageName();
+        }
+
+        @Override
+        public int getUserId() {
+            if (mUserId != null) return mUserId;
+            return super.getUserId();
+        }
+
+        @Override
+        public UserHandle getUser() {
+            if (mUserId != null) return UserHandle.of(mUserId);
+            return super.getUser();
         }
     }
 
