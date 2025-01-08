@@ -83,7 +83,6 @@ import java.util.function.IntConsumer;
 public class VirtualDeviceInternal {
 
     private final Context mContext;
-    private final IVirtualDeviceManager mService;
     private final IVirtualDevice mVirtualDevice;
     private final Object mActivityListenersLock = new Object();
     @GuardedBy("mActivityListenersLock")
@@ -206,7 +205,6 @@ public class VirtualDeviceInternal {
             Context context,
             int associationId,
             VirtualDeviceParams params) throws RemoteException {
-        mService = service;
         mContext = context.getApplicationContext();
         mVirtualDevice = service.createVirtualDevice(
                 new Binder(),
@@ -217,11 +215,7 @@ public class VirtualDeviceInternal {
                 mSoundEffectListener);
     }
 
-    VirtualDeviceInternal(
-            IVirtualDeviceManager service,
-            Context context,
-            IVirtualDevice virtualDevice) {
-        mService = service;
+    VirtualDeviceInternal(Context context, IVirtualDevice virtualDevice) {
         mContext = context.getApplicationContext();
         mVirtualDevice = virtualDevice;
         try {
