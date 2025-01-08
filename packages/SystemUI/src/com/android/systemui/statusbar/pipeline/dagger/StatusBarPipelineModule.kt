@@ -56,8 +56,8 @@ import com.android.systemui.statusbar.pipeline.shared.data.repository.Connectivi
 import com.android.systemui.statusbar.pipeline.shared.data.repository.ConnectivityRepositoryImpl
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinderImpl
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModelImpl
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.HomeStatusBarViewModelFactory
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModelImpl.HomeStatusBarViewModelFactoryImpl
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.RealWifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepository
 import com.android.systemui.statusbar.pipeline.wifi.data.repository.WifiRepositorySwitcher
@@ -148,7 +148,9 @@ abstract class StatusBarPipelineModule {
     abstract fun bindCarrierConfigStartable(impl: CarrierConfigCoreStartable): CoreStartable
 
     @Binds
-    abstract fun homeStatusBarViewModel(impl: HomeStatusBarViewModelImpl): HomeStatusBarViewModel
+    abstract fun homeStatusBarViewModelFactory(
+        impl: HomeStatusBarViewModelFactoryImpl
+    ): HomeStatusBarViewModelFactory
 
     @Binds
     abstract fun homeStatusBarViewBinder(impl: HomeStatusBarViewBinderImpl): HomeStatusBarViewBinder

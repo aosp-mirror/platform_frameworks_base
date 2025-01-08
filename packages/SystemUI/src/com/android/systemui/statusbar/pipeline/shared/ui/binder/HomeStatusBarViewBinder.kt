@@ -107,10 +107,9 @@ constructor(
                 }
 
                 if (NotificationsLiveDataStoreRefactor.isEnabled) {
-                    val displayId = view.display.displayId
                     val lightsOutView: View = view.requireViewById(R.id.notification_lights_out)
                     launch {
-                        viewModel.areNotificationsLightsOut(displayId).collect { show ->
+                        viewModel.areNotificationsLightsOut.collect { show ->
                             animateLightsOutView(lightsOutView, show)
                         }
                     }
@@ -218,7 +217,7 @@ constructor(
                     StatusBarOperatorNameViewBinder.bind(
                         operatorNameView,
                         viewModel.operatorNameViewModel,
-                        viewModel::areaTint,
+                        viewModel.areaTint,
                     )
                     launch {
                         viewModel.shouldShowOperatorNameView.collect {

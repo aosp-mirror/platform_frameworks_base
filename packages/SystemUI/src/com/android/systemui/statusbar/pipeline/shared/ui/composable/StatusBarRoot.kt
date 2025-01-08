@@ -53,13 +53,14 @@ import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarIco
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.HomeStatusBarViewModelFactory
 import javax.inject.Inject
 
 /** Factory to simplify the dependency management for [StatusBarRoot] */
 class StatusBarRootFactory
 @Inject
 constructor(
-    private val homeStatusBarViewModel: HomeStatusBarViewModel,
+    private val homeStatusBarViewModelFactory: HomeStatusBarViewModelFactory,
     private val homeStatusBarViewBinder: HomeStatusBarViewBinder,
     private val notificationIconsBinder: NotificationIconContainerStatusBarViewBinder,
     private val darkIconManagerFactory: DarkIconManager.Factory,
@@ -70,13 +71,14 @@ constructor(
 ) {
     fun create(root: ViewGroup, andThen: (ViewGroup) -> Unit): ComposeView {
         val composeView = ComposeView(root.context)
+        val displayId = root.context.displayId
         val darkIconDispatcher =
             darkIconDispatcherStore.forDisplay(root.context.displayId) ?: return composeView
         composeView.apply {
             setContent {
                 StatusBarRoot(
                     parent = root,
-                    statusBarViewModel = homeStatusBarViewModel,
+                    statusBarViewModel = homeStatusBarViewModelFactory.create(displayId),
                     statusBarViewBinder = homeStatusBarViewBinder,
                     notificationIconsBinder = notificationIconsBinder,
                     darkIconManagerFactory = darkIconManagerFactory,

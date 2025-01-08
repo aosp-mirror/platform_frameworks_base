@@ -81,6 +81,7 @@ import com.android.systemui.statusbar.phone.ui.StatusBarIconController;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder;
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener;
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel;
+import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.HomeStatusBarViewModelFactory;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.statusbar.window.StatusBarWindowController;
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore;
@@ -142,6 +143,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private StatusBarVisibilityModel mLastModifiedVisibility =
             StatusBarVisibilityModel.createDefaultModel();
     private DarkIconManager mDarkIconManager;
+    private HomeStatusBarViewModel mHomeStatusBarViewModel;
+
     private final HomeStatusBarComponent.Factory mHomeStatusBarComponentFactory;
     private final CommandQueue mCommandQueue;
     private final CollapsedStatusBarFragmentLogger mCollapsedStatusBarFragmentLogger;
@@ -151,8 +154,8 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     private final ShadeExpansionStateManager mShadeExpansionStateManager;
     private final StatusBarIconController mStatusBarIconController;
     private final CarrierConfigTracker mCarrierConfigTracker;
-    private final HomeStatusBarViewModel mHomeStatusBarViewModel;
     private final HomeStatusBarViewBinder mHomeStatusBarViewBinder;
+    private final HomeStatusBarViewModelFactory mHomeStatusBarViewModelFactory;
     private final StatusBarHideIconsForBouncerManager mStatusBarHideIconsForBouncerManager;
     private final DarkIconManager.Factory mDarkIconManagerFactory;
     private final SecureSettings mSecureSettings;
@@ -256,7 +259,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             ShadeExpansionStateManager shadeExpansionStateManager,
             StatusBarIconController statusBarIconController,
             DarkIconManager.Factory darkIconManagerFactory,
-            HomeStatusBarViewModel homeStatusBarViewModel,
+            HomeStatusBarViewModelFactory homeStatusBarViewModelFactory,
             HomeStatusBarViewBinder homeStatusBarViewBinder,
             StatusBarHideIconsForBouncerManager statusBarHideIconsForBouncerManager,
             KeyguardStateController keyguardStateController,
@@ -281,7 +284,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mAnimationScheduler = animationScheduler;
         mShadeExpansionStateManager = shadeExpansionStateManager;
         mStatusBarIconController = statusBarIconController;
-        mHomeStatusBarViewModel = homeStatusBarViewModel;
+        mHomeStatusBarViewModelFactory = homeStatusBarViewModelFactory;
         mHomeStatusBarViewBinder = homeStatusBarViewBinder;
         mStatusBarHideIconsForBouncerManager = statusBarHideIconsForBouncerManager;
         mDarkIconManagerFactory = darkIconManagerFactory;
@@ -410,6 +413,7 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
         mCarrierConfigTracker.addCallback(mCarrierConfigCallback);
         mCarrierConfigTracker.addDefaultDataSubscriptionChangedListener(mDefaultDataListener);
 
+        mHomeStatusBarViewModel = mHomeStatusBarViewModelFactory.create(displayId);
         mHomeStatusBarViewBinder.bind(
                 view.getContext().getDisplayId(),
                 mStatusBar,
