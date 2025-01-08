@@ -55,6 +55,7 @@ import static android.window.TransitionInfo.FLAG_SHOW_WALLPAPER;
 import static android.window.TransitionInfo.FLAG_STARTING_WINDOW_TRANSFER_RECIPIENT;
 import static android.window.TransitionInfo.FLAG_TRANSLUCENT;
 
+import static com.android.internal.policy.TransitionAnimation.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CHANGE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_CLOSE;
 import static com.android.internal.policy.TransitionAnimation.WALLPAPER_TRANSITION_INTRA_CLOSE;
@@ -69,6 +70,7 @@ import static com.android.wm.shell.transition.TransitionAnimationHelper.isCovere
 import static com.android.wm.shell.transition.TransitionAnimationHelper.loadAttributeAnimation;
 
 import android.animation.Animator;
+import android.animation.ValueAnimator;
 import android.annotation.ColorInt;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -104,6 +106,7 @@ import com.android.internal.policy.TransitionAnimation;
 import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
+import com.android.wm.shell.animation.SizeChangeAnimation;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayLayout;
 import com.android.wm.shell.common.ShellExecutor;
@@ -422,6 +425,14 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
                             ROTATION_ANIMATION_ROTATE, 0 /* flags */, animations, onAnimFinish);
                     continue;
                 }
+
+                if (Flags.portWindowSizeAnimation() && isTask
+                        && TransitionInfo.isIndependent(change, info)
+                        && change.getSnapshot() != null) {
+                    startBoundsChangeAnimation(startTransaction, animations, change, onAnimFinish,
+                            mMainExecutor);
+                    continue;
+                }
             }
 
             // Hide the invisible surface directly without animating it if there is a display
@@ -732,6 +743,21 @@ public class DefaultTransitionHandler implements Transitions.TransitionHandler {
             animGroupStore.add(animator);
             animations.add(animator);
         }
+    }
+
+    private void startBoundsChangeAnimation(@NonNull SurfaceControl.Transaction startT,
+            @NonNull ArrayList<Animator> animations, @NonNull TransitionInfo.Change change,
+            @NonNull Runnable finishCb, @NonNull ShellExecutor mainExecutor) {
+        final SizeChangeAnimation sca =
+                new SizeChangeAnimation(change.getStartAbsBounds(), change.getEndAbsBounds());
+        sca.initialize(change.getLeash(), change.getSnapshot(), startT);
+        final ValueAnimator va = sca.buildAnimator(change.getLeash(), change.getSnapshot(),
+                (animator) -> mainExecutor.execute(() -> {
+                    animations.remove(animator);
+                    finishCb.run();
+                }));
+        va.setDuration(DEFAULT_APP_TRANSITION_DURATION);
+        animations.add(va);
     }
 
     @Nullable
