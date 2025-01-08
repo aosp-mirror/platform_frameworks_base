@@ -881,10 +881,6 @@
     <string name="notification_channel_accessibility_magnification">Magnification</string>
 
     <!-- Text shown when viewing channel settings for notifications related to accessibility
-     hearing device. [CHAR_LIMIT=NONE]-->
-    <string name="notification_channel_accessibility_hearing_device">Hearing device</string>
-
-    <!-- Text shown when viewing channel settings for notifications related to accessibility
          security policy. [CHAR_LIMIT=NONE]-->
     <string name="notification_channel_accessibility_security_policy">Accessibility usage</string>
 
@@ -4988,19 +4984,6 @@
 
     <!-- Text used to describe system navigation features, shown within a UI allowing a user to assign system magnification features to the Accessibility button in the navigation bar. -->
     <string name="accessibility_magnification_chooser_text">Magnification</string>
-
-    <!-- Notification title for switching input to the phone's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
-    <string name="hearing_device_switch_phone_mic_notification_title">Switch to phone mic?</string>
-    <!-- Notification title for switching input to the hearing device's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
-    <string name="hearing_device_switch_hearing_mic_notification_title">Switch to hearing aid mic?</string>
-    <!-- Notification content for switching input to the phone's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
-    <string name="hearing_device_switch_phone_mic_notification_text">For better sound or if your hearing aid battery is low. This only switches your mic during the call.</string>
-    <!-- Notification content for switching input to the hearing device's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
-    <string name="hearing_device_switch_hearing_mic_notification_text">You can use your hearing aid microphone for hands-free calling. This only switches your mic during the call.</string>
-    <!-- Notification action button. Click it will switch the input between phone's microphone and hearing device's microphone. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
-    <string name="hearing_device_notification_switch_button">Switch</string>
-    <!-- Notification action button. Click it will open the bluetooth device details page for this hearing device. It will be shown when making a phone call with the hearing device. [CHAR LIMIT=none] -->
-    <string name="hearing_device_notification_settings_button">Settings</string>
 
     <!-- Text spoken when the current user is switched if accessibility is enabled. [CHAR LIMIT=none] -->
     <string name="user_switched">Current user <xliff:g id="name" example="Bob">%1$s</xliff:g>.</string>
