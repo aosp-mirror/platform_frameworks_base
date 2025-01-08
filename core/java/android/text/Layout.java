@@ -77,7 +77,7 @@ public abstract class Layout {
     private static final float HIGH_CONTRAST_TEXT_BORDER_WIDTH_FACTOR = 0f;
     private static final float HIGH_CONTRAST_TEXT_BACKGROUND_CORNER_RADIUS_DP = 5f;
     // since we're not using soft light yet, this needs to be much lower than the spec'd 0.8
-    private static final float HIGH_CONTRAST_TEXT_BACKGROUND_ALPHA_PERCENTAGE = 0.5f;
+    private static final float HIGH_CONTRAST_TEXT_BACKGROUND_ALPHA_PERCENTAGE = 0.7f;
 
     /** @hide */
     @IntDef(prefix = { "BREAK_STRATEGY_" }, value = {
