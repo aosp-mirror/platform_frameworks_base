@@ -172,16 +172,6 @@ flag {
 }
 
 flag {
-  name: "notification_verify_channel_sound_uri"
-  namespace: "systemui"
-  description: "Verify Uri permission for sound when creating a notification channel"
-  bug: "337775777"
-  metadata {
-    purpose: PURPOSE_BUGFIX
-  }
-}
-
-flag {
   name: "notification_vibration_in_sound_uri_for_channel"
   namespace: "systemui"
   description: "Enables sound uri with vibration source in notification channel"
