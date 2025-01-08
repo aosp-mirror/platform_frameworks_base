@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SysUISingleton
@@ -62,6 +63,24 @@ constructor(
 
     suspend fun setCtaDismissed(user: UserInfo = userTracker.userInfo) =
         repository.setCtaDismissed(user)
+
+    val isHubOnboardingDismissed: Flow<Boolean> =
+        userInteractor.selectedUserInfo
+            .flatMapLatest { user -> repository.isHubOnboardingDismissed(user) }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogBuffer,
+                columnPrefix = "",
+                columnName = "isHubOnboardingDismissed",
+                initialValue = false,
+            )
+            .stateIn(
+                scope = bgScope,
+                started = SharingStarted.WhileSubscribed(),
+                initialValue = false,
+            )
+
+    fun setHubOnboardingDismissed(user: UserInfo = userTracker.userInfo) =
+        bgScope.launch { repository.setHubOnboardingDismissed(user) }
 
     private companion object {
         const val TAG = "CommunalPrefsInteractor"

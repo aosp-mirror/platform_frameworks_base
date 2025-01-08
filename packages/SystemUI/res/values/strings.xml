@@ -1359,6 +1359,12 @@
     <string name="glanceable_hub_lockscreen_affordance_action_button_label">Settings</string>
     <!-- Content description for a "show screensaver" button on glanceable hub. [CHAR LIMIT=NONE] -->
     <string name="accessibility_glanceable_hub_to_dream_button">Show screensaver button</string>
+    <!-- Title shown in hub onboarding bottom sheet. [CHAR LIMIT=50] -->
+    <string name="hub_onboarding_bottom_sheet_title">Explore hub mode</string>
+    <!-- Information about communal hub shown in the onboarding bottom sheet. [CHAR LIMIT=NONE] -->
+    <string name="hub_onboarding_bottom_sheet_text">Access your favorite widgets and screen savers while charging.</string>
+    <!-- Hub onboarding bottom sheet action button title. [CHAR LIMIT=NONE] -->
+    <string name="hub_onboarding_bottom_sheet_action_button">Let\u2019s go</string>
 
     <!-- Related to user switcher --><skip/>
 
