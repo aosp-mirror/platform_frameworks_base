@@ -88,7 +88,12 @@ public class RecordingControllerTest extends SysuiTestCase {
     private ScreenRecordPermissionDialogDelegate.Factory
             mScreenRecordPermissionDialogDelegateFactory;
     @Mock
+    private ScreenRecordPermissionViewBinder.Factory
+            mScreenRecordPermissionViewBinderFactory;
+    @Mock
     private ScreenRecordPermissionDialogDelegate mScreenRecordPermissionDialogDelegate;
+    @Mock
+    private ScreenRecordPermissionViewBinder mScreenRecordPermissionViewBinder;
     @Mock
     private SystemUIDialog mScreenRecordSystemUIDialog;
 
@@ -106,6 +111,8 @@ public class RecordingControllerTest extends SysuiTestCase {
                 .thenReturn(mScreenCaptureDisabledDialog);
         when(mScreenRecordPermissionDialogDelegateFactory.create(any(), any(), anyInt(), any()))
                 .thenReturn(mScreenRecordPermissionDialogDelegate);
+        when(mScreenRecordPermissionViewBinderFactory.create(any(), anyInt(), any(), any()))
+                .thenReturn(mScreenRecordPermissionViewBinder);
         when(mScreenRecordPermissionDialogDelegate.createDialog())
                 .thenReturn(mScreenRecordSystemUIDialog);
         mController = new RecordingController(
@@ -116,7 +123,8 @@ public class RecordingControllerTest extends SysuiTestCase {
                 new RecordingControllerLogger(logcatLogBuffer("RecordingControllerTest")),
                 mMediaProjectionMetricsLogger,
                 mScreenCaptureDisabledDialogDelegate,
-                mScreenRecordPermissionDialogDelegateFactory
+                mScreenRecordPermissionDialogDelegateFactory,
+                mScreenRecordPermissionViewBinderFactory
         );
         mController.addCallback(mCallback);
     }
@@ -235,6 +243,26 @@ public class RecordingControllerTest extends SysuiTestCase {
         assertThat(dialog).isSameInstanceAs(mScreenRecordSystemUIDialog);
         assertThat(mScreenRecordPermissionDialogDelegate)
                 .isInstanceOf(ScreenRecordPermissionDialogDelegate.class);
+    }
+
+    @Test
+    public void testCreateScreenRecordPermissionViewBinder() {
+        ScreenRecordPermissionViewBinder viewBinder =
+                mController.createScreenRecordPermissionViewBinder(
+                        /* onStartRecordingClicked= */ null);
+        assertThat(viewBinder).isEqualTo(mScreenRecordPermissionViewBinder);
+    }
+
+    @Test
+    public void testScreenCapturingAllowed_returnsFalseIsScreenCaptureDisabled() {
+        when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(false);
+        assertFalse(mController.isScreenCaptureDisabled());
+    }
+
+    @Test
+    public void testScreenCapturingNotAllowed_returnsTrueIsScreenCaptureDisabled() {
+        when(mDevicePolicyResolver.isScreenCaptureCompletelyDisabled((any()))).thenReturn(true);
+        assertTrue(mController.isScreenCaptureDisabled());
     }
 
     @Test

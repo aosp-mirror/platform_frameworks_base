@@ -17,27 +17,45 @@
 package com.android.systemui.qs.tiles.dialog
 
 import android.view.LayoutInflater
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.heightIn
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.android.systemui.plugins.qs.TileDetailsViewModel
 import com.android.systemui.res.R
+import com.android.systemui.screenrecord.RecordingController
+import com.android.systemui.screenrecord.ScreenRecordPermissionViewBinder
 
 /** The view model used for the screen record details view in the Quick Settings */
-class ScreenRecordDetailsViewModel() : TileDetailsViewModel() {
+class ScreenRecordDetailsViewModel(
+    private val recordingController: RecordingController,
+    private val onStartRecordingClicked: Runnable,
+) : TileDetailsViewModel() {
+
+    private var viewBinder: ScreenRecordPermissionViewBinder =
+        recordingController.createScreenRecordPermissionViewBinder(onStartRecordingClicked)
+
     @Composable
     override fun GetContentView() {
         // TODO(b/378514312): Finish implementing this function.
+
+        if (recordingController.isScreenCaptureDisabled) {
+            // TODO(b/388345506): Show disabled page here.
+            return
+        }
+
         AndroidView(
-            modifier = Modifier.fillMaxWidth().heightIn(max = VIEW_MAX_HEIGHT),
+            modifier = Modifier.fillMaxWidth().fillMaxHeight(),
             factory = { context ->
                 // Inflate with the existing dialog xml layout
-                LayoutInflater.from(context).inflate(R.layout.screen_share_dialog, null)
+                val view = LayoutInflater.from(context).inflate(R.layout.screen_share_dialog, null)
+                viewBinder.bind(view)
+
+                view
+                // TODO(b/378514473): Revamp the details view according to the spec.
             },
+            onRelease = { viewBinder.unbind() },
         )
     }
 
@@ -53,9 +71,5 @@ class ScreenRecordDetailsViewModel() : TileDetailsViewModel() {
     override fun getSubTitle(): String {
         // No sub-title in this tile.
         return ""
-    }
-
-    companion object {
-        private val VIEW_MAX_HEIGHT: Dp = 320.dp
     }
 }
