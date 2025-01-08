@@ -1270,8 +1270,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             }
             pw.println(
                     prefix + "supportsSizeChanges=" + ActivityInfo.sizeChangesSupportModeToString(
-                            mAppCompatController.getAppCompatSizeCompatModePolicy()
-                                    .supportsSizeChanges()));
+                            mAppCompatController.getSizeCompatModePolicy().supportsSizeChanges()));
             if (info.configChanges != 0) {
                 pw.println(prefix + "configChanges=0x" + Integer.toHexString(info.configChanges));
             }
@@ -6579,7 +6578,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mTaskSupervisor.mStoppingActivities.remove(this);
         if (getDisplayArea().allResumedActivitiesComplete()) {
             // Construct the compat environment at a relatively stable state if needed.
-            mAppCompatController.getAppCompatSizeCompatModePolicy().updateAppCompatDisplayInsets();
+            mAppCompatController.getSizeCompatModePolicy().updateAppCompatDisplayInsets();
             mRootWindowContainer.executeAppTransitionForAllDisplay();
         }
 
@@ -8220,7 +8219,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     != getRequestedConfigurationOrientation(false /*forDisplay */)) {
             // Do not change the requested configuration now, because this will be done when setting
             // the orientation below with the new mAppCompatDisplayInsets
-            mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatModeAttributes();
+            mAppCompatController.getSizeCompatModePolicy().clearSizeCompatModeAttributes();
         }
         ProtoLog.v(WM_DEBUG_ORIENTATION,
                 "Setting requested orientation %s for %s",
@@ -8364,7 +8363,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
     @Nullable
     AppCompatDisplayInsets getAppCompatDisplayInsets() {
-        return mAppCompatController.getAppCompatSizeCompatModePolicy().getAppCompatDisplayInsets();
+        return mAppCompatController.getSizeCompatModePolicy().getAppCompatDisplayInsets();
     }
 
     /**
@@ -8372,7 +8371,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         density than its parent or its bounds don't fit in parent naturally.
      */
     boolean inSizeCompatMode() {
-        return mAppCompatController.getAppCompatSizeCompatModePolicy().inSizeCompatMode();
+        return mAppCompatController.getSizeCompatModePolicy().inSizeCompatMode();
     }
 
     /**
@@ -8386,13 +8385,12 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
      *         aspect ratio.
      */
     boolean shouldCreateAppCompatDisplayInsets() {
-        return mAppCompatController.getAppCompatSizeCompatModePolicy()
-                .shouldCreateAppCompatDisplayInsets();
+        return mAppCompatController.getSizeCompatModePolicy().shouldCreateAppCompatDisplayInsets();
     }
 
     @Override
     boolean hasSizeCompatBounds() {
-        return mAppCompatController.getAppCompatSizeCompatModePolicy().hasSizeCompatBounds();
+        return mAppCompatController.getSizeCompatModePolicy().hasSizeCompatBounds();
     }
 
     @Override
@@ -8411,7 +8409,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     @Override
     float getCompatScale() {
         // We need to invoke {#getCompatScale()} only if the CompatScale is not available.
-        return mAppCompatController.getAppCompatSizeCompatModePolicy()
+        return mAppCompatController.getSizeCompatModePolicy()
                 .getCompatScaleIfAvailable(ActivityRecord.super::getCompatScale);
     }
 
@@ -8477,7 +8475,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final AppCompatDisplayInsets appCompatDisplayInsets = getAppCompatDisplayInsets();
         final AppCompatSizeCompatModePolicy scmPolicy =
-                mAppCompatController.getAppCompatSizeCompatModePolicy();
+                mAppCompatController.getSizeCompatModePolicy();
         if (appCompatDisplayInsets != null) {
             scmPolicy.resolveSizeCompatModeConfiguration(newParentConfiguration,
                     appCompatDisplayInsets, mTmpBounds);
@@ -8627,7 +8625,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return mAppCompatController.getTransparentPolicy().getInheritedAppCompatState();
         }
         final AppCompatSizeCompatModePolicy scmPolicy = mAppCompatController
-                .getAppCompatSizeCompatModePolicy();
+                .getSizeCompatModePolicy();
         if (scmPolicy.isInSizeCompatModeForBounds()) {
             return APP_COMPAT_STATE_CHANGED__STATE__LETTERBOXED_FOR_SIZE_COMPAT_MODE;
         }
@@ -8665,7 +8663,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return;
         }
         final AppCompatSizeCompatModePolicy scmPolicy =
-                mAppCompatController.getAppCompatSizeCompatModePolicy();
+                mAppCompatController.getSizeCompatModePolicy();
         final Rect screenResolvedBounds = scmPolicy.replaceResolvedBoundsIfNeeded(resolvedBounds);
         final Rect parentAppBounds = mResolveConfigHint.mParentAppBoundsOverride;
         final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
@@ -8763,7 +8761,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         final Configuration resolvedConfig = getResolvedOverrideConfiguration();
         final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
         final AppCompatSizeCompatModePolicy scmPolicy =
-                mAppCompatController.getAppCompatSizeCompatModePolicy();
+                mAppCompatController.getSizeCompatModePolicy();
         return scmPolicy.replaceResolvedBoundsIfNeeded(resolvedBounds);
     }
 
@@ -8917,7 +8915,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         }
         final AppCompatDisplayInsets appCompatDisplayInsets = getAppCompatDisplayInsets();
         final AppCompatSizeCompatModePolicy scmPolicy =
-                mAppCompatController.getAppCompatSizeCompatModePolicy();
+                mAppCompatController.getSizeCompatModePolicy();
 
         if (appCompatDisplayInsets != null
                 && !appCompatDisplayInsets.mIsInFixedOrientationOrAspectRatioLetterbox) {
@@ -9038,7 +9036,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // TODO(b/268458693): Refactor configuration inheritance in case of translucent activities
         final Rect superBounds = super.getBounds();
         final AppCompatSizeCompatModePolicy scmPolicy =
-                mAppCompatController.getAppCompatSizeCompatModePolicy();
+                mAppCompatController.getSizeCompatModePolicy();
         return mAppCompatController.getTransparentPolicy().findOpaqueNotFinishingActivityBelow()
                 .map(ActivityRecord::getBounds)
                 .orElseGet(() -> scmPolicy.getAppSizeCompatBoundsIfAvailable(superBounds));
@@ -9365,7 +9363,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         if (mVisibleRequested) {
             // Calling from here rather than resolveOverrideConfiguration to ensure that this is
             // called after full config is updated in ConfigurationContainer#onConfigurationChanged.
-            mAppCompatController.getAppCompatSizeCompatModePolicy().updateAppCompatDisplayInsets();
+            mAppCompatController.getSizeCompatModePolicy().updateAppCompatDisplayInsets();
         }
 
         // Short circuit: if the two full configurations are equal (the common case), then there is
@@ -9705,7 +9703,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
 
         // Reset the existing override configuration so it can be updated according to the latest
         // configuration.
-        mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
+        mAppCompatController.getSizeCompatModePolicy().clearSizeCompatMode();
 
         if (!attachedToProcess()) {
             return;
