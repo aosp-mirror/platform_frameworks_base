@@ -39,7 +39,7 @@ class AppCompatController {
     @NonNull
     private final AppCompatOverrides mAppCompatOverrides;
     @NonNull
-    private final AppCompatDeviceStateQuery mAppCompatDeviceStateQuery;
+    private final AppCompatDeviceStateQuery mDeviceStateQuery;
     @NonNull
     private final AppCompatLetterboxPolicy mAppCompatLetterboxPolicy;
     @NonNull
@@ -50,11 +50,11 @@ class AppCompatController {
         final PackageManager packageManager = wmService.mContext.getPackageManager();
         final OptPropFactory optPropBuilder = new OptPropFactory(packageManager,
                 activityRecord.packageName);
-        mAppCompatDeviceStateQuery = new AppCompatDeviceStateQuery(activityRecord);
+        mDeviceStateQuery = new AppCompatDeviceStateQuery(activityRecord);
         mTransparentPolicy = new TransparentPolicy(activityRecord,
                 wmService.mAppCompatConfiguration);
         mAppCompatOverrides = new AppCompatOverrides(activityRecord, packageManager,
-                wmService.mAppCompatConfiguration, optPropBuilder, mAppCompatDeviceStateQuery);
+                wmService.mAppCompatConfiguration, optPropBuilder, mDeviceStateQuery);
         mOrientationPolicy = new AppCompatOrientationPolicy(activityRecord, mAppCompatOverrides);
         mAspectRatioPolicy = new AppCompatAspectRatioPolicy(activityRecord,
                 mTransparentPolicy, mAppCompatOverrides);
@@ -129,8 +129,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatDeviceStateQuery getAppCompatDeviceStateQuery() {
-        return mAppCompatDeviceStateQuery;
+    AppCompatDeviceStateQuery getDeviceStateQuery() {
+        return mDeviceStateQuery;
     }
 
     @NonNull

@@ -107,7 +107,7 @@ class AppCompatReachabilityPolicy {
             return;
         }
         final AppCompatDeviceStateQuery deviceStateQuery = mActivityRecord.mAppCompatController
-                .getAppCompatDeviceStateQuery();
+                .getDeviceStateQuery();
         final boolean isInFullScreenBookMode = deviceStateQuery
                     .isDisplayFullScreenAndSeparatingHinge()
                 && mAppCompatConfiguration.getIsAutomaticReachabilityInBookModeEnabled();
@@ -153,7 +153,7 @@ class AppCompatReachabilityPolicy {
             return;
         }
         final AppCompatDeviceStateQuery deviceStateQuery = mActivityRecord.mAppCompatController
-                .getAppCompatDeviceStateQuery();
+                .getDeviceStateQuery();
         final boolean isInFullScreenTabletopMode = deviceStateQuery
                 .isDisplayFullScreenAndSeparatingHinge();
         final int letterboxPositionForVerticalReachability = mAppCompatConfiguration
