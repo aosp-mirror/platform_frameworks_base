@@ -178,6 +178,13 @@ flag {
 }
 
 flag {
+    name: "enable_display_color_inversion_key_gestures"
+    namespace: "input"
+    description: "Adds key gestures for display color inversion for accessibility needs"
+    bug: "383730505"
+}
+
+flag {
     name: "enable_talkback_and_magnifier_key_gestures"
     namespace: "input"
     description: "Adds key gestures for talkback and magnifier"
