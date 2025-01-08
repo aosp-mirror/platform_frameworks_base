@@ -1450,8 +1450,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 mParams.getDefaultNavigationPolicy() == NAVIGATION_POLICY_DEFAULT_ALLOWED;
         final boolean showTasksInHostDeviceRecents =
                 getDevicePolicy(POLICY_TYPE_RECENTS) == DEVICE_POLICY_DEFAULT;
-        final ComponentName homeComponent =
-                Flags.vdmCustomHome() ? mParams.getHomeComponent() : null;
 
         if (mActivityListenerAdapter == null) {
             mActivityListenerAdapter = new GwpcActivityListener();
@@ -1472,7 +1470,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                 mActivityListenerAdapter,
                 displayCategories,
                 showTasksInHostDeviceRecents,
-                homeComponent);
+                mParams.getHomeComponent());
         gwpc.registerRunningAppsChangedListener(/* listener= */ this);
         return gwpc;
     }

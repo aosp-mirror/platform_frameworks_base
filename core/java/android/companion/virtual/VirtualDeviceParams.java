@@ -431,7 +431,6 @@ public final class VirtualDeviceParams implements Parcelable {
      * @see Builder#setHomeComponent
      * @see VirtualDisplayConfig#isHomeSupported()
      */
-    @FlaggedApi(Flags.FLAG_VDM_CUSTOM_HOME)
     @Nullable
     public ComponentName getHomeComponent() {
         return mHomeComponent;
@@ -926,7 +925,6 @@ public final class VirtualDeviceParams implements Parcelable {
          *
          * @see VirtualDisplayConfig#isHomeSupported()
          */
-        @FlaggedApi(Flags.FLAG_VDM_CUSTOM_HOME)
         @NonNull
         public Builder setHomeComponent(@Nullable ComponentName homeComponent) {
             mHomeComponent = homeComponent;

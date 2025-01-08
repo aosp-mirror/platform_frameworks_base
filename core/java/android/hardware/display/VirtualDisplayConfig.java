@@ -237,10 +237,9 @@ public final class VirtualDisplayConfig implements Parcelable {
      * @see Builder#setHomeSupported
      * @hide
      */
-    @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_HOME)
     @SystemApi
     public boolean isHomeSupported() {
-        return android.companion.virtual.flags.Flags.vdmCustomHome() && mIsHomeSupported;
+        return mIsHomeSupported;
     }
 
     /**
@@ -605,7 +604,6 @@ public final class VirtualDisplayConfig implements Parcelable {
          * @see DisplayManager#VIRTUAL_DISPLAY_FLAG_OWN_CONTENT_ONLY
          * @hide
          */
-        @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_HOME)
         @SystemApi
         @NonNull
         public Builder setHomeSupported(boolean isHomeSupported) {
