@@ -1,5 +1,11 @@
 -include proguard_kotlin.flags
--keep class com.android.systemui.VendorServices
+
+# VendorServices implements CoreStartable and may be instantiated reflectively in
+# SystemUIApplication#startAdditionalStartable.
+# TODO(b/373579455): Rewrite this to a @UsesReflection keep annotation.
+-keep class com.android.systemui.VendorServices {
+  public void <init>();
+}
 
 # Needed to ensure callback field references are kept in their respective
 # owning classes when the downstream callback registrars only store weak refs.
