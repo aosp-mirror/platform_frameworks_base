@@ -1932,6 +1932,9 @@ public class LauncherApps {
      * caller should have normal {@link android.Manifest.permission#ACCESS_HIDDEN_PROFILES}
      * permission and the {@link android.app.role.RoleManager#ROLE_HOME} role.
      *
+     * <p>This callback will also receive changes to the {@link LauncherUserInfo#getUserConfig()},
+     * allowing clients to monitor updates to the user-specific configuration.
+     *
      * @param callback The callback to register.
      */
     // Alternatively, a system app can access this api for private profile if they've been granted
@@ -1949,6 +1952,9 @@ public class LauncherApps {
      * <p>To receive callbacks for hidden profile {@link UserManager#USER_TYPE_PROFILE_PRIVATE},
      * caller should have normal {@link android.Manifest.permission#ACCESS_HIDDEN_PROFILES}
      * permission and the {@link android.app.role.RoleManager#ROLE_HOME} role.
+     *
+     * <p>This callback will also receive changes to the {@link LauncherUserInfo#getUserConfig()},
+     * allowing clients to monitor updates to the user-specific configuration.
      *
      * @param callback The callback to register.
      * @param handler that should be used to post callbacks on, may be null.
