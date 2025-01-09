@@ -674,7 +674,7 @@ VulkanManager::VkDrawResult VulkanManager::finishFrame(SkSurface* surface) {
         VkSemaphore semaphore;
         VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
         ALOGE_IF(VK_SUCCESS != err,
-                 "VulkanManager::makeSwapSemaphore(): Failed to create semaphore");
+                 "VulkanManager::finishFrame(): Failed to create semaphore");
 
         if (err == VK_SUCCESS) {
             sharedSemaphore = sp<SharedSemaphoreInfo>::make(mDestroySemaphore, mDevice, semaphore);
@@ -722,7 +722,7 @@ VulkanManager::VkDrawResult VulkanManager::finishFrame(SkSurface* surface) {
 
         int fenceFd = -1;
         VkResult err = mGetSemaphoreFdKHR(mDevice, &getFdInfo, &fenceFd);
-        ALOGE_IF(VK_SUCCESS != err, "VulkanManager::swapBuffers(): Failed to get semaphore Fd");
+        ALOGE_IF(VK_SUCCESS != err, "VulkanManager::finishFrame(): Failed to get semaphore Fd");
         drawResult.presentFence.reset(fenceFd);
     } else {
         ALOGE("VulkanManager::finishFrame(): Semaphore submission failed");
