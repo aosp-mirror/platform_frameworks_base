@@ -998,6 +998,11 @@
     <!-- Permission required for CTS test - CtsContentProviderMultiUserTest -->
     <uses-permission android:name="android.permission.RESOLVE_COMPONENT_FOR_UID" />
 
+    <!-- Permissions required for CTS test - MediaQualityTest -->
+    <uses-permission android:name="android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE" />
+    <uses-permission android:name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE" />
+    <uses-permission android:name="android.permission.READ_COLOR_ZONES" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"
