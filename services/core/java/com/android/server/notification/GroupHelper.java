@@ -583,6 +583,15 @@ public class GroupHelper {
         final FullyQualifiedGroupKey fullAggregateGroupKey = new FullyQualifiedGroupKey(
                 record.getUserId(), pkgName, sectioner);
 
+        // The notification was part of a different section => trigger regrouping
+        final FullyQualifiedGroupKey prevSectionKey = getPreviousValidSectionKey(record);
+        if (prevSectionKey != null && !fullAggregateGroupKey.equals(prevSectionKey)) {
+            if (DEBUG) {
+                Slog.i(TAG, "Section changed for: " + record);
+            }
+            maybeUngroupOnSectionChanged(record, prevSectionKey);
+        }
+
         // This notification is already aggregated
         if (record.getGroupKey().equals(fullAggregateGroupKey.toString())) {
             return false;
@@ -652,10 +661,33 @@ public class GroupHelper {
     }
 
     /**
+     * A notification was added that was previously part of a different section and needs to trigger
+     * GH state cleanup.
+     */
+    private void maybeUngroupOnSectionChanged(NotificationRecord record,
+            FullyQualifiedGroupKey prevSectionKey) {
+        maybeUngroupWithSections(record, prevSectionKey);
+        if (record.getGroupKey().equals(prevSectionKey.toString())) {
+            record.setOverrideGroupKey(null);
+        }
+    }
+
+    /**
      * A notification was added that is app-grouped.
      */
     private void maybeUngroupOnAppGrouped(NotificationRecord record) {
-        maybeUngroupWithSections(record, getSectionGroupKeyWithFallback(record));
+        FullyQualifiedGroupKey currentSectionKey = getSectionGroupKeyWithFallback(record);
+
+        // The notification was part of a different section => trigger regrouping
+        final FullyQualifiedGroupKey prevSectionKey = getPreviousValidSectionKey(record);
+        if (prevSectionKey != null && !prevSectionKey.equals(currentSectionKey)) {
+            if (DEBUG) {
+                Slog.i(TAG, "Section changed for: " + record);
+            }
+            currentSectionKey = prevSectionKey;
+        }
+
+        maybeUngroupWithSections(record, currentSectionKey);
     }
 
     /**

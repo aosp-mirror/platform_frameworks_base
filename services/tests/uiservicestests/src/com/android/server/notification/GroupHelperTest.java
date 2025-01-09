@@ -2509,6 +2509,134 @@ public class GroupHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
+    public void testRepostWithNewChannel_afterAutogrouping_isRegrouped() {
+        final String pkg = "package";
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        // Post ungrouped notifications => will be autogrouped
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            NotificationRecord notification = getNotificationRecord(pkg, i + 42,
+                    String.valueOf(i + 42), UserHandle.SYSTEM, null, false);
+            notificationList.add(notification);
+            mGroupHelper.onNotificationPosted(notification, false);
+        }
+
+        final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey), anyInt(), any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).addAutoGroup(anyString(),
+                eq(expectedGroupKey), eq(true));
+
+        // Post ungrouped notifications to a different section, below autogroup limit
+        Mockito.reset(mCallback);
+        // Post ungrouped notifications => will be autogrouped
+        final NotificationChannel silentChannel = new NotificationChannel("TEST_CHANNEL_ID1",
+                "TEST_CHANNEL_ID1", IMPORTANCE_LOW);
+        for (int i = 0; i < AUTOGROUP_AT_COUNT - 1; i++) {
+            NotificationRecord notification = getNotificationRecord(pkg, i + 4242,
+                    String.valueOf(i + 4242), UserHandle.SYSTEM, null, false, silentChannel);
+            notificationList.add(notification);
+            mGroupHelper.onNotificationPosted(notification, false);
+        }
+
+        verify(mCallback, never()).addAutoGroupSummary(anyInt(), anyString(), anyString(),
+                anyString(), anyInt(), any());
+        verify(mCallback, never()).addAutoGroup(anyString(), anyString(), anyBoolean());
+
+        // Update a notification to a different channel that moves it to a different section
+        Mockito.reset(mCallback);
+        final NotificationRecord notifToInvalidate = notificationList.get(0);
+        final NotificationSectioner initialSection = GroupHelper.getSection(notifToInvalidate);
+        final NotificationChannel updatedChannel = new NotificationChannel("TEST_CHANNEL_ID2",
+                "TEST_CHANNEL_ID2", IMPORTANCE_LOW);
+        notifToInvalidate.updateNotificationChannel(updatedChannel);
+        assertThat(GroupHelper.getSection(notifToInvalidate)).isNotEqualTo(initialSection);
+        boolean needsAutogrouping = mGroupHelper.onNotificationPosted(notifToInvalidate, false);
+        assertThat(needsAutogrouping).isTrue();
+
+        // Check that the silent section was autogrouped
+        final String silentSectionGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "SilentSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(silentSectionGroupKey), anyInt(), any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT - 1)).addAutoGroup(anyString(),
+                eq(silentSectionGroupKey), eq(true));
+        verify(mCallback, times(1)).removeAutoGroup(eq(notifToInvalidate.getKey()));
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(),
+                eq(expectedGroupKey), any());
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_FORCE_GROUPING, FLAG_NOTIFICATION_FORCE_GROUP_SINGLETONS,
+            android.app.Flags.FLAG_CHECK_AUTOGROUP_BEFORE_POST})
+    public void testRepostWithNewChannel_afterForceGrouping_isRegrouped() {
+        final String pkg = "package";
+        final String groupName = "testGroup";
+        final List<NotificationRecord> notificationList = new ArrayList<>();
+        final ArrayMap<String, NotificationRecord> summaryByGroup = new ArrayMap<>();
+        // Post valid section summary notifications without children => force group
+        for (int i = 0; i < AUTOGROUP_AT_COUNT; i++) {
+            NotificationRecord notification = getNotificationRecord(pkg, i + 42,
+                    String.valueOf(i + 42), UserHandle.SYSTEM, groupName, false);
+            notificationList.add(notification);
+            mGroupHelper.onNotificationPostedWithDelay(notification, notificationList,
+                    summaryByGroup);
+        }
+
+        final String expectedGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "AlertingSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(expectedGroupKey), anyInt(), any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+                eq(expectedGroupKey), eq(true));
+
+        // Update a notification to a different channel that moves it to a different section
+        Mockito.reset(mCallback);
+        final NotificationRecord notifToInvalidate = notificationList.get(0);
+        final NotificationSectioner initialSection = GroupHelper.getSection(notifToInvalidate);
+        final NotificationChannel updatedChannel = new NotificationChannel("TEST_CHANNEL_ID2",
+                "TEST_CHANNEL_ID2", IMPORTANCE_LOW);
+        notifToInvalidate.updateNotificationChannel(updatedChannel);
+        assertThat(GroupHelper.getSection(notifToInvalidate)).isNotEqualTo(initialSection);
+        boolean needsAutogrouping = mGroupHelper.onNotificationPosted(notifToInvalidate, false);
+
+        mGroupHelper.onNotificationPostedWithDelay(notifToInvalidate, notificationList,
+                summaryByGroup);
+
+        // Check that the updated notification is removed from the autogroup
+        assertThat(needsAutogrouping).isFalse();
+        verify(mCallback, times(1)).removeAutoGroup(eq(notifToInvalidate.getKey()));
+        verify(mCallback, never()).removeAutoGroupSummary(anyInt(), anyString(), anyString());
+        verify(mCallback, times(1)).updateAutogroupSummary(anyInt(), anyString(),
+                eq(expectedGroupKey), any());
+
+        // Post child notifications for the silent sectin => will be autogrouped
+        Mockito.reset(mCallback);
+        final NotificationChannel silentChannel = new NotificationChannel("TEST_CHANNEL_ID1",
+                "TEST_CHANNEL_ID1", IMPORTANCE_LOW);
+        for (int i = 0; i < AUTOGROUP_AT_COUNT - 1; i++) {
+            NotificationRecord notification = getNotificationRecord(pkg, i + 4242,
+                    String.valueOf(i + 4242), UserHandle.SYSTEM, "aGroup", false, silentChannel);
+            notificationList.add(notification);
+            needsAutogrouping = mGroupHelper.onNotificationPosted(notification, false);
+            assertThat(needsAutogrouping).isFalse();
+            mGroupHelper.onNotificationPostedWithDelay(notification, notificationList,
+                    summaryByGroup);
+        }
+
+        // Check that the silent section was autogrouped
+        final String silentSectionGroupKey = GroupHelper.getFullAggregateGroupKey(pkg,
+                AGGREGATE_GROUP_KEY + "SilentSection", UserHandle.SYSTEM.getIdentifier());
+        verify(mCallback, times(1)).addAutoGroupSummary(anyInt(), eq(pkg), anyString(),
+                eq(silentSectionGroupKey), anyInt(), any());
+        verify(mCallback, times(AUTOGROUP_AT_COUNT)).addAutoGroup(anyString(),
+                eq(silentSectionGroupKey), eq(true));
+    }
+
+    @Test
     @EnableFlags(FLAG_NOTIFICATION_FORCE_GROUPING)
     public void testMoveAggregateGroups_updateChannel() {
         final String pkg = "package";

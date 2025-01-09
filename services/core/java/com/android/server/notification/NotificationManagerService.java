@@ -9537,7 +9537,8 @@ public class NotificationManagerService extends SystemService {
                                     || !Objects.equals(oldSbn.getNotification().getGroup(),
                                         n.getNotification().getGroup())
                                     || oldSbn.getNotification().flags
-                                    != n.getNotification().flags) {
+                                    != n.getNotification().flags
+                                    || !old.getChannel().getId().equals(r.getChannel().getId())) {
                                 synchronized (mNotificationLock) {
                                     final String autogroupName =
                                             notificationForceGrouping() ?
