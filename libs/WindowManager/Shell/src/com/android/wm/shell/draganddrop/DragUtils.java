@@ -107,8 +107,11 @@ public class DragUtils {
     /**
      * Returns a list of the mime types provided in the clip description.
      */
-    public static String getMimeTypesConcatenated(ClipDescription description) {
+    public static String getMimeTypesConcatenated(@Nullable ClipDescription description) {
         String mimeTypes = "";
+        if (description == null) {
+            return mimeTypes;
+        }
         for (int i = 0; i < description.getMimeTypeCount(); i++) {
             if (i > 0) {
                 mimeTypes += ", ";
