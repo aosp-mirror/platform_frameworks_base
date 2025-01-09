@@ -15,14 +15,15 @@
  */
 package com.android.systemui.bluetooth.qsdialog
 
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import android.testing.TestableLooper
+import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.testKosmos
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -48,6 +49,7 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
     private lateinit var notConnectedDeviceItem: DeviceItem
     private lateinit var connectedMediaDeviceItem: DeviceItem
     private lateinit var connectedOtherDeviceItem: DeviceItem
+    private lateinit var audioSharingDeviceItem: DeviceItem
     @Mock private lateinit var dialog: SystemUIDialog
 
     @Before
@@ -59,7 +61,7 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
                 iconWithDescription = null,
-                background = null
+                background = null,
             )
         notConnectedDeviceItem =
             DeviceItem(
@@ -68,7 +70,7 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
                 iconWithDescription = null,
-                background = null
+                background = null,
             )
         connectedMediaDeviceItem =
             DeviceItem(
@@ -77,7 +79,7 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
                 iconWithDescription = null,
-                background = null
+                background = null,
             )
         connectedOtherDeviceItem =
             DeviceItem(
@@ -86,7 +88,16 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
                 deviceName = DEVICE_NAME,
                 connectionSummary = DEVICE_CONNECTION_SUMMARY,
                 iconWithDescription = null,
-                background = null
+                background = null,
+            )
+        audioSharingDeviceItem =
+            DeviceItem(
+                type = DeviceItemType.AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE,
+                cachedBluetoothDevice = kosmos.cachedBluetoothDevice,
+                deviceName = DEVICE_NAME,
+                connectionSummary = DEVICE_CONNECTION_SUMMARY,
+                iconWithDescription = null,
+                background = null,
             )
         actionInteractorImpl = kosmos.deviceItemActionInteractorImpl
     }
@@ -131,6 +142,29 @@ class DeviceItemActionInteractorTest : SysuiTestCase() {
                 whenever(cachedBluetoothDevice.address).thenReturn(DEVICE_ADDRESS)
                 actionInteractorImpl.onClick(notConnectedDeviceItem, dialog)
                 verify(cachedBluetoothDevice).connect()
+            }
+        }
+    }
+
+    @Test
+    fun onActionIconClick_onIntent() {
+        with(kosmos) {
+            testScope.runTest {
+                var onIntentCalledOnAddress = ""
+                whenever(cachedBluetoothDevice.address).thenReturn(DEVICE_ADDRESS)
+                actionInteractorImpl.onActionIconClick(connectedMediaDeviceItem) {
+                    onIntentCalledOnAddress = connectedMediaDeviceItem.cachedBluetoothDevice.address
+                }
+                assertThat(onIntentCalledOnAddress).isEqualTo(DEVICE_ADDRESS)
+            }
+        }
+    }
+
+    @Test(expected = IllegalArgumentException::class)
+    fun onActionIconClick_audioSharingDeviceType_throwException() {
+        with(kosmos) {
+            testScope.runTest {
+                actionInteractorImpl.onActionIconClick(audioSharingDeviceItem) {}
             }
         }
     }

@@ -18,12 +18,20 @@ package com.android.systemui.bluetooth.qsdialog
 
 import android.bluetooth.BluetoothLeBroadcast
 import android.bluetooth.BluetoothLeBroadcastMetadata
+import android.content.ContentResolver
+import android.content.applicationContext
 import android.testing.TestableLooper
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.bluetooth.BluetoothEventManager
 import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcast
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant
+import com.android.settingslib.bluetooth.LocalBluetoothProfileManager
+import com.android.settingslib.bluetooth.VolumeControlProfile
+import com.android.settingslib.volume.shared.AudioSharingLogger
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -38,10 +46,16 @@ import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
 import org.mockito.Captor
 import org.mockito.Mock
+import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
 import org.mockito.junit.MockitoJUnit
 import org.mockito.junit.MockitoRule
 import org.mockito.kotlin.any
+import org.mockito.kotlin.doReturn
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.spy
+import org.mockito.kotlin.times
+import org.mockito.kotlin.whenever
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -50,8 +64,11 @@ import org.mockito.kotlin.any
 class AudioSharingInteractorTest : SysuiTestCase() {
     @get:Rule val mockito: MockitoRule = MockitoJUnit.rule()
     private val kosmos = testKosmos()
+
     @Mock private lateinit var localBluetoothLeBroadcast: LocalBluetoothLeBroadcast
+
     @Mock private lateinit var bluetoothLeBroadcastMetadata: BluetoothLeBroadcastMetadata
+
     @Captor private lateinit var callbackCaptor: ArgumentCaptor<BluetoothLeBroadcast.Callback>
     private lateinit var underTest: AudioSharingInteractor
 
@@ -157,12 +174,14 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     fun testHandleAudioSourceWhenReady_hasProfileButAudioSharingOff_sourceNotAdded() =
         with(kosmos) {
             testScope.runTest {
-                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(false)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
                 bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 bluetoothTileDialogAudioSharingRepository.setLeAudioBroadcastProfile(
                     localBluetoothLeBroadcast
                 )
                 val job = launch { underTest.handleAudioSourceWhenReady() }
+                runCurrent()
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(false)
                 runCurrent()
 
                 assertThat(bluetoothTileDialogAudioSharingRepository.sourceAdded).isFalse()
@@ -174,15 +193,14 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     fun testHandleAudioSourceWhenReady_audioSharingOnButNoPlayback_sourceNotAdded() =
         with(kosmos) {
             testScope.runTest {
-                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(false)
                 bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 bluetoothTileDialogAudioSharingRepository.setLeAudioBroadcastProfile(
                     localBluetoothLeBroadcast
                 )
                 val job = launch { underTest.handleAudioSourceWhenReady() }
                 runCurrent()
-                verify(localBluetoothLeBroadcast)
-                    .registerServiceCallBack(any(), callbackCaptor.capture())
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
                 runCurrent()
 
                 assertThat(bluetoothTileDialogAudioSharingRepository.sourceAdded).isFalse()
@@ -194,12 +212,14 @@ class AudioSharingInteractorTest : SysuiTestCase() {
     fun testHandleAudioSourceWhenReady_audioSharingOnAndPlaybackStarts_sourceAdded() =
         with(kosmos) {
             testScope.runTest {
-                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(false)
                 bluetoothTileDialogAudioSharingRepository.setAudioSharingAvailable(true)
                 bluetoothTileDialogAudioSharingRepository.setLeAudioBroadcastProfile(
                     localBluetoothLeBroadcast
                 )
                 val job = launch { underTest.handleAudioSourceWhenReady() }
+                runCurrent()
+                bluetoothTileDialogAudioSharingRepository.setInAudioSharing(true)
                 runCurrent()
                 verify(localBluetoothLeBroadcast)
                     .registerServiceCallBack(any(), callbackCaptor.capture())
@@ -211,4 +231,100 @@ class AudioSharingInteractorTest : SysuiTestCase() {
                 job.cancel()
             }
         }
+
+    @Test
+    fun testHandleAudioSourceWhenReady_skipInitialValue_noAudioSharing_sourceNotAdded() =
+        with(kosmos) {
+            testScope.runTest {
+                val (broadcast, repository) = setupRepositoryImpl()
+                val interactor =
+                    object :
+                        AudioSharingInteractorImpl(
+                            applicationContext,
+                            localBluetoothManager,
+                            repository,
+                            testDispatcher,
+                        ) {
+                        override suspend fun audioSharingAvailable() = true
+                    }
+                val job = launch { interactor.handleAudioSourceWhenReady() }
+                runCurrent()
+                // Verify callback registered for onBroadcastStartedOrStopped
+                verify(broadcast).registerServiceCallBack(any(), callbackCaptor.capture())
+                runCurrent()
+                // Verify source is not added
+                verify(repository, never()).addSource()
+                job.cancel()
+            }
+        }
+
+    @Test
+    fun testHandleAudioSourceWhenReady_skipInitialValue_newAudioSharing_sourceAdded() =
+        with(kosmos) {
+            testScope.runTest {
+                val (broadcast, repository) = setupRepositoryImpl()
+                val interactor =
+                    object :
+                        AudioSharingInteractorImpl(
+                            applicationContext,
+                            localBluetoothManager,
+                            repository,
+                            testDispatcher,
+                        ) {
+                        override suspend fun audioSharingAvailable() = true
+                    }
+                val job = launch { interactor.handleAudioSourceWhenReady() }
+                runCurrent()
+                // Verify callback registered for onBroadcastStartedOrStopped
+                verify(broadcast).registerServiceCallBack(any(), callbackCaptor.capture())
+                // Audio sharing started, trigger onBroadcastStarted
+                whenever(broadcast.isEnabled(null)).thenReturn(true)
+                callbackCaptor.value.onBroadcastStarted(0, 0)
+                runCurrent()
+                // Verify callback registered for onBroadcastMetadataChanged
+                verify(broadcast, times(2)).registerServiceCallBack(any(), callbackCaptor.capture())
+                runCurrent()
+                // Trigger onBroadcastMetadataChanged (ready to add source)
+                callbackCaptor.value.onBroadcastMetadataChanged(0, bluetoothLeBroadcastMetadata)
+                runCurrent()
+                // Verify source added
+                verify(repository).addSource()
+                job.cancel()
+            }
+        }
+
+    private fun setupRepositoryImpl(): Pair<LocalBluetoothLeBroadcast, AudioSharingRepositoryImpl> {
+        with(kosmos) {
+            val broadcast =
+                mock<LocalBluetoothLeBroadcast> {
+                    on { isProfileReady } doReturn true
+                    on { isEnabled(null) } doReturn false
+                }
+            val assistant =
+                mock<LocalBluetoothLeBroadcastAssistant> { on { isProfileReady } doReturn true }
+            val volumeControl = mock<VolumeControlProfile> { on { isProfileReady } doReturn true }
+            val profileManager =
+                mock<LocalBluetoothProfileManager> {
+                    on { leAudioBroadcastProfile } doReturn broadcast
+                    on { leAudioBroadcastAssistantProfile } doReturn assistant
+                    on { volumeControlProfile } doReturn volumeControl
+                }
+            whenever(localBluetoothManager.profileManager).thenReturn(profileManager)
+            whenever(localBluetoothManager.eventManager).thenReturn(mock<BluetoothEventManager> {})
+
+            val repository =
+                AudioSharingRepositoryImpl(
+                    localBluetoothManager,
+                    com.android.settingslib.volume.data.repository.AudioSharingRepositoryImpl(
+                        mock<ContentResolver> {},
+                        localBluetoothManager,
+                        testScope.backgroundScope,
+                        testScope.testScheduler,
+                        mock<AudioSharingLogger> {},
+                    ),
+                    testDispatcher,
+                )
+            return Pair(broadcast, spy(repository))
+        }
+    }
 }

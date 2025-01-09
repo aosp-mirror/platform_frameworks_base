@@ -45,6 +45,8 @@ interface AudioSharingRepository {
     suspend fun setActive(cachedBluetoothDevice: CachedBluetoothDevice)
 
     suspend fun startAudioSharing()
+
+    suspend fun stopAudioSharing()
 }
 
 @SysUISingleton
@@ -100,6 +102,15 @@ class AudioSharingRepositoryImpl(
             leAudioBroadcastProfile?.startPrivateBroadcast()
         }
     }
+
+    override suspend fun stopAudioSharing() {
+        withContext(backgroundDispatcher) {
+            if (!settingsLibAudioSharingRepository.audioSharingAvailable()) {
+                return@withContext
+            }
+            leAudioBroadcastProfile?.stopLatestBroadcast()
+        }
+    }
 }
 
 @SysUISingleton
@@ -117,4 +128,6 @@ class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
     override suspend fun setActive(cachedBluetoothDevice: CachedBluetoothDevice) {}
 
     override suspend fun startAudioSharing() {}
+
+    override suspend fun stopAudioSharing() {}
 }

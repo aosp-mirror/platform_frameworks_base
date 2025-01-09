@@ -118,6 +118,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
             .isEqualTo(DeviceItemType.AVAILABLE_AUDIO_SHARING_MEDIA_BLUETOOTH_DEVICE)
         assertThat(deviceItem.cachedBluetoothDevice).isEqualTo(cachedDevice)
         assertThat(deviceItem.deviceName).isEqualTo(DEVICE_NAME)
+        assertThat(deviceItem.actionIconRes).isEqualTo(R.drawable.ic_add)
         assertThat(deviceItem.isActive).isFalse()
         assertThat(deviceItem.connectionSummary)
             .isEqualTo(
@@ -292,6 +293,7 @@ class DeviceItemFactoryTest : SysuiTestCase() {
         assertThat(deviceItem.cachedBluetoothDevice).isEqualTo(cachedDevice)
         assertThat(deviceItem.deviceName).isEqualTo(DEVICE_NAME)
         assertThat(deviceItem.connectionSummary).isEqualTo(CONNECTION_SUMMARY)
+        assertThat(deviceItem.actionIconRes).isEqualTo(R.drawable.ic_settings_24dp)
     }
 
     companion object {

@@ -56,6 +56,13 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.withContext
 
+data class DeviceItemClick(val deviceItem: DeviceItem, val clickedView: View, val target: Target) {
+    enum class Target {
+        ENTIRE_ROW,
+        ACTION_ICON,
+    }
+}
+
 /** Dialog for showing active, connected and saved bluetooth devices. */
 class BluetoothTileDialogDelegate
 @AssistedInject
@@ -80,7 +87,7 @@ internal constructor(
     internal val bluetoothAutoOnToggle
         get() = mutableBluetoothAutoOnToggle.asStateFlow()
 
-    private val mutableDeviceItemClick: MutableSharedFlow<DeviceItem> =
+    private val mutableDeviceItemClick: MutableSharedFlow<DeviceItemClick> =
         MutableSharedFlow(extraBufferCapacity = 1)
     internal val deviceItemClick
         get() = mutableDeviceItemClick.asSharedFlow()
@@ -90,7 +97,7 @@ internal constructor(
     internal val contentHeight
         get() = mutableContentHeight.asSharedFlow()
 
-    private val deviceItemAdapter: Adapter = Adapter(bluetoothTileDialogCallback)
+    private val deviceItemAdapter: Adapter = Adapter()
 
     private var lastUiUpdateMs: Long = -1
 
@@ -334,8 +341,7 @@ internal constructor(
         }
     }
 
-    internal inner class Adapter(private val onClickCallback: BluetoothTileDialogCallback) :
-        RecyclerView.Adapter<Adapter.DeviceItemViewHolder>() {
+    internal inner class Adapter : RecyclerView.Adapter<Adapter.DeviceItemViewHolder>() {
 
         private val diffUtilCallback =
             object : DiffUtil.ItemCallback<DeviceItem>() {
@@ -376,7 +382,7 @@ internal constructor(
 
         override fun onBindViewHolder(holder: DeviceItemViewHolder, position: Int) {
             val item = getItem(position)
-            holder.bind(item, onClickCallback)
+            holder.bind(item)
         }
 
         internal fun getItem(position: Int) = asyncListDiffer.currentList[position]
@@ -390,19 +396,18 @@ internal constructor(
             private val nameView = view.requireViewById<TextView>(R.id.bluetooth_device_name)
             private val summaryView = view.requireViewById<TextView>(R.id.bluetooth_device_summary)
             private val iconView = view.requireViewById<ImageView>(R.id.bluetooth_device_icon)
-            private val iconGear = view.requireViewById<ImageView>(R.id.gear_icon_image)
-            private val gearView = view.requireViewById<View>(R.id.gear_icon)
+            private val actionIcon = view.requireViewById<ImageView>(R.id.gear_icon_image)
+            private val actionIconView = view.requireViewById<View>(R.id.gear_icon)
             private val divider = view.requireViewById<View>(R.id.divider)
 
-            internal fun bind(
-                item: DeviceItem,
-                deviceItemOnClickCallback: BluetoothTileDialogCallback,
-            ) {
+            internal fun bind(item: DeviceItem) {
                 container.apply {
                     isEnabled = item.isEnabled
                     background = item.background?.let { context.getDrawable(it) }
                     setOnClickListener {
-                        mutableDeviceItemClick.tryEmit(item)
+                        mutableDeviceItemClick.tryEmit(
+                            DeviceItemClick(item, it, DeviceItemClick.Target.ENTIRE_ROW)
+                        )
                         uiEventLogger.log(BluetoothTileDialogUiEvent.DEVICE_CLICKED)
                     }
 
@@ -421,7 +426,8 @@ internal constructor(
                         }
                     }
 
-                    iconGear.apply { drawable?.let { it.mutate()?.setTint(tintColor) } }
+                    actionIcon.setImageResource(item.actionIconRes)
+                    actionIcon.drawable?.setTint(tintColor)
 
                     divider.setBackgroundColor(tintColor)
 
@@ -454,8 +460,10 @@ internal constructor(
                 nameView.text = item.deviceName
                 summaryView.text = item.connectionSummary
 
-                gearView.setOnClickListener {
-                    deviceItemOnClickCallback.onDeviceItemGearClicked(item, it)
+                actionIconView.setOnClickListener {
+                    mutableDeviceItemClick.tryEmit(
+                        DeviceItemClick(item, it, DeviceItemClick.Target.ACTION_ICON)
+                    )
                 }
             }
         }

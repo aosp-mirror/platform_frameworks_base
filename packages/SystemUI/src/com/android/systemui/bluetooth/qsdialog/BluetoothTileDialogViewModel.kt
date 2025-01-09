@@ -35,7 +35,6 @@ import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_AUDIO_SHARING
-import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_BLUETOOTH_DEVICE_DETAILS
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_PAIR_NEW_DEVICE
 import com.android.systemui.bluetooth.qsdialog.BluetoothTileDialogDelegate.Companion.ACTION_PREVIOUSLY_CONNECTED_DEVICE
 import com.android.systemui.dagger.SysUISingleton
@@ -227,8 +226,22 @@ constructor(
                 // deviceItemClick is emitted when user clicked on a device item.
                 dialogDelegate.deviceItemClick
                     .onEach {
-                        deviceItemActionInteractor.onClick(it, dialog)
-                        logger.logDeviceClick(it.cachedBluetoothDevice.address, it.type)
+                        when (it.target) {
+                            DeviceItemClick.Target.ENTIRE_ROW -> {
+                                deviceItemActionInteractor.onClick(it.deviceItem, dialog)
+                                logger.logDeviceClick(
+                                    it.deviceItem.cachedBluetoothDevice.address,
+                                    it.deviceItem.type,
+                                )
+                            }
+
+                            DeviceItemClick.Target.ACTION_ICON -> {
+                                deviceItemActionInteractor.onActionIconClick(it.deviceItem) { intent
+                                    ->
+                                    startSettingsActivity(intent, it.clickedView)
+                                }
+                            }
+                        }
                     }
                     .launchIn(this)
 
@@ -285,20 +298,6 @@ constructor(
             this@BluetoothTileDialogViewModel,
             { cancelJob() },
         )
-    }
-
-    override fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View) {
-        uiEventLogger.log(BluetoothTileDialogUiEvent.DEVICE_GEAR_CLICKED)
-        val intent =
-            Intent(ACTION_BLUETOOTH_DEVICE_DETAILS).apply {
-                putExtra(
-                    EXTRA_SHOW_FRAGMENT_ARGUMENTS,
-                    Bundle().apply {
-                        putString("device_address", deviceItem.cachedBluetoothDevice.address)
-                    },
-                )
-            }
-        startSettingsActivity(intent, view)
     }
 
     override fun onSeeAllClicked(view: View) {
@@ -382,8 +381,6 @@ constructor(
 }
 
 interface BluetoothTileDialogCallback {
-    fun onDeviceItemGearClicked(deviceItem: DeviceItem, view: View)
-
     fun onSeeAllClicked(view: View)
 
     fun onPairNewDeviceClicked(view: View)
