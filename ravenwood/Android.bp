@@ -345,14 +345,41 @@ java_library {
     ],
 }
 
+// We define our own version of platform_compat_config's here, because:
+// - The original version (e.g. "framework-platform-compat-config) is built from
+//   the output file of the device side jar, rather than the host jar, meaning
+//   they're slow to build because they depend on D8/R8 output.
+// - The original services one ("services-platform-compat-config") is built from services.jar,
+//   which includes service.permission, which is very slow to rebuild because of kotlin.
+//
+// Because we're re-defining the same compat-IDs that are defined elsewhere,
+// they should all have `include_in_merged_xml: false`. Otherwise, generating
+// merged_compat_config.xml would fail due to duplicate IDs.
+//
+// These module names must end with "compat-config" because these will be used as the filename,
+// and at runtime, we only loads files that match `*compat-config.xml`.
+platform_compat_config {
+    name: "ravenwood-framework-platform-compat-config",
+    src: ":framework-minus-apex-for-host",
+    include_in_merged_xml: false,
+    visibility: ["//visibility:private"],
+}
+
+platform_compat_config {
+    name: "ravenwood-services.core-platform-compat-config",
+    src: ":services.core-for-host",
+    include_in_merged_xml: false,
+    visibility: ["//visibility:private"],
+}
+
 filegroup {
     name: "ravenwood-data",
     device_common_srcs: [
         ":system-build.prop",
         ":framework-res",
         ":ravenwood-empty-res",
-        ":framework-platform-compat-config",
-        ":services-platform-compat-config",
+        ":ravenwood-framework-platform-compat-config",
+        ":ravenwood-services.core-platform-compat-config",
         "texts/ravenwood-build.prop",
     ],
     device_first_srcs: [
@@ -616,6 +643,10 @@ android_ravenwood_libgroup {
         "android.test.mock.ravenwood",
         "ravenwood-helper-runtime",
         "hoststubgen-helper-runtime.ravenwood",
+
+        // Note, when we include other services.* jars, we'll need to add
+        // platform_compat_config for that module too.
+        // See ravenwood-services.core-platform-compat-config above.
         "services.core.ravenwood-jarjar",
         "services.fakes.ravenwood-jarjar",
 
