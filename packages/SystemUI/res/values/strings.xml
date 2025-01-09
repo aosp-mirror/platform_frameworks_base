@@ -2309,6 +2309,9 @@
     <string name="group_system_lock_screen">Lock screen</string>
     <!-- User visible title for the keyboard shortcut that pulls up Notes app for quick memo. [CHAR LIMIT=70] -->
     <string name="group_system_quick_memo">Take a note</string>
+    <!-- TODO(b/383734125): make it translatable once string is finalized by UXW.-->
+    <!-- User visible title for the keyboard shortcut that toggles Voice Access. [CHAR LIMIT=70] -->
+    <string name="group_system_toggle_voice_access" translatable="false">Toggle Voice Access</string>
 
     <!-- User visible title for the multitasking keyboard shortcuts list. [CHAR LIMIT=70] -->
     <string name="keyboard_shortcut_group_system_multitasking">Multitasking</string>
