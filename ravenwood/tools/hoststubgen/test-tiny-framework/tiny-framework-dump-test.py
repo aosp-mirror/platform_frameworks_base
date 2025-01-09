@@ -28,8 +28,11 @@ GOLDEN_DIRS = [
 
 # Run diff.
 def run_diff(file1, file2):
+    # TODO(b/388562869) We shouldn't need `--ignore-matching-lines`, but the golden files may not have the "Constant pool:" lines.
     command = ['diff', '-u', '--ignore-blank-lines',
-               '--ignore-space-change', file1, file2]
+               '--ignore-space-change',
+               '--ignore-matching-lines=^\(Constant.pool:\|{\)$',
+               file1, file2]
     print(' '.join(command))
     result = subprocess.run(command, stderr=sys.stdout)
 
