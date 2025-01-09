@@ -40,10 +40,15 @@ import android.app.NotificationChannel;
 import android.app.NotificationChannelGroup;
 import android.app.NotificationManager;
 import android.content.Context;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.metrics.LogMaker;
+import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -68,6 +73,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -173,6 +179,7 @@ public class PreferencesHelper implements RankingConfig {
     private final ZenModeHelper mZenModeHelper;
     private final NotificationChannelLogger mNotificationChannelLogger;
     private final AppOpsManager mAppOps;
+    private final UriGrantsManagerInternal mUgmInternal;
 
     private SparseBooleanArray mBadgingEnabled;
     private SparseBooleanArray mBubblesEnabled;
@@ -191,6 +198,7 @@ public class PreferencesHelper implements RankingConfig {
     public PreferencesHelper(Context context, PackageManager pm, RankingHandler rankingHandler,
             ZenModeHelper zenHelper, NotificationChannelLogger notificationChannelLogger,
             AppOpsManager appOpsManager,
+            UriGrantsManagerInternal ugmInternal,
             SysUiStatsEvent.BuilderFactory statsEventBuilderFactory) {
         mContext = context;
         mZenModeHelper = zenHelper;
@@ -199,6 +207,7 @@ public class PreferencesHelper implements RankingConfig {
         mNotificationChannelLogger = notificationChannelLogger;
         mAppOps = appOpsManager;
         mStatsEventBuilderFactory = statsEventBuilderFactory;
+        mUgmInternal = ugmInternal;
 
         updateBadgingEnabled();
         updateBubblesEnabled();
@@ -954,6 +963,12 @@ public class PreferencesHelper implements RankingConfig {
                         : NotificationChannel.DEFAULT_ALLOW_BUBBLE);
             }
             clearLockedFieldsLocked(channel);
+
+            // Verify that the app has permission to read the sound Uri
+            // Only check for new channels, as regular apps can only set sound
+            // before creating. See: {@link NotificationChannel#setSound}
+            grantUriPermission(mUgmInternal, channel.getSound(), uid);
+
             channel.setImportanceLockedByOEM(r.oemLockedImportance);
             if (!channel.isImportanceLockedByOEM()) {
                 if (r.oemLockedChannels.contains(channel.getId())) {
@@ -1008,6 +1023,18 @@ public class PreferencesHelper implements RankingConfig {
         }
     }
 
+    static void grantUriPermission(final UriGrantsManagerInternal ugmInternal, Uri uri,
+            int sourceUid) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        Binder.withCleanCallingIdentity(() -> {
+            // This will throw a SecurityException if the caller can't grant.
+            ugmInternal.checkGrantUriPermission(sourceUid, null,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
+        });
+    }
 
     @Override
     public void updateNotificationChannel(String pkg, int uid, NotificationChannel updatedChannel,
