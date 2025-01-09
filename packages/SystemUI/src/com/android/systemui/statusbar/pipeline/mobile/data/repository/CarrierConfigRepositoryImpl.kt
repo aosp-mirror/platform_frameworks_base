@@ -20,6 +20,7 @@ import android.content.IntentFilter
 import android.os.PersistableBundle
 import android.telephony.CarrierConfigManager
 import android.telephony.SubscriptionManager
+import android.telephony.SubscriptionManager.INVALID_SUBSCRIPTION_ID
 import android.util.SparseArray
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.getOrElse
@@ -51,7 +52,7 @@ constructor(
     private val defaultConfig: PersistableBundle by lazy { CarrierConfigManager.getDefaultConfig() }
     // Used for logging the default config in the dumpsys
     private val defaultConfigForLogs: SystemUiCarrierConfig by lazy {
-        SystemUiCarrierConfig(-1, defaultConfig)
+        SystemUiCarrierConfig(INVALID_SUBSCRIPTION_ID, defaultConfig)
     }
 
     private val configs = SparseArray<SystemUiCarrierConfig>()
@@ -89,7 +90,10 @@ constructor(
         configToUpdate.processNewCarrierConfig(config)
     }
 
-    override fun getOrCreateConfigForSubId(subId: Int): SystemUiCarrierConfig {
+    override fun getOrCreateConfigForSubId(maybeSubId: Int?): SystemUiCarrierConfig {
+        // See CarrierConfigManager#getConfigForSubId(), passing INVALID_SUBSCRIPTION_ID yields
+        // the default carrier config
+        val subId = maybeSubId ?: INVALID_SUBSCRIPTION_ID
         return configs.getOrElse(subId) {
             val config = SystemUiCarrierConfig(subId, defaultConfig)
             val carrierConfig = carrierConfigManager?.getConfigForSubId(subId)

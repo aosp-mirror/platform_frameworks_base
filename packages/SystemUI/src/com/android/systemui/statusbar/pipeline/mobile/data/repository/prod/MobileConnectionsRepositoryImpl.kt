@@ -249,7 +249,7 @@ constructor(
                 tableLogger,
                 LOGGING_PREFIX,
                 columnName = "activeSubId",
-                initialValue = INVALID_SUBSCRIPTION_ID,
+                initialValue = null,
             )
             .stateIn(scope, started = SharingStarted.WhileSubscribed(), null)
 
@@ -264,22 +264,31 @@ constructor(
             }
             .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
-    override val defaultDataSubId: StateFlow<Int> =
+    override val defaultDataSubId: StateFlow<Int?> =
         broadcastDispatcher
             .broadcastFlow(
                 IntentFilter(TelephonyManager.ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED)
             ) { intent, _ ->
-                intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
+                val subId =
+                    intent.getIntExtra(PhoneConstants.SUBSCRIPTION_KEY, INVALID_SUBSCRIPTION_ID)
+                if (subId == INVALID_SUBSCRIPTION_ID) {
+                    null
+                } else {
+                    subId
+                }
             }
             .distinctUntilChanged()
             .logDiffsForTable(
                 tableLogger,
                 LOGGING_PREFIX,
                 columnName = "defaultSubId",
-                initialValue = INVALID_SUBSCRIPTION_ID,
+                initialValue = null,
             )
-            .onStart { emit(subscriptionManagerProxy.getDefaultDataSubscriptionId()) }
-            .stateIn(scope, SharingStarted.WhileSubscribed(), INVALID_SUBSCRIPTION_ID)
+            .onStart {
+                val subId = subscriptionManagerProxy.getDefaultDataSubscriptionId()
+                emit(if (subId == INVALID_SUBSCRIPTION_ID) null else subId)
+            }
+            .stateIn(scope, SharingStarted.WhileSubscribed(), null)
 
     private val carrierConfigChangedEvent =
         broadcastDispatcher

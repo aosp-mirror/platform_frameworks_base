@@ -72,7 +72,7 @@ interface MobileIconsInteractor {
     val filteredSubscriptions: Flow<List<SubscriptionModel>>
 
     /** Subscription ID of the current default data subscription */
-    val defaultDataSubId: Flow<Int>
+    val defaultDataSubId: Flow<Int?>
 
     /**
      * The current list of [MobileIconInteractor]s associated with the current list of

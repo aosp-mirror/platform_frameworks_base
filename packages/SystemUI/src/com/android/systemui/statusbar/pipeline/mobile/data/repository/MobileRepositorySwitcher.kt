@@ -164,7 +164,7 @@ constructor(
 
     override fun getIsAnySimSecure(): Boolean = activeRepo.value.getIsAnySimSecure()
 
-    override val defaultDataSubId: StateFlow<Int> =
+    override val defaultDataSubId: StateFlow<Int?> =
         activeRepo
             .flatMapLatest { it.defaultDataSubId }
             .stateIn(scope, SharingStarted.WhileSubscribed(), realRepository.defaultDataSubId.value)
