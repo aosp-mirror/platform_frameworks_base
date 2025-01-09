@@ -70,7 +70,6 @@ import com.android.internal.widget.VerifyCredentialResponse;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
@@ -1064,7 +1063,7 @@ public class KeyguardManager {
             Log.e(TAG, "Save lock exception", e);
             success = false;
         } finally {
-            Arrays.fill(password, (byte) 0);
+            LockPatternUtils.zeroize(password);
         }
         return success;
     }
