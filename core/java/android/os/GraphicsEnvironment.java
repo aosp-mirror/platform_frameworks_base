@@ -706,11 +706,11 @@ public class GraphicsEnvironment {
      * @param context
      */
     public void showAngleInUseDialogBox(Context context) {
-        if (!shouldShowAngleInUseDialogBox(context)) {
+        if (!mShouldUseAngle) {
             return;
         }
 
-        if (!mShouldUseAngle) {
+        if (!shouldShowAngleInUseDialogBox(context)) {
             return;
         }
 
