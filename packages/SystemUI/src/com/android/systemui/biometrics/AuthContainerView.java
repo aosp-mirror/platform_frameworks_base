@@ -819,6 +819,11 @@ public class AuthContainerView extends LinearLayout
     }
 
     @Override
+    public String getClassNameIfItIsConfirmDeviceCredentialActivity() {
+        return  mConfig.mPromptInfo.getClassNameIfItIsConfirmDeviceCredentialActivity();
+    }
+
+    @Override
     public void animateToCredentialUI(boolean isError) {
         if (mBiometricView != null) {
             mBiometricView.startTransitionToCredentialUI(isError);
