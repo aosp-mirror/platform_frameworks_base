@@ -22,6 +22,7 @@ import com.android.settingslib.graph.proto.PreferenceProto
 import com.android.settingslib.ipc.ApiDescriptor
 import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.ApiPermissionChecker
+import com.android.settingslib.metadata.PreferenceCoordinate
 import com.android.settingslib.metadata.PreferenceHierarchyNode
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 
