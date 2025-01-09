@@ -36,6 +36,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerType
@@ -52,6 +53,7 @@ import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
 import androidx.compose.ui.test.swipeLeft
+import androidx.compose.ui.test.swipeWithVelocity
 import androidx.compose.ui.unit.Velocity
 import com.google.common.truth.Truth.assertThat
 import kotlin.math.ceil
@@ -794,6 +796,158 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         rule.onRoot().performTouchInput { moveBy((touchSlop + 1f).toOffset()) }
 
         assertThat(draggable.onDragStartedCalled).isFalse()
+    }
+
+    @Test
+    fun availableAndConsumedScrollDeltas() {
+        val totalScroll = 200f
+        val consumedByEffectPreScroll = 10f // 200f => 190f
+        val consumedByConnectionPreScroll = 20f // 190f => 170f
+        val consumedByScroll = 30f // 170f => 140f
+        val consumedByConnectionPostScroll = 40f // 140f => 100f
+
+        // Available scroll values that we will check later.
+        var availableToEffectPreScroll = 0f
+        var availableToConnectionPreScroll = 0f
+        var availableToScroll = 0f
+        var availableToConnectionPostScroll = 0f
+        var availableToEffectPostScroll = 0f
+
+        val effect =
+            TestOverscrollEffect(
+                orientation,
+                onPreScroll = {
+                    availableToEffectPreScroll = it
+                    consumedByEffectPreScroll
+                },
+                onPostScroll = {
+                    availableToEffectPostScroll = it
+                    it
+                },
+            )
+
+        val connection =
+            object : NestedScrollConnection {
+                override fun onPreScroll(available: Offset, source: NestedScrollSource): Offset {
+                    availableToConnectionPreScroll = available.toFloat()
+                    return consumedByConnectionPreScroll.toOffset()
+                }
+
+                override fun onPostScroll(
+                    consumed: Offset,
+                    available: Offset,
+                    source: NestedScrollSource,
+                ): Offset {
+                    assertThat(consumed.toFloat()).isEqualTo(consumedByScroll)
+                    availableToConnectionPostScroll = available.toFloat()
+                    return consumedByConnectionPostScroll.toOffset()
+                }
+            }
+
+        val draggable =
+            TestDraggable(
+                onDrag = {
+                    availableToScroll = it
+                    consumedByScroll
+                }
+            )
+
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(
+                    Modifier.fillMaxSize()
+                        .nestedScroll(connection)
+                        .nestedDraggable(draggable, orientation, effect)
+                )
+            }
+
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy((touchSlop + totalScroll).toOffset())
+        }
+
+        assertThat(availableToEffectPreScroll).isEqualTo(200f)
+        assertThat(availableToConnectionPreScroll).isEqualTo(190f)
+        assertThat(availableToScroll).isEqualTo(170f)
+        assertThat(availableToConnectionPostScroll).isEqualTo(140f)
+        assertThat(availableToEffectPostScroll).isEqualTo(100f)
+    }
+
+    @Test
+    fun availableAndConsumedVelocities() {
+        val totalVelocity = 200f
+        val consumedByEffectPreFling = 10f // 200f => 190f
+        val consumedByConnectionPreFling = 20f // 190f => 170f
+        val consumedByFling = 30f // 170f => 140f
+        val consumedByConnectionPostFling = 40f // 140f => 100f
+
+        // Available velocities that we will check later.
+        var availableToEffectPreFling = 0f
+        var availableToConnectionPreFling = 0f
+        var availableToFling = 0f
+        var availableToConnectionPostFling = 0f
+        var availableToEffectPostFling = 0f
+
+        val effect =
+            TestOverscrollEffect(
+                orientation,
+                onPreFling = {
+                    availableToEffectPreFling = it
+                    consumedByEffectPreFling
+                },
+                onPostFling = {
+                    availableToEffectPostFling = it
+                    it
+                },
+                onPostScroll = { 0f },
+            )
+
+        val connection =
+            object : NestedScrollConnection {
+                override suspend fun onPreFling(available: Velocity): Velocity {
+                    availableToConnectionPreFling = available.toFloat()
+                    return consumedByConnectionPreFling.toVelocity()
+                }
+
+                override suspend fun onPostFling(
+                    consumed: Velocity,
+                    available: Velocity,
+                ): Velocity {
+                    assertThat(consumed.toFloat()).isEqualTo(consumedByFling)
+                    availableToConnectionPostFling = available.toFloat()
+                    return consumedByConnectionPostFling.toVelocity()
+                }
+            }
+
+        val draggable =
+            TestDraggable(
+                onDragStopped = { velocity, _ ->
+                    availableToFling = velocity
+                    consumedByFling
+                },
+                onDrag = { 0f },
+            )
+
+        rule.setContent {
+            Box(
+                Modifier.fillMaxSize()
+                    .nestedScroll(connection)
+                    .nestedDraggable(draggable, orientation, effect)
+            )
+        }
+
+        rule.onRoot().performTouchInput {
+            when (orientation) {
+                Orientation.Horizontal -> swipeWithVelocity(topLeft, topRight, totalVelocity)
+                Orientation.Vertical -> swipeWithVelocity(topLeft, bottomLeft, totalVelocity)
+            }
+        }
+
+        assertThat(availableToEffectPreFling).isWithin(1f).of(200f)
+        assertThat(availableToConnectionPreFling).isWithin(1f).of(190f)
+        assertThat(availableToFling).isWithin(1f).of(170f)
+        assertThat(availableToConnectionPostFling).isWithin(1f).of(140f)
+        assertThat(availableToEffectPostFling).isWithin(1f).of(100f)
     }
 
     private fun ComposeContentTestRule.setContentWithTouchSlop(
