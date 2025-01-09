@@ -18,7 +18,6 @@ package android.widget;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
-import static android.graphics.Paint.NEW_FONT_VARIATION_MANAGEMENT;
 import static android.view.ContentInfo.FLAG_CONVERT_TO_PLAIN_TEXT;
 import static android.view.ContentInfo.SOURCE_AUTOFILL;
 import static android.view.ContentInfo.SOURCE_CLIPBOARD;
@@ -5544,13 +5543,32 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             return true;
         }
 
-        final boolean useFontVariationStore = Flags.typefaceRedesignReadonly()
-                && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
         boolean effective;
-        if (useFontVariationStore) {
+        if (Flags.typefaceRedesignReadonly()) {
             if (mFontWeightAdjustment != 0
                     && mFontWeightAdjustment != Configuration.FONT_WEIGHT_ADJUSTMENT_UNDEFINED) {
-                mTextPaint.setFontVariationSettings(fontVariationSettings, mFontWeightAdjustment);
+                List<FontVariationAxis> axes = FontVariationAxis.fromFontVariationSettingsForList(
+                        fontVariationSettings);
+                if (axes == null) {
+                    return false;  // invalid format of the font variation settings.
+                }
+                boolean wghtAdjusted = false;
+                for (int i = 0; i < axes.size(); ++i) {
+                    FontVariationAxis axis = axes.get(i);
+                    if (axis.getOpenTypeTagValue() == 0x77676874 /* wght */) {
+                        axes.set(i, new FontVariationAxis("wght",
+                                Math.clamp(axis.getStyleValue() + mFontWeightAdjustment,
+                                        FontStyle.FONT_WEIGHT_MIN, FontStyle.FONT_WEIGHT_MAX)));
+                        wghtAdjusted = true;
+                    }
+                }
+                if (!wghtAdjusted) {
+                    axes.add(new FontVariationAxis("wght",
+                            Math.clamp(400 + mFontWeightAdjustment,
+                                    FontStyle.FONT_WEIGHT_MIN, FontStyle.FONT_WEIGHT_MAX)));
+                }
+                mTextPaint.setFontVariationSettings(
+                        FontVariationAxis.toFontVariationSettings(axes));
             } else {
                 mTextPaint.setFontVariationSettings(fontVariationSettings);
             }

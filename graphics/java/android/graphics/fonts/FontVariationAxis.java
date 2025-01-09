@@ -23,6 +23,7 @@ import android.os.Build;
 import android.text.TextUtils;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 import java.util.regex.Pattern;
@@ -139,8 +140,18 @@ public final class FontVariationAxis {
      */
     public static @Nullable FontVariationAxis[] fromFontVariationSettings(
             @Nullable String settings) {
-        if (settings == null || settings.isEmpty()) {
+        List<FontVariationAxis> result = fromFontVariationSettingsForList(settings);
+        if (result.isEmpty()) {
             return null;
+        }
+        return result.toArray(new FontVariationAxis[0]);
+    }
+
+    /** @hide */
+    public static @NonNull List<FontVariationAxis> fromFontVariationSettingsForList(
+            @Nullable String settings) {
+        if (settings == null || settings.isEmpty()) {
+            return Collections.emptyList();
         }
         final ArrayList<FontVariationAxis> axisList = new ArrayList<>();
         final int length = settings.length();
@@ -172,9 +183,9 @@ public final class FontVariationAxis {
             i = endOfValueString;
         }
         if (axisList.isEmpty()) {
-            return null;
+            return Collections.emptyList();
         }
-        return axisList.toArray(new FontVariationAxis[0]);
+        return axisList;
     }
 
     /**
