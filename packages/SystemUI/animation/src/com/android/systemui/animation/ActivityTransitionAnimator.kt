@@ -232,19 +232,21 @@ constructor(
     private val lifecycleListener =
         object : Listener {
             override fun onTransitionAnimationStart() {
-                listeners.forEach { it.onTransitionAnimationStart() }
+                LinkedHashSet(listeners).forEach { it.onTransitionAnimationStart() }
             }
 
             override fun onTransitionAnimationEnd() {
-                listeners.forEach { it.onTransitionAnimationEnd() }
+                LinkedHashSet(listeners).forEach { it.onTransitionAnimationEnd() }
             }
 
             override fun onTransitionAnimationProgress(linearProgress: Float) {
-                listeners.forEach { it.onTransitionAnimationProgress(linearProgress) }
+                LinkedHashSet(listeners).forEach {
+                     it.onTransitionAnimationProgress(linearProgress)
+                }
             }
 
             override fun onTransitionAnimationCancelled() {
-                listeners.forEach { it.onTransitionAnimationCancelled() }
+                LinkedHashSet(listeners).forEach { it.onTransitionAnimationCancelled() }
             }
         }
 
