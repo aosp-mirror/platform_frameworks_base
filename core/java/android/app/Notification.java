@@ -1968,6 +1968,13 @@ public class Notification implements Parcelable
         @SystemApi
         public static final int SEMANTIC_ACTION_CONVERSATION_IS_PHISHING = 12;
 
+        /**
+         * {@link #extras} key to a boolean defining if this action requires special visual
+         * treatment.
+         * @hide
+         */
+        public static final String EXTRA_IS_MAGIC = "android.extra.IS_MAGIC";
+
         private final Bundle mExtras;
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         private Icon mIcon;
