@@ -50,7 +50,6 @@ class FlexClockController(private val clockCtx: ClockContext) : ClockController 
             DEFAULT_CLOCK_ID,
             clockCtx.resources.getString(R.string.clock_default_name),
             clockCtx.resources.getString(R.string.clock_default_description),
-            isReactiveToTone = true,
         )
     }
 
