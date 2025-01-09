@@ -58,6 +58,7 @@ import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.utils.coroutines.flow.conflatedCallbackFlow
 import java.io.PrintWriter
 import java.lang.ref.WeakReference
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
@@ -108,9 +109,8 @@ constructor(
 ) : MobileConnectionsRepository, Dumpable {
 
     // TODO(b/333912012): for now, we are never invalidating the cache. We can do better though
-    private var subIdRepositoryCache:
-        MutableMap<Int, WeakReference<FullMobileConnectionRepository>> =
-        mutableMapOf()
+    private var subIdRepositoryCache =
+        ConcurrentHashMap<Int, WeakReference<FullMobileConnectionRepository>>()
 
     private val defaultNetworkName =
         NetworkNameModel.Default(
