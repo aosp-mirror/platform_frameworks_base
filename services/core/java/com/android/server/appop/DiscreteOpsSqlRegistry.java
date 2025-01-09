@@ -43,6 +43,8 @@ import java.io.File;
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.time.Duration;
+import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -176,6 +178,8 @@ public class DiscreteOpsSqlRegistry extends DiscreteOpsRegistry {
         writeAndClearOldAccessHistory();
         boolean assembleChains = attributionExemptPkgs != null;
         IntArray opCodes = getAppOpCodes(filter, opNamesFilter);
+        beginTimeMillis = Math.max(beginTimeMillis, Instant.now().minus(sDiscreteHistoryCutoff,
+                ChronoUnit.MILLIS).toEpochMilli());
         List<DiscreteOp> discreteOps = mDiscreteOpsDbHelper.getDiscreteOps(filter, uidFilter,
                 packageNameFilter, attributionTagFilter, opCodes, opFlagsFilter, beginTimeMillis,
                 endTimeMillis, -1, null);
