@@ -531,6 +531,16 @@ flag {
 }
 
 flag {
+    name: "enable_per_display_package_context_cache_in_statusbar_notif"
+    namespace: "lse_desktop_experience"
+    description: "Enables per-display package context caching in StatusBarNotification"
+    bug: "388886443"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_desktop_wallpaper_activity_for_system_user"
     namespace: "lse_desktop_experience"
     description: "Enables starting DesktopWallpaperActivity on system user."
