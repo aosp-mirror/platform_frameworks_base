@@ -577,9 +577,8 @@ public final class VirtualDeviceManager {
         }
 
         /** @hide */
-        public VirtualDevice(IVirtualDeviceManager service, Context context,
-                IVirtualDevice virtualDevice) {
-            mVirtualDeviceInternal = new VirtualDeviceInternal(service, context, virtualDevice);
+        public VirtualDevice(Context context, IVirtualDevice virtualDevice) {
+            mVirtualDeviceInternal = new VirtualDeviceInternal(context, virtualDevice);
         }
 
         /**

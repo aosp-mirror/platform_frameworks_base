@@ -767,7 +767,7 @@ public class VirtualDeviceManagerService extends SystemService {
                     params,
                     /* activityListener= */ null,
                     /* soundEffectListener= */ null);
-            return new VirtualDeviceManager.VirtualDevice(mImpl, getContext(), virtualDevice);
+            return new VirtualDeviceManager.VirtualDevice(getContext(), virtualDevice);
         }
 
         @Override
