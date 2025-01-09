@@ -294,13 +294,31 @@ public class MediaQualityService extends SystemService {
         }
 
         @Override
-        public List<PictureProfileHandle> getPictureProfileHandle(String[] id, UserHandle user) {
-            return new ArrayList<>();
+        public List<PictureProfileHandle> getPictureProfileHandle(String[] ids, UserHandle user) {
+            List<PictureProfileHandle> toReturn = new ArrayList<>();
+            for (String id : ids) {
+                Long key = mPictureProfileTempIdMap.getKey(id);
+                if (key != null) {
+                    toReturn.add(new PictureProfileHandle(key));
+                } else {
+                    toReturn.add(null);
+                }
+            }
+            return toReturn;
         }
 
         @Override
-        public List<SoundProfileHandle> getSoundProfileHandle(String[] id, UserHandle user) {
-            return new ArrayList<>();
+        public List<SoundProfileHandle> getSoundProfileHandle(String[] ids, UserHandle user) {
+            List<SoundProfileHandle> toReturn = new ArrayList<>();
+            for (String id : ids) {
+                Long key = mSoundProfileTempIdMap.getKey(id);
+                if (key != null) {
+                    toReturn.add(new SoundProfileHandle(key));
+                } else {
+                    toReturn.add(null);
+                }
+            }
+            return toReturn;
         }
 
         @Override
