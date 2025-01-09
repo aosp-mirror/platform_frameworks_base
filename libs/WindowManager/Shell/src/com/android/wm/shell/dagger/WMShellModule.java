@@ -50,6 +50,7 @@ import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.apptoweb.AssistContentRequester;
+import com.android.wm.shell.appzoomout.AppZoomOutController;
 import com.android.wm.shell.back.BackAnimationController;
 import com.android.wm.shell.bubbles.BubbleController;
 import com.android.wm.shell.bubbles.BubbleData;
@@ -1310,6 +1311,23 @@ public abstract class WMShellModule {
             PackageManager packageManager
     ) {
         return new DesktopModeUiEventLogger(uiEventLogger, packageManager);
+    }
+
+    //
+    // App zoom out
+    //
+
+    @WMSingleton
+    @Provides
+    static AppZoomOutController provideAppZoomOutController(
+            Context context,
+            ShellInit shellInit,
+            ShellTaskOrganizer shellTaskOrganizer,
+            DisplayController displayController,
+            DisplayLayout displayLayout,
+            @ShellMainThread ShellExecutor mainExecutor) {
+        return AppZoomOutController.create(context, shellInit, shellTaskOrganizer,
+                displayController, displayLayout, mainExecutor);
     }
 
     //

@@ -43,6 +43,7 @@ import com.android.systemui.testKosmos
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.util.mockito.eq
 import com.android.systemui.window.domain.interactor.WindowRootViewBlurInteractor
+import com.android.wm.shell.appzoomout.AppZoomOut
 import com.google.common.truth.Truth.assertThat
 import java.util.function.Consumer
 import org.junit.Before
@@ -65,6 +66,7 @@ import org.mockito.Mockito.reset
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.junit.MockitoJUnit
+import java.util.Optional
 
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
@@ -82,6 +84,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
     @Mock private lateinit var wallpaperController: WallpaperController
     @Mock private lateinit var notificationShadeWindowController: NotificationShadeWindowController
     @Mock private lateinit var dumpManager: DumpManager
+    @Mock private lateinit var appZoomOutOptional: Optional<AppZoomOut>
     @Mock private lateinit var root: View
     @Mock private lateinit var viewRootImpl: ViewRootImpl
     @Mock private lateinit var windowToken: IBinder
@@ -128,6 +131,7 @@ class NotificationShadeDepthControllerTest : SysuiTestCase() {
                 ResourcesSplitShadeStateController(),
                 windowRootViewBlurInteractor,
                 applicationScope,
+                appZoomOutOptional,
                 dumpManager,
                 configurationController,
             )
