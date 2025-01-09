@@ -75,7 +75,6 @@ struct LinkOptions {
   bool no_resource_removal = false;
   bool no_xml_namespaces = false;
   bool do_not_compress_anything = false;
-  bool use_sparse_encoding = false;
   std::unordered_set<std::string> extensions_to_not_compress;
   std::optional<std::regex> regex_to_not_compress;
   FeatureFlagValues feature_flag_values;
@@ -163,9 +162,11 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--no-resource-removal", "Disables automatic removal of resources without\n"
             "defaults. Use this only when building runtime resource overlay packages.",
         &options_.no_resource_removal);
-    AddOptionalSwitch("--enable-sparse-encoding",
-                      "This decreases APK size at the cost of resource retrieval performance.",
-                      &options_.use_sparse_encoding);
+    AddOptionalSwitch(
+        "--enable-sparse-encoding",
+        "[DEPRECATED] This flag is a no-op as of aapt2 v2.20. Sparse encoding is always\n"
+        "enabled if minSdk of the APK is >= 32.",
+        nullptr);
     AddOptionalSwitch("--enable-compact-entries",
         "This decreases APK size by using compact resource entries for simple data types.",
         &options_.table_flattener_options.use_compact_entries);

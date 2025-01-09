@@ -54,7 +54,9 @@ std::string GetSafePath(StringPiece arg) {
 void Command::AddRequiredFlag(StringPiece name, StringPiece description, std::string* value,
                               uint32_t flags) {
   auto func = [value, flags](StringPiece arg, std::ostream*) -> bool {
-    *value = (flags & Command::kPath) ? GetSafePath(arg) : std::string(arg);
+    if (value) {
+      *value = (flags & Command::kPath) ? GetSafePath(arg) : std::string(arg);
+    }
     return true;
   };
 
@@ -65,7 +67,9 @@ void Command::AddRequiredFlag(StringPiece name, StringPiece description, std::st
 void Command::AddRequiredFlagList(StringPiece name, StringPiece description,
                                   std::vector<std::string>* value, uint32_t flags) {
   auto func = [value, flags](StringPiece arg, std::ostream*) -> bool {
-    value->push_back((flags & Command::kPath) ? GetSafePath(arg) : std::string(arg));
+    if (value) {
+      value->push_back((flags & Command::kPath) ? GetSafePath(arg) : std::string(arg));
+    }
     return true;
   };
 
@@ -76,7 +80,9 @@ void Command::AddRequiredFlagList(StringPiece name, StringPiece description,
 void Command::AddOptionalFlag(StringPiece name, StringPiece description,
                               std::optional<std::string>* value, uint32_t flags) {
   auto func = [value, flags](StringPiece arg, std::ostream*) -> bool {
-    *value = (flags & Command::kPath) ? GetSafePath(arg) : std::string(arg);
+    if (value) {
+      *value = (flags & Command::kPath) ? GetSafePath(arg) : std::string(arg);
+    }
     return true;
   };
 
@@ -87,7 +93,9 @@ void Command::AddOptionalFlag(StringPiece name, StringPiece description,
 void Command::AddOptionalFlagList(StringPiece name, StringPiece description,
                                   std::vector<std::string>* value, uint32_t flags) {
   auto func = [value, flags](StringPiece arg, std::ostream*) -> bool {
-    value->push_back((flags & Command::kPath) ? GetSafePath(arg) : std::string(arg));
+    if (value) {
+      value->push_back((flags & Command::kPath) ? GetSafePath(arg) : std::string(arg));
+    }
     return true;
   };
 
@@ -98,7 +106,9 @@ void Command::AddOptionalFlagList(StringPiece name, StringPiece description,
 void Command::AddOptionalFlagList(StringPiece name, StringPiece description,
                                   std::unordered_set<std::string>* value) {
   auto func = [value](StringPiece arg, std::ostream* out_error) -> bool {
-    value->emplace(arg);
+    if (value) {
+      value->emplace(arg);
+    }
     return true;
   };
 
@@ -108,7 +118,9 @@ void Command::AddOptionalFlagList(StringPiece name, StringPiece description,
 
 void Command::AddOptionalSwitch(StringPiece name, StringPiece description, bool* value) {
   auto func = [value](StringPiece arg, std::ostream* out_error) -> bool {
-    *value = true;
+    if (value) {
+      *value = true;
+    }
     return true;
   };
 

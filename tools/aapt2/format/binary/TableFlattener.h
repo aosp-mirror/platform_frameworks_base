@@ -37,8 +37,7 @@ constexpr const size_t kSparseEncodingThreshold = 60;
 enum class SparseEntriesMode {
   // Disables sparse encoding for entries.
   Disabled,
-  // Enables sparse encoding for all entries for APKs with O+ minSdk. For APKs with minSdk less
-  // than O only applies sparse encoding for resource configuration available on O+.
+  // Enables sparse encoding for all entries for APKs with minSdk >= 32 (S_V2).
   Enabled,
   // Enables sparse encoding for all entries regardless of minSdk.
   Forced,
@@ -47,7 +46,7 @@ enum class SparseEntriesMode {
 struct TableFlattenerOptions {
   // When enabled, types for configurations with a sparse set of entries are encoded
   // as a sparse map of entry ID and offset to actual data.
-  SparseEntriesMode sparse_entries = SparseEntriesMode::Disabled;
+  SparseEntriesMode sparse_entries = SparseEntriesMode::Enabled;
 
   // When true, use compact entries for simple data
   bool use_compact_entries = false;
