@@ -5991,6 +5991,15 @@ public class Notification implements Parcelable
             }
             setHeaderlessVerticalMargins(contentView, p, hasSecondLine);
 
+            // Update margins to leave space for the top line (but not for headerless views like
+            // HUNS, which use a different layout that already accounts for that).
+            if (Flags.notificationsRedesignTemplates() && !p.mHeaderless) {
+                int margin = getContentMarginTop(mContext,
+                        R.dimen.notification_2025_content_margin_top);
+                contentView.setViewLayoutMargin(R.id.notification_main_column,
+                        RemoteViews.MARGIN_TOP, margin, TypedValue.COMPLEX_UNIT_PX);
+            }
+
             return contentView;
         }
 
@@ -6462,16 +6471,6 @@ public class Notification implements Parcelable
             ColorStateList actionColor = ColorStateList.valueOf(getStandardActionColor(p));
             big.setColorStateList(R.id.snooze_button, "setImageTintList", actionColor);
             big.setColorStateList(R.id.bubble_button, "setImageTintList", actionColor);
-
-            // Update margins to leave space for the top line (but not for HUNs, which use a
-            // different layout that already accounts for that).
-            if (Flags.notificationsRedesignTemplates()
-                    && p.mViewType != StandardTemplateParams.VIEW_TYPE_HEADS_UP) {
-                int margin = getContentMarginTop(mContext,
-                        R.dimen.notification_2025_content_margin_top);
-                big.setViewLayoutMargin(R.id.notification_main_column, RemoteViews.MARGIN_TOP,
-                        margin, TypedValue.COMPLEX_UNIT_PX);
-            }
 
             boolean validRemoteInput = false;
 
