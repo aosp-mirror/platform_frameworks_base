@@ -2766,6 +2766,9 @@
     <bool name="config_dreamsActivatedOnDockByDefault">true</bool>
     <!-- If supported and enabled, are dreams activated when asleep and charging? (by default) -->
     <bool name="config_dreamsActivatedOnSleepByDefault">false</bool>
+    <!-- If supported and enabled, are dreams enabled while device is stationary and upright?
+         (by default) -->
+    <bool name="config_dreamsActivatedOnPosturedByDefault">false</bool>
     <!-- ComponentName of the default dream (Settings.Secure.DEFAULT_SCREENSAVER_COMPONENT) -->
     <string name="config_dreamsDefaultComponent" translatable="false">com.android.deskclock/com.android.deskclock.Screensaver</string>
     <!-- ComponentNames of the dreams that we should hide -->

@@ -10525,6 +10525,15 @@ public final class Settings {
         public static final String SCREENSAVER_ACTIVATE_ON_SLEEP = "screensaver_activate_on_sleep";
 
         /**
+         * If screensavers are enabled, whether the screensaver should be
+         * automatically launched when the device is stationary and upright.
+         * @hide
+         */
+        @Readable
+        public static final String SCREENSAVER_ACTIVATE_ON_POSTURED =
+                "screensaver_activate_on_postured";
+
+        /**
          * If screensavers are enabled, the default screensaver component.
          * @hide
          */
