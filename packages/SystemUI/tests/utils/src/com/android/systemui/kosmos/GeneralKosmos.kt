@@ -54,8 +54,8 @@ var Kosmos.brightnessWarningToast: BrightnessWarningToast by
  * Run this test body with a [Kosmos] as receiver, and using the [testScope] currently installed in
  * that Kosmos instance
  */
-fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) {
-    testScope.runTestWithSnapshots testBody@{ this@runTest.testBody() }
+fun Kosmos.runTest(testBody: suspend Kosmos.() -> Unit) = let { kosmos ->
+    testScope.runTestWithSnapshots { kosmos.testBody() }
 }
 
 fun Kosmos.runCurrent() = testScope.runCurrent()
