@@ -1254,21 +1254,6 @@ public final class Settings {
             "android.settings.TEMPERATURE_UNIT_SETTINGS";
 
     /**
-     * Activity Action: Show numbering system configuration settings.
-     * <p>
-     * Input: Nothing.
-     * <p>
-     * Output: After calling {@link android.app.Activity#startActivityForResult}, the callback
-     * {@code onActivityResult} will have resultCode {@link android.app.Activity#RESULT_OK} if
-     * the numbering system settings page is suitable to show on the UI. Otherwise, the result is
-     * set to {@link android.app.Activity#RESULT_CANCELED}.
-     */
-    @FlaggedApi(Flags.FLAG_SYSTEM_REGIONAL_PREFERENCES_API_ENABLED)
-    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
-    public static final String ACTION_NUMBERING_SYSTEM_SETTINGS =
-            "android.settings.NUMBERING_SYSTEM_SETTINGS";
-
-    /**
      * Activity Action: Show measurement system configuration settings.
      * <p>
      * Input: Nothing.
