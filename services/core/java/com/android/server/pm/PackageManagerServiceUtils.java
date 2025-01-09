@@ -520,22 +520,6 @@ public class PackageManagerServiceUtils {
         }
     }
 
-    /** Default is to not use fs-verity since it depends on kernel support. */
-    private static final int FSVERITY_DISABLED = 0;
-
-    /** Standard fs-verity. */
-    private static final int FSVERITY_ENABLED = 2;
-
-    /** Returns true if standard APK Verity is enabled. */
-    static boolean isApkVerityEnabled() {
-        if (android.security.Flags.deprecateFsvSig()) {
-            return false;
-        }
-        return Build.VERSION.DEVICE_INITIAL_SDK_INT >= Build.VERSION_CODES.R
-                || SystemProperties.getInt("ro.apk_verity.mode", FSVERITY_DISABLED)
-                        == FSVERITY_ENABLED;
-    }
-
     /**
      * Verifies that signatures match.
      * @returns {@code true} if the compat signatures were matched; otherwise, {@code false}.
