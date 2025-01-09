@@ -256,7 +256,7 @@ import android.app.ServiceStartNotAllowedException;
 import android.app.WaitResult;
 import android.app.assist.ActivityId;
 import android.app.backup.BackupAnnotations.BackupDestination;
-import android.app.backup.IBackupManager;
+import android.app.backup.BackupManagerInternal;
 import android.app.compat.CompatChanges;
 import android.app.job.JobParameters;
 import android.app.usage.UsageEvents;
@@ -4490,11 +4490,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final int userId = app.userId;
                 final String packageName = app.info.packageName;
                 mHandler.post(() -> {
-                    try {
-                        getBackupManager().agentDisconnectedForUser(userId, packageName);
-                    } catch (RemoteException e) {
-                        // Can't happen; the backup manager is local
-                    }
+                    LocalServices.getService(BackupManagerInternal.class).agentDisconnectedForUser(
+                            packageName, userId);
                 });
             }
         } else {
@@ -13547,11 +13544,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (DEBUG_BACKUP || DEBUG_CLEANUP) Slog.d(TAG_CLEANUP, "App "
                     + backupTarget.appInfo + " died during backup");
             mHandler.post(() -> {
-                try {
-                    getBackupManager().agentDisconnectedForUser(app.userId, app.info.packageName);
-                } catch (RemoteException e) {
-                    // can't happen; backup manager is local
-                }
+                LocalServices.getService(BackupManagerInternal.class).agentDisconnectedForUser(
+                        app.info.packageName, app.userId);
             });
         }
 
@@ -14265,9 +14259,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final long oldIdent = Binder.clearCallingIdentity();
         try {
-            getBackupManager().agentConnectedForUser(userId, agentPackageName, agent);
-        } catch (RemoteException e) {
-            // can't happen; the backup manager service is local
+            LocalServices.getService(BackupManagerInternal.class).agentConnectedForUser(
+                    agentPackageName, userId, agent);
         } catch (Exception e) {
             Slog.w(TAG, "Exception trying to deliver BackupAgent binding: ");
             e.printStackTrace();
@@ -19487,9 +19480,5 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         return token;
-    }
-
-    private IBackupManager getBackupManager() {
-        return IBackupManager.Stub.asInterface(ServiceManager.getService(Context.BACKUP_SERVICE));
     }
 }
