@@ -56,8 +56,6 @@ public class NotificationExpandButton extends FrameLayout {
     private int mDefaultTextColor;
     private int mHighlightPillColor;
     private int mHighlightTextColor;
-    // Track whether this ever had mExpanded = true, so that we don't highlight it anymore.
-    private boolean mWasExpanded = false;
 
     public NotificationExpandButton(Context context) {
         this(context, null, 0, 0);
@@ -136,7 +134,6 @@ public class NotificationExpandButton extends FrameLayout {
         int contentDescriptionId;
         if (mExpanded) {
             if (notificationsRedesignTemplates()) {
-                mWasExpanded = true;
                 drawableId = R.drawable.ic_notification_2025_collapse;
             } else {
                 drawableId = R.drawable.ic_collapse_notification;
@@ -156,8 +153,6 @@ public class NotificationExpandButton extends FrameLayout {
         if (!notificationsRedesignTemplates()) {
             // changing the expanded state can affect the number display
             updateNumber();
-        } else {
-            updateColors();
         }
     }
 
@@ -197,43 +192,22 @@ public class NotificationExpandButton extends FrameLayout {
         );
     }
 
-    /**
-     * Use highlight colors for the expander for groups (when the number is showing) that haven't
-     * been opened before, as long as the colors are available.
-     */
-    private boolean shouldBeHighlighted() {
-        return !mWasExpanded && shouldShowNumber()
-                && mHighlightPillColor != 0 && mHighlightTextColor != 0;
-    }
-
     private void updateColors() {
-        if (notificationsRedesignTemplates()) {
-            if (shouldBeHighlighted()) {
+        if (shouldShowNumber()) {
+            if (mHighlightPillColor != 0) {
                 mPillDrawable.setTintList(ColorStateList.valueOf(mHighlightPillColor));
-                mIconView.setColorFilter(mHighlightTextColor);
+            }
+            mIconView.setColorFilter(mHighlightTextColor);
+            if (mHighlightTextColor != 0) {
                 mNumberView.setTextColor(mHighlightTextColor);
-            } else {
-                mPillDrawable.setTintList(ColorStateList.valueOf(mDefaultPillColor));
-                mIconView.setColorFilter(mDefaultTextColor);
-                mNumberView.setTextColor(mDefaultTextColor);
             }
         } else {
-            if (shouldShowNumber()) {
-                if (mHighlightPillColor != 0) {
-                    mPillDrawable.setTintList(ColorStateList.valueOf(mHighlightPillColor));
-                }
-                mIconView.setColorFilter(mHighlightTextColor);
-                if (mHighlightTextColor != 0) {
-                    mNumberView.setTextColor(mHighlightTextColor);
-                }
-            } else {
-                if (mDefaultPillColor != 0) {
-                    mPillDrawable.setTintList(ColorStateList.valueOf(mDefaultPillColor));
-                }
-                mIconView.setColorFilter(mDefaultTextColor);
-                if (mDefaultTextColor != 0) {
-                    mNumberView.setTextColor(mDefaultTextColor);
-                }
+            if (mDefaultPillColor != 0) {
+                mPillDrawable.setTintList(ColorStateList.valueOf(mDefaultPillColor));
+            }
+            mIconView.setColorFilter(mDefaultTextColor);
+            if (mDefaultTextColor != 0) {
+                mNumberView.setTextColor(mDefaultTextColor);
             }
         }
     }

@@ -6207,7 +6207,7 @@ public class Notification implements Parcelable
             int textColor = Colors.flattenAlpha(getPrimaryTextColor(p), pillColor);
             contentView.setInt(R.id.expand_button, "setDefaultTextColor", textColor);
             contentView.setInt(R.id.expand_button, "setDefaultPillColor", pillColor);
-            // Use different highlighted colors for e.g. unopened groups
+            // Use different highlighted colors for conversations' unread count
             if (p.mHighlightExpander) {
                 pillColor = Colors.flattenAlpha(
                         getColors(p).getTertiaryFixedDimAccentColor(), bgColor);
@@ -6807,8 +6807,6 @@ public class Notification implements Parcelable
         public RemoteViews makeNotificationGroupHeader() {
             return makeNotificationHeader(mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_GROUP_HEADER)
-                    // Highlight group expander until the group is first opened
-                    .highlightExpander(Flags.notificationsRedesignTemplates())
                     .fillTextsFrom(this));
         }
 
@@ -6984,14 +6982,12 @@ public class Notification implements Parcelable
          * @param useRegularSubtext uses the normal subtext set if there is one available. Otherwise
          *                          a new subtext is created consisting of the content of the
          *                          notification.
-         * @param highlightExpander whether the expander should use the highlighted colors
          * @hide
          */
-        public RemoteViews makeLowPriorityContentView(boolean useRegularSubtext,
-                boolean highlightExpander) {
+        public RemoteViews makeLowPriorityContentView(boolean useRegularSubtext) {
             StandardTemplateParams p = mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_MINIMIZED)
-                    .highlightExpander(highlightExpander)
+                    .highlightExpander(false)
                     .fillTextsFrom(this);
             if (!useRegularSubtext || TextUtils.isEmpty(p.mSubText)) {
                 p.summaryText(createSummaryText());
