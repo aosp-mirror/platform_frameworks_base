@@ -45,6 +45,7 @@ import android.annotation.Nullable;
 import android.content.ClipData;
 import android.content.ClipDescription;
 import android.graphics.Point;
+import android.graphics.PointF;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Build;
@@ -70,6 +71,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.internal.view.IDragAndDropPermissions;
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.window.flags.Flags;
 
 import java.util.ArrayList;
 import java.util.concurrent.CompletableFuture;
@@ -542,10 +544,26 @@ class DragState {
                 }
             }
             ClipDescription description = data != null ? data.getDescription() : mDataDescription;
+
+            // Note this can be negative numbers if touch coords are left or top of the window.
+            PointF relativeToWindowCoords = new PointF(newWin.translateToWindowX(touchX),
+                    newWin.translateToWindowY(touchY));
+            if (Flags.enableConnectedDisplaysDnd()
+                    && mDisplayContent.getDisplayId() != newWin.getDisplayId()) {
+                // Currently DRAG_STARTED coords are sent relative to the window target in **px**
+                // coordinates. However, this cannot be extended to connected displays scenario,
+                // as there's only global **dp** coordinates and no global **px** coordinates.
+                // Hence, the coords sent here will only try to indicate that drag started outside
+                // this window display, but relative distance should not be calculated or depended
+                // on.
+                relativeToWindowCoords = new PointF(-newWin.getBounds().left - 1,
+                        -newWin.getBounds().top - 1);
+            }
+
             DragEvent event = obtainDragEvent(DragEvent.ACTION_DRAG_STARTED,
-                    newWin.translateToWindowX(touchX), newWin.translateToWindowY(touchY),
-                    description, data, false /* includeDragSurface */,
-                    true /* includeDragFlags */, null /* dragAndDropPermission */);
+                    relativeToWindowCoords.x, relativeToWindowCoords.y, description, data,
+                    false /* includeDragSurface */, true /* includeDragFlags */,
+                    null /* dragAndDropPermission */);
             try {
                 newWin.mClient.dispatchDragEvent(event);
                 // track each window that we've notified that the drag is starting
