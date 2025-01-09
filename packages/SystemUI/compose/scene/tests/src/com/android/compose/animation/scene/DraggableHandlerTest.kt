@@ -137,13 +137,6 @@ class DraggableHandlerTest {
 
         var pointerInfoOwner: () -> PointersInfo = { pointersDown() }
 
-        fun nestedScrollConnection() =
-            NestedScrollHandlerImpl(
-                    draggableHandler = draggableHandler,
-                    pointersInfoOwner = { pointerInfoOwner() },
-                )
-                .connection
-
         val velocityThreshold = draggableHandler.velocityThreshold
 
         fun down(fractionOfScreen: Float) =
@@ -607,57 +600,6 @@ class DraggableHandlerTest {
     }
 
     @Test
-    fun nestedScrollUseFromSourceInfo() = runGestureTest {
-        // Start at scene C.
-        navigateToSceneC()
-        val nestedScroll = nestedScrollConnection()
-
-        // Drag from the **top** of the screen
-        pointerInfoOwner = { pointersDown() }
-        assertIdle(currentScene = SceneC)
-
-        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            // userAction: Swipe.Up to SceneB
-            toScene = SceneB,
-            progress = 0.1f,
-        )
-
-        // Reset to SceneC
-        nestedScroll.preFling(Velocity.Zero)
-        advanceUntilIdle()
-
-        // Drag from the **bottom** of the screen
-        pointerInfoOwner = { pointersDown(startedPosition = Offset(0f, SCREEN_SIZE)) }
-        assertIdle(currentScene = SceneC)
-
-        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
-        assertTransition(
-            currentScene = SceneC,
-            fromScene = SceneC,
-            // userAction: Swipe.Up(fromSource = Edge.Bottom) to SceneA
-            toScene = SceneA,
-            progress = 0.1f,
-        )
-    }
-
-    @Test
-    fun ignoreMouseWheel() = runGestureTest {
-        // Start at scene C.
-        navigateToSceneC()
-        val nestedScroll = nestedScrollConnection()
-
-        // Use mouse wheel
-        pointerInfoOwner = { PointersInfo.MouseWheel }
-        assertIdle(currentScene = SceneC)
-
-        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
-        assertIdle(currentScene = SceneC)
-    }
-
-    @Test
     fun transitionIsImmediatelyUpdatedWhenReleasingFinger() = runGestureTest {
         // Swipe up from the middle to transition to scene B.
         val middle = pointersDown(startedPosition = Offset(SCREEN_SIZE / 2f, SCREEN_SIZE / 2f))
@@ -686,24 +628,6 @@ class DraggableHandlerTest {
                 assertThat(consumedVelocity).isGreaterThan(-velocityThreshold)
             },
         )
-    }
-
-    @Test
-    fun scrollKeepPriorityEvenIfWeCanNoLongerScrollOnThatDirection() = runGestureTest {
-        val nestedScroll = nestedScrollConnection()
-
-        // Overscroll is disabled, it will scroll up to 100%
-        nestedScroll.scroll(available = upOffset(fractionOfScreen = 2f))
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
-
-        // We need to maintain scroll priority even if the scene transition can no longer consume
-        // the scroll gesture.
-        nestedScroll.scroll(available = upOffset(fractionOfScreen = 0.1f))
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 1f)
-
-        // A scroll gesture in the opposite direction allows us to return to the previous scene.
-        nestedScroll.scroll(available = downOffset(fractionOfScreen = 0.5f))
-        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.5f)
     }
 
     @Test
@@ -940,35 +864,6 @@ class DraggableHandlerTest {
             velocity = velocityThreshold,
             onAnimationStart = { assertThat(transition).hasCurrentOverlays(OverlayB) },
         )
-        assertThat(layoutState.transitionState).isIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-        assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayB)
-    }
-
-    @Test
-    fun replaceOverlayNestedScroll() = runGestureTest {
-        layoutState.showOverlay(OverlayA, animationScope = testScope)
-        advanceUntilIdle()
-
-        // Initial state.
-        assertThat(layoutState.transitionState).isIdle()
-        assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
-        assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayA)
-
-        // Swipe down to replace overlay A by overlay B.
-
-        val nestedScroll = nestedScrollConnection()
-        nestedScroll.scroll(downOffset(0.1f))
-        val transition = assertThat(layoutState.transitionState).isReplaceOverlayTransition()
-        assertThat(transition).hasCurrentScene(SceneA)
-        assertThat(transition).hasFromOverlay(OverlayA)
-        assertThat(transition).hasToOverlay(OverlayB)
-        assertThat(transition).hasCurrentOverlays(OverlayA)
-        assertThat(transition).hasProgress(0.1f)
-
-        nestedScroll.preFling(Velocity(0f, velocityThreshold))
-        advanceUntilIdle()
-        // Commit the gesture. The overlays are instantly swapped in the set of current overlays.
         assertThat(layoutState.transitionState).isIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
         assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayB)
