@@ -15,7 +15,6 @@
  */
 package com.android.server.selinux;
 
-import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 
@@ -28,7 +27,6 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 
-import android.provider.DeviceConfig;
 import android.util.EventLog;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -59,6 +57,7 @@ public class SelinuxAuditLogsCollectorTest {
     private final SelinuxAuditLogsCollector mSelinuxAutidLogsCollector =
             // Ignore rate limiting for tests
             new SelinuxAuditLogsCollector(
+                    () -> TEST_DOMAIN,
                     new RateLimiter(mClock, /* window= */ Duration.ofMillis(0)),
                     new QuotaLimiter(
                             mClock, /* windowSize= */ Duration.ofHours(1), /* maxPermits= */ 5));
@@ -67,13 +66,6 @@ public class SelinuxAuditLogsCollectorTest {
 
     @Before
     public void setUp() {
-        runWithShellPermissionIdentity(
-                () ->
-                        DeviceConfig.setLocalOverride(
-                                DeviceConfig.NAMESPACE_ADSERVICES,
-                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN,
-                                TEST_DOMAIN));
-
         mSelinuxAutidLogsCollector.setStopRequested(false);
         // move the clock forward for the limiters.
         mClock.currentTimeMillis += Duration.ofHours(1).toMillis();
@@ -85,7 +77,6 @@ public class SelinuxAuditLogsCollectorTest {
 
     @After
     public void tearDown() {
-        runWithShellPermissionIdentity(() -> DeviceConfig.clearAllLocalOverrides());
         mMockitoSession.finishMocking();
     }
 
