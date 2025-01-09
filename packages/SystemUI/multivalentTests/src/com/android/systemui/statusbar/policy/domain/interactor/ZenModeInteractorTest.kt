@@ -33,6 +33,7 @@ import androidx.test.filters.SmallTest
 import com.android.internal.R
 import com.android.settingslib.notification.data.repository.updateNotificationPolicy
 import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -204,7 +205,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
     @Test
     fun shouldAskForZenDuration_changesWithSetting() =
         testScope.runTest {
-            val manualDnd = TestModeBuilder.MANUAL_DND_ACTIVE
+            val manualDnd = TestModeBuilder().makeManualDnd().setActive(true).build()
 
             settingsRepository.setInt(ZEN_DURATION, ZEN_DURATION_FOREVER)
             runCurrent()
@@ -233,29 +234,27 @@ class ZenModeInteractorTest : SysuiTestCase() {
     @Test
     fun activateMode_usesCorrectDuration() =
         testScope.runTest {
-            val manualDnd = TestModeBuilder.MANUAL_DND_ACTIVE
-            zenModeRepository.addModes(listOf(manualDnd))
             settingsRepository.setInt(ZEN_DURATION, ZEN_DURATION_FOREVER)
             runCurrent()
 
-            underTest.activateMode(manualDnd)
-            assertThat(zenModeRepository.getModeActiveDuration(manualDnd.id)).isNull()
+            underTest.activateMode(MANUAL_DND)
+            assertThat(zenModeRepository.getModeActiveDuration(MANUAL_DND.id)).isNull()
 
-            zenModeRepository.deactivateMode(manualDnd.id)
+            zenModeRepository.deactivateMode(MANUAL_DND)
             settingsRepository.setInt(ZEN_DURATION, 60)
             runCurrent()
 
-            underTest.activateMode(manualDnd)
-            assertThat(zenModeRepository.getModeActiveDuration(manualDnd.id))
+            underTest.activateMode(MANUAL_DND)
+            assertThat(zenModeRepository.getModeActiveDuration(MANUAL_DND.id))
                 .isEqualTo(Duration.ofMinutes(60))
         }
 
     @Test
     fun deactivateAllModes_updatesCorrectModes() =
         testScope.runTest {
+            zenModeRepository.activateMode(MANUAL_DND)
             zenModeRepository.addModes(
                 listOf(
-                    TestModeBuilder.MANUAL_DND_ACTIVE,
                     TestModeBuilder().setName("Inactive").setActive(false).build(),
                     TestModeBuilder().setName("Active").setActive(true).build(),
                 )
@@ -389,12 +388,9 @@ class ZenModeInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val dndMode by collectLastValue(underTest.dndMode)
 
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
-            runCurrent()
-
             assertThat(dndMode!!.isActive).isFalse()
 
-            zenModeRepository.activateMode(TestModeBuilder.MANUAL_DND_INACTIVE.id)
+            zenModeRepository.activateMode(MANUAL_DND)
             runCurrent()
 
             assertThat(dndMode!!.isActive).isTrue()

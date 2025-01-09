@@ -28,6 +28,7 @@ import android.service.notification.ZenModeConfig.ScheduleInfo
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
@@ -111,7 +112,6 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                         .setName("Disabled by other")
                         .setEnabled(false, /* byUser= */ false)
                         .build(),
-                    TestModeBuilder.MANUAL_DND_ACTIVE,
                     TestModeBuilder()
                         .setName("Enabled")
                         .setEnabled(true)
@@ -128,14 +128,14 @@ class ModesDialogViewModelTest : SysuiTestCase() {
 
             assertThat(tiles).hasSize(3)
             with(tiles?.elementAt(0)!!) {
-                assertThat(this.text).isEqualTo("Disabled by other")
-                assertThat(this.subtext).isEqualTo("Not set")
+                assertThat(this.text).isEqualTo("Do Not Disturb")
+                assertThat(this.subtext).isEqualTo("Off")
                 assertThat(this.enabled).isEqualTo(false)
             }
             with(tiles?.elementAt(1)!!) {
-                assertThat(this.text).isEqualTo("Do Not Disturb")
-                assertThat(this.subtext).isEqualTo("On")
-                assertThat(this.enabled).isEqualTo(true)
+                assertThat(this.text).isEqualTo("Disabled by other")
+                assertThat(this.subtext).isEqualTo("Not set")
+                assertThat(this.enabled).isEqualTo(false)
             }
             with(tiles?.elementAt(2)!!) {
                 assertThat(this.text).isEqualTo("Enabled")
@@ -176,18 +176,24 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles).hasSize(3)
+            // Manual DND is included by default
+            assertThat(tiles).hasSize(4)
             with(tiles?.elementAt(0)!!) {
+                assertThat(this.text).isEqualTo("Do Not Disturb")
+                assertThat(this.subtext).isEqualTo("Off")
+                assertThat(this.enabled).isEqualTo(false)
+            }
+            with(tiles?.elementAt(1)!!) {
                 assertThat(this.text).isEqualTo("Active without manual")
                 assertThat(this.subtext).isEqualTo("On")
                 assertThat(this.enabled).isEqualTo(true)
             }
-            with(tiles?.elementAt(1)!!) {
+            with(tiles?.elementAt(2)!!) {
                 assertThat(this.text).isEqualTo("Active with manual")
                 assertThat(this.subtext).isEqualTo("On • trigger description")
                 assertThat(this.enabled).isEqualTo(true)
             }
-            with(tiles?.elementAt(2)!!) {
+            with(tiles?.elementAt(3)!!) {
                 assertThat(this.text).isEqualTo("Inactive with manual")
                 assertThat(this.subtext).isEqualTo("Off")
                 assertThat(this.enabled).isEqualTo(false)
@@ -226,10 +232,11 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles).hasSize(3)
+            // Manual DND is included by default
+            assertThat(tiles).hasSize(4)
 
             // Check that tile is initially present
-            with(tiles?.elementAt(0)!!) {
+            with(tiles?.elementAt(1)!!) {
                 assertThat(this.text).isEqualTo("Active without manual")
                 assertThat(this.subtext).isEqualTo("On")
                 assertThat(this.enabled).isEqualTo(true)
@@ -239,8 +246,8 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 runCurrent()
             }
             // Check that tile is still present at the same location, but turned off
-            assertThat(tiles).hasSize(3)
-            with(tiles?.elementAt(0)!!) {
+            assertThat(tiles).hasSize(4)
+            with(tiles?.elementAt(1)!!) {
                 assertThat(this.text).isEqualTo("Active without manual")
                 assertThat(this.subtext).isEqualTo("Manage in settings")
                 assertThat(this.enabled).isEqualTo(false)
@@ -252,9 +259,9 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             runCurrent()
 
             // Check that tile is now gone
-            assertThat(tiles2).hasSize(2)
-            assertThat(tiles2?.elementAt(0)!!.text).isEqualTo("Active with manual")
-            assertThat(tiles2?.elementAt(1)!!.text).isEqualTo("Inactive with manual")
+            assertThat(tiles2).hasSize(3)
+            assertThat(tiles2?.elementAt(1)!!.text).isEqualTo("Active with manual")
+            assertThat(tiles2?.elementAt(2)!!.text).isEqualTo("Inactive with manual")
         }
 
     @Test
@@ -287,22 +294,23 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles).hasSize(3)
+            // Manual DND is included by default
+            assertThat(tiles).hasSize(4)
 
             repository.removeMode("A")
             runCurrent()
 
-            assertThat(tiles).hasSize(2)
+            assertThat(tiles).hasSize(3)
 
             repository.removeMode("B")
             runCurrent()
 
-            assertThat(tiles).hasSize(1)
+            assertThat(tiles).hasSize(2)
 
             repository.removeMode("C")
             runCurrent()
 
-            assertThat(tiles).hasSize(0)
+            assertThat(tiles).hasSize(1)
         }
 
     @Test
@@ -353,14 +361,15 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles!!).hasSize(7)
-            assertThat(tiles!![0].subtext).isEqualTo("When the going gets tough")
-            assertThat(tiles!![1].subtext).isEqualTo("On • When in Rome")
-            assertThat(tiles!![2].subtext).isEqualTo("Not set")
-            assertThat(tiles!![3].subtext).isEqualTo("Off")
-            assertThat(tiles!![4].subtext).isEqualTo("On")
-            assertThat(tiles!![5].subtext).isEqualTo("Not set")
-            assertThat(tiles!![6].subtext).isEqualTo(timeScheduleMode.triggerDescription)
+            // Manual DND is included by default
+            assertThat(tiles!!).hasSize(8)
+            assertThat(tiles!![1].subtext).isEqualTo("When the going gets tough")
+            assertThat(tiles!![2].subtext).isEqualTo("On • When in Rome")
+            assertThat(tiles!![3].subtext).isEqualTo("Not set")
+            assertThat(tiles!![4].subtext).isEqualTo("Off")
+            assertThat(tiles!![5].subtext).isEqualTo("On")
+            assertThat(tiles!![6].subtext).isEqualTo("Not set")
+            assertThat(tiles!![7].subtext).isEqualTo(timeScheduleMode.triggerDescription)
         }
 
     @Test
@@ -411,32 +420,33 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles!!).hasSize(7)
-            with(tiles?.elementAt(0)!!) {
+            // Manual DND is included by default
+            assertThat(tiles!!).hasSize(8)
+            with(tiles?.elementAt(1)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription).isEqualTo("When the going gets tough")
             }
-            with(tiles?.elementAt(1)!!) {
+            with(tiles?.elementAt(2)!!) {
                 assertThat(this.stateDescription).isEqualTo("On")
                 assertThat(this.subtextDescription).isEqualTo("When in Rome")
             }
-            with(tiles?.elementAt(2)!!) {
+            with(tiles?.elementAt(3)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription).isEqualTo("Not set")
             }
-            with(tiles?.elementAt(3)!!) {
-                assertThat(this.stateDescription).isEqualTo("Off")
-                assertThat(this.subtextDescription).isEmpty()
-            }
             with(tiles?.elementAt(4)!!) {
-                assertThat(this.stateDescription).isEqualTo("On")
+                assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription).isEmpty()
             }
             with(tiles?.elementAt(5)!!) {
+                assertThat(this.stateDescription).isEqualTo("On")
+                assertThat(this.subtextDescription).isEmpty()
+            }
+            with(tiles?.elementAt(6)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription).isEqualTo("Not set")
             }
-            with(tiles?.elementAt(6)!!) {
+            with(tiles?.elementAt(7)!!) {
                 assertThat(this.stateDescription).isEqualTo("Off")
                 assertThat(this.subtextDescription)
                     .isEqualTo(
@@ -456,31 +466,30 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             val tiles by collectLastValue(underTest.tiles)
 
             val modeId = "id"
-            repository.addModes(
-                listOf(
-                    TestModeBuilder()
-                        .setId(modeId)
-                        .setName("Test")
-                        .setManualInvocationAllowed(true)
-                        .build()
-                )
+            repository.addMode(
+                TestModeBuilder()
+                    .setId(modeId)
+                    .setName("Test")
+                    .setManualInvocationAllowed(true)
+                    .build()
             )
             runCurrent()
 
-            assertThat(tiles).hasSize(1)
-            assertThat(tiles?.elementAt(0)?.enabled).isFalse()
+            // Manual DND is included by default
+            assertThat(tiles).hasSize(2)
+            assertThat(tiles?.elementAt(1)?.enabled).isFalse()
 
             // Trigger onClick
-            tiles?.first()?.onClick?.let { it() }
+            tiles?.elementAt(1)?.onClick?.let { it() }
             runCurrent()
 
-            assertThat(tiles?.first()?.enabled).isTrue()
+            assertThat(tiles?.elementAt(1)?.enabled).isTrue()
 
             // Trigger onClick
-            tiles?.first()?.onClick?.let { it() }
+            tiles?.elementAt(1)?.onClick?.let { it() }
             runCurrent()
 
-            assertThat(tiles?.first()?.enabled).isFalse()
+            assertThat(tiles?.elementAt(1)?.enabled).isFalse()
         }
 
     @Test
@@ -489,25 +498,24 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             val job = Job()
             val tiles by collectLastValue(underTest.tiles, context = job)
 
-            repository.addModes(
-                listOf(
-                    TestModeBuilder()
-                        .setName("Active without manual")
-                        .setActive(true)
-                        .setManualInvocationAllowed(false)
-                        .build()
-                )
+            repository.addMode(
+                TestModeBuilder()
+                    .setName("Active without manual")
+                    .setActive(true)
+                    .setManualInvocationAllowed(false)
+                    .build()
             )
             runCurrent()
 
-            assertThat(tiles).hasSize(1)
+            // Manual DND is included by default
+            assertThat(tiles).hasSize(2)
 
             // Click tile to toggle it off
-            tiles?.elementAt(0)!!.onClick()
+            tiles?.elementAt(1)!!.onClick()
             runCurrent()
 
-            assertThat(tiles).hasSize(1)
-            with(tiles?.elementAt(0)!!) {
+            assertThat(tiles).hasSize(2)
+            with(tiles?.elementAt(1)!!) {
                 assertThat(this.text).isEqualTo("Active without manual")
                 assertThat(this.subtext).isEqualTo("Manage in settings")
                 assertThat(this.enabled).isEqualTo(false)
@@ -518,7 +526,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             }
 
             // Check that nothing happened
-            with(tiles?.elementAt(0)!!) {
+            with(tiles?.elementAt(1)!!) {
                 assertThat(this.text).isEqualTo("Active without manual")
                 assertThat(this.subtext).isEqualTo("Manage in settings")
                 assertThat(this.enabled).isEqualTo(false)
@@ -530,19 +538,18 @@ class ModesDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val tiles by collectLastValue(underTest.tiles)
 
-            repository.addModes(
-                listOf(
-                    TestModeBuilder()
-                        .setId("ID")
-                        .setName("Disabled by other")
-                        .setEnabled(false, /* byUser= */ false)
-                        .build()
-                )
+            repository.addMode(
+                TestModeBuilder()
+                    .setId("ID")
+                    .setName("Disabled by other")
+                    .setEnabled(false, /* byUser= */ false)
+                    .build()
             )
             runCurrent()
 
-            assertThat(tiles).hasSize(1)
-            with(tiles?.elementAt(0)!!) {
+            // Manual DND is included by default
+            assertThat(tiles).hasSize(2)
+            with(tiles?.elementAt(1)!!) {
                 assertThat(this.text).isEqualTo("Disabled by other")
                 assertThat(this.subtext).isEqualTo("Not set")
                 assertThat(this.enabled).isEqualTo(false)
@@ -561,7 +568,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
                 .isEqualTo("ID")
 
             // Check that nothing happened to the tile
-            with(tiles?.elementAt(0)!!) {
+            with(tiles?.elementAt(1)!!) {
                 assertThat(this.text).isEqualTo("Disabled by other")
                 assertThat(this.subtext).isEqualTo("Not set")
                 assertThat(this.enabled).isEqualTo(false)
@@ -593,10 +600,11 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
-            assertThat(tiles).hasSize(2)
+            // Manual DND is included by default
+            assertThat(tiles).hasSize(3)
 
             // Trigger onLongClick for A
-            tiles?.first()?.onLongClick?.let { it() }
+            tiles?.elementAt(1)?.onLongClick?.let { it() }
             runCurrent()
 
             // Check that it launched the correct intent
@@ -625,9 +633,9 @@ class ModesDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val tiles by collectLastValue(underTest.tiles)
 
+            repository.activateMode(MANUAL_DND)
             repository.addModes(
                 listOf(
-                    TestModeBuilder.MANUAL_DND_ACTIVE,
                     TestModeBuilder()
                         .setId("id1")
                         .setName("Inactive Mode One")
@@ -644,6 +652,7 @@ class ModesDialogViewModelTest : SysuiTestCase() {
             )
             runCurrent()
 
+            // Manual DND is included by default
             assertThat(tiles).hasSize(3)
 
             // Trigger onClick for each tile in sequence
@@ -672,19 +681,17 @@ class ModesDialogViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val tiles by collectLastValue(underTest.tiles)
 
-            repository.addModes(
-                listOf(
-                    TestModeBuilder.MANUAL_DND_ACTIVE,
-                    TestModeBuilder()
-                        .setId("id1")
-                        .setName("Inactive Mode One")
-                        .setActive(false)
-                        .setManualInvocationAllowed(true)
-                        .build(),
-                )
+            repository.addMode(
+                TestModeBuilder()
+                    .setId("id1")
+                    .setName("Inactive Mode One")
+                    .setActive(false)
+                    .setManualInvocationAllowed(true)
+                    .build()
             )
             runCurrent()
 
+            // Manual DND is included by default
             assertThat(tiles).hasSize(2)
             val modeCaptor = argumentCaptor<ZenMode>()
 

@@ -24,7 +24,7 @@ import android.view.ViewTreeObserver
 import android.widget.FrameLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND_INACTIVE
+import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.BroadcastDispatcher
 import com.android.systemui.flags.Flags
@@ -99,8 +99,9 @@ import org.mockito.kotlin.clearInvocations
 class ClockEventControllerTest : SysuiTestCase() {
 
     private val kosmos = testKosmos()
-    private val zenModeRepository = kosmos.fakeZenModeRepository
     private val testScope = kosmos.testScope
+    private val zenModeRepository by lazy { kosmos.fakeZenModeRepository }
+    private val zenModeInteractor by lazy { kosmos.zenModeInteractor }
 
     @JvmField @Rule val mockito = MockitoJUnit.rule()
 
@@ -108,7 +109,6 @@ class ClockEventControllerTest : SysuiTestCase() {
     private lateinit var repository: FakeKeyguardRepository
     private val clockBuffers = ClockMessageBuffers(LogcatOnlyMessageBuffer(LogLevel.DEBUG))
     private lateinit var underTest: ClockEventController
-    private lateinit var dndModeId: String
 
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
     @Mock private lateinit var batteryController: BatteryController
@@ -158,9 +158,6 @@ class ClockEventControllerTest : SysuiTestCase() {
         whenever(largeClockController.theme).thenReturn(ThemeConfig(true, null))
         whenever(userTracker.userId).thenReturn(1)
 
-        dndModeId = MANUAL_DND_INACTIVE.id
-        zenModeRepository.addMode(MANUAL_DND_INACTIVE)
-
         repository = kosmos.fakeKeyguardRepository
 
         kosmos.fakeFeatureFlagsClassic.set(Flags.REGION_SAMPLING, false)
@@ -179,7 +176,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 clockBuffers,
                 kosmos.fakeFeatureFlagsClassic,
                 zenModeController,
-                kosmos.zenModeInteractor,
+                zenModeInteractor,
                 userTracker,
             )
         underTest.clock = clock
@@ -504,7 +501,7 @@ class ClockEventControllerTest : SysuiTestCase() {
             runCurrent()
             clearInvocations(events)
 
-            zenModeRepository.activateMode(dndModeId)
+            zenModeRepository.activateMode(MANUAL_DND)
             runCurrent()
 
             verify(events)
@@ -512,7 +509,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                     eq(ZenData(ZenMode.IMPORTANT_INTERRUPTIONS, R.string::dnd_is_on.name))
                 )
 
-            zenModeRepository.deactivateMode(dndModeId)
+            zenModeRepository.deactivateMode(MANUAL_DND)
             runCurrent()
 
             verify(events).onZenDataChanged(eq(ZenData(ZenMode.OFF, R.string::dnd_is_off.name)))
