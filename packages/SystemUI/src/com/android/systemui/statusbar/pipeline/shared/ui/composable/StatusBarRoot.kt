@@ -24,6 +24,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -33,9 +34,11 @@ import androidx.compose.ui.platform.ViewCompositionStrategy
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.compose.theme.PlatformTheme
 import com.android.keyguard.AlphaOptimizedLinearLayout
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.res.R
+import com.android.systemui.statusbar.chips.ui.compose.OngoingActivityChips
 import com.android.systemui.statusbar.data.repository.DarkIconDispatcherStore
 import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
 import com.android.systemui.statusbar.featurepods.popups.StatusBarPopupChips
@@ -158,6 +161,45 @@ fun StatusBarRoot(
                             darkIconDispatcher,
                         )
                     iconController.addIconGroup(darkIconManager)
+
+                    if (StatusBarChipsModernization.isEnabled) {
+                        val startSideExceptHeadsUp =
+                            phoneStatusBarView.requireViewById<LinearLayout>(
+                                R.id.status_bar_start_side_except_heads_up
+                            )
+
+                        val composeView =
+                            ComposeView(context).apply {
+                                layoutParams =
+                                    LinearLayout.LayoutParams(
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                                    )
+
+                                setViewCompositionStrategy(
+                                    ViewCompositionStrategy.DisposeOnViewTreeLifecycleDestroyed
+                                )
+
+                                setContent {
+                                    PlatformTheme {
+                                        val chips by
+                                            statusBarViewModel.ongoingActivityChips
+                                                .collectAsStateWithLifecycle()
+                                        OngoingActivityChips(chips = chips)
+                                    }
+                                }
+                            }
+
+                        // Add the composable container for ongoingActivityChips before the
+                        // notification_icon_area to maintain the same ordering for ongoing activity
+                        // chips in the status bar layout.
+                        val notificationIconAreaIndex =
+                            startSideExceptHeadsUp.indexOfChild(
+                                startSideExceptHeadsUp.findViewById(R.id.notification_icon_area)
+                            )
+                        startSideExceptHeadsUp.addView(composeView, notificationIconAreaIndex)
+                    }
+
                     HomeStatusBarIconBlockListBinder.bind(
                         statusIconContainer,
                         darkIconManager,
