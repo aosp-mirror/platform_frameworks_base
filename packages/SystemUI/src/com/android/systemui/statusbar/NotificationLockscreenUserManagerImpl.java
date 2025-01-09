@@ -92,6 +92,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.inject.Inject;
@@ -297,6 +298,9 @@ public class NotificationLockscreenUserManagerImpl implements
     // The last lock time. Uses currentTimeMillis
     @VisibleForTesting
     protected final AtomicLong mLastLockTime = new AtomicLong(-1);
+    // Whether or not the device is locked
+    @VisibleForTesting
+    protected final AtomicBoolean mLocked = new AtomicBoolean(true);
 
     protected int mCurrentUserId = 0;
 
@@ -369,6 +373,7 @@ public class NotificationLockscreenUserManagerImpl implements
                         if (!unlocked) {
                             mLastLockTime.set(System.currentTimeMillis());
                         }
+                        mLocked.set(!unlocked);
                     }));
         }
     }
@@ -737,7 +742,7 @@ public class NotificationLockscreenUserManagerImpl implements
             return false;
         }
 
-        if (!mKeyguardManager.isDeviceLocked()) {
+        if (!mLocked.get()) {
             return false;
         }
 
