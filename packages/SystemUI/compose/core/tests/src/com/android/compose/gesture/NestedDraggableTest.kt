@@ -773,6 +773,29 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         rule.onNodeWithTag(buttonTag).assertTextEquals("Count: 3")
     }
 
+    @Test
+    fun nestedDragNotStartedWhenEnabledAfterDragStarted() {
+        val draggable = TestDraggable()
+        var enabled by mutableStateOf(false)
+        val touchSlop =
+            rule.setContentWithTouchSlop {
+                Box(
+                    Modifier.fillMaxSize()
+                        .nestedDraggable(draggable, orientation, enabled = enabled)
+                        .scrollable(rememberScrollableState { 0f }, orientation)
+                )
+            }
+
+        rule.onRoot().performTouchInput { down(center) }
+
+        enabled = true
+        rule.waitForIdle()
+
+        rule.onRoot().performTouchInput { moveBy((touchSlop + 1f).toOffset()) }
+
+        assertThat(draggable.onDragStartedCalled).isFalse()
+    }
+
     private fun ComposeContentTestRule.setContentWithTouchSlop(
         content: @Composable () -> Unit
     ): Float {

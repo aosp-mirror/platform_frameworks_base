@@ -549,9 +549,10 @@ private class NestedDraggableNode(
             nestedScrollController == null &&
                 // TODO(b/388231324): Remove this.
                 !lastEventWasScrollWheel &&
-                draggable.shouldConsumeNestedScroll(sign)
+                draggable.shouldConsumeNestedScroll(sign) &&
+                lastFirstDown != null
         ) {
-            val startedPosition = checkNotNull(lastFirstDown) { "lastFirstDown is not set" }
+            val startedPosition = checkNotNull(lastFirstDown)
 
             // TODO(b/382665591): Ensure that there is at least one pointer down.
             val pointersDownCount = pointersDown.size.coerceAtLeast(1)
