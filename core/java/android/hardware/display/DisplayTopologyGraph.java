@@ -16,6 +16,8 @@
 
 package android.hardware.display;
 
+import static android.hardware.display.DisplayTopology.TreeNode.positionToString;
+
 /**
  * Graph of the displays in {@link android.hardware.display.DisplayTopology} tree.
  *
@@ -27,6 +29,7 @@ public record DisplayTopologyGraph(int primaryDisplayId, DisplayNode[] displayNo
      */
     public record DisplayNode(
             int displayId,
+            int density,
             AdjacentDisplay[] adjacentDisplays) {}
 
     /**
@@ -38,6 +41,18 @@ public record DisplayTopologyGraph(int primaryDisplayId, DisplayNode[] displayNo
             // Side of the other display which touches this adjacent display.
             @DisplayTopology.TreeNode.Position
             int position,
-            // How many px this display is shifted along the touchingSide, can be negative.
-            float offsetPx) {}
+            // The distance from the top edge of the other display to the top edge of this display
+            // (in case of POSITION_LEFT or POSITION_RIGHT) or from the left edge of the parent
+            // display to the left edge of this display (in case of POSITION_TOP or
+            // POSITION_BOTTOM). The unit used is density-independent pixels (dp).
+            float offsetDp) {
+        @Override
+        public String toString() {
+            return "AdjacentDisplay{"
+                    + "displayId=" + displayId
+                    + ", position=" + positionToString(position)
+                    + ", offsetDp=" + offsetDp
+                    + '}';
+        }
+    }
 }

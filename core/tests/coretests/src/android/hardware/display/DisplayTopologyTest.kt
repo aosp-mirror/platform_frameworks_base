@@ -23,6 +23,7 @@ import android.hardware.display.DisplayTopology.TreeNode.POSITION_LEFT
 import android.hardware.display.DisplayTopology.TreeNode.POSITION_TOP
 import android.hardware.display.DisplayTopology.TreeNode.POSITION_RIGHT
 import android.util.SparseArray
+import android.util.SparseIntArray
 import android.view.Display
 import com.google.common.truth.Truth.assertThat
 import org.junit.Test
@@ -811,6 +812,13 @@ class DisplayTopologyTest {
 
     @Test
     fun coordinates() {
+        // 1122222244
+        // 1122222244
+        // 11      44
+        // 11      44
+        // 1133333344
+        // 1133333344
+
         val display1 = DisplayTopology.TreeNode(/* displayId= */ 1, /* width= */ 200f,
             /* height= */ 600f, /* position= */ 0, /* offset= */ 0f)
 
@@ -835,6 +843,243 @@ class DisplayTopologyTest {
         expectedCoords.append(3, RectF(200f, 400f, 800f, 600f))
         expectedCoords.append(4, RectF(800f, 0f, 1000f, 600f))
         assertThat(coords.contentEquals(expectedCoords)).isTrue()
+    }
+
+    @Test
+    fun graph() {
+        // 1122222244
+        // 1122222244
+        // 11      44
+        // 11      44
+        // 1133333344
+        // 1133333344
+        //        555
+        //        555
+        //        555
+
+        val densityPerDisplay = SparseIntArray()
+
+        val display1 = DisplayTopology.TreeNode(/* displayId= */ 1, /* width= */ 200f,
+            /* height= */ 600f, /* position= */ 0, /* offset= */ 0f)
+        val density1 = 100
+        densityPerDisplay.append(1, density1)
+
+        val display2 = DisplayTopology.TreeNode(/* displayId= */ 2, /* width= */ 600f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ 0f)
+        display1.addChild(display2)
+        val density2 = 200
+        densityPerDisplay.append(2, density2)
+
+        val primaryDisplayId = 3
+        val display3 = DisplayTopology.TreeNode(primaryDisplayId, /* width= */ 600f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ 400f)
+        display1.addChild(display3)
+        val density3 = 150
+        densityPerDisplay.append(3, density3)
+
+        val display4 = DisplayTopology.TreeNode(/* displayId= */ 4, /* width= */ 200f,
+            /* height= */ 600f, POSITION_RIGHT, /* offset= */ 0f)
+        display2.addChild(display4)
+        val density4 = 300
+        densityPerDisplay.append(4, density4)
+
+        val display5 = DisplayTopology.TreeNode(/* displayId= */ 5, /* width= */ 300f,
+            /* height= */ 300f, POSITION_BOTTOM, /* offset= */ -100f)
+        display4.addChild(display5)
+        val density5 = 300
+        densityPerDisplay.append(5, density5)
+
+        topology = DisplayTopology(display1, primaryDisplayId)
+        val graph = topology.getGraph(densityPerDisplay)!!
+        val nodes = graph.displayNodes
+
+        assertThat(graph.primaryDisplayId).isEqualTo(primaryDisplayId)
+        assertThat(nodes.map {it.displayId}).containsExactly(1, 2, 3, 4, 5)
+        for (node in nodes) {
+            assertThat(node.density).isEqualTo(densityPerDisplay.get(node.displayId))
+            when (node.displayId) {
+                1 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 2, POSITION_RIGHT,
+                        /* offsetDp= */ 0f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_RIGHT,
+                        /* offsetDp= */ 400f))
+                2 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 1, POSITION_LEFT,
+                        /* offsetDp= */ 0f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 4, POSITION_RIGHT,
+                        /* offsetDp= */ 0f))
+                3 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 1, POSITION_LEFT,
+                        /* offsetDp= */ -400f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 4, POSITION_RIGHT,
+                        /* offsetDp= */ -400f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 5, POSITION_BOTTOM,
+                        /* offsetDp= */ 500f))
+                4 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 2, POSITION_LEFT,
+                        /* offsetDp= */ 0f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_LEFT,
+                        /* offsetDp= */ 400f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 5, POSITION_BOTTOM,
+                        /* offsetDp= */ -100f))
+                5 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_TOP,
+                        /* offsetDp= */ -500f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 4, POSITION_TOP,
+                        /* offsetDp= */ 100f))
+            }
+        }
+    }
+
+    @Test
+    fun graph_corner() {
+        // 1122244
+        // 1122244
+        // 1122244
+        //   333
+        // 55
+
+        val densityPerDisplay = SparseIntArray()
+
+        val display1 = DisplayTopology.TreeNode(/* displayId= */ 1, /* width= */ 200f,
+            /* height= */ 300f, /* position= */ 0, /* offset= */ 0f)
+        val density1 = 100
+        densityPerDisplay.append(1, density1)
+
+        val display2 = DisplayTopology.TreeNode(/* displayId= */ 2, /* width= */ 300f,
+            /* height= */ 300f, POSITION_RIGHT, /* offset= */ 0f)
+        display1.addChild(display2)
+        val density2 = 200
+        densityPerDisplay.append(2, density2)
+
+        val primaryDisplayId = 3
+        val display3 = DisplayTopology.TreeNode(primaryDisplayId, /* width= */ 300f,
+            /* height= */ 100f, POSITION_BOTTOM, /* offset= */ 0f)
+        display2.addChild(display3)
+        val density3 = 150
+        densityPerDisplay.append(3, density3)
+
+        val display4 = DisplayTopology.TreeNode(/* displayId= */ 4, /* width= */ 200f,
+            /* height= */ 300f, POSITION_RIGHT, /* offset= */ 0f)
+        display2.addChild(display4)
+        val density4 = 300
+        densityPerDisplay.append(4, density4)
+
+        val display5 = DisplayTopology.TreeNode(/* displayId= */ 5, /* width= */ 200f,
+            /* height= */ 100f, POSITION_BOTTOM, /* offset= */ -200f)
+        display3.addChild(display5)
+        val density5 = 300
+        densityPerDisplay.append(5, density5)
+
+        topology = DisplayTopology(display1, primaryDisplayId)
+        val graph = topology.getGraph(densityPerDisplay)!!
+        val nodes = graph.displayNodes
+
+        assertThat(graph.primaryDisplayId).isEqualTo(primaryDisplayId)
+        assertThat(nodes.map {it.displayId}).containsExactly(1, 2, 3, 4, 5)
+        for (node in nodes) {
+            assertThat(node.density).isEqualTo(densityPerDisplay.get(node.displayId))
+            when (node.displayId) {
+                1 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 2, POSITION_RIGHT,
+                        /* offsetDp= */ 0f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_RIGHT,
+                        /* offsetDp= */ 300f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_BOTTOM,
+                        /* offsetDp= */ 200f))
+                2 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 1, POSITION_LEFT,
+                        /* offsetDp= */ 0f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_BOTTOM,
+                        /* offsetDp= */ 0f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 4, POSITION_RIGHT,
+                        /* offsetDp= */ 0f))
+                3 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 1, POSITION_LEFT,
+                        /* offsetDp= */ -300f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 1, POSITION_TOP,
+                        /* offsetDp= */ -200f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 2, POSITION_TOP,
+                        /* offsetDp= */ 0f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 4, POSITION_RIGHT,
+                        /* offsetDp= */ -300f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 4, POSITION_TOP,
+                        /* offsetDp= */ 300f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 5, POSITION_LEFT,
+                        /* offsetDp= */ 100f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 5, POSITION_BOTTOM,
+                        /* offsetDp= */ -200f))
+                4 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 2, POSITION_LEFT,
+                        /* offsetDp= */ 0f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_LEFT,
+                        /* offsetDp= */ 300f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_BOTTOM,
+                        /* offsetDp= */ -300f))
+                5 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_TOP,
+                        /* offsetDp= */ 200f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_RIGHT,
+                        /* offsetDp= */ -100f))
+            }
+        }
+    }
+
+    @Test
+    fun graph_smallGap() {
+        // 11122
+        // 11122
+        // 11133
+        // 11133
+
+        // There is a gap between displays 2 and 3, small enough for them to still be adjacent.
+
+        val densityPerDisplay = SparseIntArray()
+
+        val display1 = DisplayTopology.TreeNode(/* displayId= */ 1, /* width= */ 300f,
+            /* height= */ 400f, /* position= */ 0, /* offset= */ 0f)
+        val density1 = 100
+        densityPerDisplay.append(1, density1)
+
+        val display2 = DisplayTopology.TreeNode(/* displayId= */ 2, /* width= */ 200f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ -1f)
+        display1.addChild(display2)
+        val density2 = 200
+        densityPerDisplay.append(2, density2)
+
+        val primaryDisplayId = 3
+        val display3 = DisplayTopology.TreeNode(primaryDisplayId, /* width= */ 200f,
+            /* height= */ 200f, POSITION_RIGHT, /* offset= */ 201f)
+        display1.addChild(display3)
+        val density3 = 150
+        densityPerDisplay.append(3, density3)
+
+        topology = DisplayTopology(display1, primaryDisplayId)
+        val graph = topology.getGraph(densityPerDisplay)!!
+        val nodes = graph.displayNodes
+
+        assertThat(graph.primaryDisplayId).isEqualTo(primaryDisplayId)
+        assertThat(nodes.map {it.displayId}).containsExactly(1, 2, 3)
+        for (node in nodes) {
+            assertThat(node.density).isEqualTo(densityPerDisplay.get(node.displayId))
+            when (node.displayId) {
+                1 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 2, POSITION_RIGHT,
+                        /* offsetDp= */ -1f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_RIGHT,
+                        /* offsetDp= */ 201f))
+                2 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 1, POSITION_LEFT,
+                        /* offsetDp= */ 1f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 3, POSITION_BOTTOM,
+                        /* offsetDp= */ 0f))
+                3 -> assertThat(node.adjacentDisplays.toSet()).containsExactly(
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 1, POSITION_LEFT,
+                        /* offsetDp= */ -201f),
+                    DisplayTopologyGraph.AdjacentDisplay(/* displayId= */ 2, POSITION_TOP,
+                        /* offsetDp= */ 0f))
+            }
+        }
     }
 
     /**
