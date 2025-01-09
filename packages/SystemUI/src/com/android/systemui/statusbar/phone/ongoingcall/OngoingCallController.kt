@@ -24,18 +24,14 @@ import android.content.Context
 import android.view.View
 import androidx.annotation.VisibleForTesting
 import com.android.app.tracing.coroutines.launchTraced as launch
-import com.android.internal.jank.InteractionJankMonitor
 import com.android.systemui.CoreStartable
 import com.android.systemui.Dumpable
-import com.android.systemui.Flags
-import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel
-import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
@@ -49,7 +45,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.data.repository.OngoingC
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.policy.CallbackController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
-import com.android.systemui.util.time.SystemClock
 import java.io.PrintWriter
 import java.util.concurrent.Executor
 import javax.inject.Inject
@@ -69,8 +64,6 @@ constructor(
     private val context: Context,
     private val ongoingCallRepository: OngoingCallRepository,
     private val activeNotificationsInteractor: ActiveNotificationsInteractor,
-    private val systemClock: SystemClock,
-    private val activityStarter: ActivityStarter,
     @Main private val mainExecutor: Executor,
     private val iActivityManager: IActivityManager,
     private val dumpManager: DumpManager,
@@ -109,7 +102,6 @@ constructor(
         scope.launch {
             statusBarModeRepository.defaultDisplay.isInFullscreenMode.collect {
                 isFullscreen = it
-                updateChipClickListener()
                 updateGestureListening()
             }
         }
@@ -194,7 +186,7 @@ constructor(
 
         if (notifModel == null) {
             logger.log(TAG, LogLevel.DEBUG, {}, { "NotifInteractorCallModel: null" })
-            removeChip()
+            removeChipInfo()
         } else if (notifModel.callType != CallType.Ongoing) {
             logger.log(
                 TAG,
@@ -202,7 +194,7 @@ constructor(
                 { str1 = notifModel.callType.name },
                 { "Notification Interactor sent ActiveNotificationModel with callType=$str1" },
             )
-            removeChip()
+            removeChipInfo()
         } else {
             logger.log(
                 TAG,
@@ -243,29 +235,10 @@ constructor(
         val timeView = currentChipView?.getTimeView()
 
         if (currentChipView != null && timeView != null) {
-            if (!Flags.statusBarScreenSharingChips()) {
-                // If the new status bar screen sharing chips are enabled, then the display logic
-                // for *all* status bar chips (both the call chip and the screen sharing chips) are
-                // handled by CollapsedStatusBarViewBinder, *not* this class. We need to disable
-                // this class from making any display changes because the new chips use the same
-                // view as the old call chip.
-                // TODO(b/332662551): We should move this whole controller class to recommended
-                // architecture so that we don't need to awkwardly disable only some parts of this
-                // class.
-                if (currentCallNotificationInfo.hasValidStartTime()) {
-                    timeView.setShouldHideText(false)
-                    timeView.base =
-                        currentCallNotificationInfo.callStartTime -
-                            systemClock.currentTimeMillis() + systemClock.elapsedRealtime()
-                    timeView.start()
-                } else {
-                    timeView.setShouldHideText(true)
-                    timeView.stop()
-                }
-                updateChipClickListener()
-            }
-
-            // But, this class still needs to do the non-display logic regardless of the flag.
+            // Current behavior: Displaying the call chip is handled by HomeStatusBarViewBinder, but
+            // this class is still responsible for the non-display logic.
+            // Future behavior: if StatusBarChipsModernization flag is enabled, this class is
+            // completely deprecated and does nothing.
             uidObserver.registerWithUid(currentCallNotificationInfo.uid)
             if (!currentCallNotificationInfo.statusBarSwipedAway) {
                 statusBarWindowControllerStore.defaultDisplay
@@ -283,33 +256,6 @@ constructor(
                 {},
                 { "Ongoing call chip view could not be found; Not displaying chip in status bar" },
             )
-        }
-    }
-
-    private fun updateChipClickListener() {
-        StatusBarChipsModernization.assertInLegacyMode()
-
-        if (Flags.statusBarScreenSharingChips()) {
-            return
-        }
-
-        if (callNotificationInfo == null) {
-            return
-        }
-        val currentChipView = chipView
-        val backgroundView =
-            currentChipView?.findViewById<View>(R.id.ongoing_activity_chip_background)
-        val intent = callNotificationInfo?.intent
-        if (currentChipView != null && backgroundView != null && intent != null) {
-            currentChipView.setOnClickListener {
-                activityStarter.postStartActivityDismissingKeyguard(
-                    intent,
-                    ActivityTransitionAnimator.Controller.fromView(
-                        backgroundView,
-                        InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
-                    ),
-                )
-            }
         }
     }
 
@@ -336,13 +282,10 @@ constructor(
         }
     }
 
-    private fun removeChip() {
+    private fun removeChipInfo() {
         StatusBarChipsModernization.assertInLegacyMode()
 
         callNotificationInfo = null
-        if (!Flags.statusBarScreenSharingChips()) {
-            tearDownChipView()
-        }
         statusBarWindowControllerStore.defaultDisplay.setOngoingProcessRequiresStatusBarVisible(
             false
         )
@@ -395,13 +338,7 @@ constructor(
         val isOngoing: Boolean,
         /** True if the user has swiped away the status bar while in this phone call. */
         val statusBarSwipedAway: Boolean,
-    ) {
-        /**
-         * Returns true if the notification information has a valid call start time. See
-         * b/192379214.
-         */
-        fun hasValidStartTime(): Boolean = callStartTime > 0
-    }
+    )
 
     override fun dump(pw: PrintWriter, args: Array<out String>) {
         pw.println("Active call notification: $callNotificationInfo")

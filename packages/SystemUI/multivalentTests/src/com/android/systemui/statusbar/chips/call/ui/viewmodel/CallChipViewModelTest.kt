@@ -283,14 +283,16 @@ class CallChipViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            val intent = mock<PendingIntent>()
-            repo.setOngoingCallState(inCallModel(startTimeMs = 1000, intent = intent))
+            val pendingIntent = mock<PendingIntent>()
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000, intent = pendingIntent))
             val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListener
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
 
-            verify(kosmos.activityStarter).postStartActivityDismissingKeyguard(intent, null)
+            // Ensure that the SysUI didn't modify the notification's intent by verifying it
+            // directly matches the `PendingIntent` set -- see b/212467440.
+            verify(kosmos.activityStarter).postStartActivityDismissingKeyguard(pendingIntent, null)
         }
 
     @Test
@@ -298,14 +300,16 @@ class CallChipViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            val intent = mock<PendingIntent>()
-            repo.setOngoingCallState(inCallModel(startTimeMs = 0, intent = intent))
+            val pendingIntent = mock<PendingIntent>()
+            repo.setOngoingCallState(inCallModel(startTimeMs = 0, intent = pendingIntent))
             val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListener
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
 
-            verify(kosmos.activityStarter).postStartActivityDismissingKeyguard(intent, null)
+            // Ensure that the SysUI didn't modify the notification's intent by verifying it
+            // directly matches the `PendingIntent` set -- see b/212467440.
+            verify(kosmos.activityStarter).postStartActivityDismissingKeyguard(pendingIntent, null)
         }
 
     companion object {
