@@ -4240,8 +4240,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         CarrierAppUtils.disableCarrierAppsUntilPrivileged(
                 mContext.getOpPackageName(), UserHandle.USER_SYSTEM, mContext);
 
-        disableSkuSpecificApps();
-
         // Read the compatibilty setting when the system is ready.
         boolean compatibilityModeEnabled = android.provider.Settings.Global.getInt(
                 mContext.getContentResolver(),
@@ -4371,29 +4369,6 @@ public class PackageManagerService implements PackageSender, TestUtilityService 
         DexUseManagerLocal dexUseManager = DexOptHelper.getDexUseManagerLocal();
         if (dexUseManager != null) {
             dexUseManager.systemReady();
-        }
-    }
-
-    //TODO: b/111402650
-    private void disableSkuSpecificApps() {
-        String[] apkList = mContext.getResources().getStringArray(
-                R.array.config_disableApksUnlessMatchedSku_apk_list);
-        String[] skuArray = mContext.getResources().getStringArray(
-                R.array.config_disableApkUnlessMatchedSku_skus_list);
-        if (ArrayUtils.isEmpty(apkList)) {
-           return;
-        }
-        String sku = SystemProperties.get("ro.boot.hardware.sku");
-        if (!TextUtils.isEmpty(sku) && ArrayUtils.contains(skuArray, sku)) {
-            return;
-        }
-        final Computer snapshot = snapshotComputer();
-        for (String packageName : apkList) {
-            setSystemAppHiddenUntilInstalled(snapshot, packageName, true);
-            final List<UserInfo> users = mInjector.getUserManagerInternal().getUsers(false);
-            for (int i = 0; i < users.size(); i++) {
-                setSystemAppInstallState(snapshot, packageName, false, users.get(i).id);
-            }
         }
     }
 
