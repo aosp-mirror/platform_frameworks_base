@@ -1454,6 +1454,18 @@ public class ActivityManagerServiceTest {
         assertThat(tokenForFullIntent.getKeyFields()).isEqualTo(tokenForCloneIntent.getKeyFields());
     }
 
+    @Test
+    public void testCanLaunchClipDataIntent() {
+        ClipData clipData = ClipData.newIntent("test", new Intent("test"));
+        clipData.prepareToLeaveProcess(true);
+        // skip mimicking sending clipData to another app because it will just be parceled and
+        // un-parceled.
+        Intent intent = clipData.getItemAt(0).getIntent();
+        // default intent redirect protection won't block an intent nested in a top level ClipData.
+        assertThat(intent.getExtendedFlags()
+                & Intent.EXTENDED_FLAG_MISSING_CREATOR_OR_INVALID_TOKEN).isEqualTo(0);
+    }
+
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,
             long lastNetworkUpdatedProcStateSeq,
             final long procStateSeqToWait, boolean expectWait) throws Exception {
