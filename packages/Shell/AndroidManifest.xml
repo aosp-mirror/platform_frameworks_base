@@ -1015,6 +1015,9 @@
     <uses-permission android:name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE" />
     <uses-permission android:name="android.permission.READ_COLOR_ZONES" />
 
+    <!-- Permission required for trade-in mode testing -->
+    <uses-permission android:name="android.permission.ENTER_TRADE_IN_MODE" />
+
     <application
         android:label="@string/app_label"
         android:theme="@android:style/Theme.DeviceDefault.DayNight"

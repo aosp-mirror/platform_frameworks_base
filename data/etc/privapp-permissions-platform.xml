@@ -259,6 +259,7 @@ applications that come with the platform
         <permission name="android.permission.MODIFY_DAY_NIGHT_MODE"/>
         <permission name="android.permission.ACCESS_LOWPAN_STATE"/>
         <permission name="android.permission.BACKUP"/>
+        <permission name="android.permission.ENTER_TRADE_IN_MODE"/>
         <!-- Needed for GMSCore Location API test only -->
         <permission name="android.permission.LOCATION_BYPASS"/>
         <!-- Needed for test only -->
