@@ -183,8 +183,11 @@ SkRect TestUtils::getLocalClipBounds(const SkCanvas* canvas) {
 }
 
 SkFont TestUtils::defaultFont() {
-    const std::shared_ptr<minikin::MinikinFont>& minikinFont =
-      Typeface::resolveDefault(nullptr)->fFontCollection->getFamilyAt(0)->getFont(0)->baseTypeface();
+    const std::shared_ptr<minikin::MinikinFont>& minikinFont = Typeface::resolveDefault(nullptr)
+                                                                       ->getFontCollection()
+                                                                       ->getFamilyAt(0)
+                                                                       ->getFont(0)
+                                                                       ->baseTypeface();
     SkTypeface* skTypeface = reinterpret_cast<const MinikinFontSkia*>(minikinFont.get())->GetSkTypeface();
     LOG_ALWAYS_FATAL_IF(skTypeface == nullptr);
     return SkFont(sk_ref_sp(skTypeface));

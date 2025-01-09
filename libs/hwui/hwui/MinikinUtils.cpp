@@ -36,7 +36,7 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
     const SkFont& font = paint->getSkFont();
 
-    minikin::MinikinPaint minikinPaint(resolvedFace->fFontCollection);
+    minikin::MinikinPaint minikinPaint(resolvedFace->getFontCollection());
     /* Prepare minikin Paint */
     minikinPaint.size =
             font.isLinearMetrics() ? font.getSize() : static_cast<int>(font.getSize());
@@ -46,9 +46,9 @@ minikin::MinikinPaint MinikinUtils::prepareMinikinPaint(const Paint* paint,
     minikinPaint.wordSpacing = paint->getWordSpacing();
     minikinPaint.fontFlags = MinikinFontSkia::packFontFlags(font);
     minikinPaint.localeListId = paint->getMinikinLocaleListId();
-    minikinPaint.fontStyle = resolvedFace->fStyle;
+    minikinPaint.fontStyle = resolvedFace->getFontStyle();
     minikinPaint.fontFeatureSettings = paint->getFontFeatureSettings();
-    if (!resolvedFace->fIsVariationInstance) {
+    if (!resolvedFace->isVariationInstance()) {
         // This is an optimization for direct private API use typically done by System UI.
         // In the public API surface, if Typeface is already configured for variation instance
         // (Target SDK <= 35) the font variation settings of Paint is not set.
@@ -132,7 +132,7 @@ minikin::MinikinExtent MinikinUtils::getFontExtent(const Paint* paint, minikin::
 
 bool MinikinUtils::hasVariationSelector(const Typeface* typeface, uint32_t codepoint, uint32_t vs) {
     const Typeface* resolvedFace = Typeface::resolveDefault(typeface);
-    return resolvedFace->fFontCollection->hasVariationSelector(codepoint, vs);
+    return resolvedFace->getFontCollection()->hasVariationSelector(codepoint, vs);
 }
 
 float MinikinUtils::xOffsetForTextAlign(Paint* paint, const minikin::Layout& layout) {

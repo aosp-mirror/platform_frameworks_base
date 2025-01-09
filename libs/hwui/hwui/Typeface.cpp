@@ -70,74 +70,45 @@ const Typeface* Typeface::resolveDefault(const Typeface* src) {
 
 Typeface* Typeface::createRelative(Typeface* src, Typeface::Style style) {
     const Typeface* resolvedFace = Typeface::resolveDefault(src);
-    Typeface* result = new Typeface;
-    if (result != nullptr) {
-        result->fFontCollection = resolvedFace->fFontCollection;
-        result->fBaseWeight = resolvedFace->fBaseWeight;
-        result->fAPIStyle = style;
-        result->fStyle = computeRelativeStyle(result->fBaseWeight, style);
-        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
-    }
-    return result;
+    return new Typeface(resolvedFace->getFontCollection(),
+                        computeRelativeStyle(resolvedFace->getBaseWeight(), style), style,
+                        resolvedFace->getBaseWeight(), resolvedFace->isVariationInstance());
 }
 
 Typeface* Typeface::createAbsolute(Typeface* base, int weight, bool italic) {
     const Typeface* resolvedFace = Typeface::resolveDefault(base);
-    Typeface* result = new Typeface();
-    if (result != nullptr) {
-        result->fFontCollection = resolvedFace->fFontCollection;
-        result->fBaseWeight = resolvedFace->fBaseWeight;
-        result->fAPIStyle = computeAPIStyle(weight, italic);
-        result->fStyle = computeMinikinStyle(weight, italic);
-        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
-    }
-    return result;
+    return new Typeface(resolvedFace->getFontCollection(), computeMinikinStyle(weight, italic),
+                        computeAPIStyle(weight, italic), resolvedFace->getBaseWeight(),
+                        resolvedFace->isVariationInstance());
 }
 
 Typeface* Typeface::createFromTypefaceWithVariation(Typeface* src,
                                                     const minikin::VariationSettings& variations) {
     const Typeface* resolvedFace = Typeface::resolveDefault(src);
-    Typeface* result = new Typeface();
-    if (result != nullptr) {
-        result->fFontCollection =
-                resolvedFace->fFontCollection->createCollectionWithVariation(variations);
-        if (result->fFontCollection == nullptr) {
+    const std::shared_ptr<minikin::FontCollection>& fc =
+            resolvedFace->getFontCollection()->createCollectionWithVariation(variations);
+    return new Typeface(
             // None of passed axes are supported by this collection.
             // So we will reuse the same collection with incrementing reference count.
-            result->fFontCollection = resolvedFace->fFontCollection;
-        }
-        // Do not update styles.
-        // TODO: We may want to update base weight if the 'wght' is specified.
-        result->fBaseWeight = resolvedFace->fBaseWeight;
-        result->fAPIStyle = resolvedFace->fAPIStyle;
-        result->fStyle = resolvedFace->fStyle;
-        result->fIsVariationInstance = true;
-    }
-    return result;
+            fc ? fc : resolvedFace->getFontCollection(),
+            // Do not update styles.
+            // TODO: We may want to update base weight if the 'wght' is specified.
+            resolvedFace->fStyle, resolvedFace->getAPIStyle(), resolvedFace->getBaseWeight(), true);
 }
 
 Typeface* Typeface::createWithDifferentBaseWeight(Typeface* src, int weight) {
     const Typeface* resolvedFace = Typeface::resolveDefault(src);
-    Typeface* result = new Typeface;
-    if (result != nullptr) {
-        result->fFontCollection = resolvedFace->fFontCollection;
-        result->fBaseWeight = weight;
-        result->fAPIStyle = resolvedFace->fAPIStyle;
-        result->fStyle = computeRelativeStyle(weight, result->fAPIStyle);
-        result->fIsVariationInstance = resolvedFace->fIsVariationInstance;
-    }
-    return result;
+    return new Typeface(resolvedFace->getFontCollection(),
+                        computeRelativeStyle(weight, resolvedFace->getAPIStyle()),
+                        resolvedFace->getAPIStyle(), weight, resolvedFace->isVariationInstance());
 }
 
 Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::FontFamily>>&& families,
                                        int weight, int italic, const Typeface* fallback) {
-    Typeface* result = new Typeface;
-    if (fallback == nullptr) {
-        result->fFontCollection = minikin::FontCollection::create(std::move(families));
-    } else {
-        result->fFontCollection =
-                fallback->fFontCollection->createCollectionWithFamilies(std::move(families));
-    }
+    const std::shared_ptr<minikin::FontCollection>& fc =
+            fallback ? fallback->getFontCollection()->createCollectionWithFamilies(
+                               std::move(families))
+                     : minikin::FontCollection::create(std::move(families));
 
     if (weight == RESOLVE_BY_FONT_TABLE || italic == RESOLVE_BY_FONT_TABLE) {
         int weightFromFont;
@@ -171,11 +142,8 @@ Typeface* Typeface::createFromFamilies(std::vector<std::shared_ptr<minikin::Font
         weight = SkFontStyle::kNormal_Weight;
     }
 
-    result->fBaseWeight = weight;
-    result->fAPIStyle = computeAPIStyle(weight, italic);
-    result->fStyle = computeMinikinStyle(weight, italic);
-    result->fIsVariationInstance = false;
-    return result;
+    return new Typeface(fc, computeMinikinStyle(weight, italic), computeAPIStyle(weight, italic),
+                        weight, false);
 }
 
 void Typeface::setDefault(const Typeface* face) {
@@ -205,11 +173,8 @@ void Typeface::setRobotoTypefaceForTest() {
     std::shared_ptr<minikin::FontCollection> collection =
             minikin::FontCollection::create(minikin::FontFamily::create(std::move(fonts)));
 
-    Typeface* hwTypeface = new Typeface();
-    hwTypeface->fFontCollection = collection;
-    hwTypeface->fAPIStyle = Typeface::kNormal;
-    hwTypeface->fBaseWeight = SkFontStyle::kNormal_Weight;
-    hwTypeface->fStyle = minikin::FontStyle();
+    Typeface* hwTypeface = new Typeface(collection, minikin::FontStyle(), Typeface::kNormal,
+                                        SkFontStyle::kNormal_Weight, false);
 
     Typeface::setDefault(hwTypeface);
 #endif

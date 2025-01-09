@@ -99,17 +99,17 @@ static jlong Typeface_getReleaseFunc(CRITICAL_JNI_PARAMS) {
 
 // CriticalNative
 static jint Typeface_getStyle(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
-    return toTypeface(faceHandle)->fAPIStyle;
+    return toTypeface(faceHandle)->getAPIStyle();
 }
 
 // CriticalNative
 static jint Typeface_getWeight(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
-    return toTypeface(faceHandle)->fStyle.weight();
+    return toTypeface(faceHandle)->getFontStyle().weight();
 }
 
 // Critical Native
 static jboolean Typeface_isVariationInstance(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
-    return toTypeface(faceHandle)->fIsVariationInstance;
+    return toTypeface(faceHandle)->isVariationInstance();
 }
 
 static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArray,
@@ -128,18 +128,18 @@ static jlong Typeface_createFromArray(JNIEnv *env, jobject, jlongArray familyArr
 // CriticalNative
 static void Typeface_setDefault(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
     Typeface::setDefault(toTypeface(faceHandle));
-    minikin::SystemFonts::registerDefault(toTypeface(faceHandle)->fFontCollection);
+    minikin::SystemFonts::registerDefault(toTypeface(faceHandle)->getFontCollection());
 }
 
 static jobject Typeface_getSupportedAxes(JNIEnv *env, jobject, jlong faceHandle) {
     Typeface* face = toTypeface(faceHandle);
-    const size_t length = face->fFontCollection->getSupportedAxesCount();
+    const size_t length = face->getFontCollection()->getSupportedAxesCount();
     if (length == 0) {
         return nullptr;
     }
     std::vector<jint> tagVec(length);
     for (size_t i = 0; i < length; i++) {
-        tagVec[i] = face->fFontCollection->getSupportedAxisAt(i);
+        tagVec[i] = face->getFontCollection()->getSupportedAxisAt(i);
     }
     std::sort(tagVec.begin(), tagVec.end());
     const jintArray result = env->NewIntArray(length);
@@ -150,7 +150,7 @@ static jobject Typeface_getSupportedAxes(JNIEnv *env, jobject, jlong faceHandle)
 static void Typeface_registerGenericFamily(JNIEnv *env, jobject, jstring familyName, jlong ptr) {
     ScopedUtfChars familyNameChars(env, familyName);
     minikin::SystemFonts::registerFallback(familyNameChars.c_str(),
-                                           toTypeface(ptr)->fFontCollection);
+                                           toTypeface(ptr)->getFontCollection());
 }
 
 #ifdef __ANDROID__
@@ -315,18 +315,19 @@ static jint Typeface_writeTypefaces(JNIEnv* env, jobject, jobject buffer, jint p
     std::vector<std::shared_ptr<minikin::FontCollection>> fontCollections;
     std::unordered_map<std::shared_ptr<minikin::FontCollection>, size_t> fcToIndex;
     for (Typeface* typeface : typefaces) {
-        bool inserted = fcToIndex.emplace(typeface->fFontCollection, fontCollections.size()).second;
+        bool inserted =
+                fcToIndex.emplace(typeface->getFontCollection(), fontCollections.size()).second;
         if (inserted) {
-            fontCollections.push_back(typeface->fFontCollection);
+            fontCollections.push_back(typeface->getFontCollection());
         }
     }
     minikin::FontCollection::writeVector(&writer, fontCollections);
     writer.write<uint32_t>(typefaces.size());
     for (Typeface* typeface : typefaces) {
-      writer.write<uint32_t>(fcToIndex.find(typeface->fFontCollection)->second);
-      typeface->fStyle.writeTo(&writer);
-      writer.write<Typeface::Style>(typeface->fAPIStyle);
-      writer.write<int>(typeface->fBaseWeight);
+        writer.write<uint32_t>(fcToIndex.find(typeface->getFontCollection())->second);
+        typeface->getFontStyle().writeTo(&writer);
+        writer.write<Typeface::Style>(typeface->getAPIStyle());
+        writer.write<int>(typeface->getBaseWeight());
     }
     return static_cast<jint>(writer.size());
 }
@@ -349,12 +350,10 @@ static jlongArray Typeface_readTypefaces(JNIEnv* env, jobject, jobject buffer, j
     std::vector<jlong> faceHandles;
     faceHandles.reserve(typefaceCount);
     for (uint32_t i = 0; i < typefaceCount; i++) {
-        Typeface* typeface = new Typeface;
-        typeface->fFontCollection = fontCollections[reader.read<uint32_t>()];
-        typeface->fStyle = minikin::FontStyle(&reader);
-        typeface->fAPIStyle = reader.read<Typeface::Style>();
-        typeface->fBaseWeight = reader.read<int>();
-        typeface->fIsVariationInstance = false;
+        Typeface* typeface =
+                new Typeface(fontCollections[reader.read<uint32_t>()], minikin::FontStyle(&reader),
+                             reader.read<Typeface::Style>(), reader.read<int>(),
+                             false /* isVariationInstance */);
         faceHandles.push_back(toJLong(typeface));
     }
     const jlongArray result = env->NewLongArray(typefaceCount);
@@ -382,7 +381,8 @@ static void Typeface_warmUpCache(JNIEnv* env, jobject, jstring jFilePath) {
 
 // Critical Native
 static void Typeface_addFontCollection(CRITICAL_JNI_PARAMS_COMMA jlong faceHandle) {
-    std::shared_ptr<minikin::FontCollection> collection = toTypeface(faceHandle)->fFontCollection;
+    std::shared_ptr<minikin::FontCollection> collection =
+            toTypeface(faceHandle)->getFontCollection();
     minikin::SystemFonts::addFontMap(std::move(collection));
 }
 
