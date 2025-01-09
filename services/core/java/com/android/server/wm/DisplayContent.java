@@ -1822,7 +1822,13 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
      */
     private void applyFixedRotationForNonTopVisibleActivityIfNeeded(@NonNull ActivityRecord ar,
             @ActivityInfo.ScreenOrientation int topOrientation) {
-        final int orientation = ar.getRequestedOrientation();
+        int orientation = ar.getRequestedOrientation();
+        if (orientation == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
+            final ActivityRecord nextCandidate = getActivityBelowForDefiningOrientation(ar);
+            if (nextCandidate != null) {
+                orientation = nextCandidate.getRequestedOrientation();
+            }
+        }
         if (orientation == topOrientation || ar.inMultiWindowMode()
                 || ar.getRequestedConfigurationOrientation() == ORIENTATION_UNDEFINED) {
             return;
@@ -1864,9 +1870,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             return ROTATION_UNDEFINED;
         }
         if (activityOrientation == ActivityInfo.SCREEN_ORIENTATION_BEHIND) {
-            final ActivityRecord nextCandidate = getActivity(
-                    a -> a.canDefineOrientationForActivitiesAbove() /* callback */,
-                    r /* boundary */, false /* includeBoundary */, true /* traverseTopToBottom */);
+            final ActivityRecord nextCandidate = getActivityBelowForDefiningOrientation(r);
             if (nextCandidate != null) {
                 r = nextCandidate;
                 activityOrientation = r.getOverrideOrientation();
