@@ -205,21 +205,30 @@ public class PowerStatsStore {
      */
     public void storeBatteryUsageStatsAsync(long monotonicStartTime,
             BatteryUsageStats batteryUsageStats) {
-        mHandler.post(() -> {
+        if (mHandler.getLooper().isCurrentThread()) {
+            storeBatteryUsageStats(monotonicStartTime, batteryUsageStats);
+        } else {
+            mHandler.post(() -> {
+                storeBatteryUsageStats(monotonicStartTime, batteryUsageStats);
+            });
+        }
+    }
+
+    private void storeBatteryUsageStats(long monotonicStartTime,
+            BatteryUsageStats batteryUsageStats) {
+        try {
+            PowerStatsSpan span = new PowerStatsSpan(monotonicStartTime);
+            span.addTimeFrame(monotonicStartTime, batteryUsageStats.getStatsStartTimestamp(),
+                    batteryUsageStats.getStatsDuration());
+            span.addSection(new BatteryUsageStatsSection(batteryUsageStats));
+            storePowerStatsSpan(span);
+        } finally {
             try {
-                PowerStatsSpan span = new PowerStatsSpan(monotonicStartTime);
-                span.addTimeFrame(monotonicStartTime, batteryUsageStats.getStatsStartTimestamp(),
-                        batteryUsageStats.getStatsDuration());
-                span.addSection(new BatteryUsageStatsSection(batteryUsageStats));
-                storePowerStatsSpan(span);
-            } finally {
-                try {
-                    batteryUsageStats.close();
-                } catch (IOException e) {
-                    Slog.e(TAG, "Cannot close BatteryUsageStats", e);
-                }
+                batteryUsageStats.close();
+            } catch (IOException e) {
+                Slog.e(TAG, "Cannot close BatteryUsageStats", e);
             }
-        });
+        }
     }
 
     /**

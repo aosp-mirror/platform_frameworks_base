@@ -225,11 +225,19 @@ public class BatteryStatsImpl extends BatteryStats {
     @VisibleForTesting
     public static final int WAKE_LOCK_WEIGHT = 50;
 
+    /**
+     * Minimum duration of a battery session. Attempt to automatically start a new
+     * session within this interval are ignored. Explicit resets (e.g. with an adb command) are
+     * not affected by this restriction.
+     */
+    private static final long MIN_BATTERY_SESSION_DURATION_MILLIS = 60000;
+
     public static final int RESET_REASON_CORRUPT_FILE = 1;
     public static final int RESET_REASON_ADB_COMMAND = 2;
     public static final int RESET_REASON_FULL_CHARGE = 3;
     public static final int RESET_REASON_ENERGY_CONSUMER_BUCKETS_CHANGE = 4;
     public static final int RESET_REASON_PLUGGED_IN_FOR_LONG_DURATION = 5;
+
     @NonNull
     private final MonotonicClock mMonotonicClock;
 
@@ -304,6 +312,81 @@ public class BatteryStatsImpl extends BatteryStats {
     private final CustomEnergyConsumerPowerStatsCollector mCustomEnergyConsumerPowerStatsCollector;
     private final SparseBooleanArray mPowerStatsCollectorEnabled = new SparseBooleanArray();
     private boolean mMoveWscLoggingToNotifierEnabled = false;
+
+    static class BatteryStatsSession {
+        private final BatteryStatsHistory mHistory;
+        private final long mMonotonicStartTime;
+        private final long mStartClockTime;
+        private final long mEstimatedBatteryCapacityMah;
+        private final long mBatteryTimeRemainingMs;
+        private final long mChargeTimeRemainingMs;
+        private final String[] mCustomEnergyConsumerNames;
+        private final BatteryStatsImpl mBatteryStats;
+
+        BatteryStatsSession(BatteryStatsHistory history, long monotonicStartTime,
+                long startClockTime, long batteryTimeRemainingMs, long chargeTimeRemainingMs,
+                long estimatedBatteryCapacityMah, String[] customEnergyConsumerNames,
+                BatteryStatsImpl batteryStats) {
+            mHistory = history;
+            mMonotonicStartTime = monotonicStartTime;
+            mStartClockTime = startClockTime;
+            mEstimatedBatteryCapacityMah = estimatedBatteryCapacityMah;
+            mBatteryTimeRemainingMs = batteryTimeRemainingMs;
+            mChargeTimeRemainingMs = chargeTimeRemainingMs;
+            mCustomEnergyConsumerNames = customEnergyConsumerNames;
+            mBatteryStats = batteryStats;
+        }
+
+        BatteryStatsHistory getHistory() {
+            return mHistory;
+        }
+
+        long getMonotonicStartTime() {
+            return mMonotonicStartTime;
+        }
+
+        long getStartClockTime() {
+            return mStartClockTime;
+        }
+
+        long getBatteryTimeRemainingMs() {
+            return mBatteryTimeRemainingMs;
+        }
+
+        long getChargeTimeRemainingMs() {
+            return mChargeTimeRemainingMs;
+        }
+
+        double getEstimatedBatteryCapacity() {
+            return mEstimatedBatteryCapacityMah;
+        }
+
+        String[] getCustomEnergyConsumerNames() {
+            return mCustomEnergyConsumerNames;
+        }
+
+        /** @deprecated This method will be removed once PowerCalculators are removed from the
+         * code base. */
+        @Deprecated
+        public BatteryStatsImpl getBatteryStats() {
+            return mBatteryStats;
+        }
+    }
+
+    BatteryStatsSession getBatteryStatsSession() {
+        synchronized (this) {
+            long elapsedTimeUs = mClock.elapsedRealtime() * 1000;
+            long batteryTimeRemainingUs = computeBatteryTimeRemaining(elapsedTimeUs);
+            long batteryTimeRemainingMs =
+                    batteryTimeRemainingUs >= 0 ? batteryTimeRemainingUs / 1000 : -1;
+            long chargeTimeRemainingUs = computeChargeTimeRemaining(elapsedTimeUs);
+            long chargeTimeRemainingMs =
+                    chargeTimeRemainingUs >= 0 ? chargeTimeRemainingUs / 1000 : -1;
+            return new BatteryStatsSession(mHistory, getMonotonicStartTime(), getStartClockTime(),
+                    batteryTimeRemainingMs, chargeTimeRemainingMs, getEstimatedBatteryCapacity(),
+                    getCustomEnergyConsumerNames(), this);
+        }
+    }
 
     private ScreenPowerStatsCollector.ScreenUsageTimeRetriever mScreenUsageTimeRetriever =
             new ScreenPowerStatsCollector.ScreenUsageTimeRetriever() {
@@ -1753,8 +1836,7 @@ public class BatteryStatsImpl extends BatteryStats {
      */
     private LongSamplingCounterArray mBinderThreadCpuTimesUs;
 
-    @VisibleForTesting
-    protected PowerProfile mPowerProfile;
+    private final PowerProfile mPowerProfile;
 
     @VisibleForTesting
     @GuardedBy("this")
@@ -11627,10 +11709,6 @@ public class BatteryStatsImpl extends BatteryStats {
         setDisplayCountLocked(mPowerProfile.getNumDisplays());
     }
 
-    PowerProfile getPowerProfile() {
-        return mPowerProfile;
-    }
-
     /**
      * Starts tracking CPU time-in-state for threads of the system server process,
      * keeping a separate account of threads receiving incoming binder calls.
@@ -12107,11 +12185,29 @@ public class BatteryStatsImpl extends BatteryStats {
         initActiveHistoryEventsLocked(mSecRealtime, mSecUptime);
     }
 
+    /**
+     * Starts a new battery stats session, resetting counters and timers. If this method is called
+     * before MIN_BATTERY_SESSION_DURATION_MILLIS from the beginning of the current session, the
+     * call is ignored.
+     */
+    public void startNewSession(int reason) {
+        if (mMonotonicClock.monotonicTime()
+                < mMonotonicStartTime + MIN_BATTERY_SESSION_DURATION_MILLIS) {
+            Slog.i(TAG, "Battery session session duration is too short, ignoring reset request");
+            return;
+        }
+
+        mHandler.post(()-> {
+            saveBatteryUsageStatsOnReset();
+            synchronized (BatteryStatsImpl.this) {
+                resetAllStatsLocked(mClock.uptimeMillis(), mClock.elapsedRealtime(), reason);
+            }
+        });
+    }
+
     @GuardedBy("this")
     private void resetAllStatsLocked(long uptimeMillis, long elapsedRealtimeMillis,
             int resetReason) {
-        saveBatteryUsageStatsOnReset(resetReason);
-
         final long uptimeUs = uptimeMillis * 1000;
         final long elapsedRealtimeUs = elapsedRealtimeMillis * 1000;
         mStartCount = 0;
@@ -12266,14 +12362,14 @@ public class BatteryStatsImpl extends BatteryStats {
         mHandler.sendEmptyMessage(MSG_REPORT_RESET_STATS);
     }
 
-    private void saveBatteryUsageStatsOnReset(int resetReason) {
-        if (!mSaveBatteryUsageStatsOnReset
-                || resetReason == BatteryStatsImpl.RESET_REASON_CORRUPT_FILE) {
+    private void saveBatteryUsageStatsOnReset() {
+        if (!mSaveBatteryUsageStatsOnReset) {
             return;
         }
 
         if (mAccumulateBatteryUsageStats) {
-            mBatteryUsageStatsProvider.accumulateBatteryUsageStats(this);
+            mBatteryUsageStatsProvider.accumulateBatteryUsageStats(getBatteryStatsSession(),
+                    mHandler);
         } else {
             final BatteryUsageStats batteryUsageStats;
             synchronized (this) {
@@ -14926,7 +15022,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     "Resetting due to long plug in duration. elapsed time = " + elapsedRealtimeMs
                             + " ms, last plug in time = " + mBatteryPluggedInRealTimeMs
                             + " ms, last reset time = " + mRealtimeStartUs / 1000);
-            resetAllStatsAndHistoryLocked(RESET_REASON_PLUGGED_IN_FOR_LONG_DURATION);
+            startNewSession(RESET_REASON_PLUGGED_IN_FOR_LONG_DURATION);
         }
 
         scheduleNextResetWhilePluggedInCheck();
@@ -15064,7 +15160,7 @@ public class BatteryStatsImpl extends BatteryStats {
                     });
                 }
                 doWrite = true;
-                resetAllStatsLocked(mSecUptime, mSecRealtime, RESET_REASON_FULL_CHARGE);
+                startNewSession(RESET_REASON_FULL_CHARGE);
                 if (chargeUah > 0 && level > 0) {
                     // Only use the reported coulomb charge value if it is supported and reported.
                     mEstimatedBatteryCapacityMah = (int) ((chargeUah / 1000) / (level / 100.0));
@@ -15980,6 +16076,8 @@ public class BatteryStatsImpl extends BatteryStats {
             if (mEnergyConsumerStatsConfig != null
                     &&  !mEnergyConsumerStatsConfig.isCompatible(config)) {
                 // Supported power buckets changed since last boot.
+                // Save accumulated battery usage stats before resetting
+                saveBatteryUsageStatsOnReset();
                 // Existing data is no longer reliable.
                 resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
                         RESET_REASON_ENERGY_CONSUMER_BUCKETS_CHANGE);
@@ -15999,7 +16097,10 @@ public class BatteryStatsImpl extends BatteryStats {
             }
         } else {
             if (mEnergyConsumerStatsConfig != null) {
-                // EnergyConsumer no longer supported, wipe out the existing data.
+                // EnergyConsumer no longer supported
+                // Save accumulated battery usage stats before resetting
+                saveBatteryUsageStatsOnReset();
+                // Wipe out the current battery session data.
                 resetAllStatsLocked(SystemClock.uptimeMillis(), SystemClock.elapsedRealtime(),
                         RESET_REASON_ENERGY_CONSUMER_BUCKETS_CHANGE);
             }
