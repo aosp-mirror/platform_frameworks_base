@@ -82,14 +82,20 @@ final class PackageHandler extends Handler {
             case POST_INSTALL: {
                 if (DEBUG_INSTALL) Log.v(TAG, "Handling post-install for " + msg.arg1);
 
-                InstallRequest request = mPm.mRunningInstalls.get(msg.arg1);
-                final boolean didRestore = (msg.arg2 != 0);
-                mPm.mRunningInstalls.delete(msg.arg1);
+                final InstallRequest request;
+                final int token;
+                final boolean didRestore;
+                synchronized (mPm.mRunningInstalls) {
+                    request= mPm.mRunningInstalls.get(msg.arg1);
+                    token = msg.arg1;
+                    didRestore = (msg.arg2 != 0);
+                    mPm.mRunningInstalls.delete(token);
+                }
 
                 if (request == null) {
                     if (DEBUG_INSTALL) {
                         Slog.i(TAG, "InstallRequest is null. Nothing to do for post-install "
-                                + "token " + msg.arg1);
+                                + "token " + token);
                     }
                     break;
                 }
@@ -100,10 +106,10 @@ final class PackageHandler extends Handler {
                     mPm.handlePackagePostInstall(request, didRestore);
                 } else if (DEBUG_INSTALL) {
                     // No post-install when we run restore from installExistingPackageForUser
-                    Slog.i(TAG, "Nothing to do for post-install token " + msg.arg1);
+                    Slog.i(TAG, "Nothing to do for post-install token " + token);
                 }
 
-                Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", msg.arg1);
+                Trace.asyncTraceEnd(TRACE_TAG_PACKAGE_MANAGER, "postInstall", token);
             } break;
             case DEFERRED_NO_KILL_POST_DELETE: {
                 CleanUpArgs args = (CleanUpArgs) msg.obj;
