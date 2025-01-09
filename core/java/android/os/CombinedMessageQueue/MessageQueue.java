@@ -36,7 +36,6 @@ import android.util.Printer;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
 
-import com.android.internal.annotations.GuardedBy;
 import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.annotation.optimization.NeverCompile;
@@ -1286,12 +1285,12 @@ public final class MessageQueue {
                 } while (msg != null && !msg.isAsynchronous());
             }
             if (msg != null) {
+                if (peek) {
+                    return msg;
+                }
                 if (now >= msg.when) {
                     // Got a message.
                     mBlocked = false;
-                    if (peek) {
-                        return msg;
-                    }
                     if (prevMsg != null) {
                         prevMsg.next = msg.next;
                         if (prevMsg.next == null) {

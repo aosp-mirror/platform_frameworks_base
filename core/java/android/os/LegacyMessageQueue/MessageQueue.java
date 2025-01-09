@@ -16,7 +16,6 @@
 
 package android.os;
 
-import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -754,12 +753,12 @@ public final class MessageQueue {
                 } while (msg != null && !msg.isAsynchronous());
             }
             if (msg != null) {
+                if (peek) {
+                    return msg;
+                }
                 if (now >= msg.when) {
                     // Got a message.
                     mBlocked = false;
-                    if (peek) {
-                        return msg;
-                    }
                     if (prevMsg != null) {
                         prevMsg.next = msg.next;
                         if (prevMsg.next == null) {
