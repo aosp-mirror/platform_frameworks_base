@@ -15,7 +15,6 @@
  */
 #pragma once
 
-#include <sys/stat.h>
 #include <time.h>
 
 //
@@ -65,14 +64,9 @@ ModDate getFileModDate(const char* fileName);
 /* same, but also returns -1 if the file has already been deleted */
 ModDate getFileModDate(int fd);
 
-// Extract the modification date from the stat structure.
-ModDate getModDate(const struct ::stat& st);
-
 // Check if |path| or |fd| resides on a readonly filesystem.
 bool isReadonlyFilesystem(const char* path);
 bool isReadonlyFilesystem(int fd);
-
-bool isKnownWritablePath(const char* path);
 
 }  // namespace android
 

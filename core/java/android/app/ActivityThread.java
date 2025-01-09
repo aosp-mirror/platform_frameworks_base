@@ -105,7 +105,6 @@ import android.content.pm.ServiceInfo;
 import android.content.res.AssetManager;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
-import android.content.res.ResourceTimer;
 import android.content.res.Resources;
 import android.content.res.ResourcesImpl;
 import android.content.res.loader.ResourcesLoader;
@@ -5254,7 +5253,6 @@ public final class ActivityThread extends ClientTransactionHandler
 
             Resources.dumpHistory(pw, "");
             pw.flush();
-            ResourceTimer.dumpTimers(info.fd.getFileDescriptor(), "-refresh");
             if (info.finishCallback != null) {
                 info.finishCallback.sendResult(null);
             }
