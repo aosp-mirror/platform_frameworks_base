@@ -1964,7 +1964,6 @@ class ActivityStarter {
             if (mLastStartActivityRecord != null) {
                 targetTaskTop.mLaunchSourceType = mLastStartActivityRecord.mLaunchSourceType;
             }
-            targetTaskTop.mTransitionController.collect(targetTaskTop);
             recordTransientLaunchIfNeeded(targetTaskTop);
             // Recycle the target task for this launch.
             startResult =
