@@ -37,11 +37,7 @@ internal fun Modifier.swipeToScene(
     draggableHandler: DraggableHandlerImpl,
     swipeDetector: SwipeDetector,
 ): Modifier {
-    return if (draggableHandler.enabled()) {
-        this.then(SwipeToSceneElement(draggableHandler, swipeDetector))
-    } else {
-        this
-    }
+    return then(SwipeToSceneElement(draggableHandler, swipeDetector, draggableHandler.enabled()))
 }
 
 private fun DraggableHandlerImpl.enabled(): Boolean {
@@ -61,83 +57,61 @@ internal fun Content.shouldEnableSwipes(orientation: Orientation): Boolean {
     return userActions.keys.any { it is Swipe.Resolved && it.direction.orientation == orientation }
 }
 
-/**
- * Finds the best matching [UserActionResult] for the given [swipe] within this [Content].
- * Prioritizes actions with matching [Swipe.Resolved.fromSource].
- *
- * @param swipe The swipe to match against.
- * @return The best matching [UserActionResult], or `null` if no match is found.
- */
-internal fun Content.findActionResultBestMatch(swipe: Swipe.Resolved): UserActionResult? {
-    if (!areSwipesAllowed()) {
-        return null
-    }
-
-    var bestPoints = Int.MIN_VALUE
-    var bestMatch: UserActionResult? = null
-    userActions.forEach { (actionSwipe, actionResult) ->
-        if (
-            actionSwipe !is Swipe.Resolved ||
-                // The direction must match.
-                actionSwipe.direction != swipe.direction ||
-                // The number of pointers down must match.
-                actionSwipe.pointerCount != swipe.pointerCount ||
-                // The action requires a specific fromSource.
-                (actionSwipe.fromSource != null && actionSwipe.fromSource != swipe.fromSource) ||
-                // The action requires a specific pointerType.
-                (actionSwipe.pointersType != null && actionSwipe.pointersType != swipe.pointersType)
-        ) {
-            // This action is not eligible.
-            return@forEach
-        }
-
-        val sameFromSource = actionSwipe.fromSource == swipe.fromSource
-        val samePointerType = actionSwipe.pointersType == swipe.pointersType
-        // Prioritize actions with a perfect match.
-        if (sameFromSource && samePointerType) {
-            return actionResult
-        }
-
-        var points = 0
-        if (sameFromSource) points++
-        if (samePointerType) points++
-
-        // Otherwise, keep track of the best eligible action.
-        if (points > bestPoints) {
-            bestPoints = points
-            bestMatch = actionResult
-        }
-    }
-    return bestMatch
-}
-
 private data class SwipeToSceneElement(
     val draggableHandler: DraggableHandlerImpl,
     val swipeDetector: SwipeDetector,
+    val enabled: Boolean,
 ) : ModifierNodeElement<SwipeToSceneRootNode>() {
     override fun create(): SwipeToSceneRootNode =
-        SwipeToSceneRootNode(draggableHandler, swipeDetector)
+        SwipeToSceneRootNode(draggableHandler, swipeDetector, enabled)
 
     override fun update(node: SwipeToSceneRootNode) {
-        node.update(draggableHandler, swipeDetector)
+        node.update(draggableHandler, swipeDetector, enabled)
     }
 }
 
 private class SwipeToSceneRootNode(
     draggableHandler: DraggableHandlerImpl,
     swipeDetector: SwipeDetector,
+    enabled: Boolean,
 ) : DelegatingNode() {
-    private var delegateNode = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
+    private var delegateNode = if (enabled) create(draggableHandler, swipeDetector) else null
 
-    fun update(draggableHandler: DraggableHandlerImpl, swipeDetector: SwipeDetector) {
-        if (draggableHandler == delegateNode.draggableHandler) {
+    fun update(
+        draggableHandler: DraggableHandlerImpl,
+        swipeDetector: SwipeDetector,
+        enabled: Boolean,
+    ) {
+        // Disabled.
+        if (!enabled) {
+            delegateNode?.let { undelegate(it) }
+            delegateNode = null
+            return
+        }
+
+        // Disabled => Enabled.
+        val nullableDelegate = delegateNode
+        if (nullableDelegate == null) {
+            delegateNode = create(draggableHandler, swipeDetector)
+            return
+        }
+
+        // Enabled => Enabled (update).
+        if (draggableHandler == nullableDelegate.draggableHandler) {
             // Simple update, just update the swipe detector directly and keep the node.
-            delegateNode.swipeDetector = swipeDetector
+            nullableDelegate.swipeDetector = swipeDetector
         } else {
             // The draggableHandler changed, force recreate the underlying SwipeToSceneNode.
-            undelegate(delegateNode)
-            delegateNode = delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
+            undelegate(nullableDelegate)
+            delegateNode = create(draggableHandler, swipeDetector)
         }
+    }
+
+    private fun create(
+        draggableHandler: DraggableHandlerImpl,
+        swipeDetector: SwipeDetector,
+    ): SwipeToSceneNode {
+        return delegate(SwipeToSceneNode(draggableHandler, swipeDetector))
     }
 }
 
