@@ -41,6 +41,8 @@ import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVI
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_TAKE_SCREENSHOT
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAXIMIZE_FREEFORM_WINDOW
 import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_NOTIFICATION_PANEL
+import android.hardware.input.KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS
+import com.android.hardware.input.Flags.enableVoiceAccessKeyGestures
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.AppCategories
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.MultiTasking
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCategoryType.System
@@ -63,6 +65,7 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
             KEY_GESTURE_TYPE_LAUNCH_ASSISTANT to System,
             KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT to System,
             KEY_GESTURE_TYPE_ALL_APPS to System,
+            KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS to System,
 
             // Multitasking Category
             KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER to MultiTasking,
@@ -100,6 +103,7 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
             KEY_GESTURE_TYPE_LAUNCH_ASSISTANT to R.string.shortcut_helper_category_system_apps,
             KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT to
                 R.string.shortcut_helper_category_system_apps,
+            KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS to R.string.shortcut_helper_category_system_apps,
 
             // Multitasking Category
             KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT to
@@ -148,6 +152,7 @@ class InputGestureMaps @Inject constructor(private val context: Context) {
             KEY_GESTURE_TYPE_LAUNCH_ASSISTANT to R.string.group_system_access_google_assistant,
             KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT to
                 R.string.group_system_access_google_assistant,
+            KEY_GESTURE_TYPE_TOGGLE_VOICE_ACCESS to R.string.group_system_toggle_voice_access,
 
             // Multitasking Category
             KEY_GESTURE_TYPE_RECENT_APPS_SWITCHER to R.string.group_system_cycle_forward,
