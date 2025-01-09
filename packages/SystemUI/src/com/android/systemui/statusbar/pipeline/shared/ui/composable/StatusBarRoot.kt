@@ -144,7 +144,9 @@ fun StatusBarRoot(
 
     Box(Modifier.fillMaxSize()) {
         // TODO(b/364360986): remove this before rolling the flag forward
-        Disambiguation(viewModel = statusBarViewModel)
+        if (StatusBarRootModernization.SHOW_DISAMBIGUATION) {
+            Disambiguation(viewModel = statusBarViewModel)
+        }
 
         Row(Modifier.fillMaxSize()) {
             val scope = rememberCoroutineScope()

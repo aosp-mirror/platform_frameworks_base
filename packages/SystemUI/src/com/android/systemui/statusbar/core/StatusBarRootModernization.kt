@@ -25,7 +25,8 @@ object StatusBarRootModernization {
     /** Aconfig flag for removing the fragment */
     const val FLAG_NAME = Flags.FLAG_STATUS_BAR_ROOT_MODERNIZATION
 
-    const val SHOW_DISAMBIGUATION = true
+    /** Shows a "compose->bar" text in the status bar for debug purposes */
+    const val SHOW_DISAMBIGUATION = false
 
     /** A token used for dependency declaration */
     val token: FlagToken
