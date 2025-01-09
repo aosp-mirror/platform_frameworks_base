@@ -14,22 +14,21 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.ringer.domain
+package com.android.systemui.volume.dialog.sliders.ui.viewmodel
 
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.plugins.volumeDialogController
-import com.android.systemui.volume.data.repository.audioSystemRepository
-import com.android.systemui.volume.dialog.domain.interactor.volumeDialogStateInteractor
-import com.android.systemui.volume.dialog.ringer.data.repository.volumeDialogRingerFeedbackRepository
+import com.android.systemui.util.time.systemClock
+import com.android.systemui.volume.dialog.domain.interactor.volumeDialogVisibilityInteractor
+import com.android.systemui.volume.dialog.sliders.domain.interactor.volumeDialogSliderInteractor
 
-val Kosmos.volumeDialogRingerInteractor by
+val Kosmos.volumeDialogSliderViewModel by
     Kosmos.Fixture {
-        VolumeDialogRingerInteractor(
+        VolumeDialogSliderViewModel(
+            interactor = volumeDialogSliderInteractor,
+            visibilityInteractor = volumeDialogVisibilityInteractor,
             coroutineScope = applicationCoroutineScope,
-            volumeDialogStateInteractor = volumeDialogStateInteractor,
-            controller = volumeDialogController,
-            audioSystemRepository = audioSystemRepository,
-            ringerFeedbackRepository = volumeDialogRingerFeedbackRepository,
+            volumeDialogSliderIconProvider = volumeDialogSliderIconProvider,
+            systemClock = systemClock,
         )
     }

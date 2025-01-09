@@ -14,17 +14,24 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.domain.interactor
+package com.android.systemui.volume.dialog.settings.ui.viewmodel
 
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
-import com.android.systemui.plugins.volumeDialogController
+import com.android.systemui.kosmos.testScope
+import com.android.systemui.volume.dialog.settings.domain.volumeDialogSettingsButtonInteractor
+import com.android.systemui.volume.mediaDeviceSessionInteractor
+import com.android.systemui.volume.mediaOutputInteractor
 
-val Kosmos.volumeDialogCallbacksInteractor: VolumeDialogCallbacksInteractor by
+val Kosmos.volumeDialogSettingsButtonViewModel by
     Kosmos.Fixture {
-        VolumeDialogCallbacksInteractor(
-            volumeDialogController = volumeDialogController,
-            coroutineScope = applicationCoroutineScope,
-            bgHandler = null,
+        VolumeDialogSettingsButtonViewModel(
+            applicationContext,
+            testScope.testScheduler,
+            applicationCoroutineScope,
+            mediaOutputInteractor,
+            mediaDeviceSessionInteractor,
+            volumeDialogSettingsButtonInteractor,
         )
     }

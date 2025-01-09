@@ -14,9 +14,9 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.data.repository
+package com.android.systemui.volume.dialog.ui.utils
 
+import com.android.systemui.jank.interactionJankMonitor
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.volume.dialog.data.VolumeDialogVisibilityRepository
 
-var Kosmos.volumeDialogVisibilityRepository by Kosmos.Fixture { VolumeDialogVisibilityRepository() }
+val Kosmos.jankListenerFactory by Kosmos.Fixture { JankListenerFactory(interactionJankMonitor) }

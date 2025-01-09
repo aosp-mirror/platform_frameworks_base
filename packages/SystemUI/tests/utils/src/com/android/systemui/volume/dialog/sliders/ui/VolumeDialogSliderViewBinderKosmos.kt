@@ -14,9 +14,16 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.data.repository
+package com.android.systemui.volume.dialog.sliders.ui
 
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.volume.dialog.data.VolumeDialogVisibilityRepository
+import com.android.systemui.volume.dialog.sliders.ui.viewmodel.volumeDialogSliderInputEventsViewModel
+import com.android.systemui.volume.dialog.sliders.ui.viewmodel.volumeDialogSliderViewModel
 
-var Kosmos.volumeDialogVisibilityRepository by Kosmos.Fixture { VolumeDialogVisibilityRepository() }
+val Kosmos.volumeDialogSliderViewBinder by
+    Kosmos.Fixture {
+        VolumeDialogSliderViewBinder(
+            volumeDialogSliderViewModel,
+            volumeDialogSliderInputEventsViewModel,
+        )
+    }

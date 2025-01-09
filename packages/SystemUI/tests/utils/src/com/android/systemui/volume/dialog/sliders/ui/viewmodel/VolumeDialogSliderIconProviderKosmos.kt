@@ -14,9 +14,18 @@
  * limitations under the License.
  */
 
-package com.android.systemui.volume.dialog.data.repository
+package com.android.systemui.volume.dialog.sliders.ui.viewmodel
 
+import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.volume.dialog.data.VolumeDialogVisibilityRepository
+import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
+import com.android.systemui.volume.domain.interactor.audioVolumeInteractor
 
-var Kosmos.volumeDialogVisibilityRepository by Kosmos.Fixture { VolumeDialogVisibilityRepository() }
+val Kosmos.volumeDialogSliderIconProvider by
+    Kosmos.Fixture {
+        VolumeDialogSliderIconProvider(
+            context = applicationContext,
+            audioVolumeInteractor = audioVolumeInteractor,
+            zenModeInteractor = zenModeInteractor,
+        )
+    }
