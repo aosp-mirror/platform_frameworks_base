@@ -25,3 +25,6 @@ val Kosmos.fakeConfigurationController: FakeConfigurationController by
     Kosmos.Fixture { FakeConfigurationController() }
 val Kosmos.statusBarConfigurationController: StatusBarConfigurationController by
     Kosmos.Fixture { fakeConfigurationController }
+
+val ConfigurationController.fake
+    get() = this as FakeConfigurationController

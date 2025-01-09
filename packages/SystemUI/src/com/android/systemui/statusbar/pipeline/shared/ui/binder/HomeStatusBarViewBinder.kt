@@ -45,6 +45,7 @@ import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernizat
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
+import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 
 /**
@@ -120,22 +121,26 @@ constructor(
                         !StatusBarNotifChips.isEnabled &&
                         !StatusBarChipsModernization.isEnabled
                 ) {
-                    val primaryChipView: View =
-                        view.requireViewById(R.id.ongoing_activity_chip_primary)
+                    val primaryChipViewBinding =
+                        OngoingActivityChipBinder.createBinding(
+                            view.requireViewById(R.id.ongoing_activity_chip_primary)
+                        )
                     launch {
                         viewModel.primaryOngoingActivityChip.collect { primaryChipModel ->
                             OngoingActivityChipBinder.bind(
                                 primaryChipModel,
-                                primaryChipView,
+                                primaryChipViewBinding,
                                 iconViewStore,
                             )
                             if (StatusBarRootModernization.isEnabled) {
                                 when (primaryChipModel) {
                                     is OngoingActivityChipModel.Shown ->
-                                        primaryChipView.show(shouldAnimateChange = true)
+                                        primaryChipViewBinding.rootView.show(
+                                            shouldAnimateChange = true
+                                        )
 
                                     is OngoingActivityChipModel.Hidden ->
-                                        primaryChipView.hide(
+                                        primaryChipViewBinding.rootView.hide(
                                             state = View.GONE,
                                             shouldAnimateChange = primaryChipModel.shouldAnimate,
                                         )
@@ -166,28 +171,34 @@ constructor(
                         StatusBarNotifChips.isEnabled &&
                         !StatusBarChipsModernization.isEnabled
                 ) {
-                    val primaryChipView: View =
-                        view.requireViewById(R.id.ongoing_activity_chip_primary)
-                    val secondaryChipView: View =
-                        view.requireViewById(R.id.ongoing_activity_chip_secondary)
+                    // Create view bindings here so we don't keep re-fetching child views each time
+                    // the chip model changes.
+                    val primaryChipViewBinding =
+                        OngoingActivityChipBinder.createBinding(
+                            view.requireViewById(R.id.ongoing_activity_chip_primary)
+                        )
+                    val secondaryChipViewBinding =
+                        OngoingActivityChipBinder.createBinding(
+                            view.requireViewById(R.id.ongoing_activity_chip_secondary)
+                        )
                     launch {
-                        viewModel.ongoingActivityChips.collect { chips ->
+                        viewModel.ongoingActivityChips.collectLatest { chips ->
                             OngoingActivityChipBinder.bind(
                                 chips.primary,
-                                primaryChipView,
+                                primaryChipViewBinding,
                                 iconViewStore,
                             )
-                            // TODO(b/364653005): Don't show the secondary chip if there isn't
-                            // enough space for it.
                             OngoingActivityChipBinder.bind(
                                 chips.secondary,
-                                secondaryChipView,
+                                secondaryChipViewBinding,
                                 iconViewStore,
                             )
 
                             if (StatusBarRootModernization.isEnabled) {
-                                primaryChipView.adjustVisibility(chips.primary.toVisibilityModel())
-                                secondaryChipView.adjustVisibility(
+                                primaryChipViewBinding.rootView.adjustVisibility(
+                                    chips.primary.toVisibilityModel()
+                                )
+                                secondaryChipViewBinding.rootView.adjustVisibility(
                                     chips.secondary.toVisibilityModel()
                                 )
                             } else {
@@ -199,6 +210,18 @@ constructor(
                                     // TODO(b/364653005): Figure out the animation story here.
                                     shouldAnimate = true,
                                 )
+                            }
+
+                            viewModel.contentArea.collect { _ ->
+                                OngoingActivityChipBinder.resetPrimaryChipWidthRestrictions(
+                                    primaryChipViewBinding,
+                                    viewModel.ongoingActivityChips.value.primary,
+                                )
+                                OngoingActivityChipBinder.resetSecondaryChipWidthRestrictions(
+                                    secondaryChipViewBinding,
+                                    viewModel.ongoingActivityChips.value.secondary,
+                                )
+                                view.requestLayout()
                             }
                         }
                     }

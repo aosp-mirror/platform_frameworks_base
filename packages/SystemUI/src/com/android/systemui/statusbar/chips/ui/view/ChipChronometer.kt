@@ -33,10 +33,8 @@ import androidx.annotation.UiThread
  *    that wide. This means the chip may get larger over time (e.g. in the transition from 59:59 to
  *    1:00:00), but never smaller.
  * 2) Hiding the text if the time gets too long for the space available. Once the text has been
- *    hidden, it remains hidden for the duration of the activity.
- *
- * Note that if the text was too big in portrait mode, resulting in the text being hidden, then the
- * text will also be hidden in landscape (even if there is enough space for it in landscape).
+ *    hidden, it remains hidden for the duration of the activity (or until [resetWidthRestriction]
+ *    is called).
  */
 class ChipChronometer
 @JvmOverloads
@@ -51,12 +49,23 @@ constructor(context: Context, attrs: AttributeSet? = null, defStyle: Int = 0) :
     private var shouldHideText: Boolean = false
 
     override fun setBase(base: Long) {
-        // These variables may have changed during the previous activity, so re-set them before the
-        // new activity starts.
+        resetWidthRestriction()
+        super.setBase(base)
+    }
+
+    /**
+     * Resets any width restrictions that were placed on the chronometer.
+     *
+     * Should be used when the user's screen bounds changed because there may now be more room in
+     * the status bar to show additional content.
+     */
+    @UiThread
+    fun resetWidthRestriction() {
         minimumTextWidth = 0
         shouldHideText = false
+        // View needs to be visible in order to be re-measured
         visibility = VISIBLE
-        super.setBase(base)
+        forceLayout()
     }
 
     /** Sets whether this view should hide its text or not. */
