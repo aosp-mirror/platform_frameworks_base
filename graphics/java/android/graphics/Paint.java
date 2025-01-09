@@ -16,9 +16,9 @@
 
 package android.graphics;
 
+import static com.android.text.flags.Flags.FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API;
 import static com.android.text.flags.Flags.FLAG_FIX_LINE_HEIGHT_FOR_LOCALE;
 import static com.android.text.flags.Flags.FLAG_LETTER_SPACING_JUSTIFICATION;
-import static com.android.text.flags.Flags.FLAG_DEPRECATE_ELEGANT_TEXT_HEIGHT_API;
 import static com.android.text.flags.Flags.FLAG_VERTICAL_TEXT_LAYOUT;
 
 import android.annotation.ColorInt;
@@ -34,7 +34,6 @@ import android.app.compat.CompatChanges;
 import android.compat.annotation.ChangeId;
 import android.compat.annotation.EnabledSince;
 import android.compat.annotation.UnsupportedAppUsage;
-import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.text.TextRunShaper;
 import android.os.Build;
@@ -2100,14 +2099,6 @@ public class Paint {
     }
 
     /**
-     * A change ID for new font variation settings management.
-     * @hide
-     */
-    @ChangeId
-    @EnabledSince(targetSdkVersion = 36)
-    public static final long NEW_FONT_VARIATION_MANAGEMENT = 361260253L;
-
-    /**
      * Sets TrueType or OpenType font variation settings. The settings string is constructed from
      * multiple pairs of axis tag and style values. The axis tag must contain four ASCII characters
      * and must be wrapped with single quotes (U+0027) or double quotes (U+0022). Axis strings that
@@ -2136,16 +2127,12 @@ public class Paint {
      * </li>
      * </ul>
      *
-     * <p>Note: If the application that targets API 35 or before, this function mutates the
-     * underlying typeface instance.
-     *
      * @param fontVariationSettings font variation settings. You can pass null or empty string as
      *                              no variation settings.
      *
-     * @return If the application that targets API 36 or later and is running on devices API 36 or
-     *         later, this function always returns true. Otherwise, this function returns true if
-     *         the given settings is effective to at least one font file underlying this typeface.
-     *         This function also returns true for empty settings string. Otherwise returns false.
+     * @return true if the given settings is effective to at least one font file underlying this
+     *         typeface. This function also returns true for empty settings string. Otherwise
+     *         returns false
      *
      * @throws IllegalArgumentException If given string is not a valid font variation settings
      *                                  format
@@ -2154,39 +2141,6 @@ public class Paint {
      * @see FontVariationAxis
      */
     public boolean setFontVariationSettings(String fontVariationSettings) {
-        return setFontVariationSettings(fontVariationSettings, 0 /* wght adjust */);
-    }
-
-    /**
-     * Set font variation settings with weight adjustment
-     * @hide
-     */
-    public boolean setFontVariationSettings(String fontVariationSettings, int wghtAdjust) {
-        final boolean useFontVariationStore = Flags.typefaceRedesignReadonly()
-                && CompatChanges.isChangeEnabled(NEW_FONT_VARIATION_MANAGEMENT);
-        if (useFontVariationStore) {
-            FontVariationAxis[] axes =
-                    FontVariationAxis.fromFontVariationSettings(fontVariationSettings);
-            if (axes == null) {
-                nSetFontVariationOverride(mNativePaint, 0);
-                mFontVariationSettings = null;
-                return true;
-            }
-
-            long builderPtr = nCreateFontVariationBuilder(axes.length);
-            for (int i = 0; i < axes.length; ++i) {
-                int tag = axes[i].getOpenTypeTagValue();
-                float value = axes[i].getStyleValue();
-                if (tag == 0x77676874 /* wght */) {
-                    value = Math.clamp(value + wghtAdjust,
-                            FontStyle.FONT_WEIGHT_MIN, FontStyle.FONT_WEIGHT_MAX);
-                }
-                nAddFontVariationToBuilder(builderPtr, tag, value);
-            }
-            nSetFontVariationOverride(mNativePaint, builderPtr);
-            mFontVariationSettings = fontVariationSettings;
-            return true;
-        }
         final String settings = TextUtils.nullIfEmpty(fontVariationSettings);
         if (settings == mFontVariationSettings
                 || (settings != null && settings.equals(mFontVariationSettings))) {
