@@ -47,8 +47,8 @@ import com.android.systemui.shade.ui.composable.Shade
 val SceneContainerTransitions = transitions {
     interruptionHandler = SceneContainerInterruptionHandler
 
-    // Overscroll progress starts linearly with some resistance (3f) and slowly approaches 0.2f
-    defaultSwipeSpec = spring(stiffness = 300f, dampingRatio = 0.8f, visibilityThreshold = 0.5f)
+    defaultMotionSpatialSpec =
+        spring(stiffness = 300f, dampingRatio = 0.8f, visibilityThreshold = 0.5f)
 
     // Scene transitions
 

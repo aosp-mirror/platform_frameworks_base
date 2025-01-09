@@ -40,11 +40,15 @@ import com.android.compose.animation.scene.transformation.Translate
 
 internal fun transitionsImpl(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
     val impl = SceneTransitionsBuilderImpl().apply(builder)
-    return SceneTransitions(impl.defaultSwipeSpec, impl.transitionSpecs, impl.interruptionHandler)
+    return SceneTransitions(
+        defaultMotionSpatialSpec = impl.defaultMotionSpatialSpec,
+        transitionSpecs = impl.transitionSpecs,
+        interruptionHandler = impl.interruptionHandler,
+    )
 }
 
 private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
-    override var defaultSwipeSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
+    override var defaultMotionSpatialSpec: SpringSpec<Float> = SceneTransitions.DefaultSwipeSpec
     override var interruptionHandler: InterruptionHandler = DefaultInterruptionHandler
 
     val transitionSpecs = mutableListOf<TransitionSpecImpl>()
@@ -85,7 +89,7 @@ private class SceneTransitionsBuilderImpl : SceneTransitionsBuilder {
             val impl = TransitionBuilderImpl(transition).apply(builder)
             return TransformationSpecImpl(
                 progressSpec = impl.spec,
-                swipeSpec = impl.swipeSpec,
+                motionSpatialSpec = impl.motionSpatialSpec,
                 distance = impl.distance,
                 transformationMatchers = impl.transformationMatchers,
             )
@@ -188,7 +192,7 @@ internal abstract class BaseTransitionBuilderImpl : BaseTransitionBuilder {
 internal class TransitionBuilderImpl(override val transition: TransitionState.Transition) :
     BaseTransitionBuilderImpl(), TransitionBuilder {
     override var spec: AnimationSpec<Float> = spring(stiffness = Spring.StiffnessLow)
-    override var swipeSpec: SpringSpec<Float>? = null
+    override var motionSpatialSpec: SpringSpec<Float>? = null
     override var distance: UserActionDistance? = null
     private val durationMillis: Int by lazy {
         val spec = spec

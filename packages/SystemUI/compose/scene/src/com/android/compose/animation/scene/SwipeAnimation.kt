@@ -365,10 +365,10 @@ internal class SwipeAnimation<T : ContentKey>(
             return 0f
         }
 
-        val swipeSpec =
+        val motionSpatialSpec =
             spec
-                ?: contentTransition.transformationSpec.swipeSpec
-                ?: layoutState.transitions.defaultSwipeSpec
+                ?: contentTransition.transformationSpec.motionSpatialSpec
+                ?: layoutState.transitions.defaultMotionSpatialSpec
 
         val velocityConsumed = CompletableDeferred<Float>()
 
@@ -376,7 +376,7 @@ internal class SwipeAnimation<T : ContentKey>(
             val result =
                 animatable.animateTo(
                     targetValue = targetOffset,
-                    animationSpec = swipeSpec,
+                    animationSpec = motionSpatialSpec,
                     initialVelocity = initialVelocity,
                 )
 

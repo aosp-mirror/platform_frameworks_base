@@ -618,7 +618,7 @@ class ElementTest {
     fun layoutGetsCurrentTransitionStateFromComposition() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
+                MutableSceneTransitionLayoutState(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) {
@@ -1126,7 +1126,7 @@ class ElementTest {
 
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
+                MutableSceneTransitionLayoutState(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
@@ -1331,7 +1331,7 @@ class ElementTest {
         val fooSize = 100.dp
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
+                MutableSceneTransitionLayoutState(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
@@ -1439,7 +1439,7 @@ class ElementTest {
     @Test
     fun targetStateIsSetEvenWhenNotPlaced() {
         // Start directly at A => B but with progress < 0f to overscroll on A.
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
 
         lateinit var layoutImpl: SceneTransitionLayoutImpl
         val scope =
@@ -1473,7 +1473,7 @@ class ElementTest {
     fun lastAlphaIsNotSetByOutdatedLayer() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
+                MutableSceneTransitionLayoutState(
                     SceneA,
                     transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } },
                 )
@@ -1537,7 +1537,7 @@ class ElementTest {
     fun fadingElementsDontAppearInstantly() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutStateImpl(
+                MutableSceneTransitionLayoutState(
                     SceneA,
                     transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } },
                 )
@@ -1583,7 +1583,7 @@ class ElementTest {
 
     @Test
     fun lastPlacementValuesAreClearedOnNestedElements() {
-        val state = rule.runOnIdle { MutableSceneTransitionLayoutStateImpl(SceneA) }
+        val state = rule.runOnIdle { MutableSceneTransitionLayoutState(SceneA) }
 
         @Composable
         fun ContentScope.NestedFooBar() {
@@ -1658,7 +1658,7 @@ class ElementTest {
     fun currentTransitionSceneIsUsedToComputeElementValues() {
         val state =
             rule.runOnIdle {
-                MutableSceneTransitionLayoutStateImpl(
+                MutableSceneTransitionLayoutState(
                     SceneA,
                     transitions {
                         from(SceneB, to = SceneC) {
@@ -1709,7 +1709,7 @@ class ElementTest {
 
     @Test
     fun interruptionDeltasAreProperlyCleaned() {
-        val state = rule.runOnIdle { MutableSceneTransitionLayoutStateImpl(SceneA) }
+        val state = rule.runOnIdle { MutableSceneTransitionLayoutState(SceneA) }
 
         @Composable
         fun ContentScope.Foo(offset: Dp) {
@@ -1780,7 +1780,7 @@ class ElementTest {
     fun transparentElementIsNotImpactingInterruption() {
         val state =
             rule.runOnIdle {
-                MutableSceneTransitionLayoutStateImpl(
+                MutableSceneTransitionLayoutState(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) {
@@ -1856,7 +1856,7 @@ class ElementTest {
 
     @Test
     fun replacedTransitionDoesNotTriggerInterruption() {
-        val state = rule.runOnIdle { MutableSceneTransitionLayoutStateImpl(SceneA) }
+        val state = rule.runOnIdle { MutableSceneTransitionLayoutState(SceneA) }
 
         @Composable
         fun ContentScope.Foo(modifier: Modifier = Modifier) {
@@ -2027,7 +2027,7 @@ class ElementTest {
     ): SceneTransitionLayoutImpl {
         val state =
             rule.runOnIdle {
-                MutableSceneTransitionLayoutStateImpl(
+                MutableSceneTransitionLayoutState(
                     from,
                     transitions { from(from, to = to, preview = preview, builder = transition) },
                 )
