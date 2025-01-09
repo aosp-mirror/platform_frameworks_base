@@ -24,6 +24,7 @@ import android.provider.Settings
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.settingslib.notification.modes.TestModeBuilder
+import com.android.settingslib.notification.modes.TestModeBuilder.MANUAL_DND
 import com.android.systemui.Flags
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.Expandable
@@ -87,9 +88,9 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val activeModes by collectLastValue(zenModeInteractor.activeModes)
 
+            zenModeRepository.activateMode(MANUAL_DND)
             zenModeRepository.addModes(
                 listOf(
-                    TestModeBuilder.MANUAL_DND_ACTIVE,
                     TestModeBuilder().setName("Mode 1").setActive(true).build(),
                     TestModeBuilder().setName("Mode 2").setActive(true).build(),
                 )
@@ -111,7 +112,7 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val dndMode by collectLastValue(zenModeInteractor.dndMode)
 
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_ACTIVE)
+            zenModeRepository.activateMode(MANUAL_DND)
             assertThat(dndMode?.isActive).isTrue()
 
             underTest.handleInput(
@@ -127,7 +128,6 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
         testScope.runTest {
             val dndMode by collectLastValue(zenModeInteractor.dndMode)
 
-            zenModeRepository.addMode(TestModeBuilder.MANUAL_DND_INACTIVE)
             assertThat(dndMode?.isActive).isFalse()
 
             underTest.handleInput(
