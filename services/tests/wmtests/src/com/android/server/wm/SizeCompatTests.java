@@ -185,31 +185,46 @@ public class SizeCompatTests extends WindowTestsBase {
     }
 
     private ActivityRecord setUpApp(DisplayContent display) {
-        return setUpApp(display, null /* appBuilder */);
+        return setUpApp(display, null /* appBuilder */, null /* taskBuilder */);
     }
 
     private ActivityRecord setUpApp(DisplayContent display, ActivityBuilder appBuilder) {
+        return setUpApp(display, appBuilder, null /* taskBuilder */);
+    }
+
+    private ActivityRecord setUpApp(DisplayContent display, ActivityBuilder aBuilder,
+            TaskBuilder tBuilder) {
         // Use the real package name (com.android.frameworks.wmtests) so that
         // EnableCompatChanges/DisableCompatChanges can take effect.
         // Otherwise the fake WindowTestsBase.DEFAULT_COMPONENT_PACKAGE_NAME will make
         // PlatformCompat#isChangeEnabledByPackageName always return default value.
         final ComponentName componentName = ComponentName.createRelative(
                 mContext, SizeCompatTests.class.getName());
-        mTask = new TaskBuilder(mSupervisor).setDisplay(display).setComponent(componentName)
+        final TaskBuilder taskBuilder = tBuilder != null ? tBuilder : new TaskBuilder(mSupervisor);
+        mTask = taskBuilder.setDisplay(display).setComponent(componentName)
                 .build();
-        final ActivityBuilder builder = appBuilder != null ? appBuilder : new ActivityBuilder(mAtm);
-        mActivity = builder.setTask(mTask).setComponent(componentName).build();
+        final ActivityBuilder appBuilder = aBuilder != null ? aBuilder : new ActivityBuilder(mAtm);
+        mActivity = appBuilder.setTask(mTask).setComponent(componentName).build();
         doReturn(false).when(mActivity).isImmersiveMode(any());
         return mActivity;
     }
 
     private ActivityRecord setUpDisplaySizeWithApp(int dw, int dh) {
-        return setUpDisplaySizeWithApp(dw, dh, null /* appBuilder */);
+        return setUpDisplaySizeWithApp(dw, dh, null /* appBuilder */, null /* taskBuilder */);
     }
 
     private ActivityRecord setUpDisplaySizeWithApp(int dw, int dh, ActivityBuilder appBuilder) {
+        return setUpDisplaySizeWithApp(dw, dh, appBuilder, null /* taskBuilder */);
+    }
+
+    private ActivityRecord setUpDisplaySizeWithApp(int dw, int dh, TaskBuilder taskBuilder) {
+        return setUpDisplaySizeWithApp(dw, dh, null /* appBuilder */, taskBuilder);
+    }
+
+    private ActivityRecord setUpDisplaySizeWithApp(int dw, int dh, ActivityBuilder appBuilder,
+            TaskBuilder taskBuilder) {
         final TestDisplayContent.Builder builder = new TestDisplayContent.Builder(mAtm, dw, dh);
-        return setUpApp(builder.build(), appBuilder);
+        return setUpApp(builder.build(), appBuilder, taskBuilder);
     }
 
     private void setUpLargeScreenDisplayWithApp(int dw, int dh) {
@@ -4467,6 +4482,80 @@ public class SizeCompatTests extends WindowTestsBase {
         // App bounds should not include insets and should match bounds when in freeform.
         assertEquals(new Rect(0, 0, 1000, 2800), appBounds);
         assertEquals(new Rect(0, 0, 1000, 2800), bounds);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES)
+    public void testUserAspectRatioOverridesNotAppliedToResizeableFreeformActivity() {
+        final TaskBuilder taskBuilder =
+                new TaskBuilder(mSupervisor).setWindowingMode(WINDOWING_MODE_FREEFORM);
+        setUpDisplaySizeWithApp(2500, 1600, taskBuilder);
+
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        spyOn(mActivity.mWmService.mAppCompatConfiguration);
+        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
+                .isUserAppAspectRatioSettingsEnabled();
+        final AppCompatController appCompatController = mActivity.mAppCompatController;
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                appCompatController.getAppCompatAspectRatioOverrides();
+        spyOn(aspectRatioOverrides);
+        // Set user aspect ratio override.
+        doReturn(USER_MIN_ASPECT_RATIO_16_9).when(aspectRatioOverrides)
+                .getUserMinAspectRatioOverrideCode();
+
+        prepareLimitedBounds(mActivity, SCREEN_ORIENTATION_PORTRAIT, /* isUnresizable= */ false);
+        assertFalse(appCompatController.getAppCompatAspectRatioPolicy().isAspectRatioApplied());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES)
+    public void testUserAspectRatioOverridesAppliedToNonResizeableFreeformActivity() {
+        final TaskBuilder taskBuilder =
+                new TaskBuilder(mSupervisor).setWindowingMode(WINDOWING_MODE_FREEFORM);
+        setUpDisplaySizeWithApp(2500, 1600, taskBuilder);
+
+        mActivity.mDisplayContent.setIgnoreOrientationRequest(true /* ignoreOrientationRequest */);
+        spyOn(mActivity.mWmService.mAppCompatConfiguration);
+        doReturn(true).when(mActivity.mWmService.mAppCompatConfiguration)
+                .isUserAppAspectRatioSettingsEnabled();
+        final AppCompatController appCompatController = mActivity.mAppCompatController;
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                appCompatController.getAppCompatAspectRatioOverrides();
+        spyOn(aspectRatioOverrides);
+        // Set user aspect ratio override.
+        doReturn(USER_MIN_ASPECT_RATIO_16_9).when(aspectRatioOverrides)
+                .getUserMinAspectRatioOverrideCode();
+
+        prepareLimitedBounds(mActivity, SCREEN_ORIENTATION_PORTRAIT, /* isUnresizable= */ true);
+        assertTrue(appCompatController.getAppCompatAspectRatioPolicy().isAspectRatioApplied());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE})
+    @EnableFlags(Flags.FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES)
+    public void testSystemAspectRatioOverridesNotAppliedToResizeableFreeformActivity() {
+        final TaskBuilder taskBuilder =
+                new TaskBuilder(mSupervisor).setWindowingMode(WINDOWING_MODE_FREEFORM);
+        setUpDisplaySizeWithApp(2500, 1600, taskBuilder);
+        prepareLimitedBounds(mActivity, SCREEN_ORIENTATION_PORTRAIT, /* isUnresizable= */ false);
+
+        assertFalse(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isAspectRatioApplied());
+    }
+
+    @Test
+    @EnableCompatChanges({ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO,
+            ActivityInfo.OVERRIDE_MIN_ASPECT_RATIO_LARGE})
+    @EnableFlags(Flags.FLAG_IGNORE_ASPECT_RATIO_RESTRICTIONS_FOR_RESIZEABLE_FREEFORM_ACTIVITIES)
+    public void testSystemAspectRatioOverridesAppliedToNonResizeableFreeformActivity() {
+        final TaskBuilder taskBuilder =
+                new TaskBuilder(mSupervisor).setWindowingMode(WINDOWING_MODE_FREEFORM);
+        setUpDisplaySizeWithApp(2500, 1600, taskBuilder);
+        prepareLimitedBounds(mActivity, SCREEN_ORIENTATION_PORTRAIT, /* isUnresizable= */ true);
+
+        assertTrue(mActivity.mAppCompatController.getAppCompatAspectRatioPolicy()
+                .isAspectRatioApplied());
     }
 
     private void assertVerticalPositionForDifferentDisplayConfigsForLandscapeActivity(
