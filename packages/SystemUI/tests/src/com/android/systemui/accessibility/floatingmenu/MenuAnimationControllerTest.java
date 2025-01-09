@@ -82,7 +82,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         final MenuViewAppearance stubMenuViewAppearance = new MenuViewAppearance(mContext,
                 stubWindowManager);
-        final SecureSettings secureSettings = TestUtils.mockSecureSettings();
+        final SecureSettings secureSettings = TestUtils.mockSecureSettings(mContext);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
                 secureSettings, mHearingAidDeviceManager);
 

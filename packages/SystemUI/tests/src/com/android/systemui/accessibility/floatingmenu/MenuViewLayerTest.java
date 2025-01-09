@@ -144,7 +144,7 @@ public class MenuViewLayerTest extends SysuiTestCase {
     private HearingAidDeviceManager mHearingAidDeviceManager;
     @Mock
     private PackageManager mMockPackageManager;
-    private final SecureSettings mSecureSettings = TestUtils.mockSecureSettings();
+    private final SecureSettings mSecureSettings = TestUtils.mockSecureSettings(mContext);
 
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
 

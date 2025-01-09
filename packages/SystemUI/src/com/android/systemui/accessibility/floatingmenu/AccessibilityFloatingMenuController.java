@@ -23,7 +23,6 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.hardware.display.DisplayManager;
 import android.os.Handler;
-import android.os.UserHandle;
 import android.text.TextUtils;
 import android.view.Display;
 import android.view.WindowManager;
@@ -58,7 +57,7 @@ public class AccessibilityFloatingMenuController implements
     private final AccessibilityButtonTargetsObserver mAccessibilityButtonTargetsObserver;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
-    private Context mContext;
+    private final Context mContext;
     private final WindowManager mWindowManager;
     private final ViewCaptureAwareWindowManager mViewCaptureAwareWindowManager;
     private final DisplayManager mDisplayManager;
@@ -226,7 +225,6 @@ public class AccessibilityFloatingMenuController implements
         @Override
         public void onUserInitializationComplete(int userId) {
             mIsUserInInitialization = false;
-            mContext = mContext.createContextAsUser(UserHandle.of(userId), /* flags= */ 0);
             mBtnMode = mAccessibilityButtonModeObserver.getCurrentAccessibilityButtonMode();
             mBtnTargets =
                     mAccessibilityButtonTargetsObserver.getCurrentAccessibilityButtonTargets();

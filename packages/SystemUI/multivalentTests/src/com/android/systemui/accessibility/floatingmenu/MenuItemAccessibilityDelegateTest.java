@@ -71,7 +71,7 @@ public class MenuItemAccessibilityDelegateTest extends SysuiTestCase {
     private AccessibilityManager mAccessibilityManager;
     @Mock
     private HearingAidDeviceManager mHearingAidDeviceManager;
-    private final SecureSettings mSecureSettings = TestUtils.mockSecureSettings();
+    private final SecureSettings mSecureSettings = TestUtils.mockSecureSettings(mContext);
     private RecyclerView mStubListView;
     private MenuView mMenuView;
     private MenuViewLayer mMenuViewLayer;
