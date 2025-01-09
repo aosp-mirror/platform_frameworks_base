@@ -169,6 +169,7 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
     private static final boolean DEFAULT_IS_KEYGUARD_VISIBLE_AND_OCCLUDED = false;
     private static final boolean DEFAULT_IS_IN_FULL_IMMERSIVE_MODE = false;
     private static final boolean DEFAULT_HAS_GLOBAL_FOCUS = true;
+    private static final boolean DEFAULT_SHOULD_IGNORE_CORNER_RADIUS = false;
 
     @Rule public final SetFlagsRule mSetFlagsRule = new SetFlagsRule(DEVICE_DEFAULT);
 
@@ -391,6 +392,31 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
         RelayoutParams relayoutParams = new RelayoutParams();
 
         updateRelayoutParams(relayoutParams, taskInfo);
+
+        assertThat(relayoutParams.mCornerRadius).isEqualTo(INVALID_CORNER_RADIUS);
+    }
+
+    @Test
+    public void updateRelayoutParams_shouldIgnoreCornerRadius_roundedCornersNotSet() {
+        final ActivityManager.RunningTaskInfo taskInfo = createTaskInfo(/* visible= */ true);
+        taskInfo.configuration.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        fillRoundedCornersResources(/* fillValue= */ 30);
+        RelayoutParams relayoutParams = new RelayoutParams();
+
+        DesktopModeWindowDecoration.updateRelayoutParams(
+                relayoutParams,
+                mTestableContext,
+                taskInfo,
+                mMockSplitScreenController,
+                DEFAULT_APPLY_START_TRANSACTION_ON_DRAW,
+                DEFAULT_SHOULD_SET_TASK_POSITIONING_AND_CROP,
+                DEFAULT_IS_STATUSBAR_VISIBLE,
+                DEFAULT_IS_KEYGUARD_VISIBLE_AND_OCCLUDED,
+                DEFAULT_IS_IN_FULL_IMMERSIVE_MODE,
+                new InsetsState(),
+                DEFAULT_HAS_GLOBAL_FOCUS,
+                mExclusionRegion,
+                /* shouldIgnoreCornerRadius= */ true);
 
         assertThat(relayoutParams.mCornerRadius).isEqualTo(INVALID_CORNER_RADIUS);
     }
@@ -634,7 +660,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* inFullImmersiveMode */ true,
                 insetsState,
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         // Takes status bar inset as padding, ignores caption bar inset.
         assertThat(relayoutParams.mCaptionTopPadding).isEqualTo(50);
@@ -659,7 +686,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* inFullImmersiveMode */ true,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         assertThat(relayoutParams.mIsInsetSource).isFalse();
     }
@@ -683,7 +711,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 DEFAULT_IS_IN_FULL_IMMERSIVE_MODE,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         // Header is always shown because it's assumed the status bar is always visible.
         assertThat(relayoutParams.mIsCaptionVisible).isTrue();
@@ -707,7 +736,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 DEFAULT_IS_IN_FULL_IMMERSIVE_MODE,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         assertThat(relayoutParams.mIsCaptionVisible).isTrue();
     }
@@ -730,7 +760,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 DEFAULT_IS_IN_FULL_IMMERSIVE_MODE,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         assertThat(relayoutParams.mIsCaptionVisible).isFalse();
     }
@@ -753,7 +784,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 DEFAULT_IS_IN_FULL_IMMERSIVE_MODE,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         assertThat(relayoutParams.mIsCaptionVisible).isFalse();
     }
@@ -777,7 +809,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* inFullImmersiveMode */ true,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         assertThat(relayoutParams.mIsCaptionVisible).isTrue();
 
@@ -793,7 +826,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* inFullImmersiveMode */ true,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         assertThat(relayoutParams.mIsCaptionVisible).isFalse();
     }
@@ -817,7 +851,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 /* inFullImmersiveMode */ true,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
 
         assertThat(relayoutParams.mIsCaptionVisible).isFalse();
     }
@@ -1480,7 +1515,8 @@ public class DesktopModeWindowDecorationTests extends ShellTestCase {
                 DEFAULT_IS_IN_FULL_IMMERSIVE_MODE,
                 new InsetsState(),
                 DEFAULT_HAS_GLOBAL_FOCUS,
-                mExclusionRegion);
+                mExclusionRegion,
+                DEFAULT_SHOULD_IGNORE_CORNER_RADIUS);
     }
 
     private DesktopModeWindowDecoration createWindowDecoration(

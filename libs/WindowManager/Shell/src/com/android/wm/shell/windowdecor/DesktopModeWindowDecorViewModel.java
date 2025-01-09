@@ -126,6 +126,8 @@ import com.android.wm.shell.desktopmode.common.ToggleTaskSizeUtilsKt;
 import com.android.wm.shell.desktopmode.education.AppHandleEducationController;
 import com.android.wm.shell.desktopmode.education.AppToWebEducationController;
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter;
+import com.android.wm.shell.recents.RecentsTransitionHandler;
+import com.android.wm.shell.recents.RecentsTransitionStateListener;
 import com.android.wm.shell.shared.FocusTransitionListener;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
@@ -157,8 +159,10 @@ import kotlinx.coroutines.MainCoroutineDispatcher;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.function.Supplier;
 
 /**
@@ -247,6 +251,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
     private final DesktopModeEventLogger mDesktopModeEventLogger;
     private final DesktopModeUiEventLogger mDesktopModeUiEventLogger;
     private final WindowDecorTaskResourceLoader mTaskResourceLoader;
+    private final RecentsTransitionHandler mRecentsTransitionHandler;
 
     public DesktopModeWindowDecorViewModel(
             Context context,
@@ -282,7 +287,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger,
             DesktopModeUiEventLogger desktopModeUiEventLogger,
-            WindowDecorTaskResourceLoader taskResourceLoader) {
+            WindowDecorTaskResourceLoader taskResourceLoader,
+            RecentsTransitionHandler recentsTransitionHandler) {
         this(
                 context,
                 shellExecutor,
@@ -323,7 +329,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 focusTransitionObserver,
                 desktopModeEventLogger,
                 desktopModeUiEventLogger,
-                taskResourceLoader);
+                taskResourceLoader,
+                recentsTransitionHandler);
     }
 
     @VisibleForTesting
@@ -367,7 +374,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger,
             DesktopModeUiEventLogger desktopModeUiEventLogger,
-            WindowDecorTaskResourceLoader taskResourceLoader) {
+            WindowDecorTaskResourceLoader taskResourceLoader,
+            RecentsTransitionHandler recentsTransitionHandler) {
         mContext = context;
         mMainExecutor = shellExecutor;
         mMainHandler = mainHandler;
@@ -436,6 +444,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         mDesktopModeEventLogger = desktopModeEventLogger;
         mDesktopModeUiEventLogger = desktopModeUiEventLogger;
         mTaskResourceLoader = taskResourceLoader;
+        mRecentsTransitionHandler = recentsTransitionHandler;
 
         shellInit.addInitCallback(this::onInit, this);
     }
@@ -450,6 +459,10 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 new DesktopModeOnTaskResizeAnimationListener());
         mDesktopTasksController.setOnTaskRepositionAnimationListener(
                 new DesktopModeOnTaskRepositionAnimationListener());
+        if (Flags.enableDesktopRecentsTransitionsCornersBugfix()) {
+            mRecentsTransitionHandler.addTransitionStateListener(
+                    new DesktopModeRecentsTransitionStateListener());
+        }
         mDisplayController.addDisplayChangingController(mOnDisplayChangingListener);
         try {
             mWindowManager.registerSystemGestureExclusionListener(mGestureExclusionListener,
@@ -1856,6 +1869,38 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
             if (decoration == null) return;
             decoration.hideResizeVeil();
             decoration.setAnimatingTaskResizeOrReposition(false);
+        }
+    }
+
+    private class DesktopModeRecentsTransitionStateListener
+            implements RecentsTransitionStateListener {
+        final Set<Integer> mAnimatingTaskIds = new HashSet<>();
+
+        @Override
+        public void onTransitionStateChanged(int state) {
+            switch (state) {
+                case RecentsTransitionStateListener.TRANSITION_STATE_REQUESTED:
+                    for (int n = 0; n < mWindowDecorByTaskId.size(); n++) {
+                        int taskId = mWindowDecorByTaskId.keyAt(n);
+                        mAnimatingTaskIds.add(taskId);
+                        setIsRecentsTransitionRunningForTask(taskId, true);
+                    }
+                    return;
+                case RecentsTransitionStateListener.TRANSITION_STATE_NOT_RUNNING:
+                    // No Recents transition running - clean up window decorations
+                    for (int taskId : mAnimatingTaskIds) {
+                        setIsRecentsTransitionRunningForTask(taskId, false);
+                    }
+                    mAnimatingTaskIds.clear();
+                    return;
+                default:
+            }
+        }
+
+        private void setIsRecentsTransitionRunningForTask(int taskId, boolean isRecentsRunning) {
+            final DesktopModeWindowDecoration decoration = mWindowDecorByTaskId.get(taskId);
+            if (decoration == null) return;
+            decoration.setIsRecentsTransitionRunning(isRecentsRunning);
         }
     }
 
