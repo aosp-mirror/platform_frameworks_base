@@ -7214,7 +7214,7 @@ public class AudioService extends IAudioService.Stub
         final int pid = Binder.getCallingPid();
         final String eventSource = new StringBuilder("setBluetoothA2dpOn(").append(on)
                 .append(") from u/pid:").append(uid).append("/")
-                .append(pid).toString();
+                .append(pid).append(" src:AudioService.setBtA2dpOn").toString();
 
         new MediaMetrics.Item(MediaMetrics.Name.AUDIO_DEVICE
                 + MediaMetrics.SEPARATOR + "setBluetoothA2dpOn")
