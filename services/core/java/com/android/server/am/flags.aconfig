@@ -270,6 +270,16 @@ flag {
 }
 
 flag {
+    name: "prototype_aggressive_freezing"
+    namespace: "backstage_power"
+    description: "Grant PROCESS_CAPABILITY_CPU_TIME to as many valid states and aggressively freeze other states"
+    bug: "370798593"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "add_modify_raw_oom_adj_service_level"
     namespace: "backstage_power"
     description: "Add a SERVICE_ADJ level to the modifyRawOomAdj method"

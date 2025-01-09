@@ -277,7 +277,9 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_FOLLOW_UP_OOMADJ_UPDATE_WAIT_DURATION = 1000L;
 
     /** The default value to {@link #KEY_FREEZER_CUTOFF_ADJ} */
-    private static final int DEFAULT_FREEZER_CUTOFF_ADJ = ProcessList.CACHED_APP_MIN_ADJ;
+    private static final int DEFAULT_FREEZER_CUTOFF_ADJ =
+            Flags.prototypeAggressiveFreezing() ? ProcessList.HOME_APP_ADJ
+                    : ProcessList.CACHED_APP_MIN_ADJ;
 
     /**
      * Same as {@link TEMPORARY_ALLOW_LIST_TYPE_FOREGROUND_SERVICE_NOT_ALLOWED}
