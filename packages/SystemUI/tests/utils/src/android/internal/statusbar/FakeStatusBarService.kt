@@ -435,6 +435,8 @@ class FakeStatusBarService : IStatusBarService.Stub() {
 
     override fun unbundleNotification(key: String) {}
 
+    override fun rebundleNotification(key: String) {}
+
     companion object {
         const val DEFAULT_DISPLAY_ID = Display.DEFAULT_DISPLAY
         const val SECONDARY_DISPLAY_ID = 2

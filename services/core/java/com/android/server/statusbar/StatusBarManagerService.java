@@ -2199,6 +2199,19 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         });
     }
 
+    /**
+     *  Called when the notification should be rebundled.
+     * @param key the notification key
+     */
+    @Override
+    public void rebundleNotification(String key) {
+        enforceStatusBarService();
+        enforceValidCallingUser();
+        Binder.withCleanCallingIdentity(() -> {
+            mNotificationDelegate.rebundleNotification(key);
+        });
+    }
+
 
     @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,

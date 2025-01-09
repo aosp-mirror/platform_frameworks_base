@@ -222,6 +222,9 @@ public final class NotificationRecord {
     // lifetime extended.
     private boolean mCanceledAfterLifetimeExtension = false;
 
+    // type of the bundle if the notification was classified
+    private @Adjustment.Types int mBundleType = Adjustment.TYPE_OTHER;
+
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
         this.sbn = sbn;
@@ -465,6 +468,10 @@ public final class NotificationRecord {
             if (previous.getSbn().getOverrideGroupKey() != null && !getSbn().isAppGroup()) {
                 getSbn().setOverrideGroupKey(previous.getSbn().getOverrideGroupKey());
             }
+        }
+
+        if (android.service.notification.Flags.notificationClassification()) {
+            mBundleType = previous.mBundleType;
         }
 
         // Don't copy importance information or mGlobalSortKey, recompute them.
@@ -1627,6 +1634,14 @@ public final class NotificationRecord {
 
     public void setCanceledAfterLifetimeExtension(boolean canceledAfterLifetimeExtension) {
         mCanceledAfterLifetimeExtension = canceledAfterLifetimeExtension;
+    }
+
+    public @Adjustment.Types int getBundleType() {
+        return mBundleType;
+    }
+
+    public void setBundleType(@Adjustment.Types int bundleType) {
+        mBundleType = bundleType;
     }
 
     /**

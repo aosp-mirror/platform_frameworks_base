@@ -107,4 +107,9 @@ public interface NotificationDelegate {
      * @param key the notification key
      */
     void unbundleNotification(String key);
+    /**
+     *  Called when the notification should be rebundled.
+     * @param key the notification key
+     */
+    void rebundleNotification(String key);
 }

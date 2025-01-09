@@ -1888,6 +1888,36 @@ public class NotificationManagerService extends SystemService {
                 }
             }
         }
+
+        @Override
+        public void rebundleNotification(String key) {
+            if (!(notificationClassification() && notificationRegroupOnClassification())) {
+                return;
+            }
+            synchronized (mNotificationLock) {
+                NotificationRecord r = mNotificationsByKey.get(key);
+                if (r == null) {
+                    return;
+                }
+
+                if (DBG) {
+                    Slog.v(TAG, "rebundleNotification: " + r);
+                }
+
+                if (r.getBundleType() != Adjustment.TYPE_OTHER) {
+                    final Bundle classifBundle = new Bundle();
+                    classifBundle.putInt(KEY_TYPE, r.getBundleType());
+                    Adjustment adj = new Adjustment(r.getSbn().getPackageName(), r.getKey(),
+                            classifBundle, "rebundle", r.getUserId());
+                    applyAdjustmentLocked(r, adj, /* isPosted= */ true);
+                    mRankingHandler.requestSort();
+                } else {
+                    if (DBG) {
+                        Slog.w(TAG, "Can't rebundle. No valid bundle type for: " + r);
+                    }
+                }
+            }
+        }
     };
 
     NotificationManagerPrivate mNotificationManagerPrivate = new NotificationManagerPrivate() {
@@ -7134,6 +7164,7 @@ public class NotificationManagerService extends SystemService {
                     adjustments.putParcelable(KEY_TYPE, newChannel);
 
                     logClassificationChannelAdjustmentReceived(r, isPosted, classification);
+                    r.setBundleType(classification);
                 }
             }
             r.addAdjustment(adjustment);
