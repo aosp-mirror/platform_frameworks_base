@@ -30,6 +30,7 @@ import static android.os.PowerManagerInternal.WAKEFULNESS_DOZING;
 import static android.os.PowerManagerInternal.WAKEFULNESS_DREAMING;
 import static android.os.PowerManagerInternal.isInteractive;
 import static android.os.PowerManagerInternal.wakefulnessToString;
+import static android.service.dreams.Flags.allowDreamWhenPostured;
 
 import static com.android.internal.util.LatencyTracker.ACTION_TURN_ON_SCREEN;
 import static com.android.server.deviceidle.Flags.disableWakelocksInLightIdle;
@@ -216,6 +217,8 @@ public final class PowerManagerService extends SystemService
     private static final int DIRTY_ATTENTIVE = 1 << 14;
     // Dirty bit: display group wakefulness has changed
     private static final int DIRTY_DISPLAY_GROUP_WAKEFULNESS = 1 << 16;
+    // Dirty bit: device postured state has changed
+    private static final int DIRTY_POSTURED_STATE = 1 << 17;
 
     // Summarizes the state of all active wakelocks.
     static final int WAKE_LOCK_CPU = 1 << 0;
@@ -500,6 +503,11 @@ public final class PowerManagerService extends SystemService
     // The current dock state.
     private int mDockState = Intent.EXTRA_DOCK_STATE_UNDOCKED;
 
+    /**
+     * Whether the device is upright and stationary.
+     */
+    private boolean mDevicePostured;
+
     // True to decouple auto-suspend mode from the display state.
     private boolean mDecoupleHalAutoSuspendModeFromDisplayConfig;
 
@@ -530,6 +538,9 @@ public final class PowerManagerService extends SystemService
     // Default value for dreams activate-on-dock
     private boolean mDreamsActivatedOnDockByDefaultConfig;
 
+    /** Default value for whether dreams are activated when postured (stationary + upright) */
+    private boolean mDreamsActivatedWhilePosturedByDefaultConfig;
+
     // True if dreams can run while not plugged in.
     private boolean mDreamsEnabledOnBatteryConfig;
 
@@ -557,6 +568,9 @@ public final class PowerManagerService extends SystemService
 
     // True if dreams should be activated on dock.
     private boolean mDreamsActivateOnDockSetting;
+
+    /** Whether dreams should be activated when device is postured (stationary and upright) */
+    private boolean mDreamsActivateWhilePosturedSetting;
 
     // True if doze should not be started until after the screen off transition.
     private boolean mDozeAfterScreenOff;
@@ -1471,6 +1485,9 @@ public final class PowerManagerService extends SystemService
         resolver.registerContentObserver(Settings.Secure.getUriFor(
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK),
                 false, mSettingsObserver, UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Secure.getUriFor(
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED),
+                false, mSettingsObserver, UserHandle.USER_ALL);
         resolver.registerContentObserver(Settings.System.getUriFor(
                 Settings.System.SCREEN_OFF_TIMEOUT),
                 false, mSettingsObserver, UserHandle.USER_ALL);
@@ -1549,6 +1566,8 @@ public final class PowerManagerService extends SystemService
                 com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
         mDreamsActivatedOnDockByDefaultConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
+        mDreamsActivatedWhilePosturedByDefaultConfig = resources.getBoolean(
+                com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault);
         mDreamsEnabledOnBatteryConfig = resources.getBoolean(
                 com.android.internal.R.bool.config_dreamsEnabledOnBattery);
         mDreamsBatteryLevelMinimumWhenPoweredConfig = resources.getInteger(
@@ -1588,6 +1607,10 @@ public final class PowerManagerService extends SystemService
         mDreamsActivateOnDockSetting = (Settings.Secure.getIntForUser(resolver,
                 Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
                 mDreamsActivatedOnDockByDefaultConfig ? 1 : 0,
+                UserHandle.USER_CURRENT) != 0);
+        mDreamsActivateWhilePosturedSetting = (Settings.Secure.getIntForUser(resolver,
+                Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
+                mDreamsActivatedWhilePosturedByDefaultConfig ? 1 : 0,
                 UserHandle.USER_CURRENT) != 0);
         mScreenOffTimeoutSetting = Settings.System.getIntForUser(resolver,
                 Settings.System.SCREEN_OFF_TIMEOUT, DEFAULT_SCREEN_OFF_TIMEOUT,
@@ -3336,7 +3359,7 @@ public final class PowerManagerService extends SystemService
         if ((dirty & (DIRTY_WAKE_LOCKS | DIRTY_USER_ACTIVITY | DIRTY_BOOT_COMPLETED
                 | DIRTY_WAKEFULNESS | DIRTY_STAY_ON | DIRTY_PROXIMITY_POSITIVE
                 | DIRTY_DOCK_STATE | DIRTY_ATTENTIVE | DIRTY_SETTINGS
-                | DIRTY_SCREEN_BRIGHTNESS_BOOST)) == 0) {
+                | DIRTY_SCREEN_BRIGHTNESS_BOOST | DIRTY_POSTURED_STATE)) == 0) {
             return changed;
         }
         final long time = mClock.uptimeMillis();
@@ -3375,7 +3398,8 @@ public final class PowerManagerService extends SystemService
     private boolean shouldNapAtBedTimeLocked() {
         return mDreamsActivateOnSleepSetting
                 || (mDreamsActivateOnDockSetting
-                        && mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED);
+                        && mDockState != Intent.EXTRA_DOCK_STATE_UNDOCKED)
+                || (mDreamsActivateWhilePosturedSetting && mDevicePostured);
     }
 
     /**
@@ -4489,6 +4513,17 @@ public final class PowerManagerService extends SystemService
         }
     }
 
+    private void setDevicePosturedInternal(boolean isPostured) {
+        if (!allowDreamWhenPostured()) {
+            return;
+        }
+        synchronized (mLock) {
+            mDevicePostured = isPostured;
+            mDirty |= DIRTY_POSTURED_STATE;
+            updatePowerStateLocked();
+        }
+    }
+
     private void setUserActivityTimeoutOverrideFromWindowManagerInternal(long timeoutMillis) {
         synchronized (mLock) {
             if (mUserActivityTimeoutOverrideFromWindowManager != timeoutMillis) {
@@ -4794,6 +4829,8 @@ public final class PowerManagerService extends SystemService
                     + mDreamsActivatedOnSleepByDefaultConfig);
             pw.println("  mDreamsActivatedOnDockByDefaultConfig="
                     + mDreamsActivatedOnDockByDefaultConfig);
+            pw.println("  mDreamsActivatedWhilePosturedByDefaultConfig="
+                    + mDreamsActivatedWhilePosturedByDefaultConfig);
             pw.println("  mDreamsEnabledOnBatteryConfig="
                     + mDreamsEnabledOnBatteryConfig);
             pw.println("  mDreamsBatteryLevelMinimumWhenPoweredConfig="
@@ -4805,6 +4842,8 @@ public final class PowerManagerService extends SystemService
             pw.println("  mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("  mDreamsActivateOnSleepSetting=" + mDreamsActivateOnSleepSetting);
             pw.println("  mDreamsActivateOnDockSetting=" + mDreamsActivateOnDockSetting);
+            pw.println("  mDreamsActivateWhilePosturedSetting="
+                    + mDreamsActivateWhilePosturedSetting);
             pw.println("  mDozeAfterScreenOff=" + mDozeAfterScreenOff);
             pw.println("  mBrightWhenDozingConfig=" + mBrightWhenDozingConfig);
             pw.println("  mMinimumScreenOffTimeoutConfig=" + mMinimumScreenOffTimeoutConfig);
@@ -7387,6 +7426,11 @@ public final class PowerManagerService extends SystemService
         @Override
         public boolean isAmbientDisplaySuppressed() {
             return mAmbientDisplaySuppressionController.isSuppressed();
+        }
+
+        @Override
+        public void setDevicePostured(boolean isPostured) {
+            setDevicePosturedInternal(isPostured);
         }
     }
 
