@@ -35,6 +35,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.VibratorHelper
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.onConfigChanged
+import com.android.systemui.util.time.SystemClock
 import com.android.systemui.volume.Events
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialog
 import com.android.systemui.volume.dialog.dagger.scope.VolumeDialogScope
@@ -56,6 +57,7 @@ import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
+private const val DRAWER_STATE_ANIMATION_DURATION = 400L
 private const val SHOW_RINGER_TOAST_COUNT = 12
 
 @VolumeDialogScope
@@ -71,6 +73,7 @@ constructor(
     private val volumeDialogLogger: VolumeDialogLogger,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
     configurationController: ConfigurationController,
+    private val systemClock: SystemClock,
 ) {
 
     private val drawerState = MutableStateFlow<RingerDrawerState>(RingerDrawerState.Initial)
@@ -108,6 +111,7 @@ constructor(
             .setUsage(AudioAttributes.USAGE_ASSISTANCE_SONIFICATION)
             .build()
 
+    private var lastClickTime = 0L
     init {
         ringerViewModel
             .onEach { viewModelState ->
@@ -124,6 +128,9 @@ constructor(
     }
 
     fun onRingerButtonClicked(ringerMode: RingerMode, isSelectedButton: Boolean = false) {
+        val currentTime = systemClock.currentTimeMillis()
+        if (currentTime - lastClickTime < DRAWER_STATE_ANIMATION_DURATION) return
+        lastClickTime = currentTime
         if (drawerState.value is RingerDrawerState.Open && !isSelectedButton) {
             Events.writeEvent(Events.EVENT_RINGER_TOGGLE, ringerMode.value)
             volumeDialogLogger.onRingerModeChanged(ringerMode)

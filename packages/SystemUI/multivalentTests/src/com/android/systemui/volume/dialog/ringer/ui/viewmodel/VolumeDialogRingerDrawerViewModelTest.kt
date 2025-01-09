@@ -30,6 +30,7 @@ import com.android.systemui.haptics.fakeVibratorHelper
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.fakeVolumeDialogController
 import com.android.systemui.testKosmos
+import com.android.systemui.util.time.fakeSystemClock
 import com.android.systemui.volume.data.repository.audioSystemRepository
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -78,7 +79,7 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
             val normalRingerMode = RingerMode(RINGER_MODE_NORMAL)
 
             setUpRingerModeAndOpenDrawer(normalRingerMode)
-            underTest.onRingerButtonClicked(normalRingerMode)
+            onRingerButtonClicked(normalRingerMode)
             controller.getState()
 
             assertThat(ringerViewModel).isInstanceOf(RingerViewModelState.Available::class.java)
@@ -95,7 +96,7 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
 
             setUpRingerModeAndOpenDrawer(normalRingerMode)
             // Select vibrate ringer mode.
-            underTest.onRingerButtonClicked(vibrateRingerMode)
+            onRingerButtonClicked(vibrateRingerMode)
             controller.getState()
             runCurrent()
 
@@ -109,11 +110,11 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
 
             val silentRingerMode = RingerMode(RINGER_MODE_SILENT)
             // Open drawer
-            underTest.onRingerButtonClicked(vibrateRingerMode)
+            onRingerButtonClicked(vibrateRingerMode)
             controller.getState()
 
             // Select silent ringer mode.
-            underTest.onRingerButtonClicked(silentRingerMode)
+            onRingerButtonClicked(silentRingerMode)
             controller.getState()
             runCurrent()
 
@@ -152,9 +153,14 @@ class VolumeDialogRingerDrawerViewModelTest : SysuiTestCase() {
 
     private fun TestScope.setUpRingerModeAndOpenDrawer(selectedRingerMode: RingerMode) {
         setUpRingerMode(selectedRingerMode)
-        underTest.onRingerButtonClicked(RingerMode(selectedRingerMode.value))
+        onRingerButtonClicked(selectedRingerMode)
         controller.getState()
         runCurrent()
+    }
+
+    private fun TestScope.onRingerButtonClicked(ringerMode: RingerMode) {
+        kosmos.fakeSystemClock.advanceTime(400L)
+        underTest.onRingerButtonClicked(ringerMode)
     }
 
     private fun TestScope.setUpRingerMode(selectedRingerMode: RingerMode) {
