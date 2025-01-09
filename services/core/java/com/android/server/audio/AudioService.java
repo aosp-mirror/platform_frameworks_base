@@ -47,6 +47,7 @@ import static android.media.AudioManager.RINGER_MODE_NORMAL;
 import static android.media.AudioManager.RINGER_MODE_SILENT;
 import static android.media.AudioManager.RINGER_MODE_VIBRATE;
 import static android.media.AudioManager.STREAM_SYSTEM;
+import static android.media.IAudioManagerNative.HardeningType;
 import static android.media.audio.Flags.autoPublicVolumeApiHardening;
 import static android.media.audio.Flags.automaticBtDeviceType;
 import static android.media.audio.Flags.concurrentAudioRecordBypassPermission;
@@ -151,6 +152,7 @@ import android.media.BluetoothProfileConnectionInfo;
 import android.media.FadeManagerConfiguration;
 import android.media.IAudioDeviceVolumeDispatcher;
 import android.media.IAudioFocusDispatcher;
+import android.media.IAudioManagerNative;
 import android.media.IAudioModeDispatcher;
 import android.media.IAudioRoutesObserver;
 import android.media.IAudioServerStateDispatcher;
@@ -834,6 +836,18 @@ public class AudioService extends IAudioService.Stub
 
     private final UserRestrictionsListener mUserRestrictionsListener =
             new AudioServiceUserRestrictionsListener();
+
+    private final IAudioManagerNative mNativeShim = new IAudioManagerNative.Stub() {
+        // oneway
+        @Override
+        public void playbackHardeningEvent(int uid, byte type, boolean bypassed) {
+        }
+
+        @Override
+        public void permissionUpdateBarrier() {
+            AudioService.this.permissionUpdateBarrier();
+        }
+    };
 
     // List of binder death handlers for setMode() client processes.
     // The last process to have called setMode() is at the top of the list.
@@ -2809,6 +2823,11 @@ public class AudioService extends IAudioService.Stub
         }
         new AudioManagerShellCommand(AudioService.this).exec(this, in, out, err,
                 args, callback, resultReceiver);
+    }
+
+    @Override
+    public IAudioManagerNative getNativeInterface() {
+        return mNativeShim;
     }
 
     /** @see AudioManager#getSurroundFormats() */
