@@ -1,7 +1,10 @@
 {
   "presubmit": [
     {
-      "name": "CtsMediaBetterTogetherTestCases"
+      "name": "CtsMediaRouterTestCases"
+    },
+    {
+      "name": "CtsMediaSessionTestCases"
     },
     {
       "name": "MediaRouterServiceTests"
