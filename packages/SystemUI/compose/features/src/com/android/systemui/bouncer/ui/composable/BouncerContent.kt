@@ -89,9 +89,9 @@ import com.android.compose.PlatformButton
 import com.android.compose.animation.Easings
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
+import com.android.compose.animation.scene.rememberMutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.bouncer.shared.model.BouncerActionButtonModel
@@ -494,7 +494,7 @@ private fun FoldAware(
     val currentSceneKey =
         if (isSplitAroundTheFold) SceneKeys.SplitSceneKey else SceneKeys.ContiguousSceneKey
 
-    val state = remember { MutableSceneTransitionLayoutState(currentSceneKey, SceneTransitions) }
+    val state = rememberMutableSceneTransitionLayoutState(currentSceneKey, SceneTransitions)
 
     // Update state whenever currentSceneKey has changed.
     LaunchedEffect(state, currentSceneKey) {

@@ -17,8 +17,12 @@
 package com.android.compose.animation.scene.content
 
 import android.annotation.SuppressLint
+import androidx.compose.animation.core.AnimationSpec
+import androidx.compose.animation.core.AnimationVector
+import androidx.compose.animation.core.TwoWayConverter
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.layout.Box
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
@@ -123,16 +127,25 @@ internal class ContentScopeImpl(
     override val lookaheadScope: LookaheadScope
         get() = layoutImpl.lookaheadScope
 
+    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+    private val animationSpatialSpec =
+        object : AnimationSpec<Float> {
+            override fun <V : AnimationVector> vectorize(converter: TwoWayConverter<Float, V>) =
+                layoutImpl.state.motionScheme.defaultSpatialSpec<Float>().vectorize(converter)
+        }
+
     private val _verticalOverscrollEffect =
         OffsetOverscrollEffect(
             orientation = Orientation.Vertical,
             animationScope = layoutImpl.animationScope,
+            animationSpec = animationSpatialSpec,
         )
 
     private val _horizontalOverscrollEffect =
         OffsetOverscrollEffect(
             orientation = Orientation.Horizontal,
             animationScope = layoutImpl.animationScope,
+            animationSpec = animationSpatialSpec,
         )
 
     val verticalOverscrollGestureEffect = GestureEffect(_verticalOverscrollEffect)

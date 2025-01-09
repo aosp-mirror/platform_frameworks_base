@@ -37,6 +37,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutStateForTests
 import com.android.compose.animation.scene.Scale
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
@@ -104,7 +105,9 @@ class NestedElementTransformationTest {
         startScene: SceneKey,
         transitions: SceneTransitions = SceneTransitions.Empty,
     ): MutableSceneTransitionLayoutState {
-        return rule.runOnUiThread { MutableSceneTransitionLayoutState(startScene, transitions) }
+        return rule.runOnUiThread {
+            MutableSceneTransitionLayoutStateForTests(startScene, transitions)
+        }
     }
 
     private val threeNestedStls:

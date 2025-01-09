@@ -51,7 +51,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun isTransitioningTo_idle() {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA, SceneTransitions.Empty)
 
         assertThat(state.isTransitioning()).isFalse()
         assertThat(state.isTransitioning(from = SceneA)).isFalse()
@@ -61,7 +61,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun isTransitioningTo_transition() = runTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, SceneTransitions.Empty)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA, SceneTransitions.Empty)
         state.startTransitionImmediately(
             animationScope = backgroundScope,
             transition(from = SceneA, to = SceneB),
@@ -77,13 +77,13 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun setTargetScene_idleToSameScene() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
         assertThat(state.setTargetScene(SceneA, animationScope = this)).isNull()
     }
 
     @Test
     fun setTargetScene_idleToDifferentScene() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
         val (transition, job) = checkNotNull(state.setTargetScene(SceneB, animationScope = this))
         assertThat(state.transitionState).isEqualTo(transition)
 
@@ -93,7 +93,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun setTargetScene_transitionToSameScene() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
 
         val (_, job) = checkNotNull(state.setTargetScene(SceneB, animationScope = this))
         assertThat(state.setTargetScene(SceneB, animationScope = this)).isNull()
@@ -104,7 +104,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun setTargetScene_transitionToDifferentScene() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
 
         assertThat(state.setTargetScene(SceneB, animationScope = this)).isNotNull()
         val (_, job) = checkNotNull(state.setTargetScene(SceneC, animationScope = this))
@@ -115,7 +115,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun setTargetScene_coroutineScopeCancelled() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
 
         lateinit var transition: TransitionState.Transition
         val job =
@@ -133,7 +133,7 @@ class SceneTransitionLayoutStateTest {
     fun setTargetScene_withTransitionKey() = runMonotonicClockTest {
         val transitionkey = TransitionKey(debugName = "foo")
         val state =
-            MutableSceneTransitionLayoutState(
+            MutableSceneTransitionLayoutStateForTests(
                 SceneA,
                 transitions =
                     transitions {
@@ -176,7 +176,7 @@ class SceneTransitionLayoutStateTest {
             return { /* do nothing */ }
         }
 
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, EmptyTestTransitions)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA, EmptyTestTransitions)
         val aToB = transition(SceneA, SceneB, onFreezeAndAnimate = ::onFreezeAndAnimate)
         val bToC = transition(SceneB, SceneC, onFreezeAndAnimate = ::onFreezeAndAnimate)
         val cToA = transition(SceneC, SceneA, onFreezeAndAnimate = ::onFreezeAndAnimate)
@@ -226,7 +226,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun tooManyTransitionsLogsWtfAndClearsTransitions() = runTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA, EmptyTestTransitions)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA, EmptyTestTransitions)
 
         fun startTransition() {
             val transition =
@@ -251,7 +251,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun snapToScene() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
 
         // Transition to B.
         state.setTargetScene(SceneB, animationScope = this)
@@ -266,7 +266,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun snapToScene_freezesCurrentTransition() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutStateImpl(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
 
         // Start a transition that is never finished. We don't use backgroundScope on purpose so
         // that this test would fail if the transition was not frozen when snapping.
@@ -283,7 +283,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun seekToScene() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
         val progress = Channel<Float>()
 
         val job =
@@ -309,7 +309,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun seekToScene_cancelled() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
         val progress = Channel<Float>()
 
         val job =
@@ -335,7 +335,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun seekToScene_interrupted() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
         val progress = Channel<Float>()
 
         val job =
@@ -354,7 +354,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun replacedTransitionIsRemovedFromFinishedTransitions() = runTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
 
         val aToB =
             transition(
@@ -403,7 +403,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun transitionCanBeStartedOnlyOnce() = runTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
         val transition = transition(from = SceneA, to = SceneB)
 
         state.startTransitionImmediately(backgroundScope, transition)
@@ -414,7 +414,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun transitionFinishedWhenScopeIsEmpty() = runTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
 
         // Start a transition.
         val transition = transition(from = SceneA, to = SceneB)
@@ -439,7 +439,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun transitionScopeIsCancelledWhenTransitionIsForceFinished() = runTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
 
         // Start a transition.
         val transition = transition(from = SceneA, to = SceneB)
@@ -458,7 +458,7 @@ class SceneTransitionLayoutStateTest {
     @Test
     fun badTransitionSpecThrowsMeaningfulMessageWhenStartingTransition() {
         val state =
-            MutableSceneTransitionLayoutState(
+            MutableSceneTransitionLayoutStateForTests(
                 SceneA,
                 transitions {
                     // This transition definition is bad because they both match when transitioning
@@ -483,7 +483,7 @@ class SceneTransitionLayoutStateTest {
 
     @Test
     fun snapToScene_multipleTransitions() = runMonotonicClockTest {
-        val state = MutableSceneTransitionLayoutState(SceneA)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA)
         state.startTransitionImmediately(this, transition(SceneA, SceneB))
         state.startTransitionImmediately(this, transition(SceneB, SceneC))
         state.snapToScene(SceneC)
@@ -498,7 +498,7 @@ class SceneTransitionLayoutStateTest {
         val finished = mutableSetOf<TransitionState.Transition>()
         val cujWhenStarting = mutableMapOf<TransitionState.Transition, Int?>()
         val state =
-            MutableSceneTransitionLayoutState(
+            MutableSceneTransitionLayoutStateForTests(
                 SceneA,
                 transitions {
                     // A <=> B.

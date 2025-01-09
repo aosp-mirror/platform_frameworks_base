@@ -20,7 +20,6 @@ import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.animation.core.DeferredTargetAnimation
 import androidx.compose.animation.core.ExperimentalAnimatableApi
 import androidx.compose.animation.core.FiniteAnimationSpec
-import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.VectorConverter
 import androidx.compose.animation.core.spring
 import androidx.compose.ui.unit.Dp
@@ -102,14 +101,6 @@ fun TransitionBuilder.verticalContainerReveal(
 
     // The spring animating the alpha of the container.
     val alphaSpec = spring<Float>(stiffness = 1200f, dampingRatio = 0.99f)
-
-    // The spring animating the progress when releasing the finger.
-    motionSpatialSpec =
-        spring(
-            stiffness = Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            visibilityThreshold = 0.5f,
-        )
 
     // Size transformation.
     transformation(container) {

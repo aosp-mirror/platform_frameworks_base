@@ -14,14 +14,22 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.android.compose.animation.scene
 
 import android.util.Log
 import androidx.annotation.VisibleForTesting
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MotionScheme
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.util.fastAll
 import androidx.compose.ui.util.fastAny
@@ -226,6 +234,7 @@ sealed interface MutableSceneTransitionLayoutState : SceneTransitionLayoutState 
  */
 fun MutableSceneTransitionLayoutState(
     initialScene: SceneKey,
+    motionScheme: MotionScheme,
     transitions: SceneTransitions = SceneTransitions.Empty,
     initialOverlays: Set<OverlayKey> = emptySet(),
     canChangeScene: (SceneKey) -> Boolean = { true },
@@ -237,6 +246,7 @@ fun MutableSceneTransitionLayoutState(
 ): MutableSceneTransitionLayoutState {
     return MutableSceneTransitionLayoutStateImpl(
         initialScene,
+        motionScheme,
         transitions,
         initialOverlays,
         canChangeScene,
@@ -248,19 +258,62 @@ fun MutableSceneTransitionLayoutState(
     )
 }
 
+@Composable
+fun rememberMutableSceneTransitionLayoutState(
+    initialScene: SceneKey,
+    transitions: SceneTransitions = SceneTransitions.Empty,
+    initialOverlays: Set<OverlayKey> = emptySet(),
+    canChangeScene: (SceneKey) -> Boolean = { true },
+    canShowOverlay: (OverlayKey) -> Boolean = { true },
+    canHideOverlay: (OverlayKey) -> Boolean = { true },
+    canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ -> true },
+    onTransitionStart: (TransitionState.Transition) -> Unit = {},
+    onTransitionEnd: (TransitionState.Transition) -> Unit = {},
+): MutableSceneTransitionLayoutState {
+    val motionScheme = MaterialTheme.motionScheme
+    val layoutState = remember {
+        MutableSceneTransitionLayoutStateImpl(
+            initialScene = initialScene,
+            motionScheme = motionScheme,
+            transitions = transitions,
+            initialOverlays = initialOverlays,
+            canChangeScene = canChangeScene,
+            canShowOverlay = canShowOverlay,
+            canHideOverlay = canHideOverlay,
+            canReplaceOverlay = canReplaceOverlay,
+            onTransitionStart = onTransitionStart,
+            onTransitionEnd = onTransitionEnd,
+        )
+    }
+
+    SideEffect {
+        layoutState.transitions = transitions
+        layoutState.motionScheme = motionScheme
+        layoutState.canChangeScene = canChangeScene
+        layoutState.canShowOverlay = canShowOverlay
+        layoutState.canHideOverlay = canHideOverlay
+        layoutState.canReplaceOverlay = canReplaceOverlay
+        layoutState.onTransitionStart = onTransitionStart
+        layoutState.onTransitionEnd = onTransitionEnd
+    }
+    return layoutState
+}
+
 /** A [MutableSceneTransitionLayoutState] that holds the value for the current scene. */
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 internal class MutableSceneTransitionLayoutStateImpl(
     initialScene: SceneKey,
+    internal var motionScheme: MotionScheme,
     override var transitions: SceneTransitions = transitions {},
     initialOverlays: Set<OverlayKey> = emptySet(),
-    internal val canChangeScene: (SceneKey) -> Boolean = { true },
-    internal val canShowOverlay: (OverlayKey) -> Boolean = { true },
-    internal val canHideOverlay: (OverlayKey) -> Boolean = { true },
-    internal val canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ ->
+    internal var canChangeScene: (SceneKey) -> Boolean = { true },
+    internal var canShowOverlay: (OverlayKey) -> Boolean = { true },
+    internal var canHideOverlay: (OverlayKey) -> Boolean = { true },
+    internal var canReplaceOverlay: (from: OverlayKey, to: OverlayKey) -> Boolean = { _, _ ->
         true
     },
-    private val onTransitionStart: (TransitionState.Transition) -> Unit = {},
-    private val onTransitionEnd: (TransitionState.Transition) -> Unit = {},
+    internal var onTransitionStart: (TransitionState.Transition) -> Unit = {},
+    internal var onTransitionEnd: (TransitionState.Transition) -> Unit = {},
 ) : MutableSceneTransitionLayoutState {
     private val creationThread: Thread = Thread.currentThread()
 

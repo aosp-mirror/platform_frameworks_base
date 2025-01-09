@@ -19,7 +19,6 @@ package com.android.compose.animation.scene
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.Easing
 import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -36,12 +35,6 @@ fun transitions(builder: SceneTransitionsBuilder.() -> Unit): SceneTransitions {
 
 @TransitionDsl
 interface SceneTransitionsBuilder {
-    /**
-     * The default [AnimationSpec] used when after the user lifts their finger after starting a
-     * swipe to transition, to animate back into one of the 2 scenes we are transitioning to.
-     */
-    var defaultMotionSpatialSpec: SpringSpec<Float>
-
     /**
      * The [InterruptionHandler] used when transitions are interrupted. Defaults to
      * [DefaultInterruptionHandler].
@@ -139,15 +132,7 @@ interface TransitionBuilder : BaseTransitionBuilder {
      * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
      * the transition is triggered (i.e. it is not gesture-based).
      */
-    var spec: AnimationSpec<Float>
-
-    /**
-     * The [SpringSpec] used to animate the associated transition progress when the transition was
-     * started by a swipe and is now animating back to a scene because the user lifted their finger.
-     *
-     * If `null`, then the [SceneTransitionsBuilder.defaultMotionSpatialSpec] will be used.
-     */
-    var motionSpatialSpec: SpringSpec<Float>?
+    var spec: AnimationSpec<Float>?
 
     /** The CUJ associated to this transitions. */
     @CujType var cuj: Int?

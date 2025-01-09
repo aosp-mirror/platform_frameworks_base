@@ -42,7 +42,7 @@ class ContentTest {
         lateinit var layoutImpl: SceneTransitionLayoutImpl
         rule.setContent {
             SceneTransitionLayoutForTesting(
-                remember { MutableSceneTransitionLayoutState(SceneA) },
+                remember { MutableSceneTransitionLayoutStateForTests(SceneA) },
                 onLayoutImpl = { layoutImpl = it },
             ) {
                 scene(SceneA) {

@@ -57,7 +57,6 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -95,6 +94,7 @@ import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.rememberMutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.modifiers.height
 import com.android.compose.modifiers.padding
@@ -313,8 +313,8 @@ constructor(
      */
     @Composable
     private fun CollapsableQuickSettingsSTL() {
-        val sceneState = remember {
-            MutableSceneTransitionLayoutState(
+        val sceneState =
+            rememberMutableSceneTransitionLayoutState(
                 viewModel.expansionState.toIdleSceneKey(),
                 transitions =
                     transitions {
@@ -323,7 +323,6 @@ constructor(
                         }
                     },
             )
-        }
 
         LaunchedEffect(Unit) {
             synchronizeQsState(

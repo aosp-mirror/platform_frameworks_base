@@ -93,7 +93,9 @@ class SwipeToSceneTest {
         initialScene: SceneKey = SceneA,
         transitions: SceneTransitions = EmptyTestTransitions,
     ): MutableSceneTransitionLayoutState {
-        return rule.runOnUiThread { MutableSceneTransitionLayoutState(initialScene, transitions) }
+        return rule.runOnUiThread {
+            MutableSceneTransitionLayoutStateForTests(initialScene, transitions)
+        }
     }
 
     /** The content under test. */
@@ -738,7 +740,7 @@ class SwipeToSceneTest {
     fun startEnd_ltrLayout() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     initialScene = SceneA,
                     transitions =
                         transitions {
@@ -811,7 +813,7 @@ class SwipeToSceneTest {
     fun startEnd_rtlLayout() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     initialScene = SceneA,
                     transitions =
                         transitions {
@@ -893,7 +895,9 @@ class SwipeToSceneTest {
                     Text("Count: $count")
                 }
 
-                SceneTransitionLayout(remember { MutableSceneTransitionLayoutState(SceneA) }) {
+                SceneTransitionLayout(
+                    remember { MutableSceneTransitionLayoutStateForTests(SceneA) }
+                ) {
                     scene(SceneA) { Box(Modifier.fillMaxSize()) }
                 }
             }
@@ -909,7 +913,7 @@ class SwipeToSceneTest {
 
     @Test
     fun swipeToSceneSupportsUpdates() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         rule.setContent {
             SceneTransitionLayout(state) {
@@ -943,7 +947,7 @@ class SwipeToSceneTest {
     @Test
     fun swipeToSceneNodeIsKeptWhenDisabled() {
         var hasHorizontalActions by mutableStateOf(false)
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         var touchSlop = 0f
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -983,7 +987,7 @@ class SwipeToSceneTest {
 
     @Test
     fun nestedScroll_useFromSourceInfo() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         var touchSlop = 0f
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -1033,7 +1037,7 @@ class SwipeToSceneTest {
 
     @Test
     fun nestedScroll_ignoreMouseWheel() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         var touchSlop = 0f
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -1057,7 +1061,7 @@ class SwipeToSceneTest {
 
     @Test
     fun nestedScroll_keepPriorityEvenIfWeCanNoLongerScrollOnThatDirection() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         var touchSlop = 0f
         rule.setContent {
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -1097,7 +1101,7 @@ class SwipeToSceneTest {
     fun nestedScroll_replaceOverlay() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(SceneA, initialOverlays = setOf(OverlayA))
+                MutableSceneTransitionLayoutStateForTests(SceneA, initialOverlays = setOf(OverlayA))
             }
         var touchSlop = 0f
         rule.setContent {

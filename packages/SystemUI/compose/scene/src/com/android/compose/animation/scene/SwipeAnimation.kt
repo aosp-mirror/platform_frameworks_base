@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
+@file:OptIn(ExperimentalMaterial3ExpressiveApi::class)
+
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -364,10 +367,7 @@ internal class SwipeAnimation<T : ContentKey>(
 
         check(isAnimatingOffset())
 
-        val motionSpatialSpec =
-            spec
-                ?: contentTransition.transformationSpec.motionSpatialSpec
-                ?: layoutState.transitions.defaultMotionSpatialSpec
+        val motionSpatialSpec = spec ?: layoutState.motionScheme.defaultSpatialSpec()
 
         val velocityConsumed = CompletableDeferred<Float>()
         offsetAnimationRunnable.complete {

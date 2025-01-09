@@ -129,13 +129,12 @@ fun ComposeContentTestRule.testTransition(
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     testTransition(
-        state =
-            runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    fromScene,
-                    transitions { from(fromScene, to = toScene, builder = transition) },
-                )
-            },
+        state = {
+            rememberMutableSceneTransitionLayoutState(
+                fromScene,
+                transitions { from(fromScene, to = toScene, builder = transition) },
+            )
+        },
         changeState = changeState,
         transitionLayout = { state ->
             SceneTransitionLayout(state, layoutModifier) {
@@ -157,13 +156,12 @@ fun ComposeContentTestRule.testShowOverlayTransition(
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     testTransition(
-        state =
-            runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    fromScene,
-                    transitions = transitions { from(fromScene, overlay, builder = transition) },
-                )
-            },
+        state = {
+            rememberMutableSceneTransitionLayoutState(
+                fromScene,
+                transitions = transitions { from(fromScene, overlay, builder = transition) },
+            )
+        },
         transitionLayout = { state ->
             SceneTransitionLayout(state) {
                 scene(fromScene) { fromSceneContent() }
@@ -185,14 +183,13 @@ fun ComposeContentTestRule.testHideOverlayTransition(
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     testTransition(
-        state =
-            runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    toScene,
-                    initialOverlays = setOf(overlay),
-                    transitions = transitions { from(overlay, toScene, builder = transition) },
-                )
-            },
+        state = {
+            rememberMutableSceneTransitionLayoutState(
+                toScene,
+                initialOverlays = setOf(overlay),
+                transitions = transitions { from(overlay, toScene, builder = transition) },
+            )
+        },
         transitionLayout = { state ->
             SceneTransitionLayout(state) {
                 scene(toScene) { toSceneContent() }
@@ -218,14 +215,13 @@ fun ComposeContentTestRule.testReplaceOverlayTransition(
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     testTransition(
-        state =
-            runOnUiThread {
-                MutableSceneTransitionLayoutState(
-                    currentScene,
-                    initialOverlays = setOf(from),
-                    transitions = transitions { from(from, to, builder = transition) },
-                )
-            },
+        state = {
+            rememberMutableSceneTransitionLayoutState(
+                currentScene,
+                initialOverlays = setOf(from),
+                transitions = transitions { from(from, to, builder = transition) },
+            )
+        },
         transitionLayout = { state ->
             SceneTransitionLayout(state) {
                 scene(currentScene) { currentSceneContent() }
@@ -263,16 +259,14 @@ fun MotionTestRule<ComposeToolkit>.recordTransition(
     fromScene: SceneKey = TestScenes.SceneA,
     toScene: SceneKey = TestScenes.SceneB,
 ): RecordedMotion {
-    val state =
-        toolkit.composeContentTestRule.runOnUiThread {
-            MutableSceneTransitionLayoutState(
-                fromScene,
-                transitions { from(fromScene, to = toScene, builder = transition) },
-            )
-        }
-
+    lateinit var state: MutableSceneTransitionLayoutState
     return recordMotion(
         content = { play ->
+            state =
+                rememberMutableSceneTransitionLayoutState(
+                    fromScene,
+                    transitions { from(fromScene, to = toScene, builder = transition) },
+                )
             LaunchedEffect(play) {
                 if (play) {
                     state.setTargetScene(toScene, animationScope = this)
@@ -309,7 +303,7 @@ fun ComposeContentTestRule.testTransition(
     }
 
     testTransition(
-        state = state,
+        state = { state },
         changeState = { state -> state.setTargetScene(to, animationScope = this) },
         transitionLayout = transitionLayout,
         builder = builder,
@@ -323,7 +317,7 @@ fun ComposeContentTestRule.testNestedTransition(
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     testTransition(
-        state = states[0],
+        state = { states[0] },
         changeState = { changeState(states) },
         transitionLayout = { transitionLayout(states) },
         builder = builder,
@@ -331,16 +325,18 @@ fun ComposeContentTestRule.testNestedTransition(
 }
 
 /** Test the transition from [state] to [to]. */
-fun ComposeContentTestRule.testTransition(
-    state: MutableSceneTransitionLayoutState,
+private fun ComposeContentTestRule.testTransition(
+    state: @Composable () -> MutableSceneTransitionLayoutState,
     changeState: CoroutineScope.(MutableSceneTransitionLayoutState) -> Unit,
     transitionLayout: @Composable (state: MutableSceneTransitionLayoutState) -> Unit,
     builder: TransitionTestBuilder.() -> Unit,
 ) {
     lateinit var coroutineScope: CoroutineScope
+    lateinit var layoutState: MutableSceneTransitionLayoutState
     setContent {
+        layoutState = state()
         coroutineScope = rememberCoroutineScope()
-        transitionLayout(state)
+        transitionLayout(layoutState)
     }
 
     val assertionScope =
@@ -390,7 +386,7 @@ fun ComposeContentTestRule.testTransition(
     mainClock.autoAdvance = false
 
     // Change the current scene.
-    runOnUiThread { coroutineScope.changeState(state) }
+    runOnUiThread { coroutineScope.changeState(layoutState) }
     waitForIdle()
     mainClock.advanceTimeByFrame()
     waitForIdle()

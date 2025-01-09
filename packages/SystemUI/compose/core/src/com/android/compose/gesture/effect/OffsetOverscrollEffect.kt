@@ -18,10 +18,10 @@ package com.android.compose.gesture.effect
 
 import androidx.annotation.VisibleForTesting
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.OverscrollEffect
 import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,7 +41,7 @@ import kotlinx.coroutines.CoroutineScope
 class OffsetOverscrollEffect(
     orientation: Orientation,
     animationScope: CoroutineScope,
-    animationSpec: AnimationSpec<Float> = DefaultAnimationSpec,
+    animationSpec: AnimationSpec<Float>,
 ) : BaseContentOverscrollEffect(orientation, animationScope, animationSpec) {
     private var _node: DelegatableNode = newNode()
     override val node: DelegatableNode
@@ -71,13 +71,6 @@ class OffsetOverscrollEffect(
     companion object {
         private val MaxDistance = 400.dp
 
-        internal val DefaultAnimationSpec =
-            spring(
-                stiffness = Spring.StiffnessLow,
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                visibilityThreshold = 0.5f,
-            )
-
         @VisibleForTesting
         fun computeOffset(density: Density, overscrollDistance: Float): Int {
             val maxDistancePx = with(density) { MaxDistance.toPx() }
@@ -87,10 +80,11 @@ class OffsetOverscrollEffect(
     }
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun rememberOffsetOverscrollEffect(
     orientation: Orientation,
-    animationSpec: AnimationSpec<Float> = OffsetOverscrollEffect.DefaultAnimationSpec,
+    animationSpec: AnimationSpec<Float> = MaterialTheme.motionScheme.defaultSpatialSpec(),
 ): OffsetOverscrollEffect {
     val animationScope = rememberCoroutineScope()
     return remember(orientation, animationScope, animationSpec) {

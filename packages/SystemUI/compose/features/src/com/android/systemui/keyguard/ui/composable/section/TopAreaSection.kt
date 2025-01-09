@@ -27,7 +27,6 @@ import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -36,7 +35,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentScope
-import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.rememberMutableSceneTransitionLayoutState
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockScenes.largeClockScene
@@ -82,9 +81,11 @@ constructor(
                     WeatherClockScenes.splitShadeLargeClockScene
             }
 
-        val state = remember {
-            MutableSceneTransitionLayoutState(currentScene, ClockTransition.defaultClockTransitions)
-        }
+        val state =
+            rememberMutableSceneTransitionLayoutState(
+                currentScene,
+                ClockTransition.defaultClockTransitions,
+            )
 
         // Update state whenever currentSceneKey has changed.
         LaunchedEffect(state, currentScene) {

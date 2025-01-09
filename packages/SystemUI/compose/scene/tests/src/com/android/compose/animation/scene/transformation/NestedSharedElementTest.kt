@@ -39,6 +39,7 @@ import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.Default4FrameLinearTransition
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
+import com.android.compose.animation.scene.MutableSceneTransitionLayoutStateForTests
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.TestElements
 import com.android.compose.animation.scene.TestScenes
@@ -94,7 +95,7 @@ class NestedSharedElementTest {
 
     private val nestedState: MutableSceneTransitionLayoutState =
         rule.runOnUiThread {
-            MutableSceneTransitionLayoutState(
+            MutableSceneTransitionLayoutStateForTests(
                 Scenes.NestedSceneA,
                 transitions {
                     from(
@@ -108,7 +109,7 @@ class NestedSharedElementTest {
 
     private val nestedNestedState: MutableSceneTransitionLayoutState =
         rule.runOnUiThread {
-            MutableSceneTransitionLayoutState(
+            MutableSceneTransitionLayoutStateForTests(
                 Scenes.NestedNestedSceneA,
                 transitions {
                     from(

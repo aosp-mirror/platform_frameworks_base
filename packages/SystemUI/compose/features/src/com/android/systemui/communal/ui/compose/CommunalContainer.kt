@@ -43,6 +43,7 @@ import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.observableTransitionState
+import com.android.compose.animation.scene.rememberMutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.transitions
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
@@ -165,13 +166,13 @@ fun CommunalContainer(
         viewModel.communalBackground.collectAsStateWithLifecycle(
             initialValue = CommunalBackgroundType.ANIMATED
         )
-    val state: MutableSceneTransitionLayoutState = remember {
-        MutableSceneTransitionLayoutState(
+    val state: MutableSceneTransitionLayoutState =
+        rememberMutableSceneTransitionLayoutState(
             initialScene = currentSceneKey,
             canChangeScene = { _ -> viewModel.canChangeScene() },
             transitions = if (viewModel.v2FlagEnabled()) sceneTransitionsV2 else sceneTransitions,
         )
-    }
+
     val isUiBlurred by viewModel.isUiBlurred.collectAsStateWithLifecycle()
 
     val detector = remember { CommunalSwipeDetector() }

@@ -17,9 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.CubicBezierEasing
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.TweenSpec
-import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.ui.unit.IntSize
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -84,7 +82,7 @@ class TransitionDslTest {
     fun defaultTransitionSpec() {
         val transitions = transitions { from(SceneA, to = SceneB) }
         val transformationSpec = transitions.transitionSpecs.single().transformationSpec(aToB())
-        assertThat(transformationSpec.progressSpec).isInstanceOf(SpringSpec::class.java)
+        assertThat(transformationSpec.progressSpec).isNull()
     }
 
     @Test
@@ -272,44 +270,10 @@ class TransitionDslTest {
     }
 
     @Test
-    fun springSpec() {
-        val defaultSpec = spring<Float>(stiffness = 1f)
-        val specFromAToC = spring<Float>(stiffness = 2f)
-        val transitions = transitions {
-            defaultMotionSpatialSpec = defaultSpec
-
-            from(SceneA, to = SceneB) {
-                // Default swipe spec.
-            }
-            from(SceneA, to = SceneC) { motionSpatialSpec = specFromAToC }
-        }
-
-        assertThat(transitions.defaultMotionSpatialSpec).isSameInstanceAs(defaultSpec)
-
-        // A => B does not have a custom spec.
-        assertThat(
-                transitions
-                    .transitionSpec(from = SceneA, to = SceneB, key = null)
-                    .transformationSpec(aToB())
-                    .motionSpatialSpec
-            )
-            .isNull()
-
-        // A => C has a custom swipe spec.
-        assertThat(
-                transitions
-                    .transitionSpec(from = SceneA, to = SceneC, key = null)
-                    .transformationSpec(transition(from = SceneA, to = SceneC))
-                    .motionSpatialSpec
-            )
-            .isSameInstanceAs(specFromAToC)
-    }
-
-    @Test
     fun transitionIsPassedToBuilder() = runTest {
         var transitionPassedToBuilder: TransitionState.Transition? = null
         val state =
-            MutableSceneTransitionLayoutState(
+            MutableSceneTransitionLayoutStateForTests(
                 SceneA,
                 transitions { from(SceneA, to = SceneB) { transitionPassedToBuilder = transition } },
             )
@@ -340,7 +304,7 @@ class TransitionDslTest {
             }
         }
 
-        val state = MutableSceneTransitionLayoutState(SceneA, transitions)
+        val state = MutableSceneTransitionLayoutStateForTests(SceneA, transitions)
         assertThrows(IllegalStateException::class.java) {
             runBlocking { state.startTransition(transition(from = SceneA, to = SceneB)) }
         }

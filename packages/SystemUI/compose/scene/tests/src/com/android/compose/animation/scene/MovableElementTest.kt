@@ -380,7 +380,7 @@ class MovableElementTest {
 
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     initialScene = SceneA,
                     initialOverlays = setOf(OverlayA),
                 )
@@ -420,7 +420,7 @@ class MovableElementTest {
 
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     initialScene = SceneA,
                     initialOverlays = setOf(OverlayA),
                 )
