@@ -17,6 +17,7 @@
 package com.android.systemui.scene.domain.startable
 
 import com.android.internal.logging.uiEventLogger
+import com.android.systemui.animation.activityTransitionAnimator
 import com.android.systemui.authentication.domain.interactor.authenticationInteractor
 import com.android.systemui.bouncer.domain.interactor.alternateBouncerInteractor
 import com.android.systemui.bouncer.domain.interactor.bouncerInteractor
@@ -85,5 +86,6 @@ val Kosmos.sceneContainerStartable by Fixture {
         vibratorHelper = vibratorHelper,
         msdlPlayer = msdlPlayer,
         disabledContentInteractor = disabledContentInteractor,
+        activityTransitionAnimator = activityTransitionAnimator,
     )
 }

@@ -47,6 +47,7 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.flow.update
 
 /**
  * Generic business logic and app state accessors for the scene framework.
@@ -165,12 +166,15 @@ constructor(
 
     /** Whether the scene container is visible. */
     val isVisible: StateFlow<Boolean> =
-        combine(repository.isVisible, repository.isRemoteUserInputOngoing) {
-                isVisible,
-                isRemoteUserInteractionOngoing ->
+        combine(
+                repository.isVisible,
+                repository.isRemoteUserInputOngoing,
+                repository.activeTransitionAnimationCount,
+            ) { isVisible, isRemoteUserInteractionOngoing, activeTransitionAnimationCount ->
                 isVisibleInternal(
                     raw = isVisible,
                     isRemoteUserInputOngoing = isRemoteUserInteractionOngoing,
+                    activeTransitionAnimationCount = activeTransitionAnimationCount,
                 )
             }
             .stateIn(
@@ -436,8 +440,9 @@ constructor(
     private fun isVisibleInternal(
         raw: Boolean = repository.isVisible.value,
         isRemoteUserInputOngoing: Boolean = repository.isRemoteUserInputOngoing.value,
+        activeTransitionAnimationCount: Int = repository.activeTransitionAnimationCount.value,
     ): Boolean {
-        return raw || isRemoteUserInputOngoing
+        return raw || isRemoteUserInputOngoing || activeTransitionAnimationCount > 0
     }
 
     /**
@@ -524,5 +529,51 @@ constructor(
         unfiltered: Flow<Map<UserAction, UserActionResult>>
     ): Flow<Map<UserAction, UserActionResult>> {
         return disabledContentInteractor.filteredUserActions(unfiltered)
+    }
+
+    /**
+     * Notifies that a transition animation has started.
+     *
+     * The scene container will remain visible while any transition animation is running within it.
+     */
+    fun onTransitionAnimationStart() {
+        repository.activeTransitionAnimationCount.update { current ->
+            (current + 1).also {
+                check(it < 10) {
+                    "Number of active transition animations is too high. Something must be" +
+                        " calling onTransitionAnimationStart too many times!"
+                }
+            }
+        }
+    }
+
+    /**
+     * Notifies that a transition animation has ended.
+     *
+     * The scene container will remain visible while any transition animation is running within it.
+     */
+    fun onTransitionAnimationEnd() {
+        decrementActiveTransitionAnimationCount()
+    }
+
+    /**
+     * Notifies that a transition animation has been canceled.
+     *
+     * The scene container will remain visible while any transition animation is running within it.
+     */
+    fun onTransitionAnimationCancelled() {
+        decrementActiveTransitionAnimationCount()
+    }
+
+    private fun decrementActiveTransitionAnimationCount() {
+        repository.activeTransitionAnimationCount.update { current ->
+            (current - 1).also {
+                check(it >= 0) {
+                    "Number of active transition animations is negative. Something must be" +
+                        " calling onTransitionAnimationEnd or onTransitionAnimationCancelled too" +
+                        " many times!"
+                }
+            }
+        }
     }
 }
