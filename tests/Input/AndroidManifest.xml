@@ -32,7 +32,7 @@
              android:process=":externalProcess">
         </activity>
 
-        <activity android:name="com.android.test.input.CaptureEventActivity"
+        <activity android:name="com.android.cts.input.CaptureEventActivity"
             android:label="Capture events"
             android:configChanges="touchscreen|uiMode|orientation|screenSize|screenLayout|keyboardHidden|uiMode|navigation|keyboard|density|fontScale|layoutDirection|locale|mcc|mnc|smallestScreenSize"
             android:enableOnBackInvokedCallback="false"
