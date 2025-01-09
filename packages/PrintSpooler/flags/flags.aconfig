@@ -1,0 +1,9 @@
+package: "com.android.printspooler.flags"
+container: "system"
+
+flag {
+  name: "log_print_jobs"
+  namespace: "printing"
+  description: "Log print job creation and state transitions."
+  bug: "385340868"
+}
