@@ -25,6 +25,7 @@ import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.TaskStackListener;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -206,31 +207,63 @@ public class AuthController extends SystemUI implements CommandQueue.Callbacks,
     private void cancelIfOwnerIsNotInForeground() {
         if (mCurrentDialog != null) {
             try {
-                final String clientPackage = mCurrentDialog.getOpPackageName();
-                Log.w(TAG, "Task stack changed, current client: " + clientPackage);
-                final List<ActivityManager.RunningTaskInfo> runningTasks =
-                        mActivityTaskManager.getTasks(1);
-                if (!runningTasks.isEmpty()) {
-                    final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                    if (!topPackage.contentEquals(clientPackage)
-                            && !Utils.isSystem(mContext, clientPackage)) {
-                        Log.e(TAG, "Evicting client due to: " + topPackage);
-                        mCurrentDialog.dismissWithoutCallback(true /* animate */);
-                        mCurrentDialog = null;
-                        mOrientationListener.disable();
+                if (isOwnerInBackground()) {
+                    Log.w(TAG, "Evicting client due to top activity is not : "
+                            + mCurrentDialog.getOpPackageName());
+                    mCurrentDialog.dismissWithoutCallback(true /* animate */);
+                    mCurrentDialog = null;
+                    mOrientationListener.disable();
 
-                        if (mReceiver != null) {
-                            mReceiver.onDialogDismissed(
-                                    BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
-                                    null /* credentialAttestation */);
-                            mReceiver = null;
-                        }
+                    if (mReceiver != null) {
+                        mReceiver.onDialogDismissed(
+                                BiometricPrompt.DISMISSED_REASON_USER_CANCEL,
+                                null /* credentialAttestation */);
+                        mReceiver = null;
                     }
                 }
             } catch (RemoteException e) {
                 Log.e(TAG, "Remote exception", e);
             }
         }
+    }
+
+    private boolean isOwnerInBackground() {
+        if (mCurrentDialog != null) {
+            final String clientPackage = mCurrentDialog.getOpPackageName();
+
+            final List<ActivityManager.RunningTaskInfo> runningTasks =
+                    mActivityTaskManager.getTasks(1);
+            if (runningTasks == null || runningTasks.isEmpty()) {
+                Log.w(TAG, "No running tasks reported");
+                return false;
+            }
+
+            final boolean isSystemApp = Utils.isSystem(mContext, clientPackage);
+
+            final ComponentName topActivity = runningTasks.get(0).topActivity;
+            final String topPackage =  topActivity.getPackageName();
+            final boolean topPackageEqualsToClient =
+                    topPackage == null
+                            || topActivity.getPackageName().contentEquals(clientPackage);
+
+            // b/339532378: If it's ConfirmDeviceCredentialActivity, we need to check further on
+            // class name.
+            final String clientClassNameForCDCA =
+                    mCurrentDialog.getClassNameIfItIsConfirmDeviceCredentialActivity();
+            final boolean isClientCDCA = clientClassNameForCDCA != null;
+            final String topClassName = topActivity.getClassName();
+            final boolean isCDCAWithWrongTopClass =
+                    isClientCDCA
+                            && !(topClassName == null
+                                    || topClassName.contentEquals(clientClassNameForCDCA));
+
+            final boolean isInBackground =
+                    !(isSystemApp || topPackageEqualsToClient) || isCDCAWithWrongTopClass;
+
+            Log.w(TAG, "isInBackground " + isInBackground);
+            return isInBackground;
+        }
+        return false;
     }
 
     /**
