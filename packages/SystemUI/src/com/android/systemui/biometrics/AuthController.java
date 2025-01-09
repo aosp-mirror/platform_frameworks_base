@@ -1011,6 +1011,16 @@ public class AuthController implements
     }
 
     /**
+     * @return true if optical udfps HW is supported on this device. Can return true even if
+     * the user has not enrolled udfps. This may be false if called before
+     * onAllAuthenticatorsRegistered.
+     */
+    public boolean isOpticalUdfpsSupported() {
+        return getUdfpsProps() != null && !getUdfpsProps().isEmpty() && getUdfpsProps()
+                .get(0).isOpticalUdfps();
+    }
+
+    /**
      * @return true if ultrasonic udfps HW is supported on this device. Can return true even if
      * the user has not enrolled udfps. This may be false if called before
      * onAllAuthenticatorsRegistered.
