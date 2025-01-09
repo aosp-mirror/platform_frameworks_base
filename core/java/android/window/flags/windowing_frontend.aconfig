@@ -415,6 +415,17 @@ flag {
 }
 
 flag {
+    name: "keep_app_window_hide_while_locked"
+    namespace: "windowing_frontend"
+    description: "Do not let app window visible while device is locked"
+    is_fixed_read_only: true
+    bug: "378088391"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "port_window_size_animation"
     namespace: "windowing_frontend"
     description: "Port window-resize animation from legacy to shell"
