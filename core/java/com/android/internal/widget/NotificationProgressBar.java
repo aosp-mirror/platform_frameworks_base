@@ -59,6 +59,7 @@ import java.util.TreeSet;
 public final class NotificationProgressBar extends ProgressBar implements
         NotificationProgressDrawable.BoundsChangeListener {
     private static final String TAG = "NotificationProgressBar";
+    private static final boolean DEBUG = false;
 
     private NotificationProgressDrawable mNotificationProgressDrawable;
     private final Rect mProgressDrawableBounds = new Rect();
@@ -417,8 +418,10 @@ public final class NotificationProgressBar extends ProgressBar implements
     }
 
     private void updateDrawableParts() {
-        Log.d(TAG, "updateDrawableParts() called. mNotificationProgressDrawable = "
-                + mNotificationProgressDrawable + ", mParts = " + mParts);
+        if (DEBUG) {
+            Log.d(TAG, "updateDrawableParts() called. mNotificationProgressDrawable = "
+                    + mNotificationProgressDrawable + ", mParts = " + mParts);
+        }
 
         if (mNotificationProgressDrawable == null) return;
         if (mParts == null) return;
@@ -426,7 +429,9 @@ public final class NotificationProgressBar extends ProgressBar implements
         final float width = mNotificationProgressDrawable.getBounds().width();
         if (width == 0) {
             if (mProgressDrawableParts != null) {
-                Log.d(TAG, "Clearing mProgressDrawableParts");
+                if (DEBUG) {
+                    Log.d(TAG, "Clearing mProgressDrawableParts");
+                }
                 mProgressDrawableParts.clear();
                 mNotificationProgressDrawable.setParts(mProgressDrawableParts);
             }
@@ -451,7 +456,9 @@ public final class NotificationProgressBar extends ProgressBar implements
                 mProgressModel.isStyledByProgress(),
                 mHasTrackerIcon ? 0F : mNotificationProgressDrawable.getSegSegGap());
 
-        Log.d(TAG, "Updating NotificationProgressDrawable parts");
+        if (DEBUG) {
+            Log.d(TAG, "Updating NotificationProgressDrawable parts");
+        }
         mNotificationProgressDrawable.setParts(p.first);
         mAdjustedProgressFraction = p.second / width;
     }
