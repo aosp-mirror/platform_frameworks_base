@@ -159,4 +159,22 @@ TEST(CommandTest, ShortOptions) {
   ASSERT_NE(0, command.Execute({"-w"s, "2"s}, &std::cerr));
 }
 
+TEST(CommandTest, OptionsWithNullptrToAcceptValues) {
+  TestCommand command;
+  command.AddRequiredFlag("--rflag", "", nullptr);
+  command.AddRequiredFlagList("--rlflag", "", nullptr);
+  command.AddOptionalFlag("--oflag", "", nullptr);
+  command.AddOptionalFlagList("--olflag", "", (std::vector<std::string>*)nullptr);
+  command.AddOptionalFlagList("--olflag2", "", (std::unordered_set<std::string>*)nullptr);
+  command.AddOptionalSwitch("--switch", "", nullptr);
+
+  ASSERT_EQ(0, command.Execute({
+    "--rflag"s, "1"s,
+    "--rlflag"s, "1"s,
+    "--oflag"s, "1"s,
+    "--olflag"s, "1"s,
+    "--olflag2"s, "1"s,
+    "--switch"s}, &std::cerr));
+}
+
 }  // namespace aapt

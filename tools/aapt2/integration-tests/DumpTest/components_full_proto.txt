@@ -877,7 +877,7 @@ resource_table {
   }
   tool_fingerprint {
     tool: "Android Asset Packaging Tool (aapt)"
-    version: "2.19-SOONG BUILD NUMBER PLACEHOLDER"
+    version: "2.20-SOONG BUILD NUMBER PLACEHOLDER"
   }
 }
 xml_files {
