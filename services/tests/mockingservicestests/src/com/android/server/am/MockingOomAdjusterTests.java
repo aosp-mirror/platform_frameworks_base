@@ -743,6 +743,43 @@ public class MockingOomAdjusterTests {
 
     @SuppressWarnings("GuardedBy")
     @Test
+    @EnableFlags(Flags.FLAG_USE_CPU_TIME_CAPABILITY)
+    public void testUpdateOomAdjFreezeState_receivers() {
+        final ProcessRecord app = makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
+                MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true);
+
+        updateOomAdj(app);
+        assertNoCpuTime(app);
+
+        app.mReceivers.incrementCurReceivers();
+        updateOomAdj(app);
+        assertCpuTime(app);
+
+        app.mReceivers.decrementCurReceivers();
+        updateOomAdj(app);
+        assertNoCpuTime(app);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
+    @EnableFlags(Flags.FLAG_USE_CPU_TIME_CAPABILITY)
+    public void testUpdateOomAdjFreezeState_activeInstrumentation() {
+        ProcessRecord app = makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID, MOCKAPP_PROCESSNAME,
+                MOCKAPP_PACKAGENAME, true);
+        updateOomAdj(app);
+        assertNoCpuTime(app);
+
+        mProcessStateController.setActiveInstrumentation(app, mock(ActiveInstrumentation.class));
+        updateOomAdj(app);
+        assertCpuTime(app);
+
+        mProcessStateController.setActiveInstrumentation(app, null);
+        updateOomAdj(app);
+        assertNoCpuTime(app);
+    }
+
+    @SuppressWarnings("GuardedBy")
+    @Test
     public void testUpdateOomAdj_DoOne_OverlayUi() {
         ProcessRecord app = spy(makeDefaultProcessRecord(MOCKAPP_PID, MOCKAPP_UID,
                 MOCKAPP_PROCESSNAME, MOCKAPP_PACKAGENAME, true));
