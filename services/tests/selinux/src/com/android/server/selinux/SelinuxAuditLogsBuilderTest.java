@@ -15,18 +15,14 @@
  */
 package com.android.server.selinux;
 
-import static com.android.compatibility.common.util.SystemUtil.runWithShellPermissionIdentity;
 import static com.android.server.selinux.SelinuxAuditLogBuilder.toCategories;
 
 import static com.google.common.truth.Truth.assertThat;
-
-import android.provider.DeviceConfig;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
 import com.android.server.selinux.SelinuxAuditLogBuilder.SelinuxAuditLog;
 
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -45,22 +41,10 @@ public class SelinuxAuditLogsBuilderTest {
 
     @Before
     public void setUp() {
-        runWithShellPermissionIdentity(
-                () ->
-                        DeviceConfig.setLocalOverride(
-                                DeviceConfig.NAMESPACE_ADSERVICES,
-                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN,
-                                TEST_DOMAIN));
-
-        mAuditLogBuilder = new SelinuxAuditLogBuilder();
+        mAuditLogBuilder = new SelinuxAuditLogBuilder(TEST_DOMAIN);
         mScontextMatcher = mAuditLogBuilder.mScontextMatcher;
         mTcontextMatcher = mAuditLogBuilder.mTcontextMatcher;
         mPathMatcher = mAuditLogBuilder.mPathMatcher;
-    }
-
-    @After
-    public void tearDown() {
-        runWithShellPermissionIdentity(() -> DeviceConfig.clearAllLocalOverrides());
     }
 
     @Test
@@ -109,13 +93,9 @@ public class SelinuxAuditLogsBuilderTest {
 
     @Test
     public void testMatcher_scontextDefaultConfig() {
-        runWithShellPermissionIdentity(
-                () ->
-                        DeviceConfig.clearLocalOverride(
-                                DeviceConfig.NAMESPACE_ADSERVICES,
-                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN));
-
-        Matcher scontexMatcher = new SelinuxAuditLogBuilder().mScontextMatcher;
+        Matcher scontexMatcher =
+                new SelinuxAuditLogBuilder(SelinuxAuditLogsCollector.DEFAULT_SELINUX_AUDIT_DOMAIN)
+                        .mScontextMatcher;
 
         assertThat(scontexMatcher.reset("u:r:" + TEST_DOMAIN + ":s0").matches()).isFalse();
         assertThat(scontexMatcher.reset("u:r:" + TEST_DOMAIN + ":s0:c123,c456").matches())
@@ -221,13 +201,7 @@ public class SelinuxAuditLogsBuilderTest {
     @Test
     public void testSelinuxAuditLogsBuilder_wrongConfig() {
         String notARegexDomain = "not]a[regex";
-        runWithShellPermissionIdentity(
-                () ->
-                        DeviceConfig.setLocalOverride(
-                                DeviceConfig.NAMESPACE_ADSERVICES,
-                                SelinuxAuditLogBuilder.CONFIG_SELINUX_AUDIT_DOMAIN,
-                                notARegexDomain));
-        SelinuxAuditLogBuilder noOpBuilder = new SelinuxAuditLogBuilder();
+        SelinuxAuditLogBuilder noOpBuilder = new SelinuxAuditLogBuilder(notARegexDomain);
 
         noOpBuilder.reset(
                 "granted { p } scontext=u:r:"

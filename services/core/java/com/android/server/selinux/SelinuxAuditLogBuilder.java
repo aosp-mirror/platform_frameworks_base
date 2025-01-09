@@ -15,7 +15,6 @@
  */
 package com.android.server.selinux;
 
-import android.provider.DeviceConfig;
 import android.text.TextUtils;
 import android.util.Slog;
 
@@ -34,10 +33,6 @@ class SelinuxAuditLogBuilder {
 
     private static final String TAG = "SelinuxAuditLogs";
 
-    // This config indicates which Selinux logs for source domains to collect. The string will be
-    // inserted into a regex, so it must follow the regex syntax. For example, a valid value would
-    // be "system_server|untrusted_app".
-    @VisibleForTesting static final String CONFIG_SELINUX_AUDIT_DOMAIN = "selinux_audit_domain";
     private static final Matcher NO_OP_MATCHER = Pattern.compile("no-op^").matcher("");
     private static final String TCONTEXT_PATTERN =
             "u:object_r:(?<ttype>\\w+):s0(:c)?(?<tcategories>((,c)?\\d+)+)*";
@@ -50,7 +45,7 @@ class SelinuxAuditLogBuilder {
     private Iterator<String> mTokens;
     private final SelinuxAuditLog mAuditLog = new SelinuxAuditLog();
 
-    SelinuxAuditLogBuilder() {
+    SelinuxAuditLogBuilder(String auditDomain) {
         Matcher scontextMatcher = NO_OP_MATCHER;
         Matcher tcontextMatcher = NO_OP_MATCHER;
         Matcher pathMatcher = NO_OP_MATCHER;
@@ -59,10 +54,7 @@ class SelinuxAuditLogBuilder {
                     Pattern.compile(
                                     TextUtils.formatSimple(
                                             "u:r:(?<stype>%s):s0(:c)?(?<scategories>((,c)?\\d+)+)*",
-                                            DeviceConfig.getString(
-                                                    DeviceConfig.NAMESPACE_ADSERVICES,
-                                                    CONFIG_SELINUX_AUDIT_DOMAIN,
-                                                    "no_match^")))
+                                            auditDomain))
                             .matcher("");
             tcontextMatcher = Pattern.compile(TCONTEXT_PATTERN).matcher("");
             pathMatcher = Pattern.compile(PATH_PATTERN).matcher("");

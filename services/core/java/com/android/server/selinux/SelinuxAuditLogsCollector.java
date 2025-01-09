@@ -15,6 +15,7 @@
  */
 package com.android.server.selinux;
 
+import android.provider.DeviceConfig;
 import android.util.EventLog;
 import android.util.EventLog.Event;
 import android.util.Log;
@@ -32,6 +33,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -43,9 +45,16 @@ class SelinuxAuditLogsCollector {
 
     private static final String SELINUX_PATTERN = "^.*\\bavc:\\s+(?<denial>.*)$";
 
+    // This config indicates which Selinux logs for source domains to collect. The string will be
+    // inserted into a regex, so it must follow the regex syntax. For example, a valid value would
+    // be "system_server|untrusted_app".
+    @VisibleForTesting static final String CONFIG_SELINUX_AUDIT_DOMAIN = "selinux_audit_domain";
+    @VisibleForTesting static final String DEFAULT_SELINUX_AUDIT_DOMAIN = "no_match^";
+
     @VisibleForTesting
     static final Matcher SELINUX_MATCHER = Pattern.compile(SELINUX_PATTERN).matcher("");
 
+    private final Supplier<String> mAuditDomainSupplier;
     private final RateLimiter mRateLimiter;
     private final QuotaLimiter mQuotaLimiter;
 
@@ -53,9 +62,24 @@ class SelinuxAuditLogsCollector {
 
     AtomicBoolean mStopRequested = new AtomicBoolean(false);
 
-    SelinuxAuditLogsCollector(RateLimiter rateLimiter, QuotaLimiter quotaLimiter) {
+    SelinuxAuditLogsCollector(
+            Supplier<String> auditDomainSupplier,
+            RateLimiter rateLimiter,
+            QuotaLimiter quotaLimiter) {
+        mAuditDomainSupplier = auditDomainSupplier;
         mRateLimiter = rateLimiter;
         mQuotaLimiter = quotaLimiter;
+    }
+
+    SelinuxAuditLogsCollector(RateLimiter rateLimiter, QuotaLimiter quotaLimiter) {
+        this(
+                () ->
+                        DeviceConfig.getString(
+                                DeviceConfig.NAMESPACE_ADSERVICES,
+                                CONFIG_SELINUX_AUDIT_DOMAIN,
+                                DEFAULT_SELINUX_AUDIT_DOMAIN),
+                rateLimiter,
+                quotaLimiter);
     }
 
     public void setStopRequested(boolean stopRequested) {
@@ -108,7 +132,8 @@ class SelinuxAuditLogsCollector {
     }
 
     private boolean writeAuditLogs(Queue<Event> logLines) {
-        final SelinuxAuditLogBuilder auditLogBuilder = new SelinuxAuditLogBuilder();
+        final SelinuxAuditLogBuilder auditLogBuilder =
+                new SelinuxAuditLogBuilder(mAuditDomainSupplier.get());
         int auditsWritten = 0;
 
         while (!mStopRequested.get() && !logLines.isEmpty()) {
