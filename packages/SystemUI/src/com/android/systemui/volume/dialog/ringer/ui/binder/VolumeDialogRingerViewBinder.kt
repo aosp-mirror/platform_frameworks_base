@@ -51,6 +51,8 @@ import kotlinx.coroutines.flow.mapLatest
 import kotlinx.coroutines.launch
 
 private const val CLOSE_DRAWER_DELAY = 300L
+// Ensure roundness and color of button is updated when progress is changed by a minimum fraction.
+private const val BUTTON_MIN_VISIBLE_CHANGE = 0.05F
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @VolumeDialogScope
@@ -58,12 +60,12 @@ class VolumeDialogRingerViewBinder
 @Inject
 constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
     private val roundnessSpringForce =
-        SpringForce(0F).apply {
+        SpringForce(1F).apply {
             stiffness = 800F
             dampingRatio = 0.6F
         }
     private val colorSpringForce =
-        SpringForce(0F).apply {
+        SpringForce(1F).apply {
             stiffness = 3800F
             dampingRatio = 1F
         }
@@ -257,30 +259,35 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
             // We only need to execute on roundness animation end and volume dialog background
             // progress update once because these changes should be applied once on volume dialog
             // background and ringer drawer views.
-            val selectedCornerRadius = (selectedButton.background as GradientDrawable).cornerRadius
-            if (selectedCornerRadius.toInt() != selectedButtonUiModel.cornerRadius) {
-                selectedButton.animateTo(
-                    selectedButtonUiModel,
-                    if (uiModel.currentButtonIndex == count - 1) {
-                        onProgressChanged
-                    } else {
-                        { _, _ -> }
-                    },
-                )
-            }
-            val unselectedCornerRadius =
-                (unselectedButton.background as GradientDrawable).cornerRadius
-            if (unselectedCornerRadius.toInt() != unselectedButtonUiModel.cornerRadius) {
-                unselectedButton.animateTo(
-                    unselectedButtonUiModel,
-                    if (previousIndex == count - 1) {
-                        onProgressChanged
-                    } else {
-                        { _, _ -> }
-                    },
-                )
-            }
             coroutineScope {
+                val selectedCornerRadius =
+                    (selectedButton.background as GradientDrawable).cornerRadius
+                if (selectedCornerRadius.toInt() != selectedButtonUiModel.cornerRadius) {
+                    launch {
+                        selectedButton.animateTo(
+                            selectedButtonUiModel,
+                            if (uiModel.currentButtonIndex == count - 1) {
+                                onProgressChanged
+                            } else {
+                                { _, _ -> }
+                            },
+                        )
+                    }
+                }
+                val unselectedCornerRadius =
+                    (unselectedButton.background as GradientDrawable).cornerRadius
+                if (unselectedCornerRadius.toInt() != unselectedButtonUiModel.cornerRadius) {
+                    launch {
+                        unselectedButton.animateTo(
+                            unselectedButtonUiModel,
+                            if (previousIndex == count - 1) {
+                                onProgressChanged
+                            } else {
+                                { _, _ -> }
+                            },
+                        )
+                    }
+                }
                 launch {
                     delay(CLOSE_DRAWER_DELAY)
                     bindButtons(viewModel, uiModel, onAnimationEnd, isAnimated = true)
@@ -383,11 +390,14 @@ constructor(private val viewModel: VolumeDialogRingerDrawerViewModel) {
         onProgressChanged: (Float, Boolean) -> Unit = { _, _ -> },
     ) {
         val roundnessAnimation =
-            SpringAnimation(FloatValueHolder(0F)).setSpring(roundnessSpringForce)
-        val colorAnimation = SpringAnimation(FloatValueHolder(0F)).setSpring(colorSpringForce)
+            SpringAnimation(FloatValueHolder(0F), 1F).setSpring(roundnessSpringForce)
+        val colorAnimation = SpringAnimation(FloatValueHolder(0F), 1F).setSpring(colorSpringForce)
         val radius = (background as GradientDrawable).cornerRadius
         val cornerRadiusDiff =
             ringerButtonUiModel.cornerRadius - (background as GradientDrawable).cornerRadius
+
+        roundnessAnimation.minimumVisibleChange = BUTTON_MIN_VISIBLE_CHANGE
+        colorAnimation.minimumVisibleChange = BUTTON_MIN_VISIBLE_CHANGE
         coroutineScope {
             launch {
                 colorAnimation.suspendAnimate { value ->
