@@ -25,11 +25,14 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.Button
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -37,10 +40,14 @@ import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.PointerInputChange
 import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.platform.LocalViewConfiguration
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.ScrollWheel
+import androidx.compose.ui.test.assertTextEquals
 import androidx.compose.ui.test.junit4.ComposeContentTestRule
 import androidx.compose.ui.test.junit4.createComposeRule
+import androidx.compose.ui.test.onNodeWithTag
 import androidx.compose.ui.test.onRoot
+import androidx.compose.ui.test.performClick
 import androidx.compose.ui.test.performMouseInput
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipeDown
@@ -693,6 +700,7 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
     }
 
     @Test
+    @Ignore("b/388507816: re-enable this when the crash in HitPath is fixed")
     fun pointersDown_clearedWhenDisabled() {
         val draggable = TestDraggable()
         var enabled by mutableStateOf(true)
@@ -738,6 +746,31 @@ class NestedDraggableTest(override val orientation: Orientation) : OrientationAw
         }
 
         assertThat(draggable.onDragStartedCalled).isFalse()
+    }
+
+    @Test
+    fun doesNotConsumeGesturesWhenDisabled() {
+        val buttonTag = "button"
+        rule.setContent {
+            Box {
+                var count by remember { mutableStateOf(0) }
+                Button(onClick = { count++ }, Modifier.testTag(buttonTag).align(Alignment.Center)) {
+                    Text("Count: $count")
+                }
+
+                Box(
+                    Modifier.fillMaxSize()
+                        .nestedDraggable(remember { TestDraggable() }, orientation, enabled = false)
+                )
+            }
+        }
+
+        rule.onNodeWithTag(buttonTag).assertTextEquals("Count: 0")
+
+        // Click on the root at its center, where the button is located. Clicks should go through
+        // the draggable and reach the button given that it is disabled.
+        repeat(3) { rule.onRoot().performClick() }
+        rule.onNodeWithTag(buttonTag).assertTextEquals("Count: 3")
     }
 
     private fun ComposeContentTestRule.setContentWithTouchSlop(
