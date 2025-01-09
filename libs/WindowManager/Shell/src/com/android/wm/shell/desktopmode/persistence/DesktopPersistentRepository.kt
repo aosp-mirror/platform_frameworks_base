@@ -141,6 +141,22 @@ class DesktopPersistentRepository(private val dataStore: DataStore<DesktopPersis
         }
     }
 
+    suspend fun removeUsers(uids: List<Int>) {
+        try {
+            dataStore.updateData { persistentRepositories: DesktopPersistentRepositories ->
+                val persistentRepositoriesBuilder = persistentRepositories.toBuilder()
+                uids.forEach { uid -> persistentRepositoriesBuilder.removeDesktopRepoByUser(uid) }
+                persistentRepositoriesBuilder.build()
+            }
+        } catch (exception: Exception) {
+            Log.e(
+                TAG,
+                "Error in removing user related data, data is stored in a file named $DESKTOP_REPOSITORIES_DATASTORE_FILE",
+                exception,
+            )
+        }
+    }
+
     private fun getDesktop(currentRepository: DesktopRepositoryState, desktopId: Int): Desktop =
         // If there are no desktops set up, create one on the default display
         currentRepository.getDesktopOrDefault(
