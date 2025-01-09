@@ -248,6 +248,7 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
             }
         }
         mEndpointManager.unregisterEndpoint(mEndpointInfo.getIdentifier().getEndpoint());
+        releaseWakeLockOnExit();
     }
 
     @Override
@@ -554,6 +555,23 @@ public class ContextHubEndpointBroker extends IContextHubEndpoint.Stub
                             mWakeLock.release();
                         } catch (RuntimeException e) {
                             Log.e(TAG, "Releasing the wakelock fails - ", e);
+                        }
+                    }
+                });
+    }
+
+    private void releaseWakeLockOnExit() {
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    while (mWakeLock.isHeld()) {
+                        try {
+                            mWakeLock.release();
+                        } catch (RuntimeException e) {
+                            Log.e(
+                                    TAG,
+                                    "Releasing the wakelock for all acquisitions fails - ",
+                                    e);
+                            break;
                         }
                     }
                 });
