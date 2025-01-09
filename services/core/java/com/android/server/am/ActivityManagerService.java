@@ -16659,7 +16659,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void onUserRemoved(@UserIdInt int userId) {
+        public void onUserRemoving(@UserIdInt int userId) {
             // Clean up any ActivityTaskManager state (by telling it the user is stopped)
             mAtmInternal.onUserStopped(userId);
             // Clean up various services by removing the user
@@ -16670,6 +16670,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mThemeOverlayReadyUsers.remove(userId);
                 }
             }
+        }
+
+        @Override
+        public void onUserRemoved(int userId) {
+            // Clean up UserController state
+            mUserController.onUserRemoved(userId);
         }
 
         @Override

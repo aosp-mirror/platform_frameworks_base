@@ -6661,7 +6661,7 @@ public class UserManagerService extends IUserManager.Stub {
                                                 + userId);
                             }
                             new Thread(() -> {
-                                getActivityManagerInternal().onUserRemoved(userId);
+                                getActivityManagerInternal().onUserRemoving(userId);
                                 removeUserState(userId);
                             }).start();
                         }
@@ -6701,6 +6701,7 @@ public class UserManagerService extends IUserManager.Stub {
         synchronized (mUsersLock) {
             removeUserDataLU(userId);
             mIsUserManaged.delete(userId);
+            getActivityManagerInternal().onUserRemoved(userId);
         }
         synchronized (mUserStates) {
             mUserStates.delete(userId);
