@@ -28,6 +28,7 @@ import android.view.InputEvent
 import android.view.MotionEvent
 import androidx.test.platform.app.InstrumentationRegistry
 import com.android.cts.input.BatchedEventSplitter
+import com.android.cts.input.CaptureEventActivity
 import com.android.cts.input.InputJsonParser
 import com.android.cts.input.VirtualDisplayActivityScenario
 import com.android.cts.input.inputeventmatchers.isResampled
