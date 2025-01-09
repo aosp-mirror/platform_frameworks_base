@@ -46,6 +46,8 @@ class FakeHomeStatusBarViewModel(
 
     override val isHomeStatusBarAllowedByScene = MutableStateFlow(false)
 
+    override val shouldHomeStatusBarBeVisible = MutableStateFlow(false)
+
     override val shouldShowOperatorNameView = MutableStateFlow(false)
 
     override val isClockVisible =

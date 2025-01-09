@@ -25,6 +25,8 @@ object StatusBarRootModernization {
     /** Aconfig flag for removing the fragment */
     const val FLAG_NAME = Flags.FLAG_STATUS_BAR_ROOT_MODERNIZATION
 
+    const val SHOW_DISAMBIGUATION = true
+
     /** A token used for dependency declaration */
     val token: FlagToken
         get() = FlagToken(FLAG_NAME, isEnabled)
