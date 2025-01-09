@@ -19,6 +19,7 @@ package com.android.packageinstaller;
 import static android.Manifest.permission;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
 import static android.content.pm.PackageManager.MATCH_ARCHIVED_PACKAGES;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.app.Activity;
 import android.app.DialogFragment;
@@ -53,6 +54,8 @@ public class UnarchiveActivity extends Activity {
 
     @Override
     public void onCreate(Bundle icicle) {
+        getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+
         super.onCreate(null);
 
         int callingUid = getLaunchedFromUid();
