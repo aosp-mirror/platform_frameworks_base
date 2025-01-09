@@ -20,6 +20,7 @@ import static android.Manifest.permission.BIND_DREAM_SERVICE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_DREAM;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
+import static android.service.dreams.Flags.allowDreamWhenPostured;
 import static android.service.dreams.Flags.cleanupDreamSettingsOnUninstall;
 import static android.service.dreams.Flags.dreamHandlesBeingObscured;
 
@@ -110,12 +111,13 @@ public final class DreamManagerService extends SystemService {
 
     /** Constants for the when to activate dreams. */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef({DREAM_ON_DOCK, DREAM_ON_CHARGE, DREAM_ON_DOCK_OR_CHARGE})
+    @IntDef({DREAM_DISABLED, DREAM_ON_DOCK, DREAM_ON_CHARGE, DREAM_ON_POSTURED})
     public @interface WhenToDream {}
-    private static final int DREAM_DISABLED = 0x0;
-    private static final int DREAM_ON_DOCK = 0x1;
-    private static final int DREAM_ON_CHARGE = 0x2;
-    private static final int DREAM_ON_DOCK_OR_CHARGE = 0x3;
+
+    private static final int DREAM_DISABLED = 0;
+    private static final int DREAM_ON_DOCK = 1 << 0;
+    private static final int DREAM_ON_CHARGE = 1 << 1;
+    private static final int DREAM_ON_POSTURED = 1 << 2;
 
     private final Object mLock = new Object();
 
@@ -137,6 +139,7 @@ public final class DreamManagerService extends SystemService {
     private final boolean mDreamsEnabledByDefaultConfig;
     private final boolean mDreamsActivatedOnChargeByDefault;
     private final boolean mDreamsActivatedOnDockByDefault;
+    private final boolean mDreamsActivatedOnPosturedByDefault;
     private final boolean mKeepDreamingWhenUnpluggingDefault;
     private final boolean mDreamsDisabledByAmbientModeSuppressionConfig;
 
@@ -152,6 +155,7 @@ public final class DreamManagerService extends SystemService {
     @WhenToDream private int mWhenToDream;
     private boolean mIsDocked;
     private boolean mIsCharging;
+    private boolean mIsPostured;
 
     // A temporary dream component that, when present, takes precedence over user configured dream
     // component.
@@ -270,6 +274,8 @@ public final class DreamManagerService extends SystemService {
                 com.android.internal.R.bool.config_dreamsActivatedOnSleepByDefault);
         mDreamsActivatedOnDockByDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_dreamsActivatedOnDockByDefault);
+        mDreamsActivatedOnPosturedByDefault = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_dreamsActivatedOnPosturedByDefault);
         mSettingsObserver = new SettingsObserver(mHandler);
         mKeepDreamingWhenUnpluggingDefault = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_keepDreamingWhenUnplugging);
@@ -326,6 +332,9 @@ public final class DreamManagerService extends SystemService {
                     false, mSettingsObserver, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                             Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK),
+                    false, mSettingsObserver, UserHandle.USER_ALL);
+            mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
+                            Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED),
                     false, mSettingsObserver, UserHandle.USER_ALL);
             mContext.getContentResolver().registerContentObserver(Settings.Secure.getUriFor(
                             Settings.Secure.SCREENSAVER_ENABLED),
@@ -392,6 +401,8 @@ public final class DreamManagerService extends SystemService {
             pw.println("mDreamsEnabledSetting=" + mDreamsEnabledSetting);
             pw.println("mDreamsActivatedOnDockByDefault=" + mDreamsActivatedOnDockByDefault);
             pw.println("mDreamsActivatedOnChargeByDefault=" + mDreamsActivatedOnChargeByDefault);
+            pw.println("mDreamsActivatedOnPosturedByDefault="
+                    + mDreamsActivatedOnPosturedByDefault);
             pw.println("mIsDocked=" + mIsDocked);
             pw.println("mIsCharging=" + mIsCharging);
             pw.println("mWhenToDream=" + mWhenToDream);
@@ -409,15 +420,28 @@ public final class DreamManagerService extends SystemService {
         synchronized (mLock) {
             final ContentResolver resolver = mContext.getContentResolver();
 
-            final int activateWhenCharging = (Settings.Secure.getIntForUser(resolver,
+            mWhenToDream = DREAM_DISABLED;
+
+            if ((Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.SCREENSAVER_ACTIVATE_ON_SLEEP,
                     mDreamsActivatedOnChargeByDefault ? 1 : 0,
-                    UserHandle.USER_CURRENT) != 0) ? DREAM_ON_CHARGE : DREAM_DISABLED;
-            final int activateWhenDocked = (Settings.Secure.getIntForUser(resolver,
+                    UserHandle.USER_CURRENT) != 0)) {
+                mWhenToDream |= DREAM_ON_CHARGE;
+            }
+
+            if (Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.SCREENSAVER_ACTIVATE_ON_DOCK,
                     mDreamsActivatedOnDockByDefault ? 1 : 0,
-                    UserHandle.USER_CURRENT) != 0) ? DREAM_ON_DOCK : DREAM_DISABLED;
-            mWhenToDream = activateWhenCharging + activateWhenDocked;
+                    UserHandle.USER_CURRENT) != 0) {
+                mWhenToDream |= DREAM_ON_DOCK;
+            }
+
+            if (Settings.Secure.getIntForUser(resolver,
+                    Settings.Secure.SCREENSAVER_ACTIVATE_ON_POSTURED,
+                    mDreamsActivatedOnPosturedByDefault ? 1 : 0,
+                    UserHandle.USER_CURRENT) != 0) {
+                mWhenToDream |= DREAM_ON_POSTURED;
+            }
 
             mDreamsEnabledSetting = (Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.SCREENSAVER_ENABLED,
@@ -506,6 +530,10 @@ public final class DreamManagerService extends SystemService {
 
             if ((mWhenToDream & DREAM_ON_DOCK) == DREAM_ON_DOCK) {
                 return mIsDocked;
+            }
+
+            if ((mWhenToDream & DREAM_ON_POSTURED) == DREAM_ON_POSTURED) {
+                return mIsPostured;
             }
 
             return false;
@@ -643,6 +671,14 @@ public final class DreamManagerService extends SystemService {
 
         synchronized (mLock) {
             mForceAmbientDisplayEnabled = enabled;
+        }
+    }
+
+    private void setDevicePosturedInternal(boolean isPostured) {
+        Slog.d(TAG, "Device postured: " + isPostured);
+        synchronized (mLock) {
+            mIsPostured = isPostured;
+            mHandler.post(() -> mPowerManagerInternal.setDevicePostured(isPostured));
         }
     }
 
@@ -1289,6 +1325,22 @@ public final class DreamManagerService extends SystemService {
             final long ident = Binder.clearCallingIdentity();
             try {
                 mHandler.post(() -> mController.setDreamIsObscured(isObscured));
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+
+        @Override
+        public void setDevicePostured(boolean isPostured) {
+            if (!allowDreamWhenPostured()) {
+                return;
+            }
+
+            checkPermission(android.Manifest.permission.WRITE_DREAM_STATE);
+
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                setDevicePosturedInternal(isPostured);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
