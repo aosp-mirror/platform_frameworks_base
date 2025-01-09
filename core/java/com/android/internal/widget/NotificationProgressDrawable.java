@@ -51,8 +51,8 @@ import java.util.Objects;
  * segments, which have non-zero length varying drawing width, and points, which have zero length
  * and fixed size for drawing.
  *
- * @see Segment
- * @see Point
+ * @see DrawableSegment
+ * @see DrawablePoint
  */
 public final class NotificationProgressDrawable extends Drawable {
     private static final String TAG = "NotifProgressDrawable";
@@ -63,7 +63,7 @@ public final class NotificationProgressDrawable extends Drawable {
     private State mState;
     private boolean mMutated;
 
-    private final ArrayList<Part> mParts = new ArrayList<>();
+    private final ArrayList<DrawablePart> mParts = new ArrayList<>();
 
     private final RectF mSegRectF = new RectF();
     private final RectF mPointRectF = new RectF();
@@ -111,7 +111,7 @@ public final class NotificationProgressDrawable extends Drawable {
     /**
      * Set the segments and points that constitute the drawable.
      */
-    public void setParts(List<Part> parts) {
+    public void setParts(List<DrawablePart> parts) {
         mParts.clear();
         mParts.addAll(parts);
 
@@ -121,7 +121,7 @@ public final class NotificationProgressDrawable extends Drawable {
     /**
      * Set the segments and points that constitute the drawable.
      */
-    public void setParts(@NonNull Part... parts) {
+    public void setParts(@NonNull DrawablePart... parts) {
         setParts(Arrays.asList(parts));
     }
 
@@ -133,10 +133,10 @@ public final class NotificationProgressDrawable extends Drawable {
 
         final int numParts = mParts.size();
         for (int iPart = 0; iPart < numParts; iPart++) {
-            final Part part = mParts.get(iPart);
+            final DrawablePart part = mParts.get(iPart);
             final float start = left + part.mStart;
             final float end = left + part.mEnd;
-            if (part instanceof Segment segment) {
+            if (part instanceof DrawableSegment segment) {
                 // No space left to draw the segment
                 if (start > end) continue;
 
@@ -148,7 +148,7 @@ public final class NotificationProgressDrawable extends Drawable {
 
                 mSegRectF.set(start, centerY - radiusY, end, centerY + radiusY);
                 canvas.drawRoundRect(mSegRectF, cornerRadius, cornerRadius, mFillPaint);
-            } else if (part instanceof Point point) {
+            } else if (part instanceof DrawablePoint point) {
                 // TODO: b/367804171 - actually use a vector asset for the default point
                 //  rather than drawing it as a box?
                 mPointRectF.set(start, centerY - pointRadius, end, centerY + pointRadius);
@@ -413,10 +413,11 @@ public final class NotificationProgressDrawable extends Drawable {
     }
 
     /**
-     * A part of the progress bar, which is either a {@link Segment} with non-zero length and
-     * varying drawing width, or a {@link Point} with zero length and fixed size for drawing.
+     * A part of the progress drawable, which is either a {@link DrawableSegment} with non-zero
+     * length and varying drawing width, or a {@link DrawablePoint} with zero length and fixed size
+     * for drawing.
      */
-    public abstract static class Part {
+    public abstract static class DrawablePart {
         // TODO: b/372908709 - maybe rename start/end to left/right, to be consistent with the
         //  bounds rect.
         /** Start position for drawing (in pixels) */
@@ -426,7 +427,7 @@ public final class NotificationProgressDrawable extends Drawable {
         /** Drawing color. */
         @ColorInt protected final int mColor;
 
-        protected Part(float start, float end, @ColorInt int color) {
+        protected DrawablePart(float start, float end, @ColorInt int color) {
             mStart = start;
             mEnd = end;
             mColor = color;
@@ -464,7 +465,7 @@ public final class NotificationProgressDrawable extends Drawable {
 
             if (other == null || getClass() != other.getClass()) return false;
 
-            Part that = (Part) other;
+            DrawablePart that = (DrawablePart) other;
             if (Float.compare(this.mStart, that.mStart) != 0) return false;
             if (Float.compare(this.mEnd, that.mEnd) != 0) return false;
             return this.mColor == that.mColor;
@@ -484,7 +485,7 @@ public final class NotificationProgressDrawable extends Drawable {
      * the Points and gaps neighboring the segment.
      * </p>
      */
-    public static final class Segment extends Part {
+    public static final class DrawableSegment extends DrawablePart {
         /**
          * Whether the segment is faded or not.
          * <p>
@@ -493,11 +494,11 @@ public final class NotificationProgressDrawable extends Drawable {
          */
         private final boolean mFaded;
 
-        public Segment(float start, float end, int color) {
+        public DrawableSegment(float start, float end, int color) {
             this(start, end, color, false);
         }
 
-        public Segment(float start, float end, int color, boolean faded) {
+        public DrawableSegment(float start, float end, int color, boolean faded) {
             super(start, end, color);
             mFaded = faded;
         }
@@ -513,7 +514,7 @@ public final class NotificationProgressDrawable extends Drawable {
         public boolean equals(@Nullable Object other) {
             if (!super.equals(other)) return false;
 
-            Segment that = (Segment) other;
+            DrawableSegment that = (DrawableSegment) other;
             return this.mFaded == that.mFaded;
         }
 
@@ -528,8 +529,8 @@ public final class NotificationProgressDrawable extends Drawable {
      * progress bar to visualize distinct stages or milestones. For example, a stop in a multi-stop
      * ride-share journey.
      */
-    public static final class Point extends Part {
-        public Point(float start, float end, int color) {
+    public static final class DrawablePoint extends DrawablePart {
+        public DrawablePoint(float start, float end, int color) {
             super(start, end, color);
         }
 
