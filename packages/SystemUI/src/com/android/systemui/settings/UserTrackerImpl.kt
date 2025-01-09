@@ -316,7 +316,7 @@ internal constructor(
             val callback = it.callback.get()
             if (callback != null) {
                 it.executor.execute {
-                    traceSection({ "$callback" }) { action(callback) { latch.countDown() } }
+                    traceSection({ "UserTrackerImpl::$callback" }) { action(callback) { latch.countDown() } }
                 }
             } else {
                 latch.countDown()
