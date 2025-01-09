@@ -5431,7 +5431,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activities that can be safely invoked from a browser must support this
      * category.  For example, if the user is viewing a web page or an e-mail
-     * and clicks on a link in the text, the Intent generated execute that
+     * and clicks on a link in the text, the Intent generated to execute that
      * link will require the BROWSABLE category, so that only activities
      * supporting this category will be considered as possible actions.  By
      * supporting this category, you are promising that there is nothing
