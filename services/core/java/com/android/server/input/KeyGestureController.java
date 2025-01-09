@@ -18,6 +18,8 @@ package com.android.server.input;
 
 import static android.content.pm.PackageManager.FEATURE_LEANBACK;
 import static android.content.pm.PackageManager.FEATURE_WATCH;
+import static android.os.UserManager.isVisibleBackgroundUsersEnabled;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.FLAG_INTERACTIVE;
 
 import static com.android.hardware.input.Flags.enableNew25q2Keycodes;
@@ -55,7 +57,6 @@ import android.util.IndentingPrintWriter;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
 import android.view.KeyEvent;
@@ -64,6 +65,8 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.policy.IShortcutService;
+import com.android.server.LocalServices;
+import com.android.server.pm.UserManagerInternal;
 import com.android.server.policy.KeyCombinationManager;
 
 import java.util.ArrayDeque;
@@ -159,6 +162,10 @@ final class KeyGestureController {
     /** Currently fully consumed key codes per device */
     private final SparseArray<Set<Integer>> mConsumedKeysForDevice = new SparseArray<>();
 
+    private final UserManagerInternal mUserManagerInternal;
+
+    private final boolean mVisibleBackgroundUsersEnabled = isVisibleBackgroundUsersEnabled();
+
     KeyGestureController(Context context, Looper looper, InputDataStore inputDataStore) {
         mContext = context;
         mHandler = new Handler(looper, this::handleMessage);
@@ -180,6 +187,7 @@ final class KeyGestureController {
         mAppLaunchShortcutManager = new AppLaunchShortcutManager(mContext);
         mInputGestureManager = new InputGestureManager(mContext);
         mInputDataStore = inputDataStore;
+        mUserManagerInternal = LocalServices.getService(UserManagerInternal.class);
         initBehaviors();
         initKeyCombinationRules();
     }
@@ -449,10 +457,31 @@ final class KeyGestureController {
     }
 
     public boolean interceptKeyBeforeQueueing(KeyEvent event, int policyFlags) {
+        if (mVisibleBackgroundUsersEnabled && shouldIgnoreKeyEventForVisibleBackgroundUser(event)) {
+            return false;
+        }
         final boolean interactive = (policyFlags & FLAG_INTERACTIVE) != 0;
         if (InputSettings.doesKeyGestureEventHandlerSupportMultiKeyGestures()
                 && (event.getFlags() & KeyEvent.FLAG_FALLBACK) == 0) {
             return mKeyCombinationManager.interceptKey(event, interactive);
+        }
+        return false;
+    }
+
+    private boolean shouldIgnoreKeyEventForVisibleBackgroundUser(KeyEvent event) {
+        final int displayAssignedUserId = mUserManagerInternal.getUserAssignedToDisplay(
+                event.getDisplayId());
+        final int currentUserId;
+        synchronized (mUserLock) {
+            currentUserId = mCurrentUserId;
+        }
+        if (currentUserId != displayAssignedUserId
+                && !KeyEvent.isVisibleBackgroundUserAllowedKey(event.getKeyCode())) {
+            if (DEBUG) {
+                Slog.w(TAG, "Ignored key event [" + event + "] for visible background user ["
+                        + displayAssignedUserId + "]");
+            }
+            return true;
         }
         return false;
     }
@@ -895,7 +924,7 @@ final class KeyGestureController {
     private void handleMultiKeyGesture(int[] keycodes,
             @KeyGestureEvent.KeyGestureType int gestureType, int action, int flags) {
         handleKeyGesture(KeyCharacterMap.VIRTUAL_KEYBOARD, keycodes, /* modifierState= */0,
-                gestureType, action, Display.DEFAULT_DISPLAY, /* focusedToken = */null, flags,
+                gestureType, action, DEFAULT_DISPLAY, /* focusedToken = */null, flags,
                 /* appLaunchData = */null);
     }
 
@@ -903,7 +932,7 @@ final class KeyGestureController {
             @Nullable AppLaunchData appLaunchData) {
         handleKeyGesture(KeyCharacterMap.VIRTUAL_KEYBOARD, new int[0], /* modifierState= */0,
                 keyGestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE,
-                Display.DEFAULT_DISPLAY, /* focusedToken = */null, /* flags = */0, appLaunchData);
+                DEFAULT_DISPLAY, /* focusedToken = */null, /* flags = */0, appLaunchData);
     }
 
     @VisibleForTesting
@@ -915,6 +944,11 @@ final class KeyGestureController {
     }
 
     private boolean handleKeyGesture(AidlKeyGestureEvent event, @Nullable IBinder focusedToken) {
+        if (mVisibleBackgroundUsersEnabled && event.displayId != DEFAULT_DISPLAY
+                && shouldIgnoreGestureEventForVisibleBackgroundUser(event.gestureType,
+                event.displayId)) {
+            return false;
+        }
         synchronized (mKeyGestureHandlerRecords) {
             for (KeyGestureHandlerRecord handler : mKeyGestureHandlerRecords.values()) {
                 if (handler.handleKeyGesture(event, focusedToken)) {
@@ -923,6 +957,24 @@ final class KeyGestureController {
                     return true;
                 }
             }
+        }
+        return false;
+    }
+
+    private boolean shouldIgnoreGestureEventForVisibleBackgroundUser(
+            @KeyGestureEvent.KeyGestureType int gestureType, int displayId) {
+        final int displayAssignedUserId = mUserManagerInternal.getUserAssignedToDisplay(displayId);
+        final int currentUserId;
+        synchronized (mUserLock) {
+            currentUserId = mCurrentUserId;
+        }
+        if (currentUserId != displayAssignedUserId
+                && !KeyGestureEvent.isVisibleBackgrounduserAllowedGesture(gestureType)) {
+            if (DEBUG) {
+                Slog.w(TAG, "Ignored gesture event [" + gestureType
+                        + "] for visible background user [" + displayAssignedUserId + "]");
+            }
+            return true;
         }
         return false;
     }
@@ -943,7 +995,7 @@ final class KeyGestureController {
         // TODO(b/358569822): Once we move the gesture detection logic to IMS, we ideally
         //  should not rely on PWM to tell us about the gesture start and end.
         AidlKeyGestureEvent event = createKeyGestureEvent(deviceId, keycodes, modifierState,
-                gestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE, Display.DEFAULT_DISPLAY,
+                gestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE, DEFAULT_DISPLAY,
                 /* flags = */0, /* appLaunchData = */null);
         mHandler.obtainMessage(MSG_NOTIFY_KEY_GESTURE_EVENT, event).sendToTarget();
     }
@@ -951,7 +1003,7 @@ final class KeyGestureController {
     public void handleKeyGesture(int deviceId, int[] keycodes, int modifierState,
             @KeyGestureEvent.KeyGestureType int gestureType) {
         AidlKeyGestureEvent event = createKeyGestureEvent(deviceId, keycodes, modifierState,
-                gestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE, Display.DEFAULT_DISPLAY,
+                gestureType, KeyGestureEvent.ACTION_GESTURE_COMPLETE, DEFAULT_DISPLAY,
                 /* flags = */0, /* appLaunchData = */null);
         handleKeyGesture(event, null /*focusedToken*/);
     }

@@ -232,6 +232,26 @@ public final class KeyGestureEvent {
     public @interface KeyGestureType {
     }
 
+    /**
+     * Returns whether the key gesture type passed as argument is allowed for visible background
+     * users.
+     *
+     * @hide
+     */
+    public static boolean isVisibleBackgrounduserAllowedGesture(int keyGestureType) {
+        switch (keyGestureType) {
+            case KEY_GESTURE_TYPE_SLEEP:
+            case KEY_GESTURE_TYPE_WAKEUP:
+            case KEY_GESTURE_TYPE_LAUNCH_ASSISTANT:
+            case KEY_GESTURE_TYPE_LAUNCH_VOICE_ASSISTANT:
+            case KEY_GESTURE_TYPE_VOLUME_MUTE:
+            case KEY_GESTURE_TYPE_RECENT_APPS:
+            case KEY_GESTURE_TYPE_APP_SWITCH:
+                return false;
+        }
+        return true;
+    }
+
     public KeyGestureEvent(@NonNull AidlKeyGestureEvent keyGestureEvent) {
         this.mKeyGestureEvent = keyGestureEvent;
     }
