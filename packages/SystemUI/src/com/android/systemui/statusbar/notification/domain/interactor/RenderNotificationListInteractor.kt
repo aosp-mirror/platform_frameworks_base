@@ -25,7 +25,6 @@ import android.graphics.drawable.Icon
 import android.service.notification.StatusBarNotification
 import android.util.ArrayMap
 import com.android.app.tracing.traceSection
-import com.android.systemui.Flags
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.notification.collection.GroupEntry
 import com.android.systemui.statusbar.notification.collection.ListEntry
@@ -132,12 +131,6 @@ private class ActiveNotificationsStoreBuilder(
     }
 
     private fun NotificationEntry.toModel(): ActiveNotificationModel {
-        val statusBarChipIcon =
-            if (Flags.statusBarCallChipNotificationIcon()) {
-                icons.statusBarChipIcon
-            } else {
-                null
-            }
         val promotedContent =
             if (PromotedNotificationContentModel.featureFlagEnabled()) {
                 promotedNotificationContentModel
@@ -158,7 +151,7 @@ private class ActiveNotificationsStoreBuilder(
             aodIcon = icons.aodIcon?.sourceIcon,
             shelfIcon = icons.shelfIcon?.sourceIcon,
             statusBarIcon = icons.statusBarIcon?.sourceIcon,
-            statusBarChipIconView = statusBarChipIcon,
+            statusBarChipIconView = icons.statusBarChipIcon,
             uid = sbn.uid,
             packageName = sbn.packageName,
             contentIntent = sbn.notification.contentIntent,

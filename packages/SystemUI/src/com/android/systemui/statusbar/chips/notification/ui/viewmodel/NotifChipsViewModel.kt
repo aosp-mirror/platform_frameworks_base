@@ -27,6 +27,7 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
+import com.android.systemui.statusbar.notification.domain.model.TopPinnedState
 import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import javax.inject.Inject
@@ -60,7 +61,7 @@ constructor(
 
     /** Converts the notification to the [OngoingActivityChipModel] object. */
     private fun NotificationChipModel.toActivityChipModel(
-        headsUpState: PinnedStatus
+        headsUpState: TopPinnedState
     ): OngoingActivityChipModel.Shown {
         StatusBarNotifChips.assertInNewMode()
         val icon =
@@ -87,8 +88,12 @@ constructor(
                 }
             }
 
-        if (headsUpState == PinnedStatus.PinnedByUser) {
-            // If the user tapped the chip to show the HUN, we want to just show the icon because
+        val isShowingHeadsUpFromChipTap =
+            headsUpState is TopPinnedState.Pinned &&
+                headsUpState.status == PinnedStatus.PinnedByUser &&
+                headsUpState.key == this.key
+        if (isShowingHeadsUpFromChipTap) {
+            // If the user tapped this chip to show the HUN, we want to just show the icon because
             // the HUN will show the rest of the information.
             return OngoingActivityChipModel.Shown.IconOnly(icon, colors, onClickListener)
         }

@@ -28,9 +28,7 @@ import android.view.View
 import android.widget.LinearLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
-import com.android.systemui.Flags.FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.dump.DumpManager
@@ -42,7 +40,6 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
 import com.android.systemui.statusbar.gesture.SwipeStatusBarAwayGestureHandler
-import com.android.systemui.statusbar.notification.collection.notifcollection.CommonNotifCollection
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
@@ -76,9 +73,8 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @TestableLooper.RunWithLooper
 @OptIn(ExperimentalCoroutinesApi::class)
-@EnableFlags(FLAG_STATUS_BAR_USE_REPOS_FOR_CALL_CHIP)
 @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
-class OngoingCallControllerViaRepoTest : SysuiTestCase() {
+class OngoingCallControllerTest : SysuiTestCase() {
     private val kosmos = Kosmos()
 
     private val clock = kosmos.fakeSystemClock
@@ -114,7 +110,6 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 context,
                 ongoingCallRepository,
-                mock<CommonNotifCollection>(),
                 kosmos.activeNotificationsInteractor,
                 clock,
                 mockActivityStarter,
@@ -162,28 +157,7 @@ class OngoingCallControllerViaRepoTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
-    fun interactorHasOngoingCallNotif_notifIconFlagOff_repoHasNoNotifIcon() =
-        testScope.runTest {
-            val icon = mock<StatusBarIconView>()
-            setNotifOnRepo(
-                activeNotificationModel(
-                    key = "ongoingNotif",
-                    callType = CallType.Ongoing,
-                    uid = CALL_UID,
-                    statusBarChipIcon = icon,
-                    whenTime = 567,
-                )
-            )
-
-            val repoState = ongoingCallRepository.ongoingCallState.value
-            assertThat(repoState).isInstanceOf(OngoingCallModel.InCall::class.java)
-            assertThat((repoState as OngoingCallModel.InCall).notificationIconView).isNull()
-        }
-
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_CALL_CHIP_NOTIFICATION_ICON)
-    fun interactorHasOngoingCallNotif_notifIconFlagOn_repoHasNotifIcon() =
+    fun interactorHasOngoingCallNotif_repoHasNotifIcon() =
         testScope.runTest {
             val icon = mock<StatusBarIconView>()
 

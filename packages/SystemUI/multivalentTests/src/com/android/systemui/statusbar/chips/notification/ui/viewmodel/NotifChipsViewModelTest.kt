@@ -501,7 +501,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
     @Test
     @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
-    fun chips_hasHeadsUpByUser_onlyShowsIcon() =
+    fun chips_hasHeadsUpBySystem_showsTime() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
 
@@ -523,7 +523,99 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                 )
             )
 
-            // WHEN there's a HUN pinned by a user
+            // WHEN there's a HUN pinned by the system
+            kosmos.headsUpNotificationRepository.setNotifications(
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "notif",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedBySystem),
+                )
+            )
+
+            // THEN the chip keeps showing time
+            // (In real life the chip won't show at all, but that's handled in a different part of
+            // the system. What we know here is that the chip shouldn't shrink to icon only.)
+            assertThat(latest!![0])
+                .isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+        }
+
+    @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
+    fun chips_hasHeadsUpByUser_forOtherNotif_showsTime() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val promotedContentBuilder =
+                PromotedNotificationContentModel.Builder("notif").apply {
+                    this.time =
+                        PromotedNotificationContentModel.When(
+                            time = 6543L,
+                            mode = PromotedNotificationContentModel.When.Mode.BasicTime,
+                        )
+                }
+            val otherPromotedContentBuilder =
+                PromotedNotificationContentModel.Builder("other notif").apply {
+                    this.time =
+                        PromotedNotificationContentModel.When(
+                            time = 654321L,
+                            mode = PromotedNotificationContentModel.When.Mode.BasicTime,
+                        )
+                }
+            val icon = createStatusBarIconViewOrNull()
+            val otherIcon = createStatusBarIconViewOrNull()
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = icon,
+                        promotedContent = promotedContentBuilder.build(),
+                    ),
+                    activeNotificationModel(
+                        key = "other notif",
+                        statusBarChipIcon = otherIcon,
+                        promotedContent = otherPromotedContentBuilder.build(),
+                    ),
+                )
+            )
+
+            // WHEN there's a HUN pinned for the "other notif" chip
+            kosmos.headsUpNotificationRepository.setNotifications(
+                UnconfinedFakeHeadsUpRowRepository(
+                    key = "other notif",
+                    pinnedStatus = MutableStateFlow(PinnedStatus.PinnedByUser),
+                )
+            )
+
+            // THEN the "notif" chip keeps showing time
+            val chip = latest!![0]
+            assertThat(chip).isInstanceOf(OngoingActivityChipModel.Shown.ShortTimeDelta::class.java)
+            assertIsNotifChip(chip, icon, "notif")
+        }
+
+    @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
+    fun chips_hasHeadsUpByUser_forThisNotif_onlyShowsIcon() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+
+            val promotedContentBuilder =
+                PromotedNotificationContentModel.Builder("notif").apply {
+                    this.time =
+                        PromotedNotificationContentModel.When(
+                            time = 6543L,
+                            mode = PromotedNotificationContentModel.When.Mode.BasicTime,
+                        )
+                }
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "notif",
+                        statusBarChipIcon = mock<StatusBarIconView>(),
+                        promotedContent = promotedContentBuilder.build(),
+                    )
+                )
+            )
+
+            // WHEN this notification is pinned by the user
             kosmos.headsUpNotificationRepository.setNotifications(
                 UnconfinedFakeHeadsUpRowRepository(
                     key = "notif",
@@ -531,6 +623,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
                 )
             )
 
+            // THEN the chip shrinks to icon only
             assertThat(latest!![0])
                 .isInstanceOf(OngoingActivityChipModel.Shown.IconOnly::class.java)
         }
