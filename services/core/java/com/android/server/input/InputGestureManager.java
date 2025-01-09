@@ -316,6 +316,31 @@ final class InputGestureManager {
         }
     }
 
+    @Nullable
+    public InputGestureData getInputGesture(int userId, InputGestureData.Trigger trigger) {
+        synchronized (mGestureLock) {
+            if (mBlockListedTriggers.contains(trigger)) {
+                return new InputGestureData.Builder().setTrigger(trigger).setKeyGestureType(
+                        KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_RESERVED).build();
+            }
+            if (trigger instanceof InputGestureData.KeyTrigger keyTrigger) {
+                if (KeyEvent.isModifierKey(keyTrigger.getKeycode()) ||
+                        KeyEvent.isSystemKey(keyTrigger.getKeycode())) {
+                    return new InputGestureData.Builder().setTrigger(trigger).setKeyGestureType(
+                            KeyGestureEvent.KEY_GESTURE_TYPE_SYSTEM_RESERVED).build();
+                }
+            }
+            InputGestureData gestureData = mSystemShortcuts.get(trigger);
+            if (gestureData != null) {
+                return gestureData;
+            }
+            if (!mCustomInputGestures.contains(userId)) {
+                return null;
+            }
+            return mCustomInputGestures.get(userId).get(trigger);
+        }
+    }
+
     @InputManager.CustomInputGestureResult
     public int addCustomInputGesture(int userId, InputGestureData newGesture) {
         synchronized (mGestureLock) {
