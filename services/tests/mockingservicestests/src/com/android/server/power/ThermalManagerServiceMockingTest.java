@@ -573,4 +573,14 @@ public class ThermalManagerServiceMockingTest {
         assertNotNull(ret);
         assertEquals(0, ret.size());
     }
+
+    @Test
+    public void forecastSkinTemperature() throws RemoteException {
+        Mockito.when(mAidlHalMock.forecastSkinTemperature(Mockito.anyInt())).thenReturn(
+                0.55f
+        );
+        float forecast = mAidlWrapper.forecastSkinTemperature(10);
+        Mockito.verify(mAidlHalMock, Mockito.times(1)).forecastSkinTemperature(10);
+        assertEquals(0.55f, forecast, 0.01f);
+    }
 }
