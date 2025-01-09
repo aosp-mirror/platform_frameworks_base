@@ -635,8 +635,7 @@ class DisplayTopologyTest {
             //         222
             RectF(0f, 0f, 30f, 30f),
             RectF(40f, 10f, 70f, 40f),
-            RectF(80.5f, 50f, 110f, 80f), // left+=0.5 to cause a preference for
-                                                            // TOP/BOTTOM attach
+            RectF(80.5f, 50f, 110f, 80f),
         )
 
         verifyDisplay(root, id = 0, width = 30f, height = 30f, noOfChildren = 1)
@@ -644,7 +643,7 @@ class DisplayTopologyTest {
                 root.children[0], id = 1, width = 30f, height = 30f, POSITION_RIGHT, offset = 10f,
                 noOfChildren = 1)
         verifyDisplay(
-                root.children[0].children[0], id = 2, width = 29.5f, height = 30f, POSITION_BOTTOM,
+                root.children[0].children[0], id = 2, width = 29.5f, height = 30f, POSITION_RIGHT,
                 offset = 30f, noOfChildren = 0)
     }
 
@@ -699,6 +698,76 @@ class DisplayTopologyTest {
         verifyDisplay(
                 root.children[0], id = 1, width = 1080f, height = 1920f, POSITION_LEFT,
                 offset = -1880f, noOfChildren = 0)
+    }
+
+    @Test
+    fun rearrange_preferLongHorizontalShiftOverAttachToCorner() {
+        // An earlier implementation decided vertical or horizontal clamp direction based on the abs
+        // value of the overlap in each dimension, rather than the raw overlap.
+
+        // This horizontal span is twice the height of displays, making abs(xOverlap) > yOverlap,
+        // i.e. abs(-60) > 30
+        //      |
+        //    |----|
+        // 000      111
+        // 000      111
+        // 000      111
+
+        // Before fix:
+        // 000
+        // 000
+        // 000
+        //    111
+        //    111
+        //    111
+
+        // After fix:
+        // 000111
+        // 000111
+        // 000111
+
+        val root = rearrangeRects(
+            RectF(0f, 0f, 30f, 30f),
+            RectF(90f, 0f, 120f, 30f),
+        )
+
+        verifyDisplay(root, id = 0, width = 30f, height = 30f, noOfChildren = 1)
+        verifyDisplay(
+                root.children[0], id = 1, width = 30f, height = 30f, POSITION_RIGHT,
+                offset = 0f, noOfChildren = 0)
+    }
+
+    @Test
+    fun rearrange_preferLongVerticalShiftOverAttachToCorner() {
+        // Before:
+        // 111
+        // 111
+        // 111
+        //        |
+        //        |- This vertical span is 40dp
+        //        |
+        //        |
+        //   000
+        //   000
+        //   000
+
+        // After:
+        // 111
+        // 111
+        // 111
+        //   000
+        //   000
+        //   000
+
+        val root = rearrangeRects(
+            RectF(20f, 70f, 50f, 100f),
+            RectF(00f, 0f, 30f, 30f),
+        )
+
+        verifyDisplay(root, id = 0, width = 30f, height = 30f, noOfChildren = 1)
+        verifyDisplay(
+                root.children[0], id = 1, width = 30f, height = 30f, POSITION_TOP,
+                offset = -20f, noOfChildren = 0)
     }
 
     @Test
