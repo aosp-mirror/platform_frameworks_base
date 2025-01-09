@@ -19,10 +19,21 @@ package {
 filegroup {
     name: "framework-ondeviceintelligence-sources",
     srcs: [
-        "java/**/*.aidl",
-        "java/**/*.java",
+        "module/java/**/*.aidl",
+        "module/java/**/*.java",
     ],
-    path: "java",
+    visibility: [
+        "//frameworks/base:__subpackages__",
+        "//packages/modules/NeuralNetworks:__subpackages__",
+    ],
+}
+
+filegroup {
+    name: "framework-ondeviceintelligence-sources-platform",
+    srcs: [
+        "platform/java/**/*.aidl",
+        "platform/java/**/*.java",
+    ],
     visibility: [
         "//frameworks/base:__subpackages__",
         "//packages/modules/NeuralNetworks:__subpackages__",

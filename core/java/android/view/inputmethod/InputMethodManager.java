@@ -938,27 +938,6 @@ public final class InputMethodManager {
             synchronized (mH) {
                 if (mCurRootView == viewRootImpl) {
                     mCurRootViewWindowFocused = false;
-
-                    if (Flags.refactorInsetsController() && mCurRootView != null) {
-                        final int softInputMode = mCurRootView.mWindowAttributes.softInputMode;
-                        final int state =
-                                softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
-                        if (state == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
-                            // when losing focus (e.g., by going to another window), we reset the
-                            // requestedVisibleTypes of WindowInsetsController by hiding the IME
-                            final var statsToken = ImeTracker.forLogging().onStart(
-                                    ImeTracker.TYPE_HIDE, ImeTracker.ORIGIN_CLIENT,
-                                    SoftInputShowHideReason.REASON_HIDE_WINDOW_LOST_FOCUS,
-                                    false /* fromUser */);
-                            if (DEBUG) {
-                                Log.d(TAG, "onWindowLostFocus, hiding IME because "
-                                        + "of STATE_ALWAYS_HIDDEN");
-                            }
-                            mCurRootView.getInsetsController().hide(WindowInsets.Type.ime(),
-                                    false /* fromIme */, statsToken);
-                        }
-                    }
-
                     clearCurRootViewIfNeeded();
                 }
             }
@@ -1012,6 +991,26 @@ public final class InputMethodManager {
         @GuardedBy("mH")
         private void setCurrentRootViewLocked(ViewRootImpl rootView) {
             final boolean wasEmpty = mCurRootView == null;
+            if (Flags.refactorInsetsController() && !wasEmpty && mCurRootView != rootView) {
+                final int softInputMode = mCurRootView.mWindowAttributes.softInputMode;
+                final int state =
+                        softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
+                if (state == WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN) {
+                    // when losing input focus (e.g., by going to another window), we reset the
+                    // requestedVisibleTypes of WindowInsetsController by hiding the IME
+                    final var statsToken = ImeTracker.forLogging().onStart(
+                            ImeTracker.TYPE_HIDE, ImeTracker.ORIGIN_CLIENT,
+                            SoftInputShowHideReason.HIDE_WINDOW_LOST_FOCUS,
+                            false /* fromUser */);
+                    if (DEBUG) {
+                        Log.d(TAG, "setCurrentRootViewLocked, hiding IME because "
+                                + "of STATE_ALWAYS_HIDDEN");
+                    }
+                    mCurRootView.getInsetsController().hide(WindowInsets.Type.ime(),
+                            false /* fromIme */, statsToken);
+                }
+            }
+
             mImeDispatcher.switchRootView(mCurRootView, rootView);
             mCurRootView = rootView;
             if (wasEmpty && mCurRootView != null) {
