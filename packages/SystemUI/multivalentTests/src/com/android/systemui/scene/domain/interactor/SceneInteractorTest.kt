@@ -575,4 +575,50 @@ class SceneInteractorTest : SysuiTestCase() {
 
             assertThat(currentScene).isNotEqualTo(disabledScene)
         }
+
+    @Test
+    fun transitionAnimations() =
+        kosmos.runTest {
+            val isVisible by collectLastValue(underTest.isVisible)
+            assertThat(isVisible).isTrue()
+
+            underTest.setVisible(false, "test")
+            assertThat(isVisible).isFalse()
+
+            underTest.onTransitionAnimationStart()
+            // One animation is active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationEnd()
+            // No more active animations, not forced visible.
+            assertThat(isVisible).isFalse()
+
+            underTest.onTransitionAnimationStart()
+            // One animation is active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationCancelled()
+            // No more active animations, not forced visible.
+            assertThat(isVisible).isFalse()
+
+            underTest.setVisible(true, "test")
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationStart()
+            underTest.onTransitionAnimationStart()
+            // Two animations are active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.setVisible(false, "test")
+            // Two animations are active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationEnd()
+            // One animation is still active, forced visible.
+            assertThat(isVisible).isTrue()
+
+            underTest.onTransitionAnimationEnd()
+            // No more active animations, not forced visible.
+            assertThat(isVisible).isFalse()
+        }
 }
