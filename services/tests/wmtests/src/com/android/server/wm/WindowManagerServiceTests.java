@@ -76,6 +76,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
 import android.content.pm.ActivityInfo;
@@ -1522,7 +1523,7 @@ public class WindowManagerServiceTests extends WindowTestsBase {
     @EnableFlags(Flags.FLAG_CONDENSE_CONFIGURATION_CHANGE_FOR_SIMPLE_MODE)
     public void setConfigurationChangeSettingsForUser_createsFromParcel_callsSettingImpl()
             throws Settings.SettingNotFoundException {
-        final int userId = 0;
+        final int currentUserId = ActivityManager.getCurrentUser();
         final int forcedDensity = 400;
         final float forcedFontScaleFactor = 1.15f;
         final Parcelable.Creator<ConfigurationChangeSetting> creator =
@@ -1536,10 +1537,10 @@ public class WindowManagerServiceTests extends WindowTestsBase {
 
         mWm.setConfigurationChangeSettingsForUser(settings, UserHandle.USER_CURRENT);
 
-        verify(mDisplayContent).setForcedDensity(forcedDensity, userId);
+        verify(mDisplayContent).setForcedDensity(forcedDensity, currentUserId);
         assertEquals(forcedFontScaleFactor, Settings.System.getFloat(
                 mContext.getContentResolver(), Settings.System.FONT_SCALE), 0.1f /* delta */);
-        verify(mAtm).updateFontScaleIfNeeded(userId);
+        verify(mAtm).updateFontScaleIfNeeded(currentUserId);
     }
 
     @Test
