@@ -69,9 +69,9 @@ interface PolicyFileProcessor {
     fun onRename(pattern: Pattern, prefix: String)
 
     /** "class" directive. */
-    fun onSimpleClassStart(className: String)
+    fun onClassStart(className: String)
     fun onSimpleClassPolicy(className: String, policy: FilterPolicyWithReason)
-    fun onSimpleClassEnd(className: String)
+    fun onClassEnd(className: String)
 
     fun onSubClassPolicy(superClassName: String, policy: FilterPolicyWithReason)
     fun onRedirectionClass(fromClassName: String, toClassName: String)
@@ -162,10 +162,10 @@ class TextFileFilterPolicyBuilder(
             )
         }
 
-        override fun onSimpleClassStart(className: String) {
+        override fun onClassStart(className: String) {
         }
 
-        override fun onSimpleClassEnd(className: String) {
+        override fun onClassEnd(className: String) {
         }
 
         override fun onSimpleClassPolicy(className: String, policy: FilterPolicyWithReason) {
@@ -273,11 +273,15 @@ class TextFileFilterPolicyParser {
     private var rFilePolicy: FilterPolicyWithReason? = null
 
     /** Name of the file that's currently being processed.  */
-    var filename: String? = null
+    var filename: String = ""
         private set
 
     /** 1-based line number in the current file */
     var lineNumber = -1
+        private set
+
+    /** Current line */
+    var currentLineText = ""
         private set
 
     /**
@@ -286,7 +290,6 @@ class TextFileFilterPolicyParser {
     fun parse(reader: Reader, inputName: String, processor: PolicyFileProcessor) {
         filename = inputName
 
-        log.i("Parsing text policy file $inputName ...")
         this.processor = processor
         BufferedReader(reader).use { rd ->
             lineNumber = 0
@@ -297,6 +300,7 @@ class TextFileFilterPolicyParser {
                         break
                     }
                     lineNumber++
+                    currentLineText = line
                     line = normalizeTextLine(line) // Remove comment and trim.
                     if (line.isEmpty()) {
                         continue
@@ -312,7 +316,7 @@ class TextFileFilterPolicyParser {
 
     private fun finishLastClass() {
         currentClassName?.let { className ->
-            processor.onSimpleClassEnd(className)
+            processor.onClassEnd(className)
             currentClassName = null
         }
     }
@@ -416,7 +420,7 @@ class TextFileFilterPolicyParser {
         if (fields.size <= 1) {
             throw ParseException("Class ('c') expects 1 or 2 fields.")
         }
-        val className = fields[1]
+        val className = fields[1].toHumanReadableClassName()
 
         // superClass is set when the class name starts with a "*".
         val superClass = resolveExtendingClass(className)
@@ -436,6 +440,8 @@ class TextFileFilterPolicyParser {
             // It's a redirection class.
             val toClass = policyStr.substring(1)
 
+            currentClassName = className
+            processor.onClassStart(className)
             processor.onRedirectionClass(className, toClass)
         } else if (policyStr.startsWith("~")) {
             if (classType != SpecialClass.NotSpecial) {
@@ -447,6 +453,8 @@ class TextFileFilterPolicyParser {
             // It's a class-load hook
             val callback = policyStr.substring(1)
 
+            currentClassName = className
+            processor.onClassStart(className)
             processor.onClassLoadHook(className, callback)
         } else {
             // Special case: if it's a class directive with no policy, then it encloses
@@ -455,7 +463,6 @@ class TextFileFilterPolicyParser {
             if (policyStr == "") {
                 if (classType == SpecialClass.NotSpecial && superClass == null) {
                     currentClassName = className
-                    processor.onSimpleClassStart(className)
                     return
                 }
                 throw ParseException("Special class or subclass directive must have a policy")
@@ -471,7 +478,7 @@ class TextFileFilterPolicyParser {
                     // TODO: Duplicate check, etc
                     if (superClass == null) {
                         currentClassName = className
-                        processor.onSimpleClassStart(className)
+                        processor.onClassStart(className)
                         processor.onSimpleClassPolicy(className, policy.withReason(FILTER_REASON))
                     } else {
                         processor.onSubClassPolicy(

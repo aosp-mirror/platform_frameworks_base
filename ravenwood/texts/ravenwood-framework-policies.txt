@@ -1,62 +1,65 @@
 # Ravenwood "policy" file for framework-minus-apex.
 
+# The "no-pta" marker is used to exclude the lines from "ravenhelper pta",
+# which tries to convert policies to annotations.
+
 # To avoid VerifyError on nano proto files (b/324063814), we rename nano proto classes.
 # Note: The "rename" directive must use slashes (/) as a package name separator.
 rename com/.*/nano/   devicenano/
 rename android/.*/nano/   devicenano/
 
 # StatsD auto-generated
-class com.android.internal.util.FrameworkStatsLog keepclass
+class com.android.internal.util.FrameworkStatsLog keepclass  # no-pta
 
 # Exported to Mainline modules; cannot use annotations
-class com.android.internal.util.FastXmlSerializer keepclass
-class com.android.internal.util.FileRotator keepclass
-class com.android.internal.util.HexDump keepclass
-class com.android.internal.util.IndentingPrintWriter keepclass
-class com.android.internal.util.LocalLog keepclass
-class com.android.internal.util.MessageUtils keepclass
-class com.android.internal.util.TokenBucket keepclass
-class android.os.HandlerExecutor keepclass
-class android.util.BackupUtils keepclass
-class android.util.IndentingPrintWriter keepclass
-class android.util.LocalLog keepclass
-class android.util.Pair keepclass
-class android.util.Rational keepclass
+class com.android.internal.util.FastXmlSerializer keepclass  # no-pta
+class com.android.internal.util.FileRotator keepclass  # no-pta
+class com.android.internal.util.HexDump keepclass  # no-pta
+class com.android.internal.util.IndentingPrintWriter keepclass  # no-pta
+class com.android.internal.util.LocalLog keepclass  # no-pta
+class com.android.internal.util.MessageUtils keepclass  # no-pta
+class com.android.internal.util.TokenBucket keepclass  # no-pta
+class android.os.HandlerExecutor keepclass  # no-pta
+class android.util.BackupUtils keepclass  # no-pta
+class android.util.IndentingPrintWriter keepclass  # no-pta
+class android.util.LocalLog keepclass  # no-pta
+class android.util.Pair keepclass  # no-pta
+class android.util.Rational keepclass  # no-pta
 
 # From modules-utils; cannot use annotations
-class com.android.internal.util.Preconditions keepclass
-class com.android.internal.logging.InstanceId keepclass
-class com.android.internal.logging.InstanceIdSequence keepclass
-class com.android.internal.logging.UiEvent keepclass
-class com.android.internal.logging.UiEventLogger keepclass
+class com.android.internal.util.Preconditions keepclass  # no-pta
+class com.android.internal.logging.InstanceId keepclass  # no-pta
+class com.android.internal.logging.InstanceIdSequence keepclass  # no-pta
+class com.android.internal.logging.UiEvent keepclass  # no-pta
+class com.android.internal.logging.UiEventLogger keepclass  # no-pta
 
 # From modules-utils; cannot use annotations
-class com.android.modules.utils.BinaryXmlPullParser keepclass
-class com.android.modules.utils.BinaryXmlSerializer keepclass
-class com.android.modules.utils.FastDataInput keepclass
-class com.android.modules.utils.FastDataOutput keepclass
-class com.android.modules.utils.ModifiedUtf8 keepclass
-class com.android.modules.utils.TypedXmlPullParser keepclass
-class com.android.modules.utils.TypedXmlSerializer keepclass
+class com.android.modules.utils.BinaryXmlPullParser keepclass  # no-pta
+class com.android.modules.utils.BinaryXmlSerializer keepclass  # no-pta
+class com.android.modules.utils.FastDataInput keepclass  # no-pta
+class com.android.modules.utils.FastDataOutput keepclass  # no-pta
+class com.android.modules.utils.ModifiedUtf8 keepclass  # no-pta
+class com.android.modules.utils.TypedXmlPullParser keepclass  # no-pta
+class com.android.modules.utils.TypedXmlSerializer keepclass  # no-pta
 
 # Uri
-class android.net.Uri keepclass
-class android.net.UriCodec keepclass
+class android.net.Uri keepclass  # no-pta
+class android.net.UriCodec keepclass  # no-pta
 
 # Telephony
-class android.telephony.PinResult keepclass
+class android.telephony.PinResult keepclass  # no-pta
 
 # Just enough to support mocking, no further functionality
-class android.content.BroadcastReceiver keep
+class android.content.BroadcastReceiver keep  # no-pta
     method <init> ()V keep
-class android.content.Context keep
+class android.content.Context keep  # no-pta
     method <init> ()V keep
-    method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; keep
-class android.content.pm.PackageManager
+    method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; keep  # no-pta
+class android.content.pm.PackageManager  # no-pta
     method <init> ()V keep
-class android.text.ClipboardManager keep
+class android.text.ClipboardManager keep  # no-pta
     method <init> ()V keep
 
 # Just enough to allow ResourcesManager to run
-class android.hardware.display.DisplayManagerGlobal keep
+class android.hardware.display.DisplayManagerGlobal keep # no-pta
     method getInstance ()Landroid/hardware/display/DisplayManagerGlobal; ignore
