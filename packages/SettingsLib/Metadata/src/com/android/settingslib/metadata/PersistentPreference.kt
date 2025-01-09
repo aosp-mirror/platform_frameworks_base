@@ -44,6 +44,24 @@ annotation class ReadWritePermit {
     }
 }
 
+/** The reason of preference change. */
+@IntDef(
+    PreferenceChangeReason.VALUE,
+    PreferenceChangeReason.STATE,
+    PreferenceChangeReason.DEPENDENT,
+)
+@Retention(AnnotationRetention.SOURCE)
+annotation class PreferenceChangeReason {
+    companion object {
+        /** Preference value is changed. */
+        const val VALUE = 1000
+        /** Preference state (title/summary, enable state, etc.) is changed. */
+        const val STATE = 1001
+        /** Dependent preference state is changed. */
+        const val DEPENDENT = 1002
+    }
+}
+
 /** Indicates how sensitive of the data. */
 @Retention(AnnotationRetention.SOURCE)
 @Target(AnnotationTarget.TYPE)
