@@ -2974,9 +2974,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
             final int transitType = info.getType();
             TransitionInfo.Change pipChange = null;
             int closingSplitTaskId = -1;
-            // This array tracks if we are sending stages TO_BACK in this transition.
-            // TODO (b/349828130): Update for n apps
-            boolean[] stagesSentToBack = new boolean[2];
+            // This array tracks where we are sending stages (TO_BACK/TO_FRONT) in this transition.
+            // TODO (b/349828130): Update for n apps (needs to handle different indices than 0/1).
+            //  Also make sure having multiple changes per stage (2+ tasks in one stage) is being
+            //  handled properly.
+            int[] stageChanges = new int[2];
 
             for (int iC = 0; iC < info.getChanges().size(); ++iC) {
                 final TransitionInfo.Change change = info.getChanges().get(iC);
@@ -3040,17 +3042,24 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                                 + " with " + taskId + " before startAnimation().");
                     }
                 }
-                if (isClosingType(change.getMode()) &&
-                        getStageOfTask(taskId) != STAGE_TYPE_UNDEFINED) {
 
-                    // Record which stages are getting sent to back
-                    if (change.getMode() == TRANSIT_TO_BACK) {
-                        stagesSentToBack[getStageOfTask(taskId)] = true;
-                    }
-
+                final int stageOfTaskId = getStageOfTask(taskId);
+                if (stageOfTaskId == STAGE_TYPE_UNDEFINED) {
+                    continue;
+                }
+                if (isClosingType(change.getMode())) {
                     // (For PiP transitions) If either one of the 2 stages is closing we're assuming
                     // we'll break split
                     closingSplitTaskId = taskId;
+                }
+                if (transitType == WindowManager.TRANSIT_WAKE) {
+                    // Record which stages are receiving which changes
+                    if ((change.getMode() == TRANSIT_TO_BACK
+                            || change.getMode() == TRANSIT_TO_FRONT)
+                            && (stageOfTaskId == STAGE_TYPE_MAIN
+                            || stageOfTaskId == STAGE_TYPE_SIDE)) {
+                        stageChanges[stageOfTaskId] = change.getMode();
+                    }
                 }
             }
 
@@ -3076,19 +3085,11 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
                 return true;
             }
 
-            // If keyguard is active, check to see if we have our TO_BACK transitions in order.
-            // This array should either be all false (no split stages sent to back) or all true
-            // (all stages sent to back). In any other case (which can happen with SHOW_ABOVE_LOCKED
-            // apps) we should break split.
-            if (mKeyguardActive) {
-                boolean isFirstStageSentToBack = stagesSentToBack[0];
-                for (boolean b : stagesSentToBack) {
-                    // Compare each boolean to the first one. If any are different, break split.
-                    if (b != isFirstStageSentToBack) {
-                        dismissSplitKeepingLastActiveStage(EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
-                        break;
-                    }
-                }
+            // If keyguard is active, check to see if we have all our stages showing. If one stage
+            // was moved but not the other (which can happen with SHOW_ABOVE_LOCKED apps), we should
+            // break split.
+            if (mKeyguardActive && stageChanges[STAGE_TYPE_MAIN] != stageChanges[STAGE_TYPE_SIDE]) {
+                dismissSplitKeepingLastActiveStage(EXIT_REASON_SCREEN_LOCKED_SHOW_ON_TOP);
             }
 
             final ArraySet<StageTaskListener> dismissStages = record.getShouldDismissedStage();
