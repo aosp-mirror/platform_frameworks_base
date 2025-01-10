@@ -1921,3 +1921,13 @@ flag {
    description: "Special UI treatment for magic actions"
    bug: "383567383"
 }
+
+flag {
+    name: "show_audio_sharing_slider_in_volume_panel"
+    namespace: "cross_device_experiences"
+    description: "Show two sliders in volume panel when audio sharing."
+    bug: "336183611"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
