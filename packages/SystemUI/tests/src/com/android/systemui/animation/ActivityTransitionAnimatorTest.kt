@@ -466,6 +466,28 @@ class ActivityTransitionAnimatorTest : SysuiTestCase() {
         assertNull(runner.delegate)
     }
 
+    @Test
+    fun concurrentListenerModification_doesNotThrow() {
+        // Need a second listener to trigger the concurrent modification.
+        activityTransitionAnimator.addListener(object : ActivityTransitionAnimator.Listener {})
+        `when`(listener.onTransitionAnimationStart()).thenAnswer {
+            activityTransitionAnimator.removeListener(listener)
+            listener
+        }
+
+        val runner = activityTransitionAnimator.createEphemeralRunner(controller)
+        runner.onAnimationStart(
+            TRANSIT_NONE,
+            arrayOf(fakeWindow()),
+            emptyArray(),
+            emptyArray(),
+            iCallback,
+        )
+
+        waitForIdleSync()
+        verify(listener).onTransitionAnimationStart()
+    }
+
     private fun controllerFactory(
         cookie: ActivityTransitionAnimator.TransitionCookie =
             mock(ActivityTransitionAnimator.TransitionCookie::class.java),
