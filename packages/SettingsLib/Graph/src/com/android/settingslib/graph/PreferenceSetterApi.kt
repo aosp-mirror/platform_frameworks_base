@@ -34,6 +34,8 @@ import com.android.settingslib.metadata.PreferenceRestrictionProvider
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.android.settingslib.metadata.RangeValue
 import com.android.settingslib.metadata.ReadWritePermit
+import com.android.settingslib.metadata.SensitivityLevel.Companion.HIGH_SENSITIVITY
+import com.android.settingslib.metadata.SensitivityLevel.Companion.UNKNOWN_SENSITIVITY
 
 /** Request to set preference value. */
 data class PreferenceSetterRequest(
@@ -187,6 +189,8 @@ fun <T> PersistentPreference<T>.evalWritePermit(
     callingUid: Int,
 ): Int =
     when {
+        sensitivityLevel == UNKNOWN_SENSITIVITY || sensitivityLevel == HIGH_SENSITIVITY ->
+            ReadWritePermit.DISALLOW
         getWritePermissions(context)?.check(context, callingPid, callingUid) == false ->
             ReadWritePermit.REQUIRE_APP_PERMISSION
         else -> getWritePermit(context, value, callingPid, callingUid)
