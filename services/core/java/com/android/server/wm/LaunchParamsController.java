@@ -79,7 +79,8 @@ class LaunchParamsController {
      * @param result    The resulting params.
      */
     void calculate(Task task, WindowLayout layout, ActivityRecord activity, ActivityRecord source,
-            ActivityOptions options, @Nullable Request request, int phase, LaunchParams result) {
+            ActivityOptions options, @Nullable Request request,
+            @LaunchParamsModifier.Phase int phase, LaunchParams result) {
         result.reset();
 
         if (task != null || activity != null) {
