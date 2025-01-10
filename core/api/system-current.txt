@@ -3171,6 +3171,11 @@ package android.app.wallpaper {
     method @NonNull public android.util.SparseArray<android.graphics.Rect> getCropHints();
   }
 
+  public static final class WallpaperDescription.Builder {
+    method @NonNull public android.app.wallpaper.WallpaperDescription.Builder setCropHints(@NonNull java.util.Map<android.graphics.Point,android.graphics.Rect>);
+    method @NonNull public android.app.wallpaper.WallpaperDescription.Builder setCropHints(@NonNull android.util.SparseArray<android.graphics.Rect>);
+  }
+
 }
 
 package android.app.wallpapereffectsgeneration {
