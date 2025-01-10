@@ -132,7 +132,8 @@
             android:layout_height="wrap_content"
             android:track="@drawable/settingslib_track_selector"
             android:thumb="@drawable/settingslib_thumb_selector"
-            android:theme="@style/MainSwitch.Settingslib"/>
+            android:theme="@style/MainSwitch.Settingslib"
+            android:minHeight="48dp" />
 
     </LinearLayout>
 
