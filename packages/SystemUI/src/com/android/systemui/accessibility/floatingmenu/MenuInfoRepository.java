@@ -266,7 +266,7 @@ class MenuInfoRepository {
                 mSecureSettings.getUriFor(Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS),
                 /* notifyForDescendants */ false, mMenuTargetFeaturesContentObserver,
                 UserHandle.USER_CURRENT);
-        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+        if (com.android.systemui.Flags.floatingMenuNotifyTargetsChangedOnStrictDiff()) {
             mSecureSettings.registerContentObserverForUserSync(
                     mSecureSettings.getUriFor(ENABLED_ACCESSIBILITY_SERVICES),
                     /* notifyForDescendants */ false,
@@ -287,7 +287,7 @@ class MenuInfoRepository {
                 UserHandle.USER_CURRENT);
         mContext.registerComponentCallbacks(mComponentCallbacks);
 
-        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+        if (com.android.systemui.Flags.floatingMenuNotifyTargetsChangedOnStrictDiff()) {
             mAccessibilityManager.addAccessibilityServicesStateChangeListener(
                     mA11yServicesStateChangeListener);
         }
@@ -317,7 +317,7 @@ class MenuInfoRepository {
         mContext.getContentResolver().unregisterContentObserver(mMenuFadeOutContentObserver);
         mContext.unregisterComponentCallbacks(mComponentCallbacks);
 
-        if (!com.android.systemui.Flags.floatingMenuNarrowTargetContentObserver()) {
+        if (com.android.systemui.Flags.floatingMenuNotifyTargetsChangedOnStrictDiff()) {
             mAccessibilityManager.removeAccessibilityServicesStateChangeListener(
                     mA11yServicesStateChangeListener);
         }
