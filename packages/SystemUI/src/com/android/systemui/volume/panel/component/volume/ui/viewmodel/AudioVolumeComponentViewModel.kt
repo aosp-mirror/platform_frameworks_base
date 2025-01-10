@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.panel.component.volume.ui.viewmodel
 
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.settingslib.volume.domain.interactor.AudioModeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor.MediaDeviceSessionInteractor
@@ -23,6 +24,7 @@ import com.android.systemui.volume.panel.component.mediaoutput.domain.interactor
 import com.android.systemui.volume.panel.component.mediaoutput.shared.model.MediaDeviceSession
 import com.android.systemui.volume.panel.component.volume.domain.interactor.AudioSlidersInteractor
 import com.android.systemui.volume.panel.component.volume.domain.model.SliderType
+import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.AudioSharingStreamSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.AudioStreamSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.CastVolumeSliderViewModel
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderViewModel
@@ -45,7 +47,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.transformLatest
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * Controls the behaviour of the whole audio
@@ -61,6 +62,7 @@ constructor(
     mediaDeviceSessionInteractor: MediaDeviceSessionInteractor,
     private val streamSliderViewModelFactory: AudioStreamSliderViewModel.Factory,
     private val castVolumeSliderViewModelFactory: CastVolumeSliderViewModel.Factory,
+    private val audioSharingStreamSliderViewModelFactory: AudioSharingStreamSliderViewModel.Factory,
     audioModeInteractor: AudioModeInteractor,
     streamsInteractor: AudioSlidersInteractor,
 ) {
@@ -108,6 +110,7 @@ constructor(
                                 is SliderType.Stream -> createStreamViewModel(type.stream)
                                 is SliderType.MediaDeviceCast ->
                                     createSessionViewModel(type.session)
+                                is SliderType.AudioSharingStream -> createAudioSharingViewModel()
                             }
                         }
                     emit(viewModels)
@@ -138,11 +141,15 @@ constructor(
     }
 
     private fun CoroutineScope.createStreamViewModel(
-        stream: AudioStream,
+        stream: AudioStream
     ): AudioStreamSliderViewModel {
         return streamSliderViewModelFactory.create(
             AudioStreamSliderViewModel.FactoryAudioStreamWrapper(stream),
             this,
         )
+    }
+
+    private fun CoroutineScope.createAudioSharingViewModel(): AudioSharingStreamSliderViewModel {
+        return audioSharingStreamSliderViewModelFactory.create(this)
     }
 }
