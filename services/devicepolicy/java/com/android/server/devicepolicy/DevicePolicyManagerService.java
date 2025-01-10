@@ -10470,6 +10470,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
         // Reset some of the user-specific policies.
         final DevicePolicyData policy = getUserData(userId);
         policy.mPermissionPolicy = DevicePolicyManager.PERMISSION_POLICY_PROMPT;
+        mPolicyCache.setPermissionPolicy(userId, policy.mPermissionPolicy);
         // Clear delegations.
         policy.mDelegationMap.clear();
         policy.mStatusBarDisabled = false;
