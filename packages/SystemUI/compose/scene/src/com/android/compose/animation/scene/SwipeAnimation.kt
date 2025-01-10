@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.Companion.DistanceUnspecified
 import kotlin.math.absoluteValue
@@ -76,7 +77,16 @@ internal fun createSwipeAnimation(
             return DistanceUnspecified
         }
 
-        val distance = if (isUpOrLeft) -absoluteDistance else absoluteDistance
+        // Compute the signed distance and make sure that the offset is always coerced in the right
+        // range.
+        val distance =
+            if (isUpOrLeft) {
+                animation.dragOffset = animation.dragOffset.fastCoerceIn(-absoluteDistance, 0f)
+                -absoluteDistance
+            } else {
+                animation.dragOffset = animation.dragOffset.fastCoerceIn(0f, absoluteDistance)
+                absoluteDistance
+            }
         lastDistance = distance
         return distance
     }
@@ -294,11 +304,9 @@ internal class SwipeAnimation<T : ContentKey>(
         initialVelocity: Float,
         targetContent: T,
         spec: AnimationSpec<Float>? = null,
-        overscrollCompletable: CompletableDeferred<Unit>? = null,
+        awaitFling: (suspend () -> Unit)? = null,
     ): Float {
         check(!isAnimatingOffset()) { "SwipeAnimation.animateOffset() can only be called once" }
-
-        val initialProgress = progress
 
         val targetContent =
             if (targetContent != currentContent && !canChangeContent(targetContent)) {
@@ -307,18 +315,16 @@ internal class SwipeAnimation<T : ContentKey>(
                 targetContent
             }
 
-        // Skip the animation if we have already reached the target content and the overscroll does
-        // not animate anything.
-        val hasReachedTargetContent =
-            (targetContent == toContent && initialProgress >= 1f) ||
-                (targetContent == fromContent && initialProgress <= 0f)
-        val skipAnimation =
-            hasReachedTargetContent && !contentTransition.isWithinProgressRange(initialProgress)
-
         val distance = distance()
-        check(distance != DistanceUnspecified) { "distance is equal to $DistanceUnspecified" }
-
-        val targetOffset = if (targetContent == fromContent) 0f else distance
+        val targetOffset =
+            if (targetContent == fromContent) {
+                0f
+            } else {
+                check(distance != DistanceUnspecified) {
+                    "distance is equal to $DistanceUnspecified"
+                }
+                distance
+            }
 
         // If the effective current content changed, it should be reflected right now in the
         // current state, even before the settle animation is ongoing. That way all the
@@ -350,28 +356,12 @@ internal class SwipeAnimation<T : ContentKey>(
 
         check(isAnimatingOffset())
 
-        // Note: we still create the animatable and set it on offsetAnimation even when
-        // skipAnimation is true, just so that isUserInputOngoing and isAnimatingOffset() are
-        // unchanged even despite this small skip-optimization (which is just an implementation
-        // detail).
-        if (skipAnimation) {
-            // Unblock the job.
-            offsetAnimationRunnable.complete {
-                // Wait for overscroll to finish so that the transition is removed from the STLState
-                // only after the overscroll is done, to avoid dropping frame right when the user
-                // lifts their finger and overscroll is animated to 0.
-                overscrollCompletable?.await()
-            }
-            return 0f
-        }
-
         val motionSpatialSpec =
             spec
                 ?: contentTransition.transformationSpec.motionSpatialSpec
                 ?: layoutState.transitions.defaultMotionSpatialSpec
 
         val velocityConsumed = CompletableDeferred<Float>()
-
         offsetAnimationRunnable.complete {
             val result =
                 animatable.animateTo(
@@ -385,9 +375,9 @@ internal class SwipeAnimation<T : ContentKey>(
             velocityConsumed.complete(initialVelocity - result.endState.velocity)
 
             // Wait for overscroll to finish so that the transition is removed from the STLState
-            // only after the overscroll is done, to avoid dropping frame right when the user
-            // lifts their finger and overscroll is animated to 0.
-            overscrollCompletable?.await()
+            // only after the overscroll is done, to avoid dropping frame right when the user lifts
+            // their finger and overscroll is animated to 0.
+            awaitFling?.invoke()
         }
 
         return velocityConsumed.await()

@@ -457,7 +457,7 @@ data class Swipe
 private constructor(
     val direction: SwipeDirection,
     val pointerCount: Int = 1,
-    val pointersType: PointerType? = null,
+    val pointerType: PointerType? = null,
     val fromSource: SwipeSource? = null,
 ) : UserAction() {
     companion object {
@@ -470,46 +470,46 @@ private constructor(
 
         fun Left(
             pointerCount: Int = 1,
-            pointersType: PointerType? = null,
+            pointerType: PointerType? = null,
             fromSource: SwipeSource? = null,
-        ) = Swipe(SwipeDirection.Left, pointerCount, pointersType, fromSource)
+        ) = Swipe(SwipeDirection.Left, pointerCount, pointerType, fromSource)
 
         fun Up(
             pointerCount: Int = 1,
-            pointersType: PointerType? = null,
+            pointerType: PointerType? = null,
             fromSource: SwipeSource? = null,
-        ) = Swipe(SwipeDirection.Up, pointerCount, pointersType, fromSource)
+        ) = Swipe(SwipeDirection.Up, pointerCount, pointerType, fromSource)
 
         fun Right(
             pointerCount: Int = 1,
-            pointersType: PointerType? = null,
+            pointerType: PointerType? = null,
             fromSource: SwipeSource? = null,
-        ) = Swipe(SwipeDirection.Right, pointerCount, pointersType, fromSource)
+        ) = Swipe(SwipeDirection.Right, pointerCount, pointerType, fromSource)
 
         fun Down(
             pointerCount: Int = 1,
-            pointersType: PointerType? = null,
+            pointerType: PointerType? = null,
             fromSource: SwipeSource? = null,
-        ) = Swipe(SwipeDirection.Down, pointerCount, pointersType, fromSource)
+        ) = Swipe(SwipeDirection.Down, pointerCount, pointerType, fromSource)
 
         fun Start(
             pointerCount: Int = 1,
-            pointersType: PointerType? = null,
+            pointerType: PointerType? = null,
             fromSource: SwipeSource? = null,
-        ) = Swipe(SwipeDirection.Start, pointerCount, pointersType, fromSource)
+        ) = Swipe(SwipeDirection.Start, pointerCount, pointerType, fromSource)
 
         fun End(
             pointerCount: Int = 1,
-            pointersType: PointerType? = null,
+            pointerType: PointerType? = null,
             fromSource: SwipeSource? = null,
-        ) = Swipe(SwipeDirection.End, pointerCount, pointersType, fromSource)
+        ) = Swipe(SwipeDirection.End, pointerCount, pointerType, fromSource)
     }
 
     override fun resolve(layoutDirection: LayoutDirection): UserAction.Resolved {
         return Resolved(
             direction = direction.resolve(layoutDirection),
             pointerCount = pointerCount,
-            pointersType = pointersType,
+            pointerType = pointerType,
             fromSource = fromSource?.resolve(layoutDirection),
         )
     }
@@ -519,7 +519,7 @@ private constructor(
         val direction: SwipeDirection.Resolved,
         val pointerCount: Int,
         val fromSource: SwipeSource.Resolved?,
-        val pointersType: PointerType?,
+        val pointerType: PointerType?,
     ) : UserAction.Resolved()
 }
 
@@ -724,6 +724,7 @@ internal fun SceneTransitionLayoutForTesting(
                 density = density,
                 layoutDirection = layoutDirection,
                 swipeSourceDetector = swipeSourceDetector,
+                swipeDetector = swipeDetector,
                 transitionInterceptionThreshold = transitionInterceptionThreshold,
                 builder = builder,
                 animationScope = animationScope,
@@ -767,8 +768,9 @@ internal fun SceneTransitionLayoutForTesting(
         layoutImpl.density = density
         layoutImpl.layoutDirection = layoutDirection
         layoutImpl.swipeSourceDetector = swipeSourceDetector
+        layoutImpl.swipeDetector = swipeDetector
         layoutImpl.transitionInterceptionThreshold = transitionInterceptionThreshold
     }
 
-    layoutImpl.Content(modifier, swipeDetector)
+    layoutImpl.Content(modifier)
 }
