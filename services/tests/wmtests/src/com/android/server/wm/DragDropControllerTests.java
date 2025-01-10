@@ -415,8 +415,14 @@ public class DragDropControllerTests extends WindowTestsBase {
                         assertEquals(ACTION_DROP, dropEvent.getAction());
                         assertEquals(dropCoordsPx, dropEvent.getX(),  0.0 /* delta */);
                         assertEquals(dropCoordsPx, dropEvent.getY(),  0.0 /* delta */);
+                        assertEquals(window2.getDisplayId(), dropEvent.getDisplayId());
 
                         mTarget.reportDropResult(iwindow2, true);
+                        // Verify both windows received ACTION_DRAG_ENDED event.
+                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents).getAction());
+                        assertEquals(window2.getDisplayId(), last(dragEvents).getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents2).getAction());
+                        assertEquals(window2.getDisplayId(), last(dragEvents2).getDisplayId());
                     } finally {
                         mTarget.mDeferDragStateClosed = false;
                     }
@@ -458,10 +464,12 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                     try {
                         mTarget.mDeferDragStateClosed = true;
+                        mTarget.handleMotionEvent(true, testDisplay.getDisplayId(), dropCoordsPx,
+                                dropCoordsPx);
                         // x, y is window-local coordinate.
                         mTarget.reportDropWindow(window2.mInputChannelToken, dropCoordsPx,
                                 dropCoordsPx);
-                        mTarget.handleMotionEvent(false, window2.getDisplayId(), dropCoordsPx,
+                        mTarget.handleMotionEvent(false, testDisplay.getDisplayId(), dropCoordsPx,
                                 dropCoordsPx);
                         mToken = window2.mClient.asBinder();
                         // Verify only window2 received the DROP event and coords are sent as-is
@@ -471,8 +479,14 @@ public class DragDropControllerTests extends WindowTestsBase {
                         assertEquals(ACTION_DROP, dropEvent.getAction());
                         assertEquals(dropCoordsPx, dropEvent.getX(),  0.0 /* delta */);
                         assertEquals(dropCoordsPx, dropEvent.getY(),  0.0 /* delta */);
+                        assertEquals(testDisplay.getDisplayId(), dropEvent.getDisplayId());
 
                         mTarget.reportDropResult(iwindow2, true);
+                        // Verify both windows received ACTION_DRAG_ENDED event.
+                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents).getAction());
+                        assertEquals(testDisplay.getDisplayId(), last(dragEvents).getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents2).getAction());
+                        assertEquals(testDisplay.getDisplayId(), last(dragEvents2).getDisplayId());
                     } finally {
                         mTarget.mDeferDragStateClosed = false;
                     }
