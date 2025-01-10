@@ -4,6 +4,8 @@ per-file *Vibrator* = file:/services/core/java/com/android/server/vibrator/OWNER
 
 # PowerManager
 per-file IPowerManager.aidl = file:/services/core/java/com/android/server/power/OWNERS
+per-file IScreenTimeoutPolicyListener.aidl = file:/services/core/java/com/android/server/power/OWNERS
+per-file IWakeLockCallback.aidl = file:/services/core/java/com/android/server/power/OWNERS
 per-file PowerManager.java = file:/services/core/java/com/android/server/power/OWNERS
 per-file PowerManagerInternal.java = file:/services/core/java/com/android/server/power/OWNERS
 

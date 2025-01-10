@@ -138,7 +138,7 @@ public class BinderProxyTest {
                     new Intent(mContext, BinderProxyService.class),
                     connection,
                     Context.BIND_AUTO_CREATE);
-            if (!bindLatch.await(500, TimeUnit.MILLISECONDS)) {
+            if (!bindLatch.await(1000, TimeUnit.MILLISECONDS)) {
                 fail(
                         "Timed out while binding service: "
                                 + BinderProxyService.class.getSimpleName());

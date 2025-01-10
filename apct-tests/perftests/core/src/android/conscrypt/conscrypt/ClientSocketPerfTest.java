@@ -44,24 +44,21 @@ import javax.crypto.Cipher;
 import javax.crypto.NoSuchPaddingException;
 
 import org.junit.Rule;
+import org.junit.After;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import junitparams.JUnitParamsRunner;
 import junitparams.Parameters;
 import android.conscrypt.ServerEndpoint.MessageProcessor;
 
-/**
- * Benchmark for comparing performance of server socket implementations.
- */
+/** Benchmark for comparing performance of server socket implementations. */
 @RunWith(JUnitParamsRunner.class)
 @LargeTest
 public final class ClientSocketPerfTest {
 
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    /**
-     * Provider for the test configuration
-     */
+    /** Provider for the test configuration */
     private class Config {
         EndpointFactory a_clientFactory;
         EndpointFactory b_serverFactory;
@@ -69,19 +66,22 @@ public final class ClientSocketPerfTest {
         String d_cipher;
         ChannelType e_channelType;
         PerfTestProtocol f_protocol;
-        Config(EndpointFactory clientFactory,
-            EndpointFactory serverFactory,
-            int messageSize,
-            String cipher,
-            ChannelType channelType,
-            PerfTestProtocol protocol) {
-          a_clientFactory = clientFactory;
-          b_serverFactory = serverFactory;
-          c_messageSize = messageSize;
-          d_cipher = cipher;
-          e_channelType = channelType;
-          f_protocol = protocol;
+
+        Config(
+                EndpointFactory clientFactory,
+                EndpointFactory serverFactory,
+                int messageSize,
+                String cipher,
+                ChannelType channelType,
+                PerfTestProtocol protocol) {
+            a_clientFactory = clientFactory;
+            b_serverFactory = serverFactory;
+            c_messageSize = messageSize;
+            d_cipher = cipher;
+            e_channelType = channelType;
+            f_protocol = protocol;
         }
+
         public EndpointFactory clientFactory() {
             return a_clientFactory;
         }
@@ -112,23 +112,43 @@ public final class ClientSocketPerfTest {
         for (EndpointFactory endpointFactory : EndpointFactory.values()) {
             for (ChannelType channelType : ChannelType.values()) {
                 for (PerfTestProtocol protocol : PerfTestProtocol.values()) {
-                    params.add(new Object[] {new Config(endpointFactory,
-                        endpointFactory, 64, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-                        channelType, protocol)});
-                    params.add(new Object[] {new Config(endpointFactory,
-                        endpointFactory, 512, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-                        channelType, protocol)});
-                    params.add(new Object[] {new Config(endpointFactory,
-                        endpointFactory, 4096, "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
-                        channelType, protocol)});
+                    params.add(
+                            new Object[] {
+                                new Config(
+                                        endpointFactory,
+                                        endpointFactory,
+                                        64,
+                                        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                                        channelType,
+                                        protocol)
+                            });
+                    params.add(
+                            new Object[] {
+                                new Config(
+                                        endpointFactory,
+                                        endpointFactory,
+                                        512,
+                                        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                                        channelType,
+                                        protocol)
+                            });
+                    params.add(
+                            new Object[] {
+                                new Config(
+                                        endpointFactory,
+                                        endpointFactory,
+                                        4096,
+                                        "TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256",
+                                        channelType,
+                                        protocol)
+                            });
                 }
             }
         }
         return params;
     }
 
-    private ClientEndpoint client;
-    private ServerEndpoint server;
+    private SocketPair socketPair = new SocketPair();
     private byte[] message;
     private ExecutorService executor;
     private Future<?> sendingFuture;
@@ -137,46 +157,78 @@ public final class ClientSocketPerfTest {
     private static final AtomicLong bytesCounter = new AtomicLong();
     private AtomicBoolean recording = new AtomicBoolean();
 
+    private static class SocketPair implements AutoCloseable {
+        public ClientEndpoint client;
+        public ServerEndpoint server;
+
+        SocketPair() {
+            client = null;
+            server = null;
+        }
+
+        @Override
+        public void close() {
+            if (client != null) {
+                client.stop();
+            }
+            if (server != null) {
+                server.stop();
+            }
+        }
+    }
+
     private void setup(Config config) throws Exception {
         message = newTextMessage(512);
 
         // Always use the same server for consistency across the benchmarks.
-        server = config.serverFactory().newServer(
-                config.messageSize(), config.protocol().getProtocols(),
-                ciphers(config));
+        socketPair.server =
+                config.serverFactory()
+                        .newServer(
+                                config.messageSize(),
+                                config.protocol().getProtocols(),
+                                ciphers(config));
+        socketPair.server.init();
 
-        server.setMessageProcessor(new ServerEndpoint.MessageProcessor() {
-            @Override
-            public void processMessage(byte[] inMessage, int numBytes, OutputStream os) {
-                if (recording.get()) {
-                    // Server received a message, increment the count.
-                    bytesCounter.addAndGet(numBytes);
-                }
-            }
-        });
-        Future<?> connectedFuture = server.start();
+        socketPair.server.setMessageProcessor(
+                new ServerEndpoint.MessageProcessor() {
+                    @Override
+                    public void processMessage(byte[] inMessage, int numBytes, OutputStream os) {
+                        if (recording.get()) {
+                            // Server received a message, increment the count.
+                            bytesCounter.addAndGet(numBytes);
+                        }
+                    }
+                });
+        Future<?> connectedFuture = socketPair.server.start();
 
-        client = config.clientFactory().newClient(
-            config.channelType(), server.port(), config.protocol().getProtocols(), ciphers(config));
-        client.start();
+        socketPair.client =
+                config.clientFactory()
+                        .newClient(
+                                config.channelType(),
+                                socketPair.server.port(),
+                                config.protocol().getProtocols(),
+                                ciphers(config));
+        socketPair.client.start();
 
         // Wait for the initial connection to complete.
         connectedFuture.get(5, TimeUnit.SECONDS);
 
         executor = Executors.newSingleThreadExecutor();
-        sendingFuture = executor.submit(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Thread thread = Thread.currentThread();
-                    while (!stopping && !thread.isInterrupted()) {
-                        client.sendMessage(message);
-                    }
-                } finally {
-                    client.flush();
-                }
-            }
-        });
+        sendingFuture =
+                executor.submit(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                try {
+                                    Thread thread = Thread.currentThread();
+                                    while (!stopping && !thread.isInterrupted()) {
+                                        socketPair.client.sendMessage(message);
+                                    }
+                                } finally {
+                                    socketPair.client.flush();
+                                }
+                            }
+                        });
     }
 
     void close() throws Exception {
@@ -185,29 +237,37 @@ public final class ClientSocketPerfTest {
         // Wait for the sending thread to stop.
         sendingFuture.get(5, TimeUnit.SECONDS);
 
-        client.stop();
-        server.stop();
-        executor.shutdown();
-        executor.awaitTermination(5, TimeUnit.SECONDS);
+        if (socketPair != null) {
+            socketPair.close();
+        }
+        if (executor != null) {
+            executor.shutdown();
+            executor.awaitTermination(5, TimeUnit.SECONDS);
+        }
     }
 
-    /**
-     * Simple benchmark for the amount of time to send a given number of messages
-     */
+    /** Simple benchmark for the amount of time to send a given number of messages */
     @Test
     @Parameters(method = "getParams")
     public void time(Config config) throws Exception {
-        reset();
-        setup(config);
-        recording.set(true);
+        try {
+            reset();
+            setup(config);
+            recording.set(true);
 
-        BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
-        while (state.keepRunning()) {
-          while (bytesCounter.get() < config.messageSize()) {
-          }
-          bytesCounter.set(0);
+            BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
+            while (state.keepRunning()) {
+                while (bytesCounter.get() < config.messageSize()) {}
+                bytesCounter.set(0);
+            }
+            recording.set(false);
+        } finally {
+            close();
         }
-        recording.set(false);
+    }
+
+    @After
+    public void tearDown() throws Exception {
         close();
     }
 

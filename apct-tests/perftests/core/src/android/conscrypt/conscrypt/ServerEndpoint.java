@@ -16,10 +16,14 @@
 
 package android.conscrypt;
 
+import static org.conscrypt.TestUtils.getLoopbackAddress;
+
 import java.io.EOFException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.lang.AutoCloseable;
+import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.SocketException;
 import java.nio.channels.ClosedChannelException;
@@ -37,7 +41,7 @@ import javax.net.ssl.SSLSocketFactory;
 /**
  * A simple socket-based test server.
  */
-final class ServerEndpoint {
+final class ServerEndpoint implements AutoCloseable {
     /**
      * A processor for receipt of a single message.
      */
@@ -82,7 +86,11 @@ final class ServerEndpoint {
         this.messageSize = messageSize;
         this.protocols = protocols;
         this.cipherSuites = cipherSuites;
-        buffer = new byte[messageSize];
+        this.buffer = new byte[messageSize];
+    }
+
+    void init() throws IOException {
+        serverSocket.bind(new InetSocketAddress(getLoopbackAddress(), 0));
     }
 
     void setMessageProcessor(MessageProcessor messageProcessor) {
@@ -92,6 +100,11 @@ final class ServerEndpoint {
     Future<?> start() throws IOException {
         executor = Executors.newSingleThreadExecutor();
         return executor.submit(new AcceptTask());
+    }
+
+    @Override
+    public void close() {
+        stop();
     }
 
     void stop() {

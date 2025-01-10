@@ -348,12 +348,14 @@ class PinnedTaskController {
      * Notifies listeners that the PIP needs to be adjusted for the IME.
      */
     private void notifyImeVisibilityChanged(boolean imeVisible, int imeHeight) {
-        if (mPinnedTaskListener != null) {
-            try {
-                mPinnedTaskListener.onImeVisibilityChanged(imeVisible, imeHeight);
-            } catch (RemoteException e) {
-                Slog.e(TAG_WM, "Error delivering bounds changed event.", e);
-            }
+        if (mPinnedTaskListener == null) {
+            return;
+        }
+
+        try {
+            mPinnedTaskListener.onImeVisibilityChanged(imeVisible, imeHeight);
+        } catch (RemoteException e) {
+            Slog.e(TAG_WM, "Error delivering ime visibility changed event.", e);
         }
     }
 
@@ -361,15 +363,14 @@ class PinnedTaskController {
      * Notifies listeners that the PIP movement bounds have changed.
      */
     private void notifyMovementBoundsChanged(boolean fromImeAdjustment) {
-        synchronized (mService.mGlobalLock) {
-            if (mPinnedTaskListener == null) {
-                return;
-            }
-            try {
-                mPinnedTaskListener.onMovementBoundsChanged(fromImeAdjustment);
-            } catch (RemoteException e) {
-                Slog.e(TAG_WM, "Error delivering actions changed event.", e);
-            }
+        if (mPinnedTaskListener == null) {
+            return;
+        }
+
+        try {
+            mPinnedTaskListener.onMovementBoundsChanged(fromImeAdjustment);
+        } catch (RemoteException e) {
+            Slog.e(TAG_WM, "Error delivering movement bounds changed event.", e);
         }
     }
 

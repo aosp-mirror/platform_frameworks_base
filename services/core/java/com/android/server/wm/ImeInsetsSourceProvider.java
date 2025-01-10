@@ -100,7 +100,8 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
             // isLeashReadyForDispatching (used to dispatch the leash of the control) is
             // depending on mGivenInsetsReady. Therefore, triggering notifyControlChanged here
             // again, so that the control with leash can be eventually dispatched
-            if (!mGivenInsetsReady && mServerVisible && !givenInsetsPending) {
+            if (!mGivenInsetsReady && mServerVisible && !givenInsetsPending
+                    && mControlTarget != null) {
                 mGivenInsetsReady = true;
                 ImeTracker.forLogging().onProgress(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);

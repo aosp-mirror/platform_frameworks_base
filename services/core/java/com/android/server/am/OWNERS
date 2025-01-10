@@ -21,6 +21,7 @@ per-file FgsTempAllowList.java = file:/ACTIVITY_MANAGER_OWNERS
 per-file HostingRecord.java = file:/ACTIVITY_MANAGER_OWNERS
 per-file App*ExitInfo* = file:/ACTIVITY_MANAGER_OWNERS
 per-file appexitinfo.proto = file:/ACTIVITY_MANAGER_OWNERS
+per-file UidObserverController* = file:/ACTIVITY_MANAGER_OWNERS
 per-file App*StartInfo* = file:/PERFORMANCE_OWNERS
 per-file appstartinfo.proto = file:/PERFORMANCE_OWNERS
 

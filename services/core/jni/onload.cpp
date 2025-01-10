@@ -70,6 +70,7 @@ int register_com_android_server_display_DisplayControl(JNIEnv* env);
 int register_com_android_server_SystemClockTime(JNIEnv* env);
 int register_android_server_display_smallAreaDetectionController(JNIEnv* env);
 int register_com_android_server_accessibility_BrailleDisplayConnection(JNIEnv* env);
+int register_android_server_am_PhantomProcessList(JNIEnv* env);
 
 // Note: Consider adding new JNI entrypoints for optional services to
 // LazyJniRegistrar instead, and relying on lazy registration.
@@ -135,5 +136,6 @@ extern "C" jint JNI_OnLoad(JavaVM* vm, void* /* reserved */)
     register_com_android_server_SystemClockTime(env);
     register_android_server_display_smallAreaDetectionController(env);
     register_com_android_server_accessibility_BrailleDisplayConnection(env);
+    register_android_server_am_PhantomProcessList(env);
     return JNI_VERSION_1_4;
 }
