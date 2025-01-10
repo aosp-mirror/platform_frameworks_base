@@ -91,7 +91,7 @@ public class MenuViewTest extends SysuiTestCase {
         mSpyContext = spy(mContext);
         doNothing().when(mSpyContext).startActivity(any());
 
-        final SecureSettings secureSettings = TestUtils.mockSecureSettings();
+        final SecureSettings secureSettings = TestUtils.mockSecureSettings(mContext);
         final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
                 secureSettings, mHearingAidDeviceManager);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
