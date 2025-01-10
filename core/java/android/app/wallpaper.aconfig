@@ -40,3 +40,10 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "enable_connected_displays_wallpaper"
+  namespace: "lse_desktop_experience"
+  description: "Enable wallpaper support in connected displays"
+  bug: "366461618"
+}
