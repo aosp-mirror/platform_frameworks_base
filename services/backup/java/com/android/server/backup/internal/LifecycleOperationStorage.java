@@ -17,7 +17,6 @@
 package com.android.server.backup.internal;
 
 import static com.android.server.backup.BackupManagerService.DEBUG;
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
 
 import android.annotation.UserIdInt;
 import android.util.Slog;
@@ -206,7 +205,7 @@ public class LifecycleOperationStorage implements OperationStorage {
      * @return true if the operation was ACKed prior to or during this call.
      */
     public boolean waitUntilOperationComplete(int token, IntConsumer callback) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(TAG, "[UserID:" + mUserId + "] Blocking until operation complete for "
                     + Integer.toHexString(token));
         }
@@ -227,7 +226,7 @@ public class LifecycleOperationStorage implements OperationStorage {
                         }
                         // When the wait is notified we loop around and recheck the current state
                     } else {
-                        if (MORE_DEBUG) {
+                        if (DEBUG) {
                             Slog.d(TAG, "[UserID:" + mUserId
                                     + "] Unblocked waiting for operation token="
                                     + Integer.toHexString(token));
@@ -244,7 +243,7 @@ public class LifecycleOperationStorage implements OperationStorage {
         if (op != null) {
             callback.accept(op.type);
         }
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(TAG, "[UserID:" + mUserId + "] operation " + Integer.toHexString(token)
                     + " complete: finalState=" + finalState);
         }
@@ -263,7 +262,7 @@ public class LifecycleOperationStorage implements OperationStorage {
      *                 operation from PENDING to ACKNOWLEDGED state.
      */
     public void onOperationComplete(int token, long result, Consumer<BackupRestoreTask> callback) {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.v(TAG, "[UserID:" + mUserId + "] onOperationComplete: "
                     + Integer.toHexString(token) + " result=" + result);
         }
@@ -277,10 +276,8 @@ public class LifecycleOperationStorage implements OperationStorage {
                     op = null;
                     mOperations.remove(token);
                 } else if (op.state == OpState.ACKNOWLEDGED) {
-                    if (DEBUG) {
-                        Slog.w(TAG, "[UserID:" + mUserId + "] Received duplicate ack for token="
+                    Slog.w(TAG, "[UserID:" + mUserId + "] Received duplicate ack for token="
                                 + Integer.toHexString(token));
-                    }
                     op = null;
                     mOperations.remove(token);
                 } else if (op.state == OpState.PENDING) {
@@ -317,7 +314,7 @@ public class LifecycleOperationStorage implements OperationStorage {
         Operation op = null;
         synchronized (mOperationsLock) {
             op = mOperations.get(token);
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 if (op == null) {
                     Slog.w(TAG, "[UserID:" + mUserId + "] Cancel of token "
                             + Integer.toHexString(token) + " but no op found");
@@ -326,17 +323,13 @@ public class LifecycleOperationStorage implements OperationStorage {
             int state = (op != null) ? op.state : OpState.TIMEOUT;
             if (state == OpState.ACKNOWLEDGED) {
                 // The operation finished cleanly, so we have nothing more to do.
-                if (DEBUG) {
-                    Slog.w(TAG, "[UserID:" + mUserId + "] Operation already got an ack."
+                Slog.w(TAG, "[UserID:" + mUserId + "] Operation already got an ack."
                             + "Should have been removed from mCurrentOperations.");
-                }
                 op = null;
                 mOperations.delete(token);
             } else if (state == OpState.PENDING) {
-                if (DEBUG) {
-                    Slog.v(TAG, "[UserID:" + mUserId + "] Cancel: token="
+                Slog.d(TAG, "[UserID:" + mUserId + "] Cancel: token="
                             + Integer.toHexString(token));
-                }
                 op.state = OpState.TIMEOUT;
                 // Can't delete op from mOperations here. waitUntilOperationComplete may be
                 // called after we receive cancel here. We need this op's state there.
@@ -347,7 +340,7 @@ public class LifecycleOperationStorage implements OperationStorage {
 
         // If there's a TimeoutHandler for this event, call it
         if (op != null && op.callback != null) {
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.v(TAG, "[UserID:" + mUserId + "   Invoking cancel on " + op.callback);
             }
             op.callback.handleCancel(cancelAll);

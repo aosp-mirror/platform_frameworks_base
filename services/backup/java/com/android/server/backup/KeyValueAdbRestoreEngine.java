@@ -89,10 +89,8 @@ public class KeyValueAdbRestoreEngine implements Runnable {
             ParcelFileDescriptor newState = ParcelFileDescriptor.open(newStateName,
                     MODE_READ_WRITE | MODE_CREATE | MODE_TRUNCATE);
 
-            if (DEBUG) {
-                Slog.i(TAG, "Starting restore of package " + pkg + " for version code "
+            Slog.i(TAG, "Starting restore of package " + pkg + " for version code "
                         + info.version);
-            }
             agent.doRestore(backupData, info.version, newState, mToken,
                     mBackupManagerService.getBackupManagerBinder());
         } catch (IOException e) {

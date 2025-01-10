@@ -57,8 +57,8 @@ public class KeyValueBackupReporterTest {
     }
 
     @Test
-    public void testMoreDebug_isFalse() {
-        assertThat(KeyValueBackupReporter.MORE_DEBUG).isFalse();
+    public void testDebug_isFalse() {
+        assertThat(KeyValueBackupReporter.DEBUG).isFalse();
     }
 
     @Test

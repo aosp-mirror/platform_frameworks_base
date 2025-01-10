@@ -1518,14 +1518,13 @@ public class BackupManagerServiceRoboTest {
     }
 
     /**
-     * Test verifying that {@link BackupManagerService#MORE_DEBUG} is set to {@code false}. This is
+     * Test verifying that {@link BackupManagerService#DEBUG} is set to {@code false}. This is
      * specifically to prevent overloading the logs in production.
      */
     @Test
-    public void testMoreDebug_isFalse() throws Exception {
-        boolean moreDebug = BackupManagerService.MORE_DEBUG;
-
-        assertThat(moreDebug).isFalse();
+    public void testDebug_isFalse() {
+        boolean debug = BackupManagerService.DEBUG;
+        assertThat(debug).isFalse();
     }
 
     /** Test that the constructor handles {@code null} parameters. */

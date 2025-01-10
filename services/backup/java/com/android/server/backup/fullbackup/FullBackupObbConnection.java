@@ -16,7 +16,7 @@
 
 package com.android.server.backup.fullbackup;
 
-import static com.android.server.backup.BackupManagerService.MORE_DEBUG;
+import static com.android.server.backup.BackupManagerService.DEBUG;
 import static com.android.server.backup.BackupManagerService.TAG;
 
 import android.app.backup.IBackupManager;
@@ -58,7 +58,7 @@ public class FullBackupObbConnection implements ServiceConnection {
     }
 
     public void establish() {
-        if (MORE_DEBUG) {
+        if (DEBUG) {
             Slog.i(TAG, "Initiating bind of OBB service on " + this);
         }
         Intent obbIntent = new Intent().setComponent(new ComponentName(
@@ -124,14 +124,14 @@ public class FullBackupObbConnection implements ServiceConnection {
     private void waitForConnection() {
         synchronized (this) {
             while (mService == null) {
-                if (MORE_DEBUG) {
+                if (DEBUG) {
                     Slog.i(TAG, "...waiting for OBB service binding...");
                 }
                 try {
                     this.wait();
                 } catch (InterruptedException e) { /* never interrupted */ }
             }
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(TAG, "Connected to OBB service; continuing");
             }
         }
@@ -141,7 +141,7 @@ public class FullBackupObbConnection implements ServiceConnection {
     public void onServiceConnected(ComponentName name, IBinder service) {
         synchronized (this) {
             mService = IObbBackupService.Stub.asInterface(service);
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(TAG, "OBB service connection " + mService + " connected on " + this);
             }
             this.notifyAll();
@@ -152,7 +152,7 @@ public class FullBackupObbConnection implements ServiceConnection {
     public void onServiceDisconnected(ComponentName name) {
         synchronized (this) {
             mService = null;
-            if (MORE_DEBUG) {
+            if (DEBUG) {
                 Slog.i(TAG, "OBB service connection disconnected on " + this);
             }
             this.notifyAll();
