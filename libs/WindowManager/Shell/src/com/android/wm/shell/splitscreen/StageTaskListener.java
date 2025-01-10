@@ -240,20 +240,12 @@ public class StageTaskListener implements ShellTaskOrganizer.TaskListener {
     @Override
     @CallSuper
     public void onTaskInfoChanged(ActivityManager.RunningTaskInfo taskInfo) {
-        ProtoLog.d(WM_SHELL_SPLIT_SCREEN,
-                "onTaskInfoChanged: taskId=%d vis=%b reqVis=%b baseAct=%s stageId=%s",
-                taskInfo.taskId, taskInfo.isVisible, taskInfo.isVisibleRequested,
-                taskInfo.baseActivity, stageTypeToString(mId));
+        ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskInfoChanged: taskId=%d taskAct=%s "
+                        + "stageId=%s",
+                taskInfo.taskId, taskInfo.baseActivity, stageTypeToString(mId));
         mWindowDecorViewModel.ifPresent(viewModel -> viewModel.onTaskInfoChanged(taskInfo));
         if (mRootTaskInfo.taskId == taskInfo.taskId) {
             mRootTaskInfo = taskInfo;
-            boolean isVisible = taskInfo.isVisible && taskInfo.isVisibleRequested;
-            if (mVisible != isVisible) {
-                ProtoLog.d(WM_SHELL_SPLIT_SCREEN, "onTaskInfoChanged: currentVis=%b newVis=%b",
-                        mVisible, isVisible);
-                mVisible = isVisible;
-                mCallbacks.onStageVisibilityChanged(this);
-            }
         } else if (taskInfo.parentTaskId == mRootTaskInfo.taskId) {
             if (!taskInfo.supportsMultiWindow
                     || !ArrayUtils.contains(CONTROLLED_ACTIVITY_TYPES, taskInfo.getActivityType())
