@@ -57,9 +57,11 @@ class PageSizeMismatchDialog extends AppWarnings.BaseDialog {
 
         final AlertDialog.Builder builder =
                 new AlertDialog.Builder(context)
-                        .setPositiveButton(
-                                R.string.ok,
-                                (dialog, which) -> {/* Do nothing */})
+                        .setPositiveButton(R.string.ok, (dialog, which) ->
+                                        manager.setPackageFlag(
+                                                mUserId, mPackageName,
+                                                AppWarnings.FLAG_HIDE_PAGE_SIZE_MISMATCH,
+                                                true))
                         .setMessage(Html.fromHtml(warning, FROM_HTML_MODE_COMPACT))
                         .setTitle(label);
 
