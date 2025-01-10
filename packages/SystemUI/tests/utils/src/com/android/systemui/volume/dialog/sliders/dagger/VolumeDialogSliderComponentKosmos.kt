@@ -18,6 +18,7 @@ package com.android.systemui.volume.dialog.sliders.dagger
 
 import android.content.applicationContext
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.volumeDialogController
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
@@ -74,6 +75,7 @@ private fun Kosmos.setupVolumeDialogSliderComponent(
     volumeDialogSliderType = type
     applicationContext = parentKosmos.applicationContext
     testScope = parentKosmos.testScope
+    testDispatcher = parentKosmos.testDispatcher
 
     volumeDialogController = parentKosmos.volumeDialogController
     mediaControllerInteractor = parentKosmos.mediaControllerInteractor
