@@ -68,8 +68,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         verify(desktopUserRepositories.current, never())
             .addTask(task.displayId, task.taskId, task.isVisible)
-        verify(desktopUserRepositories.current, never())
-            .removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current, never()).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -79,7 +78,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         desktopTaskChangeListener.onTaskOpening(task)
 
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -109,7 +108,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         desktopTaskChangeListener.onTaskChanging(task)
 
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -141,7 +140,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         desktopTaskChangeListener.onTaskMovingToFront(task)
 
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -169,7 +168,7 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
 
         verify(desktopUserRepositories.current, never()).minimizeTask(task.displayId, task.taskId)
         verify(desktopUserRepositories.current).removeClosingTask(task.taskId)
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -182,6 +181,6 @@ class DesktopTaskChangeListenerTest : ShellTestCase() {
         desktopTaskChangeListener.onTaskClosing(task)
 
         verify(desktopUserRepositories.current).removeClosingTask(task.taskId)
-        verify(desktopUserRepositories.current).removeFreeformTask(task.displayId, task.taskId)
+        verify(desktopUserRepositories.current).removeTask(task.displayId, task.taskId)
     }
 }

@@ -108,7 +108,7 @@ class DesktopTasksTransitionObserver(
                 desktopRepository.isActiveTask(taskInfo.taskId) &&
                     taskInfo.windowingMode != WINDOWING_MODE_FREEFORM
             ) {
-                desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
+                desktopRepository.removeTask(taskInfo.displayId, taskInfo.taskId)
             }
         }
     }

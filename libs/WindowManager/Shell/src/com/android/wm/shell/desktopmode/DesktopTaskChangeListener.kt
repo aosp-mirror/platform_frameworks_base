@@ -29,7 +29,7 @@ class DesktopTaskChangeListener(private val desktopUserRepositories: DesktopUser
         val desktopRepository: DesktopRepository =
             desktopUserRepositories.getProfile(taskInfo.userId)
         if (!isFreeformTask(taskInfo) && desktopRepository.isActiveTask(taskInfo.taskId)) {
-            desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
+            desktopRepository.removeTask(taskInfo.displayId, taskInfo.taskId)
             return
         }
         if (isFreeformTask(taskInfo)) {
@@ -50,7 +50,7 @@ class DesktopTaskChangeListener(private val desktopUserRepositories: DesktopUser
             desktopRepository.updateTask(taskInfo.displayId, taskInfo.taskId, taskInfo.isVisible)
         } else {
             // Case 2: Freeform task is changed outside Desktop Mode.
-            desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
+            desktopRepository.removeTask(taskInfo.displayId, taskInfo.taskId)
         }
     }
 
@@ -60,7 +60,7 @@ class DesktopTaskChangeListener(private val desktopUserRepositories: DesktopUser
     // Any changes to [DesktopRepository] from this method should be made carefully to minimize risk
     // of race conditions and possible duplications with [onTaskChanging].
     override fun onNonTransitionTaskChanging(taskInfo: RunningTaskInfo) {
-        // TODO: b/367268953 - Propapagate usages from FreeformTaskListener to this method.
+        // TODO: b/367268953 - Propagate usages from FreeformTaskListener to this method.
     }
 
     override fun onTaskMovingToFront(taskInfo: RunningTaskInfo) {
@@ -68,7 +68,7 @@ class DesktopTaskChangeListener(private val desktopUserRepositories: DesktopUser
             desktopUserRepositories.getProfile(taskInfo.userId)
         if (!desktopRepository.isActiveTask(taskInfo.taskId)) return
         if (!isFreeformTask(taskInfo)) {
-            desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
+            desktopRepository.removeTask(taskInfo.displayId, taskInfo.taskId)
         }
         // TODO: b/367268953 - Connect this with DesktopRepository for handling
         // task moving to front for tasks in windowing mode.
@@ -90,7 +90,7 @@ class DesktopTaskChangeListener(private val desktopUserRepositories: DesktopUser
             // A task that's vanishing should be removed:
             // - If it's closed by the X button which means it's marked as a closing task.
             desktopRepository.removeClosingTask(taskInfo.taskId)
-            desktopRepository.removeFreeformTask(taskInfo.displayId, taskInfo.taskId)
+            desktopRepository.removeTask(taskInfo.displayId, taskInfo.taskId)
         } else {
             desktopRepository.updateTask(taskInfo.displayId, taskInfo.taskId, isVisible = false)
             desktopRepository.minimizeTask(taskInfo.displayId, taskInfo.taskId)

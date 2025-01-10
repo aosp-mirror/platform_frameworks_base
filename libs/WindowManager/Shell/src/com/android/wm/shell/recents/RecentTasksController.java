@@ -299,7 +299,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     @Override
     public void onRecentTaskRemovedForAddTask(int taskId) {
         mDesktopUserRepositories.ifPresent(
-                desktopUserRepositories -> desktopUserRepositories.getCurrent().removeFreeformTask(
+                desktopUserRepositories -> desktopUserRepositories.getCurrent().removeTask(
                         INVALID_DISPLAY, taskId));
     }
 
