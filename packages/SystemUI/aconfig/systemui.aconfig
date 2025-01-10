@@ -84,6 +84,16 @@ flag {
 }
 
 flag {
+   name: "notification_ambient_suppression_after_inflation"
+   namespace: "systemui"
+   description: "Move the DND visual effects filter to the finalize stage of the pipeline when it is doze-dependent, but keep it in the pre-group stage when it is doze-independent."
+   bug: "373411431"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
+
+flag {
    name: "notification_over_expansion_clipping_fix"
    namespace: "systemui"
    description: "Fix NSSL clipping when over-expanding; fixes split shade bug."
