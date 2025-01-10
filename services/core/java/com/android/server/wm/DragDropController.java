@@ -215,7 +215,8 @@ class DragDropController {
                     mDragState.mOriginalAlpha = alpha;
                     mDragState.mAnimatedScale = callingWin.mGlobalScale;
                     mDragState.mToken = dragToken;
-                    mDragState.mDisplayContent = displayContent;
+                    mDragState.mStartDragDisplayContent = displayContent;
+                    mDragState.mCurrentDisplayContent = displayContent;
                     mDragState.mData = data;
                     mDragState.mCallingTaskIdToHide = shouldMoveCallingTaskToBack(callingWin,
                             flags);
@@ -273,7 +274,7 @@ class DragDropController {
                     InputManagerGlobal.getInstance().setPointerIcon(
                             PointerIcon.getSystemIcon(
                                     mService.mContext, PointerIcon.TYPE_GRABBING),
-                            mDragState.mDisplayContent.getDisplayId(), touchDeviceId,
+                            mDragState.mCurrentDisplayContent.getDisplayId(), touchDeviceId,
                             touchPointerId, mDragState.getInputToken());
                 }
                 // remember the thumb offsets for later
