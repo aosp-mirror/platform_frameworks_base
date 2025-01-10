@@ -102,5 +102,29 @@ public interface TimeZoneChangeListener {
                     + ", mCause='" + mCause + '\''
                     + '}';
         }
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o instanceof TimeZoneChangeEvent that) {
+                return mElapsedRealtimeMillis == that.mElapsedRealtimeMillis
+                        && mUnixEpochTimeMillis == that.mUnixEpochTimeMillis
+                        && mOrigin == that.mOrigin
+                        && mUserId == that.mUserId
+                        && Objects.equals(mOldZoneId, that.mOldZoneId)
+                        && Objects.equals(mNewZoneId, that.mNewZoneId)
+                        && mNewConfidence == that.mNewConfidence
+                        && Objects.equals(mCause, that.mCause);
+            }
+            return false;
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mElapsedRealtimeMillis, mUnixEpochTimeMillis, mOrigin, mUserId,
+                    mOldZoneId, mNewZoneId, mNewConfidence, mCause);
+        }
     }
 }
