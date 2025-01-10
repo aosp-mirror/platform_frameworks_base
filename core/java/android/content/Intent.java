@@ -12506,6 +12506,9 @@ public class Intent implements Parcelable, Cloneable {
         if (intent.mExtras != null) {
             intent.mExtras.enableTokenVerification();
         }
+        if (intent.mClipData != null) {
+            intent.mClipData.setTokenVerificationEnabled();
+        }
     };
 
     /** @hide */
@@ -12516,6 +12519,9 @@ public class Intent implements Parcelable, Cloneable {
             // otherwise, the logic to mark missing token would run before
             // mark trusted creator token present.
             mExtras.enableTokenVerification();
+        }
+        if (mClipData != null) {
+            mClipData.setTokenVerificationEnabled();
         }
     }
 
