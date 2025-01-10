@@ -25,6 +25,7 @@ import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.hardware.display.DisplayManager;
 import android.os.Handler;
 import android.os.SystemProperties;
 import android.provider.Settings;
@@ -175,8 +176,9 @@ public abstract class WMShellBaseModule {
     static DisplayController provideDisplayController(Context context,
             IWindowManager wmService,
             ShellInit shellInit,
-            @ShellMainThread ShellExecutor mainExecutor) {
-        return new DisplayController(context, wmService, shellInit, mainExecutor);
+            @ShellMainThread ShellExecutor mainExecutor,
+            DisplayManager displayManager) {
+        return new DisplayController(context, wmService, shellInit, mainExecutor, displayManager);
     }
 
     @WMSingleton

@@ -26,6 +26,7 @@
     <uses-permission android:name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
     <uses-permission android:name="android.permission.UPDATE_DOMAIN_VERIFICATION_USER_SELECTION" />
     <uses-permission android:name="android.permission.MANAGE_KEY_GESTURES" />
+    <uses-permission android:name="android.permission.MANAGE_DISPLAYS" />
 
     <application>
         <activity

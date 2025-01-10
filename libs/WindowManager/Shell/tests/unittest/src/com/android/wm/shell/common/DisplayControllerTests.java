@@ -22,6 +22,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.content.Context;
+import android.hardware.display.DisplayManager;
 import android.view.IWindowManager;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -50,12 +51,14 @@ public class DisplayControllerTests extends ShellTestCase {
     private @Mock IWindowManager mWM;
     private @Mock ShellInit mShellInit;
     private @Mock ShellExecutor mMainExecutor;
+    private @Mock DisplayManager mDisplayManager;
     private DisplayController mController;
 
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mController = new DisplayController(mContext, mWM, mShellInit, mMainExecutor);
+        mController = new DisplayController(
+                mContext, mWM, mShellInit, mMainExecutor, mDisplayManager);
     }
 
     @Test
