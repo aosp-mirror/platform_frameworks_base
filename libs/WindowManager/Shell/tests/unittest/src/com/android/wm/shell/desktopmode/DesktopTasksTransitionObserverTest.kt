@@ -223,7 +223,7 @@ class DesktopTasksTransitionObserverTest {
         )
 
         verify(taskRepository, never()).minimizeTask(task.displayId, task.taskId)
-        verify(taskRepository).removeFreeformTask(task.displayId, task.taskId)
+        verify(taskRepository).removeTask(task.displayId, task.taskId)
     }
 
     @Test
@@ -241,7 +241,7 @@ class DesktopTasksTransitionObserverTest {
         )
 
         verify(taskRepository, never()).minimizeTask(task.displayId, task.taskId)
-        verify(taskRepository).removeFreeformTask(task.displayId, task.taskId)
+        verify(taskRepository).removeTask(task.displayId, task.taskId)
     }
 
     @Test

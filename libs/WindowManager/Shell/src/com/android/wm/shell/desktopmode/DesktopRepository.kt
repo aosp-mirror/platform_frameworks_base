@@ -470,7 +470,7 @@ class DesktopRepository(
      * Removes [taskId] from the respective display. If [INVALID_DISPLAY], the original display id
      * will be looked up from the task id.
      */
-    fun removeFreeformTask(displayId: Int, taskId: Int) {
+    fun removeTask(displayId: Int, taskId: Int) {
         logD("Removes freeform task: taskId=%d", taskId)
         if (displayId == INVALID_DISPLAY) {
             // Removes the original display id of the task.
