@@ -265,8 +265,17 @@ public class Cuj {
      */
     public static final int CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS = 121;
 
+    /**
+     * Track closing task in Desktop Windowing.
+     *
+     * <p> Tracking begins when the CloseDesktopTaskTransitionHandler in Launcher starts
+     * animating the task closure. This is triggered when the close button in the app header is
+     * clicked on a desktop window. </p>
+     */
+    public static final int CUJ_DESKTOP_MODE_CLOSE_TASK = 122;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_CLOSE_TASK;
 
     /** @hide */
     @IntDef({
@@ -379,7 +388,8 @@ public class Cuj {
             CUJ_DESKTOP_MODE_SNAP_RESIZE,
             CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW,
             CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU,
-            CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS
+            CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS,
+            CUJ_DESKTOP_MODE_CLOSE_TASK
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -503,6 +513,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_UNMAXIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OVERVIEW_TASK_DISMISS;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_CLOSE_TASK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_CLOSE_TASK;
     }
 
     private Cuj() {
@@ -741,6 +752,8 @@ public class Cuj {
                 return "DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU";
             case CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS:
                 return "LAUNCHER_OVERVIEW_TASK_DISMISS";
+            case CUJ_DESKTOP_MODE_CLOSE_TASK:
+                return "DESKTOP_MODE_CLOSE_TASK";
         }
         return "UNKNOWN";
     }
