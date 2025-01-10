@@ -3959,7 +3959,7 @@ public final class NotificationPanelViewController implements ShadeSurface, Dump
             }
 
             final boolean isTrackpadThreeFingerSwipe = isTrackpadThreeFingerSwipe(event);
-            if (com.android.systemui.Flags.disableShadeExpandsOnTrackpadTwoFingerSwipe()
+            if (com.android.systemui.Flags.disableShadeTrackpadTwoFingerSwipe()
                     && !isTrackpadThreeFingerSwipe && isTwoFingerSwipeTrackpadEvent(event)
                     && !isPanelExpanded()) {
                 if (isDown) {
