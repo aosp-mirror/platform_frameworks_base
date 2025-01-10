@@ -37,6 +37,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.Saver
+import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
@@ -66,6 +68,31 @@ sealed interface TutorialActionState {
 
     data class InProgressAfterError(val inProgress: InProgress) :
         TutorialActionState, Progress by inProgress
+
+    companion object {
+        fun stateSaver(): Saver<TutorialActionState, Any> {
+            val classKey = "class"
+            val successAnimationKey = "animation"
+            return mapSaver(
+                save = {
+                    buildMap {
+                        put(classKey, it::class.java.name)
+                        if (it is Finished) put(successAnimationKey, it.successAnimation)
+                    }
+                },
+                restore = { map ->
+                    when (map[classKey] as? String) {
+                        NotStarted::class.java.name,
+                        InProgress::class.java.name -> NotStarted
+                        Error::class.java.name,
+                        InProgressAfterError::class.java.name -> Error
+                        Finished::class.java.name -> Finished(map[successAnimationKey]!! as Int)
+                        else -> NotStarted
+                    }
+                },
+            )
+        }
+    }
 }
 
 interface Progress {

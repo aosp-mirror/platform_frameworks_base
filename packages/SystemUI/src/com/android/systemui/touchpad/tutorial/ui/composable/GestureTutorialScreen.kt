@@ -26,7 +26,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInteropFilter
@@ -48,8 +51,13 @@ fun GestureTutorialScreen(
     onBack: () -> Unit,
 ) {
     BackHandler(onBack = onBack)
+    var cachedTutorialState: TutorialActionState by
+        rememberSaveable(stateSaver = TutorialActionState.stateSaver()) {
+            mutableStateOf(NotStarted)
+        }
     val easterEggTriggered by easterEggTriggeredFlow.collectAsStateWithLifecycle(false)
-    val tutorialState by tutorialStateFlow.collectAsStateWithLifecycle(NotStarted)
+    val tutorialState by tutorialStateFlow.collectAsStateWithLifecycle(cachedTutorialState)
+    cachedTutorialState = tutorialState
     TouchpadGesturesHandlingBox(
         motionEventConsumer,
         tutorialState,
