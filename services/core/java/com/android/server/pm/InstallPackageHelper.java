@@ -3103,13 +3103,14 @@ final class InstallPackageHelper {
             if (android.permission.flags.Flags.enhancedConfirmationModeApisEnabled()
                     && android.security.Flags.extendEcmToAllSettings()) {
                 final int appId = request.getAppId();
-                mPm.mHandler.post(() -> {
+                // TODO: b/388960315 - Implement a long-term solution to race condition
+                mPm.mHandler.postDelayed(() -> {
                     for (int userId : firstUserIds) {
                         // MODE_DEFAULT means that the app's guardedness will be decided lazily
                         setAccessRestrictedSettingsMode(packageName, appId, userId,
                                 AppOpsManager.MODE_DEFAULT);
                     }
-                });
+                }, 1000L);
             } else {
                 // Apply restricted settings on potentially dangerous packages. Needs to happen
                 // after appOpsManager is notified of the new package
