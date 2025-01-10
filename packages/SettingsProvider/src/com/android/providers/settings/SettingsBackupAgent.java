@@ -220,6 +220,11 @@ public class SettingsBackupAgent extends BackupAgentHelper {
         "failed_to_convert_network_policies";
     private static final String ERROR_UNKNOWN_BACKUP_SERIALIZATION_VERSION =
         "unknown_backup_serialization_version";
+    private static final String INTERRUPTED_EXCEPTION = "interrupted_exception";
+    private static final String ERROR_FAILED_TO_RETRIEVE_WIFI_SETTINGS_BACKUP_DATA =
+        "failed_to_retrieve_wifi_settings_backup_data";
+    private static final String ERROR_FAILED_TO_RESTORE_WIFI_SETTINGS_BACKUP_DATA =
+        "failed_to_restore_wifi_settings_backup_data";
 
 
     // Name of the temporary file we use during full backup/restore.  This is
@@ -1692,20 +1697,49 @@ public class SettingsBackupAgent extends BackupAgentHelper {
                     });
             // cts requires B&R with 10 seconds
             if (latch.await(10, TimeUnit.SECONDS) && backupWifiData.value != null) {
+                if (areAgentMetricsEnabled) {
+                    numberOfSettingsPerKey.put(KEY_WIFI_SETTINGS_BACKUP_DATA, 1);
+                }
                 return backupWifiData.value;
             }
         } catch (InterruptedException ie) {
             Log.e(TAG, "fail to retrieveWifiBackupData, " + ie);
+            if (areAgentMetricsEnabled) {
+                mBackupRestoreEventLogger.logItemsBackupFailed(
+                    KEY_WIFI_SETTINGS_BACKUP_DATA,
+                    /* count= */ 1,
+                    INTERRUPTED_EXCEPTION);
+            }
         }
         Log.e(TAG, "fail to retrieveWifiBackupData");
+        if (areAgentMetricsEnabled) {
+            mBackupRestoreEventLogger.logItemsBackupFailed(
+                KEY_WIFI_SETTINGS_BACKUP_DATA,
+                /* count= */ 1,
+                ERROR_FAILED_TO_RETRIEVE_WIFI_SETTINGS_BACKUP_DATA);
+        }
         return new byte[0];
     }
 
-    private void restoreWifiData(byte[] data) {
+    @VisibleForTesting
+    void restoreWifiData(byte[] data) {
         if (DEBUG_BACKUP) {
             Log.v(TAG, "Applying restored all wifi data");
         }
-        mWifiManager.restoreWifiBackupData(data);
+        if (areAgentMetricsEnabled) {
+            try {
+                mWifiManager.restoreWifiBackupData(data);
+                mBackupRestoreEventLogger.logItemsRestored(
+                    KEY_WIFI_SETTINGS_BACKUP_DATA, /* count= */ 1);
+            } catch (Exception e) {
+                mBackupRestoreEventLogger.logItemsRestoreFailed(
+                    KEY_WIFI_SETTINGS_BACKUP_DATA,
+                    /* count= */ 1,
+                    ERROR_FAILED_TO_RESTORE_WIFI_SETTINGS_BACKUP_DATA);
+            }
+        } else {
+            mWifiManager.restoreWifiBackupData(data);
+        }
     }
 
     private void updateWindowManagerIfNeeded(Integer previousDensity) {

@@ -19,6 +19,7 @@ package com.android.providers.settings;
 import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_WIFI_NEW_CONFIG;
 import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_SOFTAP_CONFIG;
 import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_SIM_SPECIFIC_SETTINGS_2;
+import static com.android.providers.settings.SettingsBackupRestoreKeys.KEY_WIFI_SETTINGS_BACKUP_DATA;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
@@ -967,6 +968,50 @@ public class SettingsBackupAgentTest extends BaseSettingsProviderTest {
         mAgentUnderTest.restoreSimSpecificSettings(new byte[0]);
 
         assertNull(getLoggingResultForDatatype(KEY_SIM_SPECIFIC_SETTINGS_2, mAgentUnderTest));
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+        restoreWifiData_agentMetricsAreEnabled_restoreIsSuccessful_successMetricsAreLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        doNothing().when(mWifiManager).restoreWifiBackupData(any());
+
+        mAgentUnderTest.restoreWifiData(new byte[0]);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(KEY_WIFI_SETTINGS_BACKUP_DATA, mAgentUnderTest);
+        assertNotNull(loggingResult);
+        assertEquals(loggingResult.getSuccessCount(), 1);
+    }
+
+    @Test
+    @EnableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void
+        restoreWifiData_agentMetricsAreEnabled_restoreIsNotSuccessful_failureMetricsAreLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        doThrow(new RuntimeException()).when(mWifiManager).restoreWifiBackupData(any());
+
+        mAgentUnderTest.restoreWifiData(new byte[0]);
+
+        DataTypeResult loggingResult =
+            getLoggingResultForDatatype(KEY_WIFI_SETTINGS_BACKUP_DATA, mAgentUnderTest);
+        assertNotNull(loggingResult);
+        assertEquals(loggingResult.getFailCount(), 1);
+    }
+
+    @Test
+    @DisableFlags(com.android.server.backup.Flags.FLAG_ENABLE_METRICS_SETTINGS_BACKUP_AGENTS)
+    public void restoreWifiData_agentMetricsAreDisabled_metricsAreNotLogged() {
+        mAgentUnderTest.onCreate(
+            UserHandle.SYSTEM, BackupDestination.CLOUD, OperationType.RESTORE);
+        doNothing().when(mWifiManager).restoreWifiBackupData(any());
+
+        mAgentUnderTest.restoreWifiData(new byte[0]);
+
+        assertNull(getLoggingResultForDatatype(KEY_WIFI_SETTINGS_BACKUP_DATA, mAgentUnderTest));
     }
 
     private byte[] generateBackupData(Map<String, String> keyValueData) {
