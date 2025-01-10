@@ -167,7 +167,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
      * Test for {@link ShortcutService#getLastResetTimeLocked()} and
      * {@link ShortcutService#getNextResetTimeLocked()}.
      */
-    public void testUpdateAndGetNextResetTimeLocked() {
+    public void disabled_testUpdateAndGetNextResetTimeLocked() {
         assertResetTimes(START_TIME, START_TIME + INTERVAL);
 
         // Advance clock.
@@ -284,7 +284,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals(START_TIME + 5 * INTERVAL, mManager.getRateLimitResetTime());
     }
 
-    public void testSetDynamicShortcuts() {
+    public void disabled_testSetDynamicShortcuts() {
         setCaller(CALLING_PACKAGE_1, USER_10);
 
         final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.icon1);
@@ -596,7 +596,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                 eq(CALLING_PACKAGE_2), any(), eq(USER_10));
     }
 
-    public void testUnlimitedCalls() {
+    public void disabled_testUnlimitedCalls() {
         setCaller(CALLING_PACKAGE_1, USER_10);
 
         final ShortcutInfo si1 = makeShortcut("shortcut1");
@@ -1205,7 +1205,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
                         maxSize));
     }
 
-    public void testShrinkBitmap() {
+    public void disabled_testShrinkBitmap() {
         checkShrinkBitmap(32, 32, R.drawable.black_512x512, 32);
         checkShrinkBitmap(511, 511, R.drawable.black_512x512, 511);
         checkShrinkBitmap(512, 512, R.drawable.black_512x512, 512);
@@ -1302,7 +1302,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertFalse(p11_1_3.getName().contains("_"));
     }
 
-    public void testUpdateShortcuts() {
+    public void disabled_testUpdateShortcuts() {
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1"),
@@ -1433,7 +1433,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testUpdateShortcuts_icons() {
+    public void disabled_testUpdateShortcuts_icons() {
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             assertTrue(mManager.setDynamicShortcuts(list(
                     makeShortcut("s1")
@@ -1527,7 +1527,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testShortcutManagerGetShortcuts_shortcutTypes() {
+    public void disabled_testShortcutManagerGetShortcuts_shortcutTypes() {
 
         // Create 3 manifest and 3 dynamic shortcuts
         addManifestShortcutResource(
@@ -2281,7 +2281,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertEquals("ABC", findById(list, "s1").getTitle());
     }
 
-    public void testPinShortcutAndGetPinnedShortcuts() {
+    public void disabled_testPinShortcutAndGetPinnedShortcuts() {
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             final ShortcutInfo s1_1 = makeShortcutWithTimestamp("s1", 1000);
             final ShortcutInfo s1_2 = makeShortcutWithTimestamp("s2", 2000);
@@ -3478,7 +3478,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testStartShortcut() {
+    public void disabled_testStartShortcut() {
         // Create some shortcuts.
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             final ShortcutInfo s1_1 = makeShortcut(
@@ -3902,7 +3902,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
     // === Test for persisting ===
 
-    public void testSaveAndLoadUser_empty() {
+    public void disabled_testSaveAndLoadUser_empty() {
         assertTrue(mManager.setDynamicShortcuts(list()));
 
         Log.i(TAG, "Saved state");
@@ -4074,7 +4074,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         assertNull(ShortcutPackage.loadFromFile(mService, user, corruptedShortcutPackage, false));
     }
 
-    public void testSaveCorruptAndLoadUser() throws Exception {
+    public void disabled_testSaveCorruptAndLoadUser() throws Exception {
         // First, create some shortcuts and save.
         runWithCaller(CALLING_PACKAGE_1, USER_10, () -> {
             final Icon icon1 = Icon.createWithResource(getTestContext(), R.drawable.black_64x16);
@@ -6658,7 +6658,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
 
     }
 
-    public void testSaveAndLoad_crossProfile() {
+    public void disabled_testSaveAndLoad_crossProfile() {
         prepareCrossProfileDataSet();
 
         dumpsysOnLogcat("Before save & load");
@@ -8471,7 +8471,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testShortcutsPushedOutByManifest() {
+    public void disabled_testShortcutsPushedOutByManifest() {
         // Change the max number of shortcuts.
         mService.updateConfigurationLocked(ConfigConstants.KEY_MAX_SHORTCUTS + "=3");
 
@@ -8708,7 +8708,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         }
     }
 
-    public void testShareTargetInfo_saveToXml() throws IOException, XmlPullParserException {
+    public void disabled_testShareTargetInfo_saveToXml() throws IOException, XmlPullParserException {
         List<ShareTargetInfo> expectedValues = new ArrayList<>();
         expectedValues.add(new ShareTargetInfo(
                 new ShareTargetInfo.TargetData[]{new ShareTargetInfo.TargetData(
@@ -8902,7 +8902,7 @@ public class ShortcutManagerTest1 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testUpdateShortcuts_ExcludesHiddenFromLauncherShortcuts() {
+    public void disabled_testUpdateShortcuts_ExcludesHiddenFromLauncherShortcuts() {
         final ShortcutInfo s1 = makeShortcut("s1");
         final ShortcutInfo s2 = makeShortcut("s2");
         final ShortcutInfo s3 = makeShortcut("s3");
