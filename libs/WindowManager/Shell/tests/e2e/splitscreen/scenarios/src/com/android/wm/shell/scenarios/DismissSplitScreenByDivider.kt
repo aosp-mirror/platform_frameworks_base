@@ -24,6 +24,7 @@ import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
 import com.android.launcher3.tapl.LauncherInstrumentation
 import com.android.wm.shell.Utils
+import com.android.wm.shell.flicker.utils.RecentTasksUtils
 import com.android.wm.shell.flicker.utils.SplitScreenUtils
 import org.junit.After
 import org.junit.Before
@@ -74,7 +75,6 @@ constructor(val rotation: Rotation = Rotation.ROTATION_0) {
 
     @After
     fun teardown() {
-        primaryApp.exit(wmHelper)
-        secondaryApp.exit(wmHelper)
+        RecentTasksUtils.clearAllVisibleRecentTasks(instrumentation)
     }
 }
