@@ -25,7 +25,6 @@ import static android.app.timezonedetector.TelephonyTimeZoneSuggestion.QUALITY_S
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_HIGH;
 import static com.android.server.SystemTimeZone.TIME_ZONE_CONFIDENCE_LOW;
 
-import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -54,7 +53,6 @@ import com.android.server.SystemTimeZone.TimeZoneConfidence;
 import com.android.server.flags.Flags;
 import com.android.server.timezonedetector.ConfigurationInternal.DetectionMode;
 
-import java.io.PrintWriter;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
@@ -66,55 +64,6 @@ import java.util.Objects;
  * <p>Most public methods are marked synchronized to ensure thread safety around internal state.
  */
 public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrategy {
-
-    /**
-     * Used by {@link TimeZoneDetectorStrategyImpl} to interact with device state besides that
-     * available from {@link #mServiceConfigAccessor}. It can be faked for testing.
-     */
-    @VisibleForTesting
-    public interface Environment {
-
-        /**
-         * Returns the device's currently configured time zone. May return an empty string.
-         */
-        @NonNull
-        String getDeviceTimeZone();
-
-        /**
-         * Returns the confidence of the device's current time zone.
-         */
-        @TimeZoneConfidence
-        int getDeviceTimeZoneConfidence();
-
-        /**
-         * Sets the device's time zone, associated confidence, and records a debug log entry.
-         */
-        void setDeviceTimeZoneAndConfidence(
-                @NonNull String zoneId, @TimeZoneConfidence int confidence,
-                @NonNull String logInfo);
-
-        /**
-         * Returns the time according to the elapsed realtime clock, the same as {@link
-         * android.os.SystemClock#elapsedRealtime()}.
-         */
-        @ElapsedRealtimeLong
-        long elapsedRealtimeMillis();
-
-        /**
-         * Adds a standalone entry to the time zone debug log.
-         */
-        void addDebugLogEntry(@NonNull String logMsg);
-
-        /**
-         * Dumps the time zone debug log to the supplied {@link PrintWriter}.
-         */
-        void dumpDebugLog(PrintWriter printWriter);
-
-        /**
-         * Requests that the supplied runnable be invoked asynchronously.
-         */
-        void runAsync(@NonNull Runnable runnable);
-    }
 
     private static final String LOG_TAG = TimeZoneDetectorService.TAG;
     private static final boolean DBG = TimeZoneDetectorService.DBG;
@@ -263,10 +212,10 @@ public final class TimeZoneDetectorStrategyImpl implements TimeZoneDetectorStrat
     public static TimeZoneDetectorStrategyImpl create(
             @NonNull Context context, @NonNull Handler handler,
             @NonNull ServiceConfigAccessor serviceConfigAccessor) {
-
         Environment environment = new EnvironmentImpl(handler);
         TimeZoneChangeListener changeEventTracker =
-                NotifyingTimeZoneChangeListener.create(handler, context, serviceConfigAccessor);
+                NotifyingTimeZoneChangeListener.create(handler, context, serviceConfigAccessor,
+                        environment);
         return new TimeZoneDetectorStrategyImpl(
                 serviceConfigAccessor, environment, changeEventTracker);
     }

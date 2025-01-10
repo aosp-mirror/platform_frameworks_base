@@ -85,9 +85,6 @@ public class NotifyingTimeZoneChangeListenerTest {
         return List.of(ORIGIN_LOCATION, ORIGIN_TELEPHONY);
     }
 
-    private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234;
-    /** A time zone used for initialization that does not occur elsewhere in tests. */
-    private static final String ARBITRARY_TIME_ZONE_ID = "Etc/UTC";
     private static final String INTERACT_ACROSS_USERS_FULL_PERMISSION =
             "android.permission.INTERACT_ACROSS_USERS_FULL";
 
@@ -99,6 +96,7 @@ public class NotifyingTimeZoneChangeListenerTest {
     private HandlerThread mHandlerThread;
     private TestHandler mHandler;
     private FakeServiceConfigAccessor mServiceConfigAccessor;
+    private FakeEnvironment mFakeEnvironment;
     private int mUid;
 
     private NotifyingTimeZoneChangeListener mTimeZoneChangeTracker;
@@ -106,6 +104,9 @@ public class NotifyingTimeZoneChangeListenerTest {
     @Before
     public void setUp() {
         mUid = Process.myUid();
+        mFakeEnvironment = new FakeEnvironment();
+        mFakeEnvironment.initializeClock(1735689600L, 1234L);
+
         // Create a thread + handler for processing the work that the service posts.
         mHandlerThread = new HandlerThread("TimeZoneDetectorInternalTest");
         mHandlerThread.start();
@@ -138,7 +139,7 @@ public class NotifyingTimeZoneChangeListenerTest {
         mNotificationManager = new FakeNotificationManager(mContext, InstantSource.system());
 
         mTimeZoneChangeTracker = new NotifyingTimeZoneChangeListener(mHandler, mContext,
-                mServiceConfigAccessor, mNotificationManager);
+                mServiceConfigAccessor, mNotificationManager, mFakeEnvironment);
     }
 
     @After
@@ -151,7 +152,7 @@ public class NotifyingTimeZoneChangeListenerTest {
     public void process_autoDetectionOff_noManualTracking_shouldTrackWithoutNotifying() {
         enableTimeZoneNotifications();
 
-        TimeZoneChangeRecord expectedChangeEvent = new TimeZoneChangeRecord(
+        TimeZoneChangeRecord expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                 /* id= */ 1,
                 new TimeZoneChangeEvent(
                         /* elapsedRealtimeMillis= */ 0,
@@ -162,13 +163,14 @@ public class NotifyingTimeZoneChangeListenerTest {
                         /* newZoneId= */ "Europe/London",
                         /* newConfidence= */ 1,
                         /* cause= */ "NO_REASON"));
-        expectedChangeEvent.setStatus(STATUS_UNTRACKED, SIGNAL_TYPE_NONE);
+        expectedTimeZoneChangeRecord.setStatus(STATUS_UNTRACKED, SIGNAL_TYPE_NONE);
 
         assertNull(mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
 
-        mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
+        mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
 
-        assertEquals(expectedChangeEvent, mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
+        assertEquals(expectedTimeZoneChangeRecord,
+                mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
         assertEquals(0, mNotificationManager.getNotifications().size());
         mHandler.assertTotalMessagesEnqueued(0);
     }
@@ -177,7 +179,7 @@ public class NotifyingTimeZoneChangeListenerTest {
     public void process_autoDetectionOff_shouldTrackWithoutNotifying() {
         enableNotificationsWithManualChangeTracking();
 
-        TimeZoneChangeRecord expectedChangeEvent = new TimeZoneChangeRecord(
+        TimeZoneChangeRecord expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                 /* id= */ 1,
                 new TimeZoneChangeEvent(
                         /* elapsedRealtimeMillis= */ 0,
@@ -188,13 +190,14 @@ public class NotifyingTimeZoneChangeListenerTest {
                         /* newZoneId= */ "Europe/London",
                         /* newConfidence= */ 1,
                         /* cause= */ "NO_REASON"));
-        expectedChangeEvent.setStatus(STATUS_UNTRACKED, SIGNAL_TYPE_NONE);
+        expectedTimeZoneChangeRecord.setStatus(STATUS_UNTRACKED, SIGNAL_TYPE_NONE);
 
         assertNull(mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
 
-        mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
+        mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
 
-        assertEquals(expectedChangeEvent, mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
+        assertEquals(expectedTimeZoneChangeRecord,
+                mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
         assertEquals(0, mNotificationManager.getNotifications().size());
         mHandler.assertTotalMessagesEnqueued(1);
     }
@@ -214,7 +217,7 @@ public class NotifyingTimeZoneChangeListenerTest {
 
         enableNotificationsWithManualChangeTracking();
 
-        TimeZoneChangeRecord expectedChangeEvent = new TimeZoneChangeRecord(
+        TimeZoneChangeRecord expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                 /* id= */ 1,
                 new TimeZoneChangeEvent(
                         /* elapsedRealtimeMillis= */ 0,
@@ -225,19 +228,20 @@ public class NotifyingTimeZoneChangeListenerTest {
                         /* newZoneId= */ "Europe/London",
                         /* newConfidence= */ 1,
                         /* cause= */ "NO_REASON"));
-        expectedChangeEvent.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
+        expectedTimeZoneChangeRecord.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
 
         assertNull(mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
 
         // lastTrackedChangeEvent == null
-        mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
-        TimeZoneChangeRecord trackedEvent1 = mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
+        mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
+        TimeZoneChangeRecord timeZoneChangeRecord1 =
+                mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
 
-        assertEquals(expectedChangeEvent, trackedEvent1);
+        assertEquals(expectedTimeZoneChangeRecord, timeZoneChangeRecord1);
         assertEquals(1, mNotificationManager.getNotifications().size());
         mHandler.assertTotalMessagesEnqueued(1);
 
-        expectedChangeEvent = new TimeZoneChangeRecord(
+        expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                 /* id= */ 2,
                 new TimeZoneChangeEvent(
                         /* elapsedRealtimeMillis= */ 1000L,
@@ -248,14 +252,15 @@ public class NotifyingTimeZoneChangeListenerTest {
                         /* newZoneId= */ "Europe/Paris",
                         /* newConfidence= */ 1,
                         /* cause= */ "NO_REASON"));
-        expectedChangeEvent.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
+        expectedTimeZoneChangeRecord.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
 
         // lastTrackedChangeEvent != null
-        mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
-        TimeZoneChangeRecord trackedEvent2 = mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
+        mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
+        TimeZoneChangeRecord timeZoneChangeRecord2 =
+                mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
 
-        assertEquals(STATUS_SUPERSEDED, trackedEvent1.getStatus());
-        assertEquals(expectedChangeEvent, trackedEvent2);
+        assertEquals(STATUS_SUPERSEDED, timeZoneChangeRecord1.getStatus());
+        assertEquals(expectedTimeZoneChangeRecord, timeZoneChangeRecord2);
         assertEquals(2, mNotificationManager.getNotifications().size());
         mHandler.assertTotalMessagesEnqueued(2);
 
@@ -263,7 +268,7 @@ public class NotifyingTimeZoneChangeListenerTest {
 
         // Test manual change within revert threshold
         {
-            expectedChangeEvent = new TimeZoneChangeRecord(
+            expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                     /* id= */ 3,
                     new TimeZoneChangeEvent(
                             /* elapsedRealtimeMillis= */ 999L + AUTO_REVERT_THRESHOLD,
@@ -275,16 +280,16 @@ public class NotifyingTimeZoneChangeListenerTest {
                             /* newZoneId= */ "Europe/London",
                             /* newConfidence= */ 1,
                             /* cause= */ "NO_REASON"));
-            expectedChangeEvent.setStatus(STATUS_UNTRACKED, SIGNAL_TYPE_NONE);
+            expectedTimeZoneChangeRecord.setStatus(STATUS_UNTRACKED, SIGNAL_TYPE_NONE);
 
-            mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
-            TimeZoneChangeRecord trackedEvent3 =
+            mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
+            TimeZoneChangeRecord timeZoneChangeRecord3 =
                     mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
 
             // The user manually changed the time zone within a short period of receiving the
             // notification, indicating that they rejected the automatic change of time zone
-            assertEquals(STATUS_REJECTED, trackedEvent2.getStatus());
-            assertEquals(expectedChangeEvent, trackedEvent3);
+            assertEquals(STATUS_REJECTED, timeZoneChangeRecord2.getStatus());
+            assertEquals(expectedTimeZoneChangeRecord, timeZoneChangeRecord3);
             assertEquals(2, mNotificationManager.getNotifications().size());
             mHandler.assertTotalMessagesEnqueued(3);
         }
@@ -293,12 +298,12 @@ public class NotifyingTimeZoneChangeListenerTest {
         {
             // [START] Reset previous event
             enableNotificationsWithManualChangeTracking();
-            mTimeZoneChangeTracker.process(trackedEvent2.getEvent());
-            trackedEvent2 = mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
+            mTimeZoneChangeTracker.process(timeZoneChangeRecord2.getEvent());
+            timeZoneChangeRecord2 = mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
             disableTimeZoneAutoDetection();
             // [END] Reset previous event
 
-            expectedChangeEvent = new TimeZoneChangeRecord(
+            expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                     /* id= */ 5,
                     new TimeZoneChangeEvent(
                             /* elapsedRealtimeMillis= */ 1001L + AUTO_REVERT_THRESHOLD,
@@ -310,15 +315,15 @@ public class NotifyingTimeZoneChangeListenerTest {
                             /* newZoneId= */ "Europe/London",
                             /* newConfidence= */ 1,
                             /* cause= */ "NO_REASON"));
-            expectedChangeEvent.setStatus(STATUS_UNTRACKED, SIGNAL_TYPE_NONE);
+            expectedTimeZoneChangeRecord.setStatus(STATUS_UNTRACKED, SIGNAL_TYPE_NONE);
 
-            mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
-            TimeZoneChangeRecord trackedEvent3 =
+            mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
+            TimeZoneChangeRecord timeZoneChangeRecord3 =
                     mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
 
             // The user manually changed the time zone outside of the period we consider as a revert
-            assertEquals(STATUS_SUPERSEDED, trackedEvent2.getStatus());
-            assertEquals(expectedChangeEvent, trackedEvent3);
+            assertEquals(STATUS_SUPERSEDED, timeZoneChangeRecord2.getStatus());
+            assertEquals(expectedTimeZoneChangeRecord, timeZoneChangeRecord3);
             assertEquals(3, mNotificationManager.getNotifications().size());
             mHandler.assertTotalMessagesEnqueued(5);
         }
@@ -339,7 +344,7 @@ public class NotifyingTimeZoneChangeListenerTest {
 
         enableNotificationsWithManualChangeTracking();
 
-        TimeZoneChangeRecord expectedChangeEvent = new TimeZoneChangeRecord(
+        TimeZoneChangeRecord expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                 /* id= */ 1,
                 new TimeZoneChangeEvent(
                         /* elapsedRealtimeMillis= */ 0,
@@ -350,19 +355,20 @@ public class NotifyingTimeZoneChangeListenerTest {
                         /* newZoneId= */ "Europe/London",
                         /* newConfidence= */ 1,
                         /* cause= */ "NO_REASON"));
-        expectedChangeEvent.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
+        expectedTimeZoneChangeRecord.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
 
         assertNull(mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
 
         // lastTrackedChangeEvent == null
-        mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
-        TimeZoneChangeRecord trackedEvent1 = mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
+        mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
+        TimeZoneChangeRecord timeZoneChangeRecord1 =
+                mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
 
-        assertEquals(expectedChangeEvent, trackedEvent1);
+        assertEquals(expectedTimeZoneChangeRecord, timeZoneChangeRecord1);
         assertEquals(1, mNotificationManager.getNotifications().size());
         mHandler.assertTotalMessagesEnqueued(1);
 
-        expectedChangeEvent = new TimeZoneChangeRecord(
+        expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                 /* id= */ 3,
                 new TimeZoneChangeEvent(
                         /* elapsedRealtimeMillis= */ 1000L,
@@ -373,14 +379,15 @@ public class NotifyingTimeZoneChangeListenerTest {
                         /* newZoneId= */ "Europe/Paris",
                         /* newConfidence= */ 1,
                         /* cause= */ "NO_REASON"));
-        expectedChangeEvent.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
+        expectedTimeZoneChangeRecord.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
 
         // lastTrackedChangeEvent != null
-        mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
-        TimeZoneChangeRecord trackedEvent2 = mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
+        mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
+        TimeZoneChangeRecord timeZoneChangeRecord2 =
+                mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
 
-        assertEquals(STATUS_SUPERSEDED, trackedEvent1.getStatus());
-        assertEquals(expectedChangeEvent, trackedEvent2);
+        assertEquals(STATUS_SUPERSEDED, timeZoneChangeRecord1.getStatus());
+        assertEquals(expectedTimeZoneChangeRecord, timeZoneChangeRecord2);
         assertEquals(2, mNotificationManager.getNotifications().size());
         mHandler.assertTotalMessagesEnqueued(2);
     }
@@ -400,7 +407,7 @@ public class NotifyingTimeZoneChangeListenerTest {
 
         enableNotificationsWithManualChangeTracking();
 
-        TimeZoneChangeRecord expectedChangeEvent = new TimeZoneChangeRecord(
+        TimeZoneChangeRecord expectedTimeZoneChangeRecord = new TimeZoneChangeRecord(
                 /* id= */ 1,
                 new TimeZoneChangeEvent(
                         /* elapsedRealtimeMillis= */ 0,
@@ -411,15 +418,16 @@ public class NotifyingTimeZoneChangeListenerTest {
                         /* newZoneId= */ "Europe/Rome",
                         /* newConfidence= */ 1,
                         /* cause= */ "NO_REASON"));
-        expectedChangeEvent.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
+        expectedTimeZoneChangeRecord.setStatus(STATUS_UNKNOWN, SIGNAL_TYPE_UNKNOWN);
 
         assertNull(mTimeZoneChangeTracker.getLastTimeZoneChangeRecord());
 
         // lastTrackedChangeEvent == null
-        mTimeZoneChangeTracker.process(expectedChangeEvent.getEvent());
-        TimeZoneChangeRecord trackedEvent1 = mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
+        mTimeZoneChangeTracker.process(expectedTimeZoneChangeRecord.getEvent());
+        TimeZoneChangeRecord timeZoneChangeRecord1 =
+                mTimeZoneChangeTracker.getLastTimeZoneChangeRecord();
 
-        assertEquals(expectedChangeEvent, trackedEvent1);
+        assertEquals(expectedTimeZoneChangeRecord, timeZoneChangeRecord1);
         // No notification sent for the same UTC offset
         assertEquals(0, mNotificationManager.getNotifications().size());
         mHandler.assertTotalMessagesEnqueued(1);
