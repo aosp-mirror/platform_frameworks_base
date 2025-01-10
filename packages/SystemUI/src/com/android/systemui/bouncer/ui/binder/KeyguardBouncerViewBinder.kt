@@ -170,6 +170,8 @@ object KeyguardBouncerViewBinder {
 
                     launch {
                         viewModel.startDisappearAnimation.collect {
+                            android.util.Log.i("KeyguardBouncerViewBinder",
+                                    "viewModel.startDisappearAnimation: $it")
                             securityContainerController.startDisappearAnimation(it)
                         }
                     }
