@@ -480,18 +480,6 @@ class WindowStateAnimator {
                 if (mLastHidden) {
                     showRobustly(t);
                     mLastHidden = false;
-                    final DisplayContent displayContent = w.getDisplayContent();
-                    if (!displayContent.getLastHasContent()) {
-                        // This draw means the difference between unique content and mirroring.
-                        // Run another pass through performLayout to set mHasContent in the
-                        // LogicalDisplay.
-                        displayContent.pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
-                        if (DEBUG_LAYOUT_REPEATS) {
-                            mService.mWindowPlacerLocked.debugLayoutRepeats(
-                                    "showSurfaceRobustlyLocked " + w,
-                                    displayContent.pendingLayoutChanges);
-                        }
-                    }
                 }
             }
         }
