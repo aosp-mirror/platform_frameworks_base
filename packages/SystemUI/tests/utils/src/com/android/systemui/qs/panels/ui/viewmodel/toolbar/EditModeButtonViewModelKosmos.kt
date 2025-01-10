@@ -18,13 +18,18 @@ package com.android.systemui.qs.panels.ui.viewmodel.toolbar
 
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.plugins.activityStarter
 import com.android.systemui.qs.panels.ui.viewmodel.editModeViewModel
 
 val Kosmos.editModeButtonViewModelFactory by
     Kosmos.Fixture {
         object : EditModeButtonViewModel.Factory {
             override fun create(): EditModeButtonViewModel {
-                return EditModeButtonViewModel(editModeViewModel, falsingInteractor)
+                return EditModeButtonViewModel(
+                    editModeViewModel,
+                    falsingInteractor,
+                    activityStarter,
+                )
             }
         }
     }

@@ -17,6 +17,7 @@
 package com.android.systemui.qs.panels.ui.viewmodel.toolbar
 
 import com.android.systemui.classifier.domain.interactor.FalsingInteractor
+import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.FalsingManager
 import com.android.systemui.qs.panels.ui.viewmodel.EditModeViewModel
 import dagger.assisted.AssistedFactory
@@ -27,11 +28,12 @@ class EditModeButtonViewModel
 constructor(
     private val editModeViewModel: EditModeViewModel,
     private val falsingInteractor: FalsingInteractor,
+    private val activityStarter: ActivityStarter,
 ) {
 
     fun onButtonClick() {
         if (!falsingInteractor.isFalseTap(FalsingManager.LOW_PENALTY)) {
-            editModeViewModel.startEditing()
+            activityStarter.postQSRunnableDismissingKeyguard { editModeViewModel.startEditing() }
         }
     }
 
