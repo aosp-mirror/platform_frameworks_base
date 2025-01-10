@@ -17,10 +17,14 @@
 package com.android.systemui.util.kotlin
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 
 class Utils {
     companion object {
@@ -32,6 +36,7 @@ class Utils {
 
         fun <A, B, C, D> toQuad(a: A, bcd: Triple<B, C, D>) =
             Quad(a, bcd.first, bcd.second, bcd.third)
+
         fun <A, B, C, D> toQuad(abc: Triple<A, B, C>, d: D) =
             Quad(abc.first, abc.second, abc.third, d)
 
@@ -51,7 +56,7 @@ class Utils {
                 bcdefg.third,
                 bcdefg.fourth,
                 bcdefg.fifth,
-                bcdefg.sixth
+                bcdefg.sixth,
             )
 
         /**
@@ -81,7 +86,7 @@ class Utils {
         fun <A, B, C, D> Flow<A>.sample(
             b: Flow<B>,
             c: Flow<C>,
-            d: Flow<D>
+            d: Flow<D>,
         ): Flow<Quad<A, B, C, D>> {
             return this.sample(combine(b, c, d, ::Triple), ::toQuad)
         }
@@ -134,6 +139,20 @@ class Utils {
         ): Flow<Septuple<A, B, C, D, E, F, G>> {
             return this.sample(combine(b, c, d, e, f, g, ::Sextuple), ::toSeptuple)
         }
+
+        /**
+         * Combines 2 state flows, applying [transform] between the initial values to set the
+         * initial value of the resulting StateFlow.
+         */
+        fun <A, B, R> combineState(
+            f1: StateFlow<A>,
+            f2: StateFlow<B>,
+            scope: CoroutineScope,
+            sharingStarted: SharingStarted,
+            transform: (A, B) -> R,
+        ): StateFlow<R> =
+            combine(f1, f2) { a, b -> transform(a, b) }
+                .stateIn(scope, sharingStarted, transform(f1.value, f2.value))
     }
 }
 
@@ -144,7 +163,7 @@ data class Quint<A, B, C, D, E>(
     val second: B,
     val third: C,
     val fourth: D,
-    val fifth: E
+    val fifth: E,
 )
 
 data class Sextuple<A, B, C, D, E, F>(

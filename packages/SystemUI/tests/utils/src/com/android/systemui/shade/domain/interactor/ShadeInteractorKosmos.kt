@@ -21,6 +21,7 @@ import com.android.systemui.keyguard.data.repository.keyguardRepository
 import com.android.systemui.keyguard.domain.interactor.keyguardTransitionInteractor
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
+import com.android.systemui.kosmos.testScope
 import com.android.systemui.power.domain.interactor.powerInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.ShadeModule
@@ -30,6 +31,7 @@ import com.android.systemui.statusbar.phone.dozeParameters
 import com.android.systemui.statusbar.policy.data.repository.userSetupRepository
 import com.android.systemui.statusbar.policy.domain.interactor.deviceProvisioningInteractor
 import com.android.systemui.user.domain.interactor.userSwitcherInteractor
+import org.mockito.kotlin.mock
 
 var Kosmos.baseShadeInteractor: BaseShadeInteractor by
     Kosmos.Fixture {
@@ -71,3 +73,7 @@ val Kosmos.shadeInteractorImpl by
             shadeModeInteractor = shadeModeInteractor,
         )
     }
+var Kosmos.mockShadeInteractor: ShadeInteractor by Kosmos.Fixture { mock() }
+val Kosmos.shadeExpandedStateInteractor by
+    Kosmos.Fixture { ShadeExpandedStateInteractorImpl(shadeInteractor, testScope.backgroundScope) }
+val Kosmos.fakeShadeExpandedStateInteractor by Kosmos.Fixture { FakeShadeExpandedStateInteractor() }

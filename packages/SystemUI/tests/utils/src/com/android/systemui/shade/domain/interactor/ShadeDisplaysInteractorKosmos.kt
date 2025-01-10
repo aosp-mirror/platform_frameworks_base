@@ -23,11 +23,21 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.ShadeDisplayChangeLatencyTracker
 import com.android.systemui.shade.ShadeWindowLayoutParams
 import com.android.systemui.shade.data.repository.fakeShadeDisplaysRepository
+import java.util.Optional
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 val Kosmos.shadeLayoutParams by Kosmos.Fixture { ShadeWindowLayoutParams.create(mockedContext) }
 
-val Kosmos.mockedWindowContext by Kosmos.Fixture { mock<WindowContext>() }
+val Kosmos.mockedWindowContext by
+    Kosmos.Fixture {
+        mock<WindowContext>().apply {
+            whenever(reparentToDisplay(any())).thenAnswer { displayIdParam ->
+                whenever(displayId).thenReturn(displayIdParam.arguments[0] as Int)
+            }
+        }
+    }
 val Kosmos.mockedShadeDisplayChangeLatencyTracker by
     Kosmos.Fixture { mock<ShadeDisplayChangeLatencyTracker>() }
 val Kosmos.shadeDisplaysInteractor by
@@ -38,5 +48,6 @@ val Kosmos.shadeDisplaysInteractor by
             testScope.backgroundScope,
             testScope.backgroundScope.coroutineContext,
             mockedShadeDisplayChangeLatencyTracker,
+            Optional.of(shadeExpandedStateInteractor),
         )
     }
