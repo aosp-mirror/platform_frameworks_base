@@ -103,6 +103,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
     private final RecentTasksImpl mImpl = new RecentTasksImpl();
     private final ActivityTaskManager mActivityTaskManager;
     private final TaskStackTransitionObserver mTaskStackTransitionObserver;
+    private final RecentsShellCommandHandler mRecentsShellCommandHandler;
     private RecentsTransitionHandler mTransitionHandler = null;
     private IRecentTasksListener mListener;
     private final boolean mPcFeatureEnabled;
@@ -167,6 +168,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mDesktopUserRepositories = desktopUserRepositories;
         mTaskStackTransitionObserver = taskStackTransitionObserver;
         mMainExecutor = mainExecutor;
+        mRecentsShellCommandHandler = new RecentsShellCommandHandler(this);
         shellInit.addInitCallback(this::onInit, this);
     }
 
@@ -183,6 +185,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
         mShellController.addExternalInterface(IRecentTasks.DESCRIPTOR,
                 this::createExternalInterface, this);
         mShellCommandHandler.addDumpCallback(this::dump, this);
+        mShellCommandHandler.addCommandCallback("recents", mRecentsShellCommandHandler, this);
         mUserId = ActivityManager.getCurrentUser();
         mDesktopUserRepositories.ifPresent(
                 desktopUserRepositories ->
@@ -654,6 +657,11 @@ public class RecentTasksController implements TaskStackListenerCallback,
      */
     public boolean removeBackgroundTask(int taskId) {
         return mActivityTaskManager.removeTask(taskId);
+    }
+
+    /** Removes all recent tasks that are visible. */
+    public void removeAllVisibleRecentTasks() throws RemoteException {
+        ActivityTaskManager.getService().removeAllVisibleRecentTasks();
     }
 
     public void dump(@NonNull PrintWriter pw, String prefix) {
