@@ -16,6 +16,7 @@
 package com.android.wm.shell.common
 
 import android.app.PendingIntent
+import android.app.TaskInfo
 import android.content.ComponentName
 import android.content.Intent
 import com.android.wm.shell.ShellTaskOrganizer
@@ -34,7 +35,11 @@ object ComponentUtils {
     /** Retrieves the package name from a [taskId].  */
     @JvmStatic
     fun getPackageName(taskId: Int, taskOrganizer: ShellTaskOrganizer): String? {
-        val taskInfo = taskOrganizer.getRunningTaskInfo(taskId)
-        return getPackageName(taskInfo?.baseIntent)
+        val taskInfo = taskOrganizer.getRunningTaskInfo(taskId) ?: return null
+        return getPackageName(taskInfo)
     }
+
+    /** Retrieves the package name from a [TaskInfo]. */
+    @JvmStatic
+    fun getPackageName(taskInfo: TaskInfo): String? = getPackageName(taskInfo.baseIntent)
 }
