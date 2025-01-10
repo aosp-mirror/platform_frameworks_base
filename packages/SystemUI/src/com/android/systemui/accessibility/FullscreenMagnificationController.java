@@ -22,6 +22,8 @@ import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
+import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.UiContext;
 import android.content.ComponentCallbacks;
 import android.content.Context;
@@ -44,7 +46,8 @@ import android.view.SurfaceControlViewHost;
 import android.view.View;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
-import android.view.animation.AccelerateDecelerateInterpolator;
+import android.view.animation.AccelerateInterpolator;
+import android.view.animation.DecelerateInterpolator;
 import android.view.animation.Interpolator;
 
 import androidx.annotation.NonNull;
@@ -57,12 +60,16 @@ import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.res.R;
 import com.android.systemui.util.leak.RotationUtils;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.concurrent.Executor;
 import java.util.function.Supplier;
 
 public class FullscreenMagnificationController implements ComponentCallbacks {
 
-    private static final String TAG = "FullscreenMagnificationController";
+    private static final String TAG = "FullscreenMagController";
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+
     private final Context mContext;
     private final AccessibilityManager mAccessibilityManager;
     private final WindowManager mWindowManager;
@@ -77,12 +84,14 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
     private int mBorderStoke;
     private final int mDisplayId;
     private static final Region sEmptyRegion = new Region();
-    private ValueAnimator mShowHideBorderAnimator;
+    @VisibleForTesting
+    @Nullable
+    ValueAnimator mShowHideBorderAnimator;
     private Handler mHandler;
     private Executor mExecutor;
-    private boolean mFullscreenMagnificationActivated = false;
     private final Configuration mConfiguration;
-    private final Runnable mShowBorderRunnable = this::showBorderWithNullCheck;
+    private final Runnable mHideBorderImmediatelyRunnable = this::hideBorderImmediately;
+    private final Runnable mShowBorderRunnable = this::showBorder;
     private int mRotation;
     private final IRotationWatcher mRotationWatcher = new IRotationWatcher.Stub() {
         @Override
@@ -95,6 +104,21 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
     private final DisplayManager.DisplayListener mDisplayListener;
     private String mCurrentDisplayUniqueId;
 
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({
+            DISABLED,
+            DISABLING,
+            ENABLING,
+            ENABLED
+    })
+    @interface FullscreenMagnificationActivationState {}
+    private static final int DISABLED = 0;
+    private static final int DISABLING  = 1;
+    private static final int ENABLING = 2;
+    private static final int ENABLED = 3;
+    @FullscreenMagnificationActivationState
+    private int mActivationState = DISABLED;
+
     public FullscreenMagnificationController(
             @UiContext Context context,
             @Main Handler handler,
@@ -106,7 +130,7 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
             Supplier<SurfaceControlViewHost> scvhSupplier) {
         this(context, handler, executor, displayManager, accessibilityManager,
                 windowManager, iWindowManager, scvhSupplier,
-                new SurfaceControl.Transaction(), null);
+                new SurfaceControl.Transaction());
     }
 
     @VisibleForTesting
@@ -119,8 +143,7 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
             WindowManager windowManager,
             IWindowManager iWindowManager,
             Supplier<SurfaceControlViewHost> scvhSupplier,
-            SurfaceControl.Transaction transaction,
-            ValueAnimator valueAnimator) {
+            SurfaceControl.Transaction transaction) {
         mContext = context;
         mHandler = handler;
         mExecutor = executor;
@@ -135,18 +158,6 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
         mConfiguration = new Configuration(context.getResources().getConfiguration());
         mLongAnimationTimeMs = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_longAnimTime);
-        mShowHideBorderAnimator = (valueAnimator == null)
-                ? createNullTargetObjectAnimator() : valueAnimator;
-        mShowHideBorderAnimator.addListener(new AnimatorListenerAdapter() {
-            @Override
-            public void onAnimationEnd(@NonNull Animator animation, boolean isReverse) {
-                if (isReverse) {
-                    // The animation was played in reverse, which means we are hiding the border.
-                    // We would like to perform clean up after the border is fully hidden.
-                    cleanUpBorder();
-                }
-            }
-        });
         mCurrentDisplayUniqueId = mContext.getDisplayNoVerify().getUniqueId();
         mDisplayManager = displayManager;
         mDisplayListener = new DisplayManager.DisplayListener() {
@@ -167,20 +178,51 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
                     // Same unique ID means the physical display doesn't change. Early return.
                     return;
                 }
-
                 mCurrentDisplayUniqueId = uniqueId;
-                applyCornerRadiusToBorder();
+                mHandler.post(FullscreenMagnificationController.this::applyCornerRadiusToBorder);
             }
         };
     }
 
-    private ValueAnimator createNullTargetObjectAnimator() {
+    @VisibleForTesting
+    @UiThread
+    ValueAnimator createShowTargetAnimator(@NonNull View target) {
+        if (mShowHideBorderAnimator != null) {
+            mShowHideBorderAnimator.cancel();
+        }
+
         final ValueAnimator valueAnimator =
-                ObjectAnimator.ofFloat(/* target= */ null, View.ALPHA, 0f, 1f);
-        Interpolator interpolator = new AccelerateDecelerateInterpolator();
+                ObjectAnimator.ofFloat(target, View.ALPHA, 0f, 1f);
+        Interpolator interpolator = new AccelerateInterpolator();
 
         valueAnimator.setInterpolator(interpolator);
         valueAnimator.setDuration(mLongAnimationTimeMs);
+        valueAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation) {
+                mHandler.post(() -> setState(ENABLED));
+            }});
+        return valueAnimator;
+    }
+
+    @VisibleForTesting
+    @UiThread
+    ValueAnimator createHideTargetAnimator(@NonNull View target) {
+        if (mShowHideBorderAnimator != null) {
+            mShowHideBorderAnimator.cancel();
+        }
+
+        final ValueAnimator valueAnimator =
+                ObjectAnimator.ofFloat(target, View.ALPHA, 1f, 0f);
+        Interpolator interpolator = new DecelerateInterpolator();
+
+        valueAnimator.setInterpolator(interpolator);
+        valueAnimator.setDuration(mLongAnimationTimeMs);
+        valueAnimator.addListener(new AnimatorListenerAdapter() {
+            @Override
+            public void onAnimationEnd(@NonNull Animator animation) {
+                mHandler.post(() -> cleanUpBorder());
+            }});
         return valueAnimator;
     }
 
@@ -190,14 +232,10 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
      */
     @UiThread
     public void onFullscreenMagnificationActivationChanged(boolean activated) {
-        final boolean changed = (mFullscreenMagnificationActivated != activated);
-        if (changed) {
-            mFullscreenMagnificationActivated = activated;
-            if (activated) {
-                createFullscreenMagnificationBorder();
-            } else {
-                removeFullscreenMagnificationBorder();
-            }
+        if (activated) {
+            createFullscreenMagnificationBorder();
+        } else {
+            removeFullscreenMagnificationBorder();
         }
     }
 
@@ -207,16 +245,21 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
      */
     @UiThread
     private void removeFullscreenMagnificationBorder() {
-        if (mHandler.hasCallbacks(mShowBorderRunnable)) {
-            mHandler.removeCallbacks(mShowBorderRunnable);
+        int state = getState();
+        if (state == DISABLING || state == DISABLED) {
+            // If there is an ongoing disable process or it is already disabled, return
+            return;
         }
-        mContext.unregisterComponentCallbacks(this);
-
-
-        mShowHideBorderAnimator.reverse();
+        setState(DISABLING);
+        mShowHideBorderAnimator = createHideTargetAnimator(mFullscreenBorder);
+        mShowHideBorderAnimator.start();
     }
 
-    private void cleanUpBorder() {
+    @VisibleForTesting
+    @UiThread
+    void cleanUpBorder() {
+        mContext.unregisterComponentCallbacks(this);
+
         if (Flags.updateCornerRadiusOnDisplayChanged()) {
             mDisplayManager.unregisterDisplayListener(mDisplayListener);
         }
@@ -227,6 +270,12 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
         }
 
         if (mFullscreenBorder != null) {
+            if (mHandler.hasCallbacks(mHideBorderImmediatelyRunnable)) {
+                mHandler.removeCallbacks(mHideBorderImmediatelyRunnable);
+            }
+            if (mHandler.hasCallbacks(mShowBorderRunnable)) {
+                mHandler.removeCallbacks(mShowBorderRunnable);
+            }
             mFullscreenBorder = null;
             try {
                 mIWindowManager.removeRotationWatcher(mRotationWatcher);
@@ -234,6 +283,7 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
                 Log.w(TAG, "Failed to remove rotation watcher", e);
             }
         }
+        setState(DISABLED);
     }
 
     /**
@@ -242,44 +292,47 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
      */
     @UiThread
     private void createFullscreenMagnificationBorder() {
+        int state = getState();
+        if (state == ENABLING || state == ENABLED) {
+            // If there is an ongoing enable process or it is already enabled, return
+            return;
+        }
+        if (mShowHideBorderAnimator != null) {
+            mShowHideBorderAnimator.cancel();
+        }
+        setState(ENABLING);
+
         onConfigurationChanged(mContext.getResources().getConfiguration());
         mContext.registerComponentCallbacks(this);
 
         if (mSurfaceControlViewHost == null) {
-            // Create the view only if it does not exist yet. If we are trying to enable fullscreen
-            // magnification before it was fully disabled, we use the previous view instead of
-            // creating a new one.
+            // Create the view only if it does not exist yet. If we are trying to enable
+            // fullscreen magnification before it was fully disabled, we use the previous view
+            // instead of creating a new one.
             mFullscreenBorder = LayoutInflater.from(mContext)
                     .inflate(R.layout.fullscreen_magnification_border, null);
-            // Set the initial border view alpha manually so we won't show the border accidentally
-            // after we apply show() to the SurfaceControl and before the animation starts to run.
+            // Set the initial border view alpha manually so we won't show the border
+            // accidentally after we apply show() to the SurfaceControl and before the
+            // animation starts to run.
             mFullscreenBorder.setAlpha(0f);
-            mShowHideBorderAnimator.setTarget(mFullscreenBorder);
             mSurfaceControlViewHost = mScvhSupplier.get();
             mSurfaceControlViewHost.setView(mFullscreenBorder, getBorderLayoutParams());
-            mBorderSurfaceControl = mSurfaceControlViewHost.getSurfacePackage().getSurfaceControl();
+            mBorderSurfaceControl =
+                    mSurfaceControlViewHost.getSurfacePackage().getSurfaceControl();
             try {
                 mIWindowManager.watchRotation(mRotationWatcher, Display.DEFAULT_DISPLAY);
             } catch (Exception e) {
                 Log.w(TAG, "Failed to register rotation watcher", e);
             }
             if (Flags.updateCornerRadiusOnDisplayChanged()) {
-                mHandler.post(this::applyCornerRadiusToBorder);
+                applyCornerRadiusToBorder();
             }
         }
 
         mTransaction
                 .addTransactionCommittedListener(
                         mExecutor,
-                        () -> {
-                            if (mShowHideBorderAnimator.isRunning()) {
-                                // Since the method is only called when there is an activation
-                                // status change, the running animator is hiding the border.
-                                mShowHideBorderAnimator.reverse();
-                            } else {
-                                mShowHideBorderAnimator.start();
-                            }
-                        })
+                        this::showBorder)
                 .setPosition(mBorderSurfaceControl, -mBorderOffset, -mBorderOffset)
                 .setLayer(mBorderSurfaceControl, Integer.MAX_VALUE)
                 .show(mBorderSurfaceControl)
@@ -380,19 +433,25 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
             mHandler.removeCallbacks(mShowBorderRunnable);
         }
 
-        // We hide the border immediately as early as possible to beat the redrawing of window
-        // in response to the orientation change so users won't see a weird shape border.
-        mHandler.postAtFrontOfQueue(() -> {
-            mFullscreenBorder.setAlpha(0f);
-        });
-
+        // We hide the border immediately as early as possible to beat the redrawing of
+        // window in response to the orientation change so users won't see a weird shape
+        // border.
+        mHandler.postAtFrontOfQueue(mHideBorderImmediatelyRunnable);
         mHandler.postDelayed(mShowBorderRunnable, mLongAnimationTimeMs);
     }
 
-    private void showBorderWithNullCheck() {
+    @UiThread
+    private void hideBorderImmediately() {
         if (mShowHideBorderAnimator != null) {
-            mShowHideBorderAnimator.start();
+            mShowHideBorderAnimator.cancel();
         }
+        mFullscreenBorder.setAlpha(0f);
+    }
+
+    @UiThread
+    private void showBorder() {
+        mShowHideBorderAnimator = createShowTargetAnimator(mFullscreenBorder);
+        mShowHideBorderAnimator.start();
     }
 
     private void updateDimensions() {
@@ -404,7 +463,9 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
                 R.dimen.magnifier_border_width_fullscreen_with_offset);
     }
 
-    private void applyCornerRadiusToBorder() {
+    @UiThread
+    @VisibleForTesting
+    void applyCornerRadiusToBorder() {
         if (!isActivated()) {
             return;
         }
@@ -420,6 +481,20 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
                 mContext.getResources().getColor(
                         R.color.magnification_border_color, mContext.getTheme()));
         backgroundDrawable.setCornerRadius(cornerRadius);
+    }
+
+    @UiThread
+    private void setState(@FullscreenMagnificationActivationState int state) {
+        if (DEBUG) {
+            Log.d(TAG, "setState from " + mActivationState + " to " + state);
+        }
+        mActivationState = state;
+    }
+
+    @VisibleForTesting
+    @UiThread
+    int getState() {
+        return mActivationState;
     }
 
     @Override
