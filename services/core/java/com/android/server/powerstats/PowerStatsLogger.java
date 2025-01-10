@@ -285,14 +285,20 @@ public final class PowerStatsLogger extends Handler {
     }
 
     private void updateCacheFile(String cacheFilename, byte[] data) {
+        AtomicFile atomicCachedFile = null;
+        FileOutputStream fos = null;
         try {
-            final AtomicFile atomicCachedFile =
+            atomicCachedFile =
                     new AtomicFile(new File(mDataStoragePath, cacheFilename));
-            final FileOutputStream fos = atomicCachedFile.startWrite();
+            fos = atomicCachedFile.startWrite();
             fos.write(data);
             atomicCachedFile.finishWrite(fos);
         } catch (IOException e) {
             Slog.e(TAG, "Failed to write current data to cached file", e);
+            if (fos != null) {
+                atomicCachedFile.failWrite(fos);
+            }
+            return;
         }
     }
 

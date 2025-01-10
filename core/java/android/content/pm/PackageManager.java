@@ -4614,6 +4614,7 @@ public abstract class PackageManager {
      * the Android Keystore backed by an isolated execution environment. The version indicates
      * which features are implemented in the isolated execution environment:
      * <ul>
+     * <li>400: Inclusion of module information (via tag MODULE_HASH) in the attestation record.
      * <li>300: Ability to include a second IMEI in the ID attestation record, see
      * {@link android.app.admin.DevicePolicyManager#ID_TYPE_IMEI}.
      * <li>200: Hardware support for Curve 25519 (including both Ed25519 signature generation and
@@ -4647,6 +4648,7 @@ public abstract class PackageManager {
      * StrongBox</a>. If this feature has a version, the version number indicates which features are
      * implemented in StrongBox:
      * <ul>
+     * <li>400: Inclusion of module information (via tag MODULE_HASH) in the attestation record.
      * <li>300: Ability to include a second IMEI in the ID attestation record, see
      * {@link android.app.admin.DevicePolicyManager#ID_TYPE_IMEI}.
      * <li>200: No new features for StrongBox (the Android Keystore environment backed by an

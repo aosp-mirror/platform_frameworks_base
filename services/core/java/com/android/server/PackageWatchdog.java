@@ -1228,8 +1228,6 @@ public class PackageWatchdog {
                 Slog.w(TAG, "Failed to save monitored packages, restoring backup", e);
                 mPolicyFile.failWrite(stream);
                 return false;
-            } finally {
-                IoUtils.closeQuietly(stream);
             }
         }
     }

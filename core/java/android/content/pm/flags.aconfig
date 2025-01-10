@@ -152,7 +152,7 @@ flag {
     name: "cache_sdk_system_features"
     namespace: "system_performance"
     description: "Feature flag to enable optimized cache for SDK-defined system feature lookups."
-    bug: "375000483"
+    bug: "326623529"
 }
 
 flag {

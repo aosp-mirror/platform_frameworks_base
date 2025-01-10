@@ -24,6 +24,7 @@ cc_library_shared {
         ":lib_freezer_native",
         ":lib_oomConnection_native",
         ":lib_lazilyRegisteredServices_native",
+        ":lib_phantomProcessList_native",
         "onload.cpp",
     ],
 

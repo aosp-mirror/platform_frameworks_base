@@ -42,6 +42,16 @@ flag {
 }
 
 flag {
+    name: "secure_array_zeroization"
+    namespace: "platform_security"
+    description: "Enable secure array zeroization"
+    bug: "320392352"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "deprecate_fsv_sig"
     namespace: "hardware_backed_security"
     description: "Feature flag for deprecating .fsv_sig"
