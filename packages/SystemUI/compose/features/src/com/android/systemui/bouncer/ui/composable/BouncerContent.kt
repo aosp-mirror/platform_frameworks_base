@@ -168,7 +168,7 @@ private fun StandardLayout(viewModel: BouncerSceneContentViewModel, modifier: Mo
         LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Expanded
 
     FoldAware(
-        modifier = modifier.padding(start = 32.dp, top = 92.dp, end = 32.dp, bottom = 48.dp),
+        modifier = modifier.padding(top = 92.dp, bottom = 48.dp),
         viewModel = viewModel,
         aboveFold = {
             Column(
