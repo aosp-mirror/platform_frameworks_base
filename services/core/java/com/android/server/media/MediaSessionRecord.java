@@ -264,15 +264,6 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
      */
     private static final int USER_DISENGAGED = 2;
 
-    /**
-     * Indicates the duration of the temporary engaged state, in milliseconds.
-     *
-     * <p>When switching to an {@linkplain PlaybackState#isActive() inactive state}, the user is
-     * treated as temporarily engaged, meaning the corresponding session is only considered in an
-     * engaged state for the duration of this timeout, and only if coming from an engaged state.
-     */
-    private static final int TEMP_USER_ENGAGED_TIMEOUT_MS = 600000;
-
     public MediaSessionRecord(
             int ownerPid,
             int ownerUid,
@@ -605,7 +596,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
                             if (mUserEngagementState == USER_TEMPORARILY_ENGAGED) {
                                 mHandler.postDelayed(
                                         mUserEngagementTimeoutExpirationRunnable,
-                                        TEMP_USER_ENGAGED_TIMEOUT_MS);
+                                        MediaSessionDeviceConfig
+                                                .getMediaSessionTempUserEngagedDurationMs());
                             }
                         }
                     }
@@ -1079,7 +1071,8 @@ public class MediaSessionRecord extends MediaSessionRecordImpl implements IBinde
         mUserEngagementState = newUserEngagedState;
         if (newUserEngagedState == USER_TEMPORARILY_ENGAGED && !isGlobalPrioritySessionActive) {
             mHandler.postDelayed(
-                    mUserEngagementTimeoutExpirationRunnable, TEMP_USER_ENGAGED_TIMEOUT_MS);
+                    mUserEngagementTimeoutExpirationRunnable,
+                    MediaSessionDeviceConfig.getMediaSessionTempUserEngagedDurationMs());
         } else {
             mHandler.removeCallbacks(mUserEngagementTimeoutExpirationRunnable);
         }
