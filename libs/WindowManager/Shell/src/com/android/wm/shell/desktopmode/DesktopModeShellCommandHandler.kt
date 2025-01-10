@@ -24,8 +24,8 @@ import java.io.PrintWriter
 class DesktopModeShellCommandHandler(private val controller: DesktopTasksController) :
     ShellCommandHandler.ShellCommandActionHandler {
 
-    override fun onShellCommand(args: Array<String>, pw: PrintWriter): Boolean {
-        return when (args[0]) {
+    override fun onShellCommand(args: Array<String>, pw: PrintWriter): Boolean =
+        when (args[0]) {
             "moveToDesktop" -> {
                 if (!runMoveToDesktop(args, pw)) {
                     pw.println("Task not found. Please enter a valid taskId.")
@@ -47,7 +47,6 @@ class DesktopModeShellCommandHandler(private val controller: DesktopTasksControl
                 false
             }
         }
-    }
 
     private fun runMoveToDesktop(args: Array<String>, pw: PrintWriter): Boolean {
         if (args.size < 2) {

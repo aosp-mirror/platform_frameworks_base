@@ -353,8 +353,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
         taskRepository = userRepositories.current
     }
 
-    private fun createController(): DesktopTasksController {
-        return DesktopTasksController(
+    private fun createController() =
+        DesktopTasksController(
             context,
             shellInit,
             shellCommandHandler,
@@ -388,7 +388,6 @@ class DesktopTasksControllerTest : ShellTestCase() {
             desktopWallpaperActivityTokenProvider,
             Optional.of(bubbleController),
         )
-    }
 
     @After
     fun tearDown() {
@@ -4958,13 +4957,12 @@ class DesktopTasksControllerTest : ShellTestCase() {
         return task
     }
 
-    private fun setUpPipTask(autoEnterEnabled: Boolean): RunningTaskInfo {
+    private fun setUpPipTask(autoEnterEnabled: Boolean): RunningTaskInfo =
         // active = false marks the task as non-visible; PiP window doesn't count as visible tasks
-        return setUpFreeformTask(active = false).apply {
+        setUpFreeformTask(active = false).apply {
             pictureInPictureParams =
                 PictureInPictureParams.Builder().setAutoEnterEnabled(autoEnterEnabled).build()
         }
-    }
 
     private fun setUpHomeTask(displayId: Int = DEFAULT_DISPLAY): RunningTaskInfo {
         val task = createHomeTask(displayId)

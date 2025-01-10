@@ -501,13 +501,12 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         }
     }
 
-    private fun createTaskInfo(): RunningTaskInfo {
-        return TestRunningTaskInfoBuilder()
+    private fun createTaskInfo(): RunningTaskInfo =
+        TestRunningTaskInfoBuilder()
             .setTaskId(TASK_ID)
             .setUid(TASK_UID)
             .setBounds(Rect(TASK_X, TASK_Y, TASK_WIDTH, TASK_HEIGHT))
             .build()
-    }
 
     private fun verifyNoLogging() {
         verify(

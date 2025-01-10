@@ -93,9 +93,8 @@ class DesktopModeDragAndDropTransitionHandler(private val transitions: Transitio
         return matchingChanges.first()
     }
 
-    private fun isValidTaskChange(change: TransitionInfo.Change): Boolean {
-        return change.taskInfo != null && change.taskInfo?.taskId != -1
-    }
+    private fun isValidTaskChange(change: TransitionInfo.Change): Boolean =
+        change.taskInfo != null && change.taskInfo?.taskId != -1
 
     override fun handleRequest(
         transition: IBinder,

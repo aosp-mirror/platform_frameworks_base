@@ -434,18 +434,14 @@ class DesktopModeLoggerTransitionObserver(
         visibleFreeformTaskInfos.set(taskInfo.taskId, taskInfo)
     }
 
-    private fun TransitionInfo.Change.requireTaskInfo(): RunningTaskInfo {
-        return this.taskInfo ?: throw IllegalStateException("Expected TaskInfo in the Change")
-    }
+    private fun TransitionInfo.Change.requireTaskInfo(): RunningTaskInfo =
+        this.taskInfo ?: throw IllegalStateException("Expected TaskInfo in the Change")
 
-    private fun TaskInfo.isFreeformWindow(): Boolean {
-        return this.windowingMode == WINDOWING_MODE_FREEFORM
-    }
+    private fun TaskInfo.isFreeformWindow(): Boolean = this.windowingMode == WINDOWING_MODE_FREEFORM
 
-    private fun TransitionInfo.isExitToRecentsTransition(): Boolean {
-        return this.type == WindowManager.TRANSIT_TO_FRONT &&
+    private fun TransitionInfo.isExitToRecentsTransition(): Boolean =
+        this.type == WindowManager.TRANSIT_TO_FRONT &&
             this.flags == WindowManager.TRANSIT_FLAG_IS_RECENTS
-    }
 
     companion object {
         @VisibleForTesting const val VISIBLE_TASKS_COUNTER_NAME = "desktop_mode_visible_tasks"

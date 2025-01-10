@@ -138,11 +138,10 @@ class DesktopTasksLimiter(
             )
         }
 
-        private fun getMinimizeChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? {
-            return info.changes.find { change ->
+        private fun getMinimizeChange(info: TransitionInfo, taskId: Int): TransitionInfo.Change? =
+            info.changes.find { change ->
                 change.taskInfo?.taskId == taskId && change.mode == TRANSIT_TO_BACK
             }
-        }
 
         override fun onTransitionMerged(merged: IBinder, playing: IBinder) {
             if (activeTransitionTokensAndTasks.remove(merged) != null) {

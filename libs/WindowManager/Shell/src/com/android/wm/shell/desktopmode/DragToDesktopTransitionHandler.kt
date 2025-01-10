@@ -765,9 +765,8 @@ sealed class DragToDesktopTransitionHandler(
         transitionState = null
     }
 
-    private fun isSplitTask(taskId: Int): Boolean {
-        return splitScreenController.isTaskInSplitScreen(taskId)
-    }
+    private fun isSplitTask(taskId: Int): Boolean =
+        splitScreenController.isTaskInSplitScreen(taskId)
 
     private fun getOtherSplitTask(taskId: Int): Int? {
         val splitPos = splitScreenController.getSplitPosition(taskId)
@@ -781,9 +780,8 @@ sealed class DragToDesktopTransitionHandler(
         return splitScreenController.getTaskInfo(otherTaskPos)?.taskId
     }
 
-    protected fun requireTransitionState(): TransitionState {
-        return transitionState ?: error("Expected non-null transition state")
-    }
+    protected fun requireTransitionState(): TransitionState =
+        transitionState ?: error("Expected non-null transition state")
 
     /**
      * Represents the layering (Z order) that will be given to any window based on its type during
