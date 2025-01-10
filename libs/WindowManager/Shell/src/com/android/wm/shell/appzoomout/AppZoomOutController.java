@@ -16,7 +16,6 @@
 
 package com.android.wm.shell.appzoomout;
 
-import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.app.ActivityManager;
@@ -101,7 +100,6 @@ public class AppZoomOutController implements RemoteCallable<AppZoomOutController
 
         mDisplayController.addDisplayWindowListener(mDisplaysChangedListener);
         mDisplayController.addDisplayChangingController(this);
-        updateDisplayLayout(mContext.getDisplayId());
 
         mDisplayAreaOrganizer.registerOrganizer();
     }
@@ -137,9 +135,7 @@ public class AppZoomOutController implements RemoteCallable<AppZoomOutController
     public void onDisplayChange(int displayId, int fromRotation, int toRotation,
             @Nullable DisplayAreaInfo newDisplayAreaInfo, WindowContainerTransaction wct) {
         // TODO: verify if there is synchronization issues.
-        if (toRotation != ROTATION_UNDEFINED) {
-            mDisplayAreaOrganizer.onRotateDisplay(mContext, toRotation);
-        }
+        mDisplayAreaOrganizer.onRotateDisplay(mContext, toRotation);
     }
 
     @Override
