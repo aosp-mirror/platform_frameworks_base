@@ -5666,6 +5666,13 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
         }
 
         public boolean canAccessAppWidget(Widget widget, int uid, String packageName) {
+            if (isDifferentPackageFromHost(widget.host, packageName)
+                    && isDifferentPackageFromProvider(widget.provider, packageName)) {
+                // Apps providing AppWidget are only allowed to access widgets provided by the
+                // same package. Similarly, apps hosting AppWidget are only allowed to access
+                // widgets hosted by the same package.
+                return false;
+            }
             if (isHostInPackageForUid(widget.host, uid, packageName)) {
                 // Apps hosting the AppWidget have access to it.
                 return true;
@@ -5766,6 +5773,19 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
             // The host creates a package context to bind to remote views service in the provider.
             return host.id.uid == uid && provider != null
                     && provider.id.componentName.getPackageName().equals(packageName);
+        }
+
+        private boolean isDifferentPackageFromHost(
+                @Nullable final Host host, @Nullable final String packageName) {
+            return packageName == null || host == null || host.id == null
+                || !packageName.equals(host.id.packageName);
+        }
+
+        private boolean isDifferentPackageFromProvider(
+                @Nullable final Provider provider, @Nullable final String packageName) {
+            return packageName == null || provider == null || provider.id == null
+                    || provider.id.componentName == null
+                    || !packageName.equals(provider.id.componentName.getPackageName());
         }
 
         private boolean isProfileEnabled(int profileId) {
