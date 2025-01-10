@@ -37,6 +37,11 @@ public class PowerManagerFlags {
             Flags.FLAG_ENABLE_EARLY_SCREEN_TIMEOUT_DETECTOR,
             Flags::enableEarlyScreenTimeoutDetector);
 
+    private final FlagState mEnableScreenTimeoutPolicyListenerApi = new FlagState(
+            Flags.FLAG_ENABLE_SCREEN_TIMEOUT_POLICY_LISTENER_API,
+            Flags::enableScreenTimeoutPolicyListenerApi
+    );
+
     private final FlagState mImproveWakelockLatency = new FlagState(
             Flags.FLAG_IMPROVE_WAKELOCK_LATENCY,
             Flags::improveWakelockLatency
@@ -61,6 +66,11 @@ public class PowerManagerFlags {
     /** Returns whether early-screen-timeout-detector is enabled on not. */
     public boolean isEarlyScreenTimeoutDetectorEnabled() {
         return mEarlyScreenTimeoutDetectorFlagState.isEnabled();
+    }
+
+    /** Returns whether screen timeout policy listener APIs are enabled on not. */
+    public boolean isScreenTimeoutPolicyListenerApiEnabled() {
+        return mEnableScreenTimeoutPolicyListenerApi.isEnabled();
     }
 
     /**

@@ -89,6 +89,7 @@ import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.os.UserHandle;
 import android.os.test.TestLooper;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.provider.DeviceConfig;
@@ -119,6 +120,7 @@ import com.android.server.power.PowerManagerService.WakeLock;
 import com.android.server.power.batterysaver.BatterySaverController;
 import com.android.server.power.batterysaver.BatterySaverPolicy;
 import com.android.server.power.batterysaver.BatterySaverStateMachine;
+import com.android.server.power.feature.flags.Flags;
 import com.android.server.power.feature.PowerManagerFlags;
 import com.android.server.testutils.OffsettableClock;
 
@@ -3456,6 +3458,25 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    @DisableFlags(Flags.FLAG_ENABLE_SCREEN_TIMEOUT_POLICY_LISTENER_API)
+    public void testAcquireWakelock_screenTimeoutListenersDisabled_noCrashes() {
+        IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
+        when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
+
+        final DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.displayGroupId = Display.DEFAULT_DISPLAY_GROUP;
+        when(mDisplayManagerInternalMock.getDisplayInfo(Display.DEFAULT_DISPLAY))
+                .thenReturn(displayInfo);
+
+        createService();
+        startSystem();
+
+        acquireWakeLock("screenBright", PowerManager.SCREEN_BRIGHT_WAKE_LOCK,
+                    Display.DEFAULT_DISPLAY);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_SCREEN_TIMEOUT_POLICY_LISTENER_API)
     public void testAddWakeLockKeepingScreenOn_addsToNotifierAndReportsTimeoutPolicyChange() {
         IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
         when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
@@ -3483,6 +3504,7 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_SCREEN_TIMEOUT_POLICY_LISTENER_API)
     public void test_addAndRemoveScreenTimeoutListener_propagatesToNotifier()
             throws Exception {
         IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
@@ -3509,6 +3531,7 @@ public class PowerManagerServiceTest {
     }
 
     @Test
+    @EnableFlags(Flags.FLAG_ENABLE_SCREEN_TIMEOUT_POLICY_LISTENER_API)
     public void test_displayIsRemoved_clearsScreenTimeoutListeners()
             throws Exception {
         IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
@@ -3531,7 +3554,8 @@ public class PowerManagerServiceTest {
     }
 
     @Test
-    public void testScreenWakeLockListener_screenHasWakelocks_addsWithHeldTimeoutPolicyToNotifier()
+    @EnableFlags(Flags.FLAG_ENABLE_SCREEN_TIMEOUT_POLICY_LISTENER_API)
+    public void testScreenTimeoutListener_screenHasWakelocks_addsWithHeldTimeoutPolicyToNotifier()
             throws Exception {
         IntArray displayGroupIds = IntArray.wrap(new int[]{Display.DEFAULT_DISPLAY_GROUP});
         when(mDisplayManagerInternalMock.getDisplayGroupIds()).thenReturn(displayGroupIds);
