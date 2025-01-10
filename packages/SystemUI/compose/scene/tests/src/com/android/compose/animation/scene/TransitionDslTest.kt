@@ -276,22 +276,22 @@ class TransitionDslTest {
         val defaultSpec = spring<Float>(stiffness = 1f)
         val specFromAToC = spring<Float>(stiffness = 2f)
         val transitions = transitions {
-            defaultSwipeSpec = defaultSpec
+            defaultMotionSpatialSpec = defaultSpec
 
             from(SceneA, to = SceneB) {
                 // Default swipe spec.
             }
-            from(SceneA, to = SceneC) { swipeSpec = specFromAToC }
+            from(SceneA, to = SceneC) { motionSpatialSpec = specFromAToC }
         }
 
-        assertThat(transitions.defaultSwipeSpec).isSameInstanceAs(defaultSpec)
+        assertThat(transitions.defaultMotionSpatialSpec).isSameInstanceAs(defaultSpec)
 
         // A => B does not have a custom spec.
         assertThat(
                 transitions
                     .transitionSpec(from = SceneA, to = SceneB, key = null)
                     .transformationSpec(aToB())
-                    .swipeSpec
+                    .motionSpatialSpec
             )
             .isNull()
 
@@ -300,7 +300,7 @@ class TransitionDslTest {
                 transitions
                     .transitionSpec(from = SceneA, to = SceneC, key = null)
                     .transformationSpec(transition(from = SceneA, to = SceneC))
-                    .swipeSpec
+                    .motionSpatialSpec
             )
             .isSameInstanceAs(specFromAToC)
     }

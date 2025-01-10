@@ -104,7 +104,7 @@ fun TransitionBuilder.verticalContainerReveal(
     val alphaSpec = spring<Float>(stiffness = 1200f, dampingRatio = 0.99f)
 
     // The spring animating the progress when releasing the finger.
-    swipeSpec =
+    motionSpatialSpec =
         spring(
             stiffness = Spring.StiffnessMediumLow,
             dampingRatio = Spring.DampingRatioNoBouncy,

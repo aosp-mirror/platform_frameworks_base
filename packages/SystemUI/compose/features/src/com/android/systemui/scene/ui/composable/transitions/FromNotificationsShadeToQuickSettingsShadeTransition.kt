@@ -27,7 +27,7 @@ fun TransitionBuilder.notificationsShadeToQuickSettingsShadeTransition(
     durationScale: Double = 1.0
 ) {
     spec = tween(durationMillis = (DefaultDuration * durationScale).inWholeMilliseconds.toInt())
-    swipeSpec =
+    motionSpatialSpec =
         spring(
             stiffness = Spring.StiffnessMediumLow,
             visibilityThreshold = Shade.Dimensions.ScrimVisibilityThreshold,

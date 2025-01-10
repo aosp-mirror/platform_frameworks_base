@@ -390,10 +390,10 @@ sealed interface TransitionState {
             fun create(): Animatable<Float, AnimationVector1D> {
                 val animatable = Animatable(1f, visibilityThreshold = ProgressVisibilityThreshold)
                 layoutImpl.animationScope.launch {
-                    val swipeSpec = layoutImpl.state.transitions.defaultSwipeSpec
+                    val motionSpatialSpec = layoutImpl.state.transitions.defaultMotionSpatialSpec
                     val progressSpec =
                         spring(
-                            stiffness = swipeSpec.stiffness,
+                            stiffness = motionSpatialSpec.stiffness,
                             dampingRatio = Spring.DampingRatioNoBouncy,
                             visibilityThreshold = ProgressVisibilityThreshold,
                         )
