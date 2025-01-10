@@ -7590,7 +7590,7 @@
         <!-- Minimum required drawing width. The drawing width refers to the width after
          the original segments have been adjusted for the neighboring Points and gaps. This is
          enforced by stretching the segments that are too short. -->
-        <attr name="minWidth" format="dimension" />
+        <attr name="minWidth" />
         <!-- Height of the solid segments. -->
         <attr name="height" />
         <!-- Height of the faded segments. -->

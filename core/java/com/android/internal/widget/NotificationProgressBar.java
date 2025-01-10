@@ -836,11 +836,16 @@ public final class NotificationProgressBar extends ProgressBar implements
             } else if (part instanceof Point point) {
                 final float pointWidth = 2 * pointRadius;
                 float start = x - pointRadius;
-                if (start < 0) start = 0;
-                float end = start + pointWidth;
-                if (end > totalWidth) {
+                float end = x + pointRadius;
+                // Only shift the points right at the start/end.
+                // For the points close to the start/end, the segment minimum width requirement
+                // would take care of shifting them to be within the bounds.
+                if (x == 0) {
+                    start = 0;
+                    end = pointWidth;
+                } else if (x == totalWidth) {
+                    start = totalWidth - pointWidth;
                     end = totalWidth;
-                    if (totalWidth > pointWidth) start = totalWidth - pointWidth;
                 }
 
                 drawableParts.add(new DrawablePoint(start, end, point.mColor));
@@ -853,7 +858,7 @@ public final class NotificationProgressBar extends ProgressBar implements
     private static float getSegStartOffset(Part prevPart, float pointRadius, float segPointGap,
             float startX) {
         if (!(prevPart instanceof Point)) return 0F;
-        final float pointOffset = (startX < pointRadius) ? (pointRadius - startX) : 0;
+        final float pointOffset = (startX == 0) ? pointRadius : 0;
         return pointOffset + pointRadius + segPointGap;
     }
 
@@ -869,9 +874,7 @@ public final class NotificationProgressBar extends ProgressBar implements
             return segSegGap;
         }
 
-        final float pointWidth = 2 * pointRadius;
-        final float pointOffset = (endX + pointRadius > totalWidth && totalWidth > pointWidth)
-                ? (endX + pointRadius - totalWidth) : 0;
+        final float pointOffset = (endX == totalWidth) ? pointRadius : 0;
         return segPointGap + pointRadius + pointOffset;
     }
 
