@@ -25,6 +25,7 @@ import android.view.ViewGroup;
 import android.view.inputmethod.InputMethodManager;
 
 import com.android.printspooler.R;
+import com.android.printspooler.flags.Flags;
 
 /**
  * This class is a layout manager for the print screen. It has a sliding
@@ -93,6 +94,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         // The options view is sliding under the static header but appears
         // after it in the layout, so we will draw in opposite order.
         setChildrenDrawingOrderEnabled(true);
+        setFitsSystemWindows(Flags.printEdge2edge());
     }
 
     public void setOptionsStateChangeListener(OptionsStateChangeListener listener) {
@@ -148,6 +150,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         mExpandCollapseHandle = findViewById(R.id.expand_collapse_handle);
         mExpandCollapseIcon = findViewById(R.id.expand_collapse_icon);
 
+        mOptionsContainer.setFitsSystemWindows(Flags.printEdge2edge());
         mExpandCollapseHandle.setOnClickListener(this);
         mSummaryContent.setOnClickListener(this);
 
@@ -262,7 +265,7 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
         }
 
         // The content host can grow vertically as much as needed - we will be covering it.
-        final int hostHeightMeasureSpec = MeasureSpec.makeMeasureSpec(MeasureSpec.UNSPECIFIED, 0);
+        final int hostHeightMeasureSpec = MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
         measureChild(mEmbeddedContentContainer, widthMeasureSpec, hostHeightMeasureSpec);
 
         setMeasuredDimension(resolveSize(MeasureSpec.getSize(widthMeasureSpec), widthMeasureSpec),
@@ -271,25 +274,43 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
 
     @Override
     protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
-        mStaticContent.layout(left, top, right, mStaticContent.getMeasuredHeight());
+        final int childLeft;
+        final int childRight;
+        final int childTop;
+        if (Flags.printEdge2edge()) {
+            childLeft = left + mPaddingLeft;
+            childRight = right - mPaddingRight;
+            childTop = top + mPaddingTop;
+        } else {
+            childLeft = left;
+            childRight = right;
+            childTop = top;
+        }
+        mStaticContent.layout(childLeft, childTop, childRight,
+                mStaticContent.getMeasuredHeight() + (Flags.printEdge2edge() ? mPaddingTop : 0));
 
         if (mSummaryContent.getVisibility() != View.GONE) {
-            mSummaryContent.layout(left, mStaticContent.getMeasuredHeight(), right,
-                    mStaticContent.getMeasuredHeight() + mSummaryContent.getMeasuredHeight());
+            mSummaryContent.layout(childLeft,
+                    (Flags.printEdge2edge() ? mStaticContent.getBottom()
+                            : mStaticContent.getMeasuredHeight()), childRight,
+                    (Flags.printEdge2edge() ? mStaticContent.getBottom()
+                            : mStaticContent.getMeasuredHeight())
+                                + mSummaryContent.getMeasuredHeight());
         }
 
-        final int dynContentTop = mStaticContent.getMeasuredHeight() + mCurrentOptionsOffsetY;
+        final int dynContentTop = mStaticContent.getBottom() + mCurrentOptionsOffsetY;
         final int dynContentBottom = dynContentTop + mDynamicContent.getMeasuredHeight();
 
-        mDynamicContent.layout(left, dynContentTop, right, dynContentBottom);
+        mDynamicContent.layout(childLeft, dynContentTop, childRight, dynContentBottom);
 
         MarginLayoutParams params = (MarginLayoutParams) mPrintButton.getLayoutParams();
 
         final int printButtonLeft;
         if (getLayoutDirection() == View.LAYOUT_DIRECTION_LTR) {
-            printButtonLeft = right - mPrintButton.getMeasuredWidth() - params.getMarginStart();
+            printButtonLeft = childRight - mPrintButton.getMeasuredWidth()
+                    - params.getMarginStart();
         } else {
-            printButtonLeft = left + params.getMarginStart();
+            printButtonLeft = childLeft + params.getMarginStart();
         }
         final int printButtonTop = dynContentBottom - mPrintButton.getMeasuredHeight() / 2;
         final int printButtonRight = printButtonLeft + mPrintButton.getMeasuredWidth();
@@ -297,11 +318,13 @@ public final class PrintContentView extends ViewGroup implements View.OnClickLis
 
         mPrintButton.layout(printButtonLeft, printButtonTop, printButtonRight, printButtonBottom);
 
-        final int embContentTop = mStaticContent.getMeasuredHeight() + mClosedOptionsOffsetY
-                + mDynamicContent.getMeasuredHeight();
-        final int embContentBottom = embContentTop + mEmbeddedContentContainer.getMeasuredHeight();
+        final int embContentTop = (Flags.printEdge2edge() ? mPaddingTop : 0)
+                + mStaticContent.getMeasuredHeight()
+                + mClosedOptionsOffsetY + mDynamicContent.getMeasuredHeight();
+        final int embContentBottom = embContentTop + mEmbeddedContentContainer.getMeasuredHeight()
+                -  (Flags.printEdge2edge() ? mPaddingBottom : 0);
 
-        mEmbeddedContentContainer.layout(left, embContentTop, right, embContentBottom);
+        mEmbeddedContentContainer.layout(childLeft, embContentTop, childRight, embContentBottom);
     }
 
     @Override
