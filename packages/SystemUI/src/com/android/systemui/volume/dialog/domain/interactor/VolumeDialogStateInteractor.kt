@@ -31,7 +31,6 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.launchIn
 import kotlinx.coroutines.flow.onEach
-import kotlinx.coroutines.flow.onStart
 
 /**
  * Exposes [VolumeDialogController.getState] in the [volumeDialogState].
@@ -65,12 +64,14 @@ constructor(
                     is VolumeDialogEventModel.ShowSafetyWarning -> {
                         setSafetyWarning(VolumeDialogSafetyWarningModel.Visible(event.flags))
                     }
+                    is VolumeDialogEventModel.SubscribedToEvents -> {
+                        volumeDialogController.getState()
+                    }
                     else -> {
                         // do nothing
                     }
                 }
             }
-            .onStart { volumeDialogController.getState() }
             .launchIn(coroutineScope)
     }
 

@@ -47,7 +47,7 @@ constructor(
 ) {
 
     val isDisabledByZenMode: Flow<Boolean> =
-        if (sliderType is VolumeDialogSliderType.Stream) {
+        if (zenModeInteractor.canBeBlockedByZenMode(sliderType)) {
             zenModeInteractor.activeModesBlockingStream(AudioStream(sliderType.audioStream)).map {
                 it.mainMode != null
             }
@@ -74,4 +74,9 @@ constructor(
             setActiveStream(sliderType.audioStream)
         }
     }
+}
+
+private fun ZenModeInteractor.canBeBlockedByZenMode(sliderType: VolumeDialogSliderType): Boolean {
+    return sliderType is VolumeDialogSliderType.Stream &&
+        canBeBlockedByZenMode(AudioStream(sliderType.audioStream))
 }
