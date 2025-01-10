@@ -849,7 +849,9 @@ final class InstallPackageHelper {
         int token;
         if (mPm.mNextInstallToken < 0) mPm.mNextInstallToken = 1;
         token = mPm.mNextInstallToken++;
-        mPm.mRunningInstalls.put(token, request);
+        synchronized (mPm.mRunningInstalls) {
+            mPm.mRunningInstalls.put(token, request);
+        }
 
         if (DEBUG_INSTALL) Log.v(TAG, "+ starting restore round-trip " + token);
 
