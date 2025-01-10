@@ -19,6 +19,7 @@
     android:id="@+id/volume_dialog_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:alpha="0"
     android:clipChildren="false"
     app:layoutDescription="@xml/volume_dialog_scene">
 

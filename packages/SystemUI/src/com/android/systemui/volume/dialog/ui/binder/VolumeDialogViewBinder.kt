@@ -80,7 +80,6 @@ constructor(
             MutableStateFlow(WindowInsets.Builder().build())
         // Root view of the Volume Dialog.
         val root: MotionLayout = dialog.requireViewById(R.id.volume_dialog_root)
-        root.alpha = 0f
 
         animateVisibility(root, dialog, viewModel.dialogVisibilityModel)
 
