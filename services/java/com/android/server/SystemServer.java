@@ -3038,13 +3038,8 @@ public final class SystemServer implements Dumpable {
                             && context.getPackageManager().hasSystemFeature(
                                     PackageManager.FEATURE_BLUETOOTH_LE))) {
                 t.traceBegin("RangingService");
-                // TODO: b/375264320 - Remove after RELEASE_RANGING_STACK is ramped to next.
-                try {
-                    mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
-                            RANGING_APEX_SERVICE_JAR_PATH);
-                } catch (Throwable e) {
-                    Slog.d(TAG, "service-ranging.jar not found, not starting RangingService");
-                }
+                mSystemServiceManager.startServiceFromJar(RANGING_SERVICE_CLASS,
+                        RANGING_APEX_SERVICE_JAR_PATH);
                 t.traceEnd();
             }
         }
