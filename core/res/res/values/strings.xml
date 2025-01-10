@@ -6646,6 +6646,8 @@ ul.</string>
     <string name="satellite_notification_title">Auto connected to satellite</string>
     <!-- Notification summary when satellite service is auto connected. [CHAR LIMIT=NONE] -->
     <string name="satellite_notification_summary">You can send and receive messages without a mobile or Wi-Fi network</string>
+    <!-- Notification summary when satellite service connected with data service supported. [CHAR LIMIT=NONE] -->
+    <string name="satellite_notification_summary_with_data">You can send and receive messages and use limited data by satellite</string>
     <!-- Notification title when satellite service can be manually enabled. -->
     <string name="satellite_notification_manual_title">Use satellite messaging?</string>
     <!-- Notification summary when satellite service can be manually enabled. [CHAR LIMIT=NONE] -->
