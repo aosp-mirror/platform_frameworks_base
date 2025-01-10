@@ -179,6 +179,7 @@ class DesktopTasksController(
     private val desktopTilingDecorViewModel: DesktopTilingDecorViewModel,
     private val desktopWallpaperActivityTokenProvider: DesktopWallpaperActivityTokenProvider,
     private val bubbleController: Optional<BubbleController>,
+    private val overviewToDesktopTransitionObserver: OverviewToDesktopTransitionObserver,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -415,17 +416,25 @@ class DesktopTasksController(
     }
 
     /** Moves task to desktop mode if task is running, else launches it in desktop mode. */
+    @JvmOverloads
     fun moveTaskToDesktop(
         taskId: Int,
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
         remoteTransition: RemoteTransition? = null,
+        callback: IMoveToDesktopCallback? = null,
     ): Boolean {
         val runningTask = shellTaskOrganizer.getRunningTaskInfo(taskId)
         if (runningTask == null) {
-            return moveBackgroundTaskToDesktop(taskId, wct, transitionSource, remoteTransition)
+            return moveBackgroundTaskToDesktop(
+                taskId,
+                wct,
+                transitionSource,
+                remoteTransition,
+                callback,
+            )
         }
-        moveRunningTaskToDesktop(runningTask, wct, transitionSource, remoteTransition)
+        moveRunningTaskToDesktop(runningTask, wct, transitionSource, remoteTransition, callback)
         return true
     }
 
@@ -434,6 +443,7 @@ class DesktopTasksController(
         wct: WindowContainerTransaction,
         transitionSource: DesktopModeTransitionSource,
         remoteTransition: RemoteTransition? = null,
+        callback: IMoveToDesktopCallback? = null,
     ): Boolean {
         if (recentTasksController?.findTaskInBackground(taskId) == null) {
             logW("moveBackgroundTaskToDesktop taskId=%d not found", taskId)
@@ -466,6 +476,7 @@ class DesktopTasksController(
         } else {
             // TODO(343149901): Add DPI changes for task launch
             transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+            invokeCallbackToOverview(transition, callback)
         }
         desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(
             FREEFORM_ANIMATION_DURATION
@@ -483,6 +494,7 @@ class DesktopTasksController(
         wct: WindowContainerTransaction = WindowContainerTransaction(),
         transitionSource: DesktopModeTransitionSource,
         remoteTransition: RemoteTransition? = null,
+        callback: IMoveToDesktopCallback? = null,
     ) {
         if (
             DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue() &&
@@ -514,6 +526,7 @@ class DesktopTasksController(
             remoteTransitionHandler.setTransition(transition)
         } else {
             transition = enterDesktopTaskTransitionHandler.moveToDesktop(wct, transitionSource)
+            invokeCallbackToOverview(transition, callback)
         }
         desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(
             FREEFORM_ANIMATION_DURATION
@@ -522,6 +535,15 @@ class DesktopTasksController(
             addPendingMinimizeTransition(transition, it, MinimizeReason.TASK_LIMIT)
         }
         exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
+    }
+
+    private fun invokeCallbackToOverview(transition: IBinder, callback: IMoveToDesktopCallback?) {
+        // TODO: b/333524374 - Remove this later.
+        // This is a temporary implementation for adding CUJ end and
+        // should be removed when animation is moved to launcher through remote transition.
+        if (callback != null) {
+            overviewToDesktopTransitionObserver.addPendingOverviewTransition(transition, callback)
+        }
     }
 
     /**
@@ -3023,12 +3045,14 @@ class DesktopTasksController(
             taskId: Int,
             transitionSource: DesktopModeTransitionSource,
             remoteTransition: RemoteTransition?,
+            callback: IMoveToDesktopCallback?,
         ) {
             executeRemoteCallWithTaskPermission(controller, "moveTaskToDesktop") { c ->
                 c.moveTaskToDesktop(
                     taskId,
                     transitionSource = transitionSource,
                     remoteTransition = remoteTransition,
+                    callback = callback,
                 )
             }
         }

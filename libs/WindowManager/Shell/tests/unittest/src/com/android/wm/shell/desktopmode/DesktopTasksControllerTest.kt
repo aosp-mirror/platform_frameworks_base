@@ -245,6 +245,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
     @Mock
     private lateinit var desktopWallpaperActivityTokenProvider:
         DesktopWallpaperActivityTokenProvider
+    @Mock
+    private lateinit var overviewToDesktopTransitionObserver: OverviewToDesktopTransitionObserver
 
     private lateinit var controller: DesktopTasksController
     private lateinit var shellInit: ShellInit
@@ -392,6 +394,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             desktopTilingDecorViewModel,
             desktopWallpaperActivityTokenProvider,
             Optional.of(bubbleController),
+            overviewToDesktopTransitionObserver,
         )
 
     @After
