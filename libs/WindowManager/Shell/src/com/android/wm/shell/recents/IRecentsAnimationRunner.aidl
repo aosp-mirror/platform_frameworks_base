@@ -17,10 +17,9 @@
 package com.android.wm.shell.recents;
 
 import android.graphics.Rect;
-import android.os.Bundle;
 import android.view.RemoteAnimationTarget;
 import android.window.TaskSnapshot;
-import android.window.TransitionInfo;
+import android.os.Bundle;
 
 import com.android.wm.shell.recents.IRecentsAnimationController;
 
@@ -58,8 +57,7 @@ oneway interface IRecentsAnimationRunner {
      */
     void onAnimationStart(in IRecentsAnimationController controller,
             in RemoteAnimationTarget[] apps, in RemoteAnimationTarget[] wallpapers,
-            in Rect homeContentInsets, in Rect minimizedHomeBounds, in Bundle extras,
-            in TransitionInfo info) = 2;
+            in Rect homeContentInsets, in Rect minimizedHomeBounds, in Bundle extras) = 2;
 
     /**
      * Called when the task of an activity that has been started while the recents animation
