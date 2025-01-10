@@ -5838,4 +5838,6 @@
   <!-- Whether the device supports Wi-Fi USD feature. -->
   <java-symbol type="bool" name="config_deviceSupportsWifiUsd" />
 
+  <java-symbol type="array" name="config_notificationDefaultUnsupportedAdjustments" />
+
 </resources>
