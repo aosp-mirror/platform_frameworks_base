@@ -588,7 +588,8 @@ public class SystemHealthManager {
                     if (resultCode == IPowerStatsService.RESULT_SUCCESS) {
                         PowerMonitorReadings result = new PowerMonitorReadings(powerMonitorsArray,
                                 resultData.getLongArray(IPowerStatsService.KEY_ENERGY),
-                                resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS));
+                                resultData.getLongArray(IPowerStatsService.KEY_TIMESTAMPS),
+                                resultData.getInt(IPowerStatsService.KEY_GRANULARITY));
                         if (executor != null) {
                             executor.execute(() -> onResult.onResult(result));
                         } else {
