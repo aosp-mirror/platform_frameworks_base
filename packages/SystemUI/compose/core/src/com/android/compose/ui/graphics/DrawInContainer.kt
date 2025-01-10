@@ -19,9 +19,11 @@ package com.android.compose.ui.graphics
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.ContentDrawScope
 import androidx.compose.ui.graphics.drawscope.DrawScope
@@ -30,14 +32,14 @@ import androidx.compose.ui.graphics.drawscope.translate
 import androidx.compose.ui.graphics.layer.GraphicsLayer
 import androidx.compose.ui.graphics.layer.drawLayer
 import androidx.compose.ui.layout.LayoutCoordinates
-import androidx.compose.ui.layout.layout
+import androidx.compose.ui.layout.onPlaced
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.modifier.ModifierLocalModifierNode
 import androidx.compose.ui.node.DrawModifierNode
+import androidx.compose.ui.node.LayoutAwareModifierNode
 import androidx.compose.ui.node.ModifierNodeElement
 import androidx.compose.ui.node.requireDensity
 import androidx.compose.ui.node.requireGraphicsContext
-import androidx.compose.ui.node.requireLayoutCoordinates
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastForEach
@@ -48,17 +50,7 @@ import androidx.compose.ui.util.fastForEach
  * The elements redirected to this container will be drawn above the content of this composable.
  */
 fun Modifier.container(state: ContainerState): Modifier {
-    return layout { measurable, constraints ->
-            val p = measurable.measure(constraints)
-            layout(p.width, p.height) {
-                val coords = coordinates
-                if (coords != null && !isLookingAhead) {
-                    state.lastCoords = coords
-                }
-
-                p.place(0, 0)
-            }
-        }
+    return onPlaced { state.lastOffsetInWindow = it.positionInWindow() }
         .drawWithContent {
             drawContent()
             state.drawInOverlay(this)
@@ -91,7 +83,7 @@ fun Modifier.drawInContainer(
 
 class ContainerState {
     private var renderers = mutableStateListOf<LayerRenderer>()
-    internal var lastCoords: LayoutCoordinates? = null
+    internal var lastOffsetInWindow by mutableStateOf(Offset.Zero)
 
     internal fun onLayerRendererAttached(renderer: LayerRenderer) {
         renderers.add(renderer)
@@ -142,7 +134,8 @@ internal class DrawInContainerNode(
     var enabled: () -> Boolean = { true },
     zIndex: Float = 0f,
     var clipPath: (LayoutDirection, Density) -> Path? = { _, _ -> null },
-) : Modifier.Node(), DrawModifierNode, ModifierLocalModifierNode {
+) : Modifier.Node(), LayoutAwareModifierNode, DrawModifierNode, ModifierLocalModifierNode {
+    private var lastOffsetInWindow by mutableStateOf(Offset.Zero)
     var zIndex by mutableFloatStateOf(zIndex)
 
     private inner class LayerWithRenderer(val layer: GraphicsLayer) : LayerRenderer {
@@ -152,11 +145,7 @@ internal class DrawInContainerNode(
         override fun drawInOverlay(drawScope: DrawScope) {
             if (enabled()) {
                 with(drawScope) {
-                    val containerCoords =
-                        checkNotNull(state.lastCoords) { "container is not placed" }
-                    val (x, y) =
-                        requireLayoutCoordinates().positionInWindow() -
-                            containerCoords.positionInWindow()
+                    val (x, y) = lastOffsetInWindow - state.lastOffsetInWindow
                     val clipPath = clipPath(layoutDirection, requireDensity())
                     if (clipPath != null) {
                         clipPath(clipPath) { translate(x, y) { drawLayer(layer) } }
@@ -176,6 +165,10 @@ internal class DrawInContainerNode(
         if (!enabled()) {
             drawLayer(layer)
         }
+    }
+
+    override fun onPlaced(coordinates: LayoutCoordinates) {
+        lastOffsetInWindow = coordinates.positionInWindow()
     }
 
     val layer: GraphicsLayer?
