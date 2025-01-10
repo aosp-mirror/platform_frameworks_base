@@ -43,7 +43,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.activityembedding.ActivityEmbeddingController;
-import com.android.wm.shell.common.split.SplitScreenUtils;
+import com.android.wm.shell.common.ComponentUtils;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
 import com.android.wm.shell.keyguard.KeyguardTransitionHandler;
 import com.android.wm.shell.pip.PipTransitionController;
@@ -645,7 +645,7 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
         // task enter split.
         if (mPipHandler != null) {
             return mPipHandler
-                    .isPackageActiveInPip(SplitScreenUtils.getPackageName(intent.getIntent()));
+                    .isPackageActiveInPip(ComponentUtils.getPackageName(intent.getIntent()));
         }
         return false;
     }
@@ -657,7 +657,7 @@ public class DefaultMixedHandler implements MixedTransitionHandler,
         // task enter split.
         if (mPipHandler != null) {
             return mPipHandler.isPackageActiveInPip(
-                    SplitScreenUtils.getPackageName(taskId, shellTaskOrganizer));
+                    ComponentUtils.getPackageName(taskId, shellTaskOrganizer));
         }
         return false;
     }

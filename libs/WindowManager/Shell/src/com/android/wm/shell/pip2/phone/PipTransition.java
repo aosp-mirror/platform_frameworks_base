@@ -57,12 +57,12 @@ import androidx.annotation.Nullable;
 import com.android.internal.util.Preconditions;
 import com.android.window.flags.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.ComponentUtils;
 import com.android.wm.shell.common.pip.PipBoundsAlgorithm;
 import com.android.wm.shell.common.pip.PipBoundsState;
 import com.android.wm.shell.common.pip.PipDisplayLayoutState;
 import com.android.wm.shell.common.pip.PipMenuController;
 import com.android.wm.shell.common.pip.PipUtils;
-import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.desktopmode.DesktopRepository;
 import com.android.wm.shell.desktopmode.DesktopUserRepositories;
 import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider;
@@ -1008,6 +1008,6 @@ public class PipTransition extends PipTransitionController implements
     public boolean isPackageActiveInPip(@Nullable String packageName) {
         final TaskInfo inPipTask = mPipTransitionState.getPipTaskInfo();
         return packageName != null && inPipTask != null && mPipTransitionState.isInPip()
-                && packageName.equals(SplitScreenUtils.getPackageName(inPipTask.baseIntent));
+                && packageName.equals(ComponentUtils.getPackageName(inPipTask.baseIntent));
     }
 }

@@ -131,6 +131,7 @@ import com.android.internal.protolog.ProtoLog;
 import com.android.launcher3.icons.IconProvider;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
+import com.android.wm.shell.common.ComponentUtils;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -140,7 +141,6 @@ import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.common.split.OffscreenTouchZone;
 import com.android.wm.shell.common.split.SplitDecorManager;
 import com.android.wm.shell.common.split.SplitLayout;
-import com.android.wm.shell.common.split.SplitScreenUtils;
 import com.android.wm.shell.common.split.SplitState;
 import com.android.wm.shell.common.split.SplitWindowManager;
 import com.android.wm.shell.desktopmode.DesktopTasksController;
@@ -3536,12 +3536,12 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         if (mSplitRequest.mActivateTaskId == taskInfo.taskId) {
             return mSplitRequest.mActivatePosition;
         }
-        final String packageName1 = SplitScreenUtils.getPackageName(mSplitRequest.mStartIntent);
-        final String basePackageName = SplitScreenUtils.getPackageName(taskInfo.baseIntent);
+        final String packageName1 = ComponentUtils.getPackageName(mSplitRequest.mStartIntent);
+        final String basePackageName = ComponentUtils.getPackageName(taskInfo.baseIntent);
         if (packageName1 != null && packageName1.equals(basePackageName)) {
             return mSplitRequest.mActivatePosition;
         }
-        final String packageName2 = SplitScreenUtils.getPackageName(mSplitRequest.mStartIntent2);
+        final String packageName2 = ComponentUtils.getPackageName(mSplitRequest.mStartIntent2);
         if (packageName2 != null && packageName2.equals(basePackageName)) {
             return mSplitRequest.mActivatePosition;
         }
