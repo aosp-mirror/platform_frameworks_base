@@ -42,7 +42,6 @@ import com.android.app.animation.Interpolators;
 import com.android.app.animation.InterpolatorsAndroidX;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dumpable;
-import com.android.systemui.Flags;
 import com.android.systemui.dagger.qualifiers.Main;
 import com.android.systemui.demomode.DemoMode;
 import com.android.systemui.demomode.DemoModeController;
@@ -698,20 +697,9 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
         boolean showClock = externalModel.getShowClock() && !headsUpVisible;
 
-        boolean showPrimaryOngoingActivityChip;
-        if (Flags.statusBarScreenSharingChips()) {
-            // If this flag is on, the ongoing activity status comes from
-            // CollapsedStatusBarViewBinder, which updates the mHasPrimaryOngoingActivity variable.
-            showPrimaryOngoingActivityChip = mHasPrimaryOngoingActivity;
-        } else {
-            // If this flag is off, the only ongoing activity is the ongoing call, and we pull it
-            // from the controller directly.
-            showPrimaryOngoingActivityChip = mOngoingCallController.hasOngoingCall();
-        }
+        boolean showPrimaryOngoingActivityChip = mHasPrimaryOngoingActivity;
         boolean showSecondaryOngoingActivityChip =
-                Flags.statusBarScreenSharingChips()
-                        && StatusBarNotifChips.isEnabled()
-                        && mHasSecondaryOngoingActivity;
+                StatusBarNotifChips.isEnabled() && mHasSecondaryOngoingActivity;
 
         return new StatusBarVisibilityModel(
                 showClock,
@@ -869,10 +857,6 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
 
     /**
      * Displays the primary ongoing activity chip.
-     *
-     * If Flags.statusBarScreenSharingChips is disabled, this chip will only ever contain the
-     * ongoing call information, If that flag is enabled, it will support different kinds of ongoing
-     * activities. See b/332662551.
      */
     private void showPrimaryOngoingActivityChip(boolean animate) {
         StatusBarRootModernization.assertInLegacyMode();

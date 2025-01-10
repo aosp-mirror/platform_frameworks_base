@@ -24,7 +24,6 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.app.animation.Interpolators
-import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
@@ -116,11 +115,7 @@ constructor(
                     }
                 }
 
-                if (
-                    Flags.statusBarScreenSharingChips() &&
-                        !StatusBarNotifChips.isEnabled &&
-                        !StatusBarChipsModernization.isEnabled
-                ) {
+                if (!StatusBarNotifChips.isEnabled && !StatusBarChipsModernization.isEnabled) {
                     val primaryChipViewBinding =
                         OngoingActivityChipBinder.createBinding(
                             view.requireViewById(R.id.ongoing_activity_chip_primary)
@@ -166,11 +161,7 @@ constructor(
                     }
                 }
 
-                if (
-                    Flags.statusBarScreenSharingChips() &&
-                        StatusBarNotifChips.isEnabled &&
-                        !StatusBarChipsModernization.isEnabled
-                ) {
+                if (StatusBarNotifChips.isEnabled && !StatusBarChipsModernization.isEnabled) {
                     // Create view bindings here so we don't keep re-fetching child views each time
                     // the chip model changes.
                     val primaryChipViewBinding =

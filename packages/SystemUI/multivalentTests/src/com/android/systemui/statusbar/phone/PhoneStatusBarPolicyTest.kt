@@ -45,13 +45,10 @@ import com.android.systemui.display.domain.interactor.ConnectedDisplayInteractor
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.privacy.PrivacyItemController
 import com.android.systemui.privacy.logging.PrivacyLogger
-import com.android.systemui.screenrecord.RecordingController
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.policy.BluetoothController
-import com.android.systemui.statusbar.policy.CastController
-import com.android.systemui.statusbar.policy.CastDevice
 import com.android.systemui.statusbar.policy.DataSaverController
 import com.android.systemui.statusbar.policy.DeviceProvisionedController
 import com.android.systemui.statusbar.policy.HotspotController
@@ -92,7 +89,6 @@ import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when` as whenever
 import org.mockito.MockitoAnnotations
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.reset
 
@@ -108,8 +104,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     companion object {
         private const val ZEN_SLOT = "zen"
         private const val ALARM_SLOT = "alarm"
-        private const val CAST_SLOT = "cast"
-        private const val SCREEN_RECORD_SLOT = "screen_record"
         private const val CONNECTED_DISPLAY_SLOT = "connected_display"
         private const val MANAGED_PROFILE_SLOT = "managed_profile"
     }
@@ -117,7 +111,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     @Mock private lateinit var iconController: StatusBarIconController
     @Mock private lateinit var commandQueue: CommandQueue
     @Mock private lateinit var broadcastDispatcher: BroadcastDispatcher
-    @Mock private lateinit var castController: CastController
     @Mock private lateinit var hotspotController: HotspotController
     @Mock private lateinit var bluetoothController: BluetoothController
     @Mock private lateinit var nextAlarmController: NextAlarmController
@@ -133,7 +126,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
     @Mock private lateinit var userTracker: UserTracker
     @Mock private lateinit var devicePolicyManager: DevicePolicyManager
     @Mock private lateinit var devicePolicyManagerResources: DevicePolicyResourcesManager
-    @Mock private lateinit var recordingController: RecordingController
     @Mock private lateinit var telecomManager: TelecomManager
     @Mock private lateinit var sharedPreferences: SharedPreferences
     @Mock private lateinit var dateFormatUtil: DateFormatUtil
@@ -302,101 +294,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun cast_chipsFlagOff_iconShown() {
-        statusBarPolicy.init()
-        clearInvocations(iconController)
-
-        val callbackCaptor = argumentCaptor<CastController.Callback>()
-        verify(castController).addCallback(callbackCaptor.capture())
-
-        whenever(castController.castDevices)
-            .thenReturn(
-                listOf(
-                    CastDevice(
-                        "id",
-                        "name",
-                        "description",
-                        CastDevice.CastState.Connected,
-                        CastDevice.CastOrigin.MediaProjection,
-                    )
-                )
-            )
-        callbackCaptor.firstValue.onCastDevicesChanged()
-
-        verify(iconController).setIconVisibility(CAST_SLOT, true)
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun cast_chipsFlagOn_noCallbackRegistered() {
-        statusBarPolicy.init()
-
-        verify(castController, never()).addCallback(any())
-    }
-
-    @Test
-    @DisableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun screenRecord_chipsFlagOff_iconShown_forAllStates() {
-        statusBarPolicy.init()
-        clearInvocations(iconController)
-
-        val callbackCaptor = argumentCaptor<RecordingController.RecordingStateChangeCallback>()
-        verify(recordingController).addCallback(callbackCaptor.capture())
-
-        callbackCaptor.firstValue.onCountdown(3000)
-        testableLooper.processAllMessages()
-        verify(iconController).setIconVisibility(SCREEN_RECORD_SLOT, true)
-        clearInvocations(iconController)
-
-        callbackCaptor.firstValue.onCountdownEnd()
-        testableLooper.processAllMessages()
-        verify(iconController).setIconVisibility(SCREEN_RECORD_SLOT, false)
-        clearInvocations(iconController)
-
-        callbackCaptor.firstValue.onRecordingStart()
-        testableLooper.processAllMessages()
-        verify(iconController).setIconVisibility(SCREEN_RECORD_SLOT, true)
-        clearInvocations(iconController)
-
-        callbackCaptor.firstValue.onRecordingEnd()
-        testableLooper.processAllMessages()
-        verify(iconController).setIconVisibility(SCREEN_RECORD_SLOT, false)
-        clearInvocations(iconController)
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun screenRecord_chipsFlagOn_noCallbackRegistered() {
-        statusBarPolicy.init()
-
-        verify(recordingController, never()).addCallback(any())
-    }
-
-    @Test
-    @EnableFlags(Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun screenRecord_chipsFlagOn_methodsDoNothing() {
-        statusBarPolicy.init()
-        clearInvocations(iconController)
-
-        statusBarPolicy.onCountdown(3000)
-        testableLooper.processAllMessages()
-        verify(iconController, never()).setIconVisibility(eq(SCREEN_RECORD_SLOT), any())
-
-        statusBarPolicy.onCountdownEnd()
-        testableLooper.processAllMessages()
-        verify(iconController, never()).setIconVisibility(eq(SCREEN_RECORD_SLOT), any())
-
-        statusBarPolicy.onRecordingStart()
-        testableLooper.processAllMessages()
-        verify(iconController, never()).setIconVisibility(eq(SCREEN_RECORD_SLOT), any())
-
-        statusBarPolicy.onRecordingEnd()
-        testableLooper.processAllMessages()
-        verify(iconController, never()).setIconVisibility(eq(SCREEN_RECORD_SLOT), any())
-    }
-
-    @Test
     @EnableFlags(android.app.Flags.FLAG_MODES_UI, android.app.Flags.FLAG_MODES_UI_ICONS)
     fun zenModeInteractorActiveModeChanged_showsModeIcon() =
         testScope.runTest {
@@ -514,7 +411,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             executor,
             testableLooper.looper,
             context.resources,
-            castController,
             hotspotController,
             bluetoothController,
             nextAlarmController,
@@ -530,7 +426,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
             userManager,
             userTracker,
             devicePolicyManager,
-            recordingController,
             telecomManager,
             /* displayId = */ 0,
             sharedPreferences,
@@ -588,11 +483,6 @@ class PhoneStatusBarPolicyTest : SysuiTestCase() {
         override fun getManualRule(): ZenModeConfig.ZenRule = throw NotImplementedError()
 
         override fun getConfig(): ZenModeConfig = throw NotImplementedError()
-
-        fun setConsolidatedPolicy(policy: NotificationManager.Policy) {
-            this.consolidatedPolicy = policy
-            callbacks.forEach { it.onConsolidatedPolicyChanged(consolidatedPolicy) }
-        }
 
         override fun getConsolidatedPolicy(): NotificationManager.Policy = consolidatedPolicy
 

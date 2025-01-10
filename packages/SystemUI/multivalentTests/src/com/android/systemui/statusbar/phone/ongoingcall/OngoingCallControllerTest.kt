@@ -21,21 +21,18 @@ import android.app.IActivityManager
 import android.app.IUidObserver
 import android.app.PendingIntent
 import android.platform.test.annotations.DisableFlags
-import android.platform.test.annotations.EnableFlags
 import android.testing.TestableLooper
 import android.view.LayoutInflater
 import android.view.View
 import android.widget.LinearLayout
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
-import com.android.systemui.Flags.FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.concurrency.fakeExecutor
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.log.logcatLogBuffer
-import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.data.repository.fakeStatusBarModeRepository
@@ -50,7 +47,6 @@ import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingC
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.window.StatusBarWindowController
 import com.android.systemui.statusbar.window.StatusBarWindowControllerStore
-import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.runCurrent
@@ -77,7 +73,6 @@ import org.mockito.kotlin.whenever
 class OngoingCallControllerTest : SysuiTestCase() {
     private val kosmos = Kosmos()
 
-    private val clock = kosmos.fakeSystemClock
     private val mainExecutor = kosmos.fakeExecutor
     private val testScope = kosmos.testScope
     private val statusBarModeRepository = kosmos.fakeStatusBarModeRepository
@@ -88,7 +83,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
 
     private val mockSwipeStatusBarAwayGestureHandler = mock<SwipeStatusBarAwayGestureHandler>()
     private val mockOngoingCallListener = mock<OngoingCallListener>()
-    private val mockActivityStarter = kosmos.activityStarter
     private val mockIActivityManager = mock<IActivityManager>()
     private val mockStatusBarWindowController = mock<StatusBarWindowController>()
     private val mockStatusBarWindowControllerStore = mock<StatusBarWindowControllerStore>()
@@ -111,8 +105,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 context,
                 ongoingCallRepository,
                 kosmos.activeNotificationsInteractor,
-                clock,
-                mockActivityStarter,
                 mainExecutor,
                 mockIActivityManager,
                 DumpManager(),
@@ -221,48 +213,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
                 contentIntent = null,
             )
         )
-    }
-
-    /** Regression test for b/192379214. */
-    @Test
-    @DisableFlags(android.app.Flags.FLAG_SORT_SECTION_BY_TIME, FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun notifRepoHasCallNotif_notificationWhenIsZero_timeHidden() {
-        setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Ongoing,
-                contentIntent = null,
-                whenTime = 0,
-            )
-        )
-
-        chipView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-        )
-
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
-            .isEqualTo(0)
-    }
-
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun notifRepoHasCallNotif_notificationWhenIsValid_timeShown() {
-        setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                callType = CallType.Ongoing,
-                whenTime = clock.currentTimeMillis(),
-            )
-        )
-
-        chipView.measure(
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-            View.MeasureSpec.makeMeasureSpec(0, View.MeasureSpec.UNSPECIFIED),
-        )
-
-        assertThat(chipView.findViewById<View>(R.id.ongoing_activity_chip_time)?.measuredWidth)
-            .isGreaterThan(0)
     }
 
     /** Regression test for b/194731244. */
@@ -491,52 +441,6 @@ class OngoingCallControllerTest : SysuiTestCase() {
         mainExecutor.runAllReady()
 
         verify(mockOngoingCallListener).onOngoingCallStateChanged(any())
-    }
-
-    /** Regression test for b/212467440. */
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun chipClicked_activityStarterTriggeredWithUnmodifiedIntent() {
-        val pendingIntent = mock<PendingIntent>()
-        setNotifOnRepo(
-            activeNotificationModel(
-                key = "notif",
-                uid = CALL_UID,
-                contentIntent = pendingIntent,
-                callType = CallType.Ongoing,
-            )
-        )
-
-        chipView.performClick()
-
-        // Ensure that the sysui didn't modify the notification's intent -- see b/212467440.
-        verify(mockActivityStarter).postStartActivityDismissingKeyguard(eq(pendingIntent), any())
-    }
-
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun callNotificationAdded_chipIsClickable() {
-        setCallNotifOnRepo()
-
-        assertThat(chipView.hasOnClickListeners()).isTrue()
-    }
-
-    @Test
-    @EnableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun callNotificationAdded_newChipsEnabled_chipNotClickable() {
-        setCallNotifOnRepo()
-
-        assertThat(chipView.hasOnClickListeners()).isFalse()
-    }
-
-    @Test
-    @DisableFlags(FLAG_STATUS_BAR_SCREEN_SHARING_CHIPS)
-    fun fullscreenIsTrue_chipStillClickable() {
-        setCallNotifOnRepo()
-        statusBarModeRepository.defaultDisplay.isInFullscreenMode.value = true
-        testScope.runCurrent()
-
-        assertThat(chipView.hasOnClickListeners()).isTrue()
     }
 
     @Test

@@ -392,14 +392,6 @@ flag {
 }
 
 flag {
-    name: "status_bar_screen_sharing_chips"
-    namespace: "systemui"
-    description: "Show chips on the left side of the status bar when a user is screen sharing, "
-        "recording, or casting"
-    bug: "332662551"
-}
-
-flag {
     name: "status_bar_show_audio_only_projection_chip"
     namespace: "systemui"
     description: "Show chip on the left side of the status bar when a user is only sharing *audio* "
