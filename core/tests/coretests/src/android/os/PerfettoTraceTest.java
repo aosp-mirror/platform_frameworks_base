@@ -28,7 +28,6 @@ import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.platform.test.flag.junit.CheckFlagsRule;
 import android.platform.test.flag.junit.DeviceFlagsValueProvider;
 import android.util.ArraySet;
-import android.util.Log;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
@@ -84,19 +83,9 @@ public class PerfettoTraceTest {
     private final Set<String> mDebugAnnotationNames = new ArraySet<>();
     private final Set<String> mTrackNames = new ArraySet<>();
 
-    static {
-        try {
-            System.loadLibrary("perfetto_trace_test_jni");
-            Log.i(TAG, "Successfully loaded trace_test native library");
-        } catch (UnsatisfiedLinkError ule) {
-            Log.w(TAG, "Could not load trace_test native library");
-        }
-    }
-
     @Before
     public void setUp() {
-        PerfettoTrace.register();
-        nativeRegisterPerfetto();
+        PerfettoTrace.register(true);
         FOO_CATEGORY.register();
 
         mCategoryNames.clear();
@@ -110,7 +99,7 @@ public class PerfettoTraceTest {
     public void testDebugAnnotations() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.instant(FOO_CATEGORY, "event")
                 .addFlow(2)
@@ -121,7 +110,7 @@ public class PerfettoTraceTest {
                 .addArg("string_val", FOO)
                 .emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -165,11 +154,11 @@ public class PerfettoTraceTest {
     public void testDebugAnnotationsWithLambda() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.instant(FOO_CATEGORY, "event").addArg("long_val", 123L).emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -200,7 +189,7 @@ public class PerfettoTraceTest {
     public void testNamedTrack() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.begin(FOO_CATEGORY, "event")
                 .usingNamedTrack(PerfettoTrace.getProcessTrackUuid(), FOO)
@@ -211,7 +200,7 @@ public class PerfettoTraceTest {
                 .usingNamedTrack(PerfettoTrace.getThreadTrackUuid(Process.myTid()), "bar")
                 .emit();
 
-        Trace trace = Trace.parseFrom(nativeStopTracing(ptr));
+        Trace trace = Trace.parseFrom(session.close());
 
         boolean hasTrackEvent = false;
         boolean hasTrackUuid = false;
@@ -248,7 +237,7 @@ public class PerfettoTraceTest {
     public void testProcessThreadNamedTrack() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.begin(FOO_CATEGORY, "event")
                 .usingProcessNamedTrack(FOO)
@@ -259,7 +248,7 @@ public class PerfettoTraceTest {
                 .usingThreadNamedTrack(Process.myTid(), "%s-%s", "bar", "stool")
                 .emit();
 
-        Trace trace = Trace.parseFrom(nativeStopTracing(ptr));
+        Trace trace = Trace.parseFrom(session.close());
 
         boolean hasTrackEvent = false;
         boolean hasTrackUuid = false;
@@ -296,13 +285,13 @@ public class PerfettoTraceTest {
     public void testCounterSimple() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.counter(FOO_CATEGORY, 16, FOO).emit();
 
         PerfettoTrace.counter(FOO_CATEGORY, 3.14, "bar").emit();
 
-        Trace trace = Trace.parseFrom(nativeStopTracing(ptr));
+        Trace trace = Trace.parseFrom(session.close());
 
         boolean hasTrackEvent = false;
         boolean hasCounterValue = false;
@@ -339,7 +328,7 @@ public class PerfettoTraceTest {
     public void testCounter() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.counter(FOO_CATEGORY, 16)
                 .usingCounterTrack(PerfettoTrace.getProcessTrackUuid(), FOO).emit();
@@ -348,7 +337,7 @@ public class PerfettoTraceTest {
                 .usingCounterTrack(PerfettoTrace.getThreadTrackUuid(Process.myTid()),
                                    "%s-%s", "bar", "stool").emit();
 
-        Trace trace = Trace.parseFrom(nativeStopTracing(ptr));
+        Trace trace = Trace.parseFrom(session.close());
 
         boolean hasTrackEvent = false;
         boolean hasCounterValue = false;
@@ -385,14 +374,14 @@ public class PerfettoTraceTest {
     public void testProcessThreadCounter() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.counter(FOO_CATEGORY, 16).usingProcessCounterTrack(FOO).emit();
 
         PerfettoTrace.counter(FOO_CATEGORY, 3.14)
                 .usingThreadCounterTrack(Process.myTid(), "%s-%s", "bar", "stool").emit();
 
-        Trace trace = Trace.parseFrom(nativeStopTracing(ptr));
+        Trace trace = Trace.parseFrom(session.close());
 
         boolean hasTrackEvent = false;
         boolean hasCounterValue = false;
@@ -429,7 +418,7 @@ public class PerfettoTraceTest {
     public void testProto() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.instant(FOO_CATEGORY, "event_proto")
                 .beginProto()
@@ -441,7 +430,7 @@ public class PerfettoTraceTest {
                 .endProto()
                 .emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -477,7 +466,7 @@ public class PerfettoTraceTest {
     public void testProtoNested() throws Exception {
         TraceConfig traceConfig = getTraceConfig(FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.instant(FOO_CATEGORY, "event_proto_nested")
                 .beginProto()
@@ -494,7 +483,7 @@ public class PerfettoTraceTest {
                 .endProto()
                 .emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -538,13 +527,13 @@ public class PerfettoTraceTest {
     public void testActivateTrigger() throws Exception {
         TraceConfig traceConfig = getTriggerTraceConfig(FOO, FOO);
 
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.instant(FOO_CATEGORY, "event_trigger").emit();
 
         PerfettoTrace.activateTrigger(FOO, 1000);
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -569,7 +558,7 @@ public class PerfettoTraceTest {
         TraceConfig traceConfig = getTraceConfig(BAR);
 
         Category barCategory = new Category(BAR);
-        long ptr = nativeStartTracing(traceConfig.toByteArray());
+        PerfettoTrace.Session session = new PerfettoTrace.Session(true, traceConfig.toByteArray());
 
         PerfettoTrace.instant(barCategory, "event")
                 .addArg("before", 1)
@@ -581,7 +570,7 @@ public class PerfettoTraceTest {
                 .addArg("after", 1)
                 .emit();
 
-        byte[] traceBytes = nativeStopTracing(ptr);
+        byte[] traceBytes = session.close();
 
         Trace trace = Trace.parseFrom(traceBytes);
 
@@ -602,10 +591,6 @@ public class PerfettoTraceTest {
         assertThat(mDebugAnnotationNames).contains("after");
         assertThat(mDebugAnnotationNames).doesNotContain("before");
     }
-
-    private static native long nativeStartTracing(byte[] config);
-    private static native void nativeRegisterPerfetto();
-    private static native byte[] nativeStopTracing(long ptr);
 
     private TrackEvent getTrackEvent(Trace trace, int idx) {
         int curIdx = 0;

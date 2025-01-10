@@ -154,14 +154,44 @@ public final class PerfettoTrace {
         }
     }
 
+    /**
+     * Manages a perfetto tracing session.
+     * Constructing this object with a config automatically starts a tracing session. Each session
+     * must be closed after use and then the resulting trace bytes can be read.
+     *
+     * The session could be in process or system wide, depending on {@code isBackendInProcess}.
+     * This functionality is intended for testing.
+     */
+    public static final class Session {
+        private final long mPtr;
+
+        /**
+         * Session ctor.
+         */
+        public Session(boolean isBackendInProcess, byte[] config) {
+            mPtr = native_start_session(isBackendInProcess, config);
+        }
+
+        /**
+         * Closes the session and returns the trace.
+         */
+        public byte[] close() {
+            return native_stop_session(mPtr);
+        }
+    }
+
     @CriticalNative
     private static native long native_get_process_track_uuid();
-
     @CriticalNative
     private static native long native_get_thread_track_uuid(long tid);
 
     @FastNative
     private static native void native_activate_trigger(String name, int ttlMs);
+    @FastNative
+    private static native void native_register(boolean isBackendInProcess);
+
+    private static native long native_start_session(boolean isBackendInProcess, byte[] config);
+    private static native byte[] native_stop_session(long ptr);
 
     /**
      * Writes a trace message to indicate a given section of code was invoked.
@@ -307,7 +337,7 @@ public final class PerfettoTrace {
     /**
      * Registers the process with Perfetto.
      */
-    public static void register() {
-        Trace.registerWithPerfetto();
+    public static void register(boolean isBackendInProcess) {
+        native_register(isBackendInProcess);
     }
 }

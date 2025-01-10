@@ -131,10 +131,6 @@ static jboolean android_os_Trace_nativeIsTagEnabled(jlong tag) {
     return tracing_perfetto::isTagEnabled(tag);
 }
 
-static void android_os_Trace_nativeRegisterWithPerfetto(JNIEnv* env) {
-    tracing_perfetto::registerWithPerfetto();
-}
-
 static const JNINativeMethod gTraceMethods[] = {
         /* name, signature, funcPtr */
         {"nativeSetAppTracingAllowed", "(Z)V", (void*)android_os_Trace_nativeSetAppTracingAllowed},
@@ -157,7 +153,6 @@ static const JNINativeMethod gTraceMethods[] = {
         {"nativeInstant", "(JLjava/lang/String;)V", (void*)android_os_Trace_nativeInstant},
         {"nativeInstantForTrack", "(JLjava/lang/String;Ljava/lang/String;)V",
          (void*)android_os_Trace_nativeInstantForTrack},
-        {"nativeRegisterWithPerfetto", "()V", (void*)android_os_Trace_nativeRegisterWithPerfetto},
 
         // ----------- @CriticalNative  ----------------
         {"nativeIsTagEnabled", "(J)Z", (void*)android_os_Trace_nativeIsTagEnabled},
