@@ -137,6 +137,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
+import com.android.internal.pm.RoSystemFeatures;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
@@ -1330,7 +1331,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         mContext.enforceCallingOrSelfPermission(
                 Manifest.permission.MANAGE_WEAK_ESCROW_TOKEN,
                 "Requires MANAGE_WEAK_ESCROW_TOKEN permission.");
-        if (!mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+        if (!RoSystemFeatures.hasFeatureAutomotive(mContext)) {
             throw new IllegalArgumentException(
                     "Weak escrow token are only for automotive devices.");
         }
@@ -3622,7 +3623,7 @@ public class LockSettingsService extends ILockSettings.Stub {
         }
 
         // Escrow tokens are enabled on automotive builds.
-        if (mContext.getPackageManager().hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)) {
+        if (RoSystemFeatures.hasFeatureAutomotive(mContext)) {
             return;
         }
 
