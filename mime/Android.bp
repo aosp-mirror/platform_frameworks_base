@@ -49,6 +49,17 @@ java_library {
     ],
 }
 
+java_library {
+    name: "mimemap-testing-alt",
+    defaults: ["mimemap-defaults"],
+    static_libs: ["mimemap-testing-alt-res.jar"],
+    jarjar_rules: "jarjar-rules-alt.txt",
+    visibility: [
+        "//cts/tests/tests/mimemap:__subpackages__",
+        "//frameworks/base:__subpackages__",
+    ],
+}
+
 // The mimemap-res.jar and mimemap-testing-res.jar genrules produce a .jar that
 // has the resource file in a subdirectory res/ and testres/, respectively.
 // They need to be in different paths because one of them ends up in a
@@ -86,6 +97,19 @@ java_genrule {
     cmd: "mkdir $(genDir)/testres/ && cp $(in) $(genDir)/testres/ && $(location soong_zip) -C $(genDir) -o $(out) -D $(genDir)/testres/",
 }
 
+// The same as mimemap-testing-res.jar except that the resources are placed in a different directory.
+// They get bundled with CTS so that CTS can compare a device's MimeMap implementation vs.
+// the stock Android one from when CTS was built.
+java_genrule {
+    name: "mimemap-testing-alt-res.jar",
+    tools: [
+        "soong_zip",
+    ],
+    srcs: [":mime.types.minimized-alt"],
+    out: ["mimemap-testing-alt-res.jar"],
+    cmd: "mkdir $(genDir)/testres-alt/ && cp $(in) $(genDir)/testres-alt/ && $(location soong_zip) -C $(genDir) -o $(out) -D $(genDir)/testres-alt/",
+}
+
 // Combination of all *mime.types.minimized resources.
 filegroup {
     name: "mime.types.minimized",
@@ -94,6 +118,19 @@ filegroup {
     ],
     srcs: [
         ":debian.mime.types.minimized",
+        ":android.mime.types.minimized",
+        ":vendor.mime.types.minimized",
+    ],
+}
+
+// Combination of all *mime.types.minimized resources.
+filegroup {
+    name: "mime.types.minimized-alt",
+    visibility: [
+        "//visibility:private",
+    ],
+    srcs: [
+        ":debian.mime.types.minimized-alt",
         ":android.mime.types.minimized",
         ":vendor.mime.types.minimized",
     ],
