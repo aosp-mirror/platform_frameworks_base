@@ -413,8 +413,8 @@ class TextFileFilterPolicyParser {
     }
 
     private fun parseClass(fields: Array<String>) {
-        if (fields.size < 3) {
-            throw ParseException("Class ('c') expects 2 fields.")
+        if (fields.size <= 1) {
+            throw ParseException("Class ('c') expects 1 or 2 fields.")
         }
         val className = fields[1]
 
@@ -424,7 +424,9 @@ class TextFileFilterPolicyParser {
         // :aidl, etc?
         val classType = resolveSpecialClass(className)
 
-        if (fields[2].startsWith("!")) {
+        val policyStr = if (fields.size > 2) { fields[2] } else { "" }
+
+        if (policyStr.startsWith("!")) {
             if (classType != SpecialClass.NotSpecial) {
                 // We could support it, but not needed at least for now.
                 throw ParseException(
@@ -432,10 +434,10 @@ class TextFileFilterPolicyParser {
                 )
             }
             // It's a redirection class.
-            val toClass = fields[2].substring(1)
+            val toClass = policyStr.substring(1)
 
             processor.onRedirectionClass(className, toClass)
-        } else if (fields[2].startsWith("~")) {
+        } else if (policyStr.startsWith("~")) {
             if (classType != SpecialClass.NotSpecial) {
                 // We could support it, but not needed at least for now.
                 throw ParseException(
@@ -443,11 +445,23 @@ class TextFileFilterPolicyParser {
                 )
             }
             // It's a class-load hook
-            val callback = fields[2].substring(1)
+            val callback = policyStr.substring(1)
 
             processor.onClassLoadHook(className, callback)
         } else {
-            val policy = parsePolicy(fields[2])
+            // Special case: if it's a class directive with no policy, then it encloses
+            // members, but we don't apply any policy to the class itself.
+            // This is only allowed in a not-special case.
+            if (policyStr == "") {
+                if (classType == SpecialClass.NotSpecial && superClass == null) {
+                    currentClassName = className
+                    processor.onSimpleClassStart(className)
+                    return
+                }
+                throw ParseException("Special class or subclass directive must have a policy")
+            }
+
+            val policy = parsePolicy(policyStr)
             if (!policy.isUsableWithClasses) {
                 throw ParseException("Class can't have policy '$policy'")
             }
