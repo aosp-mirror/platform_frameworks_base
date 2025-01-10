@@ -21,6 +21,7 @@ import static android.bluetooth.BluetoothAdapter.ACTIVE_DEVICE_ALL;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_ALLOWED;
 import static android.bluetooth.BluetoothProfile.CONNECTION_POLICY_FORBIDDEN;
 
+import android.annotation.CallbackExecutor;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothCsipSetCoordinator;
@@ -39,6 +40,7 @@ import com.android.settingslib.R;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Executor;
 
 public class LeAudioProfile implements LocalBluetoothProfile {
     private static final String TAG = "LeAudioProfile";
@@ -315,6 +317,78 @@ public class LeAudioProfile implements LocalBluetoothProfile {
             return BluetoothLeAudio.AUDIO_LOCATION_INVALID;
         }
         return mService.getAudioLocation(device);
+    }
+
+    /**
+     * Sets the fallback group id when broadcast switches to unicast.
+     *
+     * @param groupId the target fallback group id
+     */
+    public void setBroadcastToUnicastFallbackGroup(int groupId) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot set fallback group: " + groupId);
+            return;
+        }
+
+        mService.setBroadcastToUnicastFallbackGroup(groupId);
+    }
+
+    /**
+     * Gets the fallback group id when broadcast switches to unicast.
+     *
+     * @return current fallback group id
+     */
+    public int getBroadcastToUnicastFallbackGroup() {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot get fallback group.");
+            return BluetoothCsipSetCoordinator.GROUP_ID_INVALID;
+        }
+        return mService.getBroadcastToUnicastFallbackGroup();
+    }
+
+    /**
+     * Registers a {@link BluetoothLeAudio.Callback} that will be invoked during the
+     * operation of this profile.
+     *
+     * Repeated registration of the same <var>callback</var> object after the first call to this
+     * method will result with IllegalArgumentException being thrown, even when the
+     * <var>executor</var> is different. API caller would have to call
+     * {@link #unregisterCallback(BluetoothLeAudio.Callback)} with the same callback object
+     * before registering it again.
+     *
+     * @param executor an {@link Executor} to execute given callback
+     * @param callback user implementation of the {@link BluetoothLeAudio.Callback}
+     * @throws NullPointerException if a null executor, or callback is given, or
+     *                              IllegalArgumentException if the same <var>callback</var> is
+     *                              already registered.
+     */
+    public void registerCallback(
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull BluetoothLeAudio.Callback callback) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot register callback.");
+            return;
+        }
+        mService.registerCallback(executor, callback);
+    }
+
+    /**
+     * Unregisters the specified {@link BluetoothLeAudio.Callback}.
+     * <p>The same {@link BluetoothLeAudio.Callback} object used when calling
+     * {@link #registerCallback(Executor, BluetoothLeAudio.Callback)} must be used.
+     *
+     * <p>Callbacks are automatically unregistered when application process goes away
+     *
+     * @param callback user implementation of the {@link BluetoothLeAudio.Callback}
+     * @throws NullPointerException when callback is null or IllegalArgumentException when no
+     *                              callback is registered
+     */
+    public void unregisterCallback(@NonNull BluetoothLeAudio.Callback callback) {
+        if (mService == null) {
+            Log.w(TAG, "Proxy not attached to service. Cannot unregister callback.");
+            return;
+        }
+        mService.unregisterCallback(callback);
     }
 
     @RequiresApi(Build.VERSION_CODES.S)
