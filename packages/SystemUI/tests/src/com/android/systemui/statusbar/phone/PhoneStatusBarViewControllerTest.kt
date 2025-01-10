@@ -62,7 +62,6 @@ import com.android.systemui.unfold.SysUIUnfoldComponent
 import com.android.systemui.unfold.config.UnfoldTransitionConfig
 import com.android.systemui.unfold.util.ScopedUnfoldTransitionProgressProvider
 import com.android.systemui.user.ui.viewmodel.StatusBarUserChipViewModel
-import com.android.systemui.util.mockito.any
 import com.android.systemui.util.mockito.argumentCaptor
 import com.android.systemui.util.mockito.whenever
 import com.android.systemui.util.view.ViewUtil
@@ -74,7 +73,6 @@ import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentCaptor
-import org.mockito.ArgumentMatchers.eq
 import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.never
@@ -82,6 +80,8 @@ import org.mockito.Mockito.spy
 import org.mockito.Mockito.verify
 import org.mockito.Mockito.`when`
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -443,25 +443,28 @@ class PhoneStatusBarViewControllerTest : SysuiTestCase() {
     @Test
     @EnableFlags(AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
     fun onTouch_actionDown_propagatesToDisplayPolicy() {
-        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        controller.onTouch(event)
 
-        verify(statusBarTouchShadeDisplayPolicy).onStatusBarTouched(eq(mContext.displayId))
+        verify(statusBarTouchShadeDisplayPolicy).onStatusBarTouched(eq(event), any())
     }
 
     @Test
     @EnableFlags(AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
     fun onTouch_actionUp_notPropagatesToDisplayPolicy() {
-        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0))
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_UP, 0f, 0f, 0)
+        controller.onTouch(event)
 
-        verify(statusBarTouchShadeDisplayPolicy, never()).onStatusBarTouched(any())
+        verify(statusBarTouchShadeDisplayPolicy, never()).onStatusBarTouched(any(), any())
     }
 
     @Test
     @DisableFlags(AconfigFlags.FLAG_SHADE_WINDOW_GOES_AROUND)
     fun onTouch_shadeWindowGoesAroundDisabled_notPropagatesToDisplayPolicy() {
-        controller.onTouch(MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0))
+        val event = MotionEvent.obtain(0L, 0L, MotionEvent.ACTION_DOWN, 0f, 0f, 0)
+        controller.onTouch(event)
 
-        verify(statusBarTouchShadeDisplayPolicy, never()).onStatusBarTouched(any())
+        verify(statusBarTouchShadeDisplayPolicy, never()).onStatusBarTouched(eq(event), any())
     }
 
     @Test

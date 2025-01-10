@@ -234,7 +234,7 @@ private constructor(
             )
         }
         if (ShadeWindowGoesAround.isEnabled && event.action == MotionEvent.ACTION_DOWN) {
-            lazyStatusBarShadeDisplayPolicy.get().onStatusBarTouched(context.displayId)
+            lazyStatusBarShadeDisplayPolicy.get().onStatusBarTouched(event, mView.width)
         }
     }
 

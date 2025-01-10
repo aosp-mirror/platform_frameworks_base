@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.display
 
+import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractor.ShadeElement
 import dagger.Binds
 import dagger.Module
 import dagger.multibindings.IntoSet
@@ -33,10 +34,32 @@ interface ShadeDisplayPolicy {
     val displayId: StateFlow<Int>
 }
 
+/** Return the latest element the user intended to expand in the shade (notifications or QS). */
+interface ShadeExpansionIntent {
+    /**
+     * Returns the latest element the user intended to expand in the shade (notifications or QS).
+     *
+     * When the shade moves to a different display (e.g., due to a touch on the status bar of an
+     * external display), it's first collapsed and then re-expanded on the target display.
+     *
+     * If the user was trying to open a specific element (QS or notifications) when the shade was on
+     * the original display, that intention might be lost during the collapse/re-expand transition.
+     * This is used to preserve the user's intention, ensuring the correct element is expanded on
+     * the target display.
+     *
+     * Note that the expansion intent is kept for a very short amount of time (ideally, just a bit
+     * above the time it takes for the shade to collapse)
+     */
+    fun consumeExpansionIntent(): ShadeElement?
+}
+
 @Module
 interface ShadeDisplayPolicyModule {
 
     @Binds fun provideDefaultPolicy(impl: StatusBarTouchShadeDisplayPolicy): ShadeDisplayPolicy
+
+    @Binds
+    fun provideShadeExpansionIntent(impl: StatusBarTouchShadeDisplayPolicy): ShadeExpansionIntent
 
     @IntoSet
     @Binds
