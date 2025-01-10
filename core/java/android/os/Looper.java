@@ -70,6 +70,13 @@ public final class Looper {
 
     private static final String TAG = "Looper";
 
+    private static class NoImagePreloadHolder {
+        // Enable/Disable verbose logging with a system prop. e.g.
+        // adb shell 'setprop log.looper.slow.verbose false && stop && start'
+        private static final boolean sVerboseLogging =
+                SystemProperties.getBoolean("log.looper.slow.verbose", false);
+    }
+
     // sThreadLocal.get() will return null unless you've called prepare().
     @UnsupportedAppUsage
     static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();
@@ -246,17 +253,21 @@ public final class Looper {
             }
         }
         if (logSlowDelivery) {
+            boolean slow = false;
+
+            if (!me.mSlowDeliveryDetected || NoImagePreloadHolder.sVerboseLogging) {
+                slow = showSlowLog(slowDeliveryThresholdMs, msg.when, dispatchStart,
+                        "delivery", msg);
+            }
             if (me.mSlowDeliveryDetected) {
-                if ((dispatchStart - msg.when) <= 10) {
+                if (!slow && (dispatchStart - msg.when) <= 10) {
                     Slog.w(TAG, "Drained");
                     me.mSlowDeliveryDetected = false;
                 }
-            } else {
-                if (showSlowLog(slowDeliveryThresholdMs, msg.when, dispatchStart, "delivery",
-                        msg)) {
-                    // Once we write a slow delivery log, suppress until the queue drains.
-                    me.mSlowDeliveryDetected = true;
-                }
+            } else if (slow) {
+                // A slow delivery is detected, suppressing further logs unless verbose logging
+                // is enabled.
+                me.mSlowDeliveryDetected = true;
             }
         }
         if (logSlowDispatch) {
