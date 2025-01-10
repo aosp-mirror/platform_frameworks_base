@@ -34,6 +34,7 @@ import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.sysui.UserChangeListener
 import java.io.PrintWriter
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 /** Manages per-user DesktopRepository instances. */
 class DesktopUserRepositories(
@@ -43,7 +44,7 @@ class DesktopUserRepositories(
     private val persistentRepository: DesktopPersistentRepository,
     private val repositoryInitializer: DesktopRepositoryInitializer,
     @ShellMainThread private val mainCoroutineScope: CoroutineScope,
-    userManager: UserManager,
+    private val userManager: UserManager,
 ) : UserChangeListener {
     private var userId: Int
     private var userIdToProfileIdsMap: MutableMap<Int, List<Int>> = mutableMapOf()
@@ -100,6 +101,9 @@ class DesktopUserRepositories(
     override fun onUserChanged(newUserId: Int, userContext: Context) {
         logD("onUserChanged previousUserId=%d, newUserId=%d", userId, newUserId)
         userId = newUserId
+        if (Flags.enableDesktopWindowingHsum()) {
+            sanitizeUsers()
+        }
     }
 
     override fun onUserProfilesChanged(profiles: MutableList<UserInfo>) {
@@ -110,8 +114,32 @@ class DesktopUserRepositories(
         }
     }
 
+    private fun sanitizeUsers() {
+        val aliveUserIds = userManager.getAliveUsers().map { it.id }
+        val usersToDelete = userIdToProfileIdsMap.keys.filterNot { it in aliveUserIds }
+
+        usersToDelete.forEach { uid ->
+            userIdToProfileIdsMap.remove(uid)
+            desktopRepoByUserId.remove(uid)
+        }
+        mainCoroutineScope.launch {
+            try {
+                persistentRepository.removeUsers(usersToDelete)
+            } catch (exception: Exception) {
+                logE(
+                    "An exception occurred while updating the persistent repository \n%s",
+                    exception.stackTrace,
+                )
+            }
+        }
+    }
+
     private fun logD(msg: String, vararg arguments: Any?) {
         ProtoLog.d(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
+    }
+
+    private fun logE(msg: String, vararg arguments: Any?) {
+        ProtoLog.e(WM_SHELL_DESKTOP_MODE, "%s: $msg", TAG, *arguments)
     }
 
     companion object {
