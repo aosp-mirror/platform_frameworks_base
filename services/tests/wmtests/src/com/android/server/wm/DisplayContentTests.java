@@ -1571,42 +1571,6 @@ public class DisplayContentTests extends WindowTestsBase {
                 is(Configuration.ORIENTATION_PORTRAIT));
     }
 
-    @Test
-    public void testHybridRotationAnimation() {
-        final DisplayContent displayContent = mDefaultDisplay;
-        final WindowState statusBar = newWindowBuilder("statusBar", TYPE_STATUS_BAR).build();
-        final WindowState navBar = newWindowBuilder("navBar", TYPE_NAVIGATION_BAR).build();
-        final WindowState app = newWindowBuilder("app", TYPE_BASE_APPLICATION).build();
-        final WindowState[] windows = { statusBar, navBar, app };
-        makeWindowVisible(windows);
-        final DisplayPolicy displayPolicy = displayContent.getDisplayPolicy();
-        displayPolicy.addWindowLw(statusBar, statusBar.mAttrs);
-        displayPolicy.addWindowLw(navBar, navBar.mAttrs);
-        final ScreenRotationAnimation rotationAnim = new ScreenRotationAnimation(displayContent,
-                displayContent.getRotation());
-        spyOn(rotationAnim);
-        // Assume that the display rotation is changed so it is frozen in preparation for animation.
-        doReturn(true).when(rotationAnim).hasScreenshot();
-        displayContent.getDisplayRotation().setRotation((displayContent.getRotation() + 1) % 4);
-        displayContent.setRotationAnimation(rotationAnim);
-        // The fade rotation animation also starts to hide some non-app windows.
-        assertNotNull(displayContent.getAsyncRotationController());
-        assertTrue(statusBar.isAnimating(PARENTS, ANIMATION_TYPE_TOKEN_TRANSFORM));
-
-        for (WindowState w : windows) {
-            w.setOrientationChanging(true);
-        }
-        // The display only waits for the app window to unfreeze.
-        assertFalse(displayContent.shouldSyncRotationChange(statusBar));
-        assertFalse(displayContent.shouldSyncRotationChange(navBar));
-        assertTrue(displayContent.shouldSyncRotationChange(app));
-        // If all windows animated by fade rotation animation have done the orientation change,
-        // the animation controller should be cleared.
-        statusBar.setOrientationChanging(false);
-        navBar.setOrientationChanging(false);
-        assertNull(displayContent.getAsyncRotationController());
-    }
-
     @SetupWindows(addWindows = { W_ACTIVITY, W_WALLPAPER, W_STATUS_BAR, W_NAVIGATION_BAR,
             W_INPUT_METHOD, W_NOTIFICATION_SHADE })
     @Test

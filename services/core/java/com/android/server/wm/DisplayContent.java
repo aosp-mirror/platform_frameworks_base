@@ -193,7 +193,6 @@ import android.os.Message;
 import android.os.PowerManager;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
-import android.os.SystemClock;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -2183,12 +2182,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    /** Returns {@code true} if the screen rotation animation needs to wait for the window. */
-    boolean shouldSyncRotationChange(WindowState w) {
-        final AsyncRotationController controller = mAsyncRotationController;
-        return controller == null || !controller.isAsync(w);
-    }
-
     void notifyInsetsChanged(Consumer<WindowState> dispatchInsetsChanged) {
         if (mFixedRotationLaunchingApp != null) {
             // The insets state of fixed rotation app is a rotated copy. Make sure the visibilities
@@ -2275,10 +2268,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         if (!shellTransitions) {
             forAllWindows(w -> {
                 w.seamlesslyRotateIfAllowed(transaction, oldRotation, rotation, rotateSeamlessly);
-                if (!rotateSeamlessly && w.mHasSurface) {
-                    ProtoLog.v(WM_DEBUG_ORIENTATION, "Set mOrientationChanging of %s", w);
-                    w.setOrientationChanging(true);
-                }
             }, true /* traverseTopToBottom */);
             mPinnedTaskController.startSeamlessRotationIfNeeded(transaction, oldRotation, rotation);
             if (!mDisplayRotation.hasSeamlessRotatingWindow()) {
@@ -5047,15 +5036,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         Slog.w(TAG_WM, "Window freeze timeout expired.");
         mWmService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
 
-        forAllWindows(w -> {
-            if (!w.getOrientationChanging()) {
-                return;
-            }
-            w.orientationChangeTimedOut();
-            w.mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
-                    - mWmService.mDisplayFreezeTime);
-            Slog.w(TAG_WM, "Force clearing orientation change: " + w);
-        }, true /* traverseTopToBottom */);
         mWmService.mWindowPlacerLocked.performSurfacePlacement();
     }
 

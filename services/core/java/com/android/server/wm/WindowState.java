@@ -147,7 +147,6 @@ import static com.android.server.wm.WindowManagerService.MY_PID;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
-import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
 import static com.android.server.wm.WindowStateAnimator.COMMIT_DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.HAS_DRAWN;
@@ -591,25 +590,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     /** Completely remove from window manager after exit animation? */
     boolean mRemoveOnExit;
 
-    /**
-     * Set when the orientation is changing and this window has not yet
-     * been updated for the new orientation.
-     */
-    private boolean mOrientationChanging;
-
     /** The time when the window was last requested to redraw for orientation change. */
     private long mOrientationChangeRedrawRequestTime;
-
-    /**
-     * Sometimes in addition to the mOrientationChanging
-     * flag we report that the orientation is changing
-     * due to a mismatch in current and reported configuration.
-     *
-     * In the case of timeout we still need to make sure we
-     * leave the orientation changing state though, so we
-     * use this as a special time out escape hatch.
-     */
-    private boolean mOrientationChangeTimedOut;
 
     /**
      * The orientation during the last visible call to relayout. If our
@@ -1496,8 +1478,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             // Reset the drawn state if the window need to redraw for the change, so the transition
             // can wait until it has finished drawing to start.
-            if ((configChanged || getOrientationChanging() || dragResizingChanged)
-                    && isVisibleRequested()) {
+            if ((configChanged || dragResizingChanged) && isVisibleRequested()) {
                 winAnimator.mDrawState = DRAW_PENDING;
                 if (mActivityRecord != null) {
                     mActivityRecord.clearAllDrawn();
@@ -1511,60 +1492,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                 ProtoLog.v(WM_DEBUG_RESIZE, "Resizing window %s", this);
                 mWmService.mResizingWindows.add(this);
             }
-        } else if (getOrientationChanging()) {
-            if (isDrawn()) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Orientation not waiting for draw in %s, surfaceController %s", this,
-                        winAnimator.mSurfaceControl);
-                setOrientationChanging(false);
-                mLastFreezeDuration = (int)(SystemClock.elapsedRealtime()
-                        - mWmService.mDisplayFreezeTime);
-            }
         }
     }
 
     private boolean frameChanged() {
         return !mWindowFrames.mFrame.equals(mWindowFrames.mLastFrame);
-    }
-
-    boolean getOrientationChanging() {
-        if (mTransitionController.isShellTransitionsEnabled()) {
-            // Shell transition doesn't use the methods for display frozen state.
-            return false;
-        }
-        // In addition to the local state flag, we must also consider the difference in the last
-        // reported configuration vs. the current state. If the client code has not been informed of
-        // the change, logic dependent on having finished processing the orientation, such as
-        // unfreezing, could be improperly triggered.
-        // TODO(b/62846907): Checking against {@link mLastReportedConfiguration} could be flaky as
-        //                   this is not necessarily what the client has processed yet. Find a
-        //                   better indicator consistent with the client.
-        return (mOrientationChanging || (isVisible()
-                && getConfiguration().orientation != getLastReportedConfiguration().orientation))
-                && !mSeamlesslyRotated
-                && !mOrientationChangeTimedOut;
-    }
-
-    void setOrientationChanging(boolean changing) {
-        mOrientationChangeTimedOut = false;
-        if (mOrientationChanging == changing) {
-            return;
-        }
-        mOrientationChanging = changing;
-        if (changing) {
-            mLastFreezeDuration = 0;
-            if (mWmService.mRoot.mOrientationChangeComplete
-                    && mDisplayContent.shouldSyncRotationChange(this)) {
-                mWmService.mRoot.mOrientationChangeComplete = false;
-            }
-        } else {
-            // The orientation change is completed. If it was hidden by the animation, reshow it.
-            mDisplayContent.finishAsyncRotation(mToken);
-        }
-    }
-
-    void orientationChangeTimedOut() {
-        mOrientationChangeTimedOut = true;
     }
 
     @Override
@@ -3340,12 +3272,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         mAppFreezing = false;
 
-        if (mHasSurface && !getOrientationChanging()
-                && mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_TIMEOUT) {
-            ProtoLog.v(WM_DEBUG_ORIENTATION,
-                    "set mOrientationChanging of %s", this);
-            setOrientationChanging(true);
-        }
         mLastFreezeDuration = 0;
         setDisplayLayoutNeeded();
         return true;
@@ -4251,9 +4177,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " mDestroying=" + mDestroying
                     + " mRemoved=" + mRemoved);
         }
-        if (getOrientationChanging() || mAppFreezing) {
-            pw.println(prefix + "mOrientationChanging=" + mOrientationChanging
-                    + " configOrientationChanging="
+        if (mAppFreezing) {
+            pw.println(prefix + " configOrientationChanging="
                     + (getLastReportedConfiguration().orientation != getConfiguration().orientation)
                     + " mAppFreezing=" + mAppFreezing);
         }

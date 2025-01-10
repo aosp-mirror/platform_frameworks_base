@@ -29,7 +29,6 @@ import static android.view.WindowManager.TRANSIT_OLD_NONE;
 
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_DRAW;
-import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_STARTING_WINDOW;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_SURFACE_ALLOC;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_SHOW_TRANSACTIONS;
@@ -440,13 +439,6 @@ class WindowStateAnimator {
     void prepareSurfaceLocked(SurfaceControl.Transaction t) {
         final WindowState w = mWin;
         if (!hasSurface()) {
-
-            // There is no need to wait for an animation change if our window is gone for layout
-            // already as we'll never be visible.
-            if (w.getOrientationChanging() && w.isGoneForLayout()) {
-                ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change skips hidden %s", w);
-                w.setOrientationChanging(false);
-            }
             return;
         }
 
@@ -456,16 +448,6 @@ class WindowStateAnimator {
             hide(t, "prepareSurfaceLocked");
             if (!w.mIsWallpaper || !mService.mFlags.mEnsureWallpaperInTransitions) {
                 mWallpaperControllerLocked.hideWallpapers(w);
-            }
-
-            // If we are waiting for this window to handle an orientation change. If this window is
-            // really hidden (gone for layout), there is no point in still waiting for it.
-            // Note that this does introduce a potential glitch if the window becomes unhidden
-            // before it has drawn for the new orientation.
-            if (w.getOrientationChanging() && w.isGoneForLayout()) {
-                w.setOrientationChanging(false);
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Orientation change skips hidden %s", w);
             }
         } else if (mLastAlpha != mShownAlpha
                 || mLastHidden) {
@@ -493,20 +475,6 @@ class WindowStateAnimator {
                         }
                     }
                 }
-            }
-        }
-
-        if (w.getOrientationChanging()) {
-            if (!w.isDrawn()) {
-                if (w.mDisplayContent.shouldSyncRotationChange(w)) {
-                    w.mWmService.mRoot.mOrientationChangeComplete = false;
-                    mAnimator.mLastWindowFreezeSource = w;
-                }
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Orientation continue waiting for draw in %s", w);
-            } else {
-                w.setOrientationChanging(false);
-                ProtoLog.v(WM_DEBUG_ORIENTATION, "Orientation change complete in %s", w);
             }
         }
     }
