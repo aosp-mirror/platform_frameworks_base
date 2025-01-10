@@ -18,17 +18,25 @@ package com.android.systemui.accessibility.floatingmenu;
 
 import static android.app.UiModeManager.MODE_NIGHT_YES;
 
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_COMPONENT_NAME;
+import static com.android.internal.accessibility.AccessibilityShortcutController.MAGNIFICATION_CONTROLLER_NAME;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.UiModeManager;
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.graphics.drawable.GradientDrawable;
+import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
 import android.view.WindowManager;
@@ -37,6 +45,8 @@ import android.view.accessibility.AccessibilityManager;
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
 
+import com.android.internal.accessibility.common.ShortcutConstants;
+import com.android.internal.accessibility.dialog.AccessibilityTarget;
 import com.android.settingslib.bluetooth.HearingAidDeviceManager;
 import com.android.systemui.Flags;
 import com.android.systemui.Prefs;
@@ -54,6 +64,9 @@ import org.mockito.Mock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /** Tests for {@link MenuView}. */
 @RunWith(AndroidJUnit4.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
@@ -63,16 +76,23 @@ public class MenuViewTest extends SysuiTestCase {
     private int mNightMode;
     private UiModeManager mUiModeManager;
     private MenuView mMenuView;
+    private MenuView mMenuViewSpy;
     private String mLastPosition;
     private MenuViewAppearance mStubMenuViewAppearance;
+    private MenuViewModel mMenuViewModel;
+    private final List<String> mShortcutTargets = new ArrayList<>();
 
     @Rule
     public MockitoRule mockito = MockitoJUnit.rule();
 
     @Mock
     private AccessibilityManager mAccessibilityManager;
+
     @Mock
     private HearingAidDeviceManager mHearingAidDeviceManager;
+
+    @Mock
+    private MenuView.OnTargetFeaturesChangeListener mOnTargetFeaturesChangeListener;
 
     private SysuiTestableContext mSpyContext;
 
@@ -91,22 +111,38 @@ public class MenuViewTest extends SysuiTestCase {
         mSpyContext = spy(mContext);
         doNothing().when(mSpyContext).startActivity(any());
 
+        mContext.addMockSystemService(Context.ACCESSIBILITY_SERVICE, mAccessibilityManager);
+        mShortcutTargets.add(MAGNIFICATION_CONTROLLER_NAME);
+        doReturn(mShortcutTargets)
+                .when(mAccessibilityManager)
+                .getAccessibilityShortcutTargets(anyInt());
+
         final SecureSettings secureSettings = TestUtils.mockSecureSettings(mContext);
-        final MenuViewModel stubMenuViewModel = new MenuViewModel(mContext, mAccessibilityManager,
-                secureSettings, mHearingAidDeviceManager);
+        mMenuViewModel =
+                new MenuViewModel(
+                    mContext, mAccessibilityManager, secureSettings, mHearingAidDeviceManager);
         final WindowManager stubWindowManager = mContext.getSystemService(WindowManager.class);
         mStubMenuViewAppearance = new MenuViewAppearance(mSpyContext, stubWindowManager);
-        mMenuView = spy(new MenuView(mSpyContext, stubMenuViewModel, mStubMenuViewAppearance,
-                secureSettings));
+        mMenuView =
+                new MenuView(mSpyContext, mMenuViewModel, mStubMenuViewAppearance, secureSettings);
+        mMenuView.setOnTargetFeaturesChangeListener(mOnTargetFeaturesChangeListener);
         mLastPosition = Prefs.getString(mSpyContext,
                 Prefs.Key.ACCESSIBILITY_FLOATING_MENU_POSITION, /* defaultValue= */ null);
+
+        mMenuViewSpy =
+                spy(
+                        new MenuView(
+                                mSpyContext,
+                                mMenuViewModel,
+                                mStubMenuViewAppearance,
+                                secureSettings));
     }
 
     @Test
     public void onConfigurationChanged_updateViewModel() {
-        mMenuView.onConfigurationChanged(/* newConfig= */ null);
+        mMenuViewSpy.onConfigurationChanged(/* newConfig= */ null);
 
-        verify(mMenuView).loadLayoutResources();
+        verify(mMenuViewSpy).loadLayoutResources();
     }
 
     @Test
@@ -179,6 +215,75 @@ public class MenuViewTest extends SysuiTestCase {
         assertThat(radiiAnimator.isStarted()).isTrue();
     }
 
+    @Test
+    @DisableFlags(Flags.FLAG_FLOATING_MENU_NOTIFY_TARGETS_CHANGED_ON_STRICT_DIFF)
+    public void onTargetFeaturesChanged_listenerCalled_flagDisabled() {
+        // Call show() to start observing the target features change listener.
+        mMenuView.show();
+
+        // The target features change listener should be called when the observer is added.
+        verify(mOnTargetFeaturesChangeListener, times(1)).onChange(any());
+
+        // When the target features list changes, the listener should be called.
+        mMenuViewModel.onTargetFeaturesChanged(
+                List.of(
+                        new TestAccessibilityTarget(mContext, 123),
+                        new TestAccessibilityTarget(mContext, 456)));
+        verify(mOnTargetFeaturesChangeListener, times(2)).onChange(any());
+
+        // Double check that when the target features list changes, the listener should be called.
+        List<AccessibilityTarget> newFeaturesList =
+                List.of(
+                        new TestAccessibilityTarget(mContext, 123),
+                        new TestAccessibilityTarget(mContext, 789),
+                        new TestAccessibilityTarget(mContext, 456));
+        mMenuViewModel.onTargetFeaturesChanged(newFeaturesList);
+        verify(mOnTargetFeaturesChangeListener, times(3)).onChange(any());
+
+        // When the target features list doesn't change, the listener will still be called.
+        mMenuViewModel.onTargetFeaturesChanged(newFeaturesList);
+        verify(mOnTargetFeaturesChangeListener, times(4)).onChange(any());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_FLOATING_MENU_NOTIFY_TARGETS_CHANGED_ON_STRICT_DIFF)
+    public void onTargetFeaturesChanged_listenerCalled_flagEnabled() {
+        // Call show() to start observing the target features change listener.
+        mMenuView.show();
+
+        // The target features change listener should be called when the observer is added.
+        verify(mOnTargetFeaturesChangeListener, times(1)).onChange(any());
+
+        // When the target features list changes, the listener should be called.
+        mMenuViewModel.onTargetFeaturesChanged(
+                List.of(
+                        new TestAccessibilityTarget(mContext, 123),
+                        new TestAccessibilityTarget(mContext, 456)));
+        verify(mOnTargetFeaturesChangeListener, times(2)).onChange(any());
+
+        // Double check that when the target features list changes, the listener should be called.
+        List<AccessibilityTarget> newFeaturesList =
+                List.of(
+                        new TestAccessibilityTarget(mContext, 123),
+                        new TestAccessibilityTarget(mContext, 789),
+                        new TestAccessibilityTarget(mContext, 456));
+        mMenuViewModel.onTargetFeaturesChanged(newFeaturesList);
+        verify(mOnTargetFeaturesChangeListener, times(3)).onChange(any());
+
+        // When the target features list doesn't change, the listener should not be called again.
+        mMenuViewModel.onTargetFeaturesChanged(newFeaturesList);
+        verify(mOnTargetFeaturesChangeListener, times(3)).onChange(any());
+
+        // When the target features list changes order (but the UIDs of the targets don't change),
+        // the listener should be called.
+        mMenuViewModel.onTargetFeaturesChanged(
+                List.of(
+                        new TestAccessibilityTarget(mContext, 789),
+                        new TestAccessibilityTarget(mContext, 123),
+                        new TestAccessibilityTarget(mContext, 456)));
+        verify(mOnTargetFeaturesChangeListener, times(4)).onChange(any());
+    }
+
     private InstantInsetLayerDrawable getMenuViewInsetLayer() {
         return (InstantInsetLayerDrawable) mMenuView.getBackground();
     }
@@ -194,6 +299,23 @@ public class MenuViewTest extends SysuiTestCase {
         }
         assertThat(radiiAnimator.isStarted()).isFalse();
         return radiiAnimator;
+    }
+
+    /** Simplified AccessibilityTarget for testing MenuView. */
+    private static class TestAccessibilityTarget extends AccessibilityTarget {
+        TestAccessibilityTarget(Context context, int uid) {
+            // Set fields unused by tests to defaults that allow test compilation.
+            super(
+                    context,
+                    ShortcutConstants.UserShortcutType.SOFTWARE,
+                    0,
+                    false,
+                    MAGNIFICATION_COMPONENT_NAME.flattenToString(),
+                    uid,
+                    null,
+                    null,
+                    null);
+        }
     }
 
     @After

@@ -125,3 +125,13 @@ flag {
     description: "Update hearing device icon in floating menu according to the connection status."
     bug: "357882387"
 }
+
+flag {
+    name: "floating_menu_notify_targets_changed_on_strict_diff"
+    namespace: "accessibility"
+    description: "Only notify listeners that the list of accessibility targets has changed if the lists are not identical."
+    bug: "376473165"
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}
