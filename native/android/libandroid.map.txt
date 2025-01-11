@@ -421,6 +421,7 @@ LIBANDROID {
 LIBANDROID_PLATFORM {
   global:
     AThermal_setIThermalServiceForTesting;
+    ASystemHealth_setIHintManagerForTesting;
     APerformanceHint_setIHintManagerForTesting;
     APerformanceHint_sendHint;
     APerformanceHint_getThreadIds;
