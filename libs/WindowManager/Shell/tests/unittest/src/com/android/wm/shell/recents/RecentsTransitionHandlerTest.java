@@ -169,7 +169,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
         final IResultReceiver finishCallback = mock(IResultReceiver.class);
 
         final IBinder transition = startRecentsTransition(/* synthetic= */ true, runner);
-        verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any(), any());
+        verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any());
 
         // Finish and verify no transition remains and that the provided finish callback is called
         mRecentsTransitionHandler.findController(transition).finish(true /* toHome */,
@@ -184,7 +184,7 @@ public class RecentsTransitionHandlerTest extends ShellTestCase {
         final IRecentsAnimationRunner runner = mock(IRecentsAnimationRunner.class);
 
         final IBinder transition = startRecentsTransition(/* synthetic= */ true, runner);
-        verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any(), any());
+        verify(runner).onAnimationStart(any(), any(), any(), any(), any(), any());
 
         mRecentsTransitionHandler.findController(transition).cancel("test");
         mMainExecutor.flushAll();
