@@ -29,6 +29,7 @@ import static com.android.server.timezonedetector.TimeZoneDetectorStrategy.ORIGI
 
 import android.annotation.DurationMillisLong;
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.UserIdInt;
 import android.app.ActivityManagerInternal;
@@ -44,7 +45,6 @@ import android.icu.text.DateFormat;
 import android.icu.text.SimpleDateFormat;
 import android.icu.util.TimeZone;
 import android.os.Handler;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -153,6 +153,9 @@ public class NotifyingTimeZoneChangeListener implements TimeZoneChangeListener {
         }
     };
 
+    @NonNull
+    private final Environment mEnvironment;
+
     private final Object mConfigurationLock = new Object();
     @GuardedBy("mConfigurationLock")
     private ConfigurationInternal mConfigurationInternal;
@@ -170,12 +173,14 @@ public class NotifyingTimeZoneChangeListener implements TimeZoneChangeListener {
     /** Create and initialise a new {@code TimeZoneChangeTrackerImpl} */
     @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL")
     public static NotifyingTimeZoneChangeListener create(Handler handler, Context context,
-            ServiceConfigAccessor serviceConfigAccessor) {
+            ServiceConfigAccessor serviceConfigAccessor,
+            @NonNull Environment environment) {
         NotifyingTimeZoneChangeListener changeTracker =
                 new NotifyingTimeZoneChangeListener(handler,
                         context,
                         serviceConfigAccessor,
-                        context.getSystemService(NotificationManager.class));
+                        context.getSystemService(NotificationManager.class),
+                        environment);
 
         // Pretend there was an update to initialize configuration.
         changeTracker.handleConfigurationUpdate();
@@ -184,9 +189,9 @@ public class NotifyingTimeZoneChangeListener implements TimeZoneChangeListener {
     }
 
     @VisibleForTesting
-    NotifyingTimeZoneChangeListener(
-            Handler handler, Context context, ServiceConfigAccessor serviceConfigAccessor,
-            NotificationManager notificationManager) {
+    NotifyingTimeZoneChangeListener(Handler handler, Context context,
+            ServiceConfigAccessor serviceConfigAccessor, NotificationManager notificationManager,
+            @NonNull Environment environment) {
         mHandler = Objects.requireNonNull(handler);
         mContext = Objects.requireNonNull(context);
         mServiceConfigAccessor = Objects.requireNonNull(serviceConfigAccessor);
@@ -194,6 +199,7 @@ public class NotifyingTimeZoneChangeListener implements TimeZoneChangeListener {
                 this::handleConfigurationUpdate);
         mActivityManagerInternal = LocalServices.getService(ActivityManagerInternal.class);
         mNotificationManager = notificationManager;
+        mEnvironment = Objects.requireNonNull(environment);
     }
 
     @RequiresPermission("android.permission.INTERACT_ACROSS_USERS_FULL")
@@ -420,7 +426,7 @@ public class NotifyingTimeZoneChangeListener implements TimeZoneChangeListener {
             if (!changeEvent.getOldZoneId().equals(lastChangeEvent.getNewZoneId())) {
                 int changeEventId = mNextChangeEventId.getAndIncrement();
                 TimeZoneChangeEvent syntheticChangeEvent = new TimeZoneChangeEvent(
-                        SystemClock.elapsedRealtime(), System.currentTimeMillis(),
+                        mEnvironment.elapsedRealtimeMillis(), mEnvironment.currentTimeMillis(),
                         ORIGIN_UNKNOWN, UserHandle.USER_NULL, lastChangeEvent.getNewZoneId(),
                         changeEvent.getOldZoneId(), 0, "Synthetic");
                 TimeZoneChangeRecord syntheticTrackedChangeEvent =

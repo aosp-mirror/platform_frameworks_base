@@ -63,7 +63,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
-import android.annotation.ElapsedRealtimeLong;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.time.LocationTimeZoneAlgorithmStatus;
@@ -94,7 +93,6 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -114,6 +112,7 @@ public class TimeZoneDetectorStrategyImplTest {
     @Rule
     public final SetFlagsRule mSetFlagsRule = mClassRule.createSetFlagsRule();
 
+    private static final long ARBITRARY_CURRENT_TIME_MILLIS = 1735689600; // 2025-01-01 00:00:00
     private static final long ARBITRARY_ELAPSED_REALTIME_MILLIS = 1234;
     /** A time zone used for initialization that does not occur elsewhere in tests. */
     private static final String ARBITRARY_TIME_ZONE_ID = "Etc/UTC";
@@ -1220,7 +1219,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .build();
 
         Script script = new Script()
-                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeClock(ARBITRARY_CURRENT_TIME_MILLIS, ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(config)
                 .resetConfigurationTracking();
@@ -1420,7 +1419,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .build();
 
         Script script = new Script()
-                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeClock(ARBITRARY_CURRENT_TIME_MILLIS, ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(config)
                 .resetConfigurationTracking();
@@ -1591,7 +1590,7 @@ public class TimeZoneDetectorStrategyImplTest {
                 .build();
 
         Script script = new Script()
-                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeClock(ARBITRARY_CURRENT_TIME_MILLIS, ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(config)
                 .resetConfigurationTracking();
@@ -1666,7 +1665,7 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testGetTimeZoneState() {
         Script script = new Script()
-                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeClock(ARBITRARY_CURRENT_TIME_MILLIS, ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED_GEO_DISABLED)
                 .resetConfigurationTracking();
@@ -1688,7 +1687,7 @@ public class TimeZoneDetectorStrategyImplTest {
     @Test
     public void testSetTimeZoneState() {
         Script script = new Script()
-                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeClock(ARBITRARY_CURRENT_TIME_MILLIS, ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .initializeTimeZoneSetting(ARBITRARY_TIME_ZONE_ID, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(CONFIG_AUTO_DISABLED_GEO_DISABLED)
                 .resetConfigurationTracking();
@@ -1715,7 +1714,7 @@ public class TimeZoneDetectorStrategyImplTest {
     private void testConfirmTimeZone(ConfigurationInternal config) {
         String timeZoneId = "Europe/London";
         Script script = new Script()
-                .initializeClock(ARBITRARY_ELAPSED_REALTIME_MILLIS)
+                .initializeClock(ARBITRARY_CURRENT_TIME_MILLIS, ARBITRARY_ELAPSED_REALTIME_MILLIS)
                 .initializeTimeZoneSetting(timeZoneId, TIME_ZONE_CONFIDENCE_LOW)
                 .simulateConfigurationInternalChange(config)
                 .resetConfigurationTracking();
@@ -1902,97 +1901,6 @@ public class TimeZoneDetectorStrategyImplTest {
                 mFakeEnvironment.elapsedRealtimeMillis(), Arrays.asList(zoneIds));
     }
 
-    static class FakeEnvironment implements TimeZoneDetectorStrategyImpl.Environment {
-
-        private final TestState<String> mTimeZoneId = new TestState<>();
-        private final TestState<Integer> mTimeZoneConfidence = new TestState<>();
-        private final List<Runnable> mAsyncRunnables = new ArrayList<>();
-        private @ElapsedRealtimeLong long mElapsedRealtimeMillis;
-
-        FakeEnvironment() {
-            // Ensure the fake environment starts with the defaults a fresh device would.
-            initializeTimeZoneSetting("", TIME_ZONE_CONFIDENCE_LOW);
-        }
-
-        void initializeClock(@ElapsedRealtimeLong long elapsedRealtimeMillis) {
-            mElapsedRealtimeMillis = elapsedRealtimeMillis;
-        }
-
-        void initializeTimeZoneSetting(String zoneId, @TimeZoneConfidence int timeZoneConfidence) {
-            mTimeZoneId.init(zoneId);
-            mTimeZoneConfidence.init(timeZoneConfidence);
-        }
-
-        void incrementClock() {
-            mElapsedRealtimeMillis++;
-        }
-
-        @Override
-        public String getDeviceTimeZone() {
-            return mTimeZoneId.getLatest();
-        }
-
-        @Override
-        public int getDeviceTimeZoneConfidence() {
-            return mTimeZoneConfidence.getLatest();
-        }
-
-        @Override
-        public void setDeviceTimeZoneAndConfidence(
-                String zoneId, @TimeZoneConfidence int confidence, String logInfo) {
-            mTimeZoneId.set(zoneId);
-            mTimeZoneConfidence.set(confidence);
-        }
-
-        void assertTimeZoneNotChanged() {
-            mTimeZoneId.assertHasNotBeenSet();
-            mTimeZoneConfidence.assertHasNotBeenSet();
-        }
-
-        void assertTimeZoneChangedTo(String timeZoneId, @TimeZoneConfidence int confidence) {
-            mTimeZoneId.assertHasBeenSet();
-            mTimeZoneId.assertChangeCount(1);
-            mTimeZoneId.assertLatestEquals(timeZoneId);
-
-            mTimeZoneConfidence.assertHasBeenSet();
-            mTimeZoneConfidence.assertChangeCount(1);
-            mTimeZoneConfidence.assertLatestEquals(confidence);
-        }
-
-        void commitAllChanges() {
-            mTimeZoneId.commitLatest();
-            mTimeZoneConfidence.commitLatest();
-        }
-
-        @Override
-        @ElapsedRealtimeLong
-        public long elapsedRealtimeMillis() {
-            return mElapsedRealtimeMillis;
-        }
-
-        @Override
-        public void addDebugLogEntry(String logMsg) {
-            // No-op for tests
-        }
-
-        @Override
-        public void dumpDebugLog(PrintWriter printWriter) {
-            // No-op for tests
-        }
-
-        @Override
-        public void runAsync(Runnable runnable) {
-            mAsyncRunnables.add(runnable);
-        }
-
-        public void runAsyncRunnables() {
-            for (Runnable runnable : mAsyncRunnables) {
-                runnable.run();
-            }
-            mAsyncRunnables.clear();
-        }
-    }
-
     private void assertStateChangeNotificationsSent(
             TestStateChangeListener stateChangeListener, int expectedCount) {
         // The fake environment needs to be told to run posted work.
@@ -2013,8 +1921,8 @@ public class TimeZoneDetectorStrategyImplTest {
             return this;
         }
 
-        Script initializeClock(long elapsedRealtimeMillis) {
-            mFakeEnvironment.initializeClock(elapsedRealtimeMillis);
+        Script initializeClock(long currentTimeMillis, long elapsedRealtimeMillis) {
+            mFakeEnvironment.initializeClock(currentTimeMillis, elapsedRealtimeMillis);
             return this;
         }
 
