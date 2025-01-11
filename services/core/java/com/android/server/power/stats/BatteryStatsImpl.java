@@ -637,6 +637,7 @@ public class BatteryStatsImpl extends BatteryStats {
     }
 
     private boolean mSaveBatteryUsageStatsOnReset;
+    private boolean mResetBatteryHistoryOnNewSession;
     private boolean mAccumulateBatteryUsageStats;
     private BatteryUsageStatsProvider mBatteryUsageStatsProvider;
     private PowerStatsStore mPowerStatsStore;
@@ -12152,6 +12153,13 @@ public class BatteryStatsImpl extends BatteryStats {
         mAccumulateBatteryUsageStats = accumulateBatteryUsageStats;
     }
 
+    /**
+     * Enables or disables battery history reset at the beginning of a battery stats session.
+     */
+    public void resetBatteryHistoryOnNewSession(boolean enabled) {
+        mResetBatteryHistoryOnNewSession = enabled;
+    }
+
     @GuardedBy("this")
     public void resetAllStatsAndHistoryLocked(int reason) {
         final long mSecUptime = mClock.uptimeMillis();
@@ -12346,7 +12354,11 @@ public class BatteryStatsImpl extends BatteryStats {
 
         initDischarge(elapsedRealtimeUs);
 
-        mHistory.reset();
+        if ((resetReason != RESET_REASON_FULL_CHARGE
+                && resetReason != RESET_REASON_PLUGGED_IN_FOR_LONG_DURATION)
+                || mResetBatteryHistoryOnNewSession) {
+            mHistory.reset();
+        }
 
         // Store the empty state to disk to ensure consistency
         writeSyncLocked();

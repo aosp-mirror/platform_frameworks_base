@@ -114,6 +114,21 @@ public class BatteryStatsResetTest {
 
     @Test
     public void testResetOnUnplug_highBatteryLevel() {
+        mBatteryStatsImpl.resetBatteryHistoryOnNewSession(false);
+        long initialStartTime = mBatteryStatsImpl.getHistory().getStartTime();
+        resetOnUnplug_highBatteryLevel();
+        assertThat(mBatteryStatsImpl.getHistory().getStartTime()).isEqualTo(initialStartTime);
+    }
+
+    @Test
+    public void testResetOnUnplug_highBatteryLevel_resetHistory() {
+        mBatteryStatsImpl.resetBatteryHistoryOnNewSession(true);
+        resetOnUnplug_highBatteryLevel();
+        assertThat(mBatteryStatsImpl.getHistory().getStartTime())
+                .isEqualTo(mBatteryStatsImpl.getMonotonicStartTime());
+    }
+
+    private void resetOnUnplug_highBatteryLevel() {
         when(mConfig.shouldResetOnUnplugHighBatteryLevel()).thenReturn(true);
 
         long expectedResetTimeUs = 0;
@@ -151,6 +166,21 @@ public class BatteryStatsResetTest {
 
     @Test
     public void testResetOnUnplug_significantCharge() {
+        mBatteryStatsImpl.resetBatteryHistoryOnNewSession(false);
+        long initialStartTime = mBatteryStatsImpl.getHistory().getStartTime();
+        resetOnUnplug_significantCharge();
+        assertThat(mBatteryStatsImpl.getHistory().getStartTime()).isEqualTo(initialStartTime);
+    }
+
+    @Test
+    public void testResetOnUnplug_significantCharge_resetHistory() {
+        mBatteryStatsImpl.resetBatteryHistoryOnNewSession(true);
+        resetOnUnplug_significantCharge();
+        assertThat(mBatteryStatsImpl.getHistory().getStartTime())
+                .isEqualTo(mBatteryStatsImpl.getMonotonicStartTime());
+    }
+
+    private void resetOnUnplug_significantCharge() {
         when(mConfig.shouldResetOnUnplugAfterSignificantCharge()).thenReturn(true);
         long expectedResetTimeUs = 0;
 
