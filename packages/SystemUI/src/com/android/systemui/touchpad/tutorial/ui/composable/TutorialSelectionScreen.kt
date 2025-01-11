@@ -218,9 +218,11 @@ private fun TutorialButton(
             verticalArrangement = Arrangement.Center,
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
+            // contentDescription is set to null because the icon is decorative and we don't want to
+            // repeat the text twice
             Icon(
                 imageVector = icon,
-                contentDescription = text,
+                contentDescription = null,
                 modifier = Modifier.width(30.dp).height(30.dp),
                 tint = iconColor,
             )
