@@ -519,6 +519,7 @@ android_library {
         "androidx.activity_activity-compose",
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
+        "kairos",
     ],
     libs: [
         "keepanno-annotations",
@@ -739,6 +740,7 @@ android_library {
         "PlatformMotionTesting",
         "SystemUICustomizationTestUtils",
         "androidx.compose.runtime_runtime",
+        "kairos",
         "kosmos",
         "testables",
         "androidx.test.rules",
