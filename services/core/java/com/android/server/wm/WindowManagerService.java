@@ -331,6 +331,7 @@ import android.window.WindowContextInfo;
 import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.annotations.VisibleForTesting.Visibility;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.IKeyguardDismissCallback;
@@ -600,6 +601,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final boolean mLimitedAlphaCompositing;
     final int mMaxUiWidth;
 
+    @NonNull
     @VisibleForTesting
     WindowManagerPolicy mPolicy;
 
@@ -1054,13 +1056,16 @@ public class WindowManagerService extends IWindowManager.Stub
     private boolean mAnimationsDisabled = false;
     boolean mPointerLocationEnabled = false;
 
+    @NonNull
     final AppCompatConfiguration mAppCompatConfiguration;
 
     private boolean mIsIgnoreOrientationRequestDisabled;
 
+    @NonNull
     final InputManagerService mInputManager;
     final DisplayManagerInternal mDisplayManagerInternal;
     final DisplayManager mDisplayManager;
+    @NonNull
     final ActivityTaskManagerService mAtmService;
 
     /** Indicates whether this device supports wide color gamut / HDR rendering */
@@ -1116,7 +1121,9 @@ public class WindowManagerService extends IWindowManager.Stub
     static WindowManagerThreadPriorityBooster sThreadPriorityBooster =
             new WindowManagerThreadPriorityBooster();
 
+    @NonNull
     Supplier<SurfaceControl.Builder> mSurfaceControlFactory;
+    @NonNull
     Supplier<SurfaceControl.Transaction> mTransactionFactory;
 
     private final SurfaceControl.Transaction mTransaction;
@@ -1188,9 +1195,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
     private volatile boolean mDisableSecureWindows = false;
 
-    public static WindowManagerService main(final Context context, final InputManagerService im,
-            final boolean showBootMsgs, WindowManagerPolicy policy,
-            ActivityTaskManagerService atm) {
+    /** Creates an instance of the WindowManagerService for the system server. */
+    public static WindowManagerService main(@NonNull final Context context,
+            @NonNull final InputManagerService im, final boolean showBootMsgs,
+            @NonNull final WindowManagerPolicy policy,
+            @NonNull final ActivityTaskManagerService atm) {
         // Using SysUI context to have access to Material colors extracted from Wallpaper.
         final AppCompatConfiguration appCompat = new AppCompatConfiguration(
                 ActivityThread.currentActivityThread().getSystemUiContext());
@@ -1204,15 +1213,19 @@ public class WindowManagerService extends IWindowManager.Stub
 
     /**
      * Creates and returns an instance of the WindowManagerService. This call allows the caller
-     * to override factories that can be used to stub native calls during test.
+     * to override factories that can be used to stub native calls during test. Tests should use
+     * {@link WindowManagerServiceTestSupport} instead of calling this directly to ensure
+     * proper initialization and cleanup of dependencies.
      */
-    @VisibleForTesting
-    public static WindowManagerService main(final Context context, final InputManagerService im,
-            final boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
-            DisplayWindowSettingsProvider displayWindowSettingsProvider,
-            Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<SurfaceControl.Builder> surfaceControlFactory,
-            AppCompatConfiguration appCompat) {
+    @VisibleForTesting(visibility = Visibility.PRIVATE)
+    static WindowManagerService main(@NonNull final Context context,
+            @NonNull final InputManagerService im, boolean showBootMsgs,
+            @NonNull final WindowManagerPolicy policy,
+            @NonNull final ActivityTaskManagerService atm,
+            @NonNull final DisplayWindowSettingsProvider displayWindowSettingsProvider,
+            @NonNull final Supplier<SurfaceControl.Transaction> transactionFactory,
+            @NonNull final Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            @NonNull final AppCompatConfiguration appCompat) {
 
         final WindowManagerService[] wms = new WindowManagerService[1];
         DisplayThread.getHandler().runWithScissors(() ->
@@ -1238,12 +1251,13 @@ public class WindowManagerService extends IWindowManager.Stub
         new WindowManagerShellCommand(this).exec(this, in, out, err, args, callback, result);
     }
 
-    private WindowManagerService(Context context, InputManagerService inputManager,
-            boolean showBootMsgs, WindowManagerPolicy policy, ActivityTaskManagerService atm,
-            DisplayWindowSettingsProvider displayWindowSettingsProvider,
-            Supplier<SurfaceControl.Transaction> transactionFactory,
-            Supplier<SurfaceControl.Builder> surfaceControlFactory,
-            AppCompatConfiguration appCompat) {
+    private WindowManagerService(@NonNull Context context,
+            @NonNull InputManagerService inputManager, boolean showBootMsgs,
+            @NonNull WindowManagerPolicy policy, @NonNull ActivityTaskManagerService atm,
+            @NonNull DisplayWindowSettingsProvider displayWindowSettingsProvider,
+            @NonNull Supplier<SurfaceControl.Transaction> transactionFactory,
+            @NonNull Supplier<SurfaceControl.Builder> surfaceControlFactory,
+            @NonNull AppCompatConfiguration appCompat) {
         installLock(this, INDEX_WINDOW);
         mGlobalLock = atm.getGlobalLock();
         mAtmService = atm;
