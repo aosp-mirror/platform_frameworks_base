@@ -110,7 +110,12 @@ class DiscreteOpsDbHelper extends SQLiteOpenHelper {
             }
             db.setTransactionSuccessful();
         } finally {
-            db.endTransaction();
+            try {
+                db.endTransaction();
+            } catch (SQLiteException exception) {
+                Slog.e(LOG_TAG, "Couldn't commit transaction when inserting discrete ops, database"
+                        + " file size (bytes) : " + getDatabaseFile().length(), exception);
+            }
         }
     }
 
