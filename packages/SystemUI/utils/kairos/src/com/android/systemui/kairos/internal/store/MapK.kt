@@ -21,28 +21,28 @@ package com.android.systemui.kairos.internal.store
  *
  * Let's say you want to write a class that is generic over both a map, and the type of data within
  * the map:
- * ``` kotlin
+ * ```
  *   class Foo<TMap, TKey, TValue> {
  *     val container: TMap<TKey, TElement> // disallowed!
  *   }
  * ```
  *
  * You can use `MapK` to represent the "higher-kinded" type variable `TMap`:
- * ``` kotlin
+ * ```
  *   class Foo<TMap, TKey, TValue> {
  *      val container: MapK<TMap, TKey, TValue> // OK!
  *   }
  * ```
  *
  * Note that Kotlin will not let you use the generic type without parameters as `TMap`:
- * ``` kotlin
+ * ```
  *   val fooHk: MapK<HashMap, Int, String> // not allowed: HashMap requires two type parameters
  * ```
  *
  * To work around this, you need to declare a special type-witness object. This object is only used
  * at compile time and can be stripped out by a minifier because it's never used at runtime.
  *
- * ``` kotlin
+ * ```
  *   class Foo<A, B> : MapK<FooWitness, A, B> { ... }
  *   object FooWitness
  *

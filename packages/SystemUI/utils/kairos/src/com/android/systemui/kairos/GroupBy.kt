@@ -63,7 +63,7 @@ fun <K, A> Events<Map<K, A>>.groupByKey(numKeys: Int? = null): GroupedEvents<K, 
  * downstream [Events]. The downstream [Events] are associated with a [key][K], which is derived
  * from each emission of the original [Events] via [extractKey].
  *
- * ``` kotlin
+ * ```
  *   fun <K, A> Events<A>.groupBy(
  *       numKeys: Int? = null,
  *       extractKey: TransactionScope.(A) -> K,
@@ -108,7 +108,7 @@ class GroupedEvents<in K, out A> internal constructor(internal val impl: DemuxIm
  * Using this is equivalent to `upstream.filter(predicate) to upstream.filter { !predicate(it) }`
  * but is more efficient; specifically, [partition] will only invoke [predicate] once per element.
  *
- * ``` kotlin
+ * ```
  *   fun <A> Events<A>.partition(
  *       predicate: TransactionScope.(A) -> Boolean
  *   ): Pair<Events<A>, Events<A>> =
@@ -133,7 +133,7 @@ fun <A> Events<A>.partition(
  * [First]s and once for [Second]s, but is slightly more efficient; specifically, the
  * [filterIsInstance] check is only performed once per element.
  *
- * ``` kotlin
+ * ```
  *   fun <A, B> Events<Either<A, B>>.partitionEither(): Pair<Events<A>, Events<B>> =
  *     map { it.asThese() }.partitionThese()
  * ```

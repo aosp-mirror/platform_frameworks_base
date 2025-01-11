@@ -100,7 +100,7 @@ interface BuildScope : HasNetwork, StateScope {
      * observation of new emissions. It will however *not* cancel any running effects from previous
      * emissions. To achieve this behavior, use [launchScope] or [asyncScope] to create a child
      * build scope:
-     * ``` kotlin
+     * ```
      *   val job = launchScope {
      *       events.observe { x ->
      *           launchEffect { longRunningEffect(x) }
@@ -141,7 +141,7 @@ interface BuildScope : HasNetwork, StateScope {
      *
      * By default, [builder] is only running while the returned [Events] is being
      * [observed][observe]. If you want it to run at all times, simply add a no-op observer:
-     * ``` kotlin
+     * ```
      *   events { ... }.apply { observe() }
      * ```
      */
@@ -158,7 +158,7 @@ interface BuildScope : HasNetwork, StateScope {
      *
      * By default, [builder] is only running while the returned [Events] is being
      * [observed][observe]. If you want it to run at all times, simply add a no-op observer:
-     * ``` kotlin
+     * ```
      *   events { ... }.apply { observe() }
      * ```
      *
@@ -196,7 +196,7 @@ interface BuildScope : HasNetwork, StateScope {
      * outside of the current Kairos transaction; when [transform] returns, the returned value is
      * emitted from the result [Events] in a new transaction.
      *
-     * ``` kotlin
+     * ```
      *     fun <A, B> Events<A>.mapAsyncLatest(transform: suspend (A) -> B): Events<B> =
      *         mapLatestBuild { a -> asyncEvent { transform(a) } }.flatten()
      * ```
@@ -571,7 +571,7 @@ interface BuildScope : HasNetwork, StateScope {
 
     /**
      * Shorthand for:
-     * ``` kotlin
+     * ```
      * flow.toEvents().holdState(initialValue)
      * ```
      */
@@ -579,7 +579,7 @@ interface BuildScope : HasNetwork, StateScope {
 
     /**
      * Shorthand for:
-     * ``` kotlin
+     * ```
      * flow.scan(initialValue, operation).toEvents().holdState(initialValue)
      * ```
      */
@@ -588,7 +588,7 @@ interface BuildScope : HasNetwork, StateScope {
 
     /**
      * Shorthand for:
-     * ``` kotlin
+     * ```
      * flow.scan(initialValue) { a, f -> f(a) }.toEvents().holdState(initialValue)
      * ```
      */
@@ -665,7 +665,7 @@ interface BuildScope : HasNetwork, StateScope {
      * be used to make further modifications to the Kairos network, and/or perform side-effects via
      * [effect].
      *
-     * ``` kotlin
+     * ```
      *     fun <A> State<A>.observeBuild(block: BuildScope.(A) -> Unit = {}): Job = launchScope {
      *         block(sample())
      *         changes.observeBuild(block)
@@ -698,7 +698,7 @@ interface BuildScope : HasNetwork, StateScope {
  * outside of the current Kairos transaction; when it completes, the returned [Events] emits in a
  * new transaction.
  *
- * ``` kotlin
+ * ```
  *   fun <A> BuildScope.asyncEvent(block: suspend () -> A): Events<A> =
  *       events { emit(block()) }.apply { observe() }
  * ```
@@ -719,7 +719,7 @@ fun <A> BuildScope.asyncEvent(block: suspend () -> A): Events<A> =
  * executed if this [BuildScope] is still active by that time. It can be deactivated due to a
  * -Latest combinator, for example.
  *
- * ``` kotlin
+ * ```
  *   fun BuildScope.effect(
  *       context: CoroutineContext = EmptyCoroutineContext,
  *       block: EffectScope.() -> Unit,
@@ -740,7 +740,7 @@ fun BuildScope.effect(
  * done because the current [BuildScope] might be deactivated within this transaction, perhaps due
  * to a -Latest combinator. If this happens, then the coroutine will never actually be started.
  *
- * ``` kotlin
+ * ```
  *   fun BuildScope.launchEffect(block: suspend KairosScope.() -> Unit): Job =
  *       effect { effectCoroutineScope.launch { block() } }
  * ```
@@ -757,7 +757,7 @@ fun BuildScope.launchEffect(block: suspend KairosCoroutineScope.() -> Unit): Job
  * to a -Latest combinator. If this happens, then the coroutine will never actually be started.
  *
  * Shorthand for:
- * ``` kotlin
+ * ```
  *   fun <R> BuildScope.asyncEffect(block: suspend KairosScope.() -> R): Deferred<R> =
  *       CompletableDeferred<R>.apply {
  *               effect { effectCoroutineScope.launch { complete(block()) } }
@@ -789,7 +789,7 @@ fun BuildScope.launchScope(block: BuildSpec<*>): Job = asyncScope(block).second
  *
  * By default, [builder] is only running while the returned [Events] is being
  * [observed][BuildScope.observe]. If you want it to run at all times, simply add a no-op observer:
- * ``` kotlin
+ * ```
  * events { ... }.apply { observe() }
  * ```
  *
@@ -813,7 +813,7 @@ fun <In, Out> BuildScope.coalescingEvents(
  *
  * By default, [builder] is only running while the returned [Events] is being
  * [observed][BuildScope.observe]. If you want it to run at all times, simply add a no-op observer:
- * ``` kotlin
+ * ```
  * events { ... }.apply { observe() }
  * ```
  *

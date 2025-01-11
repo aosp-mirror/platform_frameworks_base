@@ -76,7 +76,7 @@ fun <A> stateOf(value: A): State<A> {
  *
  * Useful for recursive definitions.
  *
- * ``` kotlin
+ * ```
  *   fun <A> Lazy<State<A>>.defer() = deferredState { value }
  * ```
  */
@@ -91,7 +91,7 @@ fun <A> stateOf(value: A): State<A> {
  *
  * Useful for recursive definitions.
  *
- * ``` kotlin
+ * ```
  *   fun <A> DeferredValue<State<A>>.defer() = deferredState { get() }
  * ```
  */
@@ -150,7 +150,7 @@ fun <A, B> State<A>.mapCheapUnsafe(transform: KairosScope.(A) -> B): State<B> {
  * Splits a [State] of pairs into a pair of [Events][State], where each returned [State] holds half
  * of the original.
  *
- * ``` kotlin
+ * ```
  *   fun <A, B> State<Pair<A, B>>.unzip(): Pair<State<A>, State<B>> {
  *       val first = map { it.first }
  *       val second = map { it.second }
@@ -186,7 +186,7 @@ fun <A, B> State<A>.flatMap(transform: KairosScope.(A) -> State<B>): State<B> {
 /**
  * Returns a [State] that behaves like the current value of the original [State].
  *
- * ``` kotlin
+ * ```
  *   fun <A> State<State<A>>.flatten() = flatMap { it }
  * ```
  *
@@ -201,7 +201,7 @@ fun <A, B> State<A>.flatMap(transform: KairosScope.(A) -> State<B>): State<B> {
  * recent value is used.
  *
  * Effectively equivalent to:
- * ``` kotlin
+ * ```
  *     ConflatedMutableEvents(kairosNetwork).holdState(initialValue)
  * ```
  */
@@ -328,7 +328,7 @@ private inline fun <A> deferInline(crossinline block: InitScope.() -> State<A>):
  * Like [changes] but also includes the old value of this [State].
  *
  * Shorthand for:
- * ``` kotlin
+ * ```
  *     stateChanges.map { WithPrev(previousValue = sample(), newValue = it) }
  * ```
  */

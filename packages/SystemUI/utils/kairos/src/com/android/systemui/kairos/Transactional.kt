@@ -51,7 +51,7 @@ fun <A> transactionalOf(value: A): Transactional<A> =
  *
  * Useful for recursive definitions.
  *
- * ``` kotlin
+ * ```
  *   fun <A> DeferredValue<Transactional<A>>.defer() = deferredTransactional { get() }
  * ```
  */
@@ -67,7 +67,7 @@ fun <A> DeferredValue<Transactional<A>>.defer(): Transactional<A> = deferInline 
  *
  * Useful for recursive definitions.
  *
- * ``` kotlin
+ * ```
  *   fun <A> Lazy<Transactional<A>>.defer() = deferredTransactional { value }
  * ```
  */

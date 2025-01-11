@@ -105,7 +105,7 @@ class EventsLoop<A> : Events<A>() {
  *
  * Useful for recursive definitions.
  *
- * ``` kotlin
+ * ```
  *   fun <A> Lazy<Events<A>>.defer() = deferredEvents { value }
  * ```
  *
@@ -122,7 +122,7 @@ class EventsLoop<A> : Events<A>() {
  *
  * Useful for recursive definitions.
  *
- * ``` kotlin
+ * ```
  *   fun <A> DeferredValue<Events<A>>.defer() = deferredEvents { get() }
  * ```
  *
@@ -160,7 +160,7 @@ fun <A, B> Events<A>.mapMaybe(transform: TransactionScope.(A) -> Maybe<B>): Even
  * Returns an [Events] that contains only the non-null results of applying [transform] to each value
  * of the original [Events].
  *
- * ``` kotlin
+ * ```
  *  fun <A> Events<A>.mapNotNull(transform: TransactionScope.(A) -> B?): Events<B> =
  *      mapMaybe { if (it == null) absent else present(it) }
  * ```
@@ -201,7 +201,7 @@ fun <A, B> Events<A>.mapCheap(transform: TransactionScope.(A) -> B): Events<B> =
  * Returns an [Events] that invokes [action] before each value of the original [Events] is emitted.
  * Useful for logging and debugging.
  *
- * ``` kotlin
+ * ```
  *   fun <A> Events<A>.onEach(action: TransactionScope.(A) -> Unit): Events<A> =
  *       map { it.also { action(it) } }
  * ```
@@ -220,7 +220,7 @@ fun <A> Events<A>.onEach(action: TransactionScope.(A) -> Unit): Events<A> = map 
  * Splits an [Events] of pairs into a pair of [Events], where each returned [Events] emits half of
  * the original.
  *
- * ``` kotlin
+ * ```
  *   fun <A, B> Events<Pair<A, B>>.unzip(): Pair<Events<A>, Events<B>> {
  *       val lefts = map { it.first }
  *       val rights = map { it.second }

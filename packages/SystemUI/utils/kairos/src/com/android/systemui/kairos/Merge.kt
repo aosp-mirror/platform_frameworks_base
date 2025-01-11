@@ -33,7 +33,7 @@ import com.android.systemui.kairos.util.map
  * function is used to combine coincident emissions to produce the result value to be emitted by the
  * merged [Events].
  *
- * ``` kotlin
+ * ```
  * fun <A> Events<A>.mergeWith(
  *     other: Events<A>,
  *     transformCoincidence: TransactionScope.(A, A) -> A = { a, _ -> a },
@@ -62,7 +62,7 @@ fun <A> Events<A>.mergeWith(
  * Merges the given [Events] into a single [Events] that emits events from all. All coincident
  * emissions are collected into the emitted [List], preserving the input ordering.
  *
- * ``` kotlin
+ * ```
  *   fun <A> merge(vararg events: Events<A>): Events<List<A>> = events.asIterable().merge()
  * ```
  *
@@ -76,7 +76,7 @@ fun <A> merge(vararg events: Events<A>): Events<List<A>> = events.asIterable().m
  * Merges the given [Events] into a single [Events] that emits events from all. In the case of
  * coincident emissions, the emission from the left-most [Events] is emitted.
  *
- * ``` kotlin
+ * ```
  *   fun <A> mergeLeft(vararg events: Events<A>): Events<A> = events.asIterable().mergeLeft()
  * ```
  *
@@ -92,7 +92,7 @@ fun <A> mergeLeft(vararg events: Events<A>): Events<A> = events.asIterable().mer
  * function is used to combine coincident emissions to produce the result value to be emitted by the
  * merged [Events].
  *
- * ``` kotlin
+ * ```
  *   fun <A> merge(vararg events: Events<A>, transformCoincidence: (A, A) -> A): Events<A> =
  *       merge(*events).map { l -> l.reduce(transformCoincidence) }
  * ```
@@ -117,7 +117,7 @@ fun <A> Iterable<Events<A>>.merge(): Events<List<A>> =
  * coincident emissions, the emission from the left-most [Events] is emitted.
  *
  * Semantically equivalent to the following definition:
- * ``` kotlin
+ * ```
  *   fun <A> Iterable<Events<A>>.mergeLeft(): Events<A> =
  *       merge().mapCheap { it.first() }
  * ```
@@ -135,7 +135,7 @@ fun <A> Iterable<Events<A>>.mergeLeft(): Events<A> =
  * Creates a new [Events] that emits events from all given [Events]. All simultaneous emissions are
  * collected into the emitted [List], preserving the input ordering.
  *
- * ``` kotlin
+ * ```
  *   fun <A> Sequence<Events<A>>.merge(): Events<List<A>> = asIterable().merge()
  * ```
  *
@@ -148,7 +148,7 @@ fun <A> Iterable<Events<A>>.mergeLeft(): Events<A> =
  * collected into the emitted [Map], and are given the same key of the associated [Events] in the
  * input [Map].
  *
- * ``` kotlin
+ * ```
  *   fun <K, A> Map<K, Events<A>>.merge(): Events<Map<K, A>> =
  *       asSequence()
  *           .map { (k, events) -> events.map { a -> k to a } }
@@ -173,7 +173,7 @@ fun <K, A> Map<K, Events<A>>.merge(): Events<Map<K, A>> =
  * [Map.applyPatch][com.android.systemui.kairos.util.applyPatch].
  *
  * Conceptually this is equivalent to:
- * ``` kotlin
+ * ```
  *   fun <K, V> State<Map<K, V>>.mergeEventsIncrementally(): Events<Map<K, V>> =
  *       map { it.merge() }.switchEvents()
  * ```
@@ -218,7 +218,7 @@ fun <K, V> Incremental<K, Events<V>>.mergeEventsIncrementally(): Events<Map<K, V
  * [Map.applyPatch][com.android.systemui.kairos.util.applyPatch].
  *
  * Conceptually this is equivalent to:
- * ``` kotlin
+ * ```
  *   fun <K, V> State<Map<K, V>>.mergeEventsIncrementallyPromptly(): Events<Map<K, V>> =
  *       map { it.merge() }.switchEventsPromptly()
  * ```
