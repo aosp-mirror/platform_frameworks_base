@@ -58,7 +58,7 @@ object WindowManagerServiceTestSupport {
      * }
      * ```
      *
-     * @param context the [Context]] for the service.
+     * @param context the [Context] for the service.
      * @param im the [InputManagerService] to use.
      * @param policy the [WindowManagerPolicy] to use.
      * @param atm the [ActivityTaskManagerService] to use.
