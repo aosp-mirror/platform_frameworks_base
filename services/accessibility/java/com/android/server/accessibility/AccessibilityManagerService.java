@@ -4385,13 +4385,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private void launchAccessibilityFrameworkFeature(int displayId, ComponentName assignedTarget) {
         if (assignedTarget.equals(ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME)) {
-            //import com.android.systemui.Flags;
-            if (com.android.systemui.Flags.hearingAidsQsTileDialog()) {
-                launchHearingDevicesDialog();
-            } else {
-                launchAccessibilitySubSettings(displayId,
-                        ACCESSIBILITY_HEARING_AIDS_COMPONENT_NAME);
-            }
+            launchHearingDevicesDialog();
         }
     }
 
