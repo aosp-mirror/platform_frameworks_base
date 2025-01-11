@@ -54,14 +54,17 @@ public final class MediaQualityManager {
     private final IMediaQualityManager mService;
     private final Context mContext;
     private final UserHandle mUserHandle;
-    private final Object mLock = new Object();
-    // @GuardedBy("mLock")
+    private final Object mPpLock = new Object();
+    private final Object mSpLock = new Object();
+    private final Object mAbLock = new Object();
+    private final Object mApLock = new Object();
+    // @GuardedBy("mPpLock")
     private final List<PictureProfileCallbackRecord> mPpCallbackRecords = new ArrayList<>();
-    // @GuardedBy("mLock")
+    // @GuardedBy("mSpLock")
     private final List<SoundProfileCallbackRecord> mSpCallbackRecords = new ArrayList<>();
-    // @GuardedBy("mLock")
+    // @GuardedBy("mAbLock")
     private final List<AmbientBacklightCallbackRecord> mAbCallbackRecords = new ArrayList<>();
-    // @GuardedBy("mLock")
+    // @GuardedBy("mApLock")
     private final List<ActiveProcessingPictureListenerRecord> mApListenerRecords =
             new ArrayList<>();
 
@@ -82,7 +85,7 @@ public final class MediaQualityManager {
         IPictureProfileCallback ppCallback = new IPictureProfileCallback.Stub() {
             @Override
             public void onPictureProfileAdded(String profileId, PictureProfile profile) {
-                synchronized (mLock) {
+                synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
                         record.postPictureProfileAdded(profileId, profile);
@@ -91,7 +94,7 @@ public final class MediaQualityManager {
             }
             @Override
             public void onPictureProfileUpdated(String profileId, PictureProfile profile) {
-                synchronized (mLock) {
+                synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
                         record.postPictureProfileUpdated(profileId, profile);
@@ -100,7 +103,7 @@ public final class MediaQualityManager {
             }
             @Override
             public void onPictureProfileRemoved(String profileId, PictureProfile profile) {
-                synchronized (mLock) {
+                synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
                         record.postPictureProfileRemoved(profileId, profile);
@@ -110,7 +113,7 @@ public final class MediaQualityManager {
             @Override
             public void onParameterCapabilitiesChanged(
                     String profileId, List<ParameterCapability> caps) {
-                synchronized (mLock) {
+                synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
                         record.postParameterCapabilitiesChanged(profileId, caps);
@@ -119,7 +122,7 @@ public final class MediaQualityManager {
             }
             @Override
             public void onError(String profileId, int err) {
-                synchronized (mLock) {
+                synchronized (mPpLock) {
                     for (PictureProfileCallbackRecord record : mPpCallbackRecords) {
                         // TODO: filter callback record
                         record.postError(profileId, err);
@@ -130,7 +133,7 @@ public final class MediaQualityManager {
         ISoundProfileCallback spCallback = new ISoundProfileCallback.Stub() {
             @Override
             public void onSoundProfileAdded(String profileId, SoundProfile profile) {
-                synchronized (mLock) {
+                synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
                         record.postSoundProfileAdded(profileId, profile);
@@ -139,7 +142,7 @@ public final class MediaQualityManager {
             }
             @Override
             public void onSoundProfileUpdated(String profileId, SoundProfile profile) {
-                synchronized (mLock) {
+                synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
                         record.postSoundProfileUpdated(profileId, profile);
@@ -148,7 +151,7 @@ public final class MediaQualityManager {
             }
             @Override
             public void onSoundProfileRemoved(String profileId, SoundProfile profile) {
-                synchronized (mLock) {
+                synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
                         record.postSoundProfileRemoved(profileId, profile);
@@ -158,7 +161,7 @@ public final class MediaQualityManager {
             @Override
             public void onParameterCapabilitiesChanged(
                     String profileId, List<ParameterCapability> caps) {
-                synchronized (mLock) {
+                synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
                         record.postParameterCapabilitiesChanged(profileId, caps);
@@ -167,7 +170,7 @@ public final class MediaQualityManager {
             }
             @Override
             public void onError(String profileId, int err) {
-                synchronized (mLock) {
+                synchronized (mSpLock) {
                     for (SoundProfileCallbackRecord record : mSpCallbackRecords) {
                         // TODO: filter callback record
                         record.postError(profileId, err);
@@ -178,7 +181,7 @@ public final class MediaQualityManager {
         IAmbientBacklightCallback abCallback = new IAmbientBacklightCallback.Stub() {
             @Override
             public void onAmbientBacklightEvent(AmbientBacklightEvent event) {
-                synchronized (mLock) {
+                synchronized (mAbLock) {
                     for (AmbientBacklightCallbackRecord record : mAbCallbackRecords) {
                         record.postAmbientBacklightEvent(event);
                     }
@@ -205,7 +208,7 @@ public final class MediaQualityManager {
             @NonNull PictureProfileCallback callback) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(executor);
-        synchronized (mLock) {
+        synchronized (mPpLock) {
             mPpCallbackRecords.add(new PictureProfileCallbackRecord(callback, executor));
         }
     }
@@ -215,7 +218,7 @@ public final class MediaQualityManager {
      */
     public void unregisterPictureProfileCallback(@NonNull final PictureProfileCallback callback) {
         Preconditions.checkNotNull(callback);
-        synchronized (mLock) {
+        synchronized (mPpLock) {
             for (Iterator<PictureProfileCallbackRecord> it = mPpCallbackRecords.iterator();
                     it.hasNext(); ) {
                 PictureProfileCallbackRecord record = it.next();
@@ -416,7 +419,7 @@ public final class MediaQualityManager {
             @NonNull SoundProfileCallback callback) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(executor);
-        synchronized (mLock) {
+        synchronized (mSpLock) {
             mSpCallbackRecords.add(new SoundProfileCallbackRecord(callback, executor));
         }
     }
@@ -426,7 +429,7 @@ public final class MediaQualityManager {
      */
     public void unregisterSoundProfileCallback(@NonNull final SoundProfileCallback callback) {
         Preconditions.checkNotNull(callback);
-        synchronized (mLock) {
+        synchronized (mSpLock) {
             for (Iterator<SoundProfileCallbackRecord> it = mSpCallbackRecords.iterator();
                     it.hasNext(); ) {
                 SoundProfileCallbackRecord record = it.next();
@@ -785,7 +788,7 @@ public final class MediaQualityManager {
             @NonNull AmbientBacklightCallback callback) {
         Preconditions.checkNotNull(callback);
         Preconditions.checkNotNull(executor);
-        synchronized (mLock) {
+        synchronized (mAbLock) {
             mAbCallbackRecords.add(new AmbientBacklightCallbackRecord(callback, executor));
         }
     }
@@ -797,7 +800,7 @@ public final class MediaQualityManager {
     public void unregisterAmbientBacklightCallback(
             @NonNull final AmbientBacklightCallback callback) {
         Preconditions.checkNotNull(callback);
-        synchronized (mLock) {
+        synchronized (mAbLock) {
             for (Iterator<AmbientBacklightCallbackRecord> it = mAbCallbackRecords.iterator();
                     it.hasNext(); ) {
                 AmbientBacklightCallbackRecord record = it.next();
@@ -1128,7 +1131,7 @@ public final class MediaQualityManager {
             @NonNull Consumer<List<ActiveProcessingPicture>> listener) {
         Preconditions.checkNotNull(listener);
         Preconditions.checkNotNull(executor);
-        synchronized (mLock) {
+        synchronized (mApLock) {
             mApListenerRecords.add(
                     new ActiveProcessingPictureListenerRecord(listener, executor, false));
         }
@@ -1147,7 +1150,7 @@ public final class MediaQualityManager {
             @NonNull Consumer<List<ActiveProcessingPicture>> listener) {
         Preconditions.checkNotNull(listener);
         Preconditions.checkNotNull(executor);
-        synchronized (mLock) {
+        synchronized (mApLock) {
             mApListenerRecords.add(
                     new ActiveProcessingPictureListenerRecord(listener, executor, true));
         }
@@ -1160,7 +1163,7 @@ public final class MediaQualityManager {
     public void removeActiveProcessingPictureListener(
             @NonNull Consumer<List<ActiveProcessingPicture>> listener) {
         Preconditions.checkNotNull(listener);
-        synchronized (mLock) {
+        synchronized (mApLock) {
             for (Iterator<ActiveProcessingPictureListenerRecord> it = mApListenerRecords.iterator();
                     it.hasNext(); ) {
                 ActiveProcessingPictureListenerRecord record = it.next();
