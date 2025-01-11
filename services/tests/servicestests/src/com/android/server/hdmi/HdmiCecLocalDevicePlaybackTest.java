@@ -2868,6 +2868,9 @@ public class HdmiCecLocalDevicePlaybackTest {
 
         assertThat(mPowerManager.isInteractive()).isTrue();
         mNativeWrapper.clearResultMessages();
+        mTestLooper.moveTimeForward(TIMEOUT_MS);
+        mTestLooper.dispatchAll();
+
         mTestLooper.moveTimeForward(MONITORING_INTERVAL_MS);
         mTestLooper.dispatchAll();
 
