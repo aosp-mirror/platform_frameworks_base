@@ -96,9 +96,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     }
 
     @Override
+    @Result
     public int onCalculate(@Nullable Task task, @Nullable ActivityInfo.WindowLayout layout,
             @Nullable ActivityRecord activity, @Nullable ActivityRecord source,
-            @Nullable ActivityOptions options, @Nullable Request request, int phase,
+            @Nullable ActivityOptions options, @Nullable Request request, @Phase int phase,
             LaunchParams currentParams, LaunchParams outParams) {
         initLogBuilder(task, activity);
         final int result = calculate(task, layout, activity, source, options, request, phase,
@@ -107,9 +108,10 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return result;
     }
 
+    @Result
     private int calculate(@Nullable Task task, @Nullable ActivityInfo.WindowLayout layout,
             @Nullable ActivityRecord activity, @Nullable ActivityRecord source,
-            @Nullable ActivityOptions options, @Nullable Request request, int phase,
+            @Nullable ActivityOptions options, @Nullable Request request, @Phase int phase,
             LaunchParams currentParams, LaunchParams outParams) {
         final ActivityRecord root;
         if (task != null) {
