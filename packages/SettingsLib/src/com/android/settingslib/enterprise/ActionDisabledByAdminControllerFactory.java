@@ -84,7 +84,11 @@ public final class ActionDisabledByAdminControllerFactory {
             return false;
         }
         DevicePolicyManager dpm = context.getSystemService(DevicePolicyManager.class);
-        return ParentalControlsUtilsInternal.parentConsentRequired(context, dpm,
+        final SupervisionManager sm =
+                android.app.supervision.flags.Flags.deprecateDpmSupervisionApis()
+                        ? context.getSystemService(SupervisionManager.class)
+                        : null;
+        return ParentalControlsUtilsInternal.parentConsentRequired(context, dpm, sm,
                 BiometricAuthenticator.TYPE_ANY_BIOMETRIC, new UserHandle(UserHandle.myUserId()));
     }
 
