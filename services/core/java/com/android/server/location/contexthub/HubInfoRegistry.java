@@ -30,6 +30,7 @@ import com.android.internal.annotations.GuardedBy;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -271,9 +272,10 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
     void unregisterEndpointDiscoveryCallback(IContextHubEndpointDiscoveryCallback callback) {
         Objects.requireNonNull(callback, "callback cannot be null");
         synchronized (mCallbackLock) {
-            for (DiscoveryCallback discoveryCallback : mEndpointDiscoveryCallbacks) {
-                if (discoveryCallback.getCallback().asBinder() == callback.asBinder()) {
-                    mEndpointDiscoveryCallbacks.remove(discoveryCallback);
+            Iterator<DiscoveryCallback> iterator = mEndpointDiscoveryCallbacks.iterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().getCallback().asBinder() == callback.asBinder()) {
+                    iterator.remove();
                     break;
                 }
             }
@@ -303,7 +305,9 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
             HubEndpointInfo[] endpointInfos,
             BiConsumer<IContextHubEndpointDiscoveryCallback, HubEndpointInfo[]> consumer) {
         synchronized (mCallbackLock) {
-            for (DiscoveryCallback discoveryCallback : mEndpointDiscoveryCallbacks) {
+            Iterator<DiscoveryCallback> iterator = mEndpointDiscoveryCallbacks.iterator();
+            while (iterator.hasNext()) {
+                DiscoveryCallback discoveryCallback = iterator.next();
                 ArrayList<HubEndpointInfo> infoList = new ArrayList<>();
                 for (HubEndpointInfo endpointInfo : endpointInfos) {
                     if (discoveryCallback.isMatch(endpointInfo)) {
