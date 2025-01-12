@@ -306,8 +306,9 @@ static install_status_t copyFileIfChanged(JNIEnv* env, void* arg, ZipFileRO* zip
                                                when, uncompLen, crc);
             }
 
-            ALOGE("Library '%s' is not PAGE(%zu)-aligned - will not be able to open it directly "
-                  "from apk.\n",
+            ALOGE("extractNativeLibs=false library '%s' is not PAGE(%zu)-"
+                  "aligned within apk (APK alignment, not ELF alignment) -"
+                  "will not be able to open it directly from apk.\n",
                   fileName, kPageSize);
             return INSTALL_FAILED_INVALID_APK;
         }

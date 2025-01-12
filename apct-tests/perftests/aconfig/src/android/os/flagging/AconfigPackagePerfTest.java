@@ -43,7 +43,7 @@ public class AconfigPackagePerfTest {
 
     @Rule public PerfStatusReporter mPerfStatusReporter = new PerfStatusReporter();
 
-    @Parameterized.Parameters(name = "isPlatform={0}")
+    @Parameterized.Parameters(name = "isPlatform_{0}")
     public static Collection<Object[]> data() {
         return Arrays.asList(new Object[][] {{false}, {true}});
     }
@@ -60,10 +60,9 @@ public class AconfigPackagePerfTest {
         }
     }
 
-    @Parameterized.Parameter(0)
-
     // if this variable is true, then the test query flags from system/product/vendor
     // if this variable is false, then the test query flags from updatable partitions
+    @Parameterized.Parameter(0)
     public boolean mIsPlatform;
 
     @Test
