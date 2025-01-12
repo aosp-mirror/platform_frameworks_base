@@ -16,12 +16,18 @@
 
 package com.android.server.location.contexthub;
 
+import android.content.Context;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
 import android.hardware.location.HubInfo;
+import android.os.Binder;
 import android.os.DeadObjectException;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -38,6 +44,10 @@ import java.util.function.BiConsumer;
 
 class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycleCallback {
     private static final String TAG = "HubInfoRegistry";
+
+    /** The duration of wakelocks acquired during discovery callbacks */
+    private static final long WAKELOCK_TIMEOUT_MILLIS = 5 * 1000;
+
     private final Object mLock = new Object();
 
     private final IContextHubWrapper mContextHubWrapper;
@@ -99,7 +109,11 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
 
     private final Object mCallbackLock = new Object();
 
-    HubInfoRegistry(IContextHubWrapper contextHubWrapper) throws InstantiationException {
+    /** Wakelock held while endpoint callbacks are being invoked */
+    private final WakeLock mWakeLock;
+
+    HubInfoRegistry(Context context, IContextHubWrapper contextHubWrapper)
+            throws InstantiationException {
         mContextHubWrapper = contextHubWrapper;
         try {
             refreshCachedHubs();
@@ -109,6 +123,16 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
             Log.e(TAG, error, e);
             throw new InstantiationException(error);
         }
+
+        PowerManager powerManager = context.getSystemService(PowerManager.class);
+        if (powerManager == null) {
+            String error = "PowerManager was null";
+            Log.e(TAG, error);
+            throw new InstantiationError(error);
+        }
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock.setWorkSource(new WorkSource(Process.myUid(), context.getPackageName()));
+        mWakeLock.setReferenceCounted(true);
     }
 
     /** Retrieve the list of hubs available. */
@@ -282,6 +306,11 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
         }
     }
 
+    /* package */
+    void onDiscoveryCallbackFinished() {
+        releaseWakeLock();
+    }
+
     private void checkCallbackAlreadyRegistered(
             IContextHubEndpointDiscoveryCallback callback) {
         synchronized (mCallbackLock) {
@@ -315,11 +344,32 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
                     }
                 }
 
+                acquireWakeLock();
                 consumer.accept(
                         discoveryCallback.getCallback(),
                         infoList.toArray(new HubEndpointInfo[infoList.size()]));
             }
         }
+    }
+
+    private void acquireWakeLock() {
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
+                });
+    }
+
+    private void releaseWakeLock() {
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    if (mWakeLock.isHeld()) {
+                        try {
+                            mWakeLock.release();
+                        } catch (RuntimeException e) {
+                            Log.e(TAG, "Releasing the wakelock fails - ", e);
+                        }
+                    }
+                });
     }
 
     void dump(IndentingPrintWriter ipw) {

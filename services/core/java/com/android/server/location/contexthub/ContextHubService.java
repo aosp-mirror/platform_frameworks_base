@@ -334,7 +334,7 @@ public class ContextHubService extends IContextHubService.Stub {
         if (Flags.offloadApi() && Flags.offloadImplementation()) {
             HubInfoRegistry registry;
             try {
-                registry = new HubInfoRegistry(mContextHubWrapper);
+                registry = new HubInfoRegistry(mContext, mContextHubWrapper);
                 mEndpointManager =
                         new ContextHubEndpointManager(
                                 mContext, mContextHubWrapper, registry, mTransactionManager);
@@ -819,6 +819,13 @@ public class ContextHubService extends IContextHubService.Stub {
         super.unregisterEndpointDiscoveryCallback_enforcePermission();
         checkEndpointDiscoveryPreconditions();
         mHubInfoRegistry.unregisterEndpointDiscoveryCallback(callback);
+    }
+
+    @android.annotation.EnforcePermission(android.Manifest.permission.ACCESS_CONTEXT_HUB)
+    @Override
+    public void onDiscoveryCallbackFinished() throws RemoteException {
+        super.onDiscoveryCallbackFinished_enforcePermission();
+        mHubInfoRegistry.onDiscoveryCallbackFinished();
     }
 
     private void checkEndpointDiscoveryPreconditions() {
