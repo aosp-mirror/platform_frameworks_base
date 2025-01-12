@@ -373,7 +373,7 @@ class InsetsStateController {
         array.add(provider);
     }
 
-    void notifyControlChanged(InsetsControlTarget target, InsetsSourceProvider provider) {
+    void notifyControlChanged(@NonNull InsetsControlTarget target, InsetsSourceProvider provider) {
         addToPendingControlMaps(target, provider);
         notifyPendingInsetsControlChanged();
 
