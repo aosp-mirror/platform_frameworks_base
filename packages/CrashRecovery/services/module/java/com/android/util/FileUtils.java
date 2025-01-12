@@ -16,7 +16,6 @@
 
 package android.util;
 
-import android.annotation.NonNull;
 import android.annotation.Nullable;
 
 import java.io.BufferedInputStream;
@@ -114,15 +113,5 @@ public class FileUtils {
         } catch (IOException e) {
         }
         return false;
-    }
-
-    /**
-     * List the files in the directory or return empty file.
-     *
-     * @hide
-     */
-    public static @NonNull File[] listFilesOrEmpty(@Nullable File dir) {
-        return (dir != null) ? ArrayUtils.defeatNullable(dir.listFiles())
-            : ArrayUtils.EMPTY_FILE;
     }
 }
