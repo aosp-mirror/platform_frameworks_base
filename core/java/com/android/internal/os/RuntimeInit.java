@@ -164,7 +164,9 @@ public class RuntimeInit {
                     // System process is dead; ignore
                 } else {
                     try {
-                        Clog_e(TAG, "Error reporting crash", t2);
+                        // Log original crash and then log the error reporting exception.
+                        Clog_e(TAG, "Couldn't report crash. Here's the crash:", e);
+                        Clog_e(TAG, "Error reporting crash. Here's the error:", t2);
                     } catch (Throwable t3) {
                         // Even Clog_e() fails!  Oh well.
                     }
