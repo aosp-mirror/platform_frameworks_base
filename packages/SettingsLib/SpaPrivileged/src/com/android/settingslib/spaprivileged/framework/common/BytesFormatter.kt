@@ -24,6 +24,7 @@ import android.icu.text.NumberFormat
 import android.icu.text.UnicodeSet
 import android.icu.text.UnicodeSetSpanner
 import android.icu.util.Measure
+import android.text.BidiFormatter
 import android.text.format.Formatter
 import android.text.format.Formatter.RoundedBytesResult
 import java.math.BigDecimal
@@ -40,11 +41,17 @@ class BytesFormatter(resources: Resources) {
     constructor(context: Context) : this(context.resources)
 
     private val locale = resources.configuration.locales[0]
+    private val bidiFormatter = BidiFormatter.getInstance(locale)
 
     fun format(bytes: Long, useCase: UseCase): String {
         val rounded = RoundedBytesResult.roundBytes(bytes, useCase.flag)
         val numberFormatter = getNumberFormatter(rounded.fractionDigits)
-        return numberFormatter.formatRoundedBytesResult(rounded)
+        val formattedString = numberFormatter.formatRoundedBytesResult(rounded)
+        return if (useCase == UseCase.FileSize) {
+            formattedString.bidiWrap()
+        } else {
+            formattedString
+        }
     }
 
     fun formatWithUnits(bytes: Long, useCase: UseCase): Result {
@@ -72,6 +79,14 @@ class BytesFormatter(resources: Resources) {
             if (this is DecimalFormat) {
                 setRoundingMode(BigDecimal.ROUND_HALF_UP)
             }
+        }
+
+    /** Wraps the source string in bidi formatting characters in RTL locales. */
+    private fun String.bidiWrap(): String =
+        if (bidiFormatter.isRtlContext) {
+            bidiFormatter.unicodeWrap(this)
+        } else {
+            this
         }
 
     private companion object {
