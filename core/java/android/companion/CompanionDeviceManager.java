@@ -23,7 +23,6 @@ import static android.Manifest.permission.REQUEST_COMPANION_PROFILE_WATCH;
 import static android.graphics.drawable.Icon.TYPE_URI;
 import static android.graphics.drawable.Icon.TYPE_URI_ADAPTIVE_BITMAP;
 
-
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
 import android.annotation.IntDef;
@@ -52,10 +51,10 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
+import android.graphics.Canvas;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
-import android.graphics.drawable.VectorDrawable;
 import android.net.MacAddress;
 import android.os.Binder;
 import android.os.Handler;
@@ -110,6 +109,7 @@ import java.util.function.Consumer;
 @RequiresFeature(PackageManager.FEATURE_COMPANION_DEVICE_SETUP)
 public final class CompanionDeviceManager {
     private static final String TAG = "CDM_CompanionDeviceManager";
+    private static final int ICON_TARGET_SIZE = 24;
 
     /** @hide */
     @IntDef(prefix = {"RESULT_"}, value = {
@@ -474,10 +474,8 @@ public final class CompanionDeviceManager {
 
         if (Flags.associationDeviceIcon()) {
             final Icon deviceIcon = request.getDeviceIcon();
-
-            if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
-                throw new IllegalArgumentException("The size of the device icon must be "
-                        + "24dp x 24dp to ensure proper display");
+            if (deviceIcon != null) {
+                request.setDeviceIcon(scaleIcon(deviceIcon, mContext));
             }
         }
 
@@ -547,10 +545,8 @@ public final class CompanionDeviceManager {
 
         if (Flags.associationDeviceIcon()) {
             final Icon deviceIcon = request.getDeviceIcon();
-
-            if (deviceIcon != null && !isValidIcon(deviceIcon, mContext)) {
-                throw new IllegalArgumentException("The size of the device icon must be "
-                        + "24dp x 24dp to ensure proper display");
+            if (deviceIcon != null) {
+                request.setDeviceIcon(scaleIcon(deviceIcon, mContext));
             }
         }
 
@@ -2024,33 +2020,26 @@ public final class CompanionDeviceManager {
         }
     }
 
-    private boolean isValidIcon(Icon icon, Context context) {
+    private Icon scaleIcon(Icon icon, Context context) {
+        if (icon == null) return null;
         if (icon.getType() == TYPE_URI_ADAPTIVE_BITMAP || icon.getType() == TYPE_URI) {
             throw new IllegalArgumentException("The URI based Icon is not supported.");
         }
+
+        Bitmap bitmap;
         Drawable drawable = icon.loadDrawable(context);
-        float density = context.getResources().getDisplayMetrics().density;
-
         if (drawable instanceof BitmapDrawable) {
-            Bitmap bitmap = ((BitmapDrawable) drawable).getBitmap();
-
-            float widthDp = bitmap.getWidth() / density;
-            float heightDp = bitmap.getHeight() / density;
-
-            if (widthDp != 24 || heightDp != 24) {
-                return false;
-            }
-        } else if (drawable instanceof VectorDrawable) {
-            VectorDrawable vectorDrawable = (VectorDrawable) drawable;
-            float widthDp = vectorDrawable.getIntrinsicWidth() / density;
-            float heightDp = vectorDrawable.getIntrinsicHeight() / density;
-
-            if (widthDp != 24 || heightDp != 24) {
-                return false;
-            }
+            bitmap = Bitmap.createScaledBitmap(
+                    ((BitmapDrawable) drawable).getBitmap(), ICON_TARGET_SIZE, ICON_TARGET_SIZE,
+                    false);
         } else {
-            throw new IllegalArgumentException("The format of the device icon is unsupported.");
+            bitmap = Bitmap.createBitmap(context.getResources().getDisplayMetrics(),
+                    ICON_TARGET_SIZE, ICON_TARGET_SIZE, Bitmap.Config.ARGB_8888);
+            Canvas canvas = new Canvas(bitmap);
+            drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+            drawable.draw(canvas);
         }
-        return true;
+
+        return Icon.createWithBitmap(bitmap);
     }
 }

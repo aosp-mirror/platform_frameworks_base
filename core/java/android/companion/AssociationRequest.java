@@ -385,6 +385,10 @@ public final class AssociationRequest implements Parcelable {
     public void setAssociatedDevice(AssociatedDevice associatedDevice) {
         mAssociatedDevice = associatedDevice;
     }
+    /** @hide */
+    public void setDeviceIcon(Icon deviceIcon) {
+        mDeviceIcon = deviceIcon;
+    }
 
     /** @hide */
     @NonNull
@@ -492,9 +496,10 @@ public final class AssociationRequest implements Parcelable {
         /**
          * Set the device icon for the self-managed device and to display the icon in the
          * self-managed association dialog.
+         * <p>The given device icon will be resized to 24dp x 24dp.
          *
-         * @throws IllegalArgumentException if the icon is not exactly 24dp by 24dp
-         * or if it is {@link Icon#TYPE_URI} or {@link Icon#TYPE_URI_ADAPTIVE_BITMAP}.
+         * @throws IllegalArgumentException if the icon is
+         * {@link Icon#TYPE_URI} or {@link Icon#TYPE_URI_ADAPTIVE_BITMAP}.
          * @see #setSelfManaged(boolean)
          */
         @NonNull
