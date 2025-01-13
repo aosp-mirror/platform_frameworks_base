@@ -414,7 +414,7 @@ class AppCompatSizeCompatModePolicy {
      *         aspect ratio.
      */
     boolean shouldCreateAppCompatDisplayInsets() {
-        if (mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
+        if (mActivityRecord.mAppCompatController.getAspectRatioOverrides()
                 .hasFullscreenOverride()) {
             // If the user has forced the applications aspect ratio to be fullscreen, don't use size
             // compatibility mode in any situation. The user has been warned and therefore accepts

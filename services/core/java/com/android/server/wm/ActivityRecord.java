@@ -3229,7 +3229,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
             return false;
         }
         // If the user preference respects aspect ratio, then it becomes non-resizable.
-        return mAppCompatController.getAppCompatAspectRatioOverrides()
+        return mAppCompatController.getAspectRatioOverrides()
                 .userPreferenceCompatibleWithNonResizability();
     }
 
@@ -8469,7 +8469,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
         if (!mAppCompatController.getAspectRatioPolicy()
                     .isLetterboxedForFixedOrientationAndAspectRatio()
-                && !mAppCompatController.getAppCompatAspectRatioOverrides()
+                && !mAppCompatController.getAspectRatioOverrides()
                     .hasFullscreenOverride()) {
             resolveAspectRatioRestriction(newParentConfiguration);
         }
@@ -10135,29 +10135,27 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(LAST_DROP_INPUT_MODE, mLastDropInputMode);
         proto.write(OVERRIDE_ORIENTATION, getOverrideOrientation());
         proto.write(SHOULD_SEND_COMPAT_FAKE_FOCUS, shouldSendCompatFakeFocus());
+        final AppCompatCameraOverrides cameraOverrides =
+                mAppCompatController.getAppCompatCameraOverrides();
         proto.write(SHOULD_FORCE_ROTATE_FOR_CAMERA_COMPAT,
-                mAppCompatController.getAppCompatCameraOverrides()
-                        .shouldForceRotateForCameraCompat());
+                cameraOverrides.shouldForceRotateForCameraCompat());
         proto.write(SHOULD_REFRESH_ACTIVITY_FOR_CAMERA_COMPAT,
-                mAppCompatController.getAppCompatCameraOverrides()
-                        .shouldRefreshActivityForCameraCompat());
+                cameraOverrides.shouldRefreshActivityForCameraCompat());
         proto.write(SHOULD_REFRESH_ACTIVITY_VIA_PAUSE_FOR_CAMERA_COMPAT,
-                mAppCompatController.getAppCompatCameraOverrides()
-                        .shouldRefreshActivityViaPauseForCameraCompat());
+                cameraOverrides.shouldRefreshActivityViaPauseForCameraCompat());
+        final AppCompatAspectRatioOverrides aspectRatioOverrides =
+                mAppCompatController.getAspectRatioOverrides();
         proto.write(SHOULD_OVERRIDE_MIN_ASPECT_RATIO,
-                mAppCompatController.getAppCompatAspectRatioOverrides()
-                        .shouldOverrideMinAspectRatio());
+                aspectRatioOverrides.shouldOverrideMinAspectRatio());
         proto.write(SHOULD_IGNORE_ORIENTATION_REQUEST_LOOP,
                 mAppCompatController.getOrientationOverrides()
                         .shouldIgnoreOrientationRequestLoop());
         proto.write(SHOULD_OVERRIDE_FORCE_RESIZE_APP,
                 mAppCompatController.getResizeOverrides().shouldOverrideForceResizeApp());
         proto.write(SHOULD_ENABLE_USER_ASPECT_RATIO_SETTINGS,
-                mAppCompatController.getAppCompatAspectRatioOverrides()
-                        .shouldEnableUserAspectRatioSettings());
+                aspectRatioOverrides.shouldEnableUserAspectRatioSettings());
         proto.write(IS_USER_FULLSCREEN_OVERRIDE_ENABLED,
-                mAppCompatController.getAppCompatAspectRatioOverrides()
-                        .isUserFullscreenOverrideEnabled());
+                aspectRatioOverrides.isUserFullscreenOverrideEnabled());
     }
 
     @Override

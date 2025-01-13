@@ -104,7 +104,7 @@ public final class DesktopModeBoundsCalculator {
         if (!DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS.isTrue()) {
             return centerInScreen(idealSize, screenBounds);
         }
-        if (activity.mAppCompatController.getAppCompatAspectRatioOverrides()
+        if (activity.mAppCompatController.getAspectRatioOverrides()
                 .hasFullscreenOverride()) {
             // If the activity has a fullscreen override applied, it should be treated as
             // resizeable and match the device orientation. Thus the ideal size can be

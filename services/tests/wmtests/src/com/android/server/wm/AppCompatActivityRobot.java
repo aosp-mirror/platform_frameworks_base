@@ -213,7 +213,7 @@ class AppCompatActivityRobot {
 
     void setShouldApplyUserMinAspectRatioOverride(boolean enabled) {
         doReturn(enabled).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).shouldApplyUserMinAspectRatioOverride();
+                .getAspectRatioOverrides()).shouldApplyUserMinAspectRatioOverride();
     }
 
     void setShouldCreateCompatDisplayInsets(boolean enabled) {
@@ -226,17 +226,17 @@ class AppCompatActivityRobot {
 
     void setShouldApplyUserFullscreenOverride(boolean enabled) {
         doReturn(enabled).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).shouldApplyUserFullscreenOverride();
+                .getAspectRatioOverrides()).shouldApplyUserFullscreenOverride();
     }
 
     void setGetUserMinAspectRatioOverrideCode(@UserMinAspectRatio int overrideCode) {
         doReturn(overrideCode).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
+                .getAspectRatioOverrides()).getUserMinAspectRatioOverrideCode();
     }
 
     void setGetUserMinAspectRatioOverrideValue(float overrideValue) {
         doReturn(overrideValue).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioOverrides()).getUserMinAspectRatio();
+                .getAspectRatioOverrides()).getUserMinAspectRatio();
     }
 
     void setIgnoreOrientationRequest(boolean enabled) {
