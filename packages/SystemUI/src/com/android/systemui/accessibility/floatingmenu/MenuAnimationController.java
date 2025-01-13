@@ -24,6 +24,7 @@ import android.graphics.Rect;
 import android.os.Handler;
 import android.os.Looper;
 import android.util.Log;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.OvershootInterpolator;
@@ -197,7 +198,7 @@ class MenuAnimationController {
         constrainPositionAndUpdate(position, /* writeToPosition = */ true);
     }
 
-    void flingMenuThenSpringToEdge(float x, float velocityX, float velocityY) {
+    void flingMenuThenSpringToEdge(PointF position, float velocityX, float velocityY) {
         final boolean shouldMenuFlingLeft = isOnLeftSide()
                 ? velocityX < ESCAPE_VELOCITY
                 : velocityX < -ESCAPE_VELOCITY;
@@ -205,9 +206,17 @@ class MenuAnimationController {
         final Rect draggableBounds = mMenuView.getMenuDraggableBounds();
         final float finalPositionX = shouldMenuFlingLeft
                 ? draggableBounds.left : draggableBounds.right;
-
+        final DisplayCutout displayCutout = mMenuViewAppearance.getDisplayCutout();
+        final float finalPositionY =
+                (displayCutout == null) ? position.y
+                        : mMenuViewAppearance.avoidVerticalDisplayCutout(
+                                position.y, draggableBounds,
+                                shouldMenuFlingLeft
+                                        ? displayCutout.getBoundingRectLeft()
+                                        : displayCutout.getBoundingRectRight()
+                        );
         final float minimumVelocityToReachEdge =
-                (finalPositionX - x) * (FLING_FRICTION_SCALAR * DEFAULT_FRICTION);
+                (finalPositionX - position.x) * (FLING_FRICTION_SCALAR * DEFAULT_FRICTION);
 
         final float startXVelocity = shouldMenuFlingLeft
                 ? Math.min(minimumVelocityToReachEdge, velocityX)
@@ -219,11 +228,19 @@ class MenuAnimationController {
                 createSpringForce(),
                 finalPositionX);
 
-        flingThenSpringMenuWith(DynamicAnimation.TRANSLATION_Y,
-                velocityY,
-                FLING_FRICTION_SCALAR,
-                createSpringForce(),
-                /* finalPosition= */ null);
+        if (com.android.systemui.Flags.floatingMenuDisplayCutoutSupport()) {
+            flingThenSpringMenuWith(DynamicAnimation.TRANSLATION_Y,
+                    velocityY,
+                    FLING_FRICTION_SCALAR,
+                    createSpringForce(),
+                    (finalPositionY != position.y) ? finalPositionY : null);
+        } else {
+            flingThenSpringMenuWith(DynamicAnimation.TRANSLATION_Y,
+                    velocityY,
+                    FLING_FRICTION_SCALAR,
+                    createSpringForce(),
+                    /* finalPosition= */ null);
+        }
     }
 
     private void flingThenSpringMenuWith(DynamicAnimation.ViewProperty property, float velocity,

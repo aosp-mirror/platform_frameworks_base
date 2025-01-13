@@ -28,6 +28,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.PointF;
 import android.platform.test.annotations.DisableFlags;
 import android.platform.test.annotations.EnableFlags;
 import android.testing.TestableLooper;
@@ -210,7 +211,7 @@ public class MenuListViewTouchHandlerTest extends SysuiTestCase {
         mTouchHandler.onInterceptTouchEvent(mStubListView, stubMoveEvent);
         mTouchHandler.onInterceptTouchEvent(mStubListView, stubUpEvent);
 
-        verify(mMenuAnimationController).flingMenuThenSpringToEdge(anyFloat(), anyFloat(),
+        verify(mMenuAnimationController).flingMenuThenSpringToEdge(any(PointF.class), anyFloat(),
                 anyFloat());
     }
 

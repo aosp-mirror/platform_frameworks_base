@@ -194,7 +194,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final Runnable onSpringAnimationsEndCallback = mock(Runnable.class);
         mMenuAnimationController.setSpringAnimationsEndAction(onSpringAnimationsEndCallback);
 
-        mMenuAnimationController.flingMenuThenSpringToEdge(/* x= */ 0, /* velocityX= */
+        mMenuAnimationController.flingMenuThenSpringToEdge(new PointF(), /* velocityX= */
                 100, /* velocityY= */ 100);
         mMenuAnimationController.mPositionAnimations.values()
                 .forEach(animation -> verify((FlingAnimation) animation).addEndListener(
@@ -212,7 +212,7 @@ public class MenuAnimationControllerTest extends SysuiTestCase {
         final Runnable onSpringAnimationsEndCallback = mock(Runnable.class);
         mMenuAnimationController.setSpringAnimationsEndAction(onSpringAnimationsEndCallback);
 
-        mMenuAnimationController.flingMenuThenSpringToEdge(/* x= */ 0, /* velocityX= */
+        mMenuAnimationController.flingMenuThenSpringToEdge(new PointF(), /* velocityX= */
                 200, /* velocityY= */ 200);
         mMenuAnimationController.mPositionAnimations.values()
                 .forEach(animation -> verify((FlingAnimation) animation).addEndListener(
