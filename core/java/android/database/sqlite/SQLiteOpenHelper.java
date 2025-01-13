@@ -25,10 +25,15 @@ import android.database.DatabaseErrorHandler;
 import android.database.SQLException;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.os.FileUtils;
+import android.util.ArrayMap;
 import android.util.Log;
 
+import com.android.internal.annotations.GuardedBy;
+
 import java.io.File;
+import java.io.IOException;
 import java.util.Objects;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * A helper class to manage database creation and version management.
@@ -53,6 +58,13 @@ import java.util.Objects;
  */
 public abstract class SQLiteOpenHelper implements AutoCloseable {
     private static final String TAG = SQLiteOpenHelper.class.getSimpleName();
+
+    // Every database file has a lock, saved in this map.  The lock is held while the database is
+    // opened.
+    private static final ConcurrentHashMap<String, Object> sDbLock = new ConcurrentHashMap<>();
+
+    // The lock that this open helper instance must hold when the database is opened.
+    private final Object mLock;
 
     private final Context mContext;
     @UnsupportedAppUsage
@@ -168,6 +180,21 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
         mNewVersion = version;
         mMinimumSupportedVersion = Math.max(0, minimumSupportedVersion);
         setOpenParamsBuilder(openParamsBuilder);
+
+        Object lock = null;
+        if (mName == null || !Flags.concurrentOpenHelper()) {
+            lock = new Object();
+        } else {
+            try {
+                final String path = mContext.getDatabasePath(mName).getCanonicalPath();
+                lock = sDbLock.computeIfAbsent(path, (String k) -> new Object());
+            } catch (IOException e) {
+                Log.d(TAG, "failed to construct db path for " + mName);
+                // Ensure the lock is not null.
+                lock = new Object();
+            }
+        }
+        mLock = lock;
     }
 
     /**
@@ -358,74 +385,77 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
 
         SQLiteDatabase db = mDatabase;
         try {
-            mIsInitializing = true;
+            synchronized (mLock) {
+                mIsInitializing = true;
 
-            if (db != null) {
-                if (writable && db.isReadOnly()) {
-                    db.reopenReadWrite();
-                }
-            } else if (mName == null) {
-                db = SQLiteDatabase.createInMemory(mOpenParamsBuilder.build());
-            } else {
-                final File filePath = mContext.getDatabasePath(mName);
-                SQLiteDatabase.OpenParams params = mOpenParamsBuilder.build();
-                try {
-                    db = SQLiteDatabase.openDatabase(filePath, params);
-                    // Keep pre-O-MR1 behavior by resetting file permissions to 660
-                    setFilePermissionsForDb(filePath.getPath());
-                } catch (SQLException ex) {
-                    if (writable) {
-                        throw ex;
+                if (db != null) {
+                    if (writable && db.isReadOnly()) {
+                        db.reopenReadWrite();
                     }
-                    Log.e(TAG, "Couldn't open database for writing (will try read-only):", ex);
-                    params = params.toBuilder().addOpenFlags(SQLiteDatabase.OPEN_READONLY).build();
-                    db = SQLiteDatabase.openDatabase(filePath, params);
-                }
-            }
-
-            onConfigure(db);
-
-            final int version = db.getVersion();
-            if (version != mNewVersion) {
-                if (db.isReadOnly()) {
-                    throw new SQLiteException("Can't upgrade read-only database from version " +
-                            db.getVersion() + " to " + mNewVersion + ": " + mName);
-                }
-
-                if (version > 0 && version < mMinimumSupportedVersion) {
-                    File databaseFile = new File(db.getPath());
-                    onBeforeDelete(db);
-                    db.close();
-                    if (SQLiteDatabase.deleteDatabase(databaseFile)) {
-                        mIsInitializing = false;
-                        return getDatabaseLocked(writable);
-                    } else {
-                        throw new IllegalStateException("Unable to delete obsolete database "
-                                + mName + " with version " + version);
-                    }
+                } else if (mName == null) {
+                    db = SQLiteDatabase.createInMemory(mOpenParamsBuilder.build());
                 } else {
-                    db.beginTransaction();
+                    final File filePath = mContext.getDatabasePath(mName);
+                    SQLiteDatabase.OpenParams params = mOpenParamsBuilder.build();
                     try {
-                        if (version == 0) {
-                            onCreate(db);
-                        } else {
-                            if (version > mNewVersion) {
-                                onDowngrade(db, version, mNewVersion);
-                            } else {
-                                onUpgrade(db, version, mNewVersion);
-                            }
+                        db = SQLiteDatabase.openDatabase(filePath, params);
+                        // Keep pre-O-MR1 behavior by resetting file permissions to 660
+                        setFilePermissionsForDb(filePath.getPath());
+                    } catch (SQLException ex) {
+                        if (writable) {
+                            throw ex;
                         }
-                        db.setVersion(mNewVersion);
-                        db.setTransactionSuccessful();
-                    } finally {
-                        db.endTransaction();
+                        Log.e(TAG, "Couldn't open database for writing (will try read-only):", ex);
+                        params = params.toBuilder()
+                                 .addOpenFlags(SQLiteDatabase.OPEN_READONLY).build();
+                        db = SQLiteDatabase.openDatabase(filePath, params);
                     }
                 }
-            }
 
-            onOpen(db);
-            mDatabase = db;
-            return db;
+                onConfigure(db);
+
+                final int version = db.getVersion();
+                if (version != mNewVersion) {
+                    if (db.isReadOnly()) {
+                        throw new SQLiteException("Can't upgrade read-only database from version "
+                                + db.getVersion() + " to " + mNewVersion + ": " + mName);
+                    }
+
+                    if (version > 0 && version < mMinimumSupportedVersion) {
+                        File databaseFile = new File(db.getPath());
+                        onBeforeDelete(db);
+                        db.close();
+                        if (SQLiteDatabase.deleteDatabase(databaseFile)) {
+                            mIsInitializing = false;
+                            return getDatabaseLocked(writable);
+                        } else {
+                            throw new IllegalStateException("Unable to delete obsolete database "
+                                    + mName + " with version " + version);
+                        }
+                    } else {
+                        db.beginTransaction();
+                        try {
+                            if (version == 0) {
+                                onCreate(db);
+                            } else {
+                                if (version > mNewVersion) {
+                                    onDowngrade(db, version, mNewVersion);
+                                } else {
+                                    onUpgrade(db, version, mNewVersion);
+                                }
+                            }
+                            db.setVersion(mNewVersion);
+                            db.setTransactionSuccessful();
+                        } finally {
+                            db.endTransaction();
+                        }
+                    }
+                }
+
+                onOpen(db);
+                mDatabase = db;
+                return db;
+            }
         } finally {
             mIsInitializing = false;
             if (db != null && db != mDatabase) {
