@@ -23,9 +23,18 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
     override val primaryBouncerShowingSoon = _primaryBouncerShowingSoon.asStateFlow()
     private val _primaryBouncerStartingToHide = MutableStateFlow(false)
     override val primaryBouncerStartingToHide = _primaryBouncerStartingToHide.asStateFlow()
-    private val _primaryBouncerDisappearAnimation = MutableStateFlow<Runnable?>(null)
     override val primaryBouncerStartingDisappearAnimation =
-        _primaryBouncerDisappearAnimation.asStateFlow()
+        MutableSharedFlow<Runnable?>(extraBufferCapacity = 2, replay = 1)
+
+    override fun isPrimaryBouncerStartingDisappearAnimation(): Boolean {
+        val replayCache = primaryBouncerStartingDisappearAnimation.replayCache
+        return if (!replayCache.isEmpty()) {
+            replayCache.last() != null
+        } else {
+            false
+        }
+    }
+
     private val _primaryBouncerScrimmed = MutableStateFlow(false)
     override val primaryBouncerScrimmed = _primaryBouncerScrimmed.asStateFlow()
     private val _panelExpansionAmount = MutableStateFlow(KeyguardBouncerConstants.EXPANSION_HIDDEN)
@@ -53,6 +62,8 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
         MutableStateFlow(KeyguardSecurityModel.SecurityMode.Invalid)
     override var bouncerDismissActionModel: BouncerDismissActionModel? = null
 
+    override fun isDebuggable() = true
+
     override fun setPrimaryScrimmed(isScrimmed: Boolean) {
         _primaryBouncerScrimmed.value = isScrimmed
     }
@@ -74,7 +85,7 @@ class FakeKeyguardBouncerRepository @Inject constructor() : KeyguardBouncerRepos
     }
 
     override fun setPrimaryStartDisappearAnimation(runnable: Runnable?) {
-        _primaryBouncerDisappearAnimation.value = runnable
+        primaryBouncerStartingDisappearAnimation.tryEmit(runnable)
     }
 
     override fun setPanelExpansion(panelExpansion: Float) {
