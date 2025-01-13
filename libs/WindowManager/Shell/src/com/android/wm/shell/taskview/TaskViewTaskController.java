@@ -536,9 +536,12 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             }
             return;
         }
+        // Cache it to avoid NPE and make sure to remove it from recents history.
+        // mTaskToken can be cleared in onTaskVanished() when the task is removed.
+        final WindowContainerToken taskToken = mTaskToken;
         mShellExecutor.execute(() -> {
             WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.removeTask(mTaskToken);
+            wct.removeTask(taskToken);
             mTaskViewTransitions.closeTaskView(wct, this);
         });
     }
