@@ -3312,13 +3312,18 @@ public class UserManagerService extends IUserManager.Stub {
         }
     }
 
-
-
     private void sendUserInfoChangedBroadcast(@UserIdInt int userId) {
         Intent changedIntent = new Intent(Intent.ACTION_USER_INFO_CHANGED);
         changedIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
         changedIntent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
         mContext.sendBroadcastAsUser(changedIntent, UserHandle.ALL);
+
+        // This intent allow system UI apps to refresh the content even if process was freezed.
+        Intent bgIntent = new Intent(Intent.ACTION_USER_INFO_CHANGED_BACKGROUND);
+        bgIntent.putExtra(Intent.EXTRA_USER_HANDLE, userId);
+        bgIntent.addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
+        mContext.sendBroadcastAsUser(bgIntent, UserHandle.ALL,
+                Manifest.permission.MANAGE_USERS);
     }
 
     @Override
