@@ -56,4 +56,5 @@
     <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"Монтенегро (латин)"</string>
     <string name="keyboard_layout_serbian_cyrillic" msgid="7013541044323542196">"Серби (кирилл)"</string>
     <string name="keyboard_layout_montenegrin_cyrillic" msgid="2391253952894077421">"Монтенегро (кирилл)"</string>
+    <string name="keyboard_layout_romanian" msgid="8698989892731726903">"Румын"</string>
 </resources>

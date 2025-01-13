@@ -56,4 +56,5 @@
     <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"蒙特內哥羅文 (拉丁字母)"</string>
     <string name="keyboard_layout_serbian_cyrillic" msgid="7013541044323542196">"塞爾維亞文 (西里爾字母)"</string>
     <string name="keyboard_layout_montenegrin_cyrillic" msgid="2391253952894077421">"蒙特內哥羅文 (西里爾字母)"</string>
+    <string name="keyboard_layout_romanian" msgid="8698989892731726903">"羅馬尼亞文"</string>
 </resources>
