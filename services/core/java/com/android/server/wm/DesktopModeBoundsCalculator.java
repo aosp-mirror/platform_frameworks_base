@@ -112,7 +112,7 @@ public final class DesktopModeBoundsCalculator {
             return centerInScreen(idealSize, screenBounds);
         }
         final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
-                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+                activity.mAppCompatController.getDesktopAspectRatioPolicy();
         float appAspectRatio = desktopAppCompatAspectRatioPolicy.calculateAspectRatio(task);
         final float tdaWidth = stableBounds.width();
         final float tdaHeight = stableBounds.height();
@@ -190,7 +190,7 @@ public final class DesktopModeBoundsCalculator {
             @NonNull ActivityRecord activity, @NonNull Task task) {
         final int activityOrientation = activity.getOverrideOrientation();
         final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
-                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+                activity.mAppCompatController.getDesktopAspectRatioPolicy();
         if (desktopAppCompatAspectRatioPolicy.shouldApplyUserMinAspectRatioOverride(task)
                 && (!isFixedOrientation(activityOrientation)
                     || activityOrientation == SCREEN_ORIENTATION_LOCKED)) {

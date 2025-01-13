@@ -35,7 +35,7 @@ class AppCompatController {
     @NonNull
     private final AppCompatReachabilityPolicy mReachabilityPolicy;
     @NonNull
-    private final DesktopAppCompatAspectRatioPolicy mDesktopAppCompatAspectRatioPolicy;
+    private final DesktopAppCompatAspectRatioPolicy mDesktopAspectRatioPolicy;
     @NonNull
     private final AppCompatOverrides mAppCompatOverrides;
     @NonNull
@@ -62,7 +62,7 @@ class AppCompatController {
                 wmService.mAppCompatConfiguration);
         mAppCompatLetterboxPolicy = new AppCompatLetterboxPolicy(activityRecord,
                 wmService.mAppCompatConfiguration);
-        mDesktopAppCompatAspectRatioPolicy = new DesktopAppCompatAspectRatioPolicy(activityRecord,
+        mDesktopAspectRatioPolicy = new DesktopAppCompatAspectRatioPolicy(activityRecord,
                 mAppCompatOverrides, mTransparentPolicy, wmService.mAppCompatConfiguration);
         mSizeCompatModePolicy = new AppCompatSizeCompatModePolicy(activityRecord,
                 mAppCompatOverrides);
@@ -84,8 +84,8 @@ class AppCompatController {
     }
 
     @NonNull
-    DesktopAppCompatAspectRatioPolicy getDesktopAppCompatAspectRatioPolicy() {
-        return mDesktopAppCompatAspectRatioPolicy;
+    DesktopAppCompatAspectRatioPolicy getDesktopAspectRatioPolicy() {
+        return mDesktopAspectRatioPolicy;
     }
 
     @NonNull

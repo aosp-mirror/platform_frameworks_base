@@ -2416,7 +2416,7 @@ public class SizeCompatTests extends WindowTestsBase {
             boolean enabled) {
         final ActivityRecord activity = getActivityBuilderWithoutTask().build();
         final DesktopAppCompatAspectRatioPolicy desktopAppCompatAspectRatioPolicy =
-                activity.mAppCompatController.getDesktopAppCompatAspectRatioPolicy();
+                activity.mAppCompatController.getDesktopAspectRatioPolicy();
         spyOn(desktopAppCompatAspectRatioPolicy);
         doReturn(enabled).when(desktopAppCompatAspectRatioPolicy)
                 .hasMinAspectRatioOverride(any());
