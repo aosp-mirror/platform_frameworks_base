@@ -71,6 +71,7 @@ import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.common.AlphaOptimizedButton;
 import com.android.wm.shell.shared.TriangleShape;
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper;
 import com.android.wm.shell.taskview.TaskView;
 
 import java.io.PrintWriter;
@@ -226,7 +227,8 @@ public class BubbleExpandedView extends LinearLayout {
                             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
 
                     final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
-                            || (mBubble.getShortcutInfo() != null && Flags.enableBubbleAnything()));
+                            || (mBubble.getShortcutInfo() != null
+                            && BubbleAnythingFlagHelper.enableCreateAnyBubble()));
 
                     if (mBubble.isAppBubble()) {
                         Context context =

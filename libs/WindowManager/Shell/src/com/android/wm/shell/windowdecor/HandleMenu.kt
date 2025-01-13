@@ -49,6 +49,7 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread
 import com.android.wm.shell.shared.annotations.ShellMainThread
+import com.android.wm.shell.shared.bubbles.BubbleAnythingFlagHelper
 import com.android.wm.shell.shared.split.SplitScreenConstants
 import com.android.wm.shell.splitscreen.SplitScreenController
 import com.android.wm.shell.windowdecor.additionalviewcontainer.AdditionalSystemViewContainer
@@ -645,7 +646,7 @@ class HandleMenu(
         private fun bindWindowingPill(style: MenuStyle) {
             windowingPill.background.setTint(style.backgroundColor)
 
-            if (!com.android.wm.shell.Flags.enableBubbleAnything()) {
+            if (!BubbleAnythingFlagHelper.enableBubbleToFullscreen()) {
                 floatingBtn.visibility = View.GONE
             }
 
