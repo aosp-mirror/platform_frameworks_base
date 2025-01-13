@@ -318,16 +318,14 @@ public class VirtualDeviceManagerService extends SystemService {
             mVirtualDevices.remove(deviceId);
         }
 
-        if (Flags.vdmPublicApis()) {
-            mVirtualDeviceListeners.broadcast(listener -> {
-                try {
-                    listener.onVirtualDeviceClosed(deviceId);
-                } catch (RemoteException e) {
-                    Slog.i(TAG, "Failed to invoke onVirtualDeviceClosed listener: "
-                            + e.getMessage());
-                }
-            });
-        }
+        mVirtualDeviceListeners.broadcast(listener -> {
+            try {
+                listener.onVirtualDeviceClosed(deviceId);
+            } catch (RemoteException e) {
+                Slog.i(TAG, "Failed to invoke onVirtualDeviceClosed listener: "
+                        + e.getMessage());
+            }
+        });
 
         Intent i = new Intent(VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED);
         i.putExtra(VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID, deviceId);
@@ -498,16 +496,14 @@ public class VirtualDeviceManagerService extends SystemService {
                 mVirtualDevices.put(deviceId, virtualDevice);
             }
 
-            if (Flags.vdmPublicApis()) {
-                mVirtualDeviceListeners.broadcast(listener -> {
-                    try {
-                        listener.onVirtualDeviceCreated(deviceId);
-                    } catch (RemoteException e) {
-                        Slog.i(TAG, "Failed to invoke onVirtualDeviceCreated listener: "
-                                + e.getMessage());
-                    }
-                });
-            }
+            mVirtualDeviceListeners.broadcast(listener -> {
+                try {
+                    listener.onVirtualDeviceCreated(deviceId);
+                } catch (RemoteException e) {
+                    Slog.i(TAG, "Failed to invoke onVirtualDeviceCreated listener: "
+                            + e.getMessage());
+                }
+            });
             Counter.logIncrementWithUid(
                     "virtual_devices.value_virtual_devices_created_with_uid_count",
                     attributionSource.getUid());

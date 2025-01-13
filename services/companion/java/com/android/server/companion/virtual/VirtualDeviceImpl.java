@@ -482,14 +482,8 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
         }
         mVirtualDeviceLog.logCreated(deviceId, mOwnerUid);
 
-        if (Flags.vdmPublicApis()) {
-            mPublicVirtualDeviceObject = new VirtualDevice(
-                    this, getDeviceId(), getPersistentDeviceId(), mParams.getName(),
-                    getDisplayName());
-        } else {
-            mPublicVirtualDeviceObject = new VirtualDevice(
-                    this, getDeviceId(), getPersistentDeviceId(), mParams.getName());
-        }
+        mPublicVirtualDeviceObject = new VirtualDevice(
+                this, getDeviceId(), getPersistentDeviceId(), mParams.getName(), getDisplayName());
 
         mActivityPolicyExemptions = new ArraySet<>(
                 mParams.getDevicePolicy(POLICY_TYPE_ACTIVITY) == DEVICE_POLICY_DEFAULT
@@ -1357,10 +1351,6 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
     }
 
     private boolean hasCustomAudioInputSupportInternal() {
-        if (!Flags.vdmPublicApis()) {
-            return false;
-        }
-
         if (!android.media.audiopolicy.Flags.audioMixTestApi()) {
             return false;
         }
