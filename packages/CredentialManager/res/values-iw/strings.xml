@@ -86,7 +86,7 @@
     <string name="button_label_view_more" msgid="3429098227286495651">"עוד מידע"</string>
     <string name="get_dialog_heading_for_username" msgid="3456868514554204776">"עבור <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_locked_password_managers" msgid="8911514851762862180">"מנהלי סיסמאות נעולים"</string>
-    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"יש להקיש כדי לבטל את הנעילה"</string>
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="6390367581393605009">"יש ללחוץ כדי לבטל את הנעילה"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="8131725029983174901">"אין פרטי כניסה"</string>
     <string name="no_sign_in_info_in" msgid="2641118151920288356">"אין פרטי כניסה ב-<xliff:g id="SOURCE">%1$s</xliff:g>"</string>
     <string name="get_dialog_heading_manage_sign_ins" msgid="3522556476480676782">"ניהול כניסות"</string>
