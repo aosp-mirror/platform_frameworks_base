@@ -37,6 +37,7 @@ import com.android.systemui.res.R
 import com.android.systemui.touchpad.tutorial.ui.composable.BackGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.HomeGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.RecentAppsGestureTutorialScreen
+import com.android.systemui.touchpad.tutorial.ui.composable.SwitchAppsGestureTutorialScreen
 import com.android.systemui.touchpad.tutorial.ui.composable.TutorialSelectionScreen
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.BackGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.EasterEggGestureViewModel
@@ -45,7 +46,9 @@ import com.android.systemui.touchpad.tutorial.ui.viewmodel.RecentAppsGestureScre
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.BACK_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.HOME_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.RECENT_APPS_GESTURE
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.SWITCH_APPS_GESTURE
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.Screen.TUTORIAL_SELECTION
+import com.android.systemui.touchpad.tutorial.ui.viewmodel.SwitchAppsGestureScreenViewModel
 import com.android.systemui.touchpad.tutorial.ui.viewmodel.TouchpadTutorialViewModel
 import javax.inject.Inject
 
@@ -58,6 +61,7 @@ constructor(
     private val backGestureViewModel: BackGestureScreenViewModel,
     private val homeGestureViewModel: HomeGestureScreenViewModel,
     private val recentAppsGestureViewModel: RecentAppsGestureScreenViewModel,
+    private val switchAppsGestureScreenViewModel: SwitchAppsGestureScreenViewModel,
     private val easterEggGestureViewModel: EasterEggGestureViewModel,
 ) : ComponentActivity() {
 
@@ -75,6 +79,7 @@ constructor(
                     backGestureViewModel,
                     homeGestureViewModel,
                     recentAppsGestureViewModel,
+                    switchAppsGestureScreenViewModel,
                     easterEggGestureViewModel,
                     closeTutorial = ::finishTutorial,
                 )
@@ -108,6 +113,7 @@ fun TouchpadTutorialScreen(
     backGestureViewModel: BackGestureScreenViewModel,
     homeGestureViewModel: HomeGestureScreenViewModel,
     recentAppsGestureViewModel: RecentAppsGestureScreenViewModel,
+    switchAppsGestureScreenViewModel: SwitchAppsGestureScreenViewModel,
     easterEggGestureViewModel: EasterEggGestureViewModel,
     closeTutorial: () -> Unit,
 ) {
@@ -127,6 +133,10 @@ fun TouchpadTutorialScreen(
                 onRecentAppsTutorialClicked = {
                     lastSelectedScreen = RECENT_APPS_GESTURE
                     vm.goTo(RECENT_APPS_GESTURE)
+                },
+                onSwitchAppsTutorialClicked = {
+                    lastSelectedScreen = SWITCH_APPS_GESTURE
+                    vm.goTo(SWITCH_APPS_GESTURE)
                 },
                 onDoneButtonClicked = closeTutorial,
                 lastSelectedScreen,
@@ -150,6 +160,13 @@ fun TouchpadTutorialScreen(
                 recentAppsGestureViewModel,
                 easterEggGestureViewModel,
                 onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
+                onBack = { vm.goTo(TUTORIAL_SELECTION) },
+            )
+        SWITCH_APPS_GESTURE ->
+            SwitchAppsGestureTutorialScreen(
+                switchAppsGestureScreenViewModel,
+                easterEggGestureViewModel,
+                onDoneButtonClicked = { vm.goTo(SWITCH_APPS_GESTURE) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
     }
