@@ -105,6 +105,7 @@ import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.Hyphens
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -967,7 +968,7 @@ private fun CategoryItemTwoPane(
                 Text(
                     fontSize = 18.sp,
                     color = colors.textColor(selected).value,
-                    style = MaterialTheme.typography.titleSmall,
+                    style = MaterialTheme.typography.titleSmall.copy(hyphens = Hyphens.Auto),
                     text = label,
                 )
             }
