@@ -1869,7 +1869,7 @@ public class SettingsProvider extends ContentProvider {
                 }
                 case MUTATION_OPERATION_RESET -> {
                     return mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_SECURE,
-                            UserHandle.USER_SYSTEM, callingPackage, mode, tag);
+                            owningUserId, callingPackage, mode, tag);
                 }
             }
         }
