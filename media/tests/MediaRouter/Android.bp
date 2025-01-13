@@ -9,7 +9,7 @@ package {
 
 android_test {
     name: "mediaroutertest",
-    team: "trendy_team_android_media_solutions",
+    team: "trendy_team_android_media_better_together",
 
     srcs: ["**/*.java"],
 
