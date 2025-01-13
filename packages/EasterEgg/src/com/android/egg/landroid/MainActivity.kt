@@ -26,7 +26,6 @@ import androidx.activity.enableEdgeToEdge
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.withInfiniteAnimationFrameNanos
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.gestures.forEachGesture
@@ -45,6 +44,7 @@ import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.currentRecomposeScope
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -64,7 +64,6 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -75,6 +74,9 @@ import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import androidx.window.layout.FoldingFeature
 import androidx.window.layout.WindowInfoTracker
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import java.lang.Float.max
 import java.lang.Float.min
 import java.util.Calendar
@@ -83,9 +85,6 @@ import kotlin.math.absoluteValue
 import kotlin.math.floor
 import kotlin.math.sqrt
 import kotlin.random.Random
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
 
 enum class RandomSeedType {
     Fixed,
@@ -139,7 +138,6 @@ fun getDessertCode(): String =
         else -> Build.VERSION.RELEASE_OR_CODENAME.replace(Regex("[a-z]*"), "")
     }
 
-
 val DEBUG_TEXT = mutableStateOf("Hello Universe")
 const val SHOW_DEBUG_TEXT = false
 
@@ -158,7 +156,7 @@ fun DebugText(text: MutableState<String>) {
 }
 
 @Composable
-fun Telemetry(universe: VisibleUniverse) {
+fun Telemetry(universe: Universe) {
     var topVisible by remember { mutableStateOf(false) }
     var bottomVisible by remember { mutableStateOf(false) }
 
@@ -180,9 +178,14 @@ fun Telemetry(universe: VisibleUniverse) {
         topVisible = true
     }
 
-    universe.triggerDraw.value // recompose on every frame
-
     val explored = universe.planets.filter { it.explored }
+
+    // TODO: Narrow the scope of invalidation here to the specific data needed;
+    // the behavior below mimics the previous implementation of a snapshot ticker value
+    val recomposeScope = currentRecomposeScope
+    Telescope(universe) {
+        recomposeScope.invalidate()
+    }
 
     BoxWithConstraints(
         modifier =
@@ -299,7 +302,7 @@ class MainActivity : ComponentActivity() {
 
         enableEdgeToEdge()
 
-        val universe = VisibleUniverse(namer = Namer(resources), randomSeed = randomSeed())
+        val universe = Universe(namer = Namer(resources), randomSeed = randomSeed())
 
         if (TEST_UNIVERSE) {
             universe.initTest()
@@ -373,7 +376,7 @@ class MainActivity : ComponentActivity() {
 @Preview(name = "tablet", device = Devices.TABLET)
 @Composable
 fun MainActivityPreview() {
-    val universe = VisibleUniverse(namer = Namer(Resources.getSystem()), randomSeed = randomSeed())
+    val universe = Universe(namer = Namer(Resources.getSystem()), randomSeed = randomSeed())
 
     universe.initTest()
 
@@ -458,12 +461,12 @@ fun FlightStick(
 @Composable
 fun Spaaaace(
     modifier: Modifier,
-    u: VisibleUniverse,
+    u: Universe,
     foldState: MutableState<FoldingFeature?> = mutableStateOf(null)
 ) {
     LaunchedEffect(u) {
         while (true) withInfiniteAnimationFrameNanos { frameTimeNanos ->
-            u.simulateAndDrawFrame(frameTimeNanos)
+            u.step(frameTimeNanos)
         }
     }
 
@@ -492,7 +495,7 @@ fun Spaaaace(
     val centerFracY: Float by
         animateFloatAsState(if (halfFolded && horizontalFold) 0.25f else 0.5f, label = "centerY")
 
-    Canvas(modifier = canvasModifier) {
+    UniverseCanvas(u, canvasModifier) { u ->
         drawRect(Colors.Eigengrau, Offset.Zero, size)
 
         val closest = u.closestPlanet()
