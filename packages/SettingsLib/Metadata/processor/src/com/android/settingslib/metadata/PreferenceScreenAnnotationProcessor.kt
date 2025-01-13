@@ -114,15 +114,7 @@ class PreferenceScreenAnnotationProcessor : AbstractProcessor() {
     private fun generateCode(outputPkg: String, outputClass: String, outputFun: String) {
         // sort by screen keys to make the output deterministic and naturally fit to FixedArrayMap
         screens.sort()
-        val javaFileObject =
-            try {
-                processingEnv.filer.createSourceFile("$outputPkg.$outputClass")
-            } catch (e: Exception) {
-                // quick fix: gradle runs this processor twice unexpectedly
-                warn("cannot createSourceFile: $e")
-                return
-            }
-        javaFileObject.openWriter().use {
+        processingEnv.filer.createSourceFile("$outputPkg.$outputClass").openWriter().use {
             it.write("package $outputPkg;\n\n")
             it.write("import $PACKAGE.FixedArrayMap;\n")
             it.write("import $PACKAGE.FixedArrayMap.OrderedInitializer;\n")
