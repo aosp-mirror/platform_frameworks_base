@@ -26,6 +26,8 @@ import com.android.compose.animation.scene.UserActionResult.HideOverlay
 import com.android.compose.animation.scene.UserActionResult.ReplaceByOverlay
 import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import com.android.compose.animation.scene.transition.animateProgress
+import com.android.mechanics.ProvidedGestureContext
+import com.android.mechanics.spec.InputDirection
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -55,6 +57,8 @@ internal fun PredictiveBackHandler(
                 // compute the distance. In our case the distance is always 1f.
                 orientation = Orientation.Horizontal,
                 distance = 1f,
+                gestureContext =
+                    ProvidedGestureContext(dragOffset = 0f, direction = InputDirection.Max),
             )
 
         animateProgress(

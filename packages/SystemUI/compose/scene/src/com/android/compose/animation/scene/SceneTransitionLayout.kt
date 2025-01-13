@@ -30,6 +30,7 @@ import androidx.compose.ui.input.pointer.PointerType
 import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntOffset
@@ -716,6 +717,7 @@ internal fun SceneTransitionLayoutForTesting(
     builder: SceneTransitionLayoutScope.() -> Unit,
 ) {
     val density = LocalDensity.current
+    val directionChangeSlop = LocalViewConfiguration.current.touchSlop
     val layoutDirection = LocalLayoutDirection.current
     val animationScope = rememberCoroutineScope()
     val layoutImpl = remember {
@@ -731,6 +733,7 @@ internal fun SceneTransitionLayoutForTesting(
                 elements = sharedElementMap,
                 ancestors = ancestors,
                 lookaheadScope = lookaheadScope,
+                directionChangeSlop = directionChangeSlop,
             )
             .also { onLayoutImpl?.invoke(it) }
     }

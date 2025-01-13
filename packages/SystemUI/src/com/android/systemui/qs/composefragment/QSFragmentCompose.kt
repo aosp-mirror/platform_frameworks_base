@@ -100,6 +100,7 @@ import com.android.compose.modifiers.height
 import com.android.compose.modifiers.padding
 import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.PlatformTheme
+import com.android.mechanics.GestureContext
 import com.android.systemui.Dumpable
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
@@ -934,6 +935,8 @@ private class ExpansionTransition(currentProgress: Float) :
 
     override val isUserInputOngoing: Boolean
         get() = true
+
+    override val gestureContext: GestureContext? = null
 
     private val finishCompletable = CompletableDeferred<Unit>()
 

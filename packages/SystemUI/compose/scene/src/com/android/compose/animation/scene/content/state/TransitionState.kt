@@ -33,6 +33,7 @@ import com.android.compose.animation.scene.TransformationSpec
 import com.android.compose.animation.scene.TransformationSpecImpl
 import com.android.compose.animation.scene.TransitionKey
 import com.android.internal.jank.Cuj.CujType
+import com.android.mechanics.GestureContext
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.launch
@@ -237,6 +238,9 @@ sealed interface TransitionState {
 
         /** Whether user input is currently driving the transition. */
         abstract val isUserInputOngoing: Boolean
+
+        /** Additional gesture context whenever the transition is driven by a user gesture. */
+        abstract val gestureContext: GestureContext?
 
         /** The CUJ covered by this transition. */
         @CujType

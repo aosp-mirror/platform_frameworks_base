@@ -19,6 +19,7 @@ package com.android.compose.animation.scene.subjects
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.mechanics.GestureContext
 import com.google.common.truth.Fact.simpleFact
 import com.google.common.truth.FailureMetadata
 import com.google.common.truth.Subject
@@ -96,6 +97,17 @@ private constructor(metadata: FailureMetadata, private val actual: TransitionSta
         }
 
         return actual as TransitionState.Transition.ReplaceOverlay
+    }
+
+    fun hasGestureContext(): GestureContext {
+        if (actual !is TransitionState.Transition) {
+            failWithActual(simpleFact("expected to be TransitionState.Transition"))
+        }
+
+        val gestureContext = ((actual as TransitionState.Transition).gestureContext)
+        check("transition.gestureContext").that(gestureContext).isNotNull()
+
+        return checkNotNull(gestureContext)
     }
 
     companion object {

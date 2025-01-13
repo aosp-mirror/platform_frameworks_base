@@ -21,12 +21,13 @@ import androidx.compose.animation.core.AnimationSpec
 import androidx.compose.animation.core.AnimationVector1D
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.util.fastCoerceIn
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.content.state.TransitionState.Companion.DistanceUnspecified
+import com.android.mechanics.GestureContext
+import com.android.mechanics.MutableDragOffsetGestureContext
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.launch
@@ -37,6 +38,7 @@ internal fun createSwipeAnimation(
     isUpOrLeft: Boolean,
     orientation: Orientation,
     distance: Float,
+    gestureContext: MutableDragOffsetGestureContext,
 ): SwipeAnimation<*> {
     return createSwipeAnimation(
         layoutState,
@@ -47,6 +49,7 @@ internal fun createSwipeAnimation(
         contentForUserActions = {
             error("Computing contentForUserActions requires a SceneTransitionLayoutImpl")
         },
+        gestureContext = gestureContext,
     )
 }
 
@@ -55,6 +58,7 @@ internal fun createSwipeAnimation(
     result: UserActionResult,
     isUpOrLeft: Boolean,
     orientation: Orientation,
+    gestureContext: MutableDragOffsetGestureContext,
     distance: Float = DistanceUnspecified,
 ): SwipeAnimation<*> {
     var lastDistance = distance
@@ -98,6 +102,7 @@ internal fun createSwipeAnimation(
         orientation,
         distance = ::distance,
         contentForUserActions = { layoutImpl.contentForUserActions().key },
+        gestureContext = gestureContext,
     )
 }
 
@@ -108,6 +113,7 @@ private fun createSwipeAnimation(
     orientation: Orientation,
     distance: (SwipeAnimation<*>) -> Float,
     contentForUserActions: () -> ContentKey,
+    gestureContext: MutableDragOffsetGestureContext,
 ): SwipeAnimation<*> {
     fun <T : ContentKey> swipeAnimation(fromContent: T, toContent: T): SwipeAnimation<T> {
         return SwipeAnimation(
@@ -118,6 +124,7 @@ private fun createSwipeAnimation(
             isUpOrLeft = isUpOrLeft,
             requiresFullDistanceSwipe = result.requiresFullDistanceSwipe,
             distance = distance,
+            gestureContext = gestureContext,
         )
     }
 
@@ -132,6 +139,7 @@ private fun createSwipeAnimation(
                 )
                 .swipeAnimation
         }
+
         is UserActionResult.ShowOverlay -> {
             val fromScene = layoutState.currentScene
             val overlay = result.overlay
@@ -144,6 +152,7 @@ private fun createSwipeAnimation(
                 )
                 .swipeAnimation
         }
+
         is UserActionResult.HideOverlay -> {
             val toScene = layoutState.currentScene
             val overlay = result.overlay
@@ -156,11 +165,13 @@ private fun createSwipeAnimation(
                 )
                 .swipeAnimation
         }
+
         is UserActionResult.ReplaceByOverlay -> {
             val fromOverlay =
                 when (val contentForUserActions = contentForUserActions()) {
                     is SceneKey ->
                         error("ReplaceByOverlay can only be called when an overlay is shown")
+
                     is OverlayKey -> contentForUserActions
                 }
 
@@ -186,8 +197,8 @@ internal class SwipeAnimation<T : ContentKey>(
     val requiresFullDistanceSwipe: Boolean,
     private val distance: (SwipeAnimation<T>) -> Float,
     currentContent: T = fromContent,
-    dragOffset: Float = 0f,
-) {
+    private val gestureContext: MutableDragOffsetGestureContext,
+) : MutableDragOffsetGestureContext by gestureContext {
     /** The [TransitionState.Transition] whose implementation delegates to this [SwipeAnimation]. */
     lateinit var contentTransition: TransitionState.Transition
 
@@ -253,9 +264,6 @@ internal class SwipeAnimation<T : ContentKey>(
 
     val isInPreviewStage: Boolean
         get() = contentTransition.previewTransformationSpec != null && currentContent == fromContent
-
-    /** The current offset caused by the drag gesture. */
-    var dragOffset by mutableFloatStateOf(dragOffset)
 
     /** The offset animation that animates the offset once the user lifts their finger. */
     private var offsetAnimation: Animatable<Float, AnimationVector1D>? by mutableStateOf(null)
@@ -387,6 +395,7 @@ internal class SwipeAnimation<T : ContentKey>(
         return when (val transition = contentTransition) {
             is TransitionState.Transition.ChangeScene ->
                 layoutState.canChangeScene(targetContent as SceneKey)
+
             is TransitionState.Transition.ShowOrHideOverlay -> {
                 if (targetContent == transition.overlay) {
                     layoutState.canShowOverlay(transition.overlay)
@@ -394,6 +403,7 @@ internal class SwipeAnimation<T : ContentKey>(
                     layoutState.canHideOverlay(transition.overlay)
                 }
             }
+
             is TransitionState.Transition.ReplaceOverlay -> {
                 val to = targetContent as OverlayKey
                 val from =
@@ -464,6 +474,8 @@ private class ChangeSceneSwipeTransition(
     override val isUserInputOngoing: Boolean
         get() = swipeAnimation.isUserInputOngoing
 
+    override val gestureContext: GestureContext = swipeAnimation
+
     override suspend fun run() {
         swipeAnimation.run()
     }
@@ -515,6 +527,8 @@ private class ShowOrHideOverlaySwipeTransition(
     override val isUserInputOngoing: Boolean
         get() = swipeAnimation.isUserInputOngoing
 
+    override val gestureContext: GestureContext = swipeAnimation
+
     override suspend fun run() {
         swipeAnimation.run()
     }
@@ -561,6 +575,8 @@ private class ReplaceOverlaySwipeTransition(
 
     override val isUserInputOngoing: Boolean
         get() = swipeAnimation.isUserInputOngoing
+
+    override val gestureContext: GestureContext = swipeAnimation
 
     override suspend fun run() {
         swipeAnimation.run()
