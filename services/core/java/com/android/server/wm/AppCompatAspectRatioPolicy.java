@@ -215,6 +215,13 @@ class AppCompatAspectRatioPolicy {
         mAppCompatAspectRatioState.mLetterboxBoundsForAspectRatio = bounds;
     }
 
+    /**
+     * Returns true if the activity has maximum or minimum aspect ratio.
+     */
+    boolean hasFixedAspectRatio() {
+        return getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
+    }
+
     private boolean isParentFullscreenPortrait() {
         final WindowContainer<?> parent = mActivityRecord.getParent();
         return parent != null

@@ -18,6 +18,10 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.content.pm.ActivityInfo.SIZE_CHANGES_SUPPORTED_METADATA;
+import static android.content.pm.ActivityInfo.SIZE_CHANGES_SUPPORTED_OVERRIDE;
+import static android.content.pm.ActivityInfo.SIZE_CHANGES_UNSUPPORTED_METADATA;
+import static android.content.pm.ActivityInfo.SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
 import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 
 import static com.android.server.wm.DesktopModeHelper.canEnterDesktopMode;
@@ -82,7 +86,8 @@ class AppCompatSizeCompatModePolicy {
     }
 
     /**
-     * @return The {@code true} if the current instance has {@link #mAppCompatDisplayInsets} without
+     * @return The {@code true} if the current instance has
+     * {@link AppCompatSizeCompatModePolicy#mAppCompatDisplayInsets} without
      * considering the inheritance implemented in {@link #getAppCompatDisplayInsets()}
      */
     boolean hasAppCompatDisplayInsetsWithoutInheritance() {
@@ -366,6 +371,112 @@ class AppCompatSizeCompatModePolicy {
                 new AppCompatDisplayInsets(mActivityRecord.mDisplayContent, mActivityRecord,
                         letterboxedContainerBounds, mActivityRecord.mResolveConfigHint
                             .mUseOverrideInsetsForConfig);
+    }
+
+    /**
+     * @return {@code true} if this activity is in size compatibility mode that uses the different
+     *         density than its parent or its bounds don't fit in parent naturally.
+     */
+    boolean inSizeCompatMode() {
+        if (isInSizeCompatModeForBounds()) {
+            return true;
+        }
+        if (getAppCompatDisplayInsets() == null || !shouldCreateAppCompatDisplayInsets()
+                // The orientation is different from parent when transforming.
+                || mActivityRecord.isFixedRotationTransforming()) {
+            return false;
+        }
+        final Rect appBounds = mActivityRecord.getConfiguration().windowConfiguration
+                .getAppBounds();
+        if (appBounds == null) {
+            // The app bounds hasn't been computed yet.
+            return false;
+        }
+        final WindowContainer<?> parent = mActivityRecord.getParent();
+        if (parent == null) {
+            // The parent of detached Activity can be null.
+            return false;
+        }
+        final Configuration parentConfig = parent.getConfiguration();
+        // Although colorMode, screenLayout, smallestScreenWidthDp are also fixed, generally these
+        // fields should be changed with density and bounds, so here only compares the most
+        // significant field.
+        return parentConfig.densityDpi != mActivityRecord.getConfiguration().densityDpi;
+    }
+
+    /**
+     * Indicates the activity will keep the bounds and screen configuration when it was first
+     * launched, no matter how its parent changes.
+     *
+     * <p>If {@true}, then {@link AppCompatDisplayInsets} will be created in {@link
+     * ActivityRecord#resolveOverrideConfiguration} to "freeze" activity bounds and insets.
+     *
+     * @return {@code true} if this activity is declared as non-resizable and fixed orientation or
+     *         aspect ratio.
+     */
+    boolean shouldCreateAppCompatDisplayInsets() {
+        if (mActivityRecord.mAppCompatController.getAppCompatAspectRatioOverrides()
+                .hasFullscreenOverride()) {
+            // If the user has forced the applications aspect ratio to be fullscreen, don't use size
+            // compatibility mode in any situation. The user has been warned and therefore accepts
+            // the risk of the application misbehaving.
+            return false;
+        }
+        switch (supportsSizeChanges()) {
+            case SIZE_CHANGES_SUPPORTED_METADATA:
+            case SIZE_CHANGES_SUPPORTED_OVERRIDE:
+                return false;
+            case SIZE_CHANGES_UNSUPPORTED_OVERRIDE:
+                return true;
+            default:
+                // Fall through
+        }
+        // Use root activity's info for tasks in multi-window mode, or fullscreen tasks in freeform
+        // task display areas, to ensure visual consistency across activity launches and exits in
+        // the same task.
+        final TaskDisplayArea tda = mActivityRecord.getTaskDisplayArea();
+        if (mActivityRecord.inMultiWindowMode() || (tda != null && tda.inFreeformWindowingMode())) {
+            final Task task = mActivityRecord.getTask();
+            final ActivityRecord root = task != null ? task.getRootActivity() : null;
+            if (root != null && root != mActivityRecord
+                    && !root.shouldCreateAppCompatDisplayInsets()) {
+                // If the root activity doesn't use size compatibility mode, the activities above
+                // are forced to be the same for consistent visual appearance.
+                return false;
+            }
+        }
+        final AppCompatAspectRatioPolicy aspectRatioPolicy = mActivityRecord.mAppCompatController
+                .getAppCompatAspectRatioPolicy();
+        return !mActivityRecord.isResizeable() && (mActivityRecord.info.isFixedOrientation()
+                || aspectRatioPolicy.hasFixedAspectRatio())
+                // The configuration of non-standard type should be enforced by system.
+                // {@link WindowConfiguration#ACTIVITY_TYPE_STANDARD} is set when this activity is
+                // added to a task, but this function is called when resolving the launch params, at
+                // which point, the activity type is still undefined if it will be standard.
+                // For other non-standard types, the type is set in the constructor, so this should
+                // not be a problem.
+                && mActivityRecord.isActivityTypeStandardOrUndefined();
+    }
+
+    /**
+     * Returns whether the activity supports size changes.
+     */
+    @ActivityInfo.SizeChangesSupportMode
+    int supportsSizeChanges() {
+        final AppCompatResizeOverrides resizeOverrides = mAppCompatOverrides.getResizeOverrides();
+        if (resizeOverrides.shouldOverrideForceNonResizeApp()) {
+            return SIZE_CHANGES_UNSUPPORTED_OVERRIDE;
+        }
+
+        if (mActivityRecord.info.supportsSizeChanges) {
+            return SIZE_CHANGES_SUPPORTED_METADATA;
+        }
+
+        if (resizeOverrides.shouldOverrideForceResizeApp()) {
+            return SIZE_CHANGES_SUPPORTED_OVERRIDE;
+        }
+
+        return SIZE_CHANGES_UNSUPPORTED_METADATA;
     }
 
 
