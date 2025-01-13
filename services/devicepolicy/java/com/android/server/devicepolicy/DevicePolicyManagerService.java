@@ -16412,7 +16412,7 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
 
     @Override
     public android.app.admin.EnforcingAdmin getEnforcingAdmin(int userId, String identifier) {
-        Preconditions.checkCallAuthorization(isSystemUid(getCallerIdentity()));
+        Preconditions.checkCallAuthorization(canQueryAdminPolicy(getCallerIdentity()));
         return getEnforcingAdminInternal(userId, identifier);
     }
 
