@@ -5562,6 +5562,9 @@ public final class ViewRootImpl implements ViewParent,
             if (mAttachInfo.mContentCaptureManager != null) {
                 ContentCaptureSession session =
                         mAttachInfo.mContentCaptureManager.getMainContentCaptureSession();
+                if (android.view.contentcapture.flags.Flags.postCreateAndroidBgThread()) {
+                    session.performStart();
+                }
                 session.notifyWindowBoundsChanged(session.getId(),
                         getConfiguration().windowConfiguration.getBounds());
             }

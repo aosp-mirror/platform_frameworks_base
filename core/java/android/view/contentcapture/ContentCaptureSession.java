@@ -286,6 +286,9 @@ public abstract class ContentCaptureSession implements AutoCloseable {
     abstract void start(@NonNull IBinder token, @NonNull IBinder shareableActivityToken,
             @NonNull ComponentName component, int flags);
 
+    /** @hide */
+    public void performStart() {}
+
     abstract boolean isDisabled();
 
     /**
