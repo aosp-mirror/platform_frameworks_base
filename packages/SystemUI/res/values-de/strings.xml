@@ -759,7 +759,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellit, Verbindung gut"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellit, Verbindung verfügbar"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Notruf über Satellit"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Notrufe oder SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
+    <skip />
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"kein Empfang"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"ein Balken"</string>
@@ -871,7 +872,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Tastenkombinationen für die Eingabe werden angezeigt"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Tastenkombinationen zum Öffnen von Apps werden angezeigt"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Tastenkombinationen für die aktuelle App werden angezeigt"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Benachrichti­gungen ansehen"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Benachrichti­gun­gen ansehen"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Screenshot erstellen"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Tasten­kürzel anzeigen"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Zurück"</string>
@@ -1289,8 +1290,7 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"Eingeben des Geräts"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Mit Fingerabdruck öffnen"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Authentifizierung erforderlich. Tippe dazu einfach auf den Fingerabdrucksensor."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
-    <skip />
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Aktiver Anruf"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobile Daten"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Verbunden"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vorübergehend verbunden"</string>
@@ -1437,7 +1437,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Aktuelle App"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Bedienungshilfen"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tastenkürzel"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Tastenkürzel anpassen"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Tastenkombinationen anpassen"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Tastaturkürzel entfernen?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Auf Standardeinstellung zurücksetzen?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Drücke eine Taste, um das Tastaturkürzel einzurichten"</string>
@@ -1465,6 +1465,8 @@
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Diese Tastenkombination wird bereits verwendet. Versuche es mit einer anderen Taste."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Die Tastenkombination kann nicht festgelegt werden."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Verknüpfung hinzufügen"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Verknüpfung löschen"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigation mit der Tastatur"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Informationen zu Tastenkombinationen"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigation mit dem Touchpad"</string>

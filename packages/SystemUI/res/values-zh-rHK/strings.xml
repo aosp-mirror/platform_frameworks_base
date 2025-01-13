@@ -759,7 +759,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"衛星，連線質素好"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"衛星，可以連線"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"緊急衛星連接"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"緊急電話或 SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
+    <skip />
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>，<xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>。"</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"無訊號"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"一格"</string>
@@ -877,8 +878,8 @@
     <string name="group_system_go_back" msgid="2730322046244918816">"返回"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"前往主畫面"</string>
     <string name="group_system_overview_open_apps" msgid="5659958952937994104">"查看最近使用的應用程式"</string>
-    <string name="group_system_cycle_forward" msgid="5478663965957647805">"輪流切換最近使用的應用程式 (向前)"</string>
-    <string name="group_system_cycle_back" msgid="8194102916946802902">"輪流切換最近使用的應用程式 (向後)"</string>
+    <string name="group_system_cycle_forward" msgid="5478663965957647805">"順序查看最近使用的應用程式"</string>
+    <string name="group_system_cycle_back" msgid="8194102916946802902">"倒序查看最近使用的應用程式"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"開啟應用程式清單"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"開啟設定"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"開啟「Google 助理」"</string>
@@ -1289,8 +1290,7 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"進入裝置"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"使用指紋即可開啟"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"需要驗證。掂一下指紋感應器就可以驗證。"</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
-    <skip />
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"通話中"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"流動數據"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"已連線"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"已暫時連線"</string>
@@ -1437,7 +1437,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"目前的應用程式"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"無障礙功能"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"鍵盤快速鍵"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"自訂鍵盤快速鍵"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"自訂快速鍵"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"要移除快速鍵嗎？"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"要重設至預設捷徑嗎？"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"按鍵即可指派快速鍵"</string>
@@ -1465,6 +1465,8 @@
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"此按鍵組合已在使用，請改用其他按鍵。"</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"無法設定快速鍵。"</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"新增捷徑"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"刪除捷徑"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"使用鍵盤導覽"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"瞭解鍵盤快速鍵"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"使用觸控板導覽"</string>

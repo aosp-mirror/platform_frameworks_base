@@ -759,7 +759,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Uydu, bağlantı güçlü"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Uydu, bağlantı mevcut"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Acil Uydu Bağlantısı"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Acil durum aramaları veya acil yardım"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
+    <skip />
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"sinyal yok"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"tek çubuk"</string>
@@ -882,7 +883,7 @@
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Uygulama listesini aç"</string>
     <string name="group_system_access_system_settings" msgid="8731721963449070017">"Ayarları aç"</string>
     <string name="group_system_access_google_assistant" msgid="7210074957915968110">"Asistan\'ı aç"</string>
-    <string name="group_system_lock_screen" msgid="7391191300363416543">"Kilit ekranı"</string>
+    <string name="group_system_lock_screen" msgid="7391191300363416543">"Ekranı kilitle"</string>
     <string name="group_system_quick_memo" msgid="3764560265935722903">"Not al"</string>
     <string name="keyboard_shortcut_group_system_multitasking" msgid="6967816258924795558">"Çoklu görev"</string>
     <string name="system_multitasking_rhs" msgid="8779289852395243004">"Sağdaki uygulamayla birlikte bölünmüş ekranı kullan"</string>
@@ -1289,8 +1290,7 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"cihaz girin"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Açmak için parmak izi kullanın"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Kimlik doğrulaması gerekiyor. Kimlik doğrulaması için parmak izi sensörüne dokunun."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
-    <skip />
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Devam eden arama"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil veri"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Bağlı"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Geçici olarak bağlandı"</string>
@@ -1437,13 +1437,13 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Mevcut Uygulama"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Erişilebilirlik"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Klavye kısayolları"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Klavye kısayollarını özelleştirin"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Kısayolları özelleştirin"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Kısayol kaldırılsın mı?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Varsayılan kısayollara sıfırlansın mı?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Kısayol atamak için tuşa basın"</string>
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"Bu işlem, özel kısayolunuzu kalıcı olarak siler."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"Bu işlem, tüm özel kısayollarınızı kalıcı olarak siler."</string>
-    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Arama kısayolları"</string>
+    <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"Kısayollarda ara"</string>
     <string name="shortcut_helper_no_search_results" msgid="8554756497996692160">"Arama sonucu yok"</string>
     <string name="shortcut_helper_content_description_collapse_icon" msgid="8028015738431664954">"Daralt simgesi"</string>
     <string name="shortcut_helper_content_description_meta_key" msgid="3989315044342124818">"İşlem veya Meta tuşu simgesi"</string>
@@ -1465,6 +1465,8 @@
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Tuş kombinasyonu zaten kullanılıyor. Başka bir tuş deneyin."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Kısayol ayarlanamıyor."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Kısayol ekle"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Kısayolu sil"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Klavyenizi kullanarak gezinin"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Klavye kısayollarını öğrenin"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Dokunmatik alanınızı kullanarak gezinin"</string>
