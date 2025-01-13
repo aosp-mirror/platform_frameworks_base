@@ -16,14 +16,10 @@
 
 package com.android.wm.shell.pip2.phone;
 
-import static com.android.wm.shell.transition.Transitions.TRANSIT_EXIT_PIP;
-import static com.android.wm.shell.transition.Transitions.TRANSIT_REMOVE_PIP;
-
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.when;
 import static org.mockito.kotlin.MatchersKt.eq;
@@ -124,12 +120,13 @@ public class PipSchedulerTest {
                 .setCallsite("PipSchedulerTest")
                 .build();
         when(mMockPipTransitionState.getPinnedTaskLeash()).thenReturn(testLeash);
+        // PiP is in a valid state by default.
+        when(mMockPipTransitionState.isInPip()).thenReturn(true);
     }
 
     @Test
     public void scheduleExitPipViaExpand_nullTaskToken_noop() {
         setNullPipTaskToken();
-        when(mMockPipTransitionState.isInPip()).thenReturn(true);
 
         mPipScheduler.scheduleExitPipViaExpand();
 
@@ -137,14 +134,12 @@ public class PipSchedulerTest {
         assertNotNull(mRunnableArgumentCaptor.getValue());
         mRunnableArgumentCaptor.getValue().run();
 
-        verify(mMockPipTransitionController, never())
-                .startExitTransition(eq(TRANSIT_EXIT_PIP), any(), isNull());
+        verify(mMockPipTransitionController, never()).startExpandTransition(any());
     }
 
     @Test
     public void scheduleExitPipViaExpand_exitTransitionCalled() {
         setMockPipTaskToken();
-        when(mMockPipTransitionState.isInPip()).thenReturn(true);
 
         mPipScheduler.scheduleExitPipViaExpand();
 
@@ -152,23 +147,21 @@ public class PipSchedulerTest {
         assertNotNull(mRunnableArgumentCaptor.getValue());
         mRunnableArgumentCaptor.getValue().run();
 
-        verify(mMockPipTransitionController, times(1))
-                .startExitTransition(eq(TRANSIT_EXIT_PIP), any(), isNull());
+        verify(mMockPipTransitionController, times(1)).startExpandTransition(any());
     }
 
     @Test
     public void removePipAfterAnimation() {
         setMockPipTaskToken();
-        when(mMockPipTransitionState.isInPip()).thenReturn(true);
 
-        mPipScheduler.scheduleRemovePip();
+        mPipScheduler.scheduleRemovePip(true /* withFadeout */);
 
         verify(mMockMainExecutor, times(1)).execute(mRunnableArgumentCaptor.capture());
         assertNotNull(mRunnableArgumentCaptor.getValue());
         mRunnableArgumentCaptor.getValue().run();
 
         verify(mMockPipTransitionController, times(1))
-                .startExitTransition(eq(TRANSIT_REMOVE_PIP), any(), isNull());
+                .startRemoveTransition(true /* withFadeout */);
     }
 
     @Test
@@ -192,7 +185,6 @@ public class PipSchedulerTest {
     @Test
     public void scheduleAnimateResizePip_boundsConfig_setsConfigAtEnd() {
         setMockPipTaskToken();
-        when(mMockPipTransitionState.isInPip()).thenReturn(true);
 
         mPipScheduler.scheduleAnimateResizePip(TEST_BOUNDS, true);
 
@@ -233,7 +225,6 @@ public class PipSchedulerTest {
     @Test
     public void scheduleAnimateResizePip_resizeTransition() {
         setMockPipTaskToken();
-        when(mMockPipTransitionState.isInPip()).thenReturn(true);
 
         mPipScheduler.scheduleAnimateResizePip(TEST_BOUNDS, true, TEST_RESIZE_DURATION);
 

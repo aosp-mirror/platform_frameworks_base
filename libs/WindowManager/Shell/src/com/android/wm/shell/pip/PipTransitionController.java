@@ -129,6 +129,20 @@ public abstract class PipTransitionController implements Transitions.TransitionH
     }
 
     /**
+     * Called when the Shell wants to start an exit-via-expand from Pip transition/animation.
+     */
+    public void startExpandTransition(WindowContainerTransaction out) {
+        // Default implementation does nothing.
+    }
+
+    /**
+     * Called when the Shell wants to start a remove Pip transition/animation.
+     */
+    public void startRemoveTransition(boolean withFadeout) {
+        // Default implementation does nothing.
+    }
+
+    /**
      * Called when the Shell wants to start resizing Pip transition/animation.
      *
      * @param duration the suggested duration for resize animation.
