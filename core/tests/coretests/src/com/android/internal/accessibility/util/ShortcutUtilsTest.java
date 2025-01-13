@@ -20,8 +20,8 @@ import static android.provider.Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATI
 import static android.provider.Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER;
 
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
-import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.KEY_GESTURE;
+import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.DEFAULT;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.SOFTWARE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -42,12 +42,14 @@ import android.testing.TestableContext;
 import android.view.accessibility.AccessibilityManager;
 import android.view.accessibility.IAccessibilityManager;
 
-import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.platform.app.InstrumentationRegistry;
 
 import com.android.internal.accessibility.AccessibilityShortcutController;
 import com.android.internal.accessibility.TestUtils;
 import com.android.internal.accessibility.common.ShortcutConstants;
+
+import com.google.testing.junit.testparameterinjector.TestParameter;
+import com.google.testing.junit.testparameterinjector.TestParameterInjector;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -55,6 +57,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -62,7 +65,7 @@ import java.util.StringJoiner;
 /**
  * Unit Tests for {@link com.android.internal.accessibility.util.ShortcutUtils}
  */
-@RunWith(AndroidJUnit4.class)
+@RunWith(TestParameterInjector.class)
 public class ShortcutUtilsTest {
     private static final Set<String> ONE_COMPONENT = Set.of(
             new ComponentName("pkg", "serv").flattenToString());
@@ -99,38 +102,19 @@ public class ShortcutUtilsTest {
     }
 
     @Test
-    public void getShortcutTargets_softwareShortcutNoService_emptyResult() {
+    public void getShortcutTargets_noService_emptyResult(
+            @TestParameter(valuesProvider = ShortcutTypeValueProvider.class) int shortcutType) {
+        Settings.Secure.putStringForUser(
+                mContext.getContentResolver(),
+                ShortcutUtils.convertToKey(shortcutType), "", mContext.getUserId());
+
         assertThat(
                 ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, SOFTWARE, mDefaultUserId)
+                        mContext, shortcutType, mDefaultUserId)
         ).isEmpty();
     }
 
-    @Test
-    public void getShortcutTargets_volumeKeyShortcutNoService_emptyResult() {
-        assertThat(
-                ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, ShortcutConstants.UserShortcutType.HARDWARE,
-                        mDefaultUserId)
-        ).isEmpty();
-    }
-
-    @Test
-    public void getShortcutTargets_gestureShortcutNoService_emptyResult() {
-        assertThat(
-                ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, GESTURE, mDefaultUserId)
-        ).isEmpty();
-    }
-
-    @Test
-    public void getShortcutTargets_keyGestureShortcutNoService_emptyResult() {
-        assertThat(
-                ShortcutUtils.getShortcutTargetsFromSettings(
-                        mContext, KEY_GESTURE, mDefaultUserId)
-        ).isEmpty();
-    }
-
+    // TODO 385186274: Parameterize this test.
     @Test
     public void getShortcutTargets_softwareShortcut1Service_return1Service() {
         setupShortcutTargets(ONE_COMPONENT, Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
@@ -143,6 +127,7 @@ public class ShortcutUtilsTest {
         ).containsExactlyElementsIn(ONE_COMPONENT);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void getShortcutTargets_volumeShortcut2Service_return2Service() {
         setupShortcutTargets(ONE_COMPONENT, Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
@@ -155,6 +140,7 @@ public class ShortcutUtilsTest {
         ).containsExactlyElementsIn(TWO_COMPONENTS);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void getShortcutTargets_tripleTapShortcut_magnificationDisabled_emptyResult() {
         enableTripleTapShortcutForMagnification(/* enable= */ false);
@@ -168,6 +154,7 @@ public class ShortcutUtilsTest {
         ).isEmpty();
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void getShortcutTargets_tripleTapShortcut_magnificationEnabled_returnMagnification() {
         setupShortcutTargets(ONE_COMPONENT, Settings.Secure.ACCESSIBILITY_BUTTON_TARGETS);
@@ -181,6 +168,7 @@ public class ShortcutUtilsTest {
         ).containsExactly(ACCESSIBILITY_SHORTCUT_TARGET_MAGNIFICATION_CONTROLLER);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_alwaysOnServiceOn_noShortcuts_serviceTurnedOff() {
         setupA11yServiceAndShortcutState(
@@ -195,6 +183,7 @@ public class ShortcutUtilsTest {
         assertA11yServiceState(ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ false);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_alwaysOnServiceOnForBothUsers_noShortcutsForGuestUser_serviceTurnedOffForGuestUserOnly() {
         // setup arbitrary userId by add 10 to the default user id
@@ -218,6 +207,7 @@ public class ShortcutUtilsTest {
                 ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ true, mDefaultUserId);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_alwaysOnServiceOn_hasShortcut_serviceKeepsOn() {
         setupA11yServiceAndShortcutState(
@@ -232,6 +222,7 @@ public class ShortcutUtilsTest {
         assertA11yServiceState(ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ true);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_alwaysOnServiceOff_noShortcuts_serviceKeepsOff() {
         setupA11yServiceAndShortcutState(
@@ -246,6 +237,7 @@ public class ShortcutUtilsTest {
         assertA11yServiceState(ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ false);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_alwaysOnServiceOff_hasShortcuts_serviceTurnsOn() {
         setupA11yServiceAndShortcutState(
@@ -260,6 +252,7 @@ public class ShortcutUtilsTest {
         assertA11yServiceState(ALWAYS_ON_SERVICE_COMPONENT_NAME, /* enabled= */ true);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_standardA11yServiceOn_noShortcuts_serviceKeepsOn() {
         setupA11yServiceAndShortcutState(
@@ -274,6 +267,7 @@ public class ShortcutUtilsTest {
         assertA11yServiceState(STANDARD_SERVICE_COMPONENT_NAME, /* enabled= */ true);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_standardA11yServiceOn_hasShortcuts_serviceKeepsOn() {
         setupA11yServiceAndShortcutState(
@@ -288,6 +282,7 @@ public class ShortcutUtilsTest {
         assertA11yServiceState(STANDARD_SERVICE_COMPONENT_NAME, /* enabled= */ true);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_standardA11yServiceOff_noShortcuts_serviceKeepsOff() {
         setupA11yServiceAndShortcutState(
@@ -302,6 +297,7 @@ public class ShortcutUtilsTest {
         assertA11yServiceState(STANDARD_SERVICE_COMPONENT_NAME, /* enabled= */ false);
     }
 
+    // TODO 385186274: Parameterize this test.
     @Test
     public void updateAccessibilityServiceStateIfNeeded_standardA11yServiceOff_hasShortcuts_serviceKeepsOff() {
         setupA11yServiceAndShortcutState(
@@ -314,6 +310,37 @@ public class ShortcutUtilsTest {
         );
 
         assertA11yServiceState(STANDARD_SERVICE_COMPONENT_NAME, /* enabled= */ false);
+    }
+
+    @Test
+    public void getEnabledShortcutTypes_oneShortcut_returnsExpectedType(
+            @TestParameter(valuesProvider = ShortcutTypeValueProvider.class) int shortcutType)
+            throws RemoteException {
+        clearMockShortcutTypes();
+        assertThat(ShortcutUtils.getEnabledShortcutTypes(
+                mContext, STANDARD_SERVICE_COMPONENT_NAME)).isEqualTo(DEFAULT);
+        mockShortcutType(shortcutType, STANDARD_SERVICE_COMPONENT_NAME);
+        assertThat(ShortcutUtils.getEnabledShortcutTypes(
+                mContext, STANDARD_SERVICE_COMPONENT_NAME)).isEqualTo(shortcutType);
+
+    }
+
+    @Test
+    public void getEnabledShortcutTypes_twoShortcuts_returnsExpectedTypes(
+            @TestParameter(valuesProvider = ShortcutTypeValueProvider.class) int shortcutType1,
+            @TestParameter(valuesProvider = ShortcutTypeValueProvider.class) int shortcutType2
+    ) throws RemoteException {
+        if (shortcutType1 == shortcutType2) {
+            return;
+        }
+        clearMockShortcutTypes();
+        assertThat(ShortcutUtils.getEnabledShortcutTypes(
+                mContext, STANDARD_SERVICE_COMPONENT_NAME)).isEqualTo(DEFAULT);
+        mockShortcutType(shortcutType1, STANDARD_SERVICE_COMPONENT_NAME);
+        mockShortcutType(shortcutType2, STANDARD_SERVICE_COMPONENT_NAME);
+        assertThat(ShortcutUtils.getEnabledShortcutTypes(
+                mContext, STANDARD_SERVICE_COMPONENT_NAME)).isEqualTo(
+                shortcutType1 | shortcutType2);
     }
 
     private void setupShortcutTargets(Set<String> components, String shortcutSettingsKey) {
@@ -402,5 +429,30 @@ public class ShortcutUtilsTest {
                 Settings.Secure.ACCESSIBILITY_SHORTCUT_TARGET_SERVICE,
                 add ? a11yServiceComponentName : "",
                 userId);
+    }
+
+    private void clearMockShortcutTypes() throws RemoteException {
+        for (int shortcutType : ShortcutConstants.USER_SHORTCUT_TYPES) {
+            when(mAccessibilityManagerService
+                    .getAccessibilityShortcutTargets(shortcutType)).thenReturn(List.of());
+        }
+    }
+
+    private void mockShortcutType(int shortcutType, String componentName)
+            throws RemoteException {
+        when(mAccessibilityManagerService.getAccessibilityShortcutTargets(shortcutType))
+                .thenReturn(List.of(componentName));
+    }
+
+    static final class ShortcutTypeValueProvider implements
+            TestParameter.TestParameterValuesProvider {
+        @Override
+        public List<Integer> provideValues() {
+            List<Integer> values = new ArrayList<>();
+            for (int shortcutType: USER_SHORTCUT_TYPES) {
+                values.add(shortcutType);
+            }
+            return values;
+        }
     }
 }

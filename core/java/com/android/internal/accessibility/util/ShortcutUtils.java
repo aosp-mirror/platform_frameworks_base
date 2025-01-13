@@ -25,6 +25,7 @@ import static com.android.internal.accessibility.AccessibilityShortcutController
 import static com.android.internal.accessibility.common.ShortcutConstants.AccessibilityFragmentType.INVISIBLE_TOGGLE;
 import static com.android.internal.accessibility.common.ShortcutConstants.SERVICES_SEPARATOR;
 import static com.android.internal.accessibility.common.ShortcutConstants.USER_SHORTCUT_TYPES;
+import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.DEFAULT;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.GESTURE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.HARDWARE;
 import static com.android.internal.accessibility.common.ShortcutConstants.UserShortcutType.KEY_GESTURE;
@@ -157,19 +158,42 @@ public final class ShortcutUtils {
     }
 
     /**
-     * Returns if a {@code shortcutType} shortcut contains {@code componentId}.
+     * Returns if a {@code shortcutType} shortcut contains {@code componentName}.
      *
      * @param context The current context.
      * @param shortcutType The preferred shortcut type user selected.
-     * @param componentId The component id that need to be checked.
-     * @return {@code true} if a component id is contained.
+     * @param componentName The component that need to be checked.
+     * @return {@code true} if the shortcut contains {@code componentName}.
      */
-    public static boolean isShortcutContained(Context context, @UserShortcutType int shortcutType,
-            @NonNull String componentId) {
-        final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
-        final List<String> requiredTargets = am.getAccessibilityShortcutTargets(shortcutType);
-        return requiredTargets.contains(componentId);
+    @SuppressLint("MissingPermission")
+    public static boolean isShortcutContained(
+            Context context, @UserShortcutType int shortcutType, @NonNull String componentName) {
+        AccessibilityManager manager = context.getSystemService(AccessibilityManager.class);
+        if (manager != null) {
+            return manager
+                    .getAccessibilityShortcutTargets(shortcutType).contains(componentName);
+        } else {
+            return false;
+        }
+    }
+
+    /**
+     * Returns every shortcut type that currently has the provided componentName as a target.
+     * Types are returned as a singular flag integer.
+     * If none have the componentName, returns {@link UserShortcutType#DEFAULT}
+     */
+    public static int getEnabledShortcutTypes(
+            Context context, String componentName) {
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
+        if (am == null) return DEFAULT;
+
+        int shortcutTypes = DEFAULT;
+        for (int shortcutType : USER_SHORTCUT_TYPES) {
+            if (am.getAccessibilityShortcutTargets(shortcutType).contains(componentName)) {
+                shortcutTypes |= shortcutType;
+            }
+        }
+        return shortcutTypes;
     }
 
     /**
@@ -229,8 +253,7 @@ public final class ShortcutUtils {
      */
     public static void updateInvisibleToggleAccessibilityServiceEnableState(
             Context context, Set<String> componentNames, int userId) {
-        final AccessibilityManager am = (AccessibilityManager) context.getSystemService(
-                Context.ACCESSIBILITY_SERVICE);
+        final AccessibilityManager am = context.getSystemService(AccessibilityManager.class);
         if (am == null) return;
 
         final List<AccessibilityServiceInfo> installedServices =
