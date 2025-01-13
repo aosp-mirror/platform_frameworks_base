@@ -200,7 +200,15 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
         valueAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(@NonNull Animator animation) {
-                mHandler.post(() -> setState(ENABLED));
+                // This could be called when the animation ends or is canceled. Therefore, we need
+                // to check the state of fullscreen magnification for the following actions. We only
+                // update the state to ENABLED when the previous state is ENABLING which implies
+                // fullscreen magnification is experiencing an ongoing create border process.
+                mHandler.post(() -> {
+                    if (getState() == ENABLING) {
+                        setState(ENABLED);
+                    }
+                });
             }});
         return valueAnimator;
     }
@@ -221,7 +229,14 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
         valueAnimator.addListener(new AnimatorListenerAdapter() {
             @Override
             public void onAnimationEnd(@NonNull Animator animation) {
-                mHandler.post(() -> cleanUpBorder());
+                // This could be called when the animation ends or is canceled. Therefore, we need
+                // to check the state of fullscreen magnification for the following actions. Border
+                // cleanup should only happens after a removal process.
+                mHandler.post(() -> {
+                    if (getState() == DISABLING) {
+                        cleanUpBorder();
+                    }
+                });
             }});
         return valueAnimator;
     }
@@ -250,6 +265,8 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
             // If there is an ongoing disable process or it is already disabled, return
             return;
         }
+        // The state should be updated as early as possible so others could check
+        // the ongoing process.
         setState(DISABLING);
         mShowHideBorderAnimator = createHideTargetAnimator(mFullscreenBorder);
         mShowHideBorderAnimator.start();
@@ -297,10 +314,13 @@ public class FullscreenMagnificationController implements ComponentCallbacks {
             // If there is an ongoing enable process or it is already enabled, return
             return;
         }
+        // The state should be updated as early as possible so others could check
+        // the ongoing process.
+        setState(ENABLING);
+
         if (mShowHideBorderAnimator != null) {
             mShowHideBorderAnimator.cancel();
         }
-        setState(ENABLING);
 
         onConfigurationChanged(mContext.getResources().getConfiguration());
         mContext.registerComponentCallbacks(this);
