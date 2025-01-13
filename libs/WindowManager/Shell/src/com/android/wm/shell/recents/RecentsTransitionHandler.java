@@ -587,7 +587,8 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                 mListener.onAnimationStart(this,
                         apps.toArray(new RemoteAnimationTarget[apps.size()]),
                         new RemoteAnimationTarget[0],
-                        new Rect(0, 0, 0, 0), new Rect(), new Bundle());
+                        new Rect(0, 0, 0, 0), new Rect(), new Bundle(),
+                        null);
                 for (int i = 0; i < mStateListeners.size(); i++) {
                     mStateListeners.get(i).onTransitionStateChanged(TRANSITION_STATE_ANIMATING);
                 }
@@ -818,7 +819,7 @@ public class RecentsTransitionHandler implements Transitions.TransitionHandler,
                 mListener.onAnimationStart(this,
                         apps.toArray(new RemoteAnimationTarget[apps.size()]),
                         wallpapers.toArray(new RemoteAnimationTarget[wallpapers.size()]),
-                        new Rect(0, 0, 0, 0), new Rect(), b);
+                        new Rect(0, 0, 0, 0), new Rect(), b, info);
                 for (int i = 0; i < mStateListeners.size(); i++) {
                     mStateListeners.get(i).onTransitionStateChanged(TRANSITION_STATE_ANIMATING);
                 }

@@ -946,7 +946,8 @@ public abstract class WMShellModule {
             FocusTransitionObserver focusTransitionObserver,
             DesktopModeEventLogger desktopModeEventLogger,
             DesktopModeUiEventLogger desktopModeUiEventLogger,
-            WindowDecorTaskResourceLoader taskResourceLoader
+            WindowDecorTaskResourceLoader taskResourceLoader,
+            RecentsTransitionHandler recentsTransitionHandler
     ) {
         if (!DesktopModeStatus.canEnterDesktopModeOrShowAppHandle(context)) {
             return Optional.empty();
@@ -962,7 +963,7 @@ public abstract class WMShellModule {
                 desktopTasksLimiter, appHandleEducationController, appToWebEducationController,
                 windowDecorCaptionHandleRepository, activityOrientationChangeHandler,
                 focusTransitionObserver, desktopModeEventLogger, desktopModeUiEventLogger,
-                taskResourceLoader));
+                taskResourceLoader, recentsTransitionHandler));
     }
 
     @WMSingleton
