@@ -31,6 +31,7 @@ import com.android.systemui.statusbar.notification.collection.SortBySectionTimeF
 import com.android.systemui.statusbar.notification.emptyshade.shared.ModesEmptyShadeFix
 import com.android.systemui.statusbar.notification.interruption.VisualInterruptionRefactor
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUi
+import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiAod
 import com.android.systemui.statusbar.notification.promoted.PromotedNotificationUiForceExpanded
 import com.android.systemui.statusbar.notification.shared.NotificationAvalancheSuppression
 import com.android.systemui.statusbar.notification.shared.NotificationMinimalism
@@ -55,6 +56,9 @@ class FlagDependencies @Inject constructor(featureFlags: FeatureFlagsClassic, ha
         ModesEmptyShadeFix.token dependsOn modesUi
 
         PromotedNotificationUiForceExpanded.token dependsOn PromotedNotificationUi.token
+
+        PromotedNotificationUiAod.token dependsOn PromotedNotificationUi.token
+
         // SceneContainer dependencies
         SceneContainerFlag.getFlagDependencies().forEach { (alpha, beta) -> alpha dependsOn beta }
 
