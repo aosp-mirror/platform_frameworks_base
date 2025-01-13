@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone.ongoingcall.shared.model
 
 import android.app.PendingIntent
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 
 /** Represents the state of any ongoing calls. */
 sealed interface OngoingCallModel {
@@ -25,8 +26,8 @@ sealed interface OngoingCallModel {
     data object NoCall : OngoingCallModel
 
     /**
-     * There is an ongoing call but the call app is currently visible, so we don't need to show
-     * the chip.
+     * There is an ongoing call but the call app is currently visible, so we don't need to show the
+     * chip.
      */
     data object InCallWithVisibleApp : OngoingCallModel
 
@@ -41,11 +42,14 @@ sealed interface OngoingCallModel {
      * @property notificationIconView the [android.app.Notification.getSmallIcon] that's set on the
      *   call notification. We may use this icon in the chip instead of the default phone icon.
      * @property intent the intent associated with the call notification.
+     * @property promotedContent if the call notification also meets promoted notification criteria,
+     *   this field is filled in with the content related to promotion. Otherwise null.
      */
     data class InCall(
         val startTimeMs: Long,
         val notificationIconView: StatusBarIconView?,
         val intent: PendingIntent?,
         val notificationKey: String,
+        val promotedContent: PromotedNotificationContentModel?,
     ) : OngoingCallModel
 }

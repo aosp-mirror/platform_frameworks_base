@@ -28,6 +28,7 @@ import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.notification.domain.model.NotificationChipModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor
+import com.android.systemui.statusbar.notification.domain.interactor.ActiveNotificationsInteractor.Companion.isOngoingCallNotification
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -41,6 +42,7 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.flow.map
 
 /** An interactor for the notification chips shown in the status bar. */
 @SysUISingleton
@@ -88,45 +90,56 @@ constructor(
     private val promotedNotificationInteractors =
         MutableStateFlow<List<SingleNotificationChipInteractor>>(emptyList())
 
+    /**
+     * The notifications that are promoted and ongoing.
+     *
+     * Explicitly does *not* include any ongoing call notifications, even if the call notifications
+     * meet the promotion criteria. Those call notifications will be handled by
+     * [com.android.systemui.statusbar.chips.call.domain.CallChipInteractor] instead. See
+     * b/388521980.
+     */
+    private val promotedOngoingNotifications =
+        activeNotificationsInteractor.promotedOngoingNotifications.map { notifs ->
+            notifs.filterNot { it.isOngoingCallNotification() }
+        }
+
     override fun start() {
         if (!StatusBarNotifChips.isEnabled) {
             return
         }
 
         backgroundScope.launch("StatusBarNotificationChipsInteractor") {
-            activeNotificationsInteractor.promotedOngoingNotifications
-                .pairwise(initialValue = emptyList())
-                .collect { (oldNotifs, currentNotifs) ->
-                    val removedNotifKeys =
-                        oldNotifs.map { it.key }.minus(currentNotifs.map { it.key }.toSet())
-                    removedNotifKeys.forEach { removedNotifKey ->
-                        val wasRemoved = promotedNotificationInteractorMap.remove(removedNotifKey)
-                        if (wasRemoved == null) {
-                            logger.w({
-                                "Attempted to remove $str1 from interactor map but it wasn't present"
-                            }) {
-                                str1 = removedNotifKey
-                            }
+            promotedOngoingNotifications.pairwise(initialValue = emptyList()).collect {
+                (oldNotifs, currentNotifs) ->
+                val removedNotifKeys =
+                    oldNotifs.map { it.key }.minus(currentNotifs.map { it.key }.toSet())
+                removedNotifKeys.forEach { removedNotifKey ->
+                    val wasRemoved = promotedNotificationInteractorMap.remove(removedNotifKey)
+                    if (wasRemoved == null) {
+                        logger.w({
+                            "Attempted to remove $str1 from interactor map but it wasn't present"
+                        }) {
+                            str1 = removedNotifKey
                         }
                     }
-
-                    currentNotifs.forEach { notif ->
-                        val interactor =
-                            promotedNotificationInteractorMap.computeIfAbsent(notif.key) {
-                                singleNotificationChipInteractorFactory.create(
-                                    notif,
-                                    creationTime = systemClock.currentTimeMillis(),
-                                )
-                            }
-                        interactor.setNotification(notif)
-                    }
-                    logger.d({ "Interactors: $str1" }) {
-                        str1 =
-                            promotedNotificationInteractorMap.keys.joinToString(separator = " /// ")
-                    }
-                    promotedNotificationInteractors.value =
-                        promotedNotificationInteractorMap.values.toList()
                 }
+
+                currentNotifs.forEach { notif ->
+                    val interactor =
+                        promotedNotificationInteractorMap.computeIfAbsent(notif.key) {
+                            singleNotificationChipInteractorFactory.create(
+                                notif,
+                                creationTime = systemClock.currentTimeMillis(),
+                            )
+                        }
+                    interactor.setNotification(notif)
+                }
+                logger.d({ "Interactors: $str1" }) {
+                    str1 = promotedNotificationInteractorMap.keys.joinToString(separator = " /// ")
+                }
+                promotedNotificationInteractors.value =
+                    promotedNotificationInteractorMap.values.toList()
+            }
         }
     }
 

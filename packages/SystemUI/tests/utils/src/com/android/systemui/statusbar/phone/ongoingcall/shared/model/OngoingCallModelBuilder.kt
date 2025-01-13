@@ -18,6 +18,7 @@ package com.android.systemui.statusbar.phone.ongoingcall.shared.model
 
 import android.app.PendingIntent
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 
 /** Helper for building [OngoingCallModel.InCall] instances in tests. */
 fun inCallModel(
@@ -25,4 +26,5 @@ fun inCallModel(
     notificationIcon: StatusBarIconView? = null,
     intent: PendingIntent? = null,
     notificationKey: String = "test",
-) = OngoingCallModel.InCall(startTimeMs, notificationIcon, intent, notificationKey)
+    promotedContent: PromotedNotificationContentModel? = null,
+) = OngoingCallModel.InCall(startTimeMs, notificationIcon, intent, notificationKey, promotedContent)

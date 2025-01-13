@@ -35,6 +35,7 @@ import com.android.systemui.statusbar.gesture.swipeStatusBarAwayGestureHandler
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.window.fakeStatusBarWindowControllerStore
@@ -69,33 +70,37 @@ class OngoingCallInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun ongoingCallNotification_setsNotificationIconAndIntent() =
+    fun ongoingCallNotification_setsAllFields() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.ongoingCallState)
 
             // Set up notification with icon view and intent
             val testIconView: StatusBarIconView = mock()
             val testIntent: PendingIntent = mock()
+            val testPromotedContent =
+                PromotedNotificationContentModel.Builder("promotedCall").build()
             repository.activeNotifications.value =
                 ActiveNotificationsStore.Builder()
                     .apply {
                         addIndividualNotif(
                             activeNotificationModel(
-                                key = "notif1",
+                                key = "promotedCall",
                                 whenTime = 1000L,
                                 callType = CallType.Ongoing,
                                 statusBarChipIcon = testIconView,
                                 contentIntent = testIntent,
+                                promotedContent = testPromotedContent,
                             )
                         )
                     }
                     .build()
 
-            // Verify model is InCall and has the correct icon and intent.
+            // Verify model is InCall and has the correct icon, intent, and promoted content.
             assertThat(latest).isInstanceOf(OngoingCallModel.InCall::class.java)
             val model = latest as OngoingCallModel.InCall
             assertThat(model.notificationIconView).isSameInstanceAs(testIconView)
             assertThat(model.intent).isSameInstanceAs(testIntent)
+            assertThat(model.promotedContent).isSameInstanceAs(testPromotedContent)
         }
 
     @Test

@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.notification.data.model.activeNotification
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
@@ -166,6 +167,27 @@ class OngoingCallControllerTest : SysuiTestCase() {
             val repoState = ongoingCallRepository.ongoingCallState.value
             assertThat(repoState).isInstanceOf(OngoingCallModel.InCall::class.java)
             assertThat((repoState as OngoingCallModel.InCall).notificationIconView).isEqualTo(icon)
+        }
+
+    @Test
+    fun interactorHasOngoingCallNotif_repoHasPromotedContent() =
+        testScope.runTest {
+            val promotedContent = PromotedNotificationContentModel.Builder("ongoingNotif").build()
+            setNotifOnRepo(
+                activeNotificationModel(
+                    key = "ongoingNotif",
+                    callType = CallType.Ongoing,
+                    uid = CALL_UID,
+                    statusBarChipIcon = mock(),
+                    whenTime = 567,
+                    promotedContent = promotedContent,
+                )
+            )
+
+            val repoState = ongoingCallRepository.ongoingCallState.value
+            assertThat(repoState).isInstanceOf(OngoingCallModel.InCall::class.java)
+            assertThat((repoState as OngoingCallModel.InCall).promotedContent)
+                .isEqualTo(promotedContent)
         }
 
     @Test
