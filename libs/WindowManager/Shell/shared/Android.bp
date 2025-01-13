@@ -56,6 +56,7 @@ android_library {
     static_libs: [
         "androidx.core_core-animation",
         "androidx.dynamicanimation_dynamicanimation",
+        "com_android_wm_shell_flags_lib",
         "jsr330",
     ],
     kotlincflags: ["-Xjvm-default=all"],
