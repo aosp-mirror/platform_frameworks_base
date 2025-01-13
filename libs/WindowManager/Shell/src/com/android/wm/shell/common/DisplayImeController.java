@@ -447,8 +447,10 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
             }
         }
 
-        private int imeTop(float surfaceOffset) {
-            return mImeFrame.top + (int) surfaceOffset;
+        private int imeTop(float surfaceOffset, float surfacePositionY) {
+            // surfaceOffset is already offset by the surface's top inset, so we need to subtract
+            // the top inset so that the return value is in screen coordinates.
+            return mImeFrame.top + (int) (surfaceOffset - surfacePositionY);
         }
 
         private boolean calcIsFloating(InsetsSource imeSource) {
@@ -581,7 +583,7 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                 final float alpha = (mAnimateAlpha || isFloating)
                         ? (value - hiddenY) / (shownY - hiddenY) : 1f;
                 t.setAlpha(animatingLeash, alpha);
-                dispatchPositionChanged(mDisplayId, imeTop(value), t);
+                dispatchPositionChanged(mDisplayId, imeTop(value, defaultY), t);
                 t.apply();
                 mTransactionPool.release(t);
             });
@@ -600,11 +602,12 @@ public class DisplayImeController implements DisplayController.OnDisplaysChanged
                     t.setPosition(animatingLeash, x, value);
                     if (DEBUG) {
                         Slog.d(TAG, "onAnimationStart d:" + mDisplayId + " top:"
-                                + imeTop(hiddenY) + "->" + imeTop(shownY)
+                                + imeTop(hiddenY, defaultY) + "->" + imeTop(shownY, defaultY)
                                 + " showing:" + (mAnimationDirection == DIRECTION_SHOW));
                     }
-                    int flags = dispatchStartPositioning(mDisplayId, imeTop(hiddenY),
-                            imeTop(shownY), mAnimationDirection == DIRECTION_SHOW, isFloating, t);
+                    int flags = dispatchStartPositioning(mDisplayId, imeTop(hiddenY, defaultY),
+                            imeTop(shownY, defaultY), mAnimationDirection == DIRECTION_SHOW,
+                            isFloating, t);
                     mAnimateAlpha = (flags & ImePositionProcessor.IME_ANIMATION_NO_ALPHA) == 0;
                     final float alpha = (mAnimateAlpha || isFloating)
                             ? (value - hiddenY) / (shownY - hiddenY)
