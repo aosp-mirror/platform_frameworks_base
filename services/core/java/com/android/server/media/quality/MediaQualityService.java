@@ -16,12 +16,21 @@
 
 package com.android.server.media.quality;
 
+import static android.media.quality.AmbientBacklightEvent.AMBIENT_BACKLIGHT_EVENT_ENABLED;
+import static android.media.quality.AmbientBacklightEvent.AMBIENT_BACKLIGHT_EVENT_DISABLED;
+import static android.media.quality.AmbientBacklightEvent.AMBIENT_BACKLIGHT_EVENT_METADATA_AVAILABLE;
+import static android.media.quality.AmbientBacklightEvent.AMBIENT_BACKLIGHT_EVENT_INTERRUPTED;
+
+import android.annotation.NonNull;
 import android.content.ContentValues;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
+import android.hardware.tv.mediaquality.AmbientBacklightColorFormat;
 import android.hardware.tv.mediaquality.IMediaQuality;
+import android.media.quality.AmbientBacklightEvent;
+import android.media.quality.AmbientBacklightMetadata;
 import android.media.quality.AmbientBacklightSettings;
 import android.media.quality.IAmbientBacklightCallback;
 import android.media.quality.IMediaQualityManager;
@@ -42,6 +51,7 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
@@ -60,6 +70,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -76,13 +87,16 @@ public class MediaQualityService extends SystemService {
     private final MediaQualityDbHelper mMediaQualityDbHelper;
     private final BiMap<Long, String> mPictureProfileTempIdMap;
     private final BiMap<Long, String> mSoundProfileTempIdMap;
+    private IMediaQuality mMediaQuality;
+    private final HalAmbientBacklightCallback mHalAmbientBacklightCallback;
+    private final Map<String, AmbientBacklightCallbackRecord> mCallbackRecords = new HashMap<>();
     private final PackageManager mPackageManager;
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
-    private IMediaQuality mMediaQuality;
 
     public MediaQualityService(Context context) {
         super(context);
         mContext = context;
+        mHalAmbientBacklightCallback = new HalAmbientBacklightCallback();
         mPackageManager = mContext.getPackageManager();
         mPictureProfileTempIdMap = new BiMap<>();
         mSoundProfileTempIdMap = new BiMap<>();
@@ -97,6 +111,13 @@ public class MediaQualityService extends SystemService {
         if (binder != null) {
             Slogf.d(TAG, "binder is not null");
             mMediaQuality = IMediaQuality.Stub.asInterface(binder);
+            if (mMediaQuality != null) {
+                try {
+                    mMediaQuality.setAmbientBacklightCallback(mHalAmbientBacklightCallback);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Failed to set ambient backlight detector callback", e);
+                }
+            }
         }
 
         publishBinderService(Context.MEDIA_QUALITY_SERVICE, new BinderService());
@@ -905,23 +926,85 @@ public class MediaQualityService extends SystemService {
 
         @Override
         public void registerAmbientBacklightCallback(IAmbientBacklightCallback callback) {
+            if (DEBUG) {
+                Slogf.d(TAG, "registerAmbientBacklightCallback");
+            }
+
             if (!hasReadColorZonesPermission()) {
                 //TODO: error handling
+            }
+
+            String callingPackageName = getPackageOfCallingUid();
+
+            synchronized (mCallbackRecords) {
+                AmbientBacklightCallbackRecord record = mCallbackRecords.get(callingPackageName);
+                if (record != null) {
+                    if (record.mCallback.asBinder().equals(callback.asBinder())) {
+                        Slog.w(TAG, "AmbientBacklight Callback already registered");
+                        return;
+                    }
+                    record.release();
+                    mCallbackRecords.remove(callingPackageName);
+                }
+                mCallbackRecords.put(callingPackageName,
+                        new AmbientBacklightCallbackRecord(callingPackageName, callback));
             }
         }
 
         @Override
         public void setAmbientBacklightSettings(
                 AmbientBacklightSettings settings, UserHandle user) {
+            if (DEBUG) {
+                Slogf.d(TAG, "setAmbientBacklightSettings " + settings);
+            }
+
             if (!hasReadColorZonesPermission()) {
                 //TODO: error handling
+            }
+
+            try {
+                if (mMediaQuality != null) {
+                    android.hardware.tv.mediaquality.AmbientBacklightSettings halSettings =
+                            new android.hardware.tv.mediaquality.AmbientBacklightSettings();
+                    halSettings.uid = Binder.getCallingUid();
+                    halSettings.source = (byte) settings.getSource();
+                    halSettings.maxFramerate = settings.getMaxFps();
+                    halSettings.colorFormat = (byte) settings.getColorFormat();
+                    halSettings.hZonesNumber = settings.getHorizontalZonesCount();
+                    halSettings.vZonesNumber = settings.getVerticalZonesCount();
+                    halSettings.hasLetterbox = settings.isLetterboxOmitted();
+                    halSettings.colorThreshold = settings.getThreshold();
+
+                    mMediaQuality.setAmbientBacklightDetector(halSettings);
+
+                    mHalAmbientBacklightCallback.setAmbientBacklightClientPackageName(
+                            getPackageOfCallingUid());
+
+                    if (DEBUG) {
+                        Slogf.d(TAG, "set ambient settings package: " + halSettings.uid);
+                    }
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set ambient backlight settings", e);
             }
         }
 
         @Override
         public void setAmbientBacklightEnabled(boolean enabled, UserHandle user) {
+            if (DEBUG) {
+                Slogf.d(TAG, "setAmbientBacklightEnabled " + enabled);
+            }
             if (!hasReadColorZonesPermission()) {
                 //TODO: error handling
+            }
+            try {
+                if (mMediaQuality != null) {
+                    mMediaQuality.setAmbientBacklightDetectionEnabled(enabled);
+                }
+            } catch (UnsupportedOperationException e) {
+                Slog.e(TAG, "The current device is not supported");
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set ambient backlight enabled", e);
             }
         }
 
@@ -1118,5 +1201,168 @@ public class MediaQualityService extends SystemService {
 
     private UserState getUserStateLocked(int userId) {
         return mUserStates.get(userId);
+    }
+
+    private final class AmbientBacklightCallbackRecord implements IBinder.DeathRecipient {
+        final String mPackageName;
+        final IAmbientBacklightCallback mCallback;
+
+        AmbientBacklightCallbackRecord(@NonNull String pkgName,
+                @NonNull IAmbientBacklightCallback cb) {
+            mPackageName = pkgName;
+            mCallback = cb;
+            try {
+                mCallback.asBinder().linkToDeath(this, 0);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to link to death", e);
+            }
+        }
+
+        void release() {
+            try {
+                mCallback.asBinder().unlinkToDeath(this, 0);
+            } catch (NoSuchElementException e) {
+                Slog.e(TAG, "Failed to unlink to death", e);
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            synchronized (mCallbackRecords) {
+                mCallbackRecords.remove(mPackageName);
+            }
+        }
+    }
+
+    private final class HalAmbientBacklightCallback
+            extends android.hardware.tv.mediaquality.IMediaQualityCallback.Stub {
+        private final Object mLock = new Object();
+        private String mAmbientBacklightClientPackageName;
+
+        void setAmbientBacklightClientPackageName(@NonNull String packageName) {
+            synchronized (mLock) {
+                if (TextUtils.equals(mAmbientBacklightClientPackageName, packageName)) {
+                    return;
+                }
+                handleAmbientBacklightInterrupted();
+                mAmbientBacklightClientPackageName = packageName;
+            }
+        }
+
+        void handleAmbientBacklightInterrupted() {
+            synchronized (mCallbackRecords) {
+                if (mAmbientBacklightClientPackageName == null) {
+                    Slog.e(TAG, "Invalid package name in interrupted event");
+                    return;
+                }
+                AmbientBacklightCallbackRecord record = mCallbackRecords.get(
+                        mAmbientBacklightClientPackageName);
+                if (record == null) {
+                    Slog.e(TAG, "Callback record not found for ambient backlight");
+                    return;
+                }
+                AmbientBacklightEvent event =
+                        new AmbientBacklightEvent(
+                                AMBIENT_BACKLIGHT_EVENT_INTERRUPTED, null);
+                try {
+                    record.mCallback.onAmbientBacklightEvent(event);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Deliver ambient backlight interrupted event failed", e);
+                }
+            }
+        }
+
+        void handleAmbientBacklightEnabled(boolean enabled) {
+            AmbientBacklightEvent event =
+                    new AmbientBacklightEvent(
+                            enabled ? AMBIENT_BACKLIGHT_EVENT_ENABLED :
+                                    AMBIENT_BACKLIGHT_EVENT_DISABLED, null);
+            synchronized (mCallbackRecords) {
+                for (AmbientBacklightCallbackRecord record : mCallbackRecords.values()) {
+                    try {
+                        record.mCallback.onAmbientBacklightEvent(event);
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Deliver ambient backlight enabled event failed", e);
+                    }
+                }
+            }
+        }
+
+        void handleAmbientBacklightMetadataEvent(
+                @NonNull android.hardware.tv.mediaquality.AmbientBacklightMetadata
+                        halMetadata) {
+            String halPackageName = mContext.getPackageManager()
+                                    .getNameForUid(halMetadata.settings.uid);
+            if (!TextUtils.equals(mAmbientBacklightClientPackageName, halPackageName)) {
+                Slog.e(TAG, "Invalid package name in metadata event");
+                return;
+            }
+
+            AmbientBacklightColorFormat[] zonesColorsUnion = halMetadata.zonesColors;
+            int[] zonesColorsInt = new int[zonesColorsUnion.length];
+
+            for (int i = 0; i < zonesColorsUnion.length; i++) {
+                zonesColorsInt[i] = zonesColorsUnion[i].RGB888;
+            }
+
+            AmbientBacklightMetadata metadata =
+                    new AmbientBacklightMetadata(
+                            halPackageName,
+                            halMetadata.compressAlgorithm,
+                            halMetadata.settings.source,
+                            halMetadata.settings.colorFormat,
+                            halMetadata.settings.hZonesNumber,
+                            halMetadata.settings.vZonesNumber,
+                            zonesColorsInt);
+            AmbientBacklightEvent event =
+                    new AmbientBacklightEvent(
+                            AMBIENT_BACKLIGHT_EVENT_METADATA_AVAILABLE, metadata);
+
+            synchronized (mCallbackRecords) {
+                AmbientBacklightCallbackRecord record = mCallbackRecords
+                                                .get(halPackageName);
+                if (record == null) {
+                    Slog.e(TAG, "Callback record not found for ambient backlight metadata");
+                    return;
+                }
+
+                try {
+                    record.mCallback.onAmbientBacklightEvent(event);
+                } catch (RemoteException e) {
+                    Slog.e(TAG, "Deliver ambient backlight metadata event failed", e);
+                }
+            }
+        }
+
+        @Override
+        public void notifyAmbientBacklightEvent(
+                android.hardware.tv.mediaquality.AmbientBacklightEvent halEvent) {
+            synchronized (mLock) {
+                if (halEvent.getTag() == android.hardware.tv.mediaquality
+                                .AmbientBacklightEvent.Tag.enabled) {
+                    boolean enabled = halEvent.getEnabled();
+                    if (enabled) {
+                        handleAmbientBacklightEnabled(true);
+                    } else {
+                        handleAmbientBacklightEnabled(false);
+                    }
+                } else if (halEvent.getTag() == android.hardware.tv.mediaquality
+                                    .AmbientBacklightEvent.Tag.metadata) {
+                    handleAmbientBacklightMetadataEvent(halEvent.getMetadata());
+                } else {
+                    Slog.e(TAG, "Invalid event type in ambient backlight event");
+                }
+            }
+        }
+
+        @Override
+        public synchronized String getInterfaceHash() throws android.os.RemoteException {
+            return android.hardware.tv.mediaquality.IMediaQualityCallback.Stub.HASH;
+        }
+
+        @Override
+        public int getInterfaceVersion() throws android.os.RemoteException {
+            return android.hardware.tv.mediaquality.IMediaQualityCallback.Stub.VERSION;
+        }
     }
 }
