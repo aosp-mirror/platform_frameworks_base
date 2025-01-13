@@ -1425,7 +1425,12 @@ public class HeadsUpManagerImpl
                 }
             }
 
-            return (mEntry.isRowPinned() && mExpanded)
+            // Promoted notifications are always shown as expanded, and we don't want them to ever
+            // be sticky.
+            boolean isStickyDueToExpansion =
+                    mEntry.isRowPinned() && mExpanded && !mEntry.isPromotedOngoing();
+
+            return isStickyDueToExpansion
                     || mRemoteInputActive
                     || hasFullScreenIntent(mEntry);
         }

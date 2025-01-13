@@ -16,6 +16,7 @@
 package com.android.systemui.statusbar.notification.headsup
 
 import android.app.Notification
+import android.app.Notification.FLAG_PROMOTED_ONGOING
 import android.app.PendingIntent
 import android.app.Person
 import android.os.Handler
@@ -677,10 +678,12 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
     }
 
     @Test
-    fun testIsSticky_rowPinnedAndExpanded_true() {
-        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, mContext)
-        val row = testHelper.createRow()
-        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testIsSticky_promotedAndExpanded_notifChipsFlagOff_true() {
+        val notif = Notification.Builder(mContext, "").setSmallIcon(R.drawable.ic_person).build()
+        notif.flags = FLAG_PROMOTED_ONGOING
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, notif)
+        val row = testHelper.createRow().apply { setPinnedStatus(PinnedStatus.PinnedBySystem) }
         notifEntry.row = row
 
         underTest.showNotification(notifEntry)
@@ -689,6 +692,23 @@ class HeadsUpManagerImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         headsUpEntry!!.setExpanded(true)
 
         assertThat(underTest.isSticky(notifEntry.key)).isTrue()
+    }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun testIsSticky_promotedAndExpanded_notifChipsFlagOn_false() {
+        val notif = Notification.Builder(mContext, "").setSmallIcon(R.drawable.ic_person).build()
+        notif.flags = FLAG_PROMOTED_ONGOING
+        val notifEntry = HeadsUpManagerTestUtil.createEntry(/* id= */ 0, notif)
+        val row = testHelper.createRow().apply { setPinnedStatus(PinnedStatus.PinnedBySystem) }
+        notifEntry.row = row
+
+        underTest.showNotification(notifEntry)
+
+        val headsUpEntry = underTest.getHeadsUpEntry(notifEntry.key)
+        headsUpEntry!!.setExpanded(true)
+
+        assertThat(underTest.isSticky(notifEntry.key)).isFalse()
     }
 
     @Test
