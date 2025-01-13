@@ -30,5 +30,5 @@
     <string name="choose_password_title" msgid="7610721820858017214">"בחירת סיסמה"</string>
     <string name="sign_in_on_phone_button" msgid="7618621977586522403">"כניסה לחשבון בטלפון"</string>
     <string name="locked_credential_entry_label_subtext_no_sign_in" msgid="1733094937495140605">"אין פרטי כניסה"</string>
-    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="4320941096211904568">"צריך להקיש כדי לבטל את הנעילה"</string>
+    <string name="locked_credential_entry_label_subtext_tap_to_unlock" msgid="4320941096211904568">"צריך ללחוץ כדי לבטל את הנעילה"</string>
 </resources>
