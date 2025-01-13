@@ -3815,7 +3815,7 @@
          user what action they need to take in the customization dialog to assign a new custom shortcut.
          The shortcut customize dialog allows users to add/remove custom shortcuts
          [CHAR LIMIT=NONE] -->
-    <string name="shortcut_customize_mode_add_shortcut_description">Press key to assign shortcut</string>
+    <string name="shortcut_customize_mode_add_shortcut_description">To create this shortcut, press the Action key and one or more other keys together</string>
     <!-- Sub title at the top of the remove custom shortcut dialog. Explains to the user what action
          they're about to take when they click remove shortcut. The shortcut customize dialog allows
          users to add/remove custom shortcuts
@@ -3912,7 +3912,7 @@
     <!-- Error message displayed when the user select a key combination that is already in use while
          assigning a new custom key combination to a shortcut in shortcut helper. The helper is a
          component that shows the user which keyboard shortcuts they can use. [CHAR LIMIT=NONE] -->
-    <string name="shortcut_customizer_key_combination_in_use_error_message">Key combination already in use. Try another key.</string>
+    <string name="shortcut_customizer_key_combination_in_use_error_message">Key combination already in use. Try another combination.</string>
     <!-- Generic error message displayed when the user selected key combination cannot be used as
          custom keyboard shortcut in shortcut helper. The helper is a component that shows the user
          which keyboard shortcuts they can use and allows users to customize their keyboard
