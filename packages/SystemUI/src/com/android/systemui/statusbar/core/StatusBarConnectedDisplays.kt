@@ -16,9 +16,9 @@
 
 package com.android.systemui.statusbar.core
 
-import com.android.systemui.Flags
 import com.android.systemui.flags.FlagToken
 import com.android.systemui.flags.RefactorFlagUtils
+import com.android.systemui.shared.Flags
 
 /** Helper for reading or using the status bar connected displays flag state. */
 @Suppress("NOTHING_TO_INLINE")
