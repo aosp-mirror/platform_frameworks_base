@@ -84,7 +84,7 @@ import java.util.concurrent.Executor;
  *  is done and before invoking {@link TransitionCallBack#onResult}.
  */
 public class MagnificationController implements MagnificationConnectionManager.Callback,
-        MagnificationGestureHandler.Callback,
+        MagnificationGestureHandler.Callback, MagnificationKeyHandler.Callback,
         FullScreenMagnificationController.MagnificationInfoChangedCallback,
         WindowManagerInternal.AccessibilityControllerInternal.UiChangesForAccessibilityCallbacks {
 
@@ -345,6 +345,36 @@ public class MagnificationController implements MagnificationConnectionManager.C
     @Override
     public void onTouchInteractionEnd(int displayId, int mode) {
         handleUserInteractionChanged(displayId, mode);
+    }
+
+    @Override
+    public void onPanMagnificationStart(int displayId,
+            @MagnificationController.PanDirection int direction) {
+        // TODO(b/355499907): Handle multiple pan gestures at the same time (e.g. user may try to
+        // pan diagonally) by decreasing diagonal movement by sqrt(2) to make it appear the same
+        // speed as non-diagonal movement.
+        panMagnificationByStep(displayId, direction);
+    }
+
+    @Override
+    public void onPanMagnificationStop(int displayId,
+            @MagnificationController.PanDirection int direction) {
+        // TODO(b/388847283): Handle held key gestures, which can be used
+        // for continuous scaling and panning, until they are released.
+
+    }
+
+    @Override
+    public void onScaleMagnificationStart(int displayId,
+            @MagnificationController.ZoomDirection int direction) {
+        scaleMagnificationByStep(displayId, direction);
+    }
+
+    @Override
+    public void onScaleMagnificationStop(int displayId,
+            @MagnificationController.ZoomDirection int direction) {
+        // TODO(b/388847283): Handle held key gestures, which can be used
+        // for continuous scaling and panning, until they are released.
     }
 
     private void handleUserInteractionChanged(int displayId, int mode) {
