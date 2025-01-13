@@ -1519,11 +1519,11 @@ class WindowMagnificationController implements View.OnTouchListener, SurfaceHold
     }
 
     void updateDragHandleResourcesIfNeeded(boolean settingsPanelIsShown) {
+        mSettingsPanelVisibility = settingsPanelIsShown;
+
         if (!isActivated()) {
             return;
         }
-
-        mSettingsPanelVisibility = settingsPanelIsShown;
 
         mDragView.setBackground(mContext.getResources().getDrawable(settingsPanelIsShown
                 ? R.drawable.accessibility_window_magnification_drag_handle_background_change_inset
