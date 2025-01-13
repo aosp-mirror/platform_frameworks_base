@@ -209,6 +209,8 @@ public class Vcn extends Handler {
         this(vcnContext, subscriptionGroup, config, snapshot, vcnCallback, new Dependencies());
     }
 
+    // WARNING: This constructor executes on the binder thread. Thread safety MUST be ensured when
+    // accessing data within this constructor and any methods called from here.
     @VisibleForTesting(visibility = Visibility.PRIVATE)
     public Vcn(
             @NonNull VcnContext vcnContext,
