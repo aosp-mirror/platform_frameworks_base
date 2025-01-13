@@ -5,6 +5,7 @@ import android.view.DisplayCutout
 import com.android.systemui.battery.BatteryMeterView
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.data.repository.StatusBarContentInsetsProviderStore
+import com.android.systemui.statusbar.layout.StatusBarContentInsetsProvider
 import javax.inject.Inject
 
 /**
@@ -15,10 +16,8 @@ class QsBatteryModeController
 @Inject
 constructor(
     @ShadeDisplayAware private val context: Context,
-    insetsProviderStore: StatusBarContentInsetsProviderStore,
+    private val insetsProviderStore: StatusBarContentInsetsProviderStore,
 ) {
-
-    private val insetsProvider = insetsProviderStore.defaultDisplay
 
     private companion object {
         // MotionLayout frames are in [0, 100]. Where 0 and 100 are reserved for start and end
@@ -43,17 +42,19 @@ constructor(
      * animation.
      */
     @BatteryMeterView.BatteryPercentMode
-    fun getBatteryMode(cutout: DisplayCutout?, qsExpandedFraction: Float): Int? =
-        when {
+    fun getBatteryMode(cutout: DisplayCutout?, qsExpandedFraction: Float): Int? {
+        val insetsProvider = insetsProviderStore.forDisplay(context.displayId)
+        return when {
             qsExpandedFraction > fadeInStartFraction -> BatteryMeterView.MODE_ESTIMATE
-            qsExpandedFraction < fadeOutCompleteFraction ->
-                if (hasCenterCutout(cutout)) {
+            insetsProvider != null && qsExpandedFraction < fadeOutCompleteFraction ->
+                if (hasCenterCutout(cutout, insetsProvider)) {
                     BatteryMeterView.MODE_ON
                 } else {
                     BatteryMeterView.MODE_ESTIMATE
                 }
             else -> null
         }
+    }
 
     fun updateResources() {
         fadeInStartFraction =
@@ -64,7 +65,10 @@ constructor(
                 MOTION_LAYOUT_MAX_FRAME.toFloat()
     }
 
-    private fun hasCenterCutout(cutout: DisplayCutout?): Boolean =
+    private fun hasCenterCutout(
+        cutout: DisplayCutout?,
+        insetsProvider: StatusBarContentInsetsProvider,
+    ): Boolean =
         cutout?.let {
             !insetsProvider.currentRotationHasCornerCutout() && !it.boundingRectTop.isEmpty
         } ?: false
