@@ -2877,6 +2877,13 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
                     leashReference = leashReference.getParent();
                 }
             }
+            if (wc == leashReference
+                    && sortedTargets.get(i).mWindowingMode == WINDOWING_MODE_PINNED) {
+                // If a PiP task is the only target, we wanna make sure the transition root leash
+                // is at the top in case PiP is sent to back. This is done because a pinned task is
+                // meant to be always-on-top throughout a transition.
+                leashReference = ancestor.getTopChild();
+            }
             final SurfaceControl rootLeash = leashReference.makeAnimationLeash().setName(
                     "Transition Root: " + leashReference.getName())
                     .setCallsite("Transition.calculateTransitionRoots").build();
