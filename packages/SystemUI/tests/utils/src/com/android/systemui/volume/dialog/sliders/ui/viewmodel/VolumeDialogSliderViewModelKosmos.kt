@@ -20,15 +20,19 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.util.time.systemClock
 import com.android.systemui.volume.dialog.domain.interactor.volumeDialogVisibilityInteractor
+import com.android.systemui.volume.dialog.shared.volumeDialogLogger
 import com.android.systemui.volume.dialog.sliders.domain.interactor.volumeDialogSliderInteractor
+import com.android.systemui.volume.dialog.sliders.domain.model.volumeDialogSliderType
 
 val Kosmos.volumeDialogSliderViewModel by
     Kosmos.Fixture {
         VolumeDialogSliderViewModel(
+            sliderType = volumeDialogSliderType,
             interactor = volumeDialogSliderInteractor,
             visibilityInteractor = volumeDialogVisibilityInteractor,
             coroutineScope = applicationCoroutineScope,
             volumeDialogSliderIconProvider = volumeDialogSliderIconProvider,
             systemClock = systemClock,
+            logger = volumeDialogLogger,
         )
     }
