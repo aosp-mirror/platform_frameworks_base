@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Δεν είναι δυνατή η σύνδεση στο δίκτυο κινητής τηλεφωνίας"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Δοκιμάστε να αλλάξετε το προτιμώμενο δίκτυο. Πατήστε για αλλαγή."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Οι κλήσεις έκτακτης ανάγκης δεν είναι διαθέσιμες"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Να μην εμφανιστεί ξανά"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Για τις κλήσεις έκτακτης ανάγκης απαιτείται δίκτυο κινητής τηλεφωνίας"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ειδοποιήσεις"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Προώθηση κλήσης"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Ειδοποιήσεις δικτύου"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Το δίκτυο είναι διαθέσιμο"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Κατάσταση VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Ώρα και ζώνες ώρας"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Ειδοποιήσεις από τον διαχειριστή IT"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Ειδοποιήσεις"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Επίδειξη λιανικής"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Η εφαρμογή εκτελείται"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Εφαρμογές που καταναλώνουν μπαταρία"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Μεγιστοποίηση"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Συσκευή ακοής"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Χρήση προσβασιμότητας"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Οθόνη"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Η εφαρμογή <xliff:g id="APP_NAME">%1$s</xliff:g> χρησιμοποιεί μπαταρία"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Λήψη εφαρμογής"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Τοποθετήθηκε νέα SIM"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Πατήστε για ρύθμιση"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Η ζώνη ώρας άλλαξε"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Βρίσκεστε πλέον στη ζώνη ώρας <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Ρύθμιση ώρας"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Ορισμός ημερομηνίας"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Ορισμός"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Λειτουργία ενός χεριού"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Επιπλέον μείωση φωτεινότητας"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Συσκευές ακοής"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Αποσυνδέθηκε"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Συνδέθηκε"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Ενεργή"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Φόρτωση"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Τα πλήκτρα έντασης είναι πατημένα. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ενεργοποιήθηκε."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Τα πλήκτρα έντασης είναι πατημένα. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>: απενεργοποιημένο"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Αφήστε τα κουμπιά έντασης ήχου. Για να ενεργοποιήσετε την υπηρεσία <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, πατήστε ξανά παρατεταμένα και τα δύο κουμπιά έντασης ήχου για τρία δευτερόλεπτα."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Η λειτουργία θα ανοίξει την επόμενη φορά που θα χρησιμοποιήσετε αυτή τη συντόμευση. Σαρώστε προς τα πάνω με 2 δάχτυλα από το κάτω μέρος της οθόνης και απομακρύνετε γρήγορα τα δάχτυλά σας."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Η λειτουργία θα ανοίξει την επόμενη φορά που θα χρησιμοποιήσετε αυτή τη συντόμευση. Σαρώστε προς τα πάνω με 3 δάχτυλα από το κάτω μέρος της οθόνης και απομακρύνετε γρήγορα τα δάχτυλά σας."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Μεγιστοποίηση"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Εναλλαγή στο μικρόφωνο του τηλεφώνου;"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Εναλλαγή στο μικρόφωνο του βοηθήματος ακοής;"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Για καλύτερο ήχο ή αν η μπαταρία του βοηθήματος ακοής είναι χαμηλή. Με αυτή την ενέργεια, το μικρόφωνό σας αλλάζει μόνο κατά τη διάρκεια της κλήσης."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Μπορείτε να χρησιμοποιήσετε το μικρόφωνο του βοηθήματος ακοής σας για κλήσεις handsfree. Με αυτή την ενέργεια, το μικρόφωνό σας αλλάζει μόνο κατά τη διάρκεια της κλήσης."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Εναλλαγή"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Ρυθμίσεις"</string>
     <string name="user_switched" msgid="7249833311585228097">"Τρέχων χρήστης <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Εναλλαγή σε <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Αποσύνδεση <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Για λόγους ασφάλειας, έγινε απόκρυψη του περιεχομένου της εφαρμογής από την κοινή χρήση οθόνης"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Συνδέθηκε αυτόματα με δορυφόρο"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Μπορείτε να στέλνετε και να λαμβάνετε μηνύματα χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi."</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Χρήση της ανταλλαγής μηνυμάτων μέσω δορυφόρου;"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Αποστολή και λήψη μηνυμάτων χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Άνοιγμα Messages"</string>

@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Չհաջողվեց միանալ բջջային ցանցին"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Փորձեք այլ ցանցի միանալ: Հպեք՝ նախընտրած ցանցը փոխելու համար:"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Շտապ կանչերը հասանելի չեն"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Այլևս ցույց չտալ"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Շտապ կանչերի համար բջջային ցանց է անհրաժեշտ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ծանուցումներ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Զանգի վերահասցեավորում"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Ցանցային զգուշացումներ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Ցանցը հասանելի է"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN կարգավիճակ"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Ժամ և ժամային գոտի"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Ծանուցումներ ձեր ՏՏ ադմինիստրատորից"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Ծանուցումներ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Խանութի ցուցադրական ռեժիմ"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Հավելվածն աշխատում է"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Մարտկոցի լիցքը ծախսող հավելվածներ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Խոշորացում"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Լսողական սարք"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Հատուկ գործառույթների օգտագործում"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Էկրան"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"«<xliff:g id="APP_NAME">%1$s</xliff:g>» հավելվածը ծախսում է մարտկոցի լիցքը"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Ներբեռնել հավելվածը"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Տեղադրվել է նոր SIM քարտ"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Հպեք՝ կարգավորելու համար"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Ձեր ժամային գոտին փոխվեց"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Դուք այժմ <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) ժամային գոտում եք"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Սահմանել ժամը"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Սահմանել ամսաթիվը"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Սահմանել"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Մեկ ձեռքի ռեժիմ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Հավելյալ խամրեցում"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Լսողական սարքեր"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Անջատված է"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Միացված է"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Ակտիվ է"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Բեռնում"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացավ։"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ձայնի կարգավորման կոճակները սեղմվեցին։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունն անջատվեց։"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Բաց թողեք ձայնի ուժգնության կոճակները։ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ծառայությունը միացնելու համար սեղմեք և 3 վայրկյան պահեք ձայնի ուժգնության երկու կոճակը։"</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Գործառույթը կբացվի հաջորդ անգամ, երբ օգտագործեք այս դյուրանցումը։ Երկու մատը էկրանի ներքևից սահեցրեք վերև և արագ բաց թողեք։"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Գործառույթը կբացվի հաջորդ անգամ, երբ օգտագործեք այս դյուրանցումը։ Երեք մատը էկրանի ներքևից սահեցրեք վերև և արագ բաց թողեք։"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Խոշորացում"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Անցնե՞լ հեռախոսի խոսափողին"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Անցնե՞լ լսողական սարքի խոսափողին"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Խոսափողը կարող եք օգտագործել, եթե ձայնի որակը ցածր է, կամ լսողական սարքի մարտկոցի լիցքը քիչ է։ Դուք կանցնեք խոսափողին միայն զանգի ընթացքում։"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Լսողական սարքի խոսափողը կարող եք օգտագործել ձայնային կառավարման համար։ Դուք կանցնեք խոսափողին միայն զանգի ընթացքում։"</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Անցնել"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Կարգավորումներ"</string>
     <string name="user_switched" msgid="7249833311585228097">"Ներկայիս օգտատերը <xliff:g id="NAME">%1$s</xliff:g>:"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Անցում <xliff:g id="NAME">%1$s</xliff:g> պրոֆիլին..."</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Ելք <xliff:g id="NAME">%1$s</xliff:g>-ից…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Անվտանգության նկատառումներով՝ բովանդակությունը թաքցվել է ցուցադրումից"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Ավտոմատ միացել է արբանյակին"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Դուք կարող եք հաղորդագրություններ ուղարկել և ստանալ առանց բջջային կամ Wi-Fi կապի"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Օգտագործե՞լ արբանյակային հաղորդագրումը"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Ուղարկեք և ստացեք հաղորդագրություններ առանց բջջային կամ Wi-Fi ցանցի"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Բացել Messages-ը"</string>

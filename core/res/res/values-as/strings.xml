@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ম’বাইল নেটৱৰ্কৰ লগত সংযোগ কৰিব পৰা নাই"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"পচন্দৰ নেটৱৰ্ক সলনি কৰি চেষ্টা কৰি চাওক। সলনি কৰিবলৈ টিপক।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"জৰুৰীকালীন কল কৰাৰ সুবিধা উপলব্ধ নহয়"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"পুনৰাই নেদেখুৱাব"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"জৰুৰীকালীন কল কৰিবলৈ ম’বাইল নেটৱৰ্কৰ প্ৰয়োজন"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"সতৰ্কবাণীসমূহ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"কল ফৰৱাৰ্ডিং"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"নেটৱৰ্ক সম্পৰ্কীয় সতৰ্কবাণী"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"নেটৱৰ্ক উপলব্ধ"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"ভিপিএনৰ স্থিতি"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"সময় আৰু সময় মণ্ডল"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"আপোনাৰ আইটি প্ৰশাসকৰ পৰা অহা সতৰ্কবাণী"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"সতৰ্কবাণীসমূহ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"খুচুৰা ডেম\'"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"এপ্ চলি আছে"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"বেটাৰী খৰচ কৰা এপ্‌সমূহ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"বিবৰ্ধন"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"শুনাৰ ডিভাইচ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"সাধ্য সুবিধাৰ ব্যৱহাৰ"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"ডিছপ্লে’"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g>এ বেটাৰী ব্যৱহাৰ কৰি আছে"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"এপ্ ডাউনল’ড কৰক"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"নতুন ছিম ভৰোৱা হৈছে"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ছেট আপ কৰিবলৈ টিপক"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"আপোনাৰ সময় মণ্ডল সলনি হৈছে"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"আপুনি এতিয়া <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g>ত (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) আছে"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"সময় ছেট কৰক"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"তাৰিখ ছেট কৰক"</string>
     <string name="date_time_set" msgid="4603445265164486816">"ছেট কৰক"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"এখন হাতেৰে ব্যৱহাৰ কৰাৰ ম’ড"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"অতিৰিক্তভাৱে পোহৰ কমোৱাৰ সুবিধা"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"শুনাৰ ডিভাইচ"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"সংযোগ বিচ্ছিন্ন হ’ল"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"সংযোগ কৰা হ’ল"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"সক্ৰিয় হৈ আছে"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"ল’ড হৈ আছে"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ভলিউম কীসমূহ ধৰি ৰাখক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ভলিউম কী ধৰি ৰাখিছিল। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অফ কৰা হ\'ল।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ভলিউম কী এৰি দিয়ক। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> অন কৰিবলৈ, দুয়োটা ভলিউম কী পুনৰ ৩ ছেকেণ্ডৰ বাবে টিপি হেঁচি ৰাখক।"</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"ইয়াৰ পাছত আপুনি এই শ্বৰ্টকাটটো ব্যৱহাৰ কৰিলে সুবিধাটো খোল খাব। আপোনাৰ স্ক্ৰীনখনৰ একেবাৰে তলৰ পৰা ওপৰলৈ ২ টা আঙুলিৰে ছোৱাইপ কৰি আঙুলিকেইটা দ্ৰুতভাৱে উঠাই দিয়ক।"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"ইয়াৰ পাছত আপুনি এই শ্বৰ্টকাটটো ব্যৱহাৰ কৰিলে সুবিধাটো খোল খাব। আপোনাৰ স্ক্ৰীনখনৰ একেবাৰে তলৰ পৰা ওপৰলৈ ৩ টা আঙুলিৰে ছোৱাইপ কৰি আঙুলিকেইটা দ্ৰুতভাৱে উঠাই দিয়ক।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"বিবৰ্ধন"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"ফ’নৰ মাইকলৈ সলনি কৰিবনে?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"শ্ৰৱণ যন্ত্ৰৰ মাইকলৈ সলনি কৰিবনে?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"অধিক ভাল ধ্বনিৰ বাবে বা যদি আপোনাৰ শ্ৰৱণ যন্ত্ৰৰ বেটাৰীৰ চাৰ্জ কম থাকে। এইটোৱে কল চলি থাকোঁতে কেৱল আপোনাৰ মাইকটো সলনি কৰে।"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"আপুনি হেণ্ডছ্‌-ফ্ৰী কলিঙৰ বাবে আপোনাৰ শ্ৰৱণ যন্ত্ৰৰ মাইক্ৰ’ফ’ন ব্যৱহাৰ কৰিব পাৰে। এইটোৱে কল চলি থাকোঁতে কেৱল আপোনাৰ মাইকটো সলনি কৰে।"</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"সলনি কৰক"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"ছেটিং"</string>
     <string name="user_switched" msgid="7249833311585228097">"বৰ্তমানৰ ব্যৱহাৰকাৰী <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>লৈ সলনি কৰি থকা হৈছে…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ৰ পৰা লগ আউট কৰি থকা হৈছে…"</string>
@@ -2454,6 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"সুৰক্ষাৰ বাবে এপৰ সমল স্ক্ৰীণ শ্বেয়াৰ কৰাৰ পৰা লুকুৱাই ৰখা হৈছে"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"উপগ্ৰহৰ সৈতে স্বয়ংক্ৰিয়ভাৱে সংযুক্ত হৈছে"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"আপুনি ম’বাইল বা ৱাই-ফাই নেটৱৰ্কৰ জৰিয়তে পাঠ বাৰ্তা পঠিয়াব বা লাভ কৰিব পাৰে"</string>
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"আপুনি উপগ্ৰহৰ জৰিয়তে বাৰ্তা পঠিয়াব আৰু গ্ৰহণ কৰিব পাৰে আৰু সীমিত তথ্য ব্যৱহাৰ কৰিব পাৰে"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"উপগ্ৰহৰ জৰিয়তে বাৰ্তা বিনিময়ৰ সুবিধাটো ব্যৱহাৰ কৰিবনে?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"আপুনি কোনো ম’বাইল বা ৱাই-ফাই নেটৱৰ্ক নোহোৱাকৈ বাৰ্তা পঠিয়াওক আৰু লাভ কৰক"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খোলক"</string>

@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Không thể kết nối với mạng di động"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Hãy thử thay đổi mạng ưu tiên. Nhấn để thay đổi."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Không có dịch vụ gọi khẩn cấp"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Không hiện lại"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Cần có mạng di động để thực hiện các cuộc gọi khẩn cấp"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Thông báo"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Chuyển tiếp cuộc gọi"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Cảnh báo mạng"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Có mạng"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Trạng thái VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Thời gian và múi giờ"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Thông báo từ quản trị viên CNTT của bạn"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Cảnh báo"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Giới thiệu bán lẻ"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Ứng dụng đang chạy"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Các ứng dụng tiêu thụ pin"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Phóng to"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Thiết bị trợ thính"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Việc sử dụng tính năng hỗ trợ tiếp cận"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Hiển thị"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> đang sử dụng pin"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Tải xuống ứng dụng"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Đã lắp SIM mới"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Nhấn để thiết lập"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Múi giờ của bạn đã thay đổi"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Bạn đang ở múi giờ <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Đặt giờ"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Đặt ngày"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Đặt"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Chế độ một tay"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Siêu tối"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Thiết bị trợ thính"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Đã ngắt kết nối"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Đã kết nối"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Đang hoạt động"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Đang tải"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã bật."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Bạn đã giữ các phím âm lượng. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> đã tắt."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Thả phím âm lượng. Để bật <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, hãy nhấn và giữ cả 2 phím âm lượng trong 3 giây một lần nữa."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Tính năng này sẽ được mở vào lần tới bạn dùng lối tắt này. Hãy dùng 2 ngón tay vuốt từ cuối màn hình lên rồi thả tay nhanh."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Tính năng này sẽ được mở vào lần tới bạn dùng lối tắt này. Hãy dùng 3 ngón tay vuốt từ cuối màn hình lên rồi thả tay nhanh."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Phóng to"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Chuyển sang micrô trên điện thoại?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Chuyển sang micrô của thiết bị trợ thính?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Để có âm thanh tốt hơn hoặc nếu thiết bị trợ thính của bạn sắp hết pin. Thao tác này chỉ chuyển micrô của bạn trong cuộc gọi."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Bạn có thể sử dụng micrô của thiết bị trợ thính để gọi điện mà không cần dùng tay. Thao tác này chỉ chuyển micrô của bạn trong cuộc gọi."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Chuyển"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Cài đặt"</string>
     <string name="user_switched" msgid="7249833311585228097">"Người dùng hiện tại <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Đang chuyển sang <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Đang đăng xuất <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Nội dung ứng dụng bị ẩn khỏi tính năng chia sẻ màn hình vì lý do bảo mật"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Đã tự động kết nối với vệ tinh"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Bạn có thể gửi và nhận tin nhắn mà không cần có mạng di động hoặc mạng Wi-Fi"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Sử dụng tính năng nhắn tin qua vệ tinh?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Gửi và nhận tin nhắn mà không cần mạng di động hoặc Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>

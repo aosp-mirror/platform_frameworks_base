@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Ayikwazi ukufinyelela kunethiwekhi yeselula"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Zama ukushintsha inethiwekhi encanyelwayo. Thepha ukuze ushintshe."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Ukushaya okuphuthumayo akutholakali"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Ungaphindi Ubonise Futhi"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Amakholi aphuthumayo adinga inethiwekhi yeselula"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Izexwayiso"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Ukudlulisa ikholi"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Izexwayiso zenethiwekhi"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Inethiwekhi iyatholakala"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Isimo se-VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Isikhathi nezoni yesikhathi"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Izxwayiso kusuka kumlawuli wakho we-IT"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Izexwayiso"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Idemo yokuthenga"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Uhlelo loksuebenza olusebenzayo"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Izinhlelo zokusebenza ezidla ibhethri"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ukukhuliswa"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Insizakuzwa"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Ukusetshenziswa kokufinyeleleka"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Bonisa"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> isebenzisa ibhethri"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Landa uhlelo lokusebenza"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Kufakwe i-SIM entsha"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Thepha ukuze uyisethe"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Izoni yakho yesikhathi ishintshile"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Manje sewuku-<xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Hlela isikhathi"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Setha idethi"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Hlela"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Imodi yesandla esisodwa"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Ukufiphaza okwengeziwe"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Amadivayizi okuzwa"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Inqamukile"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Ixhunyiwe"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Kuyasebenza"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Iyalayisha"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Ubambe okhiye bevolumu. I-<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ivuliwe."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Ubambe okhiye bevolumu. I-<xliff:g id="SERVICE_NAME">%1$s</xliff:g> ivaliwe."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Khipha okhiye bevolumu. Ukuze uvule i-<xliff:g id="SERVICE_NAME">%1$s</xliff:g>, cindezela bese ubamba bobabili okhiye bevolumu futhi imizuzwana emi-3."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Lesi sakhi sizovuleka ngokulandelayo uma usebenzisa lesi sinqamuleli. Swayiphela phezulu ngeminwe engu-2 kusukela ngaphansi kwesikrini sakho uphinde udedele ngokushesha."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Lesi sakhi sizovuleka ngokulandelayo uma usebenzisa lesi sinqamuleli. Swayiphela phezulu ngeminwe engu-3 kusukela ngaphansi kwesikrini sakho uphinde udedele ngokushesha."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ukukhuliswa"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Shintshela kumakrofoni yefoni?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Shintshela kumakrofoni yomshini wendlebe?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Ukuze uthole umsindo ongcono noma uma ibhethri lakho lomshini wendlebe liphansi. Lokhu kushintsha kuphela imakrofoni yakho ngesikhathi sekholi."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Ungasebenzisa imakrofoni yakho yomshini wendlebe ekufoneni ngehands-free. Lokhu kushintsha kuphela imakrofoni yakho ngesikhathi sekholi."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Shintsha"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Amasethingi"</string>
     <string name="user_switched" msgid="7249833311585228097">"Umsebenzisi wamanje <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Ishintshela ku-<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Iyaphuma <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Okuqukethwe kwe-app kufihliwe kusuka ekwabelaneni kwesikrini ngokuvikelwa"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Ixhumeke ngokuzenzakalelayo kusathelayithi"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Ungathumela futhi wamukele imilayezo ngaphandle kwenethiwekhi yeselula noma ye-Wi-Fi"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Sebenzisa ukuthumela umyalezo ngesethelayithi?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Thumela futhi wamukele imilayezo ngaphandle kwenethiwekhi yeselula noma yeWiFi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Vula Imilayezo"</string>

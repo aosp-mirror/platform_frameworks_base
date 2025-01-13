@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"無法連線至流動網絡"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"請嘗試變更偏好的網絡。輕按即可變更。"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"無法撥打緊急電話"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"不要再顯示"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"撥打緊急電話需要使用流動網絡"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"通知"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"來電轉駁"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"網絡通知"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"有可用的網絡"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN 狀態"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"時間和時區"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"來自 IT 管理員的通知"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"通知"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"零售示範"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"應用程式正在執行"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"耗用電量的應用程式"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"放大"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"助聽器"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"無障礙功能使用情況"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"顯示屏"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"「<xliff:g id="APP_NAME">%1$s</xliff:g>」正在使用電量"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"下載應用程式"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"已插入新的 SIM 卡"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"輕按即可設定"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"你的時區已變更"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"你現在處於 <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"設定時間"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"日期設定"</string>
     <string name="date_time_set" msgid="4603445265164486816">"設定"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"單手模式"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"超暗"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"助聽器"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"已中斷連線"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"已連線"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"運作中"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"正在載入"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"已按住音量鍵。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 已開啟。"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"已按住音量鍵。<xliff:g id="SERVICE_NAME">%1$s</xliff:g> 已關閉。"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"鬆開音量鍵。如果要開 <xliff:g id="SERVICE_NAME">%1$s</xliff:g>，請同時㩒住兩個音量鍵 3 秒。"</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"下次使用此快速鍵時，就會開啟此功能。請用 2 隻手指從螢幕底部向上滑動並快速放開。"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"下次使用此快速鍵時，就會開啟此功能。請用 3 隻手指從螢幕底部向上滑動並快速放開。"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"放大"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"要切換至手機麥克風嗎？"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"要切換至助聽器麥克風嗎？"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"可改善音質，也在助聽器電量不足時適用。此操作只會切換通話期間的麥克風。"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"你可使用助聽器麥克風進行免提通話。此操作只會切換通話期間的麥克風。"</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"切換"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"設定"</string>
     <string name="user_switched" msgid="7249833311585228097">"目前的使用者是<xliff:g id="NAME">%1$s</xliff:g>。"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"正在切換至<xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"正在登出 <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"為安全起見，應用程式內容已從分享螢幕畫面隱藏"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"已自動連線至衛星"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"你可在沒有流動/Wi-Fi 網絡的情況下收發訊息"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"要使用衛星訊息嗎？"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"在沒有流動網絡或 Wi-Fi 網絡的情況下收發短訊"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」"</string>

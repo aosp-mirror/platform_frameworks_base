@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"मोबाइल नेटवर्क उपलब्ध नाही"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"प्राधान्य दिलेले नेटवर्क बदलण्याचा प्रयत्न करा. बदलण्यासाठी टॅप करा."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"आणीबाणी कॉलिंग अनुपलब्ध"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"पुन्हा दाखवू नका"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"आणीबाणी कॉलसाठी मोबाइल नेटवर्क आवश्यक आहे"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"अलर्ट"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"कॉल फॉरवर्डिंग"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"नेटवर्क सूचना"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"नेटवर्क उपलब्ध"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN स्थिती"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"वेळ आणि टाइम झोन"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"तुमच्या IT ॲडमिनकडून आलेल्या सूचना"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"सूचना"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"रीटेल डेमो"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"APP चालत आहे"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"बॅटरी लवकर संपवणारी अ‍ॅप्स"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"मॅग्निफिकेशन"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"श्रवणयंत्र"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"अ‍ॅक्सेसिबिलिटी वापर"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"डिस्प्ले"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> बॅटरी वापरत आहे"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"अ‍ॅप डाउनलोड करा"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"नवीन सिम घाला"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ते सेट करण्यासाठी टॅप करा"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"तुमचा टाइम झोन बदलला आहे"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"आता तुम्ही <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) मध्ये आहात."</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"वेळ सेट करा"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"तारीख सेट करा"</string>
     <string name="date_time_set" msgid="4603445265164486816">"सेट करा"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"एकहाती मोड"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"आणखी डिम"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"श्रवणयंत्रे"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"डिस्कनेक्ट केले आहे"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"कनेक्ट केले आहे"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"अ‍ॅक्टिव्ह"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"लोड करत आहे"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू केला आहे."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"धरून ठेवलेल्या व्हॉल्यूम की. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> बंद केले आहे."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"व्हॉल्यूम की रिलीझ करा. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> सुरू करण्यासाठी, दोन्ही व्हॉल्यूम की पुन्हा प्रेस करा आणि तीन सेकंदांसाठी धरून ठेवा."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"तुम्ही पुढील वेळी हा शॉर्टकट वापराल, तेव्हा वैशिष्ट्य उघडेल. २ बोटांनी तुमच्या स्क्रीनच्या तळापासून वर स्वाइप करा आणि पटकन रिलीझ करा."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"तुम्ही पुढील वेळी हा शॉर्टकट वापराल, तेव्हा वैशिष्ट्य उघडेल. ३ बोटांनी तुमच्या स्क्रीनच्या तळापासून वर स्वाइप करा आणि पटकन रिलीझ करा."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"मॅग्निफिकेशन"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"फोनच्या माइकवर स्विच करायचे आहे का?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"श्रवणयंत्राच्या माइकवर स्विच करायचे आहे का?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"चांगल्या आवाजासाठी किंवा तुमच्या श्रवणयंत्राची बॅटरी कमी असल्यास. यामुळे कॉलदरम्यान फक्त तुमचा माइक स्विच केला जातो."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"हँड्स-फ्री कॉलिंगसाठी तुम्ही तुमच्या श्रवणयंत्राचा मायक्रोफोन वापरू शकता. यामुळे कॉलदरम्यान फक्त तुमचा माइक स्विच केला जातो."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"स्विच करा"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"सेटिंग्ज"</string>
     <string name="user_switched" msgid="7249833311585228097">"वर्तमान वापरकर्ता <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> वर स्विच करत आहे…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> लॉग आउट करत आहे…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"स्क्रीन शेअर करताना सुरक्षेसाठी अ‍ॅपमधील आशय लपवला आहे"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"उपग्रहाशी आपोआप कनेक्ट केलेले आहे"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"तुम्ही मोबाइल किंवा वाय-फाय नेटवर्कशिवाय मेसेज पाठवू आणि मिळवू शकता"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"सॅटेलाइट मेसेजिंग वापरायचे आहे का?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"मोबाइल किंवा वाय-फाय नेटवर्कशिवाय मेसेज पाठवणे आणि मिळवणे"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages उघडा"</string>

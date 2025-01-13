@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ಮೊಬೈಲ್‌ ನೆಟ್‌ವರ್ಕ್ ತಲುಪಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ಆದ್ಯತೆಗೊಳಿಸಿದ ನೆಟ್‌ವರ್ಕ್‌ಗಳನ್ನು ಬದಲಾಯಿಸಲು ಪ್ರಯತ್ನಿಸಿ. ಬದಲಾಯಿಸಲು ಟ್ಯಾಪ್‌ ಮಾಡಿ."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ತುರ್ತು ಕರೆ ಮಾಡುವಿಕೆ ಲಭ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"ಪುನಃ ತೋರಿಸಬೇಡಿ"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ತುರ್ತು ಕರೆಗಳಿಗೆ ಮೊಬೈಲ್ ನೆಟ್‌ವರ್ಕ್‌ನ ಅಗತ್ಯವಿದೆ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ಕರೆ ಫಾರ್ವರ್ಡ್‌ ಮಾಡುವಿಕೆ"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ನೆಟ್‌ವರ್ಕ್ ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"ನೆಟ್‌ವರ್ಕ್ ಲಭ್ಯವಿದೆ"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN ಸ್ಥಿತಿ"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"ಸಮಯ ಹಾಗೂ ಸಮಯ ವಲಯಗಳು"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"ನಿಮ್ಮ IT ವಿಭಾಗದ ನಿರ್ವಾಹಕರಿಂದ ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"ಎಚ್ಚರಿಕೆಗಳು"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"ರಿಟೇಲ್ ಡೆಮೋ"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"App ರನ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಬ್ಯಾಟರಿಯನ್ನು ಉಪಯೋಗಿಸುತ್ತಿವೆ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ಹಿಗ್ಗಿಸುವಿಕೆ"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"ಹಿಯರಿಂಗ್ ಸಾಧನ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ಪ್ರವೇಶಿಸುವಿಕೆಯ ಬಳಕೆ"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"ಡಿಸ್‌ಪ್ಲೇ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಆ್ಯಪ್, ಬ್ಯಾಟರಿಯನ್ನು ಬಳಸುತ್ತಿದೆ"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ಆ್ಯಪ್‌ ಡೌನ್‌ಲೋಡ್ ಮಾಡಿ"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"ಹೊಸ ಸಿಮ್ ಸೇರಿಸಲಾಗಿದೆ"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ಇದನ್ನು ಸ್ಥಾಪಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"ನಿಮ್ಮ ಸಮಯವಲಯ ಬದಲಾಗಿದೆ."</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"ನೀವು ಈಗ <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) ನಲ್ಲಿದ್ದೀರಿ"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"ಸಮಯವನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"ದಿನಾಂಕವನ್ನು ಸೆಟ್ ಮಾಡಿ"</string>
     <string name="date_time_set" msgid="4603445265164486816">"ಹೊಂದಿಸು"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ಒಂದು ಕೈ ಮೋಡ್‌"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ಇನ್ನಷ್ಟು ಮಬ್ಬು"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ಶ್ರವಣ ಸಾಧನಗಳು"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"ಡಿಸ್‌ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"ಸಕ್ರಿಯವಾಗಿದೆ"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"ಲೋಡ್ ಆಗುತ್ತಿದೆ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಹಿಡಿದುಕೊಳ್ಳಿ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಹಿಡಿದಿಟ್ಟುಕೊಳ್ಳಲಾಗಿದೆ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, ಆಫ್ ಮಾಡಲಾಗಿದೆ."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಬಿಡುಗಡೆ ಮಾಡಿ. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ಅನ್ನು ಆನ್ ಮಾಡಲು, ಎರಡೂ ವಾಲ್ಯೂಮ್ ಕೀಗಳನ್ನು ಮತ್ತೊಮ್ಮೆ 3 ಸೆಕೆಂಡ್‌ಗಳ ಕಾಲ ಒತ್ತಿ ಹಿಡಿದುಕೊಳ್ಳಿ."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"ಮುಂದಿನ ಬಾರಿ ನೀವು ಈ ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಬಳಸುವಾಗ ಈ ಫೀಚರ್ ಆನ್ ಆಗುತ್ತದೆ. ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಗಿನಿಂದ 2 ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಹಾಗೂ ತ್ವರಿತವಾಗಿ ಬಿಡುಗಡೆ ಮಾಡಿ."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"ಮುಂದಿನ ಬಾರಿ ನೀವು ಈ ಶಾರ್ಟ್‌ಕಟ್ ಅನ್ನು ಬಳಸುವಾಗ ಈ ಫೀಚರ್ ಆನ್ ಆಗುತ್ತದೆ. ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನ ಕೆಳಗಿನಿಂದ 3 ಬೆರಳುಗಳಿಂದ ಮೇಲಕ್ಕೆ ಸ್ವೈಪ್ ಮಾಡಿ ಹಾಗೂ ತ್ವರಿತವಾಗಿ ಬಿಡುಗಡೆ ಮಾಡಿ."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ಹಿಗ್ಗಿಸುವಿಕೆ"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"ಫೋನ್ ಮೈಕ್‌ಗೆ ಬದಲಿಸಬೇಕೆ?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"ಶ್ರವಣ ಸಾಧನ ಮೈಕ್‌ಗೆ ಬದಲಿಸಬೇಕೆ?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"ಉತ್ತಮ ಧ್ವನಿಗಾಗಿ ಅಥವಾ ನಿಮ್ಮ ಶ್ರವಣ ಸಾಧನದ ಬ್ಯಾಟರಿ ಕಡಿಮೆಯಿದ್ದರೆ. ಇದು ಕರೆಯ ಸಮಯದಲ್ಲಿ ಮಾತ್ರ ನಿಮ್ಮ ಮೈಕ್ ಅನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"ಹ್ಯಾಂಡ್ಸ್-ಫ್ರೀ ಕರೆ ಮಾಡುವಿಕೆಗಾಗಿ ನಿಮ್ಮ ಶ್ರವಣ ಸಾಧನದ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ನೀವು ಬಳಸಬಹುದು. ಇದು ಕರೆಯ ಸಮಯದಲ್ಲಿ ಮಾತ್ರ ನಿಮ್ಮ ಮೈಕ್ ಅನ್ನು ಬದಲಾಯಿಸುತ್ತದೆ."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"ಬದಲಿಸಿ"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="user_switched" msgid="7249833311585228097">"ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರು <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ಗೆ ಬದಲಾಯಿಸಲಾಗುತ್ತಿದೆ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ಅವರನ್ನು ಲಾಗ್‌ ಔಟ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ಭದ್ರತೆಗಾಗಿ ಸ್ಕ್ರೀನ್‌‌ ಹಂಚಿಕೊಳ್ಳುವಿಕೆಯಲ್ಲಿ ಆ್ಯಪ್ ಕಂಟೆಂಟ್‌ ಅನ್ನು ಮರೆಮಾಡಲಾಗಿದೆ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ಸ್ಯಾಟಲೈಟ್‌ಗೆ ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಕನೆಕ್ಟ್ ಆಗಿದೆ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ನೀವು ಮೊಬೈಲ್ ಅಥವಾ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್ ಇಲ್ಲದೆಯೇ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಬಹುದು ಮತ್ತು ಸ್ವೀಕರಿಸಬಹುದು"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ಸ್ಯಾಟಲೈಟ್ ಮೆಸೇಜಿಂಗ್ ಅನ್ನು ಬಳಸಬೇಕೆ?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ಮೊಬೈಲ್ ಅಥವಾ ವೈ-ಫೈ ನೆಟ್‌ವರ್ಕ್ ಇಲ್ಲದೆಯೇ ಸಂದೇಶಗಳನ್ನು ಕಳುಹಿಸಿ ಮತ್ತು ಸ್ವೀಕರಿಸಿ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ಅನ್ನು ತೆರೆಯಿರಿ"</string>

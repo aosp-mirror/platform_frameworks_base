@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"မိုဘိုင်းကွန်ရက် လိုင်းမရပါ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ဦးစားပေးကွန်ရက်သို့ ပြောင်းကြည့်ပါ။ ပြောင်းရန် တို့ပါ။"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"အရေးပေါ်ခေါ်ဆိုမှု မရနိုင်ပါ"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"ထပ်မပြပါနှင့်"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"အရေးပေါ်ဖုန်းခေါ်ရန် မိုဘိုင်းကွန်ရက် လိုအပ်သည်"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"သတိပေးချက်များ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"အဝင်ခေါ်ဆိုမှုအား ထပ်ဆင့်ပို့ခြင်း"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ကွန်ရက် သတိပေးချက်များ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"ကွန်ရက်ချိတ်ဆက်မှု ရရှိနိုင်ပါသည်"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN အခြေအနေ"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"အချိန်နှင့် ဒေသစံတော်ချိန်များ"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"သင်၏ IT စီမံခန့်ခွဲသူထံမှ သတိပေးချက်များ"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"သတိပေးချက်များ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"လက်လီအရောင်းဆိုင် သရုပ်ပြမှု"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"APP လုပ်ဆောင်နေသည်"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"အက်ပ်များက ဘက်ထရီကုန်စေသည်"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ချဲ့ခြင်း"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"နားကြားကိရိယာ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"အများသုံးစွဲနိုင်မှုကို အသုံးပြုမှု"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"ဖန်သားပြင်"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> က ဘက်ထရီကို အသုံးပြုနေသည်"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"အက်ပ် ဒေါင်းလုဒ်လုပ်ရန်"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"SIM အသစ်ထည့်သွင်းလိုက်ပါသည်"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"၎င်းကိုတပ်ဆင်ရန် တို့ပါ"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"သင်၏ဒေသစံတော်ချိန် ပြောင်းသွားပါပြီ"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"သင်သည် ယခု <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) တွင် ရှိနေသည်"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"အချိန်သတ်မှတ်ရန်"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"ရက်စွဲ အတည်ပြုရန်"</string>
     <string name="date_time_set" msgid="4603445265164486816">"သတ်မှတ်ရန်"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"လက်တစ်ဖက်သုံးမုဒ်"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ပိုမှိန်ခြင်း"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"နားကြားကိရိယာ"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"ချိတ်ဆက်မထားပါ"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"ချိတ်ဆက်ထားသည်"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"သုံးနေသည်"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"ဖွင့်နေသည်"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"အသံခလုတ်များကို ဖိထားသည်။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ပိတ်လိုက်သည်။"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"အသံထိန်းခလုတ်များကို လွှတ်လိုက်ပါ။ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ဖွင့်ရန် အသံထိန်းခလုတ်နှစ်ခုစလုံးကို ၃ စက္ကန့်ကြာအောင် ထပ်နှိပ်ပါ။"</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"နောက်တစ်ကြိမ်တွင် ဤဖြတ်လမ်းကို သုံးသည့်အခါ ဤဝန်ဆောင်မှု ပွင့်လာမည်။ သင့်ဖန်သားပြင်အောက်ခြေမှ အပေါ်သို့ လက် ၂ ချောင်းဖြင့် ပွတ်ဆွဲ၍ အမြန်လွှတ်လိုက်ပါ။"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"နောက်တစ်ကြိမ်တွင် ဤဖြတ်လမ်းကို သုံးသည့်အခါ ဤဝန်ဆောင်မှု ပွင့်လာမည်။ သင့်ဖန်သားပြင်အောက်ခြေမှ အပေါ်သို့ လက် ၃ ချောင်းဖြင့် ပွတ်ဆွဲ၍ အမြန်လွှတ်လိုက်ပါ။"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ချဲ့ခြင်း"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"ဖုန်း၏မိုက်သို့ ပြောင်းမလား။"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"နားကြားကိရိယာ၏မိုက်သို့ ပြောင်းမလား။"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"အသံပိုကောင်းစေရန် (သို့) နားကြားကိရိယာ၏ ဘက်ထရီ နည်းနေပါက။ ခေါ်ဆိုနေစဉ်သာ သင့်မိုက်ကို ပြောင်းပေးသည်။"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"လက်လွတ်ခေါ်ဆိုခြင်းအတွက် နားကြားကိရိယာ၏ မိုက်ခရိုဖုန်းကို သုံးနိုင်သည်။ ခေါ်ဆိုနေစဉ်သာ သင့်မိုက်ကို ပြောင်းပေးသည်။"</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"ပြောင်းရန်"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"ဆက်တင်များ"</string>
     <string name="user_switched" msgid="7249833311585228097">"လက်ရှိအသုံးပြုနေသူ <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>သို့ ပြောင်းနေသည်…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ကို ထွက်ပစ်ပါတော့မည်..."</string>
@@ -1949,13 +1954,13 @@
     <string name="data_saver_enable_title" msgid="7080620065745260137">"ဒေတာချွေတာမှုစနစ် ဖွင့်မလား။"</string>
     <string name="data_saver_enable_button" msgid="4399405762586419726">"ဖွင့်ရန်"</string>
     <string name="zen_mode_duration_minutes_summary" msgid="4555514757230849789">"{count,plural, =1{တစ်မိနစ်ကြာ ({formattedTime} အထိ)}other{# မိနစ်ကြာ ({formattedTime} အထိ)}}"</string>
-    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{1 မိနစ်ကြာ ({formattedTime} အထိ)}other{# မိနစ်ကြာ ({formattedTime} အထိ)}}"</string>
-    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{1 နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
-    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{1 နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_minutes_summary_short" msgid="1187553788355486950">"{count,plural, =1{၁ မိနစ်ကြာ ({formattedTime} အထိ)}other{# မိနစ်ကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_hours_summary" msgid="3866333100793277211">"{count,plural, =1{၁ နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
+    <string name="zen_mode_duration_hours_summary_short" msgid="687919813833347945">"{count,plural, =1{၁ နာရီကြာ ({formattedTime} အထိ)}other{# နာရီကြာ ({formattedTime} အထိ)}}"</string>
     <string name="zen_mode_duration_minutes" msgid="2340007982276569054">"{count,plural, =1{တစ်မိနစ်ကြာ}other{# မိနစ်ကြာ}}"</string>
     <string name="zen_mode_duration_minutes_short" msgid="2435756450204526554">"{count,plural, =1{1 မိနစ်ကြာ}other{# မိနစ်ကြာ}}"</string>
-    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{1 နာရီကြာ}other{# နာရီကြာ}}"</string>
-    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1 နာရီကြာ}other{# နာရီကြာ}}"</string>
+    <string name="zen_mode_duration_hours" msgid="7841806065034711849">"{count,plural, =1{၁ နာရီကြာ}other{# နာရီကြာ}}"</string>
+    <string name="zen_mode_duration_hours_short" msgid="3666949653933099065">"{count,plural, =1{1၁ နာရီကြာ}other{# နာရီကြာ}}"</string>
     <string name="zen_mode_until_next_day" msgid="1403042784161725038">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> အထိ"</string>
     <string name="zen_mode_until" msgid="2250286190237669079">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>အထိ"</string>
     <string name="zen_mode_alarm" msgid="7046911727540499275">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g> အထိ (လာမည့် နှိုးစက်)"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"လုံခြုံရေးအတွက် အက်ပ်အကြောင်းအရာကို ဖန်သားပြင် မျှဝေခြင်းတွင် ဖျောက်ထားသည်"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ဂြိုဟ်တုနှင့် အလိုအလျောက် ချိတ်ဆက်ထားသည်"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များကို ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်း သုံးမလား။"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များ ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ဖွင့်ရန်"</string>
