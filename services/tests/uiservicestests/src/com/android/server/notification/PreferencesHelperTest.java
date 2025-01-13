@@ -19,6 +19,7 @@ import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.Flags.FLAG_MODES_UI;
+import static android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI;
 import static android.app.Notification.VISIBILITY_PRIVATE;
 import static android.app.Notification.VISIBILITY_SECRET;
 import static android.app.NotificationChannel.ALLOW_BUBBLE_ON;
@@ -161,6 +162,7 @@ import com.android.modules.utils.TypedXmlSerializer;
 import com.android.os.AtomsProto;
 import com.android.os.AtomsProto.PackageNotificationChannelPreferences;
 import com.android.os.AtomsProto.PackageNotificationPreferences;
+import com.android.os.notification.NotificationProtoEnums;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.PermissionHelper.PackagePermission;
 import com.android.server.uri.UriGrantsManagerInternal;
@@ -256,7 +258,8 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     public static List<FlagsParameterization> getParams() {
         return FlagsParameterization.allCombinationsOf(
                 android.app.Flags.FLAG_API_RICH_ONGOING,
-                FLAG_NOTIFICATION_CLASSIFICATION, FLAG_MODES_UI);
+                FLAG_NOTIFICATION_CLASSIFICATION, FLAG_NOTIFICATION_CLASSIFICATION_UI,
+                FLAG_MODES_UI);
     }
 
     public PreferencesHelperTest(FlagsParameterization flags) {
@@ -6135,6 +6138,7 @@ public class PreferencesHelperTest extends UiServiceTestCase {
     }
 
     @Test
+    @DisableFlags({FLAG_NOTIFICATION_CLASSIFICATION_UI})
     public void testPullPackagePreferencesStats_postPermissionMigration()
             throws InvalidProtocolBufferException {
         // make sure there's at least one channel for each package we want to test
@@ -6155,15 +6159,17 @@ public class PreferencesHelperTest extends UiServiceTestCase {
         mHelper.canShowBadge(PKG_O, UID_O);
         mHelper.canShowBadge(PKG_P, UID_P);
 
+        ArrayList<StatsEvent> events = new ArrayList<>();
+
+        mHelper.pullPackagePreferencesStats(events, appPermissions,
+                new ArrayMap<String, Set<Integer>>());
+
         // expected output. format: uid -> importance, as only uid (and not package name)
         // is in PackageNotificationPreferences
         ArrayMap<Integer, Pair<Integer, Boolean>> expected = new ArrayMap<>();
         expected.put(UID_N_MR1, new Pair<>(IMPORTANCE_DEFAULT, false));
         expected.put(UID_O, new Pair<>(IMPORTANCE_NONE, true));         // banned by permissions
         expected.put(UID_P, new Pair<>(IMPORTANCE_UNSPECIFIED, false)); // default: unspecified
-
-        ArrayList<StatsEvent> events = new ArrayList<>();
-        mHelper.pullPackagePreferencesStats(events, appPermissions);
 
         assertEquals("total number of packages", 3, events.size());
         for (StatsEvent ev : events) {
@@ -6177,6 +6183,74 @@ public class PreferencesHelperTest extends UiServiceTestCase {
             assertThat(expected.get(uid).first).isEqualTo(p.getImportance());
             assertThat(expected.get(uid).second).isEqualTo(p.getUserSetImportance());
         }
+    }
+
+    @Test
+    @EnableFlags({FLAG_NOTIFICATION_CLASSIFICATION, FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testPullPackagePreferencesStats_createsExpectedStatsEvents()
+            throws InvalidProtocolBufferException {
+        // make sure there's at least one channel for each package we want to test
+        NotificationChannel channelA = new NotificationChannel("a", "a", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_N_MR1, UID_N_MR1, channelA, true, false,
+                UID_N_MR1, false);
+        NotificationChannel channelB = new NotificationChannel("b", "b", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_O, UID_O, channelB, true, false, UID_O, false);
+        NotificationChannel channelC = new NotificationChannel("c", "c", IMPORTANCE_DEFAULT);
+        mHelper.createNotificationChannel(PKG_P, UID_P, channelC, true, false, UID_P, false);
+
+        // build a collection of app permissions that should be passed in and used
+        ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions = new ArrayMap<>();
+        pkgPermissions.put(new Pair<>(UID_N_MR1, PKG_N_MR1), new Pair<>(true, false));
+        pkgPermissions.put(new Pair<>(UID_O, PKG_O), new Pair<>(false, true)); // in local prefs
+
+        // local preferences
+        mHelper.canShowBadge(PKG_O, UID_O);
+        mHelper.canShowBadge(PKG_P, UID_P);
+
+        // Sets bundles_allowed to true for these packages.
+        ArrayMap<String, Set<Integer>> packageSpecificAdjustmentKeyTypes = new ArrayMap<>();
+        Set<Integer> nMr1BundlesSet = new ArraySet<Integer>();
+        nMr1BundlesSet.add(TYPE_NEWS);
+        nMr1BundlesSet.add(TYPE_SOCIAL_MEDIA);
+        packageSpecificAdjustmentKeyTypes.put(PKG_N_MR1, nMr1BundlesSet);
+        Set<Integer> pBundlesSet = new ArraySet<Integer>();
+        packageSpecificAdjustmentKeyTypes.put(PKG_P, pBundlesSet);
+
+        ArrayList<StatsEvent> events = new ArrayList<>();
+
+        mHelper.pullPackagePreferencesStats(events, pkgPermissions,
+                packageSpecificAdjustmentKeyTypes);
+
+        assertEquals("total number of packages", 3, events.size());
+
+        AtomsProto.Atom atom0 = StatsEventTestUtils.convertToAtom(events.get(0));
+        assertTrue(atom0.hasPackageNotificationPreferences());
+        PackageNotificationPreferences p0 = atom0.getPackageNotificationPreferences();
+        assertThat(p0.getUid()).isEqualTo(UID_O);
+        assertThat(p0.getImportance()).isEqualTo(IMPORTANCE_NONE); // banned by permissions
+        assertThat(p0.getUserSetImportance()).isTrue();
+        assertThat(p0.getAllowedBundleTypesList()).hasSize(0);
+
+        AtomsProto.Atom atom1 = StatsEventTestUtils.convertToAtom(events.get(1));
+        assertTrue(atom1.hasPackageNotificationPreferences());
+        PackageNotificationPreferences p1 = atom1.getPackageNotificationPreferences();
+        assertThat(p1.getUid()).isEqualTo(UID_N_MR1);
+        assertThat(p1.getImportance()).isEqualTo(IMPORTANCE_DEFAULT);
+        assertThat(p1.getUserSetImportance()).isFalse();
+        assertThat(p1.getAllowedBundleTypesList()).hasSize(2);
+
+        assertThat(p1.getAllowedBundleTypes(0).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_SOCIAL_MEDIA);
+        assertThat(p1.getAllowedBundleTypes(1).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_NEWS);
+
+        AtomsProto.Atom atom2 = StatsEventTestUtils.convertToAtom(events.get(2));
+        assertTrue(atom2.hasPackageNotificationPreferences());
+        PackageNotificationPreferences p2 = atom2.getPackageNotificationPreferences();
+        assertThat(p2.getUid()).isEqualTo(UID_P);
+        assertThat(p2.getImportance()).isEqualTo(IMPORTANCE_UNSPECIFIED); // default: unspecified
+        assertThat(p2.getUserSetImportance()).isFalse();
+        assertThat(p2.getAllowedBundleTypesList()).hasSize(0);
     }
 
     @Test

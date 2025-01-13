@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.Flags.notificationClassificationUi;
 import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.app.NotificationChannel.DEFAULT_CHANNEL_ID;
 import static android.app.NotificationChannel.NEWS_ID;
@@ -2523,6 +2524,25 @@ public class PreferencesHelper implements RankingConfig {
      */
     public void pullPackagePreferencesStats(List<StatsEvent> events,
             ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions) {
+        pullPackagePreferencesStats(events, pkgPermissions, new ArrayMap<String, Set<Integer>>());
+    }
+
+
+    /**
+     * Fills out {@link PackageNotificationPreferences} proto and wraps it in a {@link StatsEvent}.
+     * @param events Newly filled out StatsEvent protos are added to this list as output.
+     * @param pkgPermissions Maps from a pair representing a uid and package to a pair of booleans,
+     *                       where the first represents whether the notification permission was
+     *                       granted to that package, and the second represents whether the
+     *                       permission was user-set.
+     * @param pkgAdjustmentKeyTypes A map of package names that are not allowed to have their
+     *                                 notifications classified into differently typed notification
+     *                                 channels, and the channels that they're allowed to be
+     *                                 classified into.
+     */
+    public void pullPackagePreferencesStats(List<StatsEvent> events,
+            ArrayMap<Pair<Integer, String>, Pair<Boolean, Boolean>> pkgPermissions,
+            @NonNull Map<String, Set<Integer>> pkgAdjustmentKeyTypes) {
         Set<Pair<Integer, String>> pkgsWithPermissionsToHandle = null;
         if (pkgPermissions != null) {
             pkgsWithPermissionsToHandle = pkgPermissions.keySet();
@@ -2568,6 +2588,14 @@ public class PreferencesHelper implements RankingConfig {
                         isFsiPermissionUserSet(r.pkg, r.uid, fsiState,
                                 currentPermissionFlags);
 
+                if (!notificationClassificationUi()
+                        && pkgAdjustmentKeyTypes.keySet().size() > 0) {
+                    Slog.w(TAG, "Pkg adjustment types improperly allowed without flag set");
+                }
+
+                int[] allowedBundleTypes =
+                        getAllowedTypesForPackage(pkgAdjustmentKeyTypes, r.pkg);
+
                 events.add(FrameworkStatsLog.buildStatsEvent(
                         PACKAGE_NOTIFICATION_PREFERENCES,
                         /* optional int32 uid = 1 [(is_uid) = true] */ r.uid,
@@ -2576,7 +2604,9 @@ public class PreferencesHelper implements RankingConfig {
                         /* optional int32 user_locked_fields = 4 */ r.lockedAppFields,
                         /* optional bool user_set_importance = 5 */ importanceIsUserSet,
                         /* optional FsiState fsi_state = 6 */ fsiState,
-                        /* optional bool is_fsi_permission_user_set = 7 */ fsiIsUserSet));
+                        /* optional bool is_fsi_permission_user_set = 7 */ fsiIsUserSet,
+                        /* repeated int32 allowed_bundle_types = 8 */ allowedBundleTypes
+                ));
             }
         }
 
@@ -2587,6 +2617,10 @@ public class PreferencesHelper implements RankingConfig {
                     break;
                 }
                 pulledEvents++;
+
+                int[] allowedBundleTypes =
+                        getAllowedTypesForPackage(pkgAdjustmentKeyTypes, p.second);
+
                 // Because all fields are required in FrameworkStatsLog.buildStatsEvent, we have
                 // to fill in default values for all the unspecified fields.
                 events.add(FrameworkStatsLog.buildStatsEvent(
@@ -2598,9 +2632,29 @@ public class PreferencesHelper implements RankingConfig {
                         /* optional int32 user_locked_fields = 4 */ DEFAULT_LOCKED_APP_FIELDS,
                         /* optional bool user_set_importance = 5 */ pkgPermissions.get(p).second,
                         /* optional FsiState fsi_state = 6 */ 0,
-                        /* optional bool is_fsi_permission_user_set = 7 */ false));
+                        /* optional bool is_fsi_permission_user_set = 7 */ false,
+                        /* repeated BundleTypes allowed_bundle_types = 8 */ allowedBundleTypes));
             }
         }
+    }
+
+    private int[] getAllowedTypesForPackage(@NonNull
+                                            Map<String, Set<Integer>> pkgAdjustmentKeyTypes,
+                                            String pkg) {
+        int[] allowedBundleTypes = new int[]{};
+        if (notificationClassificationUi()) {
+            if (pkgAdjustmentKeyTypes.containsKey(pkg)) {
+                // Convert from set to int[]
+                Set<Integer> types = pkgAdjustmentKeyTypes.get(pkg);
+                allowedBundleTypes = new int[types.size()];
+                int i = 0;
+                for (int val : types) {
+                    allowedBundleTypes[i] = val;
+                    i++;
+                }
+            }
+        }
+        return allowedBundleTypes;
     }
 
     /**

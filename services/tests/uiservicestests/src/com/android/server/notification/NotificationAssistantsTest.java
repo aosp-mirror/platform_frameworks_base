@@ -64,6 +64,8 @@ import android.testing.TestableContext;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.IntArray;
+import android.util.StatsEvent;
+import android.util.StatsEventTestUtils;
 import android.util.Xml;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -71,8 +73,16 @@ import androidx.test.runner.AndroidJUnit4;
 import com.android.internal.util.CollectionUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
+import com.android.os.AtomsProto;
+import com.android.os.notification.NotificationBundlePreferences;
+import com.android.os.notification.NotificationExtensionAtoms;
+import com.android.os.notification.NotificationProtoEnums;
 import com.android.server.UiServiceTestCase;
 import com.android.server.notification.NotificationManagerService.NotificationAssistants;
+
+import com.google.protobuf.CodedInputStream;
+import com.google.protobuf.CodedOutputStream;
+import com.google.protobuf.ExtensionRegistryLite;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -119,6 +129,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     UserInfo mTen = new UserInfo(10, "ten", 0);
 
     ComponentName mCn = new ComponentName("a", "b");
+
+    private ExtensionRegistryLite mRegistry;
 
 
     // Helper function to hold mApproved lock, avoid GuardedBy lint errors
@@ -204,6 +216,8 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         when(mUserProfiles.getCurrentProfileIds()).thenReturn(profileIds);
         when(mNm.isNASMigrationDone(anyInt())).thenReturn(true);
         when(mNm.canUseManagedServices(any(), anyInt(), any())).thenReturn(true);
+        mRegistry = ExtensionRegistryLite.newInstance();
+        NotificationExtensionAtoms.registerAllExtensions(mRegistry);
     }
 
     @Test
@@ -749,6 +763,28 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
     }
 
     @Test
+    @EnableFlags({android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testGetPackagesWithKeyTypeAdjustmentSettings() throws Exception {
+        String pkg = "my.package";
+        String pkg2 = "my.package.2";
+        setDefaultAllowedAdjustmentKeyTypes(mAssistants);
+        assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_PROMOTION)).isTrue();
+        assertThat(mAssistants.getPackagesWithKeyTypeAdjustmentSettings()).isEmpty();
+
+        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_PROMOTION, true);
+        assertThat(mAssistants.getPackagesWithKeyTypeAdjustmentSettings())
+                .containsExactly(pkg);
+        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg, TYPE_PROMOTION, false);
+        assertThat(mAssistants.getPackagesWithKeyTypeAdjustmentSettings())
+                .containsExactly(pkg);
+        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg2, TYPE_NEWS, true);
+        mAssistants.setAssistantAdjustmentKeyTypeStateForPackage(pkg2, TYPE_PROMOTION, false);
+        assertThat(mAssistants.getPackagesWithKeyTypeAdjustmentSettings())
+                .containsExactly(pkg, pkg2);
+    }
+
+    @Test
     @EnableFlags(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
     public void testSetAssistantAdjustmentKeyTypeStateForPackage_usesGlobalDefault() {
         String pkg = "my.package";
@@ -891,5 +927,89 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         assertThat(mAssistants.isTypeAdjustmentAllowedForPackage(pkg, TYPE_NEWS)).isTrue();
         assertThat(mAssistants.getAllowedAdjustmentKeyTypesForPackage(pkg)).asList()
                 .containsExactly(TYPE_NEWS, TYPE_PROMOTION, TYPE_SOCIAL_MEDIA);
+    }
+
+    @Test
+    @SuppressWarnings("GuardedBy")
+    @EnableFlags({android.service.notification.Flags.FLAG_NOTIFICATION_CLASSIFICATION,
+            android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI})
+    public void testPullBundlePreferencesStats_fillsOutStatsEvent()
+            throws Exception {
+        // Create the current user and enable the package
+        int userId = ActivityManager.getCurrentUser();
+        mAssistants.loadDefaultsFromConfig(true);
+        mAssistants.setPackageOrComponentEnabled(mCn.flattenToString(), userId, true,
+                true, true);
+        ManagedServices.ManagedServiceInfo info =
+                mAssistants.new ManagedServiceInfo(null, mCn, userId, false, null, 35, 2345256);
+
+        // Ensure bundling is enabled
+        mAssistants.setAdjustmentTypeSupportedState(info, Adjustment.KEY_TYPE, true);
+        // Enable these specific bundle types
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        // When pullBundlePreferencesStats is run with the given preferences
+        ArrayList<StatsEvent> events = new ArrayList<>();
+        mAssistants.pullBundlePreferencesStats(events);
+
+        // The StatsEvent is filled out with the expected NotificationBundlePreferences values.
+        assertThat(events.size()).isEqualTo(1);
+        AtomsProto.Atom atom = StatsEventTestUtils.convertToAtom(events.get(0));
+
+        // The returned atom does not have external extensions registered.
+        // So we serialize and then deserialize with extensions registered.
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+        CodedOutputStream codedos = CodedOutputStream.newInstance(outputStream);
+        atom.writeTo(codedos);
+        codedos.flush();
+
+        ByteArrayInputStream inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        CodedInputStream codedis = CodedInputStream.newInstance(inputStream);
+        atom = AtomsProto.Atom.parseFrom(codedis, mRegistry);
+        assertTrue(atom.hasExtension(NotificationExtensionAtoms.notificationBundlePreferences));
+        NotificationBundlePreferences p =
+                atom.getExtension(NotificationExtensionAtoms.notificationBundlePreferences);
+        assertThat(p.getBundlesAllowed()).isTrue();
+        assertThat(p.getAllowedBundleTypes(0).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_NEWS);
+        assertThat(p.getAllowedBundleTypes(1).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_CONTENT_RECOMMENDATION);
+
+        // Disable the top-level bundling setting
+        mAssistants.setAdjustmentTypeSupportedState(info, Adjustment.KEY_TYPE, false);
+        // Enable these specific bundle types
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, true);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, false);
+        mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_CONTENT_RECOMMENDATION, true);
+
+        ArrayList<StatsEvent> eventsDisabled = new ArrayList<>();
+        mAssistants.pullBundlePreferencesStats(eventsDisabled);
+
+        // The StatsEvent is filled out with the expected NotificationBundlePreferences values.
+        assertThat(eventsDisabled.size()).isEqualTo(1);
+        AtomsProto.Atom atomDisabled = StatsEventTestUtils.convertToAtom(eventsDisabled.get(0));
+
+        // The returned atom does not have external extensions registered.
+        // So we serialize and then deserialize with extensions registered.
+        outputStream = new ByteArrayOutputStream();
+        codedos = CodedOutputStream.newInstance(outputStream);
+        atomDisabled.writeTo(codedos);
+        codedos.flush();
+
+        inputStream = new ByteArrayInputStream(outputStream.toByteArray());
+        codedis = CodedInputStream.newInstance(inputStream);
+        atomDisabled = AtomsProto.Atom.parseFrom(codedis, mRegistry);
+        assertTrue(atomDisabled.hasExtension(NotificationExtensionAtoms
+                .notificationBundlePreferences));
+
+        NotificationBundlePreferences p2 =
+                atomDisabled.getExtension(NotificationExtensionAtoms.notificationBundlePreferences);
+        assertThat(p2.getBundlesAllowed()).isFalse();
+        assertThat(p2.getAllowedBundleTypes(0).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_PROMOTION);
+        assertThat(p2.getAllowedBundleTypes(1).getNumber())
+                .isEqualTo(NotificationProtoEnums.TYPE_CONTENT_RECOMMENDATION);
     }
 }
