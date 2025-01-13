@@ -66,6 +66,7 @@ import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenDeviceEffects;
 import android.service.notification.ZenModeConfig;
 import android.service.notification.ZenPolicy;
+import android.text.TextUtils;
 import android.util.Log;
 import android.util.LruCache;
 import android.util.Slog;
@@ -73,6 +74,8 @@ import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.InstantSource;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -657,8 +660,10 @@ public class NotificationManager {
             mCallNotificationEventCallbacks = new HashMap<>();
 
     private final InstantSource mClock;
-    private final RateEstimator mUpdateRateEstimator = new RateEstimator();
-    private final RateEstimator mUnnecessaryCancelRateEstimator = new RateEstimator();
+    private final RateLimiter mUpdateRateLimiter = new RateLimiter("notify (update)",
+            MAX_NOTIFICATION_UPDATE_RATE);
+    private final RateLimiter mUnnecessaryCancelRateLimiter = new RateLimiter("cancel (dupe)",
+            MAX_NOTIFICATION_UNNECESSARY_CANCEL_RATE);
     // Value is KNOWN_STATUS_ENQUEUED/_CANCELLED
     private final LruCache<NotificationKey, Integer> mKnownNotifications = new LruCache<>(100);
     private final Object mThrottleLock = new Object();
@@ -816,21 +821,16 @@ public class NotificationManager {
 
         if (Flags.nmBinderPerfThrottleNotify()) {
             NotificationKey key = new NotificationKey(user, pkg, tag, id);
-            long now = mClock.millis();
             synchronized (mThrottleLock) {
                 Integer status = mKnownNotifications.get(key);
                 if (status != null && status == KNOWN_STATUS_ENQUEUED
                         && !notification.hasCompletedProgress()) {
-                    float updateRate = mUpdateRateEstimator.getRate(now);
-                    if (updateRate > MAX_NOTIFICATION_UPDATE_RATE) {
-                        Slog.w(TAG, "Shedding update of " + key
-                                + ", notification update maximum rate exceeded (" + updateRate
-                                + ")");
+                    if (mUpdateRateLimiter.eventExceedsRate()) {
+                        mUpdateRateLimiter.recordRejected(key);
                         return true;
                     }
-                    mUpdateRateEstimator.update(now);
+                    mUpdateRateLimiter.recordAccepted();
                 }
-
                 mKnownNotifications.put(key, KNOWN_STATUS_ENQUEUED);
             }
         }
@@ -840,6 +840,51 @@ public class NotificationManager {
 
     private record NotificationKey(@NonNull UserHandle user, @NonNull String pkg,
                                    @Nullable String tag, int id) { }
+
+    /** Helper class to rate-limit Binder calls. */
+    private class RateLimiter {
+
+        private static final Duration RATE_LIMITER_LOG_INTERVAL = Duration.ofSeconds(5);
+
+        private final RateEstimator mInputRateEstimator;
+        private final RateEstimator mOutputRateEstimator;
+        private final String mName;
+        private final float mLimitRate;
+
+        private Instant mLogSilencedUntil;
+
+        private RateLimiter(String name, float limitRate) {
+            mInputRateEstimator = new RateEstimator();
+            mOutputRateEstimator = new RateEstimator();
+            mName = name;
+            mLimitRate = limitRate;
+        }
+
+        boolean eventExceedsRate() {
+            long nowMillis = mClock.millis();
+            mInputRateEstimator.update(nowMillis);
+            return mOutputRateEstimator.getRate(nowMillis) > mLimitRate;
+        }
+
+        void recordAccepted() {
+            mOutputRateEstimator.update(mClock.millis());
+        }
+
+        void recordRejected(NotificationKey key) {
+            Instant now = mClock.instant();
+            if (mLogSilencedUntil != null && now.isBefore(mLogSilencedUntil)) {
+                return;
+            }
+
+            long nowMillis = now.toEpochMilli();
+            Slog.w(TAG, TextUtils.formatSimple(
+                    "Shedding %s of %s, rate limit (%s) exceeded: input %s, output would be %s",
+                    mName, key, mLimitRate, mInputRateEstimator.getRate(nowMillis),
+                    mOutputRateEstimator.getRate(nowMillis)));
+
+            mLogSilencedUntil = now.plus(RATE_LIMITER_LOG_INTERVAL);
+        }
+    }
 
     private Notification fixNotification(Notification notification) {
         String pkg = mContext.getPackageName();
@@ -963,18 +1008,14 @@ public class NotificationManager {
     private boolean discardCancel(UserHandle user, String pkg, @Nullable String tag, int id) {
         if (Flags.nmBinderPerfThrottleNotify()) {
             NotificationKey key = new NotificationKey(user, pkg, tag, id);
-            long now = mClock.millis();
             synchronized (mThrottleLock) {
                 Integer status = mKnownNotifications.get(key);
                 if (status != null && status == KNOWN_STATUS_CANCELLED) {
-                    float cancelRate = mUnnecessaryCancelRateEstimator.getRate(now);
-                    if (cancelRate > MAX_NOTIFICATION_UNNECESSARY_CANCEL_RATE) {
-                        Slog.w(TAG, "Shedding cancel of " + key
-                                + ", presumably unnecessary and maximum rate exceeded ("
-                                + cancelRate + ")");
+                    if (mUnnecessaryCancelRateLimiter.eventExceedsRate()) {
+                        mUnnecessaryCancelRateLimiter.recordRejected(key);
                         return true;
                     }
-                    mUnnecessaryCancelRateEstimator.update(now);
+                    mUnnecessaryCancelRateLimiter.recordAccepted();
                 }
                 mKnownNotifications.put(key, KNOWN_STATUS_CANCELLED);
             }
