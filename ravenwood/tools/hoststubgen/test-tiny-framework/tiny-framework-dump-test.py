@@ -28,9 +28,16 @@ GOLDEN_DIRS = [
 
 # Run diff.
 def run_diff(file1, file2):
-    # TODO(b/388562869) We shouldn't need `--ignore-matching-lines`, but the golden files may not have the "Constant pool:" lines.
-    command = ['diff', '-u', '--ignore-blank-lines',
+    command = ['diff', '-u',
+               '--ignore-blank-lines',
                '--ignore-space-change',
+
+               # Ignore the class file version.
+               '--ignore-matching-lines=^ *\(major\|minor\) version:$',
+
+               # We shouldn't need `--ignore-matching-lines`, but somehow
+               # the golden files were generated without these lines for b/388562869,
+               # so let's just ignore them.
                '--ignore-matching-lines=^\(Constant.pool:\|{\)$',
                file1, file2]
     print(' '.join(command))
@@ -85,4 +92,13 @@ class TestWithGoldenOutput(unittest.TestCase):
 
 
 if __name__ == "__main__":
+    args = sys.argv
+
+    # This script is used by diff-and-update-golden.sh too.
+    if len(args) > 1 and args[1] == "run-diff":
+        if run_diff(args[2], args[3]):
+            sys.exit(0)
+        else:
+            sys.exit(1)
+
     unittest.main(verbosity=2)

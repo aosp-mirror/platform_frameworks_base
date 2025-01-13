@@ -89,14 +89,33 @@ filter_output() {
     # - Some other transient lines
     # - Sometimes the javap shows mysterious warnings, so remove them too.
     #
-    # `/PATTERN-1/,/PATTERN-2/{//!d}` is a trick to delete lines between two patterns, without
-    # the start and the end lines.
+    # Most conversion are simple per-line deletion or simple inline replacement with a regex.
+    #
+    # But removing the constant pool is a bit tricky. It looks like this in the output:
+    #---------------------------
+    #Constant pool:
+    #    #1 = Methodref          #31.#88       // java/lang/Object."<init>":()V
+    #    #2 = Class              #89           // java/lang/UnsupportedOperationException
+    #    :
+    #{ // Or something, I'm not sure if it always ends with a "{".
+    #---------------------------
+    # i.e. we want to delete all lines from "Constant pool:" as long as the first character
+    # is a space.
+    #
+    # If we simply use '/^Constant pool:/,/^[^ ]/d', then it'll delete the "Constant pool:"
+    # line and "{" line too, but again the last line might be important, so we don't want to
+    # delete it.
+    #
+    # So we instead, use '/^Constant pool:/,/^[^ ]/{/^ /d}', which mean:
+    # between lines matching '/^Constant pool:/' and '/^[^ ]/', delete lines that start with
+    # a space. (=='/^ /d').
+    #
     sed -e 's/#[0-9][0-9]*/#x/g' \
         -e 's/^\( *\)[0-9][0-9]*:/\1x:/' \
-        -e '/^Constant pool:/,/^[^ ]/{//!d}' \
+        -e '/^Constant pool:/,/^[^ ]/{/^ /d}' \
         -e '/^ *line *[0-9][0-9]*: *[0-9][0-9]*$/d' \
-        -e '/SHA-256 checksum/d' \
-        -e '/Last modified/d' \
+        -e '/^ *SHA-256 checksum/d' \
+        -e '/^ *Last modified/d' \
         -e '/^Classfile jar/d' \
         -e '/\[warning\]/d'
   else
