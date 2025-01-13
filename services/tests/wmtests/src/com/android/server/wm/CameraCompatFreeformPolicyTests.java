@@ -606,7 +606,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 .setOnTop(true)
                 .setTask(task)
                 .build();
-        mActivity.mAppCompatController.getAppCompatSizeCompatModePolicy().clearSizeCompatMode();
+        mActivity.mAppCompatController.getSizeCompatModePolicy().clearSizeCompatMode();
 
         spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
         spyOn(mActivity.info);
