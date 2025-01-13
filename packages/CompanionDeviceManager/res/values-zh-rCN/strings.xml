@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"配套设备管理器"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"允许应用&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;访问&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;？"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"请确保此<xliff:g id="DEVICE_TYPE">%1$s</xliff:g>已开启<xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g>，并将<xliff:g id="PROFILE_NAME">%3$s</xliff:g>放在附近。"</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"找不到设备，请稍后重试。"</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"蓝牙"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"WLAN"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"蓝牙和 WLAN"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"手表"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"选择要由&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;管理的设备"</string>
     <string name="chooser_title" msgid="2235819929238267637">"选择 <xliff:g id="PROFILE_NAME">%1$s</xliff:g> 进行设置"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"寻找<xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_watch" msgid="8134580124808507407">"该应用将能同步信息（例如来电者的姓名），并能获得您<xliff:g id="DEVICE_TYPE">%1$s</xliff:g>上的以下权限"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"允许&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;管理&lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;？"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"设备"</string>

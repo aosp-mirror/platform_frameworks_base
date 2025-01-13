@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Begleitgerät-Manager"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"Zulassen, dass &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; auf &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; zugreifen darf?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Achte darauf, dass die Option „<xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g>“ auf diesem <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> aktiviert ist und dein Begleitgerät vom Typ „<xliff:g id="PROFILE_NAME">%3$s</xliff:g>“ in der Nähe ist."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Keine Geräte gefunden. Bitte versuche es später noch einmal."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"WLAN"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth &amp; WLAN"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"Smartwatch"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Gerät auswählen, das von &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; verwaltet werden soll"</string>
     <string name="chooser_title" msgid="2235819929238267637">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> zum Einrichten auswählen"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"Nach einem Begleitgerät vom Typ „<xliff:g id="PROFILE_NAME">%1$s</xliff:g>“ suchen"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Diese App darf dann Daten wie den Namen eines Anrufers synchronisieren und auf diese Berechtigungen auf deinem Gerät (<xliff:g id="DEVICE_TYPE">%1$s</xliff:g>) zugreifen"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Zulassen, dass &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; das Gerät &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; verwalten darf?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"Gerät"</string>

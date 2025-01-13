@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Gestionnaire d\'appareil compagnon"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"Autoriser l\'appli &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à accéder à &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Assurez-vous que le <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> est activé sur cet appareil (<xliff:g id="DEVICE_TYPE">%1$s</xliff:g>) et gardez votre <xliff:g id="PROFILE_NAME">%3$s</xliff:g> à proximité."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Aucun appareil détecté. Veuillez réessayer plus tard."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth et Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"montre"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Choisir un appareil qui sera géré par &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Choisir un appareil (<xliff:g id="PROFILE_NAME">%1$s</xliff:g>) pour le configurer"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"À la recherche de l\'appareil suivant : <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Cette appli sera autorisée à synchroniser des informations, comme le nom de l\'appelant, et à accéder à ces autorisations sur votre <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Autoriser &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; à gérer &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"appareil"</string>
