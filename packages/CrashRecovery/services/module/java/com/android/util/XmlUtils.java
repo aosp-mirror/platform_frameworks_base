@@ -16,21 +16,10 @@
 
 package android.util;
 
-import android.annotation.NonNull;
-import android.system.ErrnoException;
-import android.system.Os;
-
-import com.android.modules.utils.TypedXmlPullParser;
-
-import libcore.util.XmlObjectFactory;
-
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 /**
  *  Bits and pieces copied from hidden API of
@@ -39,8 +28,6 @@ import java.io.InputStream;
  * @hide
  */
 public class XmlUtils {
-
-    private static final String STRING_ARRAY_SEPARATOR = ":";
 
     /** @hide */
     public static final void beginDocument(XmlPullParser parser, String firstElementName)
@@ -75,45 +62,5 @@ public class XmlUtils {
                 return true;
             }
         }
-    }
-
-    private static XmlPullParser newPullParser() {
-        try {
-            XmlPullParser parser = XmlObjectFactory.newXmlPullParser();
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_DOCDECL, true);
-            parser.setFeature(XmlPullParser.FEATURE_PROCESS_NAMESPACES, true);
-            return parser;
-        } catch (XmlPullParserException e) {
-            throw new AssertionError();
-        }
-    }
-
-    /** @hide */
-    public static @NonNull TypedXmlPullParser resolvePullParser(@NonNull InputStream in)
-            throws IOException {
-        final byte[] magic = new byte[4];
-        if (in instanceof FileInputStream) {
-            try {
-                Os.pread(((FileInputStream) in).getFD(), magic, 0, magic.length, 0);
-            } catch (ErrnoException e) {
-                throw e.rethrowAsIOException();
-            }
-        } else {
-            if (!in.markSupported()) {
-                in = new BufferedInputStream(in);
-            }
-            in.mark(8);
-            in.read(magic);
-            in.reset();
-        }
-
-        final TypedXmlPullParser xml;
-        xml = (TypedXmlPullParser) newPullParser();
-        try {
-            xml.setInput(in, "UTF_8");
-        } catch (XmlPullParserException e) {
-            throw new IOException(e);
-        }
-        return xml;
     }
 }

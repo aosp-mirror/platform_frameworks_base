@@ -29,18 +29,13 @@ import android.content.pm.PackageManager;
 import android.content.pm.VersionedPackage;
 import android.crashrecovery.flags.Flags;
 import android.os.Build;
-import android.os.Environment;
 import android.os.PowerManager;
 import android.os.RecoverySystem;
 import android.os.SystemClock;
 import android.os.SystemProperties;
-import android.os.UserHandle;
-import android.provider.DeviceConfig;
 import android.provider.Settings;
 import android.sysprop.CrashRecoveryProperties;
 import android.text.TextUtils;
-import android.util.ArraySet;
-import android.util.ArrayUtils;
 import android.util.EventLog;
 import android.util.FileUtils;
 import android.util.Log;
@@ -56,10 +51,7 @@ import com.android.server.crashrecovery.proto.CrashRecoveryStatsLog;
 import java.io.File;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
@@ -241,85 +233,9 @@ public class RescueParty {
         CrashRecoveryProperties.maxRescueLevelAttempted(level);
     }
 
-    private static Set<String> getPresetNamespacesForPackages(List<String> packageNames) {
-        Set<String> resultSet = new ArraySet<String>();
-        if (!Flags.deprecateFlagsAndSettingsResets()) {
-            try {
-                String flagVal = DeviceConfig.getString(NAMESPACE_CONFIGURATION,
-                        NAMESPACE_TO_PACKAGE_MAPPING_FLAG, "");
-                String[] mappingEntries = flagVal.split(",");
-                for (int i = 0; i < mappingEntries.length; i++) {
-                    if (TextUtils.isEmpty(mappingEntries[i])) {
-                        continue;
-                    }
-                    String[] splitEntry = mappingEntries[i].split(":");
-                    if (splitEntry.length != 2) {
-                        throw new RuntimeException("Invalid mapping entry: " + mappingEntries[i]);
-                    }
-                    String namespace = splitEntry[0];
-                    String packageName = splitEntry[1];
-
-                    if (packageNames.contains(packageName)) {
-                        resultSet.add(namespace);
-                    }
-                }
-            } catch (Exception e) {
-                resultSet.clear();
-                Slog.e(TAG, "Failed to read preset package to namespaces mapping.", e);
-            } finally {
-                return resultSet;
-            }
-        } else {
-            return resultSet;
-        }
-    }
-
     @VisibleForTesting
     static long getElapsedRealtime() {
         return SystemClock.elapsedRealtime();
-    }
-
-    private static class RescuePartyMonitorCallback implements DeviceConfig.MonitorCallback {
-        Context mContext;
-
-        RescuePartyMonitorCallback(Context context) {
-            this.mContext = context;
-        }
-
-        public void onNamespaceUpdate(@NonNull String updatedNamespace) {
-            if (!Flags.deprecateFlagsAndSettingsResets()) {
-                startObservingPackages(mContext, updatedNamespace);
-            }
-        }
-
-        public void onDeviceConfigAccess(@NonNull String callingPackage,
-                @NonNull String namespace) {
-
-            if (!Flags.deprecateFlagsAndSettingsResets()) {
-                RescuePartyObserver.getInstance(mContext).recordDeviceConfigAccess(
-                        callingPackage,
-                        namespace);
-            }
-        }
-    }
-
-    private static void startObservingPackages(Context context, @NonNull String updatedNamespace) {
-        if (!Flags.deprecateFlagsAndSettingsResets()) {
-            RescuePartyObserver rescuePartyObserver = RescuePartyObserver.getInstance(context);
-            Set<String> callingPackages = rescuePartyObserver.getCallingPackagesSet(
-                    updatedNamespace);
-            if (callingPackages == null) {
-                return;
-            }
-            List<String> callingPackageList = new ArrayList<>();
-            callingPackageList.addAll(callingPackages);
-            Slog.i(TAG, "Starting to observe: " + callingPackageList + ", updated namespace: "
-                    + updatedNamespace);
-            PackageWatchdog.getInstance(context).startExplicitHealthCheck(
-                    callingPackageList,
-                    DEFAULT_OBSERVING_DURATION_MS,
-                    rescuePartyObserver);
-        }
     }
 
     private static int getMaxRescueLevel(boolean mayPerformReboot) {
@@ -849,34 +765,6 @@ public class RescueParty {
             }
         }
 
-        private synchronized void recordDeviceConfigAccess(@NonNull String callingPackage,
-                @NonNull String namespace) {
-            if (!Flags.deprecateFlagsAndSettingsResets()) {
-                // Record it in calling packages to namespace map
-                Set<String> namespaceSet = mCallingPackageNamespaceSetMap.get(callingPackage);
-                if (namespaceSet == null) {
-                    namespaceSet = new ArraySet<>();
-                    mCallingPackageNamespaceSetMap.put(callingPackage, namespaceSet);
-                }
-                namespaceSet.add(namespace);
-                // Record it in namespace to calling packages map
-                Set<String> callingPackageSet = mNamespaceCallingPackageSetMap.get(namespace);
-                if (callingPackageSet == null) {
-                    callingPackageSet = new ArraySet<>();
-                }
-                callingPackageSet.add(callingPackage);
-                mNamespaceCallingPackageSetMap.put(namespace, callingPackageSet);
-            }
-        }
-
-        private synchronized Set<String> getAffectedNamespaceSet(String failedPackage) {
-            return mCallingPackageNamespaceSetMap.get(failedPackage);
-        }
-
-        private synchronized Set<String> getAllAffectedNamespaceSet() {
-            return new HashSet<String>(mNamespaceCallingPackageSetMap.keySet());
-        }
-
         private synchronized Set<String> getCallingPackagesSet(String namespace) {
             return mNamespaceCallingPackageSetMap.get(namespace);
         }
@@ -892,26 +780,6 @@ public class RescueParty {
         long throttleDurationMin = SystemProperties.getLong(PROP_THROTTLE_DURATION_MIN_FLAG,
                 DEFAULT_FACTORY_RESET_THROTTLE_DURATION_MIN);
         return now < lastResetTime + TimeUnit.MINUTES.toMillis(throttleDurationMin);
-    }
-
-    private static int[] getAllUserIds() {
-        int systemUserId = UserHandle.SYSTEM.getIdentifier();
-        int[] userIds = { systemUserId };
-        try {
-            for (File file : FileUtils.listFilesOrEmpty(
-                    Environment.getDataSystemDeviceProtectedDirectory())) {
-                try {
-                    final int userId = Integer.parseInt(file.getName());
-                    if (userId != systemUserId) {
-                        userIds = ArrayUtils.appendInt(userIds, userId);
-                    }
-                } catch (NumberFormatException ignored) {
-                }
-            }
-        } catch (Throwable t) {
-            Slog.w(TAG, "Trouble discovering users", t);
-        }
-        return userIds;
     }
 
     /**
