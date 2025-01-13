@@ -26,6 +26,7 @@ import android.hardware.power.CpuHeadroomResult;
 import android.hardware.power.GpuHeadroomResult;
 import android.hardware.power.SupportInfo;
 import android.os.health.SystemHealthManager;
+import android.platform.test.annotations.DisabledOnRavenwood;
 
 import androidx.test.ext.junit.runners.AndroidJUnit4;
 
@@ -38,6 +39,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 @RunWith(AndroidJUnit4.class)
+@DisabledOnRavenwood(blockedBy = SystemHealthManager.class)
 public class SystemHealthManagerUnitTest {
     @Mock
     private IBatteryStats mBatteryStats;
