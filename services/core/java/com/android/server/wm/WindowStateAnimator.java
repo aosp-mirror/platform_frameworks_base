@@ -417,26 +417,6 @@ class WindowStateAnimator {
         }
     }
 
-    void computeShownFrameLocked() {
-        if (mWin.mIsWallpaper && mService.mRoot.mWallpaperActionPending) {
-            return;
-        } else if (mWin.isDragResizeChanged()) {
-            // This window is awaiting a relayout because user just started (or ended)
-            // drag-resizing. The shown frame (which affects surface size and pos)
-            // should not be updated until we get next finished draw with the new surface.
-            // Otherwise one or two frames rendered with old settings would be displayed
-            // with new geometry.
-            return;
-        }
-
-        if (DEBUG) {
-            Slog.v(TAG, "computeShownFrameLocked: " + this
-                    + " not attached, mAlpha=" + mAlpha);
-        }
-
-        mShownAlpha = mAlpha;
-    }
-
     void prepareSurfaceLocked(SurfaceControl.Transaction t) {
         final WindowState w = mWin;
         if (!hasSurface()) {
@@ -450,7 +430,7 @@ class WindowStateAnimator {
             return;
         }
 
-        computeShownFrameLocked();
+        mShownAlpha = mAlpha;
 
         if (!w.isOnScreen()) {
             hide(t, "prepareSurfaceLocked");

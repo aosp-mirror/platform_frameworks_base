@@ -204,7 +204,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     // For seamless rotation cases this always stays true, as the windows complete their orientation
     // changes 1 by 1 without disturbing global state.
     boolean mOrientationChangeComplete = true;
-    boolean mWallpaperActionPending = false;
 
     private final Handler mHandler;
 
@@ -1097,10 +1096,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
                 doRequest = true;
             }
-        }
-
-        if ((bulkUpdateParams & SET_WALLPAPER_ACTION_PENDING) != 0) {
-            mWallpaperActionPending = true;
         }
 
         return doRequest;
