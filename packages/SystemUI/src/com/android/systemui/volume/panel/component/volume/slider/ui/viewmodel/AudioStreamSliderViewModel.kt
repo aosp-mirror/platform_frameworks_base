@@ -65,8 +65,6 @@ constructor(
 ) : SliderViewModel {
 
     private val volumeChanges = MutableStateFlow<Int?>(null)
-    private val streamsAffectedByRing =
-        setOf(AudioManager.STREAM_RING, AudioManager.STREAM_NOTIFICATION)
     private val audioStream = audioStreamWrapper.audioStream
     private val iconsByStream =
         mapOf(
@@ -175,9 +173,9 @@ constructor(
                     null
                 },
             a11yStateDescription =
-                if (volume == volumeRange.first) {
+                if (isMuted) {
                     context.getString(
-                        if (audioStream.value in streamsAffectedByRing) {
+                        if (isAffectedByRingerMode) {
                             if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
                                 R.string.volume_panel_hint_vibrate
                             } else {
@@ -226,8 +224,8 @@ constructor(
 
     private fun AudioStreamModel.getIcon(ringerMode: RingerMode): Icon {
         val iconRes =
-            if (isAffectedByMute && isMuted) {
-                if (audioStream.value in streamsAffectedByRing) {
+            if (isMuted) {
+                if (isAffectedByRingerMode) {
                     if (ringerMode.value == AudioManager.RINGER_MODE_VIBRATE) {
                         R.drawable.ic_volume_ringer_vibrate
                     } else {
