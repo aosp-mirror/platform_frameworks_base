@@ -52,7 +52,7 @@ class android.content.BroadcastReceiver keep
 class android.content.Context keep
     method <init> ()V keep
     method getSystemService (Ljava/lang/Class;)Ljava/lang/Object; keep
-class android.content.pm.PackageManager keep
+class android.content.pm.PackageManager
     method <init> ()V keep
 class android.text.ClipboardManager keep
     method <init> ()V keep
