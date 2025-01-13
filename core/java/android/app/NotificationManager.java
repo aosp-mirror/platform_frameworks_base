@@ -1211,7 +1211,8 @@ public class NotificationManager {
                     mNotificationChannelListCache.query(new NotificationChannelQuery(
                             mContext.getOpPackageName(),
                             mContext.getPackageName(),
-                            mContext.getUserId())));
+                            mContext.getUserId(),
+                            true)));  // create (default channel) if needed
         } else {
             INotificationManager service = service();
             try {
@@ -1239,7 +1240,8 @@ public class NotificationManager {
                     mNotificationChannelListCache.query(new NotificationChannelQuery(
                             mContext.getOpPackageName(),
                             mContext.getPackageName(),
-                            mContext.getUserId())));
+                            mContext.getUserId(),
+                            true)));  // create (default channel) if needed
         } else {
             INotificationManager service = service();
             try {
@@ -1263,9 +1265,10 @@ public class NotificationManager {
     public List<NotificationChannel> getNotificationChannels() {
         if (Flags.nmBinderPerfCacheChannels()) {
             return mNotificationChannelListCache.query(new NotificationChannelQuery(
-               mContext.getOpPackageName(),
-               mContext.getPackageName(),
-               mContext.getUserId()));
+                    mContext.getOpPackageName(),
+                    mContext.getPackageName(),
+                    mContext.getUserId(),
+                    false));
         } else {
             INotificationManager service = service();
             try {
@@ -1405,8 +1408,8 @@ public class NotificationManager {
                 public List<NotificationChannel> apply(NotificationChannelQuery query) {
                     INotificationManager service = service();
                     try {
-                        return service.getNotificationChannels(query.callingPkg,
-                                query.targetPkg, query.userId).getList();
+                        return service.getOrCreateNotificationChannels(query.callingPkg,
+                                query.targetPkg, query.userId, query.createIfNeeded).getList();
                     } catch (RemoteException e) {
                         throw e.rethrowFromSystemServer();
                     }
@@ -1434,7 +1437,8 @@ public class NotificationManager {
     private record NotificationChannelQuery(
             String callingPkg,
             String targetPkg,
-            int userId) {}
+            int userId,
+            boolean createIfNeeded) {}
 
     /**
      * @hide

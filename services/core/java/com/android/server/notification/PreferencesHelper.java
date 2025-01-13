@@ -1962,10 +1962,25 @@ public class PreferencesHelper implements RankingConfig {
     @Override
     public ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
             boolean includeDeleted, boolean includeBundles) {
+        return getNotificationChannels(pkg, uid, includeDeleted, includeBundles, false);
+    }
+
+    protected ParceledListSlice<NotificationChannel> getNotificationChannels(String pkg, int uid,
+            boolean includeDeleted, boolean includeBundles, boolean createPrefsIfNeeded) {
+        if (createPrefsIfNeeded && !android.app.Flags.nmBinderPerfCacheChannels()) {
+            Slog.wtf(TAG,
+                    "getNotificationChannels called with createPrefsIfNeeded=true and flag off");
+            createPrefsIfNeeded = false;
+        }
         Objects.requireNonNull(pkg);
         List<NotificationChannel> channels = new ArrayList<>();
         synchronized (mLock) {
-            PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
+            PackagePreferences r;
+            if (createPrefsIfNeeded) {
+                r = getOrCreatePackagePreferencesLocked(pkg, uid);
+            } else {
+                r = getPackagePreferencesLocked(pkg, uid);
+            }
             if (r == null) {
                 return ParceledListSlice.emptyList();
             }
