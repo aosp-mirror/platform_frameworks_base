@@ -104,6 +104,13 @@ flag {
 }
 
 flag {
+    name: "enable_create_any_bubble"
+    namespace: "multitasking"
+    description: "Enable UI affordances to create bubbles via launcher app icons"
+    bug: "385220199"
+}
+
+flag {
     name: "only_reuse_bubbled_task_when_launched_from_bubble"
     namespace: "multitasking"
     description: "Allow reusing bubbled tasks for new activities only when launching from bubbles"
