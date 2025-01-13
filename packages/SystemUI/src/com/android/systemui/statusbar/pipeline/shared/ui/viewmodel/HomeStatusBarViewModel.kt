@@ -80,6 +80,9 @@ import kotlinx.coroutines.flow.stateIn
  * so that it's all in one place and easily testable outside of the fragment.
  */
 interface HomeStatusBarViewModel {
+    /** Should the entire status bar be hidden? */
+    val shouldHomeStatusBarBeVisible: Flow<Boolean>
+
     /**
      * True if the device is currently transitioning from lockscreen to occluded and false
      * otherwise.
@@ -271,10 +274,12 @@ constructor(
             isHomeScreenStatusBarAllowedLegacy
         }
 
-    private val shouldHomeStatusBarBeVisible =
-        combine(isHomeStatusBarAllowed, keyguardInteractor.isSecureCameraActive) {
+    override val shouldHomeStatusBarBeVisible =
+        combine(
             isHomeStatusBarAllowed,
-            isSecureCameraActive ->
+            keyguardInteractor.isSecureCameraActive,
+            headsUpNotificationInteractor.statusBarHeadsUpStatus,
+        ) { isHomeStatusBarAllowed, isSecureCameraActive, headsUpState ->
             // When launching the camera over the lockscreen, the status icons would typically
             // become visible momentarily before animating out, since we're not yet aware that the
             // launching camera activity is fullscreen. Even once the activity finishes launching,
@@ -282,7 +287,7 @@ constructor(
             // tells us to hide them.
             // To ensure that this high-visibility animation is smooth, keep the icons hidden during
             // a camera launch. See b/257292822.
-            isHomeStatusBarAllowed && !isSecureCameraActive
+            headsUpState.isPinned || (isHomeStatusBarAllowed && !isSecureCameraActive)
         }
 
     private val isAnyChipVisible =

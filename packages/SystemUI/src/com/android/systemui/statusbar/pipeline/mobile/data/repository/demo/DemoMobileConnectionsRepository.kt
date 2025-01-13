@@ -166,7 +166,7 @@ constructor(
     private fun <K, V> Map<K, V>.reverse() = entries.associateBy({ it.value }) { it.key }
 
     // TODO(b/261029387): add a command for this value
-    override val defaultDataSubId = MutableStateFlow(INVALID_SUBSCRIPTION_ID)
+    override val defaultDataSubId: MutableStateFlow<Int?> = MutableStateFlow(null)
 
     // TODO(b/261029387): not yet supported
     override val mobileIsDefault: StateFlow<Boolean> = MutableStateFlow(true)
