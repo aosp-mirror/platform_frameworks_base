@@ -463,6 +463,13 @@ flag {
 }
 
 flag {
+    name: "enable_connected_displays_pip"
+    namespace: "lse_desktop_experience"
+    description: "Enables PiP features in connected displays."
+    bug: "362721131"
+}
+
+flag {
     name: "reparent_window_token_api"
     namespace: "lse_desktop_experience"
     description: "Allows to reparent a window token to a different display"
