@@ -274,8 +274,35 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_CLOSE_TASK = 122;
 
+    /**
+     * Track opening app launch via Intent in Desktop Windowing mode.
+     *
+     * <p> Tracking starts when when the RemoteTransition in Launcher starts animating the task
+     * launch. This is triggered when the user launches the app via Intent (it can be an opening
+     * a deeplink or clicking notification in notification drawer). </p>
+     */
+    public static final int CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_INTENT = 123;
+
+    /**
+     * Track opening app launch from app icon in Desktop Windowing mode.
+     *
+     * <p> Tracking starts when when the RemoteTransition in Launcher starts animating the task
+     * launch. The task can be started from Taskbar (pinned or recent apps) or All apps menu. </p>
+     */
+    public static final int CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_ICON = 124;
+
+    /**
+     * Track opening app launch from Alt-Tab keyboard switch in Desktop Windowing mode.
+     *
+     * <p> Tracking starts when when the RemoteTransition in Launcher starts animating the task
+     * launch. This is triggered when the user switches between apps using Alt-Tab to track task
+     * launching animation. </p>
+     */
+    public static final int CUJ_DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH = 125;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_CLOSE_TASK;
+    @VisibleForTesting static final int LAST_CUJ =
+            CUJ_DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH;
 
     /** @hide */
     @IntDef({
@@ -389,7 +416,10 @@ public class Cuj {
             CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW,
             CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU,
             CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS,
-            CUJ_DESKTOP_MODE_CLOSE_TASK
+            CUJ_DESKTOP_MODE_CLOSE_TASK,
+            CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_INTENT,
+            CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_ICON,
+            CUJ_DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -514,6 +544,9 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OVERVIEW_TASK_DISMISS;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_CLOSE_TASK] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_CLOSE_TASK;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_INTENT] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_APP_LAUNCH_FROM_INTENT;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_ICON] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_APP_LAUNCH_FROM_ICON;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH;
     }
 
     private Cuj() {
@@ -754,6 +787,12 @@ public class Cuj {
                 return "LAUNCHER_OVERVIEW_TASK_DISMISS";
             case CUJ_DESKTOP_MODE_CLOSE_TASK:
                 return "DESKTOP_MODE_CLOSE_TASK";
+            case CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_INTENT:
+                return "DESKTOP_MODE_APP_LAUNCH_FROM_INTENT";
+            case CUJ_DESKTOP_MODE_APP_LAUNCH_FROM_ICON:
+                return "DESKTOP_MODE_APP_LAUNCH_FROM_ICON";
+            case CUJ_DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH:
+                return "DESKTOP_MODE_KEYBOARD_QUICK_SWITCH_APP_LAUNCH";
         }
         return "UNKNOWN";
     }
