@@ -68,6 +68,17 @@ public class LocationFudger {
     private static final double MAX_LATITUDE =
             90.0 - (1.0 / APPROXIMATE_METERS_PER_DEGREE_AT_EQUATOR);
 
+    // The average edge length in km of an S2 cell, indexed by S2 levels 0 to
+    // 13. Level 13 is the highest level used for coarsening.
+    // This approximation assumes the S2 cells are squares.
+    // For density-based coarsening, we use the edge to set the accuracy of the
+    // coarsened location.
+    // The values are from http://s2geometry.io/resources/s2cell_statistics.html
+    // We take square root of the average area.
+    private static final float[] S2_CELL_AVG_EDGE_PER_LEVEL = new float[] {
+            9220.14f, 4610.07f, 2305.04f, 1152.52f, 576.26f, 288.13f, 144.06f,
+            72.03f, 36.02f, 20.79f, 9f, 5.05f, 2.25f, 1.13f, 0.57f};
+
     private final float mAccuracyM;
     private final Clock mClock;
     private final Random mRandom;
@@ -194,12 +205,14 @@ public class LocationFudger {
         // The new algorithm is applied if and only if (1) the flag is on, (2) the cache has been
         // set, and (3) the cache has successfully queried the provider for the default coarsening
         // value.
+        float accuracy = mAccuracyM;
         if (Flags.populationDensityProvider() && Flags.densityBasedCoarseLocations()
                 && cacheCopy != null) {
             if (cacheCopy.hasDefaultValue()) {
                 // New algorithm that snaps to the center of a S2 cell.
                 int level = cacheCopy.getCoarseningLevel(latitude, longitude);
                 coarsened = snapToCenterOfS2Cell(latitude, longitude, level);
+                accuracy = getS2CellApproximateEdge(level);
             } else {
                 // Try to fetch the default value. The answer won't come in time, but will be used
                 // for the next location to coarsen.
@@ -214,7 +227,7 @@ public class LocationFudger {
 
         coarse.setLatitude(coarsened[LAT_INDEX]);
         coarse.setLongitude(coarsened[LNG_INDEX]);
-        coarse.setAccuracy(Math.max(mAccuracyM, coarse.getAccuracy()));
+        coarse.setAccuracy(Math.max(accuracy, coarse.getAccuracy()));
 
         synchronized (this) {
             mCachedFineLocation = fine;
@@ -222,6 +235,19 @@ public class LocationFudger {
         }
 
         return coarse;
+    }
+
+    // Returns the average edge length in meters of an S2 cell at the given
+    // level. This is computed as if the S2 cell were a square. We do not need
+    // an exact value, only a rough approximation.
+    @VisibleForTesting
+    protected float getS2CellApproximateEdge(int level) {
+        if (level < 0) {
+            level = 0;
+        } else if (level >= S2_CELL_AVG_EDGE_PER_LEVEL.length) {
+            level = S2_CELL_AVG_EDGE_PER_LEVEL.length - 1;
+        }
+        return S2_CELL_AVG_EDGE_PER_LEVEL[level] * 1000;
     }
 
     // quantize location by snapping to a grid. this is the primary means of obfuscation. it
