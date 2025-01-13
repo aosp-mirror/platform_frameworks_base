@@ -16,6 +16,7 @@
 
 package com.android.systemui.shade.domain.interactor
 
+import android.util.Log
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
@@ -25,6 +26,7 @@ import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.util.kotlin.Utils.Companion.combineState
 import javax.inject.Inject
 import kotlin.coroutines.CoroutineContext
+import kotlin.time.Duration
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -32,7 +34,7 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.withTimeout
+import kotlinx.coroutines.withTimeoutOrNull
 
 /**
  * Wrapper around [ShadeInteractor] to facilitate expansion and collapse of Notifications and quick
@@ -56,6 +58,8 @@ interface ShadeExpandedStateInteractor {
         abstract suspend fun collapse(reason: String)
     }
 }
+
+private val EXPAND_COLLAPSE_TIMEOUT: Duration = 1.seconds
 
 @SysUISingleton
 class ShadeExpandedStateInteractorImpl
@@ -89,7 +93,14 @@ constructor(
 private suspend fun StateFlow<Float>.waitUntil(f: Float, coroutineContext: CoroutineContext) {
     // it's important to not do this in the main thread otherwise it will block any rendering.
     withContext(coroutineContext) {
-        withTimeout(1.seconds) { traceWaitForExpansion(expansion = f) { first { it == f } } }
+        withTimeoutOrNull(EXPAND_COLLAPSE_TIMEOUT) {
+            traceWaitForExpansion(expansion = f) { first { it == f } }
+        }
+            ?: Log.e(
+                "ShadeExpStateInteractor",
+                "Timed out after ${EXPAND_COLLAPSE_TIMEOUT.inWholeMilliseconds}ms while waiting " +
+                        "for expansion to match $f. Current one: $value",
+            )
     }
 }
 
