@@ -222,7 +222,7 @@ final class AppCompatUtils {
             return "SIZE_COMPAT_MODE";
         }
         final AppCompatAspectRatioPolicy aspectRatioPolicy = activityRecord.mAppCompatController
-                .getAppCompatAspectRatioPolicy();
+                .getAspectRatioPolicy();
         if (aspectRatioPolicy.isLetterboxedForFixedOrientationAndAspectRatio()) {
             return "FIXED_ORIENTATION";
         }

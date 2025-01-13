@@ -252,7 +252,7 @@ public class AppCompatUtilsTest extends WindowTestsBase {
         @Override
         void onPostActivityCreation(@NonNull ActivityRecord activity) {
             super.onPostActivityCreation(activity);
-            spyOn(activity.mAppCompatController.getAppCompatAspectRatioPolicy());
+            spyOn(activity.mAppCompatController.getAspectRatioPolicy());
         }
 
         @Override
@@ -272,13 +272,13 @@ public class AppCompatUtilsTest extends WindowTestsBase {
 
         void setIsLetterboxedForFixedOrientationAndAspectRatio(
                 boolean forFixedOrientationAndAspectRatio) {
-            when(activity().top().mAppCompatController.getAppCompatAspectRatioPolicy()
+            when(activity().top().mAppCompatController.getAspectRatioPolicy()
                     .isLetterboxedForFixedOrientationAndAspectRatio())
                         .thenReturn(forFixedOrientationAndAspectRatio);
         }
 
         void setIsLetterboxedForAspectRatioOnly(boolean forAspectRatio) {
-            when(activity().top().mAppCompatController.getAppCompatAspectRatioPolicy()
+            when(activity().top().mAppCompatController.getAspectRatioPolicy()
                     .isLetterboxedForAspectRatioOnly()).thenReturn(forAspectRatio);
         }
 

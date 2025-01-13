@@ -204,7 +204,7 @@ class AppCompatSizeCompatModePolicy {
         // activity will be displayed within them even if it is in size compat mode. They should be
         // saved here before resolved bounds are overridden below.
         final AppCompatAspectRatioPolicy aspectRatioPolicy = mActivityRecord.mAppCompatController
-                .getAppCompatAspectRatioPolicy();
+                .getAspectRatioPolicy();
         final boolean useResolvedBounds = aspectRatioPolicy.isAspectRatioApplied();
         final Rect containerBounds = useResolvedBounds
                 ? new Rect(resolvedBounds)
@@ -249,8 +249,7 @@ class AppCompatSizeCompatModePolicy {
         resolvedBounds.set(containingBounds);
         // The size of floating task is fixed (only swap), so the aspect ratio is already correct.
         if (!appCompatDisplayInsets.mIsFloating) {
-            mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
-                    .applyAspectRatioForLetterbox(resolvedBounds, containingAppBounds,
+            aspectRatioPolicy.applyAspectRatioForLetterbox(resolvedBounds, containingAppBounds,
                             containingBounds);
         }
 
@@ -364,7 +363,7 @@ class AppCompatSizeCompatModePolicy {
         }
 
         final Rect letterboxedContainerBounds = mActivityRecord.mAppCompatController
-                .getAppCompatAspectRatioPolicy().getLetterboxedContainerBounds();
+                .getAspectRatioPolicy().getLetterboxedContainerBounds();
 
         // The role of AppCompatDisplayInsets is like the override bounds.
         mAppCompatDisplayInsets =
@@ -446,7 +445,7 @@ class AppCompatSizeCompatModePolicy {
             }
         }
         final AppCompatAspectRatioPolicy aspectRatioPolicy = mActivityRecord.mAppCompatController
-                .getAppCompatAspectRatioPolicy();
+                .getAspectRatioPolicy();
         return !mActivityRecord.isResizeable() && (mActivityRecord.info.isFixedOrientation()
                 || aspectRatioPolicy.hasFixedAspectRatio())
                 // The configuration of non-standard type should be enforced by system.

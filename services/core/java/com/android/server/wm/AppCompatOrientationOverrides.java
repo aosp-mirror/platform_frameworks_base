@@ -144,7 +144,7 @@ class AppCompatOrientationOverrides {
         mOrientationOverridesState.updateOrientationRequestLoopState();
 
         return mOrientationOverridesState.shouldIgnoreRequestInLoop()
-                && !mActivityRecord.mAppCompatController.getAppCompatAspectRatioPolicy()
+                && !mActivityRecord.mAppCompatController.getAspectRatioPolicy()
                     .isLetterboxedForFixedOrientationAndAspectRatio();
     }
 

@@ -180,7 +180,7 @@ class AppCompatActivityRobot {
 
     void setLetterboxedForFixedOrientationAndAspectRatio(boolean enabled) {
         doReturn(enabled).when(mActivityStack.top().mAppCompatController
-                .getAppCompatAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
+                .getAspectRatioPolicy()).isLetterboxedForFixedOrientationAndAspectRatio();
     }
 
     void enableFullscreenCameraCompatTreatmentForTopActivity(boolean enabled) {
