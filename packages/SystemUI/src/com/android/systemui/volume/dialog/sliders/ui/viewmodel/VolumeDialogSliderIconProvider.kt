@@ -21,6 +21,7 @@ import android.content.Context
 import android.graphics.drawable.Drawable
 import android.media.AudioManager
 import androidx.annotation.DrawableRes
+import com.android.settingslib.R as SettingsR
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.RingerMode
@@ -30,8 +31,10 @@ import com.android.systemui.statusbar.policy.domain.model.ActiveZenModes
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 
+@SuppressLint("UseCompatLoadingForDrawables")
 class VolumeDialogSliderIconProvider
 @Inject
 constructor(
@@ -40,7 +43,30 @@ constructor(
     private val audioVolumeInteractor: AudioVolumeInteractor,
 ) {
 
-    @SuppressLint("UseCompatLoadingForDrawables")
+    fun getAudioSharingIcon(isMuted: Boolean): Flow<Drawable> {
+        return flow {
+            val iconRes =
+                if (isMuted) {
+                    R.drawable.ic_volume_media_bt_mute
+                } else {
+                    R.drawable.ic_volume_media_bt
+                }
+            emit(context.getDrawable(iconRes)!!)
+        }
+    }
+
+    fun getCastIcon(isMuted: Boolean): Flow<Drawable> {
+        return flow {
+            val iconRes =
+                if (isMuted) {
+                    SettingsR.drawable.ic_volume_remote_mute
+                } else {
+                    SettingsR.drawable.ic_volume_remote
+                }
+            emit(context.getDrawable(iconRes)!!)
+        }
+    }
+
     fun getStreamIcon(
         stream: Int,
         level: Int,
