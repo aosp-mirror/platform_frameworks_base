@@ -32,7 +32,6 @@ import android.companion.virtual.audio.VirtualAudioDevice;
 import android.companion.virtual.camera.VirtualCamera;
 import android.companion.virtual.camera.VirtualCameraConfig;
 import android.companion.virtual.sensor.VirtualSensor;
-import android.companion.virtualdevice.flags.Flags;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -473,14 +472,12 @@ public class VirtualDeviceInternal {
             @Nullable VirtualAudioDevice.AudioConfigurationChangeCallback callback) {
         if (mVirtualAudioDevice == null) {
             try {
-                Context context = mContext;
-                if (Flags.deviceAwareRecordAudioPermission()) {
-                    // When using a default policy for audio device-aware RECORD_AUDIO permission
-                    // should not take effect, thus register policies with the default context.
-                    if (mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM) {
-                        context = mContext.createDeviceContext(getDeviceId());
-                    }
-                }
+                // When using a default policy for audio, the device-aware RECORD_AUDIO permission
+                // should not take effect, thus register policies with the default context.
+                final Context context =
+                        mVirtualDevice.getDevicePolicy(POLICY_TYPE_AUDIO) == DEVICE_POLICY_CUSTOM
+                                ? mContext.createDeviceContext(getDeviceId())
+                                : mContext;
                 mVirtualAudioDevice = new VirtualAudioDevice(context, mVirtualDevice, display,
                         executor, callback, () -> mVirtualAudioDevice = null);
             } catch (RemoteException e) {

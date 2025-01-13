@@ -170,7 +170,6 @@ public final class VirtualDeviceManager {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
     public static final String PERSISTENT_DEVICE_ID_DEFAULT =
             "default:" + Context.DEVICE_ID_DEFAULT;
 
@@ -393,7 +392,6 @@ public final class VirtualDeviceManager {
      * @hide
      */
     // TODO(b/315481938): Link @see VirtualDevice#getPersistentDeviceId()
-    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
     @SystemApi
     @Nullable
     public CharSequence getDisplayNameForPersistentDeviceId(@NonNull String persistentDeviceId) {
@@ -416,7 +414,6 @@ public final class VirtualDeviceManager {
      * @hide
      */
     // TODO(b/315481938): Link @see VirtualDevice#getPersistentDeviceId()
-    @FlaggedApi(Flags.FLAG_PERSISTENT_DEVICE_ID_API)
     @SystemApi
     @NonNull
     public Set<String> getAllPersistentDeviceIds() {
@@ -780,7 +777,6 @@ public final class VirtualDeviceManager {
          * @see VirtualDeviceParams#POLICY_TYPE_RECENTS
          * @see VirtualDeviceParams#POLICY_TYPE_ACTIVITY
          */
-        @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
         public void setDevicePolicy(@VirtualDeviceParams.DynamicPolicyType int policyType,
                 @VirtualDeviceParams.DevicePolicy int devicePolicy) {
             mVirtualDeviceInternal.setDevicePolicy(policyType, devicePolicy);
@@ -802,7 +798,6 @@ public final class VirtualDeviceManager {
          * @see #removeActivityPolicyExemption(ComponentName)
          * @see #setDevicePolicy
          */
-        @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
         public void addActivityPolicyExemption(@NonNull ComponentName componentName) {
             addActivityPolicyExemption(new ActivityPolicyExemption.Builder()
                     .setComponentName(componentName)
@@ -825,7 +820,6 @@ public final class VirtualDeviceManager {
          * @see #addActivityPolicyExemption(ComponentName)
          * @see #setDevicePolicy
          */
-        @FlaggedApi(Flags.FLAG_DYNAMIC_POLICY)
         public void removeActivityPolicyExemption(@NonNull ComponentName componentName) {
             removeActivityPolicyExemption(new ActivityPolicyExemption.Builder()
                     .setComponentName(componentName)
@@ -1037,9 +1031,7 @@ public final class VirtualDeviceManager {
          * @param config the touchscreen configurations for the virtual stylus.
          */
         @NonNull
-        @FlaggedApi(Flags.FLAG_VIRTUAL_STYLUS)
-        public VirtualStylus createVirtualStylus(
-                @NonNull VirtualStylusConfig config) {
+        public VirtualStylus createVirtualStylus(@NonNull VirtualStylusConfig config) {
             return mVirtualDeviceInternal.createVirtualStylus(config);
         }
 

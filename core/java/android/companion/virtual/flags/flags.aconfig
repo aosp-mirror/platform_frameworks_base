@@ -19,14 +19,6 @@ flag {
 
 flag {
      namespace: "virtual_devices"
-     name: "device_aware_record_audio_permission"
-     description: "Enable device-aware RECORD_AUDIO permission"
-     bug: "291737188"
-     is_fixed_read_only: true
-}
-
-flag {
-     namespace: "virtual_devices"
      name: "media_projection_keyguard_restrictions"
      description: "Auto-stop MP when the device locks"
      bug: "348335290"
