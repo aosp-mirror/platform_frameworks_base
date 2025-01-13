@@ -32,7 +32,7 @@
         <activity
             android:name=".desktopmode.DesktopWallpaperActivity"
             android:excludeFromRecents="true"
-            android:launchMode="singleInstance"
+            android:launchMode="singleInstancePerTask"
             android:showForAllUsers="true"
             android:theme="@style/DesktopWallpaperTheme" />
 

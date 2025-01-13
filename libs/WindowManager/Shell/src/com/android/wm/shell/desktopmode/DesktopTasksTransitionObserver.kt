@@ -60,7 +60,9 @@ class DesktopTasksTransitionObserver(
     shellInit: ShellInit,
 ) : Transitions.TransitionObserver {
 
-    private var transitionToCloseWallpaper: IBinder? = null
+    data class CloseWallpaperTransition(val transition: IBinder, val displayId: Int)
+
+    private var transitionToCloseWallpaper: CloseWallpaperTransition? = null
     /* Pending PiP transition and its associated display id and task id. */
     private var pendingPipTransitionAndPipTask: Triple<IBinder, Int, Int>? = null
     private var currentProfileId: Int
@@ -248,9 +250,10 @@ class DesktopTasksTransitionObserver(
                 desktopRepository.getVisibleTaskCount(taskInfo.displayId) == 0 &&
                     change.mode == TRANSIT_CLOSE &&
                     taskInfo.windowingMode == WINDOWING_MODE_FREEFORM &&
-                    desktopWallpaperActivityTokenProvider.getToken() != null
+                    desktopWallpaperActivityTokenProvider.getToken(taskInfo.displayId) != null
             ) {
-                transitionToCloseWallpaper = transition
+                transitionToCloseWallpaper =
+                    CloseWallpaperTransition(transition, taskInfo.displayId)
                 currentProfileId = taskInfo.userId
             }
         }
@@ -265,25 +268,28 @@ class DesktopTasksTransitionObserver(
     }
 
     override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {
+        val lastSeenTransitionToCloseWallpaper = transitionToCloseWallpaper
         // TODO: b/332682201 Update repository state
-        if (transitionToCloseWallpaper == transition) {
+        if (lastSeenTransitionToCloseWallpaper?.transition == transition) {
             // TODO: b/362469671 - Handle merging the animation when desktop is also closing.
-            desktopWallpaperActivityTokenProvider.getToken()?.let { wallpaperActivityToken ->
-                if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
-                    transitions.startTransition(
-                        TRANSIT_TO_BACK,
-                        WindowContainerTransaction()
-                            .reorder(wallpaperActivityToken, /* onTop= */ false),
-                        null,
-                    )
-                } else {
-                    transitions.startTransition(
-                        TRANSIT_CLOSE,
-                        WindowContainerTransaction().removeTask(wallpaperActivityToken),
-                        null,
-                    )
+            desktopWallpaperActivityTokenProvider
+                .getToken(lastSeenTransitionToCloseWallpaper.displayId)
+                ?.let { wallpaperActivityToken ->
+                    if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
+                        transitions.startTransition(
+                            TRANSIT_TO_BACK,
+                            WindowContainerTransaction()
+                                .reorder(wallpaperActivityToken, /* onTop= */ false),
+                            null,
+                        )
+                    } else {
+                        transitions.startTransition(
+                            TRANSIT_CLOSE,
+                            WindowContainerTransaction().removeTask(wallpaperActivityToken),
+                            null,
+                        )
+                    }
                 }
-            }
             transitionToCloseWallpaper = null
         } else if (pendingPipTransitionAndPipTask?.first == transition) {
             val desktopRepository = desktopUserRepositories.getProfile(currentProfileId)

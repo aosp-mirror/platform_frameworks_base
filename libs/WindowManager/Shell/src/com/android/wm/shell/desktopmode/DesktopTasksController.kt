@@ -552,7 +552,11 @@ class DesktopTasksController(
         )
         val wct = WindowContainerTransaction()
         exitSplitIfApplicable(wct, taskInfo)
-        moveHomeTask(wct, toTop = true)
+        if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
+            moveHomeTask(wct, toTop = true, taskInfo.displayId)
+        } else {
+            moveHomeTask(wct, toTop = true)
+        }
         val taskIdToMinimize =
             bringDesktopAppsToFrontBeforeShowingNewTask(taskInfo.displayId, wct, taskInfo.taskId)
         addMoveToDesktopChanges(wct, taskInfo)
@@ -1309,11 +1313,15 @@ class DesktopTasksController(
     ): Int? {
         logV("bringDesktopAppsToFront, newTaskId=%d", newTaskIdInFront)
         // Move home to front, ensures that we go back home when all desktop windows are closed
-        moveHomeTask(wct, toTop = true)
+        if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
+            moveHomeTask(wct, toTop = true, displayId)
+        } else {
+            moveHomeTask(wct, toTop = true)
+        }
 
         // Currently, we only handle the desktop on the default display really.
         if (
-            (displayId == DEFAULT_DISPLAY || Flags.enableBugFixesForSecondaryDisplay()) &&
+            (displayId == DEFAULT_DISPLAY || Flags.enablePerDisplayDesktopWallpaperActivity()) &&
                 ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY.isTrue()
         ) {
             // Add translucent wallpaper activity to show the wallpaper underneath
@@ -1359,9 +1367,13 @@ class DesktopTasksController(
         return taskIdToMinimize
     }
 
-    private fun moveHomeTask(wct: WindowContainerTransaction, toTop: Boolean) {
+    private fun moveHomeTask(
+        wct: WindowContainerTransaction,
+        toTop: Boolean,
+        displayId: Int = DEFAULT_DISPLAY,
+    ) {
         shellTaskOrganizer
-            .getRunningTasks(context.displayId)
+            .getRunningTasks(displayId)
             .firstOrNull { task -> task.activityType == ACTIVITY_TYPE_HOME }
             ?.let { homeTask -> wct.reorder(homeTask.getToken(), /* onTop= */ toTop) }
     }
@@ -1370,12 +1382,19 @@ class DesktopTasksController(
         logV("addWallpaperActivity")
         if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
             val intent = Intent(context, DesktopWallpaperActivity::class.java)
+            if (
+                desktopWallpaperActivityTokenProvider.getToken(displayId) == null &&
+                    Flags.enablePerDisplayDesktopWallpaperActivity()
+            ) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+            }
             val options =
                 ActivityOptions.makeBasic().apply {
                     launchWindowingMode = WINDOWING_MODE_FULLSCREEN
                     pendingIntentBackgroundActivityStartMode =
                         ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-                    if (Flags.enableBugFixesForSecondaryDisplay()) {
+                    if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
                         launchDisplayId = displayId
                     }
                 }
@@ -1391,13 +1410,20 @@ class DesktopTasksController(
             val userHandle = UserHandle.of(userId)
             val userContext = context.createContextAsUser(userHandle, /* flags= */ 0)
             val intent = Intent(userContext, DesktopWallpaperActivity::class.java)
+            if (
+                desktopWallpaperActivityTokenProvider.getToken(displayId) == null &&
+                    Flags.enablePerDisplayDesktopWallpaperActivity()
+            ) {
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                intent.addFlags(Intent.FLAG_ACTIVITY_MULTIPLE_TASK)
+            }
             intent.putExtra(Intent.EXTRA_USER_HANDLE, userId)
             val options =
                 ActivityOptions.makeBasic().apply {
                     launchWindowingMode = WINDOWING_MODE_FULLSCREEN
                     pendingIntentBackgroundActivityStartMode =
                         ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
-                    if (Flags.enableBugFixesForSecondaryDisplay()) {
+                    if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
                         launchDisplayId = displayId
                     }
                 }
@@ -1414,8 +1440,8 @@ class DesktopTasksController(
         }
     }
 
-    private fun removeWallpaperActivity(wct: WindowContainerTransaction) {
-        desktopWallpaperActivityTokenProvider.getToken()?.let { token ->
+    private fun removeWallpaperActivity(wct: WindowContainerTransaction, displayId: Int) {
+        desktopWallpaperActivityTokenProvider.getToken(displayId)?.let { token ->
             logV("removeWallpaperActivity")
             if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
                 wct.reorder(token, /* onTop= */ false)
@@ -1440,9 +1466,6 @@ class DesktopTasksController(
             if (!taskRepository.isOnlyVisibleNonClosingTask(taskId, displayId)) {
                 return
             }
-            if (displayId != DEFAULT_DISPLAY) {
-                return
-            }
         } else if (
             Flags.enableDesktopWindowingPip() &&
                 taskRepository.isMinimizedPipPresentInDisplay(displayId) &&
@@ -1457,7 +1480,7 @@ class DesktopTasksController(
         desktopModeEnterExitTransitionListener?.onExitDesktopModeTransitionStarted(
             FULLSCREEN_ANIMATION_DURATION
         )
-        removeWallpaperActivity(wct)
+        removeWallpaperActivity(wct, displayId)
     }
 
     fun releaseVisualIndicator() {

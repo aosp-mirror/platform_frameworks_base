@@ -601,7 +601,32 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(
+        Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY,
+        Flags.FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY,
+    )
+    fun showDesktopApps_onSecondaryDisplay_desktopWallpaperEnabled_perDisplayWallpaperEnabled_shouldShowWallpaper() {
+        val homeTask = setUpHomeTask(SECOND_DISPLAY)
+        val task1 = setUpFreeformTask(SECOND_DISPLAY)
+        val task2 = setUpFreeformTask(SECOND_DISPLAY)
+        markTaskHidden(task1)
+        markTaskHidden(task2)
+
+        controller.showDesktopApps(SECOND_DISPLAY, RemoteTransition(TestRemoteTransition()))
+
+        val wct =
+            getLatestWct(type = TRANSIT_TO_FRONT, handlerClass = OneShotRemoteHandler::class.java)
+        assertThat(wct.hierarchyOps).hasSize(4)
+        // Expect order to be from bottom: home, wallpaperIntent, task1, task2
+        wct.assertReorderAt(index = 0, homeTask)
+        wct.assertPendingIntentAt(index = 1, desktopWallpaperIntent)
+        wct.assertReorderAt(index = 2, task1)
+        wct.assertReorderAt(index = 3, task2)
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+    @DisableFlags(Flags.FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY)
     fun showDesktopApps_onSecondaryDisplay_desktopWallpaperEnabled_shouldNotShowWallpaper() {
         val homeTask = setUpHomeTask(SECOND_DISPLAY)
         val task1 = setUpFreeformTask(SECOND_DISPLAY)
