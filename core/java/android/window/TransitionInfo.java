@@ -211,7 +211,7 @@ public final class TransitionInfo implements Parcelable {
             FLAG_CONFIG_AT_END,
             FLAG_IS_TASK_DISPLAY_AREA,
             FLAG_FIRST_CUSTOM
-    }, flag = true)
+    })
     public @interface ChangeFlags {}
 
     private final @TransitionType int mType;
