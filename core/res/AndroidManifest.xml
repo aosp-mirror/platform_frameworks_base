@@ -8804,22 +8804,6 @@
     <permission android:name="android.permission.RESERVED_FOR_TESTING_SIGNATURE"
                 android:protectionLevel="signature"/>
 
-    <!--
-        This permission allows the system to receive PACKAGE_CHANGED broadcasts when the component
-        state of a non-exported component has been changed.
-        <p>Not for use by third-party applications. </p>
-        <p>Protection level: internal
-        @hide
-    -->
-    <permission
-        android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
-        android:protectionLevel="internal"
-        android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
-
-    <uses-permission
-        android:name="android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED"
-        android:featureFlag="android.content.pm.reduce_broadcasts_for_component_state_changes"/>
-
     <!-- @SystemApi
         @FlaggedApi("android.media.tv.flags.kids_mode_tvdb_sharing")
         This permission is required when accessing information related to

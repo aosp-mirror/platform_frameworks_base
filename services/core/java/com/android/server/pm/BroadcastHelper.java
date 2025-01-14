@@ -86,8 +86,6 @@ import java.util.function.Supplier;
  */
 public final class BroadcastHelper {
     private static final boolean DEBUG_BROADCASTS = false;
-    private static final String PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED =
-            "android.permission.INTERNAL_RECEIVE_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED";
 
     private final UserManagerInternal mUmInternal;
     private final ActivityManagerInternal mAmInternal;
@@ -398,8 +396,7 @@ public final class BroadcastHelper {
                 sendPackageChangedBroadcastWithPermissions(packageName, dontKillApp,
                         notExportedComponentNames, packageUid, reason, userIds, instantUserIds,
                         broadcastAllowList, "android" /* targetPackageName */,
-                        new String[]{
-                                PERMISSION_PACKAGE_CHANGED_BROADCAST_ON_COMPONENT_STATE_CHANGED});
+                        null /* requiredPermissions */);
             }
 
             // Second, send the PACKAGE_CHANGED broadcast to the application itself.
