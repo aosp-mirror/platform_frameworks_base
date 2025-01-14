@@ -43,6 +43,7 @@ import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.combine
@@ -123,12 +124,20 @@ constructor(
      * explicitly wants a shortcut to DND). Please prefer using [modes] or [activeModes] in all
      * other scenarios.
      */
-    val dndMode: StateFlow<ZenMode?> by lazy {
-        ModesUi.assertInNewMode()
-        zenModeRepository.modes
-            .map { modes -> modes.singleOrNull { it.isManualDnd } }
-            .stateIn(scope = backgroundScope, started = SharingStarted.Eagerly, initialValue = null)
-    }
+    val dndMode: StateFlow<ZenMode?> =
+        if (ModesUi.isEnabled)
+            zenModeRepository.modes
+                .map { modes -> modes.singleOrNull { it.isManualDnd } }
+                .stateIn(
+                    scope = backgroundScope,
+                    started = SharingStarted.Eagerly,
+                    initialValue = null,
+                )
+        else MutableStateFlow<ZenMode?>(null)
+        get() {
+            ModesUi.assertInNewMode()
+            return field
+        }
 
     /** Flow returning the currently active mode(s), if any. */
     val activeModes: Flow<ActiveZenModes> =
