@@ -19,6 +19,7 @@ package com.android.systemui.statusbar.notification.row.icon
 import android.annotation.WorkerThread
 import android.app.ActivityManager
 import android.app.Flags
+import android.app.Flags.notificationsRedesignThemedAppIcons
 import android.content.Context
 import android.content.pm.PackageManager.NameNotFoundException
 import android.graphics.Color
@@ -29,6 +30,8 @@ import android.util.Log
 import com.android.internal.R
 import com.android.launcher3.icons.BaseIconFactory
 import com.android.launcher3.icons.BaseIconFactory.IconOptions
+import com.android.launcher3.icons.BitmapInfo
+import com.android.launcher3.icons.mono.MonoIconThemeController
 import com.android.launcher3.util.UserIconInfo
 import com.android.systemui.Dumpable
 import com.android.systemui.dagger.SysUISingleton
@@ -55,6 +58,7 @@ interface AppIconProvider {
         packageName: String,
         context: Context,
         withWorkProfileBadge: Boolean = false,
+        themed: Boolean = true,
     ): Drawable
 
     /**
@@ -74,6 +78,17 @@ constructor(@ShadeDisplayAware private val sysuiContext: Context, dumpManager: D
         dumpManager.registerNormalDumpable(TAG, this)
     }
 
+    private class NotificationIcons(context: Context?, fillResIconDpi: Int, iconBitmapSize: Int) :
+        BaseIconFactory(context, fillResIconDpi, iconBitmapSize) {
+
+        init {
+            if (notificationsRedesignThemedAppIcons()) {
+                // Initialize the controller so that we can support themed icons.
+                mThemeController = MonoIconThemeController()
+            }
+        }
+    }
+
     private val iconFactory: BaseIconFactory
         get() {
             val isLowRam = ActivityManager.isLowRamDeviceStatic()
@@ -83,7 +98,7 @@ constructor(@ShadeDisplayAware private val sysuiContext: Context, dumpManager: D
                     if (isLowRam) R.dimen.notification_small_icon_size_low_ram
                     else R.dimen.notification_small_icon_size
                 )
-            return BaseIconFactory(sysuiContext, res.configuration.densityDpi, iconSize)
+            return NotificationIcons(sysuiContext, res.configuration.densityDpi, iconSize)
         }
 
     private val cache = NotifCollectionCache<Drawable>()
@@ -92,12 +107,15 @@ constructor(@ShadeDisplayAware private val sysuiContext: Context, dumpManager: D
         packageName: String,
         context: Context,
         withWorkProfileBadge: Boolean,
+        themed: Boolean,
     ): Drawable {
         // Add a suffix to distinguish the app installed on the work profile, since the icon will
         // be different.
         val key = packageName + if (withWorkProfileBadge) WORK_SUFFIX else ""
 
-        return cache.getOrFetch(key) { fetchAppIcon(packageName, context, withWorkProfileBadge) }
+        return cache.getOrFetch(key) {
+            fetchAppIcon(packageName, context, withWorkProfileBadge, themed)
+        }
     }
 
     @WorkerThread
@@ -105,6 +123,7 @@ constructor(@ShadeDisplayAware private val sysuiContext: Context, dumpManager: D
         packageName: String,
         context: Context,
         withWorkProfileBadge: Boolean,
+        themed: Boolean,
     ): Drawable {
         val pm = context.packageManager
         val icon = pm.getApplicationInfo(packageName, 0).loadUnbadgedIcon(pm)
@@ -113,13 +132,14 @@ constructor(@ShadeDisplayAware private val sysuiContext: Context, dumpManager: D
             IconOptions().apply {
                 setUser(userIconInfo(context, withWorkProfileBadge))
                 setBitmapGenerationMode(BaseIconFactory.MODE_HARDWARE)
-                // This color is not used since we're not showing the themed icons. We're just
-                // setting it so that the icon factory doesn't try to extract colors from our bitmap
-                // (since it won't work, given it's a hardware bitmap).
+                // This color will not be used, but we're just setting it so that the icon factory
+                // doesn't try to extract colors from our bitmap (since it won't work, given it's a
+                // hardware bitmap).
                 setExtractedColor(Color.BLUE)
             }
         val badgedIcon = iconFactory.createBadgedIconBitmap(icon, options)
-        return badgedIcon.newIcon(sysuiContext)
+        val creationFlags = if (themed) BitmapInfo.FLAG_THEMED else 0
+        return badgedIcon.newIcon(sysuiContext, creationFlags)
     }
 
     private fun userIconInfo(context: Context, withWorkProfileBadge: Boolean): UserIconInfo {
@@ -165,6 +185,7 @@ class NoOpIconProvider : AppIconProvider {
         packageName: String,
         context: Context,
         withWorkProfileBadge: Boolean,
+        themed: Boolean,
     ): Drawable {
         Log.wtf(TAG, "NoOpIconProvider should not be used anywhere.")
         return ColorDrawable(Color.WHITE)

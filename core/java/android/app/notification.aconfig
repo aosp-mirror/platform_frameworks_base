@@ -13,6 +13,13 @@ flag {
 }
 
 flag {
+  name: "notifications_redesign_themed_app_icons"
+  namespace: "systemui"
+  description: "Notifications Redesign: Experiment to make app icons in notifications themed"
+  bug: "371174789"
+}
+
+flag {
   name: "notifications_redesign_templates"
   namespace: "systemui"
   description: "Notifications Redesign: Update notification templates"
