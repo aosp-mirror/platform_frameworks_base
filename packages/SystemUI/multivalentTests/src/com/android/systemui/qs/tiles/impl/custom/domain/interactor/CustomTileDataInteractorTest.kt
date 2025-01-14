@@ -40,6 +40,7 @@ import com.android.systemui.qs.tiles.impl.custom.customTileRepository
 import com.android.systemui.qs.tiles.impl.custom.customTileServiceInteractor
 import com.android.systemui.qs.tiles.impl.custom.customTileSpec
 import com.android.systemui.qs.tiles.impl.custom.data.entity.CustomTileDefaults
+import com.android.systemui.qs.tiles.impl.custom.qsTileLogger
 import com.android.systemui.testKosmos
 import com.android.systemui.user.data.repository.fakeUserRepository
 import com.android.systemui.user.data.repository.userRepository
@@ -72,6 +73,7 @@ class CustomTileDataInteractorTest : SysuiTestCase() {
                 packageUpdatesRepository = customTilePackagesUpdatesRepository,
                 userRepository = userRepository,
                 tileScope = testScope.backgroundScope,
+                qsTileLogger = kosmos.qsTileLogger,
             )
         }
 
@@ -152,7 +154,7 @@ class CustomTileDataInteractorTest : SysuiTestCase() {
                     collectLastValue(
                         underTest.tileData(
                             TEST_USER_1.userHandle,
-                            flowOf(DataUpdateTrigger.InitialRequest)
+                            flowOf(DataUpdateTrigger.InitialRequest),
                         )
                     )
                 runCurrent()
