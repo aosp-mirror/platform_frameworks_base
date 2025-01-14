@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.promoted
 
+import androidx.constraintlayout.widget.ConstraintSet
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.core.LogLevel.ERROR
 import com.android.systemui.log.core.LogLevel.INFO
@@ -65,6 +66,58 @@ constructor(@PromotedNotificationLog private val buffer: LogBuffer) {
             { "extraction succeeded: $str2 for $str1" },
         )
     }
+
+    fun logBinderBindSkipped(reason: String) {
+        buffer.log(
+            AOD_VIEW_BINDER_TAG,
+            INFO,
+            { str1 = reason },
+            { "binder skipped binding: $str1" },
+        )
+    }
+
+    fun logBinderAttached() {
+        buffer.log(AOD_VIEW_BINDER_TAG, INFO, "binder attached")
+    }
+
+    fun logBinderDetached() {
+        buffer.log(AOD_VIEW_BINDER_TAG, INFO, "binder detached")
+    }
+
+    fun logBinderBoundNotification() {
+        buffer.log(AOD_VIEW_BINDER_TAG, INFO, "binder bound notification")
+    }
+
+    fun logBinderUnboundNotification() {
+        buffer.log(AOD_VIEW_BINDER_TAG, INFO, "binder unbound notification")
+    }
+
+    fun logSectionAddedViews() {
+        buffer.log(AOD_SECTION_TAG, INFO, "section added views")
+    }
+
+    fun logSectionBoundData() {
+        buffer.log(AOD_SECTION_TAG, INFO, "section bound data")
+    }
+
+    fun logSectionAppliedConstraints() {
+        buffer.log(AOD_SECTION_TAG, INFO, "section applied constraints")
+    }
+
+    fun logSectionRemovedViews() {
+        buffer.log(AOD_SECTION_TAG, INFO, "section removed views")
+    }
 }
 
 private const val EXTRACTION_TAG = "PromotedNotificationContentExtractor"
+private const val AOD_VIEW_BINDER_TAG = "AODPromotedNotificationViewBinder"
+private const val AOD_SECTION_TAG = "AodPromotedNotificationSection"
+
+private fun visibilityToString(visibility: Int): String {
+    return when (visibility) {
+        ConstraintSet.VISIBLE -> "VISIBLE"
+        ConstraintSet.INVISIBLE -> "INVISIBLE"
+        ConstraintSet.GONE -> "GONE"
+        else -> "UNKNOWN($visibility)"
+    }
+}

@@ -29,6 +29,7 @@ import com.android.systemui.keyguard.ui.view.KeyguardRootView
 import com.android.systemui.keyguard.ui.view.layout.sections.AccessibilityActionsSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodBurnInSection
 import com.android.systemui.keyguard.ui.view.layout.sections.AodNotificationIconsSection
+import com.android.systemui.keyguard.ui.view.layout.sections.AodPromotedNotificationSection
 import com.android.systemui.keyguard.ui.view.layout.sections.ClockSection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultDeviceEntrySection
 import com.android.systemui.keyguard.ui.view.layout.sections.DefaultIndicationAreaSection
@@ -68,6 +69,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
     @Mock private lateinit var defaultStatusBarViewSection: DefaultStatusBarSection
     @Mock private lateinit var defaultNSSLSection: DefaultNotificationStackScrollLayoutSection
     @Mock private lateinit var splitShadeGuidelines: SplitShadeGuidelines
+    @Mock private lateinit var aodPromotedNotificationSection: AodPromotedNotificationSection
     @Mock private lateinit var aodNotificationIconsSection: AodNotificationIconsSection
     @Mock private lateinit var aodBurnInSection: AodBurnInSection
     @Mock private lateinit var clockSection: ClockSection
@@ -90,6 +92,7 @@ class DefaultKeyguardBlueprintTest : SysuiTestCase() {
                 defaultSettingsPopupMenuSection,
                 defaultStatusBarViewSection,
                 defaultNSSLSection,
+                aodPromotedNotificationSection,
                 aodNotificationIconsSection,
                 aodBurnInSection,
                 clockSection,

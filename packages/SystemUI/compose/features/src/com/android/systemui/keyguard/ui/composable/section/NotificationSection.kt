@@ -53,6 +53,8 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.AlwaysOnDi
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.NotificationIconContainerViewBinder
 import com.android.systemui.statusbar.notification.icon.ui.viewbinder.StatusBarIconViewBindingFailureTracker
 import com.android.systemui.statusbar.notification.icon.ui.viewmodel.NotificationIconContainerAlwaysOnDisplayViewModel
+import com.android.systemui.statusbar.notification.promoted.AODPromotedNotification
+import com.android.systemui.statusbar.notification.promoted.ui.viewmodel.AODPromotedNotificationViewModel
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView
 import com.android.systemui.statusbar.notification.stack.ui.view.SharedNotificationContainer
@@ -84,6 +86,7 @@ constructor(
     private val iconBindingFailureTracker: StatusBarIconViewBindingFailureTracker,
     private val nicAodViewModel: NotificationIconContainerAlwaysOnDisplayViewModel,
     private val nicAodIconViewStore: AlwaysOnDisplayNotificationIconViewStore,
+    private val aodPromotedNotificationViewModelFactory: AODPromotedNotificationViewModel.Factory,
     private val systemBarUtilsState: SystemBarUtilsState,
     private val clockInteractor: KeyguardClockInteractor,
 ) {
@@ -104,6 +107,11 @@ constructor(
             sharedNotificationContainer,
             sharedNotificationContainerViewModel,
         )
+    }
+
+    @Composable
+    fun AodPromotedNotification() {
+        AODPromotedNotification(aodPromotedNotificationViewModelFactory)
     }
 
     @Composable
