@@ -55,6 +55,7 @@ public final class TestUtils {
             throws Exception {
         URL url = new URL("https://" + host + ":" + port);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        connection.setInstanceFollowRedirects(false);
         connection.setSSLSocketFactory(context.getSocketFactory());
         try {
             connection.getInputStream();
@@ -68,6 +69,7 @@ public final class TestUtils {
             throws Exception {
         URL url = new URL("https://" + host + ":" + port);
         HttpsURLConnection connection = (HttpsURLConnection) url.openConnection();
+        connection.setInstanceFollowRedirects(false);
         connection.setSSLSocketFactory(context.getSocketFactory());
         connection.getInputStream();
     }
