@@ -20,4 +20,6 @@ package android.app.supervision;
  * @hide
  */
 interface ISupervisionAppService {
+    void onEnabled();
+    void onDisabled();
 }
