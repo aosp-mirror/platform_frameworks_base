@@ -49,8 +49,14 @@ interface NotificationScrollView {
     /** Max alpha for this view */
     fun setMaxAlpha(alpha: Float)
 
-    /** Set the clipping bounds used when drawing */
-    fun setScrimClippingShape(shape: ShadeScrimShape?)
+    /** Sets a clipping shape, which defines the drawable area of this view. */
+    fun setClippingShape(shape: ShadeScrimShape?)
+
+    /**
+     * Sets a clipping shape, which defines the non-drawable area of this view. The final drawing
+     * area is the difference of the clipping shape, and the negative clipping shape.
+     */
+    fun setNegativeClippingShape(shape: ShadeScrimShape?)
 
     /** set the y position in px of the top of the stack in this view's coordinates */
     fun setStackTop(stackTop: Float)

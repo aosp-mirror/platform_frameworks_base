@@ -38,12 +38,14 @@ class NotificationsPlaceholderViewModelTest : SysuiTestCase() {
     private val underTest by lazy { kosmos.notificationsPlaceholderViewModel }
 
     @Test
-    fun onBoundsChanged() =
+    fun onScrimBoundsChanged() =
         kosmos.testScope.runTest {
             val bounds = ShadeScrimBounds(left = 5f, top = 15f, right = 25f, bottom = 35f)
             underTest.onScrimBoundsChanged(bounds)
             val stackBounds by
-                collectLastValue(kosmos.notificationStackAppearanceInteractor.shadeScrimBounds)
+                collectLastValue(
+                    kosmos.notificationStackAppearanceInteractor.notificationShadeScrimBounds
+                )
             assertThat(stackBounds).isEqualTo(bounds)
         }
 }

@@ -74,7 +74,8 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
         testScope.runTest {
             val radius = MutableStateFlow(32)
             val leftOffset = MutableStateFlow(0)
-            val shape by collectLastValue(scrollViewModel.shadeScrimShape(radius, leftOffset))
+            val shape by
+                collectLastValue(scrollViewModel.notificationScrimShape(radius, leftOffset))
 
             // When: receive scrim bounds
             placeholderViewModel.onScrimBoundsChanged(
@@ -87,7 +88,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                         bounds =
                             ShadeScrimBounds(left = 0f, top = 200f, right = 100f, bottom = 550f),
                         topRadius = 32,
-                        bottomRadius = 0
+                        bottomRadius = 0,
                     )
                 )
 
@@ -104,7 +105,7 @@ class NotificationStackAppearanceIntegrationTest : SysuiTestCase() {
                         bounds =
                             ShadeScrimBounds(left = 10f, top = 200f, right = 100f, bottom = 550f),
                         topRadius = 24,
-                        bottomRadius = 0
+                        bottomRadius = 0,
                     )
                 )
 

@@ -25,6 +25,7 @@ import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.data.repository.shadeRepository
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimBounds
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimRounding
+import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrimShape
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
@@ -40,25 +41,36 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
     private val underTest = kosmos.notificationStackAppearanceInteractor
 
     @Test
-    fun stackBounds() =
+    fun stackNotificationScrimBounds() =
         testScope.runTest {
-            val stackBounds by collectLastValue(underTest.shadeScrimBounds)
+            val stackBounds by collectLastValue(underTest.notificationShadeScrimBounds)
 
-            val bounds1 =
-                ShadeScrimBounds(
-                    top = 100f,
-                    bottom = 200f,
-                )
-            underTest.setShadeScrimBounds(bounds1)
+            val bounds1 = ShadeScrimBounds(top = 100f, bottom = 200f)
+            underTest.setNotificationShadeScrimBounds(bounds1)
             assertThat(stackBounds).isEqualTo(bounds1)
 
-            val bounds2 =
-                ShadeScrimBounds(
-                    top = 200f,
-                    bottom = 300f,
-                )
-            underTest.setShadeScrimBounds(bounds2)
+            val bounds2 = ShadeScrimBounds(top = 200f, bottom = 300f)
+            underTest.setNotificationShadeScrimBounds(bounds2)
             assertThat(stackBounds).isEqualTo(bounds2)
+        }
+
+    @Test
+    fun setQsPanelShape() =
+        testScope.runTest {
+            val actual by collectLastValue(underTest.qsPanelShape)
+
+            val expected1 =
+                ShadeScrimShape(
+                    bounds = ShadeScrimBounds(top = 0f, bottom = 100f),
+                    topRadius = 0,
+                    bottomRadius = 10,
+                )
+            underTest.setQsPanelShape(expected1)
+            assertThat(actual).isEqualTo(expected1)
+
+            val expected2 = expected1.copy(topRadius = 10)
+            underTest.setQsPanelShape(expected2)
+            assertThat(expected2).isEqualTo(actual)
         }
 
     @Test
@@ -76,13 +88,17 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
         }
 
     @Test(expected = IllegalStateException::class)
-    fun setStackBounds_withImproperBounds_throwsException() =
+    fun stackNotificationScrimBounds_withImproperBounds_throwsException() =
         testScope.runTest {
-            underTest.setShadeScrimBounds(
-                ShadeScrimBounds(
-                    top = 100f,
-                    bottom = 99f,
-                )
+            underTest.setNotificationShadeScrimBounds(ShadeScrimBounds(top = 100f, bottom = 99f))
+        }
+
+    @Test(expected = IllegalStateException::class)
+    fun setQsPanelShape_withImproperBounds_throwsException() =
+        testScope.runTest {
+            val invalidBounds = ShadeScrimBounds(top = 0f, bottom = -10f)
+            underTest.setQsPanelShape(
+                ShadeScrimShape(bounds = invalidBounds, topRadius = 10, bottomRadius = 10)
             )
         }
 

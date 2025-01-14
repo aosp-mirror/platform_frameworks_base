@@ -59,7 +59,7 @@ class NotificationScrollViewModel
 @AssistedInject
 constructor(
     dumpManager: DumpManager,
-    stackAppearanceInteractor: NotificationStackAppearanceInteractor,
+    private val stackAppearanceInteractor: NotificationStackAppearanceInteractor,
     shadeInteractor: ShadeInteractor,
     private val remoteInputInteractor: RemoteInputInteractor,
     private val sceneInteractor: SceneInteractor,
@@ -221,7 +221,7 @@ constructor(
     private val shadeScrimClipping: Flow<ShadeScrimClipping?> =
         combine(
                 qsAllowsClipping,
-                stackAppearanceInteractor.shadeScrimBounds,
+                stackAppearanceInteractor.notificationShadeScrimBounds,
                 stackAppearanceInteractor.shadeScrimRounding,
             ) { qsAllowsClipping, bounds, rounding ->
                 bounds?.takeIf { qsAllowsClipping }?.let { ShadeScrimClipping(it, rounding) }
@@ -229,7 +229,7 @@ constructor(
             .distinctUntilChanged()
             .dumpWhileCollecting("stackClipping")
 
-    fun shadeScrimShape(
+    fun notificationScrimShape(
         cornerRadius: Flow<Int>,
         viewLeftOffset: Flow<Int>,
     ): Flow<ShadeScrimShape?> =
@@ -242,6 +242,12 @@ constructor(
                 )
             }
             .dumpWhileCollecting("shadeScrimShape")
+
+    fun qsScrimShape(viewLeftOffset: Flow<Int>): Flow<ShadeScrimShape?> =
+        combine(stackAppearanceInteractor.qsPanelShape, viewLeftOffset) { shape, leftOffset ->
+                shape?.let { it.copy(bounds = it.bounds.minus(leftOffset = leftOffset)) }
+            }
+            .dumpWhileCollecting("qsScrimShape")
 
     /**
      * Max alpha to apply directly to the view based on the compose placeholder.

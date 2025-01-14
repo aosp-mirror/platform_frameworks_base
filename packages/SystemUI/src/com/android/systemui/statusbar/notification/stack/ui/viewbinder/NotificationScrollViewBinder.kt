@@ -79,8 +79,17 @@ constructor(
 
             launch {
                 viewModel
-                    .shadeScrimShape(cornerRadius = scrimRadius, viewLeftOffset = viewLeftOffset)
-                    .collectTraced { view.setScrimClippingShape(it) }
+                    .notificationScrimShape(
+                        cornerRadius = scrimRadius,
+                        viewLeftOffset = viewLeftOffset,
+                    )
+                    .collectTraced { view.setClippingShape(it) }
+            }
+
+            launch {
+                viewModel.qsScrimShape(viewLeftOffset = viewLeftOffset).collectTraced {
+                    view.setNegativeClippingShape(it)
+                }
             }
 
             launch { viewModel.maxAlpha.collectTraced { view.setMaxAlpha(it) } }
