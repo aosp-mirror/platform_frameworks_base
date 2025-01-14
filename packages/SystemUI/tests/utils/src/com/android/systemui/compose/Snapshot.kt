@@ -17,18 +17,16 @@
 package com.android.systemui.compose
 
 import androidx.compose.runtime.snapshots.Snapshot
-import com.android.systemui.kosmos.runCurrent
 import kotlinx.coroutines.test.TestScope
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
-import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 
 /**
  * Runs the given test [block] in a [TestScope] that's set up such that the Compose snapshot state
- * is settled eagerly. This is the Compose equivalent to using an [UnconfinedTestDispatcher] or
- * using [runCurrent] a lot.
+ * writes are properly applied to the global snapshot. This is for instance necessary if your test
+ * is using `snapshotFlow {}` or any other mechanism that is observing the global snapshot.
  *
- * Note that this shouldn't be needed or used in a Compose test environment.
+ * Note that this isn't needed in a Compose test environment, e.g. if you use the
+ * `Compose(Content)TestRule`.
  */
 fun TestScope.runTestWithSnapshots(block: suspend TestScope.() -> Unit) {
     val handle = Snapshot.registerGlobalWriteObserver { Snapshot.sendApplyNotifications() }
