@@ -231,8 +231,13 @@ class SnapshotPersistQueue {
                             if (next.isReady(mUserManagerInternal)) {
                                 isReadyToWrite = true;
                                 next.onDequeuedLocked();
-                            } else {
+                            } else if (!mShutdown) {
                                 mWriteQueue.addLast(next);
+                            } else {
+                                // User manager is locked and device is shutting down, skip writing
+                                // this item.
+                                next.onDequeuedLocked();
+                                next = null;
                             }
                         }
                     }
