@@ -37,8 +37,9 @@ class FakeZenModeRepository : ZenModeRepository {
     override val globalZenMode: StateFlow<Int>
         get() = mutableZenMode.asStateFlow()
 
-    private val mutableModesFlow: MutableStateFlow<List<ZenMode>> =
+    private val mutableModesFlow: MutableStateFlow<List<ZenMode>> by lazy {
         MutableStateFlow(listOf(TestModeBuilder.MANUAL_DND))
+    }
     override val modes: Flow<List<ZenMode>>
         get() = mutableModesFlow.asStateFlow()
 
