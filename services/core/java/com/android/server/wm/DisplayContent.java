@@ -3262,7 +3262,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mWmService.mDisplayWindowSettings.setShouldShowSystemDecorsLocked(this, shouldShow);
 
         if (!shouldShow) {
-            clearAllTasksOnDisplay(null);
+            clearAllTasksOnDisplay(null /* clearTasksCallback */, false /* isRemovingDisplay */);
         }
     }
 
@@ -6468,12 +6468,15 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return mRemoving;
     }
 
-    void clearAllTasksOnDisplay(@Nullable Runnable clearTasksCallback) {
+    private void clearAllTasksOnDisplay(@Nullable Runnable clearTasksCallback,
+            boolean isRemovingDisplay) {
         Task lastReparentedRootTask;
         mRootWindowContainer.mTaskSupervisor.beginDeferResume();
         try {
             lastReparentedRootTask = reduceOnAllTaskDisplayAreas((taskDisplayArea, rootTask) -> {
-                final Task lastReparentedRootTaskFromArea = taskDisplayArea.remove();
+                final Task lastReparentedRootTaskFromArea = isRemovingDisplay
+                        ? taskDisplayArea.prepareForRemoval()
+                        : taskDisplayArea.setShouldKeepNoTask(true);
                 if (lastReparentedRootTaskFromArea != null) {
                     return lastReparentedRootTaskFromArea;
                 }
@@ -6503,7 +6506,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             if (mContentRecorder != null) {
                 mContentRecorder.stopRecording();
             }
-        });
+        }, true /* isRemovingDisplay */);
 
         releaseSelfIfNeeded();
         mDisplayPolicy.release();

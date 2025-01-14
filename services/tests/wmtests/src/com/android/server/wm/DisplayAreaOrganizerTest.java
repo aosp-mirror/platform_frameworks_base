@@ -223,9 +223,10 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
 
         mOrganizerController.deleteTaskDisplayArea(newTda.mRemoteToken.toWindowContainerToken());
 
-        verify(newTda).remove();
+        verify(newTda).prepareForRemoval();
         verify(newTda).removeImmediately();
         assertThat(newTda.mOrganizer).isNull();
+        assertThat(newTda.shouldKeepNoTask()).isTrue();
         assertThat(newTda.isRemoved()).isTrue();
 
         final TaskDisplayArea curTda = mDisplayContent.getItemFromDisplayAreas(
@@ -248,9 +249,10 @@ public class DisplayAreaOrganizerTest extends WindowTestsBase {
 
         mOrganizerController.unregisterOrganizer(organizer);
 
-        verify(newTda).remove();
+        verify(newTda).prepareForRemoval();
         verify(newTda).removeImmediately();
         assertThat(newTda.mOrganizer).isNull();
+        assertThat(newTda.shouldKeepNoTask()).isTrue();
         assertThat(newTda.isRemoved()).isTrue();
 
         final TaskDisplayArea curTda = mDisplayContent.getItemFromDisplayAreas(
