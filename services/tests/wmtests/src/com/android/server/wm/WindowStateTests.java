@@ -855,7 +855,6 @@ public class WindowStateTests extends WindowTestsBase {
         startingApp.updateResizingWindowIfNeeded();
         assertTrue(mWm.mResizingWindows.contains(startingApp));
         assertTrue(startingApp.isDrawn());
-        assertFalse(startingApp.getOrientationChanging());
 
         // Even if the display is frozen, invisible requested window should not be affected.
         mWm.startFreezingDisplay(0, 0, mDisplayContent);
@@ -873,7 +872,6 @@ public class WindowStateTests extends WindowTestsBase {
         win.updateResizingWindowIfNeeded();
 
         assertThat(mWm.mResizingWindows).contains(win);
-        assertTrue(win.getOrientationChanging());
 
         mWm.mResizingWindows.remove(win);
         spyOn(win.mClient);
@@ -892,7 +890,6 @@ public class WindowStateTests extends WindowTestsBase {
         // Even "resized" throws remote exception, it is still considered as reported. So the window
         // shouldn't be resized again (which may block unfreeze in real case).
         assertThat(mWm.mResizingWindows).doesNotContain(win);
-        assertFalse(win.getOrientationChanging());
     }
 
     @Test
