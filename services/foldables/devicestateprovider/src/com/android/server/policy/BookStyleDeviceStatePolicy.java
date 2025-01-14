@@ -114,7 +114,7 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
         mIsDualDisplayBlockingEnabled = featureFlags.enableDualDisplayBlocking();
 
         final DeviceStatePredicateWrapper[] configuration = createConfiguration(
-                leftAccelerometerSensor, rightAccelerometerSensor, closeAngleDegrees);
+                leftAccelerometerSensor, rightAccelerometerSensor, closeAngleDegrees, featureFlags);
 
         mProvider = new FoldableDeviceStateProvider(mContext, sensorManager, hingeAngleSensor,
                 hallSensor, displayManager, configuration);
@@ -122,10 +122,10 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
 
     private DeviceStatePredicateWrapper[] createConfiguration(
             @Nullable Sensor leftAccelerometerSensor, @Nullable Sensor rightAccelerometerSensor,
-            Integer closeAngleDegrees) {
+            Integer closeAngleDegrees, @NonNull FeatureFlags featureFlags) {
         return new DeviceStatePredicateWrapper[]{
                 createClosedConfiguration(leftAccelerometerSensor, rightAccelerometerSensor,
-                        closeAngleDegrees),
+                        closeAngleDegrees, featureFlags),
                 createConfig(getHalfOpenedDeviceState(), /* activeStatePredicate= */
                         (provider) -> {
                             final float hingeAngle = provider.getHingeAngle();
@@ -147,7 +147,7 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
 
     private DeviceStatePredicateWrapper createClosedConfiguration(
             @Nullable Sensor leftAccelerometerSensor, @Nullable Sensor rightAccelerometerSensor,
-            @Nullable Integer closeAngleDegrees) {
+            @Nullable Integer closeAngleDegrees, @NonNull FeatureFlags featureFlags) {
 
         if (closeAngleDegrees != null) {
             // Switch displays at closeAngleDegrees in both ways (folding and unfolding)
@@ -161,9 +161,12 @@ public class BookStyleDeviceStatePolicy extends DeviceStatePolicy implements
         if (mEnablePostureBasedClosedState) {
             // Use smart closed state predicate that will use different switch angles
             // based on the device posture (e.g. wedge mode, tent mode, reverse wedge mode)
-            return createConfig(getClosedDeviceState(), /* activeStatePredicate= */
-                    new BookStyleClosedStatePredicate(mContext, this, leftAccelerometerSensor,
-                            rightAccelerometerSensor, DEFAULT_STATE_TRANSITIONS));
+            final BookStyleClosedStatePredicate predicate = new BookStyleClosedStatePredicate(
+                    mContext, this, leftAccelerometerSensor, rightAccelerometerSensor,
+                    DEFAULT_STATE_TRANSITIONS, featureFlags);
+            return createConfig(getClosedDeviceState(),
+                    /* activeStatePredicate= */ predicate,
+                    /* initializer= */ predicate::init);
         }
 
         // Switch to the outer display only at 0 degrees but use TENT_MODE_SWITCH_ANGLE_DEGREES

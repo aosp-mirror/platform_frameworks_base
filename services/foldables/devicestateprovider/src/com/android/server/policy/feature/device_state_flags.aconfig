@@ -9,6 +9,16 @@ flag {
 }
 
 flag {
+    name: "force_foldables_tent_mode_with_screen_wakelock"
+    namespace: "windowing_frontend"
+    description: "Switching displays on a foldable device later if screen wakelock is present"
+    bug: "363174979"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "enable_foldables_posture_based_closed_state"
     namespace: "windowing_frontend"
     description: "Enables smarter closed device state state for foldable devices"
