@@ -24,7 +24,6 @@ import com.android.compose.animation.scene.StaticElementContentPicker
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
-import com.android.systemui.shade.shared.flag.DualShade
 
 /** [ElementContentPicker] implementation for the media carousel object. */
 object MediaContentPicker : StaticElementContentPicker {
@@ -46,8 +45,11 @@ object MediaContentPicker : StaticElementContentPicker {
         toContentZIndex: Float,
     ): ContentKey {
         return when {
-            shouldElevateMedia(transition) -> {
-                if (DualShade.isEnabled) Overlays.NotificationsShade else Scenes.Shade
+            transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade) -> {
+                Scenes.Shade
+            }
+            transition.isTransitioningBetween(Scenes.Lockscreen, Overlays.NotificationsShade) -> {
+                Overlays.NotificationsShade
             }
             transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Communal) -> {
                 Scenes.Lockscreen
@@ -71,14 +73,12 @@ object MediaContentPicker : StaticElementContentPicker {
             }
         }
     }
-
-    /** Returns true when the media should be laid on top of the rest for the given [transition]. */
-    fun shouldElevateMedia(transition: TransitionState.Transition): Boolean {
-        return transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade) ||
-            transition.isTransitioningBetween(Scenes.Lockscreen, Overlays.NotificationsShade)
-    }
 }
 
+/** Whether media should be laid on top of the rest for the given [transition]. */
 fun MediaContentPicker.shouldElevateMedia(layoutState: SceneTransitionLayoutState): Boolean {
-    return layoutState.currentTransition?.let { shouldElevateMedia(it) } ?: false
+    return layoutState.currentTransition?.let { transition ->
+        transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade) ||
+            transition.isTransitioningBetween(Scenes.Lockscreen, Overlays.NotificationsShade)
+    } ?: false
 }
