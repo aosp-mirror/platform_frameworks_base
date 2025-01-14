@@ -25,8 +25,9 @@ import android.media.IRemoteDisplayProvider;
 import android.media.RemoteDisplayState;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
 import android.os.IBinder.DeathRecipient;
+import android.os.Looper;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.util.Log;
 import android.util.Slog;
@@ -35,10 +36,8 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 
-/**
- * Maintains a connection to a particular remote display provider service.
- */
-final class RemoteDisplayProviderProxy implements ServiceConnection {
+/** Maintains a connection to a particular remote display provider service. */
+final class RemoteDisplayProviderProxy {
     private static final String TAG = "RemoteDisplayProvider";  // max. 23 chars
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -61,12 +60,15 @@ final class RemoteDisplayProviderProxy implements ServiceConnection {
     private RemoteDisplayState mDisplayState;
     private boolean mScheduledDisplayStateChangedCallback;
 
-    public RemoteDisplayProviderProxy(Context context, ComponentName componentName,
-            int userId) {
+    private final ServiceConnection mServiceConnection =
+            new ServiceConnectionImpl();
+
+    /* package */ RemoteDisplayProviderProxy(
+            Context context, ComponentName componentName, int userId, Looper looper) {
         mContext = context;
         mComponentName = componentName;
         mUserId = userId;
-        mHandler = new Handler();
+        mHandler = new Handler(looper);
     }
 
     public void dump(PrintWriter pw, String prefix) {
@@ -190,9 +192,12 @@ final class RemoteDisplayProviderProxy implements ServiceConnection {
             Intent service = new Intent(RemoteDisplayState.SERVICE_INTERFACE);
             service.setComponent(mComponentName);
             try {
-                mBound = mContext.bindServiceAsUser(service, this,
-                        Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
-                        new UserHandle(mUserId));
+                mBound =
+                        mContext.bindServiceAsUser(
+                                service,
+                                mServiceConnection,
+                                Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE,
+                                new UserHandle(mUserId));
                 if (!mBound && DEBUG) {
                     Slog.d(TAG, this + ": Bind failed");
                 }
@@ -212,12 +217,11 @@ final class RemoteDisplayProviderProxy implements ServiceConnection {
 
             mBound = false;
             disconnect();
-            mContext.unbindService(this);
+            mContext.unbindService(mServiceConnection);
         }
     }
 
-    @Override
-    public void onServiceConnected(ComponentName name, IBinder service) {
+    private void onServiceConnectedOnHandler(IBinder service) {
         if (DEBUG) {
             Slog.d(TAG, this + ": Connected");
         }
@@ -241,8 +245,7 @@ final class RemoteDisplayProviderProxy implements ServiceConnection {
         }
     }
 
-    @Override
-    public void onServiceDisconnected(ComponentName name) {
+    private void onServiceDisconnectedOnHandler() {
         if (DEBUG) {
             Slog.d(TAG, this + ": Service disconnected");
         }
@@ -320,6 +323,20 @@ final class RemoteDisplayProviderProxy implements ServiceConnection {
 
     public interface Callback {
         void onDisplayStateChanged(RemoteDisplayProviderProxy provider, RemoteDisplayState state);
+    }
+
+    // All methods in this class are called on the main thread.
+    private final class ServiceConnectionImpl implements ServiceConnection {
+
+        @Override
+        public void onServiceConnected(ComponentName name, IBinder service) {
+            mHandler.post(() -> onServiceConnectedOnHandler(service));
+        }
+
+        @Override
+        public void onServiceDisconnected(ComponentName name) {
+            mHandler.post(RemoteDisplayProviderProxy.this::onServiceDisconnectedOnHandler);
+        }
     }
 
     private final class Connection implements DeathRecipient {
