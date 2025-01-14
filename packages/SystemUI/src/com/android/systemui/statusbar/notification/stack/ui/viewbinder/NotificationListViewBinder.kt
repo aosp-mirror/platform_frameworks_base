@@ -99,6 +99,9 @@ constructor(
                 .inflate(R.layout.status_bar_notification_shelf, view, false) as NotificationShelf
         view.setShelf(shelf)
 
+        // Create viewModels once, and only when needed.
+        val footerViewModel by lazy { viewModel.footerViewModelFactory.create() }
+        val emptyShadeViewModel by lazy { viewModel.emptyShadeViewModelFactory.create() }
         view.repeatWhenAttached {
             lifecycleScope.launch {
                 if (SceneContainerFlag.isEnabled) {
@@ -109,12 +112,18 @@ constructor(
 
                 val hasNonClearableSilentNotifications: StateFlow<Boolean> =
                     viewModel.hasNonClearableSilentNotifications.stateIn(this)
-                launch { reinflateAndBindFooter(view, hasNonClearableSilentNotifications) }
+                launch {
+                    reinflateAndBindFooter(
+                        footerViewModel,
+                        view,
+                        hasNonClearableSilentNotifications,
+                    )
+                }
                 launch {
                     if (ModesEmptyShadeFix.isEnabled) {
-                        reinflateAndBindEmptyShade(view)
+                        reinflateAndBindEmptyShade(emptyShadeViewModel, view)
                     } else {
-                        bindEmptyShadeLegacy(viewModel.emptyShadeViewFactory.create(), view)
+                        bindEmptyShadeLegacy(emptyShadeViewModel, view)
                     }
                 }
                 launch { bindSilentHeaderClickListener(view, hasNonClearableSilentNotifications) }
@@ -134,31 +143,30 @@ constructor(
     }
 
     private suspend fun reinflateAndBindFooter(
+        footerViewModel: FooterViewModel,
         parentView: NotificationStackScrollLayout,
         hasNonClearableSilentNotifications: StateFlow<Boolean>,
     ) {
-        viewModel.footer.getOrNull()?.let { footerViewModel ->
-            // The footer needs to be re-inflated every time the theme or the font size changes.
-            configuration
-                .inflateLayout<FooterView>(
-                    if (NotifRedesignFooter.isEnabled) R.layout.notification_2025_footer
-                    else R.layout.status_bar_notification_footer,
-                    parentView,
-                    attachToRoot = false,
-                )
-                .flowOn(backgroundDispatcher)
-                .collectLatest { footerView: FooterView ->
-                    traceAsync("bind FooterView") {
-                        parentView.setFooterView(footerView)
-                        bindFooter(
-                            footerView,
-                            footerViewModel,
-                            parentView,
-                            hasNonClearableSilentNotifications,
-                        )
-                    }
+        // The footer needs to be re-inflated every time the theme or the font size changes.
+        configuration
+            .inflateLayout<FooterView>(
+                if (NotifRedesignFooter.isEnabled) R.layout.notification_2025_footer
+                else R.layout.status_bar_notification_footer,
+                parentView,
+                attachToRoot = false,
+            )
+            .flowOn(backgroundDispatcher)
+            .collectLatest { footerView: FooterView ->
+                traceAsync("bind FooterView") {
+                    parentView.setFooterView(footerView)
+                    bindFooter(
+                        footerView,
+                        footerViewModel,
+                        parentView,
+                        hasNonClearableSilentNotifications,
+                    )
                 }
-        }
+            }
     }
 
     /**
@@ -219,7 +227,10 @@ constructor(
         notificationActivityStarter.get().startHistoryIntent(view, /* showHistory= */ true)
     }
 
-    private suspend fun reinflateAndBindEmptyShade(parentView: NotificationStackScrollLayout) {
+    private suspend fun reinflateAndBindEmptyShade(
+        emptyShadeViewModel: EmptyShadeViewModel,
+        parentView: NotificationStackScrollLayout,
+    ) {
         ModesEmptyShadeFix.assertInNewMode()
         // The empty shade needs to be re-inflated every time the theme or the font size
         // changes.
@@ -233,7 +244,7 @@ constructor(
             .collectLatest { emptyShadeView: EmptyShadeView ->
                 traceAsync("bind EmptyShadeView") {
                     parentView.setEmptyShadeView(emptyShadeView)
-                    bindEmptyShade(emptyShadeView, viewModel.emptyShadeViewFactory.create())
+                    bindEmptyShade(emptyShadeView, emptyShadeViewModel)
                 }
             }
     }
