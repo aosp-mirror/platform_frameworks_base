@@ -12869,19 +12869,6 @@ public final class Settings {
          */
         public static final String DISABLE_SECURE_WINDOWS = "disable_secure_windows";
 
-        /**
-         * Controls if the adaptive authentication feature should be disabled, which
-         * will attempt to lock the device after a number of consecutive authentication
-         * attempts fail.
-         *
-         * This can only be disabled on debuggable builds. Set to 1 to disable or 0 for the
-         * normal behavior.
-         *
-         * @hide
-         */
-        public static final String DISABLE_ADAPTIVE_AUTH_LIMIT_LOCK =
-                "disable_adaptive_auth_limit_lock";
-
         /** @hide */
         public static final int PRIVATE_SPACE_AUTO_LOCK_ON_DEVICE_LOCK = 0;
         /** @hide */

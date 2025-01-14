@@ -42,10 +42,8 @@ import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.events.AuthenticationFailedInfo;
 import android.hardware.biometrics.events.AuthenticationSucceededInfo;
 import android.os.RemoteException;
-import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
 import android.platform.test.flag.junit.SetFlagsRule;
-import android.provider.Settings;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.core.app.ApplicationProvider;
@@ -153,8 +151,6 @@ public class AuthenticationPolicyServiceTest {
             when(mSecureLockDeviceService.disableSecureLockDevice(any()))
                     .thenReturn(ERROR_UNSUPPORTED);
         }
-
-        toggleAdaptiveAuthSettingsOverride(PRIMARY_USER_ID, false /* disable */);
     }
 
     @After
@@ -256,24 +252,8 @@ public class AuthenticationPolicyServiceTest {
     }
 
     @Test
-    @EnableFlags({android.security.Flags.FLAG_DISABLE_ADAPTIVE_AUTH_COUNTER_LOCK})
-    public void testReportAuthAttempt_biometricAuthFailed_multiple_deviceCurrentlyNotLocked_deviceLockEnabled()
+    public void testReportAuthAttempt_biometricAuthFailed_multiple_deviceCurrentlyNotLocked()
             throws RemoteException {
-        testReportAuthAttempt_biometricAuthFailed_multiple_deviceCurrentlyNotLocked(
-                true /* enabled */);
-    }
-
-    @Test
-    @EnableFlags({android.security.Flags.FLAG_DISABLE_ADAPTIVE_AUTH_COUNTER_LOCK})
-    public void testReportAuthAttempt_biometricAuthFailed_multiple_deviceCurrentlyNotLocked_deviceLockDisabled()
-            throws RemoteException {
-        toggleAdaptiveAuthSettingsOverride(PRIMARY_USER_ID, true /* disabled */);
-        testReportAuthAttempt_biometricAuthFailed_multiple_deviceCurrentlyNotLocked(
-                false /* enabled */);
-    }
-
-    private void testReportAuthAttempt_biometricAuthFailed_multiple_deviceCurrentlyNotLocked(
-            boolean enabled) throws RemoteException {
         // Device is currently not locked and Keyguard is not showing
         when(mKeyguardManager.isDeviceLocked(PRIMARY_USER_ID)).thenReturn(false);
         when(mKeyguardManager.isKeyguardLocked()).thenReturn(false);
@@ -284,11 +264,7 @@ public class AuthenticationPolicyServiceTest {
         }
         waitForAuthCompletion();
 
-        if (enabled) {
-            verifyLockDevice(PRIMARY_USER_ID);
-        } else {
-            verifyNotLockDevice(MAX_ALLOWED_FAILED_AUTH_ATTEMPTS, PRIMARY_USER_ID);
-        }
+        verifyLockDevice(PRIMARY_USER_ID);
     }
 
     @Test
@@ -324,24 +300,8 @@ public class AuthenticationPolicyServiceTest {
     }
 
     @Test
-    @EnableFlags({android.security.Flags.FLAG_DISABLE_ADAPTIVE_AUTH_COUNTER_LOCK})
-    public void testReportAuthAttempt_primaryAuthAndBiometricAuthFailed_primaryUser_deviceLockEnabled()
+    public void testReportAuthAttempt_primaryAuthAndBiometricAuthFailed_primaryUser()
             throws RemoteException {
-        testReportAuthAttempt_primaryAuthAndBiometricAuthFailed_primaryUser(
-                true /* enabled */);
-    }
-
-    @Test
-    @EnableFlags({android.security.Flags.FLAG_DISABLE_ADAPTIVE_AUTH_COUNTER_LOCK})
-    public void testReportAuthAttempt_primaryAuthAndBiometricAuthFailed_primaryUser_deviceLockDisabled()
-            throws RemoteException {
-        toggleAdaptiveAuthSettingsOverride(PRIMARY_USER_ID, true /* disabled */);
-        testReportAuthAttempt_primaryAuthAndBiometricAuthFailed_primaryUser(
-                false /* enabled */);
-    }
-
-    private void testReportAuthAttempt_primaryAuthAndBiometricAuthFailed_primaryUser(
-            boolean enabled) throws RemoteException {
         // Three failed primary auth attempts
         for (int i = 0; i < 3; i++) {
             mLockSettingsStateListenerCaptor.getValue().onAuthenticationFailed(PRIMARY_USER_ID);
@@ -353,11 +313,7 @@ public class AuthenticationPolicyServiceTest {
         }
         waitForAuthCompletion();
 
-        if (enabled) {
-            verifyLockDevice(PRIMARY_USER_ID);
-        } else {
-            verifyNotLockDevice(MAX_ALLOWED_FAILED_AUTH_ATTEMPTS, PRIMARY_USER_ID);
-        }
+        verifyLockDevice(PRIMARY_USER_ID);
     }
 
     @Test
@@ -410,13 +366,10 @@ public class AuthenticationPolicyServiceTest {
                 REASON_UNKNOWN, true, userId).build();
     }
 
+
     private AuthenticationFailedInfo authFailedInfo(int userId) {
         return new AuthenticationFailedInfo.Builder(BiometricSourceType.FINGERPRINT, REASON_UNKNOWN,
                 userId).build();
     }
 
-    private void toggleAdaptiveAuthSettingsOverride(int userId, boolean disable) {
-        Settings.Secure.putIntForUser(mContext.getContentResolver(),
-                Settings.Secure.DISABLE_ADAPTIVE_AUTH_LIMIT_LOCK, disable ? 1 : 0, userId);
-    }
 }
