@@ -159,15 +159,15 @@
 
     <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
      @hide @SystemApi -->
-    <public name="config_defaultOnDeviceIntelligenceService"></public>
+    <public name="config_defaultOnDeviceIntelligenceService" />
 
     <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
      @hide @SystemApi -->
-    <public name="config_defaultOnDeviceSandboxedInferenceService"></public>
+    <public name="config_defaultOnDeviceSandboxedInferenceService" />
 
     <!-- @FlaggedApi(android.app.ondeviceintelligence.flags.Flags.FLAG_ENABLE_ON_DEVICE_INTELLIGENCE_MODULE)
      @hide @SystemApi -->
-    <public name="config_defaultOnDeviceIntelligenceDeviceConfigNamespace"></public>
+    <public name="config_defaultOnDeviceIntelligenceDeviceConfigNamespace" />
 
   </staging-public-group>
 
