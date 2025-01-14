@@ -190,11 +190,8 @@ class CommunalUserActionsViewModelTest : SysuiTestCase() {
             lockDevice()
         }
 
-        if (shadeMode == ShadeMode.Dual) {
-            assertThat(DualShade.isEnabled).isTrue()
-        } else {
-            assertThat(DualShade.isEnabled).isFalse()
-            kosmos.fakeShadeRepository.setShadeLayoutWide(shadeMode == ShadeMode.Split)
+        if (shadeMode !is ShadeMode.Dual) {
+            kosmos.fakeShadeRepository.setShadeLayoutWide(shadeMode is ShadeMode.Split)
         }
         runCurrent()
     }
