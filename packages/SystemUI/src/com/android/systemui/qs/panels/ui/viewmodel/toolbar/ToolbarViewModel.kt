@@ -34,6 +34,7 @@ import com.android.systemui.qs.footer.ui.viewmodel.settingsButtonViewModel
 import com.android.systemui.qs.footer.ui.viewmodel.userSwitcherViewModel
 import com.android.systemui.res.R
 import com.android.systemui.shade.ShadeDisplayAware
+import com.android.systemui.shade.domain.interactor.ShadeModeInteractor
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
 import javax.inject.Provider
@@ -48,13 +49,24 @@ constructor(
     private val footerActionsInteractor: FooterActionsInteractor,
     private val globalActionsDialogLiteProvider: Provider<GlobalActionsDialogLite>,
     private val falsingInteractor: FalsingInteractor,
+    shadeModeInteractor: ShadeModeInteractor,
     @ShadeDisplayAware appContext: Context,
 ) : ExclusiveActivatable() {
     private val qsThemedContext =
         ContextThemeWrapper(appContext, R.style.Theme_SystemUI_QuickSettings)
     private val hydrator = Hydrator("ToolbarViewModel.hydrator")
 
-    val powerButtonViewModel = powerButtonViewModel(qsThemedContext, ::onPowerButtonClicked)
+    val powerButtonViewModel: FooterActionsButtonViewModel? by
+        hydrator.hydratedStateOf(
+            traceName = "powerButtonViewModel",
+            initialValue = null,
+            source =
+                powerButtonViewModel(
+                    qsThemedContext,
+                    ::onPowerButtonClicked,
+                    shadeModeInteractor.shadeMode,
+                ),
+        )
 
     val settingsButtonViewModel =
         settingsButtonViewModel(qsThemedContext, ::onSettingsButtonClicked)

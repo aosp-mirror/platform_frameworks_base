@@ -36,6 +36,7 @@ import com.android.systemui.qs.footer.FooterActionsTestUtils
 import com.android.systemui.qs.footer.domain.model.SecurityButtonConfig
 import com.android.systemui.res.R
 import com.android.systemui.security.data.model.SecurityModel
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.policy.FakeSecurityController
 import com.android.systemui.statusbar.policy.FakeUserInfoController
 import com.android.systemui.statusbar.policy.FakeUserInfoController.FakeInfo
@@ -45,6 +46,7 @@ import com.android.systemui.util.mockito.mock
 import com.android.systemui.util.mockito.nullable
 import com.android.systemui.util.settings.FakeGlobalSettings
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
@@ -57,6 +59,7 @@ import org.junit.runner.RunWith
 import org.mockito.Mockito.anyInt
 import org.mockito.Mockito.`when` as whenever
 
+@OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 @RunWithLooper
@@ -78,51 +81,45 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
     @Test
     fun settingsButton() = runTest {
-        val underTest = utils.footerActionsViewModel(showPowerButton = false)
+        val underTest =
+            utils.footerActionsViewModel(showPowerButton = false, shadeMode = ShadeMode.Single)
         val settings = underTest.settings
 
         assertThat(settings.icon)
             .isEqualTo(
                 Icon.Resource(
                     R.drawable.ic_settings,
-                    ContentDescription.Resource(R.string.accessibility_quick_settings_settings)
+                    ContentDescription.Resource(R.string.accessibility_quick_settings_settings),
                 )
             )
         assertThat(settings.backgroundColor).isEqualTo(R.attr.shadeInactive)
         assertThat(settings.iconTint)
-            .isEqualTo(
-                Utils.getColorAttrDefaultColor(
-                    themedContext,
-                    R.attr.onShadeInactiveVariant,
-                )
-            )
+            .isEqualTo(Utils.getColorAttrDefaultColor(themedContext, R.attr.onShadeInactiveVariant))
     }
 
     @Test
     fun powerButton() = runTest {
         // Without power button.
-        val underTestWithoutPower = utils.footerActionsViewModel(showPowerButton = false)
-        assertThat(underTestWithoutPower.power).isNull()
+        val underTestWithoutPower =
+            utils.footerActionsViewModel(showPowerButton = false, shadeMode = ShadeMode.Single)
+        val withoutPower by collectLastValue(underTestWithoutPower.power)
+        assertThat(withoutPower).isNull()
 
         // With power button.
-        val underTestWithPower = utils.footerActionsViewModel(showPowerButton = true)
-        val power = underTestWithPower.power
+        val underTestWithPower =
+            utils.footerActionsViewModel(showPowerButton = true, shadeMode = ShadeMode.Single)
+        val power by collectLastValue(underTestWithPower.power)
         assertThat(power).isNotNull()
-        assertThat(power!!.icon)
+        assertThat(checkNotNull(power).icon)
             .isEqualTo(
                 Icon.Resource(
                     android.R.drawable.ic_lock_power_off,
-                    ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu)
+                    ContentDescription.Resource(R.string.accessibility_quick_settings_power_menu),
                 )
             )
-        assertThat(power.backgroundColor).isEqualTo(R.attr.shadeActive)
-        assertThat(power.iconTint)
-            .isEqualTo(
-                Utils.getColorAttrDefaultColor(
-                    themedContext,
-                    R.attr.onShadeActive,
-                ),
-            )
+        assertThat(checkNotNull(power).backgroundColor).isEqualTo(R.attr.shadeActive)
+        assertThat(checkNotNull(power).iconTint)
+            .isEqualTo(Utils.getColorAttrDefaultColor(themedContext, R.attr.onShadeActive))
     }
 
     @Test
@@ -130,7 +127,6 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         val picture: Drawable = mock()
         val userInfoController = FakeUserInfoController(FakeInfo(picture = picture))
         val settings = FakeGlobalSettings(testDispatcher)
-        val userId = 42
         val userSwitcherControllerWrapper =
             MockUserSwitcherControllerWrapper(currentUserName = "foo")
 
@@ -144,6 +140,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
         val underTest =
             utils.footerActionsViewModel(
                 showPowerButton = false,
+                shadeMode = ShadeMode.Single,
                 footerActionsInteractor =
                     utils.footerActionsInteractor(
                         userSwitcherRepository =
@@ -152,8 +149,8 @@ class FooterActionsViewModelTest : SysuiTestCase() {
                                 userManager = userManager,
                                 userInfoController = userInfoController,
                                 userSwitcherController = userSwitcherControllerWrapper.controller,
-                            ),
-                    )
+                            )
+                    ),
             )
 
         // Collect the user switcher into currentUserSwitcher.
@@ -213,13 +210,12 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
         val underTest =
             utils.footerActionsViewModel(
+                shadeMode = ShadeMode.Single,
                 footerActionsInteractor =
                     utils.footerActionsInteractor(
                         qsSecurityFooterUtils = qsSecurityFooterUtils,
                         securityRepository =
-                            utils.securityRepository(
-                                securityController = securityController,
-                            ),
+                            utils.securityRepository(securityController = securityController),
                     ),
             )
 
@@ -261,10 +257,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
     fun foregroundServices() = runTest {
         val securityController = FakeSecurityController()
         val fgsManagerController =
-            FakeFgsManagerController(
-                showFooterDot = false,
-                numRunningPackages = 0,
-            )
+            FakeFgsManagerController(showFooterDot = false, numRunningPackages = 0)
         val qsSecurityFooterUtils = mock<QSSecurityFooterUtils>()
 
         // Mock QSSecurityFooter to map a SecurityModel into a SecurityButtonConfig using the
@@ -276,13 +269,11 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
         val underTest =
             utils.footerActionsViewModel(
+                shadeMode = ShadeMode.Single,
                 footerActionsInteractor =
                     utils.footerActionsInteractor(
                         qsSecurityFooterUtils = qsSecurityFooterUtils,
-                        securityRepository =
-                            utils.securityRepository(
-                                securityController,
-                            ),
+                        securityRepository = utils.securityRepository(securityController),
                         foregroundServicesRepository =
                             utils.foregroundServicesRepository(fgsManagerController),
                     ),
@@ -340,14 +331,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
         // Return a fake broadcastFlow that emits 3 fake events when collected.
         val broadcastFlow = flowOf(Unit, Unit, Unit)
-        whenever(
-                broadcastDispatcher.broadcastFlow(
-                    any(),
-                    nullable(),
-                    anyInt(),
-                    nullable(),
-                )
-            )
+        whenever(broadcastDispatcher.broadcastFlow(any(), nullable(), anyInt(), nullable()))
             .thenAnswer { broadcastFlow }
 
         // Increment nDialogRequests whenever a request to show the dialog is made by the
@@ -359,6 +343,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
         val underTest =
             utils.footerActionsViewModel(
+                shadeMode = ShadeMode.Single,
                 footerActionsInteractor =
                     utils.footerActionsInteractor(
                         qsSecurityFooterUtils = qsSecurityFooterUtils,
@@ -376,7 +361,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
     @Test
     fun alpha_inSplitShade_followsExpansion() {
-        val underTest = utils.footerActionsViewModel()
+        val underTest = utils.footerActionsViewModel(shadeMode = ShadeMode.Split)
 
         underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = true)
         assertThat(underTest.alpha.value).isEqualTo(0f)
@@ -396,7 +381,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
     @Test
     fun backgroundAlpha_inSplitShade_followsExpansion_with_0_15_delay() {
-        val underTest = utils.footerActionsViewModel()
+        val underTest = utils.footerActionsViewModel(shadeMode = ShadeMode.Split)
         val floatTolerance = 0.01f
 
         underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = true)
@@ -420,7 +405,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
     @Test
     fun alpha_inSingleShade_followsExpansion_with_0_9_delay() {
-        val underTest = utils.footerActionsViewModel()
+        val underTest = utils.footerActionsViewModel(shadeMode = ShadeMode.Single)
         val floatTolerance = 0.01f
 
         underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = false)
@@ -444,7 +429,7 @@ class FooterActionsViewModelTest : SysuiTestCase() {
 
     @Test
     fun backgroundAlpha_inSingleShade_always1() {
-        val underTest = utils.footerActionsViewModel()
+        val underTest = utils.footerActionsViewModel(shadeMode = ShadeMode.Single)
 
         underTest.onQuickSettingsExpansionChanged(0f, isInSplitShade = false)
         assertThat(underTest.backgroundAlpha.value).isEqualTo(1f)
