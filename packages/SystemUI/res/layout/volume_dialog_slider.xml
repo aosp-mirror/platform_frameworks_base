@@ -14,8 +14,8 @@
      limitations under the License.
 -->
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
+    android:layout_width="@dimen/volume_dialog_slider_width"
+    android:layout_height="match_parent"
     android:maxHeight="@dimen/volume_dialog_slider_height">
 
     <com.google.android.material.slider.Slider

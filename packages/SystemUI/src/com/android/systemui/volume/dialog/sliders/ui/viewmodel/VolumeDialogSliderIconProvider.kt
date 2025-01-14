@@ -82,10 +82,6 @@ constructor(
         ringerMode: RingerMode?,
     ): Int {
         val isStreamOffline = level == 0 || isMuted
-        when (ringerMode?.value) {
-            AudioManager.RINGER_MODE_VIBRATE -> return R.drawable.ic_volume_ringer_vibrate
-            AudioManager.RINGER_MODE_SILENT -> return R.drawable.ic_ring_volume_off
-        }
         if (isRoutedToBluetooth) {
             return if (stream == AudioManager.STREAM_VOICE_CALL) {
                 R.drawable.ic_volume_bt_sco
@@ -98,29 +94,39 @@ constructor(
             }
         }
 
+        val isLevelLow = level < (levelMax + levelMin) / 2
         return if (isStreamOffline) {
+            val ringerOfflineIcon =
+                when (ringerMode?.value) {
+                    AudioManager.RINGER_MODE_VIBRATE -> return R.drawable.ic_volume_ringer_vibrate
+                    AudioManager.RINGER_MODE_SILENT -> return R.drawable.ic_ring_volume_off
+                    else -> null
+                }
             when (stream) {
                 AudioManager.STREAM_MUSIC -> R.drawable.ic_volume_media_mute
-                AudioManager.STREAM_NOTIFICATION -> R.drawable.ic_volume_ringer_mute
+                AudioManager.STREAM_NOTIFICATION ->
+                    ringerOfflineIcon ?: R.drawable.ic_volume_ringer_mute
+                AudioManager.STREAM_RING -> ringerOfflineIcon ?: R.drawable.ic_volume_ringer_vibrate
                 AudioManager.STREAM_ALARM -> R.drawable.ic_volume_alarm_mute
                 AudioManager.STREAM_SYSTEM -> R.drawable.ic_volume_system_mute
                 else -> null
-            } ?: getIconForStream(stream)
-        } else {
-            if (level < (levelMax + levelMin) / 2) {
-                // This icon is different on TV
-                R.drawable.ic_volume_media_low
-            } else {
-                getIconForStream(stream)
             }
-        }
+        } else {
+            null
+        } ?: getIconForStream(stream = stream, isLevelLow = isLevelLow)
     }
 
     @DrawableRes
-    private fun getIconForStream(stream: Int): Int {
+    private fun getIconForStream(stream: Int, isLevelLow: Boolean): Int {
         return when (stream) {
             AudioManager.STREAM_ACCESSIBILITY -> R.drawable.ic_volume_accessibility
-            AudioManager.STREAM_MUSIC -> R.drawable.ic_volume_media
+            AudioManager.STREAM_MUSIC ->
+                if (isLevelLow) {
+                    // This icon is different on TV
+                    R.drawable.ic_volume_media_low
+                } else {
+                    R.drawable.ic_volume_media
+                }
             AudioManager.STREAM_RING -> R.drawable.ic_ring_volume
             AudioManager.STREAM_NOTIFICATION -> R.drawable.ic_volume_ringer
             AudioManager.STREAM_ALARM -> R.drawable.ic_alarm
@@ -135,7 +141,9 @@ constructor(
      * affect the [stream]
      */
     private fun ringerModeForStream(stream: Int): Flow<RingerMode?> {
-        return if (stream == AudioManager.STREAM_RING) {
+        return if (
+            stream == AudioManager.STREAM_RING || stream == AudioManager.STREAM_NOTIFICATION
+        ) {
             audioVolumeInteractor.ringerMode
         } else {
             flowOf(null)
