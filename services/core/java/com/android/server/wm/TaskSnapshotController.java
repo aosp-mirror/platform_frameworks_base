@@ -66,16 +66,19 @@ class TaskSnapshotController extends AbsAppSnapshotController<Task, TaskSnapshot
 
     TaskSnapshotController(WindowManagerService service, SnapshotPersistQueue persistQueue) {
         super(service);
-        mPersistInfoProvider = createPersistInfoProvider(service,
-                Environment::getDataSystemCeDirectory);
-        mPersister = new TaskSnapshotPersister(persistQueue, mPersistInfoProvider);
-
-        initialize(new TaskSnapshotCache(new AppSnapshotLoader(mPersistInfoProvider)));
         final boolean snapshotEnabled =
                 !service.mContext
                         .getResources()
                         .getBoolean(com.android.internal.R.bool.config_disableTaskSnapshots);
         setSnapshotEnabled(snapshotEnabled);
+        mPersistInfoProvider = createPersistInfoProvider(service,
+                Environment::getDataSystemCeDirectory);
+
+        mPersister = new TaskSnapshotPersister(
+                persistQueue,
+                mPersistInfoProvider,
+                shouldDisableSnapshots());
+        initialize(new TaskSnapshotCache(new AppSnapshotLoader(mPersistInfoProvider)));
     }
 
     static PersistInfoProvider createPersistInfoProvider(WindowManagerService service,

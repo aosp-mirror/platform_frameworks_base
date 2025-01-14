@@ -428,3 +428,12 @@ flag {
     bug: "384976265"
 }
 
+flag {
+    name: "check_disabled_snapshots_in_task_persister"
+    namespace: "windowing_frontend"
+    description: "Check for TaskSnapshots disabling in TaskSnapshotPersister."
+    bug: "387915176"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}

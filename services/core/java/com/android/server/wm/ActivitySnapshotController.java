@@ -100,19 +100,21 @@ class ActivitySnapshotController extends AbsAppSnapshotController<ActivityRecord
 
     ActivitySnapshotController(WindowManagerService service, SnapshotPersistQueue persistQueue) {
         super(service);
-        mSnapshotPersistQueue = persistQueue;
-        mPersistInfoProvider = createPersistInfoProvider(service,
-                Environment::getDataSystemCeDirectory);
-        mPersister = new TaskSnapshotPersister(persistQueue, mPersistInfoProvider);
-        mSnapshotLoader = new AppSnapshotLoader(mPersistInfoProvider);
-        initialize(new ActivitySnapshotCache());
-
         final boolean snapshotEnabled =
                 !service.mContext
                         .getResources()
                         .getBoolean(com.android.internal.R.bool.config_disableTaskSnapshots)
                 && !ActivityManager.isLowRamDeviceStatic(); // Don't support Android Go
         setSnapshotEnabled(snapshotEnabled);
+        mSnapshotPersistQueue = persistQueue;
+        mPersistInfoProvider = createPersistInfoProvider(service,
+                Environment::getDataSystemCeDirectory);
+        mPersister = new TaskSnapshotPersister(
+                persistQueue,
+                mPersistInfoProvider,
+                shouldDisableSnapshots());
+        mSnapshotLoader = new AppSnapshotLoader(mPersistInfoProvider);
+        initialize(new ActivitySnapshotCache());
     }
 
     @Override

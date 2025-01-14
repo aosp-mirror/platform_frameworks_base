@@ -113,7 +113,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         mSnapshotPersistQueue = new SnapshotPersistQueue();
         PersistInfoProvider provider =
                 TaskSnapshotController.createPersistInfoProvider(mWm, userId -> FILES_DIR);
-        mPersister = new TaskSnapshotPersister(mSnapshotPersistQueue, provider);
+        mPersister = new TaskSnapshotPersister(mSnapshotPersistQueue, provider, false);
         mLoader = new AppSnapshotLoader(provider);
         mSnapshotPersistQueue.start();
     }
