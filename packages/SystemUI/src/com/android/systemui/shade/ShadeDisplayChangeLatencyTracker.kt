@@ -95,7 +95,7 @@ constructor(
      */
     @Synchronized
     fun onShadeDisplayChanging(displayId: Int) {
-        previousJob?.cancel(CancellationException("New shade move in progress"))
+        previousJob?.cancel(CancellationException("New shade move in progress to $displayId"))
         previousJob = bgScope.launch { onShadeDisplayChangingAsync(displayId) }
     }
 
@@ -109,8 +109,8 @@ constructor(
             val reason =
                 when (e) {
                     is CancellationException ->
-                        "Shade move cancelled as a new move is being done " +
-                            "before the previous one finished."
+                        "Shade move to $displayId cancelled as a new move is being done " +
+                            "before the previous one finished. Message: ${e.message}"
 
                     else -> "Shade move cancelled."
                 }
