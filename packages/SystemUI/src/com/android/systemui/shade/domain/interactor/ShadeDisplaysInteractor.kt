@@ -91,8 +91,10 @@ constructor(
         try {
             withContext(mainThreadContext) {
                 traceReparenting {
-                    shadeDisplayChangeLatencyTracker.onShadeDisplayChanging(destinationId)
-                    collapseAndExpandShadeIfNeeded { reparentToDisplayId(id = destinationId) }
+                    collapseAndExpandShadeIfNeeded {
+                        shadeDisplayChangeLatencyTracker.onShadeDisplayChanging(destinationId)
+                        reparentToDisplayId(id = destinationId)
+                    }
                     checkContextDisplayMatchesExpected(destinationId)
                 }
             }
