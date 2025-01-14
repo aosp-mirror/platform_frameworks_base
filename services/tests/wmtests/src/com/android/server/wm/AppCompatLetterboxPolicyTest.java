@@ -374,7 +374,7 @@ public class AppCompatLetterboxPolicyTest extends WindowTestsBase {
 
         @NonNull
         private AppCompatLetterboxPolicy getAppCompatLetterboxPolicy() {
-            return activity().top().mAppCompatController.getAppCompatLetterboxPolicy();
+            return activity().top().mAppCompatController.getLetterboxPolicy();
         }
 
     }

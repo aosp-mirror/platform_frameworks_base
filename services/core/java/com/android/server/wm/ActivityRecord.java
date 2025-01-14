@@ -1811,12 +1811,11 @@ final class ActivityRecord extends WindowToken {
             }
         }
 
-        mAppCompatController.getAppCompatLetterboxPolicy()
-                .onMovedToDisplay(mDisplayContent.getDisplayId());
+        mAppCompatController.getLetterboxPolicy().onMovedToDisplay(mDisplayContent.getDisplayId());
     }
 
     void layoutLetterboxIfNeeded(WindowState winHint) {
-        mAppCompatController.getAppCompatLetterboxPolicy().start(winHint);
+        mAppCompatController.getLetterboxPolicy().start(winHint);
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
@@ -1824,22 +1823,22 @@ final class ActivityRecord extends WindowToken {
     }
 
     void updateLetterboxSurfaceIfNeeded(WindowState winHint, Transaction t) {
-        mAppCompatController.getAppCompatLetterboxPolicy()
+        mAppCompatController.getLetterboxPolicy()
                 .updateLetterboxSurfaceIfNeeded(winHint, t, getPendingTransaction());
     }
 
     void updateLetterboxSurfaceIfNeeded(WindowState winHint) {
-        mAppCompatController.getAppCompatLetterboxPolicy().updateLetterboxSurfaceIfNeeded(winHint);
+        mAppCompatController.getLetterboxPolicy().updateLetterboxSurfaceIfNeeded(winHint);
     }
 
     /** Gets the letterbox insets. The insets will be empty if there is no letterbox. */
     Rect getLetterboxInsets() {
-        return mAppCompatController.getAppCompatLetterboxPolicy().getLetterboxInsets();
+        return mAppCompatController.getLetterboxPolicy().getLetterboxInsets();
     }
 
     /** Gets the inner bounds of letterbox. The bounds will be empty if there is no letterbox. */
     void getLetterboxInnerBounds(Rect outBounds) {
-        mAppCompatController.getAppCompatLetterboxPolicy().getLetterboxInnerBounds(outBounds);
+        mAppCompatController.getLetterboxPolicy().getLetterboxInnerBounds(outBounds);
     }
 
     /**
@@ -1847,8 +1846,7 @@ final class ActivityRecord extends WindowToken {
      *     when the current activity is displayed.
      */
     boolean isFullyTransparentBarAllowed(Rect rect) {
-        return mAppCompatController.getAppCompatLetterboxPolicy()
-                .isFullyTransparentBarAllowed(rect);
+        return mAppCompatController.getLetterboxPolicy().isFullyTransparentBarAllowed(rect);
     }
 
     private static class Token extends Binder {
@@ -2820,8 +2818,7 @@ final class ActivityRecord extends WindowToken {
     }
 
     void removeStartingWindow() {
-        final AppCompatLetterboxPolicy letterboxPolicy = mAppCompatController
-                .getAppCompatLetterboxPolicy();
+        final AppCompatLetterboxPolicy letterboxPolicy = mAppCompatController.getLetterboxPolicy();
         boolean prevEligibleForLetterboxEducation =
                 letterboxPolicy.isEligibleForLetterboxEducation();
 
@@ -4448,7 +4445,7 @@ final class ActivityRecord extends WindowToken {
         mTaskSupervisor.getActivityMetricsLogger().notifyActivityRemoved(this);
         mTaskSupervisor.mStoppingActivities.remove(this);
 
-        mAppCompatController.getAppCompatLetterboxPolicy().stop();
+        mAppCompatController.getLetterboxPolicy().stop();
         mAppCompatController.getTransparentPolicy().stop();
 
         // Defer removal of this activity when either a child is animating, or app transition is on
@@ -7710,7 +7707,7 @@ final class ActivityRecord extends WindowToken {
             t.setLayer(mAnimationBoundsLayer, getLastLayer());
 
             if (mNeedsLetterboxedAnimation) {
-                final int cornerRadius = mAppCompatController.getAppCompatLetterboxPolicy()
+                final int cornerRadius = mAppCompatController.getLetterboxPolicy()
                         .getRoundedCornersRadius(findMainWindow());
 
                 final Rect letterboxInnerBounds = new Rect();
@@ -8296,8 +8293,7 @@ final class ActivityRecord extends WindowToken {
         final AppCompatAspectRatioPolicy aspectRatioPolicy =
                 mAppCompatController.getAspectRatioPolicy();
         aspectRatioPolicy.reset();
-        mAppCompatController.getAppCompatLetterboxPolicy()
-                .resetFixedOrientationLetterboxEligibility();
+        mAppCompatController.getLetterboxPolicy().resetFixedOrientationLetterboxEligibility();
         mResolveConfigHint.resolveTmpOverrides(mDisplayContent, newParentConfiguration,
                 isFixedRotationTransforming());
 
@@ -8738,7 +8734,7 @@ final class ActivityRecord extends WindowToken {
         // make it fit the available bounds by scaling down its bounds.
         final int forcedOrientation = getRequestedConfigurationOrientation();
         final boolean isEligibleForFixedOrientationLetterbox = mAppCompatController
-                .getAppCompatLetterboxPolicy()
+                .getLetterboxPolicy()
                 .resolveFixedOrientationLetterboxEligibility(forcedOrientation, parentOrientation);
 
         if (!isEligibleForFixedOrientationLetterbox && (forcedOrientation == ORIENTATION_UNDEFINED
