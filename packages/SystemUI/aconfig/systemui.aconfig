@@ -1957,3 +1957,13 @@ flag {
       purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+   name: "shade_launch_accessibility"
+   namespace: "systemui"
+   description: "Intercept accessibility focus events for the Shade during launch animations to avoid stray TalkBack events."
+   bug: "379222226"
+   metadata {
+        purpose: PURPOSE_BUGFIX
+   }
+}
