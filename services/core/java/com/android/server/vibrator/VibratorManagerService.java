@@ -79,6 +79,7 @@ import com.android.internal.app.IBatteryStats;
 import com.android.internal.util.DumpUtils;
 import com.android.server.SystemService;
 import com.android.server.pm.BackgroundUserSoundNotifier;
+import com.android.server.pm.UserManagerService;
 import com.android.server.vibrator.VibrationSession.CallerInfo;
 import com.android.server.vibrator.VibrationSession.DebugInfo;
 import com.android.server.vibrator.VibrationSession.Status;
@@ -200,7 +201,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
                             VibratorManagerService.this::shouldCancelOnScreenOffLocked,
                             Status.CANCELLED_BY_SCREEN_OFF);
                 }
-            } else if (android.multiuser.Flags.addUiForSoundsFromBackgroundUsers()
+            } else if (UserManagerService.shouldShowNotificationForBackgroundUserSounds()
                     && intent.getAction().equals(BackgroundUserSoundNotifier.ACTION_MUTE_SOUND)) {
                 synchronized (mLock) {
                     maybeClearCurrentAndNextSessionsLocked(
@@ -324,7 +325,7 @@ public class VibratorManagerService extends IVibratorManagerService.Stub {
 
         IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_SCREEN_OFF);
-        if (android.multiuser.Flags.addUiForSoundsFromBackgroundUsers()) {
+        if (UserManagerService.shouldShowNotificationForBackgroundUserSounds()) {
             filter.addAction(BackgroundUserSoundNotifier.ACTION_MUTE_SOUND);
         }
         context.registerReceiver(mIntentReceiver, filter, Context.RECEIVER_NOT_EXPORTED);

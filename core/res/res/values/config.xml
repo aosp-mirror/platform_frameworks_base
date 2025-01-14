@@ -3156,6 +3156,16 @@
          with admin privileges and admin privileges can be granted/revoked from existing users. -->
     <bool name="config_enableMultipleAdmins">false</bool>
 
+    <!-- Whether to start stopped users before their scheduled alarms. If set to true, users will be
+         started in background before the alarm time so that it can go off. If false, alarms of
+         stopped users will not go off and users will remain stopped. -->
+    <bool name="config_allowAlarmsOnStoppedUsers">true</bool>
+
+    <!-- Whether notification is shown to foreground user when alarm/timer goes off on background
+         user. If set to true, foreground user will receive a notification with ability to mute
+         sound or switch user. If false, system notification will not be shown. -->
+    <bool name="config_showNotificationForBackgroundUserAlarms">true</bool>
+
     <!-- Whether there is a communal profile which should always be running.
          Only relevant for Headless System User Mode (HSUM) devices. -->
     <bool name="config_omnipresentCommunalUser">false</bool>
