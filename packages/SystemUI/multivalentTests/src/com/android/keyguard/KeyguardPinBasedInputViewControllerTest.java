@@ -79,8 +79,6 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
     @Mock
     private LatencyTracker mLatencyTracker;
     @Mock
-    private LiftToActivateListener mLiftToactivateListener;
-    @Mock
     private EmergencyButtonController mEmergencyButtonController;
     private FalsingCollector mFalsingCollector = new FalsingCollectorFake();
     @Mock
@@ -122,7 +120,7 @@ public class KeyguardPinBasedInputViewControllerTest extends SysuiTestCase {
         mSetFlagsRule.enableFlags(com.android.systemui.Flags.FLAG_REVAMPED_BOUNCER_MESSAGES);
         mKeyguardPinViewController = new KeyguardPinBasedInputViewController(mPinBasedInputView,
                 mKeyguardUpdateMonitor, mSecurityMode, mLockPatternUtils, mKeyguardSecurityCallback,
-                mKeyguardMessageAreaControllerFactory, mLatencyTracker, mLiftToactivateListener,
+                mKeyguardMessageAreaControllerFactory, mLatencyTracker,
                 mEmergencyButtonController, mFalsingCollector, featureFlags,
                 mSelectedUserInteractor, keyguardKeyboardInteractor, mBouncerHapticPlayer,
                 mUserActivityNotifier) {

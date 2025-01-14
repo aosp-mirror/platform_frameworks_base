@@ -90,8 +90,6 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
 
     @Mock private lateinit var mLatencyTracker: LatencyTracker
 
-    @Mock private lateinit var liftToActivateListener: LiftToActivateListener
-
     @Mock private val mEmergencyButtonController: EmergencyButtonController? = null
     private val falsingCollector: FalsingCollector = FalsingCollectorFake()
     private val keyguardKeyboardInteractor = KeyguardKeyboardInteractor(FakeKeyboardRepository())
@@ -147,7 +145,6 @@ class KeyguardPinViewControllerTest : SysuiTestCase() {
             mKeyguardSecurityCallback,
             keyguardMessageAreaControllerFactory,
             mLatencyTracker,
-            liftToActivateListener,
             mEmergencyButtonController,
             falsingCollector,
             postureController,

@@ -34,7 +34,6 @@ import com.android.internal.util.LatencyTracker;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 import com.android.keyguard.domain.interactor.KeyguardKeyboardInteractor;
-import com.android.systemui.Flags;
 import com.android.systemui.bouncer.ui.helper.BouncerHapticPlayer;
 import com.android.systemui.classifier.FalsingCollector;
 import com.android.systemui.flags.FeatureFlags;
@@ -44,7 +43,6 @@ import com.android.systemui.user.domain.interactor.SelectedUserInteractor;
 public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinBasedInputView>
         extends KeyguardAbsKeyInputViewController<T> {
 
-    private final LiftToActivateListener mLiftToActivateListener;
     private final FalsingCollector mFalsingCollector;
     private final KeyguardKeyboardInteractor mKeyguardKeyboardInteractor;
     protected PasswordTextView mPasswordEntry;
@@ -73,7 +71,6 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
             KeyguardSecurityCallback keyguardSecurityCallback,
             KeyguardMessageAreaController.Factory messageAreaControllerFactory,
             LatencyTracker latencyTracker,
-            LiftToActivateListener liftToActivateListener,
             EmergencyButtonController emergencyButtonController,
             FalsingCollector falsingCollector,
             FeatureFlags featureFlags,
@@ -85,7 +82,6 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
                 messageAreaControllerFactory, latencyTracker, falsingCollector,
                 emergencyButtonController, featureFlags, selectedUserInteractor,
                 bouncerHapticPlayer, userActivityNotifier);
-        mLiftToActivateListener = liftToActivateListener;
         mFalsingCollector = falsingCollector;
         mKeyguardKeyboardInteractor = keyguardKeyboardInteractor;
         mPasswordEntry = mView.findViewById(mView.getPasswordTextViewId());
@@ -151,10 +147,6 @@ public abstract class KeyguardPinBasedInputViewController<T extends KeyguardPinB
                     verifyPasswordAndUnlock();
                 }
             });
-
-            if (!Flags.simPinTalkbackFixForDoubleSubmit()) {
-                okButton.setOnHoverListener(mLiftToActivateListener);
-            }
         }
         if (pinInputFieldStyledFocusState()) {
             collectFlow(mPasswordEntry, mKeyguardKeyboardInteractor.isAnyKeyboardConnected(),
