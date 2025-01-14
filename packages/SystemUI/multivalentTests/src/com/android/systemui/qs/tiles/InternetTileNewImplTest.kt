@@ -26,11 +26,9 @@ import android.testing.TestableLooper
 import android.testing.TestableLooper.RunWithLooper
 import androidx.test.filters.SmallTest
 import com.android.internal.logging.MetricsLogger
-import com.android.systemui.Flags
 import com.android.systemui.Flags.FLAG_SCENE_CONTAINER
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.classifier.FalsingManagerFake
-import com.android.systemui.flags.setFlagValue
 import com.android.systemui.keyguard.KeyguardWmStateRefactor
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.plugins.statusbar.StatusBarStateController
@@ -42,7 +40,6 @@ import com.android.systemui.qs.logging.QSLogger
 import com.android.systemui.qs.tiles.dialog.InternetDialogManager
 import com.android.systemui.qs.tiles.dialog.WifiStateWorker
 import com.android.systemui.res.R
-import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.statusbar.connectivity.AccessPointController
 import com.android.systemui.statusbar.notification.shared.NotificationThrottleHun
@@ -65,6 +62,7 @@ import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.TestScope
 import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
+import org.junit.After
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -150,8 +148,15 @@ class InternetTileNewImplTest(flags: FlagsParameterization) : SysuiTestCase() {
             )
 
         underTest.initialize()
+
         underTest.setListening(Object(), true)
 
+        looper.processAllMessages()
+    }
+
+    @After
+    fun tearDown() {
+        underTest.destroy()
         looper.processAllMessages()
     }
 
@@ -272,33 +277,37 @@ class InternetTileNewImplTest(flags: FlagsParameterization) : SysuiTestCase() {
         underTest.click(null)
         looper.processAllMessages()
 
-        verify(dialogManager, times(1)).create(
-            aboveStatusBar = true,
-            accessPointController.canConfigMobileData(),
-            accessPointController.canConfigWifi(),
-            null,
-        )
+        verify(dialogManager, times(1))
+            .create(
+                aboveStatusBar = true,
+                accessPointController.canConfigMobileData(),
+                accessPointController.canConfigWifi(),
+                null,
+            )
     }
 
     @Test
     @EnableFlags(
-        value = [
-            QsDetailedView.FLAG_NAME,
-            FLAG_SCENE_CONTAINER,
-            KeyguardWmStateRefactor.FLAG_NAME,
-            NotificationThrottleHun.FLAG_NAME,
-            DualShade.FLAG_NAME]
+        value =
+            [
+                QsDetailedView.FLAG_NAME,
+                FLAG_SCENE_CONTAINER,
+                KeyguardWmStateRefactor.FLAG_NAME,
+                NotificationThrottleHun.FLAG_NAME,
+                DualShade.FLAG_NAME,
+            ]
     )
     fun click_withQsDetailedViewEnabled() {
         underTest.click(null)
         looper.processAllMessages()
 
-        verify(dialogManager, times(0)).create(
-            aboveStatusBar = true,
-            accessPointController.canConfigMobileData(),
-            accessPointController.canConfigWifi(),
-            null,
-        )
+        verify(dialogManager, times(0))
+            .create(
+                aboveStatusBar = true,
+                accessPointController.canConfigMobileData(),
+                accessPointController.canConfigWifi(),
+                null,
+            )
     }
 
     companion object {
