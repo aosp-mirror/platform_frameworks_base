@@ -165,7 +165,7 @@ public abstract class NetworkMetricMonitor implements AutoCloseable {
         }
     }
 
-    /** Set the IpSecTransform that applied to the Network being monitored */
+    /** Set the IpSecTransform that is applied to the Network being monitored */
     public void setInboundTransform(@NonNull IpSecTransform inTransform) {
         setInboundTransformInternal(new IpSecTransformWrapper(inTransform));
     }
