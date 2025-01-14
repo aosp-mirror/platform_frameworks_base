@@ -155,6 +155,7 @@ public class SettingsToPropertiesMapper {
         "android_core_networking",
         "android_health_services",
         "android_sdk",
+        "android_kernel",
         "aoc",
         "app_widgets",
         "arc_next",
