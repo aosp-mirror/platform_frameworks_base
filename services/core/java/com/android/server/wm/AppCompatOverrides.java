@@ -39,7 +39,7 @@ public class AppCompatOverrides {
     @NonNull
     private final AppCompatReachabilityOverrides mReachabilityOverrides;
     @NonNull
-    private final AppCompatLetterboxOverrides mAppCompatLetterboxOverrides;
+    private final AppCompatLetterboxOverrides mLetterboxOverrides;
 
     AppCompatOverrides(@NonNull ActivityRecord activityRecord,
             @NonNull PackageManager packageManager,
@@ -59,7 +59,7 @@ public class AppCompatOverrides {
                 optPropBuilder);
         mResizeOverrides = new AppCompatResizeOverrides(activityRecord, packageManager,
                 optPropBuilder);
-        mAppCompatLetterboxOverrides = new AppCompatLetterboxOverrides(activityRecord,
+        mLetterboxOverrides = new AppCompatLetterboxOverrides(activityRecord,
                 appCompatConfiguration);
     }
 
@@ -94,7 +94,7 @@ public class AppCompatOverrides {
     }
 
     @NonNull
-    AppCompatLetterboxOverrides getAppCompatLetterboxOverrides() {
-        return mAppCompatLetterboxOverrides;
+    AppCompatLetterboxOverrides getLetterboxOverrides() {
+        return mLetterboxOverrides;
     }
 }

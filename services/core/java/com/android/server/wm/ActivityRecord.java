@@ -1820,8 +1820,7 @@ final class ActivityRecord extends WindowToken {
     }
 
     boolean hasWallpaperBackgroundForLetterbox() {
-        return mAppCompatController.getAppCompatLetterboxOverrides()
-                .hasWallpaperBackgroundForLetterbox();
+        return mAppCompatController.getLetterboxOverrides().hasWallpaperBackgroundForLetterbox();
     }
 
     void updateLetterboxSurfaceIfNeeded(WindowState winHint, Transaction t) {
