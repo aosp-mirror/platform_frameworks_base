@@ -38,6 +38,7 @@ import com.android.internal.os.CpuScalingPolicies;
 import com.android.internal.os.MonotonicClock;
 import com.android.internal.os.PowerProfile;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.power.optimization.Flags;
 import com.android.server.power.stats.BatteryStatsImpl.BatteryStatsSession;
 
 import java.io.PrintWriter;
@@ -351,7 +352,7 @@ public class BatteryUsageStatsProvider {
         accumulatedStats.endMonotonicTime = endMonotonicTime;
 
         accumulatedStats.builder.setStatsEndTimestamp(endWallClockTime);
-        accumulatedStats.builder.setStatsDuration(endWallClockTime - startMonotonicTime);
+        accumulatedStats.builder.setStatsDuration(endMonotonicTime - startMonotonicTime);
 
         mPowerAttributor.estimatePowerConsumption(accumulatedStats.builder, session.getHistory(),
                 startMonotonicTime, endMonotonicTime);
@@ -403,7 +404,10 @@ public class BatteryUsageStatsProvider {
         }
         if ((query.getFlags()
                 & BatteryUsageStatsQuery.FLAG_BATTERY_USAGE_STATS_INCLUDE_HISTORY) != 0) {
-            batteryUsageStatsBuilder.setBatteryHistory(session.getHistory().copy());
+            batteryUsageStatsBuilder.setBatteryHistory(session.getHistory().copy(),
+                    Flags.extendedBatteryHistoryContinuousCollectionEnabled()
+                            ? query.getPreferredHistoryDurationMs()
+                            : Long.MAX_VALUE);
         }
 
         mPowerAttributor.estimatePowerConsumption(batteryUsageStatsBuilder, session.getHistory(),

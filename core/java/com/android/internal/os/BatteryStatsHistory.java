@@ -84,7 +84,7 @@ public class BatteryStatsHistory {
     private static final String TAG = "BatteryStatsHistory";
 
     // Current on-disk Parcel version. Must be updated when the format of the parcelable changes
-    private static final int VERSION = 211;
+    private static final int VERSION = 212;
 
     private static final String HISTORY_DIR = "battery-history";
     private static final String FILE_SUFFIX = ".bh";
@@ -211,6 +211,8 @@ public class BatteryStatsHistory {
     private final MonotonicClock mMonotonicClock;
     // Monotonic time when we started writing to the history buffer
     private long mHistoryBufferStartTime;
+    // Monotonic time when the last event was written to the history buffer
+    private long mHistoryMonotonicEndTime;
     // Monotonically increasing size of written history
     private long mMonotonicHistorySize;
     private final ArraySet<PowerStats.Descriptor> mWrittenPowerStatsDescriptors = new ArraySet<>();
@@ -423,13 +425,22 @@ public class BatteryStatsHistory {
             return file;
         }
 
-        void writeToParcel(Parcel out, boolean useBlobs) {
+        void writeToParcel(Parcel out, boolean useBlobs,
+                long preferredEarliestIncludedTimestampMs) {
             Trace.traceBegin(TRACE_TAG_SYSTEM_SERVER, "BatteryStatsHistory.writeToParcel");
             lock();
             try {
                 final long start = SystemClock.uptimeMillis();
-                out.writeInt(mHistoryFiles.size() - 1);
                 for (int i = 0; i < mHistoryFiles.size() - 1; i++) {
+                    long monotonicEndTime = Long.MAX_VALUE;
+                    if (i < mHistoryFiles.size() - 1) {
+                        monotonicEndTime = mHistoryFiles.get(i + 1).monotonicTimeMs;
+                    }
+
+                    if (monotonicEndTime < preferredEarliestIncludedTimestampMs) {
+                        continue;
+                    }
+
                     AtomicFile file = mHistoryFiles.get(i).atomicFile;
                     byte[] raw = new byte[0];
                     try {
@@ -437,6 +448,8 @@ public class BatteryStatsHistory {
                     } catch (Exception e) {
                         Slog.e(TAG, "Error reading file " + file.getBaseFile().getPath(), e);
                     }
+
+                    out.writeBoolean(true);
                     if (useBlobs) {
                         out.writeBlob(raw);
                     } else {
@@ -444,6 +457,7 @@ public class BatteryStatsHistory {
                         out.writeByteArray(raw);
                     }
                 }
+                out.writeBoolean(false);
                 if (DEBUG) {
                     Slog.d(TAG,
                             "writeToParcel duration ms:" + (SystemClock.uptimeMillis() - start));
@@ -634,6 +648,7 @@ public class BatteryStatsHistory {
         mWritableHistory = writableHistory;
         if (mWritableHistory != null) {
             mMutable = false;
+            mHistoryMonotonicEndTime = mWritableHistory.mHistoryMonotonicEndTime;
         }
 
         if (historyBuffer != null) {
@@ -937,6 +952,8 @@ public class BatteryStatsHistory {
                 }
                 // skip monotonic time field.
                 p.readLong();
+                // skip monotonic end time field
+                p.readLong();
                 // skip monotonic size field
                 p.readLong();
 
@@ -996,6 +1013,8 @@ public class BatteryStatsHistory {
             }
             // skip monotonic time field.
             out.readLong();
+            // skip monotonic end time field
+            out.readLong();
             // skip monotonic size field
             out.readLong();
             return true;
@@ -1024,6 +1043,7 @@ public class BatteryStatsHistory {
         p.setDataPosition(0);
         p.readInt();        // Skip the version field
         long monotonicTime = p.readLong();
+        p.readLong();       // Skip monotonic end time field
         p.readLong();       // Skip monotonic size field
         p.setDataPosition(pos);
         return monotonicTime;
@@ -1086,7 +1106,10 @@ public class BatteryStatsHistory {
     public void writeToParcel(Parcel out) {
         synchronized (this) {
             writeHistoryBuffer(out);
-            writeToParcel(out, false /* useBlobs */);
+            /* useBlobs */
+            if (mHistoryDir != null) {
+                mHistoryDir.writeToParcel(out, false /* useBlobs */, 0);
+            }
         }
     }
 
@@ -1096,16 +1119,13 @@ public class BatteryStatsHistory {
      *
      * @param out the output parcel
      */
-    public void writeToBatteryUsageStatsParcel(Parcel out) {
+    public void writeToBatteryUsageStatsParcel(Parcel out, long preferredHistoryDurationMs) {
         synchronized (this) {
             out.writeBlob(mHistoryBuffer.marshall());
-            writeToParcel(out, true /* useBlobs */);
-        }
-    }
-
-    private void writeToParcel(Parcel out, boolean useBlobs) {
-        if (mHistoryDir != null) {
-            mHistoryDir.writeToParcel(out, useBlobs);
+            if (mHistoryDir != null) {
+                mHistoryDir.writeToParcel(out, true /* useBlobs */,
+                        mHistoryMonotonicEndTime - preferredHistoryDurationMs);
+            }
         }
     }
 
@@ -1166,8 +1186,7 @@ public class BatteryStatsHistory {
     private void readFromParcel(Parcel in, boolean useBlobs) {
         final long start = SystemClock.uptimeMillis();
         mHistoryParcels = new ArrayList<>();
-        final int count = in.readInt();
-        for (int i = 0; i < count; i++) {
+        while (in.readBoolean()) {
             byte[] temp = useBlobs ? in.readBlob() : in.createByteArray();
             if (temp == null || temp.length == 0) {
                 continue;
@@ -2081,6 +2100,8 @@ public class BatteryStatsHistory {
      */
     @GuardedBy("this")
     private void writeHistoryDelta(Parcel dest, HistoryItem cur, HistoryItem last) {
+        mHistoryMonotonicEndTime = cur.time;
+
         if (last == null || cur.cmd != HistoryItem.CMD_UPDATE) {
             dest.writeInt(BatteryStatsHistory.DELTA_TIME_ABS);
             cur.writeToParcel(dest, 0);
@@ -2396,6 +2417,7 @@ public class BatteryStatsHistory {
             }
 
             mHistoryBufferStartTime = in.readLong();
+            mHistoryMonotonicEndTime = in.readLong();
             mMonotonicHistorySize = in.readLong();
 
             mHistoryBuffer.setDataSize(0);
@@ -2424,6 +2446,7 @@ public class BatteryStatsHistory {
     private void writeHistoryBuffer(Parcel out) {
         out.writeInt(BatteryStatsHistory.VERSION);
         out.writeLong(mHistoryBufferStartTime);
+        out.writeLong(mHistoryMonotonicEndTime);
         out.writeLong(mMonotonicHistorySize);
         out.writeInt(mHistoryBuffer.dataSize());
         if (DEBUG) {
