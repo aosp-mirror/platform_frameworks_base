@@ -27,15 +27,12 @@ val Kosmos.volumeDialogComponentFactory by
     Kosmos.Fixture {
         object : VolumeDialogComponent.Factory {
             override fun create(scope: CoroutineScope): VolumeDialogComponent =
-                volumeDialogComponent
-        }
-    }
-val Kosmos.volumeDialogComponent by
-    Kosmos.Fixture {
-        object : VolumeDialogComponent {
-            override fun volumeDialogViewBinder(): VolumeDialogViewBinder = volumeDialogViewBinder
+                object : VolumeDialogComponent {
+                    override fun volumeDialogViewBinder(): VolumeDialogViewBinder =
+                        volumeDialogViewBinder
 
-            override fun sliderComponentFactory(): VolumeDialogSliderComponent.Factory =
-                volumeDialogSliderComponentFactory
+                    override fun sliderComponentFactory(): VolumeDialogSliderComponent.Factory =
+                        volumeDialogSliderComponentFactory
+                }
         }
     }

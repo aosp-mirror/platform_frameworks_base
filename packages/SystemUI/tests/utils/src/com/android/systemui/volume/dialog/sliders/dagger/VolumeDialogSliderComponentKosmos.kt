@@ -21,8 +21,13 @@ import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.volumeDialogController
+import com.android.systemui.shared.notifications.data.repository.notificationSettingsRepository
+import com.android.systemui.statusbar.policy.data.repository.deviceProvisioningRepository
+import com.android.systemui.statusbar.policy.data.repository.userSetupRepository
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
+import com.android.systemui.statusbar.policy.devicePostureController
 import com.android.systemui.volume.data.repository.audioRepository
+import com.android.systemui.volume.dialog.data.repository.volumeDialogStateRepository
 import com.android.systemui.volume.dialog.data.repository.volumeDialogVisibilityRepository
 import com.android.systemui.volume.dialog.sliders.domain.model.VolumeDialogSliderType
 import com.android.systemui.volume.dialog.sliders.domain.model.volumeDialogSliderType
@@ -77,10 +82,18 @@ private fun Kosmos.setupVolumeDialogSliderComponent(
     testScope = parentKosmos.testScope
     testDispatcher = parentKosmos.testDispatcher
 
+    audioRepository = parentKosmos.audioRepository
+    devicePostureController = parentKosmos.devicePostureController
+
     volumeDialogController = parentKosmos.volumeDialogController
+    volumeDialogStateRepository = parentKosmos.volumeDialogStateRepository
+
     mediaControllerInteractor = parentKosmos.mediaControllerInteractor
     mediaControllerRepository = parentKosmos.mediaControllerRepository
+
     zenModeRepository = parentKosmos.zenModeRepository
     volumeDialogVisibilityRepository = parentKosmos.volumeDialogVisibilityRepository
-    audioRepository = parentKosmos.audioRepository
+    notificationSettingsRepository = parentKosmos.notificationSettingsRepository
+    deviceProvisioningRepository = parentKosmos.deviceProvisioningRepository
+    userSetupRepository = parentKosmos.userSetupRepository
 }
