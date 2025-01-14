@@ -33,7 +33,7 @@ import android.view.WindowManager.TRANSIT_CHANGE
 import android.window.TransitionInfo
 import android.window.TransitionRequestInfo
 import android.window.WindowContainerTransaction
-import com.android.systemui.car.Flags.autoTaskStackWindowing
+import com.android.wm.shell.Flags.enableAutoTaskStackController
 import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.ShellExecutor
@@ -66,7 +66,7 @@ class AutoTaskStackControllerImpl @Inject constructor(
     private val defaultRootTaskPerDisplay = mutableMapOf<Int, Int>()
 
     init {
-        if (!autoTaskStackWindowing()) {
+        if (!enableAutoTaskStackController()) {
             throw IllegalStateException("Failed to initialize" +
                     "AutoTaskStackController as the auto_task_stack_windowing TS flag is disabled.")
         } else {
@@ -220,7 +220,7 @@ class AutoTaskStackControllerImpl @Inject constructor(
         displayId: Int,
         listener: RootTaskStackListener
     ) {
-        if (!autoTaskStackWindowing()) {
+        if (!enableAutoTaskStackController()) {
             Slog.e(
                 TAG, "Failed to create root task stack as the " +
                         "auto_task_stack_windowing TS flag is disabled."
@@ -236,7 +236,7 @@ class AutoTaskStackControllerImpl @Inject constructor(
     }
 
     override fun setDefaultRootTaskStackOnDisplay(displayId: Int, rootTaskStackId: Int?) {
-        if (!autoTaskStackWindowing()) {
+        if (!enableAutoTaskStackController()) {
             Slog.e(
                 TAG, "Failed to set default root task stack as the " +
                         "auto_task_stack_windowing TS flag is disabled."
@@ -280,7 +280,7 @@ class AutoTaskStackControllerImpl @Inject constructor(
     }
 
     override fun startTransition(transaction: AutoTaskStackTransaction): IBinder? {
-        if (!autoTaskStackWindowing()) {
+        if (!enableAutoTaskStackController()) {
             Slog.e(
                 TAG, "Failed to start transaction as the " +
                         "auto_task_stack_windowing TS flag is disabled."

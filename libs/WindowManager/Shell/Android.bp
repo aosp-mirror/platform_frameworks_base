@@ -173,7 +173,6 @@ android_library {
         "//frameworks/base/packages/SystemUI/aconfig:com_android_systemui_flags_lib",
         "//frameworks/libs/systemui:com_android_systemui_shared_flags_lib",
         "//frameworks/libs/systemui:iconloader_base",
-        "//packages/apps/Car/SystemUI/aconfig:com_android_systemui_car_flags_lib",
         "PlatformAnimationLib",
         "WindowManager-Shell-lite-proto",
         "WindowManager-Shell-proto",
