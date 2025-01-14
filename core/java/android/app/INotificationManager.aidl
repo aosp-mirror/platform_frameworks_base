@@ -121,6 +121,7 @@ interface INotificationManager
     void deleteNotificationChannelGroup(String pkg, String channelGroupId);
     NotificationChannelGroup getNotificationChannelGroup(String pkg, String channelGroupId);
     ParceledListSlice getNotificationChannelGroups(String pkg);
+    ParceledListSlice getNotificationChannelGroupsWithoutChannels(String pkg);
     boolean onlyHasDefaultChannel(String pkg, int uid);
     boolean areChannelsBypassingDnd();
     ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int uid);

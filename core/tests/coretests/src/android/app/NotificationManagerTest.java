@@ -51,6 +51,7 @@ import org.junit.runner.RunWith;
 
 import java.time.Instant;
 import java.time.InstantSource;
+import java.util.ArrayList;
 import java.util.List;
 
 @RunWith(AndroidJUnit4.class)
@@ -72,7 +73,7 @@ public class NotificationManagerTest {
 
         // Caches must be in test mode in order to be used in tests.
         PropertyInvalidatedCache.setTestMode(true);
-        mNotificationManager.setChannelCacheToTestMode();
+        mNotificationManager.setChannelCachesToTestMode();
     }
 
     @After
@@ -347,8 +348,8 @@ public class NotificationManagerTest {
         when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(),
                 anyInt())).thenReturn(new ParceledListSlice<>(List.of(exampleChannel())));
 
-        // ask for channels 100 times without invalidating the cache
-        for (int i = 0; i < 100; i++) {
+        // ask for channels 5 times without invalidating the cache
+        for (int i = 0; i < 5; i++) {
             List<NotificationChannel> unused = mNotificationManager.getNotificationChannels();
         }
 
@@ -437,6 +438,86 @@ public class NotificationManagerTest {
         // Those should have been three different calls
         verify(mNotificationManager.mBackendService, times(3))
                 .getNotificationChannels(any(), any(), anyInt());
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void getNotificationChannelGroup_cachedUntilInvalidated() throws Exception {
+        // Data setup: group has some channels in it
+        NotificationChannelGroup g1 = new NotificationChannelGroup("g1", "group one");
+
+        NotificationChannel nc1 = new NotificationChannel("nc1", "channel one",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        nc1.setGroup("g1");
+        NotificationChannel nc2 = new NotificationChannel("nc2", "channel two",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        nc2.setGroup("g1");
+
+        NotificationManager.invalidateNotificationChannelCache();
+        NotificationManager.invalidateNotificationChannelGroupCache();
+        when(mNotificationManager.mBackendService.getNotificationChannelGroupsWithoutChannels(
+                any())).thenReturn(new ParceledListSlice<>(List.of(g1)));
+
+        // getting notification channel groups also involves looking for channels
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(), anyInt()))
+                .thenReturn(new ParceledListSlice<>(List.of(nc1, nc2)));
+
+        // ask for group 5 times without invalidating the cache
+        for (int i = 0; i < 5; i++) {
+            NotificationChannelGroup unused = mNotificationManager.getNotificationChannelGroup(
+                    "g1");
+        }
+
+        // invalidate group cache but not channels cache; then ask for groups again
+        NotificationManager.invalidateNotificationChannelGroupCache();
+        NotificationChannelGroup receivedG1 = mNotificationManager.getNotificationChannelGroup(
+                "g1");
+
+        verify(mNotificationManager.mBackendService, times(1))
+                .getNotificationChannels(any(), any(), anyInt());
+        verify(mNotificationManager.mBackendService,
+                times(2)).getNotificationChannelGroupsWithoutChannels(any());
+
+        // Also confirm that we got sensible information in the return value
+        assertThat(receivedG1).isNotNull();
+        assertThat(receivedG1.getChannels()).hasSize(2);
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
+    public void getNotificationChannelGroups_cachedUntilInvalidated() throws Exception {
+        NotificationChannelGroup g1 = new NotificationChannelGroup("g1", "group one");
+        NotificationChannelGroup g2 = new NotificationChannelGroup("g2", "group two");
+        NotificationChannel nc1 = new NotificationChannel("nc1", "channel one",
+                NotificationManager.IMPORTANCE_DEFAULT);
+        nc1.setGroup("g1");
+
+        NotificationManager.invalidateNotificationChannelCache();
+        NotificationManager.invalidateNotificationChannelGroupCache();
+        when(mNotificationManager.mBackendService.getNotificationChannelGroupsWithoutChannels(
+                any())).thenReturn(new ParceledListSlice<>(List.of(g1, g2)));
+        when(mNotificationManager.mBackendService.getNotificationChannels(any(), any(), anyInt()))
+                .thenReturn(new ParceledListSlice<>(List.of(nc1)));
+
+        // ask for groups 5 times without invalidating the cache
+        for (int i = 0; i < 5; i++) {
+            List<NotificationChannelGroup> unused =
+                    mNotificationManager.getNotificationChannelGroups();
+        }
+
+        // invalidate group cache; ask again
+        NotificationManager.invalidateNotificationChannelGroupCache();
+        List<NotificationChannelGroup> result = mNotificationManager.getNotificationChannelGroups();
+
+        verify(mNotificationManager.mBackendService,
+                times(2)).getNotificationChannelGroupsWithoutChannels(any());
+
+        NotificationChannelGroup expectedG1 = g1.clone();
+        expectedG1.setChannels(List.of(nc1));
+        NotificationChannelGroup expectedG2 = g2.clone();
+        expectedG2.setChannels(new ArrayList<>());
+
+        assertThat(result).containsExactly(expectedG1, expectedG2);
     }
 
     @Test

@@ -276,6 +276,7 @@ public class PreferencesHelper implements RankingConfig {
         // notification channels.
         if (android.app.Flags.nmBinderPerfCacheChannels()) {
             invalidateNotificationChannelCache();
+            invalidateNotificationChannelGroupCache();
         }
     }
 
@@ -1022,6 +1023,7 @@ public class PreferencesHelper implements RankingConfig {
             throw new IllegalArgumentException("group.getName() can't be empty");
         }
         boolean needsDndChange = false;
+        boolean changed = false;
         synchronized (mLock) {
             PackagePreferences r = getOrCreatePackagePreferencesLocked(pkg, uid);
             if (r == null) {
@@ -1052,6 +1054,7 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (!group.equals(oldGroup)) {
                 // will log for new entries as well as name/description changes
+                changed = true;
                 MetricsLogger.action(getChannelGroupLog(group.getId(), pkg));
                 mNotificationChannelLogger.logNotificationChannelGroup(group, uid, pkg,
                         oldGroup == null,
@@ -1061,6 +1064,9 @@ public class PreferencesHelper implements RankingConfig {
         }
         if (needsDndChange) {
             updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
+        }
+        if (android.app.Flags.nmBinderPerfCacheChannels() && changed) {
+            invalidateNotificationChannelGroupCache();
         }
     }
 
@@ -1714,6 +1720,7 @@ public class PreferencesHelper implements RankingConfig {
             String groupId, int callingUid, boolean fromSystemOrSystemUi) {
         List<NotificationChannel> deletedChannels = new ArrayList<>();
         boolean groupBypassedDnd = false;
+        boolean deleted = false;
         synchronized (mLock) {
             PackagePreferences r = getPackagePreferencesLocked(pkg, uid);
             if (r == null || TextUtils.isEmpty(groupId)) {
@@ -1722,6 +1729,7 @@ public class PreferencesHelper implements RankingConfig {
 
             NotificationChannelGroup channelGroup = r.groups.remove(groupId);
             if (channelGroup != null) {
+                deleted = true;
                 mNotificationChannelLogger.logNotificationChannelGroupDeleted(channelGroup, uid,
                         pkg);
             }
@@ -1739,12 +1747,22 @@ public class PreferencesHelper implements RankingConfig {
         if (groupBypassedDnd) {
             updateCurrentUserHasChannelsBypassingDnd(callingUid, fromSystemOrSystemUi);
         }
-        if (android.app.Flags.nmBinderPerfCacheChannels() && deletedChannels.size() > 0) {
-            invalidateNotificationChannelCache();
+        if (android.app.Flags.nmBinderPerfCacheChannels()) {
+            if (deletedChannels.size() > 0) {
+                invalidateNotificationChannelCache();
+            }
+            if (deleted) {
+                invalidateNotificationChannelGroupCache();
+            }
         }
         return deletedChannels;
     }
 
+    /**
+     * Returns all notification channel groups for the provided package and uid, without channel
+     * information included. Note that this method returns the object instances from the internal
+     * structure; do not modify the returned groups before copying or parceling.
+     */
     @Override
     public Collection<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
             int uid) {
@@ -2896,6 +2914,7 @@ public class PreferencesHelper implements RankingConfig {
             }
             if (android.app.Flags.nmBinderPerfCacheChannels() && removed) {
                 invalidateNotificationChannelCache();
+                invalidateNotificationChannelGroupCache();
             }
         }
     }
@@ -3008,6 +3027,7 @@ public class PreferencesHelper implements RankingConfig {
             updateConfig();
             if (android.app.Flags.nmBinderPerfCacheChannels()) {
                 invalidateNotificationChannelCache();
+                invalidateNotificationChannelGroupCache();
             }
         }
         return updated;
@@ -3028,6 +3048,7 @@ public class PreferencesHelper implements RankingConfig {
                 p.showBadge = DEFAULT_SHOW_BADGE;
                 if (android.app.Flags.nmBinderPerfCacheChannels()) {
                     invalidateNotificationChannelCache();
+                    invalidateNotificationChannelGroupCache();
                 }
             }
         }
@@ -3251,6 +3272,11 @@ public class PreferencesHelper implements RankingConfig {
     // Utility method for overriding in tests to confirm that the cache gets cleared.
     protected void invalidateNotificationChannelCache() {
         NotificationManager.invalidateNotificationChannelCache();
+    }
+
+    @VisibleForTesting
+    protected void invalidateNotificationChannelGroupCache() {
+        NotificationManager.invalidateNotificationChannelGroupCache();
     }
 
     private static String packagePreferencesKey(String pkg, int uid) {

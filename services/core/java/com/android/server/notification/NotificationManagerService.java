@@ -4994,6 +4994,16 @@ public class NotificationManagerService extends SystemService {
         }
 
         @Override
+        public ParceledListSlice<NotificationChannelGroup>
+                getNotificationChannelGroupsWithoutChannels(String pkg) {
+            checkCallerIsSystemOrSameApp(pkg);
+            List<NotificationChannelGroup> groups = new ArrayList<>();
+            groups.addAll(
+                    mPreferencesHelper.getNotificationChannelGroups(pkg, Binder.getCallingUid()));
+            return new ParceledListSlice<>(groups);
+        }
+
+        @Override
         public void deleteNotificationChannelGroup(String pkg, String groupId) {
             checkCallerIsSystemOrSameApp(pkg);
 
