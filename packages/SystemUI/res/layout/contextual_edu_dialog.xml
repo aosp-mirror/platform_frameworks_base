@@ -29,7 +29,7 @@
         android:layout_height="wrap_content"
         android:contentDescription="@null"
         android:importantForAccessibility="no"
-        android:paddingRight="16dp" />
+        android:paddingHorizontal="16dp" />
 
     <TextView
         android:id="@+id/edu_message"
