@@ -4382,26 +4382,29 @@ public final class DisplayManagerService extends SystemService {
         // would be unusual to do so.  The method returns true on success.
         // This is only used if {@link deferDisplayEventsWhenFrozen()} is true.
         public boolean dispatchPending() {
-            try {
-                synchronized (mCallback) {
-                    if (mPendingEvents == null || mPendingEvents.isEmpty() || !mAlive) {
-                        return true;
-                    }
-                    if (!isReadyLocked()) {
-                        return false;
-                    }
-                    for (int i = 0; i < mPendingEvents.size(); i++) {
-                        Event displayEvent = mPendingEvents.get(i);
-                        if (DEBUG) {
-                            Slog.d(TAG, "Send pending display event #" + i + " "
-                                    + displayEvent.displayId + "/"
-                                    + displayEvent.event + " to " + mUid + "/" + mPid);
-                        }
-                        transmitDisplayEvent(displayEvent.displayId, displayEvent.event);
-                    }
-                    mPendingEvents.clear();
+            Event[] pending;
+            synchronized (mCallback) {
+                if (mPendingEvents == null || mPendingEvents.isEmpty() || !mAlive) {
                     return true;
                 }
+                if (!isReadyLocked()) {
+                    return false;
+                }
+                pending = new Event[mPendingEvents.size()];
+                pending = mPendingEvents.toArray(pending);
+                mPendingEvents.clear();
+            }
+            try {
+                for (int i = 0; i < pending.length; i++) {
+                    Event displayEvent = pending[i];
+                    if (DEBUG) {
+                        Slog.d(TAG, "Send pending display event #" + i + " "
+                                + displayEvent.displayId + "/"
+                                + displayEvent.event + " to " + mUid + "/" + mPid);
+                    }
+                    transmitDisplayEvent(displayEvent.displayId, displayEvent.event);
+                }
+                return true;
             } catch (RemoteException ex) {
                 Slog.w(TAG, "Failed to notify process "
                         + mPid + " that display topology changed, assuming it died.", ex);
