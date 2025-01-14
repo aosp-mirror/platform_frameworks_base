@@ -408,72 +408,8 @@ final class SettingsState {
                         Slog.w(LOG_TAG, "Bulk sync request to acongid failed.");
                     }
                 }
-                // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
-                if (requests == null) {
-                    Map<String, AconfigdFlagInfo> aconfigdFlagMap =
-                            AconfigdJavaUtils.listFlagsValueInNewStorage(localSocket);
-                    compareFlagValueInNewStorage(
-                            mAconfigDefaultFlags,
-                            aconfigdFlagMap);
-                }
             }
         }
-    }
-
-    // TOBO(b/312444587): remove the comparison logic after Test Mission 2.
-    public int compareFlagValueInNewStorage(
-            Map<String, AconfigdFlagInfo> defaultFlagMap,
-            Map<String, AconfigdFlagInfo> aconfigdFlagMap) {
-
-        // Get all defaults from the default map. The mSettings may not contain
-        // all flags, since it only contains updated flags.
-        int diffNum = 0;
-        for (Map.Entry<String, AconfigdFlagInfo> entry : defaultFlagMap.entrySet()) {
-            String key = entry.getKey();
-            AconfigdFlagInfo flag = entry.getValue();
-
-            AconfigdFlagInfo aconfigdFlag = aconfigdFlagMap.get(key);
-            if (aconfigdFlag == null) {
-                Slog.w(LOG_TAG, String.format("Flag %s is missing from aconfigd", key));
-                diffNum++;
-                continue;
-            }
-            String diff = flag.dumpDiff(aconfigdFlag);
-            if (!diff.isEmpty()) {
-                Slog.w(
-                        LOG_TAG,
-                        String.format(
-                                "Flag %s is different in Settings and aconfig: %s", key, diff));
-                diffNum++;
-            }
-        }
-
-        for (String key : aconfigdFlagMap.keySet()) {
-            if (defaultFlagMap.containsKey(key)) continue;
-            Slog.w(LOG_TAG, String.format("Flag %s is missing from Settings", key));
-            diffNum++;
-        }
-
-        String compareMarkerName = "aconfigd_marker/compare_diff_num";
-        synchronized (mLock) {
-            Setting markerSetting = mSettings.get(compareMarkerName);
-            if (markerSetting == null) {
-                markerSetting =
-                        new Setting(
-                                compareMarkerName,
-                                String.valueOf(diffNum),
-                                false,
-                                "aconfig",
-                                "aconfig");
-                mSettings.put(compareMarkerName, markerSetting);
-            }
-            markerSetting.value = String.valueOf(diffNum);
-        }
-
-        if (diffNum == 0) {
-            Slog.w(LOG_TAG, "Settings and new storage have same flags.");
-        }
-        return diffNum;
     }
 
     @GuardedBy("mLock")
