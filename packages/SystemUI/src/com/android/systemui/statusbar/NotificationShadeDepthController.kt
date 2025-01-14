@@ -34,6 +34,7 @@ import androidx.dynamicanimation.animation.SpringForce
 import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.TrackTracer
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags
 import com.android.systemui.Flags.spatialModelAppPushback
 import com.android.systemui.animation.ShadeInterpolation
 import com.android.systemui.dagger.SysUISingleton
@@ -52,8 +53,8 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.window.domain.interactor.WindowRootViewBlurInteractor
-import com.android.systemui.window.flag.WindowBlurFlag
 import com.android.wm.shell.appzoomout.AppZoomOut
+
 import java.io.PrintWriter
 import java.util.Optional
 import javax.inject.Inject
@@ -230,7 +231,7 @@ constructor(
         val zoomOut = blurRadiusToZoomOut(blurRadius = shadeRadius)
         // Make blur be 0 if it is necessary to stop blur effect.
         if (scrimsVisible) {
-            if (!WindowBlurFlag.isEnabled) {
+            if (!Flags.notificationShadeBlur()) {
                 blur = 0
             }
         }
@@ -258,7 +259,9 @@ constructor(
     }
 
     private val shouldBlurBeOpaque: Boolean
-        get() = if (WindowBlurFlag.isEnabled) false else scrimsVisible && !blursDisabledForAppLaunch
+        get() =
+            if (Flags.notificationShadeBlur()) false
+            else scrimsVisible && !blursDisabledForAppLaunch
 
     /** Callback that updates the window blur value and is called only once per frame. */
     @VisibleForTesting
@@ -388,7 +391,7 @@ constructor(
     }
 
     private fun initBlurListeners() {
-        if (!WindowBlurFlag.isEnabled) return
+        if (!Flags.bouncerUiRevamp()) return
 
         applicationScope.launch {
             Log.d(TAG, "Starting coroutines for window root view blur")
@@ -523,7 +526,7 @@ constructor(
     private fun scheduleUpdate() {
         val (blur, zoomOutFromShadeRadius) = computeBlurAndZoomOut()
         zoomOutCalculatedFromShadeRadius = zoomOutFromShadeRadius
-        if (WindowBlurFlag.isEnabled) {
+        if (Flags.bouncerUiRevamp()) {
             updateScheduled =
                 windowRootViewBlurInteractor.requestBlurForShade(blur, shouldBlurBeOpaque)
             return

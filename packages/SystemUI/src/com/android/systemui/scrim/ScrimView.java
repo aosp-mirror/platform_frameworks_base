@@ -39,10 +39,10 @@ import androidx.core.graphics.ColorUtils;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.colorextraction.ColorExtractor;
+import com.android.systemui.Flags;
 import com.android.systemui.res.R;
 import com.android.systemui.shade.TouchLogger;
 import com.android.systemui.util.LargeScreenUtils;
-import com.android.systemui.window.flag.WindowBlurFlag;
 
 import java.util.concurrent.Executor;
 
@@ -252,7 +252,7 @@ public class ScrimView extends View {
             if (mBlendWithMainColor) {
                 mainTinted = ColorUtils.blendARGB(mColors.getMainColor(), mTintColor, tintAmount);
             }
-            if (WindowBlurFlag.isEnabled()) {
+            if (Flags.notificationShadeBlur()) {
                 int layerAbove = ColorUtils.setAlphaComponent(
                         getResources().getColor(R.color.shade_panel, null),
                         (int) (0.4f * 255));

@@ -34,8 +34,8 @@ import android.view.animation.DecelerateInterpolator;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.graphics.ColorUtils;
+import com.android.systemui.Flags;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
-import com.android.systemui.window.flag.WindowBlurFlag;
 
 /**
  * Drawable used on SysUI scrims.
@@ -214,7 +214,7 @@ public class ScrimDrawable extends Drawable {
     public void draw(@NonNull Canvas canvas) {
         mPaint.setColor(mMainColor);
         mPaint.setAlpha(mAlpha);
-        if (WindowBlurFlag.isEnabled()) {
+        if (Flags.notificationShadeBlur()) {
             // TODO (b/381263600), wire this at ScrimController, move it to PrimaryBouncerTransition
             mPaint.setAlpha((int) (0.5f * mAlpha));
         }

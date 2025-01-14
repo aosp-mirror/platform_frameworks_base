@@ -30,7 +30,6 @@ import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.scene.ui.composable.transitions.TO_BOUNCER_FADE_FRACTION
-import com.android.systemui.window.flag.WindowBlurFlag
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
@@ -73,7 +72,7 @@ constructor(
             onStep = alphaForAnimationStep,
         )
 
-    val lockscreenAlpha: Flow<Float> = if (WindowBlurFlag.isEnabled) alphaFlow else emptyFlow()
+    val lockscreenAlpha: Flow<Float> = if (Flags.bouncerUiRevamp()) alphaFlow else emptyFlow()
 
     val notificationAlpha: Flow<Float> =
         if (Flags.bouncerUiRevamp()) {
