@@ -929,8 +929,8 @@ public class StageCoordinator implements SplitLayout.SplitLayoutHandler,
         for (int taskId : taskIds) {
             ActivityManager.RunningTaskInfo task = mTaskOrganizer.getRunningTaskInfo(taskId);
             if (task != null) {
-                wct.setWindowingMode(task.token, WINDOWING_MODE_UNDEFINED)
-                        .setBounds(task.token, null);
+                wct.setWindowingMode(task.getToken(), WINDOWING_MODE_UNDEFINED)
+                        .setBounds(task.getToken(), null);
             }
         }
     }

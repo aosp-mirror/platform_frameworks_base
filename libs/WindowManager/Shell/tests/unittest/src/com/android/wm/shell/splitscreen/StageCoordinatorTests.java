@@ -17,6 +17,7 @@
 package com.android.wm.shell.splitscreen;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SPLIT_INDEX_UNDEFINED;
@@ -32,6 +33,8 @@ import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.atLeastOnce;
@@ -50,9 +53,11 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.IBinder;
 import android.os.Looper;
 import android.view.SurfaceControl;
 import android.window.RemoteTransition;
+import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import androidx.test.annotation.UiThreadTest;
@@ -84,6 +89,7 @@ import com.android.wm.shell.transition.Transitions;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -423,6 +429,30 @@ public class StageCoordinatorTests extends ShellTestCase {
                 null /*instanceId*/);
         verify(splitScreenTransitions, times(2))
                 .startFullscreenTransition(any(), any());
+    }
+
+
+    @Test
+    public void startTask_ensureWindowingModeCleared() {
+        SplitScreenTransitions splitScreenTransitions =
+                spy(mStageCoordinator.getSplitTransitions());
+        mStageCoordinator.setSplitTransitions(splitScreenTransitions);
+        ArgumentCaptor<WindowContainerTransaction> wctCaptor =
+                ArgumentCaptor.forClass(WindowContainerTransaction.class);
+        int taskId = 18;
+        IBinder binder = mock(IBinder.class);
+        ActivityManager.RunningTaskInfo rti = mock(ActivityManager.RunningTaskInfo.class);
+        WindowContainerToken mockToken = mock(WindowContainerToken.class);
+        when(mockToken.asBinder()).thenReturn(binder);
+        when(rti.getToken()).thenReturn(mockToken);
+        when(mTaskOrganizer.getRunningTaskInfo(taskId)).thenReturn(rti);
+        mStageCoordinator.startTask(taskId, SPLIT_POSITION_TOP_OR_LEFT, null /*options*/,
+                null, SPLIT_INDEX_UNDEFINED);
+        verify(splitScreenTransitions).startEnterTransition(anyInt(),
+                wctCaptor.capture(), any(), any(), anyInt(), anyBoolean());
+
+        int windowingMode = wctCaptor.getValue().getChanges().get(binder).getWindowingMode();
+        assertEquals(windowingMode, WINDOWING_MODE_UNDEFINED);
     }
 
     private Transitions createTestTransitions() {
