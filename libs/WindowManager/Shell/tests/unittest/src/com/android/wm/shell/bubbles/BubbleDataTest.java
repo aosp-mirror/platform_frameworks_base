@@ -445,6 +445,15 @@ public class BubbleDataTest extends ShellTestCase {
         assertThat(update.updatedBubble.showFlyout()).isFalse();
     }
 
+    @Test
+    public void getOrCreateBubble_withIntent_usesCorrectUser() {
+        Intent intent = new Intent();
+        intent.setPackage(mContext.getPackageName());
+        Bubble b = mBubbleData.getOrCreateBubble(intent, UserHandle.of(/* userId= */ 10));
+
+        assertThat(b.getUser().getIdentifier()).isEqualTo(10);
+    }
+
     //
     // Overflow
     //
@@ -1439,12 +1448,6 @@ public class BubbleDataTest extends ShellTestCase {
         BubbleData.Update update = mUpdateCaptor.getValue();
         assertWithMessage("selectionChanged").that(update.selectionChanged).isTrue();
         assertWithMessage("selectedBubble").that(update.selectedBubble).isEqualTo(bubble);
-    }
-
-    private void assertSelectionCleared() {
-        BubbleData.Update update = mUpdateCaptor.getValue();
-        assertWithMessage("selectionChanged").that(update.selectionChanged).isTrue();
-        assertWithMessage("selectedBubble").that(update.selectedBubble).isNull();
     }
 
     private void assertExpandedChangedTo(boolean expected) {

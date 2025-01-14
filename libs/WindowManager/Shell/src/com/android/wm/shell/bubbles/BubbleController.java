@@ -1439,9 +1439,9 @@ public class BubbleController implements ConfigurationChangeListener,
      *
      * @param intent the intent for the bubble.
      */
-    public void expandStackAndSelectBubble(Intent intent) {
+    public void expandStackAndSelectBubble(Intent intent, UserHandle user) {
         if (!Flags.enableBubbleAnything()) return;
-        Bubble b = mBubbleData.getOrCreateBubble(intent); // Removes from overflow
+        Bubble b = mBubbleData.getOrCreateBubble(intent, user); // Removes from overflow
         ProtoLog.v(WM_SHELL_BUBBLES, "expandStackAndSelectBubble - intent=%s", intent);
         if (b.isInflated()) {
             mBubbleData.setSelectedBubbleAndExpandStack(b);
@@ -2648,8 +2648,8 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void showAppBubble(Intent intent) {
-            mMainExecutor.execute(() -> mController.expandStackAndSelectBubble(intent));
+        public void showAppBubble(Intent intent, UserHandle user) {
+            mMainExecutor.execute(() -> mController.expandStackAndSelectBubble(intent, user));
         }
 
         @Override

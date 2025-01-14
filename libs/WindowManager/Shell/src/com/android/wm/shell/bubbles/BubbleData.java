@@ -461,10 +461,8 @@ public class BubbleData {
         return bubbleToReturn;
     }
 
-    Bubble getOrCreateBubble(Intent intent) {
-        UserHandle user = UserHandle.of(mCurrentUserId);
-        String bubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(),
-                user);
+    Bubble getOrCreateBubble(Intent intent, UserHandle user) {
+        String bubbleKey = Bubble.getAppBubbleKeyForApp(intent.getPackage(), user);
         Bubble bubbleToReturn = findAndRemoveBubbleFromOverflow(bubbleKey);
         if (bubbleToReturn == null) {
             bubbleToReturn = Bubble.createAppBubble(intent, user, null, mMainExecutor, mBgExecutor);
