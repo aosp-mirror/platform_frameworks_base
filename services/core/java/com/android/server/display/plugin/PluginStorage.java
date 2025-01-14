@@ -24,6 +24,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.tools.r8.keepanno.annotations.KeepForApi;
 
 import java.io.PrintWriter;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
@@ -62,6 +63,12 @@ public class PluginStorage {
         updateValue(type, GLOBAL_ID, value);
     }
 
+    private final Set<PluginType<?>> mEnabledTypes;
+
+    PluginStorage(Set<PluginType<?>> enabledTypes) {
+        mEnabledTypes = Collections.unmodifiableSet(enabledTypes);
+    }
+
     /**
      * Updates value in storage and forwards it to corresponding listeners for specific display.
      * Should be called by OEM Plugin implementation in order to communicate with Framework
@@ -71,6 +78,10 @@ public class PluginStorage {
      */
     @KeepForApi
     public <T> void updateValue(PluginType<T> type, String uniqueDisplayId, @Nullable T value) {
+        if (isTypeDisabled(type)) {
+            Slog.d(TAG, "updateValue ignored for disabled type=" + type.mName);
+            return;
+        }
         Slog.d(TAG, "updateValue, type=" + type.mName + "; value=" + value
                 + "; displayId=" + uniqueDisplayId);
         Set<PluginManager.PluginChangeListener<T>> localListeners;
@@ -119,6 +130,10 @@ public class PluginStorage {
      */
     <T> void addListener(PluginType<T> type, String uniqueDisplayId,
             PluginManager.PluginChangeListener<T> listener) {
+        if (isTypeDisabled(type)) {
+            Slog.d(TAG, "addListener ignored for disabled type=" + type.mName);
+            return;
+        }
         if (GLOBAL_ID.equals(uniqueDisplayId)) {
             Slog.d(TAG, "addListener ignored for GLOBAL_ID, type=" + type.mName);
             return;
@@ -141,6 +156,10 @@ public class PluginStorage {
      */
     <T> void removeListener(PluginType<T> type, String uniqueDisplayId,
             PluginManager.PluginChangeListener<T> listener) {
+        if (isTypeDisabled(type)) {
+            Slog.d(TAG, "removeListener ignored for disabled type=" + type.mName);
+            return;
+        }
         if (GLOBAL_ID.equals(uniqueDisplayId)) {
             Slog.d(TAG, "removeListener ignored for GLOBAL_ID, type=" + type.mName);
             return;
@@ -181,6 +200,10 @@ public class PluginStorage {
                 timeFrame.dump(pw);
             }
         }
+    }
+
+    private boolean isTypeDisabled(PluginType<?> type) {
+        return !mEnabledTypes.contains(type);
     }
 
     @GuardedBy("mLock")
