@@ -23,7 +23,11 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.display.AnyExternalShadeDisplayPolicy
 import com.android.systemui.shade.display.DefaultDisplayShadePolicy
 import com.android.systemui.shade.display.ShadeDisplayPolicy
+import com.android.systemui.shade.display.ShadeExpansionIntent
 import com.android.systemui.shade.display.StatusBarTouchShadeDisplayPolicy
+import com.android.systemui.shade.domain.interactor.notificationElement
+import com.android.systemui.shade.domain.interactor.qsElement
+import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.util.settings.fakeGlobalSettings
 
 val Kosmos.defaultShadeDisplayPolicy: DefaultDisplayShadePolicy by
@@ -37,16 +41,20 @@ val Kosmos.anyExternalShadeDisplayPolicy: AnyExternalShadeDisplayPolicy by
         )
     }
 
-val Kosmos.focusBasedShadeDisplayPolicy: StatusBarTouchShadeDisplayPolicy by
+val Kosmos.statusBarTouchShadeDisplayPolicy: StatusBarTouchShadeDisplayPolicy by
     Kosmos.Fixture {
         StatusBarTouchShadeDisplayPolicy(
             displayRepository = displayRepository,
             backgroundScope = testScope.backgroundScope,
             keyguardRepository = keyguardRepository,
             shadeOnDefaultDisplayWhenLocked = false,
+            shadeInteractor = { shadeInteractor },
+            notificationElement = { notificationElement },
+            qsShadeElement = { qsElement },
         )
     }
-
+val Kosmos.shadeExpansionIntent: ShadeExpansionIntent by
+    Kosmos.Fixture { statusBarTouchShadeDisplayPolicy }
 val Kosmos.shadeDisplaysRepository: MutableShadeDisplaysRepository by
     Kosmos.Fixture {
         ShadeDisplaysRepositoryImpl(
@@ -62,7 +70,7 @@ val Kosmos.shadeDisplayPolicies: Set<ShadeDisplayPolicy> by
         setOf(
             defaultShadeDisplayPolicy,
             anyExternalShadeDisplayPolicy,
-            focusBasedShadeDisplayPolicy,
+            statusBarTouchShadeDisplayPolicy,
         )
     }
 

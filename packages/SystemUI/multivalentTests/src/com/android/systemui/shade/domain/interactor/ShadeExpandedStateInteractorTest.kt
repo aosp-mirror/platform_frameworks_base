@@ -22,8 +22,6 @@ import com.android.systemui.SysuiTestCase
 import com.android.systemui.flags.EnableSceneContainer
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
-import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractorImpl.NotificationElement
-import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractorImpl.QSElement
 import com.android.systemui.shade.shadeTestUtil
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
@@ -52,7 +50,7 @@ class ShadeExpandedStateInteractorTest : SysuiTestCase() {
 
             val element = currentlyExpandedElement.value
 
-            assertThat(element).isInstanceOf(QSElement::class.java)
+            assertThat(element).isInstanceOf(QSShadeElement::class.java)
         }
 
     @Test
@@ -62,7 +60,7 @@ class ShadeExpandedStateInteractorTest : SysuiTestCase() {
 
             val element = underTest.currentlyExpandedElement.value
 
-            assertThat(element).isInstanceOf(NotificationElement::class.java)
+            assertThat(element).isInstanceOf(NotificationShadeElement::class.java)
         }
 
     @Test

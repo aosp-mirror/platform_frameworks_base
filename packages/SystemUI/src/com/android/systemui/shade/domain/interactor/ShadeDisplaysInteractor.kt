@@ -30,6 +30,7 @@ import com.android.systemui.shade.ShadeDisplayChangeLatencyTracker
 import com.android.systemui.shade.ShadeTraceLogger.logMoveShadeWindowTo
 import com.android.systemui.shade.ShadeTraceLogger.traceReparenting
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
+import com.android.systemui.shade.display.ShadeExpansionIntent
 import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
 import com.android.window.flags.Flags
 import java.util.Optional
@@ -49,6 +50,7 @@ constructor(
     @Main private val mainThreadContext: CoroutineContext,
     private val shadeDisplayChangeLatencyTracker: ShadeDisplayChangeLatencyTracker,
     shadeExpandedInteractor: Optional<ShadeExpandedStateInteractor>,
+    private val shadeExpansionIntent: ShadeExpansionIntent,
 ) : CoreStartable {
 
     private val shadeExpandedInteractor =
@@ -90,10 +92,7 @@ constructor(
             withContext(mainThreadContext) {
                 traceReparenting {
                     shadeDisplayChangeLatencyTracker.onShadeDisplayChanging(destinationId)
-                    val expandedElement = shadeExpandedInteractor.currentlyExpandedElement.value
-                    expandedElement?.collapse(reason = "Shade window move")
-                    reparentToDisplayId(id = destinationId)
-                    expandedElement?.expand(reason = "Shade window move")
+                    collapseAndExpandShadeIfNeeded { reparentToDisplayId(id = destinationId) }
                     checkContextDisplayMatchesExpected(destinationId)
                 }
             }
@@ -104,6 +103,18 @@ constructor(
                 e,
             )
         }
+    }
+
+    private suspend fun collapseAndExpandShadeIfNeeded(wrapped: () -> Unit) {
+        val previouslyExpandedElement = shadeExpandedInteractor.currentlyExpandedElement.value
+        previouslyExpandedElement?.collapse(reason = COLLAPSE_EXPAND_REASON)
+
+        wrapped()
+
+        // If the user was trying to expand a specific shade element, let's make sure to expand
+        // that one. Otherwise, we can just re-expand the previous expanded element.
+        shadeExpansionIntent.consumeExpansionIntent()?.expand(COLLAPSE_EXPAND_REASON)
+            ?: previouslyExpandedElement?.expand(reason = COLLAPSE_EXPAND_REASON)
     }
 
     private fun checkContextDisplayMatchesExpected(destinationId: Int) {
@@ -125,5 +136,6 @@ constructor(
 
     private companion object {
         const val TAG = "ShadeDisplaysInteractor"
+        const val COLLAPSE_EXPAND_REASON = "Shade window move"
     }
 }

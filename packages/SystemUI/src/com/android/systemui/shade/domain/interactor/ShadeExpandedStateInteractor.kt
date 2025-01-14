@@ -24,6 +24,7 @@ import com.android.systemui.shade.domain.interactor.ShadeExpandedStateInteractor
 import com.android.systemui.shade.shared.flag.DualShade
 import com.android.systemui.util.kotlin.Utils.Companion.combineState
 import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -47,7 +48,7 @@ interface ShadeExpandedStateInteractor {
     val currentlyExpandedElement: StateFlow<ShadeElement?>
 
     /** An element from the shade window that can be expanded or collapsed. */
-    abstract class ShadeElement {
+    sealed class ShadeElement {
         /** Expands the shade element, returning when the expansion is done */
         abstract suspend fun expand(reason: String)
 
@@ -60,12 +61,11 @@ interface ShadeExpandedStateInteractor {
 class ShadeExpandedStateInteractorImpl
 @Inject
 constructor(
-    private val shadeInteractor: ShadeInteractor,
+    shadeInteractor: ShadeInteractor,
     @Background private val bgScope: CoroutineScope,
+    private val notificationElement: NotificationShadeElement,
+    private val qsElement: QSShadeElement,
 ) : ShadeExpandedStateInteractor {
-
-    private val notificationElement = NotificationElement()
-    private val qsElement = QSElement()
 
     override val currentlyExpandedElement: StateFlow<ShadeElement?> =
         if (SceneContainerFlag.isEnabled) {
@@ -84,35 +84,47 @@ constructor(
         } else {
             MutableStateFlow(null)
         }
+}
 
-    inner class NotificationElement : ShadeElement() {
-        override suspend fun expand(reason: String) {
-            shadeInteractor.expandNotificationsShade(reason)
-            shadeInteractor.shadeExpansion.waitUntil(1f)
-        }
+private suspend fun StateFlow<Float>.waitUntil(f: Float, coroutineContext: CoroutineContext) {
+    // it's important to not do this in the main thread otherwise it will block any rendering.
+    withContext(coroutineContext) {
+        withTimeout(1.seconds) { traceWaitForExpansion(expansion = f) { first { it == f } } }
+    }
+}
 
-        override suspend fun collapse(reason: String) {
-            shadeInteractor.collapseNotificationsShade(reason)
-            shadeInteractor.shadeExpansion.waitUntil(0f)
-        }
+@SysUISingleton
+class NotificationShadeElement
+@Inject
+constructor(
+    private val shadeInteractor: ShadeInteractor,
+    @Background private val bgContext: CoroutineContext,
+) : ShadeElement() {
+    override suspend fun expand(reason: String) {
+        shadeInteractor.expandNotificationsShade(reason)
+        shadeInteractor.shadeExpansion.waitUntil(1f, bgContext)
     }
 
-    inner class QSElement : ShadeElement() {
-        override suspend fun expand(reason: String) {
-            shadeInteractor.expandQuickSettingsShade(reason)
-            shadeInteractor.qsExpansion.waitUntil(1f)
-        }
+    override suspend fun collapse(reason: String) {
+        shadeInteractor.collapseNotificationsShade(reason)
+        shadeInteractor.shadeExpansion.waitUntil(0f, bgContext)
+    }
+}
 
-        override suspend fun collapse(reason: String) {
-            shadeInteractor.collapseQuickSettingsShade(reason)
-            shadeInteractor.qsExpansion.waitUntil(0f)
-        }
+@SysUISingleton
+class QSShadeElement
+@Inject
+constructor(
+    private val shadeInteractor: ShadeInteractor,
+    @Background private val bgContext: CoroutineContext,
+) : ShadeElement() {
+    override suspend fun expand(reason: String) {
+        shadeInteractor.expandQuickSettingsShade(reason)
+        shadeInteractor.qsExpansion.waitUntil(1f, bgContext)
     }
 
-    private suspend fun StateFlow<Float>.waitUntil(f: Float) {
-        // it's important to not do this in the main thread otherwise it will block any rendering.
-        withContext(bgScope.coroutineContext) {
-            withTimeout(1.seconds) { traceWaitForExpansion(expansion = f) { first { it == f } } }
-        }
+    override suspend fun collapse(reason: String) {
+        shadeInteractor.collapseQuickSettingsShade(reason)
+        shadeInteractor.qsExpansion.waitUntil(0f, bgContext)
     }
 }
