@@ -28,6 +28,8 @@ import com.android.systemui.keyguard.shared.model.KeyguardState.GONE
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.TransitionState
+import com.android.systemui.log.table.TableLogBufferFactory
+import com.android.systemui.log.table.logDiffsForTable
 import com.android.systemui.plugins.DarkIconDispatcher
 import com.android.systemui.scene.domain.interactor.SceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.SceneInteractor
@@ -39,7 +41,6 @@ import com.android.systemui.statusbar.chips.ui.model.MultipleOngoingActivityChip
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModel
 import com.android.systemui.statusbar.events.domain.interactor.SystemStatusEventAnimationInteractor
-import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState
 import com.android.systemui.statusbar.events.shared.model.SystemEventAnimationState.Idle
 import com.android.systemui.statusbar.featurepods.popups.shared.model.PopupChipModel
 import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.StatusBarPopupChipsViewModel
@@ -53,7 +54,8 @@ import com.android.systemui.statusbar.phone.domain.interactor.DarkIconInteractor
 import com.android.systemui.statusbar.phone.domain.interactor.LightsOutInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarIconBlockListInteractor
 import com.android.systemui.statusbar.pipeline.shared.domain.interactor.HomeStatusBarInteractor
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
+import com.android.systemui.statusbar.pipeline.shared.ui.model.SystemInfoCombinedVisibilityModel
+import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedFactory
 import dagger.assisted.AssistedInject
@@ -155,19 +157,6 @@ interface HomeStatusBarViewModel {
      */
     val areaTint: Flow<StatusBarTintColor>
 
-    /** Models the current visibility for a specific child view of status bar. */
-    data class VisibilityModel(
-        @View.Visibility val visibility: Int,
-        /** True if a visibility change should be animated. */
-        val shouldAnimateChange: Boolean,
-    )
-
-    /** The combined visibility + animation state for the system info status bar area */
-    data class SystemInfoCombinedVisibilityModel(
-        val baseVisibility: VisibilityModel,
-        val animationState: SystemEventAnimationState,
-    )
-
     /** Interface for the assisted factory, to allow for providing a fake in tests */
     interface HomeStatusBarViewModelFactory {
         fun create(displayId: Int): HomeStatusBarViewModel
@@ -178,6 +167,7 @@ class HomeStatusBarViewModelImpl
 @AssistedInject
 constructor(
     @Assisted thisDisplayId: Int,
+    tableLoggerFactory: TableLogBufferFactory,
     homeStatusBarInteractor: HomeStatusBarInteractor,
     homeStatusBarIconBlockListInteractor: HomeStatusBarIconBlockListInteractor,
     lightsOutInteractor: LightsOutInteractor,
@@ -196,9 +186,19 @@ constructor(
     statusBarContentInsetsViewModelStore: StatusBarContentInsetsViewModelStore,
     @Application coroutineScope: CoroutineScope,
 ) : HomeStatusBarViewModel {
+
+    val tableLogger = tableLoggerFactory.getOrCreate(tableLogBufferName(thisDisplayId), 200)
+
     override val isTransitioningFromLockscreenToOccluded: StateFlow<Boolean> =
         keyguardTransitionInteractor
             .isInTransition(Edge.create(from = LOCKSCREEN, to = OCCLUDED))
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogger,
+                columnPrefix = "",
+                columnName = COL_LOCK_TO_OCCLUDED,
+                initialValue = false,
+            )
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val transitionFromLockscreenToDreamStartedEvent: Flow<Unit> =
@@ -225,20 +225,33 @@ constructor(
                 // which lives elsewhere.)
                 currentScene == Scenes.Gone || isOccluded
             }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogger,
+                columnPrefix = "",
+                columnName = COL_ALLOWED_BY_SCENE,
+                initialValue = false,
+            )
             .stateIn(coroutineScope, SharingStarted.WhileSubscribed(), initialValue = false)
 
     override val areNotificationsLightsOut: Flow<Boolean> =
         if (NotificationsLiveDataStoreRefactor.isUnexpectedlyInLegacyMode()) {
-            emptyFlow()
-        } else {
-            combine(
-                    notificationsInteractor.areAnyNotificationsPresent,
-                    lightsOutInteractor.isLowProfile(thisDisplayId) ?: flowOf(false),
-                ) { hasNotifications, isLowProfile ->
-                    hasNotifications && isLowProfile
-                }
-                .distinctUntilChanged()
-        }
+                emptyFlow()
+            } else {
+                combine(
+                        notificationsInteractor.areAnyNotificationsPresent,
+                        lightsOutInteractor.isLowProfile(thisDisplayId) ?: flowOf(false),
+                    ) { hasNotifications, isLowProfile ->
+                        hasNotifications && isLowProfile
+                    }
+                    .distinctUntilChanged()
+            }
+            .logDiffsForTable(
+                tableLogBuffer = tableLogger,
+                columnPrefix = "",
+                columnName = COL_NOTIF_LIGHTS_OUT,
+                initialValue = false,
+            )
 
     override val areaTint: Flow<StatusBarTintColor> =
         darkIconInteractor
@@ -277,19 +290,26 @@ constructor(
 
     override val shouldHomeStatusBarBeVisible =
         combine(
-            isHomeStatusBarAllowed,
-            keyguardInteractor.isSecureCameraActive,
-            headsUpNotificationInteractor.statusBarHeadsUpStatus,
-        ) { isHomeStatusBarAllowed, isSecureCameraActive, headsUpState ->
-            // When launching the camera over the lockscreen, the status icons would typically
-            // become visible momentarily before animating out, since we're not yet aware that the
-            // launching camera activity is fullscreen. Even once the activity finishes launching,
-            // it takes a short time before WM decides that the top app wants to hide the icons and
-            // tells us to hide them.
-            // To ensure that this high-visibility animation is smooth, keep the icons hidden during
-            // a camera launch. See b/257292822.
-            headsUpState.isPinned || (isHomeStatusBarAllowed && !isSecureCameraActive)
-        }
+                isHomeStatusBarAllowed,
+                keyguardInteractor.isSecureCameraActive,
+                headsUpNotificationInteractor.statusBarHeadsUpStatus,
+            ) { isHomeStatusBarAllowed, isSecureCameraActive, headsUpState ->
+                // When launching the camera over the lockscreen, the status icons would typically
+                // become visible momentarily before animating out, since we're not yet aware that
+                // the launching camera activity is fullscreen. Even once the activity finishes
+                // launching, it takes a short time before WM decides that the top app wants to hide
+                // the icons and tells us to hide them. To ensure that this high-visibility
+                // animation is smooth, keep the icons hidden during a camera launch. See
+                // b/257292822.
+                headsUpState.isPinned || (isHomeStatusBarAllowed && !isSecureCameraActive)
+            }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogger,
+                columnPrefix = "",
+                columnName = COL_VISIBLE,
+                initialValue = false,
+            )
 
     private val isAnyChipVisible =
         if (StatusBarNotifChips.isEnabled) {
@@ -313,53 +333,73 @@ constructor(
 
     override val shouldShowOperatorNameView: Flow<Boolean> =
         combine(
-            shouldHomeStatusBarBeVisible,
-            hideStartSideContentForHeadsUp,
-            homeStatusBarInteractor.visibilityViaDisableFlags,
-            homeStatusBarInteractor.shouldShowOperatorName,
-        ) {
-            shouldStatusBarBeVisible,
-            hideStartSideContentForHeadsUp,
-            visibilityViaDisableFlags,
-            shouldShowOperator ->
-            shouldStatusBarBeVisible &&
-                !hideStartSideContentForHeadsUp &&
-                visibilityViaDisableFlags.isSystemInfoAllowed &&
-                shouldShowOperator
-        }
+                shouldHomeStatusBarBeVisible,
+                hideStartSideContentForHeadsUp,
+                homeStatusBarInteractor.visibilityViaDisableFlags,
+                homeStatusBarInteractor.shouldShowOperatorName,
+            ) {
+                shouldStatusBarBeVisible,
+                hideStartSideContentForHeadsUp,
+                visibilityViaDisableFlags,
+                shouldShowOperator ->
+                shouldStatusBarBeVisible &&
+                    !hideStartSideContentForHeadsUp &&
+                    visibilityViaDisableFlags.isSystemInfoAllowed &&
+                    shouldShowOperator
+            }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogger,
+                columnPrefix = "",
+                columnName = COL_SHOW_OPERATOR_NAME,
+                initialValue = false,
+            )
 
     override val isClockVisible: Flow<VisibilityModel> =
         combine(
-            shouldHomeStatusBarBeVisible,
-            hideStartSideContentForHeadsUp,
-            homeStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, hideStartSideContentForHeadsUp, visibilityViaDisableFlags ->
-            val showClock =
-                shouldStatusBarBeVisible &&
-                    visibilityViaDisableFlags.isClockAllowed &&
-                    !hideStartSideContentForHeadsUp
-            // Always use View.INVISIBLE here, so that animations work
-            VisibilityModel(showClock.toVisibleOrInvisible(), visibilityViaDisableFlags.animate)
-        }
+                shouldHomeStatusBarBeVisible,
+                hideStartSideContentForHeadsUp,
+                homeStatusBarInteractor.visibilityViaDisableFlags,
+            ) { shouldStatusBarBeVisible, hideStartSideContentForHeadsUp, visibilityViaDisableFlags
+                ->
+                val showClock =
+                    shouldStatusBarBeVisible &&
+                        visibilityViaDisableFlags.isClockAllowed &&
+                        !hideStartSideContentForHeadsUp
+                // Always use View.INVISIBLE here, so that animations work
+                VisibilityModel(showClock.toVisibleOrInvisible(), visibilityViaDisableFlags.animate)
+            }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogger,
+                columnPrefix = COL_PREFIX_CLOCK,
+                initialValue = VisibilityModel(false.toVisibleOrInvisible(), false),
+            )
 
     override val isNotificationIconContainerVisible: Flow<VisibilityModel> =
         combine(
-            shouldHomeStatusBarBeVisible,
-            isAnyChipVisible,
-            homeStatusBarInteractor.visibilityViaDisableFlags,
-        ) { shouldStatusBarBeVisible, anyChipVisible, visibilityViaDisableFlags ->
-            val showNotificationIconContainer =
-                if (anyChipVisible) {
-                    false
-                } else {
-                    shouldStatusBarBeVisible &&
-                        visibilityViaDisableFlags.areNotificationIconsAllowed
-                }
-            VisibilityModel(
-                showNotificationIconContainer.toVisibleOrGone(),
-                visibilityViaDisableFlags.animate,
+                shouldHomeStatusBarBeVisible,
+                isAnyChipVisible,
+                homeStatusBarInteractor.visibilityViaDisableFlags,
+            ) { shouldStatusBarBeVisible, anyChipVisible, visibilityViaDisableFlags ->
+                val showNotificationIconContainer =
+                    if (anyChipVisible) {
+                        false
+                    } else {
+                        shouldStatusBarBeVisible &&
+                            visibilityViaDisableFlags.areNotificationIconsAllowed
+                    }
+                VisibilityModel(
+                    showNotificationIconContainer.toVisibleOrGone(),
+                    visibilityViaDisableFlags.animate,
+                )
+            }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogger,
+                columnPrefix = COL_PREFIX_NOTIF_CONTAINER,
+                initialValue = VisibilityModel(false.toVisibleOrInvisible(), false),
             )
-        }
 
     private val isSystemInfoVisible =
         combine(shouldHomeStatusBarBeVisible, homeStatusBarInteractor.visibilityViaDisableFlags) {
@@ -372,18 +412,19 @@ constructor(
 
     override val systemInfoCombinedVis =
         combine(isSystemInfoVisible, animations.animationState) { sysInfoVisible, animationState ->
-                HomeStatusBarViewModel.SystemInfoCombinedVisibilityModel(
-                    sysInfoVisible,
-                    animationState,
-                )
+                SystemInfoCombinedVisibilityModel(sysInfoVisible, animationState)
             }
+            .distinctUntilChanged()
+            .logDiffsForTable(
+                tableLogBuffer = tableLogger,
+                columnPrefix = COL_PREFIX_SYSTEM_INFO,
+                initialValue =
+                    SystemInfoCombinedVisibilityModel(VisibilityModel(View.VISIBLE, false), Idle),
+            )
             .stateIn(
                 coroutineScope,
                 SharingStarted.WhileSubscribed(),
-                HomeStatusBarViewModel.SystemInfoCombinedVisibilityModel(
-                    VisibilityModel(View.VISIBLE, false),
-                    Idle,
-                ),
+                SystemInfoCombinedVisibilityModel(VisibilityModel(View.VISIBLE, false), Idle),
             )
 
     override val iconBlockList: Flow<List<String>> =
@@ -407,6 +448,19 @@ constructor(
     interface HomeStatusBarViewModelFactoryImpl :
         HomeStatusBarViewModel.HomeStatusBarViewModelFactory {
         override fun create(displayId: Int): HomeStatusBarViewModelImpl
+    }
+
+    companion object {
+        private const val COL_LOCK_TO_OCCLUDED = "Lock->Occluded"
+        private const val COL_ALLOWED_BY_SCENE = "allowedByScene"
+        private const val COL_NOTIF_LIGHTS_OUT = "notifLightsOut"
+        private const val COL_SHOW_OPERATOR_NAME = "showOperatorName"
+        private const val COL_VISIBLE = "visible"
+        private const val COL_PREFIX_CLOCK = "clock"
+        private const val COL_PREFIX_NOTIF_CONTAINER = "notifContainer"
+        private const val COL_PREFIX_SYSTEM_INFO = "systemInfo"
+
+        fun tableLogBufferName(displayId: Int) = "HomeStatusBarViewModel[$displayId]"
     }
 }
 
