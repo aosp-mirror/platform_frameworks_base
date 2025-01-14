@@ -609,15 +609,12 @@ public class MagnificationImpl implements Magnification, CommandQueue.Callbacks 
         final WindowMagnificationController windowMagnificationController =
                 mWindowMagnificationControllerSupplier.get(displayId);
         if (windowMagnificationController != null) {
-            boolean isWindowMagnifierActivated = windowMagnificationController.isActivated();
-            if (isWindowMagnifierActivated) {
-                windowMagnificationController.updateDragHandleResourcesIfNeeded(shown);
-            }
+            windowMagnificationController.updateDragHandleResourcesIfNeeded(shown);
 
             if (shown) {
                 mA11yLogger.logWithPosition(
                         MagnificationSettingsEvent.MAGNIFICATION_SETTINGS_PANEL_OPENED,
-                        isWindowMagnifierActivated
+                        windowMagnificationController.isActivated()
                                 ? ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW
                                 : ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN
                 );
