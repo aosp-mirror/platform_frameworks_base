@@ -257,8 +257,16 @@ public class Cuj {
      */
     public static final int CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU = 120;
 
+    /** Track Launcher Overview Task Dismiss animation.
+     *
+     * <p>Tracking starts when the overview task is dismissed via
+     * {@link com.android.quickstep.views.RecentsView#dismissTask}. Tracking finishes when the
+     * animation to dismiss the overview task ends.
+     */
+    public static final int CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS = 121;
+
     // When adding a CUJ, update this and make sure to also update CUJ_TO_STATSD_INTERACTION_TYPE.
-    @VisibleForTesting static final int LAST_CUJ = CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU;
+    @VisibleForTesting static final int LAST_CUJ = CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS;
 
     /** @hide */
     @IntDef({
@@ -370,7 +378,8 @@ public class Cuj {
             CUJ_DESKTOP_MODE_EXIT_MODE_ON_LAST_WINDOW_CLOSE,
             CUJ_DESKTOP_MODE_SNAP_RESIZE,
             CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW,
-            CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU
+            CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU,
+            CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CujType {}
@@ -493,6 +502,7 @@ public class Cuj {
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_SNAP_RESIZE] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_SNAP_RESIZE;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_UNMAXIMIZE_WINDOW] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_UNMAXIMIZE_WINDOW;
         CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU;
+        CUJ_TO_STATSD_INTERACTION_TYPE[CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS] = FrameworkStatsLog.UIINTERACTION_FRAME_INFO_REPORTED__INTERACTION_TYPE__LAUNCHER_OVERVIEW_TASK_DISMISS;
     }
 
     private Cuj() {
@@ -729,6 +739,8 @@ public class Cuj {
                 return "DESKTOP_MODE_UNMAXIMIZE_WINDOW";
             case CUJ_DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU:
                 return "DESKTOP_MODE_ENTER_FROM_OVERVIEW_MENU";
+            case CUJ_LAUNCHER_OVERVIEW_TASK_DISMISS:
+                return "LAUNCHER_OVERVIEW_TASK_DISMISS";
         }
         return "UNKNOWN";
     }
