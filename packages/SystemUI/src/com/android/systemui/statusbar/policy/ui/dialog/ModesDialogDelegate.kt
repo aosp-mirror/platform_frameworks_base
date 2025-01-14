@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy.ui.dialog
 
+import android.app.Dialog
+import android.content.Context
 import android.content.Intent
 import android.provider.Settings
 import android.util.Log
@@ -36,6 +38,7 @@ import com.android.compose.PlatformOutlinedButton
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
+import com.android.settingslib.notification.modes.EnableZenModeDialog
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
@@ -43,6 +46,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dialog.ui.composable.AlertDialogContent
 import com.android.systemui.plugins.ActivityStarter
+import com.android.systemui.qs.tiles.dialog.QSZenModeDialogMetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.ComponentSystemUIDialog
@@ -61,6 +65,7 @@ import kotlinx.coroutines.withContext
 class ModesDialogDelegate
 @Inject
 constructor(
+    val context: Context,
     private val sysuiDialogFactory: SystemUIDialogFactory,
     private val dialogTransitionAnimator: DialogTransitionAnimator,
     private val activityStarter: ActivityStarter,
@@ -72,6 +77,7 @@ constructor(
 ) : SystemUIDialog.Delegate {
     // NOTE: This should only be accessed/written from the main thread.
     @VisibleForTesting var currentDialog: ComponentSystemUIDialog? = null
+    private val zenDialogMetricsLogger by lazy { QSZenModeDialogMetricsLogger(context) }
 
     override fun createDialog(): SystemUIDialog {
         Assert.isMainThread()
@@ -193,6 +199,26 @@ constructor(
             currentDialog?.dismiss()
         }
         activityStarter.startActivity(intent, /* dismissShade= */ true, animationController)
+    }
+
+    /**
+     * Special dialog to ask the user for the duration of DND. Not to be confused with the modes
+     * dialog itself.
+     */
+    fun makeDndDurationDialog(): Dialog {
+        val dialog =
+            EnableZenModeDialog(
+                    context,
+                    R.style.Theme_SystemUI_Dialog,
+                    /* cancelIsNeutral= */ true,
+                    zenDialogMetricsLogger,
+                )
+                .createDialog()
+        SystemUIDialog.applyFlags(dialog)
+        SystemUIDialog.setShowForAllUsers(dialog, true)
+        SystemUIDialog.registerDismissListener(dialog)
+        SystemUIDialog.setDialogSize(dialog)
+        return dialog
     }
 
     companion object {

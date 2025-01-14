@@ -38,6 +38,7 @@ import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.mockModesDialogDelegate
+import com.android.systemui.statusbar.policy.ui.dialog.modesDialogEventLogger
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -60,7 +61,12 @@ class ModesTileUserActionInteractorTest : SysuiTestCase() {
     private val zenModeInteractor = kosmos.zenModeInteractor
 
     private val underTest =
-        ModesTileUserActionInteractor(inputHandler, mockDialogDelegate, zenModeInteractor)
+        ModesTileUserActionInteractor(
+            inputHandler,
+            mockDialogDelegate,
+            zenModeInteractor,
+            kosmos.modesDialogEventLogger,
+        )
 
     @Test
     fun handleClick_active_showsDialog() = runTest {

@@ -66,13 +66,14 @@ class ModesDialogDelegateTest : SysuiTestCase() {
         whenever(
                 mockDialogTransitionAnimator.createActivityTransitionController(
                     any<SystemUIDialog>(),
-                    eq(null)
+                    eq(null),
                 )
             )
             .thenReturn(mockAnimationController)
 
         underTest =
             ModesDialogDelegate(
+                context,
                 kosmos.systemUIDialogFactory,
                 mockDialogTransitionAnimator,
                 activityStarter,
