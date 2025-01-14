@@ -185,16 +185,24 @@ public class ViewUIComponent implements UIComponent {
             return;
         }
         ViewGroup.LayoutParams params = mView.getLayoutParams();
-        if (params == null || params.width == 0 || params.height == 0) {
+        if (params == null) {
             // layout pass didn't happen.
             logD("draw: skipped - no layout");
             return;
         }
+
+        final Rect realBounds = getRealBounds();
+        if (realBounds.width() == 0 || realBounds.height() == 0) {
+            // bad bounds.
+            logD("draw: skipped - zero bounds");
+            return;
+        }
+
+
         Canvas canvas = mSurface.lockHardwareCanvas();
         // Clear the canvas first.
         canvas.drawColor(0, PorterDuff.Mode.CLEAR);
         if (mVisibleOverride) {
-            Rect realBounds = getRealBounds();
             Rect renderBounds = getBounds();
             canvas.translate(renderBounds.left, renderBounds.top);
             canvas.scale(
