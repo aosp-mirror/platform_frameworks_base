@@ -297,13 +297,10 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
         DisappearAnimationUtils disappearAnimationUtils = needsSlowUnlockTransition
                         ? mDisappearAnimationUtilsLocked
                         : mDisappearAnimationUtils;
-        android.util.Log.i("KeyguardPINView", "startDisappearAnimation: " + finishRunnable);
         disappearAnimationUtils.createAnimation(
                 this, 0, 200, mDisappearYTranslation, false,
                 mDisappearAnimationUtils.getInterpolator(), () -> {
                     if (finishRunnable != null) {
-                        android.util.Log.i("KeyguardPINView",
-                                "startDisappearAnimation, invoking run()");
                         finishRunnable.run();
                     }
                 },
