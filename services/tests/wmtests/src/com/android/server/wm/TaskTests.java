@@ -684,9 +684,7 @@ public class TaskTests extends WindowTestsBase {
                 .setWindowingMode(WINDOWING_MODE_FREEFORM).build();
         Task task = rootTask.getBottomMostTask();
         task.getRootActivity().setOrientation(SCREEN_ORIENTATION_UNSPECIFIED);
-        DisplayInfo info = new DisplayInfo();
-        display.mDisplay.getDisplayInfo(info);
-        final Rect fullScreenBounds = new Rect(0, 0, info.logicalWidth, info.logicalHeight);
+        final Rect fullScreenBounds = new Rect(display.getBounds());
         final Rect freeformBounds = new Rect(fullScreenBounds);
         freeformBounds.inset((int) (freeformBounds.width() * 0.2),
                 (int) (freeformBounds.height() * 0.2));
