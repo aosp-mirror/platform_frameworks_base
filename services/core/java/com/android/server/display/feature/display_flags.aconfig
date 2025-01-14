@@ -486,6 +486,17 @@ flag {
     description: "Feature flag to trigger the RR callbacks when framerate overridding happens."
     bug: "390113266"
     is_fixed_read_only: true
+        metadata {
+          purpose: PURPOSE_BUGFIX
+        }
+}
+
+flag {
+    name: "refresh_rate_event_for_foreground_apps"
+    namespace: "display_manager"
+    description: "Send Refresh Rate events only for the apps in foreground."
+    bug: "390107600"
+    is_fixed_read_only: true
     metadata {
       purpose: PURPOSE_BUGFIX
     }

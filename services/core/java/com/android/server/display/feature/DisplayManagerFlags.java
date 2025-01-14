@@ -268,6 +268,11 @@ public class DisplayManagerFlags {
             Flags::framerateOverrideTriggersRrCallbacks
     );
 
+    private final FlagState mRefreshRateEventForForegroundApps = new FlagState(
+            Flags.FLAG_REFRESH_RATE_EVENT_FOR_FOREGROUND_APPS,
+            Flags::refreshRateEventForForegroundApps
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -579,6 +584,14 @@ public class DisplayManagerFlags {
 
 
     /**
+     * @return {@code true} if the flag for sending refresh rate events only for the apps in
+     * foreground is enabled
+     */
+    public boolean isRefreshRateEventForForegroundAppsEnabled() {
+        return mRefreshRateEventForForegroundApps.isEnabled();
+    }
+
+    /**
      * dumps all flagstates
      * @param pw printWriter
      */
@@ -634,7 +647,7 @@ public class DisplayManagerFlags {
         pw.println(" " + mEnableDisplayContentModeManagementFlagState);
         pw.println(" " + mBaseDensityForExternalDisplays);
         pw.println(" " + mFramerateOverrideTriggersRrCallbacks);
-
+        pw.println(" " + mRefreshRateEventForForegroundApps);
     }
 
     private static class FlagState {
