@@ -729,6 +729,7 @@ public final class ApplicationStartInfo implements Parcelable {
         return 0;
     }
 
+    // LINT.IfChange(write_parcel)
     @Override
     public void writeToParcel(@NonNull Parcel dest, int flags) {
         dest.writeInt(mStartupState);
@@ -753,6 +754,7 @@ public final class ApplicationStartInfo implements Parcelable {
         dest.writeLong(mMonoticCreationTimeMs);
         dest.writeInt(mStartComponent);
     }
+    // LINT.ThenChange(:read_parcel)
 
     /** @hide */
     public ApplicationStartInfo(long monotonicCreationTimeMs) {
@@ -779,6 +781,7 @@ public final class ApplicationStartInfo implements Parcelable {
     }
 
     /** @hide */
+    // LINT.IfChange(read_parcel)
     @VisibleForTesting
     public ApplicationStartInfo(@NonNull Parcel in) {
         mStartupState = in.readInt();
@@ -803,6 +806,7 @@ public final class ApplicationStartInfo implements Parcelable {
         mMonoticCreationTimeMs = in.readLong();
         mStartComponent = in.readInt();
     }
+    // LINT.ThenChange(:write_parcel)
 
     private static String intern(@Nullable String source) {
         return source != null ? source.intern() : null;
@@ -835,6 +839,7 @@ public final class ApplicationStartInfo implements Parcelable {
      * @param fieldId Field Id of the ApplicationStartInfo as defined in the parent message
      * @hide
      */
+    // LINT.IfChange(write_proto)
     public void writeToProto(ProtoOutputStream proto, long fieldId) throws IOException {
         final long token = proto.start(fieldId);
         proto.write(ApplicationStartInfoProto.PID, mPid);
@@ -884,6 +889,7 @@ public final class ApplicationStartInfo implements Parcelable {
         proto.write(ApplicationStartInfoProto.START_COMPONENT, mStartComponent);
         proto.end(token);
     }
+    // LINT.ThenChange(:read_proto)
 
     /**
      * Read from a protocol buffer input stream. Protocol buffer message definition at {@link
@@ -893,6 +899,7 @@ public final class ApplicationStartInfo implements Parcelable {
      * @param fieldId Field Id of the ApplicationStartInfo as defined in the parent message
      * @hide
      */
+    // LINT.IfChange(read_proto)
     public void readFromProto(ProtoInputStream proto, long fieldId)
             throws IOException, WireTypeMismatchException, ClassNotFoundException {
         final long token = proto.start(fieldId);
@@ -976,6 +983,7 @@ public final class ApplicationStartInfo implements Parcelable {
         }
         proto.end(token);
     }
+    // LINT.ThenChange(:write_proto)
 
     /** @hide */
     public void dump(@NonNull PrintWriter pw, @Nullable String prefix, @Nullable String seqSuffix,
