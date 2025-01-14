@@ -23,6 +23,8 @@ import android.view.ViewTreeObserver.OnGlobalLayoutListener
 import androidx.constraintlayout.widget.Barrier
 import androidx.constraintlayout.widget.ConstraintLayout
 import androidx.constraintlayout.widget.ConstraintSet
+import androidx.constraintlayout.widget.ConstraintSet.GONE
+import androidx.constraintlayout.widget.ConstraintSet.VISIBLE
 import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.KeyguardUnlockAnimationController
@@ -195,24 +197,13 @@ constructor(
         smartspaceController.requestSmartspaceUpdate()
 
         constraintSet.apply {
-            val weatherVisibility =
-                when (keyguardSmartspaceViewModel.isWeatherVisible.value) {
-                    true -> ConstraintSet.VISIBLE
-                    false -> ConstraintSet.GONE
-                }
-            setVisibility(sharedR.id.weather_smartspace_view, weatherVisibility)
-            setAlpha(
-                sharedR.id.weather_smartspace_view,
-                if (weatherVisibility == View.VISIBLE) 1f else 0f,
-            )
-            val dateVisibility =
-                if (keyguardClockViewModel.hasCustomWeatherDataDisplay.value) ConstraintSet.GONE
-                else ConstraintSet.VISIBLE
-            setVisibility(sharedR.id.date_smartspace_view, dateVisibility)
-            setAlpha(
-                sharedR.id.date_smartspace_view,
-                if (dateVisibility == ConstraintSet.VISIBLE) 1f else 0f,
-            )
+            val showWeather = keyguardSmartspaceViewModel.isWeatherVisible.value
+            setVisibility(sharedR.id.weather_smartspace_view, if (showWeather) VISIBLE else GONE)
+            setAlpha(sharedR.id.weather_smartspace_view, if (showWeather) 1f else 0f)
+
+            val showDateView = !keyguardClockViewModel.hasCustomWeatherDataDisplay.value
+            setVisibility(sharedR.id.date_smartspace_view, if (showDateView) VISIBLE else GONE)
+            setAlpha(sharedR.id.date_smartspace_view, if (showDateView) 1f else 0f)
         }
     }
 }
