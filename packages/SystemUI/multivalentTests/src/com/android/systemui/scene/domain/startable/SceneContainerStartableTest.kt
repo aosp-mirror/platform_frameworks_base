@@ -1508,10 +1508,8 @@ class SceneContainerStartableTest : SysuiTestCase() {
         }
 
     @Test
-    fun collectFalsingSignals_screenOnAndOff_aodUnavailable() =
+    fun collectFalsingSignals_screenOnAndOff() =
         testScope.runTest {
-            kosmos.fakeKeyguardRepository.setAodAvailable(false)
-            runCurrent()
             prepareState(
                 initialSceneKey = Scenes.Lockscreen,
                 authenticationMethod = AuthenticationMethodModel.Pin,
@@ -1553,53 +1551,6 @@ class SceneContainerStartableTest : SysuiTestCase() {
             verify(falsingCollector, times(2)).onScreenTurningOn()
             verify(falsingCollector, times(1)).onScreenOnFromTouch()
             verify(falsingCollector, times(3)).onScreenOff()
-        }
-
-    @Test
-    fun collectFalsingSignals_screenOnAndOff_aodAvailable() =
-        testScope.runTest {
-            kosmos.fakeKeyguardRepository.setAodAvailable(true)
-            runCurrent()
-            prepareState(
-                initialSceneKey = Scenes.Lockscreen,
-                authenticationMethod = AuthenticationMethodModel.Pin,
-                isDeviceUnlocked = false,
-            )
-            underTest.start()
-            runCurrent()
-            verify(falsingCollector, never()).onScreenTurningOn()
-            verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, never()).onScreenOff()
-
-            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
-            runCurrent()
-            verify(falsingCollector, never()).onScreenTurningOn()
-            verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, never()).onScreenOff()
-
-            powerInteractor.setAsleepForTest()
-            runCurrent()
-            verify(falsingCollector, never()).onScreenTurningOn()
-            verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, never()).onScreenOff()
-
-            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_TAP)
-            runCurrent()
-            verify(falsingCollector, never()).onScreenTurningOn()
-            verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, never()).onScreenOff()
-
-            powerInteractor.setAsleepForTest()
-            runCurrent()
-            verify(falsingCollector, never()).onScreenTurningOn()
-            verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, never()).onScreenOff()
-
-            powerInteractor.setAwakeForTest(reason = PowerManager.WAKE_REASON_POWER_BUTTON)
-            runCurrent()
-            verify(falsingCollector, never()).onScreenTurningOn()
-            verify(falsingCollector, never()).onScreenOnFromTouch()
-            verify(falsingCollector, never()).onScreenOff()
         }
 
     @Test

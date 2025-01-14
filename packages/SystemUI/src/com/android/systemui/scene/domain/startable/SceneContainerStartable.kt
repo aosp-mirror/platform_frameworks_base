@@ -94,7 +94,6 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
-import kotlinx.coroutines.flow.emptyFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.filterIsInstance
 import kotlinx.coroutines.flow.filterNot
@@ -717,14 +716,7 @@ constructor(
         }
 
         applicationScope.launch {
-            keyguardInteractor.isAodAvailable
-                .flatMapLatest { isAodAvailable ->
-                    if (!isAodAvailable) {
-                        powerInteractor.detailedWakefulness
-                    } else {
-                        emptyFlow()
-                    }
-                }
+            powerInteractor.detailedWakefulness
                 .distinctUntilChangedBy { it.isAwake() }
                 .collect { wakefulness ->
                     when {
