@@ -10082,7 +10082,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         proto.write(OVERRIDE_ORIENTATION, getOverrideOrientation());
         proto.write(SHOULD_SEND_COMPAT_FAKE_FOCUS, shouldSendCompatFakeFocus());
         final AppCompatCameraOverrides cameraOverrides =
-                mAppCompatController.getAppCompatCameraOverrides();
+                mAppCompatController.getCameraOverrides();
         proto.write(SHOULD_FORCE_ROTATE_FOR_CAMERA_COMPAT,
                 cameraOverrides.shouldForceRotateForCameraCompat());
         proto.write(SHOULD_REFRESH_ACTIVITY_FOR_CAMERA_COMPAT,

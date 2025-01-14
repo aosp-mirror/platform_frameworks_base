@@ -221,7 +221,7 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     }
 
     boolean isCameraRunningAndWindowingModeEligible(@NonNull ActivityRecord activity) {
-        return  activity.mAppCompatController.getAppCompatCameraOverrides()
+        return  activity.mAppCompatController.getCameraOverrides()
                 .shouldApplyFreeformTreatmentForCameraCompat()
                 && activity.inFreeformWindowingMode()
                 && mCameraStateMonitor.isCameraRunningForActivity(activity);
@@ -232,7 +232,7 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
         // different camera compat aspect ratio set: this allows per-app camera compat override
         // aspect ratio to be smaller than the default.
         return isInFreeformCameraCompatMode(activity) && !activity.mAppCompatController
-                .getAppCompatCameraOverrides().isOverrideMinAspectRatioForCameraEnabled();
+                .getCameraOverrides().isOverrideMinAspectRatioForCameraEnabled();
     }
 
     boolean isInFreeformCameraCompatMode(@NonNull ActivityRecord activity) {
@@ -307,7 +307,7 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
     boolean isTreatmentEnabledForActivity(@NonNull ActivityRecord activity,
             boolean checkOrientation) {
         int orientation = activity.getRequestedConfigurationOrientation();
-        return activity.mAppCompatController.getAppCompatCameraOverrides()
+        return activity.mAppCompatController.getCameraOverrides()
                 .shouldApplyFreeformTreatmentForCameraCompat()
                 && mCameraStateMonitor.isCameraRunningForActivity(activity)
                 && (!checkOrientation || orientation != ORIENTATION_UNDEFINED)
@@ -333,6 +333,6 @@ final class CameraCompatFreeformPolicy implements CameraStateMonitor.CameraCompa
                 || !mCameraStateMonitor.isCameraWithIdRunningForActivity(topActivity, cameraId)) {
             return false;
         }
-        return topActivity.mAppCompatController.getAppCompatCameraOverrides().isRefreshRequested();
+        return topActivity.mAppCompatController.getCameraOverrides().isRefreshRequested();
     }
 }

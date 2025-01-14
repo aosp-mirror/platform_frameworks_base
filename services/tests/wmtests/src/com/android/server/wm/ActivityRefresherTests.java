@@ -103,7 +103,7 @@ public class ActivityRefresherTests extends WindowTestsBase {
     @Test
     public void testShouldRefreshActivity_refreshDisabledForActivity() throws Exception {
         configureActivityAndDisplay();
-        when(mActivity.mAppCompatController.getAppCompatCameraOverrides()
+        when(mActivity.mAppCompatController.getCameraOverrides()
                 .shouldRefreshActivityForCameraCompat()).thenReturn(false);
         mActivityRefresher.addEvaluator(mEvaluatorTrue);
 
@@ -161,7 +161,7 @@ public class ActivityRefresherTests extends WindowTestsBase {
         configureActivityAndDisplay();
         mActivityRefresher.addEvaluator(mEvaluatorTrue);
         doReturn(true)
-                .when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+                .when(mActivity.mAppCompatController.getCameraOverrides())
                     .shouldRefreshActivityViaPauseForCameraCompat();
 
         mActivityRefresher.onActivityConfigurationChanging(mActivity, mNewConfig, mOldConfig);
@@ -174,7 +174,7 @@ public class ActivityRefresherTests extends WindowTestsBase {
         configureActivityAndDisplay();
         mActivityRefresher.addEvaluator(mEvaluatorTrue);
         doReturn(true)
-                .when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+                .when(mActivity.mAppCompatController.getCameraOverrides())
                     .shouldRefreshActivityViaPauseForCameraCompat();
 
         mActivityRefresher.onActivityRefreshed(mActivity);
@@ -188,7 +188,7 @@ public class ActivityRefresherTests extends WindowTestsBase {
 
     private void assertActivityRefreshRequested(boolean refreshRequested,
             boolean cycleThroughStop) throws Exception {
-        verify(mActivity.mAppCompatController.getAppCompatCameraOverrides(),
+        verify(mActivity.mAppCompatController.getCameraOverrides(),
                 times(refreshRequested ? 1 : 0)).setIsRefreshRequested(true);
 
         final RefreshCallbackItem refreshCallbackItem =
@@ -212,9 +212,9 @@ public class ActivityRefresherTests extends WindowTestsBase {
                 .build()
                 .getTopMostActivity();
 
-        spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
+        spyOn(mActivity.mAppCompatController.getCameraOverrides());
         doReturn(true).when(mActivity).inFreeformWindowingMode();
         doReturn(true).when(mActivity.mAppCompatController
-                .getAppCompatCameraOverrides()).shouldRefreshActivityForCameraCompat();
+                .getCameraOverrides()).shouldRefreshActivityForCameraCompat();
     }
 }
