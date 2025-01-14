@@ -263,6 +263,38 @@ public class NotificationManagerTest {
     }
 
     @Test
+    @EnableFlags({Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY,
+            Flags.FLAG_NM_BINDER_PERF_LOG_NM_THROTTLING})
+    public void notify_rapidUpdate_logsOncePerSecond() throws Exception {
+        Notification n = exampleNotification();
+
+        for (int i = 0; i < 650; i++) {
+            mNotificationManager.notify(1, n);
+            mClock.advanceByMillis(10);
+        }
+
+        // Runs for a total of 6.5 seconds, so should log once (when RateEstimator catches up) + 6
+        // more times (after 1 second each).
+        verify(mNotificationManager.mBackendService, times(7)).incrementCounter(
+                eq("notifications.value_client_throttled_notify_update"));
+    }
+
+    @Test
+    @EnableFlags({Flags.FLAG_NM_BINDER_PERF_THROTTLE_NOTIFY,
+            Flags.FLAG_NM_BINDER_PERF_LOG_NM_THROTTLING})
+    public void cancel_unnecessaryAndRapid_logsOncePerSecond() throws Exception {
+        for (int i = 0; i < 650; i++) {
+            mNotificationManager.cancel(1);
+            mClock.advanceByMillis(10);
+        }
+
+        // Runs for a total of 6.5 seconds, so should log once (when RateEstimator catches up) + 6
+        // more times (after 1 second each).
+        verify(mNotificationManager.mBackendService, times(7)).incrementCounter(
+                eq("notifications.value_client_throttled_cancel_duplicate"));
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_NM_BINDER_PERF_CACHE_CHANNELS)
     public void getNotificationChannel_cachedUntilInvalidated() throws Exception {
         // Invalidate the cache first because the cache won't do anything until then

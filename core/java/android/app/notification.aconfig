@@ -295,6 +295,16 @@ flag {
 }
 
 flag {
+  name: "nm_binder_perf_log_nm_throttling"
+  namespace: "systemui"
+  description: "Log throttled operations (notify, cancel) to statsd. This flag will NOT be pushed past Trunkfood."
+  bug: "389918945"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "no_sbnholder"
   namespace: "systemui"
   description: "removes sbnholder from NLS"

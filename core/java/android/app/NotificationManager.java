@@ -665,8 +665,10 @@ public class NotificationManager {
 
     private final InstantSource mClock;
     private final RateLimiter mUpdateRateLimiter = new RateLimiter("notify (update)",
+            "notifications.value_client_throttled_notify_update",
             MAX_NOTIFICATION_UPDATE_RATE);
     private final RateLimiter mUnnecessaryCancelRateLimiter = new RateLimiter("cancel (dupe)",
+            "notifications.value_client_throttled_cancel_duplicate",
             MAX_NOTIFICATION_UNNECESSARY_CANCEL_RATE);
     // Value is KNOWN_STATUS_ENQUEUED/_CANCELLED
     private final LruCache<NotificationKey, Integer> mKnownNotifications = new LruCache<>(100);
@@ -848,19 +850,21 @@ public class NotificationManager {
     /** Helper class to rate-limit Binder calls. */
     private class RateLimiter {
 
-        private static final Duration RATE_LIMITER_LOG_INTERVAL = Duration.ofSeconds(5);
+        private static final Duration RATE_LIMITER_LOG_INTERVAL = Duration.ofSeconds(1);
 
         private final RateEstimator mInputRateEstimator;
         private final RateEstimator mOutputRateEstimator;
         private final String mName;
+        private final String mCounterName;
         private final float mLimitRate;
 
         private Instant mLogSilencedUntil;
 
-        private RateLimiter(String name, float limitRate) {
+        private RateLimiter(String name, String counterName, float limitRate) {
             mInputRateEstimator = new RateEstimator();
             mOutputRateEstimator = new RateEstimator();
             mName = name;
+            mCounterName = counterName;
             mLimitRate = limitRate;
         }
 
@@ -878,6 +882,14 @@ public class NotificationManager {
             Instant now = mClock.instant();
             if (mLogSilencedUntil != null && now.isBefore(mLogSilencedUntil)) {
                 return;
+            }
+
+            if (Flags.nmBinderPerfLogNmThrottling()) {
+                try {
+                    service().incrementCounter(mCounterName);
+                } catch (RemoteException e) {
+                    Slog.w(TAG, "Ignoring error while trying to log " + mCounterName, e);
+                }
             }
 
             long nowMillis = now.toEpochMilli();
