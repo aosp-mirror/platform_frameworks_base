@@ -504,6 +504,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
         CharSequence redactedMessage = systemUiContext.getString(
                 R.string.redacted_notification_single_line_text
         );
+        redacted.setWhen(original.getWhen());
 
         if (originalStyle instanceof MessagingStyle oldStyle) {
             MessagingStyle newStyle = new MessagingStyle(oldStyle.getUser());
