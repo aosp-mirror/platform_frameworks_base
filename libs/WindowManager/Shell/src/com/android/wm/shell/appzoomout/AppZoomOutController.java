@@ -18,6 +18,7 @@ package com.android.wm.shell.appzoomout;
 
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
+import static com.android.systemui.Flags.spatialModelAppPushback;
 
 import android.app.ActivityManager;
 import android.app.WindowConfiguration;
@@ -93,7 +94,9 @@ public class AppZoomOutController implements RemoteCallable<AppZoomOutController
         mDisplayAreaOrganizer = displayAreaOrganizer;
         mMainExecutor = mainExecutor;
 
-        shellInit.addInitCallback(this::onInit, this);
+        if (spatialModelAppPushback()) {
+            shellInit.addInitCallback(this::onInit, this);
+        }
     }
 
     private void onInit() {
