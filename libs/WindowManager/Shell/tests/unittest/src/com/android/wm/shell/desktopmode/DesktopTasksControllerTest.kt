@@ -1800,8 +1800,35 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    @EnableFlags(
+        FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY,
+        Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER,
+    )
+    fun moveToNextDisplay_wallpaperOnSystemUser_reorderWallpaperToBack() {
+        // Set up two display ids
+        whenever(rootTaskDisplayAreaOrganizer.displayIds)
+            .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
+        // Create a mock for the target display area: second display
+        val secondDisplayArea = DisplayAreaInfo(MockToken().token(), SECOND_DISPLAY, 0)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECOND_DISPLAY))
+            .thenReturn(secondDisplayArea)
+        // Add a task and a wallpaper
+        val task = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
+
+        controller.moveToNextDisplay(task.taskId)
+
+        with(getLatestWct(type = TRANSIT_CHANGE)) {
+            val wallpaperChange =
+                hierarchyOps.find { op -> op.container == wallpaperToken.asBinder() }
+            assertNotNull(wallpaperChange)
+            assertThat(wallpaperChange.type).isEqualTo(HIERARCHY_OP_TYPE_REORDER)
+        }
+    }
+
+    @Test
     @EnableFlags(FLAG_ENABLE_PER_DISPLAY_DESKTOP_WALLPAPER_ACTIVITY)
-    fun moveToNextDisplay_removeWallpaper() {
+    @DisableFlags(Flags.FLAG_ENABLE_DESKTOP_WALLPAPER_ACTIVITY_FOR_SYSTEM_USER)
+    fun moveToNextDisplay_wallpaperNotOnSystemUser_removeWallpaper() {
         // Set up two display ids
         whenever(rootTaskDisplayAreaOrganizer.displayIds)
             .thenReturn(intArrayOf(DEFAULT_DISPLAY, SECOND_DISPLAY))
