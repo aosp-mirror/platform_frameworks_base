@@ -564,7 +564,8 @@ public class GestureLauncherService extends SystemService {
         return Settings.Secure.getIntForUser(
                 context.getContentResolver(),
                 Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE,
-                LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER,
+                context.getResources().getInteger(
+                        R.integer.config_doubleTapPowerGestureMultiTargetDefaultAction),
                 userId);
     }
 

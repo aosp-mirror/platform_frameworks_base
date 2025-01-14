@@ -166,8 +166,7 @@ public class GestureLauncherServiceTest {
                 new GestureLauncherService(
                         mContext, mMetricsLogger, mQuickAccessWalletClient, mUiEventLogger);
 
-        withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+        Settings.Secure.clearProviderForTest();
     }
 
     private WalletLaunchedReceiver registerWalletLaunchedReceiver(String action) {
@@ -223,7 +222,7 @@ public class GestureLauncherServiceTest {
         withDoubleTapPowerModeConfigValue(
                 DOUBLE_TAP_POWER_DISABLED_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(false);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
 
         assertFalse(mGestureLauncherService.isCameraDoubleTapPowerSettingEnabled(
                 mContext, FAKE_USER_ID));
@@ -244,7 +243,7 @@ public class GestureLauncherServiceTest {
     public void testIsCameraDoubleTapPowerSettingEnabled_flagEnabled_configFalseSettingEnabled() {
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_DISABLED_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
 
         assertFalse(mGestureLauncherService.isCameraDoubleTapPowerSettingEnabled(
                 mContext, FAKE_USER_ID));
@@ -265,7 +264,7 @@ public class GestureLauncherServiceTest {
     public void testIsCameraDoubleTapPowerSettingEnabled_flagEnabled_configTrueSettingDisabled() {
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(false);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
 
         assertFalse(mGestureLauncherService.isCameraDoubleTapPowerSettingEnabled(
                 mContext, FAKE_USER_ID));
@@ -286,7 +285,7 @@ public class GestureLauncherServiceTest {
     public void testIsCameraDoubleTapPowerSettingEnabled_flagEnabled_configTrueSettingEnabled() {
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
 
         assertTrue(mGestureLauncherService.isCameraDoubleTapPowerSettingEnabled(
                 mContext, FAKE_USER_ID));
@@ -329,7 +328,31 @@ public class GestureLauncherServiceTest {
     public void testIsCameraDoubleTapPowerSettingEnabled_actionWallet() {
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
+
+        assertFalse(
+                mGestureLauncherService.isCameraDoubleTapPowerSettingEnabled(
+                        mContext, FAKE_USER_ID));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    public void testIsCameraDoubleTapPowerSettingEnabled_defaultActionCamera() {
+        withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
+        withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
+        withDefaultDoubleTapPowerGestureActionConfig(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+
+        assertTrue(
+                mGestureLauncherService.isCameraDoubleTapPowerSettingEnabled(
+                        mContext, FAKE_USER_ID));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    public void testIsCameraDoubleTapPowerSettingEnabled_defaultActionNotCamera() {
+        withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
+        withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
+        withDefaultDoubleTapPowerGestureActionConfig(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
 
         assertFalse(
                 mGestureLauncherService.isCameraDoubleTapPowerSettingEnabled(
@@ -341,7 +364,7 @@ public class GestureLauncherServiceTest {
     public void testIsWalletDoubleTapPowerSettingEnabled() {
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
 
         assertTrue(
                 mGestureLauncherService.isWalletDoubleTapPowerSettingEnabled(
@@ -353,7 +376,7 @@ public class GestureLauncherServiceTest {
     public void testIsWalletDoubleTapPowerSettingEnabled_configDisabled() {
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_DISABLED_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
 
         assertFalse(
                 mGestureLauncherService.isWalletDoubleTapPowerSettingEnabled(
@@ -365,7 +388,7 @@ public class GestureLauncherServiceTest {
     public void testIsWalletDoubleTapPowerSettingEnabled_settingDisabled() {
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(false);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
 
         assertFalse(
                 mGestureLauncherService.isWalletDoubleTapPowerSettingEnabled(
@@ -377,7 +400,31 @@ public class GestureLauncherServiceTest {
     public void testIsWalletDoubleTapPowerSettingEnabled_actionCamera() {
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+
+        assertFalse(
+                mGestureLauncherService.isWalletDoubleTapPowerSettingEnabled(
+                        mContext, FAKE_USER_ID));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    public void testIsWalletDoubleTapPowerSettingEnabled_defaultActionWallet() {
+        withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
+        withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
+        withDefaultDoubleTapPowerGestureActionConfig(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
+
+        assertTrue(
+                mGestureLauncherService.isWalletDoubleTapPowerSettingEnabled(
+                        mContext, FAKE_USER_ID));
+    }
+
+    @Test
+    @RequiresFlagsEnabled(FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP)
+    public void testIsWalletDoubleTapPowerSettingEnabled_defaultActionNotWallet() {
+        withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
+        withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
+        withDefaultDoubleTapPowerGestureActionConfig(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
 
         assertFalse(
                 mGestureLauncherService.isWalletDoubleTapPowerSettingEnabled(
@@ -1858,12 +1905,18 @@ public class GestureLauncherServiceTest {
                 UserHandle.USER_CURRENT);
     }
 
-    private void withDefaultDoubleTapPowerGestureAction(int action) {
+    private void withDoubleTapPowerGestureActionSettingValue(int action) {
         Settings.Secure.putIntForUser(
                 mContentResolver,
                 Settings.Secure.DOUBLE_TAP_POWER_BUTTON_GESTURE,
                 action,
                 UserHandle.USER_CURRENT);
+    }
+
+    private void withDefaultDoubleTapPowerGestureActionConfig(int action) {
+        when(mResources.getInteger(
+                com.android.internal.R.integer.config_doubleTapPowerGestureMultiTargetDefaultAction
+        )).thenReturn(action);
     }
 
     private void withEmergencyGestureEnabledConfigValue(boolean enableConfigValue) {
@@ -1931,7 +1984,7 @@ public class GestureLauncherServiceTest {
     }
 
     private void enableWalletGesture() {
-        withDefaultDoubleTapPowerGestureAction(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
+        withDoubleTapPowerGestureActionSettingValue(LAUNCH_WALLET_ON_DOUBLE_TAP_POWER);
         withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
         withDoubleTapPowerModeConfigValue(DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
 
@@ -1951,7 +2004,7 @@ public class GestureLauncherServiceTest {
             withDoubleTapPowerModeConfigValue(
                     DOUBLE_TAP_POWER_MULTI_TARGET_MODE);
             withMultiTargetDoubleTapPowerGestureEnableSettingValue(true);
-            withDefaultDoubleTapPowerGestureAction(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
+            withDoubleTapPowerGestureActionSettingValue(LAUNCH_CAMERA_ON_DOUBLE_TAP_POWER);
         } else {
             withCameraDoubleTapPowerEnableConfigValue(true);
             withCameraDoubleTapPowerDisableSettingValue(0);
