@@ -38,6 +38,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -284,8 +285,11 @@ public class IpSecPacketLossDetectorTest extends NetworkEvaluationTestBase {
 
         // Stop the monitor
         mIpSecPacketLossDetector.close();
+        mIpSecPacketLossDetector.close();
         verifyStopped();
-        verify(mIpSecTransform).close();
+
+        verify(mIpSecTransform, never()).close();
+        verify(mContext).unregisterReceiver(any());
     }
 
     @Test
