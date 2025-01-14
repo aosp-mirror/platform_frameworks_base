@@ -582,6 +582,10 @@
     <color name="side_fps_text_color">#191C1D</color>
     <color name="side_fps_button_color">#00677E</color>
 
+    <!-- Color for various surfaces related to system-wide blur -->
+    <color name="surface_effect_0">@color/surface_effect_0_color</color>
+    <color name="surface_effect_1">@color/surface_effect_1_color</color>
+
     <!-- Color for system bars -->
     <color name="navigation_bar_compatible">@android:color/black</color>
     <!-- This uses non-regular transparent intentionally. It is used to tell if the transparent
