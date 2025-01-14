@@ -82,6 +82,7 @@ import java.util.concurrent.CompletableFuture;
 class DragState {
     private static final long MIN_ANIMATION_DURATION_MS = 195;
     private static final long MAX_ANIMATION_DURATION_MS = 375;
+    private static final float DIFFERENT_DISPLAY_RETURN_ANIMATION_SCALE = 0.75f;
 
     private static final int DRAG_FLAGS_URI_ACCESS = View.DRAG_FLAG_GLOBAL_URI_READ |
             View.DRAG_FLAG_GLOBAL_URI_WRITE;
@@ -114,8 +115,9 @@ class DragState {
     boolean mDragResult;
     boolean mRelinquishDragSurfaceToDropTarget;
     float mAnimatedScale = 1.0f;
-    float mOriginalAlpha;
-    float mOriginalDisplayX, mOriginalDisplayY;
+    float mStartDragAlpha;
+    // Coords are in display coordinates space.
+    float mStartDragDisplayX, mStartDragDisplayY;
     float mCurrentDisplayX, mCurrentDisplayY;
     float mThumbOffsetX, mThumbOffsetY;
     InputInterceptor mInputInterceptor;
@@ -497,8 +499,8 @@ class DragState {
      */
     void broadcastDragStartedLocked(final float touchX, final float touchY) {
         Trace.instant(TRACE_TAG_WINDOW_MANAGER, "DragDropController#DRAG_STARTED");
-        mOriginalDisplayX = mCurrentDisplayX = touchX;
-        mOriginalDisplayY = mCurrentDisplayY = touchY;
+        mStartDragDisplayX = mCurrentDisplayX = touchX;
+        mStartDragDisplayY = mCurrentDisplayY = touchY;
 
         // Cache a base-class instance of the clip metadata so that parceling
         // works correctly in calling out to the apps.
@@ -809,21 +811,32 @@ class DragState {
                             mCurrentDisplayY),
                     PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
                             mAnimatedScale),
-                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0f));
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mStartDragAlpha, 0f));
+            duration = MIN_ANIMATION_DURATION_MS;
+        } else if (Flags.enableConnectedDisplaysDnd() && mCurrentDisplayContent.getDisplayId()
+                != mStartDragDisplayContent.getDisplayId()) {
+            animator = ValueAnimator.ofPropertyValuesHolder(
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_X,
+                            mCurrentDisplayX - mThumbOffsetX, mCurrentDisplayX - mThumbOffsetX),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_Y,
+                            mCurrentDisplayY - mThumbOffsetY, mCurrentDisplayY - mThumbOffsetY),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
+                            DIFFERENT_DISPLAY_RETURN_ANIMATION_SCALE * mAnimatedScale),
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mStartDragAlpha, 0f));
             duration = MIN_ANIMATION_DURATION_MS;
         } else {
             animator = ValueAnimator.ofPropertyValuesHolder(
                     PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_X,
-                            mCurrentDisplayX - mThumbOffsetX, mOriginalDisplayX - mThumbOffsetX),
+                            mCurrentDisplayX - mThumbOffsetX, mStartDragDisplayX - mThumbOffsetX),
                     PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_Y,
-                            mCurrentDisplayY - mThumbOffsetY, mOriginalDisplayY - mThumbOffsetY),
+                            mCurrentDisplayY - mThumbOffsetY, mStartDragDisplayY - mThumbOffsetY),
                     PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
                             mAnimatedScale),
-                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha,
-                            mOriginalAlpha / 2));
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mStartDragAlpha,
+                            mStartDragAlpha / 2));
 
-            final float translateX = mOriginalDisplayX - mCurrentDisplayX;
-            final float translateY = mOriginalDisplayY - mCurrentDisplayY;
+            final float translateX = mStartDragDisplayX - mCurrentDisplayX;
+            final float translateY = mStartDragDisplayY - mCurrentDisplayY;
             // Adjust the duration to the travel distance.
             final double travelDistance = Math.sqrt(
                     translateX * translateX + translateY * translateY);
@@ -853,7 +866,7 @@ class DragState {
                             mCurrentDisplayY),
                     PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale,
                             mAnimatedScale),
-                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0f));
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mStartDragAlpha, 0f));
         } else {
             animator = ValueAnimator.ofPropertyValuesHolder(
                     PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_X,
@@ -861,7 +874,7 @@ class DragState {
                     PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_Y,
                             mCurrentDisplayY - mThumbOffsetY, mCurrentDisplayY),
                     PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_SCALE, mAnimatedScale, 0),
-                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mOriginalAlpha, 0));
+                    PropertyValuesHolder.ofFloat(ANIMATED_PROPERTY_ALPHA, mStartDragAlpha, 0));
         }
 
         final AnimationListener listener = new AnimationListener();

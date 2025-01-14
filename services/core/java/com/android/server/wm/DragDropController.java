@@ -212,7 +212,7 @@ class DragDropController {
                     surface = null;
                     mDragState.mPid = callerPid;
                     mDragState.mUid = callerUid;
-                    mDragState.mOriginalAlpha = alpha;
+                    mDragState.mStartDragAlpha = alpha;
                     mDragState.mAnimatedScale = callingWin.mGlobalScale;
                     mDragState.mToken = dragToken;
                     mDragState.mStartDragDisplayContent = displayContent;
@@ -287,7 +287,7 @@ class DragDropController {
                 }
 
                 final SurfaceControl.Transaction transaction = mDragState.mTransaction;
-                transaction.setAlpha(surfaceControl, mDragState.mOriginalAlpha);
+                transaction.setAlpha(surfaceControl, mDragState.mStartDragAlpha);
                 transaction.show(surfaceControl);
                 displayContent.reparentToOverlay(transaction, surfaceControl);
                 mDragState.updateDragSurfaceLocked(true /* keepHandling */,
