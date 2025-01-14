@@ -57,7 +57,7 @@ class ZenModeInteractorTest : SysuiTestCase() {
     private val settingsRepository = kosmos.secureSettingsRepository
     private val deviceProvisioningRepository = kosmos.fakeDeviceProvisioningRepository
 
-    private val underTest = kosmos.zenModeInteractor
+    private val underTest by lazy { kosmos.zenModeInteractor }
 
     @Test
     fun isZenAvailable_off() =
@@ -176,13 +176,13 @@ class ZenModeInteractorTest : SysuiTestCase() {
     @Test
     fun shouldAskForZenDuration_changesWithSetting() =
         kosmos.runTest {
-            val manualDnd = TestModeBuilder().makeManualDnd().setActive(true).build()
+            val manualDnd by collectLastValue(underTest.dndMode)
 
             settingsRepository.setInt(ZEN_DURATION, ZEN_DURATION_FOREVER)
-            assertThat(underTest.shouldAskForZenDuration(manualDnd)).isFalse()
+            assertThat(underTest.shouldAskForZenDuration(manualDnd!!)).isFalse()
 
             settingsRepository.setInt(ZEN_DURATION, ZEN_DURATION_PROMPT)
-            assertThat(underTest.shouldAskForZenDuration(manualDnd)).isTrue()
+            assertThat(underTest.shouldAskForZenDuration(manualDnd!!)).isTrue()
         }
 
     @Test

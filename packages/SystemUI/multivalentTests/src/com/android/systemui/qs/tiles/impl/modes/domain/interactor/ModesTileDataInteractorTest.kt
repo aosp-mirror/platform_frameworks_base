@@ -58,7 +58,9 @@ class ModesTileDataInteractorTest : SysuiTestCase() {
     private val dispatcher = kosmos.testDispatcher
     private val zenModeRepository = kosmos.fakeZenModeRepository
 
-    private val underTest = ModesTileDataInteractor(context, kosmos.zenModeInteractor, dispatcher)
+    private val underTest by lazy {
+        ModesTileDataInteractor(context, kosmos.zenModeInteractor, dispatcher)
+    }
 
     @Before
     fun setUp() {

@@ -54,7 +54,7 @@ class EmptyShadeViewModelTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val activeNotificationListRepository = kosmos.activeNotificationListRepository
     private val fakeSecureSettingsRepository = kosmos.fakeSecureSettingsRepository
 
-    private val underTest = kosmos.emptyShadeViewModel
+    private val underTest by lazy { kosmos.emptyShadeViewModel }
 
     companion object {
         @JvmStatic
