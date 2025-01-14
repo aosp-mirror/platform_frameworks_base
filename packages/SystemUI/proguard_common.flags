@@ -58,3 +58,8 @@
   static *** v(...);
 }
 -maximumremovedandroidloglevel 2
+
+#Keep the R
+-keepclassmembers class com.android.systemui.customization.R$* {
+    public static <fields>;
+}
