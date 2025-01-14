@@ -6627,7 +6627,20 @@ public class Notification implements Parcelable
          */
         @Deprecated
         public RemoteViews createContentView() {
-            return createContentView(false /* increasedheight */ );
+            if (useExistingRemoteView(mN.contentView)) {
+                return fullyCustomViewRequiresDecoration(false /* fromStyle */)
+                        ? minimallyDecoratedContentView(mN.contentView) : mN.contentView;
+            } else if (mStyle != null) {
+                final RemoteViews styleView = mStyle.makeContentView();
+                if (styleView != null) {
+                    return fullyCustomViewRequiresDecoration(true /* fromStyle */)
+                            ? minimallyDecoratedContentView(styleView) : styleView;
+                }
+            }
+            StandardTemplateParams p = mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
+                    .fillTextsFrom(this);
+            return applyStandardTemplate(getCollapsedBaseLayoutResource(), p, null /* result */);
         }
 
         // This code is executed on behalf of other apps' notifications, sometimes even by 3p apps,
@@ -6686,33 +6699,6 @@ public class Notification implements Parcelable
             buildCustomContentIntoTemplate(mContext, standard, customContent,
                     p, result);
             return standard;
-        }
-
-        /**
-         * Construct a RemoteViews for the smaller content view.
-         *
-         *   @param increasedHeight true if this layout be created with an increased height. Some
-         *   styles may support showing more then just that basic 1U size
-         *   and the system may decide to render important notifications
-         *   slightly bigger even when collapsed.
-         *
-         *   @hide
-         */
-        public RemoteViews createContentView(boolean increasedHeight) {
-            if (useExistingRemoteView(mN.contentView)) {
-                return fullyCustomViewRequiresDecoration(false /* fromStyle */)
-                        ? minimallyDecoratedContentView(mN.contentView) : mN.contentView;
-            } else if (mStyle != null) {
-                final RemoteViews styleView = mStyle.makeContentView(increasedHeight);
-                if (styleView != null) {
-                    return fullyCustomViewRequiresDecoration(true /* fromStyle */)
-                            ? minimallyDecoratedContentView(styleView) : styleView;
-                }
-            }
-            StandardTemplateParams p = mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
-                    .fillTextsFrom(this);
-            return applyStandardTemplate(getCollapsedBaseLayoutResource(), p, null /* result */);
         }
 
         private boolean useExistingRemoteView(RemoteViews customContent) {
@@ -6850,48 +6836,13 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Construct a RemoteViews for the final heads-up notification layout.
-         *
-         * @param increasedHeight true if this layout be created with an increased height. Some
-         * styles may support showing more then just that basic 1U size
-         * and the system may decide to render important notifications
-         * slightly bigger even when collapsed.
-         *
-         * @hide
-         */
-        public RemoteViews createHeadsUpContentView(boolean increasedHeight) {
-            if (useExistingRemoteView(mN.headsUpContentView)) {
-                return fullyCustomViewRequiresDecoration(false /* fromStyle */)
-                        ? minimallyDecoratedHeadsUpContentView(mN.headsUpContentView)
-                        : mN.headsUpContentView;
-            } else if (mStyle != null) {
-                final RemoteViews styleView = mStyle.makeHeadsUpContentView(increasedHeight);
-                if (styleView != null) {
-                    return fullyCustomViewRequiresDecoration(true /* fromStyle */)
-                            ? minimallyDecoratedHeadsUpContentView(styleView) : styleView;
-                }
-            } else if (mActions.size() == 0) {
-                return null;
-            }
-
-            // We only want at most a single remote input history to be shown here, otherwise
-            // the content would become squished.
-            StandardTemplateParams p = mParams.reset()
-                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
-                    .fillTextsFrom(this)
-                    .setMaxRemoteInputHistory(1);
-            return applyStandardTemplateWithActions(getHeadsUpBaseLayoutResource(), p,
-                    null /* result */);
-        }
-
-        /**
          * Construct a RemoteViews for the final compact heads-up notification layout.
          * @hide
          */
         public RemoteViews createCompactHeadsUpContentView() {
             // Don't show compact heads up for FSI notifications.
             if (mN.fullScreenIntent != null) {
-                return createHeadsUpContentView(/* increasedHeight= */ false);
+                return createHeadsUpContentView();
             }
 
             if (mStyle != null) {
@@ -6929,7 +6880,28 @@ public class Notification implements Parcelable
          */
         @Deprecated
         public RemoteViews createHeadsUpContentView() {
-            return createHeadsUpContentView(false /* useIncreasedHeight */);
+            if (useExistingRemoteView(mN.headsUpContentView)) {
+                return fullyCustomViewRequiresDecoration(false /* fromStyle */)
+                        ? minimallyDecoratedHeadsUpContentView(mN.headsUpContentView)
+                        : mN.headsUpContentView;
+            } else if (mStyle != null) {
+                final RemoteViews styleView = mStyle.makeHeadsUpContentView();
+                if (styleView != null) {
+                    return fullyCustomViewRequiresDecoration(true /* fromStyle */)
+                            ? minimallyDecoratedHeadsUpContentView(styleView) : styleView;
+                }
+            } else if (mActions.size() == 0) {
+                return null;
+            }
+
+            // We only want at most a single remote input history to be shown here, otherwise
+            // the content would become squished.
+            StandardTemplateParams p = mParams.reset()
+                    .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
+                    .fillTextsFrom(this)
+                    .setMaxRemoteInputHistory(1);
+            return applyStandardTemplateWithActions(getHeadsUpBaseLayoutResource(), p,
+                    null /* result */);
         }
 
         /**
@@ -8236,10 +8208,9 @@ public class Notification implements Parcelable
          * Construct a Style-specific RemoteViews for the collapsed notification layout.
          * The default implementation has nothing additional to add.
          *
-         * @param increasedHeight true if this layout be created with an increased height.
          * @hide
          */
-        public RemoteViews makeContentView(boolean increasedHeight) {
+        public RemoteViews makeContentView() {
             return null;
         }
 
@@ -8254,10 +8225,9 @@ public class Notification implements Parcelable
         /**
          * Construct a Style-specific RemoteViews for the final HUN layout.
          *
-         * @param increasedHeight true if this layout be created with an increased height.
          * @hide
          */
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+        public RemoteViews makeHeadsUpContentView() {
             return null;
         }
 
@@ -8543,9 +8513,9 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView(boolean increasedHeight) {
+        public RemoteViews makeContentView() {
             if (mPictureIcon == null || !mShowBigPictureWhenCollapsed) {
-                return super.makeContentView(increasedHeight);
+                return super.makeContentView();
             }
 
             StandardTemplateParams p = mBuilder.mParams.reset()
@@ -8559,9 +8529,9 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+        public RemoteViews makeHeadsUpContentView() {
             if (mPictureIcon == null || !mShowBigPictureWhenCollapsed) {
-                return super.makeHeadsUpContentView(increasedHeight);
+                return super.makeHeadsUpContentView();
             }
 
             StandardTemplateParams p = mBuilder.mParams.reset()
@@ -8789,35 +8759,6 @@ public class Notification implements Parcelable
             super.restoreFromExtras(extras);
 
             mBigText = extras.getCharSequence(EXTRA_BIG_TEXT);
-        }
-
-        /**
-         * @param increasedHeight true if this layout be created with an increased height.
-         *
-         * @hide
-         */
-        @Override
-        public RemoteViews makeContentView(boolean increasedHeight) {
-            if (increasedHeight) {
-                ArrayList<Action> originalActions = mBuilder.mActions;
-                mBuilder.mActions = new ArrayList<>();
-                RemoteViews remoteViews = makeExpandedContentView();
-                mBuilder.mActions = originalActions;
-                return remoteViews;
-            }
-            return super.makeContentView(increasedHeight);
-        }
-
-        /**
-         * @hide
-         */
-        @Override
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
-            if (increasedHeight && mBuilder.mActions.size() > 0) {
-                // TODO(b/163626038): pass VIEW_TYPE_HEADS_UP?
-                return makeExpandedContentView();
-            }
-            return super.makeHeadsUpContentView(increasedHeight);
         }
 
         /**
@@ -9404,7 +9345,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView(boolean increasedHeight) {
+        public RemoteViews makeContentView() {
             // All messaging templates contain the actions
             ArrayList<Action> originalActions = mBuilder.mActions;
             try {
@@ -9649,7 +9590,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+        public RemoteViews makeHeadsUpContentView() {
             return makeMessagingView(StandardTemplateParams.VIEW_TYPE_HEADS_UP);
         }
 
@@ -10484,7 +10425,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView(boolean increasedHeight) {
+        public RemoteViews makeContentView() {
             return makeMediaContentView(null /* customContent */);
         }
 
@@ -10500,7 +10441,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+        public RemoteViews makeHeadsUpContentView() {
             return makeMediaContentView(null /* customContent */);
         }
 
@@ -10913,7 +10854,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView(boolean increasedHeight) {
+        public RemoteViews makeContentView() {
             return makeCallLayout(StandardTemplateParams.VIEW_TYPE_NORMAL);
         }
 
@@ -10921,7 +10862,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+        public RemoteViews makeHeadsUpContentView() {
             return makeCallLayout(StandardTemplateParams.VIEW_TYPE_HEADS_UP);
         }
 
@@ -10932,7 +10873,7 @@ public class Notification implements Parcelable
         @Override
         public RemoteViews makeCompactHeadsUpContentView() {
             // Use existing heads up for call style.
-            return makeHeadsUpContentView(false);
+            return makeHeadsUpContentView();
         }
 
         /**
@@ -11701,7 +11642,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView(boolean increasedHeight) {
+        public RemoteViews makeContentView() {
             final StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_NORMAL)
                     .hideProgress(true)
@@ -11713,7 +11654,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+        public RemoteViews makeHeadsUpContentView() {
             final StandardTemplateParams p = mBuilder.mParams.reset()
                     .viewType(StandardTemplateParams.VIEW_TYPE_HEADS_UP)
                     .hideProgress(true)
@@ -12192,7 +12133,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView(boolean increasedHeight) {
+        public RemoteViews makeContentView() {
             return makeStandardTemplateWithCustomContent(mBuilder.mN.contentView);
         }
 
@@ -12208,7 +12149,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+        public RemoteViews makeHeadsUpContentView() {
             return makeDecoratedHeadsUpContentView();
         }
 
@@ -12328,7 +12269,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeContentView(boolean increasedHeight) {
+        public RemoteViews makeContentView() {
             return makeMediaContentView(mBuilder.mN.contentView);
         }
 
@@ -12347,7 +12288,7 @@ public class Notification implements Parcelable
          * @hide
          */
         @Override
-        public RemoteViews makeHeadsUpContentView(boolean increasedHeight) {
+        public RemoteViews makeHeadsUpContentView() {
             RemoteViews customContent = mBuilder.mN.headsUpContentView != null
                     ? mBuilder.mN.headsUpContentView
                     : mBuilder.mN.contentView;

@@ -822,11 +822,7 @@ constructor(
                             entryForLogging,
                             "creating contracted remote view",
                         )
-                        createContentView(
-                            builder,
-                            bindParams.isMinimized,
-                            bindParams.usesIncreasedHeight,
-                        )
+                        createContentView(builder, bindParams.isMinimized)
                     } else null
                 val expanded =
                     if (reInflateFlags and FLAG_CONTENT_VIEW_EXPANDED != 0) {
@@ -846,7 +842,7 @@ constructor(
                         if (isHeadsUpCompact) {
                             builder.createCompactHeadsUpContentView()
                         } else {
-                            builder.createHeadsUpContentView(bindParams.usesIncreasedHeadsUpHeight)
+                            @Suppress("DEPRECATION") builder.createHeadsUpContentView()
                         }
                     } else null
                 val public =
@@ -862,7 +858,7 @@ constructor(
                                     systemUiContext,
                                     packageContext,
                                 )
-                                .createContentView(bindParams.usesIncreasedHeight)
+                                .createContentView()
                         } else {
                             builder.makePublicContentView(bindParams.isMinimized)
                         }
@@ -1654,11 +1650,12 @@ constructor(
         private fun createContentView(
             builder: Notification.Builder,
             isMinimized: Boolean,
-            useLarge: Boolean,
         ): RemoteViews {
             return if (isMinimized) {
                 builder.makeLowPriorityContentView(false /* useRegularSubtext */)
-            } else builder.createContentView(useLarge)
+            } else {
+                @Suppress("DEPRECATION") builder.createContentView()
+            }
         }
 
         /**

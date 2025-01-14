@@ -144,43 +144,6 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
     }
 
     @Test
-    fun testIncreasedHeadsUpBeingUsed() {
-        val params =
-            BindParams(false, false, /* usesIncreasedHeadsUpHeight */ true, REDACTION_TYPE_NONE)
-        val builder = spy(builder)
-        notificationInflater.inflateNotificationViews(
-            row.entry,
-            row,
-            params,
-            true, /* inflateSynchronously */
-            FLAG_CONTENT_VIEW_ALL,
-            builder,
-            mContext,
-            smartReplyStateInflater,
-            mock(),
-        )
-        verify(builder).createHeadsUpContentView(true)
-    }
-
-    @Test
-    fun testIncreasedHeightBeingUsed() {
-        val params = BindParams(false, /* usesIncreasedHeight */ true, false, REDACTION_TYPE_NONE)
-        val builder = spy(builder)
-        notificationInflater.inflateNotificationViews(
-            row.entry,
-            row,
-            params,
-            true, /* inflateSynchronously */
-            FLAG_CONTENT_VIEW_ALL,
-            builder,
-            mContext,
-            smartReplyStateInflater,
-            mock(),
-        )
-        verify(builder).createContentView(true)
-    }
-
-    @Test
     fun testInflationCallsUpdated() {
         inflateAndWait(notificationInflater, FLAG_CONTENT_VIEW_ALL, row)
         verify(row).onNotificationUpdated()
@@ -226,7 +189,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
             row.entry,
             row,
             FLAG_CONTENT_VIEW_ALL,
-            BindParams(false, false, false, REDACTION_TYPE_NONE),
+            BindParams(false, REDACTION_TYPE_NONE),
             false, /* forceInflate */
             null, /* callback */
         )
@@ -703,7 +666,7 @@ class NotificationRowContentBinderImplTest : SysuiTestCase() {
                 row.entry,
                 row,
                 contentToInflate,
-                BindParams(false, false, false, redactionType),
+                BindParams(false, redactionType),
                 false, /* forceInflate */
                 callback, /* callback */
             )

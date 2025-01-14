@@ -93,7 +93,6 @@ constructor(
             clickerBuilder.build(bubblesOptional, notificationActivityStarter)
         )
         notificationRowBinder.setUpWithPresenter(presenter, listContainer)
-        headsUpViewBinder.setPresenter(presenter)
         notifBindPipelineInitializer.initialize()
         animatedImageNotificationManager.bind()
 

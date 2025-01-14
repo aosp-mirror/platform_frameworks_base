@@ -248,8 +248,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
             @NonNull NotifInflater.Params inflaterParams,
             ExpandableNotificationRow row,
             @Nullable NotificationRowContentBinder.InflationCallback inflationCallback) {
-        final boolean useIncreasedCollapsedHeight =
-                mMessagingUtil.isImportantMessaging(entry.getSbn(), entry.getImportance());
         final boolean isMinimized = inflaterParams.isMinimized();
 
         // Set show snooze action
@@ -258,7 +256,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         RowContentBindParams params = mRowContentBindStage.getStageParams(entry);
         params.requireContentViews(FLAG_CONTENT_VIEW_CONTRACTED);
         params.requireContentViews(FLAG_CONTENT_VIEW_EXPANDED);
-        params.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         params.setUseMinimized(isMinimized);
         int redactionType = inflaterParams.getRedactionType();
 
@@ -303,7 +300,6 @@ public class NotificationRowBinderImpl implements NotificationRowBinder {
         mLogger.logRequestingRebind(entry, inflaterParams);
         mRowContentBindStage.requestRebind(entry, en -> {
             mLogger.logRebindComplete(entry);
-            row.setUsesIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
             row.setIsMinimized(isMinimized);
             if (inflationCallback != null) {
                 inflationCallback.onAsyncInflationFinished(en);
