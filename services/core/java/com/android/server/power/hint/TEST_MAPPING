@@ -15,5 +15,22 @@
         {"exclude-annotation": "org.junit.Ignore"}
       ]
     }
+  ],
+  "postsubmit": [
+    {
+      "name": "CtsSystemHealthTestCases",
+      "options": [
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    },
+    {
+      "name": "CtsOsTestCases",
+      "options": [
+        {"include-filter": "android.os.health.cts.HeadroomTest"},
+        {"exclude-annotation": "androidx.test.filters.FlakyTest"},
+        {"exclude-annotation": "org.junit.Ignore"}
+      ]
+    }
   ]
 }
