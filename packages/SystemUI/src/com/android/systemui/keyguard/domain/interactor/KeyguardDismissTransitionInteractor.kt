@@ -16,23 +16,31 @@
 
 package com.android.systemui.keyguard.domain.interactor
 
+import android.animation.ValueAnimator
 import android.util.Log
 import com.android.systemui.Flags.transitionRaceCondition
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.keyguard.data.repository.KeyguardTransitionRepository
 import com.android.systemui.keyguard.shared.model.KeyguardState
 import com.android.systemui.keyguard.shared.model.KeyguardState.ALTERNATE_BOUNCER
 import com.android.systemui.keyguard.shared.model.KeyguardState.AOD
 import com.android.systemui.keyguard.shared.model.KeyguardState.DOZING
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
+import com.android.systemui.keyguard.shared.model.KeyguardState.OCCLUDED
 import com.android.systemui.keyguard.shared.model.KeyguardState.PRIMARY_BOUNCER
+import com.android.systemui.keyguard.shared.model.TransitionInfo
+import com.android.systemui.keyguard.shared.model.TransitionModeOnCanceled
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import javax.inject.Inject
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.launch
 
 @SysUISingleton
 class KeyguardDismissTransitionInteractor
 @Inject
 constructor(
+    @Background private val scope: CoroutineScope,
     private val repository: KeyguardTransitionRepository,
     private val fromLockscreenTransitionInteractor: FromLockscreenTransitionInteractor,
     private val fromPrimaryBouncerTransitionInteractor: FromPrimaryBouncerTransitionInteractor,
@@ -43,45 +51,63 @@ constructor(
 ) {
 
     /**
-     * Called to start a transition that will ultimately dismiss the keyguard from the current
-     * state.
+     * Launches a coroutine to start a transition that will ultimately dismiss the keyguard from the
+     * current state.
      *
      * This is called exclusively by sources that can authoritatively say we should be unlocked,
      * including KeyguardSecurityContainerController and WindowManager.
      *
-     * Returns [false] if the transition was not started, because we're already GONE or we don't
-     * know how to dismiss keyguard from the current state.
+     * This is one of the few transitions that is started outside of the From*TransitionInteractor
+     * classes. This is because this is an external call that must be respected, so it doesn't
+     * matter what state we're in/coming from - we must transition from that state to GONE.
+     *
+     * Invokes [onAlreadyGone] if the transition was not started because we're already GONE by the
+     * time the coroutine runs.
      */
-    fun startDismissKeyguardTransition(reason: String = ""): Boolean {
-        if (SceneContainerFlag.isEnabled) return false
+    @JvmOverloads
+    fun startDismissKeyguardTransition(reason: String = "", onAlreadyGone: (() -> Unit)? = null) {
+        if (SceneContainerFlag.isEnabled) return
         Log.d(TAG, "#startDismissKeyguardTransition(reason=$reason)")
-        val startedState =
-            if (transitionRaceCondition()) {
-                repository.currentTransitionInfo.to
+
+        scope.launch {
+            val startedState =
+                if (transitionRaceCondition()) {
+                    repository.currentTransitionInfo.to
+                } else {
+                    repository.currentTransitionInfoInternal.value.to
+                }
+
+            val animator: ValueAnimator? =
+                when (startedState) {
+                    LOCKSCREEN -> fromLockscreenTransitionInteractor
+                    PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor
+                    ALTERNATE_BOUNCER -> fromAlternateBouncerTransitionInteractor
+                    AOD -> fromAodTransitionInteractor
+                    DOZING -> fromDozingTransitionInteractor
+                    OCCLUDED -> fromOccludedTransitionInteractor
+                    else -> null
+                }?.getDefaultAnimatorForTransitionsToState(KeyguardState.GONE)
+
+            if (startedState != KeyguardState.GONE && animator != null) {
+                repository.startTransition(
+                    TransitionInfo(
+                        "KeyguardDismissTransitionInteractor" +
+                            if (reason.isNotBlank()) "($reason)" else "",
+                        startedState,
+                        KeyguardState.GONE,
+                        animator,
+                        TransitionModeOnCanceled.LAST_VALUE,
+                    )
+                )
             } else {
-                repository.currentTransitionInfoInternal.value.to
-            }
-        when (startedState) {
-            LOCKSCREEN -> fromLockscreenTransitionInteractor.dismissKeyguard()
-            PRIMARY_BOUNCER -> fromPrimaryBouncerTransitionInteractor.dismissPrimaryBouncer()
-            ALTERNATE_BOUNCER -> fromAlternateBouncerTransitionInteractor.dismissAlternateBouncer()
-            AOD -> fromAodTransitionInteractor.dismissAod()
-            DOZING -> fromDozingTransitionInteractor.dismissFromDozing()
-            KeyguardState.OCCLUDED -> fromOccludedTransitionInteractor.dismissFromOccluded()
-            KeyguardState.GONE -> {
                 Log.i(
                     TAG,
-                    "Already transitioning to GONE; ignoring startDismissKeyguardTransition.",
+                    "Can't transition to GONE from $startedState; " +
+                        "ignoring startDismissKeyguardTransition.",
                 )
-                return false
-            }
-            else -> {
-                Log.e(TAG, "We don't know how to dismiss keyguard from state $startedState.")
-                return false
+                onAlreadyGone?.invoke()
             }
         }
-
-        return true
     }
 
     companion object {
