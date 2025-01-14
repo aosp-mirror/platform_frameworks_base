@@ -1766,28 +1766,22 @@ public final class DisplayManagerGlobal {
         }
 
         if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_CHANGED) != 0) {
-            // For backward compatibility, a client subscribing to
-            // DisplayManager.EVENT_FLAG_DISPLAY_CHANGED will be enrolled to both Basic and
-            // RR changes
-            baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED
-                    | INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
+            baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_BASIC_CHANGED;
         }
 
-        if ((eventFlags
-                & DisplayManager.EVENT_TYPE_DISPLAY_REMOVED) != 0) {
+        if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_REMOVED) != 0) {
             baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REMOVED;
         }
 
-        if (Flags.displayListenerPerformanceImprovements()) {
-            if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_REFRESH_RATE) != 0) {
-                baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
-            }
+        if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_REFRESH_RATE) != 0) {
+            baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_REFRESH_RATE;
+        }
 
+        if (Flags.displayListenerPerformanceImprovements()) {
             if ((eventFlags & DisplayManager.EVENT_TYPE_DISPLAY_STATE) != 0) {
                 baseEventMask |= INTERNAL_EVENT_FLAG_DISPLAY_STATE;
             }
         }
-
 
         return baseEventMask;
     }
