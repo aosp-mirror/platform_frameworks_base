@@ -503,7 +503,10 @@ public abstract class MediaRoute2ProviderService extends Service {
 
         String sessionId = sessionInfo.getId();
         synchronized (mSessionLock) {
-            if (mSessionInfos.containsKey(sessionId)) {
+            var mediaStreams = mOngoingMediaStreams.get(sessionId);
+            if (Flags.enableMirroringInMediaRouter2() && mediaStreams != null) {
+                mediaStreams.mSessionInfo = sessionInfo;
+            } else if (mSessionInfos.containsKey(sessionId)) {
                 mSessionInfos.put(sessionId, sessionInfo);
             } else {
                 Log.w(TAG, "notifySessionUpdated: Ignoring unknown session info.");
@@ -836,6 +839,9 @@ public abstract class MediaRoute2ProviderService extends Service {
         List<RoutingSessionInfo> sessions;
         synchronized (mSessionLock) {
             sessions = new ArrayList<>(mSessionInfos.values());
+            if (Flags.enableMirroringInMediaRouter2()) {
+                mOngoingMediaStreams.values().forEach(it -> sessions.add(it.mSessionInfo));
+            }
         }
 
         try {
@@ -888,7 +894,13 @@ public abstract class MediaRoute2ProviderService extends Service {
                 Log.w(TAG, description + ": Ignoring empty sessionId from system service.");
                 return false;
             }
-            if (getSessionInfo(sessionId) == null) {
+            boolean idMatchesSystemSession = false;
+            if (Flags.enableMirroringInMediaRouter2()) {
+                synchronized (mSessionLock) {
+                    idMatchesSystemSession = mOngoingMediaStreams.containsKey(sessionId);
+                }
+            }
+            if (!idMatchesSystemSession && getSessionInfo(sessionId) == null) {
                 Log.w(TAG, description + ": Ignoring unknown session from system service. "
                         + "sessionId=" + sessionId);
                 return false;
@@ -1079,8 +1091,8 @@ public abstract class MediaRoute2ProviderService extends Service {
          *
          * @hide
          */
-        @GuardedBy("MediaRoute2ProviderService.this.mSessionLock")
         @NonNull
+        // Access guarded by mSessionsLock, but it's not convenient to enforce through @GuardedBy.
         private RoutingSessionInfo mSessionInfo;
 
         // TODO: b/380431086: Add the video equivalent.

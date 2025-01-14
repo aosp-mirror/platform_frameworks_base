@@ -128,8 +128,20 @@ import java.util.stream.Stream;
                                 targetProviderProxyId, existingSession.getProviderId())) {
                     // The currently selected route and target route both belong to the same
                     // provider. We tell the provider to handle the transfer.
-                    targetProviderProxyRecord.requestTransfer(
-                            existingSession.getOriginalId(), serviceTargetRoute);
+                    if (serviceTargetRoute == null) {
+                        notifyRequestFailed(
+                                requestId, MediaRoute2ProviderService.REASON_ROUTE_NOT_AVAILABLE);
+                    } else {
+                        targetProviderProxyRecord.mProxy.transferToRoute(
+                                requestId,
+                                clientUserHandle,
+                                clientPackageName,
+                                existingSession.getOriginalId(),
+                                targetProviderProxyRecord.mNewOriginalIdToSourceOriginalIdMap.get(
+                                        routeOriginalId),
+                                transferReason);
+                    }
+                    return;
                 } else {
                     // The target route is handled by a provider other than the target one. We need
                     // to release the existing session.
@@ -429,11 +441,6 @@ import java.util.stream.Stream;
             }
         }
 
-        public void requestTransfer(String sessionId, MediaRoute2Info targetRoute) {
-            // TODO: Map the target route to the source route original id.
-            throw new UnsupportedOperationException("TODO Implement");
-        }
-
         public void releaseSession(long requestId, String originalSessionId) {
             mProxy.releaseSession(requestId, originalSessionId);
         }
@@ -491,18 +498,19 @@ import java.util.stream.Stream;
                     () -> {
                         if (mSessionRecord != null) {
                             mSessionRecord.onSessionUpdate(sessionInfo);
+                        } else {
+                            SystemMediaSessionRecord systemMediaSessionRecord =
+                                    new SystemMediaSessionRecord(mProviderId, sessionInfo);
+                            RoutingSessionInfo translatedSession;
+                            synchronized (mLock) {
+                                mSessionRecord = systemMediaSessionRecord;
+                                mPackageNameToSessionRecord.put(
+                                        mClientPackageName, systemMediaSessionRecord);
+                                mPendingSessionCreations.remove(mRequestId);
+                                translatedSession = systemMediaSessionRecord.mTranslatedSessionInfo;
+                            }
+                            onSessionOverrideUpdated(translatedSession);
                         }
-                        SystemMediaSessionRecord systemMediaSessionRecord =
-                                new SystemMediaSessionRecord(mProviderId, sessionInfo);
-                        RoutingSessionInfo translatedSession;
-                        synchronized (mLock) {
-                            mSessionRecord = systemMediaSessionRecord;
-                            mPackageNameToSessionRecord.put(
-                                    mClientPackageName, systemMediaSessionRecord);
-                            mPendingSessionCreations.remove(mRequestId);
-                            translatedSession = systemMediaSessionRecord.mTranslatedSessionInfo;
-                        }
-                        onSessionOverrideUpdated(translatedSession);
                     });
         }
 
@@ -546,7 +554,6 @@ import java.util.stream.Stream;
          * The same as {@link #mSourceSessionInfo}, except ids are {@link #asSystemRouteId system
          * provider ids}.
          */
-        @GuardedBy("SystemMediaRoute2Provider2.this.mLock")
         @NonNull
         private RoutingSessionInfo mTranslatedSessionInfo;
 
@@ -559,10 +566,10 @@ import java.util.stream.Stream;
 
         @Override
         public void onSessionUpdate(@NonNull RoutingSessionInfo sessionInfo) {
-            RoutingSessionInfo translatedSessionInfo = mTranslatedSessionInfo;
+            RoutingSessionInfo translatedSessionInfo = asSystemProviderSession(sessionInfo);
             synchronized (mLock) {
                 mSourceSessionInfo = sessionInfo;
-                mTranslatedSessionInfo = asSystemProviderSession(sessionInfo);
+                mTranslatedSessionInfo = translatedSessionInfo;
             }
             onSessionOverrideUpdated(translatedSessionInfo);
         }
