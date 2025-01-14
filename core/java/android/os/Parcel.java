@@ -50,6 +50,7 @@ import com.android.internal.util.ArrayUtils;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
+import dalvik.annotation.optimization.NeverInline;
 
 import libcore.util.SneakyThrow;
 
@@ -628,6 +629,19 @@ public final class Parcel {
         }
     }
 
+    @NeverInline
+    private void errorUsedWhileRecycling() {
+        String error = "Parcel used while recycled. "
+                + Log.getStackTraceString(new Throwable())
+                + " Original recycle call (if DEBUG_RECYCLE): ", mStack;
+        Log.wtf(TAG, error);
+        // TODO(b/381155347): harder error
+    }
+
+    private void assertNotRecycled() {
+        if (mRecycled) errorUsedWhileRecycling();
+    }
+
     /**
      * Set a {@link ReadWriteHelper}, which can be used to avoid having duplicate strings, for
      * example.
@@ -1180,6 +1194,7 @@ public final class Parcel {
      * growing dataCapacity() if needed.
      */
     public final void writeInt(int val) {
+        assertNotRecycled();
         int err = nativeWriteInt(mNativePtr, val);
         if (err != OK) {
             nativeSignalExceptionForError(err);
@@ -3282,6 +3297,7 @@ public final class Parcel {
      * Read an integer value from the parcel at the current dataPosition().
      */
     public final int readInt() {
+        assertNotRecycled();
         return nativeReadInt(mNativePtr);
     }
 
