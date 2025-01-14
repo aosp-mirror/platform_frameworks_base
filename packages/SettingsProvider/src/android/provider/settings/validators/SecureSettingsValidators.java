@@ -454,6 +454,5 @@ public class SecureSettingsValidators {
         VALIDATORS.put(Secure.MANDATORY_BIOMETRICS_REQUIREMENTS_SATISFIED,
                 new InclusiveIntegerRangeValidator(0, 1));
         VALIDATORS.put(Secure.ADVANCED_PROTECTION_MODE, BOOLEAN_VALIDATOR);
-        VALIDATORS.put(Secure.DISABLE_ADAPTIVE_AUTH_LIMIT_LOCK, BOOLEAN_VALIDATOR);
     }
 }
