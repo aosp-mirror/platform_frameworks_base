@@ -32,3 +32,11 @@ flag {
   description: "Flag that deprecates supervision methods in DPM"
   bug: "382034839"
 }
+
+flag {
+  name: "enable_supervision_app_service"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag to enable the SupervisionAppService"
+  bug: "389123070"
+}
