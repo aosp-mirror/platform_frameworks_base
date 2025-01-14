@@ -1024,6 +1024,55 @@ public class LayoutTest {
         expect.that(backgroundCommands.size()).isEqualTo(backgroundRectsDrawn);
     }
 
+    @Test
+    @RequiresFlagsEnabled(FLAG_HIGH_CONTRAST_TEXT_SMALL_TEXT_RECT)
+    public void highContrastTextEnabled_testWhitespaceText_DrawsBackgroundsWithAdjacentLetters() {
+        mTextPaint.setColor(Color.BLACK);
+        SpannableString spannedText = new SpannableString("Test\tTap and Space");
+
+        // Set the entire text to white initially
+        spannedText.setSpan(
+                new ForegroundColorSpan(Color.WHITE),
+                /* start= */ 0,
+                /* end= */ spannedText.length(),
+                Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+        );
+
+        // Find the whitespace character and set its color to black
+        for (int i = 0; i < spannedText.length(); i++) {
+            if (Character.isWhitespace(spannedText.charAt(i))) {
+                spannedText.setSpan(
+                        new ForegroundColorSpan(Color.BLACK),
+                        i,
+                        i + 1,
+                        Spanned.SPAN_INCLUSIVE_EXCLUSIVE
+                );
+            }
+        }
+
+        Layout layout = new StaticLayout(spannedText, mTextPaint, mWidth,
+                mAlign, mSpacingMult, mSpacingAdd, /* includePad= */ false);
+
+        MockCanvas c = new MockCanvas(/* width= */ 256, /* height= */ 256);
+        c.setHighContrastTextEnabled(true);
+        layout.draw(
+                c,
+                /* highlightPaths= */ null,
+                /* highlightPaints= */ null,
+                /* selectionPath= */ null,
+                /* selectionPaint= */ null,
+                /* cursorOffsetVertical= */ 0
+        );
+
+        List<MockCanvas.DrawCommand> drawCommands = c.getDrawCommands();
+        for (int i = 0; i < drawCommands.size(); i++) {
+            MockCanvas.DrawCommand drawCommand = drawCommands.get(i);
+            if (drawCommand.rect != null) {
+                expect.that(removeAlpha(drawCommand.paint.getColor())).isEqualTo(Color.BLACK);
+            }
+        }
+    }
+
     private int removeAlpha(int color) {
         return Color.rgb(
                 Color.red(color),
