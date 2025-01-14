@@ -41,6 +41,9 @@ import com.android.internal.os.PowerProfile;
 import com.android.internal.power.EnergyConsumerStats;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Queue;
@@ -49,6 +52,18 @@ import java.util.Queue;
  * Mocks a BatteryStatsImpl object.
  */
 public class MockBatteryStatsImpl extends BatteryStatsImpl {
+    public static final BatteryHistoryDirectory.Compressor PASS_THROUGH_COMPRESSOR =
+            new BatteryHistoryDirectory.Compressor() {
+                @Override
+                public void compress(OutputStream stream, byte[] data) throws IOException {
+                    stream.write(data);
+                }
+
+                @Override
+                public void uncompress(byte[] data, InputStream stream) throws IOException {
+                    readFully(data, stream);
+                }
+            };
     public boolean mForceOnBattery;
     // The mNetworkStats will be used for both wifi and mobile categories
     private NetworkStats mNetworkStats;
@@ -83,7 +98,11 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, MonotonicClock monotonicClock,
             File historyDirectory, Handler handler, PowerProfile powerProfile,
             PowerStatsUidResolver powerStatsUidResolver) {
-        super(config, clock, monotonicClock, historyDirectory, handler,
+        super(config, clock, monotonicClock, historyDirectory,
+                historyDirectory != null ? new BatteryHistoryDirectory(
+                        new File(historyDirectory, "battery-history"),
+                        config.getMaxHistorySizeBytes(), PASS_THROUGH_COMPRESSOR) : null,
+                handler,
                 mock(PlatformIdleStateCallback.class), mock(EnergyStatsRetriever.class),
                 mock(UserInfoProvider.class), powerProfile,
                 new CpuScalingPolicies(new SparseArray<>(), new SparseArray<>()),

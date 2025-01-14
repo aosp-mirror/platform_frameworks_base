@@ -227,6 +227,7 @@ java_library_static {
         "com.android.sysprop.watchdog",
         "securebox",
         "apache-commons-math",
+        "apache-commons-compress",
         "battery_saver_flag_lib",
         "notification_flags_lib",
         "power_hint_flags_lib",
