@@ -95,8 +95,13 @@ cc_defaults {
     static_libs: ["libarect"],
     fuzz_config: {
         cc: [
+            // Alphabetical order -- assign to skia-android-triage@google.com
+            "danieldilan@google.com",
             "dichenzhang@google.com",
-            "scroggo@google.com",
+            "fmalita@google.com",
+            "jreck@google.com",
+            "nscobie@google.com",
+            "skia-android-triage@google.com",
         ],
         asan_options: [
             "detect_odr_violation=1",
