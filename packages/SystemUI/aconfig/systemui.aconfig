@@ -617,13 +617,6 @@ flag {
 }
 
 flag {
-  name: "status_bar_connected_displays"
-  namespace: "lse_desktop_experience"
-  description: "Shows the status bar on connected displays"
-  bug: "379264862"
-}
-
-flag {
     name: "status_bar_switch_to_spn_from_data_spn"
     namespace: "systemui"
     description: "Fix usage of the SPN broadcast extras"
