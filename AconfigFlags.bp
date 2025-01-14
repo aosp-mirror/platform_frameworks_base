@@ -1404,6 +1404,7 @@ java_aconfig_library {
 // Content Capture
 aconfig_declarations {
     name: "android.view.contentcapture.flags-aconfig",
+    exportable: true,
     package: "android.view.contentcapture.flags",
     container: "system",
     srcs: ["core/java/android/view/contentcapture/flags/*.aconfig"],
