@@ -96,7 +96,7 @@ class FakeContextualEducationRepository : ContextualEducationRepository {
 
     override suspend fun updateGestureEduModel(
         gestureType: GestureType,
-        transform: (GestureEduModel) -> GestureEduModel
+        transform: (GestureEduModel) -> GestureEduModel,
     ) {
         val gestureModels =
             when (gestureType) {
@@ -115,6 +115,11 @@ class FakeContextualEducationRepository : ContextualEducationRepository {
     ) {
         val currentModel = _eduDeviceConnectionTime.value
         _eduDeviceConnectionTime.value = transform(currentModel)
+    }
+
+    override suspend fun clear() {
+        val currentUserMap = userGestureMap[currentUser]!!
+        currentUserMap.clear()
     }
 
     override val keyboardShortcutTriggered: Flow<GestureType>
