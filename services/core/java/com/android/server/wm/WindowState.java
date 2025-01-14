@@ -5281,7 +5281,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Send information to SurfaceFlinger about the priority of the current window.
             updateFrameRateSelectionPriorityIfNeeded();
             updateScaleIfNeeded();
-            mWinAnimator.prepareSurfaceLocked(getSyncTransaction());
+            mWinAnimator.prepareSurfaceLocked(getPendingTransaction());
             applyDims();
         }
         super.prepareSurfaces();
