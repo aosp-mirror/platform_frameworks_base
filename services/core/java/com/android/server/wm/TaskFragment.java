@@ -409,6 +409,9 @@ class TaskFragment extends WindowContainer<WindowContainer> {
 
     private boolean mForceTranslucent = false;
 
+    /** @see #setCanAffectSystemUiFlags */
+    private boolean mCanAffectSystemUiFlags = true;
+
     final Point mLastSurfaceSize = new Point();
 
     private final Rect mTmpBounds = new Rect();
@@ -964,6 +967,27 @@ class TaskFragment extends WindowContainer<WindowContainer> {
     boolean isAllowedToBeEmbeddedInTrustedMode() {
         // Traverse all activities to see if any of them are not in the trusted mode.
         return !forAllActivities(r -> !isAllowedToEmbedActivityInTrustedMode(r));
+    }
+
+    /**
+     * @param canAffectSystemUiFlags If false, all windows in this taskfragment can not affect
+     *                               SystemUI flags. See
+     *                               {@link WindowState#canAffectSystemUiFlags()}.
+     */
+    void setCanAffectSystemUiFlags(boolean canAffectSystemUiFlags) {
+        mCanAffectSystemUiFlags = canAffectSystemUiFlags;
+    }
+
+    /**
+     * @see #setCanAffectSystemUiFlags
+     */
+    boolean canAffectSystemUiFlags() {
+        if (!mCanAffectSystemUiFlags) {
+            return false;
+        }
+        final TaskFragment parentTaskFragment =
+                getParent() != null ? getParent().asTaskFragment() : null;
+        return parentTaskFragment == null || parentTaskFragment.canAffectSystemUiFlags();
     }
 
     /**
