@@ -21,8 +21,9 @@ import javax.inject.Inject
 
 /** Initializes classes related to falsing. */
 @SysUISingleton
-class FalsingCoreStartable @Inject constructor(val falsingCollector: FalsingCollector) :
-    CoreStartable {
+class FalsingCoreStartable
+@Inject
+constructor(@FalsingCollectorActual val falsingCollector: FalsingCollector) : CoreStartable {
     override fun start() {
         falsingCollector.init()
     }
