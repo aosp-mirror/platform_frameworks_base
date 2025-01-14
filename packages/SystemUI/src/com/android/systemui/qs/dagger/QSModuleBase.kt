@@ -54,11 +54,11 @@ interface QSModuleBase {
     /** A map of internal QS tiles. Ensures that this can be injected even if it is empty */
     @Multibinds fun tileMap(): Map<String?, QSTileImpl<*>?>?
 
-    @Binds fun bindsQsSceneAdapter(impl: QSSceneAdapterImpl?): QSSceneAdapter?
+    @Binds fun bindsQsSceneAdapter(impl: QSSceneAdapterImpl): QSSceneAdapter
 
     /** Dims the screen */
     @Binds
     fun bindReduceBrightColorsController(
-        impl: ReduceBrightColorsControllerImpl?
-    ): ReduceBrightColorsController?
+        impl: ReduceBrightColorsControllerImpl
+    ): ReduceBrightColorsController
 }
