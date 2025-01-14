@@ -674,9 +674,7 @@ public class BubbleBarExpandedView extends FrameLayout implements BubbleTaskView
         if (mTaskView != null) {
             mTaskView.getBoundsOnScreen(mTempBounds);
         }
-        // return the bottom of the content rect, adjusted for insets so the result is in screen
-        // coordinate
-        return mTempBounds.bottom + mPositioner.getInsets().top;
+        return mTempBounds.bottom;
     }
 
     /** Update the amount by which to clip the expanded view at the bottom. */

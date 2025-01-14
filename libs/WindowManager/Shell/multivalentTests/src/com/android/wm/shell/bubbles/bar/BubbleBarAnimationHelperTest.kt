@@ -290,11 +290,10 @@ class BubbleBarAnimationHelperTest {
 
         assertThat(semaphore.tryAcquire(5, TimeUnit.SECONDS)).isTrue()
 
-        val bbevBottom = bbev.contentBottomOnScreen + bubblePositioner.insets.top
         activityScenario.onActivity {
             // notify that the IME top coordinate is greater than the bottom of the expanded view.
             // there's no overlap so it should not be clipped.
-            animationHelper.onImeTopChanged(bbevBottom * 2)
+            animationHelper.onImeTopChanged(bbev.contentBottomOnScreen * 2)
         }
         val outline = Outline()
         bbev.outlineProvider.getOutline(bbev, outline)
