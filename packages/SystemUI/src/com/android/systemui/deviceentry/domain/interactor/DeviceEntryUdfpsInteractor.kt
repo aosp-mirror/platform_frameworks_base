@@ -17,10 +17,10 @@
 package com.android.systemui.deviceentry.domain.interactor
 
 import com.android.systemui.biometrics.domain.interactor.FingerprintPropertyInteractor
-import com.android.systemui.biometrics.shared.model.SensorLocation
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.data.repository.BiometricSettingsRepository
 import com.android.systemui.keyguard.data.repository.DeviceEntryFingerprintAuthRepository
+import com.android.systemui.shared.customization.data.SensorLocation
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow

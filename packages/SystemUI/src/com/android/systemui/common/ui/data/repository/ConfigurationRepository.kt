@@ -52,7 +52,7 @@ interface ConfigurationRepository {
     /** Called whenever the configuration has changed. */
     val onConfigurationChange: Flow<Unit>
 
-    val scaleForResolution: Flow<Float>
+    val scaleForResolution: StateFlow<Float>
 
     val configurationValues: Flow<Configuration>
 

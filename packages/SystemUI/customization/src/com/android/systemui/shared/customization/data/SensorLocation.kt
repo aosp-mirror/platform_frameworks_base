@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.biometrics.shared.model
+package com.android.systemui.shared.customization.data
 
 /**
  * Provides current sensor location information in the current screen resolution [scale].
@@ -26,18 +26,40 @@ data class SensorLocation(
     private val naturalCenterX: Int,
     private val naturalCenterY: Int,
     private val naturalRadius: Int,
-    private val scale: Float = 1f
+    private val scale: Float = 1f,
 ) {
     val centerX: Float
         get() {
             return naturalCenterX * scale
         }
+
     val centerY: Float
         get() {
             return naturalCenterY * scale
         }
+
     val radius: Float
         get() {
             return naturalRadius * scale
         }
+
+    fun encode(): String {
+        return floatArrayOf(
+                naturalCenterX.toFloat(),
+                naturalCenterY.toFloat(),
+                naturalRadius.toFloat(),
+                scale,
+            )
+            .joinToString(DELIMITER)
+    }
+
+    companion object {
+
+        private const val DELIMITER: String = ","
+
+        fun decode(encoded: String): SensorLocation {
+            val array = encoded.split(DELIMITER).map { it.toFloat() }.toFloatArray()
+            return SensorLocation(array[0].toInt(), array[1].toInt(), array[2].toInt(), array[3])
+        }
+    }
 }
