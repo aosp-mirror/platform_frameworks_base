@@ -486,6 +486,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
     final String launchedFromPackage; // always the package who started the activity.
     @Nullable
     final String launchedFromFeatureId; // always the feature in launchedFromPackage
+    @LaunchSourceType
     int mLaunchSourceType; // latest launch source type
     final Intent intent;    // the original intent that generated us
     final String shortComponentName; // the short component name of the intent
@@ -2333,6 +2334,7 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
         mLaunchSourceType = determineLaunchSourceType(launchFromUid, caller);
     }
 
+    @LaunchSourceType
     private int determineLaunchSourceType(int launchFromUid, WindowProcessController caller) {
         if (launchFromUid == Process.SYSTEM_UID || launchFromUid == Process.ROOT_UID) {
             return LAUNCH_SOURCE_TYPE_SYSTEM;
