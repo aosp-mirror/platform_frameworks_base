@@ -1,12 +1,15 @@
 # Ravenwood "policy" file for services.core.
 
+# The "no-pta" marker is used to exclude the lines from "ravenhelper pta",
+# which tries to convert policies to annotations.
+
 # Auto-generated from XSD
-class com.android.server.compat.config.Change keepclass
-class com.android.server.compat.config.Config keepclass
-class com.android.server.compat.config.XmlParser keepclass
-class com.android.server.compat.overrides.ChangeOverrides keepclass
-class com.android.server.compat.overrides.OverrideValue keepclass
-class com.android.server.compat.overrides.Overrides keepclass
-class com.android.server.compat.overrides.RawOverrideValue keepclass
-class com.android.server.compat.overrides.XmlParser keepclass
-class com.android.server.compat.overrides.XmlWriter keepclass
+class com.android.server.compat.config.Change keepclass  # no-pta
+class com.android.server.compat.config.Config keepclass  # no-pta
+class com.android.server.compat.config.XmlParser keepclass  # no-pta
+class com.android.server.compat.overrides.ChangeOverrides keepclass  # no-pta
+class com.android.server.compat.overrides.OverrideValue keepclass  # no-pta
+class com.android.server.compat.overrides.Overrides keepclass  # no-pta
+class com.android.server.compat.overrides.RawOverrideValue keepclass  # no-pta
+class com.android.server.compat.overrides.XmlParser keepclass  # no-pta
+class com.android.server.compat.overrides.XmlWriter keepclass  # no-pta
