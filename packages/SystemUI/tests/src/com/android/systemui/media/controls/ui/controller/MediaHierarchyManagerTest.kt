@@ -31,6 +31,7 @@ import com.android.systemui.communal.shared.model.CommunalScenes
 import com.android.systemui.communal.ui.viewmodel.communalTransitionViewModel
 import com.android.systemui.controls.controller.ControlsControllerImplTest.Companion.eq
 import com.android.systemui.dreams.DreamOverlayStateController
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.DisableSceneContainer
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -110,6 +111,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
     @Mock private lateinit var dreamOverlayStateController: DreamOverlayStateController
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock lateinit var logger: MediaViewLogger
+    @Mock lateinit var dumpManager: DumpManager
     @Captor
     private lateinit var wakefullnessObserver: ArgumentCaptor<(WakefulnessLifecycle.Observer)>
     @Captor
@@ -166,6 +168,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 ResourcesSplitShadeStateController(),
                 logger,
+                dumpManager,
             )
         verify(wakefulnessLifecycle).addObserver(wakefullnessObserver.capture())
         verify(statusBarStateController).addCallback(statusBarCallback.capture())
@@ -209,7 +212,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
         val observer = wakefullnessObserver.value
         assertNotNull("lifecycle observer wasn't registered", observer)
@@ -222,7 +225,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
     }
 
@@ -236,7 +239,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
         val observer = wakefullnessObserver.value
         assertNotNull("lifecycle observer wasn't registered", observer)
@@ -249,7 +252,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
     }
 
@@ -263,7 +266,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
         clearInvocations(mediaCarouselController)
         configurationController.notifyConfigurationChanged()
@@ -273,7 +276,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
     }
 
@@ -287,7 +290,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
         val observer = wakefullnessObserver.value
         assertNotNull("lifecycle observer wasn't registered", observer)
@@ -299,7 +302,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 anyBoolean(),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
     }
 
@@ -315,7 +318,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 eq(false),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
         clearInvocations(mediaCarouselController)
 
@@ -327,7 +330,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 eq(false),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
 
         // Let's make sure alpha is set
@@ -528,7 +531,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 nullable(),
                 eq(false),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
         clearInvocations(mediaCarouselController)
 
@@ -539,7 +542,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                 any<MediaHostState>(),
                 eq(false),
                 anyLong(),
-                anyLong()
+                anyLong(),
             )
     }
 
@@ -559,7 +562,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     nullable(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
             clearInvocations(mediaCarouselController)
 
@@ -576,7 +579,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     any<MediaHostState>(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
         }
 
@@ -597,7 +600,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     nullable(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
 
             val captor = ArgumentCaptor.forClass(Boolean::class.java)
@@ -630,7 +633,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     nullable(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
 
             val captor = ArgumentCaptor.forClass(Boolean::class.java)
@@ -666,7 +669,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     nullable(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
         }
 
@@ -689,7 +692,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     nullable(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
             clearInvocations(mediaCarouselController)
 
@@ -704,7 +707,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     any<MediaHostState>(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
         }
 
@@ -734,7 +737,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     anyOrNull(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
             clearInvocations(mediaCarouselController)
 
@@ -749,7 +752,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
                     any<MediaHostState>(),
                     eq(false),
                     anyLong(),
-                    anyLong()
+                    anyLong(),
                 )
         }
 
@@ -788,7 +791,7 @@ class MediaHierarchyManagerTest : SysuiTestCase() {
         whenever(statusBarStateController.state).thenReturn(StatusBarState.SHADE_LOCKED)
         statusBarCallback.value.onStatePreChange(
             StatusBarState.KEYGUARD,
-            StatusBarState.SHADE_LOCKED
+            StatusBarState.SHADE_LOCKED,
         )
     }
 

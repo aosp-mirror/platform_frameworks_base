@@ -37,12 +37,14 @@ import com.android.app.animation.Interpolators
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.keyguard.KeyguardViewController
+import com.android.systemui.Dumpable
 import com.android.systemui.Flags.mediaControlsLockscreenShadeBugFix
 import com.android.systemui.communal.ui.viewmodel.CommunalTransitionViewModel
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.dreams.DreamOverlayStateController
+import com.android.systemui.dump.DumpManager
 import com.android.systemui.keyguard.WakefulnessLifecycle
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
 import com.android.systemui.media.controls.domain.pipeline.MediaDataManager
@@ -62,6 +64,7 @@ import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.animation.UniqueObjectHostView
 import com.android.systemui.util.settings.SecureSettings
+import java.io.PrintWriter
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -119,7 +122,8 @@ constructor(
     @Application private val coroutineScope: CoroutineScope,
     private val splitShadeStateController: SplitShadeStateController,
     private val logger: MediaViewLogger,
-) {
+    private val dumpManager: DumpManager,
+) : Dumpable {
 
     /** Track the media player setting status on lock screen. */
     private var allowMediaPlayerOnLockScreen: Boolean = true
@@ -476,6 +480,7 @@ constructor(
     }
 
     init {
+        dumpManager.registerNormalDumpable(TAG, this)
         updateConfiguration()
         configurationController.addCallback(
             object : ConfigurationController.ConfigurationListener {
@@ -1342,6 +1347,19 @@ constructor(
 
     private fun isGlanceableHubVisibleToUser(): Boolean {
         return isCommunalShowing && !isPrimaryBouncerShowing && !isAnyShadeFullyExpanded
+    }
+
+    override fun dump(pw: PrintWriter, args: Array<out String>) {
+        pw.apply {
+            println(
+                "current attachment: $currentAttachmentLocation, " +
+                    "desired location: $desiredLocation, " +
+                    "visible ${getHost(desiredLocation)?.visible}"
+            )
+            println("previous location: $previousLocation")
+            println("bounds: $currentBounds, target $targetBounds")
+            println("clipping: $currentClipping, target $targetClipping")
+        }
     }
 
     companion object {
