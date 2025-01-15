@@ -325,6 +325,7 @@ public abstract class WallpaperService extends Service {
         IWindowSession mSession;
 
         final Object mLock = new Object();
+        private final Object mSurfaceReleaseLock = new Object();
         boolean mOffsetMessageEnqueued;
 
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
@@ -1075,9 +1076,11 @@ public abstract class WallpaperService extends Service {
                 animator.setDuration(DIMMING_ANIMATION_DURATION_MS);
                 animator.addUpdateListener((ValueAnimator va) -> {
                     final float dimValue = (float) va.getAnimatedValue();
-                    if (mBbqSurfaceControl != null) {
-                        surfaceControlTransaction
-                                .setAlpha(mBbqSurfaceControl, 1 - dimValue).apply();
+                    synchronized (mSurfaceReleaseLock) {
+                        if (mBbqSurfaceControl != null && mBbqSurfaceControl.isValid()) {
+                            surfaceControlTransaction
+                                    .setAlpha(mBbqSurfaceControl, 1 - dimValue).apply();
+                        }
                     }
                 });
                 animator.addListener(new AnimatorListenerAdapter() {
@@ -2356,35 +2359,39 @@ public abstract class WallpaperService extends Service {
             if (DEBUG) Log.v(TAG, "onDestroy(): " + this);
             onDestroy();
 
-            if (mCreated) {
-                try {
-                    if (DEBUG) Log.v(TAG, "Removing window and destroying surface "
-                            + mSurfaceHolder.getSurface() + " of: " + this);
+            synchronized (mSurfaceReleaseLock) {
+                if (mCreated) {
+                    try {
+                        if (DEBUG) {
+                            Log.v(TAG, "Removing window and destroying surface "
+                                    + mSurfaceHolder.getSurface() + " of: " + this);
+                        }
 
-                    if (mInputEventReceiver != null) {
-                        mInputEventReceiver.dispose();
-                        mInputEventReceiver = null;
+                        if (mInputEventReceiver != null) {
+                            mInputEventReceiver.dispose();
+                            mInputEventReceiver = null;
+                        }
+
+                        mSession.remove(mWindow.asBinder());
+                    } catch (RemoteException e) {
                     }
+                    mSurfaceHolder.mSurface.release();
+                    if (mBlastBufferQueue != null) {
+                        mBlastBufferQueue.destroy();
+                        mBlastBufferQueue = null;
+                    }
+                    if (mBbqSurfaceControl != null) {
+                        new SurfaceControl.Transaction().remove(mBbqSurfaceControl).apply();
+                        mBbqSurfaceControl = null;
+                    }
+                    mCreated = false;
+                }
 
-                    mSession.remove(mWindow.asBinder());
-                } catch (RemoteException e) {
+                if (mSurfaceControl != null) {
+                    mSurfaceControl.release();
+                    mSurfaceControl = null;
+                    mRelayoutResult = null;
                 }
-                mSurfaceHolder.mSurface.release();
-                if (mBlastBufferQueue != null) {
-                    mBlastBufferQueue.destroy();
-                    mBlastBufferQueue = null;
-                }
-                if (mBbqSurfaceControl != null) {
-                    new SurfaceControl.Transaction().remove(mBbqSurfaceControl).apply();
-                    mBbqSurfaceControl = null;
-                }
-                mCreated = false;
-            }
-
-            if (mSurfaceControl != null) {
-                mSurfaceControl.release();
-                mSurfaceControl = null;
-                mRelayoutResult = null;
             }
         }
 
