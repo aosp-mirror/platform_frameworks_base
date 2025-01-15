@@ -172,8 +172,7 @@ public class NativeLibraryHelper {
     private static native long nativeOpenApkFd(FileDescriptor fd, String debugPath);
     private static native void nativeClose(long handle);
 
-    private static native long nativeSumNativeBinaries(long handle, String cpuAbi,
-            boolean debuggable);
+    private static native long nativeSumNativeBinaries(long handle, String cpuAbi);
 
     private native static int nativeCopyNativeBinaries(long handle, String sharedLibraryPath,
             String abiToCopy, boolean extractNativeLibs, boolean debuggable);
@@ -188,7 +187,7 @@ public class NativeLibraryHelper {
     private static long sumNativeBinaries(Handle handle, String abi) {
         long sum = 0;
         for (long apkHandle : handle.apkHandles) {
-            sum += nativeSumNativeBinaries(apkHandle, abi, handle.debuggable);
+            sum += nativeSumNativeBinaries(apkHandle, abi);
         }
         return sum;
     }
@@ -222,7 +221,7 @@ public class NativeLibraryHelper {
     public static int findSupportedAbi(Handle handle, String[] supportedAbis) {
         int finalRes = NO_NATIVE_LIBRARIES;
         for (long apkHandle : handle.apkHandles) {
-            final int res = nativeFindSupportedAbi(apkHandle, supportedAbis, handle.debuggable);
+            final int res = nativeFindSupportedAbi(apkHandle, supportedAbis);
             if (res == NO_NATIVE_LIBRARIES) {
                 // No native code, keep looking through all APKs.
             } else if (res == INSTALL_FAILED_NO_MATCHING_ABIS) {
@@ -244,8 +243,7 @@ public class NativeLibraryHelper {
         return finalRes;
     }
 
-    private native static int nativeFindSupportedAbi(long handle, String[] supportedAbis,
-            boolean debuggable);
+    private native static int nativeFindSupportedAbi(long handle, String[] supportedAbis);
 
     // Convenience method to call removeNativeBinariesFromDirLI(File)
     public static void removeNativeBinariesLI(String nativeLibraryPath) {
