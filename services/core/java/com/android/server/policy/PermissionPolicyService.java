@@ -356,7 +356,7 @@ public final class PermissionPolicyService extends SystemService {
                     try {
                         manager = new PermissionControllerManager(
                                 getUserContext(getContext(), user), PermissionThread.getHandler());
-                    } catch (IllegalArgumentException exception) {
+                    } catch (IllegalStateException exception) {
                         // There's a possible race condition when a user is being removed
                         Log.e(LOG_TAG, "Could not create PermissionControllerManager for user"
                                         + user, exception);
