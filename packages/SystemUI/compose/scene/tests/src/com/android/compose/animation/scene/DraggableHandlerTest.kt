@@ -41,7 +41,9 @@ import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.gesture.NestedDraggable
 import com.android.compose.test.MonotonicClockTestScope
 import com.android.compose.test.runMonotonicClockTest
+import com.android.mechanics.spec.InputDirection
 import com.google.common.truth.Truth.assertThat
+import kotlin.math.nextUp
 import kotlin.math.sign
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Deferred
@@ -106,6 +108,7 @@ class DraggableHandlerTest {
         }
 
         val transitionInterceptionThreshold = 0.05f
+        val directionChangeSlop = 10f
 
         private val layoutImpl =
             SceneTransitionLayoutImpl(
@@ -120,6 +123,7 @@ class DraggableHandlerTest {
                     // Use testScope and not backgroundScope here because backgroundScope does not
                     // work well with advanceUntilIdle(), which is used by some tests.
                     animationScope = testScope,
+                    directionChangeSlop = directionChangeSlop,
                 )
                 .apply { setContentsAndLayoutTargetSizeForTest(LAYOUT_SIZE) }
 
@@ -870,5 +874,66 @@ class DraggableHandlerTest {
         assertThat(layoutState.transitionState).isIdle()
         assertThat(layoutState.transitionState).hasCurrentScene(SceneA)
         assertThat(layoutState.transitionState).hasCurrentOverlays(OverlayB)
+    }
+
+    @Test
+    fun gestureContext_dragOffset_matchesOverSlopAtBeginning() = runGestureTest {
+        val overSlop = down(fractionOfScreen = 0.1f)
+        onDragStarted(overSlop = overSlop)
+
+        val gestureContext = assertThat(transitionState).hasGestureContext()
+        assertThat(gestureContext.dragOffset).isEqualTo(overSlop)
+    }
+
+    @Test
+    fun gestureContext_dragOffset_getsUpdatedOnEachDragEvent() = runGestureTest {
+        val dragController = onDragStarted(overSlop = down(fractionOfScreen = 0.1f))
+
+        val gestureContext = assertThat(transitionState).hasGestureContext()
+        val initialDragOffset = gestureContext.dragOffset
+
+        dragController.onDragDelta(pixels = 3.5f)
+        assertThat(gestureContext.dragOffset).isEqualTo(initialDragOffset + 3.5f)
+
+        dragController.onDragDelta(pixels = -2f)
+        assertThat(gestureContext.dragOffset).isEqualTo(initialDragOffset + 3.5f - 2f)
+    }
+
+    @Test
+    fun gestureContext_direction_swipeDown_startsWithMaxDirection() = runGestureTest {
+        onDragStarted(overSlop = down(fractionOfScreen = 0.1f))
+
+        val gestureContext = assertThat(transitionState).hasGestureContext()
+        assertThat(gestureContext.direction).isEqualTo(InputDirection.Max)
+    }
+
+    @Test
+    fun gestureContext_direction_swipeUp_startsWithMinDirection() = runGestureTest {
+        onDragStarted(overSlop = up(fractionOfScreen = 0.1f))
+
+        val gestureContext = assertThat(transitionState).hasGestureContext()
+        assertThat(gestureContext.direction).isEqualTo(InputDirection.Min)
+    }
+
+    @Test
+    fun gestureContext_direction_withinDirectionSlop_staysSame() = runGestureTest {
+        val dragController = onDragStarted(overSlop = up(fractionOfScreen = .2f))
+
+        val gestureContext = assertThat(transitionState).hasGestureContext()
+        assertThat(gestureContext.direction).isEqualTo(InputDirection.Min)
+
+        dragController.onDragDelta(pixels = directionChangeSlop)
+        assertThat(gestureContext.direction).isEqualTo(InputDirection.Min)
+    }
+
+    @Test
+    fun gestureContext_direction_overDirectionSlop_isChanged() = runGestureTest {
+        val dragController = onDragStarted(overSlop = up(fractionOfScreen = .2f))
+
+        val gestureContext = assertThat(transitionState).hasGestureContext()
+        assertThat(gestureContext.direction).isEqualTo(InputDirection.Min)
+
+        dragController.onDragDelta(pixels = directionChangeSlop.nextUp())
+        assertThat(gestureContext.direction).isEqualTo(InputDirection.Max)
     }
 }

@@ -31,6 +31,8 @@ import com.android.compose.animation.scene.content.state.TransitionState.Compani
 import com.android.compose.animation.scene.effect.GestureEffect
 import com.android.compose.gesture.NestedDraggable
 import com.android.compose.ui.util.SpaceVectorConverter
+import com.android.mechanics.DistanceGestureContext
+import com.android.mechanics.spec.InputDirection
 import kotlin.math.absoluteValue
 import kotlinx.coroutines.launch
 
@@ -114,7 +116,14 @@ internal class DraggableHandler(
                 else -> error("Unknown result $result ($upOrLeftResult $downOrRightResult)")
             }
 
-        return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation)
+        val gestureContext =
+            DistanceGestureContext(
+                initialDragOffset = 0f,
+                initialDirection = if (isUpOrLeft) InputDirection.Min else InputDirection.Max,
+                directionChangeSlop = layoutImpl.directionChangeSlop,
+            )
+
+        return createSwipeAnimation(layoutImpl, result, isUpOrLeft, orientation, gestureContext)
     }
 
     private fun resolveSwipeSource(startedPosition: Offset): SwipeSource.Resolved? {
@@ -316,6 +325,7 @@ private class DragControllerImpl(
                     // when the distance is defined.
                     delta
                 }
+
                 distance > 0f -> desiredOffset.fastCoerceIn(0f, distance)
                 else -> desiredOffset.fastCoerceIn(distance, 0f)
             }

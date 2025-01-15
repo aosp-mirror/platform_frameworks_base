@@ -88,6 +88,14 @@ internal class SceneTransitionLayoutImpl(
     internal val animationScope: CoroutineScope,
 
     /**
+     * Number of pixels a gesture has to travel in the opposite direction to for its intrinsic
+     * direction to change.
+     *
+     * Used to determine the direction of [Transition.gestureContext].
+     */
+    internal val directionChangeSlop: Float,
+
+    /**
      * The map of [Element]s.
      *
      * Important: [Element]s from this map should never be accessed during composition because the
@@ -368,6 +376,7 @@ internal class SceneTransitionLayoutImpl(
                         error("Transition to the same scene is not supported. ${details()}")
                     }
                 }
+
                 is UserActionResult.ReplaceByOverlay -> {
                     check(key is OverlayKey) {
                         "ReplaceByOverlay() can only be used for overlays, not scenes. ${details()}"
@@ -377,6 +386,7 @@ internal class SceneTransitionLayoutImpl(
                         "Transition to the same overlay is not supported. ${details()}"
                     }
                 }
+
                 is UserActionResult.ShowOverlay,
                 is UserActionResult.HideOverlay -> {
                     /* Always valid. */
@@ -443,8 +453,10 @@ internal class SceneTransitionLayoutImpl(
                             maybeAdd(transition.toScene)
                             maybeAdd(transition.fromScene)
                         }
+
                         is TransitionState.Transition.ShowOrHideOverlay ->
                             maybeAdd(transition.fromOrToScene)
+
                         is TransitionState.Transition.ReplaceOverlay -> {}
                     }
                 }
@@ -510,6 +522,7 @@ internal class SceneTransitionLayoutImpl(
                             is TransitionState.Transition.ChangeScene -> {}
                             is TransitionState.Transition.ShowOrHideOverlay ->
                                 maybeAdd(transition.overlay)
+
                             is TransitionState.Transition.ReplaceOverlay -> {
                                 maybeAdd(transition.fromOverlay)
                                 maybeAdd(transition.toOverlay)

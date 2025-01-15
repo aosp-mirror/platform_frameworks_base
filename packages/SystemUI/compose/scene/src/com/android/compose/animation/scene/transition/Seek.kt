@@ -29,6 +29,8 @@ import com.android.compose.animation.scene.SwipeAnimation
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.createSwipeAnimation
+import com.android.mechanics.ProvidedGestureContext
+import com.android.mechanics.spec.InputDirection
 import kotlin.coroutines.cancellation.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -126,6 +128,9 @@ private suspend fun MutableSceneTransitionLayoutState.seek(
             // overscroll, which is disabled for progress-based transitions.
             orientation = Orientation.Horizontal,
             isUpOrLeft = false,
+            // There is no gesture information available here - animateProgress
+            // will set the progress as the dragOffset.
+            gestureContext = ProvidedGestureContext(0f, InputDirection.Max),
         )
 
     animateProgress(
