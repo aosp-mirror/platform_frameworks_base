@@ -198,7 +198,8 @@ public class BundleNotificationInfoTest extends SysuiTestCase {
                 false,
                 true,
                 mAssistantFeedbackController,
-                mMetricsLogger);
+                mMetricsLogger,
+                null);
         // and the feedback button is clicked,
         final View feedbackButton = mInfo.findViewById(R.id.notification_guts_bundle_feedback);
         feedbackButton.performClick();
@@ -253,7 +254,8 @@ public class BundleNotificationInfoTest extends SysuiTestCase {
                 false,
                 true,
                 mAssistantFeedbackController,
-                mMetricsLogger);
+                mMetricsLogger,
+                null);
 
         final View feedbackButton = mInfo.findViewById(R.id.notification_guts_bundle_feedback);
         feedbackButton.performClick();
@@ -294,7 +296,8 @@ public class BundleNotificationInfoTest extends SysuiTestCase {
                 false,
                 true,
                 mAssistantFeedbackController,
-                mMetricsLogger);
+                mMetricsLogger,
+                null);
 
         final View feedbackButton = mInfo.findViewById(R.id.notification_guts_bundle_feedback);
         feedbackButton.performClick();

@@ -70,10 +70,10 @@ import com.android.systemui.statusbar.notification.collection.NotificationEntry;
 import com.android.systemui.statusbar.notification.collection.provider.HighPriorityProvider;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewListener;
 import com.android.systemui.statusbar.notification.collection.render.NotifGutsViewManager;
+import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.CentralSurfaces;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
-import com.android.systemui.statusbar.notification.headsup.HeadsUpManager;
 import com.android.systemui.util.kotlin.JavaAdapter;
 import com.android.systemui.wmshell.BubblesManager;
 
@@ -422,7 +422,8 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
                 row.getIsNonblockable(),
                 mHighPriorityProvider.isHighPriority(row.getEntry()),
                 mAssistantFeedbackController,
-                mMetricsLogger);
+                mMetricsLogger,
+                row.getCloseButtonOnClickListener(row));
     }
 
     /**
@@ -476,7 +477,8 @@ public class NotificationGutsManager implements NotifGutsViewManager, CoreStarta
                 row.getIsNonblockable(),
                 mHighPriorityProvider.isHighPriority(row.getEntry()),
                 mAssistantFeedbackController,
-                mMetricsLogger);
+                mMetricsLogger,
+                row.getCloseButtonOnClickListener(row));
     }
 
     /**

@@ -444,6 +444,7 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
                 eq(true), /* wasShownHighPriority */
                 eq(assistantFeedbackController),
                 any<MetricsLogger>(),
+                any<View.OnClickListener>(),
             )
     }
 
@@ -476,6 +477,7 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
                 eq(false), /* wasShownHighPriority */
                 eq(assistantFeedbackController),
                 any<MetricsLogger>(),
+                any<View.OnClickListener>(),
             )
     }
 
@@ -508,6 +510,7 @@ class NotificationGutsManagerWithScenesTest : SysuiTestCase() {
                 eq(false), /* wasShownHighPriority */
                 eq(assistantFeedbackController),
                 any<MetricsLogger>(),
+                any<View.OnClickListener>(),
             )
     }
 

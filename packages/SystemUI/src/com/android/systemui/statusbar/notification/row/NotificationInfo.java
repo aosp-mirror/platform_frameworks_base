@@ -202,7 +202,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isNonblockable,
             boolean wasShownHighPriority,
             AssistantFeedbackController assistantFeedbackController,
-            MetricsLogger metricsLogger)
+            MetricsLogger metricsLogger, OnClickListener onCloseClick)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
         mMetricsLogger = metricsLogger;

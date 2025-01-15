@@ -1942,6 +1942,13 @@ flag {
 }
 
 flag {
+  name: "permission_helper_ui_rich_ongoing"
+  namespace: "systemui"
+  description: "[RONs] Guards inline permission helper for demoting RONs"
+  bug: "379186372"
+}
+
+flag {
     name: "aod_ui_rich_ongoing"
     namespace: "systemui"
     description: "Show a rich ongoing notification on the always-on display (depends on ui_rich_ongoing)"

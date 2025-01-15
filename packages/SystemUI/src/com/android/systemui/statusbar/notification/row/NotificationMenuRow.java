@@ -42,6 +42,7 @@ import android.widget.FrameLayout.LayoutParams;
 
 import com.android.app.animation.Interpolators;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Flags;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
@@ -270,6 +271,10 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             mInfoItem = createPartialConversationItem(mContext);
         } else if (personNotifType >= PeopleNotificationIdentifier.TYPE_FULL_PERSON) {
             mInfoItem = createConversationItem(mContext);
+        } else if (android.app.Flags.uiRichOngoing()
+                && Flags.permissionHelperUiRichOngoing()
+                && entry.getSbn().getNotification().isPromotedOngoing()) {
+            mInfoItem = createPromotedItem(mContext);
         } else {
             mInfoItem = createInfoItem(mContext);
         }
@@ -678,6 +683,16 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         NotificationConversationInfo infoContent =
                 (NotificationConversationInfo) LayoutInflater.from(context).inflate(
                         R.layout.notification_conversation_info, null, false);
+        return new NotificationMenuItem(context, infoDescription, infoContent,
+                R.drawable.ic_settings);
+    }
+
+    static NotificationMenuItem createPromotedItem(Context context) {
+        Resources res = context.getResources();
+        String infoDescription = res.getString(R.string.notification_menu_gear_description);
+        PromotedNotificationInfo infoContent =
+                (PromotedNotificationInfo) LayoutInflater.from(context).inflate(
+                        R.layout.promoted_notification_info, null, false);
         return new NotificationMenuItem(context, infoDescription, infoContent,
                 R.drawable.ic_settings);
     }
