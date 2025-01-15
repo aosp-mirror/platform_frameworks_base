@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"موبائل نیٹ ورک تک رسائی نہیں ہو سکتی"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ترجیحی نیٹ ورک تبدیل کر کے دیکھیں۔ تبدیل کرنے کے لیے تھپتھپائیں۔"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ایمرجنسی کالنگ دستیاب نہیں ہے"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"دوبارہ نہ دکھائیں"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ہنگامی کالز کو موبائل نیٹ ورک کی ضرورت ہے"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"الرٹس"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"کال فارورڈنگ"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"نیٹ ورک الرٹس"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"نیٹ ورک دستیاب ہے"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"‏VPN اسٹیٹس"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"وقت اور ٹائم زونز"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"‏آپ کے IT منتظم کی جانب سے الرٹس"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"الرٹس"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"ریٹیل ڈیمو"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ایپ چل رہی ہے"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ایپس بیٹری خرچ کر رہی ہیں"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"میگنیفکیشن"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"آلہ سماعت"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ایکسیسبیلٹی کا استعمال"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"ڈسپلے"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> بیٹری کا استعمال کر رہی ہے"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ایپ ڈاؤن لوڈ کریں"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"‏نئی SIM داخل ہو گئی"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"اسے سیٹ اپ کرنے کیلئے تھپتھپائیں"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"آپ کا ٹائم زون تبدیل ہو گیا"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"آپ اب <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) میں ہیں"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"وقت سیٹ کریں"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"تاریخ سیٹ کریں"</string>
     <string name="date_time_set" msgid="4603445265164486816">"سیٹ کریں"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ایک ہاتھ کی وضع"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"اضافی مدھم"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"سماعتی آلات"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"غیر منسلک ہے"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"منسلک ہے"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"فعال"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"لوڈ ہو رہا ہے"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آن ہے۔"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"والیوم کی کلیدوں کو دبائے رکھا گیا۔ <xliff:g id="SERVICE_NAME">%1$s</xliff:g> آف ہے۔"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"والیوم کی کلیدوں کو ریلیز کریں <xliff:g id="SERVICE_NAME">%1$s</xliff:g> کو آن کرنے کے لیے، والیوم کی دونوں کلیدوں کو دوبارہ 3 سیکنڈ تک چھوئیں اور دبائے رکھیں۔"</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"اگلی بار جب آپ یہ شارٹ کٹ استعمال کریں گے تو خصوصیت کھل جائے گی۔ اپنی اسکرین کے نیچے سے 2 انگلیوں سے اوپر کی طرف سوائپ کریں اور تیزی سے ریلیز کریں۔"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"اگلی بار جب آپ یہ شارٹ کٹ استعمال کریں گے تو خصوصیت کھل جائے گی۔ اپنی اسکرین کے نیچے سے 3 انگلیوں سے اوپر کی طرف سوائپ کریں اور تیزی سے ریلیز کریں۔"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"میگنیفکیشن"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"فون کے مائیک پر سوئچ کریں؟"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"سماعتی آلہ کے مائیک پر سوئچ کریں؟"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"بہتر آواز کے لیے یا اگر آپ کے سماعتی آلہ کی بیٹری کم ہے۔ یہ صرف کال کے دوران آپ کا مائیک سوئچ کرتا ہے۔"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"آپ ہینڈز فری کالنگ کے لیے اپنا سماعتی آلہ مائیکروفون استعمال کر سکتے ہیں۔ یہ صرف کال کے دوران آپ کا مائیک سوئچ کرتا ہے۔"</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"سوئچ کریں"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"ترتیبات"</string>
     <string name="user_switched" msgid="7249833311585228097">"موجودہ صارف <xliff:g id="NAME">%1$s</xliff:g>۔"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> پر سوئچ کیا جا رہا ہے…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> لاگ آؤٹ ہو رہا ہے…"</string>
@@ -1974,7 +1979,7 @@
     <string name="zen_mode_implicit_activated" msgid="2634285680776672994">"آن ہے"</string>
     <string name="zen_mode_implicit_deactivated" msgid="8688441768371501750">"آف ہے"</string>
     <string name="zen_mode_trigger_summary_divider_text" msgid="7461583466043698862">"، "</string>
-    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
+    <string name="zen_mode_trigger_summary_range_symbol_combination" msgid="1804900738798069619">"‪<xliff:g id="START">%1$s</xliff:g> - <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_range_words" msgid="7228261413029290750">"<xliff:g id="START">%1$s</xliff:g> تا <xliff:g id="END">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_summary_combined" msgid="6492381546327807669">"<xliff:g id="DAYS">%1$s</xliff:g>، <xliff:g id="TIMES">%2$s</xliff:g>"</string>
     <string name="zen_mode_trigger_event_calendar_any" msgid="2086784607921121803">"کوئی بھی کیلنڈر"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"سیکیورٹی کے مد نظر ایپ کا مواد اسکرین کے اشتراک سے چھپا ہوا ہے"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"سٹلائٹ سے خودکار طور پر منسلک ہے"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏آپ موبائل یا Wi-Fi نیٹ ورک کے بغیر پیغامات بھیج اور موصول کر سکتے ہیں"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"سیٹلائٹ پیغام رسانی کا استعمال کریں؟"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏موبائل یا Wi-Fi نیٹ ورک کے بغیر پیغامات بھیجیں اور موصول کریں"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"پیغامات ایپ کو کھولیں"</string>

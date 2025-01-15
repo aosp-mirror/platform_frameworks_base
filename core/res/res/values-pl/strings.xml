@@ -89,8 +89,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Brak zasięgu sieci komórkowej"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Spróbuj zmienić preferowaną sieć. Kliknij, by zmienić."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Połączenia alarmowe są niedostępne"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Nie pokazuj ponownie"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Połączenia alarmowe wymagają sieci komórkowej"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Alerty"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Przekierowanie połączeń"</string>
@@ -305,6 +304,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Alerty dotyczące sieci"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Sieć dostępna"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Stan sieci VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Godzina i strefy czasowe"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Alerty od administratora IT"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Alerty"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Tryb demo dla sklepów"</string>
@@ -312,6 +312,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Działa aplikacja"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikacje zużywające baterię"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Powiększenie"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Urządzenie słuchowe"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Użycie ułatwień dostępu"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Wyświetlacz"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikacja <xliff:g id="APP_NAME">%1$s</xliff:g> zużywa baterię"</string>
@@ -1409,6 +1410,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Pobierz aplikację"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Włożono nową kartę SIM"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Kliknij, by skonfigurować"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Zmieniła się Twoja strefa czasowa"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Jesteś teraz w strefie <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Ustaw godzinę"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Ustaw datę"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Ustaw"</string>
@@ -1782,14 +1785,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Tryb jednej ręki"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Dodatkowe przyciemnienie"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Urządzenia słuchowe"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Rozłączone"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Połączone"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Aktywne"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Wczytuję"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Przytrzymano klawisze głośności. Usługa <xliff:g id="SERVICE_NAME">%1$s</xliff:g> została włączona."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Przytrzymano klawisze głośności. Usługa <xliff:g id="SERVICE_NAME">%1$s</xliff:g> została wyłączona."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Zwolnij przyciski głośności. Aby włączyć usługę <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, naciśnij i przytrzymaj oba przyciski głośności przez 3 sekundy."</string>
@@ -1800,6 +1799,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Funkcja otworzy się, gdy następnym razem użyjesz tego skrótu. Przesuń 2 palcami z dołu ekranu i szybko je unieś."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Funkcja otworzy się, gdy następnym razem użyjesz tego skrótu. Przesuń 3 palcami z dołu ekranu i szybko je unieś."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Powiększenie"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Przełączyć na mikrofon w telefonie?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Przełączyć na mikrofon w aparacie słuchowym?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Skorzystaj z tej opcji, aby uzyskać lepszy dźwięk lub jeśli kończy się bateria w aparacie słuchowym. Mikrofon zostanie przełączony tylko na czas połączenia."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Możesz używać mikrofonu w aparacie słuchowym, aby dzwonić bez użycia rąk. Mikrofon zostanie przełączony tylko na czas połączenia."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Przełącz"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Ustawienia"</string>
     <string name="user_switched" msgid="7249833311585228097">"Bieżący użytkownik: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Przełączam na użytkownika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Wylogowuję użytkownika <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2456,6 +2461,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Ze względów bezpieczeństwa zawartość aplikacji jest niewidoczna podczas udostępniania ekranu"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatycznie połączono z satelitą"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Możesz wymieniać wiadomości bez dostępu do sieci komórkowej lub Wi-Fi"</string>
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Przez satelitę możesz wysyłać i odbierać wiadomości oraz w ograniczonym stopniu korzystać z transmisji danych"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Przesyłać wiadomości przez satelitę?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Wysyłaj i odbieraj wiadomości bez sieci komórkowej czy Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otwórz Wiadomości"</string>

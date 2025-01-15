@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"మొబైల్ నెట్‌వర్క్ అందుబాటులో లేదు"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ప్రాధాన్య నెట్‌వర్క్‌ను మార్చుకోవడానికి ప్రయత్నించండి. మార్చడానికి నొక్కండి."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"అత్యవసర కాలింగ్ అందుబాటులో లేదు"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"మళ్లీ చూపవద్దు"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ఎమర్జెన్సీ కాల్స్‌కు మొబైల్ నెట్‌వర్క్ అవసరమవుతుంది"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"అలర్ట్‌లు"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"కాల్ ఫార్వార్డింగ్"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"నెట్‌వర్క్ హెచ్చరికలు"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"నెట్‌వర్క్ అందుబాటులో ఉంది"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN స్టేటస్‌"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"టైమ్, టైమ్ జోన్‌లు"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"మీ IT నిర్వాహకుల నుండి వచ్చే హెచ్చరికలు"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"అలర్ట్‌లు"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"రిటైల్ డెమో"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"యాప్ అమలవుతోంది"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"బ్యాటరీని ఉపయోగిస్తున్న యాప్‌లు"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"మ్యాగ్నిఫికేషన్"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"వినికిడి పరికరం"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"యాక్సెసిబిలిటీ వినియోగం"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"డిస్‌ప్లే చేయండి"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> బ్యాటరీని ఉపయోగిస్తోంది"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"యాప్‌ని డౌన్‌లోడ్ చేయి"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"కొత్త SIM చొప్పించారు"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"దీన్ని సెటప్ చేయడానికి నొక్కండి"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"మీ టైమ్ జోన్ మారింది"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"మీరు ఇప్పుడు <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g>‌లో (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) ఉన్నారు"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"సమయాన్ని సెట్ చేయండి"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"తేదీని సెట్ చేయండి"</string>
     <string name="date_time_set" msgid="4603445265164486816">"సెట్ చేయి"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"వన్-హ్యాండెడ్ మోడ్"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ఎక్స్‌ట్రా డిమ్"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"వినికిడి పరికరాలు"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"డిస్‌కనెక్ట్ అయింది"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"కనెక్ట్ చేయబడింది"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"యాక్టివ్"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"లోడ్ అవుతోంది"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆన్ చేయబడింది"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"వాల్యూమ్ కీలు నొక్కి ఉంచబడ్డాయి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ఆఫ్ చేయబడింది"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"వాల్యూమ్ కీలను రిలీజ్ చేయండి. <xliff:g id="SERVICE_NAME">%1$s</xliff:g>‌ను ఆన్ చేయడానికి, రెండు వాల్యూమ్ కీలను మళ్లీ 3 సెకన్ల పాటు నొక్కి పట్టుకోండి."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"తర్వాతిసారి మీరు ఈ షార్ట్‌కట్‌ను ఉపయోగించినప్పుడు ఈ ఫీచర్ తెరుచుకుంటుంది. మీ స్క్రీన్ దిగువ నుండి 2 వేళ్లతో పైకి స్వైప్ చేసి, వెంటనే వదలండి."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"తర్వాతిసారి మీరు ఈ షార్ట్‌కట్‌ను ఉపయోగించినప్పుడు ఈ ఫీచర్ తెరుచుకుంటుంది. మీ స్క్రీన్ దిగువ నుండి 3 వేళ్లతో పైకి స్వైప్ చేసి, వెంటనే వదలండి."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"మ్యాగ్నిఫికేషన్"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"ఫోన్ మైక్‌కు మారాలా?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"వినికిడి పరికరం మైక్‌కు మారాలా?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"మెరుగైన సౌండ్ కోసం లేదా మీ వినికిడి పరికరం బ్యాటరీ తక్కువగా ఉన్నప్పుడు. ఇది కాల్ సమయంలో మాత్రమే మీ మైక్‌ను మారుస్తుంది."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"హ్యాండ్స్-ఫ్రీ కాలింగ్ కోసం మీరు మీ వినికిడి పరికరాన్ని ఉపయోగించవచ్చు. ఇది కాల్ సమయంలో మాత్రమే మీ మైక్‌ను మారుస్తుంది."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"మారండి"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"సెట్టింగ్‌లు"</string>
     <string name="user_switched" msgid="7249833311585228097">"ప్రస్తుత వినియోగదారు <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> యూజర్‌కు స్విచ్ అవుతోంది…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g>ని లాగ్ అవుట్ చేస్తోంది…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"సెక్యూరిటీ కోసం స్క్రీన్ షేర్ నుండి యాప్ కంటెంట్ దాచబడింది"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"శాటిలైట్‌కు ఆటోమేటిక్‌గా కనెక్ట్ చేయబడింది"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"మీరు మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపవచ్చు, స్వీకరించవచ్చు"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"శాటిలైట్ మెసేజింగ్‌ను ఉపయోగించాలనుకుంటున్నారా?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"మొబైల్ లేదా Wi-Fi నెట్‌వర్క్ లేకుండా మెసేజ్‌లను పంపండి, స్వీకరించండి"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messagesను తెరవండి"</string>

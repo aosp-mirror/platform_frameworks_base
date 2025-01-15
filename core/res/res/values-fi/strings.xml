@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Mobiiliverkkoon ei saada yhteyttä"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Kokeile vaihtaa ensisijaista verkkoa. Vaihda se napauttamalla."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Hätäpuhelut eivät ole käytettävissä"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Älä näytä uudelleen"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Hätäpuhelu edellyttää mobiiliverkkoa"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Ilmoitukset"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Soitonsiirto"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Verkkoilmoitukset"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Verkko käytettävissä"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN-tila"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Aika ja aikavyöhykkeet"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Ilmoitukset IT-järjestelmänvalvojalta"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Ilmoitukset"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Esittelytila"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Sovellus käynnissä"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Akkua kuluttavat sovellukset"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Suurennus"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Kuulolaite"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Esteetön käyttö"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Näyttö"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> käyttää akkua."</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Lataa sovellus"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Uusi SIM-kortti asetettu"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Määritä se napauttamalla"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Aikavyöhykkeesi on muuttunut"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Olet nyt aikavyöhykkeellä <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Aseta aika"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Aseta päivämäärä"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Aseta"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Yhden käden moodi"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Erittäin himmeä"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Kuulolaitteet"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Yhteys katkaistu"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Yhdistetty"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Aktiivinen"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Ladataan"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin päälle."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Äänenvoimakkuuspainikkeita painettiin pitkään. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> laitettiin pois päältä."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Vapauta äänenvoimakkuuspainikkeet. Laita <xliff:g id="SERVICE_NAME">%1$s</xliff:g> päälle painamalla äänenvoimakkuuspainikkeita uudelleen kolmen sekunnin ajan."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Ominaisuus avautuu, kun seuraavan kerran käytät tätä pikakomentoa. Pyyhkäise näytön alareunasta ylös kahdella sormella ja nosta sormet näytöltä nopeasti."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Ominaisuus avautuu, kun seuraavan kerran käytät tätä pikakomentoa. Pyyhkäise näytön alareunasta ylös kolmella sormella ja nosta sormet näytöltä nopeasti."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Suurennus"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Vaihdetaanko puhelimen mikrofoniin?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Vaihdetaanko kuulolaitteen mikrofoniin?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Jos haluat paremman äänen tai kuulolaitteen akku on vähissä. Tämä vaihtaa mikrofonia vain puhelun ajaksi."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Voit soittaa ääniohjatusti kuulolaitteen mikrofonin avulla. Tämä vaihtaa mikrofonia vain puhelun ajaksi."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Vaihda"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Asetukset"</string>
     <string name="user_switched" msgid="7249833311585228097">"Nykyinen käyttäjä: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Vaihdetaan käyttäjään <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> kirjautuu ulos…"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sovelluksen sisältö piilotettu näytön jakamiselta turvallisuussyistä"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Yhdistetty automaattisesti satelliittiin"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Voit lähettää ja vastaanottaa viestejä ilman mobiili‑ tai Wi-Fi-verkkoa"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Käytetäänkö satelliittiviestintää?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Lähetä ja vastaanota viestejä ilman mobiili- tai Wi-Fi-verkkoa"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Avaa Messages"</string>

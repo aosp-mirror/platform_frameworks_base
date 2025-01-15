@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"മൊബൈൽ നെറ്റ്‌വർക്കിലേക്ക് കണക്റ്റ് ചെയ്യാനാവുന്നില്ല"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"തിര‌ഞ്ഞെടുത്ത നെറ്റ്‌വർക്ക് മാറ്റുന്നത് പരീക്ഷിക്കുക. മാറ്റാൻ ടാപ്പ് ചെയ്യുക."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"എമർജൻസി കോളിംഗ് ലഭ്യമല്ല"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"വീണ്ടും കാണിക്കരുത്"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"എമർജൻസി കോളുകൾ ചെയ്യാൻ ഒരു മൊബൈൽ നെറ്റ്‌വർക്ക് ആവശ്യമാണ്"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"അലേർട്ടുകൾ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"കോൾ ഫോർവേഡിംഗ്"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"നെറ്റ്‌വർക്ക് അലേർട്ടുകൾ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"നെറ്റ്‌വർക്ക് ‌ലഭ്യമല്ല"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN നില"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"സമയവും സമയമേഖലകളും"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"നിങ്ങളുടെ ഐടി അഡ്‌മിനിൽ നിന്നുള്ള മുന്നറിയിപ്പുകൾ"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"അലേർട്ടുകൾ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"റീട്ടെയിൽ ഡെമോ"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ആപ്പ് പ്രവർത്തിക്കുന്നു"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ആപ്പുകൾ ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"മാഗ്നിഫിക്കേഷൻ"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"കേൾവിക്കുള്ള ഉപകരണം"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ഉപയോഗസഹായി ഉപയോഗം"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"ഡിസ്‌പ്ലേ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ബാറ്ററി ഉപയോഗിക്കുന്നു"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ആപ്പ് ഡൗൺലോഡ് ചെയ്യുക"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"പുതിയ സിം ഇട്ടു"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ഇത് സജ്ജമാക്കുന്നതിന് ടാപ്പുചെയ്യുക"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"നിങ്ങളുടെ സമയമേഖല മാറി"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"നിങ്ങൾ ഇപ്പോൾ <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) എന്നതിൽ ആണ്"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"സമയം സജ്ജീകരിക്കുക"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"ദിവസം സജ്ജീകരിക്കുക"</string>
     <string name="date_time_set" msgid="4603445265164486816">"സജ്ജമാക്കുക"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ഒറ്റക്കൈ മോഡ്"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"കൂടുതൽ ഡിം ചെയ്യൽ"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ശ്രവണ ഉപകരണങ്ങൾ"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"വിച്‌ഛേദിച്ചു"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"കണക്റ്റ് ചെയ്‌തു"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"സജീവം"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"ലോഡ് ചെയ്യുന്നു"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"വോളിയം കീകൾ പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കി."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"വോളിയം കീകൾ അമർത്തിപ്പിടിച്ചു. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓഫാക്കി."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"വോളിയം കീകൾ വിടുക. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ഓണാക്കാൻ, രണ്ട് വോളിയം കീകളും വീണ്ടും മൂന്ന് സെക്കൻഡ് അമർത്തിപ്പിടിക്കുക."</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"അടുത്ത തവണ നിങ്ങൾ ഈ കുറുക്കുവഴി ഉപയോഗിക്കുമ്പോൾ ഫീച്ചർ തുറക്കും. നിങ്ങളുടെ സ്ക്രീനിന്റെ താഴെ നിന്ന് 2 വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പെട്ടെന്ന് വിടുക."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"അടുത്ത തവണ നിങ്ങൾ ഈ കുറുക്കുവഴി ഉപയോഗിക്കുമ്പോൾ ഫീച്ചർ തുറക്കും. നിങ്ങളുടെ സ്ക്രീനിന്റെ താഴെ നിന്ന് 3 വിരലുകൾ ഉപയോഗിച്ച് മുകളിലേക്ക് സ്വൈപ്പ് ചെയ്‌ത് പെട്ടെന്ന് വിടുക."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"മാഗ്നിഫിക്കേഷൻ"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"ഫോൺ മൈക്കിലേക്ക് മാറണോ?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"ശ്രവണ സഹായി മൈക്കിലേക്ക് മാറണോ?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"മികച്ച ശബ്ദത്തിന് അല്ലെങ്കിൽ നിങ്ങളുടെ ശ്രവണ സഹായിയുടെ ബാറ്ററി കുറവാണെങ്കിൽ. ഇത് കോൾ സമയത്ത് മാത്രം നിങ്ങളുടെ മൈക്ക് മാറ്റുന്നു."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"ഹാൻഡ്‌സ്‌-ഫ്രീ ആയി കോൾ ചെയ്യാൻ നിങ്ങളുടെ ശ്രവണ സഹായി മൈക്രോഫോൺ ഉപയോഗിക്കാം. ഇത് കോൾ സമയത്ത് മാത്രം നിങ്ങളുടെ മൈക്ക് മാറ്റുന്നു."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"മാറുക"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"ക്രമീകരണം"</string>
     <string name="user_switched" msgid="7249833311585228097">"നിലവിലെ ഉപയോക്താവ് <xliff:g id="NAME">%1$s</xliff:g> ആണ്."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> എന്ന ഉപയോക്താവിലേക്ക് മാറുന്നു…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ലോഗൌട്ട് ചെയ്യുന്നു…"</string>
@@ -2454,6 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"സുരക്ഷയ്ക്കായി സ്ക്രീൻ പങ്കിടലിൽ നിന്ന് ആപ്പ് ഉള്ളടക്കം മറച്ചിരിക്കുന്നു"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"സാറ്റലൈറ്റിലേക്ക് സ്വയമേവ കണക്റ്റ് ചെയ്തു"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"മൊബൈലോ വൈഫൈ നെറ്റ്‌വർക്കോ ഇല്ലാതെ തന്നെ സന്ദേശങ്ങൾ അയയ്‌ക്കാനും സ്വീകരിക്കാനും നിങ്ങൾക്ക് കഴിയും"</string>
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"നിങ്ങൾക്ക് സാറ്റലൈറ്റ് വഴി സന്ദേശങ്ങൾ അയയ്‌ക്കാനും സ്വീകരിക്കാനും പരിമിതമായ ഡാറ്റ ഉപയോഗിക്കാനും കഴിയും"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"സാറ്റലൈറ്റ് സന്ദേശമയയ്ക്കൽ ഉപയോഗിക്കണോ?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"മൊബൈൽ അല്ലെങ്കിൽ വൈഫൈ നെറ്റ്‌വർക്ക് ഇല്ലാതെ സന്ദേശങ്ങൾ അയയ്ക്കുകയും സ്വീകരിക്കുകയും ചെയ്യുക"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages തുറക്കുക"</string>

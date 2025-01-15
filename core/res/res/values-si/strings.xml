@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ජංගම ජාලය වෙත ළඟා විය නොහැකිය"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"කැමති ජාලය වෙනස් කිරීමට උත්සාහ කරන්න. වෙනස් කිරීමට තට්ටු කරන්න."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"හදිසි ඇමතුම් ලබා ගත නොහැකිය"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"නැවතත් නොපෙන්වන්න"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"හදිසි ඇමතුම් සඳහා ජංගම ජාලයක් අවශ්‍ය වේ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ඇඟවීම්"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ඇමතුම ප්‍රතියොමු කිරීම"</string>
@@ -303,6 +302,8 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ජාල ඇඟවීම්"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"ජාලය ලබා ගැනීමට හැකිය"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN තත්ත්වය"</string>
+    <!-- no translation found for notification_channel_system_time (1660313368058030441) -->
+    <skip />
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"ඔබේ තොරතුරු තාක්‍ෂණ පරිපාලක වෙතින් ඇඟවීම්"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"ඇඟවීම්"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"සිල්ලර ආදර්ශනය"</string>
@@ -310,6 +311,8 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"යෙදුම ධාවනය කරමින්"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"බැටරිය භාවිත කරන යෙදුම්"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"විශාලනය"</string>
+    <!-- no translation found for notification_channel_accessibility_hearing_device (7816963856388758952) -->
+    <skip />
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ප්‍රවේශ්‍යතා භාවිතය"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"සංදර්ශකය"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> බැටරිය භාවිත කරයි"</string>
@@ -1407,6 +1410,10 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"යෙදුම බාගන්න"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"නව SIM ඇතුළු කරන්න"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"එය පිහිටුවීමට තට්ටු කරන්න"</string>
+    <!-- no translation found for time_zone_change_notification_title (5232503069219193218) -->
+    <skip />
+    <!-- no translation found for time_zone_change_notification_body (6135793674904665585) -->
+    <skip />
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"වේලාව සකසන්න"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"දිනය සැකසීම"</string>
     <string name="date_time_set" msgid="4603445265164486816">"සකසන්න"</string>
@@ -1780,14 +1787,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"තනි අත් ප්‍රකාරය"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"තවත් අඳුරු"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ශ්‍රවණ උපාංග"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"විසන්ධි විය"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"සම්බන්ධිතයි"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"සක්‍රිය"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"පූරණය වේ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාත්මකයි."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"හඬ පරිමා යතුරු අල්ලා ගන්න <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ක්‍රියාවිරහිතයි."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"හඬ පරිමා යතුරු මුදා හරින්න. <xliff:g id="SERVICE_NAME">%1$s</xliff:g> සක්‍රීය කිරීමට, හඬ පරිමා යතුරු දෙකම නැවත තත්පර 3ක් ඔබා අල්ලා සිටින්න."</string>
@@ -1798,6 +1801,18 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"ඔබ මෙම කෙටිමඟ භාවිතා කරන මීළඟ වතාවේ විශේෂාංගය විවෘත වනු ඇත. ඔබේ තිරයෙහි පහළ සිට ඇඟිලි 2කින් ඉහළට ස්වයිප් කර ඉක්මනින් නිදහස් කරන්න."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"ඔබ මෙම කෙටිමඟ භාවිතා කරන මීළඟ වතාවේ විශේෂාංගය විවෘත වනු ඇත. ඔබේ තිරයෙහි පහළ සිට ඇඟිලි 3කින් ඉහළට ස්වයිප් කර ඉක්මනින් නිදහස් කරන්න."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"විශාලනය"</string>
+    <!-- no translation found for hearing_device_switch_phone_mic_notification_title (6645178038359708836) -->
+    <skip />
+    <!-- no translation found for hearing_device_switch_hearing_mic_notification_title (4612074852145289569) -->
+    <skip />
+    <!-- no translation found for hearing_device_switch_phone_mic_notification_text (1332426273666077412) -->
+    <skip />
+    <!-- no translation found for hearing_device_switch_hearing_mic_notification_text (8288368365767284208) -->
+    <skip />
+    <!-- no translation found for hearing_device_notification_switch_button (3619524619430941300) -->
+    <skip />
+    <!-- no translation found for hearing_device_notification_settings_button (6673651052880279178) -->
+    <skip />
     <string name="user_switched" msgid="7249833311585228097">"දැනට සිටින පරිශීලකයා <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> වෙත මාරු කරමින්…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> වරමින්…"</string>
@@ -2454,6 +2469,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ආරක්ෂාව සඳහා යෙදුම් අන්තර්ගතය තිරය බෙදා ගැනීමෙන් සඟවා ඇත"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"චන්ද්‍රිකාවට ස්වයංක්‍රීයව සම්බන්ධ වේ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ඔබට ජංගම හෝ Wi-Fi ජාලයක් නොමැතිව පණිවිඩ යැවීමට සහ ලැබීමට හැක"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"චන්ද්‍රිකා පණිවිඩ යැවීම භාවිතා කරන්න ද?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ජංගම හෝ Wi-Fi ජාලයකින් තොරව පණිවිඩ යැවීම සහ ලැබීම"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages විවෘත කරන්න"</string>

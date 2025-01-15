@@ -87,8 +87,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਤੱਕ ਪਹੁੰਚ ਨਹੀਂ ਕੀਤੀ ਜਾ ਸਕਦੀ"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"ਤਰਜੀਹੀ ਨੈੱਟਵਰਕ ਨੂੰ ਬਦਲ ਕੇ ਦੇਖੋ। ਬਦਲਣ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"ਸੰਕਟਕਾਲੀਨ ਕਾਲਿੰਗ ਉਪਲਬਧ ਨਹੀਂ"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"ਦੁਬਾਰਾ ਨਾ ਦਿਖਾਓ"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"ਐਮਰਜੈਂਸੀ ਕਾਲਾਂ ਲਈ ਕਿਸੇ ਮੋਬਾਈਲ ਨੈੱਟਵਰਕ ਦੀ ਲੋੜ ਹੁੰਦੀ ਹੈ"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"ਅਲਰਟ"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"ਕਾਲ ਫਾਰਵਰਡਿੰਗ"</string>
@@ -303,6 +302,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"ਨੈੱਟਵਰਕ ਅਲਰਟ"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"ਨੈੱਟਵਰਕ ਉਪਲਬਧ ਹੈ"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN ਅਵਸਥਾ"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"ਸਮਾਂ ਅਤੇ ਸਮਾਂ ਖੇਤਰ"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"ਤੁਹਾਡੇ ਆਈ.ਟੀ. ਪ੍ਰਸ਼ਾਸਕ ਵੱਲੋਂ ਅਲਰਟ"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"ਅਲਰਟ"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"ਪ੍ਰਚੂਨ ਸਟੋਰਾਂ ਲਈ ਡੈਮੋ"</string>
@@ -310,6 +310,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"ਚੱਲ ਰਹੀ ਐਪ"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"ਬੈਟਰੀ ਦੀ ਖਪਤ ਕਰਨ ਵਾਲੀਆਂ ਐਪਾਂ"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"ਸੁਣਨ ਵਾਲਾ ਡੀਵਾਈਸ"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"ਪਹੁੰਚਯੋਗਤਾ ਵਰਤੋਂ"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"ਡਿਸਪਲੇ"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"<xliff:g id="APP_NAME">%1$s</xliff:g> ਵੱਲੋਂ ਬੈਟਰੀ ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਜਾ ਰਹੀ ਹੈ"</string>
@@ -1407,6 +1408,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ਐਪ ਡਾਊਨਲੋਡ ਕਰੋ"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"ਨਵੀਂ SIM ਦਾਖਲ ਕੀਤੀ ਗਈ"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ਇਸ ਨੂੰ ਸੈੱਟ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"ਤੁਹਾਡਾ ਸਮਾਂ ਖੇਤਰ ਬਦਲ ਗਿਆ ਹੈ"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"ਹੁਣ ਤੁਸੀਂ <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>) ਵਿੱਚ ਹੋ"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"ਸਮਾਂ ਸੈੱਟ ਕਰੋ"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"ਤਾਰੀਖ ਸੈੱਟ ਕਰੋ"</string>
     <string name="date_time_set" msgid="4603445265164486816">"ਸੈੱਟ ਕਰੋ"</string>
@@ -1780,14 +1783,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"ਇੱਕ ਹੱਥ ਮੋਡ"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"ਜ਼ਿਆਦਾ ਘੱਟ ਚਮਕ"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"ਸੁਣਨ ਵਾਲੇ ਡੀਵਾਈਸ"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"ਡਿਸਕਨੈਕਟ ਹੋ ਗਿਆ"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"ਕਨੈਕਟ ਹੈ"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"ਕਿਰਿਆਸ਼ੀਲ"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"ਲੋਡ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"ਅਵਾਜ਼ੀ ਕੁੰਜੀਆਂ ਦਬਾ ਕੇ ਰੱਖੀਆਂ ਗਈਆਂ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਬੰਦ ਕੀਤਾ ਗਿਆ।"</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ ਛੱਡੋ। <xliff:g id="SERVICE_NAME">%1$s</xliff:g> ਨੂੰ ਚਾਲੂ ਕਰਨ ਲਈ, ਦੋਵੇਂ ਅਵਾਜ਼ ਕੁੰਜੀਆਂ ਨੂੰ 3 ਸਕਿੰਟਾਂ ਲਈ ਦੁਬਾਰਾ ਦਬਾਈ ਰੱਖੋ।"</string>
@@ -1798,6 +1797,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"ਅਗਲੀ ਵਾਰ ਜਦੋਂ ਤੁਸੀਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋਗੇ, ਤਾਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ। 2 ਉਂਗਲਾਂ ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰ ਕੇ ਤੁਰੰਤ ਛੱਡੋ।"</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"ਅਗਲੀ ਵਾਰ ਜਦੋਂ ਤੁਸੀਂ ਇਸ ਸ਼ਾਰਟਕੱਟ ਦੀ ਵਰਤੋਂ ਕਰੋਗੇ, ਤਾਂ ਇਹ ਵਿਸ਼ੇਸ਼ਤਾ ਖੁੱਲ੍ਹ ਜਾਵੇਗੀ। 3 ਉਂਗਲਾਂ ਨਾਲ ਆਪਣੀ ਸਕ੍ਰੀਨ ਦੇ ਹੇਠਾਂ ਤੋਂ ਉੱਪਰ ਵੱਲ ਸਵਾਈਪ ਕਰ ਕੇ ਤੁਰੰਤ ਛੱਡੋ।"</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ਵੱਡਦਰਸ਼ੀਕਰਨ"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"ਕੀ ਫ਼ੋਨ ਦੇ ਮਾਈਕ \'ਤੇ ਸਵਿੱਚ ਕਰਨਾ ਹੈ?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"ਕੀ ਸੁਣਨ ਦੇ ਸਾਧਨ ਦੇ ਮਾਈਕ \'ਤੇ ਸਵਿੱਚ ਕਰਨਾ ਹੈ?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"ਬਿਹਤਰ ਧੁਨੀ ਲਈ ਜਾਂ ਜੇ ਤੁਹਾਡੇ ਸੁਣਨ ਦੇ ਸਾਧਨ ਦੀ ਬੈਟਰੀ ਘੱਟ ਹੈ। ਇਹ ਸਿਰਫ਼ ਕਾਲ ਦੌਰਾਨ ਹੀ ਤੁਹਾਡੇ ਮਾਈਕ ਨੂੰ ਸਵਿੱਚ ਕਰਦਾ ਹੈ।"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"ਤੁਸੀਂ ਹੱਥ-ਰਹਿਤ ਕਾਲਿੰਗ ਲਈ ਆਪਣੇ ਸੁਣਨ ਦੇ ਸਾਧਨ ਦੇ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਵਰਤੋਂ ਕਰ ਸਕਦੇ ਹੋ। ਇਹ ਸਿਰਫ਼ ਕਾਲ ਦੌਰਾਨ ਹੀ ਤੁਹਾਡੇ ਮਾਈਕ ਨੂੰ ਸਵਿੱਚ ਕਰਦਾ ਹੈ।"</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"ਸਵਿੱਚ ਕਰੋ"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ਮੌਜੂਦਾ ਉਪਭੋਗਤਾ <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g> \'ਤੇ ਸਵਿੱਚ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"<xliff:g id="NAME">%1$s</xliff:g> ਨੂੰ ਲਾਗ-ਆਉਟ ਕੀਤਾ ਜਾ ਰਿਹਾ ਹੈ …"</string>
@@ -2454,6 +2459,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ਐਪ ਸਮੱਗਰੀ ਨੂੰ ਸੁਰੱਖਿਆ ਲਈ ਸਕ੍ਰੀਨ ਸਾਂਝਾਕਰਨ ਤੋਂ ਲੁਕਾਇਆ ਗਿਆ ਹੈ"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ਸੈਟੇਲਾਈਟ ਨਾਲ ਸਵੈ-ਕਨੈਕਟ ਹੋਇਆ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ਤੁਸੀਂ ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰ ਸਕਦੇ ਹੋ"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ਕੀ ਸੈਟੇਲਾਈਟ ਸੁਨੇਹੇ ਦੀ ਵਰਤੋਂ ਕਰਨੀ ਹੈ?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ਮੋਬਾਈਲ ਜਾਂ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕ ਤੋਂ ਬਿਨਾਂ ਸੁਨੇਹੇ ਭੇਜੋ ਅਤੇ ਪ੍ਰਾਪਤ ਕਰੋ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ਐਪ ਖੋਲ੍ਹੋ"</string>

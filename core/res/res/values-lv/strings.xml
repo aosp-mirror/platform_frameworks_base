@@ -88,8 +88,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Nevar sasniegt mobilo tīklu"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Mēģiniet nomainīt vēlamo tīklu. Pieskarieties, lai to mainītu."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Nav pieejami ārkārtas izsaukumi"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Vairs nerādīt"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Lai veiktu ārkārtas zvanus, ir nepieciešams mobilais tīkls."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Brīdinājumi"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Zvanu pāradresācija"</string>
@@ -304,6 +303,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Tīkla brīdinājumi"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Tīkls ir pieejams"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"VPN statuss"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Laiks un laika joslas"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Brīdinājumi no jūsu IT administratora"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Brīdinājumi"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Demonstrācijas versija veikaliem"</string>
@@ -311,6 +311,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Lietotne darbojas"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Lietotnes, kas patērē akumulatora jaudu"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Palielinājums"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Dzirdes aparāts"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Pieejamības lietojums"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Displejs"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Lietotne <xliff:g id="APP_NAME">%1$s</xliff:g> izmanto akumulatoru"</string>
@@ -1408,6 +1409,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Lejupielādēt lietotni"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Ievietota jauna SIM karte"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Pieskarieties, lai to iestatītu."</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Jūsu laika josla ir mainīta"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Jūs tagad atrodaties šajā laika joslā: <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Iestatīt laiku"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Datuma iestatīšana"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Iestatīt"</string>
@@ -1781,14 +1784,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Vienas rokas režīms"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Papildu aptumšošana"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Dzirdes aparāti"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Atvienota"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Pievienota"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Aktīva"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Notiek ielāde"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika ieslēgts."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Turējāt nospiestas skaļuma pogas. Pakalpojums <xliff:g id="SERVICE_NAME">%1$s</xliff:g> tika izslēgts."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Atlaidiet skaļuma pogas. Lai ieslēgtu pakalpojumu <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, vēlreiz nospiediet un trīs sekundes turiet nospiestas abas skaļuma pogas."</string>
@@ -1799,6 +1798,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Funkcija tiks atvērta, kad nākamreiz izmantosiet šo saīsni. Velciet augšup ar diviem pirkstiem no ekrāna apakšdaļas un ātri atlaidiet."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Funkcija tiks atvērta, kad nākamreiz izmantosiet šo saīsni. Velciet augšup ar trim pirkstiem no ekrāna apakšdaļas un ātri atlaidiet."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Palielinājums"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Vai pārslēgt uz tālruņa mikrofonu?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Vai pārslēgt uz dzirdes aparāta mikrofonu?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Varat pārslēgt, lai iegūtu labāku skaņu vai ja dzirdes aparāta akumulatora uzlādes līmenis ir zems. Mikrofons tiek pārslēgts tikai zvana laikā."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Varat izmantot dzirdes aparāta mikrofonu zvaniem brīvroku režīmā. Mikrofons tiek pārslēgts tikai zvana laikā."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Pārslēgt"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Iestatījumi"</string>
     <string name="user_switched" msgid="7249833311585228097">"Pašreizējais lietotājs: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Notiek pāriešana uz: <xliff:g id="NAME">%1$s</xliff:g>"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Notiek lietotāja <xliff:g id="NAME">%1$s</xliff:g> atteikšanās…"</string>
@@ -2455,6 +2460,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Drošības nolūkos lietotnes saturs kopīgotajā ekrānā ir paslēpts"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automātiski izveidots savienojums ar satelītu"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Varat sūtīt un saņemt ziņojumus bez mobilā vai Wi-Fi tīkla."</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Vai izmantot satelīta ziņojumapmaiņu?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Sūtiet un saņemiet ziņojumus bez mobilā vai Wi‑Fi tīkla."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Atvērt lietotni Ziņojumi"</string>

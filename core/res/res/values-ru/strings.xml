@@ -89,8 +89,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Мобильная сеть недоступна"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Нажмите, чтобы выбрать другую сеть."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Экстренные вызовы недоступны"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Больше не показывать"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Для экстренных вызовов нужна мобильная сеть."</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Оповещения"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Переадресация вызовов"</string>
@@ -305,6 +304,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Оповещения сети"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Сеть доступна"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Статус VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Время и часовые пояса"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Уведомления от вашего администратора"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Уведомления"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Деморежим для магазина"</string>
@@ -312,6 +312,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Приложение активно"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Приложения, расходующие заряд"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Увеличение"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Слуховой аппарат"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Сервисы специальных возможностей"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Экран"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Приложение \"<xliff:g id="APP_NAME">%1$s</xliff:g>\" расходует заряд"</string>
@@ -1409,6 +1410,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Скачать приложение"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Установлена новая SIM-карта"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Нажмите, чтобы настроить."</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Ваш часовой пояс изменился"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Новый часовой пояс: <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)."</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Настройка времени"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Настройка даты"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Установить"</string>
@@ -1782,14 +1785,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Режим управления одной рукой"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Дополнительное уменьшение яркости"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Слуховые аппараты"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Отключено"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Подключено"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Активно"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Загрузка…"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Использован жест с кнопками регулировки громкости. Функция \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" включена."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Использован жест с кнопками регулировки громкости. Функция \"<xliff:g id="SERVICE_NAME">%1$s</xliff:g>\" отключена."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Отпустите кнопки громкости. Чтобы включить <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, нажмите и удерживайте обе кнопки регулировки громкости в течение трех секунд."</string>
@@ -1800,6 +1799,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Функция теперь будет включаться при выполнении действия быстрого запуска. Проведите двумя пальцами по экрану снизу вверх."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Функция теперь будет включаться при выполнении действия быстрого запуска. Проведите тремя пальцами по экрану снизу вверх."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Увеличение"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Переключиться на микрофон телефона?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Переключиться на микрофон слухового аппарата?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Вы можете использовать микрофон телефона, если вас не устраивает качество звука или если у слухового аппарата низкий заряд батареи. Микрофон будет переключен только на время звонка."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Вы можете использовать микрофон слухового аппарата, когда разговариваете по телефону. Микрофон будет переключен только на время звонка."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Переключиться"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Настройки"</string>
     <string name="user_switched" msgid="7249833311585228097">"Выбран аккаунт пользователя <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Смена профиля на \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Выход из аккаунта <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2456,6 +2461,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Для безопасности содержимое приложения при демонстрации экрана скрыто."</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматически подключено к системам спутниковой связи"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Вы можете отправлять и получать сообщения без доступа к мобильной сети или Wi-Fi."</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Включить спутниковый обмен сообщениями?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Отправляйте и получайте сообщения без подключения к мобильной сети или Wi-Fi."</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Открыть Сообщения"</string>

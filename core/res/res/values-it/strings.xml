@@ -88,8 +88,7 @@
     <string name="NetworkPreferenceSwitchTitle" msgid="1008329951315753038">"Impossibile raggiungere la rete mobile"</string>
     <string name="NetworkPreferenceSwitchSummary" msgid="2086506181486324860">"Prova a cambiare la rete preferita. Tocca per cambiare."</string>
     <string name="EmergencyCallWarningTitle" msgid="1615688002899152860">"Chiamate di emergenza non disponibili"</string>
-    <!-- no translation found for emergency_calling_do_not_show_again (5034171343309733068) -->
-    <skip />
+    <string name="emergency_calling_do_not_show_again" msgid="5034171343309733068">"Non mostrare più"</string>
     <string name="EmergencyCallWarningSummary" msgid="9102799172089265268">"Per le chiamate di emergenza è necessaria una rete mobile"</string>
     <string name="notification_channel_network_alert" msgid="4788053066033851841">"Avvisi"</string>
     <string name="notification_channel_call_forward" msgid="8230490317314272406">"Deviazione chiamate"</string>
@@ -304,6 +303,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Avvisi di rete"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Rete disponibile"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Stato della VPN"</string>
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Ora e fusi orari"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Avvisi dall\'amministratore IT"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Avvisi"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Demo retail"</string>
@@ -311,6 +311,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"App in esecuzione"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"App che consumano la batteria"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Ingrandimento"</string>
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Protesi uditiva"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Utilizzo dell\'accessibilità"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Display"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"L\'app <xliff:g id="APP_NAME">%1$s</xliff:g> sta consumando la batteria"</string>
@@ -694,7 +695,7 @@
     <string name="fingerprint_error_security_update_required" msgid="8440349108169661934">"Sensore temporaneamente disattivato"</string>
     <string name="fingerprint_error_bad_calibration" msgid="6770614925736183528">"Impossibile usare il sensore di impronte digitali. Contatta un fornitore di servizi di riparazione."</string>
     <string name="fingerprint_error_power_pressed" msgid="5479524500542129414">"Tasto di accensione premuto"</string>
-    <string name="fingerprint_name_template" msgid="8941662088160289778">"Dito <xliff:g id="FINGERID">%d</xliff:g>"</string>
+    <string name="fingerprint_name_template" msgid="8941662088160289778">"Impronta <xliff:g id="FINGERID">%d</xliff:g>"</string>
     <string name="fingerprint_app_setting_name" msgid="4253767877095495844">"Usa l\'impronta"</string>
     <string name="fingerprint_or_screen_lock_app_setting_name" msgid="3501743523487644907">"Usa l\'impronta o il blocco schermo"</string>
     <string name="fingerprint_dialog_default_subtitle" msgid="3879832845486835905">"Utilizza la tua impronta per continuare"</string>
@@ -1408,6 +1409,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Scarica app"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Nuova SIM inserita"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Tocca per configurarla"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Il tuo fuso orario è cambiato"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Il tuo fuso orario attuale è <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Imposta ora"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Imposta data"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Imposta"</string>
@@ -1781,14 +1784,10 @@
     <string name="one_handed_mode_feature_name" msgid="2334330034828094891">"Modalità a una mano"</string>
     <string name="reduce_bright_colors_feature_name" msgid="3222994553174604132">"Attenuazione extra"</string>
     <string name="hearing_aids_feature_name" msgid="1125892105105852542">"Protesi uditive"</string>
-    <!-- no translation found for hearing_device_status_disconnected (497547752953543832) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_connected (2149385149669918764) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_active (4770378695482566032) -->
-    <skip />
-    <!-- no translation found for hearing_device_status_loading (5717083847663109747) -->
-    <skip />
+    <string name="hearing_device_status_disconnected" msgid="497547752953543832">"Disconnesso"</string>
+    <string name="hearing_device_status_connected" msgid="2149385149669918764">"Connesso"</string>
+    <string name="hearing_device_status_active" msgid="4770378695482566032">"Attivo"</string>
+    <string name="hearing_device_status_loading" msgid="5717083847663109747">"Caricamento in corso…"</string>
     <string name="accessibility_shortcut_enabling_service" msgid="5473495203759847687">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> attivato."</string>
     <string name="accessibility_shortcut_disabling_service" msgid="8675244165062700619">"Tieni premuti i tasti del volume. Servizio <xliff:g id="SERVICE_NAME">%1$s</xliff:g> disattivato."</string>
     <string name="accessibility_shortcut_spoken_feedback" msgid="3760999147597564314">"Rilascia i tasti del volume. Per attivare <xliff:g id="SERVICE_NAME">%1$s</xliff:g>, tieni di nuovo premuti entrambi i tasti del volume per 3 secondi."</string>
@@ -1799,6 +1798,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"La funzionalità si aprirà la prossima volta che utilizzerai questa scorciatoia. Scorri verso l\'alto con 2 dita dalla parte inferiore dello schermo e rilascia rapidamente."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"La funzionalità si aprirà la prossima volta che utilizzerai questa scorciatoia. Scorri verso l\'alto con 3 dita dalla parte inferiore dello schermo e rilascia rapidamente."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Ingrandimento"</string>
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Passare al microfono dello smartphone?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Passare al microfono dell\'apparecchio acustico?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Per una migliore resa audio o se la batteria dell\'apparecchio acustico è scarica. In questo modo, il microfono viene attivato solo durante la chiamata."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Puoi usare il microfono dell\'apparecchio acustico per le chiamate in vivavoce. In questo modo, il microfono viene attivato solo durante la chiamata."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Cambia"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Impostazioni"</string>
     <string name="user_switched" msgid="7249833311585228097">"Utente corrente <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Passaggio a <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Disconnessione di <xliff:g id="NAME">%1$s</xliff:g> in corso…"</string>
@@ -2455,6 +2460,8 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contenuti dell\'app nascosti dalla condivisione schermo per sicurezza"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Connessione automatica al satellite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Puoi inviare e ricevere messaggi senza una rete mobile o Wi-Fi"</string>
+    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
+    <skip />
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Utilizzare i messaggi via satellite?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Invia e ricevi messaggi senza una rete mobile o Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Apri Messaggi"</string>
