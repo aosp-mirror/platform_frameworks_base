@@ -343,7 +343,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             repo.setOngoingCallState(inCallModel(startTimeMs = 1000, intent = null))
 
-            assertThat((latest as OngoingActivityChipModel.Shown).onClickListener).isNull()
+            assertThat((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy).isNull()
         }
 
     @Test
@@ -353,7 +353,7 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             val pendingIntent = mock<PendingIntent>()
             repo.setOngoingCallState(inCallModel(startTimeMs = 1000, intent = pendingIntent))
-            val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListener
+            val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListenerLegacy
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
@@ -370,7 +370,8 @@ class CallChipViewModelTest : SysuiTestCase() {
 
             val pendingIntent = mock<PendingIntent>()
             repo.setOngoingCallState(inCallModel(startTimeMs = 0, intent = pendingIntent))
-            val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListener
+            val clickListener = (latest as OngoingActivityChipModel.Shown).onClickListenerLegacy
+
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)

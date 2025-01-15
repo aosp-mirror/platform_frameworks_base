@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.casttootherdevice.ui.viewmodel
 
 import android.content.DialogInterface
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
@@ -25,6 +26,7 @@ import com.android.internal.jank.Cuj
 import com.android.systemui.Flags.FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -46,8 +48,10 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.getStopActionFromDialog
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.policy.CastDevice
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -84,6 +88,8 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                 )
                 .thenReturn(chipBackgroundView)
         }
+    private val mockExpandable: Expandable =
+        mock<Expandable>().apply { whenever(dialogTransitionController(any())).thenReturn(mock()) }
 
     private val underTest = kosmos.castToOtherDeviceChipViewModel
 
@@ -263,7 +269,13 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             // WHEN the stop action on the dialog is clicked
             val dialogStopAction =
-                getStopActionFromDialog(latest, chipView, mockScreenCastDialog, kosmos)
+                getStopActionFromDialog(
+                    latest,
+                    chipView,
+                    mockExpandable,
+                    mockScreenCastDialog,
+                    kosmos,
+                )
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN the chip is immediately hidden...
@@ -296,7 +308,13 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
 
             // WHEN the stop action on the dialog is clicked
             val dialogStopAction =
-                getStopActionFromDialog(latest, chipView, mockGenericCastDialog, kosmos)
+                getStopActionFromDialog(
+                    latest,
+                    chipView,
+                    mockExpandable,
+                    mockGenericCastDialog,
+                    kosmos,
+                )
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN the chip is immediately hidden...
@@ -416,13 +434,14 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_projectionStateEntireScreen_clickListenerShowsScreenCastDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
@@ -431,6 +450,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_projectionStateSingleTask_clickListenerShowsScreenCastDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -442,7 +462,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                     createTask(taskId = 1),
                 )
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
@@ -451,6 +471,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_routerStateCasting_clickListenerShowsGenericCastDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -466,7 +487,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                     )
                 )
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
@@ -480,13 +501,14 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_projectionStateCasting_clickListenerHasCuj() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             clickListener!!.onClick(chipView)
 
             val cujCaptor = argumentCaptor<DialogCuj>()
@@ -499,6 +521,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_routerStateCasting_clickListenerHasCuj() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -514,7 +537,7 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
                     )
                 )
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             clickListener!!.onClick(chipView)
 
             val cujCaptor = argumentCaptor<DialogCuj>()
@@ -524,5 +547,104 @@ class CastToOtherDeviceChipViewModelTest : SysuiTestCase() {
             assertThat(cujCaptor.firstValue.cujType)
                 .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)
             assertThat(cujCaptor.firstValue.tag).contains("Cast")
+        }
+
+    @Test
+    @EnableFlags(StatusBarChipsModernization.FLAG_NAME)
+    fun chip_routerStateCasting_hasClickBehavior() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaRouterRepo.castDevices.value =
+                listOf(
+                    CastDevice(
+                        state = CastDevice.CastState.Connected,
+                        id = "id",
+                        name = "name",
+                        description = "desc",
+                        origin = CastDevice.CastOrigin.MediaRouter,
+                    )
+                )
+
+            assertThat((latest as OngoingActivityChipModel.Shown).clickBehavior)
+                .isInstanceOf(OngoingActivityChipModel.ClickBehavior.ExpandAction::class.java)
+        }
+
+    @Test
+    @EnableFlags(StatusBarChipsModernization.FLAG_NAME)
+    fun chip_projectionStateCasting_hasClickBehavior() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
+
+            assertThat((latest as OngoingActivityChipModel.Shown).clickBehavior)
+                .isInstanceOf(OngoingActivityChipModel.ClickBehavior.ExpandAction::class.java)
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_projectionStateEntireScreen_clickBehaviorShowsScreenCastDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(CAST_TO_OTHER_DEVICES_PACKAGE)
+
+            val expandAction =
+                ((latest as OngoingActivityChipModel.Shown).clickBehavior
+                    as OngoingActivityChipModel.ClickBehavior.ExpandAction)
+            expandAction.onClick(mockExpandable)
+
+            verify(kosmos.mockDialogTransitionAnimator)
+                .show(eq(mockScreenCastDialog), any(), anyBoolean())
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_projectionStateSingleTask_clickBehaviorShowsScreenCastDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.SingleTask(
+                    CAST_TO_OTHER_DEVICES_PACKAGE,
+                    hostDeviceName = null,
+                    createTask(taskId = 1),
+                )
+
+            val expandAction =
+                ((latest as OngoingActivityChipModel.Shown).clickBehavior
+                    as OngoingActivityChipModel.ClickBehavior.ExpandAction)
+            expandAction.onClick(mockExpandable)
+
+            verify(kosmos.mockDialogTransitionAnimator)
+                .show(eq(mockScreenCastDialog), any(), anyBoolean())
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_routerStateCasting_clickBehaviorShowsGenericCastDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            mediaRouterRepo.castDevices.value =
+                listOf(
+                    CastDevice(
+                        state = CastDevice.CastState.Connected,
+                        id = "id",
+                        name = "name",
+                        description = "desc",
+                        origin = CastDevice.CastOrigin.MediaRouter,
+                    )
+                )
+
+            val expandAction =
+                ((latest as OngoingActivityChipModel.Shown).clickBehavior
+                    as OngoingActivityChipModel.ClickBehavior.ExpandAction)
+            expandAction.onClick(mockExpandable)
+
+            verify(kosmos.mockDialogTransitionAnimator)
+                .show(eq(mockGenericCastDialog), any(), anyBoolean())
         }
 }

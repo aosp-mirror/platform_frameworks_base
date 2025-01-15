@@ -17,12 +17,15 @@
 package com.android.systemui.statusbar.chips.screenrecord.ui.viewmodel
 
 import android.content.DialogInterface
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.jank.Cuj
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogCuj
+import com.android.systemui.animation.Expandable
 import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
@@ -41,8 +44,10 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipsViewModelTest.Companion.getStopActionFromDialog
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -77,6 +82,8 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
                 )
                 .thenReturn(chipBackgroundView)
         }
+    private val mockExpandable: Expandable =
+        mock<Expandable>().apply { whenever(dialogTransitionController(any())).thenReturn(mock()) }
 
     private val underTest = kosmos.screenRecordChipViewModel
 
@@ -106,7 +113,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
 
             assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Countdown::class.java)
             assertThat((latest as OngoingActivityChipModel.Shown).icon).isNull()
-            assertThat((latest as OngoingActivityChipModel.Shown).onClickListener).isNull()
+            assertThat((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy).isNull()
         }
 
     // The millis we typically get from [ScreenRecordRepository] are around 2995, 1995, and 995.
@@ -177,7 +184,13 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
 
             // WHEN the stop action on the dialog is clicked
             val dialogStopAction =
-                getStopActionFromDialog(latest, chipView, mockSystemUIDialog, kosmos)
+                getStopActionFromDialog(
+                    latest,
+                    chipView,
+                    mockExpandable,
+                    mockSystemUIDialog,
+                    kosmos,
+                )
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN both the screen record chip and the share-to-app chip are immediately hidden...
@@ -263,13 +276,14 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_notProjecting_clickListenerShowsDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
@@ -279,6 +293,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_projectingEntireScreen_clickListenerShowsDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -286,7 +301,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen("host.package")
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
@@ -296,6 +311,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_projectingSingleTask_clickListenerShowsDialog() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -307,7 +323,7 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
                     FakeActivityTaskManager.createTask(taskId = 1),
                 )
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             assertThat(clickListener).isNotNull()
 
             clickListener!!.onClick(chipView)
@@ -317,22 +333,85 @@ class ScreenRecordChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_clickListenerHasCuj() =
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
+    fun chip_clickListenerHasCujLegacy() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
             screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
             mediaProjectionRepo.mediaProjectionState.value =
                 MediaProjectionState.Projecting.EntireScreen("host.package")
 
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
+            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
             clickListener!!.onClick(chipView)
 
             val cujCaptor = argumentCaptor<DialogCuj>()
             verify(kosmos.mockDialogTransitionAnimator)
                 .showFromView(any(), any(), cujCaptor.capture(), anyBoolean())
-
             assertThat(cujCaptor.firstValue.cujType)
                 .isEqualTo(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP)
             assertThat(cujCaptor.firstValue.tag).contains("Screen record")
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_recordingState_hasClickBehavior() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            assertThat(latest).isInstanceOf(OngoingActivityChipModel.Shown.Timer::class.java)
+            assertThat((latest as OngoingActivityChipModel.Shown).clickBehavior)
+                .isInstanceOf(OngoingActivityChipModel.ClickBehavior.ExpandAction::class.java)
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_notProjecting_expandActionBehaviorShowsDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
+
+            val expandAction =
+                ((latest as OngoingActivityChipModel.Shown).clickBehavior
+                    as OngoingActivityChipModel.ClickBehavior.ExpandAction)
+
+            expandAction.onClick(mockExpandable)
+            verify(kosmos.mockDialogTransitionAnimator).show(any(), any(), anyBoolean())
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_projectingEntireScreen_expandActionBehaviorShowsDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+
+            val expandAction =
+                ((latest as OngoingActivityChipModel.Shown).clickBehavior
+                    as OngoingActivityChipModel.ClickBehavior.ExpandAction)
+
+            expandAction.onClick(mockExpandable)
+            verify(kosmos.mockDialogTransitionAnimator).show(any(), any(), anyBoolean())
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_projectingSingleTask_expandActionBehaviorShowsDialog() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+            screenRecordRepo.screenRecordState.value = ScreenRecordModel.Recording
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.SingleTask(
+                    "host.package",
+                    hostDeviceName = null,
+                    FakeActivityTaskManager.createTask(taskId = 1),
+                )
+
+            val expandAction =
+                ((latest as OngoingActivityChipModel.Shown).clickBehavior
+                    as OngoingActivityChipModel.ClickBehavior.ExpandAction)
+
+            expandAction.onClick(mockExpandable)
+            verify(kosmos.mockDialogTransitionAnimator).show(any(), any(), anyBoolean())
         }
 }

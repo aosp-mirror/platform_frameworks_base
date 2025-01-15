@@ -56,7 +56,8 @@ object OngoingActivityChipBinder {
                 // Data
                 setChipIcon(chipModel, chipBackgroundView, chipDefaultIconView, iconViewStore)
                 setChipMainContent(chipModel, chipTextView, chipTimeView, chipShortTimeDeltaView)
-                viewBinding.rootView.setOnClickListener(chipModel.onClickListener)
+
+                viewBinding.rootView.setOnClickListener(chipModel.onClickListenerLegacy)
                 updateChipPadding(
                     chipModel,
                     chipBackgroundView,
@@ -424,7 +425,7 @@ object OngoingActivityChipBinder {
         // Clickable chips need to be a minimum size for accessibility purposes, but let
         // non-clickable chips be smaller.
         val minimumWidth =
-            if (chipModel.onClickListener != null) {
+            if (chipModel.onClickListenerLegacy != null) {
                 chipBackgroundView.context.resources.getDimensionPixelSize(
                     R.dimen.min_clickable_item_size
                 )

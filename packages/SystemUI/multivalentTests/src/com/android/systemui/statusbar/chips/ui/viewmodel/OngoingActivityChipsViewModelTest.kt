@@ -26,6 +26,7 @@ import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
@@ -44,6 +45,7 @@ import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
@@ -91,6 +93,8 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
                 )
                 .thenReturn(chipBackgroundView)
         }
+    private val mockExpandable: Expandable =
+        mock<Expandable>().apply { whenever(dialogTransitionController(any())).thenReturn(mock()) }
 
     private val underTest = kosmos.ongoingActivityChipsViewModel
 
@@ -294,7 +298,13 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             // WHEN screen record gets stopped via dialog
             val dialogStopAction =
-                getStopActionFromDialog(latest, chipView, mockSystemUIDialog, kosmos)
+                getStopActionFromDialog(
+                    latest,
+                    chipView,
+                    mockExpandable,
+                    mockSystemUIDialog,
+                    kosmos,
+                )
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN the chip is immediately hidden with no animation
@@ -315,7 +325,13 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
 
             // WHEN media projection gets stopped via dialog
             val dialogStopAction =
-                getStopActionFromDialog(latest, chipView, mockSystemUIDialog, kosmos)
+                getStopActionFromDialog(
+                    latest,
+                    chipView,
+                    mockExpandable,
+                    mockSystemUIDialog,
+                    kosmos,
+                )
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN the chip is immediately hidden with no animation
@@ -330,6 +346,7 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
         fun getStopActionFromDialog(
             latest: OngoingActivityChipModel?,
             chipView: View,
+            expandable: Expandable,
             dialog: SystemUIDialog,
             kosmos: Kosmos,
         ): DialogInterface.OnClickListener {
@@ -349,9 +366,17 @@ class OngoingActivityChipsViewModelTest : SysuiTestCase() {
                 .create(any<SystemUIDialog.Delegate>())
             whenever(kosmos.packageManager.getApplicationInfo(eq(NORMAL_PACKAGE), any<Int>()))
                 .thenThrow(PackageManager.NameNotFoundException())
-            // Click the chip so that we open the dialog and we fill in [dialogStopAction]
-            val clickListener = ((latest as OngoingActivityChipModel.Shown).onClickListener)
-            clickListener!!.onClick(chipView)
+
+            if (StatusBarChipsModernization.isEnabled) {
+                val clickBehavior = (latest as OngoingActivityChipModel.Shown).clickBehavior
+                (clickBehavior as OngoingActivityChipModel.ClickBehavior.ExpandAction).onClick(
+                    expandable
+                )
+            } else {
+                val clickListener =
+                    ((latest as OngoingActivityChipModel.Shown).onClickListenerLegacy)
+                clickListener!!.onClick(chipView)
+            }
 
             return dialogStopAction
         }
