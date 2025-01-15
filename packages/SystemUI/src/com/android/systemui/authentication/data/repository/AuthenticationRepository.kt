@@ -215,7 +215,8 @@ constructor(
 
     override val isAutoConfirmFeatureEnabled: StateFlow<Boolean> =
         refreshingFlow(
-            initialValue = false,
+            initialValue =
+                lockPatternUtils.isAutoPinConfirmEnabled(userRepository.getSelectedUserInfo().id),
             getFreshValue = lockPatternUtils::isAutoPinConfirmEnabled,
         )
 
