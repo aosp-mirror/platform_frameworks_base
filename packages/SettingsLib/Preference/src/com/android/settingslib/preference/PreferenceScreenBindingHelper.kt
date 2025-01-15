@@ -38,6 +38,7 @@ import com.android.settingslib.metadata.PreferenceHierarchyNode
 import com.android.settingslib.metadata.PreferenceLifecycleContext
 import com.android.settingslib.metadata.PreferenceLifecycleProvider
 import com.android.settingslib.metadata.PreferenceMetadata
+import com.android.settingslib.metadata.PreferenceScreenMetadata
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.google.common.collect.ImmutableMap
 import com.google.common.collect.ImmutableMultimap
@@ -70,9 +71,7 @@ class PreferenceScreenBindingHelper(
             override fun <T : Any> requirePreference(key: String) = findPreference<T>(key)!!
 
             override fun getKeyValueStore(key: String) =
-                (findPreference<Preference>(key)?.preferenceDataStore
-                        as? PreferenceDataStoreAdapter)
-                    ?.keyValueStore
+                findPreference<Preference>(key)?.preferenceDataStore?.findKeyValueStore()
 
             override fun notifyPreferenceChange(key: String) =
                 notifyChange(key, PreferenceChangeReason.STATE)
@@ -137,15 +136,20 @@ class PreferenceScreenBindingHelper(
         addObserver(preferenceObserver, mainExecutor)
 
         preferenceScreen.forEachRecursively {
-            val preferenceDataStore = it.preferenceDataStore
-            if (preferenceDataStore is PreferenceDataStoreAdapter) {
+            it.preferenceDataStore?.findKeyValueStore()?.let { keyValueStore ->
                 val key = it.key
-                val keyValueStore = preferenceDataStore.keyValueStore
                 storages[key] = keyValueStore
                 keyValueStore.addObserver(key, storageObserver, mainExecutor)
             }
         }
     }
+
+    private fun PreferenceDataStore.findKeyValueStore(): KeyValueStore? =
+        when (this) {
+            is PreferenceDataStoreAdapter -> keyValueStore
+            is PreferenceDataStoreDelegate -> delegate.findKeyValueStore()
+            else -> null
+        }
 
     private fun onPreferenceChange(key: String?, reason: Int) {
         if (key == null) return
@@ -239,17 +243,17 @@ class PreferenceScreenBindingHelper(
             preferenceBindingFactory: PreferenceBindingFactory,
             preferenceHierarchy: PreferenceHierarchy,
         ) {
+            val preferenceScreenMetadata = preferenceHierarchy.metadata as PreferenceScreenMetadata
             val preferences = mutableMapOf<String, PreferenceHierarchyNode>()
-            preferenceHierarchy.forEachRecursively {
-                val metadata = it.metadata
-                preferences[metadata.key] = it
-            }
+            preferenceHierarchy.forEachRecursively { preferences[it.metadata.key] = it }
             val storages = mutableMapOf<KeyValueStore, PreferenceDataStore>()
 
             fun Preference.setPreferenceDataStore(metadata: PreferenceMetadata) {
                 (metadata as? PersistentPreference<*>)?.storage(context)?.let { storage ->
                     preferenceDataStore =
-                        storages.getOrPut(storage) { PreferenceDataStoreAdapter(storage) }
+                        storages.getOrPut(storage) {
+                            storage.toPreferenceDataStore(preferenceScreenMetadata, metadata)
+                        }
                 }
             }
 
