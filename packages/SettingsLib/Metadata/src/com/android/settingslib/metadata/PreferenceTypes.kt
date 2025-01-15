@@ -18,8 +18,20 @@ package com.android.settingslib.metadata
 
 import androidx.annotation.StringRes
 
+/** A persistent preference that has a boolean value. */
+interface BooleanValuePreference : PersistentPreference<Boolean> {
+    override val valueType: Class<Boolean>
+        get() = Boolean::class.javaObjectType
+}
+
+/** A persistent preference that has a float value. */
+interface FloatValuePreference : PersistentPreference<Float> {
+    override val valueType: Class<Float>
+        get() = Float::class.javaObjectType
+}
+
 /** Common base class for preferences that have two selectable states and save a boolean value. */
-interface TwoStatePreference : PreferenceMetadata, BooleanPreference
+interface TwoStatePreference : PreferenceMetadata, BooleanValuePreference
 
 /** A preference that provides a two-state toggleable option. */
 open class SwitchPreference
