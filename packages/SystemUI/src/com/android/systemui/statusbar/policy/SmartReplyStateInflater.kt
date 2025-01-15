@@ -408,6 +408,11 @@ constructor(
                             action.extras.getBoolean(Notification.Action.EXTRA_IS_MAGIC, false)
                     ) {
                         background = MagicActionBackgroundDrawable(parent.context)
+                        val textColor =
+                            parent.context.getColor(
+                                com.android.internal.R.color.materialColorOnPrimaryContainer
+                            )
+                        setTextColor(textColor)
                     }
                 }
 
