@@ -1451,7 +1451,6 @@ private fun WidgetContent(
         } else {
             Modifier
         }
-
     Box(
         modifier =
             modifier
@@ -1539,7 +1538,10 @@ private fun WidgetContent(
         with(widgetSection) {
             Widget(
                 isFocusable = isFocusable,
-                openWidgetEditor = { viewModel.onOpenWidgetEditor() },
+                openWidgetEditor = {
+                    viewModel.setSelectedKey(model.key)
+                    viewModel.onOpenWidgetEditor()
+                },
                 model = model,
                 size = size,
                 modifier = Modifier.fillMaxSize().allowGestures(allowed = !viewModel.isEditMode),
@@ -1788,6 +1790,7 @@ fun AccessibilityContainer(viewModel: BaseCommunalViewModel, content: @Composabl
                             CustomAccessibilityAction(
                                 context.getString(R.string.accessibility_action_label_edit_widgets)
                             ) {
+                                viewModel.setSelectedKey(null)
                                 viewModel.onOpenWidgetEditor()
                                 true
                             },
