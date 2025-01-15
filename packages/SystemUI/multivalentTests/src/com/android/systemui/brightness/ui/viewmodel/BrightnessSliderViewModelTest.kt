@@ -26,10 +26,8 @@ import com.android.systemui.brightness.domain.interactor.screenBrightnessInterac
 import com.android.systemui.brightness.shared.model.GammaBrightness
 import com.android.systemui.brightness.shared.model.LinearBrightness
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
-import com.android.systemui.common.shared.model.ContentDescription
-import com.android.systemui.common.shared.model.Icon
-import com.android.systemui.common.shared.model.Text
 import com.android.systemui.coroutines.collectLastValue
+import com.android.systemui.graphics.imageLoader
 import com.android.systemui.haptics.slider.sliderHapticsViewModelFactory
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.lifecycle.activateIn
@@ -65,6 +63,7 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
                 falsingInteractor,
                 supportsMirroring = true,
                 brightnessWarningToast,
+                imageLoader,
             )
         }
     }
@@ -162,20 +161,21 @@ class BrightnessSliderViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun label() {
-        assertThat(underTest.label)
-            .isEqualTo(Text.Resource(R.string.quick_settings_brightness_dialog_title))
-    }
-
-    @Test
     fun icon() {
-        assertThat(underTest.icon)
-            .isEqualTo(
-                Icon.Resource(
-                    R.drawable.ic_brightness_full,
-                    ContentDescription.Resource(underTest.label.res),
-                )
-            )
+        assertThat(BrightnessSliderViewModel.getIconForPercentage(0f))
+            .isEqualTo(R.drawable.ic_brightness_low)
+        assertThat(BrightnessSliderViewModel.getIconForPercentage(20f))
+            .isEqualTo(R.drawable.ic_brightness_low)
+        assertThat(BrightnessSliderViewModel.getIconForPercentage(20.1f))
+            .isEqualTo(R.drawable.ic_brightness_medium)
+        assertThat(BrightnessSliderViewModel.getIconForPercentage(50f))
+            .isEqualTo(R.drawable.ic_brightness_medium)
+        assertThat(BrightnessSliderViewModel.getIconForPercentage(79.9f))
+            .isEqualTo(R.drawable.ic_brightness_medium)
+        assertThat(BrightnessSliderViewModel.getIconForPercentage(80f))
+            .isEqualTo(R.drawable.ic_brightness_full)
+        assertThat(BrightnessSliderViewModel.getIconForPercentage(100f))
+            .isEqualTo(R.drawable.ic_brightness_full)
     }
 
     @Test
