@@ -56,4 +56,5 @@
     <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"মন্টেনেগ্রিন (ল্যাটিন)"</string>
     <string name="keyboard_layout_serbian_cyrillic" msgid="7013541044323542196">"সার্বিয়ান (সিরিলিক)"</string>
     <string name="keyboard_layout_montenegrin_cyrillic" msgid="2391253952894077421">"মন্টেনেগ্রিন (সিরিলিক)"</string>
+    <string name="keyboard_layout_romanian" msgid="8698989892731726903">"রোমানিয়ান"</string>
 </resources>
