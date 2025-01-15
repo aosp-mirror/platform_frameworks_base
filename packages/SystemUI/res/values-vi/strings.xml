@@ -759,7 +759,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Kết nối vệ tinh tốt"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Hiện có kết nối vệ tinh"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Liên lạc khẩn cấp qua vệ tinh"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Cuộc gọi khẩn cấp hoặc SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
+    <skip />
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"không có tín hiệu"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"1 vạch"</string>
@@ -1289,8 +1290,7 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"truy cập thiết bị"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Dùng vân tay để mở"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Bạn cần phải xác thực. Hãy chạm vào cảm biến vân tay để xác thực."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
-    <skip />
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Cuộc gọi đang diễn ra"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dữ liệu di động"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Đã kết nối"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Tạm thời có kết nối"</string>
@@ -1433,11 +1433,11 @@
     <string name="shortcut_helper_category_multitasking" msgid="7413381961404090136">"Đa nhiệm"</string>
     <string name="shortcutHelper_category_split_screen" msgid="1159669813444812244">"Chia đôi màn hình"</string>
     <string name="shortcut_helper_category_input" msgid="8674018654124839566">"Phương thức nhập"</string>
-    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Lối tắt ứng dụng"</string>
+    <string name="shortcut_helper_category_app_shortcuts" msgid="8010249408308587117">"Phím tắt cho ứng dụng"</string>
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Ứng dụng hiện tại"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Hỗ trợ tiếp cận"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Phím tắt"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Tuỳ chỉnh phím tắt"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Tuỳ chỉnh phím tắt"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Xoá phím tắt?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Đặt lại về phím tắt mặc định?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Nhấn phím để chỉ định phím tắt"</string>
@@ -1465,6 +1465,8 @@
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Tổ hợp phím đã được sử dụng. Hãy thử một phím khác."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Không đặt được lối tắt."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Thêm phím tắt"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Xoá phím tắt"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Di chuyển bằng bàn phím"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Tìm hiểu về phím tắt"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Di chuyển bằng bàn di chuột"</string>

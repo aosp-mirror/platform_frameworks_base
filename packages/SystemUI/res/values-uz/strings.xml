@@ -759,7 +759,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Sputnik, aloqa sifati yaxshi"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Sputnik, aloqa mavjud"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Sputnik SOS"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Favqulodda chaqiruvlar yoki SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
+    <skip />
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"signal yoʻq"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"bitta ustun"</string>
@@ -871,12 +872,12 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Kirish bilan bogʻliq tezkor tugmalarni koʻrsatiladi"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Ilovalarni ochuvchi tezkor tugmalar koʻrsatiladi"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Joriy ilova uchun tezkor tugmalar koʻrsatiladi"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Bildirishnomalarni ochish"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Bildirishnomalarni koʻrish"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Skrinshot olish"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Yorliqlarni ochish"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Orqaga"</string>
     <string name="group_system_access_home_screen" msgid="4130366993484706483">"Bosh ekranni ochish"</string>
-    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Oxirgi ilovalarni ochish"</string>
+    <string name="group_system_overview_open_apps" msgid="5659958952937994104">"Oxirgi ilovalarni koʻrish"</string>
     <string name="group_system_cycle_forward" msgid="5478663965957647805">"Oxirgi ilovalarni oldinga varaqlash"</string>
     <string name="group_system_cycle_back" msgid="8194102916946802902">"Oxirgi ilovalarni orqaga varaqlash"</string>
     <string name="group_system_access_all_apps_search" msgid="1553588630154197469">"Ilovalar roʻyxatini ochish"</string>
@@ -1289,8 +1290,7 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"qurilmani ochish"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Ochish uchun barmoq izidan foydalaning"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Haqiqiylikni tekshirish talab etiladi. Autentifikatsiya uchun barmoq izi skaneriga tegining."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
-    <skip />
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Joriy chaqiruv"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobil internet"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Ulangan"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Vaqtincha ulangan"</string>
@@ -1437,7 +1437,8 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Joriy ilova"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Qulayliklar"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Tezkor tugmalar"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Tezkor tugmalarni moslash"</string>
+    <!-- no translation found for shortcut_helper_customize_mode_title (8327297960035006036) -->
+    <skip />
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Tezkor tugma olib tashlansinmi?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Asliga qaytarilsinmi?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Tezkor tugma sozlash uchun tugmani bosing"</string>
@@ -1465,6 +1466,8 @@
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Bu tugmalar birikmasi band. Boshqasini ishlating."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Buyruq sozlanmadi."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Yorliq yaratish"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Yorliqni oʻchirish"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Klaviatura yordamida kezing"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Tezkor tugmalar haqida"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Sensorli panel yordamida kezing"</string>

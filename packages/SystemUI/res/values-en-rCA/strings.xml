@@ -759,7 +759,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satellite, good connection"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satellite, connection available"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Satellite SOS"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Emergency calls or SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
+    <skip />
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"no signal"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"one bar"</string>
@@ -1436,7 +1437,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Current App"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Accessibility"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Keyboard shortcuts"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Customize keyboard shortcuts"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Customize shortcuts"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Remove shortcut?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Reset back to default?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Press key to assign shortcut"</string>
@@ -1464,6 +1465,8 @@
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Key combination already in use. Try another key."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Shortcut cannot be set."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Add shortcut"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Delete shortcut"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navigate using your keyboard"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Learn keyboards shortcuts"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navigate using your touchpad"</string>

@@ -688,7 +688,7 @@
     <string name="stream_system" msgid="7663148785370565134">"Sistema"</string>
     <string name="stream_ring" msgid="7550670036738697526">"Toques"</string>
     <string name="stream_music" msgid="2188224742361847580">"Mídia"</string>
-    <string name="stream_alarm" msgid="16058075093011694">"Alarme"</string>
+    <string name="stream_alarm" msgid="16058075093011694">"Alarmes"</string>
     <string name="stream_notification" msgid="7930294049046243939">"Notificações"</string>
     <string name="stream_bluetooth_sco" msgid="6234562365528664331">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="7322536356554673067">"Multifrequência de dois tons"</string>
@@ -759,7 +759,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Satélite, conexão boa"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Satélite, conexão disponível"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"SOS via satélite"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Chamadas de emergência ou SOS"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
+    <skip />
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"sem sinal"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"uma barra"</string>
@@ -871,7 +872,7 @@
     <string name="keyboard_shortcut_a11y_filter_input" msgid="4589316004510335529">"Mostrando atalhos de entrada"</string>
     <string name="keyboard_shortcut_a11y_filter_open_apps" msgid="6175417687221004059">"Mostrando atalhos que abrem apps"</string>
     <string name="keyboard_shortcut_a11y_filter_current_app" msgid="7944592357493737911">"Mostrando atalhos do app atual"</string>
-    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Mostrar as notificações"</string>
+    <string name="group_system_access_notification_shade" msgid="1619028907006553677">"Ver notificações"</string>
     <string name="group_system_full_screenshot" msgid="5742204844232667785">"Fazer uma captura de tela"</string>
     <string name="group_system_access_system_app_shortcuts" msgid="8562482996626694026">"Mostrar atalhos"</string>
     <string name="group_system_go_back" msgid="2730322046244918816">"Voltar"</string>
@@ -1289,8 +1290,7 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"acessar o dispositivo"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Use a impressão digital para abrir"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Autenticação obrigatória. Toque no sensor de impressão digital para autenticar."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
-    <skip />
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Chamada em andamento"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Dados móveis"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Conectado"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Temporariamente conectado"</string>
@@ -1437,7 +1437,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"App atual"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Acessibilidade"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Atalhos do teclado"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Personalizar atalhos de teclado"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Personalizar atalhos"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Remover atalho?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Redefinir para o padrão?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Pressione a tecla para atribuir o atalho"</string>
@@ -1465,6 +1465,8 @@
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Essa combinação de teclas já está em uso. Tente outra tecla."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Não é possível definir o atalho."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Adicionar atalho"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Excluir atalho"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Navegue usando o teclado"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Aprenda atalhos do teclado"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Navegue usando o touchpad"</string>

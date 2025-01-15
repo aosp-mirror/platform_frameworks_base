@@ -759,7 +759,8 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"Palydovas, geras ryšys"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"Palydovas, pasiekiamas ryšys"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"Prisijungimas prie palydovo kritiniu atveju"</string>
-    <string name="satellite_emergency_only_carrier_text" msgid="828510231597991206">"Skambučiai pagalbos numeriu arba pagalbos iškvietimas kritiniu atveju"</string>
+    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
+    <skip />
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"„<xliff:g id="CARRIER_NAME">%1$s</xliff:g>“, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"nėra signalo"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"viena juosta"</string>
@@ -1289,8 +1290,7 @@
     <string name="accessibility_enter_hint" msgid="2617864063504824834">"pasiektumėte įrenginį"</string>
     <string name="keyguard_try_fingerprint" msgid="2825130772993061165">"Naudokite kontrolinį kodą, kad atidarytumėte"</string>
     <string name="accessibility_fingerprint_bouncer" msgid="7189102492498735519">"Reikia nustatyti tapatybę. Nustatykite tapatybę palietę kontrolinio kodo jutiklį."</string>
-    <!-- no translation found for ongoing_call_content_description (6394763878322348560) -->
-    <skip />
+    <string name="ongoing_call_content_description" msgid="6394763878322348560">"Vykstantis skambutis"</string>
     <string name="mobile_data_settings_title" msgid="3955246641380064901">"Mobiliojo ryšio duomenys"</string>
     <string name="mobile_data_connection_active" msgid="944490013299018227">"Prisijungta"</string>
     <string name="mobile_data_temp_connection_active" msgid="4590222725908806824">"Laikinai prijungta"</string>
@@ -1437,7 +1437,7 @@
     <string name="shortcut_helper_category_current_app_shortcuts" msgid="4017840565974573628">"Esama programa"</string>
     <string name="shortcut_helper_category_a11y" msgid="6314444792641773464">"Pritaikomumas"</string>
     <string name="shortcut_helper_title" msgid="8567500639300970049">"Spartieji klavišai"</string>
-    <string name="shortcut_helper_customize_mode_title" msgid="1467657117101096033">"Sparčiųjų klavišų tinkinimas"</string>
+    <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"Sparčiųjų klavišų tinkinimas"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"Pašalinti spartųjį klavišą?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"Iš naujo nustatyti numatytąjį nustatymą?"</string>
     <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"Paspauskite klavišą, kad priskirtumėte spartųjį klavišą"</string>
@@ -1465,6 +1465,8 @@
     <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"Klavišų derinys jau naudojamas. Bandykite naudoti kitą klavišą."</string>
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"Sparčiojo klavišo nustatyti negalima."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
+    <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"Pridėti spartųjį klavišą"</string>
+    <string name="shortcut_helper_delete_shortcut_button_label" msgid="3148773472696137052">"Ištrinti spartųjį klavišą"</string>
     <string name="launch_keyboard_tutorial_notification_title" msgid="8849933155160522519">"Naršykite naudodamiesi klaviatūra"</string>
     <string name="launch_keyboard_tutorial_notification_content" msgid="2880339951512757918">"Sužinokite apie sparčiuosius klavišus"</string>
     <string name="launch_touchpad_tutorial_notification_title" msgid="2243780062772196901">"Naršykite naudodamiesi jutikline dalimi"</string>
