@@ -689,6 +689,7 @@ public class SettingsBackupTest {
                  Settings.Secure.DEFAULT_DEVICE_INPUT_METHOD,
                  Settings.Secure.DEVICE_PAIRED,
                  Settings.Secure.DIALER_DEFAULT_APPLICATION,
+                 Settings.Secure.DISABLE_ADAPTIVE_AUTH_LIMIT_LOCK,
                  Settings.Secure.DISABLED_PRINT_SERVICES,
                  Settings.Secure.DISABLE_SECURE_WINDOWS,
                  Settings.Secure.DISABLED_SYSTEM_INPUT_METHODS,

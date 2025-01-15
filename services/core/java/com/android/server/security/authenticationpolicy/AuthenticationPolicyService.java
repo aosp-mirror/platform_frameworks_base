@@ -17,6 +17,7 @@
 package com.android.server.security.authenticationpolicy;
 
 import static android.Manifest.permission.MANAGE_SECURE_LOCK_DEVICE;
+import static android.security.Flags.disableAdaptiveAuthCounterLock;
 
 import static com.android.internal.widget.LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST;
 
@@ -39,6 +40,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
+import android.provider.Settings;
 import android.security.authenticationpolicy.AuthenticationPolicyManager;
 import android.security.authenticationpolicy.DisableSecureLockDeviceParams;
 import android.security.authenticationpolicy.EnableSecureLockDeviceParams;
@@ -249,6 +251,17 @@ public class AuthenticationPolicyService extends SystemService {
             Slog.d(TAG, "Not locking the device because the number of failed attempts is below"
                     + " the threshold.");
             return;
+        }
+
+        if (disableAdaptiveAuthCounterLock() && Build.IS_DEBUGGABLE) {
+            final boolean disabled = Settings.Secure.getIntForUser(
+                    getContext().getContentResolver(),
+                    Settings.Secure.DISABLE_ADAPTIVE_AUTH_LIMIT_LOCK,
+                    0 /* default */, userId) != 0;
+            if (disabled) {
+                Slog.d(TAG, "not locking (disabled by user)");
+                return;
+            }
         }
 
         //TODO: additionally consider the trust signal before locking device
