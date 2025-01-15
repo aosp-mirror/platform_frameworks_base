@@ -1781,6 +1781,7 @@ public class ShellTransitionTests extends ShellTestCase {
         taskInfo.configuration.windowConfiguration.setWindowingMode(windowingMode);
         taskInfo.configuration.windowConfiguration.setActivityType(activityType);
         taskInfo.token = mock(WindowContainerToken.class);
+        taskInfo.baseIntent = mock(Intent.class);
         return taskInfo;
     }
 

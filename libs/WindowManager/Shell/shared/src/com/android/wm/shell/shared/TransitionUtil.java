@@ -40,7 +40,6 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
 import android.app.ActivityManager;
-import android.app.TaskInfo;
 import android.app.WindowConfiguration;
 import android.graphics.Rect;
 import android.util.ArrayMap;
@@ -56,6 +55,9 @@ import java.util.function.Predicate;
 public class TransitionUtil {
     /** Flag applied to a transition change to identify it as a divider bar for animation. */
     public static final int FLAG_IS_DIVIDER_BAR = FLAG_FIRST_CUSTOM;
+
+    /** Flag applied to a transition change to identify it as a desktop wallpaper activity. */
+    public static final int FLAG_IS_DESKTOP_WALLPAPER_ACTIVITY = FLAG_FIRST_CUSTOM << 1;
 
     /** @return true if the transition was triggered by opening something vs closing something */
     public static boolean isOpeningType(@WindowManager.TransitionType int type) {

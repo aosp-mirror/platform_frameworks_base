@@ -27,6 +27,7 @@ import static android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_EXIT_TRAN
 import static android.window.TransitionInfo.FLAG_IS_WALLPAPER;
 
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.wm.shell.shared.TransitionUtil.FLAG_IS_DESKTOP_WALLPAPER_ACTIVITY;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingMode;
 import static com.android.wm.shell.shared.TransitionUtil.isClosingType;
 import static com.android.wm.shell.shared.TransitionUtil.isOpeningMode;
@@ -270,7 +271,8 @@ public abstract class RemoteAnimationRunnerCompat extends IRemoteAnimationRunner
             // skip changes that we didn't wrap
             if (!leashMap.containsKey(change.getLeash())) continue;
             // Only make the update if we are closing Desktop tasks.
-            if (change.getTaskInfo() != null && change.getTaskInfo().isFreeform()
+            if (change.getTaskInfo() != null && (change.getTaskInfo().isFreeform()
+                    || change.hasFlags(FLAG_IS_DESKTOP_WALLPAPER_ACTIVITY))
                     && isClosingMode(change.getMode())) {
                 startTransaction.setAlpha(leashMap.get(launcherChange.getLeash()), 0f);
                 return;
