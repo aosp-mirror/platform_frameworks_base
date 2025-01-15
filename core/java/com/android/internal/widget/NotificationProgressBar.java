@@ -817,12 +817,13 @@ public final class NotificationProgressBar extends ProgressBar implements
             if (part instanceof Segment segment) {
                 final float segWidth = segment.mFraction * totalWidth;
                 // Advance the start position to account for a point immediately prior.
-                final float startOffset = getSegStartOffset(prevPart, pointRadius, segPointGap, x);
+                final float startOffset = getSegStartOffset(prevPart, pointRadius, segPointGap,
+                        iPart == 1);
                 final float start = x + startOffset;
                 // Retract the end position to account for the padding and a point immediately
                 // after.
                 final float endOffset = getSegEndOffset(segment, nextPart, pointRadius, segPointGap,
-                        segSegGap, x + segWidth, totalWidth, hasTrackerIcon);
+                        segSegGap, iPart == nParts - 2, totalWidth, hasTrackerIcon);
                 final float end = x + segWidth - endOffset;
 
                 drawableParts.add(new DrawableSegment(start, end, segment.mColor, segment.mFaded));
@@ -840,10 +841,10 @@ public final class NotificationProgressBar extends ProgressBar implements
                 // Only shift the points right at the start/end.
                 // For the points close to the start/end, the segment minimum width requirement
                 // would take care of shifting them to be within the bounds.
-                if (x == 0) {
+                if (iPart == 0) {
                     start = 0;
                     end = pointWidth;
-                } else if (x == totalWidth) {
+                } else if (iPart == nParts - 1) {
                     start = totalWidth - pointWidth;
                     end = totalWidth;
                 }
@@ -856,14 +857,14 @@ public final class NotificationProgressBar extends ProgressBar implements
     }
 
     private static float getSegStartOffset(Part prevPart, float pointRadius, float segPointGap,
-            float startX) {
+            boolean isSecondPart) {
         if (!(prevPart instanceof Point)) return 0F;
-        final float pointOffset = (startX == 0) ? pointRadius : 0;
+        final float pointOffset = isSecondPart ? pointRadius : 0;
         return pointOffset + pointRadius + segPointGap;
     }
 
     private static float getSegEndOffset(Segment seg, Part nextPart, float pointRadius,
-            float segPointGap, float segSegGap, float endX, float totalWidth,
+            float segPointGap, float segSegGap, boolean isSecondToLastPart, float totalWidth,
             boolean hasTrackerIcon) {
         if (nextPart == null) return 0F;
         if (nextPart instanceof Segment nextSeg) {
@@ -874,7 +875,7 @@ public final class NotificationProgressBar extends ProgressBar implements
             return segSegGap;
         }
 
-        final float pointOffset = (endX == totalWidth) ? pointRadius : 0;
+        final float pointOffset = isSecondToLastPart ? pointRadius : 0;
         return segPointGap + pointRadius + pointOffset;
     }
 
