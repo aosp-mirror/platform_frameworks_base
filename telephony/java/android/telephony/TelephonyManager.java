@@ -180,7 +180,7 @@ import java.util.stream.IntStream;
  * permission-protected. Your application cannot access the protected
  * information unless it has the appropriate permissions declared in
  * its manifest file. Where permissions apply, they are noted in the
- * the methods through which you access the protected information.
+ * methods through which you access the protected information.
  *
  * <p>TelephonyManager is intended for use on devices that implement
  * {@link android.content.pm.PackageManager#FEATURE_TELEPHONY FEATURE_TELEPHONY}. On devices
