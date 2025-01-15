@@ -23,7 +23,7 @@ import android.os.IRemoteCallback;
 import android.view.MotionEvent;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 
-// Next ID: 36
+// Next ID: 38
 oneway interface IOverviewProxy {
 
     void onActiveNavBarRegionChanges(in Region activeRegion) = 11;
@@ -144,4 +144,14 @@ oneway interface IOverviewProxy {
      * TouchInteractionService is expected to send the reply once it has finished cleaning up.
      */
     void onUnbind(IRemoteCallback reply) = 35;
+
+    /**
+     * Sent when {@link TaskbarDelegate#onDisplayReady} is called.
+     */
+    void onDisplayReady(int displayId) = 36;
+
+    /**
+     * Sent when {@link TaskbarDelegate#onDisplayRemoved} is called.
+     */
+    void onDisplayRemoved(int displayId) = 37;
 }

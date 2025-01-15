@@ -236,11 +236,29 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     @Override
     public void onDisplayReady(int displayId) {
         CommandQueue.Callbacks.super.onDisplayReady(displayId);
+        if (mOverviewProxyService.getProxy() == null) {
+            return;
+        }
+
+        try {
+            mOverviewProxyService.getProxy().onDisplayReady(displayId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "onDisplayReady() failed", e);
+        }
     }
 
     @Override
     public void onDisplayRemoved(int displayId) {
         CommandQueue.Callbacks.super.onDisplayRemoved(displayId);
+        if (mOverviewProxyService.getProxy() == null) {
+            return;
+        }
+
+        try {
+            mOverviewProxyService.getProxy().onDisplayRemoved(displayId);
+        } catch (RemoteException e) {
+            Log.e(TAG, "onDisplayRemoved() failed", e);
+        }
     }
 
     // Separated into a method to keep setDependencies() clean/readable.
