@@ -790,6 +790,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         TestableResources tr = mContext.getOrCreateTestableResources();
         tr.addOverride(com.android.internal.R.string.config_defaultSearchSelectorPackageName,
                 SEARCH_SELECTOR_PKG);
+        tr.addOverride(R.array.config_notificationDefaultUnsupportedAdjustments,
+                new String[] {KEY_TYPE});
 
         doAnswer(invocation -> {
             mOnPermissionChangeListener = invocation.getArgument(2);
