@@ -111,7 +111,12 @@ constructor(
             pw.println("Carrier configs by subId")
             configs.keyIterator().forEach {
                 pw.println("  subId=$it")
-                pw.println("    config=${configs.get(it).toStringConsideringDefaults()}")
+                val config = configs.get(it)
+                if (config == null) {
+                    pw.println("    config=null (config was removed during dump)")
+                } else {
+                    pw.println("    config=${config.toStringConsideringDefaults()}")
+                }
             }
             // Finally, print the default config
             pw.println("Default config:")
