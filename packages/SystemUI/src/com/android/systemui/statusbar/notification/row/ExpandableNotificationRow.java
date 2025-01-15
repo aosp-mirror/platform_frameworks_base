@@ -21,6 +21,7 @@ import static android.app.Notification.Action.SEMANTIC_ACTION_MARK_CONVERSATION_
 import static android.service.notification.NotificationListenerService.REASON_CANCEL;
 
 import static com.android.systemui.flags.Flags.ENABLE_NOTIFICATIONS_SIMULATE_SLOW_MEASURE;
+import static com.android.systemui.Flags.notificationsPinnedHunInShade;
 import static com.android.systemui.statusbar.notification.collection.NotificationEntry.DismissState.PARENT_DISMISSED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 import static com.android.systemui.statusbar.policy.RemoteInputView.FOCUS_ANIMATION_MIN_SCALE;
@@ -3179,7 +3180,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public boolean mustStayOnScreen() {
-        return mIsHeadsUp && mMustStayOnScreen;
+        // Must stay on screen in the open shade regardless how much the stack is scrolled if:
+        // 1. Is HUN and not marked as seen yet (isHeadsUp && mustStayOnScreen)
+        // 2. Is an FSI HUN (isPinned)
+        return mIsHeadsUp && mMustStayOnScreen || notificationsPinnedHunInShade() && isPinned();
     }
 
     /**

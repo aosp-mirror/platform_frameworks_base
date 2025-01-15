@@ -941,6 +941,57 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         assertThat(row.getImageResolver().getContext()).isSameInstanceAs(userContext);
     }
 
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATIONS_PINNED_HUN_IN_SHADE)
+    public void mustStayOnScreen_false() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        assertThat(row.mustStayOnScreen()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATIONS_PINNED_HUN_IN_SHADE)
+    public void mustStayOnScreen_isHeadsUp_markedAsSeen() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        // When the row is a HUN
+        row.setHeadsUp(true);
+        //Then it must stay on screen
+        assertThat(row.mustStayOnScreen()).isTrue();
+        // And when the user has seen it
+        row.markHeadsUpSeen();
+        // Then it should NOT stay on screen anymore
+        assertThat(row.mustStayOnScreen()).isFalse();
+    }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_NOTIFICATIONS_PINNED_HUN_IN_SHADE)
+    public void mustStayOnScreen_isPinned_markedAsSeen() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        // When a HUN is pinned
+        row.setHeadsUp(true);
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem);
+        //Then it must stay on screen
+        assertThat(row.mustStayOnScreen()).isTrue();
+        // And when the user has seen it
+        row.markHeadsUpSeen();
+        // Then it should still stay on screen
+        assertThat(row.mustStayOnScreen()).isTrue();
+    }
+
+    @Test
+    @DisableFlags(com.android.systemui.Flags.FLAG_NOTIFICATIONS_PINNED_HUN_IN_SHADE)
+    public void mustStayOnScreen_isPinned_markedAsSeen_false() throws Exception {
+        final ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+        // When a HUN is pinned
+        row.setHeadsUp(true);
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem);
+        //Then it must stay on screen
+        assertThat(row.mustStayOnScreen()).isTrue();
+        // And when the user has seen it
+        row.markHeadsUpSeen();
+        // Then it should NOT stay on screen anymore
+        assertThat(row.mustStayOnScreen()).isFalse();
+    }
+
     private void setDrawableIconsInImageView(CachingIconView icon, Drawable iconDrawable,
             Drawable rightIconDrawable) {
         ImageView iconView = mock(ImageView.class);

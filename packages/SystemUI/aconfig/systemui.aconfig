@@ -193,6 +193,16 @@ flag {
 }
 
 flag {
+    name: "notifications_pinned_hun_in_shade"
+    namespace: "systemui"
+    description: "Fixes displaying pinned HUNs in the Shade, making sure that their y and z positions are correct."
+    bug: "385041854"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
    name: "pss_app_selector_recents_split_screen"
    namespace: "systemui"
    description: "Allows recent apps selected for partial screenshare to be launched in split screen mode"
