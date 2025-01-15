@@ -72,6 +72,7 @@ public class IllustrationPreference extends Preference implements GroupSectionDi
     private OnBindListener mOnBindListener;
     private boolean mLottieDynamicColor;
     private CharSequence mContentDescription;
+    private boolean mIsTablet;
 
     /**
      * Interface to listen in on when {@link #onBindViewHolder(PreferenceViewHolder)} occurs.
@@ -127,8 +128,17 @@ public class IllustrationPreference extends Preference implements GroupSectionDi
 
         final FrameLayout illustrationFrame = (FrameLayout) holder.findViewById(
                 R.id.illustration_frame);
-        final ImageView backgroundView =
+        ImageView backgroundView =
                 (ImageView) holder.findViewById(R.id.background_view);
+        ImageView backgroundViewTablet =
+                (ImageView) holder.findViewById(R.id.background_view_tablet);
+
+        backgroundView.setVisibility(mIsTablet ? View.GONE : View.VISIBLE);
+        backgroundViewTablet.setVisibility(mIsTablet ? View.VISIBLE : View.GONE);
+        if (mIsTablet) {
+            backgroundView = backgroundViewTablet;
+        }
+
         final FrameLayout middleGroundLayout =
                 (FrameLayout) holder.findViewById(R.id.middleground_layout);
         final LottieAnimationView illustrationView =
@@ -413,7 +423,7 @@ public class IllustrationPreference extends Preference implements GroupSectionDi
         final Resources res = backgroundView.getResources();
         final int frameWidth = res.getDimensionPixelSize(R.dimen.settingslib_illustration_width);
         final int frameHeight = res.getDimensionPixelSize(R.dimen.settingslib_illustration_height);
-        final int restrictedMaxHeight = Math.min(mMaxHeight, frameHeight);
+        final int restrictedMaxHeight = mMaxHeight;
         backgroundView.setMaxHeight(restrictedMaxHeight);
         illustrationView.setMaxHeight(restrictedMaxHeight);
 
@@ -504,6 +514,12 @@ public class IllustrationPreference extends Preference implements GroupSectionDi
                     false);
 
             a.recycle();
+        }
+        mIsTablet = SettingsThemeHelper.isExpressiveTheme(context)
+                && SettingsThemeHelper.isTablet(context);
+        if (mIsTablet) {
+            setMaxHeight(context.getResources().getDimensionPixelSize(
+                    R.dimen.settingslib_illustration_height_tablet));
         }
     }
 }

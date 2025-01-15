@@ -251,8 +251,8 @@ public class IllustrationPreferenceTest {
         mPreference.setMaxHeight(maxHeight);
         mPreference.onBindViewHolder(mViewHolder);
 
-        assertThat(mBackgroundView.getMaxHeight()).isEqualTo(restrictedHeight);
-        assertThat(mAnimationView.getMaxHeight()).isEqualTo(restrictedHeight);
+        assertThat(mBackgroundView.getMaxHeight()).isEqualTo(maxHeight);
+        assertThat(mAnimationView.getMaxHeight()).isEqualTo(maxHeight);
     }
 
     @Test
