@@ -132,8 +132,6 @@ constructor(
                             DeviceEntryRestrictionReason.UnattendedUpdate
                         authFlags.isPrimaryAuthRequiredAfterTimeout ->
                             DeviceEntryRestrictionReason.SecurityTimeout
-                        authFlags.isPrimaryAuthRequiredAfterLockout ->
-                            DeviceEntryRestrictionReason.BouncerLockedOut
                         isFingerprintLockedOut ->
                             DeviceEntryRestrictionReason.StrongBiometricsLockedOut
                         isFaceLockedOut && faceAuthInteractor.isFaceAuthStrong() ->
@@ -376,8 +374,7 @@ constructor(
         private val interactor: DeviceUnlockedInteractor,
     ) : CoreStartable {
         override fun start() {
-            if (!SceneContainerFlag.isEnabled)
-                return
+            if (!SceneContainerFlag.isEnabled) return
 
             applicationScope.launch { interactor.activate() }
         }

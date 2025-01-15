@@ -367,8 +367,6 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
                     DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot,
                 LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
                     DeviceEntryRestrictionReason.AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    DeviceEntryRestrictionReason.BouncerLockedOut,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
                     DeviceEntryRestrictionReason.SecurityTimeout,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
@@ -403,8 +401,6 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
                     DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot,
                 LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
                     DeviceEntryRestrictionReason.AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    DeviceEntryRestrictionReason.BouncerLockedOut,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
                     DeviceEntryRestrictionReason.SecurityTimeout,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
@@ -440,8 +436,6 @@ class DeviceUnlockedInteractorTest : SysuiTestCase() {
                     DeviceEntryRestrictionReason.DeviceNotUnlockedSinceReboot,
                 LockPatternUtils.StrongAuthTracker.SOME_AUTH_REQUIRED_AFTER_ADAPTIVE_AUTH_REQUEST to
                     DeviceEntryRestrictionReason.AdaptiveAuthRequest,
-                LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_LOCKOUT to
-                    DeviceEntryRestrictionReason.BouncerLockedOut,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_TIMEOUT to
                     DeviceEntryRestrictionReason.SecurityTimeout,
                 LockPatternUtils.StrongAuthTracker.STRONG_AUTH_REQUIRED_AFTER_USER_LOCKDOWN to
