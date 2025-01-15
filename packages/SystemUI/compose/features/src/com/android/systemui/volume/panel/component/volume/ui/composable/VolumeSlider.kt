@@ -17,10 +17,12 @@
 package com.android.systemui.volume.panel.component.volume.ui.composable
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -33,6 +35,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon as MaterialIcon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Text
@@ -47,6 +50,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.semantics.CustomAccessibilityAction
 import androidx.compose.ui.semantics.ProgressBarRangeInfo
 import androidx.compose.ui.semantics.clearAndSetSemantics
@@ -67,6 +71,7 @@ import com.android.systemui.haptics.slider.SeekableSliderTrackerConfig
 import com.android.systemui.haptics.slider.SliderHapticFeedbackConfig
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.lifecycle.rememberViewModel
+import com.android.systemui.res.R
 import com.android.systemui.volume.panel.component.volume.slider.ui.viewmodel.SliderState
 import kotlin.math.round
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -98,7 +103,7 @@ fun VolumeSlider(
     }
 
     val value by valueState(state)
-    Column(modifier) {
+    Column(modifier = modifier.animateContentSize(), verticalArrangement = Arrangement.Top) {
         Row(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth().height(40.dp),
@@ -127,7 +132,7 @@ fun VolumeSlider(
             enabled = state.isEnabled,
             modifier =
                 Modifier.height(40.dp)
-                    .padding(vertical = 8.dp)
+                    .padding(top = 4.dp, bottom = 12.dp)
                     .sysuiResTag(state.label)
                     .clearAndSetSemantics {
                         if (state.isEnabled) {
@@ -168,6 +173,28 @@ fun VolumeSlider(
                         }
                     },
         )
+        state.disabledMessage?.let { disabledMessage ->
+            AnimatedVisibility(visible = !state.isEnabled) {
+                Row(
+                    modifier = Modifier.padding(bottom = 12.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                ) {
+                    MaterialIcon(
+                        painter = painterResource(R.drawable.ic_error_outline),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                        modifier = Modifier.size(16.dp),
+                    )
+                    Text(
+                        text = disabledMessage,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        style = MaterialTheme.typography.labelSmall,
+                        modifier = Modifier.basicMarquee(),
+                    )
+                }
+            }
+        }
     }
 }
 
