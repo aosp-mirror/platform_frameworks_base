@@ -29,6 +29,10 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.hardware.tv.mediaquality.AmbientBacklightColorFormat;
 import android.hardware.tv.mediaquality.IMediaQuality;
+import android.hardware.tv.mediaquality.PictureParameter;
+import android.hardware.tv.mediaquality.PictureParameters;
+import android.hardware.tv.mediaquality.SoundParameter;
+import android.hardware.tv.mediaquality.SoundParameters;
 import android.media.quality.AmbientBacklightEvent;
 import android.media.quality.AmbientBacklightMetadata;
 import android.media.quality.AmbientBacklightSettings;
@@ -37,6 +41,8 @@ import android.media.quality.IMediaQualityManager;
 import android.media.quality.IPictureProfileCallback;
 import android.media.quality.ISoundProfileCallback;
 import android.media.quality.MediaQualityContract.BaseParameters;
+import android.media.quality.MediaQualityContract.PictureQuality;
+import android.media.quality.MediaQualityContract.SoundQuality;
 import android.media.quality.MediaQualityManager;
 import android.media.quality.ParameterCapability;
 import android.media.quality.PictureProfile;
@@ -303,8 +309,206 @@ public class MediaQualityService extends SystemService {
                 notifyOnPictureProfileError(profileId, PictureProfile.ERROR_NO_PERMISSION,
                         Binder.getCallingUid(), Binder.getCallingPid());
             }
-            // TODO: pass the profile ID to MediaQuality HAL when ready.
+
+            PictureProfile pictureProfile = getPictureProfile(
+                    mPictureProfileTempIdMap.getKey(profileId));
+            PersistableBundle params = pictureProfile.getParameters();
+
+            try {
+                if (mMediaQuality != null) {
+                    PictureParameter[] pictureParameters =
+                            convertPersistableBundleToPictureParameterList(params);
+
+                    PictureParameters pp = new PictureParameters();
+                    pp.pictureParameters = pictureParameters;
+
+                    mMediaQuality.sendDefaultPictureParameters(pp);
+                    return true;
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set default picture profile", e);
+            }
             return false;
+        }
+
+        private PictureParameter[] convertPersistableBundleToPictureParameterList(
+                PersistableBundle params) {
+            List<PictureParameter> pictureParams = new ArrayList<>();
+            if (params.containsKey(PictureQuality.PARAMETER_BRIGHTNESS)) {
+                pictureParams.add(PictureParameter.brightness(params.getLong(
+                        PictureQuality.PARAMETER_BRIGHTNESS)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_CONTRAST)) {
+                pictureParams.add(PictureParameter.contrast(params.getInt(
+                        PictureQuality.PARAMETER_CONTRAST)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_SHARPNESS)) {
+                pictureParams.add(PictureParameter.sharpness(params.getInt(
+                        PictureQuality.PARAMETER_SHARPNESS)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_SATURATION)) {
+                pictureParams.add(PictureParameter.saturation(params.getInt(
+                        PictureQuality.PARAMETER_SATURATION)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_HUE)) {
+                pictureParams.add(PictureParameter.hue(params.getInt(
+                        PictureQuality.PARAMETER_HUE)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_BRIGHTNESS)) {
+                pictureParams.add(PictureParameter.colorTunerBrightness(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_BRIGHTNESS)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_SATURATION)) {
+                pictureParams.add(PictureParameter.colorTunerSaturation(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_SATURATION)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_HUE)) {
+                pictureParams.add(PictureParameter.colorTunerHue(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_HUE)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_RED_OFFSET)) {
+                pictureParams.add(PictureParameter.colorTunerRedOffset(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_RED_OFFSET)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_GREEN_OFFSET)) {
+                pictureParams.add(PictureParameter.colorTunerGreenOffset(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_GREEN_OFFSET)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_BLUE_OFFSET)) {
+                pictureParams.add(PictureParameter.colorTunerBlueOffset(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_BLUE_OFFSET)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_RED_GAIN)) {
+                pictureParams.add(PictureParameter.colorTunerRedGain(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_RED_GAIN)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_GREEN_GAIN)) {
+                pictureParams.add(PictureParameter.colorTunerGreenGain(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_GREEN_GAIN)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_BLUE_GAIN)) {
+                pictureParams.add(PictureParameter.colorTunerBlueGain(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_BLUE_GAIN)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_NOISE_REDUCTION)) {
+                pictureParams.add(PictureParameter.noiseReduction(
+                        (byte) params.getInt(PictureQuality.PARAMETER_NOISE_REDUCTION)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_MPEG_NOISE_REDUCTION)) {
+                pictureParams.add(PictureParameter.mpegNoiseReduction(
+                        (byte) params.getInt(PictureQuality.PARAMETER_MPEG_NOISE_REDUCTION)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_FLESH_TONE)) {
+                pictureParams.add(PictureParameter.fleshTone(
+                        (byte) params.getInt(PictureQuality.PARAMETER_FLESH_TONE)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_DECONTOUR)) {
+                pictureParams.add(PictureParameter.deContour(
+                        (byte) params.getInt(PictureQuality.PARAMETER_DECONTOUR)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_DYNAMIC_LUMA_CONTROL)) {
+                pictureParams.add(PictureParameter.dynamicLumaControl(
+                        (byte) params.getInt(PictureQuality.PARAMETER_DYNAMIC_LUMA_CONTROL)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_FILM_MODE)) {
+                pictureParams.add(PictureParameter.filmMode(params.getBoolean(
+                        PictureQuality.PARAMETER_FILM_MODE)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_BLUE_STRETCH)) {
+                pictureParams.add(PictureParameter.blueStretch(params.getBoolean(
+                        PictureQuality.PARAMETER_BLUE_STRETCH)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNE)) {
+                pictureParams.add(PictureParameter.colorTune(params.getBoolean(
+                        PictureQuality.PARAMETER_COLOR_TUNE)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TEMPERATURE)) {
+                pictureParams.add(PictureParameter.colorTemperature(
+                        (byte) params.getInt(
+                                PictureQuality.PARAMETER_COLOR_TEMPERATURE)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_GLOBAL_DIMMING)) {
+                pictureParams.add(PictureParameter.globeDimming(params.getBoolean(
+                        PictureQuality.PARAMETER_GLOBAL_DIMMING)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_AUTO_PICTURE_QUALITY_ENABLED)) {
+                pictureParams.add(PictureParameter.autoPictureQualityEnabled(params.getBoolean(
+                        PictureQuality.PARAMETER_AUTO_PICTURE_QUALITY_ENABLED)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_AUTO_SUPER_RESOLUTION_ENABLED)) {
+                pictureParams.add(PictureParameter.autoSuperResolutionEnabled(params.getBoolean(
+                        PictureQuality.PARAMETER_AUTO_SUPER_RESOLUTION_ENABLED)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_RED_GAIN)) {
+                pictureParams.add(PictureParameter.colorTemperatureRedGain(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_RED_GAIN)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_GREEN_GAIN)) {
+                pictureParams.add(PictureParameter.colorTemperatureGreenGain(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_GREEN_GAIN)));
+            }
+            if (params.containsKey(PictureQuality.PARAMETER_COLOR_TUNER_BLUE_GAIN)) {
+                pictureParams.add(PictureParameter.colorTemperatureBlueGain(params.getInt(
+                        PictureQuality.PARAMETER_COLOR_TUNER_BLUE_GAIN)));
+            }
+
+            /**
+             * TODO: add conversion for following after adding to MediaQualityContract
+             *
+             * PictureParameter.levelRange
+             * PictureParameter.gamutMapping
+             * PictureParameter.pcMode
+             * PictureParameter.lowLatency
+             * PictureParameter.vrr
+             * PictureParameter.cvrr
+             * PictureParameter.hdmiRgbRange
+             * PictureParameter.colorSpace
+             * PictureParameter.panelInitMaxLuminceNits
+             * PictureParameter.panelInitMaxLuminceValid
+             * PictureParameter.gamma
+             * PictureParameter.colorTemperatureRedOffset
+             * PictureParameter.colorTemperatureGreenOffset
+             * PictureParameter.colorTemperatureBlueOffset
+             * PictureParameter.elevenPointRed
+             * PictureParameter.elevenPointGreen
+             * PictureParameter.elevenPointBlue
+             * PictureParameter.lowBlueLight
+             * PictureParameter.LdMode
+             * PictureParameter.osdRedGain
+             * PictureParameter.osdGreenGain
+             * PictureParameter.osdBlueGain
+             * PictureParameter.osdRedOffset
+             * PictureParameter.osdGreenOffset
+             * PictureParameter.osdBlueOffset
+             * PictureParameter.osdHue
+             * PictureParameter.osdSaturation
+             * PictureParameter.osdContrast
+             * PictureParameter.colorTunerSwitch
+             * PictureParameter.colorTunerHueRed
+             * PictureParameter.colorTunerHueGreen
+             * PictureParameter.colorTunerHueBlue
+             * PictureParameter.colorTunerHueCyan
+             * PictureParameter.colorTunerHueMagenta
+             * PictureParameter.colorTunerHueYellow
+             * PictureParameter.colorTunerHueFlesh
+             * PictureParameter.colorTunerSaturationRed
+             * PictureParameter.colorTunerSaturationGreen
+             * PictureParameter.colorTunerSaturationBlue
+             * PictureParameter.colorTunerSaturationCyan
+             * PictureParameter.colorTunerSaturationMagenta
+             * PictureParameter.colorTunerSaturationYellow
+             * PictureParameter.colorTunerSaturationFlesh
+             * PictureParameter.colorTunerLuminanceRed
+             * PictureParameter.colorTunerLuminanceGreen
+             * PictureParameter.colorTunerLuminanceBlue
+             * PictureParameter.colorTunerLuminanceCyan
+             * PictureParameter.colorTunerLuminanceMagenta
+             * PictureParameter.colorTunerLuminanceYellow
+             * PictureParameter.colorTunerLuminanceFlesh
+             * PictureParameter.activeProfile
+             * PictureParameter.pictureQualityEventType
+             */
+            return  (PictureParameter[]) pictureParams.toArray();
         }
 
         @Override
@@ -524,8 +728,75 @@ public class MediaQualityService extends SystemService {
                 notifyOnSoundProfileError(profileId, SoundProfile.ERROR_NO_PERMISSION,
                         Binder.getCallingUid(), Binder.getCallingPid());
             }
-            // TODO: pass the profile ID to MediaQuality HAL when ready.
+
+            SoundProfile soundProfile = getSoundProfile(mSoundProfileTempIdMap.getKey(profileId));
+            PersistableBundle params = soundProfile.getParameters();
+
+            try {
+                if (mMediaQuality != null) {
+                    SoundParameter[] soundParameters =
+                            convertPersistableBundleToSoundParameterList(params);
+
+                    SoundParameters sp = new SoundParameters();
+                    sp.soundParameters = soundParameters;
+
+                    mMediaQuality.sendDefaultSoundParameters(sp);
+                    return true;
+                }
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set default sound profile", e);
+            }
             return false;
+        }
+
+        private SoundParameter[] convertPersistableBundleToSoundParameterList(
+                PersistableBundle params) {
+            List<SoundParameter> soundParams = new ArrayList<>();
+            if (params.containsKey(SoundQuality.PARAMETER_BALANCE)) {
+                soundParams.add(SoundParameter.balance(params.getInt(
+                        SoundQuality.PARAMETER_BALANCE)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_BASS)) {
+                soundParams.add(SoundParameter.bass(params.getInt(SoundQuality.PARAMETER_BASS)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_TREBLE)) {
+                soundParams.add(SoundParameter.treble(params.getInt(
+                        SoundQuality.PARAMETER_TREBLE)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_SURROUND_SOUND)) {
+                soundParams.add(SoundParameter.surroundSoundEnabled(params.getBoolean(
+                        SoundQuality.PARAMETER_SURROUND_SOUND)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_SPEAKERS)) {
+                soundParams.add(SoundParameter.speakersEnabled(params.getBoolean(
+                        SoundQuality.PARAMETER_SPEAKERS)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_SPEAKERS_DELAY_MILLIS)) {
+                soundParams.add(SoundParameter.speakersDelayMs(params.getInt(
+                        SoundQuality.PARAMETER_SPEAKERS_DELAY_MILLIS)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_AUTO_VOLUME_CONTROL)) {
+                soundParams.add(SoundParameter.autoVolumeControl(params.getBoolean(
+                        SoundQuality.PARAMETER_AUTO_VOLUME_CONTROL)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_DTS_DRC)) {
+                soundParams.add(SoundParameter.dtsDrc(params.getBoolean(
+                        SoundQuality.PARAMETER_DTS_DRC)));
+            }
+            if (params.containsKey(SoundQuality.PARAMETER_DIGITAL_OUTPUT_DELAY_MILLIS)) {
+                soundParams.add(SoundParameter.surroundSoundEnabled(params.getBoolean(
+                        SoundQuality.PARAMETER_DIGITAL_OUTPUT_DELAY_MILLIS)));
+            }
+            //TODO: equalizerDetail
+            //TODO: downmixMode
+            //TODO: enhancedAudioReturnChannelEnabled
+            //TODO: dolbyAudioProcessing
+            //TODO: dolbyDialogueEnhancer
+            //TODO: dtsVirtualX
+            //TODO: digitalOutput
+            //TODO: activeProfile
+            //TODO: soundStyle
+            return  (SoundParameter[]) soundParams.toArray();
         }
 
         @Override
@@ -1062,10 +1333,10 @@ public class MediaQualityService extends SystemService {
 
             try {
                 if (mMediaQuality != null) {
-                    mMediaQuality.setAutoPqEnabled(enabled);
+                    if (mMediaQuality.isAutoPqSupported()) {
+                        mMediaQuality.setAutoPqEnabled(enabled);
+                    }
                 }
-            } catch (UnsupportedOperationException e) {
-                Slog.e(TAG, "The current device is not supported");
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to set auto picture quality", e);
             }
@@ -1075,10 +1346,10 @@ public class MediaQualityService extends SystemService {
         public boolean isAutoPictureQualityEnabled(UserHandle user) {
             try {
                 if (mMediaQuality != null) {
-                    return mMediaQuality.getAutoPqEnabled();
+                    if (mMediaQuality.isAutoPqSupported()) {
+                        mMediaQuality.getAutoPqEnabled();
+                    }
                 }
-            } catch (UnsupportedOperationException e) {
-                Slog.e(TAG, "The current device is not supported");
             } catch (RemoteException e) {
                 Slog.e(TAG, "Failed to get auto picture quality", e);
             }
@@ -1094,12 +1365,12 @@ public class MediaQualityService extends SystemService {
 
             try {
                 if (mMediaQuality != null) {
-                    mMediaQuality.setAutoSrEnabled(enabled);
+                    if (mMediaQuality.isAutoSrSupported()) {
+                        mMediaQuality.setAutoSrEnabled(enabled);
+                    }
                 }
-            } catch (UnsupportedOperationException e) {
-                Slog.e(TAG, "The current device is not supported");
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to set auto super resolution", e);
+                Slog.e(TAG, "Failed to set super resolution", e);
             }
         }
 
@@ -1107,12 +1378,12 @@ public class MediaQualityService extends SystemService {
         public boolean isSuperResolutionEnabled(UserHandle user) {
             try {
                 if (mMediaQuality != null) {
-                    return mMediaQuality.getAutoSrEnabled();
+                    if (mMediaQuality.isAutoSrSupported()) {
+                        mMediaQuality.getAutoSrEnabled();
+                    }
                 }
-            } catch (UnsupportedOperationException e) {
-                Slog.e(TAG, "The current device is not supported");
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to get auto super resolution", e);
+                Slog.e(TAG, "Failed to get super resolution", e);
             }
             return false;
         }
@@ -1126,12 +1397,12 @@ public class MediaQualityService extends SystemService {
 
             try {
                 if (mMediaQuality != null) {
-                    mMediaQuality.setAutoAqEnabled(enabled);
+                    if (mMediaQuality.isAutoAqSupported()) {
+                        mMediaQuality.setAutoAqEnabled(enabled);
+                    }
                 }
-            } catch (UnsupportedOperationException e) {
-                Slog.e(TAG, "The current device is not supported");
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to set auto audio quality", e);
+                Slog.e(TAG, "Failed to set auto sound quality", e);
             }
         }
 
@@ -1139,12 +1410,12 @@ public class MediaQualityService extends SystemService {
         public boolean isAutoSoundQualityEnabled(UserHandle user) {
             try {
                 if (mMediaQuality != null) {
-                    return mMediaQuality.getAutoAqEnabled();
+                    if (mMediaQuality.isAutoAqSupported()) {
+                        mMediaQuality.getAutoAqEnabled();
+                    }
                 }
-            } catch (UnsupportedOperationException e) {
-                Slog.e(TAG, "The current device is not supported");
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to get auto audio quality", e);
+                Slog.e(TAG, "Failed to get auto sound quality", e);
             }
             return false;
         }
