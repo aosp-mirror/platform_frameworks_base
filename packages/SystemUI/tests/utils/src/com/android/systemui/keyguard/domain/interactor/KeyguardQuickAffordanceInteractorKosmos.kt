@@ -18,6 +18,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.app.admin.devicePolicyManager
 import android.content.applicationContext
+import android.view.accessibility.AccessibilityManager
 import com.android.internal.widget.lockPatternUtils
 import com.android.keyguard.logging.KeyguardQuickAffordancesLogger
 import com.android.systemui.animation.dialogTransitionAnimator
@@ -54,6 +55,7 @@ var Kosmos.keyguardQuickAffordanceInteractor by Fixture {
         dockManager = dockManager,
         biometricSettingsRepository = biometricSettingsRepository,
         communalSettingsInteractor = communalSettingsInteractor,
+        accessibilityManager = mock<AccessibilityManager>(),
         backgroundDispatcher = testDispatcher,
         appContext = applicationContext,
         sceneInteractor = { sceneInteractor },

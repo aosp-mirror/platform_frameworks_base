@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.domain.interactor
 
 import android.app.admin.DevicePolicyManager
 import android.os.UserHandle
+import android.view.accessibility.AccessibilityManager
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.internal.widget.LockPatternUtils
@@ -96,6 +97,7 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
     @Mock private lateinit var shadeInteractor: ShadeInteractor
     @Mock private lateinit var logger: KeyguardQuickAffordancesLogger
     @Mock private lateinit var metricsLogger: KeyguardQuickAffordancesMetricsLogger
+    @Mock private lateinit var accessibilityManager: AccessibilityManager
 
     private lateinit var underTest: KeyguardQuickAffordanceInteractor
 
@@ -199,11 +201,13 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                 backgroundDispatcher = kosmos.testDispatcher,
                 appContext = context,
                 communalSettingsInteractor = kosmos.communalSettingsInteractor,
+                accessibilityManager = accessibilityManager,
                 sceneInteractor = { kosmos.sceneInteractor },
             )
         kosmos.keyguardQuickAffordanceInteractor = underTest
 
         whenever(shadeInteractor.anyExpansion).thenReturn(MutableStateFlow(0f))
+        whenever(accessibilityManager.isEnabled()).thenReturn(false)
     }
 
     @Test
@@ -669,6 +673,22 @@ class KeyguardQuickAffordanceInteractorTest : SysuiTestCase() {
                         KeyguardQuickAffordanceSlots.SLOT_ID_BOTTOM_END to emptyList(),
                     )
                 )
+        }
+
+    @Test
+    fun useLongPress_withA11yEnabled_isFalse() =
+        testScope.runTest {
+            whenever(accessibilityManager.isEnabled()).thenReturn(true)
+            val useLongPress by collectLastValue(underTest.useLongPress())
+            assertThat(useLongPress).isFalse()
+        }
+
+    @Test
+    fun useLongPress_withA11yDisabled_isFalse() =
+        testScope.runTest {
+            whenever(accessibilityManager.isEnabled()).thenReturn(false)
+            val useLongPress by collectLastValue(underTest.useLongPress())
+            assertThat(useLongPress).isTrue()
         }
 
     @Test
