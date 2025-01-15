@@ -17,6 +17,8 @@
 package com.android.wm.shell.transition;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
+import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.window.TransitionInfo.FLAG_IS_DISPLAY;
 import static android.window.TransitionInfo.FLAG_MOVED_TO_TOP;
@@ -66,41 +68,75 @@ public class FocusTransitionObserver {
         if (!enableDisplayFocusInShellTransitions()) {
             return;
         }
+        final SparseArray<RunningTaskInfo> lastTransitionFocusedTasks =
+                mFocusedTaskOnDisplay.clone();
+
         final List<TransitionInfo.Change> changes = info.getChanges();
         for (int i = changes.size() - 1; i >= 0; i--) {
             final TransitionInfo.Change change = changes.get(i);
 
             final RunningTaskInfo task = change.getTaskInfo();
-            if (task != null
-                    && (change.hasFlags(FLAG_MOVED_TO_TOP) || change.getMode() == TRANSIT_OPEN)) {
-                final RunningTaskInfo lastFocusedTaskOnDisplay =
-                        mFocusedTaskOnDisplay.get(task.displayId);
-                if (lastFocusedTaskOnDisplay != null) {
-                    mTmpTasksToBeNotified.add(lastFocusedTaskOnDisplay);
+            if (task != null) {
+                if (change.hasFlags(FLAG_MOVED_TO_TOP) || change.getMode() == TRANSIT_OPEN) {
+                    updateFocusedTaskPerDisplay(task, task.displayId);
+                } else {
+                    // Update focus assuming that any task moved to another display is focused in
+                    // the new display.
+                    // TODO(sahok): remove this logic when b/388665104 is fixed
+                    final boolean isBeyondDisplay = change.getStartDisplayId() != INVALID_DISPLAY
+                            && change.getEndDisplayId() != INVALID_DISPLAY
+                            && change.getStartDisplayId() != change.getEndDisplayId();
+
+                    RunningTaskInfo lastTransitionFocusedTaskOnStartDisplay =
+                            lastTransitionFocusedTasks.get(change.getStartDisplayId());
+                    final boolean isLastTransitionFocused =
+                            lastTransitionFocusedTaskOnStartDisplay != null
+                                    && task.taskId
+                                            == lastTransitionFocusedTaskOnStartDisplay.taskId;
+                    if (change.getMode() == TRANSIT_CHANGE && isBeyondDisplay
+                            && isLastTransitionFocused) {
+                        // The task have moved to another display and keeps its focus.
+                        // MOVE_TO_TOP is not reported but we need to update the focused task in
+                        // the end display.
+                        updateFocusedTaskPerDisplay(task, change.getEndDisplayId());
+                    }
                 }
-                mTmpTasksToBeNotified.add(task);
-                mFocusedTaskOnDisplay.put(task.displayId, task);
             }
+
 
             if (change.hasFlags(FLAG_IS_DISPLAY) && change.hasFlags(FLAG_MOVED_TO_TOP)) {
                 if (mFocusedDisplayId != change.getEndDisplayId()) {
-                    final RunningTaskInfo lastGloballyFocusedTask =
-                            mFocusedTaskOnDisplay.get(mFocusedDisplayId);
-                    if (lastGloballyFocusedTask != null) {
-                        mTmpTasksToBeNotified.add(lastGloballyFocusedTask);
-                    }
-                    mFocusedDisplayId = change.getEndDisplayId();
-                    notifyFocusedDisplayChanged();
-                    final RunningTaskInfo currentGloballyFocusedTask =
-                            mFocusedTaskOnDisplay.get(mFocusedDisplayId);
-                    if (currentGloballyFocusedTask != null) {
-                        mTmpTasksToBeNotified.add(currentGloballyFocusedTask);
-                    }
+                    updateFocusedDisplay(change.getEndDisplayId());
                 }
             }
         }
         mTmpTasksToBeNotified.forEach(this::notifyTaskFocusChanged);
         mTmpTasksToBeNotified.clear();
+    }
+
+    private void updateFocusedTaskPerDisplay(RunningTaskInfo task, int displayId) {
+        final RunningTaskInfo lastFocusedTaskOnDisplay =
+                mFocusedTaskOnDisplay.get(displayId);
+        if (lastFocusedTaskOnDisplay != null) {
+            mTmpTasksToBeNotified.add(lastFocusedTaskOnDisplay);
+        }
+        mTmpTasksToBeNotified.add(task);
+        mFocusedTaskOnDisplay.put(displayId, task);
+    }
+
+    private void updateFocusedDisplay(int endDisplayId) {
+        final RunningTaskInfo lastGloballyFocusedTask =
+                mFocusedTaskOnDisplay.get(mFocusedDisplayId);
+        if (lastGloballyFocusedTask != null) {
+            mTmpTasksToBeNotified.add(lastGloballyFocusedTask);
+        }
+        mFocusedDisplayId = endDisplayId;
+        notifyFocusedDisplayChanged();
+        final RunningTaskInfo currentGloballyFocusedTask =
+                mFocusedTaskOnDisplay.get(mFocusedDisplayId);
+        if (currentGloballyFocusedTask != null) {
+            mTmpTasksToBeNotified.add(currentGloballyFocusedTask);
+        }
     }
 
     /**
