@@ -69,7 +69,7 @@ option java_package com.android.server.wm
 
 # bootanim finished:
 31007 wm_boot_animation_done (time|2|3)
-# Notify keyguard occlude statuc change to SysUI.
+# Notify keyguard occlude status change to SysUI.
 31008 wm_set_keyguard_occluded (occluded|1),(animate|1),(transit|1),(Channel|3)
 
 # Back navigation.
