@@ -22,7 +22,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
-import com.android.compose.animation.scene.ContentScope
+import com.android.compose.animation.scene.InternalContentScope
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneTransitionLayoutImpl
 import com.android.compose.animation.scene.UserAction
@@ -33,12 +33,13 @@ import com.android.compose.animation.scene.UserActionResult
 internal class Overlay(
     override val key: OverlayKey,
     layoutImpl: SceneTransitionLayoutImpl,
-    content: @Composable ContentScope.() -> Unit,
+    content: @Composable InternalContentScope.() -> Unit,
     actions: Map<UserAction.Resolved, UserActionResult>,
     zIndex: Float,
+    globalZIndex: Long,
     alignment: Alignment,
     isModal: Boolean,
-) : Content(key, layoutImpl, content, actions, zIndex) {
+) : Content(key, layoutImpl, content, actions, zIndex, globalZIndex) {
     var alignment by mutableStateOf(alignment)
     var isModal by mutableStateOf(isModal)
 

@@ -210,8 +210,8 @@ interface ElementContentPicker {
     fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey
 
     /**
@@ -279,8 +279,8 @@ object HighestZIndexContentPicker : ElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey {
         return if (fromContentZIndex > toContentZIndex) {
             transition.fromContent
@@ -300,8 +300,8 @@ object HighestZIndexContentPicker : ElementContentPicker {
             override fun contentDuringTransition(
                 element: ElementKey,
                 transition: TransitionState.Transition,
-                fromContentZIndex: Float,
-                toContentZIndex: Float,
+                fromContentZIndex: Long,
+                toContentZIndex: Long,
             ): ContentKey {
                 return HighestZIndexContentPicker.contentDuringTransition(
                     element,
@@ -321,8 +321,8 @@ object LowestZIndexContentPicker : ElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey {
         return if (fromContentZIndex < toContentZIndex) {
             transition.fromContent
@@ -342,8 +342,8 @@ object LowestZIndexContentPicker : ElementContentPicker {
             override fun contentDuringTransition(
                 element: ElementKey,
                 transition: TransitionState.Transition,
-                fromContentZIndex: Float,
-                toContentZIndex: Float,
+                fromContentZIndex: Long,
+                toContentZIndex: Long,
             ): ContentKey {
                 return LowestZIndexContentPicker.contentDuringTransition(
                     element,
@@ -375,8 +375,8 @@ class MovableElementContentPicker(override val contents: Set<ContentKey>) :
     override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey {
         return when {
             transition.toContent in contents -> transition.toContent

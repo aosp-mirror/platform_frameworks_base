@@ -38,6 +38,7 @@ import com.android.compose.animation.scene.AutoTransitionTestAssertionScope
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.Default4FrameLinearTransition
 import com.android.compose.animation.scene.Edge
+import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutStateForTests
 import com.android.compose.animation.scene.SceneKey
@@ -77,11 +78,14 @@ class NestedSharedElementTest {
     )
 
     @Composable
-    private fun ContentScope.SharedElement(element: SharedElement) {
+    private fun ContentScope.SharedElement(
+        element: SharedElement,
+        key: ElementKey = TestElements.Foo,
+    ) {
         Box(Modifier.fillMaxSize()) {
             Box(
                 Modifier.offset(element.x, element.y)
-                    .element(TestElements.Foo)
+                    .element(key)
                     .size(element.width, element.height)
                     .background(element.color)
                     .alpha(element.alpha)
@@ -165,12 +169,35 @@ class NestedSharedElementTest {
         ) {
             before { onElement(TestElements.Foo).assertElementVariant(elementVariant1) }
             atAllFrames(4) {
-                onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
+                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
 
-                onElement(TestElements.Foo, TestScenes.SceneA)
+                onElement(TestElements.Foo, TestScenes.SceneB)
                     .assertBetweenElementVariants(elementVariant1, elementVariant2, this)
             }
             after { onElement(TestElements.Foo).assertElementVariant(elementVariant2) }
+        }
+    }
+
+    @Test
+    fun fromParentSTLtoNestedSTL_contentPickerLowestZOrder() {
+        rule.testTransition(
+            fromSceneContent = { SharedElement(elementVariant1, TestElements.LowZIndex) },
+            toSceneContent = {
+                NestedSceneTransitionLayout(nestedState, modifier = Modifier) {
+                    scene(Scenes.NestedSceneA) {
+                        SharedElement(elementVariant2, TestElements.LowZIndex)
+                    }
+                }
+            },
+        ) {
+            before { onElement(TestElements.LowZIndex).assertElementVariant(elementVariant1) }
+            atAllFrames(4) {
+                onElement(TestElements.LowZIndex, TestScenes.SceneB).assertIsNotDisplayed()
+
+                onElement(TestElements.LowZIndex, TestScenes.SceneA)
+                    .assertBetweenElementVariants(elementVariant1, elementVariant2, this)
+            }
+            after { onElement(TestElements.LowZIndex).assertElementVariant(elementVariant2) }
         }
     }
 
@@ -182,9 +209,9 @@ class NestedSharedElementTest {
         ) {
             before { onElement(TestElements.Foo).assertElementVariant(elementVariant1) }
             atAllFrames(4) {
-                onElement(TestElements.Foo, TestScenes.SceneB).assertIsNotDisplayed()
+                onElement(TestElements.Foo, TestScenes.SceneA).assertIsNotDisplayed()
 
-                onElement(TestElements.Foo, TestScenes.SceneA)
+                onElement(TestElements.Foo, TestScenes.SceneB)
                     .assertBetweenElementVariants(elementVariant1, elementVariant4, this)
             }
             after { onElement(TestElements.Foo).assertElementVariant(elementVariant4) }

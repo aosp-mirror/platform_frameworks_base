@@ -62,7 +62,7 @@ fun SceneTransitionLayout(
     swipeSourceDetector: SwipeSourceDetector = DefaultEdgeDetector,
     swipeDetector: SwipeDetector = DefaultSwipeDetector,
     @FloatRange(from = 0.0, to = 0.5) transitionInterceptionThreshold: Float = 0.05f,
-    builder: SceneTransitionLayoutScope.() -> Unit,
+    builder: SceneTransitionLayoutScope<ContentScope>.() -> Unit,
 ) {
     SceneTransitionLayoutForTesting(
         state,
@@ -75,7 +75,7 @@ fun SceneTransitionLayout(
     )
 }
 
-interface SceneTransitionLayoutScope {
+interface SceneTransitionLayoutScope<out CS : ContentScope> {
     /**
      * Add a scene to this layout, identified by [key].
      *
@@ -88,7 +88,7 @@ interface SceneTransitionLayoutScope {
     fun scene(
         key: SceneKey,
         userActions: Map<UserAction, UserActionResult> = emptyMap(),
-        content: @Composable ContentScope.() -> Unit,
+        content: @Composable CS.() -> Unit,
     )
 
     /**
@@ -118,7 +118,7 @@ interface SceneTransitionLayoutScope {
             mapOf(Back to UserActionResult.HideOverlay(key)),
         alignment: Alignment = Alignment.Center,
         isModal: Boolean = true,
-        content: @Composable ContentScope.() -> Unit,
+        content: @Composable CS.() -> Unit,
     )
 }
 
@@ -253,18 +253,6 @@ interface BaseContentScope : ElementStateScope {
     fun Modifier.disableSwipesWhenScrolling(
         bounds: NestedScrollableBound = NestedScrollableBound.Any
     ): Modifier
-
-    /**
-     * A [NestedSceneTransitionLayout] will share its elements with its ancestor STLs therefore
-     * enabling sharedElement transitions between them.
-     */
-    // TODO(b/380070506): Add more parameters when default params are supported in Kotlin 2.0.21
-    @Composable
-    fun NestedSceneTransitionLayout(
-        state: SceneTransitionLayoutState,
-        modifier: Modifier,
-        builder: SceneTransitionLayoutScope.() -> Unit,
-    )
 }
 
 @Stable
@@ -337,6 +325,29 @@ interface ContentScope : BaseContentScope {
         type: SharedValueType<T, *>,
         canOverflow: Boolean,
     ): AnimatedState<T>
+
+    /**
+     * A [NestedSceneTransitionLayout] will share its elements with its ancestor STLs therefore
+     * enabling sharedElement transitions between them.
+     */
+    // TODO(b/380070506): Add more parameters when default params are supported in Kotlin 2.0.21
+    @Composable
+    fun NestedSceneTransitionLayout(
+        state: SceneTransitionLayoutState,
+        modifier: Modifier,
+        builder: SceneTransitionLayoutScope<ContentScope>.() -> Unit,
+    )
+}
+
+internal interface InternalContentScope : ContentScope {
+
+    @Composable
+    fun NestedSceneTransitionLayoutForTesting(
+        state: SceneTransitionLayoutState,
+        modifier: Modifier,
+        onLayoutImpl: ((SceneTransitionLayoutImpl) -> Unit)?,
+        builder: SceneTransitionLayoutScope<InternalContentScope>.() -> Unit,
+    )
 }
 
 /**
@@ -714,7 +725,7 @@ internal fun SceneTransitionLayoutForTesting(
     sharedElementMap: MutableMap<ElementKey, Element> = remember { mutableMapOf() },
     ancestors: List<Ancestor> = remember { emptyList() },
     lookaheadScope: LookaheadScope? = null,
-    builder: SceneTransitionLayoutScope.() -> Unit,
+    builder: SceneTransitionLayoutScope<InternalContentScope>.() -> Unit,
 ) {
     val density = LocalDensity.current
     val directionChangeSlop = LocalViewConfiguration.current.touchSlop

@@ -41,8 +41,8 @@ object MediaContentPicker : StaticElementContentPicker {
     override fun contentDuringTransition(
         element: ElementKey,
         transition: TransitionState.Transition,
-        fromContentZIndex: Float,
-        toContentZIndex: Float,
+        fromContentZIndex: Long,
+        toContentZIndex: Long,
     ): ContentKey {
         return when {
             transition.isTransitioningBetween(Scenes.Lockscreen, Scenes.Shade) -> {
