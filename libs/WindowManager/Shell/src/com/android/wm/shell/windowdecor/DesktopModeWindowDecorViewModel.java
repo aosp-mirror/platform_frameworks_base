@@ -108,7 +108,6 @@ import com.android.wm.shell.common.MultiInstanceHelper;
 import com.android.wm.shell.common.ShellExecutor;
 import com.android.wm.shell.common.SyncTransactionQueue;
 import com.android.wm.shell.compatui.CompatUIController;
-import com.android.wm.shell.compatui.DesktopModeCompatPolicy;
 import com.android.wm.shell.desktopmode.DesktopActivityOrientationChangeHandler;
 import com.android.wm.shell.desktopmode.DesktopImmersiveController;
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger;
@@ -133,6 +132,7 @@ import com.android.wm.shell.recents.RecentsTransitionStateListener;
 import com.android.wm.shell.shared.FocusTransitionListener;
 import com.android.wm.shell.shared.annotations.ShellBackgroundThread;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
+import com.android.wm.shell.shared.desktopmode.DesktopModeCompatPolicy;
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
 import com.android.wm.shell.shared.split.SplitScreenConstants.SplitPosition;
@@ -1657,8 +1657,7 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                 && mSplitScreenController.isTaskRootOrStageRoot(taskInfo.taskId)) {
             return false;
         }
-        if (DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_MODALS_POLICY.isTrue()
-                && mDesktopModeCompatPolicy.isTopActivityExemptFromDesktopWindowing(taskInfo)) {
+        if (mDesktopModeCompatPolicy.isTopActivityExemptFromDesktopWindowing(taskInfo)) {
             return false;
         }
         if (isPartOfDefaultHomePackage(taskInfo)) {

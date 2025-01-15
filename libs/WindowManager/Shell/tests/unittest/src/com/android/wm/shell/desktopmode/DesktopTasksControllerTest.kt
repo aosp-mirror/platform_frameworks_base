@@ -101,7 +101,6 @@ import com.android.wm.shell.common.MultiInstanceHelper
 import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.UserProfileContexts
-import com.android.wm.shell.compatui.DesktopModeCompatPolicy
 import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
@@ -130,6 +129,7 @@ import com.android.wm.shell.recents.RecentsTransitionHandler
 import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_ANIMATING
 import com.android.wm.shell.recents.RecentsTransitionStateListener.TRANSITION_STATE_REQUESTED
+import com.android.wm.shell.shared.desktopmode.DesktopModeCompatPolicy
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource.UNKNOWN
 import com.android.wm.shell.shared.split.SplitScreenConstants

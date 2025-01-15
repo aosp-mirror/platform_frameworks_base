@@ -14,12 +14,13 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell.compatui
+package com.android.wm.shell.shared.desktopmode
 
 import android.content.ComponentName
 import android.testing.AndroidTestingRunner
 import androidx.test.filters.SmallTest
 import com.android.internal.R
+import com.android.wm.shell.compatui.CompatUIShellTestCase
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
