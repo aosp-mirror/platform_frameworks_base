@@ -426,6 +426,17 @@ flag {
 }
 
 flag {
+    name: "use_rt_frame_callback_for_splash_screen_transfer"
+    namespace: "windowing_frontend"
+    description: "report SplashscreenView shown after RtFrame commit"
+    is_fixed_read_only: true
+    bug: "387231234"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "port_window_size_animation"
     namespace: "windowing_frontend"
     description: "Port window-resize animation from legacy to shell"
