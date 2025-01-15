@@ -99,6 +99,7 @@ final class PackageHandler extends Handler {
                     }
                     break;
                 }
+                request.onRestoreFinished();
                 request.closeFreezer();
                 request.onInstallCompleted();
                 request.runPostInstallRunnable();
