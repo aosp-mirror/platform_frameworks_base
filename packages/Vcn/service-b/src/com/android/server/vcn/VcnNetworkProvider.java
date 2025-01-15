@@ -36,7 +36,6 @@ import android.net.vcn.VcnGatewayConnectionConfig;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
-import android.util.ArraySet;
 import android.util.IndentingPrintWriter;
 import android.util.Slog;
 
@@ -46,6 +45,7 @@ import com.android.modules.utils.HandlerExecutor;
 
 import java.util.Objects;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executor;
 
 /**
@@ -56,12 +56,14 @@ import java.util.concurrent.Executor;
  *
  * @hide
  */
+// TODO(b/388919146): Implement a more generic solution to prevent concurrent modifications on
+// mListeners and mRequests
 // TODO(b/374174952): Replace VANILLA_ICE_CREAM with BAKLAVA after Android B finalization
 @TargetApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
 public class VcnNetworkProvider extends NetworkProvider {
     private static final String TAG = VcnNetworkProvider.class.getSimpleName();
 
-    private final Set<NetworkRequestListener> mListeners = new ArraySet<>();
+    private final Set<NetworkRequestListener> mListeners = ConcurrentHashMap.newKeySet();
 
     private final Context mContext;
     private final Handler mHandler;
@@ -72,7 +74,7 @@ public class VcnNetworkProvider extends NetworkProvider {
      *
      * <p>NetworkRequests are immutable once created, and therefore can be used as stable keys.
      */
-    private final Set<NetworkRequest> mRequests = new ArraySet<>();
+    private final Set<NetworkRequest> mRequests = ConcurrentHashMap.newKeySet();
 
     public VcnNetworkProvider(@NonNull Context context, @NonNull Looper looper) {
         this(context, looper, new Dependencies());
