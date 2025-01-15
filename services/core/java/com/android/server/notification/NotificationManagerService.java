@@ -481,7 +481,8 @@ public class NotificationManagerService extends SystemService {
             Adjustment.KEY_SENSITIVE_CONTENT,
             Adjustment.KEY_RANKING_SCORE,
             Adjustment.KEY_NOT_CONVERSATION,
-            Adjustment.KEY_TYPE
+            Adjustment.KEY_TYPE,
+            Adjustment.KEY_SUMMARIZATION
     };
 
     static final Integer[] DEFAULT_ALLOWED_ADJUSTMENT_KEY_TYPES = new Integer[] {
@@ -7212,7 +7213,7 @@ public class NotificationManagerService extends SystemService {
                 if (!mAssistants.isAdjustmentAllowed(potentialKey)) {
                     toRemove.add(potentialKey);
                 }
-                if (notificationClassification() && adjustments.containsKey(KEY_TYPE)) {
+                if (notificationClassification() && potentialKey.equals(KEY_TYPE)) {
                     mAssistants.setNasUnsupportedDefaults(r.getSbn().getNormalizedUserId());
                     if (!mAssistants.isAdjustmentKeyTypeAllowed(adjustments.getInt(KEY_TYPE))) {
                         toRemove.add(potentialKey);
@@ -10395,7 +10396,8 @@ public class NotificationManagerService extends SystemService {
                         r.getRankingScore(),
                         r.isConversation(),
                         r.getProposedImportance(),
-                        r.hasSensitiveContent());
+                        r.hasSensitiveContent(),
+                        r.getSummarization());
                 extractorDataBefore.put(r.getKey(), extractorData);
                 mRankingHelper.extractSignals(r);
             }
@@ -11715,7 +11717,8 @@ public class NotificationManagerService extends SystemService {
                             : (record.getRankingScore() > 0 ?  RANKING_PROMOTED : RANKING_DEMOTED),
                     record.getNotification().isBubbleNotification(),
                     record.getProposedImportance(),
-                    hasSensitiveContent
+                    hasSensitiveContent,
+                    record.getSummarization()
             );
             rankings.add(ranking);
         }

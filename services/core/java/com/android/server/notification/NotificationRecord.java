@@ -25,6 +25,7 @@ import static android.app.NotificationManager.IMPORTANCE_HIGH;
 import static android.app.NotificationManager.IMPORTANCE_LOW;
 import static android.app.NotificationManager.IMPORTANCE_MIN;
 import static android.app.NotificationManager.IMPORTANCE_UNSPECIFIED;
+import static android.service.notification.Adjustment.KEY_SUMMARIZATION;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL;
 import static android.service.notification.NotificationListenerService.Ranking.USER_SENTIMENT_POSITIVE;
 
@@ -224,6 +225,8 @@ public final class NotificationRecord {
 
     // type of the bundle if the notification was classified
     private @Adjustment.Types int mBundleType = Adjustment.TYPE_OTHER;
+
+    private String mSummarization = null;
 
     public NotificationRecord(Context context, StatusBarNotification sbn,
             NotificationChannel channel) {
@@ -589,6 +592,7 @@ public final class NotificationRecord {
         pw.println(prefix + "shortcut=" + notification.getShortcutId()
                 + " found valid? " + (mShortcutInfo != null));
         pw.println(prefix + "mUserVisOverride=" + getPackageVisibilityOverride());
+        pw.println(prefix + "hasSummarization=" + (mSummarization != null));
     }
 
     private void dumpNotification(PrintWriter pw, String prefix, Notification notification,
@@ -811,6 +815,12 @@ public final class NotificationRecord {
                             Adjustment.KEY_TYPE,
                             mChannel.getId());
                 }
+                if ((android.app.Flags.nmSummarizationUi() || android.app.Flags.nmSummarization())
+                        && signals.containsKey(KEY_SUMMARIZATION)) {
+                    mSummarization = signals.getString(KEY_SUMMARIZATION);
+                    EventLogTags.writeNotificationAdjusted(getKey(),
+                            KEY_SUMMARIZATION, Boolean.toString(mSummarization != null));
+                }
                 if (!signals.isEmpty() && adjustment.getIssuer() != null) {
                     mAdjustmentIssuer = adjustment.getIssuer();
                 }
@@ -979,6 +989,13 @@ public final class NotificationRecord {
                 return "asst";
             case MetricsEvent.IMPORTANCE_EXPLANATION_SYSTEM:
                 return "system";
+        }
+        return null;
+    }
+
+    public String getSummarization() {
+        if ((android.app.Flags.nmSummarizationUi() || android.app.Flags.nmSummarization())) {
+            return mSummarization;
         }
         return null;
     }
