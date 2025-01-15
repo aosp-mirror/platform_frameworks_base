@@ -61,6 +61,11 @@ final class DeviceSelectActionFromTv extends HdmiCecFeatureAction {
     @VisibleForTesting
     static final int STATE_WAIT_FOR_DEVICE_POWER_ON = 3;
 
+    // State in which we wait for device to complete a possible power state change triggered by
+    // <Set Stream Path>.
+    @VisibleForTesting
+    static final int STATE_WAIT_FOR_POWER_STATE_CHANGE = 4;
+
     private final HdmiDeviceInfo mTarget;
     private final HdmiCecMessage mGivePowerStatus;
     private final boolean mIsCec20;
@@ -100,7 +105,12 @@ final class DeviceSelectActionFromTv extends HdmiCecFeatureAction {
         // Wake-up on <Set Stream Path> was not mandatory before CEC 2.0.
         // The message is re-sent at the end of the action for devices that don't support 2.0.
         sendSetStreamPath();
+        mState = STATE_WAIT_FOR_POWER_STATE_CHANGE;
+        addTimer(mState, HdmiConfig.TIMEOUT_MS);
+        return true;
+    }
 
+    private void checkForPowerStateChange() {
         if (!mIsCec20) {
             queryDevicePowerStatus();
         } else {
@@ -114,12 +124,11 @@ final class DeviceSelectActionFromTv extends HdmiCecFeatureAction {
                 queryDevicePowerStatus();
             } else if (targetPowerStatus == HdmiControlManager.POWER_STATUS_ON) {
                 finishWithCallback(HdmiControlManager.RESULT_SUCCESS);
-                return true;
+                return;
             }
         }
         mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
         addTimer(mState, HdmiConfig.TIMEOUT_MS);
-        return true;
     }
 
     private void queryDevicePowerStatus() {
@@ -209,6 +218,9 @@ final class DeviceSelectActionFromTv extends HdmiCecFeatureAction {
                 queryDevicePowerStatus();
                 mState = STATE_WAIT_FOR_REPORT_POWER_STATUS;
                 addTimer(mState, HdmiConfig.TIMEOUT_MS);
+                break;
+            case STATE_WAIT_FOR_POWER_STATE_CHANGE:
+                checkForPowerStateChange();
                 break;
         }
     }
