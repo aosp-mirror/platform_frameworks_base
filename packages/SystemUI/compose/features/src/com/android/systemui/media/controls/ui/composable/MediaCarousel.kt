@@ -31,8 +31,8 @@ import androidx.compose.ui.layout.layout
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.viewinterop.AndroidView
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.MovableElementKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.media.controls.ui.composable.MediaCarouselStateLoader.stateForMediaCarouselContent
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
@@ -52,7 +52,7 @@ object MediaCarousel {
 }
 
 @Composable
-fun SceneScope.MediaCarousel(
+fun ContentScope.MediaCarousel(
     isVisible: Boolean,
     mediaHost: MediaHost,
     modifier: Modifier = Modifier,
@@ -136,6 +136,6 @@ private fun ViewGroup.setView(view: View) {
 }
 
 @Composable
-fun SceneScope.isLandscape(): Boolean {
+fun ContentScope.isLandscape(): Boolean {
     return LocalWindowSizeClass.current.heightSizeClass == WindowHeightSizeClass.Compact
 }

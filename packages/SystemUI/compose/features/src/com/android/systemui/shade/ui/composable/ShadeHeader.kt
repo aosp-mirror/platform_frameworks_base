@@ -58,9 +58,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.max
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateElementFloatAsState
 import com.android.compose.animation.scene.content.state.TransitionState
@@ -122,7 +122,7 @@ object ShadeHeader {
 }
 
 @Composable
-fun SceneScope.CollapsedShadeHeader(
+fun ContentScope.CollapsedShadeHeader(
     viewModelFactory: ShadeHeaderViewModel.Factory,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
@@ -264,7 +264,7 @@ fun SceneScope.CollapsedShadeHeader(
 }
 
 @Composable
-fun SceneScope.ExpandedShadeHeader(
+fun ContentScope.ExpandedShadeHeader(
     viewModelFactory: ShadeHeaderViewModel.Factory,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     createBatteryMeterViewController: (ViewGroup, StatusBarLocation) -> BatteryMeterViewController,
@@ -339,7 +339,7 @@ fun SceneScope.ExpandedShadeHeader(
 }
 
 @Composable
-private fun SceneScope.Clock(scale: Float, viewModel: ShadeHeaderViewModel, modifier: Modifier) {
+private fun ContentScope.Clock(scale: Float, viewModel: ShadeHeaderViewModel, modifier: Modifier) {
     val layoutDirection = LocalLayoutDirection.current
 
     Element(key = ShadeHeader.Elements.Clock, modifier = modifier) {
@@ -446,7 +446,7 @@ private fun ShadeCarrierGroup(viewModel: ShadeHeaderViewModel, modifier: Modifie
 }
 
 @Composable
-private fun SceneScope.StatusIcons(
+private fun ContentScope.StatusIcons(
     viewModel: ShadeHeaderViewModel,
     createTintedIconManager: (ViewGroup, StatusBarLocation) -> TintedIconManager,
     statusBarIconController: StatusBarIconController,
@@ -548,7 +548,10 @@ private fun SystemIconContainer(
 }
 
 @Composable
-private fun SceneScope.PrivacyChip(viewModel: ShadeHeaderViewModel, modifier: Modifier = Modifier) {
+private fun ContentScope.PrivacyChip(
+    viewModel: ShadeHeaderViewModel,
+    modifier: Modifier = Modifier,
+) {
     val privacyList by viewModel.privacyItems.collectAsStateWithLifecycle()
 
     AndroidView(

@@ -28,8 +28,8 @@ import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.viewinterop.AndroidView
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.biometrics.AuthController
 import com.android.systemui.customization.R as customR
 import com.android.systemui.dagger.qualifiers.Application
@@ -66,7 +66,7 @@ constructor(
     @LongPressTouchLog private val logBuffer: LogBuffer,
 ) {
     @Composable
-    fun SceneScope.LockIcon(overrideColor: Color? = null, modifier: Modifier = Modifier) {
+    fun ContentScope.LockIcon(overrideColor: Color? = null, modifier: Modifier = Modifier) {
         val context = LocalContext.current
 
         AndroidView(

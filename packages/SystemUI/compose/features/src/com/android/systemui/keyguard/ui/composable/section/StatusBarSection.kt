@@ -26,7 +26,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.viewinterop.AndroidView
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.height
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent
 import com.android.systemui.common.ui.compose.windowinsets.LocalDisplayCutout
@@ -45,9 +45,10 @@ constructor(
     private val notificationPanelView: Lazy<NotificationPanelView>,
 ) {
     @Composable
-    fun SceneScope.StatusBar(modifier: Modifier = Modifier) {
+    fun ContentScope.StatusBar(modifier: Modifier = Modifier) {
         val context = LocalContext.current
         val viewDisplayCutout = LocalDisplayCutout.current.viewDisplayCutoutKeyguardStatusBarView
+
         @SuppressLint("InflateParams")
         val view =
             remember(context) {

@@ -34,7 +34,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.common.ui.ConfigurationState
 import com.android.systemui.dagger.SysUISingleton
@@ -148,7 +148,7 @@ constructor(
     }
 
     @Composable
-    fun SceneScope.HeadsUpNotifications() {
+    fun ContentScope.HeadsUpNotifications() {
         SnoozeableHeadsUpNotificationSpace(
             stackScrollView = stackScrollView.get(),
             viewModel = rememberViewModel("HeadsUpNotifications") { viewModelFactory.create() },
@@ -160,7 +160,7 @@ constructor(
      *   adjustment
      */
     @Composable
-    fun SceneScope.Notifications(
+    fun ContentScope.Notifications(
         areNotificationsVisible: Boolean,
         isShadeLayoutWide: Boolean,
         burnInParams: BurnInParameters?,

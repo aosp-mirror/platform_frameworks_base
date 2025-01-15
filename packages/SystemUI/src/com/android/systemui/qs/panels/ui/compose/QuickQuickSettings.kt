@@ -27,7 +27,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
 import com.android.systemui.qs.composefragment.ui.GridAnchor
@@ -38,7 +38,7 @@ import com.android.systemui.qs.shared.ui.ElementKeys.toElementKey
 import com.android.systemui.res.R
 
 @Composable
-fun SceneScope.QuickQuickSettings(
+fun ContentScope.QuickQuickSettings(
     viewModel: QuickQuickSettingsViewModel,
     modifier: Modifier = Modifier,
 ) {

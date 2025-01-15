@@ -33,13 +33,13 @@ import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.Edge
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.LowestZIndexContentPicker
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.Swipe
 import com.android.compose.animation.scene.observableTransitionState
@@ -229,7 +229,7 @@ fun CommunalContainer(
 
 /** Scene containing the glanceable hub UI. */
 @Composable
-fun SceneScope.CommunalScene(
+fun ContentScope.CommunalScene(
     backgroundType: CommunalBackgroundType,
     colors: CommunalColors,
     content: CommunalContent,

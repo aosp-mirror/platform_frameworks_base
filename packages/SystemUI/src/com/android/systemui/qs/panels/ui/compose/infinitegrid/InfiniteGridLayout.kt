@@ -26,7 +26,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.util.fastMap
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.grid.ui.compose.VerticalSpannedGrid
 import com.android.systemui.haptics.msdl.qs.TileHapticsViewModelFactoryProvider
@@ -58,7 +58,7 @@ constructor(
 ) : PaginatableGridLayout {
 
     @Composable
-    override fun SceneScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
+    override fun ContentScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
         DisposableEffect(tiles) {
             val token = Any()
             tiles.forEach { it.startListening(token) }

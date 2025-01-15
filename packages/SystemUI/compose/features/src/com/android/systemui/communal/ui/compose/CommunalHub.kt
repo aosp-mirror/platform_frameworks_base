@@ -171,7 +171,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.window.layout.WindowMetricsCalculator
 import com.android.compose.animation.Easings.Emphasized
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.painter.rememberDrawablePainter
 import com.android.internal.R.dimen.system_app_widget_background_radius
@@ -217,7 +217,7 @@ fun CommunalHub(
     widgetConfigurator: WidgetConfigurator? = null,
     onOpenWidgetPicker: (() -> Unit)? = null,
     onEditDone: (() -> Unit)? = null,
-    sceneScope: SceneScope? = null,
+    contentScope: ContentScope? = null,
 ) {
     val communalContent by
         viewModel.communalContent.collectAsStateWithLifecycle(initialValue = emptyList())
@@ -437,7 +437,7 @@ fun CommunalHub(
                             widgetConfigurator = widgetConfigurator,
                             interactionHandler = interactionHandler,
                             widgetSection = widgetSection,
-                            sceneScope = sceneScope,
+                            contentScope = contentScope,
                         )
                     }
                 }
@@ -827,7 +827,7 @@ private fun BoxScope.CommunalHubLazyGrid(
     widgetConfigurator: WidgetConfigurator?,
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
-    sceneScope: SceneScope?,
+    contentScope: ContentScope?,
 ) {
     var gridModifier =
         Modifier.align(Alignment.TopStart).onGloballyPositioned { setGridCoordinates(it) }
@@ -1009,7 +1009,7 @@ private fun BoxScope.CommunalHubLazyGrid(
                     interactionHandler = interactionHandler,
                     widgetSection = widgetSection,
                     resizeableItemFrameViewModel = resizeableItemFrameViewModel,
-                    sceneScope = sceneScope,
+                    contentScope = contentScope,
                 )
             }
         }
@@ -1261,7 +1261,7 @@ private fun CommunalContent(
     interactionHandler: RemoteViews.InteractionHandler?,
     widgetSection: CommunalAppWidgetSection,
     resizeableItemFrameViewModel: ResizeableItemFrameViewModel,
-    sceneScope: SceneScope? = null,
+    contentScope: ContentScope? = null,
 ) {
     when (model) {
         is CommunalContentModel.WidgetContent.Widget ->
@@ -1285,7 +1285,7 @@ private fun CommunalContent(
         is CommunalContentModel.CtaTileInViewMode -> CtaTileInViewModeContent(viewModel, modifier)
         is CommunalContentModel.Smartspace -> SmartspaceContent(interactionHandler, model, modifier)
         is CommunalContentModel.Tutorial -> TutorialContent(modifier)
-        is CommunalContentModel.Umo -> Umo(viewModel, sceneScope, modifier)
+        is CommunalContentModel.Umo -> Umo(viewModel, contentScope, modifier)
         is CommunalContentModel.Spacer -> Box(Modifier.fillMaxSize())
     }
 }
@@ -1701,11 +1701,11 @@ private fun TutorialContent(modifier: Modifier = Modifier) {
 @Composable
 private fun Umo(
     viewModel: BaseCommunalViewModel,
-    sceneScope: SceneScope?,
+    contentScope: ContentScope?,
     modifier: Modifier = Modifier,
 ) {
-    if (SceneContainerFlag.isEnabled && sceneScope != null) {
-        sceneScope.MediaCarousel(
+    if (SceneContainerFlag.isEnabled && contentScope != null) {
+        contentScope.MediaCarousel(
             modifier = modifier.fillMaxSize(),
             isVisible = true,
             mediaHost = viewModel.mediaHost,

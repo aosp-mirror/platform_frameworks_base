@@ -373,7 +373,7 @@ class MovableElementTest {
         val fooParentInOverlayTag = "fooParentTagInOverlay"
 
         @Composable
-        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+        fun ContentScope.Foo(modifier: Modifier = Modifier) {
             // Foo wraps its content, so there is no way for STL to know its size in advance.
             MovableElement(foo, modifier) { content { Box(Modifier.size(fooSize)) } }
         }

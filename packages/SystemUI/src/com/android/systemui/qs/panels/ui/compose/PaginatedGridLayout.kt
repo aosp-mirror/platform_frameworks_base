@@ -40,7 +40,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.pointerInteropFilter
 import androidx.compose.ui.unit.dp
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.development.ui.compose.BuildNumber
@@ -63,7 +63,7 @@ constructor(
     @PaginatedBaseLayoutType private val delegateGridLayout: PaginatableGridLayout,
 ) : GridLayout by delegateGridLayout {
     @Composable
-    override fun SceneScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
+    override fun ContentScope.TileGrid(tiles: List<TileViewModel>, modifier: Modifier) {
         val viewModel =
             rememberViewModel(traceName = "PaginatedGridLayout-TileGrid") {
                 viewModelFactory.create()

@@ -31,7 +31,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
 import com.android.systemui.communal.smartspace.SmartspaceInteractionHandler
 import com.android.systemui.communal.ui.compose.section.AmbientStatusBarSection
@@ -65,7 +65,7 @@ constructor(
 ) {
 
     @Composable
-    fun SceneScope.Content(modifier: Modifier = Modifier) {
+    fun ContentScope.Content(modifier: Modifier = Modifier) {
         CommunalTouchableSurface(viewModel = viewModel, modifier = modifier) {
             Layout(
                 modifier = Modifier.fillMaxSize(),
@@ -81,7 +81,7 @@ constructor(
                             dialogFactory = dialogFactory,
                             widgetSection = widgetSection,
                             modifier = Modifier.element(Communal.Elements.Grid),
-                            sceneScope = this@Content,
+                            contentScope = this@Content,
                         )
                     }
                     if (communalSettingsInteractor.isV2FlagEnabled()) {
@@ -193,6 +193,7 @@ constructor(
     companion object {
         private val screensaverButtonSize: Dp = 64.dp
         private val screensaverButtonPadding: Dp = 24.dp
+
         // TODO(b/382739998): Remove these hardcoded values once lock icon size and bottom area
         // position are sorted.
         private val lockIconSize: Dp = 54.dp
