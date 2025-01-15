@@ -37,6 +37,9 @@ namespace flags {
 constexpr bool high_contrast_text_small_text_rect() {
     return false;
 }
+constexpr bool high_contrast_text_inner_text_color() {
+    return false;
+}
 }  // namespace flags
 #endif
 
@@ -126,7 +129,25 @@ public:
             // inner
             gDrawTextBlobMode = DrawTextBlobMode::HctInner;
             Paint innerPaint(paint);
-            simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
+            if (flags::high_contrast_text_inner_text_color()) {
+                // Preserve some color information while still ensuring sufficient contrast.
+                // Thus we increase the lightness to make the color stand out against a black
+                // background, and vice-versa. For grayscale, we retain some gray to indicate
+                // states like disabled or to distinguish links.
+                bool isGrayscale = abs(lab.a) < 1 && abs(lab.b) < 1;
+                if (isGrayscale) {
+                    if (darken) {
+                        lab.L = lab.L < 40 ? 0 : 20;
+                    } else {
+                        lab.L = lab.L > 60 ? 100 : 80;
+                    }
+                } else {
+                    lab.L = darken ? 20 : 90;
+                }
+                simplifyPaint(uirenderer::LabToSRGB(lab, SK_AlphaOPAQUE), &innerPaint);
+            } else {
+                simplifyPaint(darken ? SK_ColorBLACK : SK_ColorWHITE, &innerPaint);
+            }
             innerPaint.setStyle(SkPaint::kFill_Style);
             canvas->drawGlyphs(glyphFunc, glyphCount, innerPaint, x, y, totalAdvance);
             gDrawTextBlobMode = DrawTextBlobMode::Normal;
