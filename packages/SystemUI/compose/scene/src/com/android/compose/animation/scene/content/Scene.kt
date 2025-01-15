@@ -16,6 +16,7 @@
 
 package com.android.compose.animation.scene.content
 
+import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.Stable
 import com.android.compose.animation.scene.InternalContentScope
@@ -33,7 +34,8 @@ internal class Scene(
     actions: Map<UserAction.Resolved, UserActionResult>,
     zIndex: Float,
     globalZIndex: Long,
-) : Content(key, layoutImpl, content, actions, zIndex, globalZIndex) {
+    effectFactory: OverscrollFactory,
+) : Content(key, layoutImpl, content, actions, zIndex, globalZIndex, effectFactory) {
     override fun toString(): String {
         return "Scene(key=$key)"
     }

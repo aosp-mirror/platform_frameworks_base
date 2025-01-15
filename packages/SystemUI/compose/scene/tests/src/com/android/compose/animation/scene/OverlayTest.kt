@@ -18,21 +18,29 @@ package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.OverscrollEffect
+import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.rememberOverscrollEffect
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.SemanticsMatcher
@@ -47,6 +55,7 @@ import androidx.compose.ui.test.onRoot
 import androidx.compose.ui.test.performTouchInput
 import androidx.compose.ui.test.swipe
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestOverlays.OverlayA
@@ -883,5 +892,66 @@ class OverlayTest {
         assertThat(state.transitionState).isIdle()
         assertThat(state.transitionState).hasCurrentScene(SceneA)
         assertThat(state.transitionState).hasCurrentOverlays(OverlayC, OverlayD)
+    }
+
+    @Test
+    fun effectFactory() {
+        val effects = mutableSetOf<OverscrollEffect>()
+        var customFactory by mutableStateOf<OverscrollFactory?>(null)
+        rule.setContent {
+            CompositionLocalProvider(LocalOverscrollFactory provides DefaultEffectFactory) {
+                SceneTransitionLayout(
+                    remember { MutableSceneTransitionLayoutStateForTests(SceneA) }
+                ) {
+                    scene(SceneA, effectFactory = customFactory) {
+                        val effect = checkNotNull(rememberOverscrollEffect())
+                        SideEffect {
+                            effects.add(effect)
+                            effects.add(horizontalOverscrollEffect)
+                            effects.add(verticalOverscrollEffect)
+                        }
+                    }
+                }
+            }
+        }
+
+        assertThat(effects.size).isEqualTo(3)
+        effects.forEach { assertThat(it).isInstanceOf(DefaultEffect::class.java) }
+
+        effects.clear()
+        customFactory = CustomEffectFactory
+        rule.waitForIdle()
+
+        assertThat(effects.size).isEqualTo(3)
+        effects.forEach { assertThat(it).isInstanceOf(CustomEffect::class.java) }
+    }
+
+    private abstract class NoOpEffect : OverscrollEffect {
+        override val isInProgress: Boolean = false
+
+        override suspend fun applyToFling(
+            velocity: Velocity,
+            performFling: suspend (Velocity) -> Velocity,
+        ) {
+            performFling(velocity)
+        }
+
+        override fun applyToScroll(
+            delta: Offset,
+            source: NestedScrollSource,
+            performScroll: (Offset) -> Offset,
+        ): Offset = performScroll(delta)
+    }
+
+    private class DefaultEffect : NoOpEffect()
+
+    private class CustomEffect : NoOpEffect()
+
+    private data object DefaultEffectFactory : OverscrollFactory {
+        override fun createOverscrollEffect(): OverscrollEffect = DefaultEffect()
+    }
+
+    private data object CustomEffectFactory : OverscrollFactory {
+        override fun createOverscrollEffect(): OverscrollEffect = CustomEffect()
     }
 }

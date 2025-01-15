@@ -17,13 +17,12 @@
 package com.android.compose.animation.scene.content
 
 import android.annotation.SuppressLint
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.AnimationVector
-import androidx.compose.animation.core.TwoWayConverter
-import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.LocalOverscrollFactory
+import androidx.compose.foundation.OverscrollEffect
+import androidx.compose.foundation.OverscrollFactory
 import androidx.compose.foundation.layout.Box
-import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
@@ -60,12 +59,10 @@ import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.ValueKey
 import com.android.compose.animation.scene.animateSharedValueAsState
 import com.android.compose.animation.scene.effect.GestureEffect
-import com.android.compose.animation.scene.effect.VisualEffect
 import com.android.compose.animation.scene.element
 import com.android.compose.animation.scene.modifiers.noResizeDuringTransitions
 import com.android.compose.gesture.NestedScrollControlState
 import com.android.compose.gesture.NestedScrollableBound
-import com.android.compose.gesture.effect.OffsetOverscrollEffect
 import com.android.compose.gesture.nestedScrollController
 import com.android.compose.modifiers.thenIf
 import com.android.compose.ui.graphics.ContainerState
@@ -81,11 +78,14 @@ internal sealed class Content(
     actions: Map<UserAction.Resolved, UserActionResult>,
     zIndex: Float,
     globalZIndex: Long,
+    effectFactory: OverscrollFactory,
 ) {
     private val nestedScrollControlState = NestedScrollControlState()
     internal val scope = ContentScopeImpl(layoutImpl, content = this, nestedScrollControlState)
     val containerState = ContainerState()
 
+    // Important: All fields in this class should be backed by State given that contents are updated
+    // directly during composition, outside of a SideEffect.
     var content by mutableStateOf(content)
     var targetSize by mutableStateOf(IntSize.Zero)
     var userActions by mutableStateOf(actions)
@@ -143,16 +143,26 @@ internal sealed class Content(
         }
     }
 
+    private var lastFactory by mutableStateOf(effectFactory)
+    var verticalEffects by mutableStateOf(ContentEffects(effectFactory))
+        private set
+
+    var horizontalEffects by mutableStateOf(ContentEffects(effectFactory))
+        private set
+
     @SuppressLint("NotConstructor")
     @Composable
     fun Content(modifier: Modifier = Modifier) {
+        // If this content has a custom factory, provide it to the content so that the factory is
+        // automatically used when calling rememberOverscrollEffect().
         Box(
             modifier
                 .zIndex(zIndex)
                 .approachLayout(
                     isMeasurementApproachInProgress = { layoutImpl.state.isTransitioning() }
                 ) { measurable, constraints ->
-                    // TODO(b/353679003): Use the ModifierNode API to set this *before* the approach
+                    // TODO(b/353679003): Use the ModifierNode API to set this *before* the
+                    // approach
                     // pass is started.
                     targetSize = lookaheadSize
                     val placeable = measurable.measure(constraints)
@@ -163,11 +173,26 @@ internal sealed class Content(
                 }
                 .testTag(key.testTag)
         ) {
-            scope.content()
+            CompositionLocalProvider(LocalOverscrollFactory provides lastFactory) {
+                scope.content()
+            }
         }
     }
 
     fun areSwipesAllowed(): Boolean = nestedScrollControlState.isOuterScrollAllowed
+
+    fun maybeUpdateEffects(effectFactory: OverscrollFactory) {
+        if (effectFactory != lastFactory) {
+            lastFactory = effectFactory
+            verticalEffects = ContentEffects(effectFactory)
+            horizontalEffects = ContentEffects(effectFactory)
+        }
+    }
+}
+
+internal class ContentEffects(factory: OverscrollFactory) {
+    val overscrollEffect = factory.createOverscrollEffect()
+    val gestureEffect = GestureEffect(overscrollEffect)
 }
 
 internal class ContentScopeImpl(
@@ -183,34 +208,11 @@ internal class ContentScopeImpl(
     override val lookaheadScope: LookaheadScope
         get() = layoutImpl.lookaheadScope
 
-    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
-    private val animationSpatialSpec =
-        object : AnimationSpec<Float> {
-            override fun <V : AnimationVector> vectorize(converter: TwoWayConverter<Float, V>) =
-                layoutImpl.state.motionScheme.defaultSpatialSpec<Float>().vectorize(converter)
-        }
+    override val verticalOverscrollEffect: OverscrollEffect
+        get() = content.verticalEffects.overscrollEffect
 
-    private val _verticalOverscrollEffect =
-        OffsetOverscrollEffect(
-            orientation = Orientation.Vertical,
-            animationScope = layoutImpl.animationScope,
-            animationSpec = animationSpatialSpec,
-        )
-
-    private val _horizontalOverscrollEffect =
-        OffsetOverscrollEffect(
-            orientation = Orientation.Horizontal,
-            animationScope = layoutImpl.animationScope,
-            animationSpec = animationSpatialSpec,
-        )
-
-    val verticalOverscrollGestureEffect = GestureEffect(_verticalOverscrollEffect)
-
-    val horizontalOverscrollGestureEffect = GestureEffect(_horizontalOverscrollEffect)
-
-    override val verticalOverscrollEffect = VisualEffect(_verticalOverscrollEffect)
-
-    override val horizontalOverscrollEffect = VisualEffect(_horizontalOverscrollEffect)
+    override val horizontalOverscrollEffect: OverscrollEffect
+        get() = content.horizontalEffects.overscrollEffect
 
     override fun Modifier.element(key: ElementKey): Modifier {
         return element(layoutImpl, content, key)

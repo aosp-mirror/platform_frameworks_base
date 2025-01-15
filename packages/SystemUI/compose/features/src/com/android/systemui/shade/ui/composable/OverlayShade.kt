@@ -20,9 +20,6 @@ package com.android.systemui.shade.ui.composable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.PaddingValues
@@ -44,21 +41,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.windowsizeclass.WindowWidthSizeClass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.ReadOnlyComposable
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
-import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.dimensionResource
-import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.gesture.effect.rememberOffsetOverscrollEffect
 import com.android.compose.windowsizeclass.LocalWindowSizeClass
 import com.android.systemui.res.R
 
@@ -70,29 +62,14 @@ fun ContentScope.OverlayShade(
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    // TODO(b/384653288) This should be removed when b/378470603 is done.
-    val idleEffect = rememberOffsetOverscrollEffect(Orientation.Vertical)
-    Box(
-        modifier
-            .overscroll(idleEffect)
-            .nestedScroll(
-                remember {
-                    object : NestedScrollConnection {
-                        override suspend fun onPreFling(available: Velocity): Velocity {
-                            return available
-                        }
-                    }
-                }
-            )
-            .scrollable(rememberScrollableState { 0f }, Orientation.Vertical, idleEffect)
-    ) {
+    Box(modifier) {
         Scrim(onClicked = onScrimClicked)
 
         Box(modifier = Modifier.fillMaxSize().panelPadding(), contentAlignment = panelAlignment) {
             Panel(
                 modifier =
-                    Modifier.element(OverlayShade.Elements.Panel)
-                        .overscroll(verticalOverscrollEffect)
+                    Modifier.overscroll(verticalOverscrollEffect)
+                        .element(OverlayShade.Elements.Panel)
                         .panelSize(),
                 content = content,
             )
@@ -133,14 +110,19 @@ private fun ContentScope.Panel(modifier: Modifier = Modifier, content: @Composab
 
 @Composable
 private fun Modifier.panelSize(): Modifier {
-    val widthSizeClass = LocalWindowSizeClass.current.widthSizeClass
     return this.then(
-        if (widthSizeClass == WindowWidthSizeClass.Compact) {
+        if (isFullWidthShade()) {
             Modifier.fillMaxWidth()
         } else {
             Modifier.width(dimensionResource(id = R.dimen.shade_panel_width))
         }
     )
+}
+
+@Composable
+@ReadOnlyComposable
+internal fun isFullWidthShade(): Boolean {
+    return LocalWindowSizeClass.current.widthSizeClass == WindowWidthSizeClass.Compact
 }
 
 @Composable

@@ -464,13 +464,15 @@ private class NestedDraggableNode(
         velocity: Velocity,
         performFling: suspend (Velocity) -> Velocity,
     ): Velocity {
+        // Make sure we only use the velocity in this draggable orientation.
+        val orientationVelocity = velocity.toFloat().toVelocity()
         return if (overscrollEffect != null) {
-            overscrollEffect.applyToFling(velocity) { performFling(it) }
+            overscrollEffect.applyToFling(orientationVelocity) { performFling(it) }
 
             // Effects always consume the whole velocity.
             velocity
         } else {
-            performFling(velocity)
+            performFling(orientationVelocity)
         }
     }
 

@@ -23,7 +23,9 @@ import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.unit.Velocity
+import com.android.compose.ui.util.HorizontalSpaceVectorConverter
 import com.android.compose.ui.util.SpaceVectorConverter
+import com.android.compose.ui.util.VerticalSpaceVectorConverter
 import kotlin.math.abs
 import kotlin.math.sign
 import kotlinx.coroutines.CoroutineScope
@@ -40,13 +42,12 @@ interface ContentOverscrollEffect : OverscrollEffect {
 }
 
 open class BaseContentOverscrollEffect(
-    orientation: Orientation,
     private val animationScope: CoroutineScope,
     private val animationSpec: AnimationSpec<Float>,
-) : ContentOverscrollEffect, SpaceVectorConverter by SpaceVectorConverter(orientation) {
-
+) : ContentOverscrollEffect {
     /** The [Animatable] that holds the current overscroll value. */
     private val animatable = Animatable(initialValue = 0f, visibilityThreshold = 0.5f)
+    private var lastConverter: SpaceVectorConverter? = null
 
     override val overscrollDistance: Float
         get() = animatable.value
@@ -55,6 +56,15 @@ open class BaseContentOverscrollEffect(
         get() = overscrollDistance != 0f
 
     override fun applyToScroll(
+        delta: Offset,
+        source: NestedScrollSource,
+        performScroll: (Offset) -> Offset,
+    ): Offset {
+        val converter = converterOrNull(delta.x, delta.y) ?: return performScroll(delta)
+        return converter.applyToScroll(delta, source, performScroll)
+    }
+
+    private fun SpaceVectorConverter.applyToScroll(
         delta: Offset,
         source: NestedScrollSource,
         performScroll: (Offset) -> Offset,
@@ -106,6 +116,14 @@ open class BaseContentOverscrollEffect(
         velocity: Velocity,
         performFling: suspend (Velocity) -> Velocity,
     ) {
+        val converter = converterOrNull(velocity.x, velocity.y) ?: return
+        converter.applyToFling(velocity, performFling)
+    }
+
+    private suspend fun SpaceVectorConverter.applyToFling(
+        velocity: Velocity,
+        performFling: suspend (Velocity) -> Velocity,
+    ) {
         // We launch a coroutine to ensure the fling animation starts after any pending [snapTo]
         // animations have finished.
         // This guarantees a smooth, sequential execution of animations on the overscroll value.
@@ -116,5 +134,36 @@ open class BaseContentOverscrollEffect(
                 animatable.animateTo(0f, animationSpec, remaining.toFloat())
             }
         }
+    }
+
+    protected fun requireConverter(): SpaceVectorConverter {
+        return checkNotNull(lastConverter) {
+            "lastConverter is null, make sure to call requireConverter() only when " +
+                "overscrollDistance != 0f"
+        }
+    }
+
+    private fun converterOrNull(x: Float, y: Float): SpaceVectorConverter? {
+        val converter: SpaceVectorConverter =
+            when {
+                x != 0f && y != 0f ->
+                    error(
+                        "BaseContentOverscrollEffect only supports single orientation scrolls " +
+                            "and velocities"
+                    )
+                x == 0f && y == 0f -> lastConverter ?: return null
+                x != 0f -> HorizontalSpaceVectorConverter
+                else -> VerticalSpaceVectorConverter
+            }
+
+        if (lastConverter != null) {
+            check(lastConverter == converter) {
+                "BaseContentOverscrollEffect should always be used in the same orientation"
+            }
+        } else {
+            lastConverter = converter
+        }
+
+        return converter
     }
 }
