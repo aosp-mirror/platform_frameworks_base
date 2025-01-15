@@ -45,7 +45,6 @@ android_test {
     ],
 
     optimize: {
-        proguard_compatibility: true,
         proguard_flags_files: ["proguard.flags"],
     },
 }
