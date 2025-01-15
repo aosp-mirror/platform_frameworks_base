@@ -2250,8 +2250,6 @@
     <string name="keyboard_shortcut_group_system_notifications">Notifications</string>
     <!-- User visible title for the keyboard shortcut that triggers the keyboard shortcuts helper. -->
     <string name="keyboard_shortcut_group_system_shortcuts_helper">Keyboard Shortcuts</string>
-    <!-- User visible title for the keyboard shortcut that switches to the next hardware keyboard layout. -->
-    <string name="keyboard_shortcut_group_system_switch_input">Switch keyboard layout</string>
     <!-- User visible string that joins different shortcuts in a list, e.g. shortcut1 "or" shortcut2 "or" ... -->
     <string  name="keyboard_shortcut_join">or</string>
 
