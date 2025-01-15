@@ -513,7 +513,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public void onVrStateChanged(boolean enabled) {
             synchronized (mGlobalLock) {
                 mVrModeEnabled = enabled;
-                mRoot.forAllDisplayPolicies(p -> p.onVrStateChangedLw(enabled));
             }
         }
     };
@@ -881,11 +880,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 return;
             }
 
-            if (mImmersiveModeConfirmationsUri.equals(uri) || mPolicyControlUri.equals(uri)) {
-                updateSystemUiSettings(true /* handleChange */);
-                return;
-            }
-
             if (mForceDesktopModeOnExternalDisplaysUri.equals(uri)) {
                 updateForceDesktopModeOnExternalDisplays();
                 return;
@@ -938,7 +932,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         void loadSettings() {
-            updateSystemUiSettings(false /* handleChange */);
             updateMaximumObscuringOpacityForTouch();
             updateDisableSecureWindows();
         }
@@ -952,21 +945,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     || mMaximumObscuringOpacityForTouch > 1.0f) {
                 mMaximumObscuringOpacityForTouch =
                         InputSettings.DEFAULT_MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH;
-            }
-        }
-
-        void updateSystemUiSettings(boolean handleChange) {
-            synchronized (mGlobalLock) {
-                boolean changed = false;
-                if (handleChange) {
-                    changed = getDefaultDisplayContentLocked().getDisplayPolicy()
-                            .onSystemUiSettingsChanged();
-                } else {
-                    ImmersiveModeConfirmation.loadSetting(mCurrentUserId, mContext);
-                }
-                if (changed) {
-                    mWindowPlacerLocked.requestTraversal();
-                }
             }
         }
 
@@ -3315,7 +3293,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     @Override
     public void onUserSwitched() {
-        mSettingsObserver.updateSystemUiSettings(true /* handleChange */);
         synchronized (mGlobalLock) {
             // force a re-application of focused window sysui visibility on each display.
             mRoot.forAllDisplayPolicies(DisplayPolicy::resetSystemBarAttributes);
@@ -9069,22 +9046,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
     SurfaceControl.Builder makeSurfaceBuilder() {
         return mSurfaceControlFactory.get();
-    }
-
-    /**
-     * Called when the state of lock task mode changes. This should be used to disable immersive
-     * mode confirmation.
-     *
-     * @param lockTaskState the new lock task mode state. One of
-     *                      {@link ActivityManager#LOCK_TASK_MODE_NONE},
-     *                      {@link ActivityManager#LOCK_TASK_MODE_LOCKED},
-     *                      {@link ActivityManager#LOCK_TASK_MODE_PINNED}.
-     */
-    void onLockTaskStateChanged(int lockTaskState) {
-        // TODO: pass in displayId to determine which display the lock task state changed
-        synchronized (mGlobalLock) {
-            mRoot.forAllDisplayPolicies(p -> p.onLockTaskStateChangedLw(lockTaskState));
-        }
     }
 
     @Override

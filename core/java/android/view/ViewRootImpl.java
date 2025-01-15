@@ -134,7 +134,6 @@ import static com.android.text.flags.Flags.disableHandwritingInitiatorForIme;
 import static com.android.window.flags.Flags.enableBufferTransformHintFromDisplay;
 import static com.android.window.flags.Flags.predictiveBackSwipeEdgeNoneApi;
 import static com.android.window.flags.Flags.setScPropertiesInClient;
-import static com.android.window.flags.Flags.systemUiImmersiveConfirmationDialog;
 
 import android.Manifest;
 import android.accessibilityservice.AccessibilityService;
@@ -375,16 +374,6 @@ public final class ViewRootImpl implements ViewParent,
      */
     public static final boolean CLIENT_TRANSIENT =
             SystemProperties.getBoolean("persist.wm.debug.client_transient", false);
-
-    /**
-     * Whether the client (system UI) is handling the immersive confirmation window. If
-     * {@link CLIENT_TRANSIENT} is set to true, the immersive confirmation window will always be the
-     * client instance and this flag will be ignored. Otherwise, the immersive confirmation window
-     * can be switched freely by this flag.
-     * @hide
-     */
-    public static final boolean CLIENT_IMMERSIVE_CONFIRMATION =
-            systemUiImmersiveConfirmationDialog();
 
     /**
      * Set this system property to true to force the view hierarchy to render

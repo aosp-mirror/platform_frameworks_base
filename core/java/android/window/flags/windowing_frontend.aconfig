@@ -257,14 +257,6 @@ flag {
 }
 
 flag {
-  name: "system_ui_immersive_confirmation_dialog"
-  namespace: "windowing_frontend"
-  description: "Enable the implementation of the immersive confirmation dialog on system UI side by default"
-  bug: "359713629"
-  is_fixed_read_only: true
-}
-
-flag {
   name: "ensure_wallpaper_in_transitions"
   namespace: "windowing_frontend"
   description: "Ensure that wallpaper window tokens are always present/available for collection in transitions"

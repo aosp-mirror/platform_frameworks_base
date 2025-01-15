@@ -22,8 +22,6 @@ import static android.app.StatusBarManager.DISABLE_BACK;
 import static android.app.StatusBarManager.DISABLE_HOME;
 import static android.app.StatusBarManager.DISABLE_RECENT;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.ViewRootImpl.CLIENT_IMMERSIVE_CONFIRMATION;
-import static android.view.ViewRootImpl.CLIENT_TRANSIENT;
 import static android.view.WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS;
 import static android.window.DisplayAreaOrganizer.FEATURE_UNDEFINED;
 import static android.window.DisplayAreaOrganizer.KEY_ROOT_DISPLAY_AREA_ID;
@@ -90,8 +88,8 @@ import kotlin.Lazy;
 import javax.inject.Inject;
 
 /**
- *  Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
- *  entering immersive mode.
+ * Helper to manage showing/hiding a confirmation prompt when the navigation bar is hidden
+ * entering immersive mode.
  */
 public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Callbacks,
         TaskStackChangeListener {
@@ -140,9 +138,9 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
 
     @Inject
     public ImmersiveModeConfirmation(Context context, CommandQueue commandQueue,
-                                     SecureSettings secureSettings,
-                                     dagger.Lazy<ViewCapture> daggerLazyViewCapture,
-                                     @Background Handler backgroundHandler) {
+            SecureSettings secureSettings,
+            dagger.Lazy<ViewCapture> daggerLazyViewCapture,
+            @Background Handler backgroundHandler) {
         mSysUiContext = context;
         final Display display = mSysUiContext.getDisplay();
         mDisplayContext = display.getDisplayId() == DEFAULT_DISPLAY
@@ -213,7 +211,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
     public void immersiveModeChanged(int rootDisplayAreaId, boolean isImmersiveMode) {
         mHandler.removeMessages(H.SHOW);
         if (isImmersiveMode) {
-            if (DEBUG) Log.d(TAG, "immersiveModeChanged() sConfirmed=" +  sConfirmed);
+            if (DEBUG) Log.d(TAG, "immersiveModeChanged() sConfirmed=" + sConfirmed);
             boolean userSetupComplete = (mSecureSettings.getIntForUser(
                     Settings.Secure.USER_SETUP_COMPLETE, 0, UserHandle.USER_CURRENT) != 0);
 
@@ -314,44 +312,42 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
 
     @Override
     public void start() {
-        if (CLIENT_TRANSIENT || CLIENT_IMMERSIVE_CONFIRMATION) {
-            mCommandQueue.addCallback(this);
+        mCommandQueue.addCallback(this);
 
-            final Resources r = mSysUiContext.getResources();
-            mShowDelayMs = r.getInteger(R.integer.dock_enter_exit_duration) * 3L;
-            mCanSystemBarsBeShownByUser = !r.getBoolean(
-                    R.bool.config_remoteInsetsControllerControlsSystemBars) || r.getBoolean(
-                    R.bool.config_remoteInsetsControllerSystemBarsCanBeShownByUserAction);
-            IVrManager vrManager = IVrManager.Stub.asInterface(
-                    ServiceManager.getService(Context.VR_SERVICE));
-            if (vrManager != null) {
-                try {
-                    mVrModeEnabled = vrManager.getVrModeState();
-                    vrManager.registerListener(mVrStateCallbacks);
-                    mVrStateCallbacks.onVrStateChanged(mVrModeEnabled);
-                } catch (RemoteException e) {
-                    // Ignore, we cannot do anything if we failed to access vr manager.
-                }
+        final Resources r = mSysUiContext.getResources();
+        mShowDelayMs = r.getInteger(R.integer.dock_enter_exit_duration) * 3L;
+        mCanSystemBarsBeShownByUser = !r.getBoolean(
+                R.bool.config_remoteInsetsControllerControlsSystemBars) || r.getBoolean(
+                R.bool.config_remoteInsetsControllerSystemBarsCanBeShownByUserAction);
+        IVrManager vrManager = IVrManager.Stub.asInterface(
+                ServiceManager.getService(Context.VR_SERVICE));
+        if (vrManager != null) {
+            try {
+                mVrModeEnabled = vrManager.getVrModeState();
+                vrManager.registerListener(mVrStateCallbacks);
+                mVrStateCallbacks.onVrStateChanged(mVrModeEnabled);
+            } catch (RemoteException e) {
+                // Ignore, we cannot do anything if we failed to access vr manager.
             }
-            TaskStackChangeListeners.getInstance().registerTaskStackListener(this);
-            mContentObserver = new ContentObserver(mBackgroundHandler) {
-                @Override
-                public void onChange(boolean selfChange) {
-                    onSettingChanged(mSysUiContext.getUserId());
-                }
-            };
-
-            // Register to listen for changes in Settings.Secure settings.
-            mSecureSettings.registerContentObserverForUserSync(
-                    Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS, mContentObserver,
-                    UserHandle.USER_CURRENT);
-            mSecureSettings.registerContentObserverForUserSync(
-                    Settings.Secure.USER_SETUP_COMPLETE, mContentObserver,
-                    UserHandle.USER_CURRENT);
-            mBackgroundHandler.post(() -> {
-                loadSetting(UserHandle.USER_CURRENT);
-            });
         }
+        TaskStackChangeListeners.getInstance().registerTaskStackListener(this);
+        mContentObserver = new ContentObserver(mBackgroundHandler) {
+            @Override
+            public void onChange(boolean selfChange) {
+                onSettingChanged(mSysUiContext.getUserId());
+            }
+        };
+
+        // Register to listen for changes in Settings.Secure settings.
+        mSecureSettings.registerContentObserverForUserSync(
+                Settings.Secure.IMMERSIVE_MODE_CONFIRMATIONS, mContentObserver,
+                UserHandle.USER_CURRENT);
+        mSecureSettings.registerContentObserverForUserSync(
+                Settings.Secure.USER_SETUP_COMPLETE, mContentObserver,
+                UserHandle.USER_CURRENT);
+        mBackgroundHandler.post(() -> {
+            loadSetting(UserHandle.USER_CURRENT);
+        });
     }
 
     private final IVrStateCallbacks mVrStateCallbacks = new IVrStateCallbacks.Stub() {
@@ -542,7 +538,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
 
     /**
      * Returns options that specify the {@link RootDisplayArea} to attach the confirmation window.
-     *         {@code null} if the {@code rootDisplayAreaId} is {@link FEATURE_UNDEFINED}.
+     * {@code null} if the {@code rootDisplayAreaId} is {@link FEATURE_UNDEFINED}.
      */
     @Nullable
     private Bundle getOptionsForWindowContext(int rootDisplayAreaId) {
@@ -600,10 +596,7 @@ public class ImmersiveModeConfirmation implements CoreStartable, CommandQueue.Ca
 
         @Override
         public void handleMessage(Message msg) {
-            if (!CLIENT_TRANSIENT && !CLIENT_IMMERSIVE_CONFIRMATION) {
-                return;
-            }
-            switch(msg.what) {
+            switch (msg.what) {
                 case SHOW:
                     handleShow(msg.arg1);
                     break;
