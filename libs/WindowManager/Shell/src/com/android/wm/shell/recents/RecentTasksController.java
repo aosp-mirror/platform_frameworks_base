@@ -54,7 +54,6 @@ import androidx.annotation.Nullable;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.protolog.ProtoLog;
-import com.android.launcher3.Flags;
 import com.android.wm.shell.common.ExternalInterfaceBinder;
 import com.android.wm.shell.common.RemoteCallable;
 import com.android.wm.shell.common.ShellExecutor;
@@ -553,9 +552,7 @@ public class RecentTasksController implements TaskStackListenerCallback,
                 groupedTasks.add(GroupedTaskInfo.forSplitTasks(taskInfo, pairedTaskInfo,
                         mTaskSplitBoundsMap.get(pairedTaskId)));
             } else {
-                if (
-                        Flags.enableUseTopVisibleActivityForExcludeFromRecentTask()
-                                && isWallpaperTask(taskInfo)) {
+                if (isWallpaperTask(taskInfo)) {
                     // Don't add the wallpaper task as an entry in grouped tasks
                     continue;
                 }
