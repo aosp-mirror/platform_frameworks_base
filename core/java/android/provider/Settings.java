@@ -353,6 +353,18 @@ public final class Settings {
      */
     public static final String ACTION_ONE_HANDED_SETTINGS =
             "android.settings.action.ONE_HANDED_SETTINGS";
+
+    /**
+     * Activity Action: Show Double tap power gesture Settings page.
+     * <p>
+     * Input: Nothing
+     * <p>
+     * Output: Nothing
+     * @hide
+     */
+    public static final String ACTION_DOUBLE_TAP_POWER_SETTINGS =
+            "android.settings.action.DOUBLE_TAP_POWER_SETTINGS";
+
     /**
      * The return values for {@link Settings.Config#set}
      * @hide
