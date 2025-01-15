@@ -19,7 +19,7 @@ package com.android.settingslib.metadata
 import androidx.annotation.StringRes
 
 /** Common base class for preferences that have two selectable states and save a boolean value. */
-interface TwoStatePreference : PreferenceMetadata, PersistentPreference<Boolean>, BooleanValue
+interface TwoStatePreference : PreferenceMetadata, BooleanPreference
 
 /** A preference that provides a two-state toggleable option. */
 open class SwitchPreference

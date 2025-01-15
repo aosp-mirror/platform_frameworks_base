@@ -79,6 +79,14 @@ annotation class SensitivityLevel {
 interface PersistentPreference<T> {
 
     /**
+     * The value type the preference is associated with.
+     *
+     * TODO(b/388167302): Remove the default implementation once all subclasses are migrated.
+     */
+    val valueType: Class<T>?
+        get() = null
+
+    /**
      * Returns the key-value storage of the preference.
      *
      * The default implementation returns the storage provided by
@@ -141,15 +149,6 @@ sealed interface ValueDescriptor {
 
     /** Returns if given value (represented by index) is valid. */
     fun isValidValue(context: Context, index: Int): Boolean
-}
-
-/**
- * A boolean type value.
- *
- * A zero value means `False`, otherwise it is `True`.
- */
-interface BooleanValue : ValueDescriptor {
-    override fun isValidValue(context: Context, index: Int) = true
 }
 
 /** Value falls into a given array. */
@@ -219,6 +218,12 @@ interface RangeValue : ValueDescriptor {
 
     override fun isValidValue(context: Context, index: Int) =
         index in getMinValue(context)..getMaxValue(context)
+}
+
+/** A persistent preference that has a boolean value. */
+interface BooleanPreference : PersistentPreference<Boolean> {
+    override val valueType: Class<Boolean>
+        get() = Boolean::class.javaObjectType
 }
 
 /** A persistent preference that has a float value. */

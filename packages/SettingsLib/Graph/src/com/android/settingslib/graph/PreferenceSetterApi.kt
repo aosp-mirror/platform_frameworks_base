@@ -26,7 +26,6 @@ import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.ipc.IntMessageCodec
 import com.android.settingslib.ipc.MessageCodec
-import com.android.settingslib.metadata.BooleanValue
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceAvailabilityProvider
 import com.android.settingslib.metadata.PreferenceMetadata
@@ -146,7 +145,9 @@ class PreferenceSetterApiHandler(
         val value = request.value
         try {
             if (value.hasBooleanValue()) {
-                if (metadata !is BooleanValue) return PreferenceSetterResult.INVALID_REQUEST
+                if (metadata.valueType != Boolean::class.javaObjectType) {
+                    return PreferenceSetterResult.INVALID_REQUEST
+                }
                 val booleanValue = value.booleanValue
                 val resultCode = metadata.checkWritePermit(booleanValue)
                 if (resultCode != PreferenceSetterResult.OK) return resultCode
