@@ -18,10 +18,12 @@ package com.android.systemui.keyguard.domain.interactor
 
 import com.android.systemui.keyguard.data.repository.keyguardTransitionRepository
 import com.android.systemui.kosmos.Kosmos
+import com.android.systemui.kosmos.testScope
 
 val Kosmos.keyguardDismissTransitionInteractor: KeyguardDismissTransitionInteractor by
     Kosmos.Fixture {
         KeyguardDismissTransitionInteractor(
+            scope = testScope,
             repository = keyguardTransitionRepository,
             fromLockscreenTransitionInteractor = fromLockscreenTransitionInteractor,
             fromPrimaryBouncerTransitionInteractor = fromPrimaryBouncerTransitionInteractor,
