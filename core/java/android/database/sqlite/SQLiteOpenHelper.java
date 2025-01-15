@@ -182,17 +182,10 @@ public abstract class SQLiteOpenHelper implements AutoCloseable {
         setOpenParamsBuilder(openParamsBuilder);
 
         Object lock = null;
-        if (mName == null || !Flags.concurrentOpenHelper()) {
+        if (!Flags.concurrentOpenHelper() || mName == null) {
             lock = new Object();
         } else {
-            try {
-                final String path = mContext.getDatabasePath(mName).getCanonicalPath();
-                lock = sDbLock.computeIfAbsent(path, (String k) -> new Object());
-            } catch (IOException e) {
-                Log.d(TAG, "failed to construct db path for " + mName);
-                // Ensure the lock is not null.
-                lock = new Object();
-            }
+            lock = sDbLock.computeIfAbsent(mName, (String k) -> new Object());
         }
         mLock = lock;
     }
