@@ -397,7 +397,6 @@ public final class DisplayManager {
      * @see #createVirtualDisplay
      * @hide
      */
-    @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_PUBLIC_APIS)
     @SystemApi
     public static final int VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT = 1 << 7;
 

@@ -217,7 +217,7 @@ public class ProxyManager {
 
     private void registerVirtualDeviceListener() {
         VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
-        if (vdm == null || !android.companion.virtual.flags.Flags.vdmPublicApis()) {
+        if (vdm == null) {
             return;
         }
         if (mVirtualDeviceListener == null) {
@@ -234,7 +234,7 @@ public class ProxyManager {
 
     private void unregisterVirtualDeviceListener() {
         VirtualDeviceManager vdm = mContext.getSystemService(VirtualDeviceManager.class);
-        if (vdm == null || !android.companion.virtual.flags.Flags.vdmPublicApis()) {
+        if (vdm == null) {
             return;
         }
         vdm.unregisterVirtualDeviceListener(mVirtualDeviceListener);

@@ -20,11 +20,9 @@ import static android.companion.virtual.VirtualDeviceParams.DEVICE_POLICY_CUSTOM
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_CAMERA;
 import static android.companion.virtual.VirtualDeviceParams.POLICY_TYPE_SENSORS;
 
-import android.annotation.FlaggedApi;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
-import android.companion.virtual.flags.Flags;
 import android.content.Context;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -34,8 +32,9 @@ import android.os.RemoteException;
  * Details of a particular virtual device.
  *
  * <p>Read-only device representation exposing the properties of an existing virtual device.
+ *
+ * @see VirtualDeviceManager#registerVirtualDeviceListener
  */
-// TODO(b/310912420): Link to VirtualDeviceManager#registerVirtualDeviceListener from the docs
 public final class VirtualDevice implements Parcelable {
 
     private final @NonNull IVirtualDevice mVirtualDevice;
@@ -93,8 +92,8 @@ public final class VirtualDevice implements Parcelable {
      * per device.
      *
      * @see Context#createDeviceContext
+     * @see #getPersistentDeviceId()
      */
-    // TODO(b/310912420): Link to #getPersistentDeviceId from the docs
     public int getDeviceId() {
         return mId;
     }
@@ -111,7 +110,6 @@ public final class VirtualDevice implements Parcelable {
      * <p class="note">This identifier may not be unique across virtual devices, in case there are
      * more than one virtual devices corresponding to the same physical device.
      */
-    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public @Nullable String getPersistentDeviceId() {
         return mPersistentId;
     }
@@ -127,7 +125,6 @@ public final class VirtualDevice implements Parcelable {
      * Returns the human-readable name of the virtual device, if defined, which is suitable to be
      * shown in UI.
      */
-    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public @Nullable CharSequence getDisplayName() {
         return mDisplayName;
     }
@@ -138,7 +135,6 @@ public final class VirtualDevice implements Parcelable {
      * <p>The actual {@link android.view.Display} objects can be obtained by passing the returned
      * IDs to {@link android.hardware.display.DisplayManager#getDisplay(int)}.</p>
      */
-    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public @NonNull int[] getDisplayIds() {
         try {
             return mVirtualDevice.getDisplayIds();
@@ -157,7 +153,6 @@ public final class VirtualDevice implements Parcelable {
      * @see Context#getDeviceId()
      * @see Context#createDeviceContext(int)
      */
-    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public boolean hasCustomSensorSupport() {
         try {
             return mVirtualDevice.getDevicePolicy(POLICY_TYPE_SENSORS) == DEVICE_POLICY_CUSTOM;
@@ -172,7 +167,6 @@ public final class VirtualDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public boolean hasCustomAudioInputSupport() {
         try {
             return mVirtualDevice.hasCustomAudioInputSupport();
@@ -194,7 +188,6 @@ public final class VirtualDevice implements Parcelable {
      * @hide
      */
     @SystemApi
-    @FlaggedApi(Flags.FLAG_VDM_PUBLIC_APIS)
     public boolean hasCustomCameraSupport() {
         try {
             return mVirtualDevice.getDevicePolicy(POLICY_TYPE_CAMERA) == DEVICE_POLICY_CUSTOM;

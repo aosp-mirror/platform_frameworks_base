@@ -35,8 +35,6 @@ import static android.accessibilityservice.AccessibilityTrace.FLAGS_MAGNIFICATIO
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_PACKAGE_BROADCAST_RECEIVER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_USER_BROADCAST_RECEIVER;
 import static android.accessibilityservice.AccessibilityTrace.FLAGS_WINDOW_MANAGER_INTERNAL;
-import static android.companion.virtual.VirtualDeviceManager.ACTION_VIRTUAL_DEVICE_REMOVED;
-import static android.companion.virtual.VirtualDeviceManager.EXTRA_VIRTUAL_DEVICE_ID;
 import static android.content.Context.DEVICE_ID_DEFAULT;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_FLOATING_MENU;
 import static android.provider.Settings.Secure.ACCESSIBILITY_BUTTON_MODE_GESTURE;
@@ -1116,22 +1114,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         mContext.registerReceiverAsUser(
                 receiver, UserHandle.ALL, filter, null, mMainHandler,
                 Context.RECEIVER_EXPORTED);
-
-        if (!android.companion.virtual.flags.Flags.vdmPublicApis()) {
-            final BroadcastReceiver virtualDeviceReceiver = new BroadcastReceiver() {
-                @Override
-                public void onReceive(Context context, Intent intent) {
-                    final int deviceId = intent.getIntExtra(
-                            EXTRA_VIRTUAL_DEVICE_ID, DEVICE_ID_DEFAULT);
-                    mProxyManager.clearConnections(deviceId);
-                }
-            };
-
-            final IntentFilter virtualDeviceFilter = new IntentFilter(
-                    ACTION_VIRTUAL_DEVICE_REMOVED);
-            mContext.registerReceiver(virtualDeviceReceiver, virtualDeviceFilter,
-                    Context.RECEIVER_NOT_EXPORTED);
-        }
     }
 
     /**
