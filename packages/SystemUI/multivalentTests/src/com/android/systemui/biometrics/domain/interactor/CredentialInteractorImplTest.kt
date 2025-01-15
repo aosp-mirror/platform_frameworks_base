@@ -135,9 +135,9 @@ class CredentialInteractorImplTest : SysuiTestCase() {
     private fun pinCredential(result: VerifyCredentialResponse, credentialOwner: Int = USER_ID) =
         runTest {
             val usedAttempts = 1
-            whenever(lockPatternUtils.getCurrentFailedPasswordAttempts(eq(USER_ID)))
+            whenever(lockPatternUtils.getCurrentFailedPasswordAttempts(eq(credentialOwner)))
                 .thenReturn(usedAttempts)
-            whenever(lockPatternUtils.verifyCredential(any(), eq(USER_ID), anyInt()))
+            whenever(lockPatternUtils.verifyCredential(any(), eq(credentialOwner), anyInt()))
                 .thenReturn(result)
             whenever(lockPatternUtils.verifyTiedProfileChallenge(any(), eq(USER_ID), anyInt()))
                 .thenReturn(result)
@@ -170,7 +170,7 @@ class CredentialInteractorImplTest : SysuiTestCase() {
                 assertThat(successfulResult).isNotNull()
                 assertThat(successfulResult!!.hat).isEqualTo(result.gatekeeperHAT)
 
-                verify(lockPatternUtils).userPresent(eq(USER_ID))
+                verify(lockPatternUtils).userPresent(eq(credentialOwner))
                 verify(lockPatternUtils)
                     .removeGatekeeperPasswordHandle(eq(result.gatekeeperPasswordHandle))
             } else {
@@ -190,13 +190,13 @@ class CredentialInteractorImplTest : SysuiTestCase() {
                         .hasSize(statusList.size)
 
                     verify(lockPatternUtils)
-                        .setLockoutAttemptDeadline(eq(USER_ID), eq(result.timeout))
+                        .setLockoutAttemptDeadline(eq(credentialOwner), eq(result.timeout))
                 } else { // failed
                     assertThat(failedResult.error)
                         .matches(Regex("(.*)try again(.*)", RegexOption.IGNORE_CASE).toPattern())
                     assertThat(statusList).isEmpty()
 
-                    verify(lockPatternUtils).reportFailedPasswordAttempt(eq(USER_ID))
+                    verify(lockPatternUtils).reportFailedPasswordAttempt(eq(credentialOwner))
                 }
             }
         }

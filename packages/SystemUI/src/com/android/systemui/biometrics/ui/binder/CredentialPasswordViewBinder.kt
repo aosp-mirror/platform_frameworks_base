@@ -12,6 +12,7 @@ import android.window.OnBackInvokedDispatcher
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.systemui.biometrics.ui.CredentialPasswordView
 import com.android.systemui.biometrics.ui.CredentialView
 import com.android.systemui.biometrics.ui.IPinPad
@@ -21,7 +22,6 @@ import com.android.systemui.res.R
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.firstOrNull
-import com.android.app.tracing.coroutines.launchTraced as launch
 
 /** Sub-binder for the [CredentialPasswordView]. */
 object CredentialPasswordViewBinder {
@@ -42,7 +42,7 @@ object CredentialPasswordViewBinder {
         view.repeatWhenAttached {
             // the header info never changes - do it early
             val header = viewModel.header.first()
-            passwordField.setTextOperationUser(UserHandle.of(header.user.userIdForPasswordEntry))
+            passwordField.setTextOperationUser(UserHandle.of(header.user.deviceCredentialOwnerId))
             viewModel.inputFlags.firstOrNull()?.let { flags -> passwordField.inputType = flags }
             if (requestFocusForInput) {
                 passwordField.requestFocus()
@@ -65,7 +65,7 @@ object CredentialPasswordViewBinder {
                         if (attestation != null) {
                             imeManager.hideSoftInputFromWindow(
                                 view.windowToken,
-                                0 // flag
+                                0, // flag
                             )
                             host.onCredentialMatched(attestation)
                         } else {
@@ -79,7 +79,7 @@ object CredentialPasswordViewBinder {
                     launch {
                             onBackInvokedDispatcher.registerOnBackInvokedCallback(
                                 OnBackInvokedDispatcher.PRIORITY_DEFAULT,
-                                onBackInvokedCallback
+                                onBackInvokedCallback,
                             )
                             awaitCancellation()
                         }
