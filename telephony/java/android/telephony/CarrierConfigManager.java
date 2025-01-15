@@ -3219,7 +3219,6 @@ public class CarrierConfigManager {
      * The roaming indicator will be shown if this is {@code true} and will not be shown if this is
      * {@code false}.
      */
-    @FlaggedApi(Flags.FLAG_HIDE_ROAMING_ICON)
     public static final String KEY_SHOW_ROAMING_INDICATOR_BOOL = "show_roaming_indicator_bool";
 
     /**
