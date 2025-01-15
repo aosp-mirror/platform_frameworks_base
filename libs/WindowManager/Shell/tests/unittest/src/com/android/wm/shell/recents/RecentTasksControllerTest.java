@@ -22,13 +22,13 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
-import static com.android.launcher3.Flags.FLAG_ENABLE_USE_TOP_VISIBLE_ACTIVITY_FOR_EXCLUDE_FROM_RECENT_TASK;
 import static com.android.window.flags.Flags.FLAG_ENABLE_DESKTOP_WINDOWING_PERSISTENCE;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FREEFORM;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_FULLSCREEN;
 import static com.android.wm.shell.shared.GroupedTaskInfo.TYPE_SPLIT;
 import static com.android.wm.shell.shared.split.SplitScreenConstants.SNAP_TO_2_50_50;
 
+import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -65,8 +65,8 @@ import android.platform.test.annotations.EnableFlags;
 import android.platform.test.flag.junit.SetFlagsRule;
 import android.view.SurfaceControl;
 
+import androidx.test.ext.junit.runners.AndroidJUnit4;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.dx.mockito.inline.extended.ExtendedMockito;
 import com.android.dx.mockito.inline.extended.StaticMockitoSession;
@@ -253,7 +253,6 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 t3.taskId, -1);
     }
 
-    @EnableFlags(FLAG_ENABLE_USE_TOP_VISIBLE_ACTIVITY_FOR_EXCLUDE_FROM_RECENT_TASK)
     @Test
     public void testGetRecentTasks_removesDesktopWallpaperActivity() {
         RecentTaskInfo t1 = makeTaskInfo(1);
@@ -753,15 +752,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
     /**
      * Helper to set the raw task list on the controller.
      */
-    private ArrayList<RecentTaskInfo> setRawList(
-            RecentTaskInfo... tasks) {
-        ArrayList<RecentTaskInfo> rawList = new ArrayList<>();
-        for (RecentTaskInfo task : tasks) {
-            rawList.add(task);
-        }
-        doReturn(rawList).when(mActivityTaskManager).getRecentTasks(anyInt(), anyInt(),
+    private void setRawList(RecentTaskInfo... tasks) {
+        doReturn(Arrays.asList(tasks)).when(mActivityTaskManager).getRecentTasks(anyInt(), anyInt(),
                 anyInt());
-        return rawList;
     }
 
     /**
@@ -794,8 +787,9 @@ public class RecentTasksControllerTest extends ShellTestCase {
                 assertNull(pair.getSplitBounds());
             }
         }
-        assertTrue("Expected: " + Arrays.toString(expectedTaskIds)
+        assertArrayEquals("Expected: " + Arrays.toString(expectedTaskIds)
                         + " Received: " + Arrays.toString(flattenedTaskIds),
-                Arrays.equals(flattenedTaskIds, expectedTaskIds));
+                flattenedTaskIds,
+                expectedTaskIds);
     }
 }
