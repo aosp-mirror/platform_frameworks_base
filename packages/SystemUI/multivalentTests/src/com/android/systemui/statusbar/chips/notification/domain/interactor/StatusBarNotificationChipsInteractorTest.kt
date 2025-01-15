@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.notification.data.repository.ActiveNotific
 import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
+import com.android.systemui.statusbar.notification.shared.CallType
 import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
@@ -176,6 +177,37 @@ class StatusBarNotificationChipsInteractorTest : SysuiTestCase() {
             assertThat(latest!![0].statusBarChipIconView).isEqualTo(firstIcon)
             assertThat(latest!![1].key).isEqualTo("notif2")
             assertThat(latest!![1].statusBarChipIconView).isEqualTo(secondIcon)
+        }
+
+    /** Regression test for b/388521980. */
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun notificationChips_callNotifIsAlsoPromoted_callNotifExcluded() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.notificationChips)
+
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key = "promotedNormal",
+                        statusBarChipIcon = mock(),
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("promotedNormal").build(),
+                        callType = CallType.None,
+                    ),
+                    activeNotificationModel(
+                        key = "promotedCall",
+                        statusBarChipIcon = mock(),
+                        promotedContent =
+                            PromotedNotificationContentModel.Builder("promotedCall").build(),
+                        callType = CallType.Ongoing,
+                    ),
+                )
+            )
+
+            // Verify the promoted call notification is not included
+            assertThat(latest).hasSize(1)
+            assertThat(latest!![0].key).isEqualTo("promotedNormal")
         }
 
     @Test

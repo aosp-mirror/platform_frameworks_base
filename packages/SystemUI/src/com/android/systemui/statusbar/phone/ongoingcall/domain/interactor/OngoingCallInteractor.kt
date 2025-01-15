@@ -165,6 +165,7 @@ constructor(
                     notificationIconView = model.statusBarChipIconView,
                     intent = model.contentIntent,
                     notificationKey = model.key,
+                    promotedContent = model.promotedContent,
                 )
             }
         }

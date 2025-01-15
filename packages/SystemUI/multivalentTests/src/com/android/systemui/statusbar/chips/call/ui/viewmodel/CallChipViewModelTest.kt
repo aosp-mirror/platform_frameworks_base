@@ -30,10 +30,12 @@ import com.android.systemui.kosmos.testScope
 import com.android.systemui.plugins.activityStarter
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.StatusBarIconView
+import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
@@ -64,7 +66,7 @@ class CallChipViewModelTest : SysuiTestCase() {
                 .thenReturn(chipBackgroundView)
         }
 
-    private val underTest = kosmos.callChipViewModel
+    private val underTest by lazy { kosmos.callChipViewModel }
 
     @Test
     fun chip_noCall_isHidden() =
@@ -219,25 +221,91 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    fun chip_positiveStartTime_colorsAreThemed() =
+    fun chip_positiveStartTime_notPromoted_colorsAreThemed() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(inCallModel(startTimeMs = 1000))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 1000, promotedContent = null))
 
             assertThat((latest as OngoingActivityChipModel.Shown).colors)
                 .isEqualTo(ColorsModel.Themed)
         }
 
     @Test
-    fun chip_zeroStartTime_colorsAreThemed() =
+    fun chip_zeroStartTime_notPromoted_colorsAreThemed() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
 
-            repo.setOngoingCallState(inCallModel(startTimeMs = 0))
+            repo.setOngoingCallState(inCallModel(startTimeMs = 0, promotedContent = null))
 
             assertThat((latest as OngoingActivityChipModel.Shown).colors)
                 .isEqualTo(ColorsModel.Themed)
+        }
+
+    @Test
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun chip_positiveStartTime_promoted_notifChipsFlagOff_colorsAreThemed() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(
+                inCallModel(startTimeMs = 1000, promotedContent = PROMOTED_CONTENT_WITH_COLOR)
+            )
+
+            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+                .isEqualTo(ColorsModel.Themed)
+        }
+
+    @Test
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun chip_zeroStartTime_promoted_notifChipsFlagOff_colorsAreThemed() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(
+                inCallModel(startTimeMs = 0, promotedContent = PROMOTED_CONTENT_WITH_COLOR)
+            )
+
+            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+                .isEqualTo(ColorsModel.Themed)
+        }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun chip_positiveStartTime_promoted_notifChipsFlagOn_colorsAreCustom() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(
+                inCallModel(startTimeMs = 1000, promotedContent = PROMOTED_CONTENT_WITH_COLOR)
+            )
+
+            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+                .isEqualTo(
+                    ColorsModel.Custom(
+                        backgroundColorInt = PROMOTED_BACKGROUND_COLOR,
+                        primaryTextColorInt = PROMOTED_PRIMARY_TEXT_COLOR,
+                    )
+                )
+        }
+
+    @Test
+    @EnableFlags(StatusBarNotifChips.FLAG_NAME)
+    fun chip_zeroStartTime_promoted_notifChipsFlagOff_colorsAreCustom() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            repo.setOngoingCallState(
+                inCallModel(startTimeMs = 0, promotedContent = PROMOTED_CONTENT_WITH_COLOR)
+            )
+
+            assertThat((latest as OngoingActivityChipModel.Shown).colors)
+                .isEqualTo(
+                    ColorsModel.Custom(
+                        backgroundColorInt = PROMOTED_BACKGROUND_COLOR,
+                        primaryTextColorInt = PROMOTED_PRIMARY_TEXT_COLOR,
+                    )
+                )
         }
 
     @Test
@@ -319,5 +387,19 @@ class CallChipViewModelTest : SysuiTestCase() {
             } else {
                 mock<StatusBarIconView>()
             }
+
+        private val PROMOTED_CONTENT_WITH_COLOR =
+            PromotedNotificationContentModel.Builder("notif")
+                .apply {
+                    this.colors =
+                        PromotedNotificationContentModel.Colors(
+                            backgroundColor = PROMOTED_BACKGROUND_COLOR,
+                            primaryTextColor = PROMOTED_PRIMARY_TEXT_COLOR,
+                        )
+                }
+                .build()
+
+        private const val PROMOTED_BACKGROUND_COLOR = 65
+        private const val PROMOTED_PRIMARY_TEXT_COLOR = 98
     }
 }

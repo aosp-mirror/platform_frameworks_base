@@ -76,11 +76,14 @@ constructor(
     val allNotificationsCountValue: Int
         get() = repository.activeNotifications.value.individuals.size
 
-    /** The notifications that are promoted and ongoing. Sorted by priority order. */
+    /**
+     * The notifications that are promoted and ongoing.
+     *
+     * This *may* include ongoing call notifications if the call notification also meets promotion
+     * criteria.
+     */
     val promotedOngoingNotifications: Flow<List<ActiveNotificationModel>> =
         if (StatusBarNotifChips.isEnabled) {
-            // TODO(b/364653005): [ongoingCallNotification] should be incorporated into this flow
-            // instead of being separate.
             topLevelRepresentativeNotifications
                 .map { notifs -> notifs.filter { it.promotedContent != null } }
                 .distinctUntilChanged()
@@ -98,10 +101,10 @@ constructor(
     val ongoingCallNotification: Flow<ActiveNotificationModel?> =
         allRepresentativeNotifications
             .map { notifMap ->
-                // Once a call has started, its `whenTime` should stay the same, so we can use it as
-                // a stable sort value.
                 notifMap.values
-                    .filter { it.callType == CallType.Ongoing }
+                    .filter { it.isOngoingCallNotification() }
+                    // Once a call has started, its `whenTime` should stay the same, so we can use
+                    // it as a stable sort value.
                     .minByOrNull { it.whenTime }
             }
             .distinctUntilChanged()
@@ -152,5 +155,9 @@ constructor(
 
     fun setNotifStats(notifStats: NotifStats) {
         repository.notifStats.value = notifStats
+    }
+
+    companion object {
+        fun ActiveNotificationModel.isOngoingCallNotification() = this.callType == CallType.Ongoing
     }
 }
