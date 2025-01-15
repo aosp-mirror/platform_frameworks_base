@@ -35,6 +35,7 @@ import android.content.pm.ActivityInfo.CONFIG_DENSITY
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_PORTRAIT
 import android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED
+import android.content.pm.PackageManager
 import android.content.res.Configuration.ORIENTATION_LANDSCAPE
 import android.content.res.Configuration.ORIENTATION_PORTRAIT
 import android.content.res.Resources
@@ -1414,6 +1415,41 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
                 baseActivity = baseComponent
                 isTopActivityNoDisplay = true
             }
+
+        controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
+
+        val wct = getLatestEnterDesktopWct()
+        assertThat(wct.changes[task.token.asBinder()]?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun moveRunningTaskToDesktop_defaultHomePackageWithDisplay_doesNothing() {
+        val packageManager: PackageManager = org.mockito.kotlin.mock()
+        val homeActivities = ComponentName("defaultHomePackage", /* class */ "")
+        val task =
+            setUpFullscreenTask().apply {
+                baseActivity = homeActivities
+                isTopActivityNoDisplay = false
+            }
+        mContext.setMockPackageManager(packageManager)
+        whenever(packageManager.getHomeActivities(any())).thenReturn(homeActivities)
+
+        controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
+        verifyEnterDesktopWCTNotExecuted()
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun moveRunningTaskToDesktop_defaultHomePackageWithoutDisplay_doesNothing() {
+        val packageManager: PackageManager = org.mockito.kotlin.mock()
+        val homeActivities = ComponentName("defaultHomePackage", /* class */ "")
+        val task =
+            setUpFullscreenTask().apply {
+                baseActivity = homeActivities
+                isTopActivityNoDisplay = false
+            }
+        mContext.setMockPackageManager(packageManager)
+        whenever(packageManager.getHomeActivities(any())).thenReturn(homeActivities)
 
         controller.moveRunningTaskToDesktop(task, transitionSource = UNKNOWN)
 
@@ -3012,6 +3048,46 @@ class DesktopTasksControllerTest(flags: FlagsParameterization) : ShellTestCase()
                 baseActivity = baseComponent
                 isTopActivityNoDisplay = true
             }
+
+        val result = controller.handleRequest(Binder(), createTransition(task))
+        assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun handleRequest_defaultHomePackageWithDisplay_returnSwitchToFullscreenWCT() {
+        val freeformTask = setUpFreeformTask()
+        markTaskVisible(freeformTask)
+
+        val packageManager: PackageManager = org.mockito.kotlin.mock()
+        val homeActivities = ComponentName("defaultHomePackage", /* class */ "")
+        val task =
+            setUpFullscreenTask().apply {
+                baseActivity = homeActivities
+                isTopActivityNoDisplay = false
+            }
+        mContext.setMockPackageManager(packageManager)
+        whenever(packageManager.getHomeActivities(any())).thenReturn(homeActivities)
+
+        val result = controller.handleRequest(Binder(), createTransition(task))
+        assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)
+            .isEqualTo(WINDOWING_MODE_FREEFORM)
+    }
+
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_MODALS_POLICY)
+    fun handleRequest_defaultHomePackageWithoutDisplay_returnSwitchToFreeformWCT() {
+        val freeformTask = setUpFreeformTask()
+        markTaskVisible(freeformTask)
+
+        val packageManager: PackageManager = org.mockito.kotlin.mock()
+        val homeActivities = ComponentName("defaultHomePackage", /* class */ "")
+        val task =
+            setUpFullscreenTask().apply {
+                baseActivity = homeActivities
+                isTopActivityNoDisplay = false
+            }
+        mContext.setMockPackageManager(packageManager)
+        whenever(packageManager.getHomeActivities(any())).thenReturn(homeActivities)
 
         val result = controller.handleRequest(Binder(), createTransition(task))
         assertThat(result?.changes?.get(task.token.asBinder())?.windowingMode)

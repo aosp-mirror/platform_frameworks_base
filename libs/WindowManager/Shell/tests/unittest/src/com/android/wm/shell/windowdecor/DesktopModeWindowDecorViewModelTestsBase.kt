@@ -162,7 +162,6 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
     val display = mock<Display>()
     protected lateinit var spyContext: TestableContext
     private lateinit var desktopModeEventLogger: DesktopModeEventLogger
-    private lateinit var desktopModeCompatPolicy: DesktopModeCompatPolicy
 
     private val transactionFactory = Supplier<SurfaceControl.Transaction> {
         SurfaceControl.Transaction()
@@ -177,6 +176,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
             DisplayChangeController.OnDisplayChangingListener
     internal lateinit var desktopModeOnKeyguardChangedListener: DesktopModeKeyguardChangeListener
     protected lateinit var desktopModeWindowDecorViewModel: DesktopModeWindowDecorViewModel
+    protected lateinit var desktopModeCompatPolicy: DesktopModeCompatPolicy
 
     fun setUpCommon() {
         spyContext = spy(mContext)
