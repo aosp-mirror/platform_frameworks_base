@@ -633,11 +633,14 @@ public class TelephonyManager {
     }
 
     /**
-     * Returns the multi SIM variant
-     * Returns DSDS for Dual SIM Dual Standby
-     * Returns DSDA for Dual SIM Dual Active
-     * Returns TSTS for Triple SIM Triple Standby
-     * Returns UNKNOWN for others
+     * Returns the multi SIM variant.
+     *
+     * <ul>
+     *   <li>Returns DSDS for Dual SIM Dual Standby.</li>
+     *   <li>Returns DSDA for Dual SIM Dual Active.</li>
+     *   <li>Returns TSTS for Triple SIM Triple Standby.</li>
+     *   <li>Returns UNKNOWN for others.</li>
+     * </ul>
      */
     /** {@hide} */
     @UnsupportedAppUsage
@@ -657,10 +660,14 @@ public class TelephonyManager {
 
     /**
      * Returns the number of phones available.
-     * Returns 0 if none of voice, sms, data is not supported
-     * Returns 1 for Single standby mode (Single SIM functionality).
-     * Returns 2 for Dual standby mode (Dual SIM functionality).
-     * Returns 3 for Tri standby mode (Tri SIM functionality).
+     *
+     * <ul>
+     *   <li>Returns 0 if none of voice, sms, data is supported.</li>
+     *   <li>Returns 1 for Single standby mode (Single SIM functionality).</li>
+     *   <li>Returns 2 for Dual standby mode (Dual SIM functionality).</li>
+     *   <li>Returns 3 for Tri standby mode (Tri SIM functionality).</li>
+     * </ul>
+     *
      * @deprecated Use {@link #getActiveModemCount} instead.
      */
     @Deprecated
@@ -671,10 +678,12 @@ public class TelephonyManager {
     /**
      * Returns the number of logical modems currently configured to be activated.
      *
-     * Returns 0 if none of voice, sms, data is not supported
-     * Returns 1 for Single standby mode (Single SIM functionality).
-     * Returns 2 for Dual standby mode (Dual SIM functionality).
-     * Returns 3 for Tri standby mode (Tri SIM functionality).
+     * <ul>
+     *   <li>Returns 0 if none of voice, sms, data is supported.</li>
+     *   <li>Returns 1 for Single standby mode (Single SIM functionality).</li>
+     *   <li>Returns 2 for Dual standby mode (Dual SIM functionality).</li>
+     *   <li>Returns 3 for Tri standby mode (Tri SIM functionality).</li>
+     * </ul>
      */
     public int getActiveModemCount() {
         int modemCount = 1;
