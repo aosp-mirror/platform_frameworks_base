@@ -66,12 +66,6 @@ public final class BLASTBufferQueue {
     }
 
     /** Create a new connection with the surface flinger. */
-    public BLASTBufferQueue(String name, SurfaceControl sc, int width, int height,
-            @PixelFormat.Format int format) {
-        this(name, true /* updateDestinationFrame */);
-        update(sc, width, height, format);
-    }
-
     public BLASTBufferQueue(String name, boolean updateDestinationFrame) {
         mNativeObject = nativeCreate(name, updateDestinationFrame);
     }
