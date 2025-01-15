@@ -5297,40 +5297,29 @@ class Task extends TaskFragment {
         return mRootWindowContainer.resumeHomeActivity(prev, reason, getDisplayArea());
     }
 
-    void startActivityLocked(ActivityRecord r, @Nullable Task topTask, boolean newTask,
-            boolean isTaskSwitch, ActivityOptions options, @Nullable ActivityRecord sourceRecord) {
-        Task rTask = r.getTask();
+    void startActivityLocked(@NonNull ActivityRecord r, @Nullable Task topTask, boolean newTask,
+            boolean isTaskSwitch, @Nullable ActivityOptions options,
+            @Nullable ActivityRecord sourceRecord) {
         final boolean allowMoveToFront = options == null || !options.getAvoidMoveToFront();
-        final boolean isOrhasTask = rTask == this || hasChild(rTask);
+        final Task activityTask = r.getTask();
+        final boolean isThisOrHasChildTask = activityTask == this || hasChild(activityTask);
+
         // mLaunchTaskBehind tasks get placed at the back of the task stack.
-        if (!r.mLaunchTaskBehind && allowMoveToFront && (!isOrhasTask || newTask)) {
+        if (!r.mLaunchTaskBehind && allowMoveToFront && (!isThisOrHasChildTask || newTask)) {
             // Last activity in task had been removed or ActivityManagerService is reusing task.
             // Insert or replace.
             // Might not even be in.
-            positionChildAtTop(rTask);
+            positionChildAtTop(activityTask);
         }
-        Task task = null;
-        if (!newTask && isOrhasTask && !r.shouldBeVisible()) {
+
+        if (!newTask && isThisOrHasChildTask && !r.shouldBeVisible()) {
             ActivityOptions.abort(options);
             return;
         }
 
-        // Place a new activity at top of root task, so it is next to interact with the user.
-
-        // If we are not placing the new activity frontmost, we do not want to deliver the
-        // onUserLeaving callback to the actual frontmost activity
-        final Task activityTask = r.getTask();
-        if (task == activityTask && mChildren.indexOf(task) != (getChildCount() - 1)) {
-            mTaskSupervisor.mUserLeaving = false;
-            if (DEBUG_USER_LEAVING) Slog.v(TAG_USER_LEAVING,
-                    "startActivity() behind front, mUserLeaving=false");
-        }
-
-        task = activityTask;
-
         // Slot the activity into the history root task and proceed
-        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Adding activity %s to task %s "
-                        + "callers: %s", r, task, new RuntimeException("here").fillInStackTrace());
+        ProtoLog.i(WM_DEBUG_ADD_REMOVE, "Adding activity %s to task %s callers: %s", r,
+                activityTask, new RuntimeException("here").fillInStackTrace());
 
         if (isActivityTypeHomeOrRecents() && getActivityBelow(r) == null) {
             // If this is the first activity, don't do any fancy animations,
@@ -5346,15 +5335,15 @@ class Task extends TaskFragment {
             return;
         }
 
-        final DisplayContent dc = mDisplayContent;
-        if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
-                "Prepare open transition: starting " + r);
+        if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare open transition: starting " + r);
+
+        // Place a new activity at top of root task, so it is next to interact with the user.
         if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-            dc.prepareAppTransition(TRANSIT_NONE);
+            mDisplayContent.prepareAppTransition(TRANSIT_NONE);
             mTaskSupervisor.mNoAnimActivities.add(r);
             mTransitionController.setNoAnimation(r);
         } else {
-            dc.prepareAppTransition(TRANSIT_OPEN);
+            mDisplayContent.prepareAppTransition(TRANSIT_OPEN);
             mTaskSupervisor.mNoAnimActivities.remove(r);
         }
         if (newTask && !r.mLaunchTaskBehind) {
@@ -5405,8 +5394,7 @@ class Task extends TaskFragment {
             // "has the same starting icon" as the next one.  This allows the
             // window manager to keep the previous window it had previously
             // created, if it still had one.
-            Task baseTask = r.getTask();
-            final ActivityRecord prev = baseTask.getActivity(
+            final ActivityRecord prev = activityTask.getActivity(
                     a -> a.mStartingData != null && a.showToCurrentUser());
             mWmService.mStartingSurfaceController.showStartingWindow(r, prev, newTask,
                     isTaskSwitch, sourceRecord);
