@@ -16,15 +16,21 @@
 
 package com.android.systemui.statusbar.notification.stack.ui.viewmodel
 
+import androidx.compose.runtime.getValue
 import com.android.app.tracing.coroutines.launchTraced as launch
+import com.android.compose.animation.scene.ContentKey
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.dump.DumpManager
 import com.android.systemui.flags.FeatureFlagsClassic
 import com.android.systemui.flags.Flags
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.lifecycle.Hydrator
 import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.scene.shared.model.Overlays
+import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.model.ShadeMode
 import com.android.systemui.statusbar.domain.interactor.RemoteInputInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.notification.stack.domain.interactor.NotificationStackAppearanceInteractor
@@ -63,6 +69,24 @@ constructor(
         tag = "NotificationsPlaceholderViewModel",
     ) {
 
+    private val hydrator = Hydrator("NotificationsPlaceholderViewModel")
+
+    /** The content key to use for the notification shade. */
+    val notificationsShadeContentKey: ContentKey by
+        hydrator.hydratedStateOf(
+            traceName = "notificationsShadeContentKey",
+            initialValue = getNotificationsShadeContentKey(shadeInteractor.shadeMode.value),
+            source = shadeInteractor.shadeMode.map { getNotificationsShadeContentKey(it) },
+        )
+
+    /** The content key to use for the quick settings shade. */
+    val quickSettingsShadeContentKey: ContentKey by
+        hydrator.hydratedStateOf(
+            traceName = "quickSettingsShadeContentKey",
+            initialValue = getQuickSettingsShadeContentKey(shadeInteractor.shadeMode.value),
+            source = shadeInteractor.shadeMode.map { getQuickSettingsShadeContentKey(it) },
+        )
+
     /** DEBUG: whether the placeholder should be made slightly visible for positional debugging. */
     val isVisualDebuggingEnabled: Boolean = featureFlags.isEnabled(Flags.NSSL_DEBUG_LINES)
 
@@ -71,6 +95,8 @@ constructor(
 
     override suspend fun onActivated(): Nothing {
         coroutineScope {
+            launch { hydrator.activate() }
+
             launch {
                 shadeInteractor.isAnyExpanded
                     .filter { it }
@@ -79,8 +105,7 @@ constructor(
 
             launch {
                 sceneInteractor.transitionState
-                    .map { state -> state is ObservableTransitionState.Idle }
-                    .filter { it }
+                    .filter { it is ObservableTransitionState.Idle }
                     .collect { headsUpNotificationInteractor.onTransitionIdle() }
             }
         }
@@ -161,6 +186,18 @@ constructor(
     /** Set a consumer for accessibility events to be handled by the placeholder. */
     fun setAccessibilityScrollEventConsumer(consumer: Consumer<AccessibilityScrollEvent>?) {
         interactor.setAccessibilityScrollEventConsumer(consumer)
+    }
+
+    private fun getNotificationsShadeContentKey(shadeMode: ShadeMode): ContentKey {
+        return if (shadeMode is ShadeMode.Dual) Overlays.NotificationsShade else Scenes.Shade
+    }
+
+    private fun getQuickSettingsShadeContentKey(shadeMode: ShadeMode): ContentKey {
+        return when (shadeMode) {
+            is ShadeMode.Single -> Scenes.QuickSettings
+            is ShadeMode.Split -> Scenes.Shade
+            is ShadeMode.Dual -> Overlays.QuickSettingsShade
+        }
     }
 
     @AssistedFactory
