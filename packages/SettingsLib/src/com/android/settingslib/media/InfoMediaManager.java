@@ -16,8 +16,6 @@
 package com.android.settingslib.media;
 
 import static android.media.MediaRoute2Info.TYPE_AUX_LINE;
-import static android.media.MediaRoute2Info.TYPE_LINE_ANALOG;
-import static android.media.MediaRoute2Info.TYPE_LINE_DIGITAL;
 import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
@@ -27,6 +25,8 @@ import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HDMI_ARC;
 import static android.media.MediaRoute2Info.TYPE_HDMI_EARC;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
+import static android.media.MediaRoute2Info.TYPE_LINE_ANALOG;
+import static android.media.MediaRoute2Info.TYPE_LINE_DIGITAL;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_CAR;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_COMPUTER;
@@ -252,6 +252,10 @@ public abstract class InfoMediaManager {
 
     @NonNull
     protected abstract List<MediaRoute2Info> getSelectableRoutes(@NonNull RoutingSessionInfo info);
+
+    @NonNull
+    protected abstract List<MediaRoute2Info> getTransferableRoutes(
+            @NonNull RoutingSessionInfo info);
 
     @NonNull
     protected abstract List<MediaRoute2Info> getDeselectableRoutes(
@@ -514,6 +518,22 @@ public abstract class InfoMediaManager {
             deviceList.add(
                     new InfoMediaDevice(
                             mContext, route, mPreferenceItemMap.get(route.getId())));
+        }
+        return deviceList;
+    }
+
+    /**
+     * Returns the list of {@link MediaDevice media devices} that can be transferred to with the
+     * current {@link RoutingSessionInfo routing session} by the media route provider.
+     */
+    @NonNull
+    List<MediaDevice> getTransferableMediaDevices() {
+        final RoutingSessionInfo info = getActiveRoutingSession();
+
+        final List<MediaDevice> deviceList = new ArrayList<>();
+        for (MediaRoute2Info route : getTransferableRoutes(info)) {
+            deviceList.add(
+                    new InfoMediaDevice(mContext, route, mPreferenceItemMap.get(route.getId())));
         }
         return deviceList;
     }

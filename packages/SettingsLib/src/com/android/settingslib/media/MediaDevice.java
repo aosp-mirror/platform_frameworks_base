@@ -15,6 +15,7 @@
  */
 package com.android.settingslib.media;
 
+import static android.media.MediaRoute2Info.TYPE_AUX_LINE;
 import static android.media.MediaRoute2Info.TYPE_BLE_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_BLUETOOTH_A2DP;
 import static android.media.MediaRoute2Info.TYPE_BUILTIN_SPEAKER;
@@ -24,6 +25,8 @@ import static android.media.MediaRoute2Info.TYPE_HDMI;
 import static android.media.MediaRoute2Info.TYPE_HDMI_ARC;
 import static android.media.MediaRoute2Info.TYPE_HDMI_EARC;
 import static android.media.MediaRoute2Info.TYPE_HEARING_AID;
+import static android.media.MediaRoute2Info.TYPE_LINE_ANALOG;
+import static android.media.MediaRoute2Info.TYPE_LINE_DIGITAL;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_AUDIO_VIDEO_RECEIVER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_SPEAKER;
 import static android.media.MediaRoute2Info.TYPE_REMOTE_TV;
@@ -33,9 +36,6 @@ import static android.media.MediaRoute2Info.TYPE_USB_DEVICE;
 import static android.media.MediaRoute2Info.TYPE_USB_HEADSET;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADPHONES;
 import static android.media.MediaRoute2Info.TYPE_WIRED_HEADSET;
-import static android.media.MediaRoute2Info.TYPE_LINE_DIGITAL;
-import static android.media.MediaRoute2Info.TYPE_LINE_ANALOG;
-import static android.media.MediaRoute2Info.TYPE_AUX_LINE;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION;
 import static android.media.RouteListingPreference.Item.FLAG_ONGOING_SESSION_MANAGED;
 import static android.media.RouteListingPreference.Item.FLAG_SUGGESTED;
@@ -243,6 +243,11 @@ public abstract class MediaDevice implements Comparable<MediaDevice> {
      * @return unique id of MediaDevice
      */
     public abstract String getId();
+
+    /** Returns {@code true} if the device has a non-null {@link RouteListingPreference.Item}. */
+    public boolean hasRouteListingPreferenceItem() {
+        return mItem != null;
+    }
 
     /**
      * Get selection behavior of device

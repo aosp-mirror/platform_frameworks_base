@@ -203,6 +203,13 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
 
     @NonNull
     @Override
+    protected List<MediaRoute2Info> getTransferableRoutes(@NonNull RoutingSessionInfo info) {
+        RoutingController controller = getControllerForSession(info);
+        return getTransferableRoutes(controller);
+    }
+
+    @NonNull
+    @Override
     protected List<MediaRoute2Info> getSelectedRoutes(@NonNull RoutingSessionInfo info) {
         RoutingController controller = getControllerForSession(info);
         if (controller == null) {
@@ -272,22 +279,27 @@ public final class RouterInfoMediaManager extends InfoMediaManager {
     protected List<MediaRoute2Info> getTransferableRoutes(@NonNull String packageName) {
         List<RoutingController> controllers = mRouter.getControllers();
         RoutingController activeController = controllers.get(controllers.size() - 1);
+        return getTransferableRoutes(activeController);
+    }
+
+    @NonNull
+    private List<MediaRoute2Info> getTransferableRoutes(@Nullable RoutingController controller) {
         HashMap<String, MediaRoute2Info> transferableRoutes = new HashMap<>();
-
-        activeController
-                .getTransferableRoutes()
-                .forEach(route -> transferableRoutes.put(route.getId(), route));
-
-        if (activeController.getRoutingSessionInfo().isSystemSession()) {
-            mRouter.getRoutes().stream()
-                    .filter(route -> !route.isSystemRoute())
+        if (controller != null) {
+            controller
+                    .getTransferableRoutes()
                     .forEach(route -> transferableRoutes.put(route.getId(), route));
-        } else {
-            mRouter.getRoutes().stream()
-                    .filter(route -> route.isSystemRoute())
-                    .forEach(route -> transferableRoutes.put(route.getId(), route));
+
+            if (controller.getRoutingSessionInfo().isSystemSession()) {
+                mRouter.getRoutes().stream()
+                        .filter(route -> !route.isSystemRoute())
+                        .forEach(route -> transferableRoutes.put(route.getId(), route));
+            } else {
+                mRouter.getRoutes().stream()
+                        .filter(route -> route.isSystemRoute())
+                        .forEach(route -> transferableRoutes.put(route.getId(), route));
+            }
         }
-
         return new ArrayList<>(transferableRoutes.values());
     }
 

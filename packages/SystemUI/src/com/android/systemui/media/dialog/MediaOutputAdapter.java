@@ -156,6 +156,34 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             boolean isMutingExpectedDeviceExist = mController.hasMutingExpectedDevice();
             final boolean currentlyConnected = isCurrentlyConnected(device);
             boolean isCurrentSeekbarInvisible = mSeekBar.getVisibility() == View.GONE;
+            boolean isSelected = isDeviceIncluded(mController.getSelectedMediaDevice(), device);
+            boolean isDeselectable =
+                    isDeviceIncluded(mController.getDeselectableMediaDevice(), device);
+            boolean isSelectable = isDeviceIncluded(mController.getSelectableMediaDevice(), device);
+            boolean isTransferable =
+                    isDeviceIncluded(mController.getTransferableMediaDevices(), device);
+            boolean hasRouteListingPreferenceItem = device.hasRouteListingPreferenceItem();
+
+            if (DEBUG) {
+                Log.d(
+                        TAG,
+                        "["
+                                + position
+                                + "] "
+                                + device.getName()
+                                + " ["
+                                + (isDeselectable ? "deselectable" : "")
+                                + "] ["
+                                + (isSelected ? "selected" : "")
+                                + "] ["
+                                + (isSelectable ? "selectable" : "")
+                                + "] ["
+                                + (isTransferable ? "transferable" : "")
+                                + "] ["
+                                + (hasRouteListingPreferenceItem ? "hasListingPreference" : "")
+                                + "]");
+            }
+
             if (mCurrentActivePosition == position) {
                 mCurrentActivePosition = -1;
             }
@@ -210,8 +238,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     }
                 } else if (device.hasSubtext()) {
                     boolean isActiveWithOngoingSession =
-                            (device.hasOngoingSession() && (currentlyConnected || isDeviceIncluded(
-                                    mController.getSelectedMediaDevice(), device)));
+                            device.hasOngoingSession() && (currentlyConnected || isSelected);
                     boolean isHost = device.isHostForOngoingSession()
                             && isActiveWithOngoingSession;
                     if (isActiveWithOngoingSession) {
@@ -266,16 +293,13 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     setSingleLineLayout(device.getName(), false /* showSeekBar*/,
                             true /* showProgressBar */, false /* showCheckBox */,
                             false /* showEndTouchArea */);
-                } else if (mController.getSelectedMediaDevice().size() > 1
-                        && isDeviceIncluded(mController.getSelectedMediaDevice(), device)) {
+                } else if (mController.getSelectedMediaDevice().size() > 1 && isSelected) {
                     // selected device in group
-                    boolean isDeviceDeselectable = isDeviceIncluded(
-                            mController.getDeselectableMediaDevice(), device);
-                    boolean showEndArea = !Flags.enableOutputSwitcherSessionGrouping()
-                            || isDeviceDeselectable;
+                    boolean showEndArea =
+                            !Flags.enableOutputSwitcherSessionGrouping() || isDeselectable;
                     updateUnmutedVolumeIcon(device);
-                    updateGroupableCheckBox(true, isDeviceDeselectable, device);
-                    updateEndClickArea(device, isDeviceDeselectable);
+                    updateGroupableCheckBox(true, isDeselectable, device);
+                    updateEndClickArea(device, isDeselectable);
                     disableFocusPropertyForView(mContainerLayout);
                     setUpContentDescriptionForView(mSeekBar, device);
                     setSingleLineLayout(device.getName(), true /* showSeekBar */,
@@ -307,10 +331,8 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         //If device is connected and there's other selectable devices, layout as
                         // one of selected devices.
                         updateUnmutedVolumeIcon(device);
-                        boolean isDeviceDeselectable = isDeviceIncluded(
-                                mController.getDeselectableMediaDevice(), device);
-                        updateGroupableCheckBox(true, isDeviceDeselectable, device);
-                        updateEndClickArea(device, isDeviceDeselectable);
+                        updateGroupableCheckBox(true, isDeselectable, device);
+                        updateEndClickArea(device, isDeselectable);
                         disableFocusPropertyForView(mContainerLayout);
                         setUpContentDescriptionForView(mSeekBar, device);
                         setSingleLineLayout(device.getName(), true /* showSeekBar */,
@@ -327,12 +349,16 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                                 false /* showEndTouchArea */);
                         initSeekbar(device, isCurrentSeekbarInvisible);
                     }
-                } else if (isDeviceIncluded(mController.getSelectableMediaDevice(), device)) {
+                } else if (isSelectable) {
                     //groupable device
                     setUpDeviceIcon(device);
                     updateGroupableCheckBox(false, true, device);
                     updateEndClickArea(device, true);
-                    updateFullItemClickListener(v -> onItemClick(v, device));
+                    if (!Flags.disableTransferWhenAppsDoNotSupport()
+                            || isTransferable
+                            || hasRouteListingPreferenceItem) {
+                        updateFullItemClickListener(v -> onItemClick(v, device));
+                    }
                     setSingleLineLayout(device.getName(), false /* showSeekBar */,
                             false /* showProgressBar */, true /* showCheckBox */,
                             true /* showEndTouchArea */);

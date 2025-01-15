@@ -352,6 +352,17 @@ public class LocalMediaManager implements BluetoothCallback {
     }
 
     /**
+     * Gets the MediaDevice list that can be transferred to with the current media session by the
+     * media route provider.
+     *
+     * @return list of MediaDevice
+     */
+    @NonNull
+    public List<MediaDevice> getTransferableMediaDevices() {
+        return mInfoMediaManager.getTransferableMediaDevices();
+    }
+
+    /**
      * Get the MediaDevice list that can be removed from current media session.
      *
      * @return list of MediaDevice

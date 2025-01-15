@@ -941,6 +941,10 @@ public class MediaSwitchingController
         return mLocalMediaManager.getSelectableMediaDevice();
     }
 
+    List<MediaDevice> getTransferableMediaDevices() {
+        return mLocalMediaManager.getTransferableMediaDevices();
+    }
+
     public List<MediaDevice> getSelectedMediaDevice() {
         if (!enableInputRouting()) {
             return mLocalMediaManager.getSelectedMediaDevice();
