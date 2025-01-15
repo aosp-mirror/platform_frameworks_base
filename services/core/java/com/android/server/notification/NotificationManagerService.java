@@ -762,6 +762,7 @@ public class NotificationManagerService extends SystemService {
 
     private int mWarnRemoteViewsSizeBytes;
     private int mStripRemoteViewsSizeBytes;
+    private String[] mDefaultUnsupportedAdjustments;
 
     @VisibleForTesting
     protected boolean mShowReviewPermissionsNotification;
@@ -2937,6 +2938,9 @@ public class NotificationManagerService extends SystemService {
 
         mShowReviewPermissionsNotification = getContext().getResources().getBoolean(
                 R.bool.config_notificationReviewPermissions);
+
+        mDefaultUnsupportedAdjustments = getContext().getResources().getStringArray(
+                R.array.config_notificationDefaultUnsupportedAdjustments);
 
         init(handler, new RankingHandlerWorker(mRankingThread.getLooper()),
                 AppGlobals.getPackageManager(), getContext().getPackageManager(),
@@ -11990,6 +11994,9 @@ public class NotificationManagerService extends SystemService {
                 }
             } else {
                 mAllowedAdjustmentKeyTypes.addAll(List.of(DEFAULT_ALLOWED_ADJUSTMENT_KEY_TYPES));
+                if (mDefaultUnsupportedAdjustments != null) {
+                    mAllowedAdjustments.removeAll(List.of(mDefaultUnsupportedAdjustments));
+                }
             }
         }
 

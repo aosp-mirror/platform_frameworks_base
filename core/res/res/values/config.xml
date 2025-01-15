@@ -7323,4 +7323,8 @@
 
     <!-- Whether the device supports Wi-Fi USD feature. -->
     <bool name="config_deviceSupportsWifiUsd">false</bool>
+
+    <!-- Array containing the notification assistant service adjustments that are not supported by
+     default on this device-->
+    <string-array translatable="false" name="config_notificationDefaultUnsupportedAdjustments" />
 </resources>
