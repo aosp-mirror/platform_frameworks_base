@@ -32,18 +32,19 @@ import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestRe
 import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestResult.ERROR_RESERVED_COMBINATION
 import com.android.systemui.keyboard.shared.model.ShortcutCustomizationRequestResult.SUCCESS
 import com.android.systemui.settings.UserTracker
+import javax.inject.Inject
+import kotlin.coroutines.CoroutineContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.withContext
-import javax.inject.Inject
-import kotlin.coroutines.CoroutineContext
 
 @SysUISingleton
 class CustomInputGesturesRepository
 @Inject
-constructor(private val userTracker: UserTracker,
-    @Background private val bgCoroutineContext: CoroutineContext)
-{
+constructor(
+    private val userTracker: UserTracker,
+    @Background private val bgCoroutineContext: CoroutineContext,
+) {
 
     private val userContext: Context
         get() = userTracker.createCurrentUserContext(userTracker.userContext)
@@ -55,8 +56,7 @@ constructor(private val userTracker: UserTracker,
 
     private val _customInputGesture = MutableStateFlow<List<InputGestureData>>(emptyList())
 
-    val customInputGestures =
-        _customInputGesture.onStart { refreshCustomInputGestures() }
+    val customInputGestures = _customInputGesture.onStart { refreshCustomInputGestures() }
 
     fun refreshCustomInputGestures() {
         setCustomInputGestures(inputGestures = retrieveCustomInputGestures())
@@ -72,24 +72,24 @@ constructor(private val userTracker: UserTracker,
         } else emptyList()
     }
 
-    suspend fun addCustomInputGesture(inputGesture: InputGestureData): ShortcutCustomizationRequestResult {
+    suspend fun addCustomInputGesture(
+        inputGesture: InputGestureData
+    ): ShortcutCustomizationRequestResult {
         return withContext(bgCoroutineContext) {
             when (val result = inputManager.addCustomInputGesture(inputGesture)) {
                 CUSTOM_INPUT_GESTURE_RESULT_SUCCESS -> {
                     refreshCustomInputGestures()
                     SUCCESS
                 }
-                CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS ->
-                    ERROR_RESERVED_COMBINATION
+                CUSTOM_INPUT_GESTURE_RESULT_ERROR_ALREADY_EXISTS -> ERROR_RESERVED_COMBINATION
 
-                CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE ->
-                    ERROR_RESERVED_COMBINATION
+                CUSTOM_INPUT_GESTURE_RESULT_ERROR_RESERVED_GESTURE -> ERROR_RESERVED_COMBINATION
 
                 else -> {
                     Log.w(
                         TAG,
                         "Attempted to add inputGesture: $inputGesture " +
-                                "but ran into an error with code: $result",
+                            "but ran into an error with code: $result",
                     )
                     ERROR_OTHER
                 }
@@ -97,11 +97,11 @@ constructor(private val userTracker: UserTracker,
         }
     }
 
-    suspend fun deleteCustomInputGesture(inputGesture: InputGestureData): ShortcutCustomizationRequestResult {
-        return withContext(bgCoroutineContext){
-            when (
-                val result = inputManager.removeCustomInputGesture(inputGesture)
-            ) {
+    suspend fun deleteCustomInputGesture(
+        inputGesture: InputGestureData
+    ): ShortcutCustomizationRequestResult {
+        return withContext(bgCoroutineContext) {
+            when (val result = inputManager.removeCustomInputGesture(inputGesture)) {
                 CUSTOM_INPUT_GESTURE_RESULT_SUCCESS -> {
                     refreshCustomInputGestures()
                     SUCCESS
@@ -110,7 +110,7 @@ constructor(private val userTracker: UserTracker,
                     Log.w(
                         TAG,
                         "Attempted to delete inputGesture: $inputGesture " +
-                                "but ran into an error with code: $result",
+                            "but ran into an error with code: $result",
                     )
                     ERROR_OTHER
                 }
@@ -133,6 +133,9 @@ constructor(private val userTracker: UserTracker,
             }
         }
     }
+
+    suspend fun getInputGestureByTrigger(trigger: InputGestureData.Trigger): InputGestureData? =
+        withContext(bgCoroutineContext) { inputManager.getInputGesture(trigger) }
 
     private companion object {
         private const val TAG = "CustomInputGesturesRepository"
