@@ -191,8 +191,9 @@ public class ScreenRecordTile extends QSTileImpl<QSTile.BooleanState>
 
     @Override
     public boolean getDetailsViewModel(Consumer<TileDetailsViewModel> callback) {
-        handleClick(() ->
-                callback.accept(new ScreenRecordDetailsViewModel())
+        handleClick(() -> executeWhenUnlockedKeyguard(
+                () -> callback.accept(new ScreenRecordDetailsViewModel(mController,
+                                        this::onStartRecordingClicked)))
         );
         return true;
     }

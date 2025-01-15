@@ -49,6 +49,9 @@ import com.android.systemui.mediaprojection.permission.ScreenShareOption
 import com.android.systemui.plugins.ActivityStarter
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserContextProvider
+import dagger.assisted.Assisted
+import dagger.assisted.AssistedFactory
+import dagger.assisted.AssistedInject
 
 class ScreenRecordPermissionViewBinder(
     private val hostUserHandle: UserHandle,
@@ -68,6 +71,38 @@ class ScreenRecordPermissionViewBinder(
         mediaProjectionMetricsLogger,
         defaultSelectedMode,
     ) {
+    @AssistedInject
+    constructor(
+        @Assisted hostUserHandle: UserHandle,
+        @Assisted hostUid: Int,
+        mediaProjectionMetricsLogger: MediaProjectionMetricsLogger,
+        displayManager: DisplayManager,
+        @Assisted controller: RecordingController,
+        activityStarter: ActivityStarter,
+        userContextProvider: UserContextProvider,
+        @Assisted onStartRecordingClicked: Runnable?,
+    ) : this(
+        hostUserHandle,
+        hostUid,
+        mediaProjectionMetricsLogger,
+        defaultSelectedMode = SINGLE_APP,
+        displayManager,
+        controller,
+        activityStarter,
+        userContextProvider,
+        onStartRecordingClicked,
+    )
+
+    @AssistedFactory
+    interface Factory {
+        fun create(
+            hostUserHandle: UserHandle,
+            hostUid: Int,
+            recordingController: RecordingController,
+            onStartRecordingClicked: Runnable?,
+        ): ScreenRecordPermissionViewBinder
+    }
+
     private lateinit var tapsSwitch: Switch
     private lateinit var audioSwitch: Switch
     private lateinit var tapsView: View
