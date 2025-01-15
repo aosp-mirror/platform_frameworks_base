@@ -61,6 +61,7 @@ fun TutorialSelectionScreen(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
     onDoneButtonClicked: () -> Unit,
     lastSelectedScreen: Screen,
 ) {
@@ -86,6 +87,7 @@ fun TutorialSelectionScreen(
                     onBackTutorialClicked = onBackTutorialClicked,
                     onHomeTutorialClicked = onHomeTutorialClicked,
                     onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
+                    onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
                     modifier = Modifier.weight(1f).padding(60.dp),
                     lastSelectedScreen,
                 )
@@ -95,6 +97,7 @@ fun TutorialSelectionScreen(
                     onBackTutorialClicked = onBackTutorialClicked,
                     onHomeTutorialClicked = onHomeTutorialClicked,
                     onRecentAppsTutorialClicked = onRecentAppsTutorialClicked,
+                    onSwitchAppsTutorialClicked = onSwitchAppsTutorialClicked,
                     modifier = Modifier.weight(1f).padding(60.dp),
                     lastSelectedScreen,
                 )
@@ -113,6 +116,7 @@ private fun HorizontalSelectionButtons(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
     modifier: Modifier = Modifier,
     lastSelectedScreen: Screen,
 ) {
@@ -121,10 +125,11 @@ private fun HorizontalSelectionButtons(
         verticalAlignment = Alignment.CenterVertically,
         modifier = modifier,
     ) {
-        ThreeTutorialButtons(
+        FourTutorialButtons(
             onBackTutorialClicked,
             onHomeTutorialClicked,
             onRecentAppsTutorialClicked,
+            onSwitchAppsTutorialClicked,
             modifier = Modifier.weight(1f).fillMaxSize(),
             lastSelectedScreen,
         )
@@ -136,6 +141,7 @@ private fun VerticalSelectionButtons(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
     modifier: Modifier = Modifier,
     lastSelectedScreen: Screen,
 ) {
@@ -144,10 +150,11 @@ private fun VerticalSelectionButtons(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier,
     ) {
-        ThreeTutorialButtons(
+        FourTutorialButtons(
             onBackTutorialClicked,
             onHomeTutorialClicked,
             onRecentAppsTutorialClicked,
+            onSwitchAppsTutorialClicked,
             modifier = Modifier.weight(1f).fillMaxSize(),
             lastSelectedScreen,
         )
@@ -155,21 +162,24 @@ private fun VerticalSelectionButtons(
 }
 
 @Composable
-private fun ThreeTutorialButtons(
+private fun FourTutorialButtons(
     onBackTutorialClicked: () -> Unit,
     onHomeTutorialClicked: () -> Unit,
     onRecentAppsTutorialClicked: () -> Unit,
+    onSwitchAppsTutorialClicked: () -> Unit,
     modifier: Modifier = Modifier,
     lastSelectedScreen: Screen,
 ) {
     val homeFocusRequester = remember { FocusRequester() }
     val backFocusRequester = remember { FocusRequester() }
     val recentAppsFocusRequester = remember { FocusRequester() }
+    val switchAppsFocusRequester = remember { FocusRequester() }
     LaunchedEffect(Unit) {
         when (lastSelectedScreen) {
             Screen.HOME_GESTURE -> homeFocusRequester.requestFocus()
             Screen.BACK_GESTURE -> backFocusRequester.requestFocus()
             Screen.RECENT_APPS_GESTURE -> recentAppsFocusRequester.requestFocus()
+            Screen.SWITCH_APPS_GESTURE -> switchAppsFocusRequester.requestFocus()
             else -> {} // No-Op.
         }
     }
@@ -196,6 +206,14 @@ private fun ThreeTutorialButtons(
         onClick = onRecentAppsTutorialClicked,
         backgroundColor = MaterialTheme.colorScheme.secondary,
         modifier = modifier.focusRequester(recentAppsFocusRequester).focusable(),
+    )
+    TutorialButton(
+        text = stringResource(R.string.touchpad_tutorial_switch_apps_gesture_button),
+        icon = ImageVector.vectorResource(id = R.drawable.touchpad_tutorial_apps_icon),
+        iconColor = MaterialTheme.colorScheme.primary,
+        onClick = onSwitchAppsTutorialClicked,
+        backgroundColor = MaterialTheme.colorScheme.onPrimary,
+        modifier = modifier.focusRequester(switchAppsFocusRequester).focusable(),
     )
 }
 
@@ -227,7 +245,7 @@ private fun TutorialButton(
                 tint = iconColor,
             )
             Spacer(modifier = Modifier.height(16.dp))
-            Text(text = text, style = MaterialTheme.typography.headlineLarge)
+            Text(text = text, style = MaterialTheme.typography.headlineLarge, color = iconColor)
         }
     }
 }

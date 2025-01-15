@@ -3954,6 +3954,8 @@
     <string name="touchpad_tutorial_home_gesture_button">Go home</string>
     <!-- Label for button opening tutorial for "view recent apps" gesture on touchpad [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_recent_apps_gesture_button">View recent apps</string>
+    <!-- Label for button opening tutorial for "switch apps" gesture on touchpad [CHAR LIMIT=NONE] -->
+    <string name="touchpad_tutorial_switch_apps_gesture_button">Switch apps</string>
     <!-- Label for button finishing touchpad tutorial [CHAR LIMIT=NONE] -->
     <string name="touchpad_tutorial_done_button">Done</string>
     <!-- Screen title after gesture was not done correctly [CHAR LIMIT=NONE] -->
@@ -3991,6 +3993,17 @@
     <string name="touchpad_recent_apps_gesture_success_body">You completed the view recent apps gesture.</string>
     <!-- Text shown to the user after recent gesture was not done correctly [CHAR LIMIT=NONE] -->
     <string name="touchpad_recent_gesture_error_body">To view recent apps, swipe up and hold using three fingers on your touchpad</string>
+    <!-- SWITCH APPS GESTURE -->
+    <!-- Touchpad switch apps gesture action name in tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_apps_gesture_action_title">Switch apps</string>
+    <!-- Touchpad switch apps gesture guidance in gestures tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_apps_gesture_guidance">Swipe left or right using four fingers on your touchpad</string>
+    <!-- Screen title after switch apps gesture was done successfully [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_apps_gesture_success_title">Great job!</string>
+    <!-- Text shown to the user after they complete switch apps gesture tutorial [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_apps_gesture_success_body">You completed the switch apps gesture.</string>
+    <!-- Text shown to the user after switch gesture was not done correctly [CHAR LIMIT=NONE] -->
+    <string name="touchpad_switch_gesture_error_body">Swipe left or right using four fingers on your touchpad to switch apps</string>
 
     <!-- KEYBOARD TUTORIAL-->
     <!-- Action key tutorial title [CHAR LIMIT=NONE] -->
