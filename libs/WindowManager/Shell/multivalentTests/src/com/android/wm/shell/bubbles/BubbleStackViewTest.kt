@@ -36,10 +36,10 @@ import com.android.internal.protolog.ProtoLog
 import com.android.launcher3.icons.BubbleIconFactory
 import com.android.wm.shell.Flags
 import com.android.wm.shell.R
-import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.animation.AnimatableScaleMatrix
 import com.android.wm.shell.common.FloatingContentCoordinator
+import com.android.wm.shell.common.TestShellExecutor
 import com.android.wm.shell.shared.animation.PhysicsAnimatorTestUtils
 import com.google.common.truth.Truth.assertThat
 import com.google.common.util.concurrent.MoreExecutors.directExecutor

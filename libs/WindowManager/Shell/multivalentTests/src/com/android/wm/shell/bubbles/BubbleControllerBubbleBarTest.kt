@@ -34,7 +34,6 @@ import com.android.internal.protolog.ProtoLog
 import com.android.internal.statusbar.IStatusBarService
 import com.android.wm.shell.Flags
 import com.android.wm.shell.ShellTaskOrganizer
-import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.bubbles.Bubbles.SysuiProxy
 import com.android.wm.shell.bubbles.properties.ProdBubbleProperties
 import com.android.wm.shell.bubbles.storage.BubblePersistentRepository
@@ -44,6 +43,7 @@ import com.android.wm.shell.common.DisplayInsetsController
 import com.android.wm.shell.common.FloatingContentCoordinator
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.common.TaskStackListenerImpl
+import com.android.wm.shell.common.TestShellExecutor
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.shared.TransactionPool
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation
