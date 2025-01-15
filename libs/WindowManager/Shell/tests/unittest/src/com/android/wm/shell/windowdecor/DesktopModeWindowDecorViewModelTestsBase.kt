@@ -177,6 +177,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
         spyContext.addMockSystemService(InputManager::class.java, mockInputManager)
         desktopModeEventLogger = mock<DesktopModeEventLogger>()
         whenever(mockDesktopUserRepositories.current).thenReturn(mockDesktopRepository)
+        whenever(mockDisplayController.getDisplayContext(any())).thenReturn(spyContext)
         whenever(mockDesktopUserRepositories.getProfile(anyInt()))
             .thenReturn(mockDesktopRepository)
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
