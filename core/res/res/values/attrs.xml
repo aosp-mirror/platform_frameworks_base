@@ -7585,7 +7585,7 @@
     <!-- Used to config the segments of a NotificationProgressDrawable. -->
     <!-- @hide internal use only -->
     <declare-styleable name="NotificationProgressDrawableSegments">
-        <!-- TODO: b/372908709 - maybe move this to NotificationProgressBar, because that's the only
+        <!-- TODO: b/390196782 - maybe move this to NotificationProgressBar, because that's the only
          place this is used actually. Same for NotificationProgressDrawable.segSegGap/segPointGap
          above. -->
         <!-- Minimum required drawing width. The drawing width refers to the width after

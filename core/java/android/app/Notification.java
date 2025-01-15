@@ -11854,7 +11854,7 @@ public class Notification implements Parcelable
                     // If segment limit is exceeded. All segments will be replaced
                     // with a single segment
                     boolean allSameColor = true;
-                    int firstSegmentColor = segments.get(0).getColor();
+                    int firstSegmentColor = segments.getFirst().getColor();
 
                     for (int i = 1; i < segments.size(); i++) {
                         if (segments.get(i).getColor() != firstSegmentColor) {
@@ -11887,8 +11887,31 @@ public class Notification implements Parcelable
                     }
                 }
 
+                // If the segments and points can't all fit inside the progress drawable, the
+                // view will replace all segments with a single segment.
+                final int segmentsFallbackColor;
+                if (segments.size() <= 1) {
+                    segmentsFallbackColor = NotificationProgressModel.INVALID_COLOR;
+                } else {
+
+                    boolean allSameColor = true;
+                    int firstSegmentColor = segments.getFirst().getColor();
+                    for (int i = 1; i < segments.size(); i++) {
+                        if (segments.get(i).getColor() != firstSegmentColor) {
+                            allSameColor = false;
+                            break;
+                        }
+                    }
+                    // If the segments are of the same color, the view can just use that color.
+                    // In that case there is no need to send the fallback color.
+                    segmentsFallbackColor = allSameColor ? NotificationProgressModel.INVALID_COLOR
+                            : sanitizeProgressColor(Notification.COLOR_DEFAULT, backgroundColor,
+                                    defaultProgressColor);
+                }
+
                 model = new NotificationProgressModel(segments, points,
-                        Math.clamp(mProgress, 0, totalLength), mIsStyledByProgress);
+                        Math.clamp(mProgress, 0, totalLength), mIsStyledByProgress,
+                        segmentsFallbackColor);
             }
             return model;
         }
