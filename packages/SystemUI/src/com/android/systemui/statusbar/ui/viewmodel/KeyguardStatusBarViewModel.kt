@@ -24,6 +24,7 @@ import com.android.systemui.scene.domain.interactor.SceneInteractor
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.KeyguardStatusBarInteractor
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationInteractor
 import com.android.systemui.statusbar.policy.BatteryController
 import com.android.systemui.statusbar.policy.BatteryController.BatteryStateChangeCallback
@@ -59,7 +60,7 @@ constructor(
 ) {
 
     private val showingHeadsUpStatusBar: Flow<Boolean> =
-        if (SceneContainerFlag.isEnabled) {
+        if (SceneContainerFlag.isEnabled && !StatusBarNoHunBehavior.isEnabled) {
             headsUpNotificationInteractor.statusBarHeadsUpStatus.map { it.isPinned }
         } else {
             flowOf(false)

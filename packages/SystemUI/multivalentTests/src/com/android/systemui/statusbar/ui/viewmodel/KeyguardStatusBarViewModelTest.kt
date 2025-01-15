@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.platform.test.flag.junit.FlagsParameterization
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
@@ -32,6 +34,7 @@ import com.android.systemui.scene.data.repository.sceneContainerRepository
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.domain.interactor.keyguardStatusBarInteractor
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
 import com.android.systemui.statusbar.notification.data.repository.FakeHeadsUpRowRepository
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
 import com.android.systemui.statusbar.notification.stack.domain.interactor.headsUpNotificationInteractor
@@ -127,7 +130,8 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
 
     @Test
     @EnableSceneContainer
-    fun isVisible_headsUpStatusBarShown_false() =
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
+    fun isVisible_headsUpShown_noHunBehaviorFlagOff_false() =
         testScope.runTest {
             val latest by collectLastValue(underTest.isVisible)
 
@@ -142,6 +146,26 @@ class KeyguardStatusBarViewModelTest(flags: FlagsParameterization) : SysuiTestCa
 
             // THEN KeyguardStatusBar is NOT visible to make space for HeadsUpStatusBar
             assertThat(latest).isFalse()
+        }
+
+    @Test
+    @EnableSceneContainer
+    @EnableFlags(StatusBarNoHunBehavior.FLAG_NAME)
+    fun isVisible_headsUpShown_noHunBehaviorFlagOn_true() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.isVisible)
+
+            // WHEN HUN displayed on the bypass lock screen
+            headsUpRepository.setNotifications(FakeHeadsUpRowRepository("key 0", isPinned = true))
+            keyguardTransitionRepository.emitInitialStepsFromOff(
+                KeyguardState.LOCKSCREEN,
+                testSetup = true,
+            )
+            kosmos.sceneContainerRepository.snapToScene(Scenes.Lockscreen)
+            faceAuthRepository.isBypassEnabled.value = true
+
+            // THEN KeyguardStatusBar is still visible because StatusBarNoHunBehavior is enabled
+            assertThat(latest).isTrue()
         }
 
     @Test

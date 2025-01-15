@@ -34,6 +34,7 @@ import com.android.systemui.shade.shadeViewController
 import com.android.systemui.statusbar.HeadsUpStatusBarView
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.commandQueue
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
 import com.android.systemui.statusbar.notification.collection.NotificationEntry
 import com.android.systemui.statusbar.notification.domain.interactor.HeadsUpNotificationIconInteractor
 import com.android.systemui.statusbar.notification.domain.interactor.headsUpNotificationIconInteractor
@@ -118,6 +119,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun showingEntryUpdated_whenPinnedBySystem() {
         row.setPinnedStatus(PinnedStatus.PinnedBySystem)
         setHeadsUpNotifOnManager(entry)
@@ -133,8 +135,18 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun showingEntryUpdated_whenPinnedByUser_andFlagOff() {
+    @EnableFlags(StatusBarNoHunBehavior.FLAG_NAME)
+    fun showingEntryNotUpdated_whenPinnedBySystem_whenNoHunBehaviorEnabled() {
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+        setHeadsUpNotifOnManager(entry)
+        underTest.onHeadsUpPinned(entry)
+
+        assertThat(headsUpStatusBarView.showingEntry).isNull()
+    }
+
+    @Test
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME, StatusBarNoHunBehavior.FLAG_NAME)
+    fun showingEntryUpdated_whenPinnedByUser_andNotifChipsFlagOff() {
         row.setPinnedStatus(PinnedStatus.PinnedByUser)
         setHeadsUpNotifOnManager(entry)
         underTest.onHeadsUpPinned(entry)
@@ -144,7 +156,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun showingEntryNotUpdated_whenPinnedByUser_andFlagOn() {
+    fun showingEntryNotUpdated_whenPinnedByUser_andNotifChipsFlagOn() {
         // WHEN the HUN was pinned by the user
         row.setPinnedStatus(PinnedStatus.PinnedByUser)
         setHeadsUpNotifOnManager(entry)
@@ -155,6 +167,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun pinnedStatusUpdatedToSystem_whenPinnedBySystem() {
         row.setPinnedStatus(PinnedStatus.PinnedBySystem)
         setHeadsUpNotifOnManager(entry)
@@ -168,8 +181,19 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @EnableFlags(StatusBarNoHunBehavior.FLAG_NAME)
+    fun pinnedStatusNotUpdatedToSystem_whenPinnedBySystem_whenNoHunBehaviorEnabled() {
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+        setHeadsUpNotifOnManager(entry)
+        underTest.onHeadsUpPinned(entry)
+
+        assertThat(underTest.pinnedStatus).isEqualTo(PinnedStatus.NotPinned)
+    }
+
+    @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun pinnedStatusUpdatedToNotPinned_whenPinnedByUser_andFlagOn() {
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
+    fun pinnedStatusUpdatedToNotPinned_whenPinnedByUser_andNotifChipsFlagOn() {
         row.setPinnedStatus(PinnedStatus.PinnedByUser)
         setHeadsUpNotifOnManager(entry)
         underTest.onHeadsUpPinned(entry)
@@ -182,6 +206,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun isolatedIconSet_whenPinnedBySystem() =
         kosmos.runTest {
             val latestIsolatedIcon by
@@ -201,8 +226,22 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun isolatedIconSet_whenPinnedByUser_andFlagOff() =
+    @EnableFlags(StatusBarNoHunBehavior.FLAG_NAME)
+    fun isolatedIconNotSet_whenPinnedBySystem_whenNoHunBehaviorEnabled() =
+        kosmos.runTest {
+            val latestIsolatedIcon by
+                collectLastValue(kosmos.headsUpNotificationIconInteractor.isolatedNotification)
+
+            row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+            setHeadsUpNotifOnManager(entry)
+            underTest.onHeadsUpPinned(entry)
+
+            assertThat(latestIsolatedIcon).isNull()
+        }
+
+    @Test
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME, StatusBarNoHunBehavior.FLAG_NAME)
+    fun isolatedIconSet_whenPinnedByUser_andNotifChipsFlagOff() =
         kosmos.runTest {
             val latestIsolatedIcon by
                 collectLastValue(kosmos.headsUpNotificationIconInteractor.isolatedNotification)
@@ -216,7 +255,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun isolatedIconNotSet_whenPinnedByUser_andFlagOn() =
+    fun isolatedIconNotSet_whenPinnedByUser_andNotifChipsFlagOn() =
         kosmos.runTest {
             val latestIsolatedIcon by
                 collectLastValue(kosmos.headsUpNotificationIconInteractor.isolatedNotification)
@@ -243,6 +282,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     }
 
     @Test
+    @DisableFlags(StatusBarNoHunBehavior.FLAG_NAME)
     fun operatorNameViewUpdated_whenPinnedBySystem() {
         underTest.setAnimationsEnabled(false)
 
@@ -258,8 +298,20 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
     }
 
     @Test
-    @DisableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun operatorNameViewUpdated_whenPinnedByUser_andFlagOff() {
+    @EnableFlags(StatusBarNoHunBehavior.FLAG_NAME)
+    fun operatorNameViewNotUpdated_whenPinnedBySystem_whenNoHunBehaviorEnabled() {
+        underTest.setAnimationsEnabled(false)
+
+        row.setPinnedStatus(PinnedStatus.PinnedBySystem)
+        setHeadsUpNotifOnManager(entry)
+        underTest.onHeadsUpPinned(entry)
+
+        assertThat(operatorNameView.visibility).isEqualTo(View.VISIBLE)
+    }
+
+    @Test
+    @DisableFlags(StatusBarNotifChips.FLAG_NAME, StatusBarNoHunBehavior.FLAG_NAME)
+    fun operatorNameViewUpdated_whenPinnedByUser_andNotifChipsFlagOff() {
         underTest.setAnimationsEnabled(false)
 
         row.setPinnedStatus(PinnedStatus.PinnedByUser)
@@ -271,7 +323,7 @@ class HeadsUpAppearanceControllerTest : SysuiTestCase() {
 
     @Test
     @EnableFlags(StatusBarNotifChips.FLAG_NAME)
-    fun operatorNameViewNotUpdated_whenPinnedByUser_andFlagOn() {
+    fun operatorNameViewNotUpdated_whenPinnedByUser_andNotifChipsFlagOn() {
         underTest.setAnimationsEnabled(false)
 
         // WHEN the row was pinned by the user

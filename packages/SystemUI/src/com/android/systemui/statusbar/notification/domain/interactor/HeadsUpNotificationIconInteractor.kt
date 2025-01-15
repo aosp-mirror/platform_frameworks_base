@@ -16,16 +16,19 @@
 package com.android.systemui.statusbar.notification.domain.interactor
 
 import android.graphics.Rect
+import com.android.systemui.statusbar.headsup.shared.StatusBarNoHunBehavior
 import com.android.systemui.statusbar.notification.data.repository.HeadsUpNotificationIconViewStateRepository
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
 
-/** Domain logic pertaining to heads up notification icons. */
+/**
+ * Domain logic pertaining to heads up notification icons.
+ *
+ * If [StatusBarNoHunBehavior] is enabled, this class should do nothing.
+ */
 class HeadsUpNotificationIconInteractor
 @Inject
-constructor(
-    private val repository: HeadsUpNotificationIconViewStateRepository,
-) {
+constructor(private val repository: HeadsUpNotificationIconViewStateRepository) {
     /** Notification key for a notification icon to show isolated, or `null` if none. */
     val isolatedIconLocation: Flow<Rect?> = repository.isolatedIconLocation
 
@@ -34,11 +37,13 @@ constructor(
 
     /** Updates the location where isolated notification icons are shown. */
     fun setIsolatedIconLocation(rect: Rect?) {
+        StatusBarNoHunBehavior.assertInLegacyMode()
         repository.isolatedIconLocation.value = rect
     }
 
     /** Updates which notification will have its icon displayed isolated. */
     fun setIsolatedIconNotificationKey(key: String?) {
+        StatusBarNoHunBehavior.assertInLegacyMode()
         repository.isolatedNotification.value = key
     }
 }
