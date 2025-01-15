@@ -364,6 +364,7 @@ import com.android.internal.content.ReferrerIntent;
 import com.android.internal.os.TimeoutRecord;
 import com.android.internal.os.TransferPipe;
 import com.android.internal.policy.AttributeCache;
+import com.android.internal.policy.PhoneWindow;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
@@ -2025,8 +2026,8 @@ final class ActivityRecord extends WindowToken implements WindowManagerService.A
                     || ent.array.getBoolean(R.styleable.Window_windowShowWallpaper, false);
             mStyleFillsParent = mOccludesParent;
             mNoDisplay = ent.array.getBoolean(R.styleable.Window_windowNoDisplay, false);
-            mOptOutEdgeToEdge = ent.array.getBoolean(
-                    R.styleable.Window_windowOptOutEdgeToEdgeEnforcement, false);
+            mOptOutEdgeToEdge = PhoneWindow.isOptingOutEdgeToEdgeEnforcement(
+                    aInfo.applicationInfo, false /* local */, ent.array);
         } else {
             mStyleFillsParent = mOccludesParent = true;
             mNoDisplay = false;
