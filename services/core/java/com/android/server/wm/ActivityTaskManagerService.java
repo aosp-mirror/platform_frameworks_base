@@ -77,7 +77,6 @@ import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_FOCUS;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_IMMERSIVE;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_LOCKTASK;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_TASKS;
-import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerServiceDumpActivitiesProto.ROOT_WINDOW_CONTAINER;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE;
@@ -1269,10 +1268,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     static boolean isSdkSandboxActivityIntent(Context context, Intent intent) {
-        return intent != null
-                && (sandboxActivitySdkBasedContext()
-                        ? SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(context, intent)
-                        : intent.isSandboxActivity(context));
+        return SdkSandboxActivityAuthority.isSdkSandboxActivityIntent(context, intent);
     }
 
     private int startActivityAsUser(IApplicationThread caller, String callingPackage,

@@ -16,7 +16,6 @@
 
 package android.content;
 
-import static android.app.sdksandbox.SdkSandboxManager.ACTION_START_SANDBOXED_ACTIVITY;
 import static android.content.ContentProvider.maybeAddUserId;
 import static android.os.Flags.FLAG_ALLOW_PRIVATE_PROFILE;
 import static android.security.Flags.FLAG_FRP_ENFORCEMENT;
@@ -13458,29 +13457,5 @@ public class Intent implements Parcelable, Cloneable {
     /** @hide */
     public boolean isDocument() {
         return (mFlags & FLAG_ACTIVITY_NEW_DOCUMENT) == FLAG_ACTIVITY_NEW_DOCUMENT;
-    }
-
-    /**
-     * @deprecated Use {@link SdkSandboxActivityAuthority#isSdkSandboxActivityIntent} instead.
-     * Once the other API is finalized this method will be removed.
-     *
-     * TODO(b/300059435): remove as part of the cleanup.
-     *
-     * @hide
-     */
-    @Deprecated
-    @android.ravenwood.annotation.RavenwoodThrow
-    public boolean isSandboxActivity(@NonNull Context context) {
-        if (mAction != null && mAction.equals(ACTION_START_SANDBOXED_ACTIVITY)) {
-            return true;
-        }
-        final String sandboxPackageName = context.getPackageManager().getSdkSandboxPackageName();
-        if (mPackage != null && mPackage.equals(sandboxPackageName)) {
-            return true;
-        }
-        if (mComponent != null && mComponent.getPackageName().equals(sandboxPackageName)) {
-            return true;
-        }
-        return false;
     }
 }

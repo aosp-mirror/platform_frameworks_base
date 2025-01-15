@@ -26,8 +26,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.inMultiWindowMode;
 import static android.os.Process.myUid;
 
-import static com.android.sdksandbox.flags.Flags.sandboxActivitySdkBasedContext;
-
 import static java.lang.Character.MIN_VALUE;
 
 import android.Manifest;
@@ -8999,12 +8997,11 @@ public class Activity extends ContextThemeWrapper
             Configuration config, String referrer, IVoiceInteractor voiceInteractor,
             Window window, ActivityConfigCallback activityConfigCallback, IBinder assistToken,
             IBinder shareableActivityToken, IBinder initialCallerInfoAccessToken) {
-        if (sandboxActivitySdkBasedContext()) {
-            // Sandbox activities extract a token from the intent's extra to identify the related
-            // SDK as part of overriding attachBaseContext, then it wraps the passed context in an
-            // SDK ContextWrapper, so mIntent has to be set before calling attachBaseContext.
-            mIntent = intent;
-        }
+
+        // mIntent field hast to be set before calling attachBaseContext, as SDK Runtime activities
+        // extract a token from the intent's extra to identify the related SDK as part of overriding
+        // attachBaseContext.
+        mIntent = intent;
         attachBaseContext(context);
 
         mFragments.attachHost(null /*parent*/);
@@ -9030,8 +9027,6 @@ public class Activity extends ContextThemeWrapper
         mShareableActivityToken = shareableActivityToken;
         mIdent = ident;
         mApplication = application;
-        //TODO(b/300059435): do not set the mIntent again as part of the flag clean up.
-        mIntent = intent;
         mReferrer = referrer;
         mComponent = intent.getComponent();
         mTitle = title;
