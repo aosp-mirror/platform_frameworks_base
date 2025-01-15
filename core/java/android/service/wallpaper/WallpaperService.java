@@ -2424,9 +2424,10 @@ public abstract class WallpaperService extends Service {
 
             Surface ret = null;
             if (mBlastBufferQueue == null) {
-                mBlastBufferQueue = new BLASTBufferQueue("Wallpaper", mBbqSurfaceControl,
-                        width, height, format);
+                mBlastBufferQueue = new BLASTBufferQueue("Wallpaper",
+                        true /* updateDestinationFrame */);
                 mBlastBufferQueue.setApplyToken(mBbqApplyToken);
+                mBlastBufferQueue.update(mBbqSurfaceControl, width, height, format);
                 // We only return the Surface the first time, as otherwise
                 // it hasn't changed and there is no need to update.
                 ret = mBlastBufferQueue.createSurface();
