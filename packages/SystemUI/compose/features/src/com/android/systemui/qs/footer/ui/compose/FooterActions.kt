@@ -253,6 +253,7 @@ private fun RowScope.ForegroundServicesButton(
     } else {
         NumberButton(
             model.foregroundServicesCount,
+            contentDescription = model.text,
             showNewDot = model.hasNewChanges,
             onClick = model.onClick,
         )
@@ -281,6 +282,7 @@ fun IconButton(model: FooterActionsButtonViewModel, modifier: Modifier = Modifie
 @Composable
 private fun NumberButton(
     number: Int,
+    contentDescription: String,
     showNewDot: Boolean,
     onClick: (Expandable) -> Unit,
     modifier: Modifier = Modifier,
@@ -311,7 +313,10 @@ private fun NumberButton(
             ) {
                 Text(
                     number.toString(),
-                    modifier = Modifier.align(Alignment.Center),
+                    modifier =
+                        Modifier.align(Alignment.Center).semantics {
+                            this.contentDescription = contentDescription
+                        },
                     style = MaterialTheme.typography.bodyLarge,
                     color = colorAttr(R.attr.onShadeInactiveVariant),
                     // TODO(b/242040009): This should only use a standard text style instead and
