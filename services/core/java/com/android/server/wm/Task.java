@@ -5119,6 +5119,7 @@ class Task extends TaskFragment {
         mTranslucentActivityWaiting = r;
         mPendingConvertFromTranslucentActivity = r;
         mUndrawnActivitiesBelowTopTranslucent.clear();
+        updateTaskDescription();
         mHandler.sendEmptyMessageDelayed(TRANSLUCENT_TIMEOUT_MSG, TRANSLUCENT_CONVERSION_TIMEOUT);
     }
 
@@ -5128,6 +5129,7 @@ class Task extends TaskFragment {
                     + " but is " + r);
         }
         mPendingConvertFromTranslucentActivity = null;
+        updateTaskDescription();
     }
 
     /**
