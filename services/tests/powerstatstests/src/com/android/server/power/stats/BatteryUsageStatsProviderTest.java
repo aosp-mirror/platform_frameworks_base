@@ -35,7 +35,6 @@ import android.os.BatteryManager;
 import android.os.BatteryStats;
 import android.os.BatteryUsageStats;
 import android.os.BatteryUsageStatsQuery;
-import android.os.ConditionVariable;
 import android.os.Handler;
 import android.os.Parcel;
 import android.os.Process;
@@ -180,6 +179,7 @@ public class BatteryUsageStatsProviderTest {
 
     private BatteryStatsImpl prepareBatteryStats(boolean plugInAtTheEnd) {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
+        batteryStats.setNoAutoReset(true);
         batteryStats.onSystemReady(mContext);
 
         synchronized (batteryStats) {
@@ -481,13 +481,12 @@ public class BatteryUsageStatsProviderTest {
     }
 
     @Test
-    public void testAggregateBatteryStats() throws IOException {
+    public void testAggregateBatteryStats() throws Throwable {
         BatteryStatsImpl batteryStats = mStatsRule.getBatteryStats();
 
         setTime(5 * MINUTE_IN_MS);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         PowerStatsStore powerStatsStore = new PowerStatsStore(
                 new File(mStatsRule.getHistoryDir(), "powerstatsstore"),
@@ -501,9 +500,8 @@ public class BatteryUsageStatsProviderTest {
 
         batteryStats.saveBatteryUsageStatsOnReset(provider, powerStatsStore,
                 /* accumulateBatteryUsageStats */ false);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
@@ -514,9 +512,8 @@ public class BatteryUsageStatsProviderTest {
                     20 * MINUTE_IN_MS, 20 * MINUTE_IN_MS);
         }
         setTime(25 * MINUTE_IN_MS);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         synchronized (batteryStats) {
             batteryStats.noteFlashlightOnLocked(APP_UID,
@@ -527,9 +524,8 @@ public class BatteryUsageStatsProviderTest {
                     50 * MINUTE_IN_MS, 50 * MINUTE_IN_MS);
         }
         setTime(55 * MINUTE_IN_MS);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         // This section should be ignored because the timestamp is out or range
         synchronized (batteryStats) {
@@ -541,9 +537,8 @@ public class BatteryUsageStatsProviderTest {
                     70 * MINUTE_IN_MS, 70 * MINUTE_IN_MS);
         }
         setTime(75 * MINUTE_IN_MS);
-        synchronized (batteryStats) {
-            batteryStats.resetAllStatsAndHistoryLocked(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
-        }
+        batteryStats.startNewSession(BatteryStatsImpl.RESET_REASON_ADB_COMMAND);
+        mStatsRule.waitForBackgroundThread();
 
         // This section should be ignored because it represents the current stats session
         synchronized (batteryStats) {
@@ -556,10 +551,7 @@ public class BatteryUsageStatsProviderTest {
         }
         setTime(95 * MINUTE_IN_MS);
 
-        // Await completion
-        ConditionVariable done = new ConditionVariable();
-        mStatsRule.getHandler().post(done::open);
-        done.block();
+        mStatsRule.waitForBackgroundThread();
 
         // Include the first and the second snapshot, but not the third or current
         BatteryUsageStatsQuery query = new BatteryUsageStatsQuery.Builder()

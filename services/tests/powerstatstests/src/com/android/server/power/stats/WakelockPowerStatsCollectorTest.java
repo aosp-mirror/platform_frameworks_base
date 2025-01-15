@@ -80,6 +80,7 @@ public class WakelockPowerStatsCollectorTest {
                 POWER_COMPONENT_WAKELOCK);
 
         mBatteryStats.forceRecordAllHistory();
+        mBatteryStats.setNoAutoReset(true);
 
         mStatsRule.advanceSuspendedTime(1000);
 

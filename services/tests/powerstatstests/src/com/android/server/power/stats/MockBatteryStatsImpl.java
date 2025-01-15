@@ -65,29 +65,27 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     }
 
     MockBatteryStatsImpl(Clock clock, File historyDirectory) {
-        this(clock, historyDirectory, new Handler(Looper.getMainLooper()));
+        this(clock, historyDirectory, new Handler(Looper.getMainLooper()), mockPowerProfile());
     }
 
-    MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler) {
-        this(DEFAULT_CONFIG, clock, historyDirectory, handler, new PowerStatsUidResolver());
+    MockBatteryStatsImpl(Clock clock, File historyDirectory, Handler handler,
+            PowerProfile powerProfile) {
+        this(DEFAULT_CONFIG, clock, new MonotonicClock(0, clock), historyDirectory, handler,
+                powerProfile, new PowerStatsUidResolver());
     }
 
-    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory) {
-        this(config, clock, historyDirectory, new Handler(Looper.getMainLooper()),
-                new PowerStatsUidResolver());
-    }
-
-    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock,
-            File historyDirectory, Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
+    MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, File historyDirectory,
+            Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
         this(config, clock, new MonotonicClock(0, clock), historyDirectory, handler,
-                powerStatsUidResolver);
+                mockPowerProfile(), powerStatsUidResolver);
     }
 
     MockBatteryStatsImpl(BatteryStatsConfig config, Clock clock, MonotonicClock monotonicClock,
-            File historyDirectory, Handler handler, PowerStatsUidResolver powerStatsUidResolver) {
+            File historyDirectory, Handler handler, PowerProfile powerProfile,
+            PowerStatsUidResolver powerStatsUidResolver) {
         super(config, clock, monotonicClock, historyDirectory, handler,
                 mock(PlatformIdleStateCallback.class), mock(EnergyStatsRetriever.class),
-                mock(UserInfoProvider.class), mockPowerProfile(),
+                mock(UserInfoProvider.class), powerProfile,
                 new CpuScalingPolicies(new SparseArray<>(), new SparseArray<>()),
                 powerStatsUidResolver, mock(FrameworkStatsLogger.class),
                 mock(BatteryStatsHistory.TraceDelegate.class),
@@ -170,12 +168,6 @@ public class MockBatteryStatsImpl extends BatteryStatsImpl {
     protected NetworkStats readWifiNetworkStatsLocked(
             @NonNull NetworkStatsManager networkStatsManager) {
         return mNetworkStats;
-    }
-
-    public MockBatteryStatsImpl setPowerProfile(PowerProfile powerProfile) {
-        mPowerProfile = powerProfile;
-        setTestCpuScalingPolicies();
-        return this;
     }
 
     public MockBatteryStatsImpl setTestCpuScalingPolicies() {
