@@ -83,6 +83,8 @@ final class LocalDisplayAdapter extends DisplayAdapter {
 
     private static final String PROPERTY_EMULATOR_CIRCULAR = "ro.boot.emulator.circular";
 
+    private static final double DEFAULT_DISPLAY_SIZE = 24.0;
+
     private final LongSparseArray<LocalDisplayDevice> mDevices = new LongSparseArray<>();
 
     private final Injector mInjector;
@@ -526,6 +528,21 @@ final class LocalDisplayAdapter extends DisplayAdapter {
         private int getLogicalDensity() {
             DensityMapping densityMapping = getDisplayDeviceConfig().getDensityMapping();
             if (densityMapping == null) {
+                if (getFeatureFlags().isBaseDensityForExternalDisplaysEnabled()
+                        && !mStaticDisplayInfo.isInternal) {
+                    double dpi;
+
+                    if (mActiveSfDisplayMode.xDpi > 0 && mActiveSfDisplayMode.yDpi > 0) {
+                        dpi = Math.sqrt((Math.pow(mActiveSfDisplayMode.xDpi, 2)
+                                + Math.pow(mActiveSfDisplayMode.yDpi, 2)) / 2);
+                    } else {
+                        // xDPI and yDPI is missing, calculate DPI from display resolution and
+                        // default display size
+                        dpi = Math.sqrt(Math.pow(mInfo.width, 2) + Math.pow(mInfo.height, 2))
+                                / DEFAULT_DISPLAY_SIZE;
+                    }
+                    return (int) (dpi + 0.5);
+                }
                 return (int) (mStaticDisplayInfo.density * 160 + 0.5);
             }
 
