@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"কম্পেনিয়ন ডিভাইচ মেনেজাৰ"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; এপ্‌টোক &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; এক্সেছ কৰিবলৈ দিবনে?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"এই <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>টোৰ <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> অন হৈ থকাটো নিশ্চিত কৰক আৰু আপোনাৰ <xliff:g id="PROFILE_NAME">%3$s</xliff:g> আশে-পাশে ৰাখক।"</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"কোনো ডিভাইচ বিচাৰি পোৱা নগ’ল। অনুগ্ৰহ কৰি পাছত পুনৰ চেষ্টা কৰক।"</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"ব্লুটুথ"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"ৱাই-ফাই"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"ব্লুটুথ আৰু ৱাই-ফাই"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"ঘড়ী"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;এ পৰিচালনা কৰিবলগীয়া এটা ডিভাইচ বাছনি কৰক"</string>
     <string name="chooser_title" msgid="2235819929238267637">"ছেট আপ কৰিবলৈ এটা <xliff:g id="PROFILE_NAME">%1$s</xliff:g> বাছনি কৰক"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"কোনো <xliff:g id="PROFILE_NAME">%1$s</xliff:g> বিচাৰি থকা হৈছে"</string>
     <string name="summary_watch" msgid="8134580124808507407">"এই এপ্‌টোক ফ’ন কৰা লোকৰ নামৰ দৰে তথ্য ছিংক কৰিবলৈ আৰু আপোনাৰ <xliff:g id="DEVICE_TYPE">%1$s</xliff:g>ত এই অনুমতিসমূহ এক্সেছ কৰিবলৈ অনুমতি দিয়া হ’ব"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;ক &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; পৰিচালনা কৰিবলৈ দিবনে?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"ডিভাইচ"</string>

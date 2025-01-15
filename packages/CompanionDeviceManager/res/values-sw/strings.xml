@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Kidhibiti cha Vifaa Visaidizi"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"Ungependa kuruhusu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; ifikie &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Hakikisha kuwa umewasha <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> kwenye <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> na uweke <xliff:g id="PROFILE_NAME">%3$s</xliff:g> karibu nawe."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Hakuna vifaa vilivyopatikana. Tafadhali jaribu tena baadaye."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth na Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"saa"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Chagua kifaa cha kudhibitiwa na &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Chagua <xliff:g id="PROFILE_NAME">%1$s</xliff:g> ili uweke mipangilio"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"Inatafuta <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Programu hii itaruhusiwa kusawazisha maelezo, kama vile jina la mtu anayepiga simu na kufikia ruhusa hizi kwenye <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> yako"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Ungependa kuruhusu &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; idhibiti &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"kifaa"</string>

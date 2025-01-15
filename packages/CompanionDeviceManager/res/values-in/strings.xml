@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"Pengelola Perangkat Pendamping"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"Izinkan aplikasi &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; mengakses &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"Pastikan <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> ini mengaktifkan <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g>, dan letakkan <xliff:g id="PROFILE_NAME">%3$s</xliff:g> di dekat Anda."</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"Perangkat tidak ditemukan. Coba lagi nanti."</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"Bluetooth"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"Bluetooth dan Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"smartwatch"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"Pilih perangkat untuk dikelola oleh &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt;"</string>
     <string name="chooser_title" msgid="2235819929238267637">"Pilih <xliff:g id="PROFILE_NAME">%1$s</xliff:g> untuk disiapkan"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"Mencari <xliff:g id="PROFILE_NAME">%1$s</xliff:g>"</string>
     <string name="summary_watch" msgid="8134580124808507407">"Aplikasi ini akan diizinkan menyinkronkan info, seperti nama penelepon, dan mengakses izin ini di <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> Anda"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"Izinkan &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; mengelola &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt;?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"perangkat"</string>

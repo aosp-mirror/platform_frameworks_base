@@ -18,9 +18,15 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="4470785958457506021">"सहयोगी डिभाइसको प्रबन्धक"</string>
     <string name="confirmation_title" msgid="2244241995958340998">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; एपलाई &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; प्रयोग गर्ने अनुमति दिने हो?"</string>
+    <string name="message_discovery_soft_timeout" msgid="473346859407859161">"यो <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> को <xliff:g id="DISCOVERY_METHOD">%2$s</xliff:g> अन गरिएको छ भन्ने कुरा सुनिश्चित गर्नुहोस् अनि आफ्नो <xliff:g id="PROFILE_NAME">%3$s</xliff:g> नजिकै राख्नुहोस्।"</string>
+    <string name="message_discovery_hard_timeout" msgid="677514663495711424">"कुनै पनि डिभाइस भेटिएन। कृपया पछि फेरि प्रयास गर्नुहोस्।"</string>
+    <string name="discovery_bluetooth" msgid="5693557668470016164">"ब्लुटुथ"</string>
+    <string name="discovery_wifi" msgid="1551782459721758773">"Wi-Fi"</string>
+    <string name="discovery_mixed" msgid="7071466134150760127">"ब्लुटुथ तथा Wi-Fi"</string>
     <string name="profile_name_watch" msgid="576290739483672360">"घडी"</string>
     <string name="chooser_title_non_profile" msgid="6035023914517087400">"आफूले &lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; प्रयोग गरी व्यवस्थापन गर्न चाहेको डिभाइस चयन गर्नुहोस्"</string>
     <string name="chooser_title" msgid="2235819929238267637">"सेट अप गर्नका लागि <xliff:g id="PROFILE_NAME">%1$s</xliff:g> छनौट गर्नुहोस्"</string>
+    <string name="single_device_title" msgid="4199861437545438606">"<xliff:g id="PROFILE_NAME">%1$s</xliff:g> खोजिँदै छ"</string>
     <string name="summary_watch" msgid="8134580124808507407">"तपाईंको <xliff:g id="DEVICE_TYPE">%1$s</xliff:g> मा यो एपलाई कल गर्ने व्यक्तिको नाम जस्ता जानकारी सिंक गर्ने र यी कुराहरू गर्ने अनुमति दिइने छ"</string>
     <string name="confirmation_title_glasses" msgid="8288346850537727333">"&lt;strong&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/strong&gt; लाई &lt;strong&gt;<xliff:g id="DEVICE_NAME">%2$s</xliff:g>&lt;/strong&gt; व्यवस्थापन गर्ने अनुमति दिने हो?"</string>
     <string name="profile_name_glasses" msgid="3506504967216601277">"डिभाइस"</string>
