@@ -16,6 +16,10 @@
 
 package com.android.settingslib.notification.modes;
 
+import static com.android.settingslib.notification.modes.EnableDndDialogFactory.COUNTDOWN_ALARM_CONDITION_INDEX;
+import static com.android.settingslib.notification.modes.EnableDndDialogFactory.COUNTDOWN_CONDITION_INDEX;
+import static com.android.settingslib.notification.modes.EnableDndDialogFactory.FOREVER_CONDITION_INDEX;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static org.junit.Assert.assertFalse;
@@ -39,6 +43,8 @@ import android.net.Uri;
 import android.service.notification.Condition;
 import android.view.LayoutInflater;
 
+import com.android.settingslib.notification.modes.EnableDndDialogFactory.ConditionTag;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -48,8 +54,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
-public class EnableZenModeDialogTest {
-    private EnableZenModeDialog mController;
+public class EnableDndDialogFactoryTest {
+    private EnableDndDialogFactory mController;
 
     @Mock
     private Context mContext;
@@ -74,7 +80,7 @@ public class EnableZenModeDialogTest {
         when(mFragment.getContext()).thenReturn(mShadowContext);
         mLayoutInflater = LayoutInflater.from(mShadowContext);
 
-        mController = spy(new EnableZenModeDialog(mContext));
+        mController = spy(new EnableDndDialogFactory(mContext));
         mController.mContext = mContext;
         mController.mLayoutInflater = mLayoutInflater;
         mController.mForeverId = Condition.newId(mContext).appendPath("forever").build();
@@ -101,36 +107,29 @@ public class EnableZenModeDialogTest {
         Uri countdown = Condition.newId(mContext).appendPath("countdown").build();
         mCountdownCondition = new Condition(countdown, "countdown", "", "", 0, 0, 0);
         mController.bind(mCountdownCondition,
-                mController.mZenRadioGroupContent.getChildAt(
-                        EnableZenModeDialog.COUNTDOWN_CONDITION_INDEX),
-                EnableZenModeDialog.COUNTDOWN_CONDITION_INDEX);
+                mController.mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX),
+                COUNTDOWN_CONDITION_INDEX);
         mController.bind(mAlarmCondition,
                 mController.mZenRadioGroupContent.getChildAt(
-                        EnableZenModeDialog.COUNTDOWN_ALARM_CONDITION_INDEX),
-                EnableZenModeDialog.COUNTDOWN_ALARM_CONDITION_INDEX);
+                        COUNTDOWN_ALARM_CONDITION_INDEX),
+                COUNTDOWN_ALARM_CONDITION_INDEX);
     }
 
     @Test
     public void testForeverChecked() {
         mController.bindConditions(mController.forever());
 
-        assertTrue(mController.getConditionTagAt(EnableZenModeDialog.FOREVER_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(EnableZenModeDialog.COUNTDOWN_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(
-                EnableZenModeDialog.COUNTDOWN_ALARM_CONDITION_INDEX).rb.isChecked());
+        assertTrue(mController.getConditionTagAt(FOREVER_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(COUNTDOWN_ALARM_CONDITION_INDEX).rb.isChecked());
     }
 
     @Test
     public void testNoneChecked() {
         mController.bindConditions(null);
-        assertFalse(mController.getConditionTagAt(EnableZenModeDialog.FOREVER_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(EnableZenModeDialog.COUNTDOWN_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(
-                EnableZenModeDialog.COUNTDOWN_ALARM_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(FOREVER_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(COUNTDOWN_ALARM_CONDITION_INDEX).rb.isChecked());
     }
 
     @Test
@@ -139,12 +138,9 @@ public class EnableZenModeDialogTest {
         doReturn(true).when(mController).isAlarm(mAlarmCondition);
 
         mController.bindConditions(mAlarmCondition);
-        assertFalse(mController.getConditionTagAt(EnableZenModeDialog.FOREVER_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(EnableZenModeDialog.COUNTDOWN_CONDITION_INDEX).rb
-                .isChecked());
-        assertTrue(mController.getConditionTagAt(
-                EnableZenModeDialog.COUNTDOWN_ALARM_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(FOREVER_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.isChecked());
+        assertTrue(mController.getConditionTagAt(COUNTDOWN_ALARM_CONDITION_INDEX).rb.isChecked());
     }
 
     @Test
@@ -153,12 +149,9 @@ public class EnableZenModeDialogTest {
         doReturn(true).when(mController).isCountdown(mCountdownCondition);
 
         mController.bindConditions(mCountdownCondition);
-        assertFalse(mController.getConditionTagAt(EnableZenModeDialog.FOREVER_CONDITION_INDEX).rb
-                .isChecked());
-        assertTrue(mController.getConditionTagAt(EnableZenModeDialog.COUNTDOWN_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(
-                EnableZenModeDialog.COUNTDOWN_ALARM_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(FOREVER_CONDITION_INDEX).rb.isChecked());
+        assertTrue(mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(COUNTDOWN_ALARM_CONDITION_INDEX).rb.isChecked());
     }
 
     @Test
@@ -198,12 +191,12 @@ public class EnableZenModeDialogTest {
     @Test
     public void testAccessibility() {
         mController.bindConditions(null);
-        EnableZenModeDialog.ConditionTag forever = mController.getConditionTagAt(
-                ZenDurationDialog.FOREVER_CONDITION_INDEX);
-        EnableZenModeDialog.ConditionTag countdown = mController.getConditionTagAt(
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
-        EnableZenModeDialog.ConditionTag alwaysAsk = mController.getConditionTagAt(
-                ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX);
+        ConditionTag forever = mController.getConditionTagAt(
+                DndDurationDialogFactory.FOREVER_CONDITION_INDEX);
+        ConditionTag countdown = mController.getConditionTagAt(
+                DndDurationDialogFactory.COUNTDOWN_CONDITION_INDEX);
+        ConditionTag alwaysAsk = mController.getConditionTagAt(
+                DndDurationDialogFactory.ALWAYS_ASK_CONDITION_INDEX);
 
         forever.rb.setChecked(true);
         assertThat(forever.line1.getStateDescription().toString()).isEqualTo("selected");

@@ -42,7 +42,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.jank.InteractionJankMonitor;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
-import com.android.settingslib.notification.modes.EnableZenModeDialog;
+import com.android.settingslib.notification.modes.EnableDndDialogFactory;
 import com.android.systemui.Prefs;
 import com.android.systemui.animation.DialogCuj;
 import com.android.systemui.animation.DialogTransitionAnimator;
@@ -59,7 +59,7 @@ import com.android.systemui.qs.QsEventLogger;
 import com.android.systemui.qs.UserSettingObserver;
 import com.android.systemui.qs.logging.QSLogger;
 import com.android.systemui.qs.tileimpl.QSTileImpl;
-import com.android.systemui.qs.tiles.dialog.QSZenModeDialogMetricsLogger;
+import com.android.systemui.qs.tiles.dialog.QSEnableDndDialogMetricsLogger;
 import com.android.systemui.res.R;
 import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.ZenModeController;
@@ -84,7 +84,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
     private final SharedPreferences mSharedPreferences;
     private final UserSettingObserver mSettingZenDuration;
     private final DialogTransitionAnimator mDialogTransitionAnimator;
-    private final QSZenModeDialogMetricsLogger mQSZenDialogMetricsLogger;
+    private final QSEnableDndDialogMetricsLogger mQSDndDurationDialogLogger;
 
     private boolean mListening;
 
@@ -121,7 +121,7 @@ public class DndTile extends QSTileImpl<BooleanState> {
                 refreshState();
             }
         };
-        mQSZenDialogMetricsLogger = new QSZenModeDialogMetricsLogger(mContext);
+        mQSDndDurationDialogLogger = new QSEnableDndDialogMetricsLogger(mContext);
     }
 
     public static void setVisible(Context context, boolean visible) {
@@ -201,9 +201,9 @@ public class DndTile extends QSTileImpl<BooleanState> {
     }
 
     private Dialog makeZenModeDialog() {
-        AlertDialog dialog = new EnableZenModeDialog(mContext, R.style.Theme_SystemUI_Dialog,
+        AlertDialog dialog = new EnableDndDialogFactory(mContext, R.style.Theme_SystemUI_Dialog,
                 true /* cancelIsNeutral */,
-                mQSZenDialogMetricsLogger).createDialog();
+                mQSDndDurationDialogLogger).createDialog();
         SystemUIDialog.applyFlags(dialog);
         SystemUIDialog.setShowForAllUsers(dialog, true);
         SystemUIDialog.registerDismissListener(dialog);
