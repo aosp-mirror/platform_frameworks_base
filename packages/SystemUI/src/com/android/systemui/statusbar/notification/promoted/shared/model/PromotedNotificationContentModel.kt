@@ -147,6 +147,7 @@ data class PromotedNotificationContentModel(
          * Returns true if the given notification should be considered promoted when deciding
          * whether or not to show the status bar chip UI.
          */
+        @JvmStatic
         fun isPromotedForStatusBarChip(notification: Notification): Boolean {
             // Notification.isPromotedOngoing checks the ui_rich_ongoing flag, but we want the
             // status bar chip to be ready before all the features behind the ui_rich_ongoing flag
