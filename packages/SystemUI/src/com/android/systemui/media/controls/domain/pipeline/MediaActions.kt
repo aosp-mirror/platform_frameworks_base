@@ -71,7 +71,7 @@ fun createActionsFromState(
                 null, // no action to perform when clicked
                 context.getString(R.string.controls_media_button_connecting),
                 if (Flags.mediaControlsUiUpdate()) {
-                    context.getDrawable(R.drawable.ic_media_connecting_status_container)
+                    context.getDrawable(R.drawable.ic_media_connecting_button_container)
                 } else {
                     context.getDrawable(R.drawable.ic_media_connecting_container)
                 },
