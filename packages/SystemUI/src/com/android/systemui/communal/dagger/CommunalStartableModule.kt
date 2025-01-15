@@ -22,6 +22,7 @@ import com.android.systemui.communal.CommunalDreamStartable
 import com.android.systemui.communal.CommunalMetricsStartable
 import com.android.systemui.communal.CommunalOngoingContentStartable
 import com.android.systemui.communal.CommunalSceneStartable
+import com.android.systemui.communal.DevicePosturingCommandListener
 import com.android.systemui.communal.log.CommunalLoggerStartable
 import com.android.systemui.communal.widgets.CommunalAppWidgetHostStartable
 import com.android.systemui.dagger.qualifiers.PerUser
@@ -67,4 +68,9 @@ interface CommunalStartableModule {
     @IntoMap
     @ClassKey(CommunalMetricsStartable::class)
     fun bindCommunalMetricsStartable(impl: CommunalMetricsStartable): CoreStartable
+
+    @Binds
+    @IntoMap
+    @ClassKey(DevicePosturingCommandListener::class)
+    fun bindDevicePosturingCommandListener(impl: DevicePosturingCommandListener): CoreStartable
 }
