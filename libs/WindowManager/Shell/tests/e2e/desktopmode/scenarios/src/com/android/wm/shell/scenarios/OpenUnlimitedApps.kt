@@ -17,6 +17,8 @@
 package com.android.wm.shell.scenarios
 
 import android.app.Instrumentation
+import android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK
+import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.tools.traces.parsers.WindowManagerStateHelper
 import androidx.test.platform.app.InstrumentationRegistry
 import androidx.test.uiautomator.UiDevice
@@ -43,7 +45,7 @@ abstract class OpenUnlimitedApps()
     private val device = UiDevice.getInstance(instrumentation)
 
     private val testApp = DesktopModeAppHelper(SimpleAppHelper(instrumentation))
-    private val mailApp = DesktopModeAppHelper(MailAppHelper(instrumentation))
+    private val mailApp = MailAppHelper(instrumentation)
 
     private val maxNum = DesktopModeStatus.getMaxTaskLimit(instrumentation.context)
 
@@ -61,7 +63,12 @@ abstract class OpenUnlimitedApps()
 
         // Launch new [openTaskNum] tasks.
         for (i in 1..openTaskNum) {
-            mailApp.launchViaIntent(wmHelper)
+            mailApp.launchViaIntent(
+                wmHelper,
+                mailApp.openAppIntent.apply {
+                    addFlags(FLAG_ACTIVITY_MULTIPLE_TASK or FLAG_ACTIVITY_NEW_TASK)
+                }
+            )
         }
     }
 
