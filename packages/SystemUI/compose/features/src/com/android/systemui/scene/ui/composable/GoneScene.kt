@@ -25,7 +25,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalDensity
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateContentDpAsState
@@ -71,7 +71,7 @@ constructor(
     }
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) {
+    override fun ContentScope.Content(modifier: Modifier) {
 
         val isIdleAndNotOccluded by remember {
             derivedStateOf {

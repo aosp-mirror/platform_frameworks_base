@@ -88,11 +88,11 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.android.compose.animation.scene.ContentKey
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.ElementMatcher
 import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.SceneTransitionLayout
 import com.android.compose.animation.scene.content.state.TransitionState
 import com.android.compose.animation.scene.transitions
@@ -580,7 +580,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.QuickQuickSettingsElement() {
+    private fun ContentScope.QuickQuickSettingsElement() {
         val qqsPadding = viewModel.qqsHeaderHeight
         val bottomPadding = viewModel.qqsBottomPadding
         DisposableEffect(Unit) {
@@ -664,7 +664,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.QuickSettingsElement() {
+    private fun ContentScope.QuickSettingsElement() {
         val qqsPadding = viewModel.qqsHeaderHeight
         val qsExtraPadding = dimensionResource(R.dimen.qs_panel_padding_top)
         Column(

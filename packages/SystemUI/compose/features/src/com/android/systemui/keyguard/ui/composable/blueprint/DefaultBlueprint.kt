@@ -32,7 +32,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.IntRect
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.ui.composable.LockscreenLongPress
@@ -68,7 +68,7 @@ constructor(
     override val id: String = "default"
 
     @Composable
-    override fun SceneScope.Content(viewModel: LockscreenContentViewModel, modifier: Modifier) {
+    override fun ContentScope.Content(viewModel: LockscreenContentViewModel, modifier: Modifier) {
         val isUdfpsVisible = viewModel.isUdfpsVisible
         val isShadeLayoutWide by viewModel.isShadeLayoutWide.collectAsStateWithLifecycle()
         val unfoldTranslations by viewModel.unfoldTranslations.collectAsStateWithLifecycle()

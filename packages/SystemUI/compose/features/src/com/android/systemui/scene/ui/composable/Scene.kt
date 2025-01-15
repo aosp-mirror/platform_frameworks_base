@@ -18,8 +18,8 @@ package com.android.systemui.scene.ui.composable
 
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.SceneKey
-import com.android.compose.animation.scene.SceneScope
 import com.android.systemui.lifecycle.Activatable
 
 /**
@@ -35,5 +35,5 @@ interface Scene : Activatable, ActionableContent {
     /** Uniquely-identifying key for this scene. The key must be unique within its container. */
     val key: SceneKey
 
-    @Composable fun SceneScope.Content(modifier: Modifier)
+    @Composable fun ContentScope.Content(modifier: Modifier)
 }

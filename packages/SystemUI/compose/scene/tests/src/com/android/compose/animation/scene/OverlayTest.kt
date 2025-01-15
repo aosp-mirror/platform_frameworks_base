@@ -547,7 +547,7 @@ class OverlayTest {
         val sharedIntValueByContent = mutableMapOf<ContentKey, Int>()
 
         @Composable
-        fun SceneScope.animateContentInt(targetValue: Int) {
+        fun ContentScope.animateContentInt(targetValue: Int) {
             val animatedValue = animateContentIntAsState(targetValue, sharedIntKey)
             LaunchedEffect(animatedValue) {
                 try {

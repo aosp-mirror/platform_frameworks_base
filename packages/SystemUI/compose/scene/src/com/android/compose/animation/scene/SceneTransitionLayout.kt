@@ -264,9 +264,6 @@ interface BaseContentScope : ElementStateScope {
     )
 }
 
-@Deprecated("Use ContentScope instead", ReplaceWith("ContentScope"))
-typealias SceneScope = ContentScope
-
 @Stable
 @ElementDsl
 interface ContentScope : BaseContentScope {

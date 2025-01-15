@@ -2095,7 +2095,7 @@ class ElementTest {
         val foo = ElementKey("Foo", placeAllCopies = true)
 
         @Composable
-        fun SceneScope.Foo(size: Dp, modifier: Modifier = Modifier) {
+        fun ContentScope.Foo(size: Dp, modifier: Modifier = Modifier) {
             Box(modifier.element(foo).size(size))
         }
 
@@ -2159,7 +2159,7 @@ class ElementTest {
 
         // Foo is a simple element that does not move or resize during the transition.
         @Composable
-        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+        fun ContentScope.Foo(modifier: Modifier = Modifier) {
             Box(
                 modifier
                     .element(TestElements.Foo)
@@ -2211,7 +2211,7 @@ class ElementTest {
     @Ignore("b/363964445")
     fun interruption_considerPreviousUniqueState() {
         @Composable
-        fun SceneScope.Foo(modifier: Modifier = Modifier) {
+        fun ContentScope.Foo(modifier: Modifier = Modifier) {
             Box(modifier.element(TestElements.Foo).size(50.dp))
         }
 

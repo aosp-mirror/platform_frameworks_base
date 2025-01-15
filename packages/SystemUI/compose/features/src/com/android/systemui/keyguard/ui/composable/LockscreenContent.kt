@@ -24,7 +24,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.keyguard.domain.interactor.KeyguardClockInteractor
 import com.android.systemui.keyguard.ui.composable.blueprint.ComposableLockscreenSceneBlueprint
@@ -50,7 +50,7 @@ class LockscreenContent(
     }
 
     @Composable
-    fun SceneScope.Content(modifier: Modifier = Modifier) {
+    fun ContentScope.Content(modifier: Modifier = Modifier) {
         val viewModel =
             rememberViewModel("LockscreenContent-viewModel") { viewModelFactory.create() }
         val notificationLockscreenScrimViewModel =

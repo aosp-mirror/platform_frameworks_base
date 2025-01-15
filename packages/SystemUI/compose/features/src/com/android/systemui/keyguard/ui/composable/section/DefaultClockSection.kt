@@ -32,7 +32,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.core.view.contains
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.modifiers.padding
 import com.android.systemui.customization.R
 import com.android.systemui.keyguard.ui.composable.blueprint.ClockElementKeys.largeClockElementKey
@@ -54,7 +54,7 @@ constructor(
     private val aodBurnInViewModel: AodBurnInViewModel,
 ) {
     @Composable
-    fun SceneScope.SmallClock(
+    fun ContentScope.SmallClock(
         burnInParams: BurnInParameters,
         onTopChanged: (top: Float?) -> Unit,
         modifier: Modifier = Modifier,
@@ -87,7 +87,7 @@ constructor(
     }
 
     @Composable
-    fun SceneScope.LargeClock(burnInParams: BurnInParameters, modifier: Modifier = Modifier) {
+    fun ContentScope.LargeClock(burnInParams: BurnInParameters, modifier: Modifier = Modifier) {
         val currentClock by viewModel.currentClock.collectAsStateWithLifecycle()
         if (currentClock?.largeClock?.view == null) {
             return

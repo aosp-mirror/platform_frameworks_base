@@ -62,9 +62,9 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
 import com.android.compose.animation.scene.LowestZIndexContentPicker
-import com.android.compose.animation.scene.SceneScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateContentDpAsState
@@ -160,7 +160,7 @@ constructor(
     override val userActions: Flow<Map<UserAction, UserActionResult>> = actionsViewModel.actions
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) =
+    override fun ContentScope.Content(modifier: Modifier) =
         ShadeScene(
             notificationStackScrollView.get(),
             viewModel =
@@ -193,7 +193,7 @@ constructor(
 }
 
 @Composable
-private fun SceneScope.ShadeScene(
+private fun ContentScope.ShadeScene(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneContentViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
@@ -242,7 +242,7 @@ private fun SceneScope.ShadeScene(
 }
 
 @Composable
-private fun SceneScope.SingleShade(
+private fun ContentScope.SingleShade(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneContentViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
@@ -410,7 +410,7 @@ private fun SceneScope.SingleShade(
 }
 
 @Composable
-private fun SceneScope.SplitShade(
+private fun ContentScope.SplitShade(
     notificationStackScrollView: NotificationScrollView,
     viewModel: ShadeSceneContentViewModel,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
@@ -632,7 +632,7 @@ private fun SceneScope.SplitShade(
 }
 
 @Composable
-private fun SceneScope.ShadeMediaCarousel(
+private fun ContentScope.ShadeMediaCarousel(
     isVisible: Boolean,
     isInRow: Boolean,
     mediaHost: MediaHost,

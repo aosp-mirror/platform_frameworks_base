@@ -23,7 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardMediaViewModel
 import com.android.systemui.media.controls.ui.composable.MediaCarousel
 import com.android.systemui.media.controls.ui.controller.MediaCarouselController
@@ -42,7 +42,7 @@ constructor(
 ) {
 
     @Composable
-    fun SceneScope.KeyguardMediaCarousel(
+    fun ContentScope.KeyguardMediaCarousel(
         isShadeLayoutWide: Boolean,
         modifier: Modifier = Modifier,
     ) {

@@ -30,9 +30,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.viewinterop.AndroidView
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.ElementKey
-import com.android.compose.animation.scene.SceneScope
-import com.android.compose.modifiers.padding
 import com.android.systemui.customization.R as customR
 import com.android.systemui.keyguard.ui.composable.blueprint.WeatherClockElementKeys
 import com.android.systemui.keyguard.ui.composable.modifier.burnInAware
@@ -50,15 +49,10 @@ constructor(
     private val aodBurnInViewModel: AodBurnInViewModel,
 ) {
     @Composable
-    fun SceneScope.Time(
-        clock: ClockController,
-        burnInParams: BurnInParameters,
-    ) {
+    fun ContentScope.Time(clock: ClockController, burnInParams: BurnInParameters) {
         Row(
             modifier =
-                Modifier.padding(
-                        horizontal = dimensionResource(customR.dimen.clock_padding_start)
-                    )
+                Modifier.padding(horizontal = dimensionResource(customR.dimen.clock_padding_start))
                     .burnInAware(aodBurnInViewModel, burnInParams, isClock = true)
         ) {
             WeatherElement(
@@ -70,10 +64,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.Date(
-        clock: ClockController,
-        modifier: Modifier = Modifier,
-    ) {
+    private fun ContentScope.Date(clock: ClockController, modifier: Modifier = Modifier) {
         WeatherElement(
             weatherClockElementViewId = customR.id.weather_clock_date,
             clock = clock,
@@ -83,10 +74,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.Weather(
-        clock: ClockController,
-        modifier: Modifier = Modifier,
-    ) {
+    private fun ContentScope.Weather(clock: ClockController, modifier: Modifier = Modifier) {
         WeatherElement(
             weatherClockElementViewId = customR.id.weather_clock_weather_icon,
             clock = clock,
@@ -96,10 +84,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.DndAlarmStatus(
-        clock: ClockController,
-        modifier: Modifier = Modifier,
-    ) {
+    private fun ContentScope.DndAlarmStatus(clock: ClockController, modifier: Modifier = Modifier) {
         WeatherElement(
             weatherClockElementViewId = customR.id.weather_clock_alarm_dnd,
             clock = clock,
@@ -109,10 +94,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.Temperature(
-        clock: ClockController,
-        modifier: Modifier = Modifier,
-    ) {
+    private fun ContentScope.Temperature(clock: ClockController, modifier: Modifier = Modifier) {
         WeatherElement(
             weatherClockElementViewId = customR.id.weather_clock_temperature,
             clock = clock,
@@ -122,7 +104,7 @@ constructor(
     }
 
     @Composable
-    private fun SceneScope.WeatherElement(
+    private fun ContentScope.WeatherElement(
         weatherClockElementViewId: Int,
         clock: ClockController,
         elementKey: ElementKey,
@@ -144,32 +126,28 @@ constructor(
                         }
                     },
                     update = {},
-                    modifier = modifier
+                    modifier = modifier,
                 )
             }
         }
     }
 
     @Composable
-    fun SceneScope.LargeClockSectionBelowSmartspace(
+    fun ContentScope.LargeClockSectionBelowSmartspace(
         burnInParams: BurnInParameters,
         clock: ClockController,
     ) {
         Row(
             modifier =
                 Modifier.height(IntrinsicSize.Max)
-                    .padding(
-                        horizontal = dimensionResource(customR.dimen.clock_padding_start)
-                    )
+                    .padding(horizontal = dimensionResource(customR.dimen.clock_padding_start))
                     .burnInAware(aodBurnInViewModel, burnInParams, isClock = true)
         ) {
             Date(clock = clock, modifier = Modifier.wrapContentSize())
             Box(
                 modifier =
                     Modifier.fillMaxSize()
-                        .padding(
-                            start = dimensionResource(customR.dimen.clock_padding_start)
-                        )
+                        .padding(start = dimensionResource(customR.dimen.clock_padding_start))
             ) {
                 Weather(clock = clock, modifier = Modifier.align(Alignment.TopStart))
                 Temperature(clock = clock, modifier = Modifier.align(Alignment.BottomEnd))

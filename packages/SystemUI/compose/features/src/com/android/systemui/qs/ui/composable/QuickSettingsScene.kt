@@ -68,7 +68,7 @@ import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import com.android.compose.animation.scene.SceneScope
+import com.android.compose.animation.scene.ContentScope
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.animateSceneDpAsState
@@ -144,7 +144,7 @@ constructor(
     }
 
     @Composable
-    override fun SceneScope.Content(modifier: Modifier) {
+    override fun ContentScope.Content(modifier: Modifier) {
         QuickSettingsScene(
             notificationStackScrollView = notificationStackScrollView.get(),
             viewModelFactory = contentViewModelFactory,
@@ -164,7 +164,7 @@ constructor(
 }
 
 @Composable
-private fun SceneScope.QuickSettingsScene(
+private fun ContentScope.QuickSettingsScene(
     notificationStackScrollView: NotificationScrollView,
     viewModelFactory: QuickSettingsSceneContentViewModel.Factory,
     notificationsPlaceholderViewModel: NotificationsPlaceholderViewModel,
