@@ -1378,6 +1378,31 @@ class DesktopTasksController(
             ?.let { homeTask -> wct.reorder(homeTask.getToken(), /* onTop= */ toTop) }
     }
 
+    private fun addLaunchHomePendingIntent(wct: WindowContainerTransaction, displayId: Int) {
+        val launchHomeIntent =
+            Intent(Intent.ACTION_MAIN).apply {
+                if (displayId != DEFAULT_DISPLAY) {
+                    addCategory(Intent.CATEGORY_SECONDARY_HOME)
+                } else {
+                    addCategory(Intent.CATEGORY_HOME)
+                }
+            }
+        val options =
+            ActivityOptions.makeBasic().apply {
+                launchWindowingMode = WINDOWING_MODE_FULLSCREEN
+                pendingIntentBackgroundActivityStartMode =
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+            }
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                /* requestCode = */ 0,
+                launchHomeIntent,
+                PendingIntent.FLAG_IMMUTABLE,
+            )
+        wct.sendPendingIntent(pendingIntent, launchHomeIntent, options.toBundle())
+    }
+
     private fun addWallpaperActivity(displayId: Int, wct: WindowContainerTransaction) {
         logV("addWallpaperActivity")
         if (Flags.enableDesktopWallpaperActivityForSystemUser()) {
@@ -1460,6 +1485,7 @@ class DesktopTasksController(
         displayId: Int,
         wct: WindowContainerTransaction,
         forceToFullscreen: Boolean,
+        shouldEndUpAtHome: Boolean = true,
     ) {
         taskRepository.setPipShouldKeepDesktopActive(displayId, !forceToFullscreen)
         if (Flags.enablePerDisplayDesktopWallpaperActivity()) {
@@ -1481,6 +1507,11 @@ class DesktopTasksController(
             FULLSCREEN_ANIMATION_DURATION
         )
         removeWallpaperActivity(wct, displayId)
+        if (shouldEndUpAtHome) {
+            // If the transition should end up with user going to home, launch home with a pending
+            // intent.
+            addLaunchHomePendingIntent(wct, displayId)
+        }
     }
 
     fun releaseVisualIndicator() {
@@ -2093,6 +2124,7 @@ class DesktopTasksController(
             taskInfo.displayId,
             wct,
             forceToFullscreen = true,
+            shouldEndUpAtHome = false,
         )
     }
 
@@ -2132,6 +2164,7 @@ class DesktopTasksController(
             taskInfo.displayId,
             wct,
             forceToFullscreen = false,
+            shouldEndUpAtHome = false,
         )
     }
 

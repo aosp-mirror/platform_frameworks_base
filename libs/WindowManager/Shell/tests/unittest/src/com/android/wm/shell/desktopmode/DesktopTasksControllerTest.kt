@@ -1569,6 +1569,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         verify(desktopModeEnterExitTransitionListener)
             .onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
         assertThat(taskChange.windowingMode).isEqualTo(WINDOWING_MODE_UNDEFINED)
+        assertThat(wct.hierarchyOps).hasSize(1)
         // Removes wallpaper activity when leaving desktop
         wct.assertReorderAt(index = 0, wallpaperToken, toTop = false)
     }
@@ -1603,6 +1604,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         assertThat(taskChange.windowingMode).isEqualTo(WINDOWING_MODE_FULLSCREEN)
         verify(desktopModeEnterExitTransitionListener)
             .onExitDesktopModeTransitionStarted(FULLSCREEN_ANIMATION_DURATION)
+        assertThat(wct.hierarchyOps).hasSize(1)
         // Removes wallpaper activity when leaving desktop
         wct.assertReorderAt(index = 0, wallpaperToken, toTop = false)
     }
@@ -2010,15 +2012,15 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
-    fun onDesktopWindowClose_singleActiveTask_noWallpaperActivityToken() {
+    fun onDesktopWindowClose_singleActiveTask_noWallpaperActivityToken_launchesHome() {
         val task = setUpFreeformTask()
         val wct = WindowContainerTransaction()
         whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
 
         controller.onDesktopWindowClose(wct, displayId = DEFAULT_DISPLAY, task)
 
-        // Doesn't modify transaction
-        assertThat(wct.hierarchyOps).isEmpty()
+        // Should launch home
+        wct.assertPendingIntentAt(0, launchHomeIntent(DEFAULT_DISPLAY))
     }
 
     @Test
@@ -2867,14 +2869,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-    fun handleRequest_backTransition_singleTaskNoToken_withWallpaper_removesTask() {
+    fun handleRequest_backTransition_singleTaskNoToken_withWallpaper_launchesHome() {
         val task = setUpFreeformTask()
         whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
 
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
 
-        assertNull(result, "Should not handle request")
+        // Should launch home
+        assertNotNull(result, "Should handle request")
+            .assertPendingIntentAt(0, launchHomeIntent(DEFAULT_DISPLAY))
     }
 
     @Test
@@ -2891,14 +2895,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-    fun handleRequest_backTransition_singleTaskNoToken_doesNotHandle() {
+    fun handleRequest_backTransition_singleTaskNoToken_launchesHomes() {
         val task = setUpFreeformTask()
         whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
 
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_TO_BACK))
 
-        assertNull(result, "Should not handle request")
+        // Should launch home
+        assertNotNull(result, "Should handle request")
+            .assertPendingIntentAt(0, launchHomeIntent(DEFAULT_DISPLAY))
     }
 
     @Test
@@ -3017,14 +3023,30 @@ class DesktopTasksControllerTest : ShellTestCase() {
 
     @Test
     @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
-    fun handleRequest_closeTransition_singleTaskNoToken_doesNotHandle() {
+    fun handleRequest_closeTransition_singleTaskNoToken_launchesHome() {
         val task = setUpFreeformTask()
         whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
 
         val result =
             controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
 
-        assertNull(result, "Should not handle request")
+        // Should launch home
+        assertNotNull(result, "Should handle request")
+            .assertPendingIntentAt(0, launchHomeIntent(DEFAULT_DISPLAY))
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY)
+    fun handleRequest_closeTransition_singleTaskNoToken_secondaryDisplay_launchesHome() {
+        val task = setUpFreeformTask(displayId = SECOND_DISPLAY)
+        whenever(desktopWallpaperActivityTokenProvider.getToken()).thenReturn(null)
+
+        val result =
+            controller.handleRequest(Binder(), createTransition(task, type = TRANSIT_CLOSE))
+
+        // Should launch home
+        assertNotNull(result, "Should handle request")
+            .assertPendingIntentAt(0, launchHomeIntent(SECOND_DISPLAY))
     }
 
     @Test
@@ -3750,6 +3772,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
                 eq(SplitScreenConstants.SPLIT_POSITION_BOTTOM_OR_RIGHT),
                 eq(task2.configuration.windowConfiguration.bounds),
             )
+        assertThat(wctArgument.value.hierarchyOps).hasSize(1)
         // Removes wallpaper activity when leaving desktop
         wctArgument.value.assertReorderAt(index = 0, wallpaperToken, toTop = false)
     }
@@ -4947,6 +4970,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
     private val desktopWallpaperIntent: Intent
         get() = Intent(context, DesktopWallpaperActivity::class.java)
 
+    private fun launchHomeIntent(displayId: Int): Intent {
+        return Intent(Intent.ACTION_MAIN).apply {
+            if (displayId != DEFAULT_DISPLAY) {
+                addCategory(Intent.CATEGORY_SECONDARY_HOME)
+            } else {
+                addCategory(Intent.CATEGORY_HOME)
+            }
+        }
+    }
+
     private fun addFreeformTaskAtPosition(
         pos: DesktopTaskPosition,
         stableBounds: Rect,
@@ -5260,6 +5293,7 @@ private fun WindowContainerTransaction.assertPendingIntentAt(index: Int, intent:
     val op = hierarchyOps[index]
     assertThat(op.type).isEqualTo(HIERARCHY_OP_TYPE_PENDING_INTENT)
     assertThat(op.pendingIntent?.intent?.component).isEqualTo(intent.component)
+    assertThat(op.pendingIntent?.intent?.categories).isEqualTo(intent.categories)
 }
 
 private fun WindowContainerTransaction.assertLaunchTaskAt(
