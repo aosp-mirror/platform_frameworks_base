@@ -18,6 +18,7 @@ package android.media.quality;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.FlaggedApi;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SuppressLint;
@@ -35,6 +36,8 @@ import androidx.annotation.RequiresPermission;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -73,6 +76,39 @@ public final class MediaQualityManager {
      * @hide
      */
     public static final String OPTION_INCLUDE_PARAMETERS = "include_parameters";
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef({AMBIENT_BACKLIGHT_EVENT_ENABLED, AMBIENT_BACKLIGHT_EVENT_DISABLED,
+            AMBIENT_BACKLIGHT_EVENT_METADATA,
+            AMBIENT_BACKLIGHT_EVENT_INTERRUPTED})
+    public @interface AmbientBacklightEventTypes {}
+
+    /**
+     * Event type for ambient backlight events. The ambient backlight is enabled.
+     * @hide
+     */
+    public static final int AMBIENT_BACKLIGHT_EVENT_ENABLED = 1;
+
+    /**
+     * Event type for ambient backlight events. The ambient backlight is disabled.
+     * @hide
+     */
+    public static final int AMBIENT_BACKLIGHT_EVENT_DISABLED = 2;
+
+    /**
+     * Event type for ambient backlight events. The ambient backlight metadata is
+     * available.
+     * @hide
+     */
+    public static final int AMBIENT_BACKLIGHT_EVENT_METADATA = 3;
+
+    /**
+     * Event type for ambient backlight events. The ambient backlight event is
+     * preempted by another application.
+     * @hide
+     */
+    public static final int AMBIENT_BACKLIGHT_EVENT_INTERRUPTED = 4;
 
 
     /**
