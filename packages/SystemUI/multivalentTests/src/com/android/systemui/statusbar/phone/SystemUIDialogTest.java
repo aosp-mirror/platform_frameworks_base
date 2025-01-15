@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_DIALOG_SHOWING;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertFalse;
@@ -44,7 +46,9 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.animation.DialogTransitionAnimator;
 import com.android.systemui.animation.back.BackAnimationSpec;
 import com.android.systemui.broadcast.BroadcastDispatcher;
+import com.android.systemui.kosmos.KosmosJavaAdapter;
 import com.android.systemui.model.SysUiState;
+import com.android.systemui.settings.FakeDisplayTracker;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -68,6 +72,7 @@ public class SystemUIDialogTest extends SysuiTestCase {
     private BroadcastDispatcher mBroadcastDispatcher;
     @Mock
     private SystemUIDialog.Delegate mDelegate;
+    private SysUiState mSysUiState;
 
     // TODO(b/292141694): build out Ravenwood support for DeviceFlagsValueProvider
     // Ravenwood already has solid support for SetFlagsRule, but CheckFlagsRule will be added soon
@@ -78,7 +83,9 @@ public class SystemUIDialogTest extends SysuiTestCase {
     @Before
     public void setup() {
         MockitoAnnotations.initMocks(this);
-
+        KosmosJavaAdapter kosmos = new KosmosJavaAdapter(this);
+        FakeDisplayTracker displayTracker = new FakeDisplayTracker(mContext);
+        mSysUiState = new SysUiState(displayTracker, kosmos.getSceneContainerPlugin());
         mDependency.injectTestDependency(BroadcastDispatcher.class, mBroadcastDispatcher);
         when(mDelegate.getBackAnimationSpec(ArgumentMatchers.any()))
                 .thenReturn(mock(BackAnimationSpec.class));
@@ -173,6 +180,30 @@ public class SystemUIDialogTest extends SysuiTestCase {
         assertThat(calledStop.get()).isTrue();
     }
 
+    /** Regression test for b/386871258 */
+    @Test
+    public void sysuiStateUpdated() {
+        SystemUIDialog dialog1 =
+                createDialogWithDelegate(mContext, mDelegate, /* shouldAcsDismissDialog */ true);
+        SystemUIDialog dialog2 =
+                createDialogWithDelegate(mContext, mDelegate, /* shouldAcsDismissDialog */ true);
+
+        dialog1.show();
+        assertThat((mSysUiState.getFlags() & SYSUI_STATE_DIALOG_SHOWING) != 0).isTrue();
+
+        dialog2.show();
+        assertThat((mSysUiState.getFlags() & SYSUI_STATE_DIALOG_SHOWING) != 0).isTrue();
+
+        dialog2.dismiss();
+        // explicitly call onWindowFocusChanged to simulate dialog 1 regaining focus
+        dialog1.onWindowFocusChanged(/* hasFocus= */ true);
+        assertThat((mSysUiState.getFlags() & SYSUI_STATE_DIALOG_SHOWING) != 0).isTrue();
+
+        dialog1.dismiss();
+        assertThat((mSysUiState.getFlags() & SYSUI_STATE_DIALOG_SHOWING) != 0).isFalse();
+    }
+
+
     @Test
     public void delegateIsCalled_inCorrectOrder() {
         Configuration configuration = new Configuration();
@@ -198,7 +229,7 @@ public class SystemUIDialogTest extends SysuiTestCase {
         SystemUIDialog.Factory factory = new SystemUIDialog.Factory(
                 getContext(),
                 Dependency.get(SystemUIDialogManager.class),
-                Dependency.get(SysUiState.class),
+                mSysUiState,
                 Dependency.get(BroadcastDispatcher.class),
                 Dependency.get(DialogTransitionAnimator.class)
         );
