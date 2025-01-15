@@ -28,10 +28,29 @@ import android.os.IBinder;
  */
 public class SupervisionAppService extends Service {
     private final ISupervisionAppService mBinder = new ISupervisionAppService.Stub() {
+        @Override
+        public void onEnabled() {
+            SupervisionAppService.this.onEnabled();
+        }
+
+        @Override
+        public void onDisabled() {
+            SupervisionAppService.this.onDisabled();
+        }
     };
 
     @Override
     public final IBinder onBind(Intent intent) {
         return mBinder.asBinder();
     }
+
+    /**
+     * Called when supervision is enabled.
+     */
+    public void onEnabled() {}
+
+    /**
+     * Called when supervision is disabled.
+     */
+    public void onDisabled() {}
 }
