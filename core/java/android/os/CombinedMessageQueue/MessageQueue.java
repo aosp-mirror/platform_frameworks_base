@@ -40,7 +40,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.ravenwood.RavenwoodEnvironment;
 
 import dalvik.annotation.optimization.NeverCompile;
-import dalvik.annotation.optimization.NeverInline;
 
 import java.io.FileDescriptor;
 import java.lang.annotation.Retention;
@@ -239,7 +238,6 @@ public final class MessageQueue {
     private final MatchDeliverableMessages mMatchDeliverableMessages =
             new MatchDeliverableMessages();
 
-    @NeverInline
     private boolean isIdleConcurrent() {
         final long now = SystemClock.uptimeMillis();
 
@@ -270,7 +268,6 @@ public final class MessageQueue {
         return true;
     }
 
-    @NeverInline
     private boolean isIdleLegacy() {
         synchronized (this) {
             final long now = SystemClock.uptimeMillis();
@@ -293,14 +290,12 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private void addIdleHandlerConcurrent(@NonNull IdleHandler handler) {
         synchronized (mIdleHandlersLock) {
             mIdleHandlers.add(handler);
         }
     }
 
-    @NeverInline
     private void addIdleHandlerLegacy(@NonNull IdleHandler handler) {
         synchronized (this) {
             mIdleHandlers.add(handler);
@@ -327,15 +322,11 @@ public final class MessageQueue {
             addIdleHandlerLegacy(handler);
         }
     }
-
-    @NeverInline
     private void removeIdleHandlerConcurrent(@NonNull IdleHandler handler) {
         synchronized (mIdleHandlersLock) {
             mIdleHandlers.remove(handler);
         }
     }
-
-    @NeverInline
     private void removeIdleHandlerLegacy(@NonNull IdleHandler handler) {
         synchronized (this) {
             mIdleHandlers.remove(handler);
@@ -359,14 +350,12 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private boolean isPollingConcurrent() {
         // If the loop is quitting then it must not be idling.
         // We can assume mPtr != 0 when sQuitting is false.
         return !((boolean) sQuitting.getVolatile(this)) && nativeIsPolling(mPtr);
     }
 
-    @NeverInline
     private boolean isPollingLegacy() {
         synchronized (this) {
             return isPollingLocked();
@@ -397,7 +386,6 @@ public final class MessageQueue {
         // We can assume mPtr != 0 when mQuitting is false.
         return !mQuitting && nativeIsPolling(mPtr);
     }
-    @NeverInline
     private void addOnFileDescriptorEventListenerConcurrent(@NonNull FileDescriptor fd,
             @OnFileDescriptorEventListener.Events int events,
             @NonNull OnFileDescriptorEventListener listener) {
@@ -406,7 +394,6 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private void addOnFileDescriptorEventListenerLegacy(@NonNull FileDescriptor fd,
             @OnFileDescriptorEventListener.Events int events,
             @NonNull OnFileDescriptorEventListener listener) {
@@ -456,14 +443,12 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private void removeOnFileDescriptorEventListenerConcurrent(@NonNull FileDescriptor fd) {
         synchronized (mFileDescriptorRecordsLock) {
             updateOnFileDescriptorEventListenerLocked(fd, 0, null);
         }
     }
 
-    @NeverInline
     private void removeOnFileDescriptorEventListenerLegacy(@NonNull FileDescriptor fd) {
         synchronized (this) {
             updateOnFileDescriptorEventListenerLocked(fd, 0, null);
@@ -797,7 +782,6 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private Message nextConcurrent() {
         final long ptr = mPtr;
         if (ptr == 0) {
@@ -872,7 +856,6 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private Message nextLegacy() {
         // Return here if the message loop has already quit and been disposed.
         // This can happen if the application tries to restart a looper after quit
@@ -1037,13 +1020,11 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private int postSyncBarrierConcurrent() {
         return postSyncBarrier(SystemClock.uptimeMillis());
 
     }
 
-    @NeverInline
     private int postSyncBarrierLegacy() {
         return postSyncBarrier(SystemClock.uptimeMillis());
     }
@@ -1163,7 +1144,6 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private void removeSyncBarrierConcurrent(int token) {
         boolean removed;
         MessageNode first;
@@ -1190,7 +1170,6 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private void removeSyncBarrierLegacy(int token) {
         synchronized (this) {
             Message prev = null;
@@ -1250,7 +1229,6 @@ public final class MessageQueue {
 
     }
 
-    @NeverInline
     private boolean enqueueMessageConcurrent(Message msg, long when) {
         if (msg.isInUse()) {
             throw new IllegalStateException(msg + " This message is already in use.");
@@ -1259,7 +1237,6 @@ public final class MessageQueue {
         return enqueueMessageUnchecked(msg, when);
     }
 
-    @NeverInline
     private boolean enqueueMessageLegacy(Message msg, long when) {
         synchronized (this) {
             if (msg.isInUse()) {
@@ -1539,13 +1516,11 @@ public final class MessageQueue {
     private final MatchHandlerWhatAndObject mMatchHandlerWhatAndObject =
             new MatchHandlerWhatAndObject();
 
-    @NeverInline
     private boolean hasMessagesConcurrent(Handler h, int what, Object object) {
         return findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObject,
                 false);
     }
 
-    @NeverInline
     private boolean hasMessagesLegacy(Handler h, int what, Object object) {
         synchronized (this) {
             Message p = mMessages;
@@ -1584,13 +1559,11 @@ public final class MessageQueue {
     private final MatchHandlerWhatAndObjectEquals mMatchHandlerWhatAndObjectEquals =
             new MatchHandlerWhatAndObjectEquals();
 
-    @NeverInline
     private boolean hasEqualMessagesConcurrent(Handler h, int what, Object object) {
         return findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObjectEquals,
                 false);
     }
 
-    @NeverInline
     private boolean hasEqualMessagesLegacy(Handler h, int what, Object object) {
         synchronized (this) {
             Message p = mMessages;
@@ -1629,13 +1602,11 @@ public final class MessageQueue {
     private final MatchHandlerRunnableAndObject mMatchHandlerRunnableAndObject =
             new MatchHandlerRunnableAndObject();
 
-    @NeverInline
     private boolean hasMessagesConcurrent(Handler h, Runnable r, Object object) {
         return findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObject,
                 false);
     }
 
-    @NeverInline
     private boolean hasMessagesLegacy(Handler h, Runnable r, Object object) {
         synchronized (this) {
             Message p = mMessages;
@@ -1670,12 +1641,10 @@ public final class MessageQueue {
     }
     private final MatchHandler mMatchHandler = new MatchHandler();
 
-    @NeverInline
     private boolean hasMessagesConcurrent(Handler h) {
         return findOrRemoveMessages(h, -1, null, null, 0, mMatchHandler, false);
     }
 
-    @NeverInline
     private boolean hasMessagesLegacy(Handler h) {
         synchronized (this) {
             Message p = mMessages;
@@ -1700,12 +1669,10 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private void removeMessagesConcurrent(Handler h, int what, Object object) {
         findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObject, true);
     }
 
-    @NeverInline
     private void removeMessagesLegacy(Handler h, int what, Object object) {
         synchronized (this) {
             Message p = mMessages;
@@ -1760,12 +1727,10 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private void removeEqualMessagesConcurrent(Handler h, int what, Object object) {
             findOrRemoveMessages(h, what, object, null, 0, mMatchHandlerWhatAndObjectEquals, true);
     }
 
-    @NeverInline
     private void removeEqualMessagesLegacy(Handler h, int what, Object object) {
         synchronized (this) {
             Message p = mMessages;
@@ -1821,12 +1786,10 @@ public final class MessageQueue {
         }
     }
 
-    @NeverInline
     private void removeMessagesConcurrent(Handler h, Runnable r, Object object) {
         findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObject, true);
     }
 
-    @NeverInline
     private void removeMessagesLegacy(Handler h, Runnable r, Object object) {
         synchronized (this) {
             Message p = mMessages;
@@ -1896,12 +1859,10 @@ public final class MessageQueue {
     private final MatchHandlerRunnableAndObjectEquals mMatchHandlerRunnableAndObjectEquals =
             new MatchHandlerRunnableAndObjectEquals();
 
-    @NeverInline
     private void removeEqualMessagesConcurrent(Handler h, Runnable r, Object object) {
         findOrRemoveMessages(h, -1, object, r, 0, mMatchHandlerRunnableAndObjectEquals, true);
     }
 
-    @NeverInline
     private void removeEqualMessagesLegacy(Handler h, Runnable r, Object object) {
         synchronized (this) {
             Message p = mMessages;
@@ -1970,12 +1931,10 @@ public final class MessageQueue {
     }
     private final MatchHandlerAndObject mMatchHandlerAndObject = new MatchHandlerAndObject();
 
-    @NeverInline
     private void removeCallbacksAndMessagesConcurrent(Handler h, Object object) {
             findOrRemoveMessages(h, -1, object, null, 0, mMatchHandlerAndObject, true);
     }
 
-    @NeverInline
     private void removeCallbacksAndMessagesLegacy(Handler h, Object object) {
         synchronized (this) {
             Message p = mMessages;
@@ -2044,12 +2003,10 @@ public final class MessageQueue {
     private final MatchHandlerAndObjectEquals mMatchHandlerAndObjectEquals =
             new MatchHandlerAndObjectEquals();
 
-    @NeverInline
     void removeCallbacksAndEqualMessagesConcurrent(Handler h, Object object) {
         findOrRemoveMessages(h, -1, object, null, 0, mMatchHandlerAndObjectEquals, true);
     }
 
-    @NeverInline
     void removeCallbacksAndEqualMessagesLegacy(Handler h, Object object) {
         synchronized (this) {
             Message p = mMessages;
