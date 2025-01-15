@@ -87,7 +87,20 @@ final class InputGestureManager {
             createKeyTrigger(KeyEvent.KEYCODE_V, KeyEvent.META_CTRL_ON),
             createKeyTrigger(KeyEvent.KEYCODE_X, KeyEvent.META_CTRL_ON),
             createKeyTrigger(KeyEvent.KEYCODE_Z, KeyEvent.META_CTRL_ON),
-            createKeyTrigger(KeyEvent.KEYCODE_Y, KeyEvent.META_CTRL_ON)
+            createKeyTrigger(KeyEvent.KEYCODE_Y, KeyEvent.META_CTRL_ON),
+            // Used for magnification viewport control.
+            createKeyTrigger(KeyEvent.KEYCODE_MINUS,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON),
+            createKeyTrigger(KeyEvent.KEYCODE_EQUALS,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON),
+            createKeyTrigger(KeyEvent.KEYCODE_DPAD_LEFT,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON),
+            createKeyTrigger(KeyEvent.KEYCODE_DPAD_RIGHT,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON),
+            createKeyTrigger(KeyEvent.KEYCODE_DPAD_UP,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON),
+            createKeyTrigger(KeyEvent.KEYCODE_DPAD_DOWN,
+                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON)
     ));
 
     public InputGestureManager(Context context) {
@@ -216,24 +229,6 @@ final class InputGestureManager {
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_T,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                     KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_TALKBACK));
-            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_MINUS,
-                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT));
-            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_EQUALS,
-                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN));
-            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_LEFT,
-                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT));
-            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_RIGHT,
-                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT));
-            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_UP,
-                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP));
-            systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_DPAD_DOWN,
-                    KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
-                    KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN));
             systemShortcuts.add(createKeyGesture(KeyEvent.KEYCODE_M,
                     KeyEvent.META_META_ON | KeyEvent.META_ALT_ON,
                     KeyGestureEvent.KEY_GESTURE_TYPE_TOGGLE_MAGNIFICATION));

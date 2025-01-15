@@ -736,30 +736,6 @@ class KeyGestureControllerTests {
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),
             TestData(
-                "META + ALT + '-' -> Magnification Zoom Out",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_MINUS
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT,
-                intArrayOf(KeyEvent.KEYCODE_MINUS),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "META + ALT + '=' -> Magnification Zoom In",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_EQUALS
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN,
-                intArrayOf(KeyEvent.KEYCODE_EQUALS),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
                 "META + ALT + M -> Toggle Magnification",
                 intArrayOf(
                     KeyEvent.KEYCODE_META_LEFT,
@@ -780,54 +756,6 @@ class KeyGestureControllerTests {
                 ),
                 KeyGestureEvent.KEY_GESTURE_TYPE_ACTIVATE_SELECT_TO_SPEAK,
                 intArrayOf(KeyEvent.KEYCODE_S),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "META + ALT + 'Down' -> Magnification Pan Down",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_DPAD_DOWN
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN,
-                intArrayOf(KeyEvent.KEYCODE_DPAD_DOWN),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "META + ALT + 'Up' -> Magnification Pan Up",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_DPAD_UP
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP,
-                intArrayOf(KeyEvent.KEYCODE_DPAD_UP),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "META + ALT + 'Left' -> Magnification Pan Left",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_DPAD_LEFT
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT,
-                intArrayOf(KeyEvent.KEYCODE_DPAD_LEFT),
-                KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
-                intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
-            ),
-            TestData(
-                "META + ALT + 'Right' -> Magnification Pan Right",
-                intArrayOf(
-                    KeyEvent.KEYCODE_META_LEFT,
-                    KeyEvent.KEYCODE_ALT_LEFT,
-                    KeyEvent.KEYCODE_DPAD_RIGHT
-                ),
-                KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT,
-                intArrayOf(KeyEvent.KEYCODE_DPAD_RIGHT),
                 KeyEvent.META_META_ON or KeyEvent.META_ALT_ON,
                 intArrayOf(KeyGestureEvent.ACTION_GESTURE_COMPLETE)
             ),

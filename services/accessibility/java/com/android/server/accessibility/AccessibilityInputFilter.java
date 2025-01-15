@@ -21,14 +21,14 @@ import static android.view.MotionEvent.ACTION_SCROLL;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_MAGNIFICATION_OVERLAY;
 
+import static com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures;
+
 import android.accessibilityservice.AccessibilityTrace;
 import android.annotation.MainThread;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.graphics.Region;
 import android.hardware.input.InputManager;
-import android.hardware.input.KeyGestureEvent;
-import android.os.IBinder;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.SystemClock;
@@ -46,15 +46,13 @@ import android.view.MotionEvent.PointerCoords;
 import android.view.MotionEvent.PointerProperties;
 import android.view.accessibility.AccessibilityEvent;
 
-import androidx.annotation.Nullable;
-
 import com.android.server.LocalServices;
 import com.android.server.accessibility.gestures.TouchExplorer;
 import com.android.server.accessibility.magnification.FullScreenMagnificationController;
 import com.android.server.accessibility.magnification.FullScreenMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.FullScreenMagnificationVibrationHelper;
-import com.android.server.accessibility.magnification.MagnificationController;
 import com.android.server.accessibility.magnification.MagnificationGestureHandler;
+import com.android.server.accessibility.magnification.MagnificationKeyHandler;
 import com.android.server.accessibility.magnification.MouseEventHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationGestureHandler;
 import com.android.server.accessibility.magnification.WindowMagnificationPromptController;
@@ -209,6 +207,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
 
     private MouseKeysInterceptor mMouseKeysInterceptor;
 
+    private MagnificationKeyHandler mMagnificationKeyHandler;
+
     private boolean mInstalled;
 
     private int mUserId;
@@ -234,74 +234,6 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
      * if a new device becomes active.
      */
     private MotionEvent mLastActiveDeviceMotionEvent = null;
-
-    private boolean mKeyGestureEventHandlerInstalled = false;
-    private InputManager.KeyGestureEventHandler mKeyGestureEventHandler =
-            new InputManager.KeyGestureEventHandler() {
-                @Override
-                public boolean handleKeyGestureEvent(
-                        @NonNull KeyGestureEvent event,
-                        @Nullable IBinder focusedToken) {
-                    final boolean complete =
-                            event.getAction() == KeyGestureEvent.ACTION_GESTURE_COMPLETE
-                                    && !event.isCancelled();
-
-                    // TODO(b/355499907): Receive and handle held key gestures, which can be used
-                    // for continuous scaling and panning. In addition, handle multiple pan gestures
-                    // at the same time (e.g. user may try to pan diagonally) reasonably, including
-                    // decreasing diagonal movement by sqrt(2) to make it appear the same speed
-                    // as non-diagonal movement.
-
-                    if (!complete) {
-                        return false;
-                    }
-
-                    final int gestureType = event.getKeyGestureType();
-                    final int displayId = isDisplayIdValid(event.getDisplayId())
-                            ? event.getDisplayId() : Display.DEFAULT_DISPLAY;
-
-                    switch (gestureType) {
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN:
-                                mAms.getMagnificationController().scaleMagnificationByStep(
-                                        displayId, MagnificationController.ZOOM_DIRECTION_IN);
-                            return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT:
-                                mAms.getMagnificationController().scaleMagnificationByStep(
-                                        displayId, MagnificationController.ZOOM_DIRECTION_OUT);
-                            return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT:
-                            mAms.getMagnificationController().panMagnificationByStep(
-                                    displayId, MagnificationController.PAN_DIRECTION_LEFT);
-                            return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT:
-                            mAms.getMagnificationController().panMagnificationByStep(
-                                    displayId, MagnificationController.PAN_DIRECTION_RIGHT);
-                            return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP:
-                            mAms.getMagnificationController().panMagnificationByStep(
-                                    displayId, MagnificationController.PAN_DIRECTION_UP);
-                            return true;
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN:
-                            mAms.getMagnificationController().panMagnificationByStep(
-                                    displayId, MagnificationController.PAN_DIRECTION_DOWN);
-                            return true;
-                    }
-                    return false;
-                }
-
-                @Override
-                public boolean isKeyGestureSupported(int gestureType) {
-                    return switch (gestureType) {
-                        case KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_IN,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_ZOOM_OUT,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_LEFT,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_RIGHT,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_UP,
-                             KeyGestureEvent.KEY_GESTURE_TYPE_MAGNIFICATION_PAN_DOWN -> true;
-                        default -> false;
-                    };
-                }
-            };
 
     private static MotionEvent cancelMotion(MotionEvent event) {
         if (event.getActionMasked() == MotionEvent.ACTION_CANCEL
@@ -787,20 +719,11 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     });
         }
 
-        if ((mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
-                || ((mEnabledFeatures & FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP) != 0)
-                || ((mEnabledFeatures & FLAG_FEATURE_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP) != 0)
-                || ((mEnabledFeatures & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0)) {
+        if (isAnyMagnificationEnabled()) {
             final MagnificationGestureHandler magnificationGestureHandler =
                     createMagnificationGestureHandler(displayId, displayContext);
             addFirstEventHandler(displayId, magnificationGestureHandler);
             mMagnificationGestureHandler.put(displayId, magnificationGestureHandler);
-
-            if (com.android.hardware.input.Flags.enableTalkbackAndMagnifierKeyGestures()
-                    && !mKeyGestureEventHandlerInstalled) {
-                mInputManager.registerKeyGestureEventHandler(mKeyGestureEventHandler);
-                mKeyGestureEventHandlerInstalled = true;
-            }
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_INJECT_MOTION_EVENTS) != 0) {
@@ -817,6 +740,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
         }
 
         if ((mEnabledFeatures & FLAG_FEATURE_FILTER_KEY_EVENTS) != 0) {
+            // mKeyboardInterceptor does not forward KeyEvents to other EventStreamTransformations,
+            // so it must be the last EventStreamTransformation for key events in the list.
             mKeyboardInterceptor = new KeyboardInterceptor(mAms,
                     LocalServices.getService(WindowManagerPolicy.class));
             // Since the display id of KeyEvent always would be -1 and it would be dispatched to
@@ -832,6 +757,19 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                     Display.DEFAULT_DISPLAY);
             addFirstEventHandler(Display.DEFAULT_DISPLAY, mMouseKeysInterceptor);
         }
+
+        if (enableTalkbackAndMagnifierKeyGestures() && isAnyMagnificationEnabled()) {
+            mMagnificationKeyHandler = new MagnificationKeyHandler(
+                    mAms.getMagnificationController());
+            addFirstEventHandler(Display.DEFAULT_DISPLAY, mMagnificationKeyHandler);
+        }
+    }
+
+    private boolean isAnyMagnificationEnabled() {
+        return (mEnabledFeatures & FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER) != 0
+                || ((mEnabledFeatures & FLAG_FEATURE_MAGNIFICATION_SINGLE_FINGER_TRIPLE_TAP) != 0)
+                || ((mEnabledFeatures & FLAG_FEATURE_MAGNIFICATION_TWO_FINGER_TRIPLE_TAP) != 0)
+                || ((mEnabledFeatures & FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER) != 0);
     }
 
     /**
@@ -921,9 +859,9 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
             mMouseKeysInterceptor = null;
         }
 
-        if (mKeyGestureEventHandlerInstalled) {
-            mInputManager.unregisterKeyGestureEventHandler(mKeyGestureEventHandler);
-            mKeyGestureEventHandlerInstalled = false;
+        if (mMagnificationKeyHandler != null) {
+            mMagnificationKeyHandler.onDestroy();
+            mMagnificationKeyHandler = null;
         }
     }
 
@@ -1365,6 +1303,8 @@ class AccessibilityInputFilter extends InputFilter implements EventStreamTransfo
                         joiner.add("AutoclickController");
                     } else if (next instanceof MotionEventInjector) {
                         joiner.add("MotionEventInjector");
+                    } else if (next instanceof MagnificationKeyHandler) {
+                        joiner.add("MagnificationKeyHandler");
                     }
                     next = next.getNext();
                 }
