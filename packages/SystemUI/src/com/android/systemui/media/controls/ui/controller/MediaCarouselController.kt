@@ -1744,7 +1744,8 @@ constructor(
             println("location: $desiredLocation")
             println(
                 "state: ${desiredHostState?.expansion}, " +
-                    "only active ${desiredHostState?.showsOnlyActiveMedia}"
+                    "only active ${desiredHostState?.showsOnlyActiveMedia}, " +
+                    "visible ${desiredHostState?.visible}"
             )
             println("isSwipedAway: ${MediaPlayerData.isSwipedAway}")
             println("allowMediaPlayerOnLockScreen: $allowMediaPlayerOnLockScreen")
