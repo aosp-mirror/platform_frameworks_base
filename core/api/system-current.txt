@@ -1290,9 +1290,7 @@ package android.app {
 
   public class WallpaperManager {
     method @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL) public void clearWallpaper(int, int);
-    method @FlaggedApi("android.app.customization_packs_apis") public static int getOrientation(@NonNull android.graphics.Point);
     method @FloatRange(from=0.0f, to=1.0f) @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT) public float getWallpaperDimAmount();
-    method @FlaggedApi("android.app.customization_packs_apis") @Nullable public android.os.ParcelFileDescriptor getWallpaperFile(int, boolean);
     method @FlaggedApi("android.app.live_wallpaper_content_handling") @Nullable @RequiresPermission(android.Manifest.permission.READ_WALLPAPER_INTERNAL) public android.app.wallpaper.WallpaperInstance getWallpaperInstance(int);
     method public void setDisplayOffset(android.os.IBinder, int, int);
     method @FlaggedApi("com.android.window.flags.multi_crop") @RequiresPermission(android.Manifest.permission.SET_WALLPAPER) public int setStreamWithCrops(@NonNull java.io.InputStream, @NonNull android.util.SparseArray<android.graphics.Rect>, boolean, int) throws java.io.IOException;
@@ -1301,10 +1299,6 @@ package android.app {
     method @FlaggedApi("android.app.live_wallpaper_content_handling") @RequiresPermission(allOf={android.Manifest.permission.SET_WALLPAPER_COMPONENT, android.Manifest.permission.INTERACT_ACROSS_USERS_FULL}, conditional=true) public boolean setWallpaperComponentWithDescription(@NonNull android.app.wallpaper.WallpaperDescription, int);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_COMPONENT) public boolean setWallpaperComponentWithFlags(@NonNull android.content.ComponentName, int);
     method @RequiresPermission(android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT) public void setWallpaperDimAmount(@FloatRange(from=0.0f, to=1.0f) float);
-    field @FlaggedApi("android.app.customization_packs_apis") public static final int ORIENTATION_LANDSCAPE = 1; // 0x1
-    field @FlaggedApi("android.app.customization_packs_apis") public static final int ORIENTATION_PORTRAIT = 0; // 0x0
-    field @FlaggedApi("android.app.customization_packs_apis") public static final int ORIENTATION_SQUARE_LANDSCAPE = 3; // 0x3
-    field @FlaggedApi("android.app.customization_packs_apis") public static final int ORIENTATION_SQUARE_PORTRAIT = 2; // 0x2
   }
 
 }

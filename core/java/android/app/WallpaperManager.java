@@ -19,7 +19,6 @@ package android.app;
 import static android.Manifest.permission.MANAGE_EXTERNAL_STORAGE;
 import static android.Manifest.permission.READ_WALLPAPER_INTERNAL;
 import static android.Manifest.permission.SET_WALLPAPER_DIM_AMOUNT;
-import static android.app.Flags.FLAG_CUSTOMIZATION_PACKS_APIS;
 import static android.app.Flags.FLAG_LIVE_WALLPAPER_CONTENT_HANDLING;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
@@ -343,32 +342,24 @@ public class WallpaperManager {
      * Portrait orientation of most screens
      * @hide
      */
-    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
-    @SystemApi
     public static final int ORIENTATION_PORTRAIT = 0;
 
     /**
      * Landscape orientation of most screens
      * @hide
      */
-    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
-    @SystemApi
     public static final int ORIENTATION_LANDSCAPE = 1;
 
     /**
      * Portrait orientation with similar width and height (e.g. the inner screen of a foldable)
      * @hide
      */
-    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
-    @SystemApi
     public static final int ORIENTATION_SQUARE_PORTRAIT = 2;
 
     /**
      * Landscape orientation with similar width and height (e.g. the inner screen of a foldable)
      * @hide
      */
-    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
-    @SystemApi
     public static final int ORIENTATION_SQUARE_LANDSCAPE = 3;
 
     /**
@@ -377,8 +368,6 @@ public class WallpaperManager {
      * @return the corresponding {@link ScreenOrientation}.
      * @hide
      */
-    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
-    @SystemApi
     public static @ScreenOrientation int getOrientation(@NonNull Point screenSize) {
         float ratio = ((float) screenSize.x) / screenSize.y;
         // ratios between 3/4 and 4/3 are considered square
@@ -1665,52 +1654,6 @@ public class WallpaperManager {
     }
 
     /**
-     * For the current user, if the wallpaper of the specified destination is an ImageWallpaper,
-     * return the custom crops of the wallpaper, that have been provided for example via
-     * {@link #setStreamWithCrops}. These crops are relative to the original bitmap.
-     * <p>
-     * This method helps apps that change wallpapers provide an undo option. Calling
-     * {@link #setStreamWithCrops(InputStream, SparseArray, boolean, int)} with this SparseArray and
-     * the current original bitmap file, that can be obtained with {@link #getWallpaperFile(int,
-     * boolean)} with {@code getCropped=false}, will exactly lead to the current wallpaper state.
-     *
-     * @param which wallpaper type. Must be either {@link #FLAG_SYSTEM} or {@link #FLAG_LOCK}.
-     * @return A map from {{@link #ORIENTATION_PORTRAIT}, {@link #ORIENTATION_LANDSCAPE},
-     *          {@link #ORIENTATION_SQUARE_PORTRAIT}, {{@link #ORIENTATION_SQUARE_LANDSCAPE}}} to
-     *          Rect, representing the custom cropHints. The map can be empty and will only contains
-     *          entries for screen orientations for which a custom crop was provided. If no custom
-     *          crop is provided for an orientation, the system will infer the crop based on the
-     *          custom crops of the other orientations; or center-align the full image if no custom
-     *          crops are provided at all.
-     *          <p>
-     *          Return an empty map if the wallpaper is not an ImageWallpaper. Also return
-     *          an empty map when called with which={@link #FLAG_LOCK} if there is a shared
-     *          home + lock wallpaper.
-     *
-     * @hide
-     */
-    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
-    @TestApi
-    @RequiresPermission(READ_WALLPAPER_INTERNAL)
-    @NonNull
-    public SparseArray<Rect> getBitmapCrops(@SetWallpaperFlags int which) {
-        checkExactlyOneWallpaperFlagSet(which);
-        try {
-            Bundle bundle = sGlobals.mService.getCurrentBitmapCrops(which, mContext.getUserId());
-            SparseArray<Rect> result = new SparseArray<>();
-            if (bundle == null) return result;
-            for (String key : bundle.keySet()) {
-                int intKey = Integer.parseInt(key);
-                Rect rect = bundle.getParcelable(key, Rect.class);
-                result.put(intKey, rect);
-            }
-            return result;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
-        }
-    }
-
-    /**
      * For preview purposes.
      * Return how a bitmap of a given size would be cropped for a given list of display sizes, if
      * it was set as wallpaper via {@link #setBitmapWithCrops(Bitmap, Map, boolean, int)} or
@@ -1955,8 +1898,6 @@ public class WallpaperManager {
      *                   which={@link #FLAG_LOCK} if there is a shared home + lock wallpaper.
      * @hide
      */
-    @FlaggedApi(FLAG_CUSTOMIZATION_PACKS_APIS)
-    @SystemApi
     @Nullable
     public ParcelFileDescriptor getWallpaperFile(@SetWallpaperFlags int which, boolean getCropped) {
         return getWallpaperFile(which, mContext.getUserId(), getCropped);
