@@ -126,7 +126,6 @@ import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrim
 import com.android.systemui.statusbar.notification.stack.shared.model.ShadeScrollState;
 import com.android.systemui.statusbar.notification.stack.ui.view.NotificationScrollView;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
-import com.android.systemui.statusbar.phone.ScreenOffAnimationController;
 import com.android.systemui.statusbar.policy.ScrollAdapter;
 import com.android.systemui.statusbar.policy.SplitShadeStateController;
 import com.android.systemui.util.Assert;
@@ -281,11 +280,9 @@ public class NotificationStackScrollLayout
     private boolean mExpandedInThisMotion;
     private boolean mShouldShowShelfOnly;
     protected boolean mScrollingEnabled;
-    private boolean mIsCurrentUserSetup;
     protected FooterView mFooterView;
     protected EmptyShadeView mEmptyShadeView;
     private boolean mClearAllInProgress;
-    private FooterClearAllListener mFooterClearAllListener;
     private boolean mFlingAfterUpEvent;
     /**
      * Was the scroller scrolled to the top when the down motion was observed?
@@ -466,7 +463,6 @@ public class NotificationStackScrollLayout
     boolean mHeadsUpAnimatingAway;
     private Consumer<Boolean> mHeadsUpAnimatingAwayListener;
     private int mStatusBarState;
-    private int mUpcomingStatusBarState;
     private boolean mHeadsUpGoingAwayAnimationsAllowed = true;
     private final Runnable mReflingAndAnimateScroll = this::animateScroll;
     private int mCornerRadius;
@@ -497,7 +493,6 @@ public class NotificationStackScrollLayout
     private float mLastSentExpandedHeight;
     private boolean mWillExpand;
     private int mGapHeight;
-    private boolean mIsRemoteInputActive;
 
     /**
      * The extra inset during the full shade transition
@@ -571,10 +566,8 @@ public class NotificationStackScrollLayout
     private boolean mDismissUsingRowTranslationX = true;
     private ExpandableNotificationRow mTopHeadsUpRow;
     private NotificationStackScrollLayoutController.TouchHandler mTouchHandler;
-    private final ScreenOffAnimationController mScreenOffAnimationController;
     private boolean mShouldUseSplitNotificationShade;
     private boolean mShouldSkipTopPaddingAnimationAfterFold = false;
-    private boolean mHasFilteredOutSeenNotifications;
     @Nullable private SplitShadeStateController mSplitShadeStateController = null;
     private boolean mIsSmallLandscapeLockscreenEnabled = false;
     private boolean mSuppressHeightUpdates;
@@ -635,9 +628,6 @@ public class NotificationStackScrollLayout
     };
 
     @Nullable
-    private OnClickListener mManageButtonClickListener;
-
-    @Nullable
     private WallpaperInteractor mWallpaperInteractor;
 
     public NotificationStackScrollLayout(Context context, AttributeSet attrs) {
@@ -649,8 +639,6 @@ public class NotificationStackScrollLayout
         mDebugLines = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_LINES);
         mDebugRemoveAnimation = mFeatureFlags.isEnabled(Flags.NSSL_DEBUG_REMOVE_ANIMATION);
         mSectionsManager = Dependency.get(NotificationSectionsManager.class);
-        mScreenOffAnimationController =
-                Dependency.get(ScreenOffAnimationController.class);
         mSectionsManager.initialize(this);
         mSections = mSectionsManager.createSectionsForBuckets();
 
@@ -5402,7 +5390,6 @@ public class NotificationStackScrollLayout
             println(pw, "suppressChildrenMeasureLayout", mSuppressChildrenMeasureAndLayout);
             println(pw, "scrollY", mAmbientState.getScrollY());
             println(pw, "showShelfOnly", mShouldShowShelfOnly);
-            println(pw, "isCurrentUserSetup", mIsCurrentUserSetup);
             println(pw, "hideAmount", mAmbientState.getHideAmount());
             println(pw, "ambientStateSwipingUp", mAmbientState.isSwipingUp());
             println(pw, "maxDisplayedNotifications", mMaxDisplayedNotifications);
@@ -6790,10 +6777,6 @@ public class NotificationStackScrollLayout
 
     interface ClearAllListener {
         void onClearAll(@SelectedRows int selectedRows);
-    }
-
-    interface FooterClearAllListener {
-        void onClearAll();
     }
 
     interface ClearAllAnimationListener {
