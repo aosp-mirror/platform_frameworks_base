@@ -99,6 +99,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.apptoweb.AppToWebGenericLinksParser;
 import com.android.wm.shell.apptoweb.AssistContentRequester;
+import com.android.wm.shell.common.ComponentUtils;
 import com.android.wm.shell.common.DisplayChangeController;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -1926,14 +1927,21 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
         //  instances, then refer to the list's size and reuse the list for Manage Windows menu.
         final IActivityTaskManager activityTaskManager = ActivityTaskManager.getService();
         try {
+            // TODO(b/389184897): Move the following into a helper method of
+            //  RecentsTasksController, similar to #findTaskInBackground.
+            final String packageName = ComponentUtils.getPackageName(info);
             return activityTaskManager.getRecentTasks(Integer.MAX_VALUE,
                     ActivityManager.RECENT_WITH_EXCLUDED,
                     info.userId).getList().stream().filter(
-                            recentTaskInfo -> (recentTaskInfo.taskId != info.taskId
-                                    && recentTaskInfo.baseActivity != null
-                                    && recentTaskInfo.baseActivity.getPackageName()
-                                    .equals(info.baseActivity.getPackageName())
-                            )
+                            recentTaskInfo -> {
+                                if (recentTaskInfo.taskId == info.taskId) {
+                                    return false;
+                                }
+                                final String recentTaskPackageName =
+                                        ComponentUtils.getPackageName(recentTaskInfo);
+                                return packageName != null
+                                        && packageName.equals(recentTaskPackageName);
+                            }
             ).toList().size();
         } catch (RemoteException e) {
             throw new RuntimeException(e);
