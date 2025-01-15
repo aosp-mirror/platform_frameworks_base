@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromDozingTransitionInteractor.Companion.TO_PRIMARY_BOUNCER_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
@@ -29,6 +30,7 @@ import com.android.systemui.scene.shared.model.Scenes
 import javax.inject.Inject
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.emptyFlow
 
 /**
  * Breaks down DOZING->PRIMARY BOUNCER transition into discrete steps for corresponding views to
@@ -64,6 +66,13 @@ constructor(private val blurConfig: BlurConfig, animationFlow: KeyguardTransitio
             },
             onFinish = { blurConfig.maxBlurRadiusPx },
         )
+
+    val lockscreenAlpha: Flow<Float> =
+        if (Flags.bouncerUiRevamp()) transitionAnimation.immediatelyTransitionTo(0.0f)
+        else emptyFlow()
+
+    val notificationAlpha: Flow<Float> = lockscreenAlpha
+
     override val notificationBlurRadius: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0f)
 }
