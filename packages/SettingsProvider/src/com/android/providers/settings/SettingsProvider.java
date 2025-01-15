@@ -385,6 +385,9 @@ public class SettingsProvider extends ContentProvider {
 
     private static final Set<String> sDeviceConfigAllowlistedNamespaces = new ArraySet<>();
 
+    // TODO(b/388901162): Remove this when the same constant is exposed as an API in DeviceConfig.
+    private static final String DEVICE_CONFIG_OVERRIDES_NAMESPACE = "device_config_overrides";
+
     // We have to call in the user manager with no lock held,
     private volatile UserManager mUserManager;
 
@@ -2480,12 +2483,21 @@ public class SettingsProvider extends ContentProvider {
             for (String flag : flags) {
                 boolean namespaceAllowed = false;
                 if (isRestrictedShell) {
-                    int delimiterIndex = flag.indexOf("/");
-                    String flagNamespace;
-                    if (delimiterIndex != -1) {
-                        flagNamespace = flag.substring(0, delimiterIndex);
-                    } else {
-                        flagNamespace = flag;
+                    String flagNamespace = getFlagNamespace(flag);
+                    // If the namespace indicates this is a flag override, then the actual
+                    // namespace and flag name should be used for the allowlist verification.
+                    if (DEVICE_CONFIG_OVERRIDES_NAMESPACE.equals(flagNamespace)) {
+                        // Override flags are in the following form:
+                        // device_config_overrides/namespace:flagName
+                        int slashIndex = flag.indexOf("/");
+                        int colonIndex = flag.indexOf(":", slashIndex);
+                        if (slashIndex != -1 && colonIndex != -1 && (slashIndex + 1) < flag.length()
+                                && (colonIndex + 1) < flag.length()) {
+                            flagNamespace = flag.substring(slashIndex + 1, colonIndex);
+                            StringBuilder flagBuilder = new StringBuilder(flagNamespace);
+                            flagBuilder.append("/").append(flag.substring(colonIndex + 1));
+                            flag = flagBuilder.toString();
+                        }
                     }
                     if (allowlistedDeviceConfigNamespaces.contains(flagNamespace)) {
                         namespaceAllowed = true;
@@ -2510,6 +2522,23 @@ public class SettingsProvider extends ContentProvider {
             throw new SecurityException("Permission denial to mutate flag, must have root, "
                 + "WRITE_DEVICE_CONFIG, or WRITE_ALLOWLISTED_DEVICE_CONFIG");
         }
+    }
+
+    /**
+     * Returns the namespace for the provided {@code flag}.
+     * <p>
+     * Flags are expected to be in the form namespace/flagName; if the '/' delimiter does
+     * not exist, then the provided flag is returned as the namespace.
+     */
+    private static String getFlagNamespace(String flag) {
+        int delimiterIndex = flag.indexOf("/");
+        String flagNamespace;
+        if (delimiterIndex != -1) {
+            flagNamespace = flag.substring(0, delimiterIndex);
+        } else {
+            flagNamespace = flag;
+        }
+        return flagNamespace;
     }
 
     // The check is added mainly for auto devices. On auto devices, it is possible that
