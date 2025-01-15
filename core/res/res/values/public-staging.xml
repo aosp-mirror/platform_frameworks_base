@@ -116,7 +116,7 @@
     <public name="adServiceTypes" />
     <!-- @FlaggedApi("android.view.inputmethod.ime_switcher_revamp_api") -->
     <public name="languageSettingsActivity"/>
-    <!-- @FlaggedApi("android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM") -->
+    <!-- @FlaggedApi(android.service.controls.flags.Flags.FLAG_HOME_PANEL_DREAM) -->
     <public name="dreamCategory"/>
     <!-- @FlaggedApi("android.permission.flags.replace_body_sensor_permission_enabled")
          @hide @SystemApi -->
