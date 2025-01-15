@@ -436,8 +436,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
                 logger.logAsyncTaskProgress(entryForLogging, "creating contracted remote view");
-                result.newContentView = createContentView(builder, bindParams.isMinimized,
-                        bindParams.usesIncreasedHeight);
+                result.newContentView = createContentView(builder, bindParams.isMinimized);
             }
 
             if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
@@ -451,8 +450,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                 if (isHeadsUpCompact) {
                     result.newHeadsUpView = builder.createCompactHeadsUpContentView();
                 } else {
-                    result.newHeadsUpView = builder.createHeadsUpContentView(
-                            bindParams.usesIncreasedHeadsUpHeight);
+                    result.newHeadsUpView = builder.createHeadsUpContentView();
                 }
             }
 
@@ -462,7 +460,7 @@ public class NotificationContentInflater implements NotificationRowContentBinder
                         && bindParams.redactionType == REDACTION_TYPE_SENSITIVE_CONTENT) {
                     result.newPublicView = createSensitiveContentMessageNotification(
                             row.getEntry().getSbn().getNotification(), builder.getStyle(),
-                            systemUiContext, packageContext).createContentView(true);
+                            systemUiContext, packageContext).createContentView();
                 } else {
                     result.newPublicView = builder.makePublicContentView(bindParams.isMinimized);
                 }
@@ -1135,11 +1133,11 @@ public class NotificationContentInflater implements NotificationRowContentBinder
     }
 
     private static RemoteViews createContentView(Notification.Builder builder,
-            boolean isMinimized, boolean useLarge) {
+            boolean isMinimized) {
         if (isMinimized) {
             return builder.makeLowPriorityContentView(false /* useRegularSubtext */);
         }
-        return builder.createContentView(useLarge);
+        return builder.createContentView();
     }
 
     /**

@@ -191,12 +191,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private int mMaxHeadsUpHeightBeforeP;
     private int mMaxHeadsUpHeightBeforeS;
     private int mMaxHeadsUpHeight;
-    private int mMaxHeadsUpHeightIncreased;
     private int mMaxSmallHeightBeforeN;
     private int mMaxSmallHeightBeforeP;
     private int mMaxSmallHeightBeforeS;
     private int mMaxSmallHeight;
-    private int mMaxSmallHeightLarge;
     private int mMaxExpandedHeight;
     private int mNotificationLaunchHeight;
     private boolean mMustStayOnScreen;
@@ -414,8 +412,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     private OnUserInteractionCallback mOnUserInteractionCallback;
     private NotificationGutsManager mNotificationGutsManager;
     private boolean mIsMinimized;
-    private boolean mUseIncreasedCollapsedHeight;
-    private boolean mUseIncreasedHeadsUpHeight;
     private float mTranslationWhenRemoved;
     private boolean mWasChildInGroupWhenRemoved;
     private final NotificationInlineImageResolver mImageResolver;
@@ -828,8 +824,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             }
         } else if (isCallLayout) {
             smallHeight = mMaxExpandedHeight;
-        } else if (mUseIncreasedCollapsedHeight && layout == mPrivateLayout) {
-            smallHeight = mMaxSmallHeightLarge;
         } else {
             smallHeight = mMaxSmallHeight;
         }
@@ -845,8 +839,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             } else {
                 headsUpHeight = mMaxHeadsUpHeightBeforeS;
             }
-        } else if (mUseIncreasedHeadsUpHeight && layout == mPrivateLayout) {
-            headsUpHeight = mMaxHeadsUpHeightIncreased;
         } else {
             headsUpHeight = mMaxHeadsUpHeight;
         }
@@ -1848,14 +1840,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         return mIsMinimized;
     }
 
-    public void setUsesIncreasedCollapsedHeight(boolean use) {
-        mUseIncreasedCollapsedHeight = use;
-    }
-
-    public void setUsesIncreasedHeadsUpHeight(boolean use) {
-        mUseIncreasedHeadsUpHeight = use;
-    }
-
     /**
      * Interface for logging {{@link ExpandableNotificationRow} events.}
      */
@@ -2086,8 +2070,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             mMaxSmallHeight = NotificationUtils.getFontScaledHeight(mContext,
                     R.dimen.notification_min_height);
         }
-        mMaxSmallHeightLarge = NotificationUtils.getFontScaledHeight(mContext,
-                R.dimen.notification_min_height_increased);
         mMaxExpandedHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_height);
         mMaxHeadsUpHeightBeforeN = NotificationUtils.getFontScaledHeight(mContext,
@@ -2098,8 +2080,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
                 R.dimen.notification_max_heads_up_height_before_s);
         mMaxHeadsUpHeight = NotificationUtils.getFontScaledHeight(mContext,
                 R.dimen.notification_max_heads_up_height);
-        mMaxHeadsUpHeightIncreased = NotificationUtils.getFontScaledHeight(mContext,
-                R.dimen.notification_max_heads_up_height_increased);
 
         Resources res = getResources();
         mEnableNonGroupedNotificationExpand =
