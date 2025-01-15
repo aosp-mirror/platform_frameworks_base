@@ -180,6 +180,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun addPendingMinimizeTransition_taskIsNotMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task = setUpFreeformTask()
         markTaskHidden(task)
 
@@ -190,6 +192,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun onTransitionReady_noPendingTransition_taskIsNotMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task = setUpFreeformTask()
         markTaskHidden(task)
 
@@ -203,6 +207,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun onTransitionReady_differentPendingTransition_taskIsNotMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val pendingTransition = Binder()
         val taskTransition = Binder()
         val task = setUpFreeformTask()
@@ -219,6 +225,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun onTransitionReady_pendingTransition_noTaskChange_taskVisible_taskIsNotMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val transition = Binder()
         val task = setUpFreeformTask()
         markTaskVisible(task)
@@ -232,6 +240,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Test
     fun onTransitionReady_pendingTransition_noTaskChange_taskInvisible_taskIsMinimized() {
         val transition = Binder()
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task = setUpFreeformTask()
         markTaskHidden(task)
         addPendingMinimizeChange(transition, taskId = task.taskId)
@@ -243,6 +253,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun onTransitionReady_pendingTransition_changeTaskToBack_taskIsMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val transition = Binder()
         val task = setUpFreeformTask()
         addPendingMinimizeChange(transition, taskId = task.taskId)
@@ -257,6 +269,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun onTransitionReady_pendingTransition_changeTaskToBack_boundsSaved() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val bounds = Rect(0, 0, 200, 200)
         val transition = Binder()
         val task = setUpFreeformTask()
@@ -280,6 +294,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun onTransitionReady_transitionMergedFromPending_taskIsMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val mergedTransition = Binder()
         val newTransition = Binder()
         val task = setUpFreeformTask()
@@ -302,6 +318,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Test
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_activeNonMinimizedTasksStillAround_doesNothing() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         desktopTaskRepo.addTask(displayId = DEFAULT_DISPLAY, taskId = 1, isVisible = true)
         desktopTaskRepo.addTask(displayId = DEFAULT_DISPLAY, taskId = 2, isVisible = true)
         desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
@@ -318,6 +336,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Test
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_noMinimizedTasks_doesNothing() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val wct = WindowContainerTransaction()
         desktopTasksLimiter.leftoverMinimizedTasksRemover.removeLeftoverMinimizedTasks(
             DEFAULT_DISPLAY,
@@ -330,6 +350,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Test
     @DisableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_onlyMinimizedTasksLeft_removesAllMinimizedTasks() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task1.taskId)
@@ -351,6 +373,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
     @Test
     @EnableFlags(FLAG_ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION)
     fun removeLeftoverMinimizedTasks_onlyMinimizedTasksLeft_backNavEnabled_doesNothing() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task1 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         val task2 = setUpFreeformTask(displayId = DEFAULT_DISPLAY)
         desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = task1.taskId)
@@ -364,6 +388,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun addAndGetMinimizeTaskChanges_tasksWithinLimit_noTaskMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
 
         val wct = WindowContainerTransaction()
@@ -380,6 +406,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun addAndGetMinimizeTaskChanges_tasksAboveLimit_backTaskMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         // The following list will be ordered bottom -> top, as the last task is moved to top last.
         val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
 
@@ -399,6 +427,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun addAndGetMinimizeTaskChanges_nonMinimizedTasksWithinLimit_noTaskMinimized() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
         desktopTaskRepo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = tasks[0].taskId)
 
@@ -416,6 +446,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getTaskToMinimize_tasksWithinLimit_returnsNull() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
 
         val minimizedTask =
@@ -426,6 +458,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getTaskToMinimize_tasksAboveLimit_returnsBackTask() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val tasks = (1..MAX_TASK_LIMIT + 1).map { setUpFreeformTask() }
 
         val minimizedTask =
@@ -437,6 +471,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getTaskToMinimize_tasksAboveLimit_otherLimit_returnsBackTask() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         desktopTasksLimiter =
             DesktopTasksLimiter(
                 transitions,
@@ -458,6 +494,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getTaskToMinimize_withNewTask_tasksAboveLimit_returnsBackTask() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
 
         val minimizedTask =
@@ -472,6 +510,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getTaskToMinimize_tasksAtLimit_newIntentReturnsBackTask() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val tasks = (1..MAX_TASK_LIMIT).map { setUpFreeformTask() }
         val minimizedTask =
             desktopTasksLimiter.getTaskIdToMinimize(
@@ -486,6 +526,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun minimizeTransitionReadyAndFinished_logsJankInstrumentationBeginAndEnd() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
         val transition = Binder()
         val task = setUpFreeformTask()
@@ -510,6 +552,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun minimizeTransitionReadyAndAborted_logsJankInstrumentationBeginAndCancel() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
         val transition = Binder()
         val task = setUpFreeformTask()
@@ -534,6 +578,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun minimizeTransitionReadyAndMerged_logsJankInstrumentationBeginAndEnd() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         (1..<MAX_TASK_LIMIT).forEach { _ -> setUpFreeformTask() }
         val mergedTransition = Binder()
         val newTransition = Binder()
@@ -566,6 +612,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getMinimizingTask_pendingTaskTransition_returnsTask() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val transition = Binder()
         val task = setUpFreeformTask()
         addPendingMinimizeChange(
@@ -582,6 +630,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getMinimizingTask_activeTaskTransition_returnsTask() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val transition = Binder()
         val task = setUpFreeformTask()
         addPendingMinimizeChange(
@@ -613,6 +663,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getUnminimizingTask_pendingTaskTransition_returnsTask() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val transition = Binder()
         val task = setUpFreeformTask()
         addPendingUnminimizeChange(
@@ -632,6 +684,8 @@ class DesktopTasksLimiterTest : ShellTestCase() {
 
     @Test
     fun getUnminimizingTask_activeTaskTransition_returnsTask() {
+        desktopTaskRepo.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        desktopTaskRepo.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val transition = Binder()
         val task = setUpFreeformTask()
         addPendingMinimizeChange(

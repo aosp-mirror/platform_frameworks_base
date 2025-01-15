@@ -102,6 +102,8 @@ import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler.FULLSCR
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider
 import com.android.wm.shell.desktopmode.minimize.DesktopWindowLimitRemoteHandler
+import com.android.wm.shell.desktopmode.multidesks.DesksOrganizer
+import com.android.wm.shell.desktopmode.multidesks.OnDeskRemovedListener
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
@@ -180,6 +182,7 @@ class DesktopTasksController(
     private val desktopWallpaperActivityTokenProvider: DesktopWallpaperActivityTokenProvider,
     private val bubbleController: Optional<BubbleController>,
     private val overviewToDesktopTransitionObserver: OverviewToDesktopTransitionObserver,
+    private val desksOrganizer: DesksOrganizer,
 ) :
     RemoteCallable<DesktopTasksController>,
     Transitions.TransitionHandler,
@@ -231,6 +234,9 @@ class DesktopTasksController(
     // Launch cookie used to identify a drag and drop transition to fullscreen after it has begun.
     // Used to prevent handleRequest from moving the new fullscreen task to freeform.
     private var dragAndDropFullscreenCookie: Binder? = null
+
+    // A listener that is invoked after a desk has been remove from the system. */
+    var onDeskRemovedListener: OnDeskRemovedListener? = null
 
     init {
         desktopMode = DesktopModeImpl()
@@ -413,6 +419,18 @@ class DesktopTasksController(
         val tdaWindowingMode = tdaInfo.configuration.windowConfiguration.windowingMode
         val isFreeformDisplay = tdaWindowingMode == WINDOWING_MODE_FREEFORM
         return isFreeformDisplay
+    }
+
+    /** Creates a new desk in the given display. */
+    fun createDesk(displayId: Int) {
+        if (Flags.enableMultipleDesktopsBackend()) {
+            desksOrganizer.createDesk(displayId) { deskId ->
+                taskRepository.addDesk(displayId = displayId, deskId = deskId)
+            }
+        } else {
+            // In single-desk, the desk reuses the display id.
+            taskRepository.addDesk(displayId = displayId, deskId = displayId)
+        }
     }
 
     /** Moves task to desktop mode if task is running, else launches it in desktop mode. */

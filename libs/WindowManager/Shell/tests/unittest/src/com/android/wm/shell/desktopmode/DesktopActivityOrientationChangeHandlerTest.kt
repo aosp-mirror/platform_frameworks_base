@@ -183,6 +183,8 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
 
     @Test
     fun handleActivityOrientationChange_resizeable_doNothing() {
+        userRepositories.current.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        userRepositories.current.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task = setUpFreeformTask()
 
         taskStackListener.onActivityRequestedOrientationChanged(
@@ -195,6 +197,8 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
 
     @Test
     fun handleActivityOrientationChange_nonResizeableFullscreen_doNothing() {
+        userRepositories.current.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        userRepositories.current.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task = createFullscreenTask()
         task.isResizeable = false
         val activityInfo = ActivityInfo()
@@ -214,6 +218,8 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
 
     @Test
     fun handleActivityOrientationChange_nonResizeablePortrait_requestSameOrientation_doNothing() {
+        userRepositories.current.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        userRepositories.current.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task = setUpFreeformTask(isResizeable = false)
         val newTask =
             setUpFreeformTask(
@@ -228,6 +234,8 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
 
     @Test
     fun handleActivityOrientationChange_notInDesktopMode_doNothing() {
+        userRepositories.current.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        userRepositories.current.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task = setUpFreeformTask(isResizeable = false)
         userRepositories.current.updateTask(task.displayId, task.taskId, isVisible = false)
 
@@ -241,6 +249,8 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
 
     @Test
     fun handleActivityOrientationChange_nonResizeablePortrait_respectLandscapeRequest() {
+        userRepositories.current.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        userRepositories.current.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val task = setUpFreeformTask(isResizeable = false)
         val oldBounds = task.configuration.windowConfiguration.bounds
         val newTask =
@@ -263,6 +273,8 @@ class DesktopActivityOrientationChangeHandlerTest : ShellTestCase() {
 
     @Test
     fun handleActivityOrientationChange_nonResizeableLandscape_respectPortraitRequest() {
+        userRepositories.current.addDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
+        userRepositories.current.setActiveDesk(displayId = DEFAULT_DISPLAY, deskId = 0)
         val oldBounds = Rect(0, 0, 500, 200)
         val task =
             setUpFreeformTask(

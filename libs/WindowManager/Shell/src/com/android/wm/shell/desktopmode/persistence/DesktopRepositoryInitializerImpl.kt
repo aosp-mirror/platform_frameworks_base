@@ -18,6 +18,7 @@ package com.android.wm.shell.desktopmode.persistence
 
 import android.content.Context
 import android.window.DesktopModeFlags
+import com.android.window.flags.Flags
 import com.android.wm.shell.desktopmode.DesktopRepository
 import com.android.wm.shell.desktopmode.DesktopUserRepositories
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -54,10 +55,22 @@ class DesktopRepositoryInitializerImpl(
                         DesktopModeStatus.getMaxTaskLimit(context).takeIf { it > 0 }
                             ?: persistentDesktop.zOrderedTasksCount
                     var visibleTasksCount = 0
+                    repository.addDesk(
+                        displayId = persistentDesktop.displayId,
+                        deskId =
+                            if (Flags.enableMultipleDesktopsBackend()) {
+                                persistentDesktop.desktopId
+                            } else {
+                                // When disabled, desk ids are always the display id.
+                                persistentDesktop.displayId
+                            },
+                    )
                     persistentDesktop.zOrderedTasksList
                         // Reverse it so we initialize the repo from bottom to top.
                         .reversed()
                         .mapNotNull { taskId -> persistentDesktop.tasksByTaskIdMap[taskId] }
+                        // TODO: b/362720497 - add tasks to their respective desk when multi-desk
+                        //   persistence is implemented.
                         .forEach { task ->
                             if (
                                 task.desktopTaskState == DesktopTaskState.VISIBLE &&

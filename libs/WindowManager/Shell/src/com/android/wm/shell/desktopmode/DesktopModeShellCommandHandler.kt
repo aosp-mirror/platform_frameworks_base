@@ -110,8 +110,8 @@ class DesktopModeShellCommandHandler(private val controller: DesktopTasksControl
                 pw.println("Error: display id should be an integer")
                 return false
             }
-        pw.println("Not implemented.")
-        return false
+        controller.createDesk(displayId)
+        return true
     }
 
     private fun runActivateDesk(args: Array<String>, pw: PrintWriter): Boolean {
