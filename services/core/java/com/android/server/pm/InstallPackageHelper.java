@@ -861,7 +861,6 @@ final class InstallPackageHelper {
             // restore if appropriate, then pass responsibility back to the
             // Package Manager to run the post-install observer callbacks
             // and broadcasts.
-            request.closeFreezer();
             doRestore = performBackupManagerRestore(userId, token, request);
         }
 
@@ -898,8 +897,11 @@ final class InstallPackageHelper {
                 }
             }
         } else {
-            // No restore possible, or the Backup Manager was mysteriously not
-            // available -- just fire the post-install work request directly.
+            // No restore possible, or the Backup Manager was mysteriously not available.
+            // we don't need to wait for restore to complete before closing the freezer,
+            // so we can close the freezer right away.
+            // Also just fire the post-install work request directly.
+            request.closeFreezer();
             if (DEBUG_INSTALL) Log.v(TAG, "No restore - queue post-install for " + token);
 
             Trace.asyncTraceBegin(TRACE_TAG_PACKAGE_MANAGER, "postInstall", token);
