@@ -27,6 +27,7 @@ import android.provider.Settings
 import androidx.annotation.IntRange
 import com.android.internal.util.ConcurrentUtils
 import com.android.settingslib.bluetooth.BluetoothUtils
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.onBroadcastStartedOrStopped
 import com.android.settingslib.bluetooth.onProfileConnectionStateChanged
@@ -70,6 +71,12 @@ interface AudioSharingRepository {
 
     /** The secondary headset groupId in audio sharing. */
     val secondaryGroupId: StateFlow<Int>
+
+    /** Primary audio sharing device. */
+    val primaryDevice: StateFlow<CachedBluetoothDevice?>
+
+    /** Secondary audio sharing device. */
+    val secondaryDevice: StateFlow<CachedBluetoothDevice?>
 
     /** The headset groupId to volume map during audio sharing. */
     val volumeMap: StateFlow<GroupIdToVolumes>
@@ -144,12 +151,31 @@ class AudioSharingRepositoryImpl(
             )
 
     override val secondaryGroupId: StateFlow<Int> =
-        merge(
+        secondaryDevice
+            .map { BluetoothUtils.getGroupId(it) }
+            .onEach { logger.onSecondaryGroupIdChanged(it) }
+            .flowOn(backgroundCoroutineContext)
+            .stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(),
+                BluetoothCsipSetCoordinator.GROUP_ID_INVALID
+            )
+
+    override val primaryDevice: StateFlow<CachedBluetoothDevice?>
+        get() = primaryGroupId.map { getCachedDeviceFromGroupId(it) }
+            .stateIn(
+                coroutineScope,
+                SharingStarted.WhileSubscribed(),
+                null
+            )
+
+    override val secondaryDevice: StateFlow<CachedBluetoothDevice?>
+        get() = merge(
             isAudioSharingProfilesReady.flatMapLatest { ready ->
                 if (ready) {
                     btManager.profileManager.leAudioBroadcastAssistantProfile
                         .onSourceConnectedOrRemoved
-                        .map { getSecondaryGroupId() }
+                        .map { getSecondaryDevice() }
                 } else {
                     emptyFlow()
                 }
@@ -160,15 +186,14 @@ class AudioSharingRepositoryImpl(
                             profileConnection.bluetoothProfile ==
                             BluetoothProfile.LE_AUDIO_BROADCAST_ASSISTANT
                 }
-                .map { getSecondaryGroupId() },
-            primaryGroupId.map { getSecondaryGroupId() })
-            .onStart { emit(getSecondaryGroupId()) }
-            .onEach { logger.onSecondaryGroupIdChanged(it) }
+                .map { getSecondaryDevice() },
+            primaryGroupId.map { getSecondaryDevice() })
+            .onStart { emit(getSecondaryDevice()) }
             .flowOn(backgroundCoroutineContext)
             .stateIn(
                 coroutineScope,
                 SharingStarted.WhileSubscribed(),
-                BluetoothCsipSetCoordinator.GROUP_ID_INVALID
+                null
             )
 
     override val volumeMap: StateFlow<GroupIdToVolumes> =
@@ -257,10 +282,24 @@ class AudioSharingRepositoryImpl(
     private fun isBroadcasting(): Boolean =
         btManager.profileManager.leAudioBroadcastProfile?.isEnabled(null) ?: false
 
-    private fun getSecondaryGroupId(): Int =
-        BluetoothUtils.getGroupId(
-            BluetoothUtils.getSecondaryDeviceForBroadcast(contentResolver, btManager)
-        )
+    private fun getSecondaryDevice(): CachedBluetoothDevice? =
+        BluetoothUtils.getSecondaryDeviceForBroadcast(contentResolver, btManager)
+
+    private suspend fun getCachedDeviceFromGroupId(groupId: Int): CachedBluetoothDevice? =
+        withContext(backgroundCoroutineContext) {
+            btManager
+                .profileManager
+                ?.leAudioBroadcastAssistantProfile
+                ?.allConnectedDevices
+                ?.firstNotNullOfOrNull { device ->
+                    val cachedDevice = btManager.cachedDeviceManager.findDevice(device)
+                    if (BluetoothUtils.getGroupId(cachedDevice) == groupId) {
+                        cachedDevice
+                    } else {
+                        null
+                    }
+                }
+        }
 }
 
 class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
@@ -269,6 +308,10 @@ class AudioSharingRepositoryEmptyImpl : AudioSharingRepository {
         MutableStateFlow(BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
     override val secondaryGroupId: StateFlow<Int> =
         MutableStateFlow(BluetoothCsipSetCoordinator.GROUP_ID_INVALID)
+    override val primaryDevice: StateFlow<CachedBluetoothDevice?>
+        get() = MutableStateFlow(null)
+    override val secondaryDevice: StateFlow<CachedBluetoothDevice?>
+        get() = MutableStateFlow(null)
     override val volumeMap: StateFlow<GroupIdToVolumes> = MutableStateFlow(emptyMap())
 
     override suspend fun audioSharingAvailable(): Boolean = false

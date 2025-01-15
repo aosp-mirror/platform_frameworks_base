@@ -23,19 +23,27 @@ import android.platform.test.annotations.EnableFlags
 import android.service.notification.ZenPolicy
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.notification.modes.TestModeBuilder
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.shared.model.Icon
+import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.applicationCoroutineScope
 import com.android.systemui.kosmos.collectLastValue
 import com.android.systemui.kosmos.runCurrent
 import com.android.systemui.kosmos.runTest
+import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.data.repository.fakeZenModeRepository
 import com.android.systemui.testKosmos
+import com.android.systemui.volume.data.repository.audioSharingRepository
 import com.google.common.truth.Truth.assertThat
+import kotlinx.coroutines.test.runCurrent
+import kotlinx.coroutines.test.runTest
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
 
 @SmallTest
 @RunWith(AndroidJUnit4::class)
@@ -145,5 +153,26 @@ class AudioStreamSliderViewModelTest : SysuiTestCase() {
 
             assertThat(notificationSlider!!.disabledMessage)
                 .isEqualTo("Unavailable because ring is muted")
+        }
+
+    @Test
+    @EnableFlags(com.android.systemui.Flags.FLAG_SHOW_AUDIO_SHARING_SLIDER_IN_VOLUME_PANEL)
+    fun slider_media_inAudioSharing() =
+        kosmos.runTest {
+            val mediaSlider by
+                collectLastValue(audioStreamSliderViewModel(AudioManager.STREAM_MUSIC).slider)
+
+            val cachedDevice: CachedBluetoothDevice = mock {
+                on { groupId }.thenReturn(123)
+                on { name }.thenReturn("my headset 1")
+            }
+
+            audioSharingRepository.setInAudioSharing(true)
+            audioSharingRepository.setPrimaryDevice(cachedDevice)
+            runCurrent()
+
+            assertThat(mediaSlider!!.label).isEqualTo("my headset 1")
+            assertThat(mediaSlider!!.icon)
+                .isEqualTo(Icon.Resource(R.drawable.ic_volume_media_bt, null))
         }
 }

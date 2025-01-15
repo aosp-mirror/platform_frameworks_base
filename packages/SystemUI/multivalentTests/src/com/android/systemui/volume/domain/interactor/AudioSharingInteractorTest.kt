@@ -16,11 +16,16 @@
 
 package com.android.systemui.volume.domain.interactor
 
+import android.bluetooth.BluetoothDevice
 import android.media.AudioManager.STREAM_MUSIC
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
+import com.android.settingslib.bluetooth.LocalBluetoothLeBroadcastAssistant
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.bluetooth.cachedBluetoothDeviceManager
+import com.android.systemui.bluetooth.localBluetoothProfileManager
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.testKosmos
@@ -32,6 +37,8 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @RunWith(AndroidJUnit4::class)
@@ -39,10 +46,23 @@ import org.junit.runner.RunWith
 class AudioSharingInteractorTest : SysuiTestCase() {
     private val kosmos = testKosmos()
     lateinit var underTest: AudioSharingInteractor
+    private val bluetoothDevice: BluetoothDevice = mock {}
+    private val cachedDevice: CachedBluetoothDevice = mock {
+        on { groupId }.thenReturn(TEST_GROUP_ID)
+        on { device }.thenReturn(bluetoothDevice)
+    }
 
     @Before
     fun setUp() {
         with(kosmos) {
+            whenever(cachedBluetoothDeviceManager.findDevice(bluetoothDevice))
+                .thenReturn(cachedDevice)
+            val broadcastAssistantProfile: LocalBluetoothLeBroadcastAssistant = mock {
+                on { allConnectedDevices }.thenReturn(listOf(bluetoothDevice))
+            }
+            whenever(localBluetoothProfileManager.leAudioBroadcastAssistantProfile)
+                .thenReturn(broadcastAssistantProfile)
+
             with(audioSharingRepository) { setVolumeMap(mapOf(TEST_GROUP_ID to TEST_VOLUME)) }
             underTest = audioSharingInteractor
         }
@@ -85,6 +105,35 @@ class AudioSharingInteractorTest : SysuiTestCase() {
                 runCurrent()
 
                 Truth.assertThat(musicStream?.volume).isEqualTo(preVolume)
+            }
+        }
+    }
+
+    @Test
+    fun getPrimaryDevice() {
+        with(kosmos) {
+            testScope.runTest {
+                with(audioSharingRepository) { setPrimaryDevice(cachedDevice) }
+                underTest.handlePrimaryGroupChange()
+
+                val primaryDevice by collectLastValue(underTest.primaryDevice)
+                runCurrent()
+
+                Truth.assertThat(primaryDevice).isEqualTo(cachedDevice)
+            }
+        }
+    }
+
+    @Test
+    fun getSecondaryDevice() {
+        with(kosmos) {
+            testScope.runTest {
+                with(audioSharingRepository) { setSecondaryDevice(cachedDevice) }
+
+                val secondaryDevice by collectLastValue(underTest.secondaryDevice)
+                runCurrent()
+
+                Truth.assertThat(secondaryDevice).isEqualTo(cachedDevice)
             }
         }
     }

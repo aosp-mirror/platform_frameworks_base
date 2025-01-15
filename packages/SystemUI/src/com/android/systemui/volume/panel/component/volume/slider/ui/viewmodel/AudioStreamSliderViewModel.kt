@@ -21,6 +21,7 @@ import android.media.AudioManager
 import android.util.Log
 import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.internal.logging.UiEventLogger
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.volume.domain.interactor.AudioVolumeInteractor
 import com.android.settingslib.volume.shared.model.AudioStream
 import com.android.settingslib.volume.shared.model.AudioStreamModel
@@ -31,6 +32,8 @@ import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
 import com.android.systemui.modes.shared.ModesUiIcons
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
+import com.android.systemui.util.kotlin.combine
+import com.android.systemui.volume.domain.interactor.AudioSharingInteractor
 import com.android.systemui.volume.panel.shared.VolumePanelLogger
 import com.android.systemui.volume.panel.ui.VolumePanelUiEvent
 import dagger.assisted.Assisted
@@ -42,7 +45,6 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.launchIn
@@ -59,6 +61,7 @@ constructor(
     private val context: Context,
     private val audioVolumeInteractor: AudioVolumeInteractor,
     private val zenModeInteractor: ZenModeInteractor,
+    private val audioSharingInteractor: AudioSharingInteractor,
     private val uiEventLogger: UiEventLogger,
     private val volumePanelLogger: VolumePanelLogger,
     private val hapticsViewModelFactory: SliderHapticsViewModel.Factory,
@@ -66,14 +69,6 @@ constructor(
 
     private val volumeChanges = MutableStateFlow<Int?>(null)
     private val audioStream = audioStreamWrapper.audioStream
-    private val iconsByStream =
-        mapOf(
-            AudioStream(AudioManager.STREAM_MUSIC) to R.drawable.ic_music_note,
-            AudioStream(AudioManager.STREAM_VOICE_CALL) to R.drawable.ic_call,
-            AudioStream(AudioManager.STREAM_RING) to R.drawable.ic_ring_volume,
-            AudioStream(AudioManager.STREAM_NOTIFICATION) to R.drawable.ic_volume_ringer,
-            AudioStream(AudioManager.STREAM_ALARM) to R.drawable.ic_volume_alarm,
-        )
     private val labelsByStream =
         mapOf(
             AudioStream(AudioManager.STREAM_MUSIC) to R.string.stream_music,
@@ -102,9 +97,18 @@ constructor(
                 audioVolumeInteractor.canChangeVolume(audioStream),
                 audioVolumeInteractor.ringerMode,
                 streamDisabledMessage(),
-            ) { model, isEnabled, ringerMode, streamDisabledMessage ->
+                audioSharingInteractor.isInAudioSharing,
+                audioSharingInteractor.primaryDevice,
+            ) { model, isEnabled, ringerMode, streamDisabledMessage, isInAudioSharing, primaryDevice
+                ->
                 volumePanelLogger.onVolumeUpdateReceived(audioStream, model.volume)
-                model.toState(isEnabled, ringerMode, streamDisabledMessage)
+                model.toState(
+                    isEnabled,
+                    ringerMode,
+                    streamDisabledMessage,
+                    isInAudioSharing,
+                    primaryDevice,
+                )
             }
             .stateIn(coroutineScope, SharingStarted.Eagerly, SliderState.Empty)
 
@@ -147,14 +151,15 @@ constructor(
         isEnabled: Boolean,
         ringerMode: RingerMode,
         disabledMessage: String?,
+        inAudioSharing: Boolean,
+        primaryDevice: CachedBluetoothDevice?,
     ): State {
-        val label =
-            labelsByStream[audioStream]?.let(context::getString)
-                ?: error("No label for the stream: $audioStream")
+        val label = getLabel(inAudioSharing, primaryDevice)
+        val icon = getIcon(ringerMode, inAudioSharing)
         return State(
             value = volume.toFloat(),
             valueRange = volumeRange.first.toFloat()..volumeRange.last.toFloat(),
-            icon = getIcon(ringerMode),
+            icon = icon,
             label = label,
             disabledMessage = disabledMessage,
             isEnabled = isEnabled,
@@ -222,7 +227,22 @@ constructor(
         }
     }
 
-    private fun AudioStreamModel.getIcon(ringerMode: RingerMode): Icon {
+    private fun AudioStreamModel.getLabel(
+        inAudioSharing: Boolean,
+        primaryDevice: CachedBluetoothDevice?,
+    ): String =
+        if (
+            Flags.showAudioSharingSliderInVolumePanel() &&
+                audioStream.value == AudioManager.STREAM_MUSIC &&
+                inAudioSharing
+        ) {
+            primaryDevice?.name ?: context.getString(R.string.stream_music)
+        } else {
+            labelsByStream[audioStream]?.let(context::getString)
+                ?: error("No label for the stream: $audioStream")
+        }
+
+    private fun AudioStreamModel.getIcon(ringerMode: RingerMode, inAudioSharing: Boolean): Icon {
         val iconRes =
             if (isMuted) {
                 if (isAffectedByRingerMode) {
@@ -232,17 +252,35 @@ constructor(
                         R.drawable.ic_volume_off
                     }
                 } else {
-                    R.drawable.ic_volume_off
+                    if (
+                        Flags.showAudioSharingSliderInVolumePanel() &&
+                            audioStream.value == AudioManager.STREAM_MUSIC &&
+                            inAudioSharing
+                    ) {
+                        R.drawable.ic_volume_media_bt_mute
+                    } else R.drawable.ic_volume_off
                 }
             } else {
-                iconsByStream[audioStream]
-                    ?: run {
-                        Log.wtf(TAG, "No icon for the stream: $audioStream")
-                        R.drawable.ic_music_note
-                    }
+                getIconByStream(audioStream, inAudioSharing)
             }
         return Icon.Resource(iconRes, null)
     }
+
+    private fun getIconByStream(audioStream: AudioStream, inAudioSharing: Boolean): Int =
+        when (audioStream.value) {
+            AudioManager.STREAM_MUSIC ->
+                if (Flags.showAudioSharingSliderInVolumePanel() && inAudioSharing) {
+                    R.drawable.ic_volume_media_bt
+                } else R.drawable.ic_music_note
+            AudioManager.STREAM_VOICE_CALL -> R.drawable.ic_call
+            AudioManager.STREAM_RING -> R.drawable.ic_ring_volume
+            AudioManager.STREAM_NOTIFICATION -> R.drawable.ic_volume_ringer
+            AudioManager.STREAM_ALARM -> R.drawable.ic_volume_alarm
+            else -> {
+                Log.wtf(TAG, "No icon for the stream: $audioStream")
+                R.drawable.ic_music_note
+            }
+        }
 
     private val AudioStreamModel.volumeRange: IntRange
         get() = minVolume..maxVolume

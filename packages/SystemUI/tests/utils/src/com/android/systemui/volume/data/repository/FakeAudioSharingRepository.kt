@@ -16,6 +16,7 @@
 
 package com.android.systemui.volume.data.repository
 
+import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.volume.data.repository.AudioSharingRepository
 import com.android.settingslib.volume.data.repository.GroupIdToVolumes
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -28,11 +29,17 @@ class FakeAudioSharingRepository : AudioSharingRepository {
         MutableStateFlow(TEST_GROUP_ID_INVALID)
     private val mutableSecondaryGroupId: MutableStateFlow<Int> =
         MutableStateFlow(TEST_GROUP_ID_INVALID)
+    private val mutablePrimaryDevice: MutableStateFlow<CachedBluetoothDevice?> =
+        MutableStateFlow(null)
+    private val mutableSecondaryDevice: MutableStateFlow<CachedBluetoothDevice?> =
+        MutableStateFlow(null)
     private val mutableVolumeMap: MutableStateFlow<GroupIdToVolumes> = MutableStateFlow(emptyMap())
 
     override val inAudioSharing: StateFlow<Boolean> = mutableInAudioSharing
     override val primaryGroupId: StateFlow<Int> = mutablePrimaryGroupId
     override val secondaryGroupId: StateFlow<Int> = mutableSecondaryGroupId
+    override val primaryDevice: StateFlow<CachedBluetoothDevice?> = mutablePrimaryDevice
+    override val secondaryDevice: StateFlow<CachedBluetoothDevice?> = mutableSecondaryDevice
     override val volumeMap: StateFlow<GroupIdToVolumes> = mutableVolumeMap
 
     override suspend fun audioSharingAvailable(): Boolean = mutableAvailable
@@ -53,6 +60,14 @@ class FakeAudioSharingRepository : AudioSharingRepository {
 
     fun setSecondaryGroupId(groupId: Int) {
         mutableSecondaryGroupId.value = groupId
+    }
+
+    fun setPrimaryDevice(device: CachedBluetoothDevice?) {
+        mutablePrimaryDevice.value = device
+    }
+
+    fun setSecondaryDevice(device: CachedBluetoothDevice?) {
+        mutableSecondaryDevice.value = device
     }
 
     fun setVolumeMap(volumeMap: GroupIdToVolumes) {
