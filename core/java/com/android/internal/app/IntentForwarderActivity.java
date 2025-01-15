@@ -689,14 +689,15 @@ public class IntentForwarderActivity extends Activity  {
     }
 
     private void setMiniresolverPadding() {
-        Insets systemWindowInsets =
-                getWindowManager().getCurrentWindowMetrics().getWindowInsets().getInsets(
-                        WindowInsets.Type.systemBars());
-
         View buttonContainer = findViewById(R.id.button_bar_container);
-        buttonContainer.setPadding(0, 0, 0,
-                systemWindowInsets.bottom + getResources().getDimensionPixelOffset(
-                        R.dimen.resolver_button_bar_spacing));
+        if (buttonContainer != null) {
+            Insets systemWindowInsets =
+                    getWindowManager().getCurrentWindowMetrics().getWindowInsets().getInsets(
+                            WindowInsets.Type.systemBars());
+            buttonContainer.setPadding(0, 0, 0,
+                    systemWindowInsets.bottom + getResources().getDimensionPixelOffset(
+                            R.dimen.resolver_button_bar_spacing));
+        }
     }
 
     @VisibleForTesting
