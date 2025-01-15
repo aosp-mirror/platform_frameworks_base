@@ -14,9 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.wm.shell
-
-import com.android.wm.shell.common.ShellExecutor
+package com.android.wm.shell.common
 
 /**
  * Simple implementation of [ShellExecutor] that collects all runnables and executes them
