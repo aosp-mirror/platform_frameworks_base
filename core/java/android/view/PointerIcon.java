@@ -514,10 +514,14 @@ public final class PointerIcon implements Parcelable {
             final TypedArray a = resources.obtainAttributes(
                     parser, com.android.internal.R.styleable.PointerIcon);
             bitmapRes = a.getResourceId(com.android.internal.R.styleable.PointerIcon_bitmap, 0);
-            hotSpotX = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0)
-                    * pointerScale;
-            hotSpotY = a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0)
-                    * pointerScale;
+            // Cast the hotspot dimensions to int before scaling to match the scaling logic of
+            // the bitmap, whose intrinsic size is also an int before it is scaled.
+            final int unscaledHotSpotX =
+                    (int) a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotX, 0);
+            final int unscaledHotSpotY =
+                    (int) a.getDimension(com.android.internal.R.styleable.PointerIcon_hotSpotY, 0);
+            hotSpotX = unscaledHotSpotX * pointerScale;
+            hotSpotY = unscaledHotSpotY * pointerScale;
             a.recycle();
         } catch (Exception ex) {
             throw new IllegalArgumentException("Exception parsing pointer icon resource.", ex);

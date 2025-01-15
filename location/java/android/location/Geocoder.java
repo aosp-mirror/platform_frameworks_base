@@ -83,8 +83,11 @@ public final class Geocoder {
      * succeed.
      */
     public static boolean isPresent() {
-        ILocationManager lm = Objects.requireNonNull(ILocationManager.Stub.asInterface(
-                ServiceManager.getService(Context.LOCATION_SERVICE)));
+        ILocationManager lm = ILocationManager.Stub.asInterface(
+                ServiceManager.getService(Context.LOCATION_SERVICE));
+        if (lm == null) {
+            return false;
+        }
         try {
             return lm.isGeocodeAvailable();
         } catch (RemoteException e) {

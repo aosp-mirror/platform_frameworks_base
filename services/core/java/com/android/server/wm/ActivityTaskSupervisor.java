@@ -1655,6 +1655,12 @@ public class ActivityTaskSupervisor implements RecentTasks.Callbacks {
         activityIdleInternal(null /* idleActivity */, false /* fromTimeout */,
                 true /* processPausingActivities */, null /* configuration */);
 
+        if (rootTask.getParent() == null) {
+            // The activities in the task may already be finishing. Then the task could be removed
+            // when performing the idle check.
+            return;
+        }
+
         // Reparent all the tasks to the bottom of the display
         final DisplayContent toDisplay =
                 mRootWindowContainer.getDisplayContent(DEFAULT_DISPLAY);

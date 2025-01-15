@@ -4479,7 +4479,7 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        public Transaction setDesintationFrame(SurfaceControl sc, @NonNull Rect destinationFrame) {
+        public Transaction setDestinationFrame(SurfaceControl sc, @NonNull Rect destinationFrame) {
             checkPreconditions(sc);
             nativeSetDestinationFrame(mNativeObject, sc.mNativeObject,
                     destinationFrame.left, destinationFrame.top, destinationFrame.right,
@@ -4490,7 +4490,7 @@ public final class SurfaceControl implements Parcelable {
         /**
          * @hide
          */
-        public Transaction setDesintationFrame(SurfaceControl sc, int width, int height) {
+        public Transaction setDestinationFrame(SurfaceControl sc, int width, int height) {
             checkPreconditions(sc);
             nativeSetDestinationFrame(mNativeObject, sc.mNativeObject, 0, 0, width, height);
             return this;
