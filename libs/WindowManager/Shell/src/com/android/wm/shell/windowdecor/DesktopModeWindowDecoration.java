@@ -204,6 +204,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
     private final MultiInstanceHelper mMultiInstanceHelper;
     private final WindowDecorCaptionHandleRepository mWindowDecorCaptionHandleRepository;
     private final DesktopUserRepositories mDesktopUserRepositories;
+    private boolean mIsRecentsTransitionRunning = false;
 
     private Runnable mLoadAppInfoRunnable;
     private Runnable mSetAppInfoRunnable;
@@ -498,7 +499,7 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 applyStartTransactionOnDraw, shouldSetTaskVisibilityPositionAndCrop,
                 mIsStatusBarVisible, mIsKeyguardVisibleAndOccluded, inFullImmersive,
                 mDisplayController.getInsetsState(taskInfo.displayId), hasGlobalFocus,
-                displayExclusionRegion);
+                displayExclusionRegion, mIsRecentsTransitionRunning);
 
         final WindowDecorLinearLayout oldRootView = mResult.mRootView;
         final SurfaceControl oldDecorationSurface = mDecorationContainerSurface;
@@ -869,7 +870,8 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
             boolean inFullImmersiveMode,
             @NonNull InsetsState displayInsetsState,
             boolean hasGlobalFocus,
-            @NonNull Region displayExclusionRegion) {
+            @NonNull Region displayExclusionRegion,
+            boolean shouldIgnoreCornerRadius) {
         final int captionLayoutId = getDesktopModeWindowDecorLayoutId(taskInfo.getWindowingMode());
         final boolean isAppHeader =
                 captionLayoutId == R.layout.desktop_mode_app_header;
@@ -1006,11 +1008,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
         relayoutParams.mWindowDecorConfig = windowDecorConfig;
 
         if (DesktopModeStatus.useRoundedCorners()) {
-            relayoutParams.mCornerRadius = taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM
-                    ? loadDimensionPixelSize(context.getResources(),
-                    R.dimen.desktop_windowing_freeform_rounded_corner_radius)
-                    : INVALID_CORNER_RADIUS;
+            relayoutParams.mCornerRadius = shouldIgnoreCornerRadius ? INVALID_CORNER_RADIUS :
+                    getCornerRadius(context, relayoutParams.mLayoutResId);
         }
+    }
+
+    private static int getCornerRadius(@NonNull Context context, int layoutResId) {
+        if (layoutResId == R.layout.desktop_mode_app_header) {
+            return loadDimensionPixelSize(context.getResources(),
+                    R.dimen.desktop_windowing_freeform_rounded_corner_radius);
+        }
+        return INVALID_CORNER_RADIUS;
     }
 
     /**
@@ -1737,6 +1745,17 @@ public class DesktopModeWindowDecoration extends WindowDecoration<WindowDecorLin
                 inFullImmersive,
                 isFocused(),
                 /* maximizeHoverEnabled= */ canOpenMaximizeMenu(animatingTaskResizeOrReposition)));
+    }
+
+    /**
+     * Declares whether a Recents transition is currently active.
+     *
+     * <p> When a Recents transition is active we allow that transition to take ownership of the
+     * corner radius of its task surfaces, so each window decoration should stop updating the corner
+     * radius of its task surface during that time.
+     */
+    void setIsRecentsTransitionRunning(boolean isRecentsTransitionRunning) {
+        mIsRecentsTransitionRunning = isRecentsTransitionRunning;
     }
 
     /**

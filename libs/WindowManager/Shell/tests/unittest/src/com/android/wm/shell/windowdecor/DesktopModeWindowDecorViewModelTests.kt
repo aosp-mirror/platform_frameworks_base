@@ -59,11 +59,12 @@ import com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn
 import com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession
 import com.android.window.flags.Flags
 import com.android.wm.shell.R
-import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.desktopmode.DesktopImmersiveController
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
+import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
+import com.android.wm.shell.recents.RecentsTransitionStateListener
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.splitscreen.SplitScreenController
@@ -539,7 +540,8 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         onLeftSnapClickListenerCaptor.value.invoke()
 
         verify(mockDesktopTasksController, never())
-            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.LEFT),
+            .snapToHalfScreen(
+                eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.LEFT),
                 eq(ResizeTrigger.MAXIMIZE_BUTTON),
                 eq(InputMethod.UNKNOWN_INPUT_METHOD),
                 eq(decor),
@@ -616,11 +618,12 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
         onRightSnapClickListenerCaptor.value.invoke()
 
         verify(mockDesktopTasksController, never())
-            .snapToHalfScreen(eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.RIGHT),
+            .snapToHalfScreen(
+                eq(decor.mTaskInfo), any(), eq(currentBounds), eq(SnapPosition.RIGHT),
                 eq(ResizeTrigger.MAXIMIZE_BUTTON),
                 eq(InputMethod.UNKNOWN_INPUT_METHOD),
                 eq(decor),
-        )
+            )
     }
 
     @Test
@@ -1221,6 +1224,49 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
 
         verify(task).onExclusionRegionChanged(newRegion)
         verify(task2, never()).onExclusionRegionChanged(newRegion)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX)
+    fun testRecentsTransitionStateListener_requestedState_setsTransitionRunning() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration = setUpMockDecorationForTask(task)
+        onTaskOpening(task, SurfaceControl())
+
+        desktopModeRecentsTransitionStateListener.onTransitionStateChanged(
+            RecentsTransitionStateListener.TRANSITION_STATE_REQUESTED)
+
+        verify(decoration).setIsRecentsTransitionRunning(true)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX)
+    fun testRecentsTransitionStateListener_nonRunningState_setsTransitionNotRunning() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration = setUpMockDecorationForTask(task)
+        onTaskOpening(task, SurfaceControl())
+        desktopModeRecentsTransitionStateListener.onTransitionStateChanged(
+            RecentsTransitionStateListener.TRANSITION_STATE_REQUESTED)
+
+        desktopModeRecentsTransitionStateListener.onTransitionStateChanged(
+            RecentsTransitionStateListener.TRANSITION_STATE_NOT_RUNNING)
+
+        verify(decoration).setIsRecentsTransitionRunning(false)
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_DESKTOP_RECENTS_TRANSITIONS_CORNERS_BUGFIX)
+    fun testRecentsTransitionStateListener_requestedAndAnimating_setsTransitionRunningOnce() {
+        val task = createTask(windowingMode = WINDOWING_MODE_FREEFORM)
+        val decoration = setUpMockDecorationForTask(task)
+        onTaskOpening(task, SurfaceControl())
+
+        desktopModeRecentsTransitionStateListener.onTransitionStateChanged(
+            RecentsTransitionStateListener.TRANSITION_STATE_REQUESTED)
+        desktopModeRecentsTransitionStateListener.onTransitionStateChanged(
+            RecentsTransitionStateListener.TRANSITION_STATE_ANIMATING)
+
+        verify(decoration, times(1)).setIsRecentsTransitionRunning(true)
     }
 
     private fun createOpenTaskDecoration(
