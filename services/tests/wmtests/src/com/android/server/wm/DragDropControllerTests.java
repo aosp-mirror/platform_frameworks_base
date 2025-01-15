@@ -118,7 +118,8 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     static class TestDragDropController extends DragDropController {
         private Runnable mCloseCallback;
-        boolean mDeferDragStateClosed;
+        private boolean mDeferDragStateClosed;
+        private DragState mPendingCloseDragState;
         boolean mIsAccessibilityDrag;
 
         TestDragDropController(WindowManagerService service, Looper looper) {
@@ -135,9 +136,26 @@ public class DragDropControllerTests extends WindowTestsBase {
             }
         }
 
+        /**
+         * Caller of this is expected to also call
+         * {@link TestDragDropController#continueDragStateClose} to properly close and clean up
+         * DragState.
+         */
+        void deferDragStateClose() {
+            mDeferDragStateClosed = true;
+        }
+
+        void continueDragStateClose() {
+            mDeferDragStateClosed = false;
+            if (mPendingCloseDragState != null) {
+                onDragStateClosedLocked(mPendingCloseDragState);
+            }
+        }
+
         @Override
         void onDragStateClosedLocked(DragState dragState) {
             if (mDeferDragStateClosed) {
+                mPendingCloseDragState = dragState;
                 return;
             }
             super.onDragStateClosedLocked(dragState);
@@ -264,7 +282,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                     // Verify after consuming that the drag surface is relinquished
                     try {
-                        mTarget.mDeferDragStateClosed = true;
+                        mTarget.deferDragStateClose();
                         mTarget.reportDropWindow(mWindow.mInputChannelToken, 0, 0);
                         // Verify the drop event includes the drag surface
                         mTarget.handleMotionEvent(false, mWindow.getDisplayId(), 0, 0);
@@ -273,9 +291,9 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                         mTarget.reportDropResult(iwindow, true);
                     } finally {
-                        mTarget.mDeferDragStateClosed = false;
+                        assertTrue(mTarget.dragSurfaceRelinquishedToDropTarget());
+                        mTarget.continueDragStateClose();
                     }
-                    assertTrue(mTarget.dragSurfaceRelinquishedToDropTarget());
                 });
     }
 
@@ -350,7 +368,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                             | View.DRAG_FLAG_START_INTENT_SENDER_ON_UNHANDLED_DRAG));
 
                     try {
-                        mTarget.mDeferDragStateClosed = true;
+                        mTarget.deferDragStateClose();
                         mTarget.reportDropWindow(mWindow.mInputChannelToken, 0, 0);
                         // Verify the drop event does not have the drag flags
                         mTarget.handleMotionEvent(false, mWindow.getDisplayId(), 0, 0);
@@ -360,7 +378,7 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                         mTarget.reportDropResult(iwindow, true);
                     } finally {
-                        mTarget.mDeferDragStateClosed = false;
+                        mTarget.continueDragStateClose();
                     }
                 });
     }
@@ -401,7 +419,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     assertEquals(-startOffsetPx, dragEvent2.getY(), 0.0 /* delta */);
 
                     try {
-                        mTarget.mDeferDragStateClosed = true;
+                        mTarget.deferDragStateClose();
                         // x, y is window-local coordinate.
                         mTarget.reportDropWindow(window2.mInputChannelToken, dropCoordsPx,
                                 dropCoordsPx);
@@ -424,7 +442,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                         assertEquals(ACTION_DRAG_ENDED, last(dragEvents2).getAction());
                         assertEquals(window2.getDisplayId(), last(dragEvents2).getDisplayId());
                     } finally {
-                        mTarget.mDeferDragStateClosed = false;
+                        mTarget.continueDragStateClose();
                     }
                 });
     }
@@ -463,7 +481,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     assertEquals(-window2.getBounds().top - 1, dragEvent2.getY(), 0.0 /* delta */);
 
                     try {
-                        mTarget.mDeferDragStateClosed = true;
+                        mTarget.deferDragStateClose();
                         mTarget.handleMotionEvent(true, testDisplay.getDisplayId(), dropCoordsPx,
                                 dropCoordsPx);
                         // x, y is window-local coordinate.
@@ -488,7 +506,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                         assertEquals(ACTION_DRAG_ENDED, last(dragEvents2).getAction());
                         assertEquals(testDisplay.getDisplayId(), last(dragEvents2).getDisplayId());
                     } finally {
-                        mTarget.mDeferDragStateClosed = false;
+                        mTarget.continueDragStateClose();
                     }
                 });
     }
