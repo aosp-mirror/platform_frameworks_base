@@ -84,7 +84,16 @@ constructor(@ShadeDisplayAware private val sysuiContext: Context, dumpManager: D
         init {
             if (notificationsRedesignThemedAppIcons()) {
                 // Initialize the controller so that we can support themed icons.
-                mThemeController = MonoIconThemeController()
+                mThemeController =
+                    MonoIconThemeController(
+                        colorProvider = { ctx ->
+                            val res = ctx.resources
+                            intArrayOf(
+                                /* background */ res.getColor(R.color.materialColorPrimary),
+                                /* icon */ res.getColor(R.color.materialColorSurfaceContainerHigh),
+                            )
+                        }
+                    )
             }
         }
     }
