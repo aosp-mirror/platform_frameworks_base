@@ -16,6 +16,7 @@
 
 package com.android.internal.app;
 
+import static android.content.ContentProvider.getUriWithoutUserId;
 import static android.content.ContentProvider.getUserIdFromUri;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
@@ -30,7 +31,9 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.app.ActivityManager;
+import android.app.IUriGrantsManager;
 import android.app.SharedElementCallback;
+import android.app.UriGrantsManager;
 import android.app.prediction.AppPredictionContext;
 import android.app.prediction.AppPredictionManager;
 import android.app.prediction.AppPredictor;
@@ -67,6 +70,7 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
+import android.graphics.drawable.Icon;
 import android.metrics.LogMaker;
 import android.net.Uri;
 import android.os.AsyncTask;
@@ -745,7 +749,11 @@ public class ChooserActivity extends ResolverActivity implements
                     targets = null;
                     break;
                 }
-                targets[i] = (ChooserTarget) pa[i];
+                ChooserTarget chooserTarget = (ChooserTarget) pa[i];
+                if (!hasValidIcon(chooserTarget)) {
+                    chooserTarget = removeIcon(chooserTarget);
+                }
+                targets[i] = chooserTarget;
             }
             mCallerChooserTargets = targets;
         }
@@ -4010,6 +4018,7 @@ public class ChooserActivity extends ResolverActivity implements
                             mChooserActivity.createContextAsUser(mUserHandle, 0 /* flags */);
                     mChooserActivity.filterServiceTargets(contextAsUser,
                             mOriginalTarget.getResolveInfo().activityInfo.packageName, targets);
+                    targets = mChooserActivity.removeUnaccessibleIcons(targets);
                     final Message msg = Message.obtain();
                     msg.what = ChooserHandler.CHOOSER_TARGET_SERVICE_RESULT;
                     msg.obj = new ServiceResultInfo(mOriginalTarget, targets,
@@ -4271,5 +4280,55 @@ public class ChooserActivity extends ResolverActivity implements
     @Override
     protected void maybeLogProfileChange() {
         getChooserActivityLogger().logShareheetProfileChanged();
+    }
+
+    private List<ChooserTarget> removeUnaccessibleIcons(@Nullable List<ChooserTarget> targets) {
+        if (targets == null) {
+            return null;
+        }
+        ArrayList<ChooserTarget> checkedTargets = new ArrayList<>(targets.size());
+        for (ChooserTarget target: targets) {
+            checkedTargets.add(hasValidIcon(target) ? target : removeIcon(target));
+        }
+        return checkedTargets;
+    }
+
+    private boolean hasValidIcon(ChooserTarget target) {
+        Icon icon = target.getIcon();
+        if (icon == null) {
+            return true;
+        }
+        if (icon.getType() == Icon.TYPE_URI || icon.getType() == Icon.TYPE_URI_ADAPTIVE_BITMAP) {
+            Uri uri = icon.getUri();
+            try {
+                getUriGrantsManager().checkGrantUriPermission_ignoreNonSystem(
+                        getLaunchedFromUid(),
+                        getPackageName(),
+                        getUriWithoutUserId(uri),
+                        Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                        getUserIdFromUri(uri)
+                );
+            } catch (SecurityException | RemoteException e) {
+                Log.e(TAG, "Failed to get URI permission for: " + uri, e);
+                return false;
+            }
+        }
+        return true;
+    }
+
+    private IUriGrantsManager getUriGrantsManager() {
+        return UriGrantsManager.getService();
+    }
+
+    private static ChooserTarget removeIcon(ChooserTarget target) {
+        if (target == null) {
+            return null;
+        }
+        return new ChooserTarget(
+                target.getTitle(),
+                null,
+                target.getScore(),
+                target.getComponentName(),
+                target.getIntentExtras());
     }
 }
