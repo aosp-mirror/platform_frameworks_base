@@ -134,6 +134,16 @@ flag {
 }
 
 flag {
+    name: "enable_recents_bookend_transition"
+    namespace: "multitasking"
+    description: "Use a finish-transition to clean up recents instead of the finish-WCT"
+    bug: "346588978"
+    metadata {
+        purpose: PURPOSE_BUGFIX
+    }
+}
+
+flag {
     name: "bubble_view_info_executors"
     namespace: "multitasking"
     description: "Use executors to inflate bubble views"
