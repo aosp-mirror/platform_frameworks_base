@@ -219,12 +219,3 @@ interface RangeValue : ValueDescriptor {
     override fun isValidValue(context: Context, index: Int) =
         index in getMinValue(context)..getMaxValue(context)
 }
-
-/** A persistent preference that has a boolean value. */
-interface BooleanPreference : PersistentPreference<Boolean> {
-    override val valueType: Class<Boolean>
-        get() = Boolean::class.javaObjectType
-}
-
-/** A persistent preference that has a float value. */
-interface FloatPersistentPreference : PersistentPreference<Float>
