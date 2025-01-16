@@ -24,6 +24,7 @@ import static android.media.quality.AmbientBacklightEvent.AMBIENT_BACKLIGHT_EVEN
 import android.annotation.NonNull;
 import android.content.ContentValues;
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
@@ -51,6 +52,7 @@ import android.media.quality.SoundProfile;
 import android.media.quality.SoundProfileHandle;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.Environment;
 import android.os.IBinder;
 import android.os.PersistableBundle;
 import android.os.RemoteCallbackList;
@@ -69,6 +71,7 @@ import com.android.server.utils.Slogf;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -88,6 +91,10 @@ public class MediaQualityService extends SystemService {
 
     private static final boolean DEBUG = false;
     private static final String TAG = "MediaQualityService";
+    private static final String ALLOWLIST = "allowlist";
+    private static final String PICTURE_PROFILE_PREFERENCE = "picture_profile_preference";
+    private static final String SOUND_PROFILE_PREFERENCE = "sound_profile_preference";
+    private static final String COMMA_DELIMITER = ",";
     private static final int MAX_UUID_GENERATION_ATTEMPTS = 10;
     private final Context mContext;
     private final MediaQualityDbHelper mMediaQualityDbHelper;
@@ -98,6 +105,8 @@ public class MediaQualityService extends SystemService {
     private final Map<String, AmbientBacklightCallbackRecord> mCallbackRecords = new HashMap<>();
     private final PackageManager mPackageManager;
     private final SparseArray<UserState> mUserStates = new SparseArray<>();
+    private SharedPreferences mPictureProfileSharedPreference;
+    private SharedPreferences mSoundProfileSharedPreference;
 
     public MediaQualityService(Context context) {
         super(context);
@@ -109,6 +118,19 @@ public class MediaQualityService extends SystemService {
         mMediaQualityDbHelper = new MediaQualityDbHelper(mContext);
         mMediaQualityDbHelper.setWriteAheadLoggingEnabled(true);
         mMediaQualityDbHelper.setIdleConnectionTimeout(30);
+
+        // The package info in the context isn't initialized in the way it is for normal apps,
+        // so the standard, name-based context.getSharedPreferences doesn't work. Instead, we
+        // build the path manually below using the same policy that appears in ContextImpl.
+        final Context deviceContext = mContext.createDeviceProtectedStorageContext();
+        final File pictureProfilePrefs = new File(Environment.getDataSystemDirectory(),
+                PICTURE_PROFILE_PREFERENCE);
+        mPictureProfileSharedPreference = deviceContext.getSharedPreferences(
+                pictureProfilePrefs, Context.MODE_PRIVATE);
+        final File soundProfilePrefs = new File(Environment.getDataSystemDirectory(),
+                SOUND_PROFILE_PREFERENCE);
+        mSoundProfileSharedPreference = deviceContext.getSharedPreferences(
+                soundProfilePrefs, Context.MODE_PRIVATE);
     }
 
     @Override
@@ -1291,6 +1313,11 @@ public class MediaQualityService extends SystemService {
                 notifyOnPictureProfileError(null, PictureProfile.ERROR_NO_PERMISSION,
                         Binder.getCallingUid(), Binder.getCallingPid());
             }
+            String allowlist = mPictureProfileSharedPreference.getString(ALLOWLIST, null);
+            if (allowlist != null) {
+                String[] stringArray = allowlist.split(COMMA_DELIMITER);
+                return new ArrayList<>(Arrays.asList(stringArray));
+            }
             return new ArrayList<>();
         }
 
@@ -1300,6 +1327,9 @@ public class MediaQualityService extends SystemService {
                 notifyOnPictureProfileError(null, PictureProfile.ERROR_NO_PERMISSION,
                         Binder.getCallingUid(), Binder.getCallingPid());
             }
+            SharedPreferences.Editor editor = mPictureProfileSharedPreference.edit();
+            editor.putString(ALLOWLIST, String.join(COMMA_DELIMITER, packages));
+            editor.commit();
         }
 
         @Override
@@ -1307,6 +1337,11 @@ public class MediaQualityService extends SystemService {
             if (!hasGlobalSoundQualityServicePermission()) {
                 notifyOnSoundProfileError(null, SoundProfile.ERROR_NO_PERMISSION,
                         Binder.getCallingUid(), Binder.getCallingPid());
+            }
+            String allowlist = mSoundProfileSharedPreference.getString(ALLOWLIST, null);
+            if (allowlist != null) {
+                String[] stringArray = allowlist.split(COMMA_DELIMITER);
+                return new ArrayList<>(Arrays.asList(stringArray));
             }
             return new ArrayList<>();
         }
@@ -1317,6 +1352,9 @@ public class MediaQualityService extends SystemService {
                 notifyOnSoundProfileError(null, SoundProfile.ERROR_NO_PERMISSION,
                         Binder.getCallingUid(), Binder.getCallingPid());
             }
+            SharedPreferences.Editor editor = mSoundProfileSharedPreference.edit();
+            editor.putString(ALLOWLIST, String.join(COMMA_DELIMITER, packages));
+            editor.commit();
         }
 
         @Override

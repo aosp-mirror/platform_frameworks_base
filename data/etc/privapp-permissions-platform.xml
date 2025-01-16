@@ -613,6 +613,10 @@ applications that come with the platform
         <permission name="android.permission.SUBSCRIBE_TO_KEYGUARD_LOCKED_STATE" />
         <!-- Permission required for CTS test - CtsContentProviderMultiUserTest -->
         <permission name="android.permission.RESOLVE_COMPONENT_FOR_UID"/>
+        <!-- Permission required for CTS test - MediaQualityTest -->
+        <permission name="android.permission.MANAGE_GLOBAL_PICTURE_QUALITY_SERVICE"/>
+        <permission name="android.permission.MANAGE_GLOBAL_SOUND_QUALITY_SERVICE"/>
+        <permission name="android.permission.READ_COLOR_ZONES"/>
     </privapp-permissions>
 
     <privapp-permissions package="com.android.statementservice">
