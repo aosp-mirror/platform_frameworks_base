@@ -36,6 +36,7 @@ import androidx.core.util.isNotEmpty
 import androidx.core.util.plus
 import androidx.core.util.putAll
 import com.android.internal.protolog.ProtoLog
+import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
@@ -52,6 +53,8 @@ import com.android.wm.shell.shared.TransitionUtil
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
 import com.android.wm.shell.sysui.ShellInit
 import com.android.wm.shell.transition.Transitions
+import java.util.Optional
+import kotlin.jvm.optionals.getOrNull
 
 /**
  * A [Transitions.TransitionObserver] that observes transitions and the proposed changes to log
@@ -63,6 +66,8 @@ class DesktopModeLoggerTransitionObserver(
     shellInit: ShellInit,
     private val transitions: Transitions,
     private val desktopModeEventLogger: DesktopModeEventLogger,
+    private val desktopTasksLimiter: Optional<DesktopTasksLimiter>,
+    private val shellTaskOrganizer: ShellTaskOrganizer,
 ) : Transitions.TransitionObserver {
 
     init {
@@ -141,6 +146,7 @@ class DesktopModeLoggerTransitionObserver(
 
         // identify if we need to log any changes and update the state of visible freeform tasks
         identifyLogEventAndUpdateState(
+            transition = transition,
             transitionInfo = info,
             preTransitionVisibleFreeformTasks = visibleFreeformTaskInfos,
             postTransitionVisibleFreeformTasks = postTransitionVisibleFreeformTasks,
@@ -227,6 +233,7 @@ class DesktopModeLoggerTransitionObserver(
      * state and update it
      */
     private fun identifyLogEventAndUpdateState(
+        transition: IBinder,
         transitionInfo: TransitionInfo,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
@@ -238,6 +245,7 @@ class DesktopModeLoggerTransitionObserver(
         ) {
             // Sessions is finishing, log task updates followed by an exit event
             identifyAndLogTaskUpdates(
+                transition,
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
@@ -255,6 +263,7 @@ class DesktopModeLoggerTransitionObserver(
             desktopModeEventLogger.logSessionEnter(getEnterReason(transitionInfo))
 
             identifyAndLogTaskUpdates(
+                transition,
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
@@ -262,6 +271,7 @@ class DesktopModeLoggerTransitionObserver(
         } else if (isSessionActive) {
             // Session is neither starting, nor finishing, log task updates if there are any
             identifyAndLogTaskUpdates(
+                transition,
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
@@ -275,6 +285,7 @@ class DesktopModeLoggerTransitionObserver(
 
     /** Compare the old and new state of taskInfos and identify and log the changes */
     private fun identifyAndLogTaskUpdates(
+        transition: IBinder,
         transitionInfo: TransitionInfo,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
@@ -310,12 +321,9 @@ class DesktopModeLoggerTransitionObserver(
         // find old tasks that were removed
         preTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
             if (!postTransitionVisibleFreeformTasks.containsKey(taskId)) {
-                val minimizeReason =
-                    if (transitionInfo.type == Transitions.TRANSIT_MINIMIZE) {
-                        MinimizeReason.MINIMIZE_BUTTON
-                    } else {
-                        null
-                    }
+                // The task is no longer visible, it might have been minimized, get the minimize
+                // reason (if any)
+                val minimizeReason = getMinimizeReason(transition, transitionInfo, taskInfo)
                 val taskUpdate =
                     buildTaskUpdateForTask(
                         taskInfo,
@@ -334,6 +342,21 @@ class DesktopModeLoggerTransitionObserver(
                 )
             }
         }
+    }
+
+    private fun getMinimizeReason(
+        transition: IBinder,
+        transitionInfo: TransitionInfo,
+        taskInfo: TaskInfo,
+    ): MinimizeReason? {
+        if (transitionInfo.type == Transitions.TRANSIT_MINIMIZE) {
+            return MinimizeReason.MINIMIZE_BUTTON
+        }
+        val minimizingTask = desktopTasksLimiter.getOrNull()?.getMinimizingTask(transition)
+        if (minimizingTask?.taskId == taskInfo.taskId) {
+            return minimizingTask.minimizeReason
+        }
+        return null
     }
 
     private fun buildTaskUpdateForTask(

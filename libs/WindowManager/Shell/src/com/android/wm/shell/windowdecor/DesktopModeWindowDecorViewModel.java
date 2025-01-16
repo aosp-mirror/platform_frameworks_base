@@ -34,6 +34,7 @@ import static com.android.internal.jank.Cuj.CUJ_DESKTOP_MODE_ENTER_MODE_APP_HAND
 import static com.android.window.flags.Flags.enableDisplayFocusInShellTransitions;
 import static com.android.wm.shell.compatui.AppCompatUtils.isTopActivityExemptFromDesktopWindowing;
 import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod;
+import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason;
 import static com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_FULLSCREEN_INDICATOR;
 import static com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.IndicatorType.TO_SPLIT_LEFT_INDICATOR;
@@ -980,7 +981,8 @@ public class DesktopModeWindowDecorViewModel implements WindowDecorViewModel,
                             ToggleTaskSizeInteraction.AmbiguousSource.HEADER_BUTTON, mMotionEvent);
                 }
             } else if (id == R.id.minimize_window) {
-                mDesktopTasksController.minimizeTask(decoration.mTaskInfo);
+                mDesktopTasksController.minimizeTask(
+                        decoration.mTaskInfo, MinimizeReason.MINIMIZE_BUTTON);
             }
         }
 

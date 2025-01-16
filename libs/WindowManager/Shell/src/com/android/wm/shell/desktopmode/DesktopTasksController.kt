@@ -87,6 +87,7 @@ import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.compatui.isTopActivityExemptFromDesktopWindowing
 import com.android.wm.shell.compatui.isTransparentTask
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopModeUiEventLogger.DesktopUiEventEnum
 import com.android.wm.shell.desktopmode.DesktopModeVisualIndicator.DragStartState
@@ -466,7 +467,9 @@ class DesktopTasksController(
         desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(
             FREEFORM_ANIMATION_DURATION
         )
-        taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
+        taskIdToMinimize?.let {
+            addPendingMinimizeTransition(transition, it, MinimizeReason.TASK_LIMIT)
+        }
         exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
         return true
     }
@@ -512,7 +515,9 @@ class DesktopTasksController(
         desktopModeEnterExitTransitionListener?.onEnterDesktopModeTransitionStarted(
             FREEFORM_ANIMATION_DURATION
         )
-        taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
+        taskIdToMinimize?.let {
+            addPendingMinimizeTransition(transition, it, MinimizeReason.TASK_LIMIT)
+        }
         exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
     }
 
@@ -573,7 +578,9 @@ class DesktopTasksController(
             DRAG_TO_DESKTOP_FINISH_ANIM_DURATION_MS.toInt()
         )
         transition?.let {
-            taskIdToMinimize?.let { taskId -> addPendingMinimizeTransition(it, taskId) }
+            taskIdToMinimize?.let { taskId ->
+                addPendingMinimizeTransition(it, taskId, MinimizeReason.TASK_LIMIT)
+            }
             exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
         }
     }
@@ -622,7 +629,7 @@ class DesktopTasksController(
             ?.runOnTransitionStart
     }
 
-    fun minimizeTask(taskInfo: RunningTaskInfo) {
+    fun minimizeTask(taskInfo: RunningTaskInfo, minimizeReason: MinimizeReason) {
         val wct = WindowContainerTransaction()
 
         val isMinimizingToPip = taskInfo.pictureInPictureParams?.isAutoEnterEnabled() ?: false
@@ -642,16 +649,16 @@ class DesktopTasksController(
             freeformTaskTransitionStarter.startPipTransition(wct)
             taskRepository.setTaskInPip(taskInfo.displayId, taskInfo.taskId, enterPip = true)
             taskRepository.setOnPipAbortedCallback { displayId, taskId ->
-                minimizeTaskInner(shellTaskOrganizer.getRunningTaskInfo(taskId)!!)
+                minimizeTaskInner(shellTaskOrganizer.getRunningTaskInfo(taskId)!!, minimizeReason)
                 taskRepository.setTaskInPip(displayId, taskId, enterPip = false)
             }
             return
         }
 
-        minimizeTaskInner(taskInfo)
+        minimizeTaskInner(taskInfo, minimizeReason)
     }
 
-    private fun minimizeTaskInner(taskInfo: RunningTaskInfo) {
+    private fun minimizeTaskInner(taskInfo: RunningTaskInfo, minimizeReason: MinimizeReason) {
         val taskId = taskInfo.taskId
         val displayId = taskInfo.displayId
         val wct = WindowContainerTransaction()
@@ -671,6 +678,7 @@ class DesktopTasksController(
                 transition = transition,
                 displayId = displayId,
                 taskId = taskId,
+                minimizeReason = minimizeReason,
             )
         }
         exitResult.asExit()?.runOnTransitionStart?.invoke(transition)
@@ -826,7 +834,7 @@ class DesktopTasksController(
                     minimizingTaskId = taskIdToMinimize,
                     exitingImmersiveTask = exitImmersiveResult.asExit()?.exitingTask,
                 )
-            taskIdToMinimize?.let { addPendingMinimizeTransition(t, it) }
+            taskIdToMinimize?.let { addPendingMinimizeTransition(t, it, MinimizeReason.TASK_LIMIT) }
             exitImmersiveResult.asExit()?.runOnTransitionStart?.invoke(t)
             return t
         }
@@ -846,7 +854,7 @@ class DesktopTasksController(
             )
         val t = transitions.startTransition(transitionType, wct, remoteTransitionHandler)
         remoteTransitionHandler.setTransition(t)
-        taskIdToMinimize.let { addPendingMinimizeTransition(t, it) }
+        taskIdToMinimize.let { addPendingMinimizeTransition(t, it, MinimizeReason.TASK_LIMIT) }
         exitImmersiveResult.asExit()?.runOnTransitionStart?.invoke(t)
         return t
     }
@@ -1898,7 +1906,7 @@ class DesktopTasksController(
         val taskIdToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
         addPendingAppLaunchTransition(transition, task.taskId, taskIdToMinimize)
         if (taskIdToMinimize != null) {
-            addPendingMinimizeTransition(transition, taskIdToMinimize)
+            addPendingMinimizeTransition(transition, taskIdToMinimize, MinimizeReason.TASK_LIMIT)
             return wct
         }
         if (!wct.isEmpty) {
@@ -1932,7 +1940,9 @@ class DesktopTasksController(
                 // Desktop Mode is already showing and we're launching a new Task - we might need to
                 // minimize another Task.
                 val taskIdToMinimize = addAndGetMinimizeChanges(task.displayId, wct, task.taskId)
-                taskIdToMinimize?.let { addPendingMinimizeTransition(transition, it) }
+                taskIdToMinimize?.let {
+                    addPendingMinimizeTransition(transition, it, MinimizeReason.TASK_LIMIT)
+                }
                 addPendingAppLaunchTransition(transition, task.taskId, taskIdToMinimize)
                 desktopImmersiveController.exitImmersiveIfApplicable(
                     transition,
@@ -2180,13 +2190,18 @@ class DesktopTasksController(
             .addAndGetMinimizeTaskChanges(displayId, wct, newTaskId, launchingNewIntent)
     }
 
-    private fun addPendingMinimizeTransition(transition: IBinder, taskIdToMinimize: Int) {
+    private fun addPendingMinimizeTransition(
+        transition: IBinder,
+        taskIdToMinimize: Int,
+        minimizeReason: MinimizeReason,
+    ) {
         val taskToMinimize = shellTaskOrganizer.getRunningTaskInfo(taskIdToMinimize)
         desktopTasksLimiter.ifPresent {
             it.addPendingMinimizeChange(
                 transition = transition,
                 displayId = taskToMinimize?.displayId ?: DEFAULT_DISPLAY,
                 taskId = taskIdToMinimize,
+                minimizeReason = minimizeReason,
             )
         }
     }

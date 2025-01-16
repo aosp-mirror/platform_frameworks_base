@@ -61,6 +61,7 @@ import com.android.window.flags.Flags
 import com.android.wm.shell.R
 import com.android.wm.shell.desktopmode.DesktopImmersiveController
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
@@ -272,7 +273,7 @@ class DesktopModeWindowDecorViewModelTests : DesktopModeWindowDecorViewModelTest
 
         onClickListenerCaptor.value.onClick(view)
 
-        verify(mockDesktopTasksController).minimizeTask(decor.mTaskInfo)
+        verify(mockDesktopTasksController).minimizeTask(decor.mTaskInfo, MinimizeReason.MINIMIZE_BUTTON)
     }
 
     @Test

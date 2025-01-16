@@ -46,6 +46,7 @@ import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.TestShellExecutor
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus
@@ -294,7 +295,7 @@ class DesktopModeKeyGestureHandlerTest : ShellTestCase() {
         testExecutor.flushAll()
 
         assertThat(result).isTrue()
-        verify(desktopTasksController).minimizeTask(task)
+        verify(desktopTasksController).minimizeTask(task, MinimizeReason.KEY_GESTURE)
     }
 
     private fun setUpFreeformTask(

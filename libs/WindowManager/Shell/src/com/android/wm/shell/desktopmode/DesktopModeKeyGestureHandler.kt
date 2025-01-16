@@ -30,6 +30,7 @@ import com.android.window.flags.Flags.enableTaskResizingKeyboardShortcuts
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.ShellExecutor
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.protolog.ShellProtoLogGroup.WM_SHELL_DESKTOP_MODE
 import com.android.wm.shell.shared.annotations.ShellMainThread
@@ -125,7 +126,9 @@ class DesktopModeKeyGestureHandler(
             KeyGestureEvent.KEY_GESTURE_TYPE_MINIMIZE_FREEFORM_WINDOW -> {
                 logV("Key gesture MINIMIZE_FREEFORM_WINDOW is handled")
                 getGloballyFocusedFreeformTask()?.let {
-                    mainExecutor.execute { desktopTasksController.get().minimizeTask(it) }
+                    mainExecutor.execute {
+                        desktopTasksController.get().minimizeTask(it, MinimizeReason.KEY_GESTURE)
+                    }
                 }
                 return true
             }

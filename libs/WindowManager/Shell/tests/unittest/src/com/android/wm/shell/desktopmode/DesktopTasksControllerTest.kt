@@ -102,6 +102,7 @@ import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopTasksController.DesktopModeEntryExitTransitionListener
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
@@ -2162,7 +2163,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
             .thenReturn(android.util.Pair(handler, WindowContainerTransaction()))
 
-        controller.minimizeTask(pipTask)
+        controller.minimizeTask(pipTask, MinimizeReason.MINIMIZE_BUTTON)
         verifyExitDesktopWCTNotExecuted()
 
         taskRepository.setTaskInPip(DEFAULT_DISPLAY, pipTask.taskId, enterPip = false)
@@ -2182,7 +2183,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
 
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         val captor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         verify(freeformTaskTransitionStarter).startMinimizedModeTransition(captor.capture())
@@ -2198,7 +2199,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
             .thenReturn(android.util.Pair(handler, WindowContainerTransaction()))
 
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         verify(freeformTaskTransitionStarter).startPipTransition(any())
         verify(freeformTaskTransitionStarter, never()).startMinimizedModeTransition(any())
@@ -2210,7 +2211,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(Binder())
 
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         verify(freeformTaskTransitionStarter).startMinimizedModeTransition(any())
         verify(freeformTaskTransitionStarter, never()).startPipTransition(any())
@@ -2223,7 +2224,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
             .thenReturn(android.util.Pair(handler, WindowContainerTransaction()))
 
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         val captor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         verify(freeformTaskTransitionStarter).startPipTransition(captor.capture())
@@ -2239,7 +2240,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
 
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         val captor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         verify(freeformTaskTransitionStarter).startMinimizedModeTransition(captor.capture())
@@ -2255,7 +2256,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             .thenReturn(transition)
 
         // The only active task is being minimized.
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         val captor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         verify(freeformTaskTransitionStarter).startMinimizedModeTransition(captor.capture())
@@ -2272,7 +2273,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         taskRepository.minimizeTask(DEFAULT_DISPLAY, task.taskId)
 
         // The only active task is already minimized.
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         val captor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         verify(freeformTaskTransitionStarter).startMinimizedModeTransition(captor.capture())
@@ -2289,7 +2290,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
 
-        controller.minimizeTask(task1)
+        controller.minimizeTask(task1, MinimizeReason.MINIMIZE_BUTTON)
 
         val captor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         verify(freeformTaskTransitionStarter).startMinimizedModeTransition(captor.capture())
@@ -2309,7 +2310,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         taskRepository.minimizeTask(DEFAULT_DISPLAY, task2.taskId)
 
         // task1 is the only visible task as task2 is minimized.
-        controller.minimizeTask(task1)
+        controller.minimizeTask(task1, MinimizeReason.MINIMIZE_BUTTON)
         // Adds remove wallpaper operation
         val captor = ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         verify(freeformTaskTransitionStarter).startMinimizedModeTransition(captor.capture())
@@ -2324,7 +2325,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(freeformTaskTransitionStarter.startMinimizedModeTransition(any()))
             .thenReturn(transition)
 
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         verify(mMockDesktopImmersiveController).exitImmersiveIfApplicable(any(), eq(task), any())
     }
@@ -2341,7 +2342,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
                 ExitResult.Exit(exitingTask = task.taskId, runOnTransitionStart = runOnTransit)
             )
 
-        controller.minimizeTask(task)
+        controller.minimizeTask(task, MinimizeReason.MINIMIZE_BUTTON)
 
         assertThat(runOnTransit.invocations).isEqualTo(1)
         assertThat(runOnTransit.lastInvoked).isEqualTo(transition)
@@ -3285,7 +3286,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         whenever(transitions.dispatchRequest(any(), any(), anyOrNull()))
             .thenReturn(android.util.Pair(handler, WindowContainerTransaction()))
 
-        controller.minimizeTask(pipTask)
+        controller.minimizeTask(pipTask, MinimizeReason.MINIMIZE_BUTTON)
         verifyExitDesktopWCTNotExecuted()
 
         freeformTask.isFocused = true

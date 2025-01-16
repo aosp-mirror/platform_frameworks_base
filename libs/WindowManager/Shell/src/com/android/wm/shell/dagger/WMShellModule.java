@@ -1154,9 +1154,12 @@ public abstract class WMShellModule {
             Context context,
             ShellInit shellInit,
             Transitions transitions,
-            DesktopModeEventLogger desktopModeEventLogger) {
+            DesktopModeEventLogger desktopModeEventLogger,
+            Optional<DesktopTasksLimiter> desktopTasksLimiter,
+            ShellTaskOrganizer shellTaskOrganizer) {
         return new DesktopModeLoggerTransitionObserver(
-                context, shellInit, transitions, desktopModeEventLogger);
+                context, shellInit, transitions, desktopModeEventLogger,
+                desktopTasksLimiter, shellTaskOrganizer);
     }
 
     @WMSingleton
