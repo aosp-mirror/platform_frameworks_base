@@ -411,6 +411,8 @@ class HostStubGen(val options: HostStubGenOptions) {
             stats = stats,
             enablePreTrace = options.enablePreTrace.get,
             enablePostTrace = options.enablePostTrace.get,
+            deleteClassFinals = options.deleteFinals.get,
+            deleteMethodFinals = options.deleteFinals.get,
         )
         outVisitor = BaseAdapter.getVisitor(
             classInternalName, classes, outVisitor, filter,
