@@ -513,7 +513,7 @@ public class PipTransition extends PipTransitionController implements
     private void startOverlayFadeoutAnimation(@NonNull SurfaceControl overlayLeash,
             @NonNull Runnable onAnimationEnd) {
         PipAlphaAnimator animator = new PipAlphaAnimator(mContext, overlayLeash,
-                null /* startTx */, PipAlphaAnimator.FADE_OUT);
+                null /* startTx */, null /* finishTx */, PipAlphaAnimator.FADE_OUT);
         animator.setDuration(CONTENT_OVERLAY_FADE_OUT_DELAY_MS);
         animator.setAnimationEndCallback(onAnimationEnd);
         animator.start();
@@ -604,7 +604,7 @@ public class PipTransition extends PipTransitionController implements
                 .setAlpha(pipLeash, 0f);
 
         PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipLeash, startTransaction,
-                PipAlphaAnimator.FADE_IN);
+                finishTransaction, PipAlphaAnimator.FADE_IN);
         // This should update the pip transition state accordingly after we stop playing.
         animator.setAnimationEndCallback(this::finishTransition);
         cacheAndStartTransitionAnimator(animator);
@@ -699,7 +699,7 @@ public class PipTransition extends PipTransitionController implements
         finishTransaction.setAlpha(pipChange.getLeash(), 0f);
         if (mPendingRemoveWithFadeout) {
             PipAlphaAnimator animator = new PipAlphaAnimator(mContext, pipChange.getLeash(),
-                    startTransaction, PipAlphaAnimator.FADE_OUT);
+                    startTransaction, finishTransaction, PipAlphaAnimator.FADE_OUT);
             animator.setAnimationEndCallback(this::finishTransition);
             animator.start();
         } else {

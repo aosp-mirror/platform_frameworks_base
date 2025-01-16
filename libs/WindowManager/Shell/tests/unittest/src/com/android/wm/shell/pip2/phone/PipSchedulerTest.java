@@ -111,7 +111,7 @@ public class PipSchedulerTest {
                 mRootTaskDisplayAreaOrganizer);
         mPipScheduler.setPipTransitionController(mMockPipTransitionController);
         mPipScheduler.setSurfaceControlTransactionFactory(mMockFactory);
-        mPipScheduler.setPipAlphaAnimatorSupplier((context, leash, tx, direction) ->
+        mPipScheduler.setPipAlphaAnimatorSupplier((context, leash, startTx, finishTx, direction) ->
                 mMockAlphaAnimator);
 
         SurfaceControl testLeash = new SurfaceControl.Builder()

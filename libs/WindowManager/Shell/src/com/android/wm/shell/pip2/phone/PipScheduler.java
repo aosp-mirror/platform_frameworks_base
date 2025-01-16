@@ -294,7 +294,8 @@ public class PipScheduler {
     interface PipAlphaAnimatorSupplier {
         PipAlphaAnimator get(@NonNull Context context,
                 SurfaceControl leash,
-                SurfaceControl.Transaction tx,
+                SurfaceControl.Transaction startTransaction,
+                SurfaceControl.Transaction finishTransaction,
                 @PipAlphaAnimator.Fade int direction);
     }
 
