@@ -753,8 +753,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final static int WINDOWS_FREEZING_SCREENS_TIMEOUT = 2;
     int mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
 
-    /** Indicates that the system server is actively demanding the screen be frozen. */
-    boolean mClientFreezingScreen = false;
     int mAppsFreezingScreen = 0;
 
     @VisibleForTesting
@@ -3354,60 +3352,6 @@ public class WindowManagerService extends IWindowManager.Stub
         return getDefaultDisplayContentLocked().mAppTransition.isIdle();
     }
 
-
-    // -------------------------------------------------------------
-    // Misc IWindowSession methods
-    // -------------------------------------------------------------
-
-    /** Freeze the screen during a user-switch event. Called by UserController. */
-    @Override
-    public void startFreezingScreen(int exitAnim, int enterAnim) {
-        if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
-                "startFreezingScreen()")) {
-            throw new SecurityException("Requires FREEZE_SCREEN permission");
-        }
-
-        synchronized (mGlobalLock) {
-            if (!mClientFreezingScreen) {
-                mClientFreezingScreen = true;
-                final long origId = Binder.clearCallingIdentity();
-                try {
-                    startFreezingDisplay(exitAnim, enterAnim);
-                    mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
-                    mH.sendEmptyMessageDelayed(H.CLIENT_FREEZE_TIMEOUT, 5000);
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
-                }
-            }
-        }
-    }
-
-    /**
-     * No longer actively demand that the screen remain frozen.
-     * Called by UserController after a user-switch.
-     * This doesn't necessarily immediately unlock the screen; it just allows it if we're ready.
-     */
-    @Override
-    public void stopFreezingScreen() {
-        if (!checkCallingPermission(android.Manifest.permission.FREEZE_SCREEN,
-                "stopFreezingScreen()")) {
-            throw new SecurityException("Requires FREEZE_SCREEN permission");
-        }
-
-        synchronized (mGlobalLock) {
-            if (mClientFreezingScreen) {
-                mClientFreezingScreen = false;
-                mLastFinishedFreezeSource = "client";
-                final long origId = Binder.clearCallingIdentity();
-                try {
-                    stopFreezingDisplayLocked();
-                } finally {
-                    Binder.restoreCallingIdentity(origId);
-                }
-            }
-        }
-    }
-
     @Override
     public void disableKeyguard(IBinder token, String tag, int userId) {
         userId = mAmInternal.handleIncomingUser(Binder.getCallingPid(), Binder.getCallingUid(),
@@ -5669,7 +5613,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
         public static final int SHOW_STRICT_MODE_VIOLATION = 25;
 
-        public static final int CLIENT_FREEZE_TIMEOUT = 30;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
 
         public static final int NEW_ANIMATOR_SCALE = 34;
@@ -5754,17 +5697,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
                         for (int i = mAppFreezeListeners.size() - 1; i >= 0; --i) {
                             mAppFreezeListeners.get(i).onAppFreezeTimeout();
-                        }
-                    }
-                    break;
-                }
-
-                case CLIENT_FREEZE_TIMEOUT: {
-                    synchronized (mGlobalLock) {
-                        if (mClientFreezingScreen) {
-                            mClientFreezingScreen = false;
-                            mLastFinishedFreezeSource = "client-timeout";
-                            stopFreezingDisplayLocked();
                         }
                     }
                     break;
@@ -6552,14 +6484,14 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         if (waitingForConfig || waitingForRemoteDisplayChange || mAppsFreezingScreen > 0
                 || mWindowsFreezingScreen == WINDOWS_FREEZING_SCREENS_ACTIVE
-                || mClientFreezingScreen || numOpeningApps > 0) {
+                || numOpeningApps > 0) {
             ProtoLog.d(WM_DEBUG_ORIENTATION, "stopFreezingDisplayLocked: Returning "
                     + "waitingForConfig=%b, waitingForRemoteDisplayChange=%b, "
                     + "mAppsFreezingScreen=%d, mWindowsFreezingScreen=%d, "
-                    + "mClientFreezingScreen=%b, mOpeningApps.size()=%d",
+                    + "mOpeningApps.size()=%d",
                     waitingForConfig, waitingForRemoteDisplayChange,
                     mAppsFreezingScreen, mWindowsFreezingScreen,
-                    mClientFreezingScreen, numOpeningApps);
+                    numOpeningApps);
             return;
         }
 
@@ -6589,7 +6521,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
         ProtoLog.i(WM_ERROR, "%s", sb.toString());
         mH.removeMessages(H.APP_FREEZE_TIMEOUT);
-        mH.removeMessages(H.CLIENT_FREEZE_TIMEOUT);
         if (PROFILE_ORIENTATION) {
             Debug.stopMethodTracing();
         }
@@ -7096,7 +7027,6 @@ public class WindowManagerService extends IWindowManager.Stub
             pw.print("  mTransactionSequence="); pw.println(mTransactionSequence);
             pw.print("  mDisplayFrozen="); pw.print(mDisplayFrozen);
                     pw.print(" windows="); pw.print(mWindowsFreezingScreen);
-                    pw.print(" client="); pw.print(mClientFreezingScreen);
                     pw.print(" apps="); pw.println(mAppsFreezingScreen);
             final DisplayContent defaultDisplayContent = getDefaultDisplayContentLocked();
             pw.print("  mRotation="); pw.println(defaultDisplayContent.getRotation());

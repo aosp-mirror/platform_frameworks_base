@@ -227,9 +227,6 @@ interface IWindowManager
     @UnsupportedAppUsage(maxTargetSdk = 30, trackingBug = 170729553)
     void endProlongedAnimations();
 
-    void startFreezingScreen(int exitAnim, int enterAnim);
-    void stopFreezingScreen();
-
     // these require DISABLE_KEYGUARD permission
     /** @deprecated use Activity.setShowWhenLocked instead. */
     void disableKeyguard(IBinder token, String tag, int userId);

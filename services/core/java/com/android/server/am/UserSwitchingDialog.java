@@ -39,7 +39,6 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.provider.Settings;
 import android.util.Slog;
 import android.util.TypedValue;
 import android.view.View;
@@ -53,7 +52,6 @@ import android.widget.TextView;
 import com.android.internal.R;
 import com.android.internal.util.ObjectUtils;
 import com.android.internal.util.UserIcons;
-import com.android.server.wm.WindowManagerService;
 
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -80,14 +78,11 @@ class UserSwitchingDialog extends Dialog {
     protected final UserInfo mNewUser;
     private final String mSwitchingFromSystemUserMessage;
     private final String mSwitchingToSystemUserMessage;
-    private final WindowManagerService mWindowManager;
     protected final Context mContext;
     private final int mTraceCookie;
-    private final boolean mNeedToFreezeScreen;
 
     UserSwitchingDialog(Context context, UserInfo oldUser, UserInfo newUser,
-            String switchingFromSystemUserMessage, String switchingToSystemUserMessage,
-            WindowManagerService windowManager) {
+            String switchingFromSystemUserMessage, String switchingToSystemUserMessage) {
         super(context, R.style.Theme_Material_NoActionBar_Fullscreen);
 
         mContext = context;
@@ -97,8 +92,6 @@ class UserSwitchingDialog extends Dialog {
         mSwitchingToSystemUserMessage = switchingToSystemUserMessage;
         mDisableAnimations = SystemProperties.getBoolean(
                 "debug.usercontroller.disable_user_switching_dialog_animations", false);
-        mWindowManager = windowManager;
-        mNeedToFreezeScreen = !mDisableAnimations && !isUserSetupComplete(newUser);
         mTraceCookie = UserHandle.MAX_SECONDARY_USER_ID * oldUser.id + newUser.id;
 
         inflateContent();
@@ -183,11 +176,6 @@ class UserSwitchingDialog extends Dialog {
                 : res.getString(R.string.user_switching_message, mNewUser.name);
     }
 
-    private boolean isUserSetupComplete(UserInfo user) {
-        return Settings.Secure.getIntForUser(mContext.getContentResolver(),
-                Settings.Secure.USER_SETUP_COMPLETE, /* default= */ 0, user.id) == 1;
-    }
-
     @Override
     public void show() {
         asyncTraceBegin("dialog", 0);
@@ -197,7 +185,6 @@ class UserSwitchingDialog extends Dialog {
     @Override
     public void dismiss() {
         super.dismiss();
-        stopFreezingScreen();
         asyncTraceEnd("dialog", 0);
     }
 
@@ -205,7 +192,6 @@ class UserSwitchingDialog extends Dialog {
         if (DEBUG) Slog.d(TAG, "show called");
         show();
         startShowAnimation(() -> {
-            startFreezingScreen();
             onShown.run();
         });
     }
@@ -221,24 +207,6 @@ class UserSwitchingDialog extends Dialog {
                 onDismissed.run();
             });
         }
-    }
-
-    private void startFreezingScreen() {
-        if (!mNeedToFreezeScreen) {
-            return;
-        }
-        traceBegin("startFreezingScreen");
-        mWindowManager.startFreezingScreen(0, 0);
-        traceEnd("startFreezingScreen");
-    }
-
-    private void stopFreezingScreen() {
-        if (!mNeedToFreezeScreen) {
-            return;
-        }
-        traceBegin("stopFreezingScreen");
-        mWindowManager.stopFreezingScreen();
-        traceEnd("stopFreezingScreen");
     }
 
     private void startShowAnimation(Runnable onAnimationEnd) {
@@ -260,7 +228,7 @@ class UserSwitchingDialog extends Dialog {
     }
 
     private void startDismissAnimation(Runnable onAnimationEnd) {
-        if (mDisableAnimations || mNeedToFreezeScreen) {
+        if (mDisableAnimations) {
             // animations are disabled or screen is frozen, no need to play an animation
             onAnimationEnd.run();
             return;
@@ -351,15 +319,5 @@ class UserSwitchingDialog extends Dialog {
     private void asyncTraceEnd(String subTag, int subCookie) {
         Trace.asyncTraceEnd(TRACE_TAG, TAG + subTag, mTraceCookie + subCookie);
         if (DEBUG) Slog.d(TAG, "asyncTraceEnd-" + subTag);
-    }
-
-    private void traceBegin(String msg) {
-        if (DEBUG) Slog.d(TAG, "traceBegin-" + msg);
-        Trace.traceBegin(TRACE_TAG, msg);
-    }
-
-    private void traceEnd(String msg) {
-        Trace.traceEnd(TRACE_TAG);
-        if (DEBUG) Slog.d(TAG, "traceEnd-" + msg);
     }
 }
