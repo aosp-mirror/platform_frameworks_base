@@ -263,7 +263,7 @@ public class MainContentCaptureSessionTest {
         session.mEvents = new ArrayList<>(Arrays.asList(EVENT));
         session.mDirectServiceInterface = mMockContentCaptureDirectManager;
 
-        session.flush(REASON);
+        session.internalFlush(REASON);
         mTestableLooper.processAllMessages();
 
         verifyZeroInteractions(mMockContentProtectionEventProcessor);
@@ -280,7 +280,7 @@ public class MainContentCaptureSessionTest {
         session.mEvents = new ArrayList<>(Arrays.asList(EVENT));
         session.mDirectServiceInterface = mMockContentCaptureDirectManager;
 
-        session.flush(REASON);
+        session.internalFlush(REASON);
         mTestableLooper.processAllMessages();
 
         verifyZeroInteractions(mMockContentProtectionEventProcessor);
@@ -298,7 +298,7 @@ public class MainContentCaptureSessionTest {
         session.mEvents = new ArrayList<>(Arrays.asList(EVENT));
         session.mDirectServiceInterface = mMockContentCaptureDirectManager;
 
-        session.flush(REASON);
+        session.internalFlush(REASON);
         mTestableLooper.processAllMessages();
 
         verifyZeroInteractions(mMockContentProtectionEventProcessor);
@@ -316,7 +316,7 @@ public class MainContentCaptureSessionTest {
         session.mEvents = new ArrayList<>(Arrays.asList(EVENT));
         session.mDirectServiceInterface = mMockContentCaptureDirectManager;
 
-        session.flush(REASON);
+        session.internalFlush(REASON);
         mTestableLooper.processAllMessages();
 
         verifyZeroInteractions(mMockContentProtectionEventProcessor);
@@ -544,7 +544,7 @@ public class MainContentCaptureSessionTest {
         session.mContentCaptureHandler = null;
         session.mDirectServiceInterface = null;
 
-        session.flush(REASON);
+        session.internalFlush(REASON);
 
         assertThat(session.mEvents).hasSize(1);
         assertThat(session.mEventProcessQueue).isEmpty();

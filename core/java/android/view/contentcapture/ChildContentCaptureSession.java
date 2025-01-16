@@ -74,8 +74,8 @@ final class ChildContentCaptureSession extends ContentCaptureSession {
     }
 
     @Override
-    void flush(@FlushReason int reason) {
-        mParent.flush(reason);
+    void internalFlush(@FlushReason int reason) {
+        mParent.internalFlush(reason);
     }
 
     @Override
