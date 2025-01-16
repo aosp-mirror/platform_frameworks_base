@@ -1723,6 +1723,7 @@ package android.hardware.display {
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public void setShouldAlwaysRespectAppRequestedMode(boolean);
     method @RequiresPermission(android.Manifest.permission.WRITE_SECURE_SETTINGS) public void setUserDisabledHdrTypes(@NonNull int[]);
     method @RequiresPermission(android.Manifest.permission.OVERRIDE_DISPLAY_MODE_REQUESTS) public boolean shouldAlwaysRespectAppRequestedMode();
+    field public static final String DISPLAY_CATEGORY_ALL_INCLUDING_DISABLED = "android.hardware.display.category.ALL_INCLUDING_DISABLED";
     field public static final String DISPLAY_CATEGORY_REAR = "android.hardware.display.category.REAR";
     field public static final String HDR_OUTPUT_CONTROL_FLAG = "enable_hdr_output_control";
     field public static final int SWITCHING_TYPE_ACROSS_AND_WITHIN_GROUPS = 2; // 0x2
