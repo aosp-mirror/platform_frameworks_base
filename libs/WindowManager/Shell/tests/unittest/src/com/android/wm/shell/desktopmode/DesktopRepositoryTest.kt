@@ -1046,14 +1046,14 @@ class DesktopRepositoryTest : ShellTestCase() {
     }
 
     @Test
-    fun removeDesktop_multipleTasks_removesAll() {
+    fun removeDesk_multipleTasks_removesAll() {
         // The front-most task will be the one added last through `addTask`.
         repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 3, isVisible = true)
         repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 2, isVisible = true)
         repo.addTask(displayId = DEFAULT_DISPLAY, taskId = 1, isVisible = true)
         repo.minimizeTask(displayId = DEFAULT_DISPLAY, taskId = 2)
 
-        val tasksBeforeRemoval = repo.removeDesktop(displayId = DEFAULT_DISPLAY)
+        val tasksBeforeRemoval = repo.removeDesk(displayId = DEFAULT_DISPLAY)
 
         assertThat(tasksBeforeRemoval).containsExactly(1, 2, 3).inOrder()
         assertThat(repo.getActiveTasks(displayId = DEFAULT_DISPLAY)).isEmpty()
