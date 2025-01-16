@@ -1065,8 +1065,7 @@ private fun EmptyStateCta(contentPadding: PaddingValues, viewModel: BaseCommunal
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
-                        contentDescription =
-                            stringResource(R.string.label_for_button_in_empty_state_cta),
+                        contentDescription = null,
                         modifier = Modifier.size(24.dp),
                     )
                     Spacer(Modifier.width(ButtonDefaults.IconSpacing))
