@@ -178,3 +178,10 @@ flag {
         purpose: PURPOSE_BUGFIX
     }
 }
+
+flag {
+    namespace: "windowing_sdk"
+    name: "safe_region_letterboxing"
+    description: "Enables letterboxing for a safe region"
+    bug: "380132497"
+}
