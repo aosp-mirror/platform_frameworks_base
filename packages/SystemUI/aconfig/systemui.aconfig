@@ -176,13 +176,6 @@ flag {
 }
 
 flag {
-    name: "notifications_dismiss_pruned_summaries"
-    namespace: "systemui"
-    description: "NotifCollection.dismissNotifications will now dismiss summaries that are pruned from the shade."
-    bug: "355967751"
-}
-
-flag {
    name: "notification_transparent_header_fix"
    namespace: "systemui"
    description: "fix the transparent group header issue for async header inflation."
