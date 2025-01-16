@@ -15,3 +15,10 @@ flag {
      description: "Remove TextServiceManagerService on Wear"
      bug: "323720705"
 }
+
+flag {
+    name: "allow_network_time_update_service"
+    namespace: "wear_systems"
+    description: "Allow NetworkTimeUpdateService on Wear"
+    bug: "327508176"
+}
