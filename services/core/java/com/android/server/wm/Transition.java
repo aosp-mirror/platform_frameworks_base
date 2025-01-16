@@ -1626,6 +1626,11 @@ class Transition implements BLASTSyncEngine.TransactionReadyListener {
         for (int i = 0; i < mConfigAtEndActivities.size(); ++i) {
             final ActivityRecord target = mConfigAtEndActivities.get(i);
             final SurfaceControl targetLeash = target.getSurfaceControl();
+            if (targetLeash == null) {
+                // activity may have been removed. In this case, no need to sync, just update state.
+                target.resumeConfigurationDispatch();
+                continue;
+            }
             if (target.getSyncGroup() == null || target.getSyncGroup().isIgnoring(target)) {
                 if (syncId < 0) {
                     final BLASTSyncEngine.SyncGroup sg = mSyncEngine.prepareSyncSet(
