@@ -74,6 +74,11 @@ public class MatrixRestore extends PaintOperation {
         return OP_CODE;
     }
 
+    /**
+     * add a matrix restore operation to the buffer
+     *
+     * @param buffer the buffer to add to
+     */
     public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(OP_CODE);
     }

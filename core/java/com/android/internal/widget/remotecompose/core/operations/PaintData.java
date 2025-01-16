@@ -32,6 +32,7 @@ import com.android.internal.widget.remotecompose.core.operations.paint.PaintBund
 
 import java.util.List;
 
+/** Paint data operation */
 public class PaintData extends PaintOperation implements VariableSupport {
     private static final int OP_CODE = Operations.PAINT_VALUES;
     private static final String CLASS_NAME = "PaintData";
@@ -80,6 +81,12 @@ public class PaintData extends PaintOperation implements VariableSupport {
         return OP_CODE;
     }
 
+    /**
+     * add a paint data to the buffer
+     *
+     * @param buffer the buffer to add to
+     * @param paintBundle the paint bundle
+     */
     public static void apply(@NonNull WireBuffer buffer, @NonNull PaintBundle paintBundle) {
         buffer.start(Operations.PAINT_VALUES);
         paintBundle.writeBundle(buffer);

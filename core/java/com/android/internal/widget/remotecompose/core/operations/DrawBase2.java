@@ -31,8 +31,8 @@ import java.util.List;
 /** Base class for commands that take 3 float */
 public abstract class DrawBase2 extends PaintOperation implements VariableSupport {
     @NonNull protected String mName = "DrawRectBase";
-    float mV1;
-    float mV2;
+    protected float mV1;
+    protected float mV2;
     float mValue1;
     float mValue2;
 
@@ -76,6 +76,13 @@ public abstract class DrawBase2 extends PaintOperation implements VariableSuppor
         return mName + " " + floatToString(mV1) + " " + floatToString(mV2);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param maker the maker of the operation
+     * @param buffer the buffer to read
+     * @param operations the list of operations to add to
+     */
     public static void read(
             @NonNull Maker maker, @NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float v1 = buffer.readFloat();

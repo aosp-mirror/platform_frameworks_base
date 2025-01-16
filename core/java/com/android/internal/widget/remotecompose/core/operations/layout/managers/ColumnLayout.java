@@ -32,6 +32,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.LayoutCo
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.ComponentMeasure;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.MeasurePass;
 import com.android.internal.widget.remotecompose.core.operations.layout.measure.Size;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.utils.DebugLog;
 
 import java.util.List;
@@ -93,7 +94,8 @@ public class ColumnLayout extends LayoutManager {
     @NonNull
     @Override
     public String toString() {
-        return "COLUMN ["
+        return getSerializedName()
+                + " ["
                 + mComponentId
                 + ":"
                 + mAnimationId
@@ -213,40 +215,61 @@ public class ColumnLayout extends LayoutManager {
             selfHeight =
                     mComponentModifiers.getVerticalScrollDimension() - mPaddingTop - mPaddingBottom;
         }
-        boolean hasWeights = false;
-        float totalWeights = 0f;
-        for (Component child : mChildrenComponents) {
-            ComponentMeasure childMeasure = measure.get(child);
-            if (childMeasure.getVisibility() == Visibility.GONE) {
-                continue;
-            }
-            if (child instanceof LayoutComponent
-                    && ((LayoutComponent) child).getHeightModifier().hasWeight()) {
-                hasWeights = true;
-                totalWeights += ((LayoutComponent) child).getHeightModifier().getValue();
-            } else {
-                childrenHeight += childMeasure.getH();
-            }
-        }
-        if (hasWeights) {
-            float availableSpace = selfHeight - childrenHeight;
+        boolean checkWeights = true;
+        while (checkWeights) {
+            checkWeights = false;
+            boolean hasWeights = false;
+            float totalWeights = 0f;
             for (Component child : mChildrenComponents) {
+                ComponentMeasure childMeasure = measure.get(child);
+                if (childMeasure.getVisibility() == Visibility.GONE) {
+                    continue;
+                }
                 if (child instanceof LayoutComponent
                         && ((LayoutComponent) child).getHeightModifier().hasWeight()) {
-                    ComponentMeasure childMeasure = measure.get(child);
-                    if (childMeasure.getVisibility() == Visibility.GONE) {
-                        continue;
-                    }
-                    float weight = ((LayoutComponent) child).getHeightModifier().getValue();
-                    childMeasure.setH((weight * availableSpace) / totalWeights);
-                    child.measure(
-                            context,
-                            childMeasure.getW(),
-                            childMeasure.getW(),
-                            childMeasure.getH(),
-                            childMeasure.getH(),
-                            measure);
+                    hasWeights = true;
+                    totalWeights += ((LayoutComponent) child).getHeightModifier().getValue();
+                } else {
+                    childrenHeight += childMeasure.getH();
                 }
+            }
+            if (hasWeights) {
+                float availableSpace = selfHeight - childrenHeight;
+                for (Component child : mChildrenComponents) {
+                    if (child instanceof LayoutComponent
+                            && ((LayoutComponent) child).getHeightModifier().hasWeight()) {
+                        ComponentMeasure childMeasure = measure.get(child);
+                        if (childMeasure.getVisibility() == Visibility.GONE) {
+                            continue;
+                        }
+                        float weight = ((LayoutComponent) child).getHeightModifier().getValue();
+                        float childHeight = (weight * availableSpace) / totalWeights;
+                        HeightInModifierOperation heightInConstraints =
+                                ((LayoutComponent) child).getHeightModifier().getHeightIn();
+                        if (heightInConstraints != null) {
+                            float min = heightInConstraints.getMin();
+                            float max = heightInConstraints.getMax();
+                            if (min != -1) {
+                                childHeight = Math.max(min, childHeight);
+                            }
+                            if (max != -1) {
+                                childHeight = Math.min(max, childHeight);
+                            }
+                        }
+                        childMeasure.setH(childHeight);
+                        child.measure(
+                                context,
+                                childMeasure.getW(),
+                                childMeasure.getW(),
+                                childMeasure.getH(),
+                                childMeasure.getH(),
+                                measure);
+                    }
+                }
+            }
+
+            if (applyVisibility(selfWidth, selfHeight, measure) && hasWeights) {
+                checkWeights = true;
             }
         }
 
@@ -360,6 +383,16 @@ public class ColumnLayout extends LayoutManager {
         return Operations.LAYOUT_COLUMN;
     }
 
+    /**
+     * Write the operation to the buffer
+     *
+     * @param buffer wire buffer
+     * @param componentId component id
+     * @param animationId animation id (-1 if not set)
+     * @param horizontalPositioning horizontal positioning rules
+     * @param verticalPositioning vertical positioning rules
+     * @param spacedBy spaced by value
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int componentId,
@@ -367,7 +400,7 @@ public class ColumnLayout extends LayoutManager {
             int horizontalPositioning,
             int verticalPositioning,
             float spacedBy) {
-        buffer.start(Operations.LAYOUT_COLUMN);
+        buffer.start(id());
         buffer.writeInt(componentId);
         buffer.writeInt(animationId);
         buffer.writeInt(horizontalPositioning);

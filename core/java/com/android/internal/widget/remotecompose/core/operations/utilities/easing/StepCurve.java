@@ -26,6 +26,13 @@ public class StepCurve extends Easing {
     //    private static final boolean DEBUG = false;
     @NonNull private final MonotonicCurveFit mCurveFit;
 
+    /**
+     * Create a step curve from a series of values
+     *
+     * @param params the series of values to ease over
+     * @param offset the offset into the array
+     * @param len the length of the array to use
+     */
     public StepCurve(@NonNull float[] params, int offset, int len) {
         mCurveFit = genSpline(params, offset, len);
     }

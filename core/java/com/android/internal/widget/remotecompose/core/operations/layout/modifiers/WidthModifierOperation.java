@@ -31,6 +31,7 @@ import java.util.List;
 public class WidthModifierOperation extends DimensionModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_WIDTH;
     public static final String CLASS_NAME = "WidthModifierOperation";
+    private WidthInModifierOperation mWidthIn = null;
 
     /**
      * The name of the class
@@ -109,5 +110,23 @@ public class WidthModifierOperation extends DimensionModifierOperation {
                 .description("define the animation")
                 .field(INT, "type", "")
                 .field(FLOAT, "value", "");
+    }
+
+    /**
+     * Set width in constraints
+     *
+     * @param widthInConstraints width constraints
+     */
+    public void setWidthIn(WidthInModifierOperation widthInConstraints) {
+        mWidthIn = widthInConstraints;
+    }
+
+    /**
+     * Returns width in constraints
+     *
+     * @return width in constraints
+     */
+    public WidthInModifierOperation getWidthIn() {
+        return mWidthIn;
     }
 }

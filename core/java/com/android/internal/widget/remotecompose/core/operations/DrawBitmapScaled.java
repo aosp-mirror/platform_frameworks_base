@@ -217,6 +217,23 @@ public class DrawBitmapScaled extends PaintOperation
         return OP_CODE;
     }
 
+    /**
+     * Draw a bitmap using integer coordinates
+     *
+     * @param buffer the buffer to write to
+     * @param imageId the id of the image
+     * @param srcLeft the left most pixel in the image to draw
+     * @param srcTop the right most pixel in the image to draw
+     * @param srcRight the right most pixel in the image to draw
+     * @param srcBottom the bottom most pixel in the image to draw
+     * @param dstLeft the left most pixel in the destination
+     * @param dstTop the top most pixel in the destination
+     * @param dstRight the right most pixel in the destination
+     * @param dstBottom the bottom most pixel in the destination
+     * @param scaleType the type of scale operation
+     * @param scaleFactor the scalefactor to use with fixed scale
+     * @param cdId the content discription id
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int imageId,

@@ -76,10 +76,10 @@ public class MonotonicCurveFit {
     }
 
     /**
-     * Get the position of all curves at time t
+     * Get the position of all curves at position t
      *
-     * @param t
-     * @param v
+     * @param t the point on the spline
+     * @param v the array to fill (for multiple curves)
      */
     public void getPos(double t, @NonNull double[] v) {
         final int n = mT.length;
@@ -136,10 +136,10 @@ public class MonotonicCurveFit {
     }
 
     /**
-     * Get the position of all curves at time t
+     * Get the position of all curves at position t
      *
-     * @param t
-     * @param v
+     * @param t the point on the spline
+     * @param v the array to fill
      */
     public void getPos(double t, @NonNull float[] v) {
         final int n = mT.length;
@@ -196,11 +196,11 @@ public class MonotonicCurveFit {
     }
 
     /**
-     * Get the position of the jth curve at time t
+     * Get the position of the jth curve at position t
      *
-     * @param t
-     * @param j
-     * @return
+     * @param t the position
+     * @param j the curve to get
+     * @return the position
      */
     public double getPos(double t, int j) {
         final int n = mT.length;
@@ -240,8 +240,8 @@ public class MonotonicCurveFit {
     /**
      * Get the slope of all the curves at position t
      *
-     * @param t
-     * @param v
+     * @param t the position
+     * @param v the array to fill
      */
     public void getSlope(double t, @NonNull double[] v) {
         final int n = mT.length;
@@ -271,9 +271,9 @@ public class MonotonicCurveFit {
     /**
      * Get the slope of the j curve at position t
      *
-     * @param t
-     * @param j
-     * @return
+     * @param t the position
+     * @param j the curve to get the value at
+     * @return the slope
      */
     public double getSlope(double t, int j) {
         final int n = mT.length;
@@ -297,6 +297,11 @@ public class MonotonicCurveFit {
         return 0; // should never reach here
     }
 
+    /**
+     * Get the time point used to create the curve
+     *
+     * @return the time points used to create the curve
+     */
     public @NonNull double[] getTimePoints() {
         return mT;
     }
@@ -332,7 +337,12 @@ public class MonotonicCurveFit {
                 + h * t1;
     }
 
-    /** This builds a monotonic spline to be used as a wave function */
+    /**
+     * This builds a monotonic spline to be used as a wave function
+     *
+     * @param configString the configuration string
+     * @return the curve
+     */
     @NonNull
     public static MonotonicCurveFit buildWave(@NonNull String configString) {
         // done this way for efficiency

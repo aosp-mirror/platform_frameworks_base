@@ -102,6 +102,13 @@ public abstract class DrawBase4 extends PaintOperation implements VariableSuppor
                 + floatToString(mY2Value, mY2);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param maker the maker of the operation
+     * @param buffer the buffer to read
+     * @param operations the list of operations to add to
+     */
     public static void read(
             @NonNull Maker maker, @NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float v1 = buffer.readFloat();

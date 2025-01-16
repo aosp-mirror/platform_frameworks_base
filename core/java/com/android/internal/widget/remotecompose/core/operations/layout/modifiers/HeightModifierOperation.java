@@ -31,6 +31,7 @@ import java.util.List;
 public class HeightModifierOperation extends DimensionModifierOperation {
     private static final int OP_CODE = Operations.MODIFIER_HEIGHT;
     public static final String CLASS_NAME = "HeightModifierOperation";
+    private HeightInModifierOperation mHeightIn = null;
 
     /**
      * The name of the class
@@ -109,5 +110,23 @@ public class HeightModifierOperation extends DimensionModifierOperation {
                 .description("define the animation")
                 .field(INT, "type", "")
                 .field(FLOAT, "value", "");
+    }
+
+    /**
+     * Set height in constraints
+     *
+     * @param heightInConstraints height constraints
+     */
+    public void setHeightIn(HeightInModifierOperation heightInConstraints) {
+        mHeightIn = heightInConstraints;
+    }
+
+    /**
+     * Returns height in constraints
+     *
+     * @return height in constraints
+     */
+    public HeightInModifierOperation getHeightIn() {
+        return mHeightIn;
     }
 }

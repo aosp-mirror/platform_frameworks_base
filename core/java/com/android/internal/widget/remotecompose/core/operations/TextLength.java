@@ -50,6 +50,11 @@ public class TextLength extends Operation {
         return CLASS_NAME + "[" + mLengthId + "] = " + mTextId;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     public static @NonNull String name() {
         return CLASS_NAME;
     }

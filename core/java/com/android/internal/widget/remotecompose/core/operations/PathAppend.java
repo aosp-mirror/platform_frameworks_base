@@ -101,6 +101,7 @@ public class PathAppend extends PaintOperation implements VariableSupport {
     public static final int CUBIC = 14;
     public static final int CLOSE = 15;
     public static final int DONE = 16;
+    public static final int RESET = 17;
     public static final float MOVE_NAN = Utils.asNan(MOVE);
     public static final float LINE_NAN = Utils.asNan(LINE);
     public static final float QUADRATIC_NAN = Utils.asNan(QUADRATIC);
@@ -108,6 +109,7 @@ public class PathAppend extends PaintOperation implements VariableSupport {
     public static final float CUBIC_NAN = Utils.asNan(CUBIC);
     public static final float CLOSE_NAN = Utils.asNan(CLOSE);
     public static final float DONE_NAN = Utils.asNan(DONE);
+    public static final float RESET_NAN = Utils.asNan(RESET);
 
     /**
      * The name of the class
@@ -128,6 +130,14 @@ public class PathAppend extends PaintOperation implements VariableSupport {
         return OP_CODE;
     }
 
+    /**
+     * add a path append operation to the buffer. With PathCreate allows you create a path
+     * dynamically
+     *
+     * @param buffer add the data to this buffer
+     * @param id id of the path
+     * @param data the path data to append
+     */
     public static void apply(@NonNull WireBuffer buffer, int id, @NonNull float[] data) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);
@@ -175,6 +185,10 @@ public class PathAppend extends PaintOperation implements VariableSupport {
     public void apply(@NonNull RemoteContext context) {
         float[] data = context.getPathData(mInstanceId);
         float[] out = mOutputPath;
+        if (Float.floatToRawIntBits(out[0]) == Float.floatToRawIntBits(RESET_NAN)) {
+            context.loadPathData(mInstanceId, new float[0]);
+            return;
+        }
         if (data != null) {
             out = new float[data.length + mOutputPath.length];
 
@@ -190,6 +204,12 @@ public class PathAppend extends PaintOperation implements VariableSupport {
         context.loadPathData(mInstanceId, out);
     }
 
+    /**
+     * Convert a path to a string
+     *
+     * @param path the path to convert
+     * @return text representation of path
+     */
     @NonNull
     public static String pathString(@Nullable float[] path) {
         if (path == null) {

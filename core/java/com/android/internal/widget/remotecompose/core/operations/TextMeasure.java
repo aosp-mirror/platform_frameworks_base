@@ -66,6 +66,11 @@ public class TextMeasure extends PaintOperation {
         return "FloatConstant[" + mId + "] = " + mTextId + " " + mType;
     }
 
+    /**
+     * The name of the class
+     *
+     * @return the name
+     */
     public static @NonNull String name() {
         return CLASS_NAME;
     }

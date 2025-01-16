@@ -131,6 +131,13 @@ public class PathData extends Operation implements VariableSupport {
         return OP_CODE;
     }
 
+    /**
+     * add a create path operation
+     *
+     * @param buffer buffer to add to
+     * @param id the id of the path
+     * @param data the path
+     */
     public static void apply(@NonNull WireBuffer buffer, int id, @NonNull float[] data) {
         buffer.start(Operations.DATA_PATH);
         buffer.writeInt(id);

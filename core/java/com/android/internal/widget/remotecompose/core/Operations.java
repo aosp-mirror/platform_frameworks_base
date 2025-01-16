@@ -88,6 +88,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.TouchUpM
 import com.android.internal.widget.remotecompose.core.operations.layout.animation.AnimationSpec;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.CanvasLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.CollapsibleColumnLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.CollapsibleRowLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.ColumnLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.RowLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.StateLayout;
@@ -97,6 +99,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ClipRectModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.GraphicsLayerModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HostNamedActionOperation;
@@ -111,6 +114,7 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueIntegerExpressionChangeActionOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ValueStringChangeActionOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.utilities.IntMap;
@@ -208,7 +212,9 @@ public class Operations {
     public static final int LAYOUT_CONTENT = 201;
     public static final int LAYOUT_BOX = 202;
     public static final int LAYOUT_ROW = 203;
+    public static final int LAYOUT_COLLAPSIBLE_ROW = 230;
     public static final int LAYOUT_COLUMN = 204;
+    public static final int LAYOUT_COLLAPSIBLE_COLUMN = 233;
     public static final int LAYOUT_CANVAS = 205;
     public static final int LAYOUT_CANVAS_CONTENT = 207;
     public static final int LAYOUT_TEXT = 208;
@@ -218,6 +224,8 @@ public class Operations {
 
     public static final int MODIFIER_WIDTH = 16;
     public static final int MODIFIER_HEIGHT = 67;
+    public static final int MODIFIER_WIDTH_IN = 231;
+    public static final int MODIFIER_HEIGHT_IN = 232;
     public static final int MODIFIER_BACKGROUND = 55;
     public static final int MODIFIER_BORDER = 107;
     public static final int MODIFIER_PADDING = 58;
@@ -324,6 +332,8 @@ public class Operations {
 
         map.put(MODIFIER_WIDTH, WidthModifierOperation::read);
         map.put(MODIFIER_HEIGHT, HeightModifierOperation::read);
+        map.put(MODIFIER_WIDTH_IN, WidthInModifierOperation::read);
+        map.put(MODIFIER_HEIGHT_IN, HeightInModifierOperation::read);
         map.put(MODIFIER_PADDING, PaddingModifierOperation::read);
         map.put(MODIFIER_BACKGROUND, BackgroundModifierOperation::read);
         map.put(MODIFIER_BORDER, BorderModifierOperation::read);
@@ -359,7 +369,9 @@ public class Operations {
         map.put(LAYOUT_CONTENT, LayoutComponentContent::read);
         map.put(LAYOUT_BOX, BoxLayout::read);
         map.put(LAYOUT_COLUMN, ColumnLayout::read);
+        map.put(LAYOUT_COLLAPSIBLE_COLUMN, CollapsibleColumnLayout::read);
         map.put(LAYOUT_ROW, RowLayout::read);
+        map.put(LAYOUT_COLLAPSIBLE_ROW, CollapsibleRowLayout::read);
         map.put(LAYOUT_CANVAS, CanvasLayout::read);
         map.put(LAYOUT_CANVAS_CONTENT, CanvasContent::read);
         map.put(LAYOUT_TEXT, TextLayout::read);
