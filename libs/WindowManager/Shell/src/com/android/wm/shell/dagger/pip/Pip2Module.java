@@ -83,13 +83,14 @@ public abstract class Pip2Module {
             @NonNull PipTransitionState pipStackListenerController,
             @NonNull PipDisplayLayoutState pipDisplayLayoutState,
             @NonNull PipUiStateChangeController pipUiStateChangeController,
+            DisplayController displayController,
             Optional<DesktopUserRepositories> desktopUserRepositoriesOptional,
             Optional<DesktopWallpaperActivityTokenProvider>
                     desktopWallpaperActivityTokenProviderOptional) {
         return new PipTransition(context, shellInit, shellTaskOrganizer, transitions,
                 pipBoundsState, null, pipBoundsAlgorithm, pipTaskListener,
                 pipScheduler, pipStackListenerController, pipDisplayLayoutState,
-                pipUiStateChangeController, desktopUserRepositoriesOptional,
+                pipUiStateChangeController, displayController, desktopUserRepositoriesOptional,
                 desktopWallpaperActivityTokenProviderOptional);
     }
 

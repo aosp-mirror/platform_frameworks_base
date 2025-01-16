@@ -40,6 +40,7 @@ import androidx.annotation.Nullable;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.protolog.ProtoLog;
 import com.android.internal.util.Preconditions;
+import com.android.window.flags.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.DisplayChangeController;
@@ -358,10 +359,21 @@ public class PipController implements ConfigurationChangeListener,
     //
 
     private Rect getSwipePipToHomeBounds(ComponentName componentName, ActivityInfo activityInfo,
-            PictureInPictureParams pictureInPictureParams,
+            int displayId, PictureInPictureParams pictureInPictureParams,
             int launcherRotation, Rect hotseatKeepClearArea) {
         ProtoLog.d(ShellProtoLogGroup.WM_SHELL_PICTURE_IN_PICTURE,
                 "getSwipePipToHomeBounds: %s", componentName);
+
+        // If PiP is enabled on Connected Displays, update PipDisplayLayoutState to have the correct
+        // display info that PiP is entering in.
+        if (Flags.enableConnectedDisplaysPip()) {
+            final DisplayLayout displayLayout = mDisplayController.getDisplayLayout(displayId);
+            if (displayLayout != null) {
+                mPipDisplayLayoutState.setDisplayId(displayId);
+                mPipDisplayLayoutState.setDisplayLayout(displayLayout);
+            }
+        }
+
         // Preemptively add the keep clear area for Hotseat, so that it is taken into account
         // when calculating the entry destination bounds of PiP window.
         mPipBoundsState.setNamedUnrestrictedKeepClearArea(
@@ -592,14 +604,14 @@ public class PipController implements ConfigurationChangeListener,
         }
 
         @Override
-        public Rect startSwipePipToHome(ComponentName componentName, ActivityInfo activityInfo,
-                PictureInPictureParams pictureInPictureParams, int launcherRotation,
-                Rect keepClearArea) {
+        public Rect startSwipePipToHome(ActivityManager.RunningTaskInfo taskInfo,
+                int launcherRotation, Rect keepClearArea) {
             Rect[] result = new Rect[1];
             executeRemoteCallWithTaskPermission(mController, "startSwipePipToHome",
                     (controller) -> {
-                        result[0] = controller.getSwipePipToHomeBounds(componentName, activityInfo,
-                                pictureInPictureParams, launcherRotation, keepClearArea);
+                        result[0] = controller.getSwipePipToHomeBounds(taskInfo.topActivity,
+                                taskInfo.topActivityInfo, taskInfo.displayId,
+                                taskInfo.pictureInPictureParams, launcherRotation, keepClearArea);
                     }, true /* blocking */);
             return result[0];
         }
