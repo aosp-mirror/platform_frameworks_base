@@ -205,18 +205,8 @@ final class HistoricalRegistry {
         mContext = context;
         if (Flags.enableSqliteAppopsAccesses()) {
             mDiscreteRegistry = new DiscreteOpsSqlRegistry(context);
-            if (DiscreteOpsXmlRegistry.getDiscreteOpsDir().exists()) {
-                DiscreteOpsSqlRegistry sqlRegistry = (DiscreteOpsSqlRegistry) mDiscreteRegistry;
-                DiscreteOpsXmlRegistry xmlRegistry = new DiscreteOpsXmlRegistry(context);
-                DiscreteOpsMigrationHelper.migrateDiscreteOpsToSqlite(xmlRegistry, sqlRegistry);
-            }
         } else {
             mDiscreteRegistry = new DiscreteOpsXmlRegistry(context);
-            if (DiscreteOpsDbHelper.getDatabaseFile().exists()) { // roll-back sqlite
-                DiscreteOpsSqlRegistry sqlRegistry = new DiscreteOpsSqlRegistry(context);
-                DiscreteOpsXmlRegistry xmlRegistry = (DiscreteOpsXmlRegistry) mDiscreteRegistry;
-                DiscreteOpsMigrationHelper.migrateDiscreteOpsToXml(sqlRegistry, xmlRegistry);
-            }
         }
     }
 
@@ -265,6 +255,19 @@ final class HistoricalRegistry {
                         }
                     }
                 }
+            }
+        }
+        if (Flags.enableSqliteAppopsAccesses()) {
+            if (DiscreteOpsXmlRegistry.getDiscreteOpsDir().exists()) {
+                DiscreteOpsSqlRegistry sqlRegistry = (DiscreteOpsSqlRegistry) mDiscreteRegistry;
+                DiscreteOpsXmlRegistry xmlRegistry = new DiscreteOpsXmlRegistry(mContext);
+                DiscreteOpsMigrationHelper.migrateDiscreteOpsToSqlite(xmlRegistry, sqlRegistry);
+            }
+        } else {
+            if (DiscreteOpsDbHelper.getDatabaseFile().exists()) { // roll-back sqlite
+                DiscreteOpsSqlRegistry sqlRegistry = new DiscreteOpsSqlRegistry(mContext);
+                DiscreteOpsXmlRegistry xmlRegistry = (DiscreteOpsXmlRegistry) mDiscreteRegistry;
+                DiscreteOpsMigrationHelper.migrateDiscreteOpsToXml(sqlRegistry, xmlRegistry);
             }
         }
     }
