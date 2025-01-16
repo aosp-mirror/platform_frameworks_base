@@ -52,7 +52,6 @@ import android.view.contentcapture.ContentCaptureSession.FlushReason;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.util.RingBuffer;
 import com.android.internal.util.SyncResultReceiver;
 
@@ -605,22 +604,12 @@ public final class ContentCaptureManager {
                     mContext,
                     this,
                     prepareUiHandler(),
-                    prepareContentCaptureHandler(),
                     mService
                 );
                 if (sVerbose) Log.v(TAG, "getMainContentCaptureSession(): created " + mMainSession);
             }
             return mMainSession;
         }
-    }
-
-    @NonNull
-    @GuardedBy("mLock")
-    private Handler prepareContentCaptureHandler() {
-        if (mContentCaptureHandler == null) {
-            mContentCaptureHandler = BackgroundThread.getHandler();
-        }
-        return mContentCaptureHandler;
     }
 
     @NonNull
