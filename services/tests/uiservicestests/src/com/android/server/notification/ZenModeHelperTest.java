@@ -211,7 +211,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.PrintWriter;
 import java.io.Reader;
+import java.io.StringWriter;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.temporal.ChronoUnit;
@@ -7406,6 +7408,43 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 .isEqualTo(mZenModeHelper.getDefaultZenPolicy());
     }
 
+    @Test
+    public void setAutomaticZenRuleState_logsOriginToZenLog() {
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("Rule", Uri.parse("cond"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT, mPkg, azr,
+                ORIGIN_APP, "adding", CUSTOM_PKG_UID);
+        ZenLog.clear();
+
+        // User enables manually from QS:
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, ruleId,
+                new Condition(azr.getConditionId(), "", STATE_TRUE), ORIGIN_USER_IN_SYSTEMUI,
+                123456);
+
+        assertThat(getZenLog()).contains(
+                "config: setAzrState: " + ruleId + " (ORIGIN_USER_IN_SYSTEMUI) from uid " + 1234);
+    }
+
+    @Test
+    public void setAutomaticZenRuleStateFromConditionProvider_logsOriginToZenLog() {
+        AutomaticZenRule azr = new AutomaticZenRule.Builder("Rule", Uri.parse("cond/cond"))
+                .setOwner(new ComponentName(CUSTOM_PKG_NAME, "SomeConditionProvider"))
+                .setPackage(mPkg)
+                .build();
+        String ruleId = mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT, mPkg, azr,
+                ORIGIN_APP, "adding", CUSTOM_PKG_UID);
+        ZenLog.clear();
+
+        // App enables rule through CPS
+        mZenModeHelper.setAutomaticZenRuleStateFromConditionProvider(UserHandle.CURRENT,
+                Uri.parse("cond/cond"), new Condition(azr.getConditionId(), "", STATE_TRUE),
+                ORIGIN_APP, CUSTOM_PKG_UID);
+
+        assertThat(getZenLog()).contains(
+                "config: setAzrStateFromCps: cond/cond (ORIGIN_APP) from uid " + CUSTOM_PKG_UID);
+    }
+
     private static void addZenRule(ZenModeConfig config, String id, String ownerPkg, int zenMode,
             @Nullable ZenPolicy zenPolicy) {
         ZenRule rule = new ZenRule();
@@ -7528,6 +7567,12 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertThat(dndProto.getBadge().getNumber()).isEqualTo(STATE_ALLOW);
         assertThat(dndProto.getAmbient().getNumber()).isEqualTo(STATE_DISALLOW);
         assertThat(dndProto.getNotificationList().getNumber()).isEqualTo(STATE_ALLOW);
+    }
+
+    private static String getZenLog() {
+        StringWriter zenLogWriter = new StringWriter();
+        ZenLog.dump(new PrintWriter(zenLogWriter), "");
+        return zenLogWriter.toString();
     }
 
     private static void withoutWtfCrash(Runnable test) {

@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import android.annotation.Nullable;
 import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.media.AudioManager;
@@ -26,6 +27,7 @@ import android.provider.Settings.Global;
 import android.service.notification.IConditionProvider;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.ZenModeConfig;
+import android.service.notification.ZenModeConfig.ConfigOrigin;
 import android.service.notification.ZenModeDiff;
 import android.util.LocalLog;
 
@@ -119,16 +121,17 @@ public class ZenLog {
         append(TYPE_UNSUBSCRIBE, uri + "," + subscribeResult(provider, e));
     }
 
-    public static void traceConfig(String reason, ComponentName triggeringComponent,
-            ZenModeConfig oldConfig, ZenModeConfig newConfig, int callingUid) {
+    public static void traceConfig(@ConfigOrigin int origin, String reason,
+            @Nullable ComponentName triggeringComponent, ZenModeConfig oldConfig,
+            ZenModeConfig newConfig, int callingUid) {
         ZenModeDiff.ConfigDiff diff = new ZenModeDiff.ConfigDiff(oldConfig, newConfig);
-        if (diff == null || !diff.hasDiff()) {
-            append(TYPE_CONFIG, reason + " no changes");
+        if (!diff.hasDiff()) {
+            append(TYPE_CONFIG, reason + " (" + originToString(origin) + ") no changes");
         } else {
-            append(TYPE_CONFIG, reason
-                    + " - " + triggeringComponent + " : " + callingUid
-                    + ",\n" + (newConfig != null ? newConfig.toString() : null)
-                    + ",\n" + diff);
+            append(TYPE_CONFIG, reason + " (" + originToString(origin) + ") from uid " + callingUid
+                    + (triggeringComponent != null ? " - " + triggeringComponent : "") + ",\n"
+                    + (newConfig != null ? newConfig.toString() : null) + ",\n"
+                    + diff);
         }
     }
 
@@ -241,7 +244,22 @@ public class ZenLog {
         }
     }
 
-    private static String componentToString(ComponentName component) {
+    private static String originToString(@ConfigOrigin int origin) {
+        return switch (origin) {
+            case ZenModeConfig.ORIGIN_UNKNOWN -> "ORIGIN_UNKNOWN";
+            case ZenModeConfig.ORIGIN_INIT -> "ORIGIN_INIT";
+            case ZenModeConfig.ORIGIN_INIT_USER -> "ORIGIN_INIT_USER";
+            case ZenModeConfig.ORIGIN_USER_IN_SYSTEMUI -> "ORIGIN_USER_IN_SYSTEMUI";
+            case ZenModeConfig.ORIGIN_APP -> "ORIGIN_APP";
+            case ZenModeConfig.ORIGIN_SYSTEM -> "ORIGIN_SYSTEM";
+            case ZenModeConfig.ORIGIN_RESTORE_BACKUP -> "ORIGIN_RESTORE_BACKUP";
+            case ZenModeConfig.ORIGIN_USER_IN_APP -> "ORIGIN_USER_IN_APP";
+            default -> origin + "??";
+        };
+    }
+
+    @Nullable
+    private static String componentToString(@Nullable ComponentName component) {
         return component != null ? component.toShortString() : null;
     }
 

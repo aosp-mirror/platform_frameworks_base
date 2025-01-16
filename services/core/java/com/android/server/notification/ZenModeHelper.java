@@ -659,7 +659,8 @@ public class ZenModeHelper {
                             mContext.getString(R.string.zen_mode_implicit_deactivated),
                             STATE_FALSE);
                     setAutomaticZenRuleStateLocked(newConfig, Collections.singletonList(rule),
-                            deactivated, ORIGIN_APP, callingUid);
+                            deactivated, ORIGIN_APP,
+                            "applyGlobalZenModeAsImplicitZenRule: " + callingPkg, callingUid);
                 }
             } else {
                 // Either create a new rule with a default ZenPolicy, or update an existing rule's
@@ -971,26 +972,27 @@ public class ZenModeHelper {
             if (Flags.modesApi()) {
                 if (rule != null && canManageAutomaticZenRule(rule, callingUid)) {
                     setAutomaticZenRuleStateLocked(newConfig, Collections.singletonList(rule),
-                            condition, origin, callingUid);
+                            condition, origin, "setAzrState: " + rule.id, callingUid);
                 }
             } else {
                 ArrayList<ZenRule> rules = new ArrayList<>();
                 rules.add(rule); // rule may be null and throw NPE in the next method.
-                setAutomaticZenRuleStateLocked(newConfig, rules, condition, origin, callingUid);
+                setAutomaticZenRuleStateLocked(newConfig, rules, condition, origin,
+                        "setAzrState: " + (rule != null ? rule.id : "null!"), callingUid);
             }
         }
     }
 
-    void setAutomaticZenRuleStateFromConditionProvider(UserHandle user, Uri ruleDefinition,
+    void setAutomaticZenRuleStateFromConditionProvider(UserHandle user, Uri ruleConditionId,
             Condition condition, @ConfigOrigin int origin, int callingUid) {
-        checkSetRuleStateOrigin("setAutomaticZenRuleState(Uri ruleDefinition)", origin);
+        checkSetRuleStateOrigin("setAutomaticZenRuleStateFromConditionProvider", origin);
         ZenModeConfig newConfig;
         synchronized (mConfigLock) {
             ZenModeConfig config = getConfigLocked(user);
             if (config == null) return;
             newConfig = config.copy();
 
-            List<ZenRule> matchingRules = findMatchingRules(newConfig, ruleDefinition, condition);
+            List<ZenRule> matchingRules = findMatchingRules(newConfig, ruleConditionId, condition);
             if (Flags.modesApi()) {
                 for (int i = matchingRules.size() - 1; i >= 0; i--) {
                     if (!canManageAutomaticZenRule(matchingRules.get(i), callingUid)) {
@@ -998,13 +1000,14 @@ public class ZenModeHelper {
                     }
                 }
             }
-            setAutomaticZenRuleStateLocked(newConfig, matchingRules, condition, origin, callingUid);
+            setAutomaticZenRuleStateLocked(newConfig, matchingRules, condition, origin,
+                    "setAzrStateFromCps: " + ruleConditionId, callingUid);
         }
     }
 
     @GuardedBy("mConfigLock")
     private void setAutomaticZenRuleStateLocked(ZenModeConfig config, List<ZenRule> rules,
-            Condition condition, @ConfigOrigin int origin, int callingUid) {
+            Condition condition, @ConfigOrigin int origin, String reason, int callingUid) {
         if (rules == null || rules.isEmpty()) return;
 
         if (!Flags.modesUi()) {
@@ -1015,7 +1018,7 @@ public class ZenModeHelper {
 
         for (ZenRule rule : rules) {
             applyConditionAndReconsiderOverride(rule, condition, origin);
-            setConfigLocked(config, rule.component, origin, "conditionChanged", callingUid);
+            setConfigLocked(config, rule.component, origin, reason, callingUid);
         }
     }
 
@@ -2111,13 +2114,14 @@ public class ZenModeHelper {
     }
 
     @GuardedBy("mConfigLock")
-    private boolean setConfigLocked(ZenModeConfig config, ComponentName triggeringComponent,
-            @ConfigOrigin int origin, String reason, int callingUid) {
+    private boolean setConfigLocked(ZenModeConfig config,
+            @Nullable ComponentName triggeringComponent, @ConfigOrigin int origin, String reason,
+            int callingUid) {
         return setConfigLocked(config, origin, reason, triggeringComponent, true /*setRingerMode*/,
                 callingUid);
     }
 
-    void setConfig(ZenModeConfig config, ComponentName triggeringComponent,
+    void setConfig(ZenModeConfig config, @Nullable ComponentName triggeringComponent,
             @ConfigOrigin int origin, String reason, int callingUid) {
         synchronized (mConfigLock) {
             setConfigLocked(config, triggeringComponent, origin, reason, callingUid);
@@ -2126,7 +2130,7 @@ public class ZenModeHelper {
 
     @GuardedBy("mConfigLock")
     private boolean setConfigLocked(ZenModeConfig config, @ConfigOrigin int origin,
-            String reason, ComponentName triggeringComponent, boolean setRingerMode,
+            String reason, @Nullable ComponentName triggeringComponent, boolean setRingerMode,
             int callingUid) {
         final long identity = Binder.clearCallingIdentity();
         try {
@@ -2149,7 +2153,7 @@ public class ZenModeHelper {
                 mConfigs.put(config.user, config);
             }
             if (DEBUG) Log.d(TAG, "setConfigLocked reason=" + reason, new Throwable());
-            ZenLog.traceConfig(reason, triggeringComponent, mConfig, config, callingUid);
+            ZenLog.traceConfig(origin, reason, triggeringComponent, mConfig, config, callingUid);
 
             // send some broadcasts
             Policy newPolicy = getNotificationPolicy(config);
