@@ -1745,7 +1745,6 @@ public final class PlaybackActivityMonitor
                             eventValues[0] = eventValue;
                             sEventLogger.enqueue(
                                     new PlayerEvent(piid, PLAYER_UPDATE_MUTED, eventValues));
-
                             final AudioPlaybackConfiguration apc = mPlayers.get(piid);
                             if (apc == null || !apc.handleMutedEvent(eventValue)) {
                                 break;  // do not dispatch
