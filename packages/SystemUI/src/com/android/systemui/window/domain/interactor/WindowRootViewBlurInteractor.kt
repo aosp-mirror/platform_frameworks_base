@@ -18,6 +18,7 @@ package com.android.systemui.window.domain.interactor
 
 import android.util.Log
 import com.android.systemui.Flags
+import com.android.systemui.communal.domain.interactor.CommunalInteractor
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor
@@ -46,6 +47,7 @@ constructor(
     @Application private val applicationScope: CoroutineScope,
     private val keyguardInteractor: KeyguardInteractor,
     keyguardTransitionInteractor: KeyguardTransitionInteractor,
+    private val communalInteractor: CommunalInteractor,
     private val repository: WindowRootViewBlurRepository,
 ) {
     private var isBouncerTransitionInProgress: StateFlow<Boolean> =
@@ -87,6 +89,23 @@ constructor(
     }
 
     /**
+     * Request to apply blur while on glanceable hub, this takes precedence over other blurs (from
+     * shade) except for bouncer.
+     */
+    fun requestBlurForGlanceableHub(blurRadius: Int): Boolean {
+        if (keyguardInteractor.primaryBouncerShowing.value) {
+            return false
+        }
+
+        Log.d(TAG, "requestBlurForGlanceableHub for $blurRadius")
+
+        repository.isBlurOpaque.value = false
+        repository.blurRadius.value = blurRadius
+
+        return true
+    }
+
+    /**
      * Method that requests blur to be applied on window root view. It is applied only when other
      * blurs are not applied.
      *
@@ -101,6 +120,9 @@ constructor(
         // primaryBouncerShowing changes early to true/false, but blur is
         // coordinated by transition value.
         if (keyguardInteractor.primaryBouncerShowing.value || isBouncerTransitionInProgress.value) {
+            return false
+        }
+        if (communalInteractor.isCommunalBlurring.value) {
             return false
         }
         Log.d(TAG, "requestingBlurForShade for $blurRadius $opaque")

@@ -54,7 +54,6 @@ import com.android.systemui.statusbar.policy.SplitShadeStateController
 import com.android.systemui.util.WallpaperController
 import com.android.systemui.window.domain.interactor.WindowRootViewBlurInteractor
 import com.android.wm.shell.appzoomout.AppZoomOut
-
 import java.io.PrintWriter
 import java.util.Optional
 import javax.inject.Inject
@@ -280,9 +279,7 @@ constructor(
         wallpaperController.setNotificationShadeZoom(zoomOutFromShadeRadius)
         if (spatialModelAppPushback()) {
             appZoomOutOptional.ifPresent { appZoomOut ->
-                appZoomOut.setProgress(
-                    zoomOutFromShadeRadius
-                )
+                appZoomOut.setProgress(zoomOutFromShadeRadius)
             }
         }
         listeners.forEach {
@@ -526,7 +523,7 @@ constructor(
     private fun scheduleUpdate() {
         val (blur, zoomOutFromShadeRadius) = computeBlurAndZoomOut()
         zoomOutCalculatedFromShadeRadius = zoomOutFromShadeRadius
-        if (Flags.bouncerUiRevamp()) {
+        if (Flags.bouncerUiRevamp() || Flags.glanceableHubBlurredBackground()) {
             updateScheduled =
                 windowRootViewBlurInteractor.requestBlurForShade(blur, shouldBlurBeOpaque)
             return

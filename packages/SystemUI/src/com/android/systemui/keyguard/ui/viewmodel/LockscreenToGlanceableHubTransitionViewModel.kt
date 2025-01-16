@@ -20,12 +20,14 @@ import android.util.LayoutDirection
 import com.android.app.animation.Interpolators.EMPHASIZED
 import com.android.systemui.common.ui.domain.interactor.ConfigurationInteractor
 import com.android.systemui.dagger.SysUISingleton
+import com.android.systemui.keyguard.dagger.GlanceableHubBlurComponent
 import com.android.systemui.keyguard.domain.interactor.FromLockscreenTransitionInteractor
 import com.android.systemui.keyguard.shared.model.Edge
 import com.android.systemui.keyguard.shared.model.KeyguardState.GLANCEABLE_HUB
 import com.android.systemui.keyguard.shared.model.KeyguardState.LOCKSCREEN
 import com.android.systemui.keyguard.ui.KeyguardTransitionAnimationFlow
 import com.android.systemui.keyguard.ui.StateToValue
+import com.android.systemui.keyguard.ui.transitions.GlanceableHubTransition
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.shade.ShadeDisplayAware
@@ -48,7 +50,9 @@ class LockscreenToGlanceableHubTransitionViewModel
 constructor(
     @ShadeDisplayAware configurationInteractor: ConfigurationInteractor,
     animationFlow: KeyguardTransitionAnimationFlow,
-) {
+    private val blurFactory: GlanceableHubBlurComponent.Factory,
+) : GlanceableHubTransition {
+
     private val transitionAnimation =
         animationFlow
             .setup(
@@ -56,6 +60,9 @@ constructor(
                 edge = Edge.create(from = LOCKSCREEN, to = Scenes.Communal),
             )
             .setupWithoutSceneContainer(edge = Edge.create(from = LOCKSCREEN, to = GLANCEABLE_HUB))
+
+    override val windowBlurRadius: Flow<Float> =
+        blurFactory.create(transitionAnimation).getBlurProvider().enterBlurRadius
 
     val keyguardAlpha: Flow<Float> =
         transitionAnimation.sharedFlow(

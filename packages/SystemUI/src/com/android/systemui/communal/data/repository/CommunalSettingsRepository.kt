@@ -32,6 +32,7 @@ import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_D
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_FLAG
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_INVALID_USER
 import com.android.systemui.communal.data.model.DisabledReason.DISABLED_REASON_USER_SETTING
+import com.android.systemui.communal.data.repository.CommunalSettingsRepositoryModule.Companion.DEFAULT_BACKGROUND_TYPE
 import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
@@ -43,6 +44,7 @@ import com.android.systemui.util.settings.SecureSettings
 import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import java.util.EnumSet
 import javax.inject.Inject
+import javax.inject.Named
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.combine
@@ -99,6 +101,7 @@ constructor(
     private val secureSettings: SecureSettings,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val devicePolicyManager: DevicePolicyManager,
+    @Named(DEFAULT_BACKGROUND_TYPE) private val defaultBackgroundType: CommunalBackgroundType,
 ) : CommunalSettingsRepository {
 
     override fun getFlagEnabled(): Boolean {
@@ -175,11 +178,11 @@ constructor(
                 val intType =
                     secureSettings.getIntForUser(
                         GLANCEABLE_HUB_BACKGROUND_SETTING,
-                        CommunalBackgroundType.ANIMATED.value,
+                        defaultBackgroundType.value,
                         user.id,
                     )
                 CommunalBackgroundType.entries.find { type -> type.value == intType }
-                    ?: CommunalBackgroundType.ANIMATED
+                    ?: defaultBackgroundType
             }
 
     private fun getEnabledByUser(user: UserInfo): Flow<Boolean> =

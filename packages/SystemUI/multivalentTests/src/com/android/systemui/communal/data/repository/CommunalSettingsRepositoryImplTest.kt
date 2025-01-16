@@ -30,6 +30,7 @@ import android.platform.test.flag.junit.FlagsParameterization
 import android.provider.Settings
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags.FLAG_COMMUNAL_HUB
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_BLURRED_BACKGROUND
 import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.broadcast.broadcastDispatcher
@@ -279,6 +280,7 @@ class CommunalSettingsRepositoryImplTest(flags: FlagsParameterization?) : SysuiT
         }
 
     @Test
+    @DisableFlags(FLAG_GLANCEABLE_HUB_BLURRED_BACKGROUND)
     fun backgroundType_defaultValue() =
         testScope.runTest {
             val backgroundType by collectLastValue(underTest.getBackground(PRIMARY_USER))

@@ -16,6 +16,9 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
+import com.android.systemui.Flags
+import com.android.systemui.communal.domain.interactor.CommunalSettingsInteractor
+import com.android.systemui.communal.shared.model.CommunalBackgroundType
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.keyguard.domain.interactor.FromPrimaryBouncerTransitionInteractor.Companion.TO_GLANCEABLE_HUB_DURATION
 import com.android.systemui.keyguard.shared.model.Edge
@@ -27,12 +30,17 @@ import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import javax.inject.Inject
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.flatMapLatest
 
 @SysUISingleton
 class PrimaryBouncerToGlanceableHubTransitionViewModel
 @Inject
-constructor(private val blurConfig: BlurConfig, animationFlow: KeyguardTransitionAnimationFlow) :
-    DeviceEntryIconTransition, PrimaryBouncerTransition {
+constructor(
+    blurConfig: BlurConfig,
+    animationFlow: KeyguardTransitionAnimationFlow,
+    communalSettingsInteractor: CommunalSettingsInteractor,
+) : DeviceEntryIconTransition, PrimaryBouncerTransition {
     private val transitionAnimation =
         animationFlow
             .setup(duration = TO_GLANCEABLE_HUB_DURATION, edge = Edge.INVALID)
@@ -42,7 +50,15 @@ constructor(private val blurConfig: BlurConfig, animationFlow: KeyguardTransitio
         transitionAnimation.immediatelyTransitionTo(1f)
 
     override val windowBlurRadius: Flow<Float> =
-        transitionAnimation.immediatelyTransitionTo(blurConfig.minBlurRadiusPx)
+        if (Flags.glanceableHubBlurredBackground()) {
+            communalSettingsInteractor.communalBackground
+                .filter { it != CommunalBackgroundType.BLUR }
+                .flatMapLatest {
+                    transitionAnimation.immediatelyTransitionTo(blurConfig.minBlurRadiusPx)
+                }
+        } else {
+            transitionAnimation.immediatelyTransitionTo(blurConfig.minBlurRadiusPx)
+        }
 
     override val notificationBlurRadius: Flow<Float> =
         transitionAnimation.immediatelyTransitionTo(0.0f)

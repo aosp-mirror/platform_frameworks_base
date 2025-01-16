@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2024 The Android Open Source Project
+ * Copyright (C) 2025 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,16 +16,14 @@
 
 package com.android.systemui.keyguard.ui.viewmodel
 
-import com.android.systemui.common.ui.domain.interactor.configurationInteractor
 import com.android.systemui.keyguard.ui.glanceableHubBlurComponentFactory
 import com.android.systemui.keyguard.ui.keyguardTransitionAnimationFlow
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.dreamingToGlanceableHubTransitionViewModel by
+val Kosmos.glanceableHubToDozingTransitionViewModel by
     Kosmos.Fixture {
-        DreamingToGlanceableHubTransitionViewModel(
-            configurationInteractor = configurationInteractor,
+        GlanceableHubToDozingTransitionViewModel(
             animationFlow = keyguardTransitionAnimationFlow,
-            blurFactory = glanceableHubBlurComponentFactory,
+            blurComponentFactory = glanceableHubBlurComponentFactory,
         )
     }

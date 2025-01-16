@@ -19,6 +19,8 @@ package com.android.systemui.window.ui.viewmodel
 import android.os.Build
 import android.util.Log
 import com.android.app.tracing.coroutines.launchTraced
+import com.android.systemui.Flags.glanceableHubBlurredBackground
+import com.android.systemui.keyguard.ui.transitions.GlanceableHubTransition
 import com.android.systemui.keyguard.ui.transitions.PrimaryBouncerTransition
 import com.android.systemui.lifecycle.ExclusiveActivatable
 import com.android.systemui.window.domain.interactor.WindowRootViewBlurInteractor
@@ -40,6 +42,7 @@ class WindowRootViewModel
 @AssistedInject
 constructor(
     private val primaryBouncerTransitions: Set<@JvmSuppressWildcards PrimaryBouncerTransition>,
+    private val glanceableHubTransitions: Set<@JvmSuppressWildcards GlanceableHubTransition>,
     private val blurInteractor: WindowRootViewBlurInteractor,
 ) : ExclusiveActivatable() {
 
@@ -79,6 +82,26 @@ constructor(
                     .collect { blurRadius ->
                         blurInteractor.requestBlurForBouncer(blurRadius.toInt())
                     }
+            }
+
+            if (glanceableHubBlurredBackground()) {
+                launchTraced("WindowRootViewModel#glanceableHubTransitions") {
+                    glanceableHubTransitions
+                        .map { transition ->
+                            transition.windowBlurRadius.onEach { blurRadius ->
+                                if (isLoggable) {
+                                    Log.d(
+                                        TAG,
+                                        "${transition.javaClass.simpleName} windowBlurRadius $blurRadius",
+                                    )
+                                }
+                            }
+                        }
+                        .merge()
+                        .collect { blurRadius ->
+                            blurInteractor.requestBlurForGlanceableHub(blurRadius.toInt())
+                        }
+                }
             }
         }
         awaitCancellation()

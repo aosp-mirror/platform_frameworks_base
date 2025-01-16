@@ -19,6 +19,7 @@ package com.android.systemui.keyguard.dagger;
 import android.app.IActivityTaskManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
+import android.content.res.Resources;
 import android.os.PowerManager;
 
 import com.android.internal.jank.InteractionJankMonitor;
@@ -34,6 +35,7 @@ import com.android.keyguard.dagger.KeyguardQsUserSwitchComponent;
 import com.android.keyguard.dagger.KeyguardStatusBarViewComponent;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.CoreStartable;
+import com.android.systemui.Flags;
 import com.android.systemui.animation.ActivityTransitionAnimator;
 import com.android.systemui.bouncer.dagger.BouncerLoggerModule;
 import com.android.systemui.broadcast.BroadcastDispatcher;
@@ -59,12 +61,14 @@ import com.android.systemui.keyguard.data.repository.KeyguardRepositoryModule;
 import com.android.systemui.keyguard.domain.interactor.KeyguardInteractor;
 import com.android.systemui.keyguard.domain.interactor.KeyguardTransitionBootInteractor;
 import com.android.systemui.keyguard.domain.interactor.StartKeyguardTransitionModule;
+import com.android.systemui.keyguard.ui.transitions.BlurConfig;
 import com.android.systemui.keyguard.ui.transitions.DeviceEntryIconTransitionModule;
 import com.android.systemui.keyguard.ui.view.AlternateBouncerWindowViewBinder;
 import com.android.systemui.keyguard.ui.viewmodel.KeyguardQuickAffordancesCombinedViewModelModule;
 import com.android.systemui.log.SessionTracker;
 import com.android.systemui.navigationbar.NavigationModeController;
 import com.android.systemui.process.ProcessWrapper;
+import com.android.systemui.res.R;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.shade.ShadeController;
 import com.android.systemui.shade.ShadeDisplayAware;
@@ -108,6 +112,8 @@ import java.util.concurrent.Executor;
         includes = {
             DeviceEntryIconTransitionModule.class,
             FalsingModule.class,
+            GlanceableHubTransitionModule.class,
+            GlanceableHubTransitionImplModule.class,
             PrimaryBouncerTransitionModule.class,
             PrimaryBouncerTransitionImplModule.class,
             KeyguardDataQuickAffordanceModule.class,
@@ -233,6 +239,20 @@ public interface KeyguardModule {
     @Provides
     static ViewMediatorCallback providesViewMediatorCallback(KeyguardViewMediator viewMediator) {
         return viewMediator.getViewMediatorCallback();
+    }
+
+    /** */
+    @Provides
+    @SysUISingleton
+    static BlurConfig provideBlurConfig(@Main Resources resources) {
+        int minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius);
+        int maxBlurRadius =
+                Flags.notificationShadeBlur() || Flags.bouncerUiRevamp()
+                        || Flags.glanceableHubBlurredBackground()
+                        ? resources.getDimensionPixelSize(R.dimen.max_shade_window_blur_radius)
+                        : resources.getDimensionPixelSize(R.dimen.max_window_blur_radius);
+
+        return new BlurConfig(minBlurRadius, maxBlurRadius);
     }
 
     /** */

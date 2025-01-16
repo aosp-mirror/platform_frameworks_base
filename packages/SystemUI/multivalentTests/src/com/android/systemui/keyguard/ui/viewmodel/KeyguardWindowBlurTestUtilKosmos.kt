@@ -76,6 +76,21 @@ class KeyguardWindowBlurTestUtil(
         }
     }
 
+    suspend fun assertNoBlurRadiusTransition(
+        transitionProgress: List<Float>,
+        actualValuesProvider: () -> List<Float>,
+        transitionFactory: (value: Float, state: TransitionState) -> TransitionStep,
+    ) {
+        val transitionSteps =
+            listOf(
+                transitionFactory(transitionProgress.first(), STARTED),
+                *transitionProgress.drop(1).map { transitionFactory(it, RUNNING) }.toTypedArray(),
+            )
+        fakeKeyguardTransitionRepository.sendTransitionSteps(transitionSteps, testScope)
+
+        assertThat(actualValuesProvider.invoke()).isEmpty()
+    }
+
     fun shadeExpanded(expanded: Boolean) {
         if (expanded) {
             shadeTestUtil.setQsExpansion(1f)
