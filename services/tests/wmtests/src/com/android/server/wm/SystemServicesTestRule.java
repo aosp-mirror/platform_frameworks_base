@@ -264,6 +264,7 @@ public class SystemServicesTestRule implements TestRule {
         spyOn(dmg);
         doNothing().when(dmg).registerDisplayListener(
                 any(), any(Executor.class), anyLong(), anyString());
+        doNothing().when(dmg).registerTopologyListener(any(Executor.class), any(), anyString());
     }
 
     private void setUpLocalServices() {

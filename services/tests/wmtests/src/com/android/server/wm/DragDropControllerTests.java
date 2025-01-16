@@ -36,6 +36,7 @@ import static com.android.server.wm.DragDropController.MSG_UNHANDLED_DROP_LISTEN
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -337,12 +338,13 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                     // Verify the drop event is only sent for the global intercept window
                     assertTrue(nonLocalWindowDragEvents.isEmpty());
-                    assertTrue(last(localWindowDragEvents).getAction() != ACTION_DROP);
-                    assertTrue(last(globalInterceptWindowDragEvents).getAction() == ACTION_DROP);
+                    assertNotEquals(ACTION_DROP, localWindowDragEvents.getLast().getAction());
+                    assertEquals(ACTION_DROP,
+                            globalInterceptWindowDragEvents.getLast().getAction());
 
                     // Verify that item extras were not sent with the drop event
-                    assertNull(last(localWindowDragEvents).getClipData());
-                    assertFalse(last(globalInterceptWindowDragEvents).getClipData()
+                    assertNull(localWindowDragEvents.getLast().getClipData());
+                    assertFalse(globalInterceptWindowDragEvents.getLast().getClipData()
                             .willParcelWithActivityInfo());
                 });
     }
@@ -384,7 +386,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDragEventCoordinates() {
+    public void testDragEventCoordinatesOverlappingWindows() {
         int dragStartX = mWindow.getBounds().centerX();
         int dragStartY = mWindow.getBounds().centerY();
         int startOffsetPx = 10;
@@ -429,7 +431,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                         // Verify only window2 received the DROP event and coords are sent as-is.
                         assertEquals(1, dragEvents.size());
                         assertEquals(2, dragEvents2.size());
-                        final DragEvent dropEvent = last(dragEvents2);
+                        final DragEvent dropEvent = dragEvents2.getLast();
                         assertEquals(ACTION_DROP, dropEvent.getAction());
                         assertEquals(dropCoordsPx, dropEvent.getX(),  0.0 /* delta */);
                         assertEquals(dropCoordsPx, dropEvent.getY(),  0.0 /* delta */);
@@ -437,10 +439,10 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                         mTarget.reportDropResult(iwindow2, true);
                         // Verify both windows received ACTION_DRAG_ENDED event.
-                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents).getAction());
-                        assertEquals(window2.getDisplayId(), last(dragEvents).getDisplayId());
-                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents2).getAction());
-                        assertEquals(window2.getDisplayId(), last(dragEvents2).getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, dragEvents.getLast().getAction());
+                        assertEquals(window2.getDisplayId(), dragEvents.getLast().getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, dragEvents2.getLast().getAction());
+                        assertEquals(window2.getDisplayId(), dragEvents2.getLast().getDisplayId());
                     } finally {
                         mTarget.continueDragStateClose();
                     }
@@ -493,7 +495,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                         // Verify only window2 received the DROP event and coords are sent as-is
                         assertEquals(1, dragEvents.size());
                         assertEquals(2, dragEvents2.size());
-                        final DragEvent dropEvent = last(dragEvents2);
+                        final DragEvent dropEvent = dragEvents2.getLast();
                         assertEquals(ACTION_DROP, dropEvent.getAction());
                         assertEquals(dropCoordsPx, dropEvent.getX(),  0.0 /* delta */);
                         assertEquals(dropCoordsPx, dropEvent.getY(),  0.0 /* delta */);
@@ -501,10 +503,12 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                         mTarget.reportDropResult(iwindow2, true);
                         // Verify both windows received ACTION_DRAG_ENDED event.
-                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents).getAction());
-                        assertEquals(testDisplay.getDisplayId(), last(dragEvents).getDisplayId());
-                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents2).getAction());
-                        assertEquals(testDisplay.getDisplayId(), last(dragEvents2).getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, dragEvents.getLast().getAction());
+                        assertEquals(testDisplay.getDisplayId(),
+                                dragEvents.getLast().getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, dragEvents2.getLast().getAction());
+                        assertEquals(testDisplay.getDisplayId(),
+                                dragEvents2.getLast().getDisplayId());
                     } finally {
                         mTarget.continueDragStateClose();
                     }
@@ -561,8 +565,23 @@ public class DragDropControllerTests extends WindowTestsBase {
                 });
     }
 
-    private DragEvent last(ArrayList<DragEvent> list) {
-        return list.get(list.size() - 1);
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CONNECTED_DISPLAYS_DND)
+    public void testDragCancelledOnTopologyChange() {
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event.
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(0, 0, View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ,
+                ClipData.newPlainText("label", "text"), (surface) -> {
+                    // Simulate display topology change to trigger drag-and-drop cancellation.
+                    mTarget.handleDisplayTopologyChange(null /* displayTopology */);
+                    assertEquals(2, dragEvents.size());
+                    assertEquals(ACTION_DRAG_ENDED, dragEvents.getLast().getAction());
+                });
     }
 
     @Test
