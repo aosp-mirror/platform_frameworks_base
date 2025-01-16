@@ -31,6 +31,7 @@ import com.android.internal.jank.Cuj
 import com.android.internal.jank.InteractionJankMonitor
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.MultiDisplayDragMoveBoundsCalculator
 import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.transition.Transitions
 import java.util.concurrent.TimeUnit
@@ -69,6 +70,7 @@ class MultiDisplayVeiledResizeTaskPositioner(
     @DragPositioningCallback.CtrlType private var ctrlType = 0
     private var isResizingOrAnimatingResize = false
     @Surface.Rotation private var rotation = 0
+    private var startDisplayId = 0
 
     constructor(
         taskOrganizer: ShellTaskOrganizer,
@@ -95,6 +97,7 @@ class MultiDisplayVeiledResizeTaskPositioner(
 
     override fun onDragPositioningStart(ctrlType: Int, displayId: Int, x: Float, y: Float): Rect {
         this.ctrlType = ctrlType
+        startDisplayId = displayId
         taskBoundsAtDragStart.set(
             desktopWindowDecoration.mTaskInfo.configuration.windowConfiguration.bounds
         )
@@ -160,16 +163,47 @@ class MultiDisplayVeiledResizeTaskPositioner(
             interactionJankMonitor.begin(
                 createLongTimeoutJankConfigBuilder(Cuj.CUJ_DESKTOP_MODE_DRAG_WINDOW)
             )
+
             val t = transactionSupplier.get()
-            DragPositioningCallbackUtility.setPositionOnDrag(
-                desktopWindowDecoration,
-                repositionTaskBounds,
-                taskBoundsAtDragStart,
-                repositionStartPoint,
-                t,
-                x,
-                y,
-            )
+            val startDisplayLayout = displayController.getDisplayLayout(startDisplayId)
+            val currentDisplayLayout = displayController.getDisplayLayout(displayId)
+
+            if (startDisplayLayout == null || currentDisplayLayout == null) {
+                // Fall back to single-display drag behavior if any display layout is unavailable.
+                DragPositioningCallbackUtility.setPositionOnDrag(
+                    desktopWindowDecoration,
+                    repositionTaskBounds,
+                    taskBoundsAtDragStart,
+                    repositionStartPoint,
+                    t,
+                    x,
+                    y,
+                )
+            } else {
+                val boundsDp =
+                    MultiDisplayDragMoveBoundsCalculator.calculateGlobalDpBoundsForDrag(
+                        startDisplayLayout,
+                        repositionStartPoint,
+                        taskBoundsAtDragStart,
+                        currentDisplayLayout,
+                        x,
+                        y,
+                    )
+                repositionTaskBounds.set(
+                    MultiDisplayDragMoveBoundsCalculator.convertGlobalDpToLocalPxForRect(
+                        boundsDp,
+                        startDisplayLayout,
+                    )
+                )
+
+                // TODO(b/383069173): Render drag indicator(s)
+
+                t.setPosition(
+                    desktopWindowDecoration.mTaskSurface,
+                    repositionTaskBounds.left.toFloat(),
+                    repositionTaskBounds.top.toFloat(),
+                )
+            }
             t.setFrameTimeline(Choreographer.getInstance().vsyncId)
             t.apply()
         }
@@ -200,13 +234,38 @@ class MultiDisplayVeiledResizeTaskPositioner(
             }
             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_RESIZE_WINDOW)
         } else {
-            DragPositioningCallbackUtility.updateTaskBounds(
-                repositionTaskBounds,
-                taskBoundsAtDragStart,
-                repositionStartPoint,
-                x,
-                y,
-            )
+            val startDisplayLayout = displayController.getDisplayLayout(startDisplayId)
+            val currentDisplayLayout = displayController.getDisplayLayout(displayId)
+
+            if (startDisplayLayout == null || currentDisplayLayout == null) {
+                // Fall back to single-display drag behavior if any display layout is unavailable.
+                DragPositioningCallbackUtility.updateTaskBounds(
+                    repositionTaskBounds,
+                    taskBoundsAtDragStart,
+                    repositionStartPoint,
+                    x,
+                    y,
+                )
+            } else {
+                val boundsDp =
+                    MultiDisplayDragMoveBoundsCalculator.calculateGlobalDpBoundsForDrag(
+                        startDisplayLayout,
+                        repositionStartPoint,
+                        taskBoundsAtDragStart,
+                        currentDisplayLayout,
+                        x,
+                        y,
+                    )
+                repositionTaskBounds.set(
+                    MultiDisplayDragMoveBoundsCalculator.convertGlobalDpToLocalPxForRect(
+                        boundsDp,
+                        currentDisplayLayout,
+                    )
+                )
+
+                // TODO(b/383069173): Clear drag indicator(s)
+            }
+
             interactionJankMonitor.end(Cuj.CUJ_DESKTOP_MODE_DRAG_WINDOW)
         }
 

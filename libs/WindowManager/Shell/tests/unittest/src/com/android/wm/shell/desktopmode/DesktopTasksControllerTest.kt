@@ -257,6 +257,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
     // Mock running tasks are registered here so we can get the list from mock shell task organizer
     private val runningTasks = mutableListOf<RunningTaskInfo>()
 
+    private val SECONDARY_DISPLAY_ID = 1
     private val DISPLAY_DIMENSION_SHORT = 1600
     private val DISPLAY_DIMENSION_LONG = 2560
     private val DEFAULT_LANDSCAPE_BOUNDS = Rect(320, 75, 2240, 1275)
@@ -316,6 +317,8 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val tda = DisplayAreaInfo(MockToken().token(), DEFAULT_DISPLAY, 0)
         tda.configuration.windowConfiguration.windowingMode = WINDOWING_MODE_FULLSCREEN
         whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(DEFAULT_DISPLAY)).thenReturn(tda)
+        whenever(rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(SECONDARY_DISPLAY_ID))
+            .thenReturn(tda)
         whenever(
                 mMockDesktopImmersiveController.exitImmersiveIfApplicable(
                     any(),
@@ -3582,6 +3585,45 @@ class DesktopTasksControllerTest : ShellTestCase() {
                     return@argThat wct.changes.any { (token, change) ->
                         change.configuration.windowConfiguration.bounds == currentDragBounds
                     }
+                },
+                eq(null),
+            )
+    }
+
+    @Test
+    @EnableFlags(Flags.FLAG_ENABLE_CONNECTED_DISPLAYS_WINDOW_DRAG)
+    fun onDesktopDragEnd_noIndicatorAndMoveToNewDisplay_reparent() {
+        val task = setUpFreeformTask()
+        val spyController = spy(controller)
+        val mockSurface = mock(SurfaceControl::class.java)
+        val mockDisplayLayout = mock(DisplayLayout::class.java)
+        whenever(displayController.getDisplayLayout(task.displayId)).thenReturn(mockDisplayLayout)
+        whenever(mockDisplayLayout.stableInsets()).thenReturn(Rect(0, 100, 2000, 2000))
+        spyController.onDragPositioningMove(task, mockSurface, 200f, Rect(100, 200, 500, 1000))
+
+        val currentDragBounds = Rect(100, 200, 500, 1000)
+        whenever(spyController.getVisualIndicator()).thenReturn(desktopModeVisualIndicator)
+        whenever(desktopModeVisualIndicator.updateIndicatorType(anyOrNull()))
+            .thenReturn(DesktopModeVisualIndicator.IndicatorType.NO_INDICATOR)
+        whenever(motionEvent.displayId).thenReturn(SECONDARY_DISPLAY_ID)
+
+        spyController.onDragPositioningEnd(
+            task,
+            mockSurface,
+            position = Point(100, 200),
+            inputCoordinate = PointF(200f, 300f),
+            currentDragBounds,
+            validDragArea = Rect(0, 50, 2000, 2000),
+            dragStartBounds = Rect(),
+            motionEvent,
+            desktopWindowDecoration,
+        )
+
+        verify(transitions)
+            .startTransition(
+                eq(TRANSIT_CHANGE),
+                Mockito.argThat { wct ->
+                    return@argThat wct.hierarchyOps[0].isReparent
                 },
                 eq(null),
             )

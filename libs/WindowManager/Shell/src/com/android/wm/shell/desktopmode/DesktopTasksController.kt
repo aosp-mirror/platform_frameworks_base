@@ -2425,6 +2425,25 @@ class DesktopTasksController(
                 // Update task bounds so that the task position will match the position of its leash
                 val wct = WindowContainerTransaction()
                 wct.setBounds(taskInfo.token, destinationBounds)
+
+                // TODO: b/362720497 - reparent to a specific desk within the target display.
+                // Reparent task if it has been moved to a new display.
+                if (Flags.enableConnectedDisplaysWindowDrag()) {
+                    val newDisplayId = motionEvent.getDisplayId()
+                    if (newDisplayId != taskInfo.getDisplayId()) {
+                        val displayAreaInfo =
+                            rootTaskDisplayAreaOrganizer.getDisplayAreaInfo(newDisplayId)
+                        if (displayAreaInfo == null) {
+                            logW(
+                                "Task reparent cannot find DisplayAreaInfo for displayId=%d",
+                                newDisplayId,
+                            )
+                        } else {
+                            wct.reparent(taskInfo.token, displayAreaInfo.token, /* onTop= */ true)
+                        }
+                    }
+                }
+
                 transitions.startTransition(TRANSIT_CHANGE, wct, null)
 
                 releaseVisualIndicator()
