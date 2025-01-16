@@ -101,7 +101,6 @@ android_test {
         "testng",
         "truth",
         "wmtests-support",
-        "display_flags_lib",
     ],
 
     libs: [

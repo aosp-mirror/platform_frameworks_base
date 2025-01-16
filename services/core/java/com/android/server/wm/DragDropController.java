@@ -28,11 +28,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.annotation.NonNull;
 import android.content.ClipData;
 import android.content.Context;
-import android.hardware.display.DisplayTopology;
 import android.hardware.input.InputManagerGlobal;
 import android.os.Binder;
 import android.os.Handler;
-import android.os.HandlerExecutor;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -51,7 +49,6 @@ import android.window.IGlobalDragListener;
 import android.window.IUnhandledDragCallback;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.hidden_from_bootclasspath.com.android.window.flags.Flags;
 import com.android.server.wm.WindowManagerInternal.IDragDropCallback;
 
 import java.util.Objects;
@@ -59,7 +56,6 @@ import java.util.Random;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicReference;
-import java.util.function.Consumer;
 
 /**
  * Managing drag and drop operations initiated by View#startDragAndDrop.
@@ -87,8 +83,6 @@ class DragDropController {
 
     private WindowManagerService mService;
     private final Handler mHandler;
-    private final Consumer<DisplayTopology> mDisplayTopologyListener =
-            this::handleDisplayTopologyChange;
 
     // The global drag listener for handling cross-window drags
     private IGlobalDragListener mGlobalDragListener;
@@ -114,17 +108,6 @@ class DragDropController {
     DragDropController(WindowManagerService service, Looper looper) {
         mService = service;
         mHandler = new DragHandler(service, looper);
-        if (Flags.enableConnectedDisplaysDnd()) {
-            mService.mDisplayManager.registerTopologyListener(
-                    new HandlerExecutor(mService.mH), mDisplayTopologyListener);
-        }
-    }
-
-    @VisibleForTesting
-    void cleanupListeners() {
-        if (Flags.enableConnectedDisplaysDnd()) {
-            mService.mDisplayManager.unregisterTopologyListener(mDisplayTopologyListener);
-        }
     }
 
     @VisibleForTesting
@@ -495,18 +478,6 @@ class DragDropController {
             }
         } finally {
             mCallback.get().postCancelDragAndDrop();
-        }
-    }
-
-    private void handleDisplayTopologyChange(DisplayTopology unused) {
-        synchronized (mService.mGlobalLock) {
-            if (mDragState == null) {
-                return;
-            }
-            if (DEBUG_DRAG) {
-                Slog.d(TAG_WM, "DisplayTopology changed, cancelling DragAndDrop");
-            }
-            cancelDragAndDrop(mDragState.mToken, true /* skipAnimation */);
         }
     }
 
