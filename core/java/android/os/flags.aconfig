@@ -150,6 +150,13 @@ flag {
 }
 
 flag {
+     name: "app_zygote_retry_start"
+     namespace: "arc_next"
+     description: "Guard the new added retry logic in app zygote."
+     bug: "361799815"
+}
+
+flag {
     name: "battery_part_status_api"
     is_exported: true
     namespace: "phoenix"

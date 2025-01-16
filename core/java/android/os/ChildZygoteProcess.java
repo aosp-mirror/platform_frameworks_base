@@ -17,6 +17,10 @@
 package android.os;
 
 import android.net.LocalSocketAddress;
+import android.system.ErrnoException;
+import android.system.Os;
+
+import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
  * Represents a connection to a child-zygote process. A child-zygote is spawend from another
@@ -30,9 +34,23 @@ public class ChildZygoteProcess extends ZygoteProcess {
      */
     private final int mPid;
 
-    ChildZygoteProcess(LocalSocketAddress socketAddress, int pid) {
+    /**
+     * The UID of the child zygote process.
+     */
+    private final int mUid;
+
+
+    /**
+     * If this zygote process was dead;
+     */
+    private AtomicBoolean mDead;
+
+
+    ChildZygoteProcess(LocalSocketAddress socketAddress, int pid, int uid) {
         super(socketAddress, null);
         mPid = pid;
+        mUid = uid;
+        mDead = new AtomicBoolean(false);
     }
 
     /**
@@ -40,5 +58,23 @@ public class ChildZygoteProcess extends ZygoteProcess {
      */
     public int getPid() {
         return mPid;
+    }
+
+    /**
+     * Check if child-zygote process is dead
+     */
+    public boolean isDead() {
+        if (mDead.get()) {
+            return true;
+        }
+        try {
+            if (Os.stat("/proc/" + mPid).st_uid == mUid) {
+                return false;
+            }
+        } catch (ErrnoException e) {
+            // Do nothing, it's dead.
+        }
+        mDead.set(true);
+        return true;
     }
 }
