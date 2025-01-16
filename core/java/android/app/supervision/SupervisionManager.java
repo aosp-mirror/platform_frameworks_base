@@ -34,6 +34,35 @@ public class SupervisionManager {
     private final Context mContext;
     private final ISupervisionManager mService;
 
+    /**
+     * Activity action: ask the human user to enable supervision for this user. Only the app that
+     * holds the {@code SYSTEM_SUPERVISION} role can launch this intent.
+     *
+     * <p>The intent must be invoked via {@link Activity#startActivityForResult} to receive the
+     * result of whether or not the user approved the action. If approved, the result will be {@link
+     * Activity#RESULT_OK}.
+     *
+     * <p>If supervision is already enabled, the operation will return a failure result.
+     *
+     * @hide
+     */
+    public static final String ACTION_ENABLE_SUPERVISION = "android.app.action.ENABLE_SUPERVISION";
+
+    /**
+     * Activity action: ask the human user to disable supervision for this user. Only the app that
+     * holds the {@code SYSTEM_SUPERVISION} role can launch this intent.
+     *
+     * <p>The intent must be invoked via {@link Activity#startActivityForResult} to receive the
+     * result of whether or not the user approved the action. If approved, the result will be {@link
+     * Activity#RESULT_OK}.
+     *
+     * <p>If supervision is not enabled, the operation will return a failure result.
+     *
+     * @hide
+     */
+    public static final String ACTION_DISABLE_SUPERVISION =
+            "android.app.action.DISABLE_SUPERVISION";
+
     /** @hide */
     @UnsupportedAppUsage
     public SupervisionManager(Context context, ISupervisionManager service) {
