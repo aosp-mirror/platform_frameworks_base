@@ -92,6 +92,7 @@ import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.SurfaceControl;
+import android.view.WindowInsetsController;
 import android.window.TaskFragmentOrganizer;
 
 import androidx.test.filters.MediumTest;
@@ -2107,6 +2108,43 @@ public class TaskTests extends WindowTestsBase {
 
         // Ensure the td is set for the original root task
         assertEquals(Color.RED, task.getTaskDescription().getBackgroundColor());
+    }
+
+    @Test
+    public void testUpdateTopOpaqueSystemBarsAppearanceWhenActivityBecomesTransparent() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(task);
+        final ActivityManager.TaskDescription td = new ActivityManager.TaskDescription();
+        td.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND);
+        activity.setTaskDescription(td);
+
+        assertEquals(WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND,
+                task.getTaskDescription().getTopOpaqueSystemBarsAppearance());
+
+        activity.setOccludesParent(false);
+
+        assertEquals(0, task.getTaskDescription().getTopOpaqueSystemBarsAppearance());
+    }
+
+    @Test
+    public void testUpdateTopOpaqueSystemBarsAppearanceWhenActivityBecomesOpaque() {
+        final Task task = createTask(mDisplayContent);
+        final ActivityRecord activity = createActivityRecord(task);
+        activity.setOccludesParent(false);
+
+        final ActivityManager.TaskDescription td = new ActivityManager.TaskDescription();
+        td.setSystemBarsAppearance(
+                WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND);
+        activity.setTaskDescription(td);
+
+        assertEquals(0, task.getTaskDescription().getTopOpaqueSystemBarsAppearance());
+
+        activity.setOccludesParent(true);
+
+        assertEquals(WindowInsetsController.APPEARANCE_TRANSPARENT_CAPTION_BAR_BACKGROUND,
+                task.getTaskDescription().getTopOpaqueSystemBarsAppearance());
+
     }
 
     private Task getTestTask() {
