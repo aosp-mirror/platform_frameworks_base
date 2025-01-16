@@ -17,6 +17,7 @@
 package com.android.settingslib.preference
 
 import android.content.Context
+import androidx.annotation.CallSuper
 import androidx.preference.DialogPreference
 import androidx.preference.ListPreference
 import androidx.preference.Preference
@@ -59,6 +60,7 @@ interface PreferenceBinding {
      * @param preference preference widget created by [createWidget]
      * @param metadata metadata to apply
      */
+    @CallSuper
     fun bind(preference: Preference, metadata: PreferenceMetadata) {
         metadata.apply {
             preference.key = key
