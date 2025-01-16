@@ -32,10 +32,16 @@ import android.hardware.tv.mediaquality.AmbientBacklightColorFormat;
 import android.hardware.tv.mediaquality.DolbyAudioProcessing;
 import android.hardware.tv.mediaquality.DtsVirtualX;
 import android.hardware.tv.mediaquality.IMediaQuality;
+import android.hardware.tv.mediaquality.IPictureProfileAdjustmentListener;
+import android.hardware.tv.mediaquality.IPictureProfileChangedListener;
+import android.hardware.tv.mediaquality.ISoundProfileAdjustmentListener;
+import android.hardware.tv.mediaquality.ISoundProfileChangedListener;
+import android.hardware.tv.mediaquality.ParamCapability;
 import android.hardware.tv.mediaquality.PictureParameter;
 import android.hardware.tv.mediaquality.PictureParameters;
 import android.hardware.tv.mediaquality.SoundParameter;
 import android.hardware.tv.mediaquality.SoundParameters;
+import android.hardware.tv.mediaquality.VendorParamCapability;
 import android.media.quality.AmbientBacklightEvent;
 import android.media.quality.AmbientBacklightMetadata;
 import android.media.quality.AmbientBacklightSettings;
@@ -105,6 +111,10 @@ public class MediaQualityService extends SystemService {
     private final BiMap<Long, String> mPictureProfileTempIdMap;
     private final BiMap<Long, String> mSoundProfileTempIdMap;
     private IMediaQuality mMediaQuality;
+    private IPictureProfileAdjustmentListener mPpAdjustmentListener;
+    private ISoundProfileAdjustmentListener mSpAdjustmentListener;
+    private IPictureProfileChangedListener mPpChangedListener;
+    private ISoundProfileChangedListener mSpChangedListener;
     private final HalAmbientBacklightCallback mHalAmbientBacklightCallback;
     private final Map<String, AmbientBacklightCallbackRecord> mCallbackRecords = new HashMap<>();
     private final PackageManager mPackageManager;
@@ -140,17 +150,103 @@ public class MediaQualityService extends SystemService {
     @Override
     public void onStart() {
         IBinder binder = ServiceManager.getService(IMediaQuality.DESCRIPTOR + "/default");
-        if (binder != null) {
-            Slogf.d(TAG, "binder is not null");
-            mMediaQuality = IMediaQuality.Stub.asInterface(binder);
-            if (mMediaQuality != null) {
-                try {
-                    mMediaQuality.setAmbientBacklightCallback(mHalAmbientBacklightCallback);
-                } catch (RemoteException e) {
-                    Slog.e(TAG, "Failed to set ambient backlight detector callback", e);
+        if (binder == null) {
+            Slogf.d(TAG, "Binder is null");
+            return;
+        }
+        Slogf.d(TAG, "Binder is not null");
+
+        mPpAdjustmentListener = new IPictureProfileAdjustmentListener.Stub() {
+                @Override
+                public void onPictureProfileAdjusted(
+                        android.hardware.tv.mediaquality.PictureProfile pictureProfile)
+                        throws RemoteException {
+                    // TODO
                 }
+
+                @Override
+                public void onParamCapabilityChanged(long pictureProfileId, ParamCapability[] caps)
+                        throws RemoteException {
+                    // TODO
+                }
+
+                @Override
+                public void onVendorParamCapabilityChanged(long pictureProfileId,
+                        VendorParamCapability[] caps) throws RemoteException {
+                    // TODO
+                }
+
+                @Override
+                public void requestPictureParameters(long pictureProfileId) throws RemoteException {
+                    // TODO
+                }
+
+                @Override
+                public void onStreamStatusChanged(long pictureProfileId, byte status)
+                        throws RemoteException {
+                    // TODO
+                }
+
+                @Override
+                public int getInterfaceVersion() throws RemoteException {
+                    return 0;
+                }
+
+                @Override
+                public String getInterfaceHash() throws RemoteException {
+                    return null;
+                }
+            };
+        mSpAdjustmentListener = new ISoundProfileAdjustmentListener.Stub() {
+
+                @Override
+                public void onSoundProfileAdjusted(
+                        android.hardware.tv.mediaquality.SoundProfile soundProfile)
+                        throws RemoteException {
+                    // TODO
+                }
+
+                @Override
+                public void onParamCapabilityChanged(long soundProfileId, ParamCapability[] caps)
+                        throws RemoteException {
+                    // TODO
+                }
+
+                @Override
+                public void onVendorParamCapabilityChanged(long soundProfileId,
+                        VendorParamCapability[] caps) throws RemoteException {
+                    // TODO
+                }
+
+                @Override
+                public void requestSoundParameters(long soundProfileId) throws RemoteException {
+                    // TODO
+                }
+
+                @Override
+                public int getInterfaceVersion() throws RemoteException {
+                    return 0;
+                }
+
+                @Override
+                public String getInterfaceHash() throws RemoteException {
+                    return null;
+                }
+            };
+
+        mMediaQuality = IMediaQuality.Stub.asInterface(binder);
+        if (mMediaQuality != null) {
+            try {
+                mMediaQuality.setAmbientBacklightCallback(mHalAmbientBacklightCallback);
+                mMediaQuality.setPictureProfileAdjustmentListener(mPpAdjustmentListener);
+                mMediaQuality.setSoundProfileAdjustmentListener(mSpAdjustmentListener);
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to set ambient backlight detector callback", e);
             }
         }
+
+        mPpChangedListener = IPictureProfileChangedListener.Stub.asInterface(binder);
+        mSpChangedListener = ISoundProfileChangedListener.Stub.asInterface(binder);
 
         publishBinderService(Context.MEDIA_QUALITY_SERVICE, new BinderService());
     }
@@ -187,6 +283,30 @@ public class MediaQualityService extends SystemService {
             return pp;
         }
 
+        private void notifyHalOnPictureProfileChange(Long dbId, PersistableBundle params) {
+            // TODO: only notify HAL when the profile is active / being used
+            try {
+                mPpChangedListener.onPictureProfileChanged(convertToHalPictureProfile(dbId,
+                        params));
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to notify HAL on picture profile change.", e);
+            }
+        }
+
+        private android.hardware.tv.mediaquality.PictureProfile convertToHalPictureProfile(Long id,
+                PersistableBundle params) {
+            PictureParameters pictureParameters = new PictureParameters();
+            pictureParameters.pictureParameters = convertPersistableBundleToPictureParameterList(
+                    params);
+
+            android.hardware.tv.mediaquality.PictureProfile toReturn =
+                    new android.hardware.tv.mediaquality.PictureProfile();
+            toReturn.pictureProfileId = id;
+            toReturn.parameters = pictureParameters;
+
+            return toReturn;
+        }
+
         @Override
         public void updatePictureProfile(String id, PictureProfile pp, UserHandle user) {
             Long dbId = mPictureProfileTempIdMap.getKey(id);
@@ -207,6 +327,7 @@ public class MediaQualityService extends SystemService {
                     null, values);
             notifyOnPictureProfileUpdated(mPictureProfileTempIdMap.getValue(dbId),
                     getPictureProfile(dbId), Binder.getCallingUid(), Binder.getCallingPid());
+            notifyHalOnPictureProfileChange(dbId, pp.getParameters());
         }
 
         private boolean hasPermissionToUpdatePictureProfile(Long dbId, PictureProfile toUpdate) {
@@ -240,6 +361,7 @@ public class MediaQualityService extends SystemService {
                 notifyOnPictureProfileRemoved(mPictureProfileTempIdMap.getValue(dbId), toDelete,
                         Binder.getCallingUid(), Binder.getCallingPid());
                 mPictureProfileTempIdMap.remove(dbId);
+                notifyHalOnPictureProfileChange(dbId, null);
             }
         }
 
@@ -359,6 +481,10 @@ public class MediaQualityService extends SystemService {
 
         private PictureParameter[] convertPersistableBundleToPictureParameterList(
                 PersistableBundle params) {
+            if (params == null) {
+                return null;
+            }
+
             List<PictureParameter> pictureParams = new ArrayList<>();
             if (params.containsKey(PictureQuality.PARAMETER_BRIGHTNESS)) {
                 pictureParams.add(PictureParameter.brightness(params.getLong(
@@ -608,6 +734,28 @@ public class MediaQualityService extends SystemService {
             return sp;
         }
 
+        private void notifyHalOnSoundProfileChange(Long dbId, PersistableBundle params) {
+            // TODO: only notify HAL when the profile is active / being used
+            try {
+                mSpChangedListener.onSoundProfileChanged(convertToHalSoundProfile(dbId, params));
+            } catch (RemoteException e) {
+                Slog.e(TAG, "Failed to notify HAL on sound profile change.", e);
+            }
+        }
+
+        private android.hardware.tv.mediaquality.SoundProfile convertToHalSoundProfile(Long id,
+                PersistableBundle params) {
+            SoundParameters soundParameters = new SoundParameters();
+            soundParameters.soundParameters = convertPersistableBundleToSoundParameterList(params);
+
+            android.hardware.tv.mediaquality.SoundProfile toReturn =
+                    new android.hardware.tv.mediaquality.SoundProfile();
+            toReturn.soundProfileId = id;
+            toReturn.parameters = soundParameters;
+
+            return toReturn;
+        }
+
         @Override
         public void updateSoundProfile(String id, SoundProfile sp, UserHandle user) {
             Long dbId = mSoundProfileTempIdMap.getKey(id);
@@ -627,6 +775,7 @@ public class MediaQualityService extends SystemService {
             db.replace(mMediaQualityDbHelper.SOUND_QUALITY_TABLE_NAME, null, values);
             notifyOnSoundProfileUpdated(mSoundProfileTempIdMap.getValue(dbId),
                     getSoundProfile(dbId), Binder.getCallingUid(), Binder.getCallingPid());
+            notifyHalOnSoundProfileChange(dbId, sp.getParameters());
         }
 
         private boolean hasPermissionToUpdateSoundProfile(Long dbId, SoundProfile sp) {
@@ -659,6 +808,7 @@ public class MediaQualityService extends SystemService {
                 notifyOnSoundProfileRemoved(mSoundProfileTempIdMap.getValue(dbId), toDelete,
                         Binder.getCallingUid(), Binder.getCallingPid());
                 mSoundProfileTempIdMap.remove(dbId);
+                notifyHalOnSoundProfileChange(dbId, null);
             }
         }
 
@@ -778,6 +928,9 @@ public class MediaQualityService extends SystemService {
         private SoundParameter[] convertPersistableBundleToSoundParameterList(
                 PersistableBundle params) {
             //TODO: set EqualizerDetail
+            if (params == null) {
+                return null;
+            }
             List<SoundParameter> soundParams = new ArrayList<>();
             if (params.containsKey(SoundQuality.PARAMETER_BALANCE)) {
                 soundParams.add(SoundParameter.balance(params.getInt(
