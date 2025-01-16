@@ -179,4 +179,33 @@ public class BubbleTransitionsTest extends ShellTestCase {
         animCb.getValue().run();
         assertTrue(finishCalled[0]);
     }
+
+    @Test
+    public void testConvertFromBubble() {
+        ActivityManager.RunningTaskInfo taskInfo = setupBubble();
+        final BubbleTransitions.BubbleTransition bt = mBubbleTransitions.startConvertFromBubble(
+                mBubble, taskInfo);
+        final BubbleTransitions.ConvertFromBubble cfb = (BubbleTransitions.ConvertFromBubble) bt;
+        verify(mTransitions).startTransition(anyInt(), any(), eq(cfb));
+        verify(mBubble).setPreparingTransition(eq(bt));
+        assertTrue(mTaskViewTransitions.hasPending());
+
+        final TransitionInfo info = new TransitionInfo(TRANSIT_CHANGE, 0);
+        final TransitionInfo.Change chg = new TransitionInfo.Change(taskInfo.token,
+                mock(SurfaceControl.class));
+        chg.setMode(TRANSIT_CHANGE);
+        chg.setTaskInfo(taskInfo);
+        info.addChange(chg);
+        info.addRoot(new TransitionInfo.Root(0, mock(SurfaceControl.class), 0, 0));
+        SurfaceControl.Transaction startT = mock(SurfaceControl.Transaction.class);
+        SurfaceControl.Transaction finishT = mock(SurfaceControl.Transaction.class);
+        Transitions.TransitionFinishCallback finishCb = wct -> {};
+        cfb.startAnimation(cfb.mTransition, info, startT, finishT, finishCb);
+
+        // Can really only verify that it interfaces with the taskViewTransitions queue.
+        // The actual functioning of this is tightly-coupled with SurfaceFlinger and renderthread
+        // in order to properly synchronize surface manipulation with drawing and thus can't be
+        // directly tested.
+        assertFalse(mTaskViewTransitions.hasPending());
+    }
 }

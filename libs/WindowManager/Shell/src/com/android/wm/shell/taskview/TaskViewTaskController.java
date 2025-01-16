@@ -417,7 +417,8 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         }
     }
 
-    void notifyTaskRemovalStarted(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+    /** Notifies listeners of a task being removed. */
+    public void notifyTaskRemovalStarted(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
         if (mListener == null) return;
         final int taskId = taskInfo.taskId;
         mListenerExecutor.execute(() -> mListener.onTaskRemovalStarted(taskId));

@@ -355,8 +355,10 @@ public class BubbleBarLayerView extends FrameLayout
 
     /** Removes the given {@code bubble}. */
     public void removeBubble(Bubble bubble, Runnable endAction) {
+        final boolean inTransition = bubble.getPreparingTransition() != null;
         Runnable cleanUp = () -> {
-            bubble.cleanupViews();
+            // The transition is already managing the task/wm state.
+            bubble.cleanupViews(!inTransition);
             endAction.run();
         };
         if (mBubbleData.getBubbles().isEmpty()) {
