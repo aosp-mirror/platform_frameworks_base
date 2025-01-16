@@ -56,6 +56,8 @@ class AppCompatAspectRatioPolicy {
     @NonNull
     private final AppCompatAspectRatioState mAppCompatAspectRatioState;
 
+    private final Rect mTmpBounds = new Rect();
+
     AppCompatAspectRatioPolicy(@NonNull ActivityRecord activityRecord,
             @NonNull TransparentPolicy transparentPolicy,
             @NonNull AppCompatOverrides appCompatOverrides) {
@@ -222,6 +224,45 @@ class AppCompatAspectRatioPolicy {
         return getMaxAspectRatio() != 0 || getMinAspectRatio() != 0;
     }
 
+    /**
+     * Resolves aspect ratio restrictions for an activity. If the bounds are restricted by
+     * aspect ratio, the position will be adjusted later in {@link #updateResolvedBoundsPosition}
+     * within parent's app bounds to balance the visual appearance. The policy of aspect ratio has
+     * higher priority than the requested override bounds.
+     */
+    void resolveAspectRatioRestrictionIfNeeded(@NonNull Configuration newParentConfiguration) {
+        // If activity in fullscreen mode is letterboxed because of fixed orientation then bounds
+        // are already calculated in resolveFixedOrientationConfiguration.
+        // Don't apply aspect ratio if app is overridden to fullscreen by device user/manufacturer.
+        if (isLetterboxedForFixedOrientationAndAspectRatio()
+                || getOverrides().hasFullscreenOverride()) {
+            return;
+        }
+        final Configuration resolvedConfig = mActivityRecord.getResolvedOverrideConfiguration();
+        final Rect parentAppBounds =
+                mActivityRecord.mResolveConfigHint.mParentAppBoundsOverride;
+        final Rect parentBounds = newParentConfiguration.windowConfiguration.getBounds();
+        final Rect resolvedBounds = resolvedConfig.windowConfiguration.getBounds();
+        // Use tmp bounds to calculate aspect ratio so we can know whether the activity should
+        // use restricted size (resolved bounds may be the requested override bounds).
+        mTmpBounds.setEmpty();
+        applyAspectRatioForLetterbox(mTmpBounds, parentAppBounds, parentBounds);
+        // If the out bounds is not empty, it means the activity cannot fill parent's app
+        // bounds, then they should be aligned later in #updateResolvedBoundsPosition().
+        if (!mTmpBounds.isEmpty()) {
+            resolvedBounds.set(mTmpBounds);
+        }
+        if (!resolvedBounds.isEmpty() && !resolvedBounds.equals(parentBounds)) {
+            // Compute the configuration based on the resolved bounds. If aspect ratio doesn't
+            // restrict, the bounds should be the requested override bounds.
+            // TODO(b/384473893): Improve ActivityRecord usage here.
+            mActivityRecord.mResolveConfigHint.mTmpOverrideDisplayInfo =
+                    mActivityRecord.getFixedRotationTransformDisplayInfo();
+            mActivityRecord.computeConfigByResolveHint(resolvedConfig, newParentConfiguration);
+            setLetterboxBoundsForAspectRatio(new Rect(resolvedBounds));
+        }
+    }
+
     private boolean isParentFullscreenPortrait() {
         final WindowContainer<?> parent = mActivityRecord.getParent();
         return parent != null
@@ -362,6 +403,11 @@ class AppCompatAspectRatioPolicy {
         final int windowingMode = parentConfig.windowConfiguration.getWindowingMode();
         return WindowConfiguration.inMultiWindowMode(windowingMode)
                 && !dc.getIgnoreOrientationRequest();
+    }
+
+    @NonNull
+    private AppCompatAspectRatioOverrides getOverrides() {
+        return mActivityRecord.mAppCompatController.getAspectRatioOverrides();
     }
 
     private static class AppCompatAspectRatioState {
