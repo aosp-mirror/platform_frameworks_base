@@ -137,6 +137,17 @@ public class DrawBitmap extends PaintOperation implements VariableSupport {
         return OP_CODE;
     }
 
+    /**
+     * Writes out the operation to the buffer
+     *
+     * @param buffer the buffer to write to
+     * @param id the id of the Bitmap
+     * @param left left most x coordinate
+     * @param top top most y coordinate
+     * @param right right most x coordinate
+     * @param bottom bottom most y coordinate
+     * @param descriptionId string id of the description
+     */
     public static void apply(
             @NonNull WireBuffer buffer,
             int id,

@@ -81,6 +81,12 @@ public class DrawPath extends PaintOperation {
         return Operations.DRAW_PATH;
     }
 
+    /**
+     * Draw a path
+     *
+     * @param buffer the buffer to write to
+     * @param id the id of the path
+     */
     public static void apply(@NonNull WireBuffer buffer, int id) {
         buffer.start(Operations.DRAW_PATH);
         buffer.writeInt(id);

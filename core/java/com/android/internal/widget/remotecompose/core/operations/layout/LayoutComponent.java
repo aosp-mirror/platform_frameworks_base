@@ -36,10 +36,12 @@ import com.android.internal.widget.remotecompose.core.operations.layout.modifier
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ComponentVisibilityOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.DimensionModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.GraphicsLayerModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.HeightModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.PaddingModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ScrollModifierOperation;
+import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthInModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.WidthModifierOperation;
 import com.android.internal.widget.remotecompose.core.operations.layout.modifiers.ZIndexModifierOperation;
 
@@ -204,6 +206,9 @@ public class LayoutComponent extends Component {
         mPaddingRight = 0f;
         mPaddingBottom = 0f;
 
+        WidthInModifierOperation widthInConstraints = null;
+        HeightInModifierOperation heightInConstraints = null;
+
         for (OperationInterface op : mComponentModifiers.getList()) {
             if (op instanceof PaddingModifierOperation) {
                 // We are accumulating padding modifiers to compute the margin
@@ -221,6 +226,10 @@ public class LayoutComponent extends Component {
                 mWidthModifier = (WidthModifierOperation) op;
             } else if (op instanceof HeightModifierOperation && mHeightModifier == null) {
                 mHeightModifier = (HeightModifierOperation) op;
+            } else if (op instanceof WidthInModifierOperation) {
+                widthInConstraints = (WidthInModifierOperation) op;
+            } else if (op instanceof HeightInModifierOperation) {
+                heightInConstraints = (HeightInModifierOperation) op;
             } else if (op instanceof ZIndexModifierOperation) {
                 mZIndexModifier = (ZIndexModifierOperation) op;
             } else if (op instanceof GraphicsLayerModifierOperation) {
@@ -240,6 +249,12 @@ public class LayoutComponent extends Component {
         }
         if (mHeightModifier == null) {
             mHeightModifier = new HeightModifierOperation(DimensionModifierOperation.Type.WRAP);
+        }
+        if (widthInConstraints != null) {
+            mWidthModifier.setWidthIn(widthInConstraints);
+        }
+        if (heightInConstraints != null) {
+            mHeightModifier.setHeightIn(heightInConstraints);
         }
         setWidth(computeModifierDefinedWidth(null));
         setHeight(computeModifierDefinedHeight(null));

@@ -117,6 +117,15 @@ public class DrawTextOnPath extends PaintOperation implements VariableSupport {
         return Operations.DRAW_TEXT_ON_PATH;
     }
 
+    /**
+     * add a draw text on path operation to the buffer
+     *
+     * @param buffer the buffer to add to
+     * @param textId the id of the text string
+     * @param pathId the id of the path
+     * @param hOffset the horizontal offset to position the string
+     * @param vOffset the vertical offset to position the string
+     */
     public static void apply(
             @NonNull WireBuffer buffer, int textId, int pathId, float hOffset, float vOffset) {
         buffer.start(OP_CODE);

@@ -102,6 +102,12 @@ public class ClipPath extends PaintOperation {
         return OP_CODE;
     }
 
+    /**
+     * Apply this operation to the buffer
+     *
+     * @param buffer the buffer to apply the operation to
+     * @param id the id of the path
+     */
     public static void apply(@NonNull WireBuffer buffer, int id) {
         buffer.start(OP_CODE);
         buffer.writeInt(id);

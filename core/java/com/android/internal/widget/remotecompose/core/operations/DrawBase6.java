@@ -116,6 +116,13 @@ public abstract class DrawBase6 extends PaintOperation implements VariableSuppor
         DrawBase6 create(float v1, float v2, float v3, float v4, float v5, float v6);
     }
 
+    /**
+     * Read this operation and add it to the list of operations
+     *
+     * @param build interface to construct the component
+     * @param buffer the buffer to read from
+     * @param operations the list of operations to add to
+     */
     public static void read(
             @NonNull Maker build, @NonNull WireBuffer buffer, @NonNull List<Operation> operations) {
         float sv1 = buffer.readFloat();
@@ -132,13 +139,13 @@ public abstract class DrawBase6 extends PaintOperation implements VariableSuppor
     /**
      * writes out a the operation to the buffer.
      *
-     * @param v1
-     * @param v2
-     * @param v3
-     * @param v4
-     * @param v5
-     * @param v6
-     * @return
+     * @param v1 the first parameter
+     * @param v2 the second parameter
+     * @param v3 the third parameter
+     * @param v4 the fourth parameter
+     * @param v5 the fifth parameter
+     * @param v6 the sixth parameter
+     * @return the operation
      */
     @Nullable
     public Operation construct(float v1, float v2, float v3, float v4, float v5, float v6) {

@@ -25,13 +25,18 @@ public class GeneralEasing extends Easing {
     /**
      * Set the curve based on the float encoding of it
      *
-     * @param data
+     * @param data the float encoding of the curve
      */
     public void setCurveSpecification(@NonNull float[] data) {
         mEasingData = data;
         createEngine();
     }
 
+    /**
+     * Get the float encoding of the curve
+     *
+     * @return the float encoding of the curve
+     */
     public @NonNull float[] getCurveSpecification() {
         return mEasingData;
     }

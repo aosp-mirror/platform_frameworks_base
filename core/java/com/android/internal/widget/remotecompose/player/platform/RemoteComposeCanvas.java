@@ -48,7 +48,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
     boolean mHasClickAreas = false;
     Point mActionDownPoint = new Point(0, 0);
     AndroidRemoteContext mARContext = new AndroidRemoteContext();
-    float mDensity = 1f;
+    float mDensity = Float.NaN;
     long mStart = System.nanoTime();
 
     long mLastFrameDelay = 1;
@@ -68,24 +68,18 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
 
     public RemoteComposeCanvas(Context context) {
         super(context);
-        if (USE_VIEW_AREA_CLICK) {
-            addOnAttachStateChangeListener(this);
-        }
+        addOnAttachStateChangeListener(this);
     }
 
     public RemoteComposeCanvas(Context context, AttributeSet attrs) {
         super(context, attrs);
-        if (USE_VIEW_AREA_CLICK) {
-            addOnAttachStateChangeListener(this);
-        }
+        addOnAttachStateChangeListener(this);
     }
 
     public RemoteComposeCanvas(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         setBackgroundColor(Color.WHITE);
-        if (USE_VIEW_AREA_CLICK) {
-            addOnAttachStateChangeListener(this);
-        }
+        addOnAttachStateChangeListener(this);
     }
 
     public void setDebug(int value) {
@@ -124,6 +118,7 @@ public class RemoteComposeCanvas extends FrameLayout implements View.OnAttachSta
             mChoreographer.postFrameCallback(mFrameCallback);
         }
         mDensity = getContext().getResources().getDisplayMetrics().density;
+        mARContext.setDensity(mDensity);
         if (mDocument == null) {
             return;
         }

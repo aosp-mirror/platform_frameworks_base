@@ -72,6 +72,11 @@ public class MatrixSave extends PaintOperation {
         return OP_CODE;
     }
 
+    /**
+     * add a matrix save operation to the buffer
+     *
+     * @param buffer the buffer to add to
+     */
     public static void apply(@NonNull WireBuffer buffer) {
         buffer.start(Operations.MATRIX_SAVE);
     }

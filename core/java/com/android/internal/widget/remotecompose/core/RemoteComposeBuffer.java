@@ -86,6 +86,8 @@ import com.android.internal.widget.remotecompose.core.operations.layout.LoopOper
 import com.android.internal.widget.remotecompose.core.operations.layout.RootLayoutComponent;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.BoxLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.CanvasLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.CollapsibleColumnLayout;
+import com.android.internal.widget.remotecompose.core.operations.layout.managers.CollapsibleRowLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.ColumnLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.RowLayout;
 import com.android.internal.widget.remotecompose.core.operations.layout.managers.StateLayout;
@@ -691,6 +693,12 @@ public class RemoteComposeBuffer {
         return out;
     }
 
+    /**
+     * Append a path to an existing path
+     *
+     * @param id id of the path to append to
+     * @param path the path to append
+     */
     public void pathAppend(int id, float... path) {
         PathAppend.apply(mBuffer, id, path);
     }
@@ -772,8 +780,8 @@ public class RemoteComposeBuffer {
      * @param text The text to be drawn
      * @param start The index of the first character in text to draw
      * @param end (end - 1) is the index of the last character in text to draw
-     * @param contextStart
-     * @param contextEnd
+     * @param contextStart the context start
+     * @param contextEnd the context end
      * @param x The x-coordinate of the origin of the text being drawn
      * @param y The y-coordinate of the baseline of the text being drawn
      * @param rtl Draw RTTL
@@ -798,8 +806,8 @@ public class RemoteComposeBuffer {
      * @param textId The text to be drawn
      * @param start The index of the first character in text to draw
      * @param end (end - 1) is the index of the last character in text to draw
-     * @param contextStart
-     * @param contextEnd
+     * @param contextStart the context start
+     * @param contextEnd the context end
      * @param x The x-coordinate of the origin of the text being drawn
      * @param y The y-coordinate of the baseline of the text being drawn
      * @param rtl Draw RTTL
@@ -986,6 +994,11 @@ public class RemoteComposeBuffer {
 
     ///////////////////////////////////////////////////////////////////////////////////////////////
 
+    /**
+     * inflate the buffer into a list of operations
+     *
+     * @param operations the operations list to add to
+     */
     public void inflateFromBuffer(@NonNull ArrayList<Operation> operations) {
         mBuffer.setIndex(0);
         while (mBuffer.available()) {
@@ -1001,6 +1014,12 @@ public class RemoteComposeBuffer {
         }
     }
 
+    /**
+     * Read the next operation from the buffer
+     *
+     * @param buffer The buff to read
+     * @param operations the operations list to add to
+     */
     public static void readNextOperation(
             @NonNull WireBuffer buffer, @NonNull ArrayList<Operation> operations) {
         int opId = buffer.readByte();
@@ -1014,6 +1033,11 @@ public class RemoteComposeBuffer {
         operation.read(buffer, operations);
     }
 
+    /**
+     * copy the current buffer to a new one
+     *
+     * @return A new RemoteComposeBuffer
+     */
     @NonNull
     RemoteComposeBuffer copy() {
         ArrayList<Operation> operations = new ArrayList<>();
@@ -1022,6 +1046,11 @@ public class RemoteComposeBuffer {
         return copyFromOperations(operations, buffer);
     }
 
+    /**
+     * add a set theme
+     *
+     * @param theme The theme to set
+     */
     public void setTheme(int theme) {
         Theme.apply(mBuffer, theme);
     }
@@ -1040,6 +1069,14 @@ public class RemoteComposeBuffer {
         return buffer;
     }
 
+    /**
+     * Create a RemoteComposeBuffer from a file
+     *
+     * @param file A file
+     * @param remoteComposeState The RemoteComposeState
+     * @return A RemoteComposeBuffer
+     * @throws IOException if the file cannot be read
+     */
     @NonNull
     public RemoteComposeBuffer fromFile(
             @NonNull File file, @NonNull RemoteComposeState remoteComposeState) throws IOException {
@@ -1048,6 +1085,13 @@ public class RemoteComposeBuffer {
         return buffer;
     }
 
+    /**
+     * Create a RemoteComposeBuffer from an InputStream
+     *
+     * @param inputStream An InputStream
+     * @param remoteComposeState The RemoteComposeState
+     * @return A RemoteComposeBuffer
+     */
     @NonNull
     public static RemoteComposeBuffer fromInputStream(
             @NonNull InputStream inputStream, @NonNull RemoteComposeState remoteComposeState) {
@@ -1056,6 +1100,13 @@ public class RemoteComposeBuffer {
         return buffer;
     }
 
+    /**
+     * Create a RemoteComposeBuffer from an array of operations
+     *
+     * @param operations An array of operations
+     * @param buffer A RemoteComposeBuffer
+     * @return A RemoteComposeBuffer
+     */
     @NonNull
     RemoteComposeBuffer copyFromOperations(
             @NonNull ArrayList<Operation> operations, @NonNull RemoteComposeBuffer buffer) {
@@ -1834,12 +1885,12 @@ public class RemoteComposeBuffer {
     /**
      * Add a marquee modifier
      *
-     * @param iterations
-     * @param animationMode
-     * @param repeatDelayMillis
-     * @param initialDelayMillis
-     * @param spacing
-     * @param velocity
+     * @param iterations number of iterations
+     * @param animationMode animation mode
+     * @param repeatDelayMillis repeat delay
+     * @param initialDelayMillis initial delay
+     * @param spacing spacing between items
+     * @param velocity velocity of the marquee
      */
     public void addModifierMarquee(
             int iterations,
@@ -1861,14 +1912,21 @@ public class RemoteComposeBuffer {
     /**
      * Add a graphics layer
      *
-     * @param scaleX
-     * @param scaleY
-     * @param rotationX
-     * @param rotationY
-     * @param rotationZ
-     * @param shadowElevation
-     * @param transformOriginX
-     * @param transformOriginY
+     * @param scaleX scale x
+     * @param scaleY scale y
+     * @param rotationX rotation in X
+     * @param rotationY rotation in Y
+     * @param rotationZ rotation in Z
+     * @param shadowElevation shadow elevation
+     * @param transformOriginX transform origin x
+     * @param transformOriginY transform origin y
+     * @param alpha alpha value
+     * @param cameraDistance camera distance
+     * @param blendMode blend mode
+     * @param spotShadowColorId spot shadow color
+     * @param ambientShadowColorId ambient shadow color
+     * @param colorFilterId id of color filter
+     * @param renderEffectId id of render effect
      */
     public void addModifierGraphicsLayer(
             float scaleX,
@@ -1923,14 +1981,32 @@ public class RemoteComposeBuffer {
         ClipRectModifierOperation.apply(mBuffer);
     }
 
+    /**
+     * add start of loop
+     *
+     * @param indexId id of the variable
+     * @param from start value
+     * @param step step value
+     * @param until stop value
+     */
     public void addLoopStart(int indexId, float from, float step, float until) {
         LoopOperation.apply(mBuffer, indexId, from, step, until);
     }
 
+    /** Add a loop end */
     public void addLoopEnd() {
         ContainerEnd.apply(mBuffer);
     }
 
+    /**
+     * add a state layout
+     *
+     * @param componentId id of the state
+     * @param animationId animation id
+     * @param horizontal horizontal alignment
+     * @param vertical vertical alignment
+     * @param indexId index of the state
+     */
     public void addStateLayout(
             int componentId, int animationId, int horizontal, int vertical, int indexId) {
         mLastComponentId = getComponentId(componentId);
@@ -1966,6 +2042,22 @@ public class RemoteComposeBuffer {
     }
 
     /**
+     * Add a row start tag
+     *
+     * @param componentId component id
+     * @param animationId animation id
+     * @param horizontal horizontal alignment
+     * @param vertical vertical alignment
+     * @param spacedBy spacing between items
+     */
+    public void addCollapsibleRowStart(
+            int componentId, int animationId, int horizontal, int vertical, float spacedBy) {
+        mLastComponentId = getComponentId(componentId);
+        CollapsibleRowLayout.apply(
+                mBuffer, mLastComponentId, animationId, horizontal, vertical, spacedBy);
+    }
+
+    /**
      * Add a column start tag
      *
      * @param componentId component id
@@ -1978,6 +2070,22 @@ public class RemoteComposeBuffer {
             int componentId, int animationId, int horizontal, int vertical, float spacedBy) {
         mLastComponentId = getComponentId(componentId);
         ColumnLayout.apply(mBuffer, mLastComponentId, animationId, horizontal, vertical, spacedBy);
+    }
+
+    /**
+     * Add a column start tag
+     *
+     * @param componentId component id
+     * @param animationId animation id
+     * @param horizontal horizontal alignment
+     * @param vertical vertical alignment
+     * @param spacedBy spacing between items
+     */
+    public void addCollapsibleColumnStart(
+            int componentId, int animationId, int horizontal, int vertical, float spacedBy) {
+        mLastComponentId = getComponentId(componentId);
+        CollapsibleColumnLayout.apply(
+                mBuffer, mLastComponentId, animationId, horizontal, vertical, spacedBy);
     }
 
     /**

@@ -66,6 +66,28 @@ public class RemoteComposePlayer extends FrameLayout {
     }
 
     /**
+     * @inheritDoc
+     */
+    public void requestLayout() {
+        super.requestLayout();
+
+        if (mInner != null) {
+            mInner.requestLayout();
+        }
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public void invalidate() {
+        super.invalidate();
+
+        if (mInner != null) {
+            mInner.invalidate();
+        }
+    }
+
+    /**
      * Returns true if the document supports drag touch events
      *
      * @return true if draggable content, false otherwise

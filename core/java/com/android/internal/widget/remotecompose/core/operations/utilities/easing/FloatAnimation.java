@@ -52,16 +52,25 @@ public class FloatAnimation extends Easing {
         return str;
     }
 
-    public FloatAnimation() {
-        mType = CUBIC_STANDARD;
-        mEasingCurve = new CubicEasing(mType);
-    }
-
+    /**
+     * Create an animation based on a float encoding of the animation
+     *
+     * @param description the float encoding of the animation
+     */
     public FloatAnimation(@NonNull float... description) {
         mType = CUBIC_STANDARD;
         setAnimationDescription(description);
     }
 
+    /**
+     * Create an animation based on the parameters
+     *
+     * @param type The type of animation
+     * @param duration The duration of the animation
+     * @param description The float parameters describing the animation
+     * @param initialValue The initial value of the float (NaN if none)
+     * @param wrap The wrap value of the animation NaN if it does not wrap
+     */
     public FloatAnimation(
             int type,
             float duration,
@@ -139,8 +148,8 @@ public class FloatAnimation extends Easing {
     /**
      * Useful to debug the packed form of an animation string
      *
-     * @param description
-     * @return
+     * @param description the float encoding of the animation
+     * @return a string describing the animation
      */
     public static String unpackAnimationToString(float[] description) {
         float[] mSpec = description;
@@ -223,7 +232,7 @@ public class FloatAnimation extends Easing {
     /**
      * Create an animation based on a float encoding of the animation
      *
-     * @param description
+     * @param description the float encoding of the animation
      */
     public void setAnimationDescription(@NonNull float[] description) {
         mSpec = description;
@@ -288,7 +297,7 @@ public class FloatAnimation extends Easing {
     /**
      * Set the initial Value
      *
-     * @param value
+     * @param value the value to set
      */
     public void setInitialValue(float value) {
 
@@ -321,7 +330,7 @@ public class FloatAnimation extends Easing {
     /**
      * Set the target value to interpolate to
      *
-     * @param value
+     * @param value the value to set
      */
     public void setTargetValue(float value) {
         mTargetValue = value;
@@ -342,6 +351,11 @@ public class FloatAnimation extends Easing {
         setScaleOffset();
     }
 
+    /**
+     * Get the target value
+     *
+     * @return the target value
+     */
     public float getTargetValue() {
         return mTargetValue;
     }
@@ -369,6 +383,11 @@ public class FloatAnimation extends Easing {
         return mEasingCurve.getDiff(t / mDuration) * (mTargetValue - mInitialValue);
     }
 
+    /**
+     * Get the initial value
+     *
+     * @return the initial value
+     */
     public float getInitialValue() {
         return mInitialValue;
     }
