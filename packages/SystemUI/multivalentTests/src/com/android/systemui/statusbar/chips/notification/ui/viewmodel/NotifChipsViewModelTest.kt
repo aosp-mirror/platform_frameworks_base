@@ -36,6 +36,7 @@ import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifCh
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
 import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
 import com.android.systemui.statusbar.notification.data.repository.UnconfinedFakeHeadsUpRowRepository
@@ -44,6 +45,7 @@ import com.android.systemui.statusbar.notification.headsup.PinnedStatus
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
 import com.android.systemui.statusbar.notification.shared.ActiveNotificationModel
 import com.android.systemui.statusbar.notification.stack.data.repository.headsUpNotificationRepository
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.testKosmos
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -629,22 +631,26 @@ class NotifChipsViewModelTest : SysuiTestCase() {
         }
 
     @Test
-    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
-    fun chips_clickingChipNotifiesInteractor() =
+    @DisableFlags(
+        FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY,
+        StatusBarRootModernization.FLAG_NAME,
+        StatusBarChipsModernization.FLAG_NAME,
+    )
+    fun chips_chipsModernizationDisabled_clickingChipNotifiesInteractor() =
         kosmos.runTest {
             val latest by collectLastValue(underTest.chips)
-            val latestChipTap by
+            val latestChipTapKey by
                 collectLastValue(
                     kosmos.statusBarNotificationChipsInteractor.promotedNotificationChipTapEvent
                 )
+            val key = "clickTest"
 
             setNotifs(
                 listOf(
                     activeNotificationModel(
-                        key = "clickTest",
+                        key,
                         statusBarChipIcon = createStatusBarIconViewOrNull(),
-                        promotedContent =
-                            PromotedNotificationContentModel.Builder("clickTest").build(),
+                        promotedContent = PromotedNotificationContentModel.Builder(key).build(),
                     )
                 )
             )
@@ -652,7 +658,41 @@ class NotifChipsViewModelTest : SysuiTestCase() {
 
             chip.onClickListenerLegacy!!.onClick(mock<View>())
 
-            assertThat(latestChipTap).isEqualTo("clickTest")
+            assertThat(latestChipTapKey).isEqualTo(key)
+        }
+
+    @Test
+    @DisableFlags(FLAG_PROMOTE_NOTIFICATIONS_AUTOMATICALLY)
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chips_chipsModernizationEnabled_clickingChipNotifiesInteractor() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.chips)
+            val latestChipTapKey by
+                collectLastValue(
+                    kosmos.statusBarNotificationChipsInteractor.promotedNotificationChipTapEvent
+                )
+            val key = "clickTest"
+
+            setNotifs(
+                listOf(
+                    activeNotificationModel(
+                        key,
+                        statusBarChipIcon = createStatusBarIconViewOrNull(),
+                        promotedContent = PromotedNotificationContentModel.Builder(key).build(),
+                    )
+                )
+            )
+            val chip = latest!![0]
+
+            assertThat(chip.clickBehavior)
+                .isInstanceOf(
+                    OngoingActivityChipModel.ClickBehavior.ShowHeadsUpNotification::class.java
+                )
+
+            (chip.clickBehavior as OngoingActivityChipModel.ClickBehavior.ShowHeadsUpNotification)
+                .onClick()
+
+            assertThat(latestChipTapKey).isEqualTo(key)
         }
 
     private fun setNotifs(notifs: List<ActiveNotificationModel>) {

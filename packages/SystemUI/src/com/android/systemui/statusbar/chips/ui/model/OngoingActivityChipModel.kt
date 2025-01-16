@@ -170,5 +170,8 @@ sealed class OngoingActivityChipModel {
 
         /** The chip expands into a dialog or activity on click. */
         data class ExpandAction(val onClick: (Expandable) -> Unit) : ClickBehavior
+
+        /** Clicking the chip will show the heads up notification associated with the chip. */
+        data class ShowHeadsUpNotification(val onClick: () -> Unit) : ClickBehavior
     }
 }

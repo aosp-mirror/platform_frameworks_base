@@ -66,6 +66,9 @@ fun OngoingActivityChip(model: OngoingActivityChipModel.Shown, modifier: Modifie
                 ChipBody(model, onClick = { clickBehavior.onClick(expandable) })
             }
         }
+        is OngoingActivityChipModel.ClickBehavior.ShowHeadsUpNotification -> {
+            ChipBody(model, onClick = { clickBehavior.onClick() })
+        }
 
         is OngoingActivityChipModel.ClickBehavior.None -> {
             ChipBody(model, modifier = modifier)
