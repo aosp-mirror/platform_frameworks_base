@@ -32,6 +32,9 @@ object PreferenceScreenRegistry : ReadWritePermitProvider {
      */
     var preferenceScreenMetadataFactories = FixedArrayMap<String, PreferenceScreenMetadataFactory>()
 
+    /** Metrics logger for preference actions triggered by user interaction. */
+    var preferenceUiActionMetricsLogger: PreferenceUiActionMetricsLogger? = null
+
     private var readWritePermitProvider: ReadWritePermitProvider =
         object : ReadWritePermitProvider {}
 

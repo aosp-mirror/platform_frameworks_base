@@ -27,6 +27,7 @@ android_library {
         "androidx.test.core",
         "androidx.test.ext.junit",
         "flag-junit",
+        "mockito-kotlin2",
         "truth",
     ],
 }
