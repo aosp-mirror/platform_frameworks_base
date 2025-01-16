@@ -16,6 +16,12 @@ per-file *Keyguard* = set noparent
 per-file *Keyguard* = file:../keyguard/OWNERS
 # Not setting noparent here, since *Notification* also matches some status bar notification chips files (statusbar/chips/notification) which should be owned by the status bar team.
 per-file *Notification* = file:notification/OWNERS
+# Files that control blur effects on shade
+per-file *NotificationShadeDepth* = set noparent
+per-file *NotificationShadeDepth* = shanh@google.com, rahulbanerjee@google.com
+per-file *NotificationShadeDepth* = file:../keyguard/OWNERS
+per-file *Blur* = set noparent
+per-file *Blur* = shanh@google.com, rahulbanerjee@google.com
 # Not setting noparent here, since *Mode* matches many other classes (e.g., *ViewModel*)
 per-file *Mode* = file:notification/OWNERS
 per-file *RemoteInput* = set noparent
