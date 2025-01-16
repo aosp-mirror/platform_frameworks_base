@@ -23,6 +23,7 @@ import com.android.wm.shell.RootTaskDisplayAreaOrganizer
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.ShellTestCase
 import com.android.wm.shell.common.DisplayController
+import com.android.wm.shell.common.ShellExecutor
 import com.android.wm.shell.common.SyncTransactionQueue
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger
 import com.android.wm.shell.desktopmode.DesktopUserRepositories
@@ -30,6 +31,7 @@ import com.android.wm.shell.desktopmode.DesktopTasksController
 import com.android.wm.shell.desktopmode.DesktopTestHelpers.createFreeformTask
 import com.android.wm.shell.desktopmode.ReturnToDragStartAnimator
 import com.android.wm.shell.desktopmode.ToggleResizeDesktopTaskTransitionHandler
+import com.android.wm.shell.transition.FocusTransitionObserver
 import com.android.wm.shell.transition.Transitions
 import com.android.wm.shell.windowdecor.DesktopModeWindowDecoration
 import com.android.wm.shell.windowdecor.common.WindowDecorTaskResourceLoader
@@ -67,6 +69,8 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
     private val desktopModeWindowDecorationMock: DesktopModeWindowDecoration = mock()
     private val desktopTilingDecoration: DesktopTilingWindowDecoration = mock()
     private val taskResourceLoader: WindowDecorTaskResourceLoader = mock()
+    private val focusTransitionObserver: FocusTransitionObserver = mock()
+    private val mainExecutor: ShellExecutor = mock()
     private lateinit var desktopTilingDecorViewModel: DesktopTilingDecorViewModel
 
     @Before
@@ -86,6 +90,8 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
                 userRepositories,
                 desktopModeEventLogger,
                 taskResourceLoader,
+                focusTransitionObserver,
+                mainExecutor
             )
         whenever(contextMock.createContextAsUser(any(), any())).thenReturn(contextMock)
     }
@@ -140,7 +146,7 @@ class DesktopTilingDecorViewModelTest : ShellTestCase() {
         desktopTilingDecorViewModel.moveTaskToFrontIfTiled(task1)
 
         verify(desktopTilingDecoration, times(1))
-            .moveTiledPairToFront(any(), isTaskFocused = eq(true))
+            .moveTiledPairToFront(any(), isFocusedOnDisplay = eq(true))
     }
 
     @Test
