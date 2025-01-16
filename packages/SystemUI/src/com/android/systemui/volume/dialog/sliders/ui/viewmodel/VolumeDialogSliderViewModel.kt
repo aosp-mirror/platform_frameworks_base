@@ -57,12 +57,12 @@ private const val VOLUME_UPDATE_GRACE_PERIOD = 1000
 class VolumeDialogSliderViewModel
 @Inject
 constructor(
+    private val sliderType: VolumeDialogSliderType,
     private val interactor: VolumeDialogSliderInteractor,
     private val visibilityInteractor: VolumeDialogVisibilityInteractor,
     @VolumeDialog private val coroutineScope: CoroutineScope,
     private val volumeDialogSliderIconProvider: VolumeDialogSliderIconProvider,
     private val systemClock: SystemClock,
-    private val sliderType: VolumeDialogSliderType,
     private val logger: VolumeDialogLogger,
 ) {
 
@@ -82,14 +82,24 @@ constructor(
         model
             .flatMapLatest { streamModel ->
                 with(streamModel) {
-                        volumeDialogSliderIconProvider.getStreamIcon(
-                            stream = stream,
-                            level = level,
-                            levelMin = levelMin,
-                            levelMax = levelMax,
-                            isMuted = muteSupported && muted,
-                            isRoutedToBluetooth = routedToBluetooth,
-                        )
+                        val isMuted = muteSupported && muted
+                        when (sliderType) {
+                            is VolumeDialogSliderType.Stream ->
+                                volumeDialogSliderIconProvider.getStreamIcon(
+                                    stream = sliderType.audioStream,
+                                    level = level,
+                                    levelMin = levelMin,
+                                    levelMax = levelMax,
+                                    isMuted = isMuted,
+                                    isRoutedToBluetooth = routedToBluetooth,
+                                )
+                            is VolumeDialogSliderType.RemoteMediaStream -> {
+                                volumeDialogSliderIconProvider.getCastIcon(isMuted)
+                            }
+                            is VolumeDialogSliderType.AudioSharingStream -> {
+                                volumeDialogSliderIconProvider.getAudioSharingIcon(isMuted)
+                            }
+                        }
                     }
                     .map { icon -> streamModel.toStateModel(icon) }
             }
