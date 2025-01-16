@@ -109,7 +109,9 @@ public class BubbleTaskViewHelper {
                             MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS);
                     final boolean isShortcutBubble = (mBubble.hasMetadataShortcutId()
                             || (mBubble.getShortcutInfo() != null && Flags.enableBubbleAnything()));
-                    if (mBubble.isAppBubble()) {
+                    if (mBubble.getPreparingTransition() != null) {
+                        mBubble.getPreparingTransition().surfaceCreated();
+                    } else if (mBubble.isAppBubble()) {
                         Context context =
                                 mContext.createContextAsUser(
                                         mBubble.getUser(), Context.CONTEXT_RESTRICTED);

@@ -28,6 +28,7 @@ import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.drawable.ColorDrawable;
 import android.view.Gravity;
+import android.view.SurfaceControl;
 import android.view.TouchDelegate;
 import android.view.View;
 import android.view.ViewTreeObserver;
@@ -174,14 +175,34 @@ public class BubbleBarLayerView extends FrameLayout
 
     /** Shows the expanded view of the provided bubble. */
     public void showExpandedView(BubbleViewProvider b) {
-        BubbleBarExpandedView expandedView = b.getBubbleBarExpandedView();
-        if (expandedView == null) {
-            return;
-        }
+        if (!canExpandView(b)) return;
+        animateExpand(prepareExpandedView(b));
+    }
+
+    /**
+     * @return whether it's possible to expand {@param b} right now. This is {@code false} if
+     *         the bubble has no view or if the bubble is already showing.
+     */
+    public boolean canExpandView(BubbleViewProvider b) {
+        if (b.getBubbleBarExpandedView() == null) return false;
         if (mExpandedBubble != null && mIsExpanded && b.getKey().equals(mExpandedBubble.getKey())) {
-            // Already showing this bubble, skip animating
-            return;
+            // Already showing this bubble so can't expand it.
+            return false;
         }
+        return true;
+    }
+
+    /**
+     * Prepares the expanded view of the provided bubble to be shown. This includes removing any
+     * stale content and cancelling any related animations.
+     *
+     * @return previous open bubble if there was one.
+     */
+    private BubbleViewProvider prepareExpandedView(BubbleViewProvider b) {
+        if (!canExpandView(b)) {
+            throw new IllegalStateException("Can't prepare expand. Check canExpandView(b) first.");
+        }
+        BubbleBarExpandedView expandedView = b.getBubbleBarExpandedView();
         BubbleViewProvider previousBubble = null;
         if (mExpandedBubble != null && !b.getKey().equals(mExpandedBubble.getKey())) {
             if (mIsExpanded && mExpandedBubble.getBubbleBarExpandedView() != null) {
@@ -251,7 +272,20 @@ public class BubbleBarLayerView extends FrameLayout
 
         mIsExpanded = true;
         mBubbleController.getSysuiProxy().onStackExpandChanged(true);
+        showScrim(true);
+        return previousBubble;
+    }
 
+    /**
+     * Performs an animation to open a bubble with content that is not already visible.
+     *
+     * @param previousBubble If non-null, this is a bubble that is already showing before the new
+     *                       bubble is expanded.
+     */
+    public void animateExpand(BubbleViewProvider previousBubble) {
+        if (!mIsExpanded || mExpandedBubble == null) {
+            throw new IllegalStateException("Can't animateExpand without expnaded state");
+        }
         final Runnable afterAnimation = () -> {
             if (mExpandedView == null) return;
             // Touch delegate for the menu
@@ -274,8 +308,49 @@ public class BubbleBarLayerView extends FrameLayout
         } else {
             mAnimationHelper.animateExpansion(mExpandedBubble, afterAnimation);
         }
+    }
 
-        showScrim(true);
+    /**
+     * Like {@link #prepareExpandedView} but also makes the current expanded bubble visible
+     * immediately so it gets a surface that can be animated. Since the surface may not be ready
+     * yet, this keeps the TaskView alpha=0.
+     */
+    public BubbleViewProvider prepareConvertedView(BubbleViewProvider b) {
+        final BubbleViewProvider prior = prepareExpandedView(b);
+
+        final BubbleBarExpandedView bbev = mExpandedBubble.getBubbleBarExpandedView();
+        if (bbev != null) {
+            updateExpandedView();
+            bbev.setAnimating(true);
+            bbev.setContentVisibility(true);
+            bbev.setSurfaceZOrderedOnTop(true);
+            bbev.setTaskViewAlpha(0.f);
+            bbev.setVisibility(VISIBLE);
+        }
+
+        return prior;
+    }
+
+    /**
+     * Starts and animates a conversion-from transition.
+     *
+     * @param startT A transaction with first-frame work. this *will* be applied here!
+     */
+    public void animateConvert(@NonNull SurfaceControl.Transaction startT,
+            @NonNull Rect startBounds, @NonNull SurfaceControl snapshot, SurfaceControl taskLeash,
+            Runnable animFinish) {
+        if (!mIsExpanded || mExpandedBubble == null) {
+            throw new IllegalStateException("Can't animateExpand without expanded state");
+        }
+        mAnimationHelper.animateConvert(mExpandedBubble, startT, startBounds, snapshot, taskLeash,
+                animFinish);
+    }
+
+    /**
+     * Populates {@param out} with the rest bounds of an expanded bubble.
+     */
+    public void getExpandedViewRestBounds(Rect out) {
+        mAnimationHelper.getExpandedViewRestBounds(out);
     }
 
     /** Removes the given {@code bubble}. */

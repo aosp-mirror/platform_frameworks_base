@@ -20,6 +20,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_MULTI_WINDOW;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.WindowManager.TRANSIT_CHANGE;
 import static android.view.WindowManager.TRANSIT_CLOSE;
+import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_OPEN;
 import static android.view.WindowManager.TRANSIT_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TO_FRONT;
@@ -66,7 +67,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
     static final String TAG = "TaskViewTransitions";
 
     /**
-     * Map of {@link TaskViewTaskController} to {@link TaskViewRequestedState}.
+     * Map of {@link TaskViewTaskController} to {@link TaskViewRepository.TaskViewState}.
      * <p>
      * {@link TaskView} keeps a reference to the {@link TaskViewTaskController} instance and
      * manages its lifecycle.
@@ -95,6 +96,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
         final @WindowManager.TransitionType int mType;
         final WindowContainerTransaction mWct;
         final @NonNull TaskViewTaskController mTaskView;
+        ExternalTransition mExternalTransition;
         IBinder mClaimed;
 
         /**
@@ -182,6 +184,32 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
     }
 
     /**
+     * Starts or queues an "external" runnable into the pending queue. This means it will run
+     * in order relative to the local transitions.
+     *
+     * The external operation *must* call {@link #onExternalDone} once it has finished.
+     *
+     * In practice, the external is usually another transition on a different handler.
+     */
+    public void enqueueExternal(@NonNull TaskViewTaskController taskView, ExternalTransition ext) {
+        final PendingTransition pending = new PendingTransition(
+                TRANSIT_NONE, null /* wct */, taskView, null /* cookie */);
+        pending.mExternalTransition = ext;
+        mPending.add(pending);
+        startNextTransition();
+    }
+
+    /**
+     * An external transition run in this "queue" is required to call this once it becomes ready.
+     */
+    public void onExternalDone(IBinder key) {
+        final PendingTransition pending = findPending(key);
+        if (pending == null) return;
+        mPending.remove(pending);
+        startNextTransition();
+    }
+
+    /**
      * Looks through the pending transitions for a opening transaction that matches the provided
      * `taskView`.
      *
@@ -191,6 +219,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
     PendingTransition findPendingOpeningTransition(TaskViewTaskController taskView) {
         for (int i = mPending.size() - 1; i >= 0; --i) {
             if (mPending.get(i).mTaskView != taskView) continue;
+            if (mPending.get(i).mExternalTransition != null) continue;
             if (TransitionUtil.isOpeningType(mPending.get(i).mType)) {
                 return mPending.get(i);
             }
@@ -207,6 +236,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
     PendingTransition findPending(TaskViewTaskController taskView, int type) {
         for (int i = mPending.size() - 1; i >= 0; --i) {
             if (mPending.get(i).mTaskView != taskView) continue;
+            if (mPending.get(i).mExternalTransition != null) continue;
             if (mPending.get(i).mType == type) {
                 return mPending.get(i);
             }
@@ -518,7 +548,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
             // Wait for this to start animating.
             return;
         }
-        pending.mClaimed = mTransitions.startTransition(pending.mType, pending.mWct, this);
+        if (pending.mExternalTransition != null) {
+            pending.mClaimed = pending.mExternalTransition.start();
+        } else {
+            pending.mClaimed = mTransitions.startTransition(pending.mType, pending.mWct, this);
+        }
     }
 
     @Override
@@ -641,7 +675,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
     }
 
     @VisibleForTesting
-    void prepareOpenAnimation(TaskViewTaskController taskView,
+    public void prepareOpenAnimation(TaskViewTaskController taskView,
             final boolean newTask,
             SurfaceControl.Transaction startTransaction,
             SurfaceControl.Transaction finishTransaction,
@@ -694,5 +728,11 @@ public class TaskViewTransitions implements Transitions.TransitionHandler, TaskV
         wct.setTaskTrimmableFromRecents(taskInfo.token, false /* isTrimmableFromRecents */);
 
         taskView.notifyAppeared(newTask);
+    }
+
+    /** Interface for running an external transition in this object's pending queue. */
+    public interface ExternalTransition {
+        /** Starts a transition and returns an identifying key for lookup. */
+        IBinder start();
     }
 }

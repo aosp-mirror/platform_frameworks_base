@@ -448,7 +448,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
      * have the pending info, we'll do it when we receive it in
      * {@link #onTaskAppeared(ActivityManager.RunningTaskInfo, SurfaceControl)}.
      */
-    void setTaskNotFound() {
+    public void setTaskNotFound() {
         mTaskNotFound = true;
         if (mPendingInfo != null) {
             cleanUpPendingTask();
