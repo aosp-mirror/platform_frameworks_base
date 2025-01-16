@@ -19,12 +19,12 @@ package com.android.systemui.window.ui
 import android.util.Log
 import android.view.Choreographer
 import android.view.Choreographer.FrameCallback
+import com.android.systemui.Flags
 import com.android.systemui.lifecycle.WindowLifecycleState
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.lifecycle.viewModel
 import com.android.systemui.scene.ui.view.WindowRootView
 import com.android.systemui.statusbar.BlurUtils
-import com.android.systemui.window.flag.WindowBlurFlag
 import com.android.systemui.window.ui.viewmodel.WindowRootViewModel
 import kotlinx.coroutines.awaitCancellation
 import kotlinx.coroutines.flow.filter
@@ -43,7 +43,7 @@ object WindowRootViewBinder {
         blurUtils: BlurUtils?,
         choreographer: Choreographer?,
     ) {
-        if (!WindowBlurFlag.isEnabled) return
+        if (!Flags.bouncerUiRevamp()) return
         if (blurUtils == null || choreographer == null) return
 
         view.repeatWhenAttached {

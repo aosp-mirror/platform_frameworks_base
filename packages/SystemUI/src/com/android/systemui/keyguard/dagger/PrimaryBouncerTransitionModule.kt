@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard.dagger
 
 import android.content.res.Resources
+import com.android.systemui.Flags
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyguard.ui.transitions.BlurConfig
@@ -34,7 +35,6 @@ import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToGoneTransition
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToLockscreenTransitionViewModel
 import com.android.systemui.keyguard.ui.viewmodel.PrimaryBouncerToOccludedTransitionViewModel
 import com.android.systemui.res.R
-import com.android.systemui.window.flag.WindowBlurFlag
 import dagger.Binds
 import dagger.Module
 import dagger.Provides
@@ -56,7 +56,7 @@ interface PrimaryBouncerTransitionModule {
         fun provideBlurConfig(@Main resources: Resources): BlurConfig {
             val minBlurRadius = resources.getDimensionPixelSize(R.dimen.min_window_blur_radius)
             val maxBlurRadius =
-                if (WindowBlurFlag.isEnabled) {
+                if (Flags.notificationShadeBlur() || Flags.bouncerUiRevamp()) {
                     resources.getDimensionPixelSize(R.dimen.max_shade_window_blur_radius)
                 } else {
                     resources.getDimensionPixelSize(R.dimen.max_window_blur_radius)
