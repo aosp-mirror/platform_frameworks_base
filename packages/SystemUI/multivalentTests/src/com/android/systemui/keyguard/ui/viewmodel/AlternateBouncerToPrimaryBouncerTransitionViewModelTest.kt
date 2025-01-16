@@ -80,7 +80,7 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
     fun notifications_areFullyVisible_whenShadeIsOpen() =
         testScope.runTest {
             val values by collectValues(underTest.notificationAlpha)
-            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+            kosmos.keyguardWindowBlurTestUtil.shadeExpanded(true)
 
             keyguardTransitionRepository.sendTransitionSteps(
                 listOf(
@@ -100,9 +100,9 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
     fun blurRadiusGoesToMaximumWhenShadeIsExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
-            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+            kosmos.keyguardWindowBlurTestUtil.shadeExpanded(true)
 
-            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0f, 0f, 0.1f, 0.2f, 0.3f, 1f),
                 startValue = kosmos.blurConfig.maxBlurRadiusPx,
                 endValue = kosmos.blurConfig.maxBlurRadiusPx,
@@ -119,9 +119,9 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
         testScope.runTest {
             val values by collectValues(underTest.notificationBlurRadius)
 
-            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+            kosmos.keyguardWindowBlurTestUtil.shadeExpanded(true)
 
-            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0f, 0f, 0.1f, 0.2f, 0.3f, 1f),
                 startValue = kosmos.blurConfig.maxBlurRadiusPx / 3.0f,
                 endValue = kosmos.blurConfig.maxBlurRadiusPx / 3.0f,
@@ -135,9 +135,9 @@ class AlternateBouncerToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() 
     fun blurRadiusGoesFromMinToMaxWhenShadeIsNotExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
-            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(false)
+            kosmos.keyguardWindowBlurTestUtil.shadeExpanded(false)
 
-            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0f, 0f, 0.1f, 0.2f, 0.3f, 1f),
                 startValue = kosmos.blurConfig.minBlurRadiusPx,
                 endValue = kosmos.blurConfig.maxBlurRadiusPx,

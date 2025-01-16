@@ -116,9 +116,9 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
     fun blurRadiusGoesFromMaxToMinWhenShadeIsNotExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
-            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(false)
+            kosmos.keyguardWindowBlurTestUtil.shadeExpanded(false)
 
-            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
                 startValue = kosmos.blurConfig.maxBlurRadiusPx,
                 endValue = kosmos.blurConfig.minBlurRadiusPx,
@@ -131,9 +131,9 @@ class PrimaryBouncerToLockscreenTransitionViewModelTest : SysuiTestCase() {
     fun blurRadiusRemainsAtMaxWhenShadeIsExpanded() =
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
-            kosmos.bouncerWindowBlurTestUtil.shadeExpanded(true)
+            kosmos.keyguardWindowBlurTestUtil.shadeExpanded(true)
 
-            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
                 startValue = kosmos.blurConfig.maxBlurRadiusPx,
                 endValue = kosmos.blurConfig.maxBlurRadiusPx,

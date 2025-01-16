@@ -45,7 +45,7 @@ class OccludedToPrimaryBouncerTransitionViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val values by collectValues(underTest.windowBlurRadius)
 
-            kosmos.bouncerWindowBlurTestUtil.assertTransitionToBlurRadius(
+            kosmos.keyguardWindowBlurTestUtil.assertTransitionToBlurRadius(
                 transitionProgress = listOf(0.0f, 0.2f, 0.3f, 0.65f, 0.7f, 1.0f),
                 startValue = kosmos.blurConfig.maxBlurRadiusPx,
                 endValue = kosmos.blurConfig.maxBlurRadiusPx,
