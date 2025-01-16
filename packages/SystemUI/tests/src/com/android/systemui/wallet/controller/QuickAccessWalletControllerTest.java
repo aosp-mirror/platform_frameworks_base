@@ -17,6 +17,7 @@
 package com.android.systemui.wallet.controller;
 
 import static android.service.quickaccesswallet.Flags.FLAG_LAUNCH_WALLET_OPTION_ON_POWER_DOUBLE_TAP;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotSame;
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 import android.app.PendingIntent;
 import android.app.role.RoleManager;
 import android.content.Intent;
+import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.service.quickaccesswallet.GetWalletCardsRequest;
 import android.service.quickaccesswallet.QuickAccessWalletClient;
@@ -59,7 +61,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.mockito.Spy;
 
 import java.util.List;
 
@@ -98,6 +99,7 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
         when(mQuickAccessWalletClient.isWalletServiceAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailable()).thenReturn(true);
         when(mQuickAccessWalletClient.isWalletFeatureAvailableWhenDeviceLocked()).thenReturn(true);
+        when(mQuickAccessWalletClient.getUser()).thenReturn(UserHandle.of(0));
         mClock.setElapsedRealtime(100L);
 
         doAnswer(invocation -> {
@@ -269,7 +271,8 @@ public class QuickAccessWalletControllerTest extends SysuiTestCase {
     public void getQuickAccessUiIntent_noCards_noPendingIntent_startsWalletActivity() {
         mController.startQuickAccessUiIntent(mActivityStarter, mAnimationController, false);
         verify(mActivityStarter).postStartActivityDismissingKeyguard(mIntentCaptor.capture(), eq(0),
-                any(ActivityTransitionAnimator.Controller.class));
+                any(ActivityTransitionAnimator.Controller.class), eq(null),
+                eq(UserHandle.of(0)));
         Intent intent = mIntentCaptor.getValue();
         assertEquals(intent.getAction(), Intent.ACTION_VIEW);
         assertEquals(

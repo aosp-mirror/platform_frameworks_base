@@ -163,15 +163,13 @@ public class WalletActivity extends ComponentActivity implements
 
                     if (mKeyguardStateController.isUnlocked()) {
                         mUiEventLogger.log(WalletUiEvent.QAW_SHOW_ALL);
-                        mActivityStarter.startActivity(
-                                mWalletClient.createWalletIntent(), true);
+                        startWalletActivity();
                         finish();
                     } else {
                         mUiEventLogger.log(WalletUiEvent.QAW_UNLOCK_FROM_SHOW_ALL_BUTTON);
                         mKeyguardDismissUtil.executeWhenUnlocked(() -> {
                             mUiEventLogger.log(WalletUiEvent.QAW_SHOW_ALL);
-                            mActivityStarter.startActivity(
-                                    mWalletClient.createWalletIntent(), true);
+                            startWalletActivity();
                             finish();
                             return false;
                         }, false, true);
@@ -191,6 +189,11 @@ public class WalletActivity extends ComponentActivity implements
                     mKeyguardDismissUtil.executeWhenUnlocked(() -> false, false,
                             false);
                 });
+    }
+
+    private void startWalletActivity() {
+        mActivityStarter.startActivity(mWalletClient.createWalletIntent(), true,
+                null, true, mWalletClient.getUser());
     }
 
     @Override

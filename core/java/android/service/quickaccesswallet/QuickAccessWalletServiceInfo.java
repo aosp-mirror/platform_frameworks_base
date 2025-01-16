@@ -16,6 +16,10 @@
 
 package android.service.quickaccesswallet;
 
+import static android.permission.flags.Flags.walletRoleCrossUserEnabled;
+
+import static com.android.permission.flags.Flags.crossUserRoleEnabled;
+
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -32,10 +36,12 @@ import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.drawable.Drawable;
 import android.os.Binder;
+import android.os.UserHandle;
 import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Xml;
 
 import com.android.internal.R;
@@ -59,22 +65,29 @@ class QuickAccessWalletServiceInfo {
     private final ServiceInfo mServiceInfo;
     private final ServiceMetadata mServiceMetadata;
     private final TileServiceMetadata mTileServiceMetadata;
+    private final int mUserId;
 
     private QuickAccessWalletServiceInfo(
             @NonNull ServiceInfo serviceInfo,
             @NonNull ServiceMetadata metadata,
-            @NonNull TileServiceMetadata tileServiceMetadata) {
+            @NonNull TileServiceMetadata tileServiceMetadata,
+            int userId) {
         mServiceInfo = serviceInfo;
         mServiceMetadata = metadata;
         mTileServiceMetadata = tileServiceMetadata;
+        mUserId = userId;
     }
 
     @Nullable
     static QuickAccessWalletServiceInfo tryCreate(@NonNull Context context) {
         String defaultAppPackageName = null;
 
+        int defaultAppUser = UserHandle.myUserId();
+
         if (isWalletRoleAvailable(context)) {
-            defaultAppPackageName = getDefaultWalletApp(context);
+            Pair<String, Integer> roleAndUser = getDefaultWalletApp(context);
+            defaultAppPackageName = roleAndUser.first;
+            defaultAppUser = roleAndUser.second;
         } else {
             ComponentName defaultPaymentApp = getDefaultPaymentApp(context);
             if (defaultPaymentApp == null) {
@@ -83,7 +96,8 @@ class QuickAccessWalletServiceInfo {
             defaultAppPackageName = defaultPaymentApp.getPackageName();
         }
 
-        ServiceInfo serviceInfo = getWalletServiceInfo(context, defaultAppPackageName);
+        ServiceInfo serviceInfo = getWalletServiceInfo(context, defaultAppPackageName,
+                defaultAppUser);
         if (serviceInfo == null) {
             return null;
         }
@@ -98,15 +112,32 @@ class QuickAccessWalletServiceInfo {
         ServiceMetadata metadata = parseServiceMetadata(context, serviceInfo);
         TileServiceMetadata tileServiceMetadata =
                 new TileServiceMetadata(parseTileServiceMetadata(context, serviceInfo));
-        return new QuickAccessWalletServiceInfo(serviceInfo, metadata, tileServiceMetadata);
+        return new QuickAccessWalletServiceInfo(serviceInfo, metadata, tileServiceMetadata,
+                defaultAppUser);
     }
 
-    private static String getDefaultWalletApp(Context context) {
+    @NonNull
+    private static Pair<String, Integer> getDefaultWalletApp(Context context) {
+        UserHandle user = UserHandle.of(UserHandle.myUserId());
+
         final long token = Binder.clearCallingIdentity();
         try {
             RoleManager roleManager = context.getSystemService(RoleManager.class);
-            List<String> roleHolders = roleManager.getRoleHolders(RoleManager.ROLE_WALLET);
-            return roleHolders.isEmpty() ? null : roleHolders.get(0);
+
+            if (walletRoleCrossUserEnabled()
+                    && crossUserRoleEnabled()
+                    && context.checkCallingOrSelfPermission(
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+                    == PackageManager.PERMISSION_GRANTED) {
+                user = roleManager.getActiveUserForRole(RoleManager.ROLE_WALLET);
+                if (user == null) {
+                    return new Pair<>(null, user.getIdentifier());
+                }
+            }
+            List<String> roleHolders = roleManager.getRoleHoldersAsUser(RoleManager.ROLE_WALLET,
+                    user);
+            return new Pair<>(roleHolders.isEmpty() ? null : roleHolders.get(0),
+                    user.getIdentifier());
         } finally {
             Binder.restoreCallingIdentity(token);
         }
@@ -128,15 +159,16 @@ class QuickAccessWalletServiceInfo {
         return comp == null ? null : ComponentName.unflattenFromString(comp);
     }
 
-    private static ServiceInfo getWalletServiceInfo(Context context, String packageName) {
+    private static ServiceInfo getWalletServiceInfo(Context context, String packageName,
+            int userId) {
         Intent intent = new Intent(QuickAccessWalletService.SERVICE_INTERFACE);
         intent.setPackage(packageName);
         List<ResolveInfo> resolveInfos =
-                context.getPackageManager().queryIntentServices(intent,
+                context.getPackageManager().queryIntentServicesAsUser(intent,
                         PackageManager.MATCH_DIRECT_BOOT_AWARE
                         | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
                         | PackageManager.MATCH_DEFAULT_ONLY
-                        | PackageManager.GET_META_DATA);
+                        | PackageManager.GET_META_DATA, userId);
         return resolveInfos.isEmpty() ? null : resolveInfos.get(0).serviceInfo;
     }
 
@@ -247,6 +279,9 @@ class QuickAccessWalletServiceInfo {
         return mServiceInfo.getComponentName();
     }
 
+    int getUserId() {
+        return mUserId;
+    }
     /**
      * @return the fully qualified name of the activity that hosts the full wallet. If available,
      * this intent should be started with the action

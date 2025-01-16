@@ -243,8 +243,9 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
             return null;
         }
         String packageName = mServiceInfo.getComponentName().getPackageName();
+        int userId = mServiceInfo.getUserId();
         String walletActivity = mServiceInfo.getWalletActivity();
-        return createIntent(walletActivity, packageName, ACTION_VIEW_WALLET);
+        return createIntent(walletActivity, packageName, userId, ACTION_VIEW_WALLET);
     }
 
     @Override
@@ -302,12 +303,15 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
         }
         String packageName = mServiceInfo.getComponentName().getPackageName();
         String settingsActivity = mServiceInfo.getSettingsActivity();
-        return createIntent(settingsActivity, packageName, ACTION_VIEW_WALLET_SETTINGS);
+        return createIntent(settingsActivity, packageName, UserHandle.myUserId(),
+                ACTION_VIEW_WALLET_SETTINGS);
     }
 
     @Nullable
-    private Intent createIntent(@Nullable String activityName, String packageName, String action) {
-        PackageManager pm = mContext.getPackageManager();
+    private Intent createIntent(@Nullable String activityName, String packageName,
+            int userId, String action) {
+        Context userContext = mContext.createContextAsUser(UserHandle.of(userId), 0);
+        PackageManager pm = userContext.getPackageManager();
         if (TextUtils.isEmpty(activityName)) {
             activityName = queryActivityForAction(pm, packageName, action);
         }
@@ -359,6 +363,12 @@ public class QuickAccessWalletClientImpl implements QuickAccessWalletClient, Ser
     @Override
     public Drawable getTileIcon() {
         return mServiceInfo == null ? null : mServiceInfo.getTileIcon();
+    }
+
+    @Nullable
+    @Override
+    public UserHandle getUser() {
+        return mServiceInfo == null ? null : UserHandle.of(mServiceInfo.getUserId());
     }
 
     @Override
