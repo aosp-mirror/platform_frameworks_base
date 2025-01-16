@@ -16,12 +16,18 @@
 
 package com.android.server.location.contexthub;
 
+import android.content.Context;
 import android.hardware.contexthub.HubEndpointInfo;
 import android.hardware.contexthub.HubServiceInfo;
 import android.hardware.contexthub.IContextHubEndpointDiscoveryCallback;
 import android.hardware.location.HubInfo;
-import android.os.DeadObjectException;
+import android.os.Binder;
+import android.os.IBinder;
+import android.os.PowerManager;
+import android.os.PowerManager.WakeLock;
+import android.os.Process;
 import android.os.RemoteException;
+import android.os.WorkSource;
 import android.util.ArrayMap;
 import android.util.IndentingPrintWriter;
 import android.util.Log;
@@ -34,10 +40,15 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
 
 class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycleCallback {
     private static final String TAG = "HubInfoRegistry";
+
+    /** The duration of wakelocks acquired during discovery callbacks */
+    private static final long WAKELOCK_TIMEOUT_MILLIS = 5 * 1000;
+
     private final Object mLock = new Object();
 
     private final IContextHubWrapper mContextHubWrapper;
@@ -53,21 +64,37 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
      * A wrapper class that is used to store arguments to
      * ContextHubManager.registerEndpointCallback.
      */
-    private static class DiscoveryCallback {
+    private static class DiscoveryCallback implements IBinder.DeathRecipient {
+        private final HubInfoRegistry mHubInfoRegistry;
         private final IContextHubEndpointDiscoveryCallback mCallback;
         private final Optional<Long> mEndpointId;
         private final Optional<String> mServiceDescriptor;
 
-        DiscoveryCallback(IContextHubEndpointDiscoveryCallback callback, long endpointId) {
+        // True if the binder death recipient fired
+        private final AtomicBoolean mBinderDied = new AtomicBoolean(false);
+
+        DiscoveryCallback(
+                HubInfoRegistry registry,
+                IContextHubEndpointDiscoveryCallback callback,
+                long endpointId)
+                throws RemoteException {
+            mHubInfoRegistry = registry;
             mCallback = callback;
             mEndpointId = Optional.of(endpointId);
             mServiceDescriptor = Optional.empty();
+            attachDeathRecipient();
         }
 
-        DiscoveryCallback(IContextHubEndpointDiscoveryCallback callback, String serviceDescriptor) {
+        DiscoveryCallback(
+                HubInfoRegistry registry,
+                IContextHubEndpointDiscoveryCallback callback,
+                String serviceDescriptor)
+                throws RemoteException {
+            mHubInfoRegistry = registry;
             mCallback = callback;
             mEndpointId = Optional.empty();
             mServiceDescriptor = Optional.of(serviceDescriptor);
+            attachDeathRecipient();
         }
 
         public IContextHubEndpointDiscoveryCallback getCallback() {
@@ -79,6 +106,10 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
          * @return true if info matches
          */
         public boolean isMatch(HubEndpointInfo info) {
+            if (mBinderDied.get()) {
+                Log.w(TAG, "Callback died, isMatch returning false");
+                return false;
+            }
             if (mEndpointId.isPresent()) {
                 return mEndpointId.get() == info.getIdentifier().getEndpoint();
             }
@@ -91,6 +122,17 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
             }
             return false;
         }
+
+        @Override
+        public void binderDied() {
+            Log.d(TAG, "Binder died for discovery callback");
+            mBinderDied.set(true);
+            mHubInfoRegistry.unregisterEndpointDiscoveryCallback(mCallback);
+        }
+
+        private void attachDeathRecipient() throws RemoteException {
+            mCallback.asBinder().linkToDeath(this, 0 /* flags */);
+        }
     }
 
     /* The list of discovery callbacks registered with the service */
@@ -99,7 +141,11 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
 
     private final Object mCallbackLock = new Object();
 
-    HubInfoRegistry(IContextHubWrapper contextHubWrapper) throws InstantiationException {
+    /** Wakelock held while endpoint callbacks are being invoked */
+    private final WakeLock mWakeLock;
+
+    HubInfoRegistry(Context context, IContextHubWrapper contextHubWrapper)
+            throws InstantiationException {
         mContextHubWrapper = contextHubWrapper;
         try {
             refreshCachedHubs();
@@ -109,6 +155,16 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
             Log.e(TAG, error, e);
             throw new InstantiationException(error);
         }
+
+        PowerManager powerManager = context.getSystemService(PowerManager.class);
+        if (powerManager == null) {
+            String error = "PowerManager was null";
+            Log.e(TAG, error);
+            throw new InstantiationError(error);
+        }
+        mWakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, TAG);
+        mWakeLock.setWorkSource(new WorkSource(Process.myUid(), context.getPackageName()));
+        mWakeLock.setReferenceCounted(true);
     }
 
     /** Retrieve the list of hubs available. */
@@ -178,12 +234,7 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
                     try {
                         cb.onEndpointsStarted(infoList);
                     } catch (RemoteException e) {
-                        if (e instanceof DeadObjectException) {
-                            Log.w(TAG, "onEndpointStarted: callback died, unregistering");
-                            unregisterEndpointDiscoveryCallback(cb);
-                        } else {
-                            Log.e(TAG, "Exception while calling onEndpointsStarted", e);
-                        }
+                        Log.e(TAG, "Exception while calling onEndpointsStarted", e);
                     }
                 });
     }
@@ -208,12 +259,7 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
                         cb.onEndpointsStopped(
                                 infoList, ContextHubServiceUtil.toAppHubEndpointReason(reason));
                     } catch (RemoteException e) {
-                        if (e instanceof DeadObjectException) {
-                            Log.w(TAG, "onEndpointStopped: callback died, unregistering");
-                            unregisterEndpointDiscoveryCallback(cb);
-                        } else {
-                            Log.e(TAG, "Exception while calling onEndpointsStopped", e);
-                        }
+                        Log.e(TAG, "Exception while calling onEndpointsStopped", e);
                     }
                 });
     }
@@ -254,7 +300,11 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
         Objects.requireNonNull(callback, "callback cannot be null");
         synchronized (mCallbackLock) {
             checkCallbackAlreadyRegistered(callback);
-            mEndpointDiscoveryCallbacks.add(new DiscoveryCallback(callback, endpointId));
+            try {
+                mEndpointDiscoveryCallbacks.add(new DiscoveryCallback(this, callback, endpointId));
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while adding discovery callback", e);
+            }
         }
     }
 
@@ -264,7 +314,12 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
         Objects.requireNonNull(callback, "callback cannot be null");
         synchronized (mCallbackLock) {
             checkCallbackAlreadyRegistered(callback);
-            mEndpointDiscoveryCallbacks.add(new DiscoveryCallback(callback, serviceDescriptor));
+            try {
+                mEndpointDiscoveryCallbacks.add(
+                        new DiscoveryCallback(this, callback, serviceDescriptor));
+            } catch (RemoteException e) {
+                Log.e(TAG, "RemoteException while adding discovery callback", e);
+            }
         }
     }
 
@@ -280,6 +335,11 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
                 }
             }
         }
+    }
+
+    /* package */
+    void onDiscoveryCallbackFinished() {
+        releaseWakeLock();
     }
 
     private void checkCallbackAlreadyRegistered(
@@ -315,11 +375,32 @@ class HubInfoRegistry implements ContextHubHalEndpointCallback.IEndpointLifecycl
                     }
                 }
 
+                acquireWakeLock();
                 consumer.accept(
                         discoveryCallback.getCallback(),
                         infoList.toArray(new HubEndpointInfo[infoList.size()]));
             }
         }
+    }
+
+    private void acquireWakeLock() {
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    mWakeLock.acquire(WAKELOCK_TIMEOUT_MILLIS);
+                });
+    }
+
+    private void releaseWakeLock() {
+        Binder.withCleanCallingIdentity(
+                () -> {
+                    if (mWakeLock.isHeld()) {
+                        try {
+                            mWakeLock.release();
+                        } catch (RuntimeException e) {
+                            Log.e(TAG, "Releasing the wakelock fails - ", e);
+                        }
+                    }
+                });
     }
 
     void dump(IndentingPrintWriter ipw) {
