@@ -314,6 +314,7 @@ import android.window.ActivityWindowInfo;
 import android.window.AddToSurfaceSyncGroupResult;
 import android.window.ClientWindowFrames;
 import android.window.ConfigurationChangeSetting;
+import android.window.DesktopModeFlags;
 import android.window.IGlobalDragListener;
 import android.window.IScreenRecordingCallback;
 import android.window.ISurfaceSyncGroupCompletedListener;
@@ -843,6 +844,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 DEVELOPMENT_WM_DISPLAY_SETTINGS_PATH);
         private final Uri mMaximumObscuringOpacityForTouchUri = Settings.Global.getUriFor(
                 Settings.Global.MAXIMUM_OBSCURING_OPACITY_FOR_TOUCH);
+        private final Uri mDevelopmentOverrideDesktopExperienceUri = Settings.Global.getUriFor(
+                Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_EXPERIENCE_FEATURES);
 
         public SettingsObserver() {
             super(new Handler());
@@ -869,6 +872,8 @@ public class WindowManagerService extends IWindowManager.Stub
             resolver.registerContentObserver(mDisplaySettingsPathUri, false, this,
                     UserHandle.USER_ALL);
             resolver.registerContentObserver(mMaximumObscuringOpacityForTouchUri, false, this,
+                    UserHandle.USER_ALL);
+            resolver.registerContentObserver(mDevelopmentOverrideDesktopExperienceUri, false, this,
                     UserHandle.USER_ALL);
         }
 
@@ -910,6 +915,11 @@ public class WindowManagerService extends IWindowManager.Stub
 
             if (mDisableSecureWindowsUri.equals(uri)) {
                 updateDisableSecureWindows();
+                return;
+            }
+
+            if (mDevelopmentOverrideDesktopExperienceUri.equals(uri)) {
+                updateDevelopmentOverrideDesktopExperience();
                 return;
             }
 
@@ -977,6 +987,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES, 0) != 0;
 
             mAtmService.mForceResizableActivities = forceResizable;
+        }
+
+        void updateDevelopmentOverrideDesktopExperience() {
+            ContentResolver resolver = mContext.getContentResolver();
+            final int overrideDesktopMode = Settings.Global.getInt(resolver,
+                    Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_EXPERIENCE_FEATURES,
+                    DesktopModeFlags.ToggleOverride.OVERRIDE_UNSET.getSetting());
+
+            SystemProperties.set(DesktopModeFlags.SYSTEM_PROPERTY_NAME,
+                    Integer.toString(overrideDesktopMode));
         }
 
         void updateDevEnableNonResizableMultiWindow() {

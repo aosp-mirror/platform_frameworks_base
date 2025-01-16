@@ -178,6 +178,7 @@ public class SettingsBackupTest {
                     Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
                     Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
                     Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_MODE_FEATURES,
+                    Settings.Global.DEVELOPMENT_OVERRIDE_DESKTOP_EXPERIENCE_FEATURES,
                     Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_ENABLE_NON_RESIZABLE_MULTI_WINDOW,
