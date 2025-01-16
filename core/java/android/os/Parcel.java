@@ -2831,9 +2831,11 @@ public final class Parcel {
         }
     }
 
-    private void resetSqaushingState() {
+    private void resetSquashingState() {
         if (mAllowSquashing) {
-            Slog.wtf(TAG, "allowSquashing wasn't restored.");
+            String error = "allowSquashing wasn't restored.";
+            Slog.wtf(TAG, error);
+            throw new BadParcelableException(error);
         }
         mWrittenSquashableParcelables = null;
         mReadSquashableParcelables = null;
@@ -2950,9 +2952,11 @@ public final class Parcel {
             for (int i = 0; i < mReadSquashableParcelables.size(); i++) {
                 sb.append(mReadSquashableParcelables.keyAt(i)).append(' ');
             }
-            Slog.wtfStack(TAG, "Map doesn't contain offset "
+            String error = "Map doesn't contain offset "
                     + firstAbsolutePos
-                    + " : contains=" + sb.toString());
+                    + " : contains=" + sb.toString();
+            Slog.wtfStack(TAG, error);
+            throw new BadParcelableException(error);
         }
         return (T) p;
     }
@@ -5505,7 +5509,7 @@ public final class Parcel {
 
     private void freeBuffer() {
         mFlags = 0;
-        resetSqaushingState();
+        resetSquashingState();
         if (mOwnsNativeParcelObject) {
             nativeFreeBuffer(mNativePtr);
         }
@@ -5513,7 +5517,7 @@ public final class Parcel {
     }
 
     private void destroy() {
-        resetSqaushingState();
+        resetSquashingState();
         if (mNativePtr != 0) {
             if (mOwnsNativeParcelObject) {
                 nativeDestroy(mNativePtr);
