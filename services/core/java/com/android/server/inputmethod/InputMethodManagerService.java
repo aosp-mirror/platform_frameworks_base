@@ -2189,7 +2189,7 @@ public final class InputMethodManagerService implements IInputMethodManagerImpl.
         if (mVdmInternal == null) {
             mVdmInternal = LocalServices.getService(VirtualDeviceManagerInternal.class);
         }
-        if (mVdmInternal == null || !android.companion.virtual.flags.Flags.vdmCustomIme()) {
+        if (mVdmInternal == null) {
             return currentMethodId;
         }
 
