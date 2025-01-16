@@ -32,10 +32,12 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
+import static com.android.server.display.feature.flags.Flags.FLAG_DISPLAY_TOPOLOGY;
 import static com.android.server.wm.DragDropController.MSG_UNHANDLED_DROP_LISTENER_TIMEOUT;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
@@ -56,6 +58,7 @@ import android.content.Intent;
 import android.content.pm.ShortcutServiceInternal;
 import android.graphics.PixelFormat;
 import android.graphics.Rect;
+import android.hardware.display.VirtualDisplay;
 import android.os.Binder;
 import android.os.Handler;
 import android.os.IBinder;
@@ -66,6 +69,7 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.platform.test.annotations.EnableFlags;
 import android.platform.test.annotations.Presubmit;
+import android.platform.test.annotations.RequiresFlagsEnabled;
 import android.view.DragEvent;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
@@ -79,12 +83,14 @@ import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.pm.UserManagerInternal;
+import com.android.server.wm.utils.VirtualDisplayTestRule;
 import com.android.window.flags.Flags;
 
 import org.junit.After;
 import org.junit.AfterClass;
 import org.junit.Before;
 import org.junit.BeforeClass;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
@@ -105,6 +111,8 @@ import java.util.function.Consumer;
 @Presubmit
 @RunWith(WindowTestRunner.class)
 public class DragDropControllerTests extends WindowTestsBase {
+    @Rule
+    public VirtualDisplayTestRule mVirtualDisplayTestRule = new VirtualDisplayTestRule();
     private static final int TIMEOUT_MS = 3000;
     private static final int TEST_UID = 12345;
     private static final int TEST_PROFILE_UID = 12345 * UserHandle.PER_USER_RANGE;
@@ -220,13 +228,17 @@ public class DragDropControllerTests extends WindowTestsBase {
 
     @After
     public void tearDown() throws Exception {
-        final CountDownLatch latch;
+        // Besides TestDragDropController, WMService also creates another DragDropController in
+        // test, and since listeners are added on instantiation, it has to be cleared here as well.
+        mTarget.cleanupListeners();
+        mWm.mDragDropController.cleanupListeners();
         if (!mTarget.dragDropActiveLocked()) {
             return;
         }
         if (mToken != null) {
             mTarget.cancelDragAndDrop(mToken, false);
         }
+        final CountDownLatch latch;
         latch = new CountDownLatch(1);
         mTarget.setOnClosedCallbackLocked(latch::countDown);
         if (mTarget.mIsAccessibilityDrag) {
@@ -337,12 +349,13 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                     // Verify the drop event is only sent for the global intercept window
                     assertTrue(nonLocalWindowDragEvents.isEmpty());
-                    assertTrue(last(localWindowDragEvents).getAction() != ACTION_DROP);
-                    assertTrue(last(globalInterceptWindowDragEvents).getAction() == ACTION_DROP);
+                    assertNotEquals(ACTION_DROP, localWindowDragEvents.getLast().getAction());
+                    assertEquals(ACTION_DROP,
+                            globalInterceptWindowDragEvents.getLast().getAction());
 
                     // Verify that item extras were not sent with the drop event
-                    assertNull(last(localWindowDragEvents).getClipData());
-                    assertFalse(last(globalInterceptWindowDragEvents).getClipData()
+                    assertNull(localWindowDragEvents.getLast().getClipData());
+                    assertFalse(globalInterceptWindowDragEvents.getLast().getClipData()
                             .willParcelWithActivityInfo());
                 });
     }
@@ -384,7 +397,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDragEventCoordinates() {
+    public void testDragEventCoordinatesOverlappingWindows() {
         int dragStartX = mWindow.getBounds().centerX();
         int dragStartY = mWindow.getBounds().centerY();
         int startOffsetPx = 10;
@@ -429,7 +442,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                         // Verify only window2 received the DROP event and coords are sent as-is.
                         assertEquals(1, dragEvents.size());
                         assertEquals(2, dragEvents2.size());
-                        final DragEvent dropEvent = last(dragEvents2);
+                        final DragEvent dropEvent = dragEvents2.getLast();
                         assertEquals(ACTION_DROP, dropEvent.getAction());
                         assertEquals(dropCoordsPx, dropEvent.getX(),  0.0 /* delta */);
                         assertEquals(dropCoordsPx, dropEvent.getY(),  0.0 /* delta */);
@@ -437,10 +450,10 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                         mTarget.reportDropResult(iwindow2, true);
                         // Verify both windows received ACTION_DRAG_ENDED event.
-                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents).getAction());
-                        assertEquals(window2.getDisplayId(), last(dragEvents).getDisplayId());
-                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents2).getAction());
-                        assertEquals(window2.getDisplayId(), last(dragEvents2).getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, dragEvents.getLast().getAction());
+                        assertEquals(window2.getDisplayId(), dragEvents.getLast().getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, dragEvents2.getLast().getAction());
+                        assertEquals(window2.getDisplayId(), dragEvents2.getLast().getDisplayId());
                     } finally {
                         mTarget.continueDragStateClose();
                     }
@@ -493,7 +506,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                         // Verify only window2 received the DROP event and coords are sent as-is
                         assertEquals(1, dragEvents.size());
                         assertEquals(2, dragEvents2.size());
-                        final DragEvent dropEvent = last(dragEvents2);
+                        final DragEvent dropEvent = dragEvents2.getLast();
                         assertEquals(ACTION_DROP, dropEvent.getAction());
                         assertEquals(dropCoordsPx, dropEvent.getX(),  0.0 /* delta */);
                         assertEquals(dropCoordsPx, dropEvent.getY(),  0.0 /* delta */);
@@ -501,10 +514,12 @@ public class DragDropControllerTests extends WindowTestsBase {
 
                         mTarget.reportDropResult(iwindow2, true);
                         // Verify both windows received ACTION_DRAG_ENDED event.
-                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents).getAction());
-                        assertEquals(testDisplay.getDisplayId(), last(dragEvents).getDisplayId());
-                        assertEquals(ACTION_DRAG_ENDED, last(dragEvents2).getAction());
-                        assertEquals(testDisplay.getDisplayId(), last(dragEvents2).getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, dragEvents.getLast().getAction());
+                        assertEquals(testDisplay.getDisplayId(),
+                                dragEvents.getLast().getDisplayId());
+                        assertEquals(ACTION_DRAG_ENDED, dragEvents2.getLast().getAction());
+                        assertEquals(testDisplay.getDisplayId(),
+                                dragEvents2.getLast().getDisplayId());
                     } finally {
                         mTarget.continueDragStateClose();
                     }
@@ -561,8 +576,30 @@ public class DragDropControllerTests extends WindowTestsBase {
                 });
     }
 
-    private DragEvent last(ArrayList<DragEvent> list) {
-        return list.get(list.size() - 1);
+    @Test
+    @RequiresFlagsEnabled(FLAG_DISPLAY_TOPOLOGY)
+    @EnableFlags(Flags.FLAG_ENABLE_CONNECTED_DISPLAYS_DND)
+    public void testDragCancelledOnTopologyChange() {
+        VirtualDisplay virtualDisplay = createVirtualDisplay();
+        // Necessary for now since DragState.sendDragStartedLocked() will recycle drag events
+        // immediately after dispatching, which is a problem when using mockito arguments captor
+        // because it returns and modifies the same drag event.
+        TestIWindow iwindow = (TestIWindow) mWindow.mClient;
+        final ArrayList<DragEvent> dragEvents = new ArrayList<>();
+        iwindow.setDragEventJournal(dragEvents);
+
+        startDrag(0, 0, View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ,
+                ClipData.newPlainText("label", "text"), (surface) -> {
+                    final CountDownLatch latch = new CountDownLatch(1);
+                    mTarget.setOnClosedCallbackLocked(latch::countDown);
+
+                    // Release virtual display to trigger drag-and-drop cancellation.
+                    virtualDisplay.release();
+                    assertTrue(awaitInWmLock(() -> latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS)));
+
+                    assertEquals(2, dragEvents.size());
+                    assertEquals(ACTION_DRAG_ENDED, dragEvents.getLast().getAction());
+                });
     }
 
     @Test
@@ -941,5 +978,13 @@ public class DragDropControllerTests extends WindowTestsBase {
                 flags | View.DRAG_FLAG_ACCESSIBILITY_ACTION, null, 0, 0, 0, 0, 0, 0, 0, data);
         assertNotNull(mToken);
         r.run();
+    }
+
+    private VirtualDisplay createVirtualDisplay() {
+        final int width = 800;
+        final int height = 600;
+        final String name = getClass().getSimpleName() + "_VirtualDisplay";
+        return mVirtualDisplayTestRule.createDisplayManagerAttachedVirtualDisplay(name, width,
+                height);
     }
 }
