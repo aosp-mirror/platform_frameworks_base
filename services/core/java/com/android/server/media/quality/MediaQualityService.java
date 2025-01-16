@@ -1385,7 +1385,7 @@ public class MediaQualityService extends SystemService {
             try {
                 if (mMediaQuality != null) {
                     if (mMediaQuality.isAutoPqSupported()) {
-                        mMediaQuality.getAutoPqEnabled();
+                        return mMediaQuality.getAutoPqEnabled();
                     }
                 }
             } catch (RemoteException e) {
@@ -1417,7 +1417,7 @@ public class MediaQualityService extends SystemService {
             try {
                 if (mMediaQuality != null) {
                     if (mMediaQuality.isAutoSrSupported()) {
-                        mMediaQuality.getAutoSrEnabled();
+                        return mMediaQuality.getAutoSrEnabled();
                     }
                 }
             } catch (RemoteException e) {
@@ -1449,7 +1449,7 @@ public class MediaQualityService extends SystemService {
             try {
                 if (mMediaQuality != null) {
                     if (mMediaQuality.isAutoAqSupported()) {
-                        mMediaQuality.getAutoAqEnabled();
+                        return mMediaQuality.getAutoAqEnabled();
                     }
                 }
             } catch (RemoteException e) {
