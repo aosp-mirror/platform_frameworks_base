@@ -48,6 +48,7 @@
         android:layout_height="wrap_content"
         app:layout_constraintTop_toBottomOf="@android:id/title"
         app:layout_constraintStart_toStartOf="parent"
+        android:paddingTop="@dimen/settingslib_expressive_space_extrasmall6"
         android:textAlignment="viewStart"
         android:clickable="true"
         android:visibility="gone"
