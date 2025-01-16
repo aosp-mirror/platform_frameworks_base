@@ -78,3 +78,17 @@ java_library {
         "com.android.window.flags.window-aconfig-java",
     ],
 }
+
+// Things that can be shared with launcher3
+java_library {
+    name: "WindowManager-Shell-shared-AOSP",
+
+    sdk_version: "current",
+
+    srcs: [
+        "src/com/android/wm/shell/shared/bubbles/BubbleAnythingFlagHelper.java",
+    ],
+    static_libs: [
+        "com_android_wm_shell_flags_lib",
+    ],
+}
