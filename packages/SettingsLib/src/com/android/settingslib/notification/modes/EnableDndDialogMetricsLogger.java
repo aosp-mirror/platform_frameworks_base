@@ -22,12 +22,12 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 
 /**
- * Logs ui events for {@link EnableZenModeDialog}.
+ * Logs ui events for {@link EnableDndDialogFactory}.
  */
-public class ZenModeDialogMetricsLogger {
+public class EnableDndDialogMetricsLogger {
     private final Context mContext;
 
-    public ZenModeDialogMetricsLogger(Context context) {
+    public EnableDndDialogMetricsLogger(Context context) {
         mContext = context;
     }
 

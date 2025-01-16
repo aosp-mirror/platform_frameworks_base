@@ -38,7 +38,7 @@ import com.android.compose.PlatformOutlinedButton
 import com.android.compose.theme.PlatformTheme
 import com.android.internal.annotations.VisibleForTesting
 import com.android.internal.jank.InteractionJankMonitor
-import com.android.settingslib.notification.modes.EnableZenModeDialog
+import com.android.settingslib.notification.modes.EnableDndDialogFactory
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
 import com.android.systemui.animation.Expandable
@@ -46,7 +46,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.dialog.ui.composable.AlertDialogContent
 import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.qs.tiles.dialog.QSZenModeDialogMetricsLogger
+import com.android.systemui.qs.tiles.dialog.QSEnableDndDialogMetricsLogger
 import com.android.systemui.res.R
 import com.android.systemui.shade.domain.interactor.ShadeDialogContextInteractor
 import com.android.systemui.statusbar.phone.ComponentSystemUIDialog
@@ -77,7 +77,7 @@ constructor(
 ) : SystemUIDialog.Delegate {
     // NOTE: This should only be accessed/written from the main thread.
     @VisibleForTesting var currentDialog: ComponentSystemUIDialog? = null
-    private val zenDialogMetricsLogger by lazy { QSZenModeDialogMetricsLogger(context) }
+    private val dndDurationDialogLogger by lazy { QSEnableDndDialogMetricsLogger(context) }
 
     override fun createDialog(): SystemUIDialog {
         Assert.isMainThread()
@@ -207,11 +207,11 @@ constructor(
      */
     fun makeDndDurationDialog(): Dialog {
         val dialog =
-            EnableZenModeDialog(
+            EnableDndDialogFactory(
                     context,
                     R.style.Theme_SystemUI_Dialog,
                     /* cancelIsNeutral= */ true,
-                    zenDialogMetricsLogger,
+                    dndDurationDialogLogger,
                 )
                 .createDialog()
         SystemUIDialog.applyFlags(dialog)

@@ -54,8 +54,15 @@ import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.Objects;
 
-public class EnableZenModeDialog {
-    private static final String TAG = "EnableZenModeDialog";
+/**
+ * When enabling DND, if the user has the setting to "Ask every time" for the duration, we show
+ * this dialog to allow the user to select for how long they want DND to be enabled this time.
+ * Not to be confused with {@link DndDurationDialogFactory}, which is the dialog that allows the
+ * user to configure the default behavior for enabling DND (and in turn may lead to this dialog
+ * being shown, since it contains the said "Ask every time" option).
+ */
+public class EnableDndDialogFactory {
+    private static final String TAG = "EnableDndDialogFactory";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private static final int[] MINUTE_BUCKETS = ZenModeConfig.MINUTE_BUCKETS;
@@ -74,7 +81,7 @@ public class EnableZenModeDialog {
     private static final int MINUTES_MS = 60 * SECONDS_MS;
 
     @Nullable
-    private final ZenModeDialogMetricsLogger mMetricsLogger;
+    private final EnableDndDialogMetricsLogger mMetricsLogger;
 
     @VisibleForTesting
     protected Uri mForeverId;
@@ -101,17 +108,17 @@ public class EnableZenModeDialog {
     @VisibleForTesting
     protected LayoutInflater mLayoutInflater;
 
-    public EnableZenModeDialog(Context context) {
+    public EnableDndDialogFactory(Context context) {
         this(context, 0);
     }
 
-    public EnableZenModeDialog(Context context, int themeResId) {
+    public EnableDndDialogFactory(Context context, int themeResId) {
         this(context, themeResId, false /* cancelIsNeutral */,
-                new ZenModeDialogMetricsLogger(context));
+                new EnableDndDialogMetricsLogger(context));
     }
 
-    public EnableZenModeDialog(Context context, int themeResId, boolean cancelIsNeutral,
-            ZenModeDialogMetricsLogger metricsLogger) {
+    public EnableDndDialogFactory(Context context, int themeResId, boolean cancelIsNeutral,
+            EnableDndDialogMetricsLogger metricsLogger) {
         mContext = context;
         mThemeResId = themeResId;
         mCancelIsNeutral = cancelIsNeutral;

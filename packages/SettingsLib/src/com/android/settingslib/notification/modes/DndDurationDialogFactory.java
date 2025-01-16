@@ -44,7 +44,12 @@ import com.android.settingslib.R;
 
 import java.util.Arrays;
 
-public class ZenDurationDialog {
+/**
+ * This dialog configures the default behavior that the user prefers when enabling DND.
+ * Not to be confused with {@link EnableDndDialogFactory}, which is the dialog that will be shown
+ * when the user enables DND if the "Ask every time" option was selected in this dialog.
+ */
+public class DndDurationDialogFactory {
     private static final int[] MINUTE_BUCKETS = ZenModeConfig.MINUTE_BUCKETS;
     @VisibleForTesting
     protected static final int MIN_BUCKET_MINUTES = MINUTE_BUCKETS[0];
@@ -72,7 +77,7 @@ public class ZenDurationDialog {
     @VisibleForTesting
     protected LayoutInflater mLayoutInflater;
 
-    public ZenDurationDialog(Context context) {
+    public DndDurationDialogFactory(Context context) {
         mContext = context;
     }
 

@@ -19,7 +19,7 @@ package com.android.systemui.qs.tiles.dialog;
 import android.content.Context;
 
 import com.android.internal.logging.UiEventLogger;
-import com.android.settingslib.notification.modes.ZenModeDialogMetricsLogger;
+import com.android.settingslib.notification.modes.EnableDndDialogMetricsLogger;
 import com.android.systemui.qs.QSDndEvent;
 import com.android.systemui.qs.QSEvents;
 
@@ -30,10 +30,10 @@ import com.android.systemui.qs.QSEvents;
  *
  * Other names for DND (Do Not Disturb) include "Zen" and "Priority only".
  */
-public class QSZenModeDialogMetricsLogger extends ZenModeDialogMetricsLogger {
+public class QSEnableDndDialogMetricsLogger extends EnableDndDialogMetricsLogger {
     private final UiEventLogger mUiEventLogger = QSEvents.INSTANCE.getQsUiEventsLogger();
 
-    public QSZenModeDialogMetricsLogger(Context context) {
+    public QSEnableDndDialogMetricsLogger(Context context) {
         super(context);
     }
 

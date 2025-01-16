@@ -16,6 +16,12 @@
 
 package com.android.settingslib.notification.modes;
 
+import static com.android.settingslib.notification.modes.DndDurationDialogFactory.ALWAYS_ASK_CONDITION_INDEX;
+import static com.android.settingslib.notification.modes.DndDurationDialogFactory.COUNTDOWN_CONDITION_INDEX;
+import static com.android.settingslib.notification.modes.DndDurationDialogFactory.FOREVER_CONDITION_INDEX;
+import static com.android.settingslib.notification.modes.DndDurationDialogFactory.MAX_BUCKET_MINUTES;
+import static com.android.settingslib.notification.modes.DndDurationDialogFactory.MIN_BUCKET_MINUTES;
+
 import static com.google.common.truth.Truth.assertThat;
 
 import static junit.framework.Assert.assertEquals;
@@ -32,6 +38,8 @@ import android.view.View;
 
 import androidx.appcompat.app.AlertDialog;
 
+import com.android.settingslib.notification.modes.DndDurationDialogFactory.ConditionTag;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -39,8 +47,8 @@ import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(RobolectricTestRunner.class)
-public class ZenDurationDialogTest {
-    private ZenDurationDialog mController;
+public class DndDurationDialogFactoryTest {
+    private DndDurationDialogFactory mController;
 
     private Context mContext;
     private LayoutInflater mLayoutInflater;
@@ -53,7 +61,7 @@ public class ZenDurationDialogTest {
         mContentResolver = RuntimeEnvironment.application.getContentResolver();
         mLayoutInflater = LayoutInflater.from(mContext);
 
-        mController = spy(new ZenDurationDialog(mContext));
+        mController = spy(new DndDurationDialogFactory(mContext));
         mController.mLayoutInflater = mLayoutInflater;
         mController.getContentView();
         mBuilder = new AlertDialog.Builder(mContext);
@@ -65,12 +73,9 @@ public class ZenDurationDialogTest {
                 Settings.Global.ZEN_DURATION_PROMPT);
         mController.setupDialog(mBuilder);
 
-        assertFalse(mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(ZenDurationDialog.COUNTDOWN_CONDITION_INDEX).rb
-                .isChecked());
-        assertTrue(mController.getConditionTagAt(
-                ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(FOREVER_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.isChecked());
+        assertTrue(mController.getConditionTagAt(ALWAYS_ASK_CONDITION_INDEX).rb.isChecked());
     }
 
     @Test
@@ -79,12 +84,9 @@ public class ZenDurationDialogTest {
                 Settings.Secure.ZEN_DURATION_FOREVER);
         mController.setupDialog(mBuilder);
 
-        assertTrue(mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(ZenDurationDialog.COUNTDOWN_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(
-                ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX).rb.isChecked());
+        assertTrue(mController.getConditionTagAt(FOREVER_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(ALWAYS_ASK_CONDITION_INDEX).rb.isChecked());
     }
 
     @Test
@@ -92,12 +94,9 @@ public class ZenDurationDialogTest {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION, 45);
         mController.setupDialog(mBuilder);
 
-        assertFalse(mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb
-                .isChecked());
-        assertTrue(mController.getConditionTagAt(ZenDurationDialog.COUNTDOWN_CONDITION_INDEX).rb
-                .isChecked());
-        assertFalse(mController.getConditionTagAt(
-                ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(FOREVER_CONDITION_INDEX).rb.isChecked());
+        assertTrue(mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.isChecked());
+        assertFalse(mController.getConditionTagAt(ALWAYS_ASK_CONDITION_INDEX).rb.isChecked());
     }
 
     @Test
@@ -106,8 +105,7 @@ public class ZenDurationDialogTest {
                 Settings.Secure.ZEN_DURATION_FOREVER);
 
         mController.setupDialog(mBuilder);
-        mController.getConditionTagAt(ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX).rb.setChecked(
-                true);
+        mController.getConditionTagAt(ALWAYS_ASK_CONDITION_INDEX).rb.setChecked(true);
         mController.updateZenDuration(Settings.Secure.ZEN_DURATION_FOREVER);
 
         assertEquals(Settings.Secure.ZEN_DURATION_PROMPT, Settings.Secure.getInt(mContentResolver,
@@ -120,8 +118,7 @@ public class ZenDurationDialogTest {
                 Settings.Secure.ZEN_DURATION_PROMPT);
 
         mController.setupDialog(mBuilder);
-        mController.getConditionTagAt(ZenDurationDialog.FOREVER_CONDITION_INDEX).rb.setChecked(
-                true);
+        mController.getConditionTagAt(FOREVER_CONDITION_INDEX).rb.setChecked(true);
         mController.updateZenDuration(Settings.Secure.ZEN_DURATION_PROMPT);
 
         assertEquals(Settings.Secure.ZEN_DURATION_FOREVER, Settings.Secure.getInt(mContentResolver,
@@ -134,8 +131,7 @@ public class ZenDurationDialogTest {
                 Settings.Secure.ZEN_DURATION_PROMPT);
 
         mController.setupDialog(mBuilder);
-        mController.getConditionTagAt(ZenDurationDialog.COUNTDOWN_CONDITION_INDEX).rb.setChecked(
-                true);
+        mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX).rb.setChecked(true);
         mController.updateZenDuration(Settings.Secure.ZEN_DURATION_PROMPT);
 
         // countdown defaults to 60 minutes:
@@ -152,59 +148,50 @@ public class ZenDurationDialogTest {
         // click time button starts at 60 minutes
         // - 1 hour to MAX_BUCKET_MINUTES (12 hours), increments by 1 hour
         // - 0-60 minutes increments by 15 minutes
-        View view = mController.mZenRadioGroupContent.getChildAt(
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
-        ZenDurationDialog.ConditionTag tag = mController.getConditionTagAt(
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        View view = mController.mZenRadioGroupContent.getChildAt(COUNTDOWN_CONDITION_INDEX);
+        ConditionTag tag = mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX);
 
         // test incrementing up:
-        mController.onClickTimeButton(view, tag, true, ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        mController.onClickTimeButton(view, tag, true, COUNTDOWN_CONDITION_INDEX);
         assertEquals(120, tag.countdownZenDuration); // goes from 1 hour to 2 hours
 
         // try clicking up 50 times - should max out at ZenDurationDialog.MAX_BUCKET_MINUTES
         for (int i = 0; i < 50; i++) {
-            mController.onClickTimeButton(view, tag, true,
-                    ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+            mController.onClickTimeButton(view, tag, true, COUNTDOWN_CONDITION_INDEX);
         }
-        assertEquals(ZenDurationDialog.MAX_BUCKET_MINUTES, tag.countdownZenDuration);
+        assertEquals(MAX_BUCKET_MINUTES, tag.countdownZenDuration);
 
         // reset, test incrementing down:
         mController.mBucketIndex = -1; // reset current bucket index to reset countdownZenDuration
         tag.countdownZenDuration = 60; // back to default
-        mController.onClickTimeButton(view, tag, false,
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        mController.onClickTimeButton(view, tag, false, COUNTDOWN_CONDITION_INDEX);
         assertEquals(45, tag.countdownZenDuration); // goes from 60 minutes to 45 minutes
 
         // try clicking down 50 times - should stop at MIN_BUCKET_MINUTES
         for (int i = 0; i < 50; i++) {
-            mController.onClickTimeButton(view, tag, false,
-                    ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+            mController.onClickTimeButton(view, tag, false, COUNTDOWN_CONDITION_INDEX);
         }
-        assertEquals(ZenDurationDialog.MIN_BUCKET_MINUTES, tag.countdownZenDuration);
+        assertEquals(MIN_BUCKET_MINUTES, tag.countdownZenDuration);
 
         // reset countdownZenDuration to unbucketed number, should round change to nearest bucket
         mController.mBucketIndex = -1;
         tag.countdownZenDuration = 50;
-        mController.onClickTimeButton(view, tag, false,
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        mController.onClickTimeButton(view, tag, false, COUNTDOWN_CONDITION_INDEX);
         assertEquals(45, tag.countdownZenDuration);
 
         mController.mBucketIndex = -1;
         tag.countdownZenDuration = 50;
-        mController.onClickTimeButton(view, tag, true,
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        mController.onClickTimeButton(view, tag, true, COUNTDOWN_CONDITION_INDEX);
         assertEquals(60, tag.countdownZenDuration);
 
         mController.mBucketIndex = -1;
         tag.countdownZenDuration = 75;
-        mController.onClickTimeButton(view, tag, false,
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        mController.onClickTimeButton(view, tag, false, COUNTDOWN_CONDITION_INDEX);
         assertEquals(60, tag.countdownZenDuration);
 
         mController.mBucketIndex = -1;
         tag.countdownZenDuration = 75;
-        mController.onClickTimeButton(view, tag, true,
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
+        mController.onClickTimeButton(view, tag, true, COUNTDOWN_CONDITION_INDEX);
         assertEquals(120, tag.countdownZenDuration);
     }
 
@@ -213,12 +200,9 @@ public class ZenDurationDialogTest {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_DURATION,
                 Settings.Secure.ZEN_DURATION_FOREVER);
         mController.setupDialog(mBuilder);
-        ZenDurationDialog.ConditionTag forever = mController.getConditionTagAt(
-                ZenDurationDialog.FOREVER_CONDITION_INDEX);
-        ZenDurationDialog.ConditionTag countdown = mController.getConditionTagAt(
-                ZenDurationDialog.COUNTDOWN_CONDITION_INDEX);
-        ZenDurationDialog.ConditionTag alwaysAsk = mController.getConditionTagAt(
-                ZenDurationDialog.ALWAYS_ASK_CONDITION_INDEX);
+        ConditionTag forever = mController.getConditionTagAt(FOREVER_CONDITION_INDEX);
+        ConditionTag countdown = mController.getConditionTagAt(COUNTDOWN_CONDITION_INDEX);
+        ConditionTag alwaysAsk = mController.getConditionTagAt(ALWAYS_ASK_CONDITION_INDEX);
 
         forever.rb.setChecked(true);
         assertThat(forever.line1.getStateDescription().toString()).isEqualTo("selected");
