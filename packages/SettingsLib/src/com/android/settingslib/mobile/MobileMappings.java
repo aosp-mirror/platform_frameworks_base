@@ -15,11 +15,14 @@
  */
 package com.android.settingslib.mobile;
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.os.PersistableBundle;
 import android.telephony.Annotation;
 import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionInfo;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyDisplayInfo;
 import android.telephony.TelephonyManager;
@@ -196,9 +199,9 @@ public class MobileMappings {
         networkToIconLookup.put(toDisplayIconKey(
                 TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_NSA),
                 TelephonyIcons.NR_5G);
-        networkToIconLookup.put(toDisplayIconKey(
-                TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED),
-                TelephonyIcons.NR_5G_PLUS);
+        networkToIconLookup.put(
+                toDisplayIconKey(TelephonyDisplayInfo.OVERRIDE_NETWORK_TYPE_NR_ADVANCED),
+                config.mobileIconGroup5gPlus);
         networkToIconLookup.put(toIconKey(
                 TelephonyManager.NETWORK_TYPE_NR),
                 TelephonyIcons.NR_5G);
@@ -217,6 +220,7 @@ public class MobileMappings {
         public boolean hideLtePlus = false;
         public boolean hspaDataDistinguishable;
         public boolean alwaysShowDataRatIcon = false;
+        public MobileIconGroup mobileIconGroup5gPlus = TelephonyIcons.NR_5G_PLUS;
 
         /**
          * Reads the latest configs.
@@ -250,7 +254,52 @@ public class MobileMappings {
                 config.hideLtePlus = b.getBoolean(
                         CarrierConfigManager.KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL);
             }
+
+            SubscriptionManager subscriptionManager =
+                    context.getSystemService(SubscriptionManager.class);
+            if (subscriptionManager != null) {
+                SubscriptionInfo subInfo = subscriptionManager.getDefaultDataSubscriptionInfo();
+                if (subInfo != null) {
+                    readMobileIconGroup5gPlus(subInfo.getCarrierId(), res, config);
+                }
+            }
             return config;
+        }
+
+        @SuppressLint("ResourceType")
+        private static void readMobileIconGroup5gPlus(int carrierId, Resources res, Config config) {
+            int networkTypeResId = 0;
+            TypedArray groupArray;
+            try {
+                groupArray = res.obtainTypedArray(R.array.config_override_carrier_5g_plus);
+            } catch (Resources.NotFoundException e) {
+                return;
+            }
+            for (int i = 0; i < groupArray.length() && networkTypeResId == 0; i++) {
+                int groupId = groupArray.getResourceId(i, 0);
+                if (groupId == 0) {
+                    continue;
+                }
+                TypedArray carrierArray;
+                try {
+                    carrierArray = res.obtainTypedArray(groupId);
+                } catch (Resources.NotFoundException e) {
+                    continue;
+                }
+                int groupCarrierId = carrierArray.getInt(0, 0);
+                if (groupCarrierId == carrierId) {
+                    networkTypeResId = carrierArray.getResourceId(1, 0);
+                }
+                carrierArray.recycle();
+            }
+            groupArray.recycle();
+
+            if (networkTypeResId != 0) {
+                config.mobileIconGroup5gPlus = new MobileIconGroup(
+                        TelephonyIcons.NR_5G_PLUS.name,
+                        networkTypeResId,
+                        TelephonyIcons.NR_5G_PLUS.dataType);
+            }
         }
 
         /**
