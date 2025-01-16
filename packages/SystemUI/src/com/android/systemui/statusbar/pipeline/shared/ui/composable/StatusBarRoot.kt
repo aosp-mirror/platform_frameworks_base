@@ -57,6 +57,7 @@ import com.android.systemui.statusbar.phone.ui.StatusBarIconController
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarIconBlockListBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.HomeStatusBarViewBinder
 import com.android.systemui.statusbar.pipeline.shared.ui.binder.StatusBarVisibilityChangeListener
+import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.HomeStatusBarViewModelFactory
 import javax.inject.Inject
@@ -304,11 +305,7 @@ fun StatusBarRoot(
 fun Disambiguation(viewModel: HomeStatusBarViewModel) {
     val clockVisibilityModel =
         viewModel.isClockVisible.collectAsStateWithLifecycle(
-            initialValue =
-                HomeStatusBarViewModel.VisibilityModel(
-                    visibility = View.GONE,
-                    shouldAnimateChange = false,
-                )
+            initialValue = VisibilityModel(visibility = View.GONE, shouldAnimateChange = false)
         )
     if (clockVisibilityModel.value.visibility == View.VISIBLE) {
         Box(modifier = Modifier.fillMaxSize().alpha(0.5f), contentAlignment = Alignment.Center) {

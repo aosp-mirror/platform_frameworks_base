@@ -41,8 +41,8 @@ import com.android.systemui.statusbar.notification.icon.ui.viewbinder.ConnectedD
 import com.android.systemui.statusbar.notification.shared.NotificationsLiveDataStoreRefactor
 import com.android.systemui.statusbar.phone.fragment.CollapsedStatusBarFragment
 import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
+import com.android.systemui.statusbar.pipeline.shared.ui.model.VisibilityModel
 import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel
-import com.android.systemui.statusbar.pipeline.shared.ui.viewmodel.HomeStatusBarViewModel.VisibilityModel
 import javax.inject.Inject
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
