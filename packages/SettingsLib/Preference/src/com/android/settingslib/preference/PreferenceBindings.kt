@@ -45,7 +45,7 @@ interface PreferenceScreenBinding : PreferenceBinding {
                     context.getString(screenTitle)
                 } else {
                     screenMetadata.getScreenTitle(context)
-                        ?: (this as? PreferenceTitleProvider)?.getTitle(context)
+                        ?: (screenMetadata as? PreferenceTitleProvider)?.getTitle(context)
                 }
         }
     }

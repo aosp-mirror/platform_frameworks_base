@@ -52,7 +52,7 @@ import com.google.common.collect.ImmutableMultimap
  */
 class PreferenceScreenBindingHelper(
     context: Context,
-    fragment: PreferenceFragment,
+    private val fragment: PreferenceFragment,
     private val preferenceBindingFactory: PreferenceBindingFactory,
     private val preferenceScreen: PreferenceScreen,
     private val preferenceHierarchy: PreferenceHierarchy,
@@ -156,7 +156,9 @@ class PreferenceScreenBindingHelper(
 
         // bind preference to update UI
         preferenceScreen.findPreference<Preference>(key)?.let {
-            preferences[key]?.let { node -> preferenceBindingFactory.bind(it, node) }
+            val node = preferences[key] ?: return@let
+            preferenceBindingFactory.bind(it, node)
+            if (it == preferenceScreen) fragment.updateActivityTitle()
         }
 
         // check reason to avoid potential infinite loop

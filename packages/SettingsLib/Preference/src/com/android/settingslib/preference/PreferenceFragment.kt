@@ -21,6 +21,7 @@ import android.content.Intent
 import android.os.Bundle
 import android.util.Log
 import androidx.annotation.XmlRes
+import androidx.lifecycle.Lifecycle
 import androidx.preference.PreferenceScreen
 import com.android.settingslib.metadata.EXTRA_BINDING_SCREEN_KEY
 import com.android.settingslib.metadata.PreferenceScreenBindingKeyProvider
@@ -36,6 +37,11 @@ open class PreferenceFragment :
 
     override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
         preferenceScreen = createPreferenceScreen()
+    }
+
+    override fun setPreferenceScreen(preferenceScreen: PreferenceScreen?) {
+        super.setPreferenceScreen(preferenceScreen)
+        updateActivityTitle()
     }
 
     fun createPreferenceScreen(): PreferenceScreen? =
@@ -102,7 +108,17 @@ open class PreferenceFragment :
 
     override fun onResume() {
         super.onResume()
+        // Even when activity has several fragments with preference screen, this will keep activity
+        // title in sync when fragment manager pops back stack.
+        updateActivityTitle()
         preferenceScreenBindingHelper?.onResume()
+    }
+
+    internal fun updateActivityTitle() {
+        if (!lifecycle.currentState.isAtLeast(Lifecycle.State.STARTED)) return
+        val activity = activity ?: return
+        val title = preferenceScreen?.title ?: return
+        if (activity.title != title) activity.title = title
     }
 
     override fun onPause() {
