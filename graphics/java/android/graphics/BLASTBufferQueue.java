@@ -61,8 +61,10 @@ public final class BLASTBufferQueue {
         /**
          * Indicates that the client is waiting on buffer release
          * due to no free buffers being available to render into.
+         * @param durationNanos The length of time in nanoseconds
+         * that the client was blocked on buffer release.
          */
-        void onWaitForBufferRelease();
+        void onWaitForBufferRelease(long durationNanos);
     }
 
     /** Create a new connection with the surface flinger. */
