@@ -19,6 +19,7 @@ package com.android.wm.shell.pip2.phone;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import android.annotation.NonNull;
 import android.app.ActivityManager;
@@ -219,6 +220,7 @@ public class PipController implements ConfigurationChangeListener,
         mPipDisplayLayoutState.setDisplayLayout(layout);
 
         mDisplayController.addDisplayChangingController(this);
+        mDisplayController.addDisplayWindowListener(this);
         mDisplayInsetsController.addInsetsChangedListener(mPipDisplayLayoutState.getDisplayId(),
                 new ImeListener(mDisplayController, mPipDisplayLayoutState.getDisplayId()) {
                     @Override
@@ -295,6 +297,22 @@ public class PipController implements ConfigurationChangeListener,
             return;
         }
         setDisplayLayout(mDisplayController.getDisplayLayout(displayId));
+    }
+
+    @Override
+    public void onDisplayRemoved(int displayId) {
+        // If PiP was active on an external display that is removed, clean up states and set
+        // {@link PipDisplayLayoutState} to DEFAULT_DISPLAY.
+        if (Flags.enableConnectedDisplaysPip() && mPipTransitionState.isInPip()
+                && displayId == mPipDisplayLayoutState.getDisplayId()
+                && displayId != DEFAULT_DISPLAY) {
+            mPipTransitionState.setState(PipTransitionState.EXITING_PIP);
+            mPipTransitionState.setState(PipTransitionState.EXITED_PIP);
+
+            mPipDisplayLayoutState.setDisplayId(DEFAULT_DISPLAY);
+            mPipDisplayLayoutState.setDisplayLayout(
+                    mDisplayController.getDisplayLayout(DEFAULT_DISPLAY));
+        }
     }
 
     /**
