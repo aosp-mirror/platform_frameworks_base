@@ -32,7 +32,6 @@ import com.android.systemui.scene.shared.model.Overlays
 import com.android.systemui.scene.shared.model.Scenes
 import com.android.systemui.statusbar.notification.domain.interactor.NotificationLaunchAnimationInteractor
 import com.android.systemui.util.kotlin.Utils.Companion.toQuad
-import com.android.systemui.util.kotlin.sample
 import com.android.systemui.utils.coroutines.flow.flatMapLatestConflated
 import dagger.Lazy
 import javax.inject.Inject
@@ -232,12 +231,12 @@ constructor(
     private val lockscreenVisibilityLegacy =
         combine(
                 transitionInteractor.currentKeyguardState,
+                transitionInteractor.startedStepWithPrecedingStep,
                 wakeToGoneInteractor.canWakeDirectlyToGone,
                 surfaceBehindVisibility,
-                ::Triple,
+                ::toQuad,
             )
-            .sample(transitionInteractor.startedStepWithPrecedingStep, ::toQuad)
-            .map { (currentState, canWakeDirectlyToGone, surfaceBehindVis, startedWithPrev) ->
+            .map { (currentState, startedWithPrev, canWakeDirectlyToGone, surfaceBehindVis) ->
                 val startedFromStep = startedWithPrev.previousValue
                 val startedStep = startedWithPrev.newValue
                 val returningToGoneAfterCancellation =
