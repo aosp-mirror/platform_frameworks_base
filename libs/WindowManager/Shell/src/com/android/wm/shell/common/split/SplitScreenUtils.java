@@ -76,8 +76,7 @@ public class SplitScreenUtils {
      * Returns whether left/right split is allowed in portrait.
      */
     public static boolean allowLeftRightSplitInPortrait(Resources res) {
-        return Flags.enableLeftRightSplitInPortrait() && res.getBoolean(
-                com.android.internal.R.bool.config_leftRightSplitInPortrait);
+        return res.getBoolean(com.android.internal.R.bool.config_leftRightSplitInPortrait);
     }
 
     /**
