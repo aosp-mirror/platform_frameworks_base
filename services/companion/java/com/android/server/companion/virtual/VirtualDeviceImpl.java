@@ -490,7 +490,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
                         ? mParams.getBlockedActivities()
                         : mParams.getAllowedActivities());
 
-        if (Flags.vdmCustomIme() && mParams.getInputMethodComponent() != null) {
+        if (mParams.getInputMethodComponent() != null) {
             final String imeId = mParams.getInputMethodComponent().flattenToShortString();
             Slog.d(TAG, "Setting custom input method " + imeId + " as default for virtual device "
                     + deviceId);
@@ -807,7 +807,7 @@ final class VirtualDeviceImpl extends IVirtualDevice.Stub
             }
 
             // Clear any previously set custom IME components.
-            if (Flags.vdmCustomIme() && mParams.getInputMethodComponent() != null) {
+            if (mParams.getInputMethodComponent() != null) {
                 InputMethodManagerInternal.get().setVirtualDeviceInputMethodForAllUsers(
                         mDeviceId, null);
             }

@@ -440,7 +440,6 @@ public final class VirtualDeviceParams implements Parcelable {
      *
      * @see Builder#setInputMethodComponent
      */
-    @FlaggedApi(Flags.FLAG_VDM_CUSTOM_IME)
     @Nullable
     public ComponentName getInputMethodComponent() {
         return mInputMethodComponent;
@@ -945,7 +944,6 @@ public final class VirtualDeviceParams implements Parcelable {
          * @attr ref android.R.styleable#InputMethod_isVirtualDeviceOnly
          * @attr ref android.R.styleable#InputMethod_showInInputMethodPicker
          */
-        @FlaggedApi(Flags.FLAG_VDM_CUSTOM_IME)
         @NonNull
         public Builder setInputMethodComponent(@Nullable ComponentName inputMethodComponent) {
             mInputMethodComponent = inputMethodComponent;

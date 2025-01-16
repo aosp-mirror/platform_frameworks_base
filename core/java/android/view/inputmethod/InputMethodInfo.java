@@ -766,7 +766,6 @@ public final class InputMethodInfo implements Parcelable {
      * Returns true if IME supports only virtual devices.
      * @hide
      */
-    @FlaggedApi(android.companion.virtual.flags.Flags.FLAG_VDM_CUSTOM_IME)
     @SystemApi
     public boolean isVirtualDeviceOnly() {
         return mIsVirtualDeviceOnly;

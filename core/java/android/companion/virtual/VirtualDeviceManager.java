@@ -1116,11 +1116,8 @@ public final class VirtualDeviceManager {
          * @throws SecurityException if the display is not owned by this device or is not
          *                           {@link DisplayManager#VIRTUAL_DISPLAY_FLAG_TRUSTED trusted}
          */
-        @FlaggedApi(Flags.FLAG_VDM_CUSTOM_IME)
         public void setDisplayImePolicy(int displayId, @WindowManager.DisplayImePolicy int policy) {
-            if (Flags.vdmCustomIme()) {
-                mVirtualDeviceInternal.setDisplayImePolicy(displayId, policy);
-            }
+            mVirtualDeviceInternal.setDisplayImePolicy(displayId, policy);
         }
 
         /**
