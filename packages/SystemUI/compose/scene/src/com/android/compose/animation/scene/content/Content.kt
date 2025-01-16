@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.layout.LookaheadScope
 import androidx.compose.ui.layout.approachLayout
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.unit.IntSize
@@ -118,6 +119,9 @@ internal class ContentScopeImpl(
         get() = content.key
 
     override val layoutState: SceneTransitionLayoutState = layoutImpl.state
+
+    override val lookaheadScope: LookaheadScope
+        get() = layoutImpl.lookaheadScope
 
     private val _verticalOverscrollEffect =
         OffsetOverscrollEffect(
