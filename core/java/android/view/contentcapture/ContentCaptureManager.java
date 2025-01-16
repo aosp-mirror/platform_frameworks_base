@@ -663,7 +663,7 @@ public final class ContentCaptureManager {
     @UiThread
     public void flush(@FlushReason int reason) {
         if (mOptions.lite) return;
-        getMainContentCaptureSession().flush(reason);
+        getMainContentCaptureSession().internalFlush(reason);
     }
 
     /**
