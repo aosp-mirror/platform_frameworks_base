@@ -16,6 +16,9 @@
 
 package com.android.server.display;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
@@ -1181,6 +1184,14 @@ public class BrightnessTracker {
         }
 
         public RootTaskInfo getFocusedStack() throws RemoteException {
+            if (UserManager.isVisibleBackgroundUsersEnabled()) {
+                // In MUMD (Multiple Users on Multiple Displays) system, the top most focused stack
+                // could be on the secondary display with a user signed on its display so get the
+                // root task info only on the default display.
+                return ActivityTaskManager.getService().getRootTaskInfoOnDisplay(
+                        WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_UNDEFINED,
+                        Display.DEFAULT_DISPLAY);
+            }
             return ActivityTaskManager.getService().getFocusedRootTaskInfo();
         }
 
