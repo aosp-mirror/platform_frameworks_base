@@ -1023,7 +1023,6 @@ stubs_defaults {
     api_levels_annotations_enabled: true,
     api_levels_annotations_dirs: [
         "sdk-dir",
-        "api-versions-jars-dir",
     ],
 }
 

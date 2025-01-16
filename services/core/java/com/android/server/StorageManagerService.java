@@ -41,6 +41,7 @@ import static android.os.storage.OnObbStateChangeListener.ERROR_NOT_MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.ERROR_PERMISSION_DENIED;
 import static android.os.storage.OnObbStateChangeListener.MOUNTED;
 import static android.os.storage.OnObbStateChangeListener.UNMOUNTED;
+import static android.mmd.flags.Flags.mmdEnabled;
 
 import static com.android.internal.util.XmlUtils.readStringAttribute;
 import static com.android.internal.util.XmlUtils.writeStringAttribute;
@@ -944,12 +945,17 @@ class StorageManagerService extends IStorageManager.Stub
             });
         refreshZramSettings();
 
-        // Schedule zram writeback unless zram is disabled by persist.sys.zram_enabled
-        String zramPropValue = SystemProperties.get(ZRAM_ENABLED_PROPERTY);
-        if (!zramPropValue.equals("0")
-                && mContext.getResources().getBoolean(
+        if (mmdEnabled()) {
+            // TODO: b/375432472 - Start zram maintenance only when zram is enabled.
+            ZramMaintenance.startZramMaintenance(mContext);
+        } else {
+            // Schedule zram writeback unless zram is disabled by persist.sys.zram_enabled
+            String zramPropValue = SystemProperties.get(ZRAM_ENABLED_PROPERTY);
+            if (!zramPropValue.equals("0")
+                    && mContext.getResources().getBoolean(
                     com.android.internal.R.bool.config_zramWriteback)) {
-            ZramWriteback.scheduleZramWriteback(mContext);
+                ZramWriteback.scheduleZramWriteback(mContext);
+            }
         }
 
         configureTranscoding();
@@ -976,7 +982,7 @@ class StorageManagerService extends IStorageManager.Stub
             // sole writer.
             SystemProperties.set(ZRAM_ENABLED_PROPERTY, desiredPropertyValue);
             // Schedule writeback only if zram is being enabled.
-            if (desiredPropertyValue.equals("1")
+            if (!mmdEnabled() && desiredPropertyValue.equals("1")
                     && mContext.getResources().getBoolean(
                         com.android.internal.R.bool.config_zramWriteback)) {
                 ZramWriteback.scheduleZramWriteback(mContext);
