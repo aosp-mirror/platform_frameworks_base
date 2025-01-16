@@ -427,8 +427,6 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
             mTitleIcon.setImageDrawable(addDrawable);
             mTitleIcon.setImageTintList(
                     ColorStateList.valueOf(mController.getColorItemContent()));
-            mIconAreaLayout.setBackgroundTintList(
-                    ColorStateList.valueOf(mController.getColorItemBackground()));
             mContainerLayout.setOnClickListener(mController::launchBluetoothPairing);
         }
 
