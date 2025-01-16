@@ -57,6 +57,7 @@ import android.window.DesktopModeFlags.DISABLE_NON_RESIZABLE_APP_SNAP_RESIZE
 import android.window.DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_WALLPAPER_ACTIVITY
 import android.window.DesktopModeFlags.ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS
 import android.window.RemoteTransition
+import android.window.SplashScreen.SPLASH_SCREEN_STYLE_ICON
 import android.window.TransitionInfo
 import android.window.TransitionInfo.Change
 import android.window.TransitionRequestInfo
@@ -1354,7 +1355,10 @@ class DesktopTasksController(
                     wct.startTask(
                         taskId,
                         ActivityOptions.makeBasic()
-                            .apply { launchWindowingMode = WINDOWING_MODE_FREEFORM }
+                            .apply {
+                                launchWindowingMode = WINDOWING_MODE_FREEFORM
+                                splashScreenStyle = SPLASH_SCREEN_STYLE_ICON
+                            }
                             .toBundle(),
                     )
                 }
