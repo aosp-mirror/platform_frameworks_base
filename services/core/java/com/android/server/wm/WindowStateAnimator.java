@@ -303,8 +303,6 @@ class WindowStateAnimator {
 
         resetDrawState();
 
-        mService.makeWindowFreezingScreenIfNeededLocked(w);
-
         int flags = SurfaceControl.HIDDEN;
         final WindowManager.LayoutParams attrs = w.mAttrs;
 

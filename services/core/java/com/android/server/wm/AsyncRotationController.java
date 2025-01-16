@@ -135,8 +135,7 @@ class AsyncRotationController extends FadeAnimationController implements Consume
         // decides not to perform seamless rotation, it only affects whether to use fade animation
         // when the windows are drawn. If the windows are not too slow (after rotation animation is
         // done) to be drawn, the visual result can still look smooth.
-        mHasScreenRotationAnimation =
-                displayContent.getRotationAnimation() != null || mTransitionOp == OP_CHANGE;
+        mHasScreenRotationAnimation = mTransitionOp == OP_CHANGE;
         if (mHasScreenRotationAnimation) {
             // Hide the windows immediately because screen should have been covered by screenshot.
             mHideImmediately = true;

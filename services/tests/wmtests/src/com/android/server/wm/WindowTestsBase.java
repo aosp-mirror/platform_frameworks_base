@@ -1010,20 +1010,6 @@ public class WindowTestsBase extends SystemServiceTestsBase {
         waitUntilWindowAnimatorIdle();
     }
 
-    /**
-     * Avoids rotating screen disturbed by some conditions. It is usually used for the default
-     * display that is not the instance of {@link TestDisplayContent} (it bypasses the conditions).
-     *
-     * @see DisplayRotation#updateRotationUnchecked
-     */
-    void unblockDisplayRotation(DisplayContent dc) {
-        dc.mOpeningApps.clear();
-        mWm.mAppsFreezingScreen = 0;
-        mWm.stopFreezingDisplayLocked();
-        // The rotation animation won't actually play, it needs to be cleared manually.
-        dc.setRotationAnimation(null);
-    }
-
     static void resizeDisplay(DisplayContent displayContent, int width, int height) {
         displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity,
                 displayContent.mBaseDisplayPhysicalXDpi, displayContent.mBaseDisplayPhysicalYDpi);

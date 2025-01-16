@@ -509,7 +509,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         int changes;
         // If the activity was relaunched to match the new configuration.
         boolean activityRelaunched;
-        boolean mIsUpdating;
     }
 
     /** Current sequencing integer of the configuration, for skipping old configurations. */
@@ -4694,14 +4693,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (values != null) {
                 changes = updateGlobalConfigurationLocked(values, initLocale, persistent, userId);
                 mTmpUpdateConfigurationResult.changes = changes;
-                mTmpUpdateConfigurationResult.mIsUpdating = true;
             }
 
             if (!deferResume) {
                 kept = ensureConfigAndVisibilityAfterUpdate(starting, changes);
             }
         } finally {
-            mTmpUpdateConfigurationResult.mIsUpdating = false;
             continueWindowLayout();
         }
         mTmpUpdateConfigurationResult.activityRelaunched = !kept;

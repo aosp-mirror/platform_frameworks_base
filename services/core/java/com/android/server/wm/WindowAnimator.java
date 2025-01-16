@@ -146,7 +146,6 @@ public class WindowAnimator {
         boolean rootAnimating = false;
         mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
         mBulkUpdateParams = 0;
-        root.mOrientationChangeComplete = true;
         if (DEBUG_WINDOW_TRACE) {
             Slog.i(TAG, "!!! animate: entry time=" + mCurrentTime);
         }
@@ -203,8 +202,7 @@ public class WindowAnimator {
         }
 
         final boolean hasPendingLayoutChanges = root.hasPendingLayoutChanges(this);
-        final boolean doRequest = (mBulkUpdateParams != 0 || root.mOrientationChangeComplete)
-                && root.copyAnimToLayoutParams();
+        final boolean doRequest = mBulkUpdateParams != 0 && root.copyAnimToLayoutParams();
         if (hasPendingLayoutChanges || doRequest) {
             mService.mWindowPlacerLocked.requestTraversal();
         }
