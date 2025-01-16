@@ -1506,15 +1506,17 @@ public class InternetDetailsContentController implements AccessPointController.A
 
     Intent getConfiguratorQrCodeGeneratorIntentOrNull(WifiEntry wifiEntry) {
         if (!mFeatureFlags.isEnabled(Flags.SHARE_WIFI_QS_BUTTON) || wifiEntry == null
-                || mWifiManager == null || !wifiEntry.canShare()
-                || wifiEntry.getWifiConfiguration() == null) {
+                || mWifiManager == null || !wifiEntry.canShare()) {
+            return null;
+        }
+        var wifiConfiguration = wifiEntry.getWifiConfiguration();
+        if (wifiConfiguration == null) {
             return null;
         }
         Intent intent = new Intent();
         intent.setAction(WifiDppIntentHelper.ACTION_CONFIGURATOR_AUTH_QR_CODE_GENERATOR);
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        WifiDppIntentHelper.setConfiguratorIntentExtra(intent, mWifiManager,
-                wifiEntry.getWifiConfiguration());
+        WifiDppIntentHelper.setConfiguratorIntentExtra(intent, mWifiManager, wifiConfiguration);
         return intent;
     }
 }
