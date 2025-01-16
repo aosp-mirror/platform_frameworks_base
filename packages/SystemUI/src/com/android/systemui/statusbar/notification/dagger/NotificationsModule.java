@@ -117,6 +117,7 @@ import javax.inject.Provider;
         NotificationMemoryModule.class,
         NotificationStatsLoggerModule.class,
         NotificationsLogModule.class,
+        NotificationStackModule.class,
 })
 public interface NotificationsModule {
     @Binds

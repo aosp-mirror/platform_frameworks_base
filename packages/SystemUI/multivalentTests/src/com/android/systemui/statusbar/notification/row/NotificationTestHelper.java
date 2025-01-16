@@ -653,7 +653,8 @@ public class NotificationTestHelper {
                 mock(SmartReplyConstants.class),
                 mock(SmartReplyController.class),
                 mock(IStatusBarService.class),
-                mock(UiEventLogger.class));
+                mock(UiEventLogger.class),
+                mock(NotificationRebindingTracker.class));
 
         row.setAboveShelfChangedListener(aboveShelf -> { });
         mBindStage.getStageParams(entry).requireContentViews(extraInflationFlags);

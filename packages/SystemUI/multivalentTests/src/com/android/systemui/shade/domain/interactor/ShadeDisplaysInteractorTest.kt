@@ -22,17 +22,24 @@ import android.view.Display
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.common.ui.data.repository.configurationRepository
+import com.android.systemui.common.ui.data.repository.fakeConfigurationRepository
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.scene.ui.view.mockShadeRootView
 import com.android.systemui.shade.data.repository.fakeShadeDisplaysRepository
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.setActiveNotifs
+import com.android.systemui.statusbar.notification.row.notificationRebindingTracker
+import com.android.systemui.statusbar.notification.stack.notificationStackRebindingHider
 import com.android.systemui.testKosmos
-import kotlinx.coroutines.test.advanceUntilIdle
+import com.google.common.truth.Truth.assertThat
 import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
+import org.mockito.Mockito.times
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
@@ -42,7 +49,7 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 @SmallTest
 class ShadeDisplaysInteractorTest : SysuiTestCase() {
-    val kosmos = testKosmos().useUnconfinedTestDispatcher()
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
 
     private val testScope = kosmos.testScope
     private val shadeRootview = kosmos.mockShadeRootView
@@ -52,6 +59,10 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
     private val latencyTracker = kosmos.mockedShadeDisplayChangeLatencyTracker
     private val configuration = mock<Configuration>()
     private val display = mock<Display>()
+    private val activeNotificationRepository = kosmos.activeNotificationListRepository
+    private val notificationRebindingTracker = kosmos.notificationRebindingTracker
+    private val notificationStackRebindingHider = kosmos.notificationStackRebindingHider
+    private val configurationRepository = kosmos.fakeConfigurationRepository
 
     private val underTest by lazy { kosmos.shadeDisplaysInteractor }
 
@@ -68,24 +79,26 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
     }
 
     @Test
-    fun start_shadeInCorrectPosition_notAddedOrRemoved() {
-        whenever(display.displayId).thenReturn(0)
-        positionRepository.setDisplayId(0)
+    fun start_shadeInCorrectPosition_notAddedOrRemoved() =
+        testScope.runTest {
+            whenever(display.displayId).thenReturn(0)
+            positionRepository.setDisplayId(0)
 
-        underTest.start()
+            underTest.start()
 
-        verify(shadeContext, never()).reparentToDisplay(any())
-    }
+            verify(shadeContext, never()).reparentToDisplay(any())
+        }
 
     @Test
-    fun start_shadeInWrongPosition_changes() {
-        whenever(display.displayId).thenReturn(0)
-        positionRepository.setDisplayId(1)
+    fun start_shadeInWrongPosition_changes() =
+        testScope.runTest {
+            whenever(display.displayId).thenReturn(0)
+            positionRepository.setDisplayId(1)
 
-        underTest.start()
+            underTest.start()
 
-        verify(shadeContext).reparentToDisplay(eq(1))
-    }
+            verify(shadeContext).reparentToDisplay(eq(1))
+        }
 
     @Test
     fun start_shadeInWrongPosition_logsStartToLatencyTracker() =
@@ -94,8 +107,79 @@ class ShadeDisplaysInteractorTest : SysuiTestCase() {
             positionRepository.setDisplayId(1)
 
             underTest.start()
-            advanceUntilIdle()
 
             verify(latencyTracker).onShadeDisplayChanging(eq(1))
+        }
+
+    @Test
+    fun start_shadeInWrongPosition_someNotificationsVisible_hiddenThenShown() =
+        testScope.runTest {
+            whenever(display.displayId).thenReturn(0)
+            positionRepository.setDisplayId(1)
+            activeNotificationRepository.setActiveNotifs(1)
+
+            underTest.start()
+
+            verify(notificationStackRebindingHider).setVisible(eq(false), eq(false))
+            configurationRepository.onMovedToDisplay(1)
+            verify(notificationStackRebindingHider).setVisible(eq(true), eq(true))
+        }
+
+    @Test
+    fun start_shadeInWrongPosition_someNotificationsVisible_waitsForInflationsBeforeShowingNssl() =
+        testScope.runTest {
+            whenever(display.displayId).thenReturn(0)
+            positionRepository.setDisplayId(1)
+            activeNotificationRepository.setActiveNotifs(1)
+
+            val endRebinding = notificationRebindingTracker.trackRebinding("test")
+
+            assertThat(notificationRebindingTracker.rebindingInProgressCount.value).isEqualTo(1)
+
+            underTest.start()
+
+            verify(notificationStackRebindingHider).setVisible(eq(false), eq(false))
+            configurationRepository.onMovedToDisplay(1)
+
+            // Verify that setVisible(true, true) is NOT called yet, as we
+            // first need to wait for notification bindings to have happened
+            verify(notificationStackRebindingHider, never()).setVisible(eq(true), eq(true))
+
+            endRebinding.onFinished()
+
+            // Now verify that setVisible(true, true) is called
+            verify(notificationStackRebindingHider, times(1)).setVisible(eq(true), eq(true))
+        }
+
+    @Test
+    fun start_shadeInWrongPosition_noNotifications_nsslNotHidden() =
+        testScope.runTest {
+            whenever(display.displayId).thenReturn(0)
+            positionRepository.setDisplayId(1)
+            activeNotificationRepository.setActiveNotifs(0)
+
+            underTest.start()
+
+            verify(notificationStackRebindingHider, never()).setVisible(eq(false), eq(false))
+            verify(notificationStackRebindingHider, never()).setVisible(eq(true), eq(true))
+        }
+
+    @Test
+    fun start_shadeInWrongPosition_waitsUntilMovedToDisplayReceived() =
+        testScope.runTest {
+            whenever(display.displayId).thenReturn(0)
+            positionRepository.setDisplayId(1)
+            activeNotificationRepository.setActiveNotifs(1)
+
+            underTest.start()
+
+            verify(notificationStackRebindingHider).setVisible(eq(false), eq(false))
+            // It's not set to visible yet, as we first need to wait for the view to receive the
+            // display moved callback.
+            verify(notificationStackRebindingHider, never()).setVisible(eq(true), eq(true))
+
+            configurationRepository.onMovedToDisplay(1)
+
+            verify(notificationStackRebindingHider).setVisible(eq(true), eq(true))
         }
 }

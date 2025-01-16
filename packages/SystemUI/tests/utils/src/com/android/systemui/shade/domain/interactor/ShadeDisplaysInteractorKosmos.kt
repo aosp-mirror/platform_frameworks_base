@@ -18,12 +18,16 @@ package com.android.systemui.shade.domain.interactor
 
 import android.content.mockedContext
 import android.window.WindowContext
+import com.android.systemui.common.ui.data.repository.configurationRepository
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.shade.ShadeDisplayChangeLatencyTracker
 import com.android.systemui.shade.ShadeWindowLayoutParams
 import com.android.systemui.shade.data.repository.fakeShadeDisplaysRepository
 import com.android.systemui.shade.data.repository.shadeExpansionIntent
+import com.android.systemui.statusbar.notification.domain.interactor.activeNotificationsInteractor
+import com.android.systemui.statusbar.notification.row.notificationRebindingTracker
+import com.android.systemui.statusbar.notification.stack.notificationStackRebindingHider
 import java.util.Optional
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -46,10 +50,14 @@ val Kosmos.shadeDisplaysInteractor by
         ShadeDisplaysInteractor(
             fakeShadeDisplaysRepository,
             mockedWindowContext,
+            configurationRepository,
             testScope.backgroundScope,
             testScope.backgroundScope.coroutineContext,
             mockedShadeDisplayChangeLatencyTracker,
             Optional.of(shadeExpandedStateInteractor),
             shadeExpansionIntent,
+            activeNotificationsInteractor,
+            notificationRebindingTracker,
+            Optional.of(notificationStackRebindingHider),
         )
     }

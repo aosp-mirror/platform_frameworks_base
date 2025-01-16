@@ -16,7 +16,6 @@
 package com.android.systemui.shade
 
 import android.util.Log
-import android.view.Display
 import com.android.app.tracing.coroutines.TrackTracer
 import com.android.internal.util.LatencyTracker
 import com.android.systemui.common.ui.data.repository.ConfigurationRepository
@@ -32,11 +31,9 @@ import javax.inject.Inject
 import kotlin.time.Duration.Companion.seconds
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
-import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.filter
 import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withTimeout
 
@@ -73,12 +70,7 @@ constructor(
     /**
      * We need to keep this always up to date eagerly to avoid delays receiving the new display ID.
      */
-    private val onMovedToDisplayFlow: StateFlow<Int> =
-        configurationRepository.onMovedToDisplay.stateIn(
-            bgScope,
-            SharingStarted.Eagerly,
-            Display.DEFAULT_DISPLAY,
-        )
+    private val onMovedToDisplayFlow: StateFlow<Int> = configurationRepository.onMovedToDisplay
 
     private var previousJob: Job? = null
 

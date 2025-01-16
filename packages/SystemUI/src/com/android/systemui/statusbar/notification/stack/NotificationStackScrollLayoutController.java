@@ -249,8 +249,25 @@ public class NotificationStackScrollLayoutController implements Dumpable {
                 }
             };
 
+    private static final Property<NotificationStackScrollLayoutController, Float>
+            HIDE_DURING_REBINDING_PROPERTY = new Property<>(Float.class,
+            "HideNotificationsAlphaDuringRebind") {
+                @Override
+                public Float get(NotificationStackScrollLayoutController object) {
+                    return object.mMaxAlphaForRebind;
+                }
+
+                @Override
+                public void set(NotificationStackScrollLayoutController object, Float value) {
+                    object.setMaxAlphaForRebind(value);
+                }
+            };
+
     @Nullable
     private ObjectAnimator mHideAlphaAnimator = null;
+
+    @Nullable
+    private ObjectAnimator mRebindAlphaAnimator = null;
 
     private final Runnable mSensitiveStateChangedListener = new Runnable() {
         @Override
@@ -295,6 +312,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     private float mMaxAlphaForKeyguard = 1.0f;
     private String mMaxAlphaForKeyguardSource = "constructor";
     private float mMaxAlphaForUnhide = 1.0f;
+    private float mMaxAlphaForRebind = 1.0f;
     private float mMaxAlphaFromView = 1.0f;
 
     /**
@@ -1244,6 +1262,16 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     }
 
     /**
+     * Max alpha for rebind.
+     *
+     * Used to hide notifications while rebiding is in progress (e.g. after a density change).
+     */
+    public void setMaxAlphaForRebind(float alpha) {
+        mMaxAlphaForRebind = alpha;
+        updateAlpha();
+    }
+
+    /**
      * Applies a blur effect to the view.
      *
      * @param blurRadius Radius of blur
@@ -1261,8 +1289,10 @@ public class NotificationStackScrollLayoutController implements Dumpable {
 
     private void updateAlpha() {
         if (mView != null) {
-            mView.setAlpha(Math.min(Math.min(mMaxAlphaFromView, mMaxAlphaForKeyguard),
-                    Math.min(mMaxAlphaForUnhide, mMaxAlphaForGlanceableHub)));
+            float newAlpha = Math.min(mMaxAlphaForRebind,
+                    Math.min(Math.min(mMaxAlphaFromView, mMaxAlphaForKeyguard),
+                            Math.min(mMaxAlphaForUnhide, mMaxAlphaForGlanceableHub)));
+            mView.setAlpha(newAlpha);
         }
     }
 
@@ -1289,9 +1319,37 @@ public class NotificationStackScrollLayoutController implements Dumpable {
         }
     }
 
+    /**
+     * Sets whether the nssl should be visible or not. Used during notification rebinding, to hide
+     * possible flickers that happen when display density changes. (e.g. as a result of the shade
+     * moving to a different display.)
+     */
+    public void updateContainerVisibilityForRebind(boolean visible, boolean animate) {
+        if (mRebindAlphaAnimator != null) {
+            mRebindAlphaAnimator.cancel();
+        }
+
+        final float targetAlpha = visible ? 1f : 0f;
+
+        if (animate) {
+            mRebindAlphaAnimator = createAlphaAnimatorForRebind(targetAlpha);
+            mRebindAlphaAnimator.start();
+        } else {
+            HIDE_DURING_REBINDING_PROPERTY.set(this, targetAlpha);
+        }
+    }
+
     private ObjectAnimator createAlphaAnimator(float targetAlpha) {
         final ObjectAnimator objectAnimator = ObjectAnimator
                 .ofFloat(this, HIDE_ALPHA_PROPERTY, targetAlpha);
+        objectAnimator.setInterpolator(STANDARD);
+        objectAnimator.setDuration(ANIMATION_DURATION_STANDARD);
+        return objectAnimator;
+    }
+
+    private ObjectAnimator createAlphaAnimatorForRebind(float targetAlpha) {
+        final ObjectAnimator objectAnimator = ObjectAnimator
+                .ofFloat(this, HIDE_DURING_REBINDING_PROPERTY, targetAlpha);
         objectAnimator.setInterpolator(STANDARD);
         objectAnimator.setDuration(ANIMATION_DURATION_STANDARD);
         return objectAnimator;
@@ -1688,6 +1746,7 @@ public class NotificationStackScrollLayoutController implements Dumpable {
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("mMaxAlphaFromView=" + mMaxAlphaFromView);
         pw.println("mMaxAlphaForUnhide=" + mMaxAlphaForUnhide);
+        pw.println("mMaxAlphaForRebind=" + mMaxAlphaForRebind);
         pw.println("mMaxAlphaForGlanceableHub=" + mMaxAlphaForGlanceableHub);
         pw.println("mMaxAlphaForKeyguard=" + mMaxAlphaForKeyguard);
         pw.println("mMaxAlphaForKeyguardSource=" + mMaxAlphaForKeyguardSource);

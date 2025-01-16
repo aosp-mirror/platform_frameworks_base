@@ -40,6 +40,7 @@ import org.mockito.Mock
 import org.mockito.Mockito.mock
 import org.mockito.Mockito.verify
 import org.mockito.MockitoAnnotations
+import org.mockito.kotlin.clearInvocations
 
 @ExperimentalCoroutinesApi
 @SmallTest
@@ -65,11 +66,13 @@ class ConfigurationRepositoryImplTest : SysuiTestCase() {
                 testScope.backgroundScope,
                 displayUtils,
             )
+        testScope.runCurrent()
     }
 
     @Test
     fun onAnyConfigurationChange_updatesOnUiModeChanged() =
         testScope.runTest {
+            clearInvocations(configurationController)
             val lastAnyConfigurationChange by collectLastValue(underTest.onAnyConfigurationChange)
             assertThat(lastAnyConfigurationChange).isNull()
 
@@ -85,6 +88,7 @@ class ConfigurationRepositoryImplTest : SysuiTestCase() {
     @Test
     fun onAnyConfigurationChange_updatesOnThemeChanged() =
         testScope.runTest {
+            clearInvocations(configurationController)
             val lastAnyConfigurationChange by collectLastValue(underTest.onAnyConfigurationChange)
             assertThat(lastAnyConfigurationChange).isNull()
 
@@ -101,7 +105,7 @@ class ConfigurationRepositoryImplTest : SysuiTestCase() {
     fun onMovedToDisplays_updatesOnMovedToDisplay() =
         testScope.runTest {
             val lastOnMovedToDisplay by collectLastValue(underTest.onMovedToDisplay)
-            assertThat(lastOnMovedToDisplay).isNull()
+            assertThat(lastOnMovedToDisplay).isEqualTo(Display.DEFAULT_DISPLAY)
 
             val configurationCallback = withArgCaptor {
                 verify(configurationController).addCallback(capture())
@@ -115,6 +119,7 @@ class ConfigurationRepositoryImplTest : SysuiTestCase() {
     @Test
     fun onAnyConfigurationChange_updatesOnConfigChanged() =
         testScope.runTest {
+            clearInvocations(configurationController)
             val lastAnyConfigurationChange by collectLastValue(underTest.onAnyConfigurationChange)
             assertThat(lastAnyConfigurationChange).isNull()
 
@@ -130,6 +135,7 @@ class ConfigurationRepositoryImplTest : SysuiTestCase() {
     @Test
     fun onResolutionScale_updatesOnConfigurationChange() =
         testScope.runTest {
+            clearInvocations(configurationController)
             val scaleForResolution by collectLastValue(underTest.scaleForResolution)
             assertThat(scaleForResolution).isEqualTo(displaySizeRatio)
 
@@ -149,6 +155,7 @@ class ConfigurationRepositoryImplTest : SysuiTestCase() {
     @Test
     fun onResolutionScale_nullMaxResolution() =
         testScope.runTest {
+            clearInvocations(configurationController)
             val scaleForResolution by collectLastValue(underTest.scaleForResolution)
             runCurrent()
 
@@ -203,7 +210,7 @@ class ConfigurationRepositoryImplTest : SysuiTestCase() {
                     anyInt(),
                     anyInt(),
                     anyInt(),
-                    anyInt()
+                    anyInt(),
                 )
             )
             .thenReturn(ratio)
