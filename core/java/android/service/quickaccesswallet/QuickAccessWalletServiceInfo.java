@@ -131,7 +131,7 @@ class QuickAccessWalletServiceInfo {
                     == PackageManager.PERMISSION_GRANTED) {
                 user = roleManager.getActiveUserForRole(RoleManager.ROLE_WALLET);
                 if (user == null) {
-                    return new Pair<>(null, user.getIdentifier());
+                    return new Pair<>(null, UserHandle.myUserId());
                 }
             }
             List<String> roleHolders = roleManager.getRoleHoldersAsUser(RoleManager.ROLE_WALLET,
