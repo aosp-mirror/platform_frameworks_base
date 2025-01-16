@@ -17,7 +17,7 @@
 package android.inputmethodservice.navigationbar;
 
 import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN;
+import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.DARK_MODE_ICON_COLOR_SINGLE_TONE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.LIGHT_MODE_ICON_COLOR_SINGLE_TONE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.NAVBAR_BACK_BUTTON_IME_OFFSET;
@@ -316,9 +316,10 @@ public final class NavigationBarView extends FrameLayout {
 
         getImeSwitchButton().setImageDrawable(mImeSwitcherIcon);
 
-        // Update IME button visibility, a11y and rotate button always overrides the appearance
+        // Update IME switcher button visibility, a11y and rotate button always overrides
+        // the appearance.
         final boolean isImeSwitcherButtonVisible =
-                (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_SHOWN) != 0;
+                (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0;
         getImeSwitchButton()
                 .setVisibility(isImeSwitcherButtonVisible ? View.VISIBLE : View.INVISIBLE);
 
