@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.internal.logging.UiEventLogger
 import com.android.systemui.animation.Expandable
@@ -54,7 +55,7 @@ constructor(
             VolumePanelUiEvent.VOLUME_PANEL_SPATIAL_AUDIO_POP_UP_SHOWN,
             0,
             null,
-            viewModel.spatialAudioButtons.value.indexOfFirst { it.button.isActive }
+            viewModel.spatialAudioButtons.value.indexOfFirst { it.button.isActive },
         )
         val gravity = horizontalGravity or Gravity.BOTTOM
         volumePanelPopup.show(expandable, gravity, { Title() }, { Content(it) })
@@ -95,14 +96,14 @@ constructor(
                     icon = { Icon(icon = buttonViewModel.button.icon) },
                     label = {
                         Text(
-                            modifier = Modifier.basicMarquee(),
                             text = label,
                             style = MaterialTheme.typography.labelMedium,
                             color = LocalContentColor.current,
                             textAlign = TextAlign.Center,
-                            maxLines = 2
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis,
                         )
-                    }
+                    },
                 )
             }
         }
