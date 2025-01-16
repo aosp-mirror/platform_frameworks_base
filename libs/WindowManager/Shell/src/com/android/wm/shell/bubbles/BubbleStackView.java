@@ -2183,34 +2183,39 @@ public class BubbleStackView extends FrameLayout
         ProtoLog.d(WM_SHELL_BUBBLES, "showNewlySelectedBubble b=%s, previouslySelected=%s,"
                         + " mIsExpanded=%b", newlySelectedKey, previouslySelectedKey, mIsExpanded);
         if (mIsExpanded) {
-            hideCurrentInputMethod();
-
-            if (Flags.enableRetrievableBubbles()) {
-                if (mBubbleData.getBubbles().size() == 1) {
-                    // First bubble, check if overflow visibility needs to change
-                    updateOverflowVisibility();
+            Runnable onImeHidden = () -> {
+                if (Flags.enableRetrievableBubbles()) {
+                    if (mBubbleData.getBubbles().size() == 1) {
+                        // First bubble, check if overflow visibility needs to change
+                        updateOverflowVisibility();
+                    }
                 }
+
+                // Make the container of the expanded view transparent before removing the expanded
+                // view from it. Otherwise a punch hole created by {@link android.view.SurfaceView}
+                // in the expanded view becomes visible on the screen. See b/126856255
+                mExpandedViewContainer.setAlpha(0.0f);
+                mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
+                    if (previouslySelected != null) {
+                        previouslySelected.setTaskViewVisibility(false);
+                    }
+
+                    updateExpandedBubble();
+                    requestUpdate();
+
+                    logBubbleEvent(previouslySelected,
+                            FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
+                    logBubbleEvent(bubbleToSelect,
+                            FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
+                    notifyExpansionChanged(previouslySelected, false /* expanded */);
+                    notifyExpansionChanged(bubbleToSelect, true /* expanded */);
+                });
+            };
+            if (mPositioner.isImeVisible()) {
+                hideCurrentInputMethod(onImeHidden);
+            } else {
+                onImeHidden.run();
             }
-
-            // Make the container of the expanded view transparent before removing the expanded view
-            // from it. Otherwise a punch hole created by {@link android.view.SurfaceView} in the
-            // expanded view becomes visible on the screen. See b/126856255
-            mExpandedViewContainer.setAlpha(0.0f);
-            mSurfaceSynchronizer.syncSurfaceAndRun(() -> {
-                if (previouslySelected != null) {
-                    previouslySelected.setTaskViewVisibility(false);
-                }
-
-                updateExpandedBubble();
-                requestUpdate();
-
-                logBubbleEvent(previouslySelected,
-                        FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__COLLAPSED);
-                logBubbleEvent(bubbleToSelect,
-                        FrameworkStatsLog.BUBBLE_UICHANGED__ACTION__EXPANDED);
-                notifyExpansionChanged(previouslySelected, false /* expanded */);
-                notifyExpansionChanged(bubbleToSelect, true /* expanded */);
-            });
         }
     }
 
