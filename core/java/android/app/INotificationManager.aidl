@@ -271,6 +271,6 @@ interface INotificationManager
 
     int[] getAllowedAdjustmentKeyTypes();
     void setAssistantAdjustmentKeyTypeState(int type, boolean enabled);
-    int[] getAllowedAdjustmentKeyTypesForPackage(String pkg);
-    void setAssistantAdjustmentKeyTypeStateForPackage(String pkg, int type, boolean enabled);
+    String[] getTypeAdjustmentDeniedPackages();
+    void setTypeAdjustmentForPackageState(String pkg, boolean enabled);
 }

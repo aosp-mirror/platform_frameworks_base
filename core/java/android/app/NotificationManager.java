@@ -2163,12 +2163,10 @@ public class NotificationManager {
      * @hide
      */
     @FlaggedApi(android.app.Flags.FLAG_NOTIFICATION_CLASSIFICATION_UI)
-    public void setAssistantAdjustmentKeyTypeStateForPackage(@NonNull String pkg,
-                                                             @Adjustment.Types int type,
-                                                             boolean enabled) {
+    public void setTypeAdjustmentForPackageState(@NonNull String pkg, boolean enabled) {
         INotificationManager service = service();
         try {
-            service.setAssistantAdjustmentKeyTypeStateForPackage(pkg, type, enabled);
+            service.setTypeAdjustmentForPackageState(pkg, enabled);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
