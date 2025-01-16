@@ -53,6 +53,12 @@ import java.util.List;
  * Policy that manages {@link DisplayArea}.
  */
 public abstract class DisplayAreaPolicy {
+    /**
+     * No corresponding use case yet (see b/154719717). The current implementation still uses
+     * {@link WindowState#shouldMagnify}.
+     */
+    static final boolean USE_DISPLAY_AREA_FOR_FULLSCREEN_MAGNIFICATION = false;
+
     protected final WindowManagerService mWmService;
 
     /**
@@ -161,14 +167,17 @@ public abstract class DisplayAreaPolicy {
                                         TYPE_STATUS_BAR, TYPE_NOTIFICATION_SHADE, TYPE_WALLPAPER)
                                 .build());
             }
+            if (USE_DISPLAY_AREA_FOR_FULLSCREEN_MAGNIFICATION) {
+                rootHierarchy.addFeature(
+                        new Feature.Builder(wmService.mPolicy, "FullscreenMagnification",
+                                FEATURE_FULLSCREEN_MAGNIFICATION)
+                                .all()
+                                .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, TYPE_INPUT_METHOD,
+                                        TYPE_INPUT_METHOD_DIALOG, TYPE_MAGNIFICATION_OVERLAY,
+                                        TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
+                                .build());
+            }
             rootHierarchy
-                    .addFeature(new Feature.Builder(wmService.mPolicy, "FullscreenMagnification",
-                            FEATURE_FULLSCREEN_MAGNIFICATION)
-                            .all()
-                            .except(TYPE_ACCESSIBILITY_MAGNIFICATION_OVERLAY, TYPE_INPUT_METHOD,
-                                    TYPE_INPUT_METHOD_DIALOG, TYPE_MAGNIFICATION_OVERLAY,
-                                    TYPE_NAVIGATION_BAR, TYPE_NAVIGATION_BAR_PANEL)
-                            .build())
                     .addFeature(new Feature.Builder(wmService.mPolicy, "ImePlaceholder",
                             FEATURE_IME_PLACEHOLDER)
                             .and(TYPE_INPUT_METHOD, TYPE_INPUT_METHOD_DIALOG)

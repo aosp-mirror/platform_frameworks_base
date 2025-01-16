@@ -202,7 +202,7 @@ public class DisplayAreaPolicyBuilderTest {
     }
 
     @Test
-    public void testBuilder_defaultPolicy_hasWindowedMagnificationFeature() {
+    public void testBuilder_defaultPolicy_hasMagnificationFeature() {
         final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
                 resourcesWithProvider(""));
         final DisplayAreaPolicyBuilder.Result defaultPolicy =
@@ -210,28 +210,16 @@ public class DisplayAreaPolicyBuilderTest {
                         mRoot, mImeContainer);
         final List<Feature> features = defaultPolicy.getFeatures();
         boolean hasWindowedMagnificationFeature = false;
-        for (Feature feature : features) {
-            hasWindowedMagnificationFeature |= feature.getId() == FEATURE_WINDOWED_MAGNIFICATION;
-        }
-
-        assertThat(hasWindowedMagnificationFeature).isTrue();
-    }
-
-    @Test
-    public void testBuilder_defaultPolicy_hasFullscreenMagnificationFeature() {
-        final DisplayAreaPolicy.Provider defaultProvider = DisplayAreaPolicy.Provider.fromResources(
-                resourcesWithProvider(""));
-        final DisplayAreaPolicyBuilder.Result defaultPolicy =
-                (DisplayAreaPolicyBuilder.Result) defaultProvider.instantiate(mWms, mDisplayContent,
-                        mRoot, mImeContainer);
-        final List<Feature> features = defaultPolicy.getFeatures();
         boolean hasFullscreenMagnificationFeature = false;
         for (Feature feature : features) {
+            hasWindowedMagnificationFeature |= feature.getId() == FEATURE_WINDOWED_MAGNIFICATION;
             hasFullscreenMagnificationFeature |=
                     feature.getId() == FEATURE_FULLSCREEN_MAGNIFICATION;
         }
 
-        assertThat(hasFullscreenMagnificationFeature).isTrue();
+        assertThat(hasWindowedMagnificationFeature).isTrue();
+        assertThat(hasFullscreenMagnificationFeature).isEqualTo(
+                DisplayAreaPolicy.USE_DISPLAY_AREA_FOR_FULLSCREEN_MAGNIFICATION);
     }
 
     @Test
