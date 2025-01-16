@@ -842,7 +842,6 @@ public class TaskFragmentOrganizerController extends ITaskFragmentOrganizerContr
             return;
         }
         validateAndGetState(organizer);
-        Slog.w(TAG, "onTaskFragmentError ", exception);
         addPendingEvent(new PendingTaskFragmentEvent.Builder(
                 PendingTaskFragmentEvent.EVENT_ERROR, organizer)
                 .setErrorCallbackToken(errorCallbackToken)

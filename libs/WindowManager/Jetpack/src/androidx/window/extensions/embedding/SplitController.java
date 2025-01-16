@@ -73,6 +73,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.OperationCanceledException;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
@@ -1106,7 +1107,12 @@ public class SplitController implements JetpackTaskFragmentOrganizer.TaskFragmen
     void onTaskFragmentError(@NonNull WindowContainerTransaction wct,
             @Nullable IBinder errorCallbackToken, @Nullable TaskFragmentInfo taskFragmentInfo,
             @TaskFragmentOperation.OperationType int opType, @NonNull Throwable exception) {
-        Log.e(TAG, "onTaskFragmentError=" + exception.getMessage());
+        if (exception instanceof OperationCanceledException) {
+            // This is a non-fatal error and the operation just canceled.
+            Log.i(TAG, "operation canceled:" + exception.getMessage());
+        } else {
+            Log.e(TAG, "onTaskFragmentError=" + exception.getMessage(), exception);
+        }
         switch (opType) {
             case OP_TYPE_START_ACTIVITY_IN_TASK_FRAGMENT:
             case OP_TYPE_REPARENT_ACTIVITY_TO_TASK_FRAGMENT: {
