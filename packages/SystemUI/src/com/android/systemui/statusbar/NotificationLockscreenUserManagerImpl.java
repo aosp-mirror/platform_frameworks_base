@@ -121,7 +121,6 @@ public class NotificationLockscreenUserManagerImpl implements
 
     private static final long LOCK_TIME_FOR_SENSITIVE_REDACTION_MS =
             TimeUnit.MINUTES.toMillis(10);
-
     private final Lazy<NotificationVisibilityProvider> mVisibilityProviderLazy;
     private final Lazy<CommonNotifCollection> mCommonNotifCollectionLazy;
     private final DevicePolicyManager mDevicePolicyManager;
@@ -751,7 +750,7 @@ public class NotificationLockscreenUserManagerImpl implements
         }
 
         long lastLockedTime = mLastLockTime.get();
-        if (ent.getSbn().getPostTime() < lastLockedTime) {
+        if (ent.getSbn().getNotification().getWhen() < lastLockedTime) {
             return false;
         }
 
