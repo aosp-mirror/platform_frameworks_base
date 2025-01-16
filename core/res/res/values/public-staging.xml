@@ -137,6 +137,14 @@
     <public name="wantsRoleHolderPriority"/>
     <!-- @FlaggedApi(android.sdk.Flags.FLAG_MAJOR_MINOR_VERSIONING_SCHEME) -->
     <public name="minSdkVersionFull"/>
+    <!-- @hide Only for device overlay to use this. -->
+    <public name="pointerIconVectorFill"/>
+    <!-- @hide Only for device overlay to use this. -->
+    <public name="pointerIconVectorFillInverse"/>
+    <!-- @hide Only for device overlay to use this. -->
+    <public name="pointerIconVectorStroke"/>
+    <!-- @hide Only for device overlay to use this. -->
+    <public name="pointerIconVectorStrokeInverse"/>
   </staging-public-group>
 
   <staging-public-group type="id" first-id="0x01b60000">
