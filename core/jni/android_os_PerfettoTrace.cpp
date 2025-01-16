@@ -23,6 +23,7 @@
 #include <nativehelper/scoped_local_ref.h>
 #include <nativehelper/scoped_primitive_array.h>
 #include <nativehelper/scoped_utf_chars.h>
+#include <nativehelper/utils.h>
 #include <tracing_sdk.h>
 
 namespace android {
@@ -36,30 +37,6 @@ inline static jlong toJLong(T* ptr) {
     return static_cast<jlong>(reinterpret_cast<uintptr_t>(ptr));
 }
 
-static const char* fromJavaString(JNIEnv* env, jstring jstr) {
-    if (!jstr) return "";
-    ScopedUtfChars chars(env, jstr);
-
-    if (!chars.c_str()) {
-        ALOGE("Failed extracting string");
-        return "";
-    }
-
-    return chars.c_str();
-}
-
-static void android_os_PerfettoTrace_event(JNIEnv* env, jclass, jint type, jlong cat_ptr,
-                                           jstring name, jlong extra_ptr) {
-    ScopedUtfChars name_utf(env, name);
-    if (!name_utf.c_str()) {
-        ALOGE("Failed extracting string");
-    }
-
-    tracing_perfetto::Category* category = toPointer<tracing_perfetto::Category>(cat_ptr);
-    tracing_perfetto::trace_event(type, category->get(), name_utf.c_str(),
-                                  toPointer<tracing_perfetto::Extra>(extra_ptr));
-}
-
 static jlong android_os_PerfettoTrace_get_process_track_uuid() {
     return tracing_perfetto::get_process_track_uuid();
 }
@@ -70,20 +47,18 @@ static jlong android_os_PerfettoTrace_get_thread_track_uuid(jlong tid) {
 
 static void android_os_PerfettoTrace_activate_trigger(JNIEnv* env, jclass, jstring name,
                                                       jint ttl_ms) {
-    ScopedUtfChars name_utf(env, name);
-    if (!name_utf.c_str()) {
-        ALOGE("Failed extracting string");
-        return;
-    }
-
-    tracing_perfetto::activate_trigger(name_utf.c_str(), static_cast<uint32_t>(ttl_ms));
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN_VOID(env, name);
+    tracing_perfetto::activate_trigger(name_chars.c_str(), static_cast<uint32_t>(ttl_ms));
 }
 
 static jlong android_os_PerfettoTraceCategory_init(JNIEnv* env, jclass, jstring name, jstring tag,
                                                    jstring severity) {
-    return toJLong(new tracing_perfetto::Category(fromJavaString(env, name),
-                                                  fromJavaString(env, tag),
-                                                  fromJavaString(env, severity)));
+    ScopedUtfChars name_chars = GET_UTF_OR_RETURN(env, name);
+    ScopedUtfChars tag_chars = GET_UTF_OR_RETURN(env, tag);
+    ScopedUtfChars severity_chars = GET_UTF_OR_RETURN(env, severity);
+
+    return toJLong(new tracing_perfetto::Category(name_chars.c_str(), tag_chars.c_str(),
+                                                  severity_chars.c_str()));
 }
 
 static jlong android_os_PerfettoTraceCategory_delete() {
@@ -121,8 +96,7 @@ static const JNINativeMethod gCategoryMethods[] = {
 };
 
 static const JNINativeMethod gTraceMethods[] =
-        {{"native_event", "(IJLjava/lang/String;J)V", (void*)android_os_PerfettoTrace_event},
-         {"native_get_process_track_uuid", "()J",
+        {{"native_get_process_track_uuid", "()J",
           (void*)android_os_PerfettoTrace_get_process_track_uuid},
          {"native_get_thread_track_uuid", "(J)J",
           (void*)android_os_PerfettoTrace_get_thread_track_uuid},
@@ -132,10 +106,11 @@ static const JNINativeMethod gTraceMethods[] =
 int register_android_os_PerfettoTrace(JNIEnv* env) {
     int res = jniRegisterNativeMethods(env, "android/os/PerfettoTrace", gTraceMethods,
                                        NELEM(gTraceMethods));
+    LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register perfetto native methods.");
 
     res = jniRegisterNativeMethods(env, "android/os/PerfettoTrace$Category", gCategoryMethods,
                                    NELEM(gCategoryMethods));
-    LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
+    LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register category native methods.");
 
     return 0;
 }

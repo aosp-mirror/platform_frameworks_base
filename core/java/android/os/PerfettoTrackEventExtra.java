@@ -31,6 +31,7 @@ import java.util.function.Supplier;
  */
 public final class PerfettoTrackEventExtra {
     private static final int DEFAULT_EXTRA_CACHE_SIZE = 5;
+    private static final Builder NO_OP_BUILDER = new NoOpBuilder();
     private static final ThreadLocal<PerfettoTrackEventExtra> sTrackEventExtra =
             new ThreadLocal<PerfettoTrackEventExtra>() {
                 @Override
@@ -40,7 +41,6 @@ public final class PerfettoTrackEventExtra {
             };
     private static final AtomicLong sNamedTrackId = new AtomicLong();
 
-    private boolean mIsInUse;
     private CounterInt64 mCounterInt64;
     private CounterDouble mCounterDouble;
     private Proto mProto;
@@ -123,15 +123,299 @@ public final class PerfettoTrackEventExtra {
         }
     }
 
+    public interface Builder {
+        /**
+         * Emits the track event.
+         */
+        void emit();
+
+        /**
+         * Initialize the builder for a new trace event.
+         */
+        Builder init(int traceType, PerfettoTrace.Category category);
+
+        /**
+         * Sets the event name for the track event.
+         *
+         * @param eventName can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code eventName} should be the string itself.
+         * @param args format arguments if {@code eventName} is specified.
+         */
+        Builder setEventName(String eventName, Object... args);
+
+        /**
+         * Adds a debug arg with key {@code name} and value {@code val}.
+         */
+        Builder addArg(String name, long val);
+
+        /**
+         * Adds a debug arg with key {@code name} and value {@code val}.
+         */
+        Builder addArg(String name, boolean val);
+
+        /**
+         * Adds a debug arg with key {@code name} and value {@code val}.
+         */
+        Builder addArg(String name, double val);
+
+        /**
+         * Adds a debug arg with key {@code name} and value {@code val}.
+         *
+         * @param val can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code val} should be the string itself.
+         * @param args format arguments if {@code val} is specified.
+         */
+        Builder addArg(String name, String val, Object... args);
+
+        /**
+         * Adds a flow with {@code id}.
+         */
+        Builder addFlow(int id);
+
+        /**
+         * Adds a terminating flow with {@code id}.
+         */
+        Builder addTerminatingFlow(int id);
+
+        /**
+         * Adds the events to a named track instead of the thread track where the
+         * event occurred.
+         *
+         * @param name can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code name} should be the string itself.
+         * @param args format arguments if {@code name} is specified.
+         */
+        Builder usingNamedTrack(long parentUuid, String name, Object... args);
+
+        /**
+         * Adds the events to a process scoped named track instead of the thread track where the
+         * event occurred.
+         *
+         * @param name can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code name} should be the string itself.
+         * @param args format arguments if {@code name} is specified.
+         */
+        Builder usingProcessNamedTrack(String name, Object... args);
+
+        /**
+         * Adds the events to a thread scoped named track instead of the thread track where the
+         * event occurred.
+         *
+         * @param name can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code name} should be the string itself.
+         * @param args format arguments if {@code name} is specified.
+         */
+        Builder usingThreadNamedTrack(long tid, String name, Object... args);
+
+        /**
+         * Adds the events to a counter track instead. This is required for
+         * setting counter values.
+         *
+         * @param name can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code name} should be the string itself.
+         * @param args format arguments if {@code name} is specified.
+         */
+        Builder usingCounterTrack(long parentUuid, String name, Object... args);
+
+        /**
+         * Adds the events to a process scoped counter track instead. This is required for
+         * setting counter values.
+         *
+         * @param name can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code name} should be the string itself.
+         * @param args format arguments if {@code eventName} is specified.
+         */
+        Builder usingProcessCounterTrack(String name, Object... args);
+
+        /**
+         * Adds the events to a thread scoped counter track instead. This is required for
+         * setting counter values.
+         *
+         * @param name can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code name} should be the string itself.
+         * @param args format arguments if {@code name} is specified.
+         */
+        Builder usingThreadCounterTrack(long tid, String name, Object... args);
+
+        /**
+         * Sets a long counter value on the event.
+         *
+         */
+        Builder setCounter(long val);
+
+        /**
+         * Sets a double counter value on the event.
+         *
+         */
+        Builder setCounter(double val);
+
+        /**
+         * Adds a proto field with field id {@code id} and value {@code val}.
+         */
+        Builder addField(long id, long val);
+
+        /**
+         * Adds a proto field with field id {@code id} and value {@code val}.
+         */
+        Builder addField(long id, double val);
+
+        /**
+         * Adds a proto field with field id {@code id} and value {@code val}.
+         *
+         * @param val can contain a format string specifier, in which case, the
+         * {@code args} are the format arguments. If no {@code args} are provided,
+         * the {@code val} should be the string itself.
+         * @param args format arguments if {@code val} is specified.
+         */
+        Builder addField(long id, String val, Object... args);
+
+        /**
+         * Begins a proto field with field
+         * Fields can be added from this point and there must be a corresponding
+         * {@link endProto}.
+         *
+         * The proto field is a singleton and all proto fields get added inside the
+         * one {@link beginProto} and {@link endProto} within the {@link Builder}.
+         */
+        Builder beginProto();
+
+        /**
+         * Ends a proto field.
+         */
+        Builder endProto();
+
+        /**
+         * Begins a nested proto field with field id {@code id}.
+         * Fields can be added from this point and there must be a corresponding
+         * {@link endNested}.
+         */
+        Builder beginNested(long id);
+
+        /**
+         * Ends a nested proto field.
+         */
+        Builder endNested();
+    }
+
+    public static final class NoOpBuilder implements Builder {
+        @Override
+        public void emit() {}
+        @Override
+        public Builder init(int traceType, PerfettoTrace.Category category) {
+            return this;
+        }
+        @Override
+        public Builder setEventName(String eventName, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder addArg(String name, long val) {
+            return this;
+        }
+        @Override
+        public Builder addArg(String name, boolean val) {
+            return this;
+        }
+        @Override
+        public Builder addArg(String name, double val) {
+            return this;
+        }
+        @Override
+        public Builder addArg(String name, String val, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder addFlow(int id) {
+            return this;
+        }
+        @Override
+        public Builder addTerminatingFlow(int id) {
+            return this;
+        }
+        @Override
+        public Builder usingNamedTrack(long parentUuid, String name, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder usingProcessNamedTrack(String name, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder usingThreadNamedTrack(long tid, String name, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder usingCounterTrack(long parentUuid, String name, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder usingProcessCounterTrack(String name, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder usingThreadCounterTrack(long tid, String name, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder setCounter(long val) {
+            return this;
+        }
+        @Override
+        public Builder setCounter(double val) {
+            return this;
+        }
+        @Override
+        public Builder addField(long id, long val) {
+            return this;
+        }
+        @Override
+        public Builder addField(long id, double val) {
+            return this;
+        }
+        @Override
+        public Builder addField(long id, String val, Object... args) {
+            return this;
+        }
+        @Override
+        public Builder beginProto() {
+            return this;
+        }
+        @Override
+        public Builder endProto() {
+            return this;
+        }
+        @Override
+        public Builder beginNested(long id) {
+            return this;
+        }
+        @Override
+        public Builder endNested() {
+            return this;
+        }
+    }
+
     /**
      * Builder for Perfetto track event extras.
      */
-    public static final class Builder {
+    public static final class BuilderImpl implements Builder {
         // For performance reasons, we hold a reference to mExtra as a holder for
         // perfetto pointers being added. This way, we avoid an additional list to hold
         // the pointers in Java and we can pass them down directly to native code.
         private final PerfettoTrackEventExtra mExtra;
+
+        private int mTraceType;
+        private PerfettoTrace.Category mCategory;
+        private String mEventName;
         private boolean mIsBuilt;
+
         private Builder mParent;
         private FieldContainer mCurrentContainer;
 
@@ -151,16 +435,10 @@ public final class PerfettoTrackEventExtra {
         private final Pool<FieldString> mFieldStringCache;
         private final Pool<FieldNested> mFieldNestedCache;
         private final Pool<Flow> mFlowCache;
-        private final Pool<Builder> mBuilderCache;
+        private final Pool<BuilderImpl> mBuilderCache;
 
-        private Builder() {
-            this(sTrackEventExtra.get(), null, null);
-        }
-
-        private Builder(PerfettoTrackEventExtra extra, Builder parent, FieldContainer container) {
-            mExtra = extra;
-            mParent = parent;
-            mCurrentContainer = container;
+        private BuilderImpl() {
+            mExtra = sTrackEventExtra.get();
 
             mNamedTrackCache = mExtra.mNamedTrackCache;
             mCounterTrackCache = mExtra.mCounterTrackCache;
@@ -180,25 +458,39 @@ public final class PerfettoTrackEventExtra {
             mProto = mExtra.getProto();
         }
 
-        /**
-         * Builds the track event extra.
-         */
-        public PerfettoTrackEventExtra build() {
+        @Override
+        public void emit() {
             checkParent();
             mIsBuilt = true;
 
+            native_emit(mTraceType, mCategory.getPtr(), mEventName, mExtra.getPtr());
+            // Reset after emitting to free any the extras used to trace the event.
+            mExtra.reset();
+        }
+
+        @Override
+        public Builder init(int traceType, PerfettoTrace.Category category) {
+            mTraceType = traceType;
+            mCategory = category;
+            mEventName = "";
             mFieldInt64Cache.reset();
             mFieldDoubleCache.reset();
             mFieldStringCache.reset();
             mFieldNestedCache.reset();
             mBuilderCache.reset();
 
-            return mExtra;
+            mExtra.reset();
+            // Reset after on init in case the thread created builders without calling emit
+            return initInternal(this, null);
         }
 
-        /**
-         * Adds a debug arg with key {@code name} and value {@code val}.
-         */
+        @Override
+        public Builder setEventName(String eventName, Object... args) {
+            mEventName = toString(eventName, args);
+            return this;
+        }
+
+        @Override
         public Builder addArg(String name, long val) {
             checkParent();
             ArgInt64 arg = mArgInt64Cache.get(name.hashCode());
@@ -211,9 +503,7 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds a debug arg with key {@code name} and value {@code val}.
-         */
+        @Override
         public Builder addArg(String name, boolean val) {
             checkParent();
             ArgBool arg = mArgBoolCache.get(name.hashCode());
@@ -226,9 +516,7 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds a debug arg with key {@code name} and value {@code val}.
-         */
+        @Override
         public Builder addArg(String name, double val) {
             checkParent();
             ArgDouble arg = mArgDoubleCache.get(name.hashCode());
@@ -241,24 +529,20 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds a debug arg with key {@code name} and value {@code val}.
-         */
-        public Builder addArg(String name, String val) {
+        @Override
+        public Builder addArg(String name, String val, Object... args) {
             checkParent();
             ArgString arg = mArgStringCache.get(name.hashCode());
             if (arg == null || !arg.getName().equals(name)) {
                 arg = new ArgString(name);
                 mArgStringCache.put(name.hashCode(), arg);
             }
-            arg.setValue(val);
+            arg.setValue(toString(val, args));
             mExtra.addPerfettoPointer(arg);
             return this;
         }
 
-        /**
-         * Adds a flow with {@code id}.
-         */
+        @Override
         public Builder addFlow(int id) {
             checkParent();
             Flow flow = mFlowCache.get(Flow::new);
@@ -267,9 +551,7 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds a terminating flow with {@code id}.
-         */
+        @Override
         public Builder addTerminatingFlow(int id) {
             checkParent();
             Flow flow = mFlowCache.get(Flow::new);
@@ -278,12 +560,11 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds the events to a named track instead of the thread track where the
-         * event occurred.
-         */
-        public Builder usingNamedTrack(String name, long parentUuid) {
+        @Override
+        public Builder usingNamedTrack(long parentUuid, String name, Object... args) {
             checkParent();
+            name = toString(name, args);
+
             NamedTrack track = mNamedTrackCache.get(name.hashCode());
             if (track == null || !track.getName().equals(name)) {
                 track = new NamedTrack(name, parentUuid);
@@ -293,13 +574,21 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds the events to a counter track instead. This is required for
-         * setting counter values.
-         *
-         */
-        public Builder usingCounterTrack(String name, long parentUuid) {
+        @Override
+        public Builder usingProcessNamedTrack(String name, Object... args) {
+            return usingNamedTrack(PerfettoTrace.getProcessTrackUuid(), name, args);
+        }
+
+        @Override
+        public Builder usingThreadNamedTrack(long tid, String name, Object... args) {
+            return usingNamedTrack(PerfettoTrace.getThreadTrackUuid(tid), name, args);
+        }
+
+        @Override
+        public Builder usingCounterTrack(long parentUuid, String name, Object... args) {
             checkParent();
+            name = toString(name, args);
+
             CounterTrack track = mCounterTrackCache.get(name.hashCode());
             if (track == null || !track.getName().equals(name)) {
                 track = new CounterTrack(name, parentUuid);
@@ -309,10 +598,17 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Sets a long counter value on the event.
-         *
-         */
+        @Override
+        public Builder usingProcessCounterTrack(String name, Object... args) {
+            return usingCounterTrack(PerfettoTrace.getProcessTrackUuid(), name, args);
+        }
+
+        @Override
+        public Builder usingThreadCounterTrack(long tid, String name, Object... args) {
+            return usingCounterTrack(PerfettoTrace.getThreadTrackUuid(tid), name, args);
+        }
+
+        @Override
         public Builder setCounter(long val) {
             checkParent();
             mCounterInt64.setValue(val);
@@ -320,10 +616,7 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Sets a double counter value on the event.
-         *
-         */
+        @Override
         public Builder setCounter(double val) {
             checkParent();
             mCounterDouble.setValue(val);
@@ -331,9 +624,7 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds a proto field with field id {@code id} and value {@code val}.
-         */
+        @Override
         public Builder addField(long id, long val) {
             checkContainer();
             FieldInt64 field = mFieldInt64Cache.get(FieldInt64::new);
@@ -342,9 +633,7 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds a proto field with field id {@code id} and value {@code val}.
-         */
+        @Override
         public Builder addField(long id, double val) {
             checkContainer();
             FieldDouble field = mFieldDoubleCache.get(FieldDouble::new);
@@ -353,35 +642,24 @@ public final class PerfettoTrackEventExtra {
             return this;
         }
 
-        /**
-         * Adds a proto field with field id {@code id} and value {@code val}.
-         */
-        public Builder addField(long id, String val) {
+        @Override
+        public Builder addField(long id, String val, Object... args) {
             checkContainer();
             FieldString field = mFieldStringCache.get(FieldString::new);
-            field.setValue(id, val);
+            field.setValue(id, toString(val, args));
             mCurrentContainer.addField(field);
             return this;
         }
 
-        /**
-         * Begins a proto field with field
-         * Fields can be added from this point and there must be a corresponding
-         * {@link endProto}.
-         *
-         * The proto field is a singleton and all proto fields get added inside the
-         * one {@link beginProto} and {@link endProto} within the {@link Builder}.
-         */
+        @Override
         public Builder beginProto() {
             checkParent();
             mProto.clearFields();
             mExtra.addPerfettoPointer(mProto);
-            return mBuilderCache.get(Builder::new).init(this, mProto);
+            return mBuilderCache.get(BuilderImpl::new).initInternal(this, mProto);
         }
 
-        /**
-         * Ends a proto field.
-         */
+        @Override
         public Builder endProto() {
             if (mParent == null || mCurrentContainer == null) {
                 throw new IllegalStateException("No proto to end");
@@ -389,22 +667,16 @@ public final class PerfettoTrackEventExtra {
             return mParent;
         }
 
-        /**
-         * Begins a nested proto field with field id {@code id}.
-         * Fields can be added from this point and there must be a corresponding
-         * {@link endNested}.
-         */
+        @Override
         public Builder beginNested(long id) {
             checkContainer();
             FieldNested field = mFieldNestedCache.get(FieldNested::new);
             field.setId(id);
             mCurrentContainer.addField(field);
-            return mBuilderCache.get(Builder::new).init(this, field);
+            return mBuilderCache.get(BuilderImpl::new).initInternal(this, field);
         }
 
-        /**
-         * Ends a nested proto field.
-         */
+        @Override
         public Builder endNested() {
             if (mParent == null || mCurrentContainer == null) {
                 throw new IllegalStateException("No nested field to end");
@@ -412,21 +684,15 @@ public final class PerfettoTrackEventExtra {
             return mParent;
         }
 
-        /**
-         * Initializes a {@link Builder}.
-         */
-        public Builder init(Builder parent, FieldContainer container) {
+        private static String toString(String val, Object... args) {
+            return args == null || args.length == 0 ? val : String.format(val, args);
+        }
+
+        private Builder initInternal(Builder parent, FieldContainer container) {
             mParent = parent;
             mCurrentContainer = container;
             mIsBuilt = false;
 
-            if (mParent == null) {
-                if (mExtra.mIsInUse) {
-                    throw new IllegalStateException("Cannot create a new builder when another"
-                            + " extra is in use");
-                }
-                mExtra.mIsInUse = true;
-            }
             return this;
         }
 
@@ -439,9 +705,8 @@ public final class PerfettoTrackEventExtra {
 
         private void checkParent() {
             checkState();
-            if (mParent != null) {
-                throw new IllegalStateException(
-                    "This builder has already been used. Create a new builder for another event.");
+            if (!this.equals(mParent)) {
+                throw new IllegalStateException("Operation not supported for proto");
             }
         }
 
@@ -458,7 +723,14 @@ public final class PerfettoTrackEventExtra {
      * Start a {@link Builder} to build a {@link PerfettoTrackEventExtra}.
      */
     public static Builder builder() {
-        return sTrackEventExtra.get().mBuilderCache.get(Builder::new).init(null, null);
+        return sTrackEventExtra.get().mBuilderCache.get(BuilderImpl::new).initInternal(null, null);
+    }
+
+    /**
+     * Returns a no-op {@link Builder}. Useful if a category is disabled.
+     */
+    public static Builder noOpBuilder() {
+        return NO_OP_BUILDER;
     }
 
     private final RingBuffer<NamedTrack> mNamedTrackCache =
@@ -476,7 +748,7 @@ public final class PerfettoTrackEventExtra {
     private final Pool<FieldString> mFieldStringCache = new Pool(DEFAULT_EXTRA_CACHE_SIZE);
     private final Pool<FieldNested> mFieldNestedCache = new Pool(DEFAULT_EXTRA_CACHE_SIZE);
     private final Pool<Flow> mFlowCache = new Pool(DEFAULT_EXTRA_CACHE_SIZE);
-    private final Pool<Builder> mBuilderCache = new Pool(DEFAULT_EXTRA_CACHE_SIZE);
+    private final Pool<BuilderImpl> mBuilderCache = new Pool(DEFAULT_EXTRA_CACHE_SIZE);
 
     private static final NativeAllocationRegistry sRegistry =
             NativeAllocationRegistry.createMalloced(
@@ -509,7 +781,6 @@ public final class PerfettoTrackEventExtra {
      */
     public void reset() {
         native_clear_args(mPtr);
-        mIsInUse = false;
     }
 
     private CounterInt64 getCounterInt64() {
@@ -1078,4 +1349,6 @@ public final class PerfettoTrackEventExtra {
     private static native void native_add_arg(long ptr, long extraPtr);
     @CriticalNative
     private static native void native_clear_args(long ptr);
+    @FastNative
+    private static native void native_emit(int type, long tag, String name, long ptr);
 }
