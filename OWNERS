@@ -16,6 +16,7 @@ omakoto@google.com #{LAST_RESORT_SUGGESTION}
 roosa@google.com #{LAST_RESORT_SUGGESTION}
 smoreland@google.com #{LAST_RESORT_SUGGESTION}
 yamasani@google.com #{LAST_RESORT_SUGGESTION}
+timmurray@google.com #{LAST_RESORT_SUGGESTION}
 
 # API changes are already covered by API-Review+1 (http://mdb/android-api-council)
 # via https://android.git.corp.google.com/All-Projects/+/refs/meta/config/rules.pl.
