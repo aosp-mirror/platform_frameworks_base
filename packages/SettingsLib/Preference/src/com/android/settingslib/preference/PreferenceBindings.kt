@@ -66,7 +66,7 @@ interface PreferenceCategoryBinding : PreferenceBinding {
 }
 
 /** A boolean value type preference associated with the abstract [TwoStatePreference]. */
-interface TwoStatePreferenceBinding : PreferenceBinding {
+interface BooleanValuePreferenceBinding : PreferenceBinding {
 
     override fun bind(preference: Preference, metadata: PreferenceMetadata) {
         super.bind(preference, metadata)
@@ -78,7 +78,7 @@ interface TwoStatePreferenceBinding : PreferenceBinding {
 }
 
 /** A boolean value type preference associated with [SwitchPreferenceCompat]. */
-interface SwitchPreferenceBinding : TwoStatePreferenceBinding {
+interface SwitchPreferenceBinding : BooleanValuePreferenceBinding {
 
     override fun createWidget(context: Context): Preference = SwitchPreferenceCompat(context)
 
@@ -88,7 +88,7 @@ interface SwitchPreferenceBinding : TwoStatePreferenceBinding {
 }
 
 /** A boolean value type preference associated with [MainSwitchPreference]. */
-interface MainSwitchPreferenceBinding : TwoStatePreferenceBinding {
+interface MainSwitchPreferenceBinding : BooleanValuePreferenceBinding {
 
     override fun createWidget(context: Context): Preference = MainSwitchPreference(context)
 
