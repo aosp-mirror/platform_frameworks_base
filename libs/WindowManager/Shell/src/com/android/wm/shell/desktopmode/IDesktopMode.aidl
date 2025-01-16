@@ -17,6 +17,8 @@
 package com.android.wm.shell.desktopmode;
 
 import android.app.ActivityManager.RunningTaskInfo;
+import android.content.Intent;
+import android.os.Bundle;
 import android.window.RemoteTransition;
 import com.android.wm.shell.desktopmode.IDesktopTaskListener;
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource;
@@ -61,4 +63,7 @@ interface IDesktopMode {
 
     /** Move a task with given `taskId` to external display */
     void moveToExternalDisplay(int taskId);
+
+    /** Start a transition when launching an intent in desktop mode */
+    void startLaunchIntentTransition(in Intent intent, in Bundle options, in int displayId);
 }

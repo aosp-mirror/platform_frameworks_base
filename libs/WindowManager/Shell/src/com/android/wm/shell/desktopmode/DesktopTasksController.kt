@@ -35,6 +35,7 @@ import android.graphics.PointF
 import android.graphics.Rect
 import android.graphics.Region
 import android.os.Binder
+import android.os.Bundle
 import android.os.Handler
 import android.os.IBinder
 import android.os.SystemProperties
@@ -881,6 +882,36 @@ class DesktopTasksController(
             return
         }
         moveToDisplay(task, newDisplayId)
+    }
+
+    /**
+     * Start an intent through a launch transition for starting tasks whose transition does not get
+     * handled by [handleRequest]
+     */
+    fun startLaunchIntentTransition(intent: Intent, options: Bundle, displayId: Int) {
+        val wct = WindowContainerTransaction()
+        val displayLayout = displayController.getDisplayLayout(displayId) ?: return
+        val bounds = calculateDefaultDesktopTaskBounds(displayLayout)
+        if (DesktopModeFlags.ENABLE_CASCADING_WINDOWS.isTrue) {
+            cascadeWindow(bounds, displayLayout, displayId)
+        }
+        val pendingIntent =
+            PendingIntent.getActivity(
+                context,
+                /* requestCode= */ 0,
+                intent,
+                PendingIntent.FLAG_IMMUTABLE,
+            )
+        val ops =
+            ActivityOptions.fromBundle(options).apply {
+                launchWindowingMode = WINDOWING_MODE_FREEFORM
+                pendingIntentBackgroundActivityStartMode =
+                    ActivityOptions.MODE_BACKGROUND_ACTIVITY_START_ALLOW_ALWAYS
+                launchBounds = bounds
+            }
+
+        wct.sendPendingIntent(pendingIntent, intent, ops.toBundle())
+        startLaunchTransition(TRANSIT_OPEN, wct, launchingTaskId = null)
     }
 
     /**
@@ -2902,6 +2933,12 @@ class DesktopTasksController(
         override fun moveToExternalDisplay(taskId: Int) {
             executeRemoteCallWithTaskPermission(controller, "moveTaskToExternalDisplay") { c ->
                 c.moveToNextDisplay(taskId)
+            }
+        }
+
+        override fun startLaunchIntentTransition(intent: Intent, options: Bundle, displayId: Int) {
+            executeRemoteCallWithTaskPermission(controller, "startLaunchIntentTransition") { c ->
+                c.startLaunchIntentTransition(intent, options, displayId)
             }
         }
     }

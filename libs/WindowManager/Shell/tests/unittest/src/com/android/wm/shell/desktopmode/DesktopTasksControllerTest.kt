@@ -1146,6 +1146,21 @@ class DesktopTasksControllerTest : ShellTestCase() {
     }
 
     @Test
+    fun launchIntent_taskInDesktopMode_transitionStarted() {
+        setUpLandscapeDisplay()
+        val freeformTask = setUpFreeformTask()
+
+        controller.startLaunchIntentTransition(
+            freeformTask.baseIntent,
+            Bundle.EMPTY,
+            DEFAULT_DISPLAY,
+        )
+
+        val wct = getLatestDesktopMixedTaskWct(type = TRANSIT_OPEN)
+        assertThat(wct.hierarchyOps).hasSize(1)
+    }
+
+    @Test
     @EnableFlags(Flags.FLAG_ENABLE_WINDOWING_DYNAMIC_INITIAL_BOUNDS)
     fun addMoveToDesktopChanges_landscapeDevice_userFullscreenOverride_defaultPortraitBounds() {
         setUpLandscapeDisplay()
@@ -5204,7 +5219,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
         val arg: ArgumentCaptor<WindowContainerTransaction> =
             ArgumentCaptor.forClass(WindowContainerTransaction::class.java)
         verify(desktopMixedTransitionHandler)
-            .startLaunchTransition(eq(type), capture(arg), anyInt(), anyOrNull(), anyOrNull())
+            .startLaunchTransition(eq(type), capture(arg), anyOrNull(), anyOrNull(), anyOrNull())
         return arg.value
     }
 
