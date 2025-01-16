@@ -31,6 +31,7 @@ import static com.android.systemui.assist.AssistManager.INVOCATION_TYPE_HOME_BUT
 import static com.android.systemui.navigationbar.views.NavigationBar.NavBarActionEvent.NAVBAR_ASSIST_LONGPRESS;
 import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_LONGPRESS;
 import static com.android.systemui.navigationbar.views.buttons.KeyButtonView.NavBarButtonEvent.NAVBAR_IME_SWITCHER_BUTTON_TAP;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_ALT_BACK;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
@@ -502,6 +503,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 BACK_DISPOSITION_DEFAULT, true /* showImeSwitcher */);
         verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_VISIBLE), eq(true));
         verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE), eq(true));
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_ALT_BACK), eq(true));
     }
 
     /**
@@ -516,6 +518,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 BACK_DISPOSITION_DEFAULT, false /* showImeSwitcher */);
         verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_VISIBLE), eq(true));
         verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE), eq(false));
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_ALT_BACK), eq(true));
     }
 
     /**
@@ -533,6 +536,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 BACK_DISPOSITION_DEFAULT, true /* showImeSwitcher */);
         verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_VISIBLE), eq(false));
         verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE), eq(false));
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_ALT_BACK), eq(false));
     }
 
     /**
@@ -547,6 +551,7 @@ public class NavigationBarTest extends SysuiTestCase {
                 BACK_DISPOSITION_ADJUST_NOTHING, true /* showImeSwitcher */);
         verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_VISIBLE), eq(true));
         verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE), eq(true));
+        verify(mMockSysUiState).setFlag(eq(SYSUI_STATE_IME_ALT_BACK), eq(false));
     }
 
     @Test
