@@ -41,6 +41,7 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickCallback
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.util.kotlin.pairwise
 import com.android.systemui.util.time.SystemClock
@@ -91,16 +92,24 @@ constructor(
                                 ),
                             colors = ColorsModel.Red,
                             startTimeMs = systemClock.elapsedRealtime(),
-                            createDialogLaunchOnClickListener(
-                                createDelegate(state.recordedTask),
-                                dialogTransitionAnimator,
-                                DialogCuj(
-                                    Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
-                                    tag = "Screen record",
+                            onClickListenerLegacy =
+                                createDialogLaunchOnClickListener(
+                                    createDelegate(state.recordedTask),
+                                    dialogTransitionAnimator,
+                                    DIALOG_CUJ,
+                                    logger,
+                                    TAG,
                                 ),
-                                logger,
-                                TAG,
-                            ),
+                            clickBehavior =
+                                OngoingActivityChipModel.ClickBehavior.ExpandAction(
+                                    createDialogLaunchOnClickCallback(
+                                        dialogDelegate = createDelegate(state.recordedTask),
+                                        dialogTransitionAnimator = dialogTransitionAnimator,
+                                        DIALOG_CUJ,
+                                        logger,
+                                        TAG,
+                                    )
+                                ),
                         )
                     }
                 }
@@ -154,6 +163,8 @@ constructor(
 
     companion object {
         @DrawableRes val ICON = R.drawable.ic_screenrecord
+        private val DIALOG_CUJ =
+            DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Screen record")
         private val TAG = "ScreenRecordVM".pad()
     }
 }

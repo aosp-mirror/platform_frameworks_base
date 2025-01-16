@@ -92,7 +92,10 @@ constructor(
                             OngoingActivityChipModel.Shown.IconOnly(
                                 icon = icon,
                                 colors = colors,
-                                getOnClickListener(state),
+                                onClickListenerLegacy = getOnClickListener(state),
+                                // TODO(b/372657935): Add click support for the call chip when
+                                // StatusBarChipModernization is enabled.
+                                clickBehavior = OngoingActivityChipModel.ClickBehavior.None,
                             )
                         } else {
                             val startTimeInElapsedRealtime =
@@ -102,7 +105,10 @@ constructor(
                                 icon = icon,
                                 colors = colors,
                                 startTimeMs = startTimeInElapsedRealtime,
-                                getOnClickListener(state),
+                                onClickListenerLegacy = getOnClickListener(state),
+                                // TODO(b/372657935): Add click support for the call chip when
+                                // StatusBarChipModernization is enabled.
+                                clickBehavior = OngoingActivityChipModel.ClickBehavior.None,
                             )
                         }
                     }

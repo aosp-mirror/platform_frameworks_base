@@ -39,6 +39,7 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ChipTransitionHelper
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickCallback
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -128,13 +129,25 @@ constructor(
             colors = ColorsModel.Red,
             // TODO(b/332662551): Maybe use a MediaProjection API to fetch this time.
             startTimeMs = systemClock.elapsedRealtime(),
-            createDialogLaunchOnClickListener(
-                createShareScreenToAppDialogDelegate(state),
-                dialogTransitionAnimator,
-                DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Share to app"),
-                logger,
-                TAG,
-            ),
+            onClickListenerLegacy =
+                createDialogLaunchOnClickListener(
+                    createShareScreenToAppDialogDelegate(state),
+                    dialogTransitionAnimator,
+                    DIALOG_CUJ,
+                    logger,
+                    TAG,
+                ),
+            clickBehavior =
+                OngoingActivityChipModel.ClickBehavior.ExpandAction(
+                    onClick =
+                        createDialogLaunchOnClickCallback(
+                            createShareScreenToAppDialogDelegate(state),
+                            dialogTransitionAnimator,
+                            DIALOG_CUJ,
+                            logger,
+                            TAG,
+                        )
+                ),
         )
     }
 
@@ -150,16 +163,24 @@ constructor(
                     )
                 ),
             colors = ColorsModel.Red,
-            createDialogLaunchOnClickListener(
-                createGenericShareToAppDialogDelegate(),
-                dialogTransitionAnimator,
-                DialogCuj(
-                    Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP,
-                    tag = "Share to app audio only",
+            onClickListenerLegacy =
+                createDialogLaunchOnClickListener(
+                    createGenericShareToAppDialogDelegate(),
+                    dialogTransitionAnimator,
+                    DIALOG_CUJ_AUDIO_ONLY,
+                    logger,
+                    TAG,
                 ),
-                logger,
-                TAG,
-            ),
+            clickBehavior =
+                OngoingActivityChipModel.ClickBehavior.ExpandAction(
+                    createDialogLaunchOnClickCallback(
+                        createGenericShareToAppDialogDelegate(),
+                        dialogTransitionAnimator,
+                        DIALOG_CUJ_AUDIO_ONLY,
+                        logger,
+                        TAG,
+                    )
+                ),
         )
     }
 
@@ -180,6 +201,10 @@ constructor(
 
     companion object {
         @DrawableRes val SHARE_TO_APP_ICON = R.drawable.ic_present_to_all
+        private val DIALOG_CUJ =
+            DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Share to app")
+        private val DIALOG_CUJ_AUDIO_ONLY =
+            DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Share to app audio only")
         private val TAG = "ShareToAppVM".pad()
     }
 }

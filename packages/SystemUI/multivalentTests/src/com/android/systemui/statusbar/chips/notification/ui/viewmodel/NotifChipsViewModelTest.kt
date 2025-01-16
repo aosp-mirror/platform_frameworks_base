@@ -650,7 +650,7 @@ class NotifChipsViewModelTest : SysuiTestCase() {
             )
             val chip = latest!![0]
 
-            chip.onClickListener!!.onClick(mock<View>())
+            chip.onClickListenerLegacy!!.onClick(mock<View>())
 
             assertThat(latestChipTap).isEqualTo("clickTest")
         }

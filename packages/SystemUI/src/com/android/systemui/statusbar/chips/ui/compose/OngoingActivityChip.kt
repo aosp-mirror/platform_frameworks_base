@@ -35,10 +35,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.dimensionResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
+import com.android.compose.animation.Expandable
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.ui.compose.Icon
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.ui.compose.modifiers.neverDecreaseWidth
@@ -47,23 +50,42 @@ import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 
 @Composable
 fun OngoingActivityChip(model: OngoingActivityChipModel.Shown, modifier: Modifier = Modifier) {
+    when (val clickBehavior = model.clickBehavior) {
+        is OngoingActivityChipModel.ClickBehavior.ExpandAction -> {
+            // Wrap the chip in an Expandable so we can animate the expand transition.
+            ExpandableChip(
+                color = { Color.Transparent },
+                shape =
+                    RoundedCornerShape(
+                        dimensionResource(id = R.dimen.ongoing_activity_chip_corner_radius)
+                    ),
+                modifier = modifier,
+            ) { expandable ->
+                ChipBody(model, onClick = { clickBehavior.onClick(expandable) })
+            }
+        }
+
+        is OngoingActivityChipModel.ClickBehavior.None -> {
+            ChipBody(model, modifier = modifier)
+        }
+    }
+}
+
+@Composable
+private fun ChipBody(
+    model: OngoingActivityChipModel.Shown,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {},
+) {
     val context = LocalContext.current
-    val isClickable = model.onClickListener != null
+    val isClickable = onClick != {}
     val hasEmbeddedIcon = model.icon is OngoingActivityChipModel.ChipIcon.StatusBarView
 
     // Use a Box with `fillMaxHeight` to create a larger click surface for the chip. The visible
     // height of the chip is determined by the height of the background of the Row below.
     Box(
         contentAlignment = Alignment.Center,
-        modifier =
-            modifier
-                .fillMaxHeight()
-                .clickable(
-                    enabled = isClickable,
-                    onClick = {
-                        // TODO(b/372657935): Implement click actions.
-                    },
-                ),
+        modifier = modifier.fillMaxHeight().clickable(enabled = isClickable, onClick = onClick),
     ) {
         Row(
             horizontalArrangement = Arrangement.Center,
@@ -205,4 +227,14 @@ private fun ChipContent(viewModel: OngoingActivityChipModel.Shown, modifier: Mod
             // TODO(b/372657935): Implement ShortTimeDelta content in compose.
         }
     }
+}
+
+@Composable
+private fun ExpandableChip(
+    color: () -> Color,
+    shape: Shape,
+    modifier: Modifier = Modifier,
+    content: @Composable (Expandable) -> Unit,
+) {
+    Expandable(color = color(), shape = shape, modifier = modifier.clip(shape)) { content(it) }
 }

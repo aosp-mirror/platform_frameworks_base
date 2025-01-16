@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.chips.ui.viewmodel
 
+import android.platform.test.annotations.DisableFlags
+import android.platform.test.annotations.EnableFlags
 import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
@@ -23,14 +25,19 @@ import com.android.internal.jank.Cuj
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.animation.DialogCuj
 import com.android.systemui.animation.DialogTransitionAnimator
+import com.android.systemui.animation.Expandable
 import com.android.systemui.log.logcatLogBuffer
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
+import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickCallback
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel.Companion.createDialogLaunchOnClickListener
+import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.phone.SystemUIDialog
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import kotlin.test.Test
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
@@ -53,8 +60,11 @@ class OngoingActivityChipViewModelTest : SysuiTestCase() {
                 )
                 .thenReturn(chipBackgroundView)
         }
+    private val mockExpandable: Expandable =
+        mock<Expandable>().apply { whenever(dialogTransitionController(any())).thenReturn(mock()) }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun createDialogLaunchOnClickListener_showsDialogOnClick() {
         val cuj = DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Test")
         val clickListener =
@@ -68,11 +78,23 @@ class OngoingActivityChipViewModelTest : SysuiTestCase() {
 
         clickListener.onClick(chipView)
         verify(dialogTransitionAnimator)
-            .showFromView(
-                eq(mockSystemUIDialog),
-                eq(chipBackgroundView),
-                eq(cuj),
-                anyBoolean(),
+            .showFromView(eq(mockSystemUIDialog), eq(chipBackgroundView), eq(cuj), anyBoolean())
+    }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun createDialogLaunchOnClickCallback_showsDialogOnClick() {
+        val cuj = DialogCuj(Cuj.CUJ_STATUS_BAR_LAUNCH_DIALOG_FROM_CHIP, tag = "Test")
+        val clickCallback =
+            createDialogLaunchOnClickCallback(
+                dialogDelegate,
+                dialogTransitionAnimator,
+                cuj,
+                logcatLogBuffer("OngoingActivityChipViewModelTest"),
+                "tag",
             )
+
+        clickCallback.invoke(mockExpandable)
+        verify(dialogTransitionAnimator).show(eq(mockSystemUIDialog), any(), anyBoolean())
     }
 }

@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.chips.ui.model
 
 import android.view.View
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.statusbar.StatusBarIconView
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
@@ -46,17 +47,20 @@ sealed class OngoingActivityChipModel {
         open val colors: ColorsModel,
         /**
          * Listener method to invoke when this chip is clicked. If null, the chip won't be
-         * clickable.
+         * clickable. Will be deprecated after [StatusBarChipsModernization] is enabled.
          */
-        open val onClickListener: View.OnClickListener?,
+        open val onClickListenerLegacy: View.OnClickListener?,
+        /** Data class that determines how clicks on the chip should be handled. */
+        open val clickBehavior: ClickBehavior,
     ) : OngoingActivityChipModel() {
 
         /** This chip shows only an icon and nothing else. */
         data class IconOnly(
             override val icon: ChipIcon,
             override val colors: ColorsModel,
-            override val onClickListener: View.OnClickListener?,
-        ) : Shown(icon, colors, onClickListener) {
+            override val onClickListenerLegacy: View.OnClickListener?,
+            override val clickBehavior: ClickBehavior,
+        ) : Shown(icon, colors, onClickListenerLegacy, clickBehavior) {
             override val logName = "Shown.Icon"
         }
 
@@ -74,8 +78,9 @@ sealed class OngoingActivityChipModel {
              * [android.widget.Chronometer.setBase].
              */
             val startTimeMs: Long,
-            override val onClickListener: View.OnClickListener?,
-        ) : Shown(icon, colors, onClickListener) {
+            override val onClickListenerLegacy: View.OnClickListener?,
+            override val clickBehavior: ClickBehavior,
+        ) : Shown(icon, colors, onClickListenerLegacy, clickBehavior) {
             override val logName = "Shown.Timer"
         }
 
@@ -88,8 +93,9 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             /** The time of the event that this chip represents. */
             val time: Long,
-            override val onClickListener: View.OnClickListener?,
-        ) : Shown(icon, colors, onClickListener) {
+            override val onClickListenerLegacy: View.OnClickListener?,
+            override val clickBehavior: ClickBehavior,
+        ) : Shown(icon, colors, onClickListenerLegacy, clickBehavior) {
             init {
                 StatusBarNotifChips.assertInNewMode()
             }
@@ -105,7 +111,13 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             /** The number of seconds until an event is started. */
             val secondsUntilStarted: Long,
-        ) : Shown(icon = null, colors, onClickListener = null) {
+        ) :
+            Shown(
+                icon = null,
+                colors,
+                onClickListenerLegacy = null,
+                clickBehavior = ClickBehavior.None,
+            ) {
             override val logName = "Shown.Countdown"
         }
 
@@ -115,8 +127,9 @@ sealed class OngoingActivityChipModel {
             override val colors: ColorsModel,
             // TODO(b/361346412): Enforce a max length requirement?
             val text: String,
-            override val onClickListener: View.OnClickListener? = null,
-        ) : Shown(icon, colors, onClickListener) {
+            override val onClickListenerLegacy: View.OnClickListener? = null,
+            override val clickBehavior: ClickBehavior,
+        ) : Shown(icon, colors, onClickListenerLegacy, clickBehavior) {
             override val logName = "Shown.Text"
         }
     }
@@ -148,5 +161,14 @@ sealed class OngoingActivityChipModel {
          * UI created internally.
          */
         data class SingleColorIcon(val impl: Icon) : ChipIcon
+    }
+
+    /** Defines the behavior of the chip when it is clicked. */
+    sealed interface ClickBehavior {
+        /** No specific click behavior. */
+        data object None : ClickBehavior
+
+        /** The chip expands into a dialog or activity on click. */
+        data class ExpandAction(val onClick: (Expandable) -> Unit) : ClickBehavior
     }
 }

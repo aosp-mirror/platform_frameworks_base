@@ -25,6 +25,7 @@ import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.Expandable
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.kosmos.useUnconfinedTestDispatcher
@@ -104,6 +105,8 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
                 )
                 .thenReturn(chipBackgroundView)
         }
+    private val mockExpandable: Expandable =
+        mock<Expandable>().apply { whenever(dialogTransitionController(any())).thenReturn(mock()) }
 
     private val underTest by lazy { kosmos.ongoingActivityChipsViewModel }
 
@@ -679,7 +682,13 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             // WHEN screen record gets stopped via dialog
             val dialogStopAction =
-                getStopActionFromDialog(latest, chipView, mockSystemUIDialog, kosmos)
+                getStopActionFromDialog(
+                    latest,
+                    chipView,
+                    mockExpandable,
+                    mockSystemUIDialog,
+                    kosmos,
+                )
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN the chip is immediately hidden with no animation
@@ -700,7 +709,13 @@ class OngoingActivityChipsWithNotifsViewModelTest : SysuiTestCase() {
 
             // WHEN media projection gets stopped via dialog
             val dialogStopAction =
-                getStopActionFromDialog(latest, chipView, mockSystemUIDialog, kosmos)
+                getStopActionFromDialog(
+                    latest,
+                    chipView,
+                    mockExpandable,
+                    mockSystemUIDialog,
+                    kosmos,
+                )
             dialogStopAction.onClick(mock<DialogInterface>(), 0)
 
             // THEN the chip is immediately hidden with no animation
