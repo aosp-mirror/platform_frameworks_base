@@ -109,6 +109,7 @@ message SecureSettingsProto {
         optional SettingProto em_value = 61 [ (android.privacy).dest = DEST_AUTOMATIC ];
         // Settings for accessibility autoclick
         optional SettingProto autoclick_cursor_area_size = 62 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto autoclick_ignore_minor_cursor_movement = 63 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     }
     optional Accessibility accessibility = 2;

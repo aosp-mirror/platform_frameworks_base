@@ -1718,6 +1718,9 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.ACCESSIBILITY_AUTOCLICK_CURSOR_AREA_SIZE,
                 SecureSettingsProto.Accessibility.AUTOCLICK_CURSOR_AREA_SIZE);
         dumpSetting(s, p,
+                Settings.Secure.ACCESSIBILITY_AUTOCLICK_IGNORE_MINOR_CURSOR_MOVEMENT,
+                SecureSettingsProto.Accessibility.AUTOCLICK_IGNORE_MINOR_CURSOR_MOVEMENT);
+        dumpSetting(s, p,
                 Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED,
                 SecureSettingsProto.Accessibility.AUTOCLICK_ENABLED);
         dumpSetting(s, p,

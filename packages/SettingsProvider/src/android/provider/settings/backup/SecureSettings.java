@@ -92,6 +92,7 @@ public class SecureSettings {
         Settings.Secure.KEY_REPEAT_DELAY_MS,
         Settings.Secure.CAMERA_GESTURE_DISABLED,
         Settings.Secure.ACCESSIBILITY_AUTOCLICK_CURSOR_AREA_SIZE,
+        Settings.Secure.ACCESSIBILITY_AUTOCLICK_IGNORE_MINOR_CURSOR_MOVEMENT,
         Settings.Secure.ACCESSIBILITY_AUTOCLICK_ENABLED,
         Settings.Secure.ACCESSIBILITY_AUTOCLICK_DELAY,
         Settings.Secure.ACCESSIBILITY_LARGE_POINTER_ICON,

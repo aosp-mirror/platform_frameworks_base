@@ -9314,6 +9314,16 @@ public final class Settings {
                 "accessibility_autoclick_cursor_area_size";
 
         /**
+         * Setting that specifies whether minor cursor movement will be ignored when
+         * {@link #ACCESSIBILITY_AUTOCLICK_ENABLED} is set.
+         *
+         * @see #ACCESSIBILITY_AUTOCLICK_ENABLED
+         * @hide
+         */
+        public static final String ACCESSIBILITY_AUTOCLICK_IGNORE_MINOR_CURSOR_MOVEMENT =
+                "accessibility_autoclick_ignore_minor_cursor_movement";
+
+        /**
          * Whether or not larger size icons are used for the pointer of mouse/trackpad for
          * accessibility.
          * (0 = false, 1 = true)
