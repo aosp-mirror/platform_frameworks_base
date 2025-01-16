@@ -13,6 +13,7 @@ flag {
     namespace: "machine_learning"
     description: "Feature flag for baklava content capture API"
     bug: "380381249"
+    is_exported: true
 }
 
 flag {
