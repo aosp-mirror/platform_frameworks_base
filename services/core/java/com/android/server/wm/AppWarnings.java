@@ -51,6 +51,7 @@ import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.Xml;
+import android.view.ContextThemeWrapper;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.ArrayUtils;
@@ -498,10 +499,21 @@ class AppWarnings {
             }
         }
         if (!hasPackageFlag(userId, ar.packageName, FLAG_HIDE_PAGE_SIZE_MISMATCH)) {
+            Context context =  getUiContextForActivity(ar);
+            // PageSizeMismatchDialog has link in message which should open in browser.
+            // Starting activity from non-activity context is not allowed and flag
+            // FLAG_ACTIVITY_NEW_TASK is needed to start activity.
+            context =  new ContextThemeWrapper(context, context.getThemeResId()) {
+                @Override
+                public void startActivity(Intent intent) {
+                    intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    super.startActivity(intent);
+                }
+            };
             pageSizeMismatchDialog =
                     new PageSizeMismatchDialog(
                             AppWarnings.this,
-                            getUiContextForActivity(ar),
+                            context,
                             ar.info.applicationInfo,
                             userId,
                             warning);
