@@ -17,6 +17,7 @@
 package com.android.systemui.keyguard
 
 import android.app.IActivityTaskManager
+import android.os.RemoteException
 import android.util.Log
 import android.view.IRemoteAnimationFinishedCallback
 import android.view.RemoteAnimationTarget
@@ -265,7 +266,11 @@ constructor(
         if (enableNewKeyguardShellTransitions) {
             startKeyguardTransition(lockscreenShowing, aodVisible)
         } else {
-            activityTaskManagerService.setLockScreenShown(lockscreenShowing, aodVisible)
+            try {
+                activityTaskManagerService.setLockScreenShown(lockscreenShowing, aodVisible)
+            } catch (e: RemoteException) {
+                Log.e(TAG, "Remote exception", e)
+            }
         }
         this.isLockscreenShowing = lockscreenShowing
         this.isAodVisible = aodVisible
