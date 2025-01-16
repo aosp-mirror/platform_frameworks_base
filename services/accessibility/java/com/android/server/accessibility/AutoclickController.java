@@ -39,6 +39,8 @@ import android.view.MotionEvent.PointerProperties;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityManager;
 
+import androidx.annotation.VisibleForTesting;
+
 /**
  * Implements "Automatically click on mouse stop" feature.
  *
@@ -69,10 +71,10 @@ public class AutoclickController extends BaseEventStreamTransformation {
     private final int mUserId;
 
     // Lazily created on the first mouse motion event.
-    private ClickScheduler mClickScheduler;
-    private AutoclickSettingsObserver mAutoclickSettingsObserver;
-    private AutoclickIndicatorScheduler mAutoclickIndicatorScheduler;
-    private AutoclickIndicatorView mAutoclickIndicatorView;
+    @VisibleForTesting ClickScheduler mClickScheduler;
+    @VisibleForTesting AutoclickSettingsObserver mAutoclickSettingsObserver;
+    @VisibleForTesting AutoclickIndicatorScheduler mAutoclickIndicatorScheduler;
+    @VisibleForTesting AutoclickIndicatorView mAutoclickIndicatorView;
     private WindowManager mWindowManager;
 
     public AutoclickController(Context context, int userId, AccessibilityTraceManager trace) {
@@ -360,7 +362,8 @@ public class AutoclickController extends BaseEventStreamTransformation {
      * moving. The click is first scheduled when a mouse movement is detected, and then further
      * delayed on every sufficient mouse movement.
      */
-    final private class ClickScheduler implements Runnable {
+    @VisibleForTesting
+    final class ClickScheduler implements Runnable {
         /**
          * Minimal distance pointer has to move relative to anchor in order for movement not to be
          * discarded as noise. Anchor is the position of the last MOVE event that was not considered
@@ -472,6 +475,11 @@ public class AutoclickController extends BaseEventStreamTransformation {
             if (Flags.enableAutoclickIndicator() && mAutoclickIndicatorView != null) {
                 mAutoclickIndicatorView.setAnimationDuration(delay - SHOW_INDICATOR_DELAY_TIME);
             }
+        }
+
+        @VisibleForTesting
+        int getDelayForTesting() {
+            return mDelay;
         }
 
         /**

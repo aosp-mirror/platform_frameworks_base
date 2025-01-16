@@ -28,6 +28,8 @@ import android.view.View;
 import android.view.accessibility.AccessibilityManager;
 import android.view.animation.LinearInterpolator;
 
+import androidx.annotation.VisibleForTesting;
+
 // A visual indicator for the autoclick feature.
 public class AutoclickIndicatorView extends View {
     private static final String TAG = AutoclickIndicatorView.class.getSimpleName();
@@ -37,7 +39,7 @@ public class AutoclickIndicatorView extends View {
 
     static final int MINIMAL_ANIMATION_DURATION = 50;
 
-    private float mRadius = AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT;
+    private int mRadius = AUTOCLICK_CURSOR_AREA_SIZE_DEFAULT;
 
     private final Paint mPaint;
 
@@ -110,6 +112,11 @@ public class AutoclickIndicatorView extends View {
 
     public void setRadius(int radius) {
         mRadius = radius;
+    }
+
+    @VisibleForTesting
+    int getRadiusForTesting() {
+        return mRadius;
     }
 
     public void redrawIndicator() {
