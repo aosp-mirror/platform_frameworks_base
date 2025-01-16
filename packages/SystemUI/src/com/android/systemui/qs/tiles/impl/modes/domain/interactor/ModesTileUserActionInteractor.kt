@@ -29,6 +29,7 @@ import com.android.systemui.qs.tiles.impl.modes.domain.model.ModesTileModel
 import com.android.systemui.qs.tiles.viewmodel.QSTileUserAction
 import com.android.systemui.statusbar.policy.domain.interactor.ZenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
+import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogEventLogger
 import javax.inject.Inject
 
 @SysUISingleton
@@ -39,6 +40,7 @@ constructor(
     // TODO(b/353896370): The domain layer should not have to depend on the UI layer.
     private val dialogDelegate: ModesDialogDelegate,
     private val zenModeInteractor: ZenModeInteractor,
+    private val dialogEventLogger: ModesDialogEventLogger,
 ) : QSTileUserActionInteractor<ModesTileModel> {
     val longClickIntent = Intent(Settings.ACTION_ZEN_MODE_SETTINGS)
 
@@ -78,7 +80,16 @@ constructor(
                 Log.wtf(TAG, "Triggered DND but it's null!?")
                 return
             }
-            zenModeInteractor.activateMode(dnd)
+
+            if (zenModeInteractor.shouldAskForZenDuration(dnd)) {
+                dialogEventLogger.logOpenDurationDialog(dnd)
+                // NOTE: The dialog handles turning on the mode itself.
+                val dialog = dialogDelegate.makeDndDurationDialog()
+                dialog.show()
+            } else {
+                dialogEventLogger.logModeOn(dnd)
+                zenModeInteractor.activateMode(dnd)
+            }
         } else {
             zenModeInteractor.deactivateAllModes()
         }

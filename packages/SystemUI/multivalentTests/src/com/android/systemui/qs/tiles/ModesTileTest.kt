@@ -48,6 +48,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.policy.data.repository.zenModeRepository
 import com.android.systemui.statusbar.policy.domain.interactor.zenModeInteractor
 import com.android.systemui.statusbar.policy.ui.dialog.ModesDialogDelegate
+import com.android.systemui.statusbar.policy.ui.dialog.modesDialogEventLogger
 import com.android.systemui.testKosmos
 import com.android.systemui.util.mockito.any
 import com.android.systemui.util.settings.FakeSettings
@@ -123,7 +124,12 @@ class ModesTileTest : SysuiTestCase() {
             )
 
         userActionInteractor =
-            ModesTileUserActionInteractor(inputHandler, dialogDelegate, kosmos.zenModeInteractor)
+            ModesTileUserActionInteractor(
+                inputHandler,
+                dialogDelegate,
+                kosmos.zenModeInteractor,
+                kosmos.modesDialogEventLogger,
+            )
 
         underTest =
             ModesTile(
