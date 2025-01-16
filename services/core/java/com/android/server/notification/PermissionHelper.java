@@ -25,12 +25,17 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.UserIdInt;
+import android.content.ContentProvider;
+import android.content.ContentResolver;
+import android.content.Intent;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.permission.IPermissionManager;
 import android.util.ArrayMap;
 import android.util.Pair;
@@ -38,6 +43,7 @@ import android.util.Slog;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.permission.PermissionManagerServiceInternal;
+import com.android.server.uri.UriGrantsManagerInternal;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -268,6 +274,19 @@ public final class PermissionHelper {
             Slog.e(TAG, "Could not reach system server", e);
         }
         return false;
+    }
+
+    static void grantUriPermission(final UriGrantsManagerInternal ugmInternal, Uri uri,
+            int sourceUid) {
+        if (uri == null || !ContentResolver.SCHEME_CONTENT.equals(uri.getScheme())) return;
+
+        Binder.withCleanCallingIdentity(() -> {
+            // This will throw a SecurityException if the caller can't grant.
+            ugmInternal.checkGrantUriPermission(sourceUid, null,
+                    ContentProvider.getUriWithoutUserId(uri),
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION,
+                    ContentProvider.getUserIdFromUri(uri, UserHandle.getUserId(sourceUid)));
+        });
     }
 
     public static class PackagePermission {
