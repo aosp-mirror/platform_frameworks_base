@@ -212,7 +212,11 @@ class PromotedNotificationContentExtractorImplTest : SysuiTestCase() {
     }
 
     @Test
-    @EnableFlags(PromotedNotificationUi.FLAG_NAME, StatusBarNotifChips.FLAG_NAME)
+    @EnableFlags(
+        PromotedNotificationUi.FLAG_NAME,
+        StatusBarNotifChips.FLAG_NAME,
+        android.app.Flags.FLAG_API_RICH_ONGOING,
+    )
     fun extractContent_fromProgressStyle() {
         val entry = createEntry {
             setStyle(ProgressStyle().addProgressSegment(Segment(100)).setProgress(75))
