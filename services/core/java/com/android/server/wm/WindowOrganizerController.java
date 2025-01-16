@@ -1380,7 +1380,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 break;
             }
             case HIERARCHY_OP_TYPE_RESTORE_TRANSIENT_ORDER: {
-                if (!com.android.wm.shell.Flags.enableShellTopTaskTracking()) {
+                if (!com.android.wm.shell.Flags.enableRecentsBookendTransition()) {
                     // Only allow restoring transient order when finishing a transition
                     if (!chain.isFinishing()) break;
                 }
@@ -1416,7 +1416,7 @@ class WindowOrganizerController extends IWindowOrganizerController.Stub
                 final TaskDisplayArea taskDisplayArea = thisTask.getTaskDisplayArea();
                 taskDisplayArea.moveRootTaskBehindRootTask(thisTask.getRootTask(), restoreAt);
 
-                if (com.android.wm.shell.Flags.enableShellTopTaskTracking()) {
+                if (com.android.wm.shell.Flags.enableRecentsBookendTransition()) {
                     // Because we are in a transient launch transition, the requested visibility of
                     // tasks does not actually change for the transient-hide tasks, but we do want
                     // the restoration of these transient-hide tasks to top to be a part of this
