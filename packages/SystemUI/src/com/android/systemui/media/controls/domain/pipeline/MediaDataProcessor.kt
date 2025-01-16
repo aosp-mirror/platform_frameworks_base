@@ -45,16 +45,15 @@ import android.media.session.MediaController
 import android.media.session.MediaSession
 import android.media.session.PlaybackState
 import android.net.Uri
-import android.os.Parcelable
 import android.os.Process
 import android.os.UserHandle
-import android.provider.Settings
 import android.service.notification.StatusBarNotification
 import android.support.v4.media.MediaMetadataCompat
 import android.text.TextUtils
 import android.util.Log
 import android.util.Pair as APair
 import androidx.media.utils.MediaConstants
+import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.app.tracing.traceSection
 import com.android.internal.annotations.Keep
 import com.android.internal.logging.InstanceId
@@ -87,8 +86,6 @@ import com.android.systemui.media.controls.util.MediaDataUtils
 import com.android.systemui.media.controls.util.MediaFlags
 import com.android.systemui.media.controls.util.MediaUiEventLogger
 import com.android.systemui.media.controls.util.SmallHash
-import com.android.systemui.plugins.ActivityStarter
-import com.android.systemui.plugins.BcSmartspaceDataPlugin
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.statusbar.NotificationMediaManager.isPlayingState
@@ -97,8 +94,6 @@ import com.android.systemui.util.Assert
 import com.android.systemui.util.Utils
 import com.android.systemui.util.concurrency.DelayableExecutor
 import com.android.systemui.util.concurrency.ThreadFactory
-import com.android.systemui.util.settings.SecureSettings
-import com.android.systemui.util.settings.SettingsProxyExt.observerFlow
 import com.android.systemui.util.time.SystemClock
 import java.io.IOException
 import java.io.PrintWriter
@@ -106,12 +101,6 @@ import java.util.concurrent.Executor
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.flow.collectLatest
-import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.flow.flowOn
-import kotlinx.coroutines.flow.map
-import kotlinx.coroutines.flow.onStart
-import com.android.app.tracing.coroutines.launchTraced as launch
 import kotlinx.coroutines.withContext
 
 // URI fields to try loading album art from
@@ -139,12 +128,10 @@ class MediaDataProcessor(
     private val mediaControllerFactory: MediaControllerFactory,
     private val broadcastDispatcher: BroadcastDispatcher,
     private val dumpManager: DumpManager,
-    private val activityStarter: ActivityStarter,
     private val smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
     private var useMediaResumption: Boolean,
     private val useQsMediaPlayer: Boolean,
     private val systemClock: SystemClock,
-    private val secureSettings: SecureSettings,
     private val mediaFlags: MediaFlags,
     private val logger: MediaUiEventLogger,
     private val smartspaceManager: SmartspaceManager?,
@@ -152,7 +139,7 @@ class MediaDataProcessor(
     private val mediaDataRepository: MediaDataRepository,
     private val mediaDataLoader: dagger.Lazy<MediaDataLoader>,
     private val mediaLogger: MediaLogger,
-) : CoreStartable, BcSmartspaceDataPlugin.SmartspaceTargetListener {
+) : CoreStartable {
 
     companion object {
         /**
@@ -191,7 +178,6 @@ class MediaDataProcessor(
 
     // There should ONLY be at most one Smartspace media recommendation.
     @Keep private var smartspaceSession: SmartspaceSession? = null
-    private var allowMediaRecommendations = false
 
     private val artworkWidth =
         context.resources.getDimensionPixelSize(
@@ -221,10 +207,8 @@ class MediaDataProcessor(
         mediaControllerFactory: MediaControllerFactory,
         dumpManager: DumpManager,
         broadcastDispatcher: BroadcastDispatcher,
-        activityStarter: ActivityStarter,
         smartspaceMediaDataProvider: SmartspaceMediaDataProvider,
         clock: SystemClock,
-        secureSettings: SecureSettings,
         mediaFlags: MediaFlags,
         logger: MediaUiEventLogger,
         smartspaceManager: SmartspaceManager?,
@@ -245,12 +229,10 @@ class MediaDataProcessor(
         mediaControllerFactory,
         broadcastDispatcher,
         dumpManager,
-        activityStarter,
         smartspaceMediaDataProvider,
         Utils.useMediaResumption(context),
         Utils.useQsMediaPlayer(context),
         clock,
-        secureSettings,
         mediaFlags,
         logger,
         smartspaceManager,
@@ -296,7 +278,7 @@ class MediaDataProcessor(
         context.registerReceiver(appChangeReceiver, uninstallFilter)
 
         // Register for Smartspace data updates.
-        smartspaceMediaDataProvider.registerListener(this)
+        // TODO(b/382680767): remove
         smartspaceSession =
             smartspaceManager?.createSmartspaceSession(
                 SmartspaceConfig.Builder(context, SMARTSPACE_UI_SURFACE_LABEL).build()
@@ -314,13 +296,9 @@ class MediaDataProcessor(
             }
         }
         smartspaceSession?.requestSmartspaceUpdate()
-
-        // Track media controls recommendation setting.
-        applicationScope.launch { trackMediaControlsRecommendationSetting() }
     }
 
     fun destroy() {
-        smartspaceMediaDataProvider.unregisterListener(this)
         smartspaceSession?.close()
         smartspaceSession = null
         context.unregisterReceiver(appChangeReceiver)
@@ -355,43 +333,6 @@ class MediaDataProcessor(
         } else {
             onNotificationRemoved(key)
         }
-    }
-
-    /**
-     * Allow recommendations from smartspace to show in media controls. Requires
-     * [Utils.useQsMediaPlayer] to be enabled. On by default, but can be disabled by setting to 0
-     */
-    private suspend fun allowMediaRecommendations(): Boolean {
-        return withContext(backgroundDispatcher) {
-            val flag =
-                secureSettings.getBoolForUser(
-                    Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION,
-                    true,
-                    UserHandle.USER_CURRENT,
-                )
-
-            useQsMediaPlayer && flag
-        }
-    }
-
-    private suspend fun trackMediaControlsRecommendationSetting() {
-        secureSettings
-            .observerFlow(UserHandle.USER_ALL, Settings.Secure.MEDIA_CONTROLS_RECOMMENDATION)
-            // perform a query at the beginning.
-            .onStart { emit(Unit) }
-            .map { allowMediaRecommendations() }
-            .distinctUntilChanged()
-            .flowOn(backgroundDispatcher)
-            // only track the most recent emission
-            .collectLatest {
-                allowMediaRecommendations = it
-                if (!allowMediaRecommendations) {
-                    dismissSmartspaceRecommendation(
-                        key = mediaDataRepository.smartspaceMediaData.value.targetId,
-                        delay = 0L,
-                    )
-                }
-            }
     }
 
     private fun removeAllForPackage(packageName: String) {
@@ -1277,62 +1218,6 @@ class MediaDataProcessor(
             }
         }
 
-    override fun onSmartspaceTargetsUpdated(targets: List<Parcelable>) {
-        if (!allowMediaRecommendations) {
-            if (DEBUG) Log.d(TAG, "Smartspace recommendation is disabled in Settings.")
-            return
-        }
-
-        val mediaTargets = targets.filterIsInstance<SmartspaceTarget>()
-        val smartspaceMediaData = mediaDataRepository.smartspaceMediaData.value
-        when (mediaTargets.size) {
-            0 -> {
-                if (!smartspaceMediaData.isActive) {
-                    return
-                }
-                if (DEBUG) {
-                    Log.d(TAG, "Set Smartspace media to be inactive for the data update")
-                }
-                if (mediaFlags.isPersistentSsCardEnabled()) {
-                    // Smartspace uses this signal to hide the card (e.g. when it expires or user
-                    // disconnects headphones), so treat as setting inactive when flag is on
-                    val recommendation = smartspaceMediaData.copy(isActive = false)
-                    mediaDataRepository.setRecommendation(recommendation)
-                    notifySmartspaceMediaDataLoaded(recommendation.targetId, recommendation)
-                } else {
-                    notifySmartspaceMediaDataRemoved(
-                        smartspaceMediaData.targetId,
-                        immediately = false,
-                    )
-                    mediaDataRepository.setRecommendation(
-                        SmartspaceMediaData(
-                            targetId = smartspaceMediaData.targetId,
-                            instanceId = smartspaceMediaData.instanceId,
-                        )
-                    )
-                }
-            }
-            1 -> {
-                val newMediaTarget = mediaTargets.get(0)
-                if (smartspaceMediaData.targetId == newMediaTarget.smartspaceTargetId) {
-                    // The same Smartspace updates can be received. Skip the duplicate updates.
-                    return
-                }
-                if (DEBUG) Log.d(TAG, "Forwarding Smartspace media update.")
-                val recommendation = toSmartspaceMediaData(newMediaTarget)
-                mediaDataRepository.setRecommendation(recommendation)
-                notifySmartspaceMediaDataLoaded(recommendation.targetId, recommendation)
-            }
-            else -> {
-                // There should NOT be more than 1 Smartspace media update. When it happens, it
-                // indicates a bad state or an error. Reset the status accordingly.
-                Log.wtf(TAG, "More than 1 Smartspace Media Update. Resetting the status...")
-                notifySmartspaceMediaDataRemoved(smartspaceMediaData.targetId, immediately = false)
-                mediaDataRepository.setRecommendation(SmartspaceMediaData())
-            }
-        }
-    }
-
     fun onNotificationRemoved(key: String) {
         Assert.isMainThread()
         val removed = mediaDataRepository.removeMediaEntry(key) ?: return
@@ -1621,7 +1506,6 @@ class MediaDataProcessor(
         pw.apply {
             println("internalListeners: $internalListeners")
             println("useMediaResumption: $useMediaResumption")
-            println("allowMediaRecommendations: $allowMediaRecommendations")
         }
     }
 }
