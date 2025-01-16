@@ -23,7 +23,6 @@ import android.animation.ValueAnimator;
 import android.app.WallpaperColors;
 import android.content.Context;
 import android.content.res.ColorStateList;
-import android.graphics.Typeface;
 import android.graphics.drawable.ClipDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
@@ -233,14 +232,14 @@ public abstract class MediaOutputBaseAdapter extends
                     : mController.getItemMarginEndDefault();
         }
 
-        void setTwoLineLayout(MediaDevice device, boolean bFocused, boolean showSeekBar,
+        void setTwoLineLayout(MediaDevice device, boolean showSeekBar,
                 boolean showProgressBar, boolean showSubtitle, boolean showStatus,
                 boolean isFakeActive) {
-            setTwoLineLayout(device, null, bFocused, showSeekBar, showProgressBar, showSubtitle,
+            setTwoLineLayout(device, null, showSeekBar, showProgressBar, showSubtitle,
                     showStatus, false, isFakeActive);
         }
 
-        void setTwoLineLayout(MediaDevice device, CharSequence title, boolean bFocused,
+        void setTwoLineLayout(MediaDevice device, CharSequence title,
                 boolean showSeekBar, boolean showProgressBar, boolean showSubtitle,
                 boolean showStatus , boolean showEndTouchArea, boolean isFakeActive) {
             mTitleText.setVisibility(View.GONE);
@@ -271,10 +270,6 @@ public abstract class MediaOutputBaseAdapter extends
             mSubTitleText.setVisibility(showSubtitle ? View.VISIBLE : View.GONE);
             mTwoLineTitleText.setTranslationY(0);
             mTwoLineTitleText.setText(device == null ? title : getItemTitle(device));
-            mTwoLineTitleText.setTypeface(Typeface.create(mContext.getString(
-                            bFocused ? com.android.internal.R.string.config_headlineFontFamilyMedium
-                                    : com.android.internal.R.string.config_headlineFontFamily),
-                    Typeface.NORMAL));
         }
 
         void updateSeekbarProgressBackground() {

@@ -189,7 +189,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         updateEndClickAreaAsSessionEditing(device,
                                 isHost ? R.drawable.media_output_status_edit_session
                                         : R.drawable.ic_sound_bars_anim);
-                        setTwoLineLayout(device, null /* title */, true /* bFocused */,
+                        setTwoLineLayout(device, null /* title */,
                                 true /* showSeekBar */, false /* showProgressBar */,
                                 true /* showSubtitle */, false /* showStatus */,
                                 true /* showEndTouchArea */, false /* isFakeActive */);
@@ -214,7 +214,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         updateTwoLineLayoutContentAlpha(
                                 updateClickActionBasedOnSelectionBehavior(device)
                                         ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
-                        setTwoLineLayout(device, currentlyConnected /* bFocused */,
+                        setTwoLineLayout(device,
                                 currentlyConnected  /* showSeekBar */,
                                 false /* showProgressBar */, true /* showSubtitle */,
                                 deviceStatusIcon != null /* showStatus */,
@@ -225,7 +225,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     updateConnectionFailedStatusIcon();
                     mSubTitleText.setText(R.string.media_output_dialog_connect_failed);
                     updateFullItemClickListener(v -> onItemClick(v, device));
-                    setTwoLineLayout(device, false /* bFocused */, false /* showSeekBar */,
+                    setTwoLineLayout(device, false /* showSeekBar */,
                             false /* showProgressBar */, true /* showSubtitle */,
                             true /* showStatus */, false /*isFakeActive*/);
                 } else if (device.getState() == MediaDeviceState.STATE_GROUPING) {
