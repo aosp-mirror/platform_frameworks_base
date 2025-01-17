@@ -714,6 +714,9 @@ android_library {
     use_resource_processor: true,
     manifest: "tests/AndroidManifest-base.xml",
     resource_dirs: [],
+
+    kotlin_lang_version: "1.9",
+
     additional_manifests: ["tests/AndroidManifest.xml"],
     srcs: [
         "tests/src/**/*.kt",
