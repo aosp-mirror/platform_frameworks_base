@@ -54,10 +54,10 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
             assertThat(stackBounds).isEqualTo(bounds2)
         }
 
-    @Test
     fun setQsPanelShape() =
         testScope.runTest {
-            val actual by collectLastValue(underTest.qsPanelShape)
+            var actual: ShadeScrimShape? = null
+            underTest.setQsPanelShapeConsumer { shape -> actual = shape }
 
             val expected1 =
                 ShadeScrimShape(
@@ -65,11 +65,9 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
                     topRadius = 0,
                     bottomRadius = 10,
                 )
-            underTest.setQsPanelShape(expected1)
             assertThat(actual).isEqualTo(expected1)
 
             val expected2 = expected1.copy(topRadius = 10)
-            underTest.setQsPanelShape(expected2)
             assertThat(expected2).isEqualTo(actual)
         }
 
@@ -97,7 +95,7 @@ class NotificationStackAppearanceInteractorTest : SysuiTestCase() {
     fun setQsPanelShape_withImproperBounds_throwsException() =
         testScope.runTest {
             val invalidBounds = ShadeScrimBounds(top = 0f, bottom = -10f)
-            underTest.setQsPanelShape(
+            underTest.sendQsPanelShape(
                 ShadeScrimShape(bounds = invalidBounds, topRadius = 10, bottomRadius = 10)
             )
         }

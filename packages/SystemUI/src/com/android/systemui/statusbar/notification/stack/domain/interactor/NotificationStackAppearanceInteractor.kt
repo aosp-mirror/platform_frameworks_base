@@ -51,9 +51,6 @@ constructor(
     val notificationShadeScrimBounds: StateFlow<ShadeScrimBounds?> =
         placeholderRepository.notificationShadeScrimBounds.asStateFlow()
 
-    /** The shape of the QuickSettingsShadeOverlay panel */
-    val qsPanelShape: StateFlow<ShadeScrimShape?> = placeholderRepository.qsPanelShape.asStateFlow()
-
     /**
      * Whether the stack is expanding from GONE-with-HUN to SHADE
      *
@@ -128,10 +125,22 @@ constructor(
         placeholderRepository.notificationShadeScrimBounds.value = bounds
     }
 
-    /** Sets the bounds of the QuickSettings overlay panel */
-    fun setQsPanelShape(shape: ShadeScrimShape?) {
+    /**
+     * Sends the bounds of the QuickSettings panel to the consumer set by [setQsPanelShapeConsumer].
+     *
+     * Used to clip Notification content when the QuickSettings Overlay panel covers it. Sending
+     * `null` resets the negative shape clipping of the Notification Stack.
+     */
+    fun sendQsPanelShape(shape: ShadeScrimShape?) {
         checkValidBounds(shape?.bounds)
-        placeholderRepository.qsPanelShape.value = shape
+        placeholderRepository.qsPanelShapeConsumer?.invoke(shape)
+    }
+
+    /**
+     * Sets a consumer to be notified when the QuickSettings Overlay panel changes size or position.
+     */
+    fun setQsPanelShapeConsumer(consumer: ((ShadeScrimShape?) -> Unit)?) {
+        placeholderRepository.qsPanelShapeConsumer = consumer
     }
 
     /** Updates the current scroll state of the notification shade. */
