@@ -1756,6 +1756,10 @@ public class Transitions implements RemoteCallable<Transitions>,
 
     @Override
     public boolean onShellCommand(String[] args, PrintWriter pw) {
+        if (args.length == 0) {
+            printShellCommandHelp(pw, "");
+            return false;
+        }
         switch (args[0]) {
             case "tracing": {
                 if (!android.tracing.Flags.perfettoTransitionTracing()) {
