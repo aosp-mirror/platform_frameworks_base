@@ -16,8 +16,8 @@
 
 package android.inputmethodservice.navigationbar;
 
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_BACK_DISMISS_IME;
+import static android.app.StatusBarManager.NAVBAR_IME_SWITCHER_BUTTON_VISIBLE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.DARK_MODE_ICON_COLOR_SINGLE_TONE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.LIGHT_MODE_ICON_COLOR_SINGLE_TONE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.NAVBAR_BACK_BUTTON_IME_OFFSET;
@@ -30,7 +30,7 @@ import android.annotation.DrawableRes;
 import android.annotation.FloatRange;
 import android.annotation.NonNull;
 import android.app.StatusBarManager;
-import android.app.StatusBarManager.NavigationHint;
+import android.app.StatusBarManager.NavbarFlags;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Canvas;
@@ -66,8 +66,8 @@ public final class NavigationBarView extends FrameLayout {
     private int mCurrentRotation = -1;
 
     int mDisabledFlags = 0;
-    @NavigationHint
-    private int mNavigationIconHints = 0;
+    @NavbarFlags
+    private int mNavbarFlags;
     private final int mNavBarMode = NAV_BAR_MODE_GESTURAL;
 
     private KeyButtonDrawable mBackIcon;
@@ -245,8 +245,7 @@ public final class NavigationBarView extends FrameLayout {
     }
 
     private void orientBackButton(KeyButtonDrawable drawable) {
-        final boolean isBackDismissIme =
-                (mNavigationIconHints & NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+        final boolean isBackDismissIme = (mNavbarFlags & NAVBAR_BACK_DISMISS_IME) != 0;
         final boolean isRtl = mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
         float degrees = isBackDismissIme ? (isRtl ? 90 : -90) : 0;
         if (drawable.getRotation() == degrees) {
@@ -284,27 +283,26 @@ public final class NavigationBarView extends FrameLayout {
     }
 
     /**
-     * Updates the navigation icons based on {@code hints}.
+     * Sets the navigation bar state flags.
      *
-     * @param hints bit flags defined in {@link StatusBarManager}.
+     * @param flags the navigation bar state flags.
      */
-    public void setNavigationIconHints(@NavigationHint int hints) {
-        if (hints == mNavigationIconHints) {
+    public void setNavbarFlags(@NavbarFlags int flags) {
+        if (flags == mNavbarFlags) {
             return;
         }
-        final boolean backDismissIme =
-                (hints & StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+        final boolean backDismissIme = (flags & StatusBarManager.NAVBAR_BACK_DISMISS_IME) != 0;
         final boolean oldBackDismissIme =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+                (mNavbarFlags & StatusBarManager.NAVBAR_BACK_DISMISS_IME) != 0;
         if (backDismissIme != oldBackDismissIme) {
             //onBackDismissImeChanged(backDismissIme);
         }
 
         if (DEBUG) {
-            android.widget.Toast.makeText(getContext(), "Navigation icon hints = " + hints, 500)
+            android.widget.Toast.makeText(getContext(), "Navbar flags = " + flags, 500)
                     .show();
         }
-        mNavigationIconHints = hints;
+        mNavbarFlags = flags;
         updateNavButtonIcons();
     }
 
@@ -321,7 +319,7 @@ public final class NavigationBarView extends FrameLayout {
         // Update IME switcher button visibility, a11y and rotate button always overrides
         // the appearance.
         final boolean isImeSwitcherButtonVisible =
-                (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0;
+                (mNavbarFlags & NAVBAR_IME_SWITCHER_BUTTON_VISIBLE) != 0;
         getImeSwitchButton()
                 .setVisibility(isImeSwitcherButtonVisible ? View.VISIBLE : View.INVISIBLE);
 

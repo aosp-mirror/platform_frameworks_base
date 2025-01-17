@@ -17,9 +17,9 @@
 package com.android.systemui.navigationbar;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_BACK_DISMISS_IME;
+import static android.app.StatusBarManager.NAVBAR_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_IME_VISIBLE;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.view.WindowInsetsController.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
@@ -30,16 +30,16 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISABLED;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISMISS_IME;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_HOME_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_OVERVIEW_DISABLED;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 
 import android.app.StatusBarManager;
-import android.app.StatusBarManager.NavigationHint;
+import android.app.StatusBarManager.NavbarFlags;
 import android.app.StatusBarManager.WindowVisibleState;
 import android.content.Context;
 import android.graphics.Rect;
@@ -114,8 +114,8 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     private TaskStackChangeListeners mTaskStackChangeListeners;
     private Optional<Pip> mPipOptional;
     private int mDefaultDisplayId;
-    @NavigationHint
-    private int mNavigationIconHints;
+    @NavbarFlags
+    private int mNavbarFlags;
     private final NavBarHelper.NavbarTaskbarStateUpdater mNavbarTaskbarStateUpdater =
             new NavBarHelper.NavbarTaskbarStateUpdater() {
                 @Override
@@ -379,11 +379,11 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         mSysUiState.setFlag(SYSUI_STATE_A11Y_BUTTON_CLICKABLE, clickable)
                 .setFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable)
                 .setFlag(SYSUI_STATE_IME_VISIBLE,
-                        (mNavigationIconHints & NAVIGATION_HINT_IME_VISIBLE) != 0)
+                        (mNavbarFlags & NAVBAR_IME_VISIBLE) != 0)
                 .setFlag(SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE,
-                        (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0)
+                        (mNavbarFlags & NAVBAR_IME_SWITCHER_BUTTON_VISIBLE) != 0)
                 .setFlag(SYSUI_STATE_BACK_DISMISS_IME,
-                        (mNavigationIconHints & NAVIGATION_HINT_BACK_DISMISS_IME) != 0)
+                        (mNavbarFlags & NAVBAR_BACK_DISMISS_IME) != 0)
                 .setFlag(SYSUI_STATE_OVERVIEW_DISABLED,
                         (mDisabledFlags & View.STATUS_BAR_DISABLE_RECENT) != 0)
                 .setFlag(SYSUI_STATE_HOME_DISABLED,
@@ -506,13 +506,13 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
         // Count imperceptible changes as visible so we transition taskbar out quickly.
         final boolean isImeVisible = mNavBarHelper.isImeVisible(vis)
                 || (vis & InputMethodService.IME_VISIBLE_IMPERCEPTIBLE) != 0;
-        final int hints = Utilities.calculateNavigationIconHints(mNavigationIconHints,
-                backDisposition, isImeVisible, showImeSwitcher);
-        if (hints == mNavigationIconHints) {
+        final int flags = Utilities.updateNavbarFlagsFromIme(mNavbarFlags, backDisposition,
+                isImeVisible, showImeSwitcher);
+        if (flags == mNavbarFlags) {
             return;
         }
 
-        mNavigationIconHints = hints;
+        mNavbarFlags = flags;
         updateSysuiFlags();
     }
 
@@ -707,7 +707,7 @@ public class TaskbarDelegate implements CommandQueue.Callbacks,
     @Override
     public void dump(@NonNull PrintWriter pw, @NonNull String[] args) {
         pw.println("TaskbarDelegate (mDefaultDisplayId=" + mDefaultDisplayId + "):");
-        pw.println("  mNavigationIconHints=" + mNavigationIconHints);
+        pw.println("  mNavbarFlags=" + mNavbarFlags);
         pw.println("  mNavigationMode=" + mNavigationMode);
         pw.println("  mDisabledFlags=" + mDisabledFlags);
         pw.println("  mTaskBarWindowState=" + mTaskBarWindowState);

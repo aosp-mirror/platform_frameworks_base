@@ -17,14 +17,14 @@
 package com.android.systemui.navigationbar.views;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
-import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_BACK_DISMISS_IME;
+import static android.app.StatusBarManager.NAVBAR_IME_SWITCHER_BUTTON_VISIBLE;
+import static android.app.StatusBarManager.NAVBAR_IME_VISIBLE;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.WindowType;
 import static android.app.StatusBarManager.WindowVisibleState;
-import static android.app.StatusBarManager.navigationHintsToString;
+import static android.app.StatusBarManager.navbarFlagsToString;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.view.InsetsSource.FLAG_SUPPRESS_SCRIM;
@@ -45,8 +45,8 @@ import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISMISS_IME;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_SCREEN_PINNING;
 import static com.android.systemui.shared.system.QuickStepContract.isGesturalMode;
@@ -59,7 +59,7 @@ import android.annotation.NonNull;
 import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.app.StatusBarManager;
-import android.app.StatusBarManager.NavigationHint;
+import android.app.StatusBarManager.NavbarFlags;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Insets;
@@ -237,8 +237,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
 
     private @WindowVisibleState int mNavigationBarWindowState = WINDOW_STATE_SHOWING;
 
-    @NavigationHint
-    private int mNavigationIconHints = 0;
+    @NavbarFlags
+    private int mNavbarFlags;
     private @TransitionMode int mTransitionMode;
     private boolean mLongPressHomeEnabled;
 
@@ -1115,7 +1115,7 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         pw.println("  mLongPressHomeEnabled=" + mLongPressHomeEnabled);
         pw.println("  mNavigationBarWindowState="
                 + windowStateToString(mNavigationBarWindowState));
-        pw.println("  mNavigationIconHints=" + navigationHintsToString(mNavigationIconHints));
+        pw.println("  mNavbarFlags=" + navbarFlagsToString(mNavbarFlags));
         pw.println("  mTransitionMode="
                 + BarTransitions.modeToString(mTransitionMode));
         pw.println("  mTransientShown=" + mTransientShown);
@@ -1141,13 +1141,13 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             return;
         }
         final boolean isImeVisible = mNavBarHelper.isImeVisible(vis);
-        final int hints = Utilities.calculateNavigationIconHints(mNavigationIconHints,
-                backDisposition, isImeVisible, showImeSwitcher);
-        if (hints == mNavigationIconHints) {
+        final int flags = Utilities.updateNavbarFlagsFromIme(mNavbarFlags, backDisposition,
+                isImeVisible, showImeSwitcher);
+        if (flags == mNavbarFlags) {
             return;
         }
 
-        setNavigationIconHints(hints);
+        setNavbarFlags(flags);
         checkBarModes();
         updateSystemUiStateFlags();
     }
@@ -1687,11 +1687,11 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                 .setFlag(SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE, longClickable)
                 .setFlag(SYSUI_STATE_NAV_BAR_HIDDEN, !isNavBarWindowVisible())
                 .setFlag(SYSUI_STATE_IME_VISIBLE,
-                        (mNavigationIconHints & NAVIGATION_HINT_IME_VISIBLE) != 0)
+                        (mNavbarFlags & NAVBAR_IME_VISIBLE) != 0)
                 .setFlag(SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE,
-                        (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0)
+                        (mNavbarFlags & NAVBAR_IME_SWITCHER_BUTTON_VISIBLE) != 0)
                 .setFlag(SYSUI_STATE_BACK_DISMISS_IME,
-                        (mNavigationIconHints & NAVIGATION_HINT_BACK_DISMISS_IME) != 0)
+                        (mNavbarFlags & NAVBAR_BACK_DISMISS_IME) != 0)
                 .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
                         allowSystemGestureIgnoringBarVisibility())
                 .commitUpdate(mDisplayId);
@@ -1934,38 +1934,37 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
             };
 
     @VisibleForTesting
-    @NavigationHint
-    int getNavigationIconHints() {
-        return mNavigationIconHints;
+    @NavbarFlags
+    int getNavbarFlags() {
+        return mNavbarFlags;
     }
 
     /**
-     * Updates the navigation icons based on {@code hints}.
+     * Sets the navigation bar state flags.
      *
-     * @param hints bit flags defined in {@link StatusBarManager}.
+     * @param flags the navigation bar state flags.
      */
-    private void setNavigationIconHints(@NavigationHint int hints) {
-        if (hints == mNavigationIconHints) {
+    private void setNavbarFlags(@NavbarFlags int flags) {
+        if (flags == mNavbarFlags) {
             return;
         }
         if (!isLargeScreen(mContext)) {
             // All IME functions handled by launcher via Sysui flags for large screen
-            final boolean backDismissIme =
-                    (hints & StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+            final boolean backDismissIme = (flags & StatusBarManager.NAVBAR_BACK_DISMISS_IME) != 0;
             final boolean oldBackDismissIme =
-                    (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+                    (mNavbarFlags & StatusBarManager.NAVBAR_BACK_DISMISS_IME) != 0;
             if (backDismissIme != oldBackDismissIme) {
                 mView.onBackDismissImeChanged(backDismissIme);
             }
-            mImeVisible = (hints & NAVIGATION_HINT_IME_VISIBLE) != 0;
+            mImeVisible = (flags & NAVBAR_IME_VISIBLE) != 0;
 
-            mView.setNavigationIconHints(hints);
+            mView.setNavbarFlags(flags);
         }
         if (DEBUG) {
-            android.widget.Toast.makeText(mContext, "Navigation icon hints = " + hints, 500)
+            android.widget.Toast.makeText(mContext, "Navbar flags = " + flags, 500)
                     .show();
         }
-        mNavigationIconHints = hints;
+        mNavbarFlags = flags;
     }
 
     /**
