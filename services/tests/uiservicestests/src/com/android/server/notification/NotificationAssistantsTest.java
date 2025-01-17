@@ -17,6 +17,7 @@ package com.android.server.notification;
 
 import static android.os.UserHandle.USER_ALL;
 import static android.service.notification.Adjustment.KEY_IMPORTANCE;
+import static android.service.notification.Adjustment.KEY_TYPE;
 import static android.service.notification.Adjustment.TYPE_CONTENT_RECOMMENDATION;
 import static android.service.notification.Adjustment.TYPE_NEWS;
 import static android.service.notification.Adjustment.TYPE_PROMOTION;
@@ -165,6 +166,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mContext.getOrCreateTestableResources().addOverride(
                 com.android.internal.R.string.config_defaultAssistantAccessComponent,
                 mCn.flattenToString());
+        mNm.mDefaultUnsupportedAdjustments = new String[] {};
         mAssistants = spy(mNm.new NotificationAssistants(mContext, mLock, mUserProfiles, miPm));
         when(mNm.getBinderService()).thenReturn(mINm);
         mContext.ensureTestableResources();
@@ -660,7 +662,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
         mAssistants.disallowAdjustmentType(Adjustment.KEY_RANKING_SCORE);
         assertThat(mAssistants.getAllowedAssistantAdjustments())
                 .doesNotContain(Adjustment.KEY_RANKING_SCORE);
-        assertThat(mAssistants.getAllowedAssistantAdjustments()).contains(Adjustment.KEY_TYPE);
+        assertThat(mAssistants.getAllowedAssistantAdjustments()).contains(KEY_TYPE);
     }
 
     @Test
@@ -856,7 +858,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
                 mAssistants.new ManagedServiceInfo(null, mCn, userId, false, null, 35, 2345256);
 
         // Ensure bundling is enabled
-        mAssistants.setAdjustmentTypeSupportedState(info, Adjustment.KEY_TYPE, true);
+        mAssistants.setAdjustmentTypeSupportedState(info, KEY_TYPE, true);
         // Enable these specific bundle types
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, false);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, true);
@@ -890,7 +892,7 @@ public class NotificationAssistantsTest extends UiServiceTestCase {
                 .isEqualTo(NotificationProtoEnums.TYPE_CONTENT_RECOMMENDATION);
 
         // Disable the top-level bundling setting
-        mAssistants.setAdjustmentTypeSupportedState(info, Adjustment.KEY_TYPE, false);
+        mAssistants.setAdjustmentTypeSupportedState(info, KEY_TYPE, false);
         // Enable these specific bundle types
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_PROMOTION, true);
         mAssistants.setAssistantAdjustmentKeyTypeState(TYPE_NEWS, false);
