@@ -43,7 +43,7 @@ flag {
 
 flag {
     name: "secure_array_zeroization"
-    namespace: "platform_security"
+    namespace: "security"
     description: "Enable secure array zeroization"
     bug: "320392352"
     metadata {
