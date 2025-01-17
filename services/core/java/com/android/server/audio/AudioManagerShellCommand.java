@@ -65,6 +65,10 @@ class AudioManagerShellCommand extends ShellCommand {
                 return setRingerMode();
             case "set-volume":
                 return setVolume();
+            case "get-min-volume":
+                return getMinVolume();
+            case "get-max-volume":
+                return getMaxVolume();
             case "set-device-volume":
                 return setDeviceVolume();
             case "adj-mute":
@@ -106,6 +110,10 @@ class AudioManagerShellCommand extends ShellCommand {
         pw.println("    Sets the Ringer mode to one of NORMAL|SILENT|VIBRATE");
         pw.println("  set-volume STREAM_TYPE VOLUME_INDEX");
         pw.println("    Sets the volume for STREAM_TYPE to VOLUME_INDEX");
+        pw.println("  get-min-volume STREAM_TYPE");
+        pw.println("    Gets the min volume for STREAM_TYPE");
+        pw.println("  get-max-volume STREAM_TYPE");
+        pw.println("    Gets the max volume for STREAM_TYPE");
         pw.println("  set-device-volume STREAM_TYPE VOLUME_INDEX NATIVE_DEVICE_TYPE");
         pw.println("    Sets for NATIVE_DEVICE_TYPE the STREAM_TYPE volume to VOLUME_INDEX");
         pw.println("  adj-mute STREAM_TYPE");
@@ -293,6 +301,24 @@ class AudioManagerShellCommand extends ShellCommand {
         getOutPrintWriter().println("calling AudioManager.setStreamVolume("
                 + stream + ", " + index + ", 0)");
         am.setStreamVolume(stream, index, 0);
+        return 0;
+    }
+
+    private int getMinVolume() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int stream = readIntArg();
+        final int result = am.getStreamMinVolume(stream);
+        getOutPrintWriter().println("AudioManager.getStreamMinVolume(" + stream + ") -> " + result);
+        return 0;
+    }
+
+    private int getMaxVolume() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int stream = readIntArg();
+        final int result = am.getStreamMaxVolume(stream);
+        getOutPrintWriter().println("AudioManager.getStreamMaxVolume(" + stream + ") -> " + result);
         return 0;
     }
 
