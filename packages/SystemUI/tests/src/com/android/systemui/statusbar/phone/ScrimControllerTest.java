@@ -30,7 +30,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
-import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -1425,8 +1424,7 @@ public class ScrimControllerTest extends SysuiTestCase {
         HashSet<ScrimState> regularStates = new HashSet<>(Arrays.asList(
                 ScrimState.UNINITIALIZED, ScrimState.KEYGUARD, BOUNCER,
                 ScrimState.DREAMING, ScrimState.BOUNCER_SCRIMMED, ScrimState.BRIGHTNESS_MIRROR,
-                ScrimState.UNLOCKED, SHADE_LOCKED, ScrimState.AUTH_SCRIMMED,
-                ScrimState.AUTH_SCRIMMED_SHADE, ScrimState.GLANCEABLE_HUB,
+                ScrimState.UNLOCKED, SHADE_LOCKED, ScrimState.GLANCEABLE_HUB,
                 ScrimState.GLANCEABLE_HUB_OVER_DREAM));
 
         for (ScrimState state : ScrimState.values()) {
@@ -1448,79 +1446,6 @@ public class ScrimControllerTest extends SysuiTestCase {
                 mScrimBehind.getViewAlpha(), 1, 0.0);
         assertEquals("Notifications scrim should be opaque",
                 mNotificationsScrim.getViewAlpha(), 1, 0.0);
-    }
-
-    @Test
-    public void testAuthScrim_setClipQSScrimTrue_notifScrimOpaque_whenShadeFullyExpanded() {
-        // GIVEN device has an activity showing ('UNLOCKED' state can occur on the lock screen
-        // with the camera app occluding the keyguard)
-        mScrimController.legacyTransitionTo(ScrimState.UNLOCKED);
-        mScrimController.setClipsQsScrim(true);
-        mScrimController.setRawPanelExpansionFraction(1);
-        // notifications scrim alpha change require calling setQsPosition
-        mScrimController.setQsPosition(0, 300);
-        finishAnimationsImmediately();
-
-        // WHEN the user triggers the auth bouncer
-        mScrimController.legacyTransitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
-        finishAnimationsImmediately();
-
-        assertEquals("Behind scrim should be opaque",
-                mScrimBehind.getViewAlpha(), 1, 0.0);
-        assertEquals("Notifications scrim should be opaque",
-                mNotificationsScrim.getViewAlpha(), 1, 0.0);
-
-        assertScrimTinted(Map.of(
-                mScrimInFront, true,
-                mScrimBehind, true,
-                mNotificationsScrim, false
-        ));
-    }
-
-
-    @Test
-    public void testAuthScrim_setClipQSScrimFalse_notifScrimOpaque_whenShadeFullyExpanded() {
-        // GIVEN device has an activity showing ('UNLOCKED' state can occur on the lock screen
-        // with the camera app occluding the keyguard)
-        mScrimController.legacyTransitionTo(ScrimState.UNLOCKED);
-        mScrimController.setClipsQsScrim(false);
-        mScrimController.setRawPanelExpansionFraction(1);
-        // notifications scrim alpha change require calling setQsPosition
-        mScrimController.setQsPosition(0, 300);
-        finishAnimationsImmediately();
-
-        // WHEN the user triggers the auth bouncer
-        mScrimController.legacyTransitionTo(ScrimState.AUTH_SCRIMMED_SHADE);
-        finishAnimationsImmediately();
-
-        assertEquals("Behind scrim should be opaque",
-                mScrimBehind.getViewAlpha(), 1, 0.0);
-        assertEquals("Notifications scrim should be opaque",
-                mNotificationsScrim.getViewAlpha(), 1, 0.0);
-
-        assertScrimTinted(Map.of(
-                mScrimInFront, true,
-                mScrimBehind, true,
-                mNotificationsScrim, false
-        ));
-    }
-
-    @Test
-    public void testAuthScrimKeyguard() {
-        // GIVEN device is on the keyguard
-        mScrimController.legacyTransitionTo(ScrimState.KEYGUARD);
-        finishAnimationsImmediately();
-
-        // WHEN the user triggers the auth bouncer
-        mScrimController.legacyTransitionTo(ScrimState.AUTH_SCRIMMED);
-        finishAnimationsImmediately();
-
-        // THEN the front scrim is updated and the KEYGUARD scrims are the same as the
-        // KEYGUARD scrim state
-        assertScrimAlpha(Map.of(
-                mScrimInFront, SEMI_TRANSPARENT,
-                mScrimBehind, SEMI_TRANSPARENT,
-                mNotificationsScrim, TRANSPARENT));
     }
 
     @Test

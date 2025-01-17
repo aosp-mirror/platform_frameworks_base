@@ -99,34 +99,6 @@ public enum ScrimState {
         }
     },
 
-    AUTH_SCRIMMED_SHADE {
-        @Override
-        public void prepare(ScrimState previousState) {
-            // notif scrim alpha values are determined by ScrimController#applyState
-            // based on the shade expansion
-
-            mFrontTint = mBackgroundColor;
-            mFrontAlpha = .66f;
-
-            mBehindTint = mBackgroundColor;
-            mBehindAlpha = 1f;
-        }
-    },
-
-    AUTH_SCRIMMED {
-        @Override
-        public void prepare(ScrimState previousState) {
-            mNotifTint = previousState.mNotifTint;
-            mNotifAlpha = previousState.mNotifAlpha;
-
-            mBehindTint = previousState.mBehindTint;
-            mBehindAlpha = previousState.mBehindAlpha;
-
-            mFrontTint = mBackgroundColor;
-            mFrontAlpha = .66f;
-        }
-    },
-
     /**
      * Showing password challenge on the keyguard.
      */
