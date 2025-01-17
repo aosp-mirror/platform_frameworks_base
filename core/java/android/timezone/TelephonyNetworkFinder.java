@@ -19,7 +19,6 @@ package android.timezone;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 
-import com.android.i18n.timezone.MobileCountries;
 import com.android.icu.Flags;
 
 import java.util.Objects;
@@ -59,11 +58,13 @@ public final class TelephonyNetworkFinder {
      */
     @Nullable
     public MobileCountries findCountriesByMcc(@NonNull String mcc) {
-        Objects.requireNonNull(mcc);
-
         if (!Flags.telephonyLookupMccExtension()) {
             return null;
         }
-        return mDelegate.findCountriesByMcc(mcc);
+        Objects.requireNonNull(mcc);
+
+        com.android.i18n.timezone.MobileCountries countriesByMcc =
+                mDelegate.findCountriesByMcc(mcc);
+        return countriesByMcc != null ? new MobileCountries(countriesByMcc) : null;
     }
 }
