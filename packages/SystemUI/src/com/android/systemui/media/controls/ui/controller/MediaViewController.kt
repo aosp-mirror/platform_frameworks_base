@@ -1042,6 +1042,18 @@ constructor(
             return null
         }
 
+        if (state.expansion == 1.0f) {
+            val height =
+                if (state.expandedMatchesParentHeight) {
+                    heightInSceneContainerPx
+                } else {
+                    context.resources.getDimensionPixelSize(
+                        R.dimen.qs_media_session_height_expanded
+                    )
+                }
+            setBackgroundHeights(height)
+        }
+
         // Similar to obtainViewState: Let's create a new measurement
         val result =
             transitionLayout?.calculateViewState(
