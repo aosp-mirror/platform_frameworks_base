@@ -43,6 +43,9 @@ interface DesksOrganizer {
      */
     fun getDeskAtEnd(change: TransitionInfo.Change): Int?
 
+    /** Whether the desk is activate according to the given change at the end of a transition. */
+    fun isDeskActiveAtEnd(change: TransitionInfo.Change, deskId: Int): Boolean
+
     /** A callback that is invoked when the desk container is created. */
     fun interface OnCreateCallback {
         /** Calls back when the [deskId] has been created. */

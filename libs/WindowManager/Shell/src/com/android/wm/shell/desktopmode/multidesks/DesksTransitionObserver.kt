@@ -25,7 +25,10 @@ import com.android.wm.shell.desktopmode.DesktopUserRepositories
  * Observer of desk-related transitions, such as adding, removing or activating a whole desk. It
  * tracks pending transitions and updates repository state once they finish.
  */
-class DesksTransitionObserver(private val desktopUserRepositories: DesktopUserRepositories) {
+class DesksTransitionObserver(
+    private val desktopUserRepositories: DesktopUserRepositories,
+    private val desksOrganizer: DesksOrganizer,
+) {
     private val deskTransitions = mutableMapOf<IBinder, DeskTransition>()
 
     /** Adds a pending desk transition to be tracked. */
@@ -52,6 +55,18 @@ class DesksTransitionObserver(private val desktopUserRepositories: DesktopUserRe
                 val displayId = deskTransition.displayId
                 desktopRepository.removeDesk(deskTransition.deskId)
                 deskTransition.onDeskRemovedListener?.onDeskRemoved(displayId, deskId)
+            }
+            is DeskTransition.ActivateDesk -> {
+                val activeDeskChange =
+                    info.changes.find { change ->
+                        desksOrganizer.isDeskActiveAtEnd(change, deskTransition.deskId)
+                    }
+                activeDeskChange?.let {
+                    desktopRepository.setActiveDesk(
+                        displayId = deskTransition.displayId,
+                        deskId = deskTransition.deskId,
+                    )
+                }
             }
         }
     }
