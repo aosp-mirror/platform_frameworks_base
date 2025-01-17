@@ -40,7 +40,9 @@ import android.util.AtomicFile;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.Xml;
+import android.util.proto.ProtoFieldFilter;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.ProtoParseException;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
@@ -49,10 +51,13 @@ import com.android.internal.util.XmlUtils;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.am.DropboxRateLimiter;
+import com.android.server.os.TombstoneProtos.Tombstone;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileDescriptor;
@@ -64,6 +69,7 @@ import java.nio.file.Files;
 import java.nio.file.attribute.PosixFilePermissions;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -390,6 +396,129 @@ public class BootReceiver extends BroadcastReceiver {
             Slog.e(TAG, "Can't log tombstone", e);
         }
         writeTimestamps(timestamps);
+    }
+
+    /**
+     * Processes a tombstone file and adds it to the DropBox after filtering and applying
+     * rate limiting.
+     * Filtering removes memory sections from the tombstone proto to reduce size while preserving
+     * critical information. The filtered tombstone is then added to DropBox in both proto
+     * and text formats, with the text format derived from the filtered proto.
+     * Rate limiting is applied as it is the case with other crash types.
+     *
+     * @param ctx Context
+     * @param tombstone path to the tombstone
+     * @param processName the name of the process corresponding to the tombstone
+     * @param tmpFileLock the lock for reading/writing tmp files
+     */
+    public static void filterAndAddTombstoneToDropBox(
+                Context ctx, File tombstone, String processName, ReentrantLock tmpFileLock) {
+        final DropBoxManager db = ctx.getSystemService(DropBoxManager.class);
+        if (db == null) {
+            Slog.e(TAG, "Can't log tombstone: DropBoxManager not available");
+            return;
+        }
+        File filteredProto = null;
+        // Check if we should rate limit and abort early if needed.
+        DropboxRateLimiter.RateLimitResult rateLimitResult =
+                sDropboxRateLimiter.shouldRateLimit(TAG_TOMBSTONE_PROTO_WITH_HEADERS, processName);
+        if (rateLimitResult.shouldRateLimit()) return;
+
+        HashMap<String, Long> timestamps = readTimestamps();
+        try {
+            tmpFileLock.lock();
+            Slog.i(TAG, "Filtering tombstone file: " + tombstone.getName());
+            // Create a temporary tombstone without memory sections.
+            filteredProto = createTempTombstoneWithoutMemory(tombstone);
+            Slog.i(TAG, "Generated tombstone file: " + filteredProto.getName());
+
+            if (recordFileTimestamp(tombstone, timestamps)) {
+                // We need to attach the count indicating the number of dropped dropbox entries
+                // due to rate limiting. Do this by enclosing the proto tombsstone in a
+                // container proto that has the dropped entry count and the proto tombstone as
+                // bytes (to avoid the complexity of reading and writing nested protos).
+                Slog.i(TAG, "Adding tombstone " + filteredProto.getName() + " to dropbox");
+                addAugmentedProtoToDropbox(filteredProto, db, rateLimitResult);
+            }
+            // Always add the text version of the tombstone to the DropBox, in order to
+            // match the previous behaviour.
+            Slog.i(TAG, "Adding text tombstone version of " + filteredProto.getName()
+                    + " to dropbox");
+            addTextTombstoneFromProtoToDropbox(filteredProto, db, timestamps, rateLimitResult);
+
+        } catch (IOException | ProtoParseException e) {
+            Slog.e(TAG, "Failed to log tombstone '" + tombstone.getName()
+                    + "' to DropBox. Error during processing or writing: " + e.getMessage(), e);
+        }  finally {
+            if (filteredProto != null) {
+                filteredProto.delete();
+            }
+            tmpFileLock.unlock();
+        }
+        writeTimestamps(timestamps);
+    }
+
+    /**
+     * Creates a temporary tombstone file by filtering out memory mapping fields.
+     * This ensures that the unneeded memory mapping data is removed from the tombstone
+     * before adding it to Dropbox
+     *
+     * @param tombstone the original tombstone file to process
+     * @return a temporary file containing the filtered tombstone data
+     * @throws IOException if an I/O error occurs during processing
+     */
+    private static File createTempTombstoneWithoutMemory(File tombstone) throws IOException {
+        // Process the proto tombstone file and write it to a temporary file
+        File tombstoneProto =
+                File.createTempFile(tombstone.getName(), ".pb.tmp", TOMBSTONE_TMP_DIR);
+        ProtoFieldFilter protoFilter =
+                new ProtoFieldFilter(fieldNumber -> fieldNumber != (int) Tombstone.MEMORY_MAPPINGS);
+
+        try (FileInputStream fis = new FileInputStream(tombstone);
+                BufferedInputStream bis = new BufferedInputStream(fis);
+                FileOutputStream fos = new FileOutputStream(tombstoneProto);
+                BufferedOutputStream bos = new BufferedOutputStream(fos)) {
+            protoFilter.filter(bis, bos);
+            return tombstoneProto;
+        }
+    }
+
+    private static void addTextTombstoneFromProtoToDropbox(File tombstone, DropBoxManager db,
+            HashMap<String, Long> timestamps, DropboxRateLimiter.RateLimitResult rateLimitResult) {
+        File tombstoneTextFile = null;
+
+        try {
+            tombstoneTextFile = File.createTempFile(tombstone.getName(),
+                ".pb.txt.tmp", TOMBSTONE_TMP_DIR);
+
+            // Create a ProcessBuilder to execute pbtombstone
+            ProcessBuilder pb = new ProcessBuilder("/system/bin/pbtombstone", tombstone.getPath());
+            pb.redirectOutput(tombstoneTextFile);
+            Process process = pb.start();
+
+            // Wait 10 seconds for the process to complete
+            if (!process.waitFor(10, TimeUnit.SECONDS)) {
+                Slog.e(TAG, "pbtombstone timed out");
+                process.destroyForcibly();
+                return;
+            }
+
+            int exitCode = process.exitValue();
+            if (exitCode != 0) {
+                Slog.e(TAG, "pbtombstone failed with exit code " + exitCode);
+            } else {
+                final String headers = getBootHeadersToLogAndUpdate()
+                        + rateLimitResult.createHeader();
+                addFileToDropBox(db, timestamps, headers, tombstoneTextFile.getPath(), LOG_SIZE,
+                        TAG_TOMBSTONE);
+            }
+        } catch (IOException | InterruptedException e) {
+            Slog.e(TAG, "Failed to process tombstone with pbtombstone", e);
+        } finally {
+            if (tombstoneTextFile != null) {
+                tombstoneTextFile.delete();
+            }
+        }
     }
 
     private static void addAugmentedProtoToDropbox(
