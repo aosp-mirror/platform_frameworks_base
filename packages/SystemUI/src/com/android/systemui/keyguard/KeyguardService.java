@@ -72,6 +72,7 @@ import com.android.internal.policy.IKeyguardDrawnCallback;
 import com.android.internal.policy.IKeyguardExitCallback;
 import com.android.internal.policy.IKeyguardService;
 import com.android.internal.policy.IKeyguardStateCallback;
+import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.keyguard.mediator.ScreenOnCoordinator;
 import com.android.systemui.SystemUIApplication;
 import com.android.systemui.dagger.qualifiers.Application;
@@ -331,6 +332,7 @@ public class KeyguardService extends Service {
         }
     };
     private final KeyguardServiceLockNowInteractor mKeyguardServiceLockNowInteractor;
+    private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
 
     @Inject
     public KeyguardService(
@@ -356,7 +358,8 @@ public class KeyguardService extends Service {
             KeyguardDismissInteractor keyguardDismissInteractor,
             Lazy<DeviceEntryInteractor> deviceEntryInteractorLazy,
             KeyguardStateCallbackInteractor keyguardStateCallbackInteractor,
-            KeyguardServiceLockNowInteractor keyguardServiceLockNowInteractor) {
+            KeyguardServiceLockNowInteractor keyguardServiceLockNowInteractor,
+            KeyguardUpdateMonitor keyguardUpdateMonitor) {
         super();
         mKeyguardViewMediator = keyguardViewMediator;
         mKeyguardLifecyclesDispatcher = keyguardLifecyclesDispatcher;
@@ -389,6 +392,7 @@ public class KeyguardService extends Service {
         mKeyguardWakeDirectlyToGoneInteractor = keyguardWakeDirectlyToGoneInteractor;
         mKeyguardDismissInteractor = keyguardDismissInteractor;
         mKeyguardServiceLockNowInteractor = keyguardServiceLockNowInteractor;
+        mKeyguardUpdateMonitor = keyguardUpdateMonitor;
     }
 
     @Override
@@ -585,6 +589,7 @@ public class KeyguardService extends Service {
             mPowerInteractor.onScreenPowerStateUpdated(ScreenPowerState.SCREEN_TURNING_ON);
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNING_ON,
                     callback);
+            mKeyguardUpdateMonitor.triggerTimeUpdate();
 
             final String onDrawWaitingTraceTag = "Waiting for KeyguardDrawnCallback#onDrawn";
             final int traceCookie = System.identityHashCode(callback);
@@ -620,6 +625,7 @@ public class KeyguardService extends Service {
             checkPermission();
             mPowerInteractor.onScreenPowerStateUpdated(ScreenPowerState.SCREEN_ON);
             mKeyguardLifecyclesDispatcher.dispatch(KeyguardLifecyclesDispatcher.SCREEN_TURNED_ON);
+            mKeyguardUpdateMonitor.triggerTimeUpdate();
             mScreenOnCoordinator.onScreenTurnedOn();
             Trace.endSection();
         }

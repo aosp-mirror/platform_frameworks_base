@@ -3328,6 +3328,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
         }
     }
 
+    /** Triggers an out of band time update */
+    public void triggerTimeUpdate() {
+        mHandler.sendEmptyMessage(MSG_TIME_UPDATE);
+    }
+
     /**
      * Handle {@link #MSG_TIME_UPDATE}
      */
