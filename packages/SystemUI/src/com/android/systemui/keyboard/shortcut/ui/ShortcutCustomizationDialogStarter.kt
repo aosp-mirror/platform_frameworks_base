@@ -17,6 +17,7 @@
 package com.android.systemui.keyboard.shortcut.ui
 
 import android.app.Dialog
+import android.content.res.Resources
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -26,6 +27,7 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import com.android.systemui.dagger.qualifiers.Main
 import com.android.systemui.keyboard.shortcut.shared.model.ShortcutCustomizationRequestInfo
 import com.android.systemui.keyboard.shortcut.ui.composable.ShortcutCustomizationDialog
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState
@@ -34,6 +36,8 @@ import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiSt
 import com.android.systemui.keyboard.shortcut.ui.model.ShortcutCustomizationUiState.ResetShortcutDialog
 import com.android.systemui.keyboard.shortcut.ui.viewmodel.ShortcutCustomizationViewModel
 import com.android.systemui.lifecycle.ExclusiveActivatable
+import com.android.systemui.res.R
+import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.SystemUIDialogFactory
 import com.android.systemui.statusbar.phone.create
 import dagger.assisted.AssistedFactory
@@ -46,6 +50,7 @@ class ShortcutCustomizationDialogStarter
 constructor(
     viewModelFactory: ShortcutCustomizationViewModel.Factory,
     private val dialogFactory: SystemUIDialogFactory,
+    @Main private val resources: Resources,
 ) : ExclusiveActivatable() {
 
     private var dialog: Dialog? = null
@@ -97,12 +102,26 @@ constructor(
                     coroutineScope.launch { viewModel.resetAllCustomShortcuts() }
                 },
             )
-            dialog.setOnDismissListener { viewModel.onDialogDismissed() }
-
-            // By default, apps cannot intercept action key. The system always handles it. This
-            // flag is needed to enable customisation dialog window to intercept action key
-            dialog.window?.addPrivateFlags(PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
+            setDialogProperties(dialog, uiState)
         }
+    }
+
+    private fun setDialogProperties(dialog: SystemUIDialog, uiState: ShortcutCustomizationUiState) {
+        dialog.setOnDismissListener { viewModel.onDialogDismissed() }
+        dialog.setTitle(
+            resources.getString(
+                when (uiState) {
+                    is AddShortcutDialog ->
+                        R.string.shortcut_customize_mode_add_shortcut_description
+                    is DeleteShortcutDialog ->
+                        R.string.shortcut_customize_mode_remove_shortcut_description
+                    else -> R.string.shortcut_customize_mode_reset_shortcut_description
+                }
+            )
+        )
+        // By default, apps cannot intercept action key. The system always handles it. This
+        // flag is needed to enable customisation dialog window to intercept action key
+        dialog.window?.addPrivateFlags(PRIVATE_FLAG_ALLOW_ACTION_KEY_EVENTS)
     }
 
     @AssistedFactory

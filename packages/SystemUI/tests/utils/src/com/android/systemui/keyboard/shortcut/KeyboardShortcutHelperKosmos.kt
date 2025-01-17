@@ -211,6 +211,7 @@ val Kosmos.shortcutCustomizationDialogStarterFactory by
                 return ShortcutCustomizationDialogStarter(
                     shortcutCustomizationViewModelFactory,
                     systemUIDialogFactory,
+                    mainResources,
                 )
             }
         }
