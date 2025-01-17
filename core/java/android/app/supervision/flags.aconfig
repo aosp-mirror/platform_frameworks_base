@@ -40,3 +40,11 @@ flag {
   description: "Flag to enable the SupervisionAppService"
   bug: "389123070"
 }
+
+flag {
+  name: "enable_supervision_settings_screen"
+  is_exported: true
+  namespace: "supervision"
+  description: "Flag that enables the Supervision settings screen with top-level Android settings entry point"
+  bug: "383404606"
+}
