@@ -25,6 +25,8 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Application
 import com.android.systemui.shade.data.repository.ShadeDisplaysRepository
 import com.android.systemui.shade.domain.interactor.ShadeInteractor
+import com.android.systemui.shade.shared.flag.ShadeWindowGoesAround
+import dagger.Lazy
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -34,7 +36,7 @@ class ShadeStateTraceLogger
 @Inject
 constructor(
     private val shadeInteractor: ShadeInteractor,
-    private val shadeDisplaysRepository: ShadeDisplaysRepository,
+    private val shadeDisplaysRepository: Lazy<ShadeDisplaysRepository>,
     @Application private val scope: CoroutineScope,
 ) : CoreStartable {
     override fun start() {
@@ -52,9 +54,11 @@ constructor(
                     instantForGroup(TRACK_GROUP_NAME, "shadeExpansion", it)
                 }
             }
-            launch {
-                shadeDisplaysRepository.displayId.collect {
-                    instantForGroup(TRACK_GROUP_NAME, "displayId", it)
+            if (ShadeWindowGoesAround.isEnabled) {
+                launch {
+                    shadeDisplaysRepository.get().displayId.collect {
+                        instantForGroup(TRACK_GROUP_NAME, "displayId", it)
+                    }
                 }
             }
         }
