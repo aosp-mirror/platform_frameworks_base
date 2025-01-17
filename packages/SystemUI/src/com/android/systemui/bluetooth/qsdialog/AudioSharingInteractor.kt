@@ -22,20 +22,25 @@ import com.android.settingslib.bluetooth.BluetoothUtils
 import com.android.settingslib.bluetooth.CachedBluetoothDevice
 import com.android.settingslib.bluetooth.LocalBluetoothManager
 import com.android.settingslib.bluetooth.onBroadcastMetadataChanged
+import com.android.settingslib.bluetooth.onBroadcastStartedOrStopped
 import com.android.settingslib.flags.Flags.audioSharingQsDialogImprovement
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineDispatcher
+import kotlinx.coroutines.channels.Channel
 import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.emptyFlow
+import kotlinx.coroutines.flow.filterNot
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
+import kotlinx.coroutines.flow.merge
+import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.withContext
 
 /** Holds business logic for the audio sharing state. */
@@ -71,6 +76,7 @@ constructor(
     @Background private val backgroundDispatcher: CoroutineDispatcher,
 ) : AudioSharingInteractor {
 
+    private val audioSharingStartedEvents = Channel<Unit>(Channel.BUFFERED)
     private var previewEnabled: Boolean? = null
 
     override val isAudioSharingOn: Flow<Boolean> =
@@ -99,12 +105,18 @@ constructor(
         withContext(backgroundDispatcher) {
             if (audioSharingAvailable()) {
                 audioSharingRepository.leAudioBroadcastProfile?.let { profile ->
-                    isAudioSharingOn
-                        // Skip the default value, we only care about adding source for newly
-                        // started audio sharing session
-                        .drop(1)
-                        .mapNotNull { audioSharingOn ->
-                            if (audioSharingOn) {
+                    merge(
+                            // Register and start listen to onBroadcastMetadataChanged (means ready
+                            // to add source)
+                            audioSharingStartedEvents.receiveAsFlow().map { true },
+                            // When session is off or failed to start, stop listening to
+                            // onBroadcastMetadataChanged as we won't be adding source
+                            profile.onBroadcastStartedOrStopped
+                                .filterNot { profile.isEnabled(null) }
+                                .map { false },
+                        )
+                        .mapNotNull { shouldListenToMetadata ->
+                            if (shouldListenToMetadata) {
                                 // onBroadcastMetadataChanged could emit multiple times during one
                                 // audio sharing session, we only perform add source on the first
                                 // time
@@ -146,6 +158,7 @@ constructor(
         if (!audioSharingAvailable()) {
             return
         }
+        audioSharingStartedEvents.trySend(Unit)
         audioSharingRepository.startAudioSharing()
     }
 
