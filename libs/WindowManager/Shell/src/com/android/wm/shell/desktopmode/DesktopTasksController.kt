@@ -103,7 +103,9 @@ import com.android.wm.shell.desktopmode.ExitDesktopTaskTransitionHandler.FULLSCR
 import com.android.wm.shell.desktopmode.common.ToggleTaskSizeInteraction
 import com.android.wm.shell.desktopmode.desktopwallpaperactivity.DesktopWallpaperActivityTokenProvider
 import com.android.wm.shell.desktopmode.minimize.DesktopWindowLimitRemoteHandler
+import com.android.wm.shell.desktopmode.multidesks.DeskTransition
 import com.android.wm.shell.desktopmode.multidesks.DesksOrganizer
+import com.android.wm.shell.desktopmode.multidesks.DesksTransitionObserver
 import com.android.wm.shell.desktopmode.multidesks.OnDeskRemovedListener
 import com.android.wm.shell.draganddrop.DragAndDropController
 import com.android.wm.shell.freeform.FreeformTaskTransitionStarter
@@ -185,6 +187,7 @@ class DesktopTasksController(
     private val bubbleController: Optional<BubbleController>,
     private val overviewToDesktopTransitionObserver: OverviewToDesktopTransitionObserver,
     private val desksOrganizer: DesksOrganizer,
+    private val desksTransitionObserver: DesksTransitionObserver,
     private val userProfileContexts: UserProfileContexts,
     private val desktopModeCompatPolicy: DesktopModeCompatPolicy,
 ) :
@@ -2363,20 +2366,62 @@ class DesktopTasksController(
         )
     }
 
-    fun removeDesktop(displayId: Int) {
-        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
-
-        val tasksToRemove = taskRepository.removeDesk(displayId)
-        val wct = WindowContainerTransaction()
-        tasksToRemove.forEach {
-            val task = shellTaskOrganizer.getRunningTaskInfo(it)
-            if (task != null) {
-                wct.removeTask(task.token)
-            } else {
-                recentTasksController?.removeBackgroundTask(it)
+    /** Removes the default desk in the given display. */
+    @Deprecated("Deprecated with multi-desks.", ReplaceWith("removeDesk()"))
+    fun removeDefaultDeskInDisplay(displayId: Int) {
+        val deskId =
+            checkNotNull(taskRepository.getDefaultDeskId(displayId)) {
+                "Expected a default desk to exist"
             }
+        removeDesk(displayId = displayId, deskId = deskId)
+    }
+
+    /** Removes the given desk. */
+    fun removeDesk(deskId: Int) {
+        val displayId = taskRepository.getDisplayForDesk(deskId)
+        removeDesk(displayId = displayId, deskId = deskId)
+    }
+
+    private fun removeDesk(displayId: Int, deskId: Int) {
+        if (!DesktopModeFlags.ENABLE_DESKTOP_WINDOWING_BACK_NAVIGATION.isTrue()) return
+        logV("removeDesk deskId=%d from displayId=%d", deskId, displayId)
+
+        val tasksToRemove =
+            if (Flags.enableMultipleDesktopsBackend()) {
+                taskRepository.getActiveTaskIdsInDesk(deskId)
+            } else {
+                // TODO: 362720497 - make sure minimized windows are also removed in WM
+                //  and the repository.
+                taskRepository.removeDesk(deskId)
+            }
+
+        val wct = WindowContainerTransaction()
+        if (!Flags.enableMultipleDesktopsBackend()) {
+            tasksToRemove.forEach {
+                val task = shellTaskOrganizer.getRunningTaskInfo(it)
+                if (task != null) {
+                    wct.removeTask(task.token)
+                } else {
+                    recentTasksController?.removeBackgroundTask(it)
+                }
+            }
+        } else {
+            // TODO: 362720497 - double check background tasks are also removed.
+            desksOrganizer.removeDesk(wct, deskId)
         }
-        if (!wct.isEmpty) transitions.startTransition(TRANSIT_CLOSE, wct, null)
+        if (!Flags.enableMultipleDesktopsBackend() && wct.isEmpty) return
+        val transition = transitions.startTransition(TRANSIT_CLOSE, wct, /* handler= */ null)
+        if (Flags.enableMultipleDesktopsBackend()) {
+            desksTransitionObserver.addPendingTransition(
+                DeskTransition.RemoveDesk(
+                    token = transition,
+                    displayId = displayId,
+                    deskId = deskId,
+                    tasks = tasksToRemove,
+                    onDeskRemovedListener = onDeskRemovedListener,
+                )
+            )
+        }
     }
 
     /** Enter split by using the focused desktop task in given `displayId`. */
@@ -3082,7 +3127,7 @@ class DesktopTasksController(
 
         override fun removeDesktop(displayId: Int) {
             executeRemoteCallWithTaskPermission(controller, "removeDesktop") { c ->
-                c.removeDesktop(displayId)
+                c.removeDefaultDeskInDisplay(displayId)
             }
         }
 
