@@ -908,13 +908,13 @@ public final class MediaCodecInfo {
         /** @hide */
         public String[] validFeatures() {
             Feature[] features = getValidFeatures();
-            String[] res = new String[features.length];
-            for (int i = 0; i < res.length; i++) {
+            ArrayList<String> res = new ArrayList();
+            for (int i = 0; i < features.length; i++) {
                 if (!features[i].mInternal) {
-                    res[i] = features[i].mName;
+                    res.add(features[i].mName);
                 }
             }
-            return res;
+            return res.toArray(new String[0]);
         }
 
         private Feature[] getValidFeatures() {
