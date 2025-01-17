@@ -20,13 +20,13 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.DisplayAdjustments.DEFAULT_DISPLAY_ADJUSTMENTS;
 import static android.view.WindowManagerPolicyConstants.FLAG_PASS_TO_USER;
 
-import static com.android.hardware.input.Flags.FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_AUTOCLICK;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_CONTROL_SCREEN_MAGNIFIER;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_FILTER_KEY_EVENTS;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_INJECT_MOTION_EVENTS;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_TOUCH_EXPLORATION;
 import static com.android.server.accessibility.AccessibilityInputFilter.FLAG_FEATURE_TRIGGERED_SCREEN_MAGNIFIER;
+import static com.android.server.accessibility.Flags.FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -191,7 +191,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+    @RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
     public void testEventHandler_shouldIncreaseAndHaveCorrectOrderAfterOnDisplayAdded() {
         prepareLooper();
 
@@ -248,7 +248,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+    @RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
     public void testEventHandler_shouldHaveCorrectOrderForEventStreamTransformation() {
         prepareLooper();
 
@@ -274,7 +274,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
-    @RequiresFlagsDisabled(FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+    @RequiresFlagsDisabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
     public void testEventHandler_shouldHaveCorrectOrderForEventStreamTransformation_noMagKeys() {
         prepareLooper();
 
@@ -455,7 +455,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+    @RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
     public void testEnabledFeatures_windowMagnificationMode_expectedMagnificationKeyHandler() {
         prepareLooper();
         doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_WINDOW).when(
@@ -468,7 +468,7 @@ public class AccessibilityInputFilterTest {
     }
 
     @Test
-    @RequiresFlagsEnabled(FLAG_ENABLE_TALKBACK_AND_MAGNIFIER_KEY_GESTURES)
+    @RequiresFlagsEnabled(FLAG_ENABLE_MAGNIFICATION_KEYBOARD_CONTROL)
     public void testEnabledFeatures_fullscreenMagnificationMode_expectedMagnificationKeyHandler() {
         prepareLooper();
         doReturn(Settings.Secure.ACCESSIBILITY_MAGNIFICATION_MODE_FULLSCREEN).when(
