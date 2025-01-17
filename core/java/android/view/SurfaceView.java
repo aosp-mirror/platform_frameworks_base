@@ -2391,4 +2391,9 @@ public class SurfaceView extends View implements ViewRootImpl.SurfaceChangedCall
             }
         }
     }
+
+    @Override
+    public CharSequence getAccessibilityClassName() {
+        return SurfaceView.class.getName();
+    }
 }
