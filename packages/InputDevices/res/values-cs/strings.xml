@@ -56,6 +56,5 @@
     <string name="keyboard_layout_montenegrin_latin" msgid="1467832503378949945">"černohorština (latinka)"</string>
     <string name="keyboard_layout_serbian_cyrillic" msgid="7013541044323542196">"srbština (cyrilice)"</string>
     <string name="keyboard_layout_montenegrin_cyrillic" msgid="2391253952894077421">"černohorština (cyrilice)"</string>
-    <!-- no translation found for keyboard_layout_romanian (8698989892731726903) -->
-    <skip />
+    <string name="keyboard_layout_romanian" msgid="8698989892731726903">"rumunština"</string>
 </resources>
