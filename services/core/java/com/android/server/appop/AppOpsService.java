@@ -33,6 +33,7 @@ import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_FOREGROUND;
 import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.app.AppOpsManager.OP_BLUETOOTH_CONNECT;
 import static android.app.AppOpsManager.OP_CAMERA;
 import static android.app.AppOpsManager.OP_CAMERA_SANDBOXED;
 import static android.app.AppOpsManager.OP_FLAGS_ALL;
@@ -3267,6 +3268,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                         packageName);
             }
             if (!isIncomingPackageValid(packageName, UserHandle.getUserId(uid))) {
+                // TODO(b/333931259): Remove extra logging after this issue is diagnosed.
+                if (code == OP_BLUETOOTH_CONNECT) {
+                    Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as incoming "
+                            + "package: " + packageName + " and uid: " + uid + " is invalid");
+                }
                 return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                         packageName);
             }
@@ -3306,6 +3312,13 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         } catch (SecurityException e) {
             logVerifyAndGetBypassFailure(uid, e, "noteOperation");
+            // TODO(b/333931259): Remove extra logging after this issue is diagnosed.
+            if (code == OP_BLUETOOTH_CONNECT) {
+                Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
+                        + " verifyAndGetBypass returned a SecurityException for package: "
+                        + packageName + " and uid: " + uid + " and attributionTag: "
+                        + attributionTag, e);
+            }
             return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                     packageName);
         }
@@ -3323,6 +3336,17 @@ public class AppOpsService extends IAppOpsService.Stub {
                 if (DEBUG) Slog.d(TAG, "noteOperation: no op for code " + code + " uid " + uid
                         + " package " + packageName + "flags: " +
                         AppOpsManager.flagsToString(flags));
+                // TODO(b/333931259): Remove extra logging after this issue is diagnosed.
+                if (code == OP_BLUETOOTH_CONNECT) {
+                    Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
+                            + " #getOpsLocked returned null for"
+                            + " uid: " + uid
+                            + " packageName: " + packageName
+                            + " attributionTag: " + attributionTag
+                            + " pvr.isAttributionTagValid: " + pvr.isAttributionTagValid
+                            + " pvr.bypass: " + pvr.bypass);
+                    Slog.e(TAG, "mUidStates.get(" + uid + "): " + mUidStates.get(uid));
+                }
                 return new SyncNotedAppOp(AppOpsManager.MODE_ERRORED, code, attributionTag,
                         packageName);
             }
@@ -3367,6 +3391,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag,
                             virtualDeviceId, flags, uidMode);
+                    // TODO(b/333931259): Remove extra logging after this issue is diagnosed.
+                    if (code == OP_BLUETOOTH_CONNECT && uidMode == MODE_ERRORED) {
+                        Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
+                                + " uid mode is MODE_ERRORED");
+                    }
                     return new SyncNotedAppOp(uidMode, code, attributionTag, packageName);
                 }
             } else {
@@ -3386,6 +3415,11 @@ public class AppOpsService extends IAppOpsService.Stub {
                     attributedOp.rejected(uidState.getState(), flags);
                     scheduleOpNotedIfNeededLocked(code, uid, packageName, attributionTag,
                             virtualDeviceId, flags, mode);
+                    // TODO(b/333931259): Remove extra logging after this issue is diagnosed.
+                    if (code == OP_BLUETOOTH_CONNECT && mode == MODE_ERRORED) {
+                        Slog.e(TAG, "noting OP_BLUETOOTH_CONNECT returned MODE_ERRORED as"
+                                + " package mode is MODE_ERRORED");
+                    }
                     return new SyncNotedAppOp(mode, code, attributionTag, packageName);
                 }
             }
