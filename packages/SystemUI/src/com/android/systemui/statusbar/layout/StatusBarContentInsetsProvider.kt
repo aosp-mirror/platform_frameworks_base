@@ -184,7 +184,7 @@ constructor(
 
     override fun start() {
         configurationController.addCallback(this)
-        dumpManager.registerDumpable(dumpableName, this)
+        dumpManager.registerNormalDumpable(dumpableName, this)
         commandRegistry.registerCommand(commandName) {
             StatusBarInsetsCommand(
                 object : StatusBarInsetsCommand.Callback {

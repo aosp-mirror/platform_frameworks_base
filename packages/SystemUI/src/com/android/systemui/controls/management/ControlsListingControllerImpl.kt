@@ -122,7 +122,7 @@ constructor(
 
     init {
         Log.d(TAG, "Initializing")
-        dumpManager.registerDumpable(TAG, this)
+        dumpManager.registerNormalDumpable(TAG, this)
         serviceListing.addCallback(serviceListingCallback)
         serviceListing.setListening(true)
         serviceListing.reload()

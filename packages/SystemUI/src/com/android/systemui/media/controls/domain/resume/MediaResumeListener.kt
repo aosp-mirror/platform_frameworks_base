@@ -141,7 +141,7 @@ constructor(
 
     init {
         if (useMediaResumption) {
-            dumpManager.registerDumpable(TAG, this)
+            dumpManager.registerNormalDumpable(TAG, this)
             val unlockFilter = IntentFilter()
             unlockFilter.addAction(Intent.ACTION_USER_UNLOCKED)
             broadcastDispatcher.registerReceiver(

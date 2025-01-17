@@ -43,7 +43,7 @@ constructor(
             shadeExpansionStateManager.addExpansionListener(this::onPanelExpansionChanged)
         onPanelExpansionChanged(currentState)
         shadeExpansionStateManager.addStateListener(this::onPanelStateChanged)
-        dumpManager.registerDumpable(
+        dumpManager.registerNormalDumpable(
             ScrimShadeTransitionController::class.java.simpleName,
             this::dump
         )
