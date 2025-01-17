@@ -5593,7 +5593,6 @@ public abstract class Context {
      * @hide
      * @see #getSystemService(String)
      */
-    @FlaggedApi(android.app.contextualsearch.flags.Flags.FLAG_ENABLE_SERVICE)
     @SystemApi
     public static final String CONTEXTUAL_SEARCH_SERVICE = "contextual_search";
 
