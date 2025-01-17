@@ -100,7 +100,7 @@ class AppCompatOrientationPolicy {
         }
 
         if (displayContent != null
-                && mAppCompatOverrides.getAppCompatCameraOverrides()
+                && mAppCompatOverrides.getCameraOverrides()
                     .isOverrideOrientationOnlyForCameraEnabled()
                 && !AppCompatCameraPolicy
                     .isActivityEligibleForOrientationOverride(mActivityRecord)) {

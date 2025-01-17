@@ -277,7 +277,7 @@ class AppCompatCameraPolicy {
      */
     static boolean shouldOverrideMinAspectRatioForCamera(@NonNull ActivityRecord activityRecord) {
         return AppCompatCameraPolicy.isCameraRunningAndWindowingModeEligible(activityRecord)
-                && activityRecord.mAppCompatController.getAppCompatCameraOverrides()
+                && activityRecord.mAppCompatController.getCameraOverrides()
                         .isOverrideMinAspectRatioForCameraEnabled();
     }
 }

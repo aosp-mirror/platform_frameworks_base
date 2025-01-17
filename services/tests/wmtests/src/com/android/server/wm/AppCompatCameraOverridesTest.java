@@ -393,7 +393,7 @@ public class AppCompatCameraOverridesTest extends WindowTestsBase {
         }
 
         private AppCompatCameraOverrides getAppCompatCameraOverrides() {
-            return activity().top().mAppCompatController.getAppCompatCameraOverrides();
+            return activity().top().mAppCompatController.getCameraOverrides();
         }
     }
 }

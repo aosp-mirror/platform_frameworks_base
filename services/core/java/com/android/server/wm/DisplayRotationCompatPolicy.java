@@ -253,10 +253,10 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 != lastReportedConfig.windowConfiguration.getDisplayRotation());
         return isTreatmentEnabledForDisplay()
                 && isTreatmentEnabledForActivity(activity)
-                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                && activity.mAppCompatController.getCameraOverrides()
                     .shouldRefreshActivityForCameraCompat()
                 && (displayRotationChanged
-                || activity.mAppCompatController.getAppCompatCameraOverrides()
+                || activity.mAppCompatController.getCameraOverrides()
                         .isCameraCompatSplitScreenAspectRatioAllowed());
     }
 
@@ -281,7 +281,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     boolean isActivityEligibleForOrientationOverride(@NonNull ActivityRecord activity) {
         return isTreatmentEnabledForDisplay()
                 && isCameraRunningAndWindowingModeEligible(activity, /* mustBeFullscreen */ true)
-                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                && activity.mAppCompatController.getCameraOverrides()
                     .shouldForceRotateForCameraCompat();
     }
 
@@ -325,7 +325,7 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
                 // handle dynamic changes so we shouldn't force rotate them.
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_NOSENSOR
                 && activity.getOverrideOrientation() != SCREEN_ORIENTATION_LOCKED
-                && activity.mAppCompatController.getAppCompatCameraOverrides()
+                && activity.mAppCompatController.getCameraOverrides()
                     .shouldForceRotateForCameraCompat();
     }
 
@@ -457,14 +457,14 @@ final class DisplayRotationCompatPolicy implements CameraStateMonitor.CameraComp
     private boolean shouldRecomputeConfigurationForCameraCompat(
             @NonNull ActivityRecord activityRecord) {
         final AppCompatCameraOverrides overrides = activityRecord.mAppCompatController
-                .getAppCompatCameraOverrides();
+                .getCameraOverrides();
         return overrides.isOverrideOrientationOnlyForCameraEnabled()
                 || overrides.isCameraCompatSplitScreenAspectRatioAllowed()
                 || shouldOverrideMinAspectRatio(activityRecord);
     }
 
     private boolean shouldOverrideMinAspectRatio(@NonNull ActivityRecord activityRecord) {
-        return activityRecord.mAppCompatController.getAppCompatCameraOverrides()
+        return activityRecord.mAppCompatController.getCameraOverrides()
                 .isOverrideMinAspectRatioForCameraEnabled()
                         && isCameraRunningAndWindowingModeEligible(activityRecord,
                                 /* mustBeFullscreen= */ true);

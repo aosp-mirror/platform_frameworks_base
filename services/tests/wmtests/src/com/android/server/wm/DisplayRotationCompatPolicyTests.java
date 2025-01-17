@@ -267,7 +267,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testTreatmentDisabledPerApp_noForceRotationOrRefresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(false).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+        doReturn(false).when(mActivity.mAppCompatController.getCameraOverrides())
                 .shouldForceRotateForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -469,7 +469,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        doReturn(false).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+        doReturn(false).when(mActivity.mAppCompatController.getCameraOverrides())
                 .shouldRefreshActivityForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -496,7 +496,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         doReturn(false).when(mActivity
-                        .mAppCompatController.getAppCompatCameraOverrides())
+                        .mAppCompatController.getCameraOverrides())
                             .isCameraCompatSplitScreenAspectRatioAllowed();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -509,7 +509,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_splitScreenAspectRatioAllowed_refresh()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+        doReturn(true).when(mActivity.mAppCompatController.getCameraOverrides())
                 .isCameraCompatSplitScreenAspectRatioAllowed();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -535,7 +535,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+        doReturn(true).when(mActivity.mAppCompatController.getCameraOverrides())
                 .shouldRefreshActivityViaPauseForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -599,7 +599,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
                 ActivityInfo.UNIVERSAL_RESIZABLE_BY_DEFAULT);
 
         spyOn(mActivity.mAtmService.getLifecycleManager());
-        spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
+        spyOn(mActivity.mAppCompatController.getCameraOverrides());
 
         doReturn(mActivity).when(mDisplayContent).topRunningActivity(anyBoolean());
         doReturn(naturalOrientation).when(mDisplayContent).getNaturalOrientation();
@@ -611,7 +611,7 @@ public final class DisplayRotationCompatPolicyTests extends WindowTestsBase {
 
     private void assertActivityRefreshRequested(boolean refreshRequested,
                 boolean cycleThroughStop) throws Exception {
-        verify(mActivity.mAppCompatController.getAppCompatCameraOverrides(),
+        verify(mActivity.mAppCompatController.getCameraOverrides(),
                 times(refreshRequested ? 1 : 0)).setIsRefreshRequested(true);
 
         final RefreshCallbackItem refreshCallbackItem =

@@ -401,7 +401,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
 
-        doReturn(false).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+        doReturn(false).when(mActivity.mAppCompatController.getCameraOverrides())
                 .shouldRefreshActivityForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -431,7 +431,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
     public void testOnActivityConfigurationChanging_cycleThroughStopDisabledForApp()
             throws Exception {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
-        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+        doReturn(true).when(mActivity.mAppCompatController.getCameraOverrides())
                 .shouldRefreshActivityViaPauseForCameraCompat();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -477,7 +477,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
         configureActivity(SCREEN_ORIENTATION_PORTRAIT);
         final float configAspectRatio = 1.5f;
         mWm.mAppCompatConfiguration.setCameraCompatAspectRatio(configAspectRatio);
-        doReturn(true).when(mActivity.mAppCompatController.getAppCompatCameraOverrides())
+        doReturn(true).when(mActivity.mAppCompatController.getCameraOverrides())
                 .isOverrideMinAspectRatioForCameraEnabled();
 
         mCameraAvailabilityCallback.onCameraOpened(CAMERA_ID_1, TEST_PACKAGE_1);
@@ -608,7 +608,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
                 .build();
         mActivity.mAppCompatController.getSizeCompatModePolicy().clearSizeCompatMode();
 
-        spyOn(mActivity.mAppCompatController.getAppCompatCameraOverrides());
+        spyOn(mActivity.mAppCompatController.getCameraOverrides());
         spyOn(mActivity.info);
 
         doReturn(mActivity).when(mDisplayContent).topRunningActivity(anyBoolean());
@@ -630,7 +630,7 @@ public class CameraCompatFreeformPolicyTests extends WindowTestsBase {
 
     private void assertActivityRefreshRequested(boolean refreshRequested,
             boolean cycleThroughStop) throws Exception {
-        verify(mActivity.mAppCompatController.getAppCompatCameraOverrides(),
+        verify(mActivity.mAppCompatController.getCameraOverrides(),
                 times(refreshRequested ? 1 : 0)).setIsRefreshRequested(true);
 
         final RefreshCallbackItem refreshCallbackItem =

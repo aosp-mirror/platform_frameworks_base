@@ -94,8 +94,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatCameraOverrides getAppCompatCameraOverrides() {
-        return mAppCompatOverrides.getAppCompatCameraOverrides();
+    AppCompatCameraOverrides getCameraOverrides() {
+        return mAppCompatOverrides.getCameraOverrides();
     }
 
     @NonNull
