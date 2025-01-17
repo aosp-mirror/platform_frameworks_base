@@ -304,8 +304,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Síťová upozornění"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"K dispozici je síť"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Stav sítě VPN"</string>
-    <!-- no translation found for notification_channel_system_time (1660313368058030441) -->
-    <skip />
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Čas a časová pásma"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Upozornění od vašeho administrátora IT"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Upozornění"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Prodejní ukázka"</string>
@@ -313,8 +312,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Aplikace je spuštěna"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Aplikace spotřebovávají baterii"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Zvětšení"</string>
-    <!-- no translation found for notification_channel_accessibility_hearing_device (7816963856388758952) -->
-    <skip />
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Naslouchátko"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Využití přístupnosti"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Displej"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Aplikace <xliff:g id="APP_NAME">%1$s</xliff:g> využívá baterii"</string>
@@ -1412,10 +1410,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Stáhnout aplikaci"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Byla vložena nová SIM karta"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Klepnutím zahájíte nastavení"</string>
-    <!-- no translation found for time_zone_change_notification_title (5232503069219193218) -->
-    <skip />
-    <!-- no translation found for time_zone_change_notification_body (6135793674904665585) -->
-    <skip />
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Vaše časové pásmo se změnilo"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Jste v časovém pásmu <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Nastavit čas"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Nastavení data"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Nastavit"</string>
@@ -1803,18 +1799,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Funkce se otevře při příštím použití této zkratky. Přejeďte dvěma prsty nahoru ze spodní části obrazovky a rychle je zvedněte."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Funkce se otevře při příštím použití této zkratky. Přejeďte třemi prsty nahoru ze spodní části obrazovky a rychle je zvedněte."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Zvětšení"</string>
-    <!-- no translation found for hearing_device_switch_phone_mic_notification_title (6645178038359708836) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_hearing_mic_notification_title (4612074852145289569) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_phone_mic_notification_text (1332426273666077412) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_hearing_mic_notification_text (8288368365767284208) -->
-    <skip />
-    <!-- no translation found for hearing_device_notification_switch_button (3619524619430941300) -->
-    <skip />
-    <!-- no translation found for hearing_device_notification_settings_button (6673651052880279178) -->
-    <skip />
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Přepnout na mikrofon telefonu?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Přepnout na mikrofon naslouchátka?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Pro lepší zvuk, nebo pokud je baterie naslouchátka téměř vybitá. Mikrofon se přepne jen během hovoru."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"K handsfree telefonování můžete použít mikrofon naslouchátka. Mikrofon se přepne jen během hovoru."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Přepnout"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Nastavení"</string>
     <string name="user_switched" msgid="7249833311585228097">"Aktuální uživatel je <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Přepínání na uživatele <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Odhlašování uživatele <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2471,8 +2461,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Obsah aplikace je z bezpečnostních důvodů při sdílení obrazovky skryt"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automaticky připojeno k satelitu"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Zprávy můžete odesílat a přijímat bez mobilní sítě nebo sítě Wi-Fi"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Můžete dostávat a odesílat zprávy a používat omezená data přes satelit"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Použít satelitní zprávy?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Odesílejte a přijímejte zprávy bez mobilní sítě nebo Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Otevřít Zprávy"</string>

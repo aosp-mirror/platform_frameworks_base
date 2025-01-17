@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"보안을 위해 화면 공유에서 앱 콘텐츠가 숨겨집니다."</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"위성에 자동 연결됨"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"모바일 또는 Wi-Fi 네트워크 없이 메시지를 주고 받을 수 있습니다"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"위성으로 메시지를 주고받을 수 있으며 데이터를 제한적으로 사용할 수도 있습니다."</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"위성 메시지를 사용하시겠습니까?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"모바일 또는 Wi-Fi 네트워크 없이 메시지 주고받기"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"메시지 열기"</string>

@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Για λόγους ασφάλειας, έγινε απόκρυψη του περιεχομένου της εφαρμογής από την κοινή χρήση οθόνης"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Συνδέθηκε αυτόματα με δορυφόρο"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Μπορείτε να στέλνετε και να λαμβάνετε μηνύματα χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi."</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Μπορείτε να στέλνετε και να λαμβάνετε μηνύματα και να χρησιμοποιείτε περιορισμένα δεδομένα μέσω δορυφόρου"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Χρήση της ανταλλαγής μηνυμάτων μέσω δορυφόρου;"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Αποστολή και λήψη μηνυμάτων χωρίς δίκτυο κινητής τηλεφωνίας ή Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Άνοιγμα Messages"</string>

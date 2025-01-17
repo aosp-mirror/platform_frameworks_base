@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ለደኅንነት ሲባል የመተግበሪያ ይዘት ከማያ ገጽ ማጋራት ተደብቋል"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ከሳተላይት ጋር በራስ-ሰር ተገናኝቷል"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ያለ ሞባይል ወይም የWi-Fi አውታረ መረብ መልዕክቶችን መላክ እና መቀበል ይችላሉ"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"በሳተላይት መልዕክቶችን መላክ እና መቀበል እና የተገደበ ውሂብ መጠቀም ይችላሉ"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"የሳተላይት መልዕክት መላላክን ይጠቀማሉ?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ያለ ሞባይል ወይም የWi-Fi አውታረ መረብ መልዕክቶችን ይላኩ እና ይቀበሉ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"መልዕክቶች ይክፈቱ"</string>

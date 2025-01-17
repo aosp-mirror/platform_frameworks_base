@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"स्क्रीन शेअर करताना सुरक्षेसाठी अ‍ॅपमधील आशय लपवला आहे"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"उपग्रहाशी आपोआप कनेक्ट केलेले आहे"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"तुम्ही मोबाइल किंवा वाय-फाय नेटवर्कशिवाय मेसेज पाठवू आणि मिळवू शकता"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"तुम्ही उपग्रहाद्वारे मेसेज पाठवू आणि मिळवू शकता व मर्यादित डेटा वापरू शकता"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"सॅटेलाइट मेसेजिंग वापरायचे आहे का?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"मोबाइल किंवा वाय-फाय नेटवर्कशिवाय मेसेज पाठवणे आणि मिळवणे"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages उघडा"</string>

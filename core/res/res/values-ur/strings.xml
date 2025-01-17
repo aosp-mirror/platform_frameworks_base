@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"سیکیورٹی کے مد نظر ایپ کا مواد اسکرین کے اشتراک سے چھپا ہوا ہے"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"سٹلائٹ سے خودکار طور پر منسلک ہے"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏آپ موبائل یا Wi-Fi نیٹ ورک کے بغیر پیغامات بھیج اور موصول کر سکتے ہیں"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"آپ سیٹلائٹ کے ذریعے پیغامات بھیج اور موصول کر سکتے ہیں اور محدود ڈیٹا استعمال کر سکتے ہیں"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"سیٹلائٹ پیغام رسانی کا استعمال کریں؟"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏موبائل یا Wi-Fi نیٹ ورک کے بغیر پیغامات بھیجیں اور موصول کریں"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"پیغامات ایپ کو کھولیں"</string>

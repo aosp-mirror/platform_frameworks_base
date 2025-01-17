@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Uygulama içerikleri, güvenlik nedeniyle ekran paylaşımında gizlendi"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Uyduya otomatik olarak bağlandı"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil veya kablosuz ağa bağlı olmadan mesaj alıp gönderebilirsiniz"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Uydu üzerinden mesaj gönderip alabilir ve sınırlı miktarda veri kullanabilirsiniz"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Uydu üzerinden mesajlaşma kullanılsın mı?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Mobil veya kablosuz ağ kullanmadan mesaj gönderip alın"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mesajlar\'ı aç"</string>

@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ซ่อนเนื้อหาแอปจากการแชร์หน้าจอแล้วเพื่อความปลอดภัย"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"เชื่อมต่อกับดาวเทียมโดยอัตโนมัติ"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"คุณรับส่งข้อความผ่านดาวเทียมได้โดยไม่ต้องใช้เครือข่ายมือถือหรือ Wi-Fi"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"คุณจะรับส่งข้อความและใช้อินเทอร์เน็ตแบบจำกัดผ่านดาวเทียมได้"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ใช้การรับส่งข้อความผ่านดาวเทียมไหม"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"รับและส่งข้อความโดยไม่ต้องใช้เครือข่ายมือถือหรือ Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"เปิด Messages"</string>

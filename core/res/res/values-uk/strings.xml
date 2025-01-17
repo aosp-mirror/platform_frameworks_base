@@ -304,8 +304,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"Сповіщення мережі"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"Мережа доступна"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"Статус мережі VPN"</string>
-    <!-- no translation found for notification_channel_system_time (1660313368058030441) -->
-    <skip />
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"Час і часові пояси"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"Сповіщення від ІТ-адміністратора"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"Сповіщення"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"Демо-режим для роздрібної торгівлі"</string>
@@ -313,8 +312,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"Працює додаток"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"Додатки, що використовують заряд акумулятора"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"Збільшення"</string>
-    <!-- no translation found for notification_channel_accessibility_hearing_device (7816963856388758952) -->
-    <skip />
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"Слуховий апарат"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"Використання спеціальних можливостей"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"Дисплей"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"Додаток <xliff:g id="APP_NAME">%1$s</xliff:g> використовує заряд акумулятора"</string>
@@ -1412,10 +1410,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"Завантажити додаток"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"Вставлено нову SIM-карту"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"Торкніться, щоб налаштувати"</string>
-    <!-- no translation found for time_zone_change_notification_title (5232503069219193218) -->
-    <skip />
-    <!-- no translation found for time_zone_change_notification_body (6135793674904665585) -->
-    <skip />
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"Часовий пояс змінено"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"Ви зараз у часовому поясі \"<xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g>\" (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"Установити час"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"Установити дату"</string>
     <string name="date_time_set" msgid="4603445265164486816">"Застосувати"</string>
@@ -1803,18 +1799,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"Функція відкриється, коли ви наступного разу скористаєтеся цією швидкою командою. Проведіть двома пальцями вгору від низу екрана й швидко відпустіть."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"Функція відкриється, коли ви наступного разу скористаєтеся цією швидкою командою. Проведіть трьома пальцями вгору від низу екрана й швидко відпустіть."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"Збільшення"</string>
-    <!-- no translation found for hearing_device_switch_phone_mic_notification_title (6645178038359708836) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_hearing_mic_notification_title (4612074852145289569) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_phone_mic_notification_text (1332426273666077412) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_hearing_mic_notification_text (8288368365767284208) -->
-    <skip />
-    <!-- no translation found for hearing_device_notification_switch_button (3619524619430941300) -->
-    <skip />
-    <!-- no translation found for hearing_device_notification_settings_button (6673651052880279178) -->
-    <skip />
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"Перемкнути на мікрофон телефона?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"Перемкнути на мікрофон слухового апарата?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"Використовується, щоб покращити якість звуку або якщо акумулятор слухового апарата розряджений. Мікрофон перемикатиметься лише на час дзвінка."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"Ви можете використовувати мікрофон слухового апарата для голосового керування викликами. Мікрофон перемикатиметься лише на час дзвінка."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"Перемкнути"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"Налаштування"</string>
     <string name="user_switched" msgid="7249833311585228097">"Поточний користувач: <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"Перехід у режим \"<xliff:g id="NAME">%1$s</xliff:g>\"…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"Вихід з облікового запису користувача <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2471,8 +2461,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"З міркувань безпеки вміст додатка приховано під час показу екрана"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Автоматично підключено до супутника"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Ви можете надсилати й отримувати повідомлення, не використовуючи Wi-Fi або мобільну мережу"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Ви можете надсилати й отримувати повідомлення та використовувати обмежений обсяг даних через супутник"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Скористатися супутниковим обміном повідомленнями?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Надсилайте й отримуйте текстові повідомлення без мобільної мережі або Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Відкрийте Повідомлення"</string>

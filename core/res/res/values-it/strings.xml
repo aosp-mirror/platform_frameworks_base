@@ -2460,8 +2460,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contenuti dell\'app nascosti dalla condivisione schermo per sicurezza"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Connessione automatica al satellite"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Puoi inviare e ricevere messaggi senza una rete mobile o Wi-Fi"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Puoi inviare e ricevere messaggi e utilizzare dati limitati via satellite"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Utilizzare i messaggi via satellite?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Invia e ricevi messaggi senza una rete mobile o Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Apri Messaggi"</string>

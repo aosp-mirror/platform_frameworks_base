@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Rakenduse sisu on ekraani jagamisel turvalisuse huvides peidetud"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Satelliidiga loodi automaatselt ühendus"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Teil on võimalik sõnumeid saata ja vastu võtta ilma mobiilside- ja WiFi-võrguta"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Saate sõnumeid vahetada ja kasutada piiratud andmeid satelliidi kaudu"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Kas soovite kasutada satelliidipõhist sõnumsidet?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Sõnumite saatmine ja vastuvõtmine ilma mobiilside- või WiFi-võrguta"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Ava rakendus Messages"</string>

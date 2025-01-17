@@ -2460,8 +2460,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Contingut de l\'aplicació amagat de la compartició de pantalla per seguretat"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"S\'ha connectat automàticament a un satèl·lit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Pots enviar i rebre missatges sense una xarxa mòbil o Wi‑Fi"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Pots enviar i rebre missatges i utilitzar dades limitades per satèl·lit"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Vols utilitzar els missatges per satèl·lit?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Envia i rep missatges sense una xarxa mòbil o Wi‑Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Obre Missatges"</string>

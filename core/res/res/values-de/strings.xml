@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Aus Sicherheitsgründen werden bei der Bildschirmfreigabe App-Inhalte ausgeblendet"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatisch mit Satellit verbunden"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kannst Nachrichten ohne Mobilfunknetz oder WLAN senden und empfangen"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Du kannst Nachrichten senden und empfangen und begrenzte Datenmengen per Satellit nutzen"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Nachrichten per Satellit verwenden?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Du kannst ohne Mobilgerät oder WLAN Nachrichten senden und empfangen"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages öffnen"</string>

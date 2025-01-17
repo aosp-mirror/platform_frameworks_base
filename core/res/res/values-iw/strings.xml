@@ -303,8 +303,7 @@
     <string name="notification_channel_network_alerts" msgid="6312366315654526528">"התראות רשת"</string>
     <string name="notification_channel_network_available" msgid="6083697929214165169">"יש רשת זמינה"</string>
     <string name="notification_channel_vpn" msgid="1628529026203808999">"‏סטטוס ה-VPN"</string>
-    <!-- no translation found for notification_channel_system_time (1660313368058030441) -->
-    <skip />
+    <string name="notification_channel_system_time" msgid="1660313368058030441">"זמן ואזורי זמן"</string>
     <string name="notification_channel_device_admin" msgid="6384932669406095506">"‏התראות ממנהל ה-IT"</string>
     <string name="notification_channel_alerts" msgid="5070241039583668427">"התראות"</string>
     <string name="notification_channel_retail_mode" msgid="3732239154256431213">"הדגמה לקמעונאים"</string>
@@ -312,8 +311,7 @@
     <string name="notification_channel_heavy_weight_app" msgid="17455756500828043">"אפליקציה פועלת"</string>
     <string name="notification_channel_foreground_service" msgid="7102189948158885178">"אפליקציות שמרוקנות את הסוללה"</string>
     <string name="notification_channel_accessibility_magnification" msgid="1707913872219798098">"הגדלה"</string>
-    <!-- no translation found for notification_channel_accessibility_hearing_device (7816963856388758952) -->
-    <skip />
+    <string name="notification_channel_accessibility_hearing_device" msgid="7816963856388758952">"מכשיר שמיעה"</string>
     <string name="notification_channel_accessibility_security_policy" msgid="1727787021725251912">"שימוש בנגישות"</string>
     <string name="notification_channel_display" msgid="6905032605735615090">"מסך"</string>
     <string name="foreground_service_app_in_background" msgid="1439289699671273555">"האפליקציה <xliff:g id="APP_NAME">%1$s</xliff:g> משתמשת בסוללה"</string>
@@ -1411,10 +1409,8 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"להורדת האפליקציה"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"‏ה-SIM החדש הוכנס"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"יש ללחוץ כדי להגדיר"</string>
-    <!-- no translation found for time_zone_change_notification_title (5232503069219193218) -->
-    <skip />
-    <!-- no translation found for time_zone_change_notification_body (6135793674904665585) -->
-    <skip />
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"אזור הזמן שלך השתנה"</string>
+    <string name="time_zone_change_notification_body" msgid="6135793674904665585">"אזור הזמן הנוכחי שלך הוא <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> ‏(<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"הגדרת שעה"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"הגדרת תאריך"</string>
     <string name="date_time_set" msgid="4603445265164486816">"הגדרה"</string>
@@ -1463,7 +1459,7 @@
     <string name="select_input_method" msgid="3971267998568587025">"בחירה של שיטת הזנה"</string>
     <string name="input_method_language_settings" msgid="8069089418056819437">"הגדרות שפה"</string>
     <string name="show_ime" msgid="6406112007347443383">"להשאיר במסך בזמן שהמקלדת הפיזית פעילה"</string>
-    <string name="hardware" msgid="3611039921284836033">"שימוש במקלדת שמופיעה במסך"</string>
+    <string name="hardware" msgid="3611039921284836033">"שימוש במקלדת הווירטואלית"</string>
     <string name="select_keyboard_layout_notification_title" msgid="5823199895322205589">"הגדרה של <xliff:g id="DEVICE_NAME">%s</xliff:g>"</string>
     <string name="select_multiple_keyboards_layout_notification_title" msgid="6999491025126641938">"הגדרת מקלדות פיזיות"</string>
     <string name="select_keyboard_layout_notification_message" msgid="8835158247369158154">"יש ללחוץ כדי לבחור שפה ופריסה"</string>
@@ -1802,18 +1798,12 @@
     <string name="accessibility_gesture_instructional_text" msgid="4133877896011098550">"התכונה תיפתח בפעם הבאה שייעשה שימוש במקש הקיצור הזה. צריך להחליק למעלה עם 2 אצבעות מהחלק התחתון של המסך ולשחרר במהירות."</string>
     <string name="accessibility_gesture_3finger_instructional_text" msgid="1124458279366968154">"התכונה תיפתח בפעם הבאה שייעשה שימוש במקש הקיצור הזה. צריך להחליק למעלה עם 3 אצבעות מהחלק התחתון של המסך ולשחרר במהירות."</string>
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"הגדלה"</string>
-    <!-- no translation found for hearing_device_switch_phone_mic_notification_title (6645178038359708836) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_hearing_mic_notification_title (4612074852145289569) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_phone_mic_notification_text (1332426273666077412) -->
-    <skip />
-    <!-- no translation found for hearing_device_switch_hearing_mic_notification_text (8288368365767284208) -->
-    <skip />
-    <!-- no translation found for hearing_device_notification_switch_button (3619524619430941300) -->
-    <skip />
-    <!-- no translation found for hearing_device_notification_settings_button (6673651052880279178) -->
-    <skip />
+    <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"להחליף למיקרופון של הטלפון?"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"להחליף למיקרופון של מכשיר השמיעה?"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"כדי לשמוע טוב יותר או אם הסוללה של מכשיר השמיעה נחלשת. במצב הזה המיקרופון מוחלף רק במהלך השיחה."</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"אפשר לשוחח במצב דיבורית באמצעות המיקרופון של מכשיר השמיעה. במצב הזה המיקרופון מוחלף רק במהלך השיחה."</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"החלפה"</string>
+    <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"הגדרות"</string>
     <string name="user_switched" msgid="7249833311585228097">"המשתמש הנוכחי <xliff:g id="NAME">%1$s</xliff:g>."</string>
     <string name="user_switching_message" msgid="1912993630661332336">"מעבר אל <xliff:g id="NAME">%1$s</xliff:g>…"</string>
     <string name="user_logging_out_message" msgid="7216437629179710359">"מתבצע ניתוק של <xliff:g id="NAME">%1$s</xliff:g>…"</string>
@@ -2470,8 +2460,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"תוכן האפליקציה מוסתר משיתוף המסך מטעמי אבטחה"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"חיבור אוטומטי ללוויין"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"‏אפשר לשלוח ולקבל הודעות ללא רשת סלולרית או רשת Wi-Fi"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"אפשר לשלוח ולקבל הודעות ולהשתמש בחבילת הגלישה באופן מוגבל באמצעות לוויין"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"רוצה לשלוח הודעות באמצעות תקשורת לוויינית?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"‏אפשר לשלוח ולקבל הודעות ללא רשת סלולרית או Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"‏לפתיחת Messages"</string>

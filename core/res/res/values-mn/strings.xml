@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Аюулгүй байдлын үүднээс аппын контентыг дэлгэц хуваалцахаас нуусан"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Хиймэл дагуулд автоматаар холбогдсон"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Та мобайл эсвэл Wi-Fi сүлжээгүйгээр мессеж илгээх болон хүлээн авах боломжтой"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Та хиймэл дагуулаар мессеж илгээх, хүлээн авах, хязгаарлагдмал дата ашиглах боломжтой"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Хиймэл дагуулаар дамжин мессеж бичихийг ашиглах уу?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Хөдөлгөөнт холбооны эсвэл Wi-Fi сүлжээгүйгээр мессеж илгээх болон хүлээн авах"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Мессежийг нээх"</string>

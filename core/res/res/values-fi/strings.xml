@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Sovelluksen sisältö piilotettu näytön jakamiselta turvallisuussyistä"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Yhdistetty automaattisesti satelliittiin"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Voit lähettää ja vastaanottaa viestejä ilman mobiili‑ tai Wi-Fi-verkkoa"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Voit lähettää ja vastaanottaa viestejä ja käyttää rajoitetusti dataa satelliitin kautta"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Käytetäänkö satelliittiviestintää?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Lähetä ja vastaanota viestejä ilman mobiili- tai Wi-Fi-verkkoa"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Avaa Messages"</string>

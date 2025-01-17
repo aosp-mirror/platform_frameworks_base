@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"নিরাপত্তার জন্য স্ক্রিন শেয়ার করা থেকে লুকানো অ্যাপের কন্টেন্ট"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"স্যাটেলাইটের সাথে অটোমেটিক কানেক্ট করা হয়েছে"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"আপনি কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠাতে ও পেতে পারবেন"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"আপনি স্যাটেলাইটের মাধ্যমে মেসেজ পাঠাতে ও পেতে এবং সীমিত ডেটা ব্যবহার করতে পারেন"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"\'স্যাটেলাইট মেসেজিং\' ব্যবহার করবেন?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"কোনও মেবাইল বা ওয়াই-ফাই নেটওয়ার্ক ছাড়াই মেসেজ পাঠান ও রিসিভ করুন"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages খুলুন"</string>

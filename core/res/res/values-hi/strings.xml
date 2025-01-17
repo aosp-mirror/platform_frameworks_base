@@ -291,7 +291,7 @@
     <string name="status_bar_notification_info_overflow" msgid="3330152558746563475">"999+"</string>
     <string name="notification_compact_heads_up_reply" msgid="2425293958371284340">"जवाब दें"</string>
     <string name="notification_hidden_text" msgid="2835519769868187223">"नई सूचना"</string>
-    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"सामान्य कीबोर्ड"</string>
+    <string name="notification_channel_physical_keyboard" msgid="5417306456125988096">"फ़िज़िकल कीबोर्ड"</string>
     <string name="notification_channel_security" msgid="8516754650348238057">"सुरक्षा"</string>
     <string name="notification_channel_car_mode" msgid="2123919247040988436">"कार मोड"</string>
     <string name="notification_channel_account" msgid="6436294521740148173">"खाते की स्थिति"</string>
