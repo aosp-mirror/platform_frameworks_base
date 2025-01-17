@@ -1562,74 +1562,72 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /**
      * This method has different behavior depending on:
-     *    - if an app bubble exists
-     *    - if an app bubble is expanded
+     *    - if a notes bubble exists
+     *    - if a notes bubble is expanded
      *
-     * If no app bubble exists, this will add and expand a bubble with the provided intent. The
+     * If no notes bubble exists, this will add and expand a bubble with the provided intent. The
      * intent must be explicit (i.e. include a package name or fully qualified component class name)
      * and the activity for it should be resizable.
      *
-     * If an app bubble exists, this will toggle the visibility of it, i.e. if the app bubble is
-     * expanded, calling this method will collapse it. If the app bubble is not expanded, calling
+     * If a notes bubble exists, this will toggle the visibility of it, i.e. if the notes bubble is
+     * expanded, calling this method will collapse it. If the notes bubble is not expanded, calling
      * this method will expand it.
      *
      * These bubbles are <b>not</b> backed by a notification and remain until the user dismisses
      * the bubble or bubble stack.
      *
-     * Some notes:
-     *    - Only one app bubble is supported at a time, regardless of users. Multi-users support is
-     *      tracked in b/273533235.
-     *    - Calling this method with a different intent than the existing app bubble will do nothing
+     * Some details:
+     *    - Calling this method with a different intent than the existing bubble will do nothing
      *
      * @param intent the intent to display in the bubble expanded view.
      * @param user the {@link UserHandle} of the user to start this activity for.
      * @param icon the {@link Icon} to use for the bubble view.
      */
-    public void showOrHideAppBubble(Intent intent, UserHandle user, @Nullable Icon icon) {
+    public void showOrHideNotesBubble(Intent intent, UserHandle user, @Nullable Icon icon) {
         if (intent == null || intent.getPackage() == null) {
-            Log.w(TAG, "App bubble failed to show, invalid intent: " + intent
+            Log.w(TAG, "Notes bubble failed to show, invalid intent: " + intent
                     + ((intent != null) ? " with package: " + intent.getPackage() : " "));
             return;
         }
 
-        String appBubbleKey = Bubble.getNoteBubbleKeyForApp(intent.getPackage(), user);
+        String noteBubbleKey = Bubble.getNoteBubbleKeyForApp(intent.getPackage(), user);
         PackageManager packageManager = getPackageManagerForUser(mContext, user.getIdentifier());
-        if (!mResizabilityChecker.isResizableActivity(intent, packageManager, appBubbleKey)) {
+        if (!mResizabilityChecker.isResizableActivity(intent, packageManager, noteBubbleKey)) {
             // resize check logs any errors
             return;
         }
 
-        Bubble existingAppBubble = mBubbleData.getBubbleInStackWithKey(appBubbleKey);
+        Bubble existingNotebubble = mBubbleData.getBubbleInStackWithKey(noteBubbleKey);
         ProtoLog.d(WM_SHELL_BUBBLES,
-                "showOrHideAppBubble, key=%s existingAppBubble=%s stackVisibility=%s "
+                "showOrHideNotesBubble, key=%s existingAppBubble=%s stackVisibility=%s "
                         + "statusBarShade=%s",
-                appBubbleKey, existingAppBubble,
+                noteBubbleKey, existingNotebubble,
                 (mStackView != null ? mStackView.getVisibility() : "null"),
                 mIsStatusBarShade);
 
-        if (existingAppBubble != null) {
+        if (existingNotebubble != null) {
             BubbleViewProvider selectedBubble = mBubbleData.getSelectedBubble();
             if (isStackExpanded()) {
-                if (selectedBubble != null && appBubbleKey.equals(selectedBubble.getKey())) {
-                    ProtoLog.d(WM_SHELL_BUBBLES, "collapseStack for %s", appBubbleKey);
-                    // App bubble is expanded, lets collapse
+                if (selectedBubble != null && noteBubbleKey.equals(selectedBubble.getKey())) {
+                    ProtoLog.d(WM_SHELL_BUBBLES, "collapseStack for %s", noteBubbleKey);
+                    // Notes bubble is expanded, lets collapse
                     collapseStack();
                 } else {
-                    ProtoLog.d(WM_SHELL_BUBBLES, "setSelected for %s", appBubbleKey);
-                    // App bubble is not selected, select it
-                    mBubbleData.setSelectedBubble(existingAppBubble);
+                    ProtoLog.d(WM_SHELL_BUBBLES, "setSelected for %s", noteBubbleKey);
+                    // Notes bubble is not selected, select it
+                    mBubbleData.setSelectedBubble(existingNotebubble);
                 }
             } else {
-                ProtoLog.d(WM_SHELL_BUBBLES, "setSelectedBubbleAndExpandStack %s", appBubbleKey);
-                // App bubble is not selected, select it & expand
-                mBubbleData.setSelectedBubbleAndExpandStack(existingAppBubble);
+                ProtoLog.d(WM_SHELL_BUBBLES, "setSelectedBubbleAndExpandStack %s", noteBubbleKey);
+                // Notes bubble is not selected, select it & expand
+                mBubbleData.setSelectedBubbleAndExpandStack(existingNotebubble);
             }
         } else {
             // Check if it exists in the overflow
-            Bubble b = mBubbleData.getOverflowBubbleWithKey(appBubbleKey);
+            Bubble b = mBubbleData.getOverflowBubbleWithKey(noteBubbleKey);
             if (b != null) {
                 // It's in the overflow, so remove it & reinflate
-                mBubbleData.dismissBubbleWithKey(appBubbleKey, Bubbles.DISMISS_NOTIF_CANCEL);
+                mBubbleData.dismissBubbleWithKey(noteBubbleKey, Bubbles.DISMISS_NOTIF_CANCEL);
                 // Update the bubble entry in the overflow with the latest intent.
                 b.setAppBubbleIntent(intent);
             } else {
@@ -1637,7 +1635,7 @@ public class BubbleController implements ConfigurationChangeListener,
                 b = Bubble.createNotesBubble(intent, user, icon, mMainExecutor,
                         mBackgroundExecutor);
             }
-            ProtoLog.d(WM_SHELL_BUBBLES, "inflateAndAdd %s", appBubbleKey);
+            ProtoLog.d(WM_SHELL_BUBBLES, "inflateAndAdd %s", noteBubbleKey);
             b.setShouldAutoExpand(true);
             inflateAndAdd(b, /* suppressFlyout= */ true, /* showInShade= */ false);
         }
@@ -1685,9 +1683,9 @@ public class BubbleController implements ConfigurationChangeListener,
         }
     }
 
-    /** Sets the app bubble's taskId which is cached for SysUI. */
-    public void setAppBubbleTaskId(String key, int taskId) {
-        mImpl.mCachedState.setAppBubbleTaskId(key, taskId);
+    /** Sets the note bubble's taskId which is cached for SysUI. */
+    public void setNoteBubbleTaskId(String key, int taskId) {
+        mImpl.mCachedState.setNoteBubbleTaskId(key, taskId);
     }
 
     /**
@@ -2793,7 +2791,7 @@ public class BubbleController implements ConfigurationChangeListener,
             private HashMap<String, String> mSuppressedGroupToNotifKeys = new HashMap<>();
             private HashMap<String, Bubble> mShortcutIdToBubble = new HashMap<>();
 
-            private HashMap<String, Integer> mAppBubbleTaskIds = new HashMap();
+            private HashMap<String, Integer> mNoteBubbleTaskIds = new HashMap();
 
             private ArrayList<Bubble> mTmpBubbles = new ArrayList<>();
 
@@ -2825,20 +2823,20 @@ public class BubbleController implements ConfigurationChangeListener,
 
                 mSuppressedBubbleKeys.clear();
                 mShortcutIdToBubble.clear();
-                mAppBubbleTaskIds.clear();
+                mNoteBubbleTaskIds.clear();
                 for (Bubble b : mTmpBubbles) {
                     mShortcutIdToBubble.put(b.getShortcutId(), b);
                     updateBubbleSuppressedState(b);
 
-                    if (b.isAppBubble()) {
-                        mAppBubbleTaskIds.put(b.getKey(), b.getTaskId());
+                    if (b.isNoteBubble()) {
+                        mNoteBubbleTaskIds.put(b.getKey(), b.getTaskId());
                     }
                 }
             }
 
-            /** Sets the app bubble's taskId which is cached for SysUI. */
-            synchronized void setAppBubbleTaskId(String key, int taskId) {
-                mAppBubbleTaskIds.put(key, taskId);
+            /** Sets the note bubble's taskId which is cached for SysUI. */
+            synchronized void setNoteBubbleTaskId(String key, int taskId) {
+                mNoteBubbleTaskIds.put(key, taskId);
             }
 
             /**
@@ -2890,7 +2888,7 @@ public class BubbleController implements ConfigurationChangeListener,
                     pw.println("   suppressing: " + key);
                 }
 
-                pw.println("mAppBubbleTaskIds: " + mAppBubbleTaskIds.values());
+                pw.println("mNoteBubbleTaskIds: " + mNoteBubbleTaskIds.values());
             }
         }
 
@@ -2941,14 +2939,14 @@ public class BubbleController implements ConfigurationChangeListener,
         }
 
         @Override
-        public void showOrHideAppBubble(Intent intent, UserHandle user, @Nullable Icon icon) {
+        public void showOrHideNoteBubble(Intent intent, UserHandle user, @Nullable Icon icon) {
             mMainExecutor.execute(
-                    () -> BubbleController.this.showOrHideAppBubble(intent, user, icon));
+                    () -> BubbleController.this.showOrHideNotesBubble(intent, user, icon));
         }
 
         @Override
-        public boolean isAppBubbleTaskId(int taskId) {
-            return mCachedState.mAppBubbleTaskIds.values().contains(taskId);
+        public boolean isNoteBubbleTaskId(int taskId) {
+            return mCachedState.mNoteBubbleTaskIds.values().contains(taskId);
         }
 
         @Override

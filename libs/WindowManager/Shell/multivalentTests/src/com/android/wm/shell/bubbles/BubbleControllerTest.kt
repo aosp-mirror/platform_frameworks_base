@@ -128,14 +128,14 @@ class BubbleControllerTest {
     }
 
     @Test
-    fun showOrHideAppBubble_createsNoteBubble() {
+    fun showOrHideNotesBubble_createsNoteBubble() {
         val intent = Intent(context, TestActivity::class.java)
         intent.setPackage(context.packageName)
         val user = UserHandle.of(0)
         val expectedKey = Bubble.getNoteBubbleKeyForApp(intent.getPackage(), user)
 
         getInstrumentation().runOnMainSync {
-            bubbleController.showOrHideAppBubble(intent, user, mock<Icon>())
+            bubbleController.showOrHideNotesBubble(intent, user, mock<Icon>())
         }
         getInstrumentation().waitForIdleSync()
 

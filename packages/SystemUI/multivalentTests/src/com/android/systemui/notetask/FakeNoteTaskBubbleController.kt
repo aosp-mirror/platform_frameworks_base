@@ -38,7 +38,7 @@ class FakeNoteTaskBubbleController(
 ) : NoteTaskBubblesController(unUsed1, unsUsed2) {
     override suspend fun areBubblesAvailable() = optionalBubbles.isPresent
 
-    override suspend fun showOrHideAppBubble(
+    override suspend fun showOrHideNoteBubble(
         intent: Intent,
         userHandle: UserHandle,
         icon: Icon,
@@ -54,7 +54,7 @@ class FakeNoteTaskBubbleController(
                 ) {
                     return@ifPresentOrElse
                 }
-                bubbles.showOrHideAppBubble(intent, userHandle, icon)
+                bubbles.showOrHideNoteBubble(intent, userHandle, icon)
             },
             { throw IllegalAccessException() },
         )

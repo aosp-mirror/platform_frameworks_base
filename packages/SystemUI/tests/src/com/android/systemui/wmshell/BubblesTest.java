@@ -26,8 +26,6 @@ import static android.service.notification.NotificationListenerService.REASON_AP
 import static android.service.notification.NotificationListenerService.REASON_GROUP_SUMMARY_CANCELED;
 import static android.service.notification.NotificationListenerService.REASON_PACKAGE_BANNED;
 
-import static androidx.test.ext.truth.content.IntentSubject.assertThat;
-
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
 import static com.android.server.notification.Flags.FLAG_SCREENSHARE_NOTIFICATION_HIDING;
 import static com.android.wm.shell.Flags.FLAG_ENABLE_BUBBLE_BAR;
@@ -298,7 +296,7 @@ public class BubblesTest extends SysuiTestCase {
     private BubbleEntry mBubbleEntryUser11;
     private BubbleEntry mBubbleEntry2User11;
 
-    private Intent mAppBubbleIntent;
+    private Intent mNotesBubbleIntent;
 
     @Mock
     private ShellInit mShellInit;
@@ -355,7 +353,7 @@ public class BubblesTest extends SysuiTestCase {
     @Mock
     private NotifPipelineFlags mNotifPipelineFlags;
     @Mock
-    private Icon mAppBubbleIcon;
+    private Icon mNotesBubbleIcon;
     @Mock
     private Display mDefaultDisplay;
     @Mock
@@ -458,8 +456,8 @@ public class BubblesTest extends SysuiTestCase {
         mNotificationShadeWindowController.fetchWindowRootView();
         mNotificationShadeWindowController.attach();
 
-        mAppBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
-        mAppBubbleIntent.setPackage(mContext.getPackageName());
+        mNotesBubbleIntent = new Intent(mContext, BubblesTestActivity.class);
+        mNotesBubbleIntent.setPackage(mContext.getPackageName());
 
         mZenModeConfig.suppressedVisualEffects = 0;
         when(mZenModeController.getConfig()).thenReturn(mZenModeConfig);
@@ -1480,8 +1478,8 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowManageMenuChangesSysuiState_appBubble() {
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+    public void testShowManageMenuChangesSysuiState_notesBubble() {
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
         assertTrue(mBubbleController.hasBubbles());
 
         // Expand the stack
@@ -1981,10 +1979,10 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowOrHideAppBubble_addsAndExpand() {
+    public void testShowOrHideNotesBubble_addsAndExpand() {
         assertThat(mBubbleController.isStackExpanded()).isFalse();
 
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
 
         verify(mBubbleController).inflateAndAdd(any(Bubble.class), /* suppressFlyout= */ eq(true),
                 /* showInShade= */ eq(false));
@@ -1994,14 +1992,14 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowOrHideAppBubble_expandIfCollapsed() {
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+    public void testShowOrHideNotesBubble_expandIfCollapsed() {
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
         mBubbleController.updateBubble(mBubbleEntry);
         mBubbleController.collapseStack();
         assertThat(mBubbleController.isStackExpanded()).isFalse();
 
         // Calling this while collapsed will expand the app bubble
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
 
         assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(
                 Bubble.getNoteBubbleKeyForApp(mContext.getPackageName(), mUser0));
@@ -2010,14 +2008,14 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowOrHideAppBubble_collapseIfSelected() {
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+    public void testShowOrHideNotesBubble_collapseIfSelected() {
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
         assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(
                 Bubble.getNoteBubbleKeyForApp(mContext.getPackageName(), mUser0));
         assertThat(mBubbleController.isStackExpanded()).isTrue();
 
         // Calling this while the app bubble is expanded should collapse the stack
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
 
         assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(
                 Bubble.getNoteBubbleKeyForApp(mContext.getPackageName(), mUser0));
@@ -2027,33 +2025,34 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowOrHideAppBubbleWithNonPrimaryUser_bubbleCollapsedWithExpectedUser() {
+    public void testShowOrHideNotesBubbleWithNonPrimaryUser_bubbleCollapsedWithExpectedUser() {
         UserHandle user10 = createUserHandle(/* userId = */ 10);
-        String appBubbleKey = Bubble.getNoteBubbleKeyForApp(mContext.getPackageName(), user10);
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, user10, mAppBubbleIcon);
-        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        String notesKey = Bubble.getNoteBubbleKeyForApp(mContext.getPackageName(), user10);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, user10, mNotesBubbleIcon);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(notesKey);
         assertThat(mBubbleController.isStackExpanded()).isTrue();
         assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
         assertThat(mBubbleData.getBubbles().get(0).getUser()).isEqualTo(user10);
 
         // Calling this while the app bubble is expanded should collapse the stack
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, user10, mAppBubbleIcon);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, user10, mNotesBubbleIcon);
 
-        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(notesKey);
         assertThat(mBubbleController.isStackExpanded()).isFalse();
         assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
         assertThat(mBubbleData.getBubbles().get(0).getUser()).isEqualTo(user10);
     }
 
     @Test
-    public void testShowOrHideAppBubbleOnUser10AndThenUser0_user0BubbleExpanded() {
+    public void testShowOrHideNotesBubbleOnUser10AndThenUser0_user0BubbleExpanded() {
         UserHandle user10 = createUserHandle(/* userId = */ 10);
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, user10, mAppBubbleIcon);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, user10, mNotesBubbleIcon);
 
-        String appBubbleUser0Key = Bubble.getNoteBubbleKeyForApp(mContext.getPackageName(), mUser0);
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        String notesBubbleUser0Key = Bubble.getNoteBubbleKeyForApp(mContext.getPackageName(),
+                mUser0);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
 
-        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleUser0Key);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(notesBubbleUser0Key);
         assertThat(mBubbleController.isStackExpanded()).isTrue();
         assertThat(mBubbleData.getBubbles()).hasSize(2);
         assertThat(mBubbleData.getBubbles().get(0).getUser()).isEqualTo(mUser0);
@@ -2061,14 +2060,14 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowOrHideAppBubble_selectIfNotSelected() {
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+    public void testShowOrHideNotesBubble_selectIfNotSelected() {
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
         mBubbleController.updateBubble(mBubbleEntry);
         mBubbleController.expandStackAndSelectBubble(mBubbleEntry);
         assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(mBubbleEntry.getKey());
         assertThat(mBubbleController.isStackExpanded()).isTrue();
 
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
         assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(
                 Bubble.getNoteBubbleKeyForApp(mContext.getPackageName(), mUser0));
         assertThat(mBubbleController.isStackExpanded()).isTrue();
@@ -2076,48 +2075,49 @@ public class BubblesTest extends SysuiTestCase {
     }
 
     @Test
-    public void testShowOrHideAppBubble_addsFromOverflow() {
-        String appBubbleKey = Bubble.getNoteBubbleKeyForApp(mAppBubbleIntent.getPackage(), mUser0);
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
-
+    public void testShowOrHideNotesBubble_addsFromOverflow() {
+        String noteBubbleKey = Bubble.getNoteBubbleKeyForApp(mNotesBubbleIntent.getPackage(),
+                mUser0);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
         // Collapse the stack so we don't need to wait for the dismiss animation in the test
         mBubbleController.collapseStack();
 
         // Dismiss the app bubble so it's in the overflow
-        mBubbleController.dismissBubble(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
-        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNotNull();
+        mBubbleController.dismissBubble(noteBubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(noteBubbleKey)).isNotNull();
 
         // Calling this while collapsed will re-add and expand the app bubble
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
-        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(noteBubbleKey);
         assertThat(mBubbleController.isStackExpanded()).isTrue();
         assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
-        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+        assertThat(mBubbleData.getOverflowBubbleWithKey(noteBubbleKey)).isNull();
     }
 
     @Test
-    public void testShowOrHideAppBubble_updateExistedBubbleInOverflow_updateIntentInBubble() {
-        String appBubbleKey = Bubble.getNoteBubbleKeyForApp(mAppBubbleIntent.getPackage(), mUser0);
-        mBubbleController.showOrHideAppBubble(mAppBubbleIntent, mUser0, mAppBubbleIcon);
+    public void testShowOrHideNotesBubble_updateExistedBubbleInOverflow_updateIntentInBubble() {
+        String noteBubbleKey = Bubble.getNoteBubbleKeyForApp(mNotesBubbleIntent.getPackage(),
+                mUser0);
+        mBubbleController.showOrHideNotesBubble(mNotesBubbleIntent, mUser0, mNotesBubbleIcon);
         // Collapse the stack so we don't need to wait for the dismiss animation in the test
         mBubbleController.collapseStack();
         // Dismiss the app bubble so it's in the overflow
-        mBubbleController.dismissBubble(appBubbleKey, Bubbles.DISMISS_USER_GESTURE);
-        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNotNull();
+        mBubbleController.dismissBubble(noteBubbleKey, Bubbles.DISMISS_USER_GESTURE);
+        assertThat(mBubbleData.getOverflowBubbleWithKey(noteBubbleKey)).isNotNull();
 
         // Modify the intent to include new extras.
-        Intent newAppBubbleIntent = new Intent(mContext, BubblesTestActivity.class)
+        Intent newIntent = new Intent(mContext, BubblesTestActivity.class)
                 .setPackage(mContext.getPackageName())
                 .putExtra("hello", "world");
 
         // Calling this while collapsed will re-add and expand the app bubble
-        mBubbleController.showOrHideAppBubble(newAppBubbleIntent, mUser0, mAppBubbleIcon);
-        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(appBubbleKey);
+        mBubbleController.showOrHideNotesBubble(newIntent, mUser0, mNotesBubbleIcon);
+        assertThat(mBubbleData.getSelectedBubble().getKey()).isEqualTo(noteBubbleKey);
         assertThat(mBubbleController.isStackExpanded()).isTrue();
         assertThat(mBubbleData.getBubbles().size()).isEqualTo(1);
         assertThat(mBubbleData.getBubbles().get(0).getAppBubbleIntent()
                 .getStringExtra("hello")).isEqualTo("world");
-        assertThat(mBubbleData.getOverflowBubbleWithKey(appBubbleKey)).isNull();
+        assertThat(mBubbleData.getOverflowBubbleWithKey(noteBubbleKey)).isNull();
     }
 
     @Test

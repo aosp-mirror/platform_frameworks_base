@@ -169,7 +169,7 @@ public class BubbleTaskViewHelper {
 
             if (mBubble != null && mBubble.isNoteBubble()) {
                 // Let the controller know sooner what the taskId is.
-                mExpandedViewManager.setAppBubbleTaskId(mBubble.getKey(), mTaskId);
+                mExpandedViewManager.setNoteBubbleTaskId(mBubble.getKey(), mTaskId);
             }
 
             // With the task org, the taskAppeared callback will only happen once the task has

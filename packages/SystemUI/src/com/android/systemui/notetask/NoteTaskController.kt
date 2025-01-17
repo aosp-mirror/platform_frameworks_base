@@ -219,7 +219,7 @@ constructor(
                     val intent = createNoteTaskIntent(info, useStylusMode)
                     val icon =
                         Icon.createWithResource(context, R.drawable.ic_note_task_shortcut_widget)
-                    noteTaskBubblesController.showOrHideAppBubble(
+                    noteTaskBubblesController.showOrHideNoteBubble(
                         intent,
                         user,
                         icon,

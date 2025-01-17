@@ -230,7 +230,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
     }
 
     @Test
-    fun onBubbleExpandChanged_notKeyAppBubble_shouldDoNothing() {
+    fun onBubbleExpandChanged_notKeyNoteBubble_shouldDoNothing() {
         createNoteTaskController().onBubbleExpandChanged(isExpanding = true, key = "any other key")
 
         verifyNoMoreInteractions(bubbles, keyguardManager, userManager, eventLogger)
@@ -740,7 +740,7 @@ internal class NoteTaskControllerTest : SysuiTestCase() {
         val intentCaptor = argumentCaptor<Intent>()
         val iconCaptor = argumentCaptor<Icon>()
         verify(bubbles)
-            .showOrHideAppBubble(capture(intentCaptor), eq(userHandle), capture(iconCaptor))
+            .showOrHideNoteBubble(capture(intentCaptor), eq(userHandle), capture(iconCaptor))
         assertThat(intentCaptor.value).run {
             hasAction(ACTION_CREATE_NOTE)
             hasPackage(NOTE_TASK_PACKAGE_NAME)

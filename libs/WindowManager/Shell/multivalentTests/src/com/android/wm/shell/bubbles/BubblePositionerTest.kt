@@ -154,19 +154,19 @@ class BubblePositionerTest {
 
     /** Test that the default resting position on tablet is middle right. */
     @Test
-    fun testGetDefaultPosition_appBubble_onTablet() {
+    fun testGetDefaultPosition_noteBubble_onTablet() {
         positioner.update(defaultDeviceConfig.copy(isLargeScreen = true))
         val allowableStackRegion = positioner.getAllowableStackPositionRegion(1 /* bubbleCount */)
-        val startPosition = positioner.getDefaultStartPosition(true /* isAppBubble */)
+        val startPosition = positioner.getDefaultStartPosition(true /* isNoteBubble */)
         assertThat(startPosition.x).isEqualTo(allowableStackRegion.right)
         assertThat(startPosition.y).isEqualTo(defaultYPosition)
     }
 
     @Test
-    fun testGetRestingPosition_appBubble_onTablet_RTL() {
+    fun testGetRestingPosition_noteBubble_onTablet_RTL() {
         positioner.update(defaultDeviceConfig.copy(isLargeScreen = true, isRtl = true))
         val allowableStackRegion = positioner.getAllowableStackPositionRegion(1 /* bubbleCount */)
-        val startPosition = positioner.getDefaultStartPosition(true /* isAppBubble */)
+        val startPosition = positioner.getDefaultStartPosition(true /* isNoteBubble */)
         assertThat(startPosition.x).isEqualTo(allowableStackRegion.left)
         assertThat(startPosition.y).isEqualTo(defaultYPosition)
     }

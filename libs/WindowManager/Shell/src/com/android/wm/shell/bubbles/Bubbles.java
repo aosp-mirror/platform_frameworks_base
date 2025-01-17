@@ -135,33 +135,31 @@ public interface Bubbles {
 
     /**
      * This method has different behavior depending on:
-     * - if an app bubble exists
-     * - if an app bubble is expanded
+     *    - if a notes bubble exists
+     *    - if a notes bubble is expanded
      *
-     * If no app bubble exists, this will add and expand a bubble with the provided intent. The
+     * If no notes bubble exists, this will add and expand a bubble with the provided intent. The
      * intent must be explicit (i.e. include a package name or fully qualified component class name)
      * and the activity for it should be resizable.
      *
-     * If an app bubble exists, this will toggle the visibility of it, i.e. if the app bubble is
-     * expanded, calling this method will collapse it. If the app bubble is not expanded, calling
+     * If a notes bubble exists, this will toggle the visibility of it, i.e. if the notes bubble is
+     * expanded, calling this method will collapse it. If the notes bubble is not expanded, calling
      * this method will expand it.
      *
      * These bubbles are <b>not</b> backed by a notification and remain until the user dismisses
      * the bubble or bubble stack.
      *
-     * Some notes:
-     * - Only one app bubble is supported at a time, regardless of users. Multi-users support is
-     * tracked in b/273533235.
-     * - Calling this method with a different intent than the existing app bubble will do nothing
+     * Some details:
+     *    - Calling this method with a different intent than the existing bubble will do nothing
      *
      * @param intent the intent to display in the bubble expanded view.
-     * @param user   the {@link UserHandle} of the user to start this activity for.
-     * @param icon   the {@link Icon} to use for the bubble view.
+     * @param user the {@link UserHandle} of the user to start this activity for.
+     * @param icon the {@link Icon} to use for the bubble view.
      */
-    void showOrHideAppBubble(Intent intent, UserHandle user, @Nullable Icon icon);
+    void showOrHideNoteBubble(Intent intent, UserHandle user, @Nullable Icon icon);
 
     /** @return true if the specified {@code taskId} corresponds to app bubble's taskId. */
-    boolean isAppBubbleTaskId(int taskId);
+    boolean isNoteBubbleTaskId(int taskId);
 
     /**
 `    * @return a {@link SynchronousScreenCaptureListener} after performing a screenshot that may
