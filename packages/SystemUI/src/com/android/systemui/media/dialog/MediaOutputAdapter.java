@@ -185,7 +185,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         mCurrentActivePosition = position;
                         updateUnmutedVolumeIcon(device);
                         mSubTitleText.setText(device.getSubtextString());
-                        updateTwoLineLayoutContentAlpha(DEVICE_CONNECTED_ALPHA);
+                        updateContentAlpha(DEVICE_CONNECTED_ALPHA);
                         updateEndClickAreaAsSessionEditing(device,
                                 isHost ? R.drawable.media_output_status_edit_session
                                         : R.drawable.ic_sound_bars_anim);
@@ -211,7 +211,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         if (deviceStatusIcon != null) {
                             updateDeviceStatusIcon(deviceStatusIcon);
                         }
-                        updateTwoLineLayoutContentAlpha(
+                        updateContentAlpha(
                                 updateClickActionBasedOnSelectionBehavior(device)
                                         ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
                         setTwoLineLayout(device.getName(),
@@ -314,7 +314,7 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                         updateDeviceStatusIcon(deviceStatusIcon);
                         mStatusIcon.setVisibility(View.VISIBLE);
                     }
-                    updateSingleLineLayoutContentAlpha(
+                    updateContentAlpha(
                             updateClickActionBasedOnSelectionBehavior(device)
                                     ? DEVICE_CONNECTED_ALPHA : DEVICE_DISCONNECTED_ALPHA);
                 }
@@ -328,16 +328,10 @@ public class MediaOutputAdapter extends MediaOutputBaseAdapter {
                     ColorStateList(states, colors));
         }
 
-        private void updateTwoLineLayoutContentAlpha(float alphaValue) {
-            mSubTitleText.setAlpha(alphaValue);
-            mTitleIcon.setAlpha(alphaValue);
-            mTwoLineTitleText.setAlpha(alphaValue);
-            mStatusIcon.setAlpha(alphaValue);
-        }
-
-        private void updateSingleLineLayoutContentAlpha(float alphaValue) {
+        private void updateContentAlpha(float alphaValue) {
             mTitleIcon.setAlpha(alphaValue);
             mTitleText.setAlpha(alphaValue);
+            mSubTitleText.setAlpha(alphaValue);
             mStatusIcon.setAlpha(alphaValue);
         }
 
