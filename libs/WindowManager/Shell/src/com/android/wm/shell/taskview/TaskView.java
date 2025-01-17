@@ -74,16 +74,16 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     private final Rect mTmpRootRect = new Rect();
     private final int[] mTmpLocation = new int[2];
     private final Rect mBoundsOnScreen = new Rect();
-    private final TaskViewTransitions mTaskViewTransitions;
+    private final TaskViewController mTaskViewController;
     private final TaskViewTaskController mTaskViewTaskController;
     private Region mObscuredTouchRegion;
     private Insets mCaptionInsets;
     private Handler mHandler;
 
-    public TaskView(Context context, TaskViewTransitions taskViewTransitions,
+    public TaskView(Context context, TaskViewController taskViewController,
             TaskViewTaskController taskViewTaskController) {
         super(context, null, 0, 0, true /* disableBackgroundLayer */);
-        mTaskViewTransitions = taskViewTransitions;
+        mTaskViewController = taskViewController;
         mTaskViewTaskController = taskViewTaskController;
         // TODO(b/266736992): Think about a better way to set the TaskViewBase on the
         //  TaskViewTaskController and vice-versa
@@ -103,7 +103,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void startActivity(@NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
             @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
-        mTaskViewTransitions.startActivity(mTaskViewTaskController, pendingIntent, fillInIntent,
+        mTaskViewController.startActivity(mTaskViewTaskController, pendingIntent, fillInIntent,
                 options, launchBounds);
     }
 
@@ -119,7 +119,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void startShortcutActivity(@NonNull ShortcutInfo shortcut,
             @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
-        mTaskViewTransitions.startShortcutActivity(mTaskViewTaskController, shortcut, options,
+        mTaskViewController.startShortcutActivity(mTaskViewTaskController, shortcut, options,
                 launchBounds);
     }
 
@@ -127,12 +127,12 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      * Moves the current task in taskview out of the view and back to fullscreen.
      */
     public void moveToFullscreen() {
-        mTaskViewTransitions.moveTaskViewToFullscreen(mTaskViewTaskController);
+        mTaskViewController.moveTaskViewToFullscreen(mTaskViewTaskController);
     }
 
     @Override
     public void onTaskAppeared(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
-        if (mTaskViewTransitions.isUsingShellTransitions()) {
+        if (mTaskViewController.isUsingShellTransitions()) {
             // No need for additional work as it is already taken care of during
             // prepareOpenAnimation().
             return;
@@ -227,14 +227,14 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      */
     public void onLocationChanged() {
         getBoundsOnScreen(mTmpRect);
-        mTaskViewTransitions.setTaskBounds(mTaskViewTaskController, mTmpRect);
+        mTaskViewController.setTaskBounds(mTaskViewTaskController, mTmpRect);
     }
 
     /**
      * Call to remove the task from window manager. This task will not appear in recents.
      */
     public void removeTask() {
-        mTaskViewTransitions.removeTaskView(mTaskViewTaskController, null /* token */);
+        mTaskViewController.removeTaskView(mTaskViewTaskController, null /* token */);
     }
 
     /**
@@ -259,7 +259,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
     public void surfaceChanged(@androidx.annotation.NonNull SurfaceHolder holder, int format,
             int width, int height) {
         getBoundsOnScreen(mTmpRect);
-        mTaskViewTransitions.setTaskBounds(mTaskViewTaskController, mTmpRect);
+        mTaskViewController.setTaskBounds(mTaskViewTaskController, mTmpRect);
     }
 
     @Override

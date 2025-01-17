@@ -61,22 +61,8 @@ import java.util.concurrent.Executor;
 
 /**
  * Handles Shell Transitions that involve TaskView tasks.
- *
- * <ul>
- *     <li>To start an activity based task view, use {@link TaskViewTransitions#startActivity}</li>
- *
- *     <li>To start an activity (represented by {@link ShortcutInfo}) based task view, use
- *     {@link TaskViewTransitions#startShortcutActivity}
- *     </li>
- *
- *     <li>To start a root-task based task view, use {@link TaskViewTransitions#startRootTask}.
- *     This method is special as it doesn't create a root task and instead expects that the
- *     launch root task is already created and started. This method just attaches the taskInfo to
- *     the TaskView.
- *     </li>
- * </ul>
  */
-public class TaskViewTransitions implements Transitions.TransitionHandler {
+public class TaskViewTransitions implements Transitions.TransitionHandler, TaskViewController {
     static final String TAG = "TaskViewTransitions";
 
     /**
@@ -157,7 +143,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         return mTaskViewRepo;
     }
 
-    void registerTaskView(TaskViewTaskController tv) {
+    @Override
+    public void registerTaskView(TaskViewTaskController tv) {
         synchronized (mRegistered) {
             if (!mRegistered[0]) {
                 mRegistered[0] = true;
@@ -171,7 +158,8 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
     }
 
-    void unregisterTaskView(TaskViewTaskController tv) {
+    @Override
+    public void unregisterTaskView(TaskViewTaskController tv) {
         if (useRepo()) {
             mTaskViewRepo.remove(tv);
         } else {
@@ -180,6 +168,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         // Note: Don't unregister handler since this is a singleton with lifetime bound to Shell
     }
 
+    @Override
     public boolean isUsingShellTransitions() {
         return mTransitions.isRegistered();
     }
@@ -298,17 +287,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         options.setRemoveWithTaskOrganizer(true);
     }
 
-    /**
-     * Launch an activity represented by {@link ShortcutInfo}.
-     * <p>The owner of this container must be allowed to access the shortcut information,
-     * as defined in {@link LauncherApps#hasShortcutHostPermission()} to use this method.
-     *
-     * @param destination  the TaskView to start the shortcut into.
-     * @param shortcut     the shortcut used to launch the activity.
-     * @param options      options for the activity.
-     * @param launchBounds the bounds (window size and position) that the activity should be
-     *                     launched in, in pixels and in screen coordinates.
-     */
+    @Override
     public void startShortcutActivity(@NonNull TaskViewTaskController destination,
             @NonNull ShortcutInfo shortcut, @NonNull ActivityOptions options,
             @Nullable Rect launchBounds) {
@@ -330,16 +309,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
     }
 
-    /**
-     * Launch a new activity into a TaskView
-     *
-     * @param destination   The TaskView to start the activity into.
-     * @param pendingIntent Intent used to launch an activity.
-     * @param fillInIntent  Additional Intent data, see {@link Intent#fillIn Intent.fillIn()}
-     * @param options       options for the activity.
-     * @param launchBounds  the bounds (window size and position) that the activity should be
-     *                      launched in, in pixels and in screen coordinates.
-     */
+    @Override
     public void startActivity(@NonNull TaskViewTaskController destination,
             @NonNull PendingIntent pendingIntent, @Nullable Intent fillInIntent,
             @NonNull ActivityOptions options, @Nullable Rect launchBounds) {
@@ -361,18 +331,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         }
     }
 
-    /**
-     * Attaches the given root task {@code taskInfo} in the task view.
-     *
-     * <p> Since {@link ShellTaskOrganizer#createRootTask(int, int,
-     * ShellTaskOrganizer.TaskListener)} does not use the shell transitions flow, this method is
-     * used as an entry point for an already-created root-task in the task view.
-     *
-     * @param destination The TaskView to put the root-task into.
-     * @param taskInfo    the task info of the root task.
-     * @param leash       the {@link android.content.pm.ShortcutInfo.Surface} of the root task
-     * @param wct         The Window container work that should happen as part of this set up.
-     */
+    @Override
     public void startRootTask(@NonNull TaskViewTaskController destination,
             ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
             @Nullable WindowContainerTransaction wct) {
@@ -399,10 +358,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         startNextTransition();
     }
 
-    /**
-     * Removes a taskview and also removes it's task from window manager. This task will not appear
-     * in recents.
-     */
+    @Override
     public void removeTaskView(@NonNull TaskViewTaskController taskView,
             @Nullable WindowContainerToken taskToken) {
         final WindowContainerToken token = taskToken != null ? taskToken : taskView.getTaskToken();
@@ -425,9 +381,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         });
     }
 
-    /**
-     * Moves the current task in TaskView out of the view and back to fullscreen.
-     */
+    @Override
     public void moveTaskViewToFullscreen(@NonNull TaskViewTaskController taskView) {
         final WindowContainerToken taskToken = taskView.getTaskToken();
         if (taskToken == null) return;
@@ -442,17 +396,15 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         });
     }
 
-    /** Starts a new transition to make the given {@code taskView} visible. */
+    @Override
     public void setTaskViewVisible(TaskViewTaskController taskView, boolean visible) {
         setTaskViewVisible(taskView, visible, false /* reorder */);
     }
 
     /**
-     * Starts a new transition to make the given {@code taskView} visible and optionally change
-     * the task order.
+     * Starts a new transition to make the given {@code taskView} visible and optionally
+     * reordering it.
      *
-     * @param taskView the task view which the visibility is being changed for
-     * @param visible  the new visibility of the task view
      * @param reorder  whether to reorder the task or not. If this is {@code true}, the task will
      *                 be reordered as per the given {@code visible}. For {@code visible = true},
      *                 task will be reordered to top. For {@code visible = false}, task will be
@@ -517,12 +469,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         state.mVisible = visible;
     }
 
-    /**
-     * Sets the task bounds to {@code boundsOnScreen}.
-     * Usually called when the taskview's position or size has changed.
-     *
-     * @param boundsOnScreen the on screen bounds of the surface view.
-     */
+    @Override
     public void setTaskBounds(TaskViewTaskController taskView, Rect boundsOnScreen) {
         if (taskView.getTaskToken() == null) {
             return;
