@@ -3445,8 +3445,11 @@ public final class DisplayManagerService extends SystemService {
     }
 
     private void sendDisplayEventFrameRateOverrideLocked(int displayId) {
+        int event = (mFlags.isFramerateOverrideTriggersRrCallbacksEnabled())
+                ? DisplayManagerGlobal.EVENT_DISPLAY_REFRESH_RATE_CHANGED
+                : DisplayManagerGlobal.EVENT_DISPLAY_BASIC_CHANGED;
         Message msg = mHandler.obtainMessage(MSG_DELIVER_DISPLAY_EVENT_FRAME_RATE_OVERRIDE,
-                displayId, DisplayManagerGlobal.EVENT_DISPLAY_BASIC_CHANGED);
+                displayId, event);
         mHandler.sendMessage(msg);
     }
 

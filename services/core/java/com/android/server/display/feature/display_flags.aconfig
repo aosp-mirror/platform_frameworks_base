@@ -479,3 +479,14 @@ flag {
     bug: "382954433"
     is_fixed_read_only: true
 }
+
+flag {
+    name: "framerate_override_triggers_rr_callbacks"
+    namespace: "display_manager"
+    description: "Feature flag to trigger the RR callbacks when framerate overridding happens."
+    bug: "390113266"
+    is_fixed_read_only: true
+    metadata {
+      purpose: PURPOSE_BUGFIX
+    }
+}

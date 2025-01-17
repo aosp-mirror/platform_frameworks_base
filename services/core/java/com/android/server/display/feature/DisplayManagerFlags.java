@@ -263,6 +263,11 @@ public class DisplayManagerFlags {
             Flags::baseDensityForExternalDisplays
     );
 
+    private final FlagState mFramerateOverrideTriggersRrCallbacks = new FlagState(
+            Flags.FLAG_FRAMERATE_OVERRIDE_TRIGGERS_RR_CALLBACKS,
+            Flags::framerateOverrideTriggersRrCallbacks
+    );
+
     /**
      * @return {@code true} if 'port' is allowed in display layout configuration file.
      */
@@ -564,6 +569,14 @@ public class DisplayManagerFlags {
         return mBaseDensityForExternalDisplays.isEnabled();
     }
 
+    /**
+     * @return {@code true} if the flag triggering refresh rate callbacks when framerate is
+     * overridden is enabled
+     */
+    public boolean isFramerateOverrideTriggersRrCallbacksEnabled() {
+        return mFramerateOverrideTriggersRrCallbacks.isEnabled();
+    }
+
 
     /**
      * dumps all flagstates
@@ -620,6 +633,8 @@ public class DisplayManagerFlags {
         pw.println(" " + mSubscribeGranularDisplayEvents);
         pw.println(" " + mEnableDisplayContentModeManagementFlagState);
         pw.println(" " + mBaseDensityForExternalDisplays);
+        pw.println(" " + mFramerateOverrideTriggersRrCallbacks);
+
     }
 
     private static class FlagState {
