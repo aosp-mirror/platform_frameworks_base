@@ -17,6 +17,7 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
+import android.content.res.ColorStateList;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.PorterDuff;
@@ -29,6 +30,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import androidx.annotation.ColorInt;
@@ -39,6 +41,8 @@ import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
 
 import com.android.settingslib.widget.preference.banner.R;
+
+import com.google.android.material.button.MaterialButton;
 /**
  * Banner message is a banner displaying important information (permission request, page error etc),
  * and provide actions for user to address. It requires a user action to be dismissed.
@@ -46,22 +50,36 @@ import com.android.settingslib.widget.preference.banner.R;
 public class BannerMessagePreference extends Preference implements GroupSectionDividerMixin {
 
     public enum AttentionLevel {
-        HIGH(0, R.color.banner_background_attention_high, R.color.banner_accent_attention_high),
+        HIGH(0,
+                R.color.banner_background_attention_high,
+                R.color.banner_accent_attention_high,
+                R.color.settingslib_banner_button_background_high),
         MEDIUM(1,
-               R.color.banner_background_attention_medium,
-               R.color.banner_accent_attention_medium),
-        LOW(2, R.color.banner_background_attention_low, R.color.banner_accent_attention_low);
+                R.color.banner_background_attention_medium,
+                R.color.banner_accent_attention_medium,
+                R.color.settingslib_banner_button_background_medium),
+        LOW(2,
+                R.color.banner_background_attention_low,
+                R.color.banner_accent_attention_low,
+                R.color.settingslib_banner_button_background_low),
+        NORMAL(3,
+                R.color.banner_background_attention_normal,
+                R.color.banner_accent_attention_normal,
+                R.color.settingslib_banner_button_background_normal);
 
         // Corresponds to the enum valye of R.attr.attentionLevel
         private final int mAttrValue;
         @ColorRes private final int mBackgroundColorResId;
         @ColorRes private final int mAccentColorResId;
+        @ColorRes private final int mButtonBackgroundColorResId;
 
         AttentionLevel(int attrValue, @ColorRes int backgroundColorResId,
-                @ColorRes int accentColorResId) {
+                @ColorRes int accentColorResId,
+                @ColorRes int buttonBackgroundColorResId) {
             mAttrValue = attrValue;
             mBackgroundColorResId = backgroundColorResId;
             mAccentColorResId = accentColorResId;
+            mButtonBackgroundColorResId = buttonBackgroundColorResId;
         }
 
         static AttentionLevel fromAttr(int attrValue) {
@@ -80,6 +98,10 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
         public @ColorRes int getBackgroundColorResId() {
             return mBackgroundColorResId;
         }
+
+        public @ColorRes int getButtonBackgroundColorResId() {
+            return mButtonBackgroundColorResId;
+        }
     }
 
     private static final String TAG = "BannerPreference";
@@ -95,6 +117,8 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
     // Default attention level is High.
     private AttentionLevel mAttentionLevel = AttentionLevel.HIGH;
     private String mSubtitle;
+    private String mHeader;
+    private int mButtonOrientation;
 
     public BannerMessagePreference(Context context) {
         super(context);
@@ -119,7 +143,10 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
 
     private void init(Context context, AttributeSet attrs) {
         setSelectable(false);
-        setLayoutResource(R.layout.settingslib_banner_message);
+        int resId = SettingsThemeHelper.isExpressiveTheme(context)
+                ? R.layout.settingslib_expressive_banner_message
+                : R.layout.settingslib_banner_message;
+        setLayoutResource(resId);
 
         if (IS_AT_LEAST_S) {
             if (attrs != null) {
@@ -130,6 +157,9 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
                         a.getInt(R.styleable.BannerMessagePreference_attentionLevel, 0);
                 mAttentionLevel = AttentionLevel.fromAttr(mAttentionLevelValue);
                 mSubtitle = a.getString(R.styleable.BannerMessagePreference_subtitle);
+                mHeader = a.getString(R.styleable.BannerMessagePreference_bannerHeader);
+                mButtonOrientation = a.getInt(R.styleable.BannerMessagePreference_buttonOrientation,
+                        LinearLayout.HORIZONTAL);
                 a.recycle();
             }
         }
@@ -142,11 +172,16 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
 
         final TextView titleView = (TextView) holder.findViewById(R.id.banner_title);
         CharSequence title = getTitle();
-        titleView.setText(title);
-        titleView.setVisibility(title == null ? View.GONE : View.VISIBLE);
+        if (titleView != null) {
+            titleView.setText(title);
+            titleView.setVisibility(title == null ? View.GONE : View.VISIBLE);
+        }
 
         final TextView summaryView = (TextView) holder.findViewById(R.id.banner_summary);
-        summaryView.setText(getSummary());
+        if (summaryView != null) {
+            summaryView.setText(getSummary());
+            summaryView.setVisibility(TextUtils.isEmpty(getSummary()) ? View.GONE : View.VISIBLE);
+        }
 
         mPositiveButtonInfo.mButton = (Button) holder.findViewById(R.id.banner_positive_btn);
         mNegativeButtonInfo.mButton = (Button) holder.findViewById(R.id.banner_negative_btn);
@@ -162,8 +197,11 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
                     icon == null
                             ? getContext().getDrawable(R.drawable.ic_warning)
                             : icon);
-            iconView.setColorFilter(
-                    new PorterDuffColorFilter(accentColor, PorterDuff.Mode.SRC_IN));
+            if (mAttentionLevel != AttentionLevel.NORMAL
+                    && !SettingsThemeHelper.isExpressiveTheme(context)) {
+                iconView.setColorFilter(
+                        new PorterDuffColorFilter(accentColor, PorterDuff.Mode.SRC_IN));
+            }
         }
 
         if (IS_AT_LEAST_S) {
@@ -171,12 +209,25 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
                     context.getResources().getColor(
                             mAttentionLevel.getBackgroundColorResId(), theme);
 
+            @ColorInt final int btnBackgroundColor =
+                    context.getResources().getColor(mAttentionLevel.getButtonBackgroundColorResId(),
+                            theme);
+            ColorStateList strokeColor = context.getResources().getColorStateList(
+                    mAttentionLevel.getButtonBackgroundColorResId(), theme);
+
             holder.setDividerAllowedAbove(false);
             holder.setDividerAllowedBelow(false);
-            holder.itemView.getBackground().setTint(backgroundColor);
+            View backgroundView = holder.findViewById(R.id.banner_background);
+            if (backgroundView != null && !SettingsThemeHelper.isExpressiveTheme(context)) {
+                backgroundView.getBackground().setTint(backgroundColor);
+            }
 
             mPositiveButtonInfo.mColor = accentColor;
             mNegativeButtonInfo.mColor = accentColor;
+            if (mAttentionLevel != AttentionLevel.NORMAL) {
+                mPositiveButtonInfo.mBackgroundColor = btnBackgroundColor;
+                mNegativeButtonInfo.mStrokeColor = strokeColor;
+            }
 
             mDismissButtonInfo.mButton = (ImageButton) holder.findViewById(R.id.banner_dismiss_btn);
             mDismissButtonInfo.setUpButton();
@@ -185,6 +236,13 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
             subtitleView.setText(mSubtitle);
             subtitleView.setVisibility(mSubtitle == null ? View.GONE : View.VISIBLE);
 
+            TextView headerView = (TextView) holder.findViewById(R.id.banner_header);
+            if (headerView != null) {
+                headerView.setText(mHeader);
+                headerView.setVisibility(TextUtils.isEmpty(mHeader) ? View.GONE : View.VISIBLE);
+            }
+
+
         } else {
             holder.setDividerAllowedAbove(true);
             holder.setDividerAllowedBelow(true);
@@ -192,6 +250,24 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
 
         mPositiveButtonInfo.setUpButton();
         mNegativeButtonInfo.setUpButton();
+        View buttonFrame = holder.findViewById(R.id.banner_buttons_frame);
+        if (buttonFrame != null) {
+            buttonFrame.setVisibility(
+                    mPositiveButtonInfo.shouldBeVisible() || mNegativeButtonInfo.shouldBeVisible()
+                            ? View.VISIBLE : View.GONE);
+
+            LinearLayout linearLayout = (LinearLayout) buttonFrame;
+            if (mButtonOrientation != linearLayout.getOrientation()) {
+                int childCount = linearLayout.getChildCount();
+                //reverse the order of the buttons
+                for (int i = childCount - 1; i >= 0; i--) {
+                    View child = linearLayout.getChildAt(i);
+                    linearLayout.removeViewAt(i);
+                    linearLayout.addView(child);
+                }
+                linearLayout.setOrientation(mButtonOrientation);
+            }
+        }
     }
 
     /**
@@ -302,6 +378,18 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
     }
 
     /**
+     * Sets button orientation.
+     */
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public BannerMessagePreference setButtonOrientation(int orientation) {
+        if (mButtonOrientation != orientation) {
+            mButtonOrientation = orientation;
+            notifyChanged();
+        }
+        return this;
+    }
+
+    /**
      * Sets the subtitle.
      */
     @RequiresApi(Build.VERSION_CODES.S)
@@ -316,6 +404,26 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
     public BannerMessagePreference setSubtitle(String subtitle) {
         if (!TextUtils.equals(subtitle, mSubtitle)) {
             mSubtitle = subtitle;
+            notifyChanged();
+        }
+        return this;
+    }
+
+    /**
+     * Sets the header.
+     */
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public BannerMessagePreference setHeader(@StringRes int textResId) {
+        return setHeader(getContext().getString(textResId));
+    }
+
+    /**
+     * Sets the header.
+     */
+    @RequiresApi(Build.VERSION_CODES.VANILLA_ICE_CREAM)
+    public BannerMessagePreference setHeader(String header) {
+        if (!TextUtils.equals(header, mSubtitle)) {
+            mHeader = header;
             notifyChanged();
         }
         return this;
@@ -342,13 +450,29 @@ public class BannerMessagePreference extends Preference implements GroupSectionD
         private View.OnClickListener mListener;
         private boolean mIsVisible = true;
         @ColorInt private int mColor;
+        @ColorInt private int mBackgroundColor;
+        private ColorStateList mStrokeColor;
 
         void setUpButton() {
             mButton.setText(mText);
             mButton.setOnClickListener(mListener);
 
+            MaterialButton btn = null;
+            if (mButton instanceof MaterialButton) {
+                btn = (MaterialButton) mButton;
+            }
+
             if (IS_AT_LEAST_S) {
-                mButton.setTextColor(mColor);
+                if (btn != null && SettingsThemeHelper.isExpressiveTheme(btn.getContext())) {
+                    if (mBackgroundColor != 0) {
+                        btn.setBackgroundColor(mBackgroundColor);
+                    }
+                    if (mStrokeColor != null) {
+                        btn.setStrokeColor(mStrokeColor);
+                    }
+                } else {
+                    mButton.setTextColor(mColor);
+                }
             }
 
             if (shouldBeVisible()) {

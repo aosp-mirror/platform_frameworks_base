@@ -19,7 +19,9 @@
     <color name="banner_background_attention_high">#FFDAD5</color> <!-- red card background -->
     <color name="banner_background_attention_medium">#F0E3A8</color> <!-- yellow card background -->
     <color name="banner_background_attention_low">#CFEBC0</color> <!-- green card background -->
+    <color name="banner_background_attention_normal">@color/settingslib_materialColorSurfaceBright</color> <!-- normal card background -->
     <color name="banner_accent_attention_high">#BB3322</color> <!-- red accent color -->
     <color name="banner_accent_attention_medium">#895900</color> <!-- yellow accent color -->
     <color name="banner_accent_attention_low">#1D7233</color> <!-- green accent color -->
+    <color name="banner_accent_attention_normal">@color/settingslib_materialColorPrimary</color> <!-- normal accent color -->
 </resources>
