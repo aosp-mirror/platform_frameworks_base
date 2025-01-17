@@ -16,6 +16,7 @@
 
 package com.android.systemui.keyboard.shortcut.ui.composable
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -27,6 +28,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.sizeIn
@@ -211,19 +213,19 @@ private fun DialogButtons(
             shape = RoundedCornerShape(50.dp),
             onClick = onCancel,
             color = Color.Transparent,
-            width = 80.dp,
+            modifier = Modifier.heightIn(40.dp),
             contentColor = MaterialTheme.colorScheme.primary,
             text = stringResource(R.string.shortcut_helper_customize_dialog_cancel_button_label),
+            border = BorderStroke(width = 1.dp, color = MaterialTheme.colorScheme.outlineVariant)
         )
         Spacer(modifier = Modifier.width(8.dp))
         ShortcutHelperButton(
-            modifier =
-                Modifier.focusRequester(focusRequester).focusProperties {
-                    canFocus = true
-                }, // enable focus on touch/click mode
+            modifier = Modifier
+                .heightIn(40.dp)
+                .focusRequester(focusRequester)
+                .focusProperties { canFocus = true }, // enable focus on touch/click mode
             onClick = onConfirm,
             color = MaterialTheme.colorScheme.primary,
-            width = 116.dp,
             contentColor = MaterialTheme.colorScheme.onPrimary,
             text = confirmButtonText,
             enabled = isConfirmButtonEnabled,
@@ -413,8 +415,7 @@ private fun PromptShortcutModifier(
 private fun ActionKeyContainer(defaultModifierKey: ShortcutKey.Icon.ResIdIcon) {
     Row(
         modifier =
-            Modifier.height(48.dp)
-                .width(105.dp)
+            Modifier.sizeIn(minWidth = 105.dp, minHeight = 48.dp)
                 .background(
                     color = MaterialTheme.colorScheme.surface,
                     shape = RoundedCornerShape(16.dp),

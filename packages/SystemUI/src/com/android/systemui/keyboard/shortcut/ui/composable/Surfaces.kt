@@ -32,7 +32,6 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -45,7 +44,6 @@ import androidx.compose.material3.LocalAbsoluteTonalElevation
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.LocalTonalElevationEnabled
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.material3.minimumInteractiveComponentSize
@@ -74,13 +72,14 @@ import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import com.android.app.tracing.coroutines.launchTraced as launch
 import com.android.compose.modifiers.thenIf
 import com.android.systemui.keyboard.shortcut.ui.model.IconSource
+import com.android.app.tracing.coroutines.launchTraced as launch
 
 /**
  * A selectable surface with no default focus/hover indications.
@@ -217,30 +216,37 @@ fun ClickableShortcutSurface(
  */
 @Composable
 fun ShortcutHelperButton(
-    modifier: Modifier = Modifier,
     onClick: () -> Unit,
-    shape: Shape = RoundedCornerShape(360.dp),
+    contentColor: Color,
     color: Color,
-    width: Dp,
-    height: Dp = 40.dp,
+    modifier: Modifier = Modifier,
+    shape: Shape = RoundedCornerShape(360.dp),
     iconSource: IconSource = IconSource(),
     text: String? = null,
-    contentColor: Color,
     contentPaddingHorizontal: Dp = 16.dp,
     contentPaddingVertical: Dp = 10.dp,
     enabled: Boolean = true,
     border: BorderStroke? = null,
     contentDescription: String? = null,
 ) {
-    ShortcutHelperButtonSurface(
+    ClickableShortcutSurface(
         onClick = onClick,
         shape = shape,
-        color = color,
-        modifier = modifier,
-        enabled = enabled,
-        width = width,
-        height = height,
+        color = color.getDimmedColorIfDisabled(enabled),
         border = border,
+        modifier = modifier.semantics { role = Role.Button },
+        interactionsConfig = InteractionsConfig(
+            hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
+            hoverOverlayAlpha = 0.11f,
+            pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
+            pressedOverlayAlpha = 0.15f,
+            focusOutlineColor = MaterialTheme.colorScheme.secondary,
+            focusOutlineStrokeWidth = 3.dp,
+            focusOutlinePadding = 2.dp,
+            surfaceCornerRadius = 28.dp,
+            focusOutlineCornerRadius = 33.dp,
+        ),
+        enabled = enabled
     ) {
         Row(
             modifier =
@@ -251,75 +257,44 @@ fun ShortcutHelperButton(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center,
         ) {
-            if (iconSource.imageVector != null) {
-                Icon(
-                    tint = contentColor,
-                    imageVector = iconSource.imageVector,
-                    contentDescription = contentDescription,
-                    modifier = Modifier.size(20.dp).wrapContentSize(Alignment.Center),
-                )
-            }
-
-            if (iconSource.imageVector != null && text != null)
-                Spacer(modifier = Modifier.weight(1f))
-
-            if (text != null) {
-                Text(
-                    text,
-                    color = contentColor,
-                    fontSize = 14.sp,
-                    style = MaterialTheme.typography.labelLarge,
-                    modifier = Modifier.wrapContentSize(Alignment.Center),
-                )
-            }
+            ShortcutHelperButtonContent(iconSource, contentColor, text, contentDescription)
         }
     }
 }
 
 @Composable
-private fun ShortcutHelperButtonSurface(
-    onClick: () -> Unit,
-    shape: Shape,
-    color: Color,
-    modifier: Modifier = Modifier,
-    enabled: Boolean,
-    width: Dp,
-    height: Dp,
-    border: BorderStroke?,
-    content: @Composable () -> Unit,
+private fun ShortcutHelperButtonContent(
+    iconSource: IconSource,
+    contentColor: Color,
+    text: String?,
+    contentDescription: String?
 ) {
-    if (enabled) {
-        ClickableShortcutSurface(
-            onClick = onClick,
-            shape = shape,
-            color = color,
-            border = border,
-            modifier = modifier.semantics { role = Role.Button }.width(width).height(height),
-            interactionsConfig =
-                InteractionsConfig(
-                    hoverOverlayColor = MaterialTheme.colorScheme.onSurface,
-                    hoverOverlayAlpha = 0.11f,
-                    pressedOverlayColor = MaterialTheme.colorScheme.onSurface,
-                    pressedOverlayAlpha = 0.15f,
-                    focusOutlineColor = MaterialTheme.colorScheme.secondary,
-                    focusOutlineStrokeWidth = 3.dp,
-                    focusOutlinePadding = 2.dp,
-                    surfaceCornerRadius = 28.dp,
-                    focusOutlineCornerRadius = 33.dp,
-                ),
-        ) {
-            content()
-        }
-    } else {
-        Surface(
-            shape = shape,
-            color = color.copy(0.38f),
-            modifier = modifier.semantics { role = Role.Button }.width(width).height(height),
-        ) {
-            content()
-        }
+    if (iconSource.imageVector != null) {
+        Icon(
+            tint = contentColor,
+            imageVector = iconSource.imageVector,
+            contentDescription = contentDescription,
+            modifier = Modifier.size(20.dp).wrapContentSize(Alignment.Center),
+        )
+    }
+
+    if (iconSource.imageVector != null && text != null)
+        Spacer(modifier = Modifier.width(8.dp))
+
+    if (text != null) {
+        Text(
+            text,
+            color = contentColor,
+            fontSize = 14.sp,
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.wrapContentSize(Alignment.Center),
+            overflow = TextOverflow.Ellipsis,
+        )
     }
 }
+
+private fun Color.getDimmedColorIfDisabled(enabled: Boolean): Color =
+    if (enabled) this else copy(alpha = 0.38f)
 
 @Composable
 private fun surfaceColorAtElevation(color: Color, elevation: Dp): Color {
