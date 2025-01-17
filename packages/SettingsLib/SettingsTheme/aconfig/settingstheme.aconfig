@@ -1,0 +1,10 @@
+package: "com.android.settingslib.widget.theme.flags"
+container: "system"
+
+flag {
+    name: "is_expressive_design_enabled"
+    namespace: "android_settings"
+    description: "enable expressive design in Settings"
+    bug: "386013400"
+    is_exported: true
+}

@@ -1856,6 +1856,41 @@ java_aconfig_library {
     defaults: ["framework-minus-apex-aconfig-java-defaults"],
 }
 
+// SettingsTheme Lib
+aconfig_declarations {
+    name: "aconfig_settings_theme_flags",
+    package: "com.android.settingslib.widget.theme.flags",
+    container: "system",
+    exportable: true,
+    srcs: [
+        "packages/SettingsLib/SettingsTheme/aconfig/settingstheme.aconfig",
+    ],
+}
+
+java_aconfig_library {
+    name: "aconfig_settingstheme_exported_flags_java_lib",
+    aconfig_declarations: "aconfig_settings_theme_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+    mode: "exported",
+    min_sdk_version: "21",
+    apex_available: [
+        "//apex_available:platform",
+        "com.android.adservices",
+        "com.android.cellbroadcast",
+        "com.android.devicelock",
+        "com.android.extservices",
+        "com.android.healthfitness",
+        "com.android.mediaprovider",
+        "com.android.permission",
+    ],
+}
+
+java_aconfig_library {
+    name: "aconfig_settingstheme_flags_java_lib",
+    aconfig_declarations: "aconfig_settings_theme_flags",
+    defaults: ["framework-minus-apex-aconfig-java-defaults"],
+}
+
 // Quick Access Wallet
 aconfig_declarations {
     name: "android.service.quickaccesswallet.flags-aconfig",
