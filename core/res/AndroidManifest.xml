@@ -8324,16 +8324,15 @@
 
     <!-- Allows an application to perform actions on behalf of users inside of
          applications.
-         <p>This permission is currently only granted to preinstalled / system apps having the
-         {@link android.app.role.ASSISTANT} role.
+         <p>This permission is currently only granted to privileged system apps.
          <p>Apps contributing app functions can opt to disallow callers with this permission,
          limiting to only callers with {@link android.permission.EXECUTE_APP_FUNCTIONS_TRUSTED}
          instead.
-         <p>Protection level: internal|role
+         <p>Protection level: internal|privileged
          @FlaggedApi(android.app.appfunctions.flags.Flags.FLAG_ENABLE_APP_FUNCTION_MANAGER)  -->
     <permission android:name="android.permission.EXECUTE_APP_FUNCTIONS"
         android:featureFlag="android.app.appfunctions.flags.enable_app_function_manager"
-        android:protectionLevel="internal|role" />
+        android:protectionLevel="internal|privileged" />
 
     <!-- Allows an application to display its suggestions using the autofill framework.
          <p>For now, this permission is only granted to the Browser application.
