@@ -4,6 +4,7 @@ import android.view.View
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.systemui.classifier.domain.interactor.falsingInteractor
 import com.android.systemui.haptics.msdl.msdlPlayer
+import com.android.systemui.keyguard.ui.viewmodel.lightRevealScrimViewModel
 import com.android.systemui.kosmos.Kosmos
 import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.power.domain.interactor.powerInteractor
@@ -19,6 +20,7 @@ import com.android.systemui.scene.ui.viewmodel.SceneContainerViewModel
 import com.android.systemui.scene.ui.viewmodel.splitEdgeDetector
 import com.android.systemui.shade.domain.interactor.shadeInteractor
 import com.android.systemui.statusbar.domain.interactor.remoteInputInteractor
+import com.android.systemui.wallpapers.ui.viewmodel.wallpaperViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import org.mockito.kotlin.mock
 
@@ -96,6 +98,8 @@ val Kosmos.sceneContainerViewModelFactory by Fixture {
                 hapticsViewModelFactory = sceneContainerHapticsViewModelFactory,
                 view = view,
                 motionEventHandlerReceiver = motionEventHandlerReceiver,
+                lightRevealScrim = lightRevealScrimViewModel,
+                wallpaperViewModel = wallpaperViewModel,
             )
     }
 }
