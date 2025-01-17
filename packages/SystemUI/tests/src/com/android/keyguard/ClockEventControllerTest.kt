@@ -55,6 +55,7 @@ import com.android.systemui.plugins.clocks.ClockTickRate
 import com.android.systemui.plugins.clocks.ThemeConfig
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
+import com.android.systemui.power.domain.interactor.PowerInteractor
 import com.android.systemui.res.R
 import com.android.systemui.settings.UserTracker
 import com.android.systemui.statusbar.policy.BatteryController
@@ -131,6 +132,7 @@ class ClockEventControllerTest : SysuiTestCase() {
     @Mock private lateinit var parentView: View
     @Mock private lateinit var keyguardTransitionInteractor: KeyguardTransitionInteractor
     @Mock private lateinit var userTracker: UserTracker
+    @Mock private lateinit var powerInteractor: PowerInteractor
 
     @Mock private lateinit var zenModeController: ZenModeController
     private var zenModeControllerCallback: ZenModeController.Callback? = null
@@ -178,6 +180,7 @@ class ClockEventControllerTest : SysuiTestCase() {
                 zenModeController,
                 zenModeInteractor,
                 userTracker,
+                powerInteractor,
             )
         underTest.clock = clock
 
