@@ -115,6 +115,7 @@ android.util.UtilConfig
 android.util.Xml
 
 android.util.proto.EncodedBuffer
+android.util.proto.ProtoFieldFilter
 android.util.proto.ProtoInputStream
 android.util.proto.ProtoOutputStream
 android.util.proto.ProtoParseException
