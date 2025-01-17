@@ -71,8 +71,6 @@ import com.android.systemui.media.controls.domain.pipeline.MediaDataManager.Comp
 import com.android.systemui.media.controls.domain.pipeline.interactor.MediaCarouselInteractor
 import com.android.systemui.media.controls.domain.resume.ResumeMediaBrowser
 import com.android.systemui.media.controls.shared.MediaLogger
-import com.android.systemui.media.controls.shared.model.EXTRA_KEY_TRIGGER_SOURCE
-import com.android.systemui.media.controls.shared.model.EXTRA_VALUE_TRIGGER_PERIODIC
 import com.android.systemui.media.controls.shared.model.MediaAction
 import com.android.systemui.media.controls.shared.model.MediaButton
 import com.android.systemui.media.controls.shared.model.MediaData
@@ -610,14 +608,6 @@ class MediaDataProcessor(
                 { notifySmartspaceMediaDataRemoved(key, immediately = true) },
                 delay,
             )
-        }
-    }
-
-    /** Called when the recommendation card should no longer be visible in QQS or lockscreen */
-    fun setRecommendationInactive(key: String) {
-        if (mediaDataRepository.setRecommendationInactive(key)) {
-            val recommendation = mediaDataRepository.smartspaceMediaData.value
-            notifySmartspaceMediaDataLoaded(recommendation.targetId, recommendation)
         }
     }
 
@@ -1459,15 +1449,7 @@ class MediaDataProcessor(
                 ?.extras
                 ?.getParcelable(EXTRAS_SMARTSPACE_DISMISS_INTENT_KEY, Intent::class.java)
 
-        val isActive =
-            when {
-                !mediaFlags.isPersistentSsCardEnabled() -> true
-                baseAction == null -> true
-                else -> {
-                    val triggerSource = baseAction.extras?.getString(EXTRA_KEY_TRIGGER_SOURCE)
-                    triggerSource != EXTRA_VALUE_TRIGGER_PERIODIC
-                }
-            }
+        val isActive = true
 
         packageName(target)?.let {
             return SmartspaceMediaData(

@@ -107,7 +107,6 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
     @Test
     fun addAndRemoveMedia_mediaVisibilityIsUpdated() =
         testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             val isMediaVisible by collectLastValue(underTest.isMediaVisible)
             val userMedia = MediaData(active = true)
 
@@ -125,7 +124,6 @@ class QuickSettingsSceneContentViewModelTest : SysuiTestCase() {
     @Test
     fun addInactiveMedia_mediaVisibilityIsUpdated() =
         testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             val isMediaVisible by collectLastValue(underTest.isMediaVisible)
             val userMedia = MediaData(active = false)
 

@@ -180,30 +180,6 @@ constructor(
         mediaListeners.remove(key)?.destroy()
     }
 
-    override fun onSmartspaceMediaDataLoaded(
-        key: String,
-        data: SmartspaceMediaData,
-        shouldPrioritize: Boolean,
-    ) {
-        if (!mediaFlags.isPersistentSsCardEnabled()) return
-
-        // First check if we already have a listener
-        recommendationListeners.get(key)?.let {
-            if (!it.destroyed) {
-                it.recommendationData = data
-                return
-            }
-        }
-
-        // Otherwise, create a new one
-        recommendationListeners[key] = RecommendationListener(key, data)
-    }
-
-    override fun onSmartspaceMediaDataRemoved(key: String, immediately: Boolean) {
-        if (!mediaFlags.isPersistentSsCardEnabled()) return
-        recommendationListeners.remove(key)?.destroy()
-    }
-
     fun isTimedOut(key: String): Boolean {
         return mediaListeners[key]?.timedOut ?: false
     }

@@ -68,7 +68,7 @@ constructor(
         combine(
                 mediaFilterRepository.selectedUserEntries,
                 mediaFilterRepository.smartspaceMediaData,
-                mediaFilterRepository.reactivatedId
+                mediaFilterRepository.reactivatedId,
             ) { entries, smartspaceMediaData, reactivatedKey ->
                 entries.any { it.value.active } ||
                     (smartspaceMediaData.isActive &&
@@ -84,14 +84,10 @@ constructor(
     val hasAnyMediaOrRecommendation: StateFlow<Boolean> =
         combine(
                 mediaFilterRepository.selectedUserEntries,
-                mediaFilterRepository.smartspaceMediaData
+                mediaFilterRepository.smartspaceMediaData,
             ) { entries, smartspaceMediaData ->
                 entries.isNotEmpty() ||
-                    (if (mediaFlags.isPersistentSsCardEnabled()) {
-                        smartspaceMediaData.isValid()
-                    } else {
-                        smartspaceMediaData.isActive && smartspaceMediaData.isValid()
-                    })
+                    (smartspaceMediaData.isActive && smartspaceMediaData.isValid())
             }
             .stateIn(
                 scope = applicationScope,
@@ -168,7 +164,7 @@ constructor(
         token: MediaSession.Token,
         appName: String,
         appIntent: PendingIntent,
-        packageName: String
+        packageName: String,
     ) {
         mediaDataProcessor.addResumptionControls(
             userId,
@@ -177,7 +173,7 @@ constructor(
             token,
             appName,
             appIntent,
-            packageName
+            packageName,
         )
     }
 
@@ -192,8 +188,6 @@ constructor(
     override fun dismissSmartspaceRecommendation(key: String, delay: Long) {
         return mediaDataProcessor.dismissSmartspaceRecommendation(key, delay)
     }
-
-    override fun setRecommendationInactive(key: String) = unsupported
 
     override fun onNotificationRemoved(key: String) {
         mediaDataProcessor.onNotificationRemoved(key)
@@ -228,7 +222,7 @@ constructor(
         mediaFilterRepository.logSmartspaceCardSeen(
             MediaSmartspaceLogger.getSurface(location),
             visibleIndex,
-            isMediaCardUpdate
+            isMediaCardUpdate,
         )
     }
 

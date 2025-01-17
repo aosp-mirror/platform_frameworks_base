@@ -614,12 +614,8 @@ constructor(
                             logSmartspaceImpression(mediaCarouselScrollHandler.qsExpanded)
                         }
                     } else {
-                        if (!mediaFlags.isPersistentSsCardEnabled()) {
-                            // Handle update to inactive as a removal
-                            onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
-                        } else {
-                            addSmartspaceMediaRecommendations(key, data, shouldPrioritize)
-                        }
+                        // Handle update to inactive as a removal
+                        onSmartspaceMediaDataRemoved(data.targetId, immediately = true)
                     }
                     MediaPlayerData.isSwipedAway = false
                 }
@@ -1125,18 +1121,6 @@ constructor(
         traceSection("MediaCarouselController#addSmartspaceMediaRecommendations") {
             if (DEBUG) Log.d(TAG, "Updating smartspace target in carousel")
             MediaPlayerData.getMediaPlayer(key)?.let {
-                if (mediaFlags.isPersistentSsCardEnabled()) {
-                    // The card exists, but could have changed active state, so update for sorting
-                    MediaPlayerData.addMediaRecommendation(
-                        key,
-                        data,
-                        it,
-                        shouldPrioritize,
-                        systemClock,
-                        debugLogger,
-                        update = true,
-                    )
-                }
                 Log.w(TAG, "Skip adding smartspace target in carousel")
                 return
             }

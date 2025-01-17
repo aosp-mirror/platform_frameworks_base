@@ -25,8 +25,6 @@ import androidx.test.filters.SmallTest
 import com.android.internal.logging.InstanceId
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestHelper
 import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
@@ -126,7 +124,6 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
     fun loadMediaControlsAndRecommendations_mediaItemsAreUpdated() =
         testScope.runTest {
             val sortedMedia by collectLastValue(underTest.mediaItems)
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             val instanceId1 = InstanceId.fakeInstanceId(123)
             val instanceId2 = InstanceId.fakeInstanceId(456)
 
@@ -147,7 +144,6 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
         testScope.runTest {
             val sortedMedia by collectLastValue(underTest.mediaItems)
             kosmos.visualStabilityProvider.isReorderingAllowed = false
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
             val instanceId = InstanceId.fakeInstanceId(123)
 
             loadMediaRecommendations()
@@ -207,7 +203,6 @@ class MediaCarouselViewModelTest : SysuiTestCase() {
     fun addMediaRecommendationThenRemove_mediaEventsAreLogged() =
         testScope.runTest {
             val sortedMedia by collectLastValue(underTest.mediaItems)
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, false)
 
             loadMediaRecommendations()
 

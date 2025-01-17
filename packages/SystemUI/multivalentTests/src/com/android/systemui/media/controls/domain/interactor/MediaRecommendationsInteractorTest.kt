@@ -29,8 +29,6 @@ import com.android.systemui.animation.Expandable
 import com.android.systemui.broadcast.broadcastSender
 import com.android.systemui.broadcast.mockBroadcastSender
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.flags.Flags
-import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.media.controls.MediaTestHelper
 import com.android.systemui.media.controls.domain.pipeline.MediaDataFilterImpl
@@ -104,29 +102,13 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
                         listOf(
                             MediaRecModel(icon = icon),
                             MediaRecModel(icon = icon),
-                            MediaRecModel(icon = icon)
-                        )
+                            MediaRecModel(icon = icon),
+                        ),
                 )
 
             mediaDataFilter.onSmartspaceMediaDataLoaded(KEY_MEDIA_SMARTSPACE, smartspaceMediaData)
 
             assertThat(recommendations).isEqualTo(model)
-        }
-
-    @Test
-    fun setRecommendationInactive_isActiveUpdate() =
-        testScope.runTest {
-            kosmos.fakeFeatureFlagsClassic.set(Flags.MEDIA_RETAIN_RECOMMENDATIONS, true)
-            val isActive by collectLastValue(underTest.isActive)
-
-            mediaDataFilter.onSmartspaceMediaDataLoaded(KEY_MEDIA_SMARTSPACE, smartspaceMediaData)
-            assertThat(isActive).isTrue()
-
-            mediaDataFilter.onSmartspaceMediaDataLoaded(
-                KEY_MEDIA_SMARTSPACE,
-                smartspaceMediaData.copy(isActive = false)
-            )
-            assertThat(isActive).isFalse()
         }
 
     @Test
@@ -155,7 +137,7 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
             intent,
             0,
             SMARTSPACE_CARD_DISMISS_EVENT,
-            1
+            1,
         )
 
         verify(smartspaceLogger)
@@ -183,7 +165,7 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
             intent,
             0,
             SMARTSPACE_CARD_DISMISS_EVENT,
-            1
+            1,
         )
 
         verify(spyContext).startActivity(eq(intent))
@@ -216,7 +198,7 @@ class MediaRecommendationsInteractorTest : SysuiTestCase() {
                 cardinality = 1,
                 isRecommendationCard = true,
                 interactedSubcardRank = 2,
-                interactedSubcardCardinality = 3
+                interactedSubcardCardinality = 3,
             )
         verify(spyContext).startActivity(eq(intent))
     }

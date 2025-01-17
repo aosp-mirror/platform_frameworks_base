@@ -96,7 +96,6 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
     @Before
     fun setup() {
         whenever(mediaControllerFactory.create(any())).thenReturn(mediaController)
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(false)
         mainExecutor = FakeExecutor(clock)
         bgExecutor = FakeExecutor(clock)
         uiExecutor = FakeExecutor(clock)
@@ -610,89 +609,6 @@ class MediaTimeoutListenerTest : SysuiTestCase() {
         dozingCallbackCaptor.value.onDozingChanged(false)
         verify(timeoutCallback, never()).invoke(eq(KEY), eq(true))
         assertThat(mainExecutor.numPending()).isEqualTo(1)
-    }
-
-    @Test
-    fun testSmartspaceDataLoaded_schedulesTimeout() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-        val duration = 60_000
-        val createTime = 1234L
-        val expireTime = createTime + duration
-        whenever(smartspaceData.headphoneConnectionTimeMillis).thenReturn(createTime)
-        whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
-
-        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-        assertThat(mainExecutor.numPending()).isEqualTo(1)
-        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(duration)
-    }
-
-    @Test
-    fun testSmartspaceMediaData_timesOut_invokesCallback() {
-        // Given a pending timeout
-        testSmartspaceDataLoaded_schedulesTimeout()
-
-        mainExecutor.runAllReady()
-        verify(timeoutCallback).invoke(eq(SMARTSPACE_KEY), eq(true))
-    }
-
-    @Test
-    fun testSmartspaceDataLoaded_alreadyExists_updatesTimeout() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-        val duration = 100
-        val createTime = 1234L
-        val expireTime = createTime + duration
-        whenever(smartspaceData.headphoneConnectionTimeMillis).thenReturn(createTime)
-        whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
-
-        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-        assertThat(mainExecutor.numPending()).isEqualTo(1)
-
-        val expiryLonger = expireTime + duration
-        whenever(smartspaceData.expiryTimeMs).thenReturn(expiryLonger)
-        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-
-        assertThat(mainExecutor.numPending()).isEqualTo(1)
-        assertThat(mainExecutor.advanceClockToNext()).isEqualTo(duration * 2)
-    }
-
-    @Test
-    fun testSmartspaceDataRemoved_cancelTimeout() {
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-
-        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-        assertThat(mainExecutor.numPending()).isEqualTo(1)
-
-        mediaTimeoutListener.onSmartspaceMediaDataRemoved(SMARTSPACE_KEY)
-        assertThat(mainExecutor.numPending()).isEqualTo(0)
-    }
-
-    @Test
-    fun testSmartspaceData_dozedPastTimeout_invokedOnWakeup() {
-        // Given a pending timeout
-        whenever(mediaFlags.isPersistentSsCardEnabled()).thenReturn(true)
-        verify(statusBarStateController).addCallback(capture(dozingCallbackCaptor))
-        val duration = 60_000
-        val createTime = 1234L
-        val expireTime = createTime + duration
-        whenever(smartspaceData.headphoneConnectionTimeMillis).thenReturn(createTime)
-        whenever(smartspaceData.expiryTimeMs).thenReturn(expireTime)
-
-        mediaTimeoutListener.onSmartspaceMediaDataLoaded(SMARTSPACE_KEY, smartspaceData)
-        assertThat(mainExecutor.numPending()).isEqualTo(1)
-
-        // And we doze past the scheduled timeout
-        val time = clock.currentTimeMillis()
-        clock.setElapsedRealtime(time + duration * 2)
-        assertThat(mainExecutor.numPending()).isEqualTo(1)
-
-        // Then when no longer dozing, the timeout runs immediately
-        dozingCallbackCaptor.value.onDozingChanged(false)
-        verify(timeoutCallback).invoke(eq(SMARTSPACE_KEY), eq(true))
-        verify(logger).logTimeout(eq(SMARTSPACE_KEY))
-
-        // and cancel any later scheduled timeout
-        assertThat(mainExecutor.numPending()).isEqualTo(0)
     }
 
     private fun loadMediaDataWithPlaybackState(state: PlaybackState) {

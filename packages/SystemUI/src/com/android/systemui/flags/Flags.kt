@@ -206,9 +206,6 @@ object Flags {
     // TODO(b/267007629): Tracking Bug
     val MEDIA_RESUME_PROGRESS = releasedFlag("media_resume_progress")
 
-    // TODO(b/267166152) : Tracking Bug
-    val MEDIA_RETAIN_RECOMMENDATIONS = unreleasedFlag("media_retain_recommendations")
-
     // TODO(b/270437894): Tracking Bug
     val MEDIA_REMOTE_RESUME = unreleasedFlag("media_remote_resume")
 
