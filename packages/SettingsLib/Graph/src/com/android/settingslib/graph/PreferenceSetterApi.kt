@@ -26,12 +26,12 @@ import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.ipc.IntMessageCodec
 import com.android.settingslib.ipc.MessageCodec
+import com.android.settingslib.metadata.IntRangeValuePreference
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceAvailabilityProvider
 import com.android.settingslib.metadata.PreferenceMetadata
 import com.android.settingslib.metadata.PreferenceRestrictionProvider
 import com.android.settingslib.metadata.PreferenceScreenRegistry
-import com.android.settingslib.metadata.RangeValue
 import com.android.settingslib.metadata.ReadWritePermit
 import com.android.settingslib.metadata.SensitivityLevel.Companion.HIGH_SENSITIVITY
 import com.android.settingslib.metadata.SensitivityLevel.Companion.UNKNOWN_SENSITIVITY
@@ -157,7 +157,10 @@ class PreferenceSetterApiHandler(
                 val intValue = value.intValue
                 val resultCode = metadata.checkWritePermit(intValue)
                 if (resultCode != PreferenceSetterResult.OK) return resultCode
-                if (metadata is RangeValue && !metadata.isValidValue(application, intValue)) {
+                if (
+                    metadata is IntRangeValuePreference &&
+                        !metadata.isValidValue(application, intValue)
+                ) {
                     return PreferenceSetterResult.INVALID_REQUEST
                 }
                 storage.setInt(key, intValue)

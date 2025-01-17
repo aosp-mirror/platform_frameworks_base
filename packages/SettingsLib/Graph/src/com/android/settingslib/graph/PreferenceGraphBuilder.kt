@@ -40,6 +40,7 @@ import com.android.settingslib.graph.proto.PreferenceProto
 import com.android.settingslib.graph.proto.PreferenceProto.ActionTarget
 import com.android.settingslib.graph.proto.PreferenceScreenProto
 import com.android.settingslib.graph.proto.TextProto
+import com.android.settingslib.metadata.IntRangeValuePreference
 import com.android.settingslib.metadata.PersistentPreference
 import com.android.settingslib.metadata.PreferenceAvailabilityProvider
 import com.android.settingslib.metadata.PreferenceHierarchy
@@ -50,7 +51,6 @@ import com.android.settingslib.metadata.PreferenceScreenMetadata
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.android.settingslib.metadata.PreferenceSummaryProvider
 import com.android.settingslib.metadata.PreferenceTitleProvider
-import com.android.settingslib.metadata.RangeValue
 import com.android.settingslib.metadata.ReadWritePermit
 import com.android.settingslib.preference.PreferenceScreenFactory
 import com.android.settingslib.preference.PreferenceScreenProvider
@@ -407,22 +407,20 @@ fun PreferenceMetadata.toProto(
         ) {
             val storage = metadata.storage(context)
             value = preferenceValueProto {
-                when (metadata) {
-                    is RangeValue -> storage.getInt(metadata.key)?.let { intValue = it }
-                    else -> {}
-                }
                 when (metadata.valueType) {
+                    Int::class.javaObjectType -> storage.getInt(metadata.key)?.let { intValue = it }
                     Boolean::class.javaObjectType ->
                         storage.getBoolean(metadata.key)?.let { booleanValue = it }
                     Float::class.javaObjectType ->
                         storage.getFloat(metadata.key)?.let { floatValue = it }
+                    else -> {}
                 }
             }
         }
         if (flags.includeValueDescriptor()) {
             valueDescriptor = preferenceValueDescriptorProto {
                 when (metadata) {
-                    is RangeValue -> rangeValue = rangeValueProto {
+                    is IntRangeValuePreference -> rangeValue = rangeValueProto {
                             min = metadata.getMinValue(context)
                             max = metadata.getMaxValue(context)
                             step = metadata.getIncrementStep(context)

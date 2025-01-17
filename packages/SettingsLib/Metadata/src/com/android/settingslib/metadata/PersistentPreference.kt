@@ -75,7 +75,7 @@ annotation class SensitivityLevel {
     }
 }
 
-/** Preference interface that has a value persisted in datastore. */
+/** Preference metadata that has a value persisted in datastore. */
 interface PersistentPreference<T> : PreferenceMetadata {
 
     /**
@@ -203,19 +203,4 @@ interface DiscreteIntValue : DiscreteValue<Int> {
 
     override fun getValue(context: Context, index: Int): Int =
         context.resources.getIntArray(values)[index]
-}
-
-/** Value is between a range. */
-interface RangeValue : ValueDescriptor {
-    /** The lower bound (inclusive) of the range. */
-    fun getMinValue(context: Context): Int
-
-    /** The upper bound (inclusive) of the range. */
-    fun getMaxValue(context: Context): Int
-
-    /** The increment step within the range. 0 means unset, which implies step size is 1. */
-    fun getIncrementStep(context: Context) = 0
-
-    override fun isValidValue(context: Context, index: Int) =
-        index in getMinValue(context)..getMaxValue(context)
 }
