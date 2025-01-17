@@ -6330,6 +6330,17 @@ public final class Settings {
         public static final String TOUCHPAD_SYSTEM_GESTURES = "touchpad_system_gestures";
 
         /**
+         * Whether touchpad acceleration is enabled.
+         *
+         * When enabled, the speed of the pointer will increase as the user moves their
+         * finger faster on the touchpad.
+         *
+         * @hide
+         */
+        public static final String TOUCHPAD_ACCELERATION_ENABLED =
+                "touchpad_acceleration_enabled";
+
+        /**
          * Whether to enable reversed vertical scrolling for connected mice.
          *
          * When enabled, scrolling down on the mouse wheel will move the screen up and vice versa.
@@ -6624,6 +6635,7 @@ public final class Settings {
             PRIVATE_SETTINGS.add(TOUCHPAD_TAP_DRAGGING);
             PRIVATE_SETTINGS.add(TOUCHPAD_RIGHT_CLICK_ZONE);
             PRIVATE_SETTINGS.add(TOUCHPAD_SYSTEM_GESTURES);
+            PRIVATE_SETTINGS.add(TOUCHPAD_ACCELERATION_ENABLED);
             PRIVATE_SETTINGS.add(CAMERA_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION);
             PRIVATE_SETTINGS.add(SCREEN_FLASH_NOTIFICATION_COLOR);

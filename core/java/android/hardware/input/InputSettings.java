@@ -385,6 +385,42 @@ public class InputSettings {
     }
 
     /**
+     * Whether touchpad acceleration is enabled or not.
+     *
+     * @param context The application context.
+     *
+     * @hide
+     */
+    public static boolean isTouchpadAccelerationEnabled(@NonNull Context context) {
+        if (!isPointerAccelerationFeatureFlagEnabled()) {
+            return false;
+        }
+
+        return Settings.System.getIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_ACCELERATION_ENABLED, 1, UserHandle.USER_CURRENT)
+                == 1;
+    }
+
+   /**
+    * Enables or disables touchpad acceleration.
+    *
+    * @param context The application context.
+    * @param enabled Will enable touchpad acceleration if true, disable it if
+    *                false.
+    * @hide
+    */
+    @RequiresPermission(Manifest.permission.WRITE_SETTINGS)
+    public static void setTouchpadAccelerationEnabled(@NonNull Context context,
+            boolean enabled) {
+        if (!isPointerAccelerationFeatureFlagEnabled()) {
+            return;
+        }
+        Settings.System.putIntForUser(context.getContentResolver(),
+                Settings.System.TOUCHPAD_ACCELERATION_ENABLED, enabled ? 1 : 0,
+                UserHandle.USER_CURRENT);
+    }
+
+    /**
      * Returns true if the feature flag for disabling system gestures on touchpads is enabled.
      *
      * @hide
@@ -834,7 +870,6 @@ public class InputSettings {
                 Settings.System.MOUSE_POINTER_ACCELERATION_ENABLED, enabled ? 1 : 0,
                 UserHandle.USER_CURRENT);
     }
-
 
     /**
      * Whether Accessibility bounce keys feature is enabled.
