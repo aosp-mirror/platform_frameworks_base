@@ -26,15 +26,14 @@ import kotlinx.coroutines.flow.map
 class SwitchAppsGestureScreenViewModel(private val gestureRecognizer: GestureRecognizerAdapter) :
     TouchpadTutorialScreenViewModel {
 
-    // TODO: replace with correct markers and resource
     override val tutorialState: Flow<TutorialActionState> =
         gestureRecognizer.gestureState
             .map {
                 it to
                     TutorialAnimationProperties(
-                        progressStartMarker = "drag with gesture",
-                        progressEndMarker = "onPause",
-                        successAnimation = R.raw.trackpad_recent_apps_success,
+                        progressStartMarker = "gesture to R",
+                        progressEndMarker = "end of gesture",
+                        successAnimation = R.raw.trackpad_switch_apps_success,
                     )
             }
             .mapToTutorialState()
