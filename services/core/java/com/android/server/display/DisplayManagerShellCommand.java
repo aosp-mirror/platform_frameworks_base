@@ -112,6 +112,8 @@ class DisplayManagerShellCommand extends ShellCommand {
                 return requestDisplayPower(Display.STATE_UNKNOWN);
             case "power-off":
                 return requestDisplayPower(Display.STATE_OFF);
+            case "override-max-importance-rr-callbacks":
+                return overrideMaxImportanceForRRCallbacks();
             default:
                 return handleDefaultCommands(cmd);
         }
@@ -629,6 +631,23 @@ class DisplayManagerShellCommand extends ShellCommand {
             return 1;
         }
         mService.requestDisplayPower(displayId, state);
+        return 0;
+    }
+
+    private int overrideMaxImportanceForRRCallbacks() {
+        final String importanceString = getNextArg();
+        if (importanceString == null) {
+            getErrPrintWriter().println("Error: no importance specified");
+            return 1;
+        }
+        final int importance;
+        try {
+            importance = Integer.parseInt(importanceString);
+        } catch (NumberFormatException e) {
+            getErrPrintWriter().println("Error: invalid importance: '" + importanceString + "'");
+            return 1;
+        }
+        mService.overrideMaxImportanceForRRCallbacks(importance);
         return 0;
     }
 }

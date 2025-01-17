@@ -23,6 +23,7 @@ import static android.Manifest.permission.CAPTURE_VIDEO_OUTPUT;
 import static android.Manifest.permission.CONTROL_DISPLAY_BRIGHTNESS;
 import static android.Manifest.permission.MANAGE_DISPLAYS;
 import static android.Manifest.permission.MODIFY_USER_PREFERRED_DISPLAY_MODE;
+import static android.app.ActivityManager.PROCESS_STATE_TRANSIENT_BACKGROUND;
 import static android.hardware.display.DisplayManager.SWITCHING_TYPE_NONE;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ALWAYS_UNLOCKED;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
@@ -2341,6 +2342,29 @@ public class DisplayManagerServiceTest {
         updateRenderFrameRate(displayManager, displayDevice, 20f);
         waitForIdleHandler(displayManager.getDisplayHandler());
         assertThat(callback.receivedEvents()).contains(EVENT_DISPLAY_REFRESH_RATE_CHANGED);
+        callback.clear();
+    }
+
+    @Test
+    public void test_doesNotNotifyRefreshRateChanged_whenAppInBackground() {
+        when(mMockFlags.isRefreshRateEventForForegroundAppsEnabled()).thenReturn(true);
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        DisplayManagerService.BinderService displayManagerBinderService =
+                displayManager.new BinderService();
+        displayManager.windowManagerAndInputReady();
+        registerDefaultDisplays(displayManager);
+        displayManager.onBootPhase(SystemService.PHASE_WAIT_FOR_DEFAULT_DISPLAY);
+
+        FakeDisplayDevice displayDevice = createFakeDisplayDevice(displayManager, new float[]{60f});
+        FakeDisplayManagerCallback callback = registerDisplayListenerCallback(displayManager,
+                displayManagerBinderService, displayDevice);
+
+        when(mMockActivityManagerInternal.getUidProcessState(Process.myUid()))
+                .thenReturn(PROCESS_STATE_TRANSIENT_BACKGROUND);
+        updateRenderFrameRate(displayManager, displayDevice, 30f);
+        waitForIdleHandler(displayManager.getDisplayHandler());
+        assertEquals(0, callback.receivedEvents().size());
         callback.clear();
     }
 
