@@ -2968,6 +2968,20 @@ public final class ViewRootImpl implements ViewParent,
         }
     }
 
+    /**
+     * Same as notifyRendererOfExpensiveFrame(), but adding {@code reason} for tracing.
+     *
+     * @hide
+     */
+    public void notifyRendererOfExpensiveFrame(String reason) {
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, reason);
+        try {
+            notifyRendererOfExpensiveFrame();
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        }
+    }
+
     @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.R, trackingBug = 170729553)
     void scheduleTraversals() {
         if (!mTraversalScheduled) {
