@@ -1940,3 +1940,10 @@ flag {
     description: "Force promoted notifications to always be expanded"
     bug: "380901479"
 }
+
+flag {
+    name: "aod_ui_rich_ongoing"
+    namespace: "systemui"
+    description: "Show a rich ongoing notification on the always-on display (depends on ui_rich_ongoing)"
+    bug: "369151941"
+}
