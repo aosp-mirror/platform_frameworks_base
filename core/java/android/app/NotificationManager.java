@@ -1656,7 +1656,8 @@ public class NotificationManager {
         if (Flags.modesApi() && Flags.modesUi()) {
             PackageManager pm = mContext.getPackageManager();
             return !pm.hasSystemFeature(PackageManager.FEATURE_WATCH)
-                    && !pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE);
+                    && !pm.hasSystemFeature(PackageManager.FEATURE_AUTOMOTIVE)
+                    && !pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
         } else {
             return false;
         }
