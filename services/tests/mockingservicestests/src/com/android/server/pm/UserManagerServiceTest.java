@@ -49,6 +49,7 @@ import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.KeyguardManager;
+import android.app.PropertyInvalidatedCache;
 import android.content.Context;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.UserInfo;
@@ -181,8 +182,8 @@ public final class UserManagerServiceTest {
         MockitoAnnotations.initMocks(this);
         mSpiedContext = spy(mRealContext);
 
-        // Called when WatchedUserStates is constructed
-        doNothing().when(() -> UserManager.invalidateIsUserUnlockedCache());
+        // Disable binder caches in this process.
+        PropertyInvalidatedCache.disableForTestMode();
 
         // Called when creating new users
         when(mDeviceStorageMonitorInternal.isMemoryLow()).thenReturn(false);
