@@ -27,7 +27,6 @@ import android.content.Intent;
 import android.content.LocusId;
 import android.content.pm.ShortcutInfo;
 import android.os.UserHandle;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -48,6 +47,7 @@ import com.android.wm.shell.shared.bubbles.RemovedBubble;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -667,7 +667,7 @@ public class BubbleData {
 
     /** Removes all bubbles for the given user. */
     public void removeBubblesForUser(int userId) {
-        List<Bubble> removedBubbles = filterAllBubbles(bubble ->
+        final List<Bubble> removedBubbles = filterAllBubbles(bubble ->
                 userId == bubble.getUser().getIdentifier());
         for (Bubble b : removedBubbles) {
             doRemove(b.getKey(), Bubbles.DISMISS_USER_ACCOUNT_REMOVED);
@@ -1162,7 +1162,7 @@ public class BubbleData {
 
     @VisibleForTesting(visibility = PRIVATE)
     @Nullable
-    Bubble getAnyBubbleWithkey(String key) {
+    Bubble getAnyBubbleWithKey(String key) {
         Bubble b = getBubbleInStackWithKey(key);
         if (b == null) {
             b = getOverflowBubbleWithKey(key);
@@ -1173,77 +1173,45 @@ public class BubbleData {
         return b;
     }
 
-    /** @return any bubble (in the stack or the overflow) that matches the provided shortcutId. */
+    /** @return the bubble in the stack that matches the provided taskId. */
     @Nullable
-    Bubble getAnyBubbleWithShortcutId(String shortcutId) {
-        if (TextUtils.isEmpty(shortcutId)) {
+    Bubble getBubbleInStackWithTaskId(int taskId) {
+        return getBubbleWithPredicate(mBubbles, b -> b.getTaskId() == taskId);
+    }
+
+    /** @return the bubble in the stack that matches the provided key. */
+    @Nullable
+    @VisibleForTesting(visibility = PRIVATE)
+    public Bubble getBubbleInStackWithKey(String key) {
+        return getBubbleWithPredicate(mBubbles, b -> b.getKey().equals(key));
+    }
+
+    /** @return the bubble in the stack that matches the provided locusId. */
+    @Nullable
+    private Bubble getBubbleInStackWithLocusId(@Nullable LocusId locusId) {
+        if (locusId == null) {
             return null;
         }
-        for (int i = 0; i < mBubbles.size(); i++) {
-            Bubble bubble = mBubbles.get(i);
-            String bubbleShortcutId = bubble.getShortcutInfo() != null
-                    ? bubble.getShortcutInfo().getId()
-                    : bubble.getMetadataShortcutId();
-            if (shortcutId.equals(bubbleShortcutId)) {
-                return bubble;
-            }
-        }
-
-        for (int i = 0; i < mOverflowBubbles.size(); i++) {
-            Bubble bubble = mOverflowBubbles.get(i);
-            String bubbleShortcutId = bubble.getShortcutInfo() != null
-                    ? bubble.getShortcutInfo().getId()
-                    : bubble.getMetadataShortcutId();
-            if (shortcutId.equals(bubbleShortcutId)) {
-                return bubble;
-            }
-        }
-        return null;
+        return getBubbleWithPredicate(mBubbles, b -> locusId.equals(b.getLocusId()));
     }
 
-    @VisibleForTesting(visibility = PRIVATE)
+    /** @return the bubble in the stack that matches the provided icon view. */
     @Nullable
-    public Bubble getBubbleInStackWithKey(String key) {
-        for (int i = 0; i < mBubbles.size(); i++) {
-            Bubble bubble = mBubbles.get(i);
-            if (bubble.getKey().equals(key)) {
-                return bubble;
-            }
-        }
-        return null;
+    Bubble getBubbleInStackWithView(View view) {
+        return getBubbleWithPredicate(mBubbles, b ->
+                b.getIconView() != null && b.getIconView().equals(view));
     }
 
+    /** @return the overflow bubble that matches the provided taskId. */
     @Nullable
-    private Bubble getBubbleInStackWithLocusId(LocusId locusId) {
-        if (locusId == null) return null;
-        for (int i = 0; i < mBubbles.size(); i++) {
-            Bubble bubble = mBubbles.get(i);
-            if (locusId.equals(bubble.getLocusId())) {
-                return bubble;
-            }
-        }
-        return null;
+    Bubble getOverflowBubbleWithTaskId(int taskId) {
+        return getBubbleWithPredicate(mOverflowBubbles, b -> b.getTaskId() == taskId);
     }
 
+    /** @return the overflow bubble that matches the provided key. */
     @Nullable
-    Bubble getBubbleWithView(View view) {
-        for (int i = 0; i < mBubbles.size(); i++) {
-            Bubble bubble = mBubbles.get(i);
-            if (bubble.getIconView() != null && bubble.getIconView().equals(view)) {
-                return bubble;
-            }
-        }
-        return null;
-    }
-
     public Bubble getOverflowBubbleWithKey(String key) {
-        for (int i = 0; i < mOverflowBubbles.size(); i++) {
-            Bubble bubble = mOverflowBubbles.get(i);
-            if (bubble.getKey().equals(key)) {
-                return bubble;
-            }
-        }
-        return null;
+        return getBubbleWithPredicate(mOverflowBubbles, b -> b.getKey().equals(key));
     }
 
     /**
@@ -1255,12 +1223,7 @@ public class BubbleData {
     @Nullable
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble getSuppressedBubbleWithKey(String key) {
-        for (Bubble b : mSuppressedBubbles.values()) {
-            if (b.getKey().equals(key)) {
-                return b;
-            }
-        }
-        return null;
+        return getBubbleWithPredicate(mSuppressedBubbles.values(), b -> b.getKey().equals(key));
     }
 
     /**
@@ -1269,11 +1232,32 @@ public class BubbleData {
      * @param key notification key
      * @return bubble that matches or null
      */
+    @Nullable
     @VisibleForTesting(visibility = PRIVATE)
     public Bubble getPendingBubbleWithKey(String key) {
-        for (Bubble b : mPendingBubbles.values()) {
-            if (b.getKey().equals(key)) {
-                return b;
+        return getBubbleWithPredicate(mPendingBubbles.values(), b -> b.getKey().equals(key));
+    }
+
+    @Nullable
+    private static Bubble getBubbleWithPredicate(@NonNull final List<Bubble> bubbles,
+            @NonNull final Predicate<Bubble> predicate) {
+        // Uses an indexed for loop for optimized performance when iterating over ArrayLists.
+        for (int i = 0; i < bubbles.size(); i++) {
+            final Bubble bubble = bubbles.get(i);
+            if (predicate.test(bubble)) {
+                return bubble;
+            }
+        }
+        return null;
+    }
+
+    @Nullable
+    private static Bubble getBubbleWithPredicate(@NonNull final Collection<Bubble> bubbles,
+            @NonNull final Predicate<Bubble> predicate) {
+        // Uses an enhanced for loop for general collections, which may not support indexed access.
+        for (final Bubble bubble : bubbles) {
+            if (predicate.test(bubble)) {
+                return bubble;
             }
         }
         return null;
@@ -1284,7 +1268,7 @@ public class BubbleData {
      * bubbles (i.e. pending, suppressed, active, and overflowed).
      */
     private List<Bubble> filterAllBubbles(Predicate<Bubble> predicate) {
-        ArrayList<Bubble> matchingBubbles = new ArrayList<>();
+        final ArrayList<Bubble> matchingBubbles = new ArrayList<>();
         for (Bubble b : mPendingBubbles.values()) {
             if (predicate.test(b)) {
                 matchingBubbles.add(b);
