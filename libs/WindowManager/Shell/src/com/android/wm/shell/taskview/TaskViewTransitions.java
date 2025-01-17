@@ -385,7 +385,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         // and tracked correctly inside taskview. Which is done by calling
         // prepareOpenAnimationInternal() and then manually enqueuing the resulting window container
         // transaction.
-        destination.prepareOpenAnimation(true /* newTask */, mTransaction /* startTransaction */,
+        prepareOpenAnimation(destination, true /* newTask */, mTransaction /* startTransaction */,
                 null /* finishTransaction */, taskInfo, leash, wct);
         mTransaction.apply();
         mTransitions.startTransition(TRANSIT_CHANGE, wct, null);
@@ -658,7 +658,7 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
                     }
                 }
                 if (wct == null) wct = new WindowContainerTransaction();
-                tv.prepareOpenAnimation(taskIsNew, startTransaction, finishTransaction,
+                prepareOpenAnimation(tv, taskIsNew, startTransaction, finishTransaction,
                         chg.getTaskInfo(), chg.getLeash(), wct);
                 changesHandled++;
             } else if (chg.getMode() == TRANSIT_CHANGE) {
@@ -691,5 +691,61 @@ public class TaskViewTransitions implements Transitions.TransitionHandler {
         finishCallback.onTransitionFinished(wct);
         startNextTransition();
         return true;
+    }
+
+    @VisibleForTesting
+    void prepareOpenAnimation(TaskViewTaskController taskView,
+            final boolean newTask,
+            SurfaceControl.Transaction startTransaction,
+            SurfaceControl.Transaction finishTransaction,
+            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
+            WindowContainerTransaction wct) {
+        final Rect boundsOnScreen = taskView.prepareOpen(taskInfo, leash);
+        if (boundsOnScreen != null) {
+            final SurfaceControl tvSurface = taskView.getSurfaceControl();
+            // Surface is ready, so just reparent the task to this surface control
+            startTransaction.reparent(leash, tvSurface)
+                    .show(leash);
+            // Also reparent on finishTransaction since the finishTransaction will reparent back
+            // to its "original" parent by default.
+            if (finishTransaction != null) {
+                finishTransaction.reparent(leash, tvSurface)
+                        .setPosition(leash, 0, 0)
+                        // TODO: maybe once b/280900002 is fixed this will be unnecessary
+                        .setWindowCrop(leash, boundsOnScreen.width(), boundsOnScreen.height());
+            }
+            if (useRepo()) {
+                final TaskViewRepository.TaskViewState state = mTaskViewRepo.byTaskView(taskView);
+                if (state != null) {
+                    state.mBounds.set(boundsOnScreen);
+                    state.mVisible = true;
+                }
+            } else {
+                updateBoundsState(taskView, boundsOnScreen);
+                updateVisibilityState(taskView, true /* visible */);
+            }
+            wct.setBounds(taskInfo.token, boundsOnScreen);
+            taskView.applyCaptionInsetsIfNeeded();
+        } else {
+            // The surface has already been destroyed before the task has appeared,
+            // so go ahead and hide the task entirely
+            wct.setHidden(taskInfo.token, true /* hidden */);
+            updateVisibilityState(taskView, false /* visible */);
+            // listener callback is below
+        }
+        if (newTask) {
+            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(taskInfo.token, true /* intercept */);
+        }
+
+        if (taskInfo.taskDescription != null) {
+            int backgroundColor = taskInfo.taskDescription.getBackgroundColor();
+            taskView.setResizeBgColor(startTransaction, backgroundColor);
+        }
+
+        // After the embedded task has appeared, set it to non-trimmable. This is important
+        // to prevent recents from trimming and removing the embedded task.
+        wct.setTaskTrimmableFromRecents(taskInfo.token, false /* isTrimmableFromRecents */);
+
+        taskView.notifyAppeared(newTask);
     }
 }

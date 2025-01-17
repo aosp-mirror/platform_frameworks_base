@@ -135,6 +135,10 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         return mTaskToken;
     }
 
+    void setResizeBgColor(SurfaceControl.Transaction t, int bgColor) {
+        mTaskViewBase.setResizeBgColor(t, bgColor);
+    }
+
     /**
      * Only one listener may be set on the view, throws an exception otherwise.
      */
@@ -489,72 +493,23 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         resetTaskInfo();
     }
 
-    void prepareOpenAnimation(final boolean newTask,
-            @NonNull SurfaceControl.Transaction startTransaction,
-            @NonNull SurfaceControl.Transaction finishTransaction,
-            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
-            WindowContainerTransaction wct) {
-        prepareOpenAnimationInternal(newTask, startTransaction, finishTransaction, taskInfo, leash,
-                wct);
-    }
-
-    private TaskViewRepository.TaskViewState getState() {
-        return mTaskViewTransitions.getRepository().byTaskView(this);
-    }
-
-    private void prepareOpenAnimationInternal(final boolean newTask,
-            SurfaceControl.Transaction startTransaction,
-            SurfaceControl.Transaction finishTransaction,
-            ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash,
-            WindowContainerTransaction wct) {
+    /**
+     * Prepare this taskview to open {@param taskInfo}.
+     * @return The bounds of the task or {@code null} on failure (surface is destroyed)
+     */
+    Rect prepareOpen(ActivityManager.RunningTaskInfo taskInfo, SurfaceControl leash) {
         mPendingInfo = null;
         mTaskInfo = taskInfo;
         mTaskToken = mTaskInfo.token;
         mTaskLeash = leash;
-        if (mSurfaceCreated) {
-            // Surface is ready, so just reparent the task to this surface control
-            startTransaction.reparent(mTaskLeash, mSurfaceControl)
-                    .show(mTaskLeash);
-            // Also reparent on finishTransaction since the finishTransaction will reparent back
-            // to its "original" parent by default.
-            Rect boundsOnScreen = mTaskViewBase.getCurrentBoundsOnScreen();
-            if (finishTransaction != null) {
-                finishTransaction.reparent(mTaskLeash, mSurfaceControl)
-                        .setPosition(mTaskLeash, 0, 0)
-                        // TODO: maybe once b/280900002 is fixed this will be unnecessary
-                        .setWindowCrop(mTaskLeash, boundsOnScreen.width(), boundsOnScreen.height());
-            }
-            if (TaskViewTransitions.useRepo()) {
-                final TaskViewRepository.TaskViewState state = getState();
-                if (state != null) {
-                    state.mBounds.set(boundsOnScreen);
-                    state.mVisible = true;
-                }
-            } else {
-                mTaskViewTransitions.updateBoundsState(this, boundsOnScreen);
-                mTaskViewTransitions.updateVisibilityState(this, true /* visible */);
-            }
-            wct.setBounds(mTaskToken, boundsOnScreen);
-            applyCaptionInsetsIfNeeded();
-        } else {
-            // The surface has already been destroyed before the task has appeared,
-            // so go ahead and hide the task entirely
-            wct.setHidden(mTaskToken, true /* hidden */);
-            mTaskViewTransitions.updateVisibilityState(this, false /* visible */);
-            // listener callback is below
+        if (!mSurfaceCreated) {
+            return null;
         }
-        if (newTask) {
-            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, true /* intercept */);
-        }
+        return mTaskViewBase.getCurrentBoundsOnScreen();
+    }
 
-        if (mTaskInfo.taskDescription != null) {
-            int backgroundColor = mTaskInfo.taskDescription.getBackgroundColor();
-            mTaskViewBase.setResizeBgColor(startTransaction, backgroundColor);
-        }
-
-        // After the embedded task has appeared, set it to non-trimmable. This is important
-        // to prevent recents from trimming and removing the embedded task.
-        wct.setTaskTrimmableFromRecents(taskInfo.token, false /* isTrimmableFromRecents */);
+    /** Notify that the associated task has appeared. This will call appropriate listeners. */
+    void notifyAppeared(final boolean newTask) {
         mTaskViewBase.onTaskAppeared(mTaskInfo, mTaskLeash);
         if (mListener != null) {
             final int taskId = mTaskInfo.taskId;
