@@ -23,7 +23,7 @@ import android.os.IRemoteCallback;
 import android.view.MotionEvent;
 import com.android.systemui.shared.recents.ISystemUiProxy;
 
-// Next ID: 38
+// Next ID: 39
 oneway interface IOverviewProxy {
 
     void onActiveNavBarRegionChanges(in Region activeRegion) = 11;
@@ -154,4 +154,9 @@ oneway interface IOverviewProxy {
      * Sent when {@link TaskbarDelegate#onDisplayRemoved} is called.
      */
     void onDisplayRemoved(int displayId) = 37;
+
+    /**
+     * Sent when {@link TaskbarDelegate#onDisplayRemoveSystemDecorations} is called.
+     */
+    void onDisplayRemoveSystemDecorations(int displayId) = 38;
 }
