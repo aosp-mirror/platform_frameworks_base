@@ -16,8 +16,6 @@
 
 package com.android.wm.shell.taskview;
 
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -27,14 +25,12 @@ import android.graphics.Rect;
 import android.gui.TrustedOverlay;
 import android.os.Binder;
 import android.util.CloseGuard;
-import android.util.Slog;
 import android.view.SurfaceControl;
 import android.view.WindowInsets;
 import android.window.WindowContainerToken;
 import android.window.WindowContainerTransaction;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.wm.shell.Flags;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.common.SyncTransactionQueue;
 
@@ -93,7 +89,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         mTaskViewTransitions = taskViewTransitions;
         mShellExecutor.execute(() -> {
             if (mTaskViewTransitions != null) {
-                mTaskViewTransitions.addTaskView(this);
+                mTaskViewTransitions.registerTaskView(this);
             }
         });
         mGuard.open("release");
@@ -152,24 +148,6 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     }
 
     /**
-     * Moves the current task in TaskView out of the view and back to fullscreen.
-     */
-    public void moveToFullscreen() {
-        if (mTaskToken == null) return;
-        mShellExecutor.execute(() -> {
-            WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.setWindowingMode(mTaskToken, WINDOWING_MODE_UNDEFINED);
-            wct.setAlwaysOnTop(mTaskToken, false);
-            mTaskOrganizer.setInterceptBackPressedOnTaskRoot(mTaskToken, false);
-            mTaskViewTransitions.moveTaskViewToFullscreen(wct, this);
-            if (mListener != null) {
-                // Task is being "removed" from the clients perspective
-                mListener.onTaskRemovalStarted(mTaskInfo.taskId);
-            }
-        });
-    }
-
-    /**
      * Release this container if it is initialized.
      */
     public void release() {
@@ -191,7 +169,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     private void performRelease() {
         mShellExecutor.execute(() -> {
             if (mTaskViewTransitions != null) {
-                mTaskViewTransitions.removeTaskView(this);
+                mTaskViewTransitions.unregisterTaskView(this);
             }
             mTaskOrganizer.removeListener(this);
             resetTaskInfo();
@@ -378,30 +356,6 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
     }
 
     /**
-     * Call to remove the task from window manager. This task will not appear in recents.
-     */
-    void removeTask() {
-        if (mTaskToken == null) {
-            if (Flags.enableTaskViewControllerCleanup()) {
-                // We don't have a task yet. Only clean up the controller
-                mTaskViewTransitions.removeTaskView(this);
-            } else {
-                // Call to remove task before we have one, do nothing
-                Slog.w(TAG, "Trying to remove a task that was never added? (no taskToken)");
-            }
-            return;
-        }
-        // Cache it to avoid NPE and make sure to remove it from recents history.
-        // mTaskToken can be cleared in onTaskVanished() when the task is removed.
-        final WindowContainerToken taskToken = mTaskToken;
-        mShellExecutor.execute(() -> {
-            WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.removeTask(taskToken);
-            mTaskViewTransitions.closeTaskView(wct, this);
-        });
-    }
-
-    /**
      * Sets a region of the task to inset to allow for a caption bar.
      *
      * @param captionInsets the rect for the insets in screen coordinates.
@@ -459,15 +413,16 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
         }
     }
 
+    void notifyTaskRemovalStarted(@NonNull ActivityManager.RunningTaskInfo taskInfo) {
+        if (mListener == null) return;
+        final int taskId = taskInfo.taskId;
+        mListenerExecutor.execute(() -> mListener.onTaskRemovalStarted(taskId));
+    }
+
     /** Notifies listeners of a task being removed and stops intercepting back presses on it. */
     private void handleAndNotifyTaskRemoval(ActivityManager.RunningTaskInfo taskInfo) {
         if (taskInfo != null) {
-            if (mListener != null) {
-                final int taskId = taskInfo.taskId;
-                mListenerExecutor.execute(() -> {
-                    mListener.onTaskRemovalStarted(taskId);
-                });
-            }
+            notifyTaskRemovalStarted(taskInfo);
             mTaskViewBase.onTaskVanished(taskInfo);
         }
     }
@@ -506,9 +461,7 @@ public class TaskViewTaskController implements ShellTaskOrganizer.TaskListener {
             handleAndNotifyTaskRemoval(pendingInfo);
 
             // Make sure the task is removed
-            WindowContainerTransaction wct = new WindowContainerTransaction();
-            wct.removeTask(pendingInfo.token);
-            mTaskViewTransitions.closeTaskView(wct, this);
+            mTaskViewTransitions.removeTaskView(this, pendingInfo.token);
         }
         resetTaskInfo();
     }

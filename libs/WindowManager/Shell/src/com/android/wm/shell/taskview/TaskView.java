@@ -127,7 +127,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      * Moves the current task in taskview out of the view and back to fullscreen.
      */
     public void moveToFullscreen() {
-        mTaskViewTaskController.moveToFullscreen();
+        mTaskViewTransitions.moveTaskViewToFullscreen(mTaskViewTaskController);
     }
 
     @Override
@@ -234,7 +234,7 @@ public class TaskView extends SurfaceView implements SurfaceHolder.Callback,
      * Call to remove the task from window manager. This task will not appear in recents.
      */
     public void removeTask() {
-        mTaskViewTaskController.removeTask();
+        mTaskViewTransitions.removeTaskView(mTaskViewTaskController, null /* token */);
     }
 
     /**

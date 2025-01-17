@@ -116,7 +116,7 @@ public class TaskViewTransitionsTest extends ShellTestCase {
         when(mOrganizer.getExecutor()).thenReturn(mExecutor);
         mTaskViewTransitions = spy(new TaskViewTransitions(mTransitions, mTaskViewRepository,
                 mOrganizer, mSyncQueue));
-        mTaskViewTransitions.addTaskView(mTaskViewTaskController);
+        mTaskViewTransitions.registerTaskView(mTaskViewTaskController);
         when(mTaskViewTaskController.getTaskInfo()).thenReturn(mTaskInfo);
         when(mTaskViewTaskController.getTaskToken()).thenReturn(mToken);
     }
@@ -224,7 +224,7 @@ public class TaskViewTransitionsTest extends ShellTestCase {
 
     @Test
     public void testSetTaskVisibility_taskRemoved_noNPE() {
-        mTaskViewTransitions.removeTaskView(mTaskViewTaskController);
+        mTaskViewTransitions.unregisterTaskView(mTaskViewTaskController);
 
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
 
@@ -233,7 +233,7 @@ public class TaskViewTransitionsTest extends ShellTestCase {
 
     @Test
     public void testSetTaskBounds_taskRemoved_noNPE() {
-        mTaskViewTransitions.removeTaskView(mTaskViewTaskController);
+        mTaskViewTransitions.unregisterTaskView(mTaskViewTaskController);
 
         assumeTrue(Transitions.ENABLE_SHELL_TRANSITIONS);
 
