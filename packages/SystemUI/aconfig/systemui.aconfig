@@ -1933,3 +1933,10 @@ flag {
         purpose: PURPOSE_BUGFIX
    }
 }
+
+flag {
+    name: "ui_rich_ongoing_force_expanded"
+    namespace: "systemui"
+    description: "Force promoted notifications to always be expanded"
+    bug: "380901479"
+}
