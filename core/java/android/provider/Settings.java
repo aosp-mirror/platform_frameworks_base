@@ -12368,12 +12368,6 @@ public final class Settings {
         public static final String CAMERA_EXTENSIONS_FALLBACK = "camera_extensions_fallback";
 
         /**
-         * Controls whether contextual suggestions can be shown in the media controls.
-         * @hide
-         */
-        public static final String MEDIA_CONTROLS_RECOMMENDATION = "qs_media_recommend";
-
-        /**
          * Controls magnification mode when magnification is enabled via a system-wide triple tap
          * gesture or the accessibility shortcut.
          *
