@@ -61,6 +61,8 @@ import com.android.systemui.plugins.clocks.ClockTickRate
 import com.android.systemui.plugins.clocks.WeatherData
 import com.android.systemui.plugins.clocks.ZenData
 import com.android.systemui.plugins.clocks.ZenData.ZenMode
+import com.android.systemui.power.domain.interactor.PowerInteractor
+import com.android.systemui.power.shared.model.ScreenPowerState
 import com.android.systemui.res.R as SysuiR
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
 import com.android.systemui.settings.UserTracker
@@ -106,6 +108,7 @@ constructor(
     private val zenModeController: ZenModeController,
     private val zenModeInteractor: ZenModeInteractor,
     private val userTracker: UserTracker,
+    private val powerInteractor: PowerInteractor,
 ) {
     var loggers =
         listOf(
@@ -377,12 +380,12 @@ constructor(
             override fun onTimeChanged() {
                 refreshTime()
             }
-
-            private fun refreshTime() {
-                clock?.smallClock?.events?.onTimeTick()
-                clock?.largeClock?.events?.onTimeTick()
-            }
         }
+
+    private fun refreshTime() {
+        clock?.smallClock?.events?.onTimeTick()
+        clock?.largeClock?.events?.onTimeTick()
+    }
 
     @VisibleForTesting
     internal fun listenForDnd(scope: CoroutineScope): Job {
@@ -474,6 +477,7 @@ constructor(
                     listenForAnyStateToAodTransition(this)
                     listenForAnyStateToLockscreenTransition(this)
                     listenForAnyStateToDozingTransition(this)
+                    listenForScreenPowerOn(this)
                 }
             }
         smallTimeListener?.update(shouldTimeListenerRun)
@@ -640,6 +644,17 @@ constructor(
                     localDozeAmount > dozeAmount || localIsDozing
                 }
                 .collect { localIsDozing -> isDozing = localIsDozing }
+        }
+    }
+
+    @VisibleForTesting
+    internal fun listenForScreenPowerOn(scope: CoroutineScope): Job {
+        return scope.launch {
+            powerInteractor.screenPowerState.collect { powerState ->
+                if (powerState != ScreenPowerState.SCREEN_OFF) {
+                    refreshTime()
+                }
+            }
         }
     }
 
