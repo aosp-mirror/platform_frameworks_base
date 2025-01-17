@@ -107,10 +107,11 @@ public:
         }
     }
 
-    void onWaitForBufferRelease() {
+    void onWaitForBufferRelease(const nsecs_t durationNanos) {
         JNIEnv* env = getenv(mVm);
         getenv(mVm)->CallVoidMethod(mWaitForBufferReleaseObject,
-                                    gWaitForBufferReleaseCallback.onWaitForBufferRelease);
+                                    gWaitForBufferReleaseCallback.onWaitForBufferRelease,
+                                    durationNanos);
         DieIfException(env, "Uncaught exception in WaitForBufferReleaseCallback.");
     }
 
@@ -255,7 +256,9 @@ static void nativeSetWaitForBufferReleaseCallback(JNIEnv* env, jclass clazz, jlo
     } else {
         sp<WaitForBufferReleaseCallbackWrapper> wrapper =
                 new WaitForBufferReleaseCallbackWrapper{env, waitForBufferReleaseCallback};
-        queue->setWaitForBufferReleaseCallback([wrapper]() { wrapper->onWaitForBufferRelease(); });
+        queue->setWaitForBufferReleaseCallback([wrapper](const nsecs_t durationNanos) {
+            wrapper->onWaitForBufferRelease(durationNanos);
+        });
     }
 }
 
@@ -305,7 +308,7 @@ int register_android_graphics_BLASTBufferQueue(JNIEnv* env) {
     jclass waitForBufferReleaseClass =
             FindClassOrDie(env, "android/graphics/BLASTBufferQueue$WaitForBufferReleaseCallback");
     gWaitForBufferReleaseCallback.onWaitForBufferRelease =
-            GetMethodIDOrDie(env, waitForBufferReleaseClass, "onWaitForBufferRelease", "()V");
+            GetMethodIDOrDie(env, waitForBufferReleaseClass, "onWaitForBufferRelease", "(J)V");
 
     return 0;
 }
