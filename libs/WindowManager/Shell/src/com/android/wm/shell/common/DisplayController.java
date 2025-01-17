@@ -20,6 +20,7 @@ import android.annotation.Nullable;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.graphics.RectF;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayTopology;
 import android.os.RemoteException;
@@ -41,7 +42,9 @@ import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellInit;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 /**
@@ -62,6 +65,7 @@ public class DisplayController {
 
     private final SparseArray<DisplayRecord> mDisplays = new SparseArray<>();
     private final ArrayList<OnDisplaysChangedListener> mDisplayChangedListeners = new ArrayList<>();
+    private final Map<Integer, RectF> mUnpopulatedDisplayBounds = new HashMap<>();
 
     public DisplayController(Context context, IWindowManager wmService, ShellInit shellInit,
             ShellExecutor mainExecutor, DisplayManager displayManager) {
@@ -193,7 +197,12 @@ public class DisplayController {
                     ? mContext
                     : mContext.createDisplayContext(display);
             final DisplayRecord record = new DisplayRecord(displayId);
-            record.setDisplayLayout(context, new DisplayLayout(context, display));
+            DisplayLayout displayLayout = new DisplayLayout(context, display);
+            if (Flags.enableConnectedDisplaysWindowDrag()
+                    && mUnpopulatedDisplayBounds.containsKey(displayId)) {
+                displayLayout.setGlobalBoundsDp(mUnpopulatedDisplayBounds.get(displayId));
+            }
+            record.setDisplayLayout(context, displayLayout);
             mDisplays.put(displayId, record);
             for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
                 mDisplayChangedListeners.get(i).onDisplayAdded(displayId);
@@ -231,10 +240,27 @@ public class DisplayController {
     }
 
     private void onDisplayTopologyChanged(DisplayTopology topology) {
-        // TODO(b/381472611): Call DisplayTopology#getCoordinates and update values in
-        //                    DisplayLayout when DM code is ready.
+        if (topology == null) {
+            return;
+        }
+        SparseArray<RectF> absoluteBounds = topology.getAbsoluteBounds();
+        mUnpopulatedDisplayBounds.clear();
+        for (int i = 0; i < absoluteBounds.size(); ++i) {
+            int displayId = absoluteBounds.keyAt(i);
+            DisplayLayout displayLayout = getDisplayLayout(displayId);
+            if (displayLayout == null) {
+                // onDisplayTopologyChanged can arrive before onDisplayAdded.
+                // Store the bounds to be applied later in onDisplayAdded.
+                Slog.d(TAG, "Storing bounds for onDisplayTopologyChanged on unknown"
+                        + " display, displayId=" + displayId);
+                mUnpopulatedDisplayBounds.put(displayId, absoluteBounds.valueAt(i));
+            } else {
+                displayLayout.setGlobalBoundsDp(absoluteBounds.valueAt(i));
+            }
+        }
+
         for (int i = 0; i < mDisplayChangedListeners.size(); ++i) {
-            mDisplayChangedListeners.get(i).onTopologyChanged();
+            mDisplayChangedListeners.get(i).onTopologyChanged(topology);
         }
     }
 
@@ -429,6 +455,6 @@ public class DisplayController {
         /**
          * Called when the display topology has changed.
          */
-        default void onTopologyChanged() {}
+        default void onTopologyChanged(DisplayTopology topology) {}
     }
 }
