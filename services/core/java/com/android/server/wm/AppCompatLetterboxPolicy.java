@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
+import static android.content.res.Configuration.ORIENTATION_UNDEFINED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_BASE_APPLICATION;
@@ -28,6 +31,7 @@ import static com.android.server.wm.AppCompatLetterboxUtils.calculateLetterboxPo
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.content.res.Configuration.Orientation;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.view.SurfaceControl;
@@ -55,6 +59,11 @@ class AppCompatLetterboxPolicy {
 
     private boolean mLastShouldShowLetterboxUi;
 
+    // Whether the activity is eligible to be letterboxed for fixed orientation with respect to its
+    // requested orientation, even when it's letterbox for another reason (e.g., size compat mode)
+    // and therefore #isLetterboxedForFixedOrientationAndAspectRatio returns false.
+    private boolean mIsEligibleForFixedOrientationLetterbox;
+
     AppCompatLetterboxPolicy(@NonNull ActivityRecord  activityRecord,
             @NonNull AppCompatConfiguration appCompatConfiguration) {
         mActivityRecord = activityRecord;
@@ -64,6 +73,10 @@ class AppCompatLetterboxPolicy {
         mAppCompatRoundedCorners = new AppCompatRoundedCorners(mActivityRecord,
                 this::isLetterboxedNotForDisplayCutout);
         mAppCompatConfiguration = appCompatConfiguration;
+    }
+
+    void resetFixedOrientationLetterboxEligibility() {
+        mIsEligibleForFixedOrientationLetterbox = false;
     }
 
     /** Cleans up {@link Letterbox} if it exists.*/
@@ -89,6 +102,43 @@ class AppCompatLetterboxPolicy {
     /** Gets the inner bounds of letterbox. The bounds will be empty if there is no letterbox. */
     void getLetterboxInnerBounds(@NonNull Rect outBounds) {
         mLetterboxPolicyState.getLetterboxInnerBounds(outBounds);
+    }
+
+    /**
+     * Checks if the current activity is eligible to be letterboxed because of a fixed orientation.
+     *
+     * @param forcedOrientation The requeste orientation
+     * @param parentOrientation The orientation of the parent container.
+     * @return {@code true} if the activity can be letterboxed because of the requested fixed
+     * orientation.
+     */
+    boolean resolveFixedOrientationLetterboxEligibility(@Orientation int forcedOrientation,
+            @Orientation int parentOrientation) {
+        mIsEligibleForFixedOrientationLetterbox = forcedOrientation != ORIENTATION_UNDEFINED
+                && forcedOrientation != parentOrientation;
+        return mIsEligibleForFixedOrientationLetterbox;
+    }
+
+    /**
+     * Whether this activity is eligible for letterbox eduction.
+     *
+     * <p>Conditions that need to be met:
+     *
+     * <ul>
+     *     <li>{@link AppCompatConfiguration#getIsEducationEnabled} is true.
+     *     <li>The activity is eligible for fixed orientation letterbox.
+     *     <li>The activity is in fullscreen.
+     *     <li>The activity is portrait-only.
+     *     <li>The activity doesn't have a starting window (education should only be displayed
+     *     once the starting window is removed in {@link #removeStartingWindow}).
+     * </ul>
+     */
+    boolean isEligibleForLetterboxEducation() {
+        return mAppCompatConfiguration.getIsEducationEnabled()
+                && mIsEligibleForFixedOrientationLetterbox
+                && mActivityRecord.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && mActivityRecord.getRequestedConfigurationOrientation() == ORIENTATION_PORTRAIT
+                && mActivityRecord.mStartingWindow == null;
     }
 
     @Nullable

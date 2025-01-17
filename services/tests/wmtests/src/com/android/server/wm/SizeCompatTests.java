@@ -4683,7 +4683,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
-        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
     }
 
     @Test
@@ -4694,7 +4695,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
-        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
     }
 
     @Test
@@ -4716,7 +4718,8 @@ public class SizeCompatTests extends WindowTestsBase {
                 false /*moveParents*/, "test");
         organizer.mPrimary.setBounds(0, 0, 1000, 600);
 
-        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
         assertEquals(WINDOWING_MODE_MULTI_WINDOW, mActivity.getWindowingMode());
     }
 
@@ -4728,7 +4731,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_LANDSCAPE);
 
-        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
         assertTrue(mActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
@@ -4745,14 +4749,16 @@ public class SizeCompatTests extends WindowTestsBase {
                 createWindowState(new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING),
                         mActivity));
 
-        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
 
         // Verify that after removing the starting window isEligibleForLetterboxEducation returns
         // true and mTask.dispatchTaskInfoChangedIfNeeded is called.
         spyOn(mTask);
         mActivity.removeStartingWindow();
 
-        assertTrue(mActivity.isEligibleForLetterboxEducation());
+        assertTrue(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
         verify(mTask).dispatchTaskInfoChangedIfNeeded(true);
     }
 
@@ -4768,14 +4774,16 @@ public class SizeCompatTests extends WindowTestsBase {
                 createWindowState(new WindowManager.LayoutParams(TYPE_APPLICATION_STARTING),
                         mActivity));
 
-        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
 
         // Verify that after removing the starting window isEligibleForLetterboxEducation still
         // returns false and mTask.dispatchTaskInfoChangedIfNeeded isn't called.
         spyOn(mTask);
         mActivity.removeStartingWindow();
 
-        assertFalse(mActivity.isEligibleForLetterboxEducation());
+        assertFalse(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
         verify(mTask, never()).dispatchTaskInfoChangedIfNeeded(true);
     }
 
@@ -4787,7 +4795,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
         prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
 
-        assertTrue(mActivity.isEligibleForLetterboxEducation());
+        assertTrue(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
         assertTrue(mActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
     }
@@ -4802,7 +4811,8 @@ public class SizeCompatTests extends WindowTestsBase {
 
         rotateDisplay(mActivity.mDisplayContent, ROTATION_90);
 
-        assertTrue(mActivity.isEligibleForLetterboxEducation());
+        assertTrue(mActivity.mAppCompatController.getAppCompatLetterboxPolicy()
+                .isEligibleForLetterboxEducation());
         assertFalse(mActivity.mAppCompatController.getAspectRatioPolicy()
                 .isLetterboxedForFixedOrientationAndAspectRatio());
         assertTrue(mActivity.inSizeCompatMode());
