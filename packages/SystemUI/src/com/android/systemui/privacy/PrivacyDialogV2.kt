@@ -39,7 +39,6 @@ import androidx.annotation.DrawableRes
 import androidx.annotation.WorkerThread
 import androidx.core.view.ViewCompat
 import androidx.core.view.accessibility.AccessibilityNodeInfoCompat
-import com.android.settingslib.Utils
 import com.android.systemui.animation.ViewHierarchyAnimator
 import com.android.systemui.res.R
 import com.android.systemui.statusbar.phone.SystemUIDialog
@@ -63,7 +62,7 @@ class PrivacyDialogV2(
     private val list: List<PrivacyElement>,
     private val manageApp: (String, Int, Intent) -> Unit,
     private val closeApp: (String, Int) -> Unit,
-    private val openPrivacyDashboard: () -> Unit
+    private val openPrivacyDashboard: () -> Unit,
 ) : SystemUIDialog(context, R.style.Theme_PrivacyDialog) {
 
     private val dismissListeners = mutableListOf<WeakReference<OnDialogDismissed>>()
@@ -192,11 +191,9 @@ class PrivacyDialogV2(
             return null
         }
         val closeAppButton =
-            checkNotNull(window).layoutInflater.inflate(
-                R.layout.privacy_dialog_card_button,
-                expandedLayout,
-                false
-            ) as Button
+            checkNotNull(window)
+                .layoutInflater
+                .inflate(R.layout.privacy_dialog_card_button, expandedLayout, false) as Button
         expandedLayout.addView(closeAppButton)
         closeAppButton.id = R.id.privacy_dialog_close_app_button
         closeAppButton.setText(R.string.privacy_dialog_close_app_button)
@@ -248,11 +245,9 @@ class PrivacyDialogV2(
 
     private fun configureManageButton(element: PrivacyElement, expandedLayout: ViewGroup): View {
         val manageButton =
-            checkNotNull(window).layoutInflater.inflate(
-                R.layout.privacy_dialog_card_button,
-                expandedLayout,
-                false
-            ) as Button
+            checkNotNull(window)
+                .layoutInflater
+                .inflate(R.layout.privacy_dialog_card_button, expandedLayout, false) as Button
         expandedLayout.addView(manageButton)
         manageButton.id = R.id.privacy_dialog_manage_app_button
         manageButton.setText(
@@ -294,7 +289,7 @@ class PrivacyDialogV2(
             itemCard,
             AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
             context.getString(R.string.privacy_dialog_expand_action),
-            null
+            null,
         )
 
         val expandedLayout =
@@ -311,7 +306,7 @@ class PrivacyDialogV2(
                     it!!,
                     AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
                     context.getString(R.string.privacy_dialog_expand_action),
-                    null
+                    null,
                 )
             } else {
                 expandedLayout.visibility = View.VISIBLE
@@ -320,12 +315,12 @@ class PrivacyDialogV2(
                     it!!,
                     AccessibilityNodeInfoCompat.AccessibilityActionCompat.ACTION_CLICK,
                     context.getString(R.string.privacy_dialog_collapse_action),
-                    null
+                    null,
                 )
             }
             ViewHierarchyAnimator.animateNextUpdate(
                 rootView = window!!.decorView,
-                excludedViews = setOf(expandedLayout)
+                excludedViews = setOf(expandedLayout),
             )
         }
     }
@@ -345,19 +340,13 @@ class PrivacyDialogV2(
 
     @ColorInt
     private fun getForegroundColor(active: Boolean) =
-        Utils.getColorAttrDefaultColor(
-            context,
-            if (active) com.android.internal.R.color.materialColorOnPrimaryFixed
-            else com.android.internal.R.color.materialColorOnSurface,
-        )
+        if (active) context.getColor(com.android.internal.R.color.materialColorOnPrimaryFixed)
+        else context.getColor(com.android.internal.R.color.materialColorOnSurface)
 
     @ColorInt
     private fun getBackgroundColor(active: Boolean) =
-        Utils.getColorAttrDefaultColor(
-            context,
-            if (active) com.android.internal.R.color.materialColorPrimaryFixed
-            else com.android.internal.R.color.materialColorSurfaceContainerHigh,
-        )
+        if (active) context.getColor(com.android.internal.R.color.materialColorPrimaryFixed)
+        else context.getColor(com.android.internal.R.color.materialColorSurfaceContainerHigh)
 
     private fun getMutableDrawable(@DrawableRes resId: Int) = context.getDrawable(resId)!!.mutate()
 
@@ -379,7 +368,7 @@ class PrivacyDialogV2(
             context.getString(
                 singleUsageResId,
                 element.applicationName,
-                element.attributionLabel ?: element.proxyLabel
+                element.attributionLabel ?: element.proxyLabel,
             )
         } else {
             val doubleUsageResId: Int =
@@ -389,7 +378,7 @@ class PrivacyDialogV2(
                 doubleUsageResId,
                 element.applicationName,
                 element.attributionLabel,
-                element.proxyLabel
+                element.proxyLabel,
             )
         }
 
@@ -429,7 +418,7 @@ class PrivacyDialogV2(
             return groupInfo.loadSafeLabel(
                 this,
                 0f,
-                TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM
+                TextUtils.SAFE_STRING_FLAG_FIRST_LINE or TextUtils.SAFE_STRING_FLAG_TRIM,
             )
         }
 
@@ -472,7 +461,7 @@ class PrivacyDialogV2(
             icon: Drawable,
             iconSize: Int,
             background: Drawable,
-            backgroundSize: Int
+            backgroundSize: Int,
         ): Drawable {
             val layered = LayerDrawable(arrayOf(background, icon))
             layered.setLayerSize(0, backgroundSize, backgroundSize)
@@ -497,7 +486,7 @@ class PrivacyDialogV2(
         val isPhoneCall: Boolean,
         val isService: Boolean,
         val permGroupName: String,
-        val navigationIntent: Intent
+        val navigationIntent: Intent,
     ) {
         private val builder = StringBuilder("PrivacyElement(")
 
