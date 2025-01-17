@@ -68,3 +68,11 @@ fun View.onTouchListener(listener: View.OnTouchListener): DisposableHandle {
     setOnTouchListener(listener)
     return DisposableHandle { setOnTouchListener(null) }
 }
+
+/** A null listener should also set the longClickable property to false */
+fun View.updateLongClickListener(listener: View.OnLongClickListener?) {
+    setOnLongClickListener(listener)
+    if (listener == null) {
+        setLongClickable(false)
+    }
+}

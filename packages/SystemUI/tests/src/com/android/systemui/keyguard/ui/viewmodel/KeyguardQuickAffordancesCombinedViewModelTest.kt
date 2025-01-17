@@ -294,6 +294,7 @@ class KeyguardQuickAffordancesCombinedViewModelTest : SysuiTestCase() {
                         biometricSettingsRepository = biometricSettingsRepository,
                         backgroundDispatcher = kosmos.testDispatcher,
                         appContext = mContext,
+                        accessibilityManager = mock(),
                         communalSettingsInteractor = kosmos.communalSettingsInteractor,
                         sceneInteractor = { kosmos.sceneInteractor },
                     ),

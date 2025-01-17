@@ -22,6 +22,7 @@ import android.app.admin.DevicePolicyManager
 import android.content.Context
 import android.content.Intent
 import android.util.Log
+import android.view.accessibility.AccessibilityManager
 import com.android.app.tracing.coroutines.withContextTraced as withContext
 import com.android.compose.animation.scene.ObservableTransitionState
 import com.android.internal.widget.LockPatternUtils
@@ -92,6 +93,7 @@ constructor(
     private val dockManager: DockManager,
     private val biometricSettingsRepository: BiometricSettingsRepository,
     private val communalSettingsInteractor: CommunalSettingsInteractor,
+    private val accessibilityManager: AccessibilityManager,
     @Background private val backgroundDispatcher: CoroutineDispatcher,
     @ShadeDisplayAware private val appContext: Context,
     private val sceneInteractor: Lazy<SceneInteractor>,
@@ -115,7 +117,10 @@ constructor(
      *
      * If `false`, the UI goes back to using single taps.
      */
-    fun useLongPress(): Flow<Boolean> = dockManager.retrieveIsDocked().map { !it }
+    fun useLongPress(): Flow<Boolean> =
+        dockManager.retrieveIsDocked().map { isDocked ->
+            !isDocked && !accessibilityManager.isEnabled()
+        }
 
     /** Returns an observable for the quick affordance at the given position. */
     suspend fun quickAffordance(

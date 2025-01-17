@@ -205,6 +205,7 @@ class CustomizationProviderTest : SysuiTestCase() {
                 biometricSettingsRepository = biometricSettingsRepository,
                 backgroundDispatcher = testDispatcher,
                 appContext = mContext,
+                accessibilityManager = mock(),
                 communalSettingsInteractor = kosmos.communalSettingsInteractor,
                 sceneInteractor = { kosmos.sceneInteractor },
             )
