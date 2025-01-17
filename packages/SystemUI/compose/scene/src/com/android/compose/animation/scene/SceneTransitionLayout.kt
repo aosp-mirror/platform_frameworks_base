@@ -159,6 +159,9 @@ interface BaseContentScope : ElementStateScope {
     /** The state of the [SceneTransitionLayout] in which this content is contained. */
     val layoutState: SceneTransitionLayoutState
 
+    /** The [LookaheadScope] used by the [SceneTransitionLayout]. */
+    val lookaheadScope: LookaheadScope
+
     /**
      * Tag an element identified by [key].
      *
