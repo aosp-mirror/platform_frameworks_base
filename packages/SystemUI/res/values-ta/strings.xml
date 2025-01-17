@@ -759,8 +759,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"சாட்டிலைட், நிலையான இணைப்பு"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"சாட்டிலைட், இணைப்பு கிடைக்கிறது"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"சாட்டிலைட் SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"அவசர அழைப்புகள் அல்லது SOS மட்டும்"</string>
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"சிக்னல் இல்லை"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"ஒரு கோடு"</string>
@@ -857,7 +856,6 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"முந்தையது"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"அறிவிப்புகள்"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"கீபோர்டு ஷார்ட்கட்கள்"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"கீபோர்டு லே அவுட்டை மாற்று"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"அல்லது"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"தேடல் வினவலை அழிக்கும்"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"கீபோர்டு ஷார்ட்கட்கள்"</string>
@@ -1440,7 +1438,8 @@
     <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"ஷார்ட்கட்களைப் பிரத்தியேகமாக்குதல்"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"ஷார்ட்கட்டை அகற்றவா?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"மீண்டும் இயல்புநிலைக்கு மீட்டமைக்கவா?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"ஷார்ட்கட்டை அமைக்க பட்டனை அழுத்துங்கள்"</string>
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (7636040209946696120) -->
+    <skip />
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"இது உங்கள் பிரத்தியேக ஷார்ட்கட்டை நிரந்தரமாக நீக்கும்."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"இது உங்கள் பிரத்தியேக ஷார்ட்கட்கள் அனைத்தையும் நிரந்தரமாக நீக்கும்."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"ஷார்ட்கட்களைத் தேடுக"</string>
@@ -1462,7 +1461,8 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"ஆம். மீட்டமை"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"ரத்துசெய்"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"பட்டனை அழுத்துங்கள்"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"பட்டன் சேர்க்கை ஏற்கெனவே பயன்பாட்டில் உள்ளது. வேறொரு பட்டனைப் பயன்படுத்திப் பார்க்கவும்."</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (3325858369539848162) -->
+    <skip />
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"ஷார்ட்கட்டை அமைக்க முடியாது."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"ஷார்ட்கட்டைச் சேர்க்கும்"</string>
@@ -1476,6 +1476,8 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"பின்செல்"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"முகப்பிற்குச் செல்"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"சமீபத்திய ஆப்ஸைக் காட்டுதல்"</string>
+    <!-- no translation found for touchpad_tutorial_switch_apps_gesture_button (7768255095423767779) -->
+    <skip />
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"முடிந்தது"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"மீண்டும் முயலவும்!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"பின்செல்"</string>
@@ -1493,6 +1495,16 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"அருமை!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"சமீபத்தில் பயன்படுத்திய ஆப்ஸுக்கான சைகை பயிற்சியை நிறைவுசெய்துவிட்டீர்கள்."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"சமீபத்திய ஆப்ஸைப் பார்க்க, உங்கள் டச்பேடில் மூன்று விரல்களால் மேல்நோக்கி ஸ்வைப் செய்து பிடிக்கவும்"</string>
+    <!-- no translation found for touchpad_switch_apps_gesture_action_title (6835222344612924512) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (6859830005390732562) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_success_title (4894947244328032458) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_success_body (8151089866035126312) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_gesture_error_body (2211950382592343759) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"அனைத்து ஆப்ஸையும் காட்டு"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"உங்கள் கீபோர்டில் ஆக்‌ஷன் பட்டனை அழுத்தவும்"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"அருமை!"</string>

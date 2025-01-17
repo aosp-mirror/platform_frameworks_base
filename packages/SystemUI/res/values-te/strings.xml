@@ -759,8 +759,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"శాటిలైట్, కనెక్షన్ బాగుంది"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"శాటిలైట్, కనెక్షన్ అందుబాటులో ఉంది"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"ఎమర్జెన్సీ శాటిలైట్ సహాయం"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"ఎమర్జెన్సీ కాల్స్ లేదా SOS మాత్రమే"</string>
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>, <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>."</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"సిగ్నల్ లేదు"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"సిగ్నల్ ఒక బార్ ఉంది"</string>
@@ -857,7 +856,6 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"వెనుకకు"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"నోటిఫికేషన్‌లు"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"కీబోర్డ్ లేఅవుట్‌ను మార్చండి"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"లేదా"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"సెర్చ్ క్వెరీని క్లియర్ చేయండి"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"కీబోర్డ్ షార్ట్‌కట్‌లు"</string>
@@ -1440,7 +1438,8 @@
     <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"షార్ట్‌కట్‌లను అనుకూలంగా మార్చండి"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"షార్ట్‌కట్‌ను తీసివేయాలా?"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"తిరిగి ఆటోమేటిక్ సెట్టింగ్‌కు రీసెట్ చేయాలా?"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"షార్ట్‌కట్‌ను కేటాయించడానికి కీని నొక్కండి"</string>
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (7636040209946696120) -->
+    <skip />
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"ఇది మీ అనుకూల షార్ట్‌కట్‌ను శాశ్వతంగా తొలగిస్తుంది."</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"ఇది మీ అనుకూల షార్ట్‌కట్‌లన్నింటిని శాశ్వతంగా తొలగిస్తుంది."</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"షార్ట్‌కట్‌లను వెతకండి"</string>
@@ -1462,7 +1461,8 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"అవును, రీసెట్ చేయాలి"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"రద్దు చేయండి"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"కీని నొక్కండి"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"కీ కాంబినేషన్ ఇప్పటికే వినియోగంలో ఉంది. వేరొక కీని ట్రై చేయండి."</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (3325858369539848162) -->
+    <skip />
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"షార్ట్‌కట్‌ను సెట్ చేయడం సాధ్యం కాదు."</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"షార్ట్‌కట్‌ను జోడించండి"</string>
@@ -1476,6 +1476,8 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"వెనుకకు వెళ్లండి"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"మొదటి ట్యాబ్‌కు వెళ్లండి"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"ఇటీవలి యాప్‌లను చూడండి"</string>
+    <!-- no translation found for touchpad_tutorial_switch_apps_gesture_button (7768255095423767779) -->
+    <skip />
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"పూర్తయింది"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"మళ్లీ ట్రై చేయండి!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"వెనుకకు"</string>
@@ -1493,6 +1495,16 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"చక్కగా పూర్తి చేశారు!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"ఇటీవలి యాప్‌లను చూడడానికి ఉపయోగించే సంజ్ఞకు సంబంధించిన ట్యుటోరియల్‌ను మీరు పూర్తి చేశారు."</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"ఇటీవలి యాప్‌లను చూడటానికి, మీ టచ్‌ప్యాడ్‌లో మూడు వేళ్లను ఉపయోగించి పైకి స్వైప్ చేసి, హోల్డ్ చేయండి"</string>
+    <!-- no translation found for touchpad_switch_apps_gesture_action_title (6835222344612924512) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (6859830005390732562) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_success_title (4894947244328032458) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_success_body (8151089866035126312) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_gesture_error_body (2211950382592343759) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"అన్ని యాప్‌లను చూడండి"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"మీ కీబోర్డ్‌లో యాక్షన్ కీని నొక్కండి"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"చక్కగా చేశారు!"</string>

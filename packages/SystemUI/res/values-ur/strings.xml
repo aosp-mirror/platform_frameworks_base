@@ -759,8 +759,7 @@
     <string name="accessibility_status_bar_satellite_good_connection" msgid="308079391708578704">"سیٹلائٹ، کنکشن اچھا ہے"</string>
     <string name="accessibility_status_bar_satellite_available" msgid="6514855015496916829">"سیٹلائٹ، کنکشن دستیاب ہے"</string>
     <string name="satellite_connected_carrier_text" msgid="118524195198532589">"‏سیٹلائٹ SOS"</string>
-    <!-- no translation found for satellite_emergency_only_carrier_text (9103913890116841786) -->
-    <skip />
+    <string name="satellite_emergency_only_carrier_text" msgid="9103913890116841786">"‏صرف ایمرجنسی کالز یا SOS"</string>
     <string name="accessibility_phone_string_format" msgid="7798841417881811812">"<xliff:g id="CARRIER_NAME">%1$s</xliff:g>، <xliff:g id="SIGNAL_STRENGTH_DESCRIPTION">%2$s</xliff:g>۔"</string>
     <string name="accessibility_no_signal" msgid="7052827511409250167">"کوئی سگنل نہیں"</string>
     <string name="accessibility_one_bar" msgid="5342012847647834506">"ایک بار"</string>
@@ -857,7 +856,6 @@
     <string name="keyboard_shortcut_group_system_back" msgid="1055709713218453863">"پیچھے"</string>
     <string name="keyboard_shortcut_group_system_notifications" msgid="3615971650562485878">"اطلاعات"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4856808328618265589">"کی بورڈ شارٹ کٹس"</string>
-    <string name="keyboard_shortcut_group_system_switch_input" msgid="952555530383268166">"کی بورڈ لے آؤٹ سوئچ کریں"</string>
     <string name="keyboard_shortcut_join" msgid="3578314570034512676">"یا"</string>
     <string name="keyboard_shortcut_clear_text" msgid="6631051796030377857">"تلاش کا استفسار صاف کریں"</string>
     <string name="keyboard_shortcut_search_list_title" msgid="4271769465397671138">"کی بورڈ شارٹ کٹس"</string>
@@ -1440,7 +1438,8 @@
     <string name="shortcut_helper_customize_mode_title" msgid="8327297960035006036">"شارٹ کٹس کو حسب ضرورت بنائیں"</string>
     <string name="shortcut_customize_mode_remove_shortcut_dialog_title" msgid="7106420484940737208">"شارٹ کٹ ہٹائیں؟"</string>
     <string name="shortcut_customize_mode_reset_shortcut_dialog_title" msgid="8131184731313717780">"ڈیفالٹ پر واپس ری سیٹ کریں؟"</string>
-    <string name="shortcut_customize_mode_add_shortcut_description" msgid="6866025005347407696">"شارٹ کٹ تفویض کرنے کے لیے کلید کو دبائیں"</string>
+    <!-- no translation found for shortcut_customize_mode_add_shortcut_description (7636040209946696120) -->
+    <skip />
     <string name="shortcut_customize_mode_remove_shortcut_description" msgid="6851287900585057128">"اس سے آپ کا حسب ضرورت شارٹ کٹ مستقل طور پر حذف ہو جائے گا۔"</string>
     <string name="shortcut_customize_mode_reset_shortcut_description" msgid="2081849715634358684">"اس سے آپ کے تمام حسب ضرورت شارٹ کٹس مستقل طور پر حذف ہو جائیں گے۔"</string>
     <string name="shortcut_helper_search_placeholder" msgid="5488547526269871819">"تلاش کے شارٹ کٹس"</string>
@@ -1462,7 +1461,8 @@
     <string name="shortcut_helper_customize_dialog_reset_button_label" msgid="7645535254306312685">"ہاں، ری سیٹ کریں"</string>
     <string name="shortcut_helper_customize_dialog_cancel_button_label" msgid="5595546460431741178">"منسوخ کریں"</string>
     <string name="shortcut_helper_add_shortcut_dialog_placeholder" msgid="9154297849458741995">"کلید کو دبائیں"</string>
-    <string name="shortcut_customizer_key_combination_in_use_error_message" msgid="7693234470526626327">"کلیدی مجموعہ پہلے سے استعمال میں ہے۔ دوسری کلید آزمائیں۔"</string>
+    <!-- no translation found for shortcut_customizer_key_combination_in_use_error_message (3325858369539848162) -->
+    <skip />
     <string name="shortcut_customizer_generic_error_message" msgid="3128454624049722741">"شارٹ کٹ سیٹ نہیں کیا جا سکتا۔"</string>
     <string name="shortcut_helper_plus_symbol" msgid="4534843157353732011">"+"</string>
     <string name="shortcut_helper_add_shortcut_button_label" msgid="7655779534665954910">"شارٹ کٹ شامل کریں"</string>
@@ -1476,6 +1476,8 @@
     <string name="touchpad_tutorial_back_gesture_button" msgid="3104716365403620315">"واپس جائیں"</string>
     <string name="touchpad_tutorial_home_gesture_button" msgid="8023973153559885624">"ہوم پر جائیں"</string>
     <string name="touchpad_tutorial_recent_apps_gesture_button" msgid="8919227647650347359">"حالیہ ایپس دیکھیں"</string>
+    <!-- no translation found for touchpad_tutorial_switch_apps_gesture_button (7768255095423767779) -->
+    <skip />
     <string name="touchpad_tutorial_done_button" msgid="176168488821755503">"ہو گیا"</string>
     <string name="gesture_error_title" msgid="469064941635578511">"دوبارہ کوشش کریں!"</string>
     <string name="touchpad_back_gesture_action_title" msgid="7199067250654332735">"واپس جائیں"</string>
@@ -1493,6 +1495,16 @@
     <string name="touchpad_recent_apps_gesture_success_title" msgid="8481920554139332593">"بہترین!"</string>
     <string name="touchpad_recent_apps_gesture_success_body" msgid="4334263906697493273">"آپ نے حالیہ ایپس دیکھیں کا اشارہ مکمل کر لیا ہے۔"</string>
     <string name="touchpad_recent_gesture_error_body" msgid="8695535720378462022">"حالیہ ایپس دیکھنے کے لیے، اپنے ٹچ پیڈ پر تین انگلیوں کی مدد سے اوپر کی طرف سوائپ کریں اور دبائے رکھیں"</string>
+    <!-- no translation found for touchpad_switch_apps_gesture_action_title (6835222344612924512) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_guidance (6859830005390732562) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_success_title (4894947244328032458) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_apps_gesture_success_body (8151089866035126312) -->
+    <skip />
+    <!-- no translation found for touchpad_switch_gesture_error_body (2211950382592343759) -->
+    <skip />
     <string name="tutorial_action_key_title" msgid="8172535792469008169">"سبھی ایپس دیکھیں"</string>
     <string name="tutorial_action_key_guidance" msgid="5040613427202799294">"اپنے کی بورڈ پر ایکشن کلید دبائیں"</string>
     <string name="tutorial_action_key_success_title" msgid="2371827347071979571">"بہت خوب!"</string>
