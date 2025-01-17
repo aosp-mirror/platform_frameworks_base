@@ -36,6 +36,7 @@ import android.window.WindowContainerTransaction;
 import androidx.annotation.BinderThread;
 
 import com.android.window.flags.Flags;
+import com.android.wm.shell.R;
 import com.android.wm.shell.common.DisplayChangeController.OnDisplayChangingListener;
 import com.android.wm.shell.shared.annotations.ShellMainThread;
 import com.android.wm.shell.sysui.ShellInit;
@@ -87,7 +88,10 @@ public class DisplayController {
                 onDisplayAdded(displayIds[i]);
             }
 
-            if (Flags.enableConnectedDisplaysWindowDrag()) {
+            final boolean enableConnectedDisplayWindowDrag =
+                    mContext.getResources()
+                            .getBoolean(R.bool.config_enableConnectedDisplayWindowDrag);
+            if (Flags.enableConnectedDisplaysWindowDrag() && enableConnectedDisplayWindowDrag) {
                 mDisplayManager.registerTopologyListener(mMainExecutor,
                         this::onDisplayTopologyChanged);
                 onDisplayTopologyChanged(mDisplayManager.getDisplayTopology());
