@@ -37,6 +37,7 @@ import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.chips.ui.viewmodel.OngoingActivityChipViewModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.util.time.SystemClock
 import javax.inject.Inject
@@ -93,9 +94,7 @@ constructor(
                                 icon = icon,
                                 colors = colors,
                                 onClickListenerLegacy = getOnClickListener(state),
-                                // TODO(b/372657935): Add click support for the call chip when
-                                // StatusBarChipModernization is enabled.
-                                clickBehavior = OngoingActivityChipModel.ClickBehavior.None,
+                                clickBehavior = getClickBehavior(state),
                             )
                         } else {
                             val startTimeInElapsedRealtime =
@@ -106,9 +105,7 @@ constructor(
                                 colors = colors,
                                 startTimeMs = startTimeInElapsedRealtime,
                                 onClickListenerLegacy = getOnClickListener(state),
-                                // TODO(b/372657935): Add click support for the call chip when
-                                // StatusBarChipModernization is enabled.
-                                clickBehavior = OngoingActivityChipModel.ClickBehavior.None,
+                                clickBehavior = getClickBehavior(state),
                             )
                         }
                     }
@@ -122,6 +119,7 @@ constructor(
         }
 
         return View.OnClickListener { view ->
+            StatusBarChipsModernization.assertInLegacyMode()
             logger.log(TAG, LogLevel.INFO, {}, { "Chip clicked" })
             val backgroundView =
                 view.requireViewById<ChipBackgroundContainer>(R.id.ongoing_activity_chip_background)
@@ -135,6 +133,27 @@ constructor(
             )
         }
     }
+
+    private fun getClickBehavior(
+        state: OngoingCallModel.InCall
+    ): OngoingActivityChipModel.ClickBehavior =
+        if (state.intent == null) {
+            OngoingActivityChipModel.ClickBehavior.None
+        } else {
+            OngoingActivityChipModel.ClickBehavior.ExpandAction(
+                onClick = { expandable ->
+                    StatusBarChipsModernization.assertInNewMode()
+                    val animationController =
+                        expandable.activityTransitionController(
+                            InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP
+                        )
+                    activityStarter.postStartActivityDismissingKeyguard(
+                        state.intent,
+                        animationController,
+                    )
+                }
+            )
+        }
 
     companion object {
         private val phoneIcon =

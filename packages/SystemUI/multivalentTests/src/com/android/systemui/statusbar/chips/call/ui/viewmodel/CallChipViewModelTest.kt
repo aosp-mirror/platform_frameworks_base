@@ -23,6 +23,7 @@ import android.view.View
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.SysuiTestCase
+import com.android.systemui.animation.Expandable
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
 import com.android.systemui.kosmos.Kosmos
@@ -35,7 +36,14 @@ import com.android.systemui.statusbar.chips.ui.model.ColorsModel
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
 import com.android.systemui.statusbar.chips.ui.view.ChipBackgroundContainer
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
+import com.android.systemui.statusbar.core.StatusBarRootModernization
+import com.android.systemui.statusbar.notification.data.model.activeNotificationModel
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationListRepository
+import com.android.systemui.statusbar.notification.data.repository.ActiveNotificationsStore
+import com.android.systemui.statusbar.notification.data.repository.activeNotificationListRepository
 import com.android.systemui.statusbar.notification.promoted.shared.model.PromotedNotificationContentModel
+import com.android.systemui.statusbar.notification.shared.CallType
+import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
 import com.android.systemui.statusbar.phone.ongoingcall.data.repository.ongoingCallRepository
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.OngoingCallModel
 import com.android.systemui.statusbar.phone.ongoingcall.shared.model.inCallModel
@@ -44,6 +52,7 @@ import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
 import kotlinx.coroutines.test.runTest
 import org.junit.runner.RunWith
+import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -52,6 +61,7 @@ import org.mockito.kotlin.whenever
 @RunWith(AndroidJUnit4::class)
 class CallChipViewModelTest : SysuiTestCase() {
     private val kosmos = Kosmos()
+    private val notificationListRepository = kosmos.activeNotificationListRepository
     private val testScope = kosmos.testScope
     private val repo = kosmos.ongoingCallRepository
 
@@ -65,6 +75,8 @@ class CallChipViewModelTest : SysuiTestCase() {
                 )
                 .thenReturn(chipBackgroundView)
         }
+    private val mockExpandable: Expandable =
+        mock<Expandable>().apply { whenever(dialogTransitionController(any())).thenReturn(mock()) }
 
     private val underTest by lazy { kosmos.callChipViewModel }
 
@@ -337,6 +349,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_inCall_nullIntent_nullClickListener() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -347,6 +360,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_inCall_positiveStartTime_validIntent_clickListenerLaunchesIntent() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -364,6 +378,7 @@ class CallChipViewModelTest : SysuiTestCase() {
         }
 
     @Test
+    @DisableFlags(StatusBarChipsModernization.FLAG_NAME)
     fun chip_inCall_zeroStartTime_validIntent_clickListenerLaunchesIntent() =
         testScope.runTest {
             val latest by collectLastValue(underTest.chip)
@@ -381,6 +396,72 @@ class CallChipViewModelTest : SysuiTestCase() {
             verify(kosmos.activityStarter).postStartActivityDismissingKeyguard(pendingIntent, null)
         }
 
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_inCall_nullIntent_noneClickBehavior() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            postOngoingCallNotification(
+                repository = notificationListRepository,
+                startTimeMs = 1000L,
+                intent = null,
+            )
+
+            assertThat((latest as OngoingActivityChipModel.Shown).clickBehavior)
+                .isInstanceOf(OngoingActivityChipModel.ClickBehavior.None::class.java)
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_inCall_positiveStartTime_validIntent_clickBehaviorLaunchesIntent() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            val pendingIntent = mock<PendingIntent>()
+            postOngoingCallNotification(
+                repository = notificationListRepository,
+                startTimeMs = 1000L,
+                intent = pendingIntent,
+            )
+
+            val clickBehavior = (latest as OngoingActivityChipModel.Shown).clickBehavior
+            assertThat(clickBehavior)
+                .isInstanceOf(OngoingActivityChipModel.ClickBehavior.ExpandAction::class.java)
+            (clickBehavior as OngoingActivityChipModel.ClickBehavior.ExpandAction).onClick(
+                mockExpandable
+            )
+
+            // Ensure that the SysUI didn't modify the notification's intent by verifying it
+            // directly matches the `PendingIntent` set -- see b/212467440.
+            verify(kosmos.activityStarter).postStartActivityDismissingKeyguard(pendingIntent, null)
+        }
+
+    @Test
+    @EnableFlags(StatusBarRootModernization.FLAG_NAME, StatusBarChipsModernization.FLAG_NAME)
+    fun chip_inCall_zeroStartTime_validIntent_clickBehaviorLaunchesIntent() =
+        testScope.runTest {
+            val latest by collectLastValue(underTest.chip)
+
+            val pendingIntent = mock<PendingIntent>()
+            postOngoingCallNotification(
+                repository = notificationListRepository,
+                startTimeMs = 0L,
+                intent = pendingIntent,
+            )
+
+            val clickBehavior = (latest as OngoingActivityChipModel.Shown).clickBehavior
+            assertThat(clickBehavior)
+                .isInstanceOf(OngoingActivityChipModel.ClickBehavior.ExpandAction::class.java)
+            (clickBehavior as OngoingActivityChipModel.ClickBehavior.ExpandAction).onClick(
+                mockExpandable
+            )
+
+            // Ensure that the SysUI didn't modify the notification's intent by verifying it
+            // directly matches the `PendingIntent` set -- see b/212467440.
+            verify(kosmos.activityStarter).postStartActivityDismissingKeyguard(pendingIntent, null)
+        }
+
     companion object {
         fun createStatusBarIconViewOrNull(): StatusBarIconView? =
             if (StatusBarConnectedDisplays.isEnabled) {
@@ -388,6 +469,27 @@ class CallChipViewModelTest : SysuiTestCase() {
             } else {
                 mock<StatusBarIconView>()
             }
+
+        fun postOngoingCallNotification(
+            repository: ActiveNotificationListRepository,
+            startTimeMs: Long,
+            intent: PendingIntent?,
+        ) {
+            repository.activeNotifications.value =
+                ActiveNotificationsStore.Builder()
+                    .apply {
+                        addIndividualNotif(
+                            activeNotificationModel(
+                                key = "notif1",
+                                whenTime = startTimeMs,
+                                callType = CallType.Ongoing,
+                                statusBarChipIcon = null,
+                                contentIntent = intent,
+                            )
+                        )
+                    }
+                    .build()
+        }
 
         private val PROMOTED_CONTENT_WITH_COLOR =
             PromotedNotificationContentModel.Builder("notif")
