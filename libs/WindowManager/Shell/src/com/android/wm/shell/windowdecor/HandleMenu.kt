@@ -245,8 +245,7 @@ class HandleMenu(
                     width = menuWidth,
                     height = menuHeight,
                     flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
-                            WindowManager.LayoutParams.FLAG_SPLIT_TOUCH,
+                            WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
                     view = handleMenuView.rootView,
                     forciblyShownTypes = if (forceShowSystemBars) { systemBars() } else { 0 },
                     ignoreCutouts = Flags.showAppHandleLargeScreens()

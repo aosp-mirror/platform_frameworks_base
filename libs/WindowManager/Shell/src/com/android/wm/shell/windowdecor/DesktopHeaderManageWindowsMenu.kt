@@ -74,8 +74,7 @@ class DesktopHeaderManageWindowsMenu(
     override fun addToContainer(menuView: ManageWindowsView) {
         val menuPosition = Point(x, y)
         val flags = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE or
-                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
-                WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
+                WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
         val desktopRepository = desktopUserRepositories.getProfile(callerTaskInfo.userId)
         menuViewContainer = if (Flags.enableFullyImmersiveInDesktop()
             && desktopRepository.isTaskInFullImmersiveState(callerTaskInfo.taskId)) {
