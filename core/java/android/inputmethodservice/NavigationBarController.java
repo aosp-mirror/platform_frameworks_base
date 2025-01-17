@@ -16,7 +16,7 @@
 
 package android.inputmethodservice;
 
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
 import static android.view.WindowInsets.Type.captionBar;
@@ -243,7 +243,7 @@ final class NavigationBarController {
                 if (navigationBarView != null) {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
                     // TODO(b/213337792): Set NAVIGATION_HINT_IME_VISIBLE only when necessary.
-                    final int hints = NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_VISIBLE
+                    final int hints = NAVIGATION_HINT_BACK_DISMISS_IME | NAVIGATION_HINT_IME_VISIBLE
                             | (mShouldShowImeSwitcherWhenImeIsShown
                                     ? NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE : 0);
                     navigationBarView.setNavigationIconHints(hints);
@@ -516,7 +516,7 @@ final class NavigationBarController {
                 if (navigationBarView != null) {
                     // TODO(b/213337792): Support InputMethodService#setBackDisposition().
                     // TODO(b/213337792): Set NAVIGATION_HINT_IME_VISIBLE only when necessary.
-                    final int hints = NAVIGATION_HINT_BACK_ALT | NAVIGATION_HINT_IME_VISIBLE
+                    final int hints = NAVIGATION_HINT_BACK_DISMISS_IME | NAVIGATION_HINT_IME_VISIBLE
                             | (mShouldShowImeSwitcherWhenImeIsShown
                                     ? NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE : 0);
                     navigationBarView.setNavigationIconHints(hints);

@@ -134,8 +134,10 @@ public class QuickStepContract {
     public static final long SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING = 1L << 34;
     // Communal hub is showing
     public static final long SYSUI_STATE_COMMUNAL_HUB_SHOWING = 1L << 35;
-    // The back button is adjusted for the IME.
-    public static final long SYSUI_STATE_IME_ALT_BACK = 1L << 36;
+    // The back button is visually adjusted to indicate that it will dismiss the IME when pressed.
+    // This only takes effect while the IME is visible. By default, it is set while the IME is
+    // visible, but may be overridden by the backDispositionMode set by the IME.
+    public static final long SYSUI_STATE_BACK_DISMISS_IME = 1L << 36;
 
     // Mask for SystemUiStateFlags to isolate SYSUI_STATE_AWAKE and
     // SYSUI_STATE_WAKEFULNESS_TRANSITION, to match WAKEFULNESS_* constants
@@ -187,7 +189,7 @@ public class QuickStepContract {
             SYSUI_STATE_TOUCHPAD_GESTURES_DISABLED,
             SYSUI_STATE_DISABLE_GESTURE_PIP_ANIMATING,
             SYSUI_STATE_COMMUNAL_HUB_SHOWING,
-            SYSUI_STATE_IME_ALT_BACK,
+            SYSUI_STATE_BACK_DISMISS_IME,
     })
     public @interface SystemUiStateFlags {}
 
@@ -298,8 +300,8 @@ public class QuickStepContract {
         if ((flags & SYSUI_STATE_COMMUNAL_HUB_SHOWING) != 0) {
             str.add("communal_hub_showing");
         }
-        if ((flags & SYSUI_STATE_IME_ALT_BACK) != 0) {
-            str.add("ime_alt_back");
+        if ((flags & SYSUI_STATE_BACK_DISMISS_IME) != 0) {
+            str.add("back_dismiss_ime");
         }
 
         return str.toString();

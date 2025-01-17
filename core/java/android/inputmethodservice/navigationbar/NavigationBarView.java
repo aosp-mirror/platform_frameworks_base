@@ -16,7 +16,7 @@
 
 package android.inputmethodservice.navigationbar;
 
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.DARK_MODE_ICON_COLOR_SINGLE_TONE;
 import static android.inputmethodservice.navigationbar.NavigationBarConstants.LIGHT_MODE_ICON_COLOR_SINGLE_TONE;
@@ -245,9 +245,10 @@ public final class NavigationBarView extends FrameLayout {
     }
 
     private void orientBackButton(KeyButtonDrawable drawable) {
-        final boolean useAltBack = (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0;
+        final boolean isBackDismissIme =
+                (mNavigationIconHints & NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
         final boolean isRtl = mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
-        float degrees = useAltBack ? (isRtl ? 90 : -90) : 0;
+        float degrees = isBackDismissIme ? (isRtl ? 90 : -90) : 0;
         if (drawable.getRotation() == degrees) {
             return;
         }
@@ -259,7 +260,7 @@ public final class NavigationBarView extends FrameLayout {
 
         // Animate the back button's rotation to the new degrees and only in portrait move up the
         // back button to line up with the other buttons
-        float targetY = useAltBack
+        float targetY = isBackDismissIme
                 ? -dpToPx(NAVBAR_BACK_BUTTON_IME_OFFSET, getResources())
                 : 0;
         ObjectAnimator navBarAnimator = ObjectAnimator.ofPropertyValuesHolder(drawable,
@@ -291,11 +292,12 @@ public final class NavigationBarView extends FrameLayout {
         if (hints == mNavigationIconHints) {
             return;
         }
-        final boolean newBackAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-        final boolean oldBackAlt =
-                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-        if (newBackAlt != oldBackAlt) {
-            //onBackAltChanged(newBackAlt);
+        final boolean backDismissIme =
+                (hints & StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+        final boolean oldBackDismissIme =
+                (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+        if (backDismissIme != oldBackDismissIme) {
+            //onBackDismissImeChanged(backDismissIme);
         }
 
         if (DEBUG) {

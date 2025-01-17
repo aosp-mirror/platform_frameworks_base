@@ -17,7 +17,7 @@
 package com.android.systemui.navigationbar.views;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_PINNED;
-import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_ALT;
+import static android.app.StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_VISIBLE;
 import static android.app.StatusBarManager.NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE;
 import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
@@ -44,7 +44,7 @@ import static com.android.systemui.shared.statusbar.phone.BarTransitions.Transit
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_A11Y_BUTTON_LONG_CLICKABLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY;
-import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_ALT_BACK;
+import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_BACK_DISMISS_IME;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE;
 import static com.android.systemui.shared.system.QuickStepContract.SYSUI_STATE_NAV_BAR_HIDDEN;
@@ -1690,8 +1690,8 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
                         (mNavigationIconHints & NAVIGATION_HINT_IME_VISIBLE) != 0)
                 .setFlag(SYSUI_STATE_IME_SWITCHER_BUTTON_VISIBLE,
                         (mNavigationIconHints & NAVIGATION_HINT_IME_SWITCHER_BUTTON_VISIBLE) != 0)
-                .setFlag(SYSUI_STATE_IME_ALT_BACK,
-                        (mNavigationIconHints & NAVIGATION_HINT_BACK_ALT) != 0)
+                .setFlag(SYSUI_STATE_BACK_DISMISS_IME,
+                        (mNavigationIconHints & NAVIGATION_HINT_BACK_DISMISS_IME) != 0)
                 .setFlag(SYSUI_STATE_ALLOW_GESTURE_IGNORING_BAR_VISIBILITY,
                         allowSystemGestureIgnoringBarVisibility())
                 .commitUpdate(mDisplayId);
@@ -1950,11 +1950,12 @@ public class NavigationBar extends ViewController<NavigationBarView> implements 
         }
         if (!isLargeScreen(mContext)) {
             // All IME functions handled by launcher via Sysui flags for large screen
-            final boolean newBackAlt = (hints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-            final boolean oldBackAlt =
-                    (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-            if (newBackAlt != oldBackAlt) {
-                mView.onBackAltChanged(newBackAlt);
+            final boolean backDismissIme =
+                    (hints & StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+            final boolean oldBackDismissIme =
+                    (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_DISMISS_IME) != 0;
+            if (backDismissIme != oldBackDismissIme) {
+                mView.onBackDismissImeChanged(backDismissIme);
             }
             mImeVisible = (hints & NAVIGATION_HINT_IME_VISIBLE) != 0;
 
