@@ -17,8 +17,9 @@
 package com.android.wm.shell.bubbles;
 
 import android.content.Intent;
-import android.graphics.Rect;
 import android.content.pm.ShortcutInfo;
+import android.graphics.Rect;
+import android.os.UserHandle;
 import com.android.wm.shell.bubbles.IBubblesListener;
 import com.android.wm.shell.shared.bubbles.BubbleBarLocation;
 
@@ -52,7 +53,7 @@ interface IBubbles {
 
     oneway void showShortcutBubble(in ShortcutInfo info) = 12;
 
-    oneway void showAppBubble(in Intent intent) = 13;
+    oneway void showAppBubble(in Intent intent, in UserHandle user) = 13;
 
     oneway void showExpandedView() = 14;
 }
