@@ -820,13 +820,12 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public void onAuthenticationPrompt(int uid) {
-            synchronized (mVirtualDeviceManagerLock) {
-                for (int i = 0; i < mVirtualDevices.size(); i++) {
-                    VirtualDeviceImpl device = mVirtualDevices.valueAt(i);
-                    device.showToastWhereUidIsRunning(uid,
-                            R.string.app_streaming_blocked_message_for_fingerprint_dialog,
-                            Toast.LENGTH_LONG, Looper.getMainLooper());
-                }
+            ArrayList<VirtualDeviceImpl> virtualDevicesSnapshot = getVirtualDevicesSnapshot();
+            for (int i = 0; i < virtualDevicesSnapshot.size(); i++) {
+                VirtualDeviceImpl device = virtualDevicesSnapshot.get(i);
+                device.showToastWhereUidIsRunning(uid,
+                        R.string.app_streaming_blocked_message_for_fingerprint_dialog,
+                        Toast.LENGTH_LONG, Looper.getMainLooper());
             }
         }
 
