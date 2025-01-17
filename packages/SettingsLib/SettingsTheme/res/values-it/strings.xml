@@ -19,4 +19,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="settingslib_expressive_text_expand" msgid="7520894876795775876">"Espandi"</string>
     <string name="settingslib_expressive_text_collapse" msgid="5625043934702341576">"Comprimi"</string>
+    <!-- no translation found for settingslib_dismiss_button_content_description (6466433970910120385) -->
+    <skip />
 </resources>
