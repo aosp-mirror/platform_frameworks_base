@@ -79,6 +79,34 @@ public class WindowContainerTransactionTests extends WindowTestsBase {
     }
 
     @Test
+    public void testRemoveRootTask() {
+        final Task rootTask = createTask(mDisplayContent);
+        final Task task = createTaskInRootTask(rootTask, 0 /* userId */);
+        final ActivityRecord activity = createActivityRecord(mDisplayContent, task);
+        final TaskDisplayArea taskDisplayArea = mDisplayContent.getDefaultTaskDisplayArea();
+
+        WindowContainerTransaction wct = new WindowContainerTransaction();
+        WindowContainerToken token = rootTask.getTaskInfo().token;
+        wct.removeTask(token);
+        applyTransaction(wct);
+
+        // There is still an activity to be destroyed, so the task is not removed immediately.
+        assertNotNull(task.getParent());
+        assertTrue(rootTask.hasChild());
+        assertTrue(task.hasChild());
+        assertTrue(activity.finishing);
+
+        activity.destroyed("testRemoveRootTask");
+        // Assert that the container was removed after the activity is destroyed.
+        assertNull(task.getParent());
+        assertEquals(0, task.getChildCount());
+        assertNull(activity.getParent());
+        assertNull(taskDisplayArea.getTask(task1 -> task1.mTaskId == rootTask.mTaskId));
+        verify(mAtm.getLockTaskController(), atLeast(1)).clearLockedTask(task);
+        verify(mAtm.getLockTaskController(), atLeast(1)).clearLockedTask(rootTask);
+    }
+
+    @Test
     public void testDesktopMode_tasksAreBroughtToFront() {
         final TestDesktopOrganizer desktopOrganizer = new TestDesktopOrganizer(mAtm);
         TaskDisplayArea tda = desktopOrganizer.mDefaultTDA;

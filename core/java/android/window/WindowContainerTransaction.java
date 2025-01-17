@@ -614,11 +614,28 @@ public final class WindowContainerTransaction implements Parcelable {
     /**
      * Finds and removes a task and its children using its container token. The task is removed
      * from recents.
+     *
+     * If the task is a root task, its leaves are removed but the root task is not. Use
+     * {@link #removeRootTask(WindowContainerToken)} to remove the root task.
+     *
      * @param containerToken ContainerToken of Task to be removed
      */
     @NonNull
     public WindowContainerTransaction removeTask(@NonNull WindowContainerToken containerToken) {
         mHierarchyOps.add(HierarchyOp.createForRemoveTask(containerToken.asBinder()));
+        return this;
+    }
+
+    /**
+     * Finds and removes a root task created by an organizer and its leaves using its container
+     * token.
+     *
+     * @param containerToken ContainerToken of the root task to be removed
+     * @hide
+     */
+    @NonNull
+    public WindowContainerTransaction removeRootTask(@NonNull WindowContainerToken containerToken) {
+        mHierarchyOps.add(HierarchyOp.createForRemoveRootTask(containerToken.asBinder()));
         return this;
     }
 
@@ -1573,6 +1590,7 @@ public final class WindowContainerTransaction implements Parcelable {
         public static final int HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES = 21;
         public static final int HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE = 22;
         public static final int HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT = 23;
+        public static final int HIERARCHY_OP_TYPE_REMOVE_ROOT_TASK = 24;
 
         @IntDef(prefix = {"HIERARCHY_OP_TYPE_"}, value = {
                 HIERARCHY_OP_TYPE_REPARENT,
@@ -1598,7 +1616,8 @@ public final class WindowContainerTransaction implements Parcelable {
                 HIERARCHY_OP_TYPE_RESTORE_BACK_NAVIGATION,
                 HIERARCHY_OP_TYPE_SET_EXCLUDE_INSETS_TYPES,
                 HIERARCHY_OP_TYPE_SET_KEYGUARD_STATE,
-                HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT
+                HIERARCHY_OP_TYPE_SET_DISABLE_LAUNCH_ADJACENT,
+                HIERARCHY_OP_TYPE_REMOVE_ROOT_TASK,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface HierarchyOpType {
@@ -1791,6 +1810,18 @@ public final class WindowContainerTransaction implements Parcelable {
         @NonNull
         public static HierarchyOp createForRemoveTask(@NonNull IBinder container) {
             return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_REMOVE_TASK)
+                    .setContainer(container)
+                    .build();
+        }
+
+        /**
+         * Creates a hierarchy op for deleting a root task
+         *
+         * @hide
+         **/
+        @NonNull
+        public static HierarchyOp createForRemoveRootTask(@NonNull IBinder container) {
+            return new HierarchyOp.Builder(HIERARCHY_OP_TYPE_REMOVE_ROOT_TASK)
                     .setContainer(container)
                     .build();
         }
@@ -2012,6 +2043,7 @@ public final class WindowContainerTransaction implements Parcelable {
                     return "removeInsetsFrameProvider";
                 case HIERARCHY_OP_TYPE_SET_ALWAYS_ON_TOP: return "setAlwaysOnTop";
                 case HIERARCHY_OP_TYPE_REMOVE_TASK: return "removeTask";
+                case HIERARCHY_OP_TYPE_REMOVE_ROOT_TASK: return "removeRootTask";
                 case HIERARCHY_OP_TYPE_FINISH_ACTIVITY: return "finishActivity";
                 case HIERARCHY_OP_TYPE_CLEAR_ADJACENT_ROOTS: return "clearAdjacentRoots";
                 case HIERARCHY_OP_TYPE_SET_REPARENT_LEAF_TASK_IF_RELAUNCH:
@@ -2095,6 +2127,9 @@ public final class WindowContainerTransaction implements Parcelable {
                     break;
                 case HIERARCHY_OP_TYPE_REMOVE_TASK:
                     sb.append("task=").append(mContainer);
+                    break;
+                case HIERARCHY_OP_TYPE_REMOVE_ROOT_TASK:
+                    sb.append("rootTask=").append(mContainer);
                     break;
                 case HIERARCHY_OP_TYPE_FINISH_ACTIVITY:
                     sb.append("activity=").append(mContainer);
