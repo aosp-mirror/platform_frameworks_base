@@ -21,6 +21,7 @@ import android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD
 import android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM
 import android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN
 import android.app.WindowConfiguration.WindowingMode
+import android.os.Handler
 import android.testing.AndroidTestingRunner
 import android.testing.TestableLooper.RunWithLooper
 import android.view.SurfaceControl
@@ -52,6 +53,7 @@ class CloseDesktopTaskTransitionHandlerTest : ShellTestCase() {
 
     @Mock lateinit var testExecutor: ShellExecutor
     @Mock lateinit var closingTaskLeash: SurfaceControl
+    @Mock lateinit var mockHandler: Handler
 
     private val transactionSupplier = Supplier { mock<SurfaceControl.Transaction>() }
 
@@ -65,6 +67,7 @@ class CloseDesktopTaskTransitionHandlerTest : ShellTestCase() {
                 testExecutor,
                 testExecutor,
                 transactionSupplier,
+                mockHandler,
             )
     }
 

@@ -1031,8 +1031,9 @@ public abstract class WMShellModule {
     static CloseDesktopTaskTransitionHandler provideCloseDesktopTaskTransitionHandler(
             Context context,
             @ShellMainThread ShellExecutor mainExecutor,
-            @ShellAnimationThread ShellExecutor animExecutor) {
-        return new CloseDesktopTaskTransitionHandler(context, mainExecutor, animExecutor);
+            @ShellAnimationThread ShellExecutor animExecutor,
+            @ShellMainThread Handler handler) {
+        return new CloseDesktopTaskTransitionHandler(context, mainExecutor, animExecutor, handler);
     }
 
     @WMSingleton
