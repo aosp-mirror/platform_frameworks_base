@@ -273,4 +273,7 @@ interface INotificationManager
     void setAssistantAdjustmentKeyTypeState(int type, boolean enabled);
     String[] getTypeAdjustmentDeniedPackages();
     void setTypeAdjustmentForPackageState(String pkg, boolean enabled);
+
+    // TODO: b/389918945 - Remove once nm_binder_perf flags are going to Nextfood.
+    void incrementCounter(String metricId);
 }

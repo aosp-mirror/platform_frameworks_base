@@ -356,6 +356,7 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.XmlUtils;
 import com.android.internal.util.function.TriPredicate;
 import com.android.internal.widget.LockPatternUtils;
+import com.android.modules.expresslog.Counter;
 import com.android.modules.utils.TypedXmlPullParser;
 import com.android.modules.utils.TypedXmlSerializer;
 import com.android.server.DeviceIdleInternal;
@@ -7135,6 +7136,13 @@ public class NotificationManagerService extends SystemService {
             }
             Slog.e(TAG, "exiting pullStats: bad request");
             return 0;
+        }
+
+        @Override
+        public void incrementCounter(String metricId) {
+            if (android.app.Flags.nmBinderPerfLogNmThrottling() && metricId != null) {
+                Counter.logIncrementWithUid(metricId, Binder.getCallingUid());
+            }
         }
     };
 
