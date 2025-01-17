@@ -95,6 +95,11 @@ public class MediaProjectionStopController {
         }
     }
 
+    /** Checks if the given stop reason corresponds to a call ending. */
+    public boolean isStopReasonCallEnd(int stopReason) {
+        return stopReason == STOP_REASON_CALL_END;
+    }
+
     /**
      * Checks whether the given projection grant is exempt from stopping restrictions.
      */

@@ -300,6 +300,22 @@ public class MediaProjectionStopControllerTest {
     }
 
     @Test
+    public void isStopReasonCallEnd_stopReasonCallEnd_returnsTrue() {
+        boolean result =
+                mStopController.isStopReasonCallEnd(
+                        MediaProjectionStopController.STOP_REASON_CALL_END);
+        assertThat(result).isTrue();
+    }
+
+    @Test
+    public void isStopReasonCallEnd_stopReasonKeyguard_returnsFalse() {
+        boolean result =
+                mStopController.isStopReasonCallEnd(
+                        MediaProjectionStopController.STOP_REASON_KEYGUARD);
+        assertThat(result).isFalse();
+    }
+
+    @Test
     @EnableFlags(
             android.companion.virtualdevice.flags.Flags.FLAG_MEDIA_PROJECTION_KEYGUARD_RESTRICTIONS)
     public void testKeyguardLockedStateChanged_unlocked() {
