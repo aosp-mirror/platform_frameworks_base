@@ -28,6 +28,7 @@ import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.lifecycle.repeatWhenAttached
 import com.android.systemui.res.R
 import com.android.systemui.scene.shared.flag.SceneContainerFlag
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.MediaProjectionStopDialogModel
 import com.android.systemui.statusbar.chips.notification.shared.StatusBarNotifChips
 import com.android.systemui.statusbar.chips.ui.binder.OngoingActivityChipBinder
 import com.android.systemui.statusbar.chips.ui.model.OngoingActivityChipModel
@@ -111,6 +112,17 @@ constructor(
                     launch {
                         viewModel.areNotificationsLightsOut.collect { show ->
                             animateLightsOutView(lightsOutView, show)
+                        }
+                    }
+                }
+
+                if (com.android.media.projection.flags.Flags.showStopDialogPostCallEnd()) {
+                    launch {
+                        viewModel.mediaProjectionStopDialogDueToCallEndedState.collect { stopDialog
+                            ->
+                            if (stopDialog is MediaProjectionStopDialogModel.Shown) {
+                                stopDialog.createAndShowDialog()
+                            }
                         }
                     }
                 }

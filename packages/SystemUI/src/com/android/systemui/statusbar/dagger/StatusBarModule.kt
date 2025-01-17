@@ -24,6 +24,7 @@ import com.android.systemui.SysUICutoutProviderImpl
 import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.log.LogBuffer
 import com.android.systemui.log.LogBufferFactory
+import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.ShareToAppChipViewModel
 import com.android.systemui.statusbar.core.StatusBarConnectedDisplays
 import com.android.systemui.statusbar.data.StatusBarDataLayerModule
 import com.android.systemui.statusbar.data.repository.LightBarControllerStore
@@ -134,6 +135,20 @@ interface StatusBarModule {
                 multiDisplayImplLazy.get()
             } else {
                 singleDisplayImplLazy.get()
+            }
+        }
+
+        @Provides
+        @SysUISingleton
+        @IntoMap
+        @ClassKey(ShareToAppChipViewModel::class)
+        fun providesShareToAppChipViewModel(
+            shareToAppChipViewModelLazy: Lazy<ShareToAppChipViewModel>
+        ): CoreStartable {
+            return if (com.android.media.projection.flags.Flags.showStopDialogPostCallEnd()) {
+                shareToAppChipViewModelLazy.get()
+            } else {
+                CoreStartable.NOP
             }
         }
 

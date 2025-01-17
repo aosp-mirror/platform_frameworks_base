@@ -31,9 +31,10 @@ import com.android.systemui.animation.mockDialogTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
 import com.android.systemui.coroutines.collectLastValue
-import com.android.systemui.kosmos.Kosmos
-import com.android.systemui.kosmos.testCase
+import com.android.systemui.kosmos.collectLastValue
+import com.android.systemui.kosmos.runTest
 import com.android.systemui.kosmos.testScope
+import com.android.systemui.kosmos.useUnconfinedTestDispatcher
 import com.android.systemui.mediaprojection.data.model.MediaProjectionState
 import com.android.systemui.mediaprojection.data.repository.fakeMediaProjectionRepository
 import com.android.systemui.mediaprojection.taskswitcher.FakeActivityTaskManager.Companion.createTask
@@ -41,6 +42,7 @@ import com.android.systemui.res.R
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.CAST_TO_OTHER_DEVICES_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.NORMAL_PACKAGE
 import com.android.systemui.statusbar.chips.mediaprojection.domain.interactor.MediaProjectionChipInteractorTest.Companion.setUpPackageManagerForMediaProjection
+import com.android.systemui.statusbar.chips.mediaprojection.domain.model.MediaProjectionStopDialogModel
 import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndGenericShareToAppDialogDelegate
 import com.android.systemui.statusbar.chips.sharetoapp.ui.view.EndShareScreenToAppDialogDelegate
 import com.android.systemui.statusbar.chips.ui.model.ColorsModel
@@ -51,6 +53,7 @@ import com.android.systemui.statusbar.core.StatusBarRootModernization
 import com.android.systemui.statusbar.phone.SystemUIDialog
 import com.android.systemui.statusbar.phone.mockSystemUIDialogFactory
 import com.android.systemui.statusbar.phone.ongoingcall.StatusBarChipsModernization
+import com.android.systemui.testKosmos
 import com.android.systemui.util.time.fakeSystemClock
 import com.google.common.truth.Truth.assertThat
 import kotlin.test.Test
@@ -58,6 +61,7 @@ import kotlinx.coroutines.test.runTest
 import org.junit.Before
 import org.junit.runner.RunWith
 import org.mockito.ArgumentMatchers.anyBoolean
+import org.mockito.Mockito.times
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
@@ -68,7 +72,7 @@ import org.mockito.kotlin.whenever
 @SmallTest
 @RunWith(AndroidJUnit4::class)
 class ShareToAppChipViewModelTest : SysuiTestCase() {
-    private val kosmos = Kosmos().also { it.testCase = this }
+    private val kosmos = testKosmos().useUnconfinedTestDispatcher()
     private val testScope = kosmos.testScope
     private val mediaProjectionRepo = kosmos.fakeMediaProjectionRepository
     private val systemClock = kosmos.fakeSystemClock
@@ -89,9 +93,11 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
         mock<Expandable>().apply { whenever(dialogTransitionController(any())).thenReturn(mock()) }
 
     private val underTest = kosmos.shareToAppChipViewModel
+    private val mockDialog = mock<SystemUIDialog>()
 
     @Before
     fun setUp() {
+        underTest.start()
         setUpPackageManagerForMediaProjection(kosmos)
 
         whenever(kosmos.mockSystemUIDialogFactory.create(any<EndShareScreenToAppDialogDelegate>()))
@@ -99,6 +105,196 @@ class ShareToAppChipViewModelTest : SysuiTestCase() {
         whenever(kosmos.mockSystemUIDialogFactory.create(any<EndGenericShareToAppDialogDelegate>()))
             .thenReturn(mockGenericShareDialog)
     }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun chip_flagEnabled_projectionStartedDuringCallAndActivePostCallEventEmitted_chipHidden() =
+        kosmos.runTest {
+            val latestChip by collectLastValue(underTest.chip)
+
+            // Set mediaProjectionState to Projecting
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            // Verify the chip is initially shown
+            assertThat(latestChip).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Verify the chip is hidden
+            assertThat(latestChip).isInstanceOf(OngoingActivityChipModel.Hidden::class.java)
+        }
+
+    @Test
+    @DisableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun chip_flagDisabled_projectionStartedDuringCallAndActivePostCallEventEmitted_chipRemainsVisible() =
+        kosmos.runTest {
+            val latestChip by collectLastValue(underTest.chip)
+
+            // Set mediaProjectionState to Projecting
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            // Verify the chip is initially shown
+            assertThat(latestChip).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Chip is still shown
+            assertThat(latestChip).isInstanceOf(OngoingActivityChipModel.Shown::class.java)
+        }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun stopDialog_flagEnabled_initialState_isHidden() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.stopDialogToShow)
+
+            assertThat(latest).isEqualTo(MediaProjectionStopDialogModel.Hidden)
+        }
+
+    @Test
+    @DisableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun stopDialog_flagDisabled_projectionStartedDuringCallAndActivePostCallEventEmitted_dialogRemainsHidden() =
+        kosmos.runTest {
+            val latestStopDialogModel by collectLastValue(underTest.stopDialogToShow)
+
+            // Set mediaProjectionRepo state to Projecting
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Verify that no dialog is shown
+            assertThat(latestStopDialogModel).isEqualTo(MediaProjectionStopDialogModel.Hidden)
+        }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun stopDialog_notProjectingState_flagEnabled_remainsHidden() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.stopDialogToShow)
+
+            // Set the state to not projecting
+            mediaProjectionRepo.mediaProjectionState.value = MediaProjectionState.NotProjecting
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Verify that the dialog remains hidden
+            assertThat(latest).isEqualTo(MediaProjectionStopDialogModel.Hidden)
+        }
+
+    @Test
+    @EnableFlags(
+        com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END,
+        FLAG_STATUS_BAR_SHOW_AUDIO_ONLY_PROJECTION_CHIP,
+    )
+    fun stopDialog_projectingAudio_flagEnabled_eventEmitted_showsGenericStopDialog() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.stopDialogToShow)
+
+            // Set the state to projecting audio
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.NoScreen(NORMAL_PACKAGE)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Verify that the generic dialog is shown
+            assertThat(latest).isInstanceOf(MediaProjectionStopDialogModel.Shown::class.java)
+            val dialogDelegate = (latest as MediaProjectionStopDialogModel.Shown).dialogDelegate
+            assertThat(dialogDelegate).isInstanceOf(EndGenericShareToAppDialogDelegate::class.java)
+        }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun stopDialog_projectingEntireScreen_flagEnabled_eventEmitted_showsShareScreenToAppStopDialog() =
+        kosmos.runTest {
+            val latest by collectLastValue(underTest.stopDialogToShow)
+
+            // Set the state to projecting the entire screen
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            assertThat(latest).isInstanceOf(MediaProjectionStopDialogModel.Hidden::class.java)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Verify that the dialog is shown
+            assertThat(latest).isInstanceOf(MediaProjectionStopDialogModel.Shown::class.java)
+            val dialogDelegate = (latest as MediaProjectionStopDialogModel.Shown).dialogDelegate
+            assertThat(dialogDelegate).isInstanceOf(EndShareScreenToAppDialogDelegate::class.java)
+        }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun stopDialog_projectingEntireScreen_eventEmitted_hasCancelBehaviour() =
+        kosmos.runTest {
+            val latestDialogModel by collectLastValue(underTest.stopDialogToShow)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Verify that the dialog is shown
+            assertThat(latestDialogModel)
+                .isInstanceOf(MediaProjectionStopDialogModel.Shown::class.java)
+
+            val dialogModel = latestDialogModel as MediaProjectionStopDialogModel.Shown
+
+            whenever(dialogModel.dialogDelegate.createDialog()).thenReturn(mockDialog)
+
+            dialogModel.createAndShowDialog()
+
+            // Verify dialog is shown
+            verify(mockDialog).show()
+
+            // Verify dialog is hidden when dialog is cancelled
+            argumentCaptor<DialogInterface.OnCancelListener>().apply {
+                verify(mockDialog).setOnCancelListener(capture())
+                firstValue.onCancel(mockDialog)
+            }
+            assertThat(underTest.stopDialogToShow.value)
+                .isEqualTo(MediaProjectionStopDialogModel.Hidden)
+
+            verify(mockDialog, times(1)).setOnCancelListener(any())
+        }
+
+    @Test
+    @EnableFlags(com.android.media.projection.flags.Flags.FLAG_SHOW_STOP_DIALOG_POST_CALL_END)
+    fun stopDialog_projectingEntireScreen_eventEmitted_hasDismissBehaviour() =
+        kosmos.runTest {
+            val latestDialogModel by collectLastValue(underTest.stopDialogToShow)
+
+            mediaProjectionRepo.mediaProjectionState.value =
+                MediaProjectionState.Projecting.EntireScreen(NORMAL_PACKAGE)
+
+            fakeMediaProjectionRepository.emitProjectionStartedDuringCallAndActivePostCallEvent()
+
+            // Verify that the dialog is shown
+            assertThat(latestDialogModel)
+                .isInstanceOf(MediaProjectionStopDialogModel.Shown::class.java)
+
+            val dialogModel = latestDialogModel as MediaProjectionStopDialogModel.Shown
+
+            whenever(dialogModel.dialogDelegate.createDialog()).thenReturn(mockDialog)
+
+            // Simulate showing the dialog
+            dialogModel.createAndShowDialog()
+
+            // Verify dialog is shown
+            verify(mockDialog).show()
+
+            // Verify dialog is hidden when dialog is dismissed
+            argumentCaptor<DialogInterface.OnDismissListener>().apply {
+                verify(mockDialog).setOnDismissListener(capture())
+                firstValue.onDismiss(mockDialog)
+            }
+            assertThat(underTest.stopDialogToShow.value)
+                .isEqualTo(MediaProjectionStopDialogModel.Hidden)
+
+            verify(mockDialog, times(1)).setOnDismissListener(any())
+        }
 
     @Test
     fun chip_notProjectingState_isHidden() =

@@ -25,6 +25,7 @@ import com.android.systemui.log.table.tableLogBufferFactory
 import com.android.systemui.scene.domain.interactor.sceneContainerOcclusionInteractor
 import com.android.systemui.scene.domain.interactor.sceneInteractor
 import com.android.systemui.shade.domain.interactor.shadeInteractor
+import com.android.systemui.statusbar.chips.sharetoapp.ui.viewmodel.shareToAppChipViewModel
 import com.android.systemui.statusbar.chips.ui.viewmodel.ongoingActivityChipsViewModel
 import com.android.systemui.statusbar.events.domain.interactor.systemStatusEventAnimationInteractor
 import com.android.systemui.statusbar.featurepods.popups.ui.viewmodel.statusBarPopupChipsViewModel
@@ -53,6 +54,7 @@ var Kosmos.homeStatusBarViewModel: HomeStatusBarViewModel by
             sceneInteractor,
             sceneContainerOcclusionInteractor,
             shadeInteractor,
+            shareToAppChipViewModel,
             ongoingActivityChipsViewModel,
             statusBarPopupChipsViewModel,
             systemStatusEventAnimationInteractor,

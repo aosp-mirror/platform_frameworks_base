@@ -32,6 +32,7 @@ import com.android.systemui.statusbar.chips.StatusBarChipsLog
 import com.android.systemui.statusbar.chips.mediaprojection.domain.model.ProjectionChipModel
 import javax.inject.Inject
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -53,6 +54,9 @@ constructor(
     private val packageManager: PackageManager,
     @StatusBarChipsLog private val logger: LogBuffer,
 ) {
+    val projectionStartedDuringCallAndActivePostCallEvent: Flow<Unit> =
+        mediaProjectionRepository.projectionStartedDuringCallAndActivePostCallEvent
+
     val projection: StateFlow<ProjectionChipModel> =
         mediaProjectionRepository.mediaProjectionState
             .map { state ->
