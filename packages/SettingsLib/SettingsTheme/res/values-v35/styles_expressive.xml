@@ -70,11 +70,6 @@
         <item name="android:textAppearance">@style/TextAppearance.SettingsLib.TitleLarge.Emphasized</item>
     </style>
 
-    <style name="SettingslibTextAppearance.LinkableTextStyle.Expressive"
-           parent="@style/TextAppearance.SettingsLib.LabelLarge">
-        <item name="android:textColor">?android:attr/colorAccent</item>
-    </style>
-
     <style name="SettingsLibStatusBannerCardStyle">
         <item name="android:layout_width">match_parent</item>
         <item name="android:layout_height">wrap_content</item>

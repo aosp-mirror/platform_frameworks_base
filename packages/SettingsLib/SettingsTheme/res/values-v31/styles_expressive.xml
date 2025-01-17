@@ -104,6 +104,11 @@
         <item name="android:layout_width">match_parent</item>
     </style>
 
+    <style name="SettingslibTextAppearance.LinkableTextStyle.Expressive"
+        parent="@style/TextAppearance.SettingsLib.LabelLarge">
+        <item name="android:textColor">?android:attr/colorAccent</item>
+    </style>
+
     <style name="SettingslibTextButtonStyle.Expressive"
         parent="@style/Widget.Material3Expressive.Button.TextButton.Icon">
         <item name="android:theme">@style/Theme.Material3.DynamicColors.DayNight</item>
