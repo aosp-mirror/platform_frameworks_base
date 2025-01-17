@@ -863,6 +863,9 @@ final class InstallPackageHelper {
                 // restore if appropriate, then pass responsibility back to the
                 // Package Manager to run the post-install observer callbacks
                 // and broadcasts.
+                // Note: MUST close freezer before backup/restore, otherwise test
+                // of CtsBackupHostTestCases will fail.
+                request.closeFreezer();
                 doRestore = performBackupManagerRestore(userId, token, request);
             }
 
