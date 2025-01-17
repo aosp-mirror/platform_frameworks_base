@@ -30,9 +30,6 @@ interface FloatValuePreference : PersistentPreference<Float> {
         get() = Float::class.javaObjectType
 }
 
-/** Common base class for preferences that have two selectable states and save a boolean value. */
-interface TwoStatePreference : PreferenceMetadata, BooleanValuePreference
-
 /** A preference that provides a two-state toggleable option. */
 open class SwitchPreference
 @JvmOverloads
@@ -40,9 +37,10 @@ constructor(
     override val key: String,
     @StringRes override val title: Int = 0,
     @StringRes override val summary: Int = 0,
-) : TwoStatePreference
+) : BooleanValuePreference
 
 /** A preference that provides a two-state toggleable option that can be used as a main switch. */
 open class MainSwitchPreference
 @JvmOverloads
-constructor(override val key: String, @StringRes override val title: Int = 0) : TwoStatePreference
+constructor(override val key: String, @StringRes override val title: Int = 0) :
+    BooleanValuePreference

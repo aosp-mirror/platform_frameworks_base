@@ -76,7 +76,7 @@ annotation class SensitivityLevel {
 }
 
 /** Preference interface that has a value persisted in datastore. */
-interface PersistentPreference<T> {
+interface PersistentPreference<T> : PreferenceMetadata {
 
     /**
      * The value type the preference is associated with.
@@ -93,7 +93,7 @@ interface PersistentPreference<T> {
      * [PreferenceScreenRegistry.getKeyValueStore].
      */
     fun storage(context: Context): KeyValueStore =
-        PreferenceScreenRegistry.getKeyValueStore(context, this as PreferenceMetadata)!!
+        PreferenceScreenRegistry.getKeyValueStore(context, this)!!
 
     /** Returns the required permissions to read preference value. */
     fun getReadPermissions(context: Context): Permissions? = null
@@ -111,7 +111,7 @@ interface PersistentPreference<T> {
             context,
             callingPid,
             callingUid,
-            this as PreferenceMetadata,
+            this,
         )
 
     /** Returns the required permissions to write preference value. */
@@ -136,7 +136,7 @@ interface PersistentPreference<T> {
             value,
             callingPid,
             callingUid,
-            this as PreferenceMetadata,
+            this,
         )
 
     /** The sensitivity level of the preference. */
