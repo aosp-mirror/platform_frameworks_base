@@ -31,6 +31,7 @@ import android.platform.test.flag.junit.SetFlagsRule
 import android.testing.TestableContext
 import android.util.SparseArray
 import android.view.Choreographer
+import android.view.Display
 import android.view.Display.DEFAULT_DISPLAY
 import android.view.IWindowManager
 import android.view.InputChannel
@@ -157,6 +158,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
     protected val mockRecentsTransitionHandler = mock<RecentsTransitionHandler>()
     protected val motionEvent = mock<MotionEvent>()
     val displayLayout = mock<DisplayLayout>()
+    val display = mock<Display>()
     protected lateinit var spyContext: TestableContext
     private lateinit var desktopModeEventLogger: DesktopModeEventLogger
 
@@ -183,6 +185,7 @@ open class DesktopModeWindowDecorViewModelTestsBase : ShellTestCase() {
         desktopModeEventLogger = mock<DesktopModeEventLogger>()
         whenever(mockDesktopUserRepositories.current).thenReturn(mockDesktopRepository)
         whenever(mockDisplayController.getDisplayContext(any())).thenReturn(spyContext)
+        whenever(mockDisplayController.getDisplay(any())).thenReturn(display)
         whenever(mockDesktopUserRepositories.getProfile(anyInt()))
             .thenReturn(mockDesktopRepository)
         desktopModeWindowDecorViewModel = DesktopModeWindowDecorViewModel(
