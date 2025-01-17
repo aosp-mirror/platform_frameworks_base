@@ -584,6 +584,12 @@ public abstract class UserManagerInternal {
      * Returns the user id of the main user, or {@link android.os.UserHandle#USER_NULL} if there is
      * no main user.
      *
+     * <p>NB: Features should ideally not limit functionality to the main user. Ideally, they
+     * should either work for all users or for all admin users. If a feature should only work for
+     * select users, its determination of which user should be done intelligently or be
+     * customizable. Not all devices support a main user, and the idea of singling out one user as
+     * special is contrary to overall multiuser goals.
+     *
      * @see UserManager#isMainUser()
      */
     public abstract @UserIdInt int getMainUserId();
