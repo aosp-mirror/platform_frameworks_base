@@ -16,14 +16,17 @@
 
 package com.android.systemui.communal
 
+import android.platform.test.annotations.DisableFlags
 import android.platform.test.annotations.EnableFlags
+import android.platform.test.flag.junit.FlagsParameterization
 import android.service.dream.dreamManager
-import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.filters.SmallTest
 import com.android.systemui.Flags
+import com.android.systemui.Flags.FLAG_GLANCEABLE_HUB_V2
 import com.android.systemui.SysuiTestCase
 import com.android.systemui.communal.domain.interactor.communalSceneInteractor
 import com.android.systemui.communal.domain.interactor.communalSettingsInteractor
+import com.android.systemui.communal.domain.interactor.setCommunalV2Enabled
 import com.android.systemui.flags.Flags.COMMUNAL_SERVICE_ENABLED
 import com.android.systemui.flags.fakeFeatureFlagsClassic
 import com.android.systemui.keyguard.data.repository.fakeKeyguardRepository
@@ -48,12 +51,14 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import org.mockito.Mockito.never
 import org.mockito.Mockito.verify
+import platform.test.runner.parameterized.ParameterizedAndroidJunit4
+import platform.test.runner.parameterized.Parameters
 
 @OptIn(ExperimentalCoroutinesApi::class)
 @SmallTest
 @EnableFlags(Flags.FLAG_COMMUNAL_HUB)
-@RunWith(AndroidJUnit4::class)
-class CommunalDreamStartableTest : SysuiTestCase() {
+@RunWith(ParameterizedAndroidJunit4::class)
+class CommunalDreamStartableTest(flags: FlagsParameterization) : SysuiTestCase() {
     private val kosmos = testKosmos()
     private val testScope = kosmos.testScope
 
@@ -63,26 +68,50 @@ class CommunalDreamStartableTest : SysuiTestCase() {
     private val keyguardRepository by lazy { kosmos.fakeKeyguardRepository }
     private val powerRepository by lazy { kosmos.fakePowerRepository }
 
+    init {
+        mSetFlagsRule.setFlagsParameterization(flags)
+    }
+
     @Before
     fun setUp() {
         kosmos.fakeFeatureFlagsClassic.set(COMMUNAL_SERVICE_ENABLED, true)
 
         underTest =
             CommunalDreamStartable(
-                    powerInteractor = kosmos.powerInteractor,
-                    communalSettingsInteractor = kosmos.communalSettingsInteractor,
-                    keyguardInteractor = kosmos.keyguardInteractor,
-                    keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
-                    dreamManager = dreamManager,
-                    communalSceneInteractor = kosmos.communalSceneInteractor,
-                    bgScope = kosmos.applicationCoroutineScope,
-                )
-                .apply { start() }
+                powerInteractor = kosmos.powerInteractor,
+                communalSettingsInteractor = kosmos.communalSettingsInteractor,
+                keyguardInteractor = kosmos.keyguardInteractor,
+                keyguardTransitionInteractor = kosmos.keyguardTransitionInteractor,
+                dreamManager = dreamManager,
+                communalSceneInteractor = kosmos.communalSceneInteractor,
+                bgScope = kosmos.applicationCoroutineScope,
+            )
     }
 
+    @EnableFlags(FLAG_GLANCEABLE_HUB_V2)
+    @Test
+    fun dreamNotStartedWhenTransitioningToHub() =
+        testScope.runTest {
+            // Enable v2 flag and recreate + rerun start method.
+            kosmos.setCommunalV2Enabled(true)
+            underTest.start()
+
+            keyguardRepository.setKeyguardShowing(true)
+            keyguardRepository.setDreaming(false)
+            powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
+            whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
+            runCurrent()
+
+            transition(from = KeyguardState.DREAMING, to = KeyguardState.GLANCEABLE_HUB)
+
+            verify(dreamManager, never()).startDream()
+        }
+
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun startDreamWhenTransitioningToHub() =
         testScope.runTest {
+            underTest.start()
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
@@ -100,6 +129,7 @@ class CommunalDreamStartableTest : SysuiTestCase() {
     @EnableFlags(Flags.FLAG_RESTART_DREAM_ON_UNOCCLUDE)
     fun restartDreamingWhenTransitioningFromDreamingToOccludedToDreaming() =
         testScope.runTest {
+            underTest.start()
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
             whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
@@ -122,9 +152,11 @@ class CommunalDreamStartableTest : SysuiTestCase() {
             verify(dreamManager).startDream()
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun shouldNotStartDreamWhenIneligibleToDream() =
         testScope.runTest {
+            underTest.start()
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
             // Not eligible to dream
@@ -134,9 +166,11 @@ class CommunalDreamStartableTest : SysuiTestCase() {
             verify(dreamManager, never()).startDream()
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun shouldNotStartDreamIfAlreadyDreaming() =
         testScope.runTest {
+            underTest.start()
             keyguardRepository.setDreaming(true)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
             whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
@@ -145,9 +179,11 @@ class CommunalDreamStartableTest : SysuiTestCase() {
             verify(dreamManager, never()).startDream()
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun shouldNotStartDreamForInvalidTransition() =
         testScope.runTest {
+            underTest.start()
             keyguardRepository.setDreaming(true)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
             whenever(dreamManager.canStartDreaming(/* isScreenOn= */ true)).thenReturn(true)
@@ -160,9 +196,11 @@ class CommunalDreamStartableTest : SysuiTestCase() {
             }
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun shouldNotStartDreamWhenLaunchingWidget() =
         testScope.runTest {
+            underTest.start()
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
@@ -175,9 +213,11 @@ class CommunalDreamStartableTest : SysuiTestCase() {
             verify(dreamManager, never()).startDream()
         }
 
+    @DisableFlags(FLAG_GLANCEABLE_HUB_V2)
     @Test
     fun shouldNotStartDreamWhenOccluded() =
         testScope.runTest {
+            underTest.start()
             keyguardRepository.setKeyguardShowing(true)
             keyguardRepository.setDreaming(false)
             powerRepository.setScreenPowerState(ScreenPowerState.SCREEN_ON)
@@ -194,8 +234,16 @@ class CommunalDreamStartableTest : SysuiTestCase() {
         kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
             from = from,
             to = to,
-            testScope = this
+            testScope = this,
         )
         runCurrent()
+    }
+
+    companion object {
+        @JvmStatic
+        @Parameters(name = "{0}")
+        fun getParams(): List<FlagsParameterization> {
+            return FlagsParameterization.allCombinationsOf(FLAG_GLANCEABLE_HUB_V2)
+        }
     }
 }
