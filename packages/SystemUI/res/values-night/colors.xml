@@ -108,8 +108,14 @@
 
     <color name="people_tile_background">@color/material_dynamic_secondary20</color>
 
-    <!-- Dark Theme colors for notification shade/scrim -->
-    <color name="shade_panel">@android:color/system_accent1_900</color>
+    <!-- Dark theme base colors for notification shade/scrim, the alpha component is adjusted
+     programmatically to match the spec -->
+    <color name="shade_panel">@android:color/system_accent1_800</color>
+    <color name="surface_effect_0">@android:color/system_accent1_800</color>
+
+    <!-- todo(b/388891904) Remove updated color references once they are available. -->
+    <color name="shade_panel_base">@color/shade_panel</color>
+    <color name="notification_scrim_base">@color/surface_effect_0</color>
 
     <!-- Keyboard shortcut helper dialog -->
     <color name="ksh_key_item_color">@*android:color/system_on_surface_variant_dark</color>

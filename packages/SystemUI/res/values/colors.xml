@@ -31,8 +31,14 @@
     <!-- The dark background color behind the shade -->
     <color name="shade_scrim_background_dark">@androidprv:color/system_under_surface_light</color>
 
-    <!-- Colors for notification shade/scrim -->
-    <color name="shade_panel">@android:color/system_accent1_800</color>
+    <!-- Base colors for notification shade/scrim, the alpha component is adjusted programmatically
+    to match the spec -->
+    <color name="shade_panel">@android:color/system_accent1_900</color>
+    <color name="surface_effect_0">@android:color/system_accent1_100</color>
+
+    <!-- todo(b/388891904) Remove updated color references once they are available. -->
+    <color name="shade_panel_base">@color/shade_panel</color>
+    <color name="notification_scrim_base">@color/surface_effect_0</color>
 
     <!-- The color of the background in the separated list of the Global Actions menu -->
     <color name="global_actions_separated_background">#F5F5F5</color>
