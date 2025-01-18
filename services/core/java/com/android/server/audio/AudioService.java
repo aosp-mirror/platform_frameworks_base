@@ -11953,7 +11953,7 @@ public class AudioService extends IAudioService.Stub
         mLoudnessCodecHelper.startLoudnessCodecUpdates(sessionId);
     }
 
-    /** @see LoudnessCodecController#release() */
+    /** @see LoudnessCodecController#close() */
     @Override
     public void stopLoudnessCodecUpdates(int sessionId) {
         mLoudnessCodecHelper.stopLoudnessCodecUpdates(sessionId);
