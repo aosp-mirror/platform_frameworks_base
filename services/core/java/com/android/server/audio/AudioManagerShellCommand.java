@@ -69,6 +69,8 @@ class AudioManagerShellCommand extends ShellCommand {
                 return getMinVolume();
             case "get-max-volume":
                 return getMaxVolume();
+            case "get-stream-volume":
+                return getStreamVolume();
             case "set-device-volume":
                 return setDeviceVolume();
             case "adj-mute":
@@ -114,6 +116,8 @@ class AudioManagerShellCommand extends ShellCommand {
         pw.println("    Gets the min volume for STREAM_TYPE");
         pw.println("  get-max-volume STREAM_TYPE");
         pw.println("    Gets the max volume for STREAM_TYPE");
+        pw.println("  get-stream-volume STREAM_TYPE");
+        pw.println("    Gets the volume for STREAM_TYPE");
         pw.println("  set-device-volume STREAM_TYPE VOLUME_INDEX NATIVE_DEVICE_TYPE");
         pw.println("    Sets for NATIVE_DEVICE_TYPE the STREAM_TYPE volume to VOLUME_INDEX");
         pw.println("  adj-mute STREAM_TYPE");
@@ -319,6 +323,15 @@ class AudioManagerShellCommand extends ShellCommand {
         final int stream = readIntArg();
         final int result = am.getStreamMaxVolume(stream);
         getOutPrintWriter().println("AudioManager.getStreamMaxVolume(" + stream + ") -> " + result);
+        return 0;
+    }
+
+    private int getStreamVolume() {
+        final Context context = mService.mContext;
+        final AudioManager am = context.getSystemService(AudioManager.class);
+        final int stream = readIntArg();
+        final int result = am.getStreamVolume(stream);
+        getOutPrintWriter().println("AudioManager.getStreamVolume(" + stream + ") -> " + result);
         return 0;
     }
 

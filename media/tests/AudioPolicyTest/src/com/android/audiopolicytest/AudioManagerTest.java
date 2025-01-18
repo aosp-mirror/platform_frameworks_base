@@ -67,6 +67,17 @@ public class AudioManagerTest {
 
     private AudioManager mAudioManager;
 
+    private static final int[] PUBLIC_STREAM_TYPES = {
+            STREAM_VOICE_CALL,
+            STREAM_SYSTEM,
+            STREAM_RING,
+            STREAM_MUSIC,
+            STREAM_ALARM,
+            STREAM_NOTIFICATION,
+            STREAM_DTMF,
+            STREAM_ACCESSIBILITY,
+    };
+
     @Rule
     public final AudioVolumesTestRule rule = new AudioVolumesTestRule();
 
@@ -226,22 +237,23 @@ public class AudioManagerTest {
     public void getStreamMinMaxVolume_consistentWithAs() throws Exception {
         IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
         IAudioService service = IAudioService.Stub.asInterface(b);
-        final int[] streamTypes = {
-                STREAM_VOICE_CALL,
-                STREAM_SYSTEM,
-                STREAM_RING,
-                STREAM_MUSIC,
-                STREAM_ALARM,
-                STREAM_NOTIFICATION,
-                STREAM_DTMF,
-                STREAM_ACCESSIBILITY,
-        };
 
-        for (int streamType : streamTypes) {
+        for (int streamType : PUBLIC_STREAM_TYPES) {
             assertEquals(service.getStreamMinVolume(streamType),
                     mAudioManager.getStreamMinVolume(streamType));
             assertEquals(service.getStreamMaxVolume(streamType),
                     mAudioManager.getStreamMaxVolume(streamType));
+        }
+    }
+
+    @Test
+    public void getStreamVolume_consistentWithAs() throws Exception {
+        IBinder b = ServiceManager.getService(Context.AUDIO_SERVICE);
+        IAudioService service = IAudioService.Stub.asInterface(b);
+
+        for (int streamType : PUBLIC_STREAM_TYPES) {
+            assertEquals(service.getStreamVolume(streamType),
+                    mAudioManager.getStreamVolume(streamType));
         }
     }
 
