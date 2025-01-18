@@ -284,6 +284,10 @@ public class CaptionWindowDecorViewModel implements WindowDecorViewModel, FocusT
     }
 
     private boolean shouldShowWindowDecor(RunningTaskInfo taskInfo) {
+        if (mDisplayController.getDisplay(taskInfo.displayId) == null) {
+            // If DisplayController doesn't have it tracked, it could be a private/managed display.
+            return false;
+        }
         if (taskInfo.getWindowingMode() == WINDOWING_MODE_FREEFORM) {
             return true;
         }
