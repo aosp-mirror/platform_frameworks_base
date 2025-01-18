@@ -36,7 +36,6 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.animation.scene.ContentKey
-import com.android.compose.animation.scene.MutableSceneTransitionLayoutState
 import com.android.compose.animation.scene.OverlayKey
 import com.android.compose.animation.scene.SceneKey
 import com.android.compose.animation.scene.SceneTransitionLayout
@@ -44,6 +43,7 @@ import com.android.compose.animation.scene.SceneTransitions
 import com.android.compose.animation.scene.UserAction
 import com.android.compose.animation.scene.UserActionResult
 import com.android.compose.animation.scene.observableTransitionState
+import com.android.compose.animation.scene.rememberMutableSceneTransitionLayoutState
 import com.android.systemui.lifecycle.rememberActivated
 import com.android.systemui.qs.ui.adapter.QSSceneAdapter
 import com.android.systemui.qs.ui.composable.QuickSettingsTheme
@@ -94,29 +94,27 @@ fun SceneContainer(
     val sceneJankMonitor =
         rememberActivated(traceName = "sceneJankMonitor") { sceneJankMonitorFactory.create() }
 
-    val state: MutableSceneTransitionLayoutState =
-        remember(view, sceneJankMonitor) {
-            MutableSceneTransitionLayoutState(
-                initialScene = initialSceneKey,
-                canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
-                transitions = sceneTransitions,
-                onTransitionStart = { transition ->
-                    sceneJankMonitor.onTransitionStart(
-                        view = view,
-                        from = transition.fromContent,
-                        to = transition.toContent,
-                        cuj = transition.cuj,
-                    )
-                },
-                onTransitionEnd = { transition ->
-                    sceneJankMonitor.onTransitionEnd(
-                        from = transition.fromContent,
-                        to = transition.toContent,
-                        cuj = transition.cuj,
-                    )
-                },
-            )
-        }
+    val state =
+        rememberMutableSceneTransitionLayoutState(
+            initialScene = initialSceneKey,
+            canChangeScene = { toScene -> viewModel.canChangeScene(toScene) },
+            transitions = sceneTransitions,
+            onTransitionStart = { transition ->
+                sceneJankMonitor.onTransitionStart(
+                    view = view,
+                    from = transition.fromContent,
+                    to = transition.toContent,
+                    cuj = transition.cuj,
+                )
+            },
+            onTransitionEnd = { transition ->
+                sceneJankMonitor.onTransitionEnd(
+                    from = transition.fromContent,
+                    to = transition.toContent,
+                    cuj = transition.cuj,
+                )
+            },
+        )
 
     DisposableEffect(state) {
         val dataSource = SceneTransitionLayoutDataSource(state, coroutineScope)

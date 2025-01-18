@@ -18,8 +18,7 @@ package com.android.compose.animation.scene.content.state
 
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.AnimationVector1D
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.spring
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.runtime.Stable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
@@ -385,14 +384,13 @@ sealed interface TransitionState {
             fun create(): Animatable<Float, AnimationVector1D> {
                 val animatable = Animatable(1f, visibilityThreshold = ProgressVisibilityThreshold)
                 layoutImpl.animationScope.launch {
-                    val motionSpatialSpec = layoutImpl.state.transitions.defaultMotionSpatialSpec
-                    val progressSpec =
-                        spring(
-                            stiffness = motionSpatialSpec.stiffness,
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            visibilityThreshold = ProgressVisibilityThreshold,
-                        )
-                    animatable.animateTo(0f, progressSpec)
+                    @OptIn(ExperimentalMaterial3ExpressiveApi::class)
+                    animatable.animateTo(
+                        targetValue = 0f,
+                        // Quickly animate (use fast) the current transition and without bounces
+                        // (use effects). A new transition will start soon.
+                        animationSpec = layoutImpl.state.motionScheme.fastEffectsSpec(),
+                    )
                 }
 
                 return animatable

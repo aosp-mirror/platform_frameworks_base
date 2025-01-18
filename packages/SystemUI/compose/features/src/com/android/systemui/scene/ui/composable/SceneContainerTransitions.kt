@@ -1,6 +1,5 @@
 package com.android.systemui.scene.ui.composable
 
-import androidx.compose.animation.core.spring
 import com.android.compose.animation.scene.TransitionKey
 import com.android.compose.animation.scene.transitions
 import com.android.internal.jank.Cuj
@@ -47,9 +46,6 @@ import com.android.systemui.shade.ui.composable.Shade
  */
 val SceneContainerTransitions = transitions {
     interruptionHandler = SceneContainerInterruptionHandler
-
-    defaultMotionSpatialSpec =
-        spring(stiffness = 300f, dampingRatio = 0.8f, visibilityThreshold = 0.5f)
 
     // Scene transitions
 

@@ -50,7 +50,7 @@ class PredictiveBackHandlerTest {
 
     @Test
     fun testBack() {
-        val layoutState = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val layoutState = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         rule.setContent {
             SceneTransitionLayout(layoutState) {
                 scene(SceneA, mapOf(Back to SceneB)) { Box(Modifier.fillMaxSize()) }
@@ -70,7 +70,7 @@ class PredictiveBackHandlerTest {
         val transitionFrames = 2
         val layoutState =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions =
                         transitions {
@@ -142,7 +142,7 @@ class PredictiveBackHandlerTest {
     fun testPredictiveBackWithPreview() {
         val layoutState =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions = transitions { from(SceneA, to = SceneB, preview = {}) },
                 )
@@ -192,7 +192,7 @@ class PredictiveBackHandlerTest {
         var canChangeSceneCalled = false
         val layoutState =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     canChangeScene = {
                         canChangeSceneCalled = true
@@ -241,7 +241,7 @@ class PredictiveBackHandlerTest {
     fun backDismissesOverlayWithHighestZIndexByDefault() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     initialOverlays = setOf(OverlayA, OverlayB),
                 )

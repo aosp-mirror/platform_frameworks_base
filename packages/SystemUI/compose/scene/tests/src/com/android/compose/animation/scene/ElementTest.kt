@@ -209,7 +209,7 @@ class ElementTest {
 
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) { spec = tween }
@@ -343,7 +343,7 @@ class ElementTest {
 
     @Test
     fun elementIsReusedBetweenScenes() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         var sceneCState by mutableStateOf(0)
         val key = TestElements.Foo
         var nullableLayoutImpl: SceneTransitionLayoutImpl? = null
@@ -473,7 +473,7 @@ class ElementTest {
 
     @Test
     fun elementModifierSupportsUpdates() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         var key by mutableStateOf(TestElements.Foo)
         var nullableLayoutImpl: SceneTransitionLayoutImpl? = null
 
@@ -523,7 +523,7 @@ class ElementTest {
             rule.waitUntil(timeoutMillis = 10_000) { animationFinished }
         }
 
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         rule.setContent {
             scrollScope = rememberCoroutineScope()
 
@@ -618,7 +618,7 @@ class ElementTest {
     fun layoutGetsCurrentTransitionStateFromComposition() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) {
@@ -663,7 +663,8 @@ class ElementTest {
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(initialScene = SceneA) }
+        val state =
+            rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(initialScene = SceneA) }
         rule.setContent {
             density = LocalDensity.current
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -718,7 +719,8 @@ class ElementTest {
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(initialScene = SceneA) }
+        val state =
+            rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(initialScene = SceneA) }
         rule.setContent {
             density = LocalDensity.current
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -813,7 +815,8 @@ class ElementTest {
         // The draggable touch slop, i.e. the min px distance a touch pointer must move before it is
         // detected as a drag event.
         var touchSlop = 0f
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(initialScene = SceneA) }
+        val state =
+            rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(initialScene = SceneA) }
         rule.setContent {
             density = LocalDensity.current
             touchSlop = LocalViewConfiguration.current.touchSlop
@@ -866,7 +869,8 @@ class ElementTest {
         val layoutWidth = 200.dp
         val layoutHeight = 400.dp
 
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(initialScene = SceneA) }
+        val state =
+            rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(initialScene = SceneA) }
 
         rule.setContent {
             density = LocalDensity.current
@@ -934,7 +938,7 @@ class ElementTest {
 
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     initialScene = SceneA,
                     transitions =
                         transitions {
@@ -943,7 +947,6 @@ class ElementTest {
                             }
                         },
                 )
-                    as MutableSceneTransitionLayoutStateImpl
             }
 
         rule.setContent {
@@ -999,7 +1002,7 @@ class ElementTest {
 
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions {
                         // Foo is at the top left corner of scene A. We make it disappear during A
@@ -1126,7 +1129,7 @@ class ElementTest {
 
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
@@ -1331,7 +1334,7 @@ class ElementTest {
         val fooSize = 100.dp
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) { spec = tween(duration, easing = LinearEasing) }
@@ -1439,7 +1442,7 @@ class ElementTest {
     @Test
     fun targetStateIsSetEvenWhenNotPlaced() {
         // Start directly at A => B but with progress < 0f to overscroll on A.
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         lateinit var layoutImpl: SceneTransitionLayoutImpl
         val scope =
@@ -1473,7 +1476,7 @@ class ElementTest {
     fun lastAlphaIsNotSetByOutdatedLayer() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } },
                 )
@@ -1537,7 +1540,7 @@ class ElementTest {
     fun fadingElementsDontAppearInstantly() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions { from(SceneA, to = SceneB) { fade(TestElements.Foo) } },
                 )
@@ -1583,7 +1586,7 @@ class ElementTest {
 
     @Test
     fun lastPlacementValuesAreClearedOnNestedElements() {
-        val state = rule.runOnIdle { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnIdle { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         @Composable
         fun ContentScope.NestedFooBar() {
@@ -1658,7 +1661,7 @@ class ElementTest {
     fun currentTransitionSceneIsUsedToComputeElementValues() {
         val state =
             rule.runOnIdle {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions {
                         from(SceneB, to = SceneC) {
@@ -1709,7 +1712,7 @@ class ElementTest {
 
     @Test
     fun interruptionDeltasAreProperlyCleaned() {
-        val state = rule.runOnIdle { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnIdle { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         @Composable
         fun ContentScope.Foo(offset: Dp) {
@@ -1780,7 +1783,7 @@ class ElementTest {
     fun transparentElementIsNotImpactingInterruption() {
         val state =
             rule.runOnIdle {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     SceneA,
                     transitions {
                         from(SceneA, to = SceneB) {
@@ -1856,7 +1859,7 @@ class ElementTest {
 
     @Test
     fun replacedTransitionDoesNotTriggerInterruption() {
-        val state = rule.runOnIdle { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnIdle { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         @Composable
         fun ContentScope.Foo(modifier: Modifier = Modifier) {
@@ -2027,7 +2030,7 @@ class ElementTest {
     ): SceneTransitionLayoutImpl {
         val state =
             rule.runOnIdle {
-                MutableSceneTransitionLayoutState(
+                MutableSceneTransitionLayoutStateForTests(
                     from,
                     transitions { from(from, to = to, preview = preview, builder = transition) },
                 )
@@ -2174,7 +2177,7 @@ class ElementTest {
             )
         }
 
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         val scope =
             rule.setContentAndCreateMainScope {
                 SceneTransitionLayout(state) {
@@ -2215,7 +2218,7 @@ class ElementTest {
             Box(modifier.element(TestElements.Foo).size(50.dp))
         }
 
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         val scope =
             rule.setContentAndCreateMainScope {
                 SceneTransitionLayout(state) {

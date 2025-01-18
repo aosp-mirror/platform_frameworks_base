@@ -17,10 +17,7 @@
 package com.android.compose.animation.scene
 
 import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.animation.core.snap
-import androidx.compose.animation.core.spring
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.util.fastForEach
@@ -34,7 +31,6 @@ import com.android.internal.jank.Cuj.CujType
 /** The transitions configuration of a [SceneTransitionLayout]. */
 class SceneTransitions
 internal constructor(
-    internal val defaultMotionSpatialSpec: SpringSpec<Float>,
     internal val transitionSpecs: List<TransitionSpecImpl>,
     internal val interruptionHandler: InterruptionHandler,
 ) {
@@ -123,16 +119,8 @@ internal constructor(
         )
 
     companion object {
-        internal val DefaultSwipeSpec =
-            spring(
-                stiffness = Spring.StiffnessMediumLow,
-                dampingRatio = Spring.DampingRatioLowBouncy,
-                visibilityThreshold = OffsetVisibilityThreshold,
-            )
-
         val Empty =
             SceneTransitions(
-                defaultMotionSpatialSpec = DefaultSwipeSpec,
                 transitionSpecs = emptyList(),
                 interruptionHandler = DefaultInterruptionHandler,
             )
@@ -188,15 +176,7 @@ internal interface TransformationSpec {
      * The [AnimationSpec] used to animate the associated transition progress from `0` to `1` when
      * the transition is triggered (i.e. it is not gesture-based).
      */
-    val progressSpec: AnimationSpec<Float>
-
-    /**
-     * The [SpringSpec] used to animate the associated transition progress when the transition was
-     * started by a swipe and is now animating back to a scene because the user lifted their finger.
-     *
-     * If `null`, then the [SceneTransitions.defaultMotionSpatialSpec] will be used.
-     */
-    val motionSpatialSpec: AnimationSpec<Float>?
+    val progressSpec: AnimationSpec<Float>?
 
     /**
      * The distance it takes for this transition to animate from 0% to 100% when it is driven by a
@@ -213,7 +193,6 @@ internal interface TransformationSpec {
         internal val Empty =
             TransformationSpecImpl(
                 progressSpec = snap(),
-                motionSpatialSpec = null,
                 distance = null,
                 transformationMatchers = emptyList(),
             )
@@ -246,7 +225,6 @@ internal class TransitionSpecImpl(
                 val reverse = transformationSpec.invoke(transition)
                 TransformationSpecImpl(
                     progressSpec = reverse.progressSpec,
-                    motionSpatialSpec = reverse.motionSpatialSpec,
                     distance = reverse.distance,
                     transformationMatchers =
                         reverse.transformationMatchers.map {
@@ -275,8 +253,7 @@ internal class TransitionSpecImpl(
  * [ElementTransformations].
  */
 internal class TransformationSpecImpl(
-    override val progressSpec: AnimationSpec<Float>,
-    override val motionSpatialSpec: SpringSpec<Float>?,
+    override val progressSpec: AnimationSpec<Float>?,
     override val distance: UserActionDistance?,
     override val transformationMatchers: List<TransformationMatcher>,
 ) : TransformationSpec {

@@ -73,7 +73,7 @@ class OverlayTest {
 
     @Test
     fun showThenHideOverlay() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         lateinit var coroutineScope: CoroutineScope
         rule.setContent {
             coroutineScope = rememberCoroutineScope()
@@ -115,7 +115,7 @@ class OverlayTest {
 
     @Test
     fun multipleOverlays() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         lateinit var coroutineScope: CoroutineScope
         rule.setContent {
             coroutineScope = rememberCoroutineScope()
@@ -213,7 +213,7 @@ class OverlayTest {
             }
         }
 
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutState(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
         lateinit var coroutineScope: CoroutineScope
         rule.setContent {
             coroutineScope = rememberCoroutineScope()
@@ -285,7 +285,7 @@ class OverlayTest {
     fun overlayAlignment() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(SceneA, initialOverlays = setOf(OverlayA))
+                MutableSceneTransitionLayoutStateForTests(SceneA, initialOverlays = setOf(OverlayA))
             }
         var alignment by mutableStateOf(Alignment.Center)
         rule.setContent {
@@ -320,7 +320,7 @@ class OverlayTest {
     fun overlayMaxSizeIsCurrentSceneSize() {
         val state =
             rule.runOnUiThread {
-                MutableSceneTransitionLayoutState(SceneA, initialOverlays = setOf(OverlayA))
+                MutableSceneTransitionLayoutStateForTests(SceneA, initialOverlays = setOf(OverlayA))
             }
 
         val contentTag = "overlayContent"
@@ -742,7 +742,7 @@ class OverlayTest {
 
     @Test
     fun overscrollingOverlay_movableElementNotInOverlay() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         val key = MovableElementKey("Foo", contents = setOf(SceneA))
         val movableElementChildTag = "movableElementChildTag"
@@ -769,7 +769,7 @@ class OverlayTest {
 
     @Test
     fun overlaysAreModalByDefault() {
-        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateImpl(SceneA) }
+        val state = rule.runOnUiThread { MutableSceneTransitionLayoutStateForTests(SceneA) }
 
         val scrollState = ScrollState(initial = 0)
         val scope =

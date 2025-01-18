@@ -60,7 +60,7 @@ class DraggableHandlerTest {
     private class TestGestureScope(val testScope: MonotonicClockTestScope) {
         var canChangeScene: (SceneKey) -> Boolean = { true }
         val layoutState =
-            MutableSceneTransitionLayoutStateImpl(
+            MutableSceneTransitionLayoutStateForTests(
                 SceneA,
                 EmptyTestTransitions,
                 canChangeScene = { canChangeScene(it) },
@@ -640,10 +640,7 @@ class DraggableHandlerTest {
     @Test
     fun overscroll_releaseBetween0And100Percent_up() = runGestureTest {
         // Make scene B overscrollable.
-        layoutState.transitions = transitions {
-            defaultMotionSpatialSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy)
-            from(SceneA, to = SceneB) {}
-        }
+        layoutState.transitions = transitions { from(SceneA, to = SceneB) {} }
 
         val dragController =
             onDragStarted(
@@ -671,10 +668,7 @@ class DraggableHandlerTest {
     @Test
     fun overscroll_releaseBetween0And100Percent_down() = runGestureTest {
         // Make scene C overscrollable.
-        layoutState.transitions = transitions {
-            defaultMotionSpatialSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy)
-            from(SceneA, to = SceneC) {}
-        }
+        layoutState.transitions = transitions { from(SceneA, to = SceneC) {} }
 
         val dragController =
             onDragStarted(
