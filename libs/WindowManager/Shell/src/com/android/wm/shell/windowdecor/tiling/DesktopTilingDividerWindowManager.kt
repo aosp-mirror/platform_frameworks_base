@@ -34,7 +34,6 @@ import android.view.WindowManager
 import android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
 import android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL
 import android.view.WindowManager.LayoutParams.FLAG_SLIPPERY
-import android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH
 import android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION
 import android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY
@@ -240,7 +239,6 @@ class DesktopTilingDividerWindowManager(
                 FLAG_NOT_FOCUSABLE or
                     FLAG_NOT_TOUCH_MODAL or
                     FLAG_WATCH_OUTSIDE_TOUCH or
-                    FLAG_SPLIT_TOUCH or
                     FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT,
             )

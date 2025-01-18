@@ -19,7 +19,6 @@ package com.android.wm.shell.common.split;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
 import static android.view.WindowManager.LayoutParams.FLAG_SLIPPERY;
-import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_NO_MOVE_ANIMATION;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
@@ -126,7 +125,7 @@ public final class SplitWindowManager extends WindowlessWindowManager {
         WindowManager.LayoutParams lp = new WindowManager.LayoutParams(
                 dividerBounds.width(), dividerBounds.height(), TYPE_DOCK_DIVIDER,
                 FLAG_NOT_FOCUSABLE | FLAG_NOT_TOUCH_MODAL | FLAG_WATCH_OUTSIDE_TOUCH
-                        | FLAG_SPLIT_TOUCH | FLAG_SLIPPERY,
+                        | FLAG_SLIPPERY,
                 PixelFormat.TRANSLUCENT);
         lp.token = new Binder();
         lp.setTitle(mWindowName);

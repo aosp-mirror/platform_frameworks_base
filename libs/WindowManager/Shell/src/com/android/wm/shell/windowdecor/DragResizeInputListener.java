@@ -17,7 +17,6 @@
 package com.android.wm.shell.windowdecor;
 
 import static android.view.WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
-import static android.view.WindowManager.LayoutParams.FLAG_SPLIT_TOUCH;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHANNEL;
 import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_SPY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY;
@@ -122,7 +121,7 @@ class DragResizeInputListener implements AutoCloseable {
                     mDecorationSurface,
                     mClientToken,
                     null /* hostInputToken */,
-                    FLAG_NOT_FOCUSABLE | FLAG_SPLIT_TOUCH,
+                    FLAG_NOT_FOCUSABLE,
                     PRIVATE_FLAG_TRUSTED_OVERLAY,
                     INPUT_FEATURE_SPY,
                     TYPE_APPLICATION,
