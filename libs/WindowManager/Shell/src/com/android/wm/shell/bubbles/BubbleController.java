@@ -94,7 +94,6 @@ import com.android.wm.shell.Flags;
 import com.android.wm.shell.R;
 import com.android.wm.shell.ShellTaskOrganizer;
 import com.android.wm.shell.bubbles.bar.BubbleBarLayerView;
-import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.bubbles.shortcut.BubbleShortcutHelper;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
@@ -204,7 +203,6 @@ public class BubbleController implements ConfigurationChangeListener,
     private final ShellController mShellController;
     private final ShellCommandHandler mShellCommandHandler;
     private final IWindowManager mWmService;
-    private final BubbleProperties mBubbleProperties;
     private final BubbleTaskViewFactory mBubbleTaskViewFactory;
     private final BubbleExpandedViewManager mExpandedViewManager;
     private final ResizabilityChecker mResizabilityChecker;
@@ -323,7 +321,6 @@ public class BubbleController implements ConfigurationChangeListener,
             Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService,
-            BubbleProperties bubbleProperties,
             ResizabilityChecker resizabilityChecker) {
         mContext = context;
         mShellCommandHandler = shellCommandHandler;
@@ -373,7 +370,6 @@ public class BubbleController implements ConfigurationChangeListener,
         mDragAndDropController = dragAndDropController;
         mSyncQueue = syncQueue;
         mWmService = wmService;
-        mBubbleProperties = bubbleProperties;
         shellInit.addInitCallback(this::onInit, this);
         mBubbleTaskViewFactory = new BubbleTaskViewFactory() {
             @Override
@@ -592,7 +588,6 @@ public class BubbleController implements ConfigurationChangeListener,
      * <p>If bubble bar is supported, bubble views will be updated to switch to bar mode.
      */
     public void registerBubbleStateListener(Bubbles.BubbleStateListener listener) {
-        mBubbleProperties.refresh();
         if (canShowAsBubbleBar() && listener != null) {
             // Only set the listener if we can show the bubble bar.
             mBubbleStateListener = listener;
@@ -610,7 +605,6 @@ public class BubbleController implements ConfigurationChangeListener,
      * will be updated accordingly.
      */
     public void unregisterBubbleStateListener() {
-        mBubbleProperties.refresh();
         if (mBubbleStateListener != null) {
             mBubbleStateListener = null;
             setUpBubbleViewsForMode();
@@ -775,7 +769,7 @@ public class BubbleController implements ConfigurationChangeListener,
 
     /** Whether the current configuration supports showing as bubble bar. */
     private boolean canShowAsBubbleBar() {
-        return mBubbleProperties.isBubbleBarEnabled() && mBubblePositioner.isLargeScreen();
+        return Flags.enableBubbleBar() && mBubblePositioner.isLargeScreen();
     }
 
     /**

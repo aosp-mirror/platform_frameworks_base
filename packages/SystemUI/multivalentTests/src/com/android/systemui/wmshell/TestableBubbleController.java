@@ -31,7 +31,6 @@ import com.android.wm.shell.bubbles.BubbleDataRepository;
 import com.android.wm.shell.bubbles.BubbleLogger;
 import com.android.wm.shell.bubbles.BubblePositioner;
 import com.android.wm.shell.bubbles.ResizabilityChecker;
-import com.android.wm.shell.bubbles.properties.BubbleProperties;
 import com.android.wm.shell.common.DisplayController;
 import com.android.wm.shell.common.DisplayImeController;
 import com.android.wm.shell.common.DisplayInsetsController;
@@ -83,7 +82,6 @@ public class TestableBubbleController extends BubbleController {
             Transitions transitions,
             SyncTransactionQueue syncQueue,
             IWindowManager wmService,
-            BubbleProperties bubbleProperties,
             ResizabilityChecker resizabilityChecker) {
         super(context, shellInit, shellCommandHandler, shellController, data, Runnable::run,
                 floatingContentCoordinator, dataRepository, statusBarService, windowManager,
@@ -91,7 +89,7 @@ public class TestableBubbleController extends BubbleController {
                 bubbleLogger, taskStackListener, shellTaskOrganizer, positioner, displayController,
                 oneHandedOptional, dragAndDropController, shellMainExecutor, shellMainHandler,
                 new SyncExecutor(), taskViewRepository, taskViewTransitions, transitions,
-                syncQueue, wmService, bubbleProperties, resizabilityChecker);
+                syncQueue, wmService, resizabilityChecker);
         setInflateSynchronously(true);
         onInit();
     }
