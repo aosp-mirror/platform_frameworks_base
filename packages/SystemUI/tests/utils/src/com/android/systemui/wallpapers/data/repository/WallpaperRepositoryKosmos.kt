@@ -26,13 +26,11 @@ import com.android.systemui.kosmos.Kosmos.Fixture
 import com.android.systemui.kosmos.testDispatcher
 import com.android.systemui.kosmos.testScope
 import com.android.systemui.user.data.repository.userRepository
-import kotlinx.coroutines.ExperimentalCoroutinesApi
 
-@OptIn(ExperimentalCoroutinesApi::class)
 val Kosmos.wallpaperRepository by Fixture {
     WallpaperRepositoryImpl(
         context = applicationContext,
-        scope = testScope,
+        scope = testScope.backgroundScope,
         bgDispatcher = testDispatcher,
         broadcastDispatcher = broadcastDispatcher,
         userRepository = userRepository,

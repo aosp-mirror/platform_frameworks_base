@@ -84,7 +84,7 @@ object LiftReveal : LightRevealEffect {
                 scrim.width * initialWidthMultiplier + -scrim.width * ovalWidthIncreaseAmount,
                 scrim.height * OVAL_INITIAL_TOP_PERCENT - scrim.height * interpolatedAmount,
                 scrim.width * (1f - initialWidthMultiplier) + scrim.width * ovalWidthIncreaseAmount,
-                scrim.height * OVAL_INITIAL_BOTTOM_PERCENT + scrim.height * interpolatedAmount
+                scrim.height * OVAL_INITIAL_BOTTOM_PERCENT + scrim.height * interpolatedAmount,
             )
         }
     }
@@ -98,7 +98,7 @@ data class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevea
             /* controlX1= */ 0.4f,
             /* controlY1= */ 0f,
             /* controlX2= */ 0.2f,
-            /* controlY2= */ 1f
+            /* controlY2= */ 1f,
         )
 
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
@@ -109,14 +109,14 @@ data class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevea
         scrim.startColorAlpha =
             getPercentPastThreshold(
                 1 - interpolatedAmount,
-                threshold = 1 - START_COLOR_REVEAL_PERCENTAGE
+                threshold = 1 - START_COLOR_REVEAL_PERCENTAGE,
             )
 
         scrim.revealGradientEndColorAlpha =
             1f -
                 getPercentPastThreshold(
                     interpolatedAmount,
-                    threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE
+                    threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE,
                 )
 
         // Start changing gradient bounds later to avoid harsh gradient in the beginning
@@ -127,14 +127,14 @@ data class LinearLightRevealEffect(private val isVertical: Boolean) : LightRevea
                 left = scrim.viewWidth / 2 - (scrim.viewWidth / 2) * gradientBoundsAmount,
                 top = 0f,
                 right = scrim.viewWidth / 2 + (scrim.viewWidth / 2) * gradientBoundsAmount,
-                bottom = scrim.viewHeight.toFloat()
+                bottom = scrim.viewHeight.toFloat(),
             )
         } else {
             scrim.setRevealGradientBounds(
                 left = 0f,
                 top = scrim.viewHeight / 2 - (scrim.viewHeight / 2) * gradientBoundsAmount,
                 right = scrim.viewWidth.toFloat(),
-                bottom = scrim.viewHeight / 2 + (scrim.viewHeight / 2) * gradientBoundsAmount
+                bottom = scrim.viewHeight / 2 + (scrim.viewHeight / 2) * gradientBoundsAmount,
             )
         }
     }
@@ -166,7 +166,7 @@ data class LinearSideLightRevealEffect(private val isVertical: Boolean) : LightR
             1f -
                 getPercentPastThreshold(
                     amount,
-                    threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE
+                    threshold = REVEAL_GRADIENT_END_COLOR_ALPHA_START_PERCENTAGE,
                 )
 
         val gradientBoundsAmount = lerp(GRADIENT_START_BOUNDS_PERCENTAGE, 1f, amount)
@@ -175,14 +175,14 @@ data class LinearSideLightRevealEffect(private val isVertical: Boolean) : LightR
                 left = -(scrim.viewWidth) * gradientBoundsAmount,
                 top = -(scrim.viewHeight) * gradientBoundsAmount,
                 right = (scrim.viewWidth) * gradientBoundsAmount,
-                bottom = (scrim.viewHeight) + (scrim.viewHeight) * gradientBoundsAmount
+                bottom = (scrim.viewHeight) + (scrim.viewHeight) * gradientBoundsAmount,
             )
         } else {
             scrim.setRevealGradientBounds(
                 left = -(scrim.viewWidth) * gradientBoundsAmount,
                 top = -(scrim.viewHeight) * gradientBoundsAmount,
                 right = (scrim.viewWidth) + (scrim.viewWidth) * gradientBoundsAmount,
-                bottom = (scrim.viewHeight) * gradientBoundsAmount
+                bottom = (scrim.viewHeight) * gradientBoundsAmount,
             )
         }
     }
@@ -212,7 +212,7 @@ data class CircleReveal(
     /** Radius of initial state of circle reveal */
     val startRadius: Int,
     /** Radius of end state of circle reveal */
-    val endRadius: Int
+    val endRadius: Int,
 ) : LightRevealEffect {
     override fun setRevealAmountOnScrim(amount: Float, scrim: LightRevealScrim) {
         // reveal amount updates already have an interpolator, so we intentionally use the
@@ -225,7 +225,7 @@ data class CircleReveal(
             centerX - radius /* left */,
             centerY - radius /* top */,
             centerX + radius /* right */,
-            centerY + radius /* bottom */
+            centerY + radius, /* bottom */
         )
     }
 }
@@ -259,7 +259,7 @@ data class PowerButtonReveal(
                     powerButtonY - height * interpolatedAmount,
                     width * (1f + OFF_SCREEN_START_AMOUNT) +
                         width * INCREASE_MULTIPLIER * interpolatedAmount,
-                    powerButtonY + height * interpolatedAmount
+                    powerButtonY + height * interpolatedAmount,
                 )
             } else if (rotation == RotationUtils.ROTATION_LANDSCAPE) {
                 setRevealGradientBounds(
@@ -268,7 +268,7 @@ data class PowerButtonReveal(
                         height * INCREASE_MULTIPLIER * interpolatedAmount,
                     powerButtonY + width * interpolatedAmount,
                     (-height * OFF_SCREEN_START_AMOUNT) +
-                        height * INCREASE_MULTIPLIER * interpolatedAmount
+                        height * INCREASE_MULTIPLIER * interpolatedAmount,
                 )
             } else {
                 // RotationUtils.ROTATION_SEASCAPE
@@ -278,7 +278,7 @@ data class PowerButtonReveal(
                         height * INCREASE_MULTIPLIER * interpolatedAmount,
                     (width - powerButtonY) + width * interpolatedAmount,
                     height * (1f + OFF_SCREEN_START_AMOUNT) +
-                        height * INCREASE_MULTIPLIER * interpolatedAmount
+                        height * INCREASE_MULTIPLIER * interpolatedAmount,
                 )
             }
         }
@@ -296,9 +296,9 @@ class LightRevealScrim
 @JvmOverloads
 constructor(
     context: Context?,
-    attrs: AttributeSet?,
+    attrs: AttributeSet? = null,
     initialWidth: Int? = null,
-    initialHeight: Int? = null
+    initialHeight: Int? = null,
 ) : View(context, attrs) {
 
     private val logString = this::class.simpleName!! + "@" + hashCode()
@@ -322,8 +322,9 @@ constructor(
                 revealEffect.setRevealAmountOnScrim(value, this)
                 updateScrimOpaque()
                 TrackTracer.instantForGroup(
-                    "scrim", { "light_reveal_amount $logString" },
-                    (field * 100).toInt()
+                    "scrim",
+                    { "light_reveal_amount $logString" },
+                    (field * 100).toInt(),
                 )
                 invalidate()
             }
@@ -440,7 +441,7 @@ constructor(
                     1f,
                     intArrayOf(Color.TRANSPARENT, Color.WHITE),
                     floatArrayOf(0f, 1f),
-                    Shader.TileMode.CLAMP
+                    Shader.TileMode.CLAMP,
                 )
 
             // SRC_OVER ensures that we draw the semitransparent pixels over other views in the same
@@ -466,6 +467,7 @@ constructor(
         viewWidth = measuredWidth
         viewHeight = measuredHeight
     }
+
     /**
      * Sets bounds for the transparent oval gradient that reveals the views below the scrim. This is
      * simply a helper method that sets [revealGradientCenter], [revealGradientWidth], and
@@ -513,7 +515,7 @@ constructor(
         gradientPaint.colorFilter =
             PorterDuffColorFilter(
                 getColorWithAlpha(revealGradientEndColor, revealGradientEndColorAlpha),
-                PorterDuff.Mode.MULTIPLY
+                PorterDuff.Mode.MULTIPLY,
             )
     }
 }

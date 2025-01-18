@@ -179,6 +179,12 @@ fun SceneContainer(
                 }
             }
     ) {
+        SceneRevealScrim(
+            viewModel = viewModel.lightRevealScrim,
+            wallpaperViewModel = viewModel.wallpaperViewModel,
+            modifier = Modifier.fillMaxSize(),
+        )
+
         SceneTransitionLayout(
             state = state,
             modifier = modifier.fillMaxSize(),
