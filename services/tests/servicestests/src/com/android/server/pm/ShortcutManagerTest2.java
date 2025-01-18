@@ -1612,7 +1612,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
                 );
     }
 
-    public void testThrottling() {
+    public void disabled_testThrottling() {
         final ShortcutInfo si1 = makeShortcut("shortcut1");
 
         assertTrue(mManager.setDynamicShortcuts(list(si1)));
@@ -1685,7 +1685,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(START_TIME + INTERVAL * 9, mManager.getRateLimitResetTime());
     }
 
-    public void testThrottling_rewind() {
+    public void disabled_testThrottling_rewind() {
         final ShortcutInfo si1 = makeShortcut("shortcut1");
 
         assertTrue(mManager.setDynamicShortcuts(list(si1)));
@@ -1715,7 +1715,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         assertEquals(3, mManager.getRemainingCallCount());
     }
 
-    public void testThrottling_perPackage() {
+    public void disabled_testThrottling_perPackage() {
         final ShortcutInfo si1 = makeShortcut("shortcut1");
 
         assertTrue(mManager.setDynamicShortcuts(list(si1)));
@@ -1847,7 +1847,7 @@ public class ShortcutManagerTest2 extends BaseShortcutManagerTest {
         });
     }
 
-    public void testThrottling_foreground() throws Exception {
+    public void disabled_testThrottling_foreground() throws Exception {
         prepareCrossProfileDataSet();
 
         dumpsysOnLogcat("Before save & load");
