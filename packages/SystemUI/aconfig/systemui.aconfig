@@ -1832,6 +1832,13 @@ flag {
 }
 
 flag {
+    name: "double_tap_to_sleep"
+    namespace: "systemui"
+    description: "Enable Double Tap to Sleep"
+    bug: "385194612"
+}
+
+flag{
     name: "gsf_bouncer"
     namespace: "systemui"
     description: "Applies GSF font styles to Bouncer surfaces."
