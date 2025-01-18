@@ -17,7 +17,7 @@
 package com.android.systemui.statusbar.chips.call.ui.viewmodel
 
 import android.view.View
-import com.android.internal.jank.InteractionJankMonitor
+import com.android.internal.jank.Cuj
 import com.android.systemui.animation.ActivityTransitionAnimator
 import com.android.systemui.common.shared.model.ContentDescription
 import com.android.systemui.common.shared.model.Icon
@@ -128,7 +128,7 @@ constructor(
                 state.intent,
                 ActivityTransitionAnimator.Controller.fromView(
                     backgroundView,
-                    InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
+                    Cuj.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP,
                 ),
             )
         }
@@ -145,7 +145,7 @@ constructor(
                     StatusBarChipsModernization.assertInNewMode()
                     val animationController =
                         expandable.activityTransitionController(
-                            InteractionJankMonitor.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP
+                            Cuj.CUJ_STATUS_BAR_APP_LAUNCH_FROM_CALL_CHIP
                         )
                     activityStarter.postStartActivityDismissingKeyguard(
                         state.intent,
