@@ -16,17 +16,24 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.statusbar.phone.ScrimController.BUSY_SCRIM_ALPHA;
+import static com.android.systemui.statusbar.phone.ScrimController.TRANSPARENT_BOUNCER_SCRIM_ALPHA;
+
 import android.graphics.Color;
 
 import com.android.app.tracing.coroutines.TrackTracer;
+import com.android.systemui.Flags;
 import com.android.systemui.dock.DockManager;
 import com.android.systemui.res.R;
 import com.android.systemui.scrim.ScrimView;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 
+import kotlinx.coroutines.ExperimentalCoroutinesApi;
+
 /**
  * Possible states of the ScrimController state machine.
  */
+@ExperimentalCoroutinesApi
 public enum ScrimState {
 
     /**
@@ -92,40 +99,19 @@ public enum ScrimState {
         }
     },
 
-    AUTH_SCRIMMED_SHADE {
-        @Override
-        public void prepare(ScrimState previousState) {
-            // notif scrim alpha values are determined by ScrimController#applyState
-            // based on the shade expansion
-
-            mFrontTint = mBackgroundColor;
-            mFrontAlpha = .66f;
-
-            mBehindTint = mBackgroundColor;
-            mBehindAlpha = 1f;
-        }
-    },
-
-    AUTH_SCRIMMED {
-        @Override
-        public void prepare(ScrimState previousState) {
-            mNotifTint = previousState.mNotifTint;
-            mNotifAlpha = previousState.mNotifAlpha;
-
-            mBehindTint = previousState.mBehindTint;
-            mBehindAlpha = previousState.mBehindAlpha;
-
-            mFrontTint = mBackgroundColor;
-            mFrontAlpha = .66f;
-        }
-    },
-
     /**
      * Showing password challenge on the keyguard.
      */
     BOUNCER {
         @Override
         public void prepare(ScrimState previousState) {
+            if (Flags.bouncerUiRevamp()) {
+                mBehindAlpha = mClipQsScrim ? 0.0f : TRANSPARENT_BOUNCER_SCRIM_ALPHA;
+                mNotifAlpha = mClipQsScrim ? TRANSPARENT_BOUNCER_SCRIM_ALPHA : 0;
+                mBehindTint = mNotifTint = mSurfaceColor;
+                mFrontAlpha = 0f;
+                return;
+            }
             mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
             mBehindTint = mClipQsScrim ? mBackgroundColor : mSurfaceColor;
             mNotifAlpha = mClipQsScrim ? mDefaultScrimAlpha : 0;
@@ -136,6 +122,10 @@ public enum ScrimState {
         @Override
         public void setSurfaceColor(int surfaceColor) {
             super.setSurfaceColor(surfaceColor);
+            if (Flags.bouncerUiRevamp()) {
+                mBehindTint = mNotifTint = mSurfaceColor;
+                return;
+            }
             if (!mClipQsScrim) {
                 mBehindTint = mSurfaceColor;
             }
@@ -146,14 +136,37 @@ public enum ScrimState {
      * Showing password challenge on top of a FLAG_SHOW_WHEN_LOCKED activity.
      */
     BOUNCER_SCRIMMED {
+        @ExperimentalCoroutinesApi
         @Override
         public void prepare(ScrimState previousState) {
+            if (Flags.bouncerUiRevamp()) {
+                mBehindAlpha = 0f;
+                mFrontAlpha = TRANSPARENT_BOUNCER_SCRIM_ALPHA;
+                mFrontTint = mSurfaceColor;
+                return;
+            }
             mBehindAlpha = 0;
             mFrontAlpha = mDefaultScrimAlpha;
+        }
+
+        @Override
+        public boolean shouldBlendWithMainColor() {
+            return !Flags.bouncerUiRevamp();
         }
     },
 
     SHADE_LOCKED {
+        @Override
+        public void setDefaultScrimAlpha(float defaultScrimAlpha) {
+            super.setDefaultScrimAlpha(defaultScrimAlpha);
+            if (!Flags.notificationShadeBlur()) {
+                // Temporary change that prevents the shade from being semi-transparent when
+                // bouncer blur is enabled but notification shade blur is not enabled. This is
+                // required to perf test these two flags independently.
+                mDefaultScrimAlpha = BUSY_SCRIM_ALPHA;
+            }
+        }
+
         @Override
         public void prepare(ScrimState previousState) {
             mBehindAlpha = mClipQsScrim ? 1 : mDefaultScrimAlpha;
