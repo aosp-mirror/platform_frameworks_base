@@ -57,7 +57,7 @@ class DesktopModeShellCommandHandler(private val controller: DesktopTasksControl
                 return false
             }
         if (!Flags.enableMultipleDesktopsBackend()) {
-            return controller.moveTaskToDesktop(taskId, transitionSource = UNKNOWN)
+            return controller.moveTaskToDefaultDeskAndActivate(taskId, transitionSource = UNKNOWN)
         }
         if (args.size < 3) {
             pw.println("Error: desk id should be provided as arguments")
@@ -70,8 +70,9 @@ class DesktopModeShellCommandHandler(private val controller: DesktopTasksControl
                 pw.println("Error: desk id should be an integer")
                 return false
             }
+        controller.moveTaskToDesk(taskId = taskId, deskId = deskId, transitionSource = UNKNOWN)
         pw.println("Not implemented.")
-        return false
+        return true
     }
 
     private fun runMoveToNextDisplay(args: Array<String>, pw: PrintWriter): Boolean {
