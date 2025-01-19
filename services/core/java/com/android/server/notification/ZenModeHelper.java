@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.AutomaticZenRule.TYPE_DRIVING;
 import static android.app.AutomaticZenRule.TYPE_UNKNOWN;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_ACTIVATED;
 import static android.app.NotificationManager.AUTOMATIC_RULE_STATUS_DEACTIVATED;
@@ -46,6 +47,7 @@ import static android.service.notification.ZenModeConfig.isImplicitRuleId;
 
 import static com.android.internal.util.FrameworkStatsLog.DND_MODE_RULE;
 import static com.android.internal.util.Preconditions.checkArgument;
+import static com.android.server.notification.Flags.preventZenDeviceEffectsWhileDriving;
 
 import static java.util.Objects.requireNonNull;
 
@@ -2379,6 +2381,26 @@ public class ZenModeHelper {
             }
 
             if (Flags.modesApi()) {
+                // Prevent other rules from applying grayscale if Driving is active (but allow it
+                // if _Driving itself_ wants grayscale).
+                if (Flags.modesUi() && preventZenDeviceEffectsWhileDriving()) {
+                    boolean hasActiveDriving = false;
+                    boolean hasActiveDrivingWithGrayscale = false;
+                    for (ZenRule rule : mConfig.automaticRules.values()) {
+                        if (rule.isActive() && rule.type == TYPE_DRIVING) {
+                            hasActiveDriving = true;
+                            if (rule.zenDeviceEffects != null
+                                    && rule.zenDeviceEffects.shouldDisplayGrayscale()) {
+                                hasActiveDrivingWithGrayscale = true;
+                                break; // Further rules won't affect decision.
+                            }
+                        }
+                    }
+                    if (hasActiveDriving && !hasActiveDrivingWithGrayscale) {
+                        deviceEffectsBuilder.setShouldDisplayGrayscale(false);
+                    }
+                }
+
                 ZenDeviceEffects deviceEffects = deviceEffectsBuilder.build();
                 if (!deviceEffects.equals(mConsolidatedDeviceEffects)) {
                     mConsolidatedDeviceEffects = deviceEffects;

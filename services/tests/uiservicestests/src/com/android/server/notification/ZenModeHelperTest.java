@@ -17,8 +17,10 @@
 package com.android.server.notification;
 
 import static android.app.AutomaticZenRule.TYPE_BEDTIME;
+import static android.app.AutomaticZenRule.TYPE_DRIVING;
 import static android.app.AutomaticZenRule.TYPE_IMMERSIVE;
 import static android.app.AutomaticZenRule.TYPE_SCHEDULE_TIME;
+import static android.app.AutomaticZenRule.TYPE_THEATER;
 import static android.app.AutomaticZenRule.TYPE_UNKNOWN;
 import static android.app.Flags.FLAG_BACKUP_RESTORE_LOGGING;
 import static android.app.Flags.FLAG_MODES_API;
@@ -87,6 +89,7 @@ import static com.android.os.dnd.DNDProtoEnums.PEOPLE_STARRED;
 import static com.android.os.dnd.DNDProtoEnums.ROOT_CONFIG;
 import static com.android.os.dnd.DNDProtoEnums.STATE_ALLOW;
 import static com.android.os.dnd.DNDProtoEnums.STATE_DISALLOW;
+import static com.android.server.notification.Flags.FLAG_PREVENT_ZEN_DEVICE_EFFECTS_WHILE_DRIVING;
 import static com.android.server.notification.ZenModeEventLogger.ACTIVE_RULE_TYPE_MANUAL;
 import static com.android.server.notification.ZenModeHelper.RULE_LIMIT_PER_PACKAGE;
 
@@ -5518,8 +5521,72 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 eq(ORIGIN_INIT_USER));
     }
 
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI, FLAG_PREVENT_ZEN_DEVICE_EFFECTS_WHILE_DRIVING})
+    public void testDeviceEffects_allowsGrayscale() {
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+        reset(mDeviceEffectsApplier);
+        ZenDeviceEffects grayscale = new ZenDeviceEffects.Builder()
+                .setShouldDisplayGrayscale(true)
+                .build();
+        String ruleId = addRuleWithEffects(TYPE_THEATER, grayscale);
+
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, ruleId, CONDITION_TRUE,
+                ORIGIN_APP, CUSTOM_PKG_UID);
+        mTestableLooper.processAllMessages();
+
+        verify(mDeviceEffectsApplier).apply(eq(grayscale), anyInt());
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI, FLAG_PREVENT_ZEN_DEVICE_EFFECTS_WHILE_DRIVING})
+    public void testDeviceEffects_whileDriving_avoidsGrayscale() {
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+        reset(mDeviceEffectsApplier);
+        ZenDeviceEffects grayscale = new ZenDeviceEffects.Builder()
+                .setShouldDisplayGrayscale(true)
+                .build();
+        String ruleWithGrayscale = addRuleWithEffects(TYPE_THEATER, grayscale);
+        String drivingRule = addRuleWithEffects(TYPE_DRIVING, null);
+
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, ruleWithGrayscale,
+                CONDITION_TRUE, ORIGIN_APP, CUSTOM_PKG_UID);
+        mTestableLooper.processAllMessages();
+
+        verify(mDeviceEffectsApplier).apply(eq(grayscale), anyInt());
+
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, drivingRule, CONDITION_TRUE,
+                ORIGIN_APP, CUSTOM_PKG_UID);
+        mTestableLooper.processAllMessages();
+
+        verify(mDeviceEffectsApplier).apply(eq(NO_EFFECTS), anyInt());
+    }
+
+    @Test
+    @EnableFlags({FLAG_MODES_API, FLAG_MODES_UI, FLAG_PREVENT_ZEN_DEVICE_EFFECTS_WHILE_DRIVING})
+    public void testDeviceEffects_whileDrivingWithGrayscale_allowsGrayscale() {
+        mZenModeHelper.setDeviceEffectsApplier(mDeviceEffectsApplier);
+        reset(mDeviceEffectsApplier);
+        ZenDeviceEffects grayscale = new ZenDeviceEffects.Builder()
+                .setShouldDisplayGrayscale(true)
+                .build();
+        String weirdoDrivingWithGrayscale = addRuleWithEffects(TYPE_DRIVING, grayscale);
+
+        mZenModeHelper.setAutomaticZenRuleState(UserHandle.CURRENT, weirdoDrivingWithGrayscale,
+                CONDITION_TRUE, ORIGIN_APP, CUSTOM_PKG_UID);
+        mTestableLooper.processAllMessages();
+
+        verify(mDeviceEffectsApplier).apply(eq(grayscale), anyInt());
+    }
+
     private String addRuleWithEffects(ZenDeviceEffects effects) {
+        return addRuleWithEffects(TYPE_UNKNOWN, effects);
+    }
+
+    private String addRuleWithEffects(int type, @Nullable ZenDeviceEffects effects) {
         AutomaticZenRule rule = new AutomaticZenRule.Builder("Test", CONDITION_ID)
+                .setPackage(mContext.getPackageName())
+                .setType(type)
                 .setDeviceEffects(effects)
                 .build();
         return mZenModeHelper.addAutomaticZenRule(UserHandle.CURRENT, mContext.getPackageName(),

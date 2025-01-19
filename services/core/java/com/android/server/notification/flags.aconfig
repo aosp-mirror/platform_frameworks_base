@@ -190,3 +190,13 @@ flag {
     purpose: PURPOSE_BUGFIX
   }
 }
+
+flag {
+  name: "prevent_zen_device_effects_while_driving"
+  namespace: "systemui"
+  description: "Don't apply certain device effects (such as grayscale) from active zen rules, if a rule of TYPE_DRIVING is active"
+  bug: "390389174"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
