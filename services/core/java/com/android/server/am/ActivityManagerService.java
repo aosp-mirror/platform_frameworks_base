@@ -12796,6 +12796,28 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
+            final long kernelCmaUsage = Debug.getKernelCmaUsageKb();
+            if (kernelCmaUsage >= 0) {
+                pw.print("      Kernel CMA: ");
+                pw.println(stringifyKBSize(kernelCmaUsage));
+                // CMA memory can be in one of the following four states:
+                //
+                // 1. Free, in which case it is accounted for as part of MemFree, which
+                //    is already considered in the lostRAM calculation below.
+                //
+                // 2. Allocated as part of a userspace allocated, in which case it is
+                //    already accounted for in the total PSS value that was computed.
+                //
+                // 3. Allocated for storing compressed memory (ZRAM) on Android kernels.
+                //    This is accounted for by calculating the amount of memory ZRAM
+                //    consumes and including it in the lostRAM calculuation.
+                //
+                // 4. Allocated by a kernel driver, in which case, it is currently not
+                //    attributed to any term that has been derived thus far. Since the
+                //    allocations come from a kernel driver, add it to kernelUsed.
+                kernelUsed += kernelCmaUsage;
+            }
+
              // Note: ION/DMA-BUF heap pools are reclaimable and hence, they are included as part of
              // memInfo.getCachedSizeKb().
             final long lostRAM = memInfo.getTotalSizeKb()
@@ -13313,12 +13335,32 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proto.write(MemInfoDumpProto.CACHED_KERNEL_KB, memInfo.getCachedSizeKb());
                 proto.write(MemInfoDumpProto.FREE_KB, memInfo.getFreeSizeKb());
             }
+            // CMA memory can be in one of the following four states:
+            //
+            // 1. Free, in which case it is accounted for as part of MemFree, which
+            //    is already considered in the lostRAM calculation below.
+            //
+            // 2. Allocated as part of a userspace allocated, in which case it is
+            //    already accounted for in the total PSS value that was computed.
+            //
+            // 3. Allocated for storing compressed memory (ZRAM) on Android Kernels.
+            //    This is accounted for by calculating hte amount of memory ZRAM
+            //    consumes and including it in the lostRAM calculation.
+            //
+            // 4. Allocated by a kernel driver, in which case, it is currently not
+            //    attributed to any term that has been derived thus far, so subtract
+            //    it from lostRAM.
+            long kernelCmaUsage = Debug.getKernelCmaUsageKb();
+            if (kernelCmaUsage < 0) {
+                kernelCmaUsage = 0;
+            }
             long lostRAM = memInfo.getTotalSizeKb()
                     - (ss[INDEX_TOTAL_PSS] - ss[INDEX_TOTAL_SWAP_PSS])
                     - memInfo.getFreeSizeKb() - memInfo.getCachedSizeKb()
                     // NR_SHMEM is subtracted twice (getCachedSizeKb() and getKernelUsedSizeKb())
                     + memInfo.getShmemSizeKb()
-                    - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb();
+                    - memInfo.getKernelUsedSizeKb() - memInfo.getZramTotalSizeKb()
+                    - kernelCmaUsage;
             proto.write(MemInfoDumpProto.USED_PSS_KB, ss[INDEX_TOTAL_PSS] - cachedPss);
             proto.write(MemInfoDumpProto.USED_KERNEL_KB, memInfo.getKernelUsedSizeKb());
             proto.write(MemInfoDumpProto.LOST_RAM_KB, lostRAM);

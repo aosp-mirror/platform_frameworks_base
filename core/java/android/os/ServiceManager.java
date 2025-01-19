@@ -278,7 +278,7 @@ public final class ServiceManager {
                 return service;
             } else {
                 return Binder.allowBlocking(
-                        getIServiceManager().checkService(name).getServiceWithMetadata().service);
+                        getIServiceManager().checkService2(name).getServiceWithMetadata().service);
             }
         } catch (RemoteException e) {
             Log.e(TAG, "error in checkService", e);

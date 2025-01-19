@@ -62,16 +62,23 @@ class ServiceManagerProxy implements IServiceManager {
     @UnsupportedAppUsage
     public IBinder getService(String name) throws RemoteException {
         // Same as checkService (old versions of servicemanager had both methods).
-        return checkService(name).getServiceWithMetadata().service;
+        return checkService2(name).getServiceWithMetadata().service;
     }
 
     public Service getService2(String name) throws RemoteException {
         // Same as checkService (old versions of servicemanager had both methods).
-        return checkService(name);
+        return checkService2(name);
     }
 
-    public Service checkService(String name) throws RemoteException {
-        return mServiceManager.checkService(name);
+    // TODO(b/355394904): This function has been deprecated, please use checkService2 instead.
+    @UnsupportedAppUsage
+    public IBinder checkService(String name) throws RemoteException {
+        // Same as checkService (old versions of servicemanager had both methods).
+        return checkService2(name).getServiceWithMetadata().service;
+    }
+
+    public Service checkService2(String name) throws RemoteException {
+        return mServiceManager.checkService2(name);
     }
 
     public void addService(String name, IBinder service, boolean allowIsolated, int dumpPriority)

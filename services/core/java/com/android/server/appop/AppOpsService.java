@@ -2566,7 +2566,6 @@ public class AppOpsService extends IAppOpsService.Stub {
 
                 Map<String, Ops> packages = uidState.pkgOps;
                 Iterator<Map.Entry<String, Ops>> it = packages.entrySet().iterator();
-                boolean uidChanged = false;
                 while (it.hasNext()) {
                     Map.Entry<String, Ops> ent = it.next();
                     String packageName = ent.getKey();
@@ -2599,7 +2598,6 @@ public class AppOpsService extends IAppOpsService.Stub {
                                     newMode,
                                     UserHandle.getUserId(curOp.uid));
                             changed = true;
-                            uidChanged = true;
                             final int uid = curOp.uidState.uid;
                             callbacks = addCallbacks(callbacks, curOp.op, uid, packageName,
                                     previousMode, mOpModeWatchers.get(curOp.op));
