@@ -102,7 +102,7 @@ Changes to the whitelist during system updates can result in installing addition
 to pre-existing users, but cannot uninstall pre-existing system packages from pre-existing users.
 -->
 <config>
-    <!--  Bluetooth (com.android.btservices apex) - visible on the sharesheet -->
+    <!--  Bluetooth (com.android.bt apex) - visible on the sharesheet -->
     <install-in-user-type package="com.android.bluetooth">
         <install-in user-type="SYSTEM" />
         <install-in user-type="FULL" />

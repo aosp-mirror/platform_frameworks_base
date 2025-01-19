@@ -414,7 +414,7 @@ java_aconfig_library {
         "//apex_available:platform",
         "com.android.art",
         "com.android.art.debug",
-        "com.android.btservices",
+        "com.android.bt",
         "com.android.mediaprovider",
         "com.android.permission",
     ],
