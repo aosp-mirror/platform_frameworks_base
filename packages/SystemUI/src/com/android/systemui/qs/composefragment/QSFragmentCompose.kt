@@ -102,6 +102,7 @@ import com.android.compose.modifiers.thenIf
 import com.android.compose.theme.PlatformTheme
 import com.android.mechanics.GestureContext
 import com.android.systemui.Dumpable
+import com.android.systemui.Flags
 import com.android.systemui.brightness.ui.compose.BrightnessSliderContainer
 import com.android.systemui.compose.modifiers.sysuiResTag
 import com.android.systemui.dump.DumpManager
@@ -252,12 +253,14 @@ constructor(
                     Box(
                         modifier =
                             Modifier.graphicsLayer { alpha = viewModel.viewAlpha }
-                                // Clipping before translation to match QSContainerImpl.onDraw
-                                .offset {
-                                    IntOffset(
-                                        x = 0,
-                                        y = viewModel.viewTranslationY.fastRoundToInt(),
-                                    )
+                                .thenIf(!Flags.notificationShadeBlur()) {
+                                    // Clipping before translation to match QSContainerImpl.onDraw
+                                    Modifier.offset {
+                                        IntOffset(
+                                            x = 0,
+                                            y = viewModel.viewTranslationY.fastRoundToInt(),
+                                        )
+                                    }
                                 }
                                 .thenIf(notificationScrimClippingParams.isEnabled) {
                                     Modifier.notificationScrimClip {
