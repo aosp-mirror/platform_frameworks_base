@@ -12426,8 +12426,8 @@ public class Intent implements Parcelable, Cloneable {
     }
 
     private void collectNestedIntentKeysRecur(Set<Intent> visited, boolean forceUnparcel) {
-        addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
         if (mExtras != null && (forceUnparcel || !mExtras.isParcelled()) && !mExtras.isEmpty()) {
+            addExtendedFlags(EXTENDED_FLAG_NESTED_INTENT_KEYS_COLLECTED);
             for (String key : mExtras.keySet()) {
                 Object value;
                 try {

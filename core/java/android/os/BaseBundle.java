@@ -142,6 +142,7 @@ public class BaseBundle {
     /** {@hide} */
     @VisibleForTesting
     public int mFlags;
+    private boolean mHasIntent = false;
 
     /**
      * Constructs a new, empty Bundle that uses a specific ClassLoader for
@@ -258,7 +259,18 @@ public class BaseBundle {
 
             // Keep as last statement to ensure visibility of other fields
             mParcelledData = parcelledData;
+            mHasIntent = from.mHasIntent;
         }
+    }
+
+    /** @hide */
+    public boolean hasIntent() {
+        return mHasIntent;
+    }
+
+    /** @hide */
+    public void setHasIntent(boolean hasIntent) {
+        mHasIntent = hasIntent;
     }
 
     /**
@@ -1837,6 +1849,7 @@ public class BaseBundle {
                     parcel.writeInt(length);
                     parcel.writeInt(mParcelledByNative ? BUNDLE_MAGIC_NATIVE : BUNDLE_MAGIC);
                     parcel.appendFrom(mParcelledData, 0, length);
+                    parcel.writeBoolean(mHasIntent);
                 }
                 return;
             }
@@ -1851,7 +1864,6 @@ public class BaseBundle {
         int lengthPos = parcel.dataPosition();
         parcel.writeInt(-1); // placeholder, will hold length
         parcel.writeInt(BUNDLE_MAGIC);
-
         int startPos = parcel.dataPosition();
         parcel.writeArrayMapInternal(map);
         int endPos = parcel.dataPosition();
@@ -1861,6 +1873,7 @@ public class BaseBundle {
         int length = endPos - startPos;
         parcel.writeInt(length);
         parcel.setDataPosition(endPos);
+        parcel.writeBoolean(mHasIntent);
     }
 
     /**
@@ -1904,6 +1917,7 @@ public class BaseBundle {
                 mOwnsLazyValues = false;
                 initializeFromParcelLocked(parcel, /*ownsParcel*/ false, isNativeBundle);
             }
+            mHasIntent = parcel.readBoolean();
             return;
         }
 
@@ -1922,6 +1936,7 @@ public class BaseBundle {
         mOwnsLazyValues = true;
         mParcelledByNative = isNativeBundle;
         mParcelledData = p;
+        mHasIntent = parcel.readBoolean();
     }
 
     /** {@hide} */
