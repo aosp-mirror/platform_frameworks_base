@@ -257,7 +257,7 @@ class AppCompatLetterboxPolicy {
                 + AppCompatUtils.getLetterboxReasonString(mActivityRecord, mainWin));
         mActivityRecord.mAppCompatController.getReachabilityPolicy().dump(pw, prefix);
         final AppCompatLetterboxOverrides letterboxOverride = mActivityRecord.mAppCompatController
-                .getAppCompatLetterboxOverrides();
+                .getLetterboxOverrides();
         pw.println(prefix + "  letterboxBackgroundColor=" + Integer.toHexString(
                 letterboxOverride.getLetterboxBackgroundColor().toArgb()));
         pw.println(prefix + "  letterboxBackgroundType="
@@ -276,7 +276,7 @@ class AppCompatLetterboxPolicy {
 
     private void updateWallpaperForLetterbox(@NonNull WindowState mainWindow) {
         final AppCompatLetterboxOverrides letterboxOverrides = mActivityRecord
-                .mAppCompatController.getAppCompatLetterboxOverrides();
+                .mAppCompatController.getLetterboxOverrides();
         final @LetterboxBackgroundType int letterboxBackgroundType =
                 letterboxOverrides.getLetterboxBackgroundType();
         boolean wallpaperShouldBeShown =
@@ -324,7 +324,7 @@ class AppCompatLetterboxPolicy {
         public void layoutLetterboxIfNeeded(@NonNull WindowState w) {
             if (!isRunning()) {
                 final AppCompatLetterboxOverrides letterboxOverrides = mActivityRecord
-                        .mAppCompatController.getAppCompatLetterboxOverrides();
+                        .mAppCompatController.getLetterboxOverrides();
                 final AppCompatReachabilityPolicy reachabilityPolicy = mActivityRecord
                         .mAppCompatController.getReachabilityPolicy();
                 mLetterbox = new Letterbox(() -> mActivityRecord.makeChildSurface(null),

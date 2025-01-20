@@ -134,8 +134,8 @@ class AppCompatController {
     }
 
     @NonNull
-    AppCompatLetterboxOverrides getAppCompatLetterboxOverrides() {
-        return mAppCompatOverrides.getAppCompatLetterboxOverrides();
+    AppCompatLetterboxOverrides getLetterboxOverrides() {
+        return mAppCompatOverrides.getLetterboxOverrides();
     }
 
     @NonNull

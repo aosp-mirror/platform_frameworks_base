@@ -154,7 +154,7 @@ final class AppCompatUtils {
                 && top.mAppCompatController.getAppCompatLetterboxPolicy()
                     .isEligibleForLetterboxEducation());
         appCompatTaskInfo.setLetterboxEducationEnabled(
-                top.mAppCompatController.getAppCompatLetterboxOverrides()
+                top.mAppCompatController.getLetterboxOverrides()
                         .isLetterboxEducationEnabled());
 
         final AppCompatAspectRatioOverrides aspectRatioOverrides =
