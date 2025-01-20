@@ -16,6 +16,8 @@
 
 package com.android.settingslib.metadata
 
+import android.content.Context
+
 /** Metrics logger for preference actions triggered by user interaction. */
 interface PreferenceUiActionMetricsLogger {
 
@@ -28,8 +30,34 @@ interface PreferenceUiActionMetricsLogger {
         screen: PreferenceScreenMetadata,
         preference: PreferenceMetadata,
         value: Any?,
-    ) {}
+    )
 }
 
 /** Metrics logger for preference remote operations (e.g. external get/set). */
-interface PreferenceRemoteOpMetricsLogger
+interface PreferenceRemoteOpMetricsLogger {
+
+    /** Logs get preference metadata operation. */
+    fun logGetterApi(
+        context: Context,
+        callingUid: Int,
+        preferenceCoordinate: PreferenceCoordinate,
+        screen: PreferenceScreenMetadata?,
+        preference: PreferenceMetadata?,
+        errorCode: Int,
+        latencyMs: Long,
+    )
+
+    /** Logs set preference value operation. */
+    fun logSetterApi(
+        context: Context,
+        callingUid: Int,
+        preferenceCoordinate: PreferenceCoordinate,
+        screen: PreferenceScreenMetadata?,
+        preference: PreferenceMetadata?,
+        errorCode: Int,
+        latencyMs: Long,
+    )
+
+    /** Logs get preference graph operation. */
+    fun logGraphApi(context: Context, callingUid: Int, success: Boolean, latencyMs: Long)
+}

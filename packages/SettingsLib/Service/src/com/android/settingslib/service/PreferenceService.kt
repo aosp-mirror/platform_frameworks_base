@@ -16,6 +16,7 @@
 
 package com.android.settingslib.service
 
+import com.android.settingslib.graph.GetPreferenceGraphApiHandler
 import com.android.settingslib.graph.GetPreferenceGraphRequest
 import com.android.settingslib.graph.PreferenceGetterApiHandler
 import com.android.settingslib.graph.PreferenceGetterRequest
@@ -25,6 +26,7 @@ import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.ipc.MessengerService
 import com.android.settingslib.ipc.PermissionChecker
+import com.android.settingslib.metadata.PreferenceRemoteOpMetricsLogger
 import com.android.settingslib.preference.PreferenceScreenProvider
 
 /**
@@ -40,16 +42,26 @@ open class PreferenceService(
     graphPermissionChecker: ApiPermissionChecker<GetPreferenceGraphRequest>? = null,
     setterPermissionChecker: ApiPermissionChecker<PreferenceSetterRequest>? = null,
     getterPermissionChecker: ApiPermissionChecker<PreferenceGetterRequest>? = null,
+    metricsLogger: PreferenceRemoteOpMetricsLogger? = null,
     vararg apiHandlers: ApiHandler<*, *>,
 ) :
     MessengerService(
         mutableListOf<ApiHandler<*, *>>().apply {
-            graphPermissionChecker?.let { add(PreferenceGraphApi(preferenceScreenProviders, it)) }
+            graphPermissionChecker?.let {
+                add(
+                    GetPreferenceGraphApiHandler(
+                        API_GET_PREFERENCE_GRAPH,
+                        it,
+                        metricsLogger,
+                        preferenceScreenProviders,
+                    )
+                )
+            }
             setterPermissionChecker?.let {
-                add(PreferenceSetterApiHandler(API_PREFERENCE_SETTER, it))
+                add(PreferenceSetterApiHandler(API_PREFERENCE_SETTER, it, metricsLogger))
             }
             getterPermissionChecker?.let {
-                add(PreferenceGetterApiHandler(API_PREFERENCE_GETTER, it))
+                add(PreferenceGetterApiHandler(API_PREFERENCE_GETTER, it, metricsLogger))
             }
             addAll(apiHandlers)
         },

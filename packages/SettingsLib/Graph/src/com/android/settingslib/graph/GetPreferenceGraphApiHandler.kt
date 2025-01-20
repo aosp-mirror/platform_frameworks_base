@@ -18,16 +18,22 @@ package com.android.settingslib.graph
 
 import android.app.Application
 import android.os.Bundle
+import android.os.SystemClock
 import com.android.settingslib.graph.proto.PreferenceGraphProto
 import com.android.settingslib.ipc.ApiHandler
+import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.ipc.MessageCodec
+import com.android.settingslib.metadata.PreferenceRemoteOpMetricsLogger
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 import com.android.settingslib.preference.PreferenceScreenProvider
 import java.util.Locale
 
 /** API to get preference graph. */
-abstract class GetPreferenceGraphApiHandler(
-    private val preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>>
+class GetPreferenceGraphApiHandler(
+    override val id: Int,
+    private val permissionChecker: ApiPermissionChecker<GetPreferenceGraphRequest>,
+    private val metricsLogger: PreferenceRemoteOpMetricsLogger? = null,
+    private val preferenceScreenProviders: Set<Class<out PreferenceScreenProvider>> = emptySet(),
 ) : ApiHandler<GetPreferenceGraphRequest, PreferenceGraphProto> {
 
     override val requestCodec: MessageCodec<GetPreferenceGraphRequest>
@@ -36,22 +42,42 @@ abstract class GetPreferenceGraphApiHandler(
     override val responseCodec: MessageCodec<PreferenceGraphProto>
         get() = PreferenceGraphProtoCodec
 
+    override fun hasPermission(
+        application: Application,
+        callingPid: Int,
+        callingUid: Int,
+        request: GetPreferenceGraphRequest,
+    ) = permissionChecker.hasPermission(application, callingPid, callingUid, request)
+
     override suspend fun invoke(
         application: Application,
         callingPid: Int,
         callingUid: Int,
         request: GetPreferenceGraphRequest,
     ): PreferenceGraphProto {
-        val builder = PreferenceGraphBuilder.of(application, callingPid, callingUid, request)
-        if (request.screenKeys.isEmpty()) {
-            PreferenceScreenRegistry.preferenceScreenMetadataFactories.forEachKeyAsync {
-                builder.addPreferenceScreenFromRegistry(it)
+        val elapsedRealtime = SystemClock.elapsedRealtime()
+        var success = false
+        try {
+            val builder = PreferenceGraphBuilder.of(application, callingPid, callingUid, request)
+            if (request.screenKeys.isEmpty()) {
+                PreferenceScreenRegistry.preferenceScreenMetadataFactories.forEachKeyAsync {
+                    builder.addPreferenceScreenFromRegistry(it)
+                }
+                for (provider in preferenceScreenProviders) {
+                    builder.addPreferenceScreenProvider(provider)
+                }
             }
-            for (provider in preferenceScreenProviders) {
-                builder.addPreferenceScreenProvider(provider)
-            }
+            val result = builder.build()
+            success = true
+            return result
+        } finally {
+            metricsLogger?.logGraphApi(
+                application,
+                callingUid,
+                success,
+                SystemClock.elapsedRealtime() - elapsedRealtime,
+            )
         }
-        return builder.build()
     }
 }
 

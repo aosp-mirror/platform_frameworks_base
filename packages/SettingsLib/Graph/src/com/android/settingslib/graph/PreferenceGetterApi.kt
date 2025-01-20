@@ -17,6 +17,7 @@
 package com.android.settingslib.graph
 
 import android.app.Application
+import android.os.SystemClock
 import androidx.annotation.IntDef
 import com.android.settingslib.graph.proto.PreferenceProto
 import com.android.settingslib.ipc.ApiDescriptor
@@ -24,6 +25,7 @@ import com.android.settingslib.ipc.ApiHandler
 import com.android.settingslib.ipc.ApiPermissionChecker
 import com.android.settingslib.metadata.PreferenceCoordinate
 import com.android.settingslib.metadata.PreferenceHierarchyNode
+import com.android.settingslib.metadata.PreferenceRemoteOpMetricsLogger
 import com.android.settingslib.metadata.PreferenceScreenRegistry
 
 /**
@@ -37,6 +39,7 @@ class PreferenceGetterRequest(val preferences: Array<PreferenceCoordinate>, val 
 /** Error code of preference getter request. */
 @Target(AnnotationTarget.TYPE)
 @IntDef(
+    PreferenceGetterErrorCode.OK,
     PreferenceGetterErrorCode.NOT_FOUND,
     PreferenceGetterErrorCode.DISALLOW,
     PreferenceGetterErrorCode.INTERNAL_ERROR,
@@ -44,6 +47,8 @@ class PreferenceGetterRequest(val preferences: Array<PreferenceCoordinate>, val 
 @Retention(AnnotationRetention.SOURCE)
 annotation class PreferenceGetterErrorCode {
     companion object {
+        /** Preference value is returned. */
+        const val OK = 0
         /** Preference is not found. */
         const val NOT_FOUND = 1
         /** Disallow to get preference value (e.g. uid not allowed). */
@@ -80,6 +85,7 @@ class PreferenceGetterApiDescriptor(override val id: Int) :
 class PreferenceGetterApiHandler(
     override val id: Int,
     private val permissionChecker: ApiPermissionChecker<PreferenceGetterRequest>,
+    private val metricsLogger: PreferenceRemoteOpMetricsLogger? = null,
 ) : ApiHandler<PreferenceGetterRequest, PreferenceGetterResponse> {
 
     override fun hasPermission(
@@ -95,14 +101,25 @@ class PreferenceGetterApiHandler(
         callingUid: Int,
         request: PreferenceGetterRequest,
     ): PreferenceGetterResponse {
+        val elapsedRealtime = SystemClock.elapsedRealtime()
         val errors = mutableMapOf<PreferenceCoordinate, Int>()
         val preferences = mutableMapOf<PreferenceCoordinate, PreferenceProto>()
         val flags = request.flags
         for ((screenKey, coordinates) in request.preferences.groupBy { it.screenKey }) {
             val screenMetadata = PreferenceScreenRegistry.create(application, screenKey)
             if (screenMetadata == null) {
+                val latencyMs = SystemClock.elapsedRealtime() - elapsedRealtime
                 for (coordinate in coordinates) {
                     errors[coordinate] = PreferenceGetterErrorCode.NOT_FOUND
+                    metricsLogger?.logGetterApi(
+                        application,
+                        callingUid,
+                        coordinate,
+                        null,
+                        null,
+                        PreferenceGetterErrorCode.NOT_FOUND,
+                        latencyMs,
+                    )
                 }
                 continue
             }
@@ -117,27 +134,48 @@ class PreferenceGetterApiHandler(
                 val node = nodes[coordinate.key]
                 if (node == null) {
                     errors[coordinate] = PreferenceGetterErrorCode.NOT_FOUND
+                    metricsLogger?.logGetterApi(
+                        application,
+                        callingUid,
+                        coordinate,
+                        null,
+                        null,
+                        PreferenceGetterErrorCode.NOT_FOUND,
+                        SystemClock.elapsedRealtime() - elapsedRealtime,
+                    )
                     continue
                 }
                 val metadata = node.metadata
-                try {
-                    val preferenceProto =
-                        metadata.toProto(
-                            application,
-                            callingPid,
-                            callingUid,
-                            screenMetadata,
-                            metadata.key == screenMetadata.key,
-                            flags,
-                        )
-                    if (flags == PreferenceGetterFlags.VALUE && !preferenceProto.hasValue()) {
-                        errors[coordinate] = PreferenceGetterErrorCode.DISALLOW
-                    } else {
-                        preferences[coordinate] = preferenceProto
+                val errorCode =
+                    try {
+                        val preferenceProto =
+                            metadata.toProto(
+                                application,
+                                callingPid,
+                                callingUid,
+                                screenMetadata,
+                                metadata.key == screenMetadata.key,
+                                flags,
+                            )
+                        if (flags == PreferenceGetterFlags.VALUE && !preferenceProto.hasValue()) {
+                            PreferenceGetterErrorCode.DISALLOW
+                        } else {
+                            preferences[coordinate] = preferenceProto
+                            PreferenceGetterErrorCode.OK
+                        }
+                    } catch (e: Exception) {
+                        PreferenceGetterErrorCode.INTERNAL_ERROR
                     }
-                } catch (e: Exception) {
-                    errors[coordinate] = PreferenceGetterErrorCode.INTERNAL_ERROR
-                }
+                if (errorCode != PreferenceGetterErrorCode.OK) errors[coordinate] = errorCode
+                metricsLogger?.logGetterApi(
+                    application,
+                    callingUid,
+                    coordinate,
+                    screenMetadata,
+                    metadata,
+                    errorCode,
+                    SystemClock.elapsedRealtime() - elapsedRealtime,
+                )
             }
         }
         return PreferenceGetterResponse(errors, preferences)
