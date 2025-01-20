@@ -17,6 +17,7 @@
 package com.android.server.media;
 
 import static android.media.MediaRoute2Info.FEATURE_LIVE_AUDIO;
+import static android.media.MediaRoute2Info.FEATURE_LIVE_VIDEO;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -215,6 +216,28 @@ import java.util.stream.Stream;
                 return systemSession;
             }
         }
+    }
+
+    @Override
+    public void setRouteVolume(long requestId, String routeOriginalId, int volume) {
+        synchronized (mLock) {
+            var targetProviderProxyId = mOriginalRouteIdToProviderId.get(routeOriginalId);
+            var targetProviderProxyRecord = mProxyRecords.get(targetProviderProxyId);
+            // Holds the target route, if it's managed by a provider service. Holds null otherwise.
+            if (targetProviderProxyRecord != null) {
+                var serviceTargetRoute =
+                        targetProviderProxyRecord.mNewOriginalIdToSourceOriginalIdMap.get(
+                                routeOriginalId);
+                if (serviceTargetRoute != null) {
+                    targetProviderProxyRecord.mProxy.setRouteVolume(
+                            requestId, serviceTargetRoute, volume);
+                } else {
+                    notifyRequestFailed(
+                            requestId, MediaRoute2ProviderService.REASON_ROUTE_NOT_AVAILABLE);
+                }
+            }
+        }
+        super.setRouteVolume(requestId, routeOriginalId, volume);
     }
 
     /**
@@ -463,11 +486,18 @@ import java.util.stream.Stream;
                 }
                 String id =
                         asSystemRouteId(providerInfo.getUniqueId(), sourceRoute.getOriginalId());
-                var newRoute =
-                        new MediaRoute2Info.Builder(id, sourceRoute.getName())
-                                .addFeature(FEATURE_LIVE_AUDIO)
-                                .build();
-                routesMap.put(id, newRoute);
+                var newRouteBuilder = new MediaRoute2Info.Builder(id, sourceRoute);
+                if ((sourceRoute.getSupportedRoutingTypes()
+                                & MediaRoute2Info.FLAG_ROUTING_TYPE_SYSTEM_AUDIO)
+                        != 0) {
+                    newRouteBuilder.addFeature(FEATURE_LIVE_AUDIO);
+                }
+                if ((sourceRoute.getSupportedRoutingTypes()
+                                & MediaRoute2Info.FLAG_ROUTING_TYPE_SYSTEM_VIDEO)
+                        != 0) {
+                    newRouteBuilder.addFeature(FEATURE_LIVE_VIDEO);
+                }
+                routesMap.put(id, newRouteBuilder.build());
                 idMap.put(id, sourceRoute.getOriginalId());
             }
             return new ProviderProxyRecord(
