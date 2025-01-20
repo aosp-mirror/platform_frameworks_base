@@ -151,7 +151,7 @@ final class AppCompatUtils {
         }
         // Whether the direct top activity is eligible for letterbox education.
         appCompatTaskInfo.setEligibleForLetterboxEducation(isTopActivityResumed
-                && top.mAppCompatController.getAppCompatLetterboxPolicy()
+                && top.mAppCompatController.getLetterboxPolicy()
                     .isEligibleForLetterboxEducation());
         appCompatTaskInfo.setLetterboxEducationEnabled(
                 top.mAppCompatController.getLetterboxOverrides()
