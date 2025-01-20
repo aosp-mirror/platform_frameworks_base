@@ -166,7 +166,7 @@ fun TouchpadTutorialScreen(
             SwitchAppsGestureTutorialScreen(
                 switchAppsGestureScreenViewModel,
                 easterEggGestureViewModel,
-                onDoneButtonClicked = { vm.goTo(SWITCH_APPS_GESTURE) },
+                onDoneButtonClicked = { vm.goTo(TUTORIAL_SELECTION) },
                 onBack = { vm.goTo(TUTORIAL_SELECTION) },
             )
     }

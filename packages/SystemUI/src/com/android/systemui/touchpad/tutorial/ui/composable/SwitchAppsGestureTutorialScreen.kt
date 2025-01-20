@@ -46,8 +46,8 @@ fun SwitchAppsGestureTutorialScreen(
                     titleErrorResId = R.string.gesture_error_title,
                     bodyErrorResId = R.string.touchpad_switch_gesture_error_body,
                 ),
-            // TODO: replace animation
-            animations = TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_back_edu),
+            animations =
+                TutorialScreenConfig.Animations(educationResId = R.raw.trackpad_switch_apps_edu),
         )
     GestureTutorialScreen(
         screenConfig = screenConfig,

@@ -136,7 +136,7 @@ fun ActionTutorialContent(
         val buttonAlpha by animateFloatAsState(if (actionState is Finished) 1f else 0f)
         DoneButton(
             onDoneButtonClicked = onDoneButtonClicked,
-            modifier = Modifier.graphicsLayer { alpha = buttonAlpha },
+            modifier = Modifier.padding(horizontal = 60.dp).graphicsLayer { alpha = buttonAlpha },
             enabled = actionState is Finished,
         )
     }
