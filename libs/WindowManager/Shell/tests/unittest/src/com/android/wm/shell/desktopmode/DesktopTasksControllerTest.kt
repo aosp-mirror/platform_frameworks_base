@@ -104,6 +104,7 @@ import com.android.wm.shell.desktopmode.DesktopImmersiveController.ExitResult
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
 import com.android.wm.shell.desktopmode.DesktopTasksController.DesktopModeEntryExitTransitionListener
 import com.android.wm.shell.desktopmode.DesktopTasksController.SnapPosition
 import com.android.wm.shell.desktopmode.DesktopTasksController.TaskbarDesktopTaskListener
@@ -1150,6 +1151,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun launchIntent_taskInDesktopMode_transitionStarted() {
         setUpLandscapeDisplay()
         val freeformTask = setUpFreeformTask()
+        whenever(
+                desktopMixedTransitionHandler.startLaunchTransition(
+                    eq(TRANSIT_OPEN),
+                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                )
+            )
+            .thenReturn(Binder())
 
         controller.startLaunchIntentTransition(
             freeformTask.baseIntent,
@@ -1672,6 +1683,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveTaskToFront_postsWctWithReorderOp() {
         val task1 = setUpFreeformTask()
         setUpFreeformTask()
+        whenever(
+                desktopMixedTransitionHandler.startLaunchTransition(
+                    eq(TRANSIT_TO_FRONT),
+                    any(),
+                    eq(task1.taskId),
+                    anyOrNull(),
+                    anyOrNull(),
+                )
+            )
+            .thenReturn(Binder())
 
         controller.moveTaskToFront(task1, remoteTransition = null)
 
@@ -1701,6 +1722,46 @@ class DesktopTasksControllerTest : ShellTestCase() {
         assertThat(wct.hierarchyOps.size).isEqualTo(2) // move-to-front + minimize
         wct.assertReorderAt(0, freeformTasks[0], toTop = true)
         wct.assertReorderAt(1, freeformTasks[1], toTop = false)
+    }
+
+    @Test
+    fun moveTaskToFront_minimizedTask_marksTaskAsUnminimized() {
+        val transition = Binder()
+        val freeformTask = setUpFreeformTask()
+        taskRepository.minimizeTask(DEFAULT_DISPLAY, freeformTask.taskId)
+        whenever(
+                desktopMixedTransitionHandler.startLaunchTransition(
+                    eq(TRANSIT_TO_FRONT),
+                    any(),
+                    eq(freeformTask.taskId),
+                    anyOrNull(),
+                    anyOrNull(),
+                )
+            )
+            .thenReturn(transition)
+
+        controller.moveTaskToFront(freeformTask, unminimizeReason = UnminimizeReason.ALT_TAB)
+
+        val task = desktopTasksLimiter.getUnminimizingTask(transition)
+        assertThat(task).isNotNull()
+        assertThat(task?.taskId).isEqualTo(freeformTask.taskId)
+        assertThat(task?.unminimizeReason).isEqualTo(UnminimizeReason.ALT_TAB)
+    }
+
+    @Test
+    fun handleRequest_minimizedFreeformTask_marksTaskAsUnminimized() {
+        val transition = Binder()
+        // Create a visible task so we stay in Desktop Mode when minimizing task under test.
+        setUpFreeformTask().also { markTaskVisible(it) }
+        val freeformTask = setUpFreeformTask()
+        taskRepository.minimizeTask(DEFAULT_DISPLAY, freeformTask.taskId)
+
+        controller.handleRequest(transition, createTransition(freeformTask, TRANSIT_OPEN))
+
+        val task = desktopTasksLimiter.getUnminimizingTask(transition)
+        assertThat(task).isNotNull()
+        assertThat(task?.taskId).isEqualTo(freeformTask.taskId)
+        assertThat(task?.unminimizeReason).isEqualTo(UnminimizeReason.TASK_LAUNCH)
     }
 
     @Test
@@ -1734,8 +1795,18 @@ class DesktopTasksControllerTest : ShellTestCase() {
     fun moveTaskToFront_backgroundTask_launchesTask() {
         val task = createTaskInfo(1)
         whenever(shellTaskOrganizer.getRunningTaskInfo(anyInt())).thenReturn(null)
+        whenever(
+                desktopMixedTransitionHandler.startLaunchTransition(
+                    eq(TRANSIT_OPEN),
+                    any(),
+                    anyOrNull(),
+                    anyOrNull(),
+                    anyOrNull(),
+                )
+            )
+            .thenReturn(Binder())
 
-        controller.moveTaskToFront(task.taskId, remoteTransition = null)
+        controller.moveTaskToFront(task.taskId, unminimizeReason = UnminimizeReason.UNKNOWN)
 
         val wct = getLatestDesktopMixedTaskWct(type = TRANSIT_OPEN)
         assertThat(wct.hierarchyOps).hasSize(1)
@@ -1758,7 +1829,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             )
             .thenReturn(Binder())
 
-        controller.moveTaskToFront(task.taskId, remoteTransition = null)
+        controller.moveTaskToFront(task.taskId, unminimizeReason = UnminimizeReason.UNKNOWN)
 
         val wct = getLatestDesktopMixedTaskWct(type = TRANSIT_OPEN)
         assertThat(wct.hierarchyOps.size).isEqualTo(2) // launch + minimize
@@ -4026,6 +4097,16 @@ class DesktopTasksControllerTest : ShellTestCase() {
         setUpLandscapeDisplay()
         val task = setUpFreeformTask()
         val taskToRequest = setUpFreeformTask()
+        whenever(
+                desktopMixedTransitionHandler.startLaunchTransition(
+                    eq(TRANSIT_TO_FRONT),
+                    any(),
+                    eq(taskToRequest.taskId),
+                    anyOrNull(),
+                    anyOrNull(),
+                )
+            )
+            .thenReturn(Binder())
         runOpenInstance(task, taskToRequest.taskId)
         verify(desktopMixedTransitionHandler)
             .startLaunchTransition(anyInt(), any(), anyInt(), anyOrNull(), anyOrNull())
@@ -4759,7 +4840,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             )
             .thenReturn(transition)
 
-        controller.moveTaskToFront(task.taskId, remoteTransition = null)
+        controller.moveTaskToFront(task.taskId, unminimizeReason = UnminimizeReason.UNKNOWN)
 
         verify(mMockDesktopImmersiveController)
             .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId), any())
@@ -4791,7 +4872,7 @@ class DesktopTasksControllerTest : ShellTestCase() {
             )
             .thenReturn(transition)
 
-        controller.moveTaskToFront(task.taskId, remoteTransition = null)
+        controller.moveTaskToFront(task.taskId, unminimizeReason = UnminimizeReason.UNKNOWN)
 
         verify(mMockDesktopImmersiveController)
             .exitImmersiveIfApplicable(any(), eq(task.displayId), eq(task.taskId), any())

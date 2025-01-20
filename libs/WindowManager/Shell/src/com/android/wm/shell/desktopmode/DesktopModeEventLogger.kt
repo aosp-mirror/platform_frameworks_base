@@ -407,7 +407,7 @@ class DesktopModeEventLogger {
          * @property taskX x-coordinate of the top-left corner
          * @property taskY y-coordinate of the top-left corner
          * @property minimizeReason the reason the task was minimized
-         * @property unminimizeEvent the reason the task was unminimized
+         * @property unminimizeReason the reason the task was unminimized
          */
         data class TaskUpdate(
             val instanceId: Int,
@@ -498,6 +498,14 @@ class DesktopModeEventLogger {
             TASK_LAUNCH(
                 FrameworkStatsLog
                     .DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNMINIMIZE_TASK_LAUNCH
+            ),
+            APP_HANDLE_MENU_BUTTON(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNMINIMIZE_APP_HANDLE_MENU_BUTTON
+            ),
+            TASKBAR_MANAGE_WINDOW(
+                FrameworkStatsLog
+                    .DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNMINIMIZE_TASKBAR_MANAGE_WINDOW
             ),
         }
 
