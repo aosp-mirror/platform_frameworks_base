@@ -3801,10 +3801,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 true /* leftOrTop */);
                         notifyKeyGestureCompleted(event,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT);
-                    } else if (event.isAltPressed()) {
-                        setSplitscreenFocus(true /* leftOrTop */);
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT);
                     } else {
                         notifyKeyGestureCompleted(event,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_BACK);
@@ -3820,11 +3816,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                                 false /* leftOrTop */);
                         notifyKeyGestureCompleted(event,
                                 KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT);
-                        return true;
-                    } else if (event.isAltPressed()) {
-                        setSplitscreenFocus(false /* leftOrTop */);
-                        notifyKeyGestureCompleted(event,
-                                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT);
                         return true;
                     }
                 }
@@ -4241,9 +4232,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     case KeyGestureEvent.KEY_GESTURE_TYPE_MULTI_WINDOW_NAVIGATION:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_DESKTOP_MODE:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT:
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT:
-                    case KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_UP:
                     case KeyGestureEvent.KEY_GESTURE_TYPE_BRIGHTNESS_DOWN:
@@ -4379,20 +4368,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                             true /* leftOrTop */);
                 }
                 return true;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT:
-                if (complete) {
-                    setSplitscreenFocus(true /* leftOrTop */);
-                }
-                return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT:
                 if (complete) {
                     moveFocusedTaskToStageSplit(getTargetDisplayIdForKeyGestureEvent(event),
                             false /* leftOrTop */);
-                }
-                return true;
-            case KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT:
-                if (complete) {
-                    setSplitscreenFocus(false /* leftOrTop */);
                 }
                 return true;
             case KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER:
@@ -5081,13 +5060,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
         if (statusbar != null) {
             statusbar.moveFocusedTaskToStageSplit(displayId, leftOrTop);
-        }
-    }
-
-    private void setSplitscreenFocus(boolean leftOrTop) {
-        StatusBarManagerInternal statusbar = getStatusBarManagerInternal();
-        if (statusbar != null) {
-            statusbar.setSplitscreenFocus(leftOrTop);
         }
     }
 

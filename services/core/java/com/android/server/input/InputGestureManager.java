@@ -186,19 +186,9 @@ final class InputGestureManager {
                         KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_LEFT
                 ),
                 createKeyGesture(
-                        KeyEvent.KEYCODE_DPAD_LEFT,
-                        KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT
-                ),
-                createKeyGesture(
                         KeyEvent.KEYCODE_DPAD_RIGHT,
                         KeyEvent.META_META_ON | KeyEvent.META_CTRL_ON,
                         KeyGestureEvent.KEY_GESTURE_TYPE_SPLIT_SCREEN_NAVIGATION_RIGHT
-                ),
-                createKeyGesture(
-                        KeyEvent.KEYCODE_DPAD_RIGHT,
-                        KeyEvent.META_CTRL_ON | KeyEvent.META_ALT_ON,
-                        KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT
                 ),
                 createKeyGesture(
                         KeyEvent.KEYCODE_SLASH,

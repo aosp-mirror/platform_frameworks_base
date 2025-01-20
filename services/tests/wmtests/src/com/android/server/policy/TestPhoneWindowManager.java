@@ -925,11 +925,6 @@ class TestPhoneWindowManager {
         verify(mStatusBarManagerInternal).moveFocusedTaskToStageSplit(anyInt(), eq(leftOrTop));
     }
 
-    void assertSetSplitscreenFocus(boolean leftOrTop) {
-        mTestLooper.dispatchAll();
-        verify(mStatusBarManagerInternal).setSplitscreenFocus(eq(leftOrTop));
-    }
-
     void assertStatusBarStartAssist() {
         mTestLooper.dispatchAll();
         verify(mStatusBarManagerInternal).startAssist(any());

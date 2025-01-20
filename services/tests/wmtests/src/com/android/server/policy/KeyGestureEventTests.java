@@ -544,17 +544,6 @@ public class KeyGestureEventTests extends ShortcutKeyTestBase {
     }
 
     @Test
-    public void testKeyGestureSplitscreenFocus() {
-        Assert.assertTrue(sendKeyGestureEventComplete(
-                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_LEFT));
-        mPhoneWindowManager.assertSetSplitscreenFocus(true);
-
-        Assert.assertTrue(sendKeyGestureEventComplete(
-                KeyGestureEvent.KEY_GESTURE_TYPE_CHANGE_SPLITSCREEN_FOCUS_RIGHT));
-        mPhoneWindowManager.assertSetSplitscreenFocus(false);
-    }
-
-    @Test
     public void testKeyGestureShortcutHelper() {
         Assert.assertTrue(sendKeyGestureEventComplete(
                 KeyGestureEvent.KEY_GESTURE_TYPE_OPEN_SHORTCUT_HELPER));
