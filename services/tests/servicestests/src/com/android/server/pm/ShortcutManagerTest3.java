@@ -171,12 +171,11 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 .haveRanksInOrder("ms1");
     }
 
-    public void disabled_testSetDynamicShortcuts_withManifestShortcuts() {
-        runTestWithManifestShortcuts(() ->
-                disabled_testAddDynamicShortcuts_noManifestShortcuts());
+    public void testSetDynamicShortcuts_withManifestShortcuts() {
+        runTestWithManifestShortcuts(() -> testSetDynamicShortcuts_noManifestShortcuts());
     }
 
-    public void disabled_testAddDynamicShortcuts_noManifestShortcuts() {
+    public void testAddDynamicShortcuts_noManifestShortcuts() {
         mManager.addDynamicShortcuts(list(
                 shortcut("s1", A1)
         ));
@@ -265,8 +264,8 @@ public class ShortcutManagerTest3 extends BaseShortcutManagerTest {
                 .haveIds("s1", "s2", "s4", "s5", "s10");
     }
 
-    public void disabled_testAddDynamicShortcuts_withManifestShortcuts() {
-        runTestWithManifestShortcuts(() -> disabled_testAddDynamicShortcuts_noManifestShortcuts());
+    public void testAddDynamicShortcuts_withManifestShortcuts() {
+        runTestWithManifestShortcuts(() -> testAddDynamicShortcuts_noManifestShortcuts());
     }
 
     public void testUpdateShortcuts_noManifestShortcuts() {
