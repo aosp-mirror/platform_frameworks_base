@@ -27,7 +27,9 @@ import android.os.Trace
 import android.util.SparseArray
 import android.view.SurfaceControl
 import android.view.WindowManager
+import android.view.WindowManager.TRANSIT_OPEN
 import android.window.TransitionInfo
+import android.window.TransitionInfo.FLAG_MOVED_TO_TOP
 import androidx.annotation.VisibleForTesting
 import androidx.core.util.containsKey
 import androidx.core.util.forEach
@@ -39,6 +41,7 @@ import com.android.internal.protolog.ProtoLog
 import com.android.wm.shell.ShellTaskOrganizer
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.FocusReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
@@ -90,6 +93,8 @@ class DesktopModeLoggerTransitionObserver(
     // Caching whether the previous transition was exit due to screen off. This helps check if a
     // following enter reason could be Screen On
     private var wasPreviousTransitionExitByScreenOff: Boolean = false
+
+    private var focusedFreeformTask: TaskInfo? = null
 
     @VisibleForTesting var isSessionActive: Boolean = false
 
@@ -151,6 +156,7 @@ class DesktopModeLoggerTransitionObserver(
             transitionInfo = info,
             preTransitionVisibleFreeformTasks = visibleFreeformTaskInfos,
             postTransitionVisibleFreeformTasks = postTransitionVisibleFreeformTasks,
+            newFocusedFreeformTask = getNewFocusedFreeformTask(info),
         )
         wasPreviousTransitionExitToOverview = info.isExitToRecentsTransition()
     }
@@ -160,6 +166,19 @@ class DesktopModeLoggerTransitionObserver(
     override fun onTransitionMerged(merged: IBinder, playing: IBinder) {}
 
     override fun onTransitionFinished(transition: IBinder, aborted: Boolean) {}
+
+    // Returns null if there was no change in focused task
+    private fun getNewFocusedFreeformTask(info: TransitionInfo): TaskInfo? {
+        val freeformWindowChanges =
+            info.changes
+                .filter { it.taskInfo != null && it.requireTaskInfo().taskId != INVALID_TASK_ID }
+                .filter { it.requireTaskInfo().isFreeformWindow() }
+        return freeformWindowChanges
+            .findLast { change ->
+                change.hasFlags(FLAG_MOVED_TO_TOP) || change.mode == TRANSIT_OPEN
+            }
+            ?.taskInfo
+    }
 
     private fun getPostTransitionVisibleFreeformTaskInfos(
         info: TransitionInfo
@@ -238,6 +257,7 @@ class DesktopModeLoggerTransitionObserver(
         transitionInfo: TransitionInfo,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
+        newFocusedFreeformTask: TaskInfo?,
     ) {
         if (
             postTransitionVisibleFreeformTasks.isEmpty() &&
@@ -250,6 +270,7 @@ class DesktopModeLoggerTransitionObserver(
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
+                newFocusedFreeformTask,
             )
 
             desktopModeEventLogger.logSessionExit(getExitReason(transitionInfo))
@@ -268,6 +289,7 @@ class DesktopModeLoggerTransitionObserver(
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
+                newFocusedFreeformTask,
             )
         } else if (isSessionActive) {
             // Session is neither starting, nor finishing, log task updates if there are any
@@ -276,12 +298,14 @@ class DesktopModeLoggerTransitionObserver(
                 transitionInfo,
                 preTransitionVisibleFreeformTasks,
                 postTransitionVisibleFreeformTasks,
+                newFocusedFreeformTask,
             )
         }
 
         // update the state to the new version
         visibleFreeformTaskInfos.clear()
         visibleFreeformTaskInfos.putAll(postTransitionVisibleFreeformTasks)
+        focusedFreeformTask = newFocusedFreeformTask
     }
 
     /** Compare the old and new state of taskInfos and identify and log the changes */
@@ -290,10 +314,16 @@ class DesktopModeLoggerTransitionObserver(
         transitionInfo: TransitionInfo,
         preTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
         postTransitionVisibleFreeformTasks: SparseArray<TaskInfo>,
+        newFocusedFreeformTask: TaskInfo?,
     ) {
         postTransitionVisibleFreeformTasks.forEach { taskId, taskInfo ->
+            val focusChangedReason = getFocusChangedReason(taskId, newFocusedFreeformTask)
             val currentTaskUpdate =
-                buildTaskUpdateForTask(taskInfo, postTransitionVisibleFreeformTasks.size())
+                buildTaskUpdateForTask(
+                    taskInfo,
+                    postTransitionVisibleFreeformTasks.size(),
+                    focusChangedReason = focusChangedReason,
+                )
             val previousTaskInfo = preTransitionVisibleFreeformTasks[taskId]
             when {
                 // new tasks added
@@ -314,11 +344,14 @@ class DesktopModeLoggerTransitionObserver(
                         postTransitionVisibleFreeformTasks.size().toString(),
                     )
                 }
+                focusChangedReason != null ->
+                    desktopModeEventLogger.logTaskInfoChanged(currentTaskUpdate)
                 // old tasks that were resized or repositioned
                 // TODO(b/347935387): Log changes only once they are stable.
                 buildTaskUpdateForTask(
                     previousTaskInfo,
                     postTransitionVisibleFreeformTasks.size(),
+                    focusChangedReason = focusChangedReason,
                 ) != currentTaskUpdate ->
                     desktopModeEventLogger.logTaskInfoChanged(currentTaskUpdate)
             }
@@ -373,11 +406,21 @@ class DesktopModeLoggerTransitionObserver(
         return null
     }
 
+    private fun getFocusChangedReason(
+        taskId: Int,
+        newFocusedFreeformTask: TaskInfo?,
+    ): FocusReason? {
+        val newFocusedTask = newFocusedFreeformTask ?: return null
+        if (taskId != newFocusedTask.taskId) return null
+        return if (newFocusedTask != focusedFreeformTask) FocusReason.UNKNOWN else null
+    }
+
     private fun buildTaskUpdateForTask(
         taskInfo: TaskInfo,
         visibleTasks: Int,
         minimizeReason: MinimizeReason? = null,
         unminimizeReason: UnminimizeReason? = null,
+        focusChangedReason: FocusReason? = null,
     ): TaskUpdate {
         val screenBounds = taskInfo.configuration.windowConfiguration.bounds
         val positionInParent = taskInfo.positionInParent
@@ -393,6 +436,7 @@ class DesktopModeLoggerTransitionObserver(
             visibleTaskCount = visibleTasks,
             minimizeReason = minimizeReason,
             unminimizeReason = unminimizeReason,
+            focusReason = focusChangedReason,
         )
     }
 
@@ -473,6 +517,12 @@ class DesktopModeLoggerTransitionObserver(
     @VisibleForTesting
     fun addTaskInfosToCachedMap(taskInfo: TaskInfo) {
         visibleFreeformTaskInfos.set(taskInfo.taskId, taskInfo)
+    }
+
+    /** Sets the focused task - only used for testing. */
+    @VisibleForTesting
+    fun setFocusedTaskForTesting(taskInfo: TaskInfo) {
+        focusedFreeformTask = taskInfo
     }
 
     private fun TransitionInfo.Change.requireTaskInfo(): RunningTaskInfo =
