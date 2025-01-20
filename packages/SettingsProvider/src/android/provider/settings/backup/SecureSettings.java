@@ -291,5 +291,6 @@ public class SecureSettings {
         Settings.Secure.FACE_KEYGUARD_ENABLED,
         Settings.Secure.FINGERPRINT_APP_ENABLED,
         Settings.Secure.FINGERPRINT_KEYGUARD_ENABLED,
+        Settings.Secure.DUAL_SHADE,
     };
 }

@@ -11008,6 +11008,21 @@ public final class Settings {
         @Readable
         public static final String SHOW_NOTIFICATION_SNOOZE = "show_notification_snooze";
 
+        /**
+         * Controls whether dual shade is enabled. This splits notifications and quick settings to
+         * have their own independently expandable/collapsible panels, appearing on either side of
+         * the large screen (including unfolded device) or sharing a space on a narrow screen
+         * (including a folded device). Both panels will now cover the screen only partially
+         * (wrapping their content), so a running app or the lockscreen will remain visible in the
+         * background.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        @android.provider.Settings.Readable
+        public static final String DUAL_SHADE = "dual_shade";
+
        /**
          * 1 if it is allowed to remove the primary GAIA account. 0 by default.
          * @hide
