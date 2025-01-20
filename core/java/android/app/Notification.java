@@ -11909,7 +11909,7 @@ public class Notification implements Parcelable
         }
 
         /**
-         * Finds steps and points fill color with sufficient contrast over bg (1.3:1) that
+         * Finds steps and points fill color with sufficient contrast over bg (3:1) that
          * has the same hue as the original color, but is lightened or darkened depending on
          * whether the background is dark or light.
          *
@@ -11922,7 +11922,7 @@ public class Notification implements Parcelable
             return Builder.ensureColorContrast(
                     Color.alpha(color) == 0 ? defaultColor : color,
                     bg,
-                    1.3);
+                    3);
         }
 
         /**
