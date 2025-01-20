@@ -39,7 +39,6 @@ object ShadeWindowLayoutParams {
                 LayoutParams.TYPE_NOTIFICATION_SHADE,
                 LayoutParams.FLAG_NOT_FOCUSABLE or
                     LayoutParams.FLAG_TOUCHABLE_WHEN_WAKING or
-                    LayoutParams.FLAG_SPLIT_TOUCH or
                     LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH or
                     LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS,
                 // Now that the notification shade encompasses the sliding panel and its

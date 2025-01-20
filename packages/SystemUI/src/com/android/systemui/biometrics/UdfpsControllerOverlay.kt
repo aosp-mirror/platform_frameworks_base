@@ -155,9 +155,7 @@ constructor(
                 gravity = android.view.Gravity.TOP or android.view.Gravity.LEFT
                 layoutInDisplayCutoutMode =
                     WindowManager.LayoutParams.LAYOUT_IN_DISPLAY_CUTOUT_MODE_ALWAYS
-                flags =
-                    (Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS or
-                        WindowManager.LayoutParams.FLAG_SPLIT_TOUCH)
+                flags = Utils.FINGERPRINT_OVERLAY_LAYOUT_PARAM_FLAGS
                 privateFlags =
                     WindowManager.LayoutParams.PRIVATE_FLAG_TRUSTED_OVERLAY or
                         WindowManager.LayoutParams.PRIVATE_FLAG_EXCLUDE_FROM_SCREEN_MAGNIFICATION
