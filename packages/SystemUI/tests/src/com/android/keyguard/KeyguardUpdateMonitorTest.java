@@ -18,6 +18,8 @@ package com.android.keyguard;
 
 import static android.app.StatusBarManager.SESSION_KEYGUARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_ANY_BIOMETRIC;
+import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FACE;
 import static android.hardware.biometrics.BiometricAuthenticator.TYPE_FINGERPRINT;
 import static android.hardware.biometrics.BiometricFaceConstants.FACE_ERROR_LOCKOUT_PERMANENT;
 import static android.hardware.biometrics.BiometricFingerprintConstants.FINGERPRINT_ERROR_LOCKOUT;
@@ -1507,6 +1509,72 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     @Test
+    @EnableFlags(com.android.settings.flags.Flags.FLAG_BIOMETRICS_ONBOARDING_EDUCATION)
+    public void listenForFingerprint_whenEnabledForUser_typeFingerprint()
+            throws RemoteException {
+        // GIVEN keyguard showing
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, false);
+
+        biometricsEnabledForCurrentUser(true, TYPE_FINGERPRINT);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(true);
+    }
+
+    @Test
+    @EnableFlags(com.android.settings.flags.Flags.FLAG_BIOMETRICS_ONBOARDING_EDUCATION)
+    public void doNotListenForFingerprint_whenDisabledForUser_typeFingerprint()
+            throws RemoteException {
+        // GIVEN keyguard showing
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, false);
+
+        biometricsEnabledForCurrentUser(false, TYPE_FINGERPRINT);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
+    }
+
+    @Test
+    @EnableFlags(com.android.settings.flags.Flags.FLAG_BIOMETRICS_ONBOARDING_EDUCATION)
+    public void listenForFingerprint_typeFingerprintEnabled_typeFaceDisabled()
+            throws RemoteException {
+        // GIVEN keyguard showing
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, false);
+
+        // Enable with fingerprint
+        biometricsEnabledForCurrentUser(true, TYPE_FINGERPRINT);
+        mTestableLooper.processAllMessages();
+
+        // Disable with face
+        biometricsEnabledForCurrentUser(false, TYPE_FACE);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(true);
+    }
+
+    @Test
+    @EnableFlags(com.android.settings.flags.Flags.FLAG_BIOMETRICS_ONBOARDING_EDUCATION)
+    public void doNotListenForFingerprint_typeFingerprintDisabled_typeFaceEnabled()
+            throws RemoteException {
+        // GIVEN keyguard showing
+        mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
+        mKeyguardUpdateMonitor.setKeyguardShowing(true, false);
+
+        // Enable with face
+        biometricsEnabledForCurrentUser(true, TYPE_FACE);
+        mTestableLooper.processAllMessages();
+
+        // Disable with fingerprint
+        biometricsEnabledForCurrentUser(false, TYPE_FINGERPRINT);
+        mTestableLooper.processAllMessages();
+
+        assertThat(mKeyguardUpdateMonitor.shouldListenForFingerprint(true)).isEqualTo(false);
+    }
+
+    @Test
     public void testOccludingAppFingerprintListeningState() {
         // GIVEN keyguard isn't visible (app occluding)
         mKeyguardUpdateMonitor.dispatchStartedWakingUp(PowerManager.WAKE_REASON_POWER_BUTTON);
@@ -2464,8 +2532,13 @@ public class KeyguardUpdateMonitorTest extends SysuiTestCase {
     }
 
     private void biometricsEnabledForCurrentUser() throws RemoteException {
-        mBiometricEnabledOnKeyguardCallback.onChanged(true,
-                mSelectedUserInteractor.getSelectedUserId());
+        biometricsEnabledForCurrentUser(true /* enabled */, TYPE_FINGERPRINT);
+    }
+
+    private void biometricsEnabledForCurrentUser(boolean enabled, int modality)
+            throws RemoteException {
+        mBiometricEnabledOnKeyguardCallback.onChanged(enabled,
+                mSelectedUserInteractor.getSelectedUserId(), modality);
     }
 
     private void primaryAuthNotRequiredByStrongAuthTracker() {

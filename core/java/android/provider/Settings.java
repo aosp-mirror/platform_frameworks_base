@@ -11380,17 +11380,54 @@ public final class Settings {
 
         /**
          * Whether or not biometric is allowed on Keyguard.
+         *
+         * @deprecated Use {@link #FINGERPRINT_KEYGUARD_ENABLED} or {@link #FACE_KEYGUARD_ENABLED}
+         * instead.
+         *
          * @hide
          */
+        @Deprecated
         @Readable
         public static final String BIOMETRIC_KEYGUARD_ENABLED = "biometric_keyguard_enabled";
 
         /**
          * Whether or not biometric is allowed for apps (through BiometricPrompt).
+         *
+         * @deprecated Use {@link #FINGERPRINT_APP_ENABLED} or {@link #FACE_APP_ENABLED} instead.
+         *
+         * @hide
+         */
+        @Deprecated
+        @Readable
+        public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
+
+        /**
+         * Whether or not fingerprint is allowed on Keyguard.
          * @hide
          */
         @Readable
-        public static final String BIOMETRIC_APP_ENABLED = "biometric_app_enabled";
+        public static final String FINGERPRINT_KEYGUARD_ENABLED = "fingerprint_keyguard_enabled";
+
+        /**
+         * Whether or not fingerprint is allowed for apps (through BiometricPrompt).
+         * @hide
+         */
+        @Readable
+        public static final String FINGERPRINT_APP_ENABLED = "fingerptint_app_enabled";
+
+        /**
+         * Whether or not face is allowed on Keyguard.
+         * @hide
+         */
+        @Readable
+        public static final String FACE_KEYGUARD_ENABLED = "face_keyguard_enabled";
+
+        /**
+         * Whether or not face is allowed for apps (through BiometricPrompt).
+         * @hide
+         */
+        @Readable
+        public static final String FACE_APP_ENABLED = "face_app_enabled";
 
         /**
          * Whether or not mandatory biometrics is enabled.

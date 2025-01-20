@@ -437,8 +437,12 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener, Dumpab
     private final IBiometricEnabledOnKeyguardCallback mBiometricEnabledCallback =
             new IBiometricEnabledOnKeyguardCallback.Stub() {
                 @Override
-                public void onChanged(boolean enabled, int userId) {
+                public void onChanged(boolean enabled, int userId, int modality) {
                     mHandler.post(() -> {
+                        if (com.android.settings.flags.Flags.biometricsOnboardingEducation()
+                                && modality != TYPE_FINGERPRINT) {
+                            return;
+                        }
                         mBiometricEnabledForUser.put(userId, enabled);
                         updateFingerprintListeningState(BIOMETRIC_ACTION_UPDATE);
                     });

@@ -23,6 +23,7 @@ import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_HW_UN
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_NOT_ENABLED_FOR_APPS;
 import static android.hardware.biometrics.BiometricManager.BIOMETRIC_ERROR_NO_HARDWARE;
 
+import static com.android.server.biometrics.PreAuthInfo.BIOMETRIC_NOT_ENABLED_FOR_APPS;
 import static com.android.server.biometrics.sensors.LockoutTracker.LOCKOUT_NONE;
 
 import static com.google.common.truth.Truth.assertThat;
@@ -96,7 +97,7 @@ public class PreAuthInfoTest {
         when(mTrustManager.isDeviceSecure(anyInt(), anyInt())).thenReturn(true);
         when(mDevicePolicyManager.getKeyguardDisabledFeatures(any(), anyInt()))
                 .thenReturn(KEYGUARD_DISABLE_FEATURES_NONE);
-        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
+        when(mSettingObserver.getEnabledForApps(anyInt(), anyInt())).thenReturn(true);
         when(mSettingObserver.getMandatoryBiometricsEnabledAndRequirementsSatisfiedForUser(
                 anyInt())).thenReturn(true);
         when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(true);
@@ -280,7 +281,7 @@ public class PreAuthInfoTest {
     public void testCalculateByPriority()
             throws Exception {
         when(mFaceAuthenticator.hasEnrolledTemplates(anyInt(), any())).thenReturn(false);
-        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(false);
+        when(mSettingObserver.getEnabledForApps(anyInt(), anyInt())).thenReturn(false);
 
         BiometricSensor faceSensor = getFaceSensor();
         BiometricSensor fingerprintSensor = getFingerprintSensor();
@@ -368,6 +369,58 @@ public class PreAuthInfoTest {
                 mUserManager);
 
         assertThat(preAuthInfo.getCanAuthenticateResult()).isEqualTo(BIOMETRIC_ERROR_NO_HARDWARE);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(com.android.settings.flags.Flags.FLAG_BIOMETRICS_ONBOARDING_EDUCATION)
+    public void testBiometricsEnabledForApps_fingerprintEnabled_faceDisabled()
+            throws Exception {
+        when(mSettingObserver.getEnabledForApps(USER_ID, TYPE_FINGERPRINT)).thenReturn(true);
+        when(mSettingObserver.getEnabledForApps(USER_ID, TYPE_FACE)).thenReturn(false);
+        when(mTrustManager.isInSignificantPlace()).thenReturn(true);
+
+        final BiometricSensor sensor = getFaceSensor();
+        BiometricSensor fingerprintSensor = getFingerprintSensor();
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.IDENTITY_CHECK
+                | BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor, fingerprintSensor), USER_ID, promptInfo,
+                TEST_PACKAGE_NAME, false /* checkDevicePolicyManager */, mContext,
+                mBiometricCameraManager, mUserManager);
+
+        assertThat(preAuthInfo.eligibleSensors).hasSize(1);
+        assertThat(preAuthInfo.eligibleSensors.get(0).modality).isEqualTo(TYPE_FINGERPRINT);
+        assertThat(preAuthInfo.ineligibleSensors).hasSize(1);
+        assertThat(preAuthInfo.ineligibleSensors.get(0).first.modality).isEqualTo(TYPE_FACE);
+        assertThat(preAuthInfo.ineligibleSensors.get(0).second)
+                .isEqualTo(BIOMETRIC_NOT_ENABLED_FOR_APPS);
+    }
+
+    @Test
+    @RequiresFlagsEnabled(com.android.settings.flags.Flags.FLAG_BIOMETRICS_ONBOARDING_EDUCATION)
+    public void testBiometricsEnabledForApps_fingerprintDisabled_faceEnabled()
+            throws Exception {
+        when(mSettingObserver.getEnabledForApps(USER_ID, TYPE_FINGERPRINT)).thenReturn(false);
+        when(mSettingObserver.getEnabledForApps(USER_ID, TYPE_FACE)).thenReturn(true);
+        when(mTrustManager.isInSignificantPlace()).thenReturn(true);
+
+        final BiometricSensor sensor = getFaceSensor();
+        BiometricSensor fingerprintSensor = getFingerprintSensor();
+        final PromptInfo promptInfo = new PromptInfo();
+        promptInfo.setAuthenticators(BiometricManager.Authenticators.IDENTITY_CHECK
+                | BiometricManager.Authenticators.BIOMETRIC_STRONG);
+        final PreAuthInfo preAuthInfo = PreAuthInfo.create(mTrustManager, mDevicePolicyManager,
+                mSettingObserver, List.of(sensor, fingerprintSensor), USER_ID, promptInfo,
+                TEST_PACKAGE_NAME, false /* checkDevicePolicyManager */, mContext,
+                mBiometricCameraManager, mUserManager);
+
+        assertThat(preAuthInfo.eligibleSensors).hasSize(1);
+        assertThat(preAuthInfo.eligibleSensors.get(0).modality).isEqualTo(TYPE_FACE);
+        assertThat(preAuthInfo.ineligibleSensors).hasSize(1);
+        assertThat(preAuthInfo.ineligibleSensors.get(0).first.modality).isEqualTo(TYPE_FINGERPRINT);
+        assertThat(preAuthInfo.ineligibleSensors.get(0).second)
+                .isEqualTo(BIOMETRIC_NOT_ENABLED_FOR_APPS);
     }
 
     private BiometricSensor getFingerprintSensor() {

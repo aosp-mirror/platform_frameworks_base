@@ -908,7 +908,7 @@ public class AuthSessionTest {
                 type,
                 false /* resetLockoutRequiresHardwareAuthToken */));
 
-        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
+        when(mSettingObserver.getEnabledForApps(anyInt(), anyInt())).thenReturn(true);
     }
 
     private void setupFace(int id, boolean confirmationAlwaysRequired,
@@ -930,6 +930,6 @@ public class AuthSessionTest {
             }
         });
 
-        when(mSettingObserver.getEnabledForApps(anyInt())).thenReturn(true);
+        when(mSettingObserver.getEnabledForApps(anyInt(), anyInt())).thenReturn(true);
     }
 }

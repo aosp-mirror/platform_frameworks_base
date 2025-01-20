@@ -521,6 +521,7 @@ android_library {
         "androidx.compose.animation_animation-graphics",
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "kairos",
+        "aconfig_settings_flags_lib",
     ],
     libs: [
         "keepanno-annotations",
@@ -706,6 +707,7 @@ android_library {
         "androidx.lifecycle_lifecycle-viewmodel-compose",
         "TraceurCommon",
         "Traceur-res",
+        "aconfig_settings_flags_lib",
     ],
 }
 
