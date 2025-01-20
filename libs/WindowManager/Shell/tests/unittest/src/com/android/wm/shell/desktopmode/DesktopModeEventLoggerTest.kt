@@ -35,12 +35,14 @@ import com.android.wm.shell.common.DisplayController
 import com.android.wm.shell.common.DisplayLayout
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.EnterReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ExitReason
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.FocusReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.InputMethod
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.MinimizeReason
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.NO_SESSION_ID
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.ResizeTrigger
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskSizeUpdate
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.TaskUpdate
+import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_FOCUS_REASON
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_MINIMIZE_REASON
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UNSET_UNMINIMIZE_REASON
 import com.android.wm.shell.desktopmode.DesktopModeEventLogger.Companion.UnminimizeReason
@@ -188,6 +190,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             UNSET_MINIMIZE_REASON,
             UNSET_UNMINIMIZE_REASON,
             TASK_COUNT,
+            UNSET_FOCUS_REASON,
         )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
@@ -202,6 +205,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -233,6 +237,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             UNSET_MINIMIZE_REASON,
             UNSET_UNMINIMIZE_REASON,
             TASK_COUNT,
+            UNSET_FOCUS_REASON,
         )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
@@ -247,6 +252,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -278,6 +284,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             UNSET_MINIMIZE_REASON,
             UNSET_UNMINIMIZE_REASON,
             TASK_COUNT,
+            UNSET_FOCUS_REASON,
         )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
@@ -295,6 +302,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -320,6 +328,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             MinimizeReason.TASK_LIMIT.reason,
             UNSET_UNMINIMIZE_REASON,
             TASK_COUNT,
+            UNSET_FOCUS_REASON,
         )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
@@ -337,6 +346,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(MinimizeReason.TASK_LIMIT.reason),
                 eq(UNSET_UNMINIMIZE_REASON),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -362,6 +372,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             UNSET_MINIMIZE_REASON,
             UnminimizeReason.TASKBAR_TAP.reason,
             TASK_COUNT,
+            UNSET_FOCUS_REASON,
         )
         verify {
             EventLogTags.writeWmShellDesktopModeTaskUpdate(
@@ -379,6 +390,51 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_MINIMIZE_REASON),
                 eq(UnminimizeReason.TASKBAR_TAP.reason),
                 eq(TASK_COUNT),
+                eq(UNSET_FOCUS_REASON),
+            )
+        }
+        verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
+    }
+
+    @Test
+    fun logTaskInfoChanged_logsTaskUpdateWithFocusReason() {
+        val sessionId = startDesktopModeSession()
+
+        desktopModeEventLogger.logTaskInfoChanged(
+            createTaskUpdate(focusChangesReason = FocusReason.UNKNOWN)
+        )
+
+        verifyOnlyOneTaskUpdateLogging(
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED,
+            TASK_UPDATE.instanceId,
+            TASK_UPDATE.uid,
+            TASK_UPDATE.taskHeight,
+            TASK_UPDATE.taskWidth,
+            TASK_UPDATE.taskX,
+            TASK_UPDATE.taskY,
+            sessionId,
+            UNSET_MINIMIZE_REASON,
+            UNSET_UNMINIMIZE_REASON,
+            TASK_COUNT,
+            FocusReason.UNKNOWN.reason,
+        )
+        verify {
+            EventLogTags.writeWmShellDesktopModeTaskUpdate(
+                eq(
+                    FrameworkStatsLog
+                        .DESKTOP_MODE_SESSION_TASK_UPDATE__TASK_EVENT__TASK_INFO_CHANGED
+                ),
+                eq(TASK_UPDATE.instanceId),
+                eq(TASK_UPDATE.uid),
+                eq(TASK_UPDATE.taskHeight),
+                eq(TASK_UPDATE.taskWidth),
+                eq(TASK_UPDATE.taskX),
+                eq(TASK_UPDATE.taskY),
+                eq(sessionId),
+                eq(UNSET_MINIMIZE_REASON),
+                eq(UNSET_UNMINIMIZE_REASON),
+                eq(TASK_COUNT),
+                eq(FocusReason.UNKNOWN.reason),
             )
         }
         verifyZeroInteractions(staticMockMarker(EventLogTags::class.java))
@@ -497,6 +553,8 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(UNSET_UNMINIMIZE_REASON),
                 /* visible_task_count */
                 eq(0),
+                /* focus_reason */
+                eq(UNSET_FOCUS_REASON),
             )
         }
     }
@@ -525,6 +583,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
             {
                 FrameworkStatsLog.write(
                     eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
+                    anyInt(),
                     anyInt(),
                     anyInt(),
                     anyInt(),
@@ -597,6 +656,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         minimizeReason: Int,
         unminimizeReason: Int,
         visibleTaskCount: Int,
+        focusChangedReason: Int,
     ) {
         verify({
             FrameworkStatsLog.write(
@@ -612,11 +672,13 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 eq(minimizeReason),
                 eq(unminimizeReason),
                 eq(visibleTaskCount),
+                eq(focusChangedReason),
             )
         })
         verify({
             FrameworkStatsLog.write(
                 eq(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE),
+                anyInt(),
                 anyInt(),
                 anyInt(),
                 anyInt(),
@@ -710,6 +772,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
         private fun createTaskUpdate(
             minimizeReason: MinimizeReason? = null,
             unminimizeReason: UnminimizeReason? = null,
+            focusChangesReason: FocusReason? = null,
         ) =
             TaskUpdate(
                 TASK_ID,
@@ -721,6 +784,7 @@ class DesktopModeEventLoggerTest : ShellTestCase() {
                 minimizeReason,
                 unminimizeReason,
                 TASK_COUNT,
+                focusChangesReason,
             )
     }
 }

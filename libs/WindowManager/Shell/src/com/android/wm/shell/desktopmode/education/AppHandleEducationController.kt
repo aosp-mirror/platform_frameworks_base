@@ -33,7 +33,6 @@ import com.android.wm.shell.shared.annotations.ShellMainThread
 import com.android.wm.shell.shared.desktopmode.DesktopModeStatus.canEnterDesktopMode
 import com.android.wm.shell.shared.desktopmode.DesktopModeTransitionSource
 import com.android.wm.shell.windowdecor.common.DecorThemeUtil
-import com.android.wm.shell.windowdecor.common.Theme
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipColorScheme
 import com.android.wm.shell.windowdecor.education.DesktopWindowingEducationTooltipController.TooltipEducationViewConfig

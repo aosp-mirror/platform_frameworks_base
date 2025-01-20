@@ -342,6 +342,7 @@ class DesktopModeEventLogger {
             taskUpdate.unminimizeReason?.reason ?: UNSET_UNMINIMIZE_REASON,
             /* visible_task_count */
             taskUpdate.visibleTaskCount,
+            taskUpdate.focusReason?.reason ?: UNSET_FOCUS_REASON,
         )
         EventLogTags.writeWmShellDesktopModeTaskUpdate(
             /* task_event */
@@ -364,6 +365,7 @@ class DesktopModeEventLogger {
             taskUpdate.unminimizeReason?.reason ?: UNSET_UNMINIMIZE_REASON,
             /* visible_task_count */
             taskUpdate.visibleTaskCount,
+            taskUpdate.focusReason?.reason ?: UNSET_FOCUS_REASON,
         )
     }
 
@@ -408,6 +410,8 @@ class DesktopModeEventLogger {
          * @property taskY y-coordinate of the top-left corner
          * @property minimizeReason the reason the task was minimized
          * @property unminimizeReason the reason the task was unminimized
+         * @property visibleTaskCount the number of visible tasks after this update
+         * @property focusReason the reason the task was focused
          */
         data class TaskUpdate(
             val instanceId: Int,
@@ -419,6 +423,7 @@ class DesktopModeEventLogger {
             val minimizeReason: MinimizeReason? = null,
             val unminimizeReason: UnminimizeReason? = null,
             val visibleTaskCount: Int,
+            val focusReason: FocusReason? = null,
         )
 
         /**
@@ -507,6 +512,16 @@ class DesktopModeEventLogger {
                 FrameworkStatsLog
                     .DESKTOP_MODE_SESSION_TASK_UPDATE__UNMINIMIZE_REASON__UNMINIMIZE_TASKBAR_MANAGE_WINDOW
             ),
+        }
+
+        // Default value used when the task was not unminimized.
+        @VisibleForTesting
+        const val UNSET_FOCUS_REASON =
+            FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__FOCUS_REASON__UNSET_FOCUS
+
+        /** The reason a task was unminimized. */
+        enum class FocusReason(val reason: Int) {
+            UNKNOWN(FrameworkStatsLog.DESKTOP_MODE_SESSION_TASK_UPDATE__FOCUS_REASON__FOCUS_UNKNOWN)
         }
 
         /**
