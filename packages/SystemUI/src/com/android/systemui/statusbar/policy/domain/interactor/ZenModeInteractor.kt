@@ -30,6 +30,7 @@ import com.android.settingslib.notification.modes.ZenIcon
 import com.android.settingslib.notification.modes.ZenIconLoader
 import com.android.settingslib.notification.modes.ZenMode
 import com.android.settingslib.volume.shared.model.AudioStream
+import com.android.systemui.dagger.SysUISingleton
 import com.android.systemui.dagger.qualifiers.Background
 import com.android.systemui.modes.shared.ModesUi
 import com.android.systemui.shared.notifications.data.repository.NotificationSettingsRepository
@@ -57,6 +58,7 @@ import kotlinx.coroutines.flow.stateIn
  * An interactor that performs business logic related to the status and configuration of Zen Mode
  * (or Do Not Disturb/DND Mode).
  */
+ @SysUISingleton
 class ZenModeInteractor
 @Inject
 constructor(
