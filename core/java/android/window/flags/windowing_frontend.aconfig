@@ -180,6 +180,16 @@ flag {
 }
 
 flag {
+  name: "app_handle_no_relayout_on_exclusion_change"
+  namespace: "windowing_frontend"
+  description: "Remove unnecessary relayouts for app handle when exclusion regions change"
+  bug: "383672263"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
   name: "respect_non_top_visible_fixed_orientation"
   namespace: "windowing_frontend"
   description: "If top activity is not opaque, respect the fixed orientation of activity behind it"
