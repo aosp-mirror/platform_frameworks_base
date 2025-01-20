@@ -24,7 +24,7 @@ import com.android.systemui.flags.RefactorFlagUtils
 @Suppress("NOTHING_TO_INLINE")
 object StabilizeHeadsUpGroup {
     /** The aconfig flag name */
-    const val FLAG_NAME: String = Flags.FLAG_STABILIZE_HEADS_UP_GROUP
+    const val FLAG_NAME: String = Flags.FLAG_STABILIZE_HEADS_UP_GROUP_V2
 
     /** A token used for dependency declaration */
     val token: FlagToken
@@ -33,7 +33,7 @@ object StabilizeHeadsUpGroup {
     /** Is the refactor enabled */
     @JvmStatic
     inline val isEnabled
-        get() = Flags.stabilizeHeadsUpGroup()
+        get() = Flags.stabilizeHeadsUpGroupV2()
 
     /**
      * Called to ensure code is only run when the flag is enabled. This protects users from the
