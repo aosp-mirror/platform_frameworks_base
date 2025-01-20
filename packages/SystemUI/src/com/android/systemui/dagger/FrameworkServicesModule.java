@@ -41,6 +41,7 @@ import android.app.ambientcontext.AmbientContextManager;
 import android.app.job.JobScheduler;
 import android.app.role.RoleManager;
 import android.app.smartspace.SmartspaceManager;
+import android.app.supervision.SupervisionManager;
 import android.app.trust.TrustManager;
 import android.app.usage.UsageStatsManager;
 import android.appwidget.AppWidgetManager;
@@ -835,5 +836,12 @@ public class FrameworkServicesModule {
     @Singleton
     static ViewCapture provideViewCapture(Context context) {
         return ViewCaptureFactory.getInstance(context);
+    }
+
+    @Provides
+    @Singleton
+    @Nullable
+    static SupervisionManager provideSupervisionManager(Context context) {
+        return (SupervisionManager) context.getSystemService(Context.SUPERVISION_SERVICE);
     }
 }
