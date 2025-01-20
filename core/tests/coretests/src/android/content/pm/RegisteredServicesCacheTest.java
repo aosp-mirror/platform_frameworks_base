@@ -76,6 +76,10 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         mUsers = new ArrayList<>();
         mUsers.add(new UserInfo(0, "Owner", UserInfo.FLAG_ADMIN));
         mUsers.add(new UserInfo(1, "User1", 0));
+        addServiceInfoIntoResolveInfo(r1, "r1.package.name" /* packageName */,
+                "r1.service.name" /* serviceName */);
+        addServiceInfoIntoResolveInfo(r2, "r2.package.name" /* packageName */,
+                "r2.service.name" /* serviceName */);
     }
 
     public void testGetAllServicesHappyPath() {
@@ -218,6 +222,14 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         assertTrue("File should be created at " + file, file.length() > 0);
     }
 
+    private void addServiceInfoIntoResolveInfo(ResolveInfo resolveInfo, String packageName,
+            String serviceName) {
+        final ServiceInfo serviceInfo = new ServiceInfo();
+        serviceInfo.packageName = packageName;
+        serviceInfo.name = serviceName;
+        resolveInfo.serviceInfo = serviceInfo;
+    }
+
     /**
      * Mock implementation of {@link android.content.pm.RegisteredServicesCache} for testing
      */
@@ -301,8 +313,8 @@ public class RegisteredServicesCacheTest extends AndroidTestCase {
         }
 
         @Override
-        protected ServiceInfo<TestServiceType> parseServiceInfo(
-                ResolveInfo resolveInfo, int userId) throws XmlPullParserException, IOException {
+        protected ServiceInfo<TestServiceType> parseServiceInfo(ResolveInfo resolveInfo,
+                long lastUpdateTime) throws XmlPullParserException, IOException {
             int size = mServices.size();
             for (int i = 0; i < size; i++) {
                 Map<ResolveInfo, ServiceInfo<TestServiceType>> map = mServices.valueAt(i);
