@@ -8351,6 +8351,12 @@ public class AudioService extends IAudioService.Stub
         return true;
     }
 
+    private boolean shouldPreserveVolume(boolean userSwitch, VolumeGroupState vgs) {
+        // as for STREAM_MUSIC, preserve volume from one user to the next except
+        // Android Automotive platform
+        return (userSwitch && vgs.isMusic()) && !isPlatformAutomotive();
+    }
+
     private void readVolumeGroupsSettings(boolean userSwitch) {
         synchronized (mSettingsLock) {
             synchronized (VolumeStreamState.class) {
@@ -8359,8 +8365,7 @@ public class AudioService extends IAudioService.Stub
                 }
                 for (int i = 0; i < sVolumeGroupStates.size(); i++) {
                     VolumeGroupState vgs = sVolumeGroupStates.valueAt(i);
-                    // as for STREAM_MUSIC, preserve volume from one user to the next.
-                    if (!(userSwitch && vgs.isMusic())) {
+                    if (!shouldPreserveVolume(userSwitch, vgs)) {
                         vgs.clearIndexCache();
                         vgs.readSettings();
                     }
@@ -8793,6 +8798,11 @@ public class AudioService extends IAudioService.Stub
             mIndexMap.clear();
         }
 
+        private @UserIdInt int getVolumePersistenceUserId() {
+            return isMusic() && !isPlatformAutomotive()
+                    ? UserHandle.USER_SYSTEM : UserHandle.USER_CURRENT;
+        }
+
         private void persistVolumeGroup(int device) {
             // No need to persist the index if the volume group is backed up
             // by a public stream type as this is redundant
@@ -8810,7 +8820,7 @@ public class AudioService extends IAudioService.Stub
             boolean success = mSettings.putSystemIntForUser(mContentResolver,
                     getSettingNameForDevice(device),
                     getIndex(device),
-                    isMusic() ? UserHandle.USER_SYSTEM : UserHandle.USER_CURRENT);
+                    getVolumePersistenceUserId());
             if (!success) {
                 Log.e(TAG, "persistVolumeGroup failed for group " +  mAudioVolumeGroup.name());
             }
@@ -8833,7 +8843,7 @@ public class AudioService extends IAudioService.Stub
                     String name = getSettingNameForDevice(device);
                     index = mSettings.getSystemIntForUser(
                             mContentResolver, name, defaultIndex,
-                            isMusic() ? UserHandle.USER_SYSTEM : UserHandle.USER_CURRENT);
+                            getVolumePersistenceUserId());
                     if (index == -1) {
                         continue;
                     }
