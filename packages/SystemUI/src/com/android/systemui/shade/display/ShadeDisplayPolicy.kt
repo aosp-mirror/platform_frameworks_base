@@ -56,7 +56,7 @@ interface ShadeExpansionIntent {
 @Module
 interface ShadeDisplayPolicyModule {
 
-    @Binds fun provideDefaultPolicy(impl: StatusBarTouchShadeDisplayPolicy): ShadeDisplayPolicy
+    @Binds fun provideDefaultPolicy(impl: DefaultDisplayShadePolicy): ShadeDisplayPolicy
 
     @Binds
     fun provideShadeExpansionIntent(impl: StatusBarTouchShadeDisplayPolicy): ShadeExpansionIntent
