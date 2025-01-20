@@ -188,7 +188,11 @@ constructor(
         finish.addListener(
             object : AnimatorListenerAdapter() {
                 override fun onAnimationEnd(animation: Animator) {
-                    animationWindowView.removeView(currentAnimatedView!!.view)
+                    if (!::animationWindowView.isInitialized) {
+                        return
+                    }
+                    val animatedView = currentAnimatedView ?: return
+                    animationWindowView.removeView(animatedView.view)
                 }
             }
         )
