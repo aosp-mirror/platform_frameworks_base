@@ -6962,11 +6962,11 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 }
                 return;
             }
+            if (!r.isVisible()) {
+                // Let the opening activity update orientation.
+                return;
+            }
             if (mFixedRotationLaunchingApp.hasFixedRotationTransform(r)) {
-                if (!r.isVisible()) {
-                    // Let the opening activity update orientation.
-                    return;
-                }
                 if (mFixedRotationLaunchingApp.hasAnimatingFixedRotationTransition()) {
                     // Waiting until all of the associated activities have done animation, or the
                     // orientation would be updated too early and cause flickering.
@@ -6974,11 +6974,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 }
             } else {
                 // Check to skip updating display orientation by a non-top activity.
-                if ((!r.isVisible() || !mFixedRotationLaunchingApp.fillsParent())
-                        // When closing a translucent task A (r.fillsParent() is false) to a
-                        // visible task B, because only A has visibility change, there is only A's
-                        // transition callback. Then it still needs to update orientation for B.
-                        && r.fillsParent()) {
+                if (!mFixedRotationLaunchingApp.fillsParent()) {
                     return;
                 }
                 if (r.inTransition()) {
