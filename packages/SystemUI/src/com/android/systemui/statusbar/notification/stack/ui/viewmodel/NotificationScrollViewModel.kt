@@ -54,6 +54,8 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.mapNotNull
 
+private typealias ShadeScrimShapeConsumer = (ShadeScrimShape?) -> Unit
+
 /** ViewModel which represents the state of the NSSL/Controller in the world of flexiglass */
 class NotificationScrollViewModel
 @AssistedInject
@@ -243,11 +245,12 @@ constructor(
             }
             .dumpWhileCollecting("shadeScrimShape")
 
-    fun qsScrimShape(viewLeftOffset: Flow<Int>): Flow<ShadeScrimShape?> =
-        combine(stackAppearanceInteractor.qsPanelShape, viewLeftOffset) { shape, leftOffset ->
-                shape?.let { it.copy(bounds = it.bounds.minus(leftOffset = leftOffset)) }
-            }
-            .dumpWhileCollecting("qsScrimShape")
+    /**
+     * Sets a consumer to be notified when the QuickSettings Overlay panel changes size or position.
+     */
+    fun setQsScrimShapeConsumer(consumer: ShadeScrimShapeConsumer?) {
+        stackAppearanceInteractor.setQsPanelShapeConsumer(consumer)
+    }
 
     /**
      * Max alpha to apply directly to the view based on the compose placeholder.

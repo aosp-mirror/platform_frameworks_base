@@ -96,7 +96,7 @@ constructor(
 
     /** Notifies that the bounds of the QuickSettings panel have changed. */
     fun onPanelShapeChanged(shape: ShadeScrimShape?) {
-        notificationStackAppearanceInteractor.setQsPanelShape(shape)
+        notificationStackAppearanceInteractor.sendQsPanelShape(shape)
     }
 
     fun onScrimClicked() {

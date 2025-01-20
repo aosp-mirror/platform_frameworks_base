@@ -86,12 +86,6 @@ constructor(
                     .collectTraced { view.setClippingShape(it) }
             }
 
-            launch {
-                viewModel.qsScrimShape(viewLeftOffset = viewLeftOffset).collectTraced {
-                    view.setNegativeClippingShape(it)
-                }
-            }
-
             launch { viewModel.maxAlpha.collectTraced { view.setMaxAlpha(it) } }
             launch { viewModel.shadeScrollState.collect { view.setScrollState(it) } }
             launch {
@@ -134,12 +128,20 @@ constructor(
                     viewModel.remoteInputRowBottomBoundConsumer
                 )
                 view.setAccessibilityScrollEventConsumer(viewModel.accessibilityScrollEventConsumer)
+                viewModel.setQsScrimShapeConsumer { shape ->
+                    view.setNegativeClippingShape(
+                        shape?.let {
+                            it.copy(bounds = it.bounds.minus(leftOffset = view.asView().left))
+                        }
+                    )
+                }
                 DisposableHandle {
                     view.setSyntheticScrollConsumer(null)
                     view.setCurrentGestureOverscrollConsumer(null)
                     view.setCurrentGestureInGutsConsumer(null)
                     view.setRemoteInputRowBottomBoundConsumer(null)
                     view.setAccessibilityScrollEventConsumer(null)
+                    viewModel.setQsScrimShapeConsumer(null)
                 }
             }
         }

@@ -45,14 +45,6 @@ class NotificationPlaceholderRepository @Inject constructor() {
      */
     val notificationShadeScrimBounds = MutableStateFlow<ShadeScrimBounds?>(null)
 
-    /**
-     * The shape of the QuickSettings overlay panel. Used to clip Notification content when the QS
-     * covers it.
-     *
-     * When `null`, it doesn't affect notification clipping.
-     */
-    val qsPanelShape = MutableStateFlow<ShadeScrimShape?>(null)
-
     /** height made available to the notifications in the size-constrained mode of lock screen. */
     val constrainedAvailableSpace = MutableStateFlow(0)
 
@@ -61,4 +53,10 @@ class NotificationPlaceholderRepository @Inject constructor() {
 
     /** A consumer of [AccessibilityScrollEvent]s. */
     var accessibilityScrollEventConsumer: Consumer<AccessibilityScrollEvent>? = null
+
+    /**
+     * A consumer of [ShadeScrimShape], to be updated when the bounds of the QuickSettings Overlay
+     * panel changes.
+     */
+    var qsPanelShapeConsumer: ((ShadeScrimShape?) -> Unit)? = null
 }
