@@ -4836,6 +4836,29 @@ public class SizeCompatTests extends WindowTestsBase {
         assertTrue(mTask.getTaskInfo().appCompatTaskInfo.isTopActivityInSizeCompat());
     }
 
+    @Test
+    public void testParentRotationIgnoredForSCMActivityInDesktopMode() {
+        final TaskBuilder taskBuilder =
+                new TaskBuilder(mSupervisor).setWindowingMode(WINDOWING_MODE_FREEFORM);
+        setUpDisplaySizeWithApp(2500, 1600, taskBuilder);
+        prepareUnresizable(mActivity, SCREEN_ORIENTATION_PORTRAIT);
+        assertFitted();
+
+        // Simulate entering desktop mode by changing app to freeform and reducing size.
+        mTask.getWindowConfiguration().setWindowingMode(WINDOWING_MODE_FREEFORM);
+        mTask.getWindowConfiguration().setAppBounds(new Rect(0, 0, 500, 1250));
+        mActivity.onConfigurationChanged(mTask.getConfiguration());
+        // Activity should now be in SCM mode.
+        assertDownScaled();
+
+        final int originalRotation =
+                mActivity.getResolvedOverrideConfiguration().windowConfiguration.getRotation();
+        rotateDisplay(mActivity.mDisplayContent, ROTATION_180);
+        // Resolved orientation should match original orientation before device was rotated.
+        assertEquals(originalRotation,
+                mActivity.getResolvedOverrideConfiguration().windowConfiguration.getRotation());
+    }
+
     /**
      * Tests that all three paths in which aspect ratio logic can be applied yield the same
      * result, which is that aspect ratio is respected on app bounds. The three paths are
