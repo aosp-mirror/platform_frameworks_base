@@ -33,6 +33,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.test.SemanticsMatcher
 import androidx.compose.ui.test.assertIsDisplayed
@@ -50,7 +51,10 @@ import androidx.compose.ui.unit.dp
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import com.android.compose.animation.scene.TestOverlays.OverlayA
 import com.android.compose.animation.scene.TestOverlays.OverlayB
+import com.android.compose.animation.scene.TestOverlays.OverlayC
+import com.android.compose.animation.scene.TestOverlays.OverlayD
 import com.android.compose.animation.scene.TestScenes.SceneA
+import com.android.compose.animation.scene.UserActionResult.ShowOverlay
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.test.assertSizeIsEqualTo
 import com.android.compose.test.setContentAndCreateMainScope
@@ -820,5 +824,64 @@ class OverlayTest {
         rule.waitForIdle()
         assertThat(state.transitionState).isIdle()
         assertThat(state.transitionState).hasCurrentOverlays(/* empty */ )
+    }
+
+    @Test
+    fun showOverlay_hideAllOverlays() {
+        val state =
+            rule.runOnUiThread {
+                MutableSceneTransitionLayoutStateForTests(
+                    SceneA,
+                    initialOverlays = setOf(OverlayA, OverlayB, OverlayC),
+                    // We don't allow overlay C to be hidden.
+                    canHideOverlay = { it != OverlayC },
+                )
+            }
+
+        var touchSlop = 0f
+        rule.setContent {
+            touchSlop = LocalViewConfiguration.current.touchSlop
+            SceneTransitionLayout(state) {
+                scene(SceneA) { Box(Modifier.fillMaxSize()) }
+                overlay(OverlayA) { Box(Modifier.fillMaxSize()) }
+                overlay(OverlayB) { Box(Modifier.fillMaxSize()) }
+                overlay(
+                    OverlayC,
+                    mapOf(
+                        Swipe.Down to
+                            ShowOverlay(
+                                OverlayD,
+                                hideCurrentOverlays = ShowOverlay.HideCurrentOverlays.All,
+                            )
+                    ),
+                ) {
+                    Box(Modifier.fillMaxSize())
+                }
+                overlay(OverlayD) { Box(Modifier.fillMaxSize()) }
+            }
+        }
+
+        assertThat(state.transitionState).hasCurrentOverlays(OverlayA, OverlayB, OverlayC)
+
+        rule.onRoot().performTouchInput {
+            down(center)
+            moveBy(Offset(0f, touchSlop))
+        }
+
+        // We closed all overlay, but C can not be hidden.
+        val transition = assertThat(state.transitionState).isShowOrHideOverlayTransition()
+        assertThat(transition).hasCurrentScene(SceneA)
+        assertThat(transition).hasCurrentOverlays(OverlayC)
+        assertThat(transition).hasProgress(0f)
+        assertThat(transition).hasOverlay(OverlayD)
+
+        rule.onRoot().performTouchInput { moveBy(Offset(0f, bottom / 2f)) }
+        assertThat(transition).hasProgress(0.5f)
+
+        rule.onRoot().performTouchInput { up() }
+        rule.waitForIdle()
+        assertThat(state.transitionState).isIdle()
+        assertThat(state.transitionState).hasCurrentScene(SceneA)
+        assertThat(state.transitionState).hasCurrentOverlays(OverlayC, OverlayD)
     }
 }

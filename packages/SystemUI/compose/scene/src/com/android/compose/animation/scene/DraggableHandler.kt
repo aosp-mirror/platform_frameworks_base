@@ -92,6 +92,10 @@ internal class DraggableHandler(
                 else -> null
             } ?: return NoOpDragController
 
+        if (result is UserActionResult.ShowOverlay) {
+            layoutImpl.hideOverlays(result.hideCurrentOverlays)
+        }
+
         val swipeAnimation = createSwipeAnimation(swipes, result)
         return updateDragController(swipes, swipeAnimation)
     }

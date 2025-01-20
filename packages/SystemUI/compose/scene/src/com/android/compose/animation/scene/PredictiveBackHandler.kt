@@ -44,6 +44,10 @@ internal fun PredictiveBackHandler(
             return@PredictiveBackHandler
         }
 
+        if (result is ShowOverlay) {
+            layoutImpl.hideOverlays(result.hideCurrentOverlays)
+        }
+
         val animation =
             createSwipeAnimation(
                 layoutImpl,
