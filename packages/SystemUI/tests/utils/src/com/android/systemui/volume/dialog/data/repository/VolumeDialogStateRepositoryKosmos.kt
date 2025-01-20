@@ -18,5 +18,5 @@ package com.android.systemui.volume.dialog.data.repository
 
 import com.android.systemui.kosmos.Kosmos
 
-val Kosmos.volumeDialogStateRepository: VolumeDialogStateRepository by
+var Kosmos.volumeDialogStateRepository: VolumeDialogStateRepository by
     Kosmos.Fixture { VolumeDialogStateRepository() }

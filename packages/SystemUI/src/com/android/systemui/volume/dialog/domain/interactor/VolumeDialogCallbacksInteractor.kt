@@ -32,6 +32,7 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.buffer
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.onStart
 import kotlinx.coroutines.flow.shareIn
 
 private const val BUFFER_CAPACITY = 16
@@ -60,6 +61,7 @@ constructor(
             }
             .buffer(capacity = BUFFER_CAPACITY, onBufferOverflow = BufferOverflow.DROP_OLDEST)
             .shareIn(replay = 0, scope = coroutineScope, started = SharingStarted.WhileSubscribed())
+            .onStart { emit(VolumeDialogEventModel.SubscribedToEvents) }
 
     private class VolumeDialogEventModelProducer(
         private val scope: ProducerScope<VolumeDialogEventModel>
