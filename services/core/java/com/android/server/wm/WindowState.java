@@ -218,7 +218,6 @@ import android.util.DisplayMetrics;
 import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
 import android.view.DisplayInfo;
@@ -366,7 +365,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     boolean mPermanentlyHidden; // the window should never be shown again
     // This is a non-system overlay window that is currently force hidden.
     private boolean mForceHideNonSystemOverlayWindow;
-    boolean mAppFreezing;
     boolean mHidden = true;    // Used to determine if to show child windows.
     private boolean mDragResizing;
     private boolean mDragResizingChangeReported = true;
@@ -600,11 +598,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * to be shown.
      */
     int mLastVisibleLayoutRotation = -1;
-
-    /**
-     * How long we last kept the screen frozen.
-     */
-    int mLastFreezeDuration;
 
     /** Is this window now (or just being) removed? */
     boolean mRemoved;
@@ -1475,7 +1468,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             consumeInsetsChange();
             onResizeHandled();
-            mWmService.makeWindowFreezingScreenIfNeededLocked(this);
 
             // Reset the drawn state if the window need to redraw for the change, so the transition
             // can wait until it has finished drawing to start.
@@ -1700,7 +1692,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean hasContentToDisplay() {
-        if (!mAppFreezing && isDrawn() && (mViewVisibility == View.VISIBLE
+        if (!isDrawn() && (mViewVisibility == View.VISIBLE
                 || (isAnimating(TRANSITION | PARENTS)
                 && !getDisplayContent().mAppTransition.isTransitionSet()))) {
             return true;
@@ -1912,7 +1904,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      */
     boolean isInteresting() {
         return mActivityRecord != null
-                && (!mActivityRecord.isFreezingScreen() || !mAppFreezing)
                 && mViewVisibility == View.VISIBLE;
     }
 
@@ -2398,12 +2389,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             ProtoLog.v(WM_DEBUG_APP_TRANSITIONS,
                     "Remove %s: mSurfaceControl=%s mAnimatingExit=%b mRemoveOnExit=%b "
                             + "mHasSurface=%b surfaceShowing=%b animating=%b app-animation=%b "
-                            + "mDisplayFrozen=%b callers=%s",
+                            + "callers=%s",
                     this, mWinAnimator.mSurfaceControl, mAnimatingExit, mRemoveOnExit,
                     mHasSurface, mWinAnimator.getShown(),
                     isAnimating(TRANSITION | PARENTS),
                     mActivityRecord != null && mActivityRecord.isAnimating(PARENTS | TRANSITION),
-                    mWmService.mDisplayFrozen, Debug.getCallers(6));
+                    Debug.getCallers(6));
 
             // First, see if we need to run an animation. If we do, we have to hold off on removing the
             // window until the animation is done. If the display is frozen, just remove immediately,
@@ -3264,32 +3255,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Make sure the app can report drawn if it becomes visible again.
             forceReportingResized();
         }
-    }
-
-    void onStartFreezingScreen() {
-        mAppFreezing = true;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            c.onStartFreezingScreen();
-        }
-    }
-
-    boolean onStopFreezingScreen() {
-        boolean unfrozeWindows = false;
-        for (int i = mChildren.size() - 1; i >= 0; --i) {
-            final WindowState c = mChildren.get(i);
-            unfrozeWindows |= c.onStopFreezingScreen();
-        }
-
-        if (!mAppFreezing) {
-            return unfrozeWindows;
-        }
-
-        mAppFreezing = false;
-
-        mLastFreezeDuration = 0;
-        setDisplayLayoutNeeded();
-        return true;
     }
 
     boolean destroySurface(boolean cleanupOnResume, boolean appStopped) {
@@ -4192,16 +4157,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " mDestroying=" + mDestroying
                     + " mRemoved=" + mRemoved);
         }
-        if (mAppFreezing) {
-            pw.println(prefix + " configOrientationChanging="
-                    + (getLastReportedConfiguration().orientation != getConfiguration().orientation)
-                    + " mAppFreezing=" + mAppFreezing);
-        }
-        if (mLastFreezeDuration != 0) {
-            pw.print(prefix + "mLastFreezeDuration=");
-            TimeUtils.formatDuration(mLastFreezeDuration, pw);
-            pw.println();
-        }
         pw.print(prefix + "mForceSeamlesslyRotate=" + mForceSeamlesslyRotate
                 + " seamlesslyRotate: pending=");
         if (mPendingSeamlessRotate != null) {
@@ -4882,7 +4837,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             c.updateReportedVisibility(results);
         }
 
-        if (mAppFreezing || mViewVisibility != View.VISIBLE
+        if (mViewVisibility != View.VISIBLE
                 || mAttrs.type == TYPE_APPLICATION_STARTING
                 || mDestroying) {
             return;

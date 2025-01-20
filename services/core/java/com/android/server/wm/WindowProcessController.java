@@ -969,14 +969,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return canUpdate;
     }
 
+    // TODO(365884835): remove this method with external callers.
     public void stopFreezingActivities() {
-        synchronized (mAtm.mGlobalLock) {
-            int i = mActivities.size();
-            while (i > 0) {
-                i--;
-                mActivities.get(i).stopFreezingScreen(true /* unfreezeNow */, true /* force */);
-            }
-        }
     }
 
     void finishActivities() {

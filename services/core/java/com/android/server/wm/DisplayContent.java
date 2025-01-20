@@ -128,7 +128,6 @@ import static com.android.server.wm.DisplayContentProto.MIN_SIZE_OF_RESIZEABLE_T
 import static com.android.server.wm.DisplayContentProto.OPENING_APPS;
 import static com.android.server.wm.DisplayContentProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.DisplayContentProto.ROOT_DISPLAY_AREA;
-import static com.android.server.wm.DisplayContentProto.SCREEN_ROTATION_ANIMATION;
 import static com.android.server.wm.DisplayContentProto.SLEEP_TOKENS;
 import static com.android.server.wm.EventLogTags.IMF_REMOVE_IME_SCREENSHOT;
 import static com.android.server.wm.EventLogTags.IMF_SHOW_IME_SCREENSHOT;
@@ -150,7 +149,6 @@ import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_ASSIGN_LAYERS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
-import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.dipToPixel;
 import static com.android.server.wm.WindowState.EXCLUSION_LEFT;
 import static com.android.server.wm.WindowState.EXCLUSION_RIGHT;
@@ -629,8 +627,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     /** Windows removed since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
     final ArrayList<WindowState> mWinRemovedSinceNullFocus = new ArrayList<>();
-
-    private ScreenRotationAnimation mScreenRotationAnimation;
 
     /**
      * Sequence number for the current layout pass.
@@ -1594,8 +1590,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     mTransitionController.setDisplaySyncMethod(startBounds, endBounds, this);
                     collectDisplayChange(transition);
                 }
-            } else if (mLastHasContent) {
-                mWmService.startFreezingDisplay(0 /* exitAnim */, 0 /* enterAnim */, this);
             }
             sendNewConfiguration();
         }
@@ -1638,7 +1632,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         // DisplayContent#updateRotationUnchecked.
         if (mWaitingForConfig) {
             mWaitingForConfig = false;
-            mWmService.mLastFinishedFreezeSource = "config-unchanged";
             setLayoutNeeded();
             mWmService.mWindowPlacerLocked.performSurfacePlacement();
         }
@@ -1647,8 +1640,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     @Override
     boolean onDescendantOrientationChanged(@Nullable WindowContainer requestingContainer) {
-        final Configuration config = updateOrientation(
-                requestingContainer, false /* forceUpdate */);
+        final Configuration config = updateOrientationAndComputeConfig(false /* forceUpdate */);
         // If display rotation class tells us that it doesn't consider app requested orientation,
         // this display won't rotate just because of an app changes its requested orientation. Thus
         // it indicates that this display chooses not to handle this request.
@@ -1696,28 +1688,17 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     /**
      * Update orientation of the display, returning a non-null new Configuration if it has
      * changed from the current orientation. If a non-null configuration is returned, someone must
-     * call {@link WindowManagerService#setNewDisplayOverrideConfiguration(Configuration,
-     * DisplayContent)} to tell the window manager it can unfreeze the screen. This will typically
-     * be done by calling {@link #sendNewConfiguration}.
+     * request a change transition or call {@link #sendNewConfiguration}.
      *
-     * @param freezeDisplayWindow Freeze the app window if the orientation is changed.
      * @param forceUpdate See {@link DisplayRotation#updateRotationUnchecked(boolean)}
      */
-    Configuration updateOrientation(WindowContainer<?> freezeDisplayWindow, boolean forceUpdate) {
+    Configuration updateOrientationAndComputeConfig(boolean forceUpdate) {
         if (!mDisplayReady) {
             return null;
         }
 
         Configuration config = null;
         if (updateOrientation(forceUpdate)) {
-            // If we changed the orientation but mOrientationChangeComplete is already true,
-            // we used seamless rotation, and we don't need to freeze the screen.
-            if (freezeDisplayWindow != null && !mWmService.mRoot.mOrientationChangeComplete) {
-                final ActivityRecord activity = freezeDisplayWindow.asActivityRecord();
-                if (activity != null && activity.mayFreezeScreenLocked()) {
-                    activity.startFreezingScreen();
-                }
-            }
             config = new Configuration();
             computeScreenConfiguration(config);
         }
@@ -2254,20 +2235,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                 mDisplayRotation.isRotatingSeamlessly() && !shellTransitions;
         final Transaction transaction =
                 shellTransitions ? getSyncTransaction() : getPendingTransaction();
-        ScreenRotationAnimation screenRotationAnimation = rotateSeamlessly
-                ? null : getRotationAnimation();
         // We need to update our screen size information to match the new rotation. If the rotation
         // has actually changed then this method will return true and, according to the comment at
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
         // By updating the Display info here it will be available to
         // #computeScreenConfiguration() later.
         updateDisplayAndOrientation(null /* outConfig */);
-
-        // NOTE: We disable the rotation in the emulator because
-        //       it doesn't support hardware OpenGL emulation yet.
-        if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()) {
-            screenRotationAnimation.setRotation(transaction, rotation);
-        }
 
         if (!shellTransitions) {
             forAllWindows(w -> {
@@ -2932,20 +2905,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
     @ScreenOrientation
     @Override
     int getOrientation() {
-        if (mWmService.mDisplayFrozen) {
-            if (mWmService.mPolicy.isKeyguardLocked()) {
-                // Use the last orientation the while the display is frozen with the keyguard
-                // locked. This could be the keyguard forced orientation or from a SHOW_WHEN_LOCKED
-                // window. We don't want to check the show when locked window directly though as
-                // things aren't stable while the display is frozen, for example the window could be
-                // momentarily unavailable due to activity relaunch.
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Display id=%d is frozen while keyguard locked, return %d",
-                        mDisplayId, getLastOrientation());
-                return getLastOrientation();
-            }
-        }
-
         final int compatOrientation = mAppCompatCameraPolicy.getOrientation();
         if (compatOrientation != SCREEN_ORIENTATION_UNSPECIFIED) {
             mLastOrientationSource = null;
@@ -3413,12 +3372,10 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             mAppTransition.removeAppTransitionTimeoutCallbacks();
             mTransitionController.unregisterLegacyListener(mFixedRotationTransitionListener);
             handleAnimatingStoppedAndTransition();
-            mWmService.stopFreezingDisplayLocked();
             mDeviceStateController.unregisterDeviceStateCallback(mDeviceStateConsumer);
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
             mPointerEventDispatcher.dispose();
-            setRotationAnimation(null);
             // Unlink death from remote to clear the reference from binder -> mRemoteInsetsDeath
             // -> this DisplayContent.
             setRemoteInsetsController(null);
@@ -3514,24 +3471,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         RotationUtils.rotateBounds(inOutBounds, mTmpRect, oldRotation, newRotation);
     }
 
-    public void setRotationAnimation(ScreenRotationAnimation screenRotationAnimation) {
-        final ScreenRotationAnimation prev = mScreenRotationAnimation;
-        mScreenRotationAnimation = screenRotationAnimation;
-        if (prev != null) {
-            prev.kill();
-        }
-
-        // Hide the windows which are not significant in rotation animation. So that the windows
-        // don't need to block the unfreeze time.
-        if (screenRotationAnimation != null && screenRotationAnimation.hasScreenshot()) {
-            startAsyncRotationIfNeeded();
-        }
-    }
-
-    public ScreenRotationAnimation getRotationAnimation() {
-        return mScreenRotationAnimation;
-    }
-
     /**
      * Collects this display into an already-collecting transition.
      */
@@ -3595,12 +3534,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         }
     }
 
-    /** If the display is in transition, there should be a screenshot covering it. */
-    @Override
-    boolean inTransition() {
-        return mScreenRotationAnimation != null || super.inTransition();
-    }
-
     @Override
     public void dumpDebug(ProtoOutputStream proto, long fieldId,
             @WindowTracingLogLevel int logLevel) {
@@ -3616,10 +3549,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         proto.write(DPI, mBaseDisplayDensity);
         mDisplayInfo.dumpDebug(proto, DISPLAY_INFO);
         mDisplayRotation.dumpDebug(proto, DISPLAY_ROTATION);
-        final ScreenRotationAnimation screenRotationAnimation = getRotationAnimation();
-        if (screenRotationAnimation != null) {
-            screenRotationAnimation.dumpDebug(proto, SCREEN_ROTATION_ANIMATION);
-        }
         mDisplayFrames.dumpDebug(proto, DISPLAY_FRAMES);
         proto.write(MIN_SIZE_OF_RESIZEABLE_TASK_DP, mMinSizeOfResizeableTaskDp);
         if (mTransitionController.isShellTransitionsEnabled()) {
@@ -3763,16 +3692,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         forAllTaskDisplayAreas(taskDisplayArea -> {
             taskDisplayArea.dump(pw, prefix + "  ", dumpAll);
         });
-
-        pw.println();
-
-        final ScreenRotationAnimation rotationAnimation = getRotationAnimation();
-        if (rotationAnimation != null) {
-            pw.println("  mScreenRotationAnimation:");
-            rotationAnimation.printTo(subPrefix, pw);
-        } else if (dumpAll) {
-            pw.println("  no ScreenRotationAnimation ");
-        }
 
         pw.println();
 
@@ -5068,13 +4987,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         return win != null;
     }
 
-    void onWindowFreezeTimeout() {
-        Slog.w(TAG_WM, "Window freeze timeout expired.");
-        mWmService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_TIMEOUT;
-
-        mWmService.mWindowPlacerLocked.performSurfacePlacement();
-    }
-
     /**
      * Callbacks when the given type of {@link WindowContainer} animation finished running in the
      * hierarchy.
@@ -5297,8 +5209,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
 
     boolean okToDisplay(boolean ignoreFrozen, boolean ignoreScreenOn) {
         if (mDisplayId == DEFAULT_DISPLAY) {
-            return (!mWmService.mDisplayFrozen || ignoreFrozen)
-                    && mWmService.mDisplayEnabled
+            return mWmService.mDisplayEnabled
                     && (ignoreScreenOn || mWmService.mPolicy.isScreenOn());
         }
         return mDisplayInfo.state == Display.STATE_ON;
@@ -5443,10 +5354,7 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
             // We skip IME windows so they're processed just above their target.
             // Note that this method check should align with {@link
             // WindowState#applyImeWindowsIfNeeded} in case of any state mismatch.
-            return dc.mImeLayeringTarget != null
-                    // Make sure that the IME window won't be skipped to report that it has
-                    // completed the orientation change.
-                    && !dc.mWmService.mDisplayFrozen;
+            return dc.mImeLayeringTarget != null;
         }
 
         /** Like {@link #forAllWindows}, but ignores {@link #skipImeWindowsDuringTraversal} */
@@ -6427,14 +6335,12 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     changes = performDisplayOverrideConfigUpdate(values);
                 }
                 mAtmService.mTmpUpdateConfigurationResult.changes = changes;
-                mAtmService.mTmpUpdateConfigurationResult.mIsUpdating = true;
             }
 
             if (!deferResume) {
                 kept = mAtmService.ensureConfigAndVisibilityAfterUpdate(starting, changes);
             }
         } finally {
-            mAtmService.mTmpUpdateConfigurationResult.mIsUpdating = false;
             mAtmService.continueWindowLayout();
         }
 
@@ -6490,7 +6396,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
         mCurrentOverrideConfigurationChanges = 0;
         if (mWaitingForConfig) {
             mWaitingForConfig = false;
-            mWmService.mLastFinishedFreezeSource = "new-config";
         }
         mAtmService.addWindowLayoutReasons(
                 ActivityTaskManagerService.LAYOUT_REASON_CONFIG_CHANGED);
@@ -7082,13 +6987,6 @@ class DisplayContent extends RootDisplayArea implements WindowManagerPolicy.Disp
                     // launching activity is done.
                 }
             }
-            continueUpdateOrientationForDiffOrienLaunchingApp();
-        }
-
-        @Override
-        public void onAppTransitionCancelledLocked(boolean keyguardGoingAwayCancelled) {
-            // It is only needed when freezing display in legacy transition.
-            if (mTransitionController.isShellTransitionsEnabled()) return;
             continueUpdateOrientationForDiffOrienLaunchingApp();
         }
 

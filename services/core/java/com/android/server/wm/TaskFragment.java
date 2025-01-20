@@ -2092,12 +2092,6 @@ class TaskFragment extends WindowContainer<WindowContainer> {
                 ProtoLog.v(WM_DEBUG_STATES, "App died during pause, not stopping: %s", prev);
                 prev = null;
             }
-            // It is possible the activity was freezing the screen before it was paused.
-            // In that case go ahead and remove the freeze this activity has on the screen
-            // since it is no longer visible.
-            if (prev != null) {
-                prev.stopFreezingScreen(true /* unfreezeNow */, true /* force */);
-            }
         }
 
         if (resumeNext) {

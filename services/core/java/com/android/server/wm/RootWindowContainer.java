@@ -78,11 +78,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEAT
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WINDOW_TRACE;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.WINDOW_FREEZE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
-import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_NONE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
 
@@ -199,12 +197,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
 
     private boolean mSustainedPerformanceModeEnabled = false;
     private boolean mSustainedPerformanceModeCurrent = false;
-
-    // During an orientation change, we track whether all windows have rendered
-    // at the new orientation, and this will be false from changing orientation until that occurs.
-    // For seamless rotation cases this always stays true, as the windows complete their orientation
-    // changes 1 by 1 without disturbing global state.
-    boolean mOrientationChangeComplete = true;
 
     private final Handler mHandler;
 
@@ -841,20 +833,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        if (mWmService.mDisplayFrozen) {
-            ProtoLog.v(WM_DEBUG_ORIENTATION,
-                    "With display frozen, orientationChangeComplete=%b",
-                    mOrientationChangeComplete);
-        }
-        if (mOrientationChangeComplete) {
-            if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
-                mWmService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_NONE;
-                mWmService.mLastFinishedFreezeSource = mLastWindowFreezeSource;
-                mWmService.mH.removeMessages(WINDOW_FREEZE_TIMEOUT);
-            }
-            mWmService.stopFreezingDisplayLocked();
-        }
-
         // Destroy the surface of any windows that are no longer visible.
         i = mWmService.mDestroySurface.size();
         if (i > 0) {
@@ -881,13 +859,11 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
             }
         }
 
-        if (!mWmService.mDisplayFrozen) {
-            // Post these on a handler such that we don't call into power manager service while
-            // holding the window manager lock to avoid lock contention with power manager lock.
-            mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, mDisplayBrightnessOverrides)
-                    .sendToTarget();
-            mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
-        }
+        // Post these on a handler such that we don't call into power manager service while
+        // holding the window manager lock to avoid lock contention with power manager lock.
+        mHandler.obtainMessage(SET_SCREEN_BRIGHTNESS_OVERRIDE, mDisplayBrightnessOverrides)
+                .sendToTarget();
+        mHandler.obtainMessage(SET_USER_ACTIVITY_TIMEOUT, mUserActivityTimeout).sendToTarget();
 
         if (mSustainedPerformanceModeCurrent != mSustainedPerformanceModeEnabled) {
             mSustainedPerformanceModeEnabled = mSustainedPerformanceModeCurrent;
@@ -902,8 +878,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         }
 
         if (!mWmService.mWaitingForDrawnCallbacks.isEmpty()
-                || (mOrientationChangeComplete && !isLayoutNeeded()
-                && !mUpdateRotation)) {
+                || (!isLayoutNeeded() && !mUpdateRotation)) {
             mWmService.checkDrawnWindowsLocked();
         }
 
@@ -991,7 +966,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
     private void handleResizingWindows() {
         for (int i = mWmService.mResizingWindows.size() - 1; i >= 0; i--) {
             WindowState win = mWmService.mResizingWindows.get(i);
-            if (win.mAppFreezing || win.getDisplayContent().mWaitingForConfig) {
+            if (win.getDisplayContent().mWaitingForConfig) {
                 // Don't remove this window until rotation has completed and is not waiting for the
                 // complete configuration.
                 continue;
@@ -1091,12 +1066,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         if ((bulkUpdateParams & SET_UPDATE_ROTATION) != 0) {
             mUpdateRotation = true;
             doRequest = true;
-        }
-        if (mOrientationChangeComplete) {
-            mLastWindowFreezeSource = mWmService.mAnimator.mLastWindowFreezeSource;
-            if (mWmService.mWindowsFreezingScreen != WINDOWS_FREEZING_SCREENS_NONE) {
-                doRequest = true;
-            }
         }
 
         return doRequest;
@@ -1765,7 +1734,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent>
         // Force-update the orientation from the WindowManager, since we need the true configuration
         // to send to the client now.
         final Configuration config =
-                displayContent.updateOrientation(starting, true /* forceUpdate */);
+                displayContent.updateOrientationAndComputeConfig(true /* forceUpdate */);
         // Visibilities may change so let the starting activity have a chance to report. Can't do it
         // when visibility is changed in each AppWindowToken because it may trigger wrong
         // configuration push because the visibility of some activities may not be updated yet.

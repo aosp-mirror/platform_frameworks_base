@@ -1714,7 +1714,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testFinishFixedRotationNoAppTransitioningTask() {
-        unblockDisplayRotation(mDisplayContent);
         final ActivityRecord app = createActivityRecord(mDisplayContent);
         final Task task = app.getTask();
         final ActivityRecord app2 = new ActivityBuilder(mWm.mAtmService).setTask(task).build();
@@ -1742,7 +1741,6 @@ public class DisplayContentTests extends WindowTestsBase {
     public void testFixedRotationWithPip() {
         final DisplayContent displayContent = mDefaultDisplay;
         displayContent.setIgnoreOrientationRequest(false);
-        unblockDisplayRotation(displayContent);
         // Unblock the condition in PinnedTaskController#continueOrientationChangeIfNeeded.
         doNothing().when(displayContent).prepareAppTransition(anyInt());
         // Make resume-top really update the activity state.
@@ -1762,7 +1760,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
         assertTrue(displayContent.hasTopFixedRotationLaunchingApp());
         assertTrue(displayContent.mPinnedTaskController.shouldDeferOrientationChange());
-        verify(mWm, never()).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
         clearInvocations(pinnedTask);
 
         // Assume that the PiP enter animation is done then the new bounds are set. Expect the
@@ -1799,7 +1796,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testNoFixedRotationOnResumedScheduledApp() {
-        unblockDisplayRotation(mDisplayContent);
         final ActivityRecord app = new ActivityBuilder(mAtm).setCreateTask(true).build();
         app.setVisible(false);
         app.setState(ActivityRecord.State.RESUMED, "test");
@@ -1811,7 +1807,7 @@ public class DisplayContentTests extends WindowTestsBase {
         // The condition should reject using fixed rotation because the resumed client in real case
         // might get display info immediately. And the fixed rotation adjustments haven't arrived
         // client side so the info may be inconsistent with the requested orientation.
-        verify(mDisplayContent).updateOrientation(eq(app), anyBoolean());
+        verify(mDisplayContent).updateOrientationAndComputeConfig(anyBoolean());
         assertFalse(app.isFixedRotationTransforming());
         assertFalse(mDisplayContent.hasTopFixedRotationLaunchingApp());
     }
@@ -1863,9 +1859,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryInternalDisplayRotationFollowsDefaultDisplay() {
-        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
-        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
-
         final DisplayRotationCoordinator coordinator =
                 mRootWindowContainer.getDisplayRotationCoordinator();
         final DisplayContent defaultDisplayContent = mDisplayContent;
@@ -1921,9 +1914,6 @@ public class DisplayContentTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryNonInternalDisplayDoesNotFollowDefaultDisplay() {
-        // Skip freezing so the unrelated conditions in updateRotationUnchecked won't disturb.
-        doNothing().when(mWm).startFreezingDisplay(anyInt(), anyInt(), any(), anyInt());
-
         final DisplayRotationCoordinator coordinator =
                 mRootWindowContainer.getDisplayRotationCoordinator();
 
@@ -1994,20 +1984,11 @@ public class DisplayContentTests extends WindowTestsBase {
                     }
                 };
 
-        // kill any existing rotation animation (vestigial from test setup).
-        dc.setRotationAnimation(null);
-
         mWm.updateRotation(true /* alwaysSendConfiguration */, false /* forceRelayout */);
-        // If remote rotation is not finished, the display should not be able to unfreeze.
-        mWm.stopFreezingDisplayLocked();
-        assertTrue(mWm.mDisplayFrozen);
 
         assertTrue(called[0]);
         waitUntilHandlersIdle();
         assertTrue(continued[0]);
-
-        mWm.stopFreezingDisplayLocked();
-        assertFalse(mWm.mDisplayFrozen);
     }
 
     @Test

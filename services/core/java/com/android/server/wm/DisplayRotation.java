@@ -22,12 +22,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.Display.TYPE_EXTERNAL;
 import static android.view.Display.TYPE_OVERLAY;
 import static android.view.Display.TYPE_VIRTUAL;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_CROSSFADE;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_JUMPCUT;
-import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_ROTATE;
 import static android.view.WindowManager.LayoutParams.ROTATION_ANIMATION_SEAMLESS;
 
-import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ANIM;
 import static com.android.internal.protolog.WmProtoLogGroups.WM_DEBUG_ORIENTATION;
 import static com.android.server.policy.WindowManagerPolicy.WindowManagerFuncs.LID_OPEN;
 import static com.android.server.wm.DisplayRotationProto.FIXED_TO_USER_ROTATION_MODE;
@@ -41,10 +37,7 @@ import static com.android.server.wm.DisplayRotationReversionController.REVERSION
 import static com.android.server.wm.DisplayRotationReversionController.REVERSION_TYPE_NOSENSOR;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_ACTIVE;
-import static com.android.server.wm.WindowManagerService.WINDOW_FREEZE_TIMEOUT_DURATION;
 
-import android.annotation.AnimRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -104,13 +97,6 @@ public class DisplayRotation {
 
     private static final int ROTATION_UNDEFINED = -1;
 
-    private static class RotationAnimationPair {
-        @AnimRes
-        int mEnter;
-        @AnimRes
-        int mExit;
-    }
-
     @Nullable
     final FoldController mFoldController;
 
@@ -130,7 +116,6 @@ public class DisplayRotation {
     private final int mCarDockRotation;
     private final int mDeskDockRotation;
     private final int mUndockedHdmiRotation;
-    private final RotationAnimationPair mTmpRotationAnim = new RotationAnimationPair();
     private final RotationHistory mRotationHistory = new RotationHistory();
     private final RotationLockHistory mRotationLockHistory = new RotationLockHistory();
 
@@ -540,14 +525,6 @@ public class DisplayRotation {
                 ProtoLog.v(WM_DEBUG_ORIENTATION, "Deferring rotation, animation in progress.");
                 return false;
             }
-            if (mService.mDisplayFrozen) {
-                // Even if the screen rotation animation has finished (e.g. isAnimating returns
-                // false), there is still some time where we haven't yet unfrozen the display. We
-                // also need to abort rotation here.
-                ProtoLog.v(WM_DEBUG_ORIENTATION,
-                        "Deferring rotation, still finishing previous rotation");
-                return false;
-            }
 
             if (mDisplayContent.mFixedRotationTransitionListener.shouldDeferRotation()) {
                 // Makes sure that after the transition is finished, updateOrientation() can see
@@ -644,17 +621,13 @@ public class DisplayRotation {
             return true;
         }
 
-        mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
-        mService.mH.sendNewMessageDelayed(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT,
-                mDisplayContent, WINDOW_FREEZE_TIMEOUT_DURATION);
-
         if (shouldRotateSeamlessly(oldRotation, rotation, forceUpdate)) {
             // The screen rotation animation uses a screenshot to freeze the screen while windows
             // resize underneath. When we are rotating seamlessly, we allow the elements to
             // transition to their rotated state independently and without a freeze required.
             prepareSeamlessRotation();
         } else {
-            prepareNormalRotationAnimation();
+            cancelSeamlessRotation();
         }
 
         // Give a remote handler (system ui) some time to reposition things.
@@ -693,12 +666,6 @@ public class DisplayRotation {
         } finally {
             mService.mAtmService.continueWindowLayout();
         }
-    }
-
-    void prepareNormalRotationAnimation() {
-        cancelSeamlessRotation();
-        final RotationAnimationPair anim = selectRotationAnimation();
-        mService.startFreezingDisplay(anim.mExit, anim.mEnter, mDisplayContent);
     }
 
     /**
@@ -817,79 +784,6 @@ public class DisplayRotation {
             mDisplayContent.finishAsyncRotationIfPossible();
 
             updateRotationAndSendNewConfigIfChanged();
-        }
-    }
-
-    /**
-     * Returns the animation to run for a rotation transition based on the top fullscreen windows
-     * {@link android.view.WindowManager.LayoutParams#rotationAnimation} and whether it is currently
-     * fullscreen and frontmost.
-     */
-    private RotationAnimationPair selectRotationAnimation() {
-        // If the screen is off or non-interactive, force a jumpcut.
-        final boolean forceJumpcut = !mDisplayPolicy.isScreenOnFully()
-                || !mService.mPolicy.okToAnimate(false /* ignoreScreenOn */);
-        final WindowState topFullscreen = mDisplayPolicy.getTopFullscreenOpaqueWindow();
-        ProtoLog.i(WM_DEBUG_ANIM, "selectRotationAnimation topFullscreen=%s"
-                + " rotationAnimation=%d forceJumpcut=%b",
-                topFullscreen,
-                topFullscreen == null ? 0 : topFullscreen.getAttrs().rotationAnimation,
-                forceJumpcut);
-        if (forceJumpcut) {
-            mTmpRotationAnim.mExit = R.anim.rotation_animation_jump_exit;
-            mTmpRotationAnim.mEnter = R.anim.rotation_animation_enter;
-            return mTmpRotationAnim;
-        }
-        if (topFullscreen != null) {
-            int animationHint = topFullscreen.getRotationAnimationHint();
-            if (animationHint < 0 && mDisplayPolicy.isTopLayoutFullscreen()) {
-                animationHint = topFullscreen.getAttrs().rotationAnimation;
-            }
-            switch (animationHint) {
-                case ROTATION_ANIMATION_CROSSFADE:
-                case ROTATION_ANIMATION_SEAMLESS: // Crossfade is fallback for seamless.
-                    mTmpRotationAnim.mExit = R.anim.rotation_animation_xfade_exit;
-                    mTmpRotationAnim.mEnter = R.anim.rotation_animation_enter;
-                    break;
-                case ROTATION_ANIMATION_JUMPCUT:
-                    mTmpRotationAnim.mExit = R.anim.rotation_animation_jump_exit;
-                    mTmpRotationAnim.mEnter = R.anim.rotation_animation_enter;
-                    break;
-                case ROTATION_ANIMATION_ROTATE:
-                default:
-                    mTmpRotationAnim.mExit = mTmpRotationAnim.mEnter = 0;
-                    break;
-            }
-        } else {
-            mTmpRotationAnim.mExit = mTmpRotationAnim.mEnter = 0;
-        }
-        return mTmpRotationAnim;
-    }
-
-    /**
-     * Validate whether the current top fullscreen has specified the same
-     * {@link android.view.WindowManager.LayoutParams#rotationAnimation} value as that being passed
-     * in from the previous top fullscreen window.
-     *
-     * @param exitAnimId exiting resource id from the previous window.
-     * @param enterAnimId entering resource id from the previous window.
-     * @param forceDefault For rotation animations only, if true ignore the animation values and
-     *                     just return false.
-     * @return {@code true} if the previous values are still valid, false if they should be replaced
-     *         with the default.
-     */
-    boolean validateRotationAnimation(int exitAnimId, int enterAnimId, boolean forceDefault) {
-        switch (exitAnimId) {
-            case R.anim.rotation_animation_xfade_exit:
-            case R.anim.rotation_animation_jump_exit:
-                // These are the only cases that matter.
-                if (forceDefault) {
-                    return false;
-                }
-                final RotationAnimationPair anim = selectRotationAnimation();
-                return exitAnimId == anim.mExit && enterAnimId == anim.mEnter;
-            default:
-                return true;
         }
     }
 
