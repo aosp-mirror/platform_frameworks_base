@@ -96,6 +96,9 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 
@@ -105,6 +108,11 @@ import java.util.function.Predicate;
 public final class DexOptHelper {
     private static final long SEVEN_DAYS_IN_MILLISECONDS = 7 * 24 * 60 * 60 * 1000;
 
+    @NonNull
+    private static final ThreadPoolExecutor sDexoptExecutor =
+            new ThreadPoolExecutor(1 /* corePoolSize */, 1 /* maximumPoolSize */,
+                    60 /* keepAliveTime */, TimeUnit.SECONDS, new LinkedBlockingQueue<Runnable>());
+
     private static boolean sArtManagerLocalIsInitialized = false;
 
     private final PackageManagerService mPm;
@@ -112,6 +120,11 @@ public final class DexOptHelper {
     // Start time for the boot dexopt in performPackageDexOptUpgradeIfNeeded when ART Service is
     // used, to make it available to the onDexoptDone callback.
     private volatile long mBootDexoptStartTime;
+
+    static {
+        // Recycle the thread if it's not used for `keepAliveTime`.
+        sDexoptExecutor.allowsCoreThreadTimeOut();
+    }
 
     DexOptHelper(PackageManagerService pm) {
         mPm = pm;
@@ -746,43 +759,11 @@ public final class DexOptHelper {
      */
     static void performDexoptIfNeeded(InstallRequest installRequest, DexManager dexManager,
             Context context, PackageManagerTracedLock.RawLock installLock) {
-
         // Construct the DexoptOptions early to see if we should skip running dexopt.
-        //
-        // Do not run PackageDexOptimizer through the local performDexOpt
-        // method because `pkg` may not be in `mPackages` yet.
-        //
-        // Also, don't fail application installs if the dexopt step fails.
         DexoptOptions dexoptOptions = getDexoptOptionsByInstallRequest(installRequest, dexManager);
-        // Check whether we need to dexopt the app.
-        //
-        // NOTE: it is IMPORTANT to call dexopt:
-        //   - after doRename which will sync the package data from AndroidPackage and
-        //     its corresponding ApplicationInfo.
-        //   - after installNewPackageLIF or replacePackageLIF which will update result with the
-        //     uid of the application (pkg.applicationInfo.uid).
-        //     This update happens in place!
-        //
-        // We only need to dexopt if the package meets ALL of the following conditions:
-        //   1) it is not an instant app or if it is then dexopt is enabled via gservices.
-        //   2) it is not debuggable.
-        //   3) it is not on Incremental File System.
-        //
-        // Note that we do not dexopt instant apps by default. dexopt can take some time to
-        // complete, so we skip this step during installation. Instead, we'll take extra time
-        // the first time the instant app starts. It's preferred to do it this way to provide
-        // continuous progress to the useur instead of mysteriously blocking somewhere in the
-        // middle of running an instant app. The default behaviour can be overridden
-        // via gservices.
-        //
-        // Furthermore, dexopt may be skipped, depending on the install scenario and current
-        // state of the device.
-        //
-        // TODO(b/174695087): instantApp and onIncremental should be removed and their install
-        //       path moved to SCENARIO_FAST.
+        boolean performDexopt =
+                DexOptHelper.shouldPerformDexopt(installRequest, dexoptOptions, context);
 
-        final boolean performDexopt = DexOptHelper.shouldPerformDexopt(installRequest,
-                dexoptOptions, context);
         if (performDexopt) {
             // dexopt can take long, and ArtService doesn't require installd, so we release
             // the lock here and re-acquire the lock after dexopt is finished.
@@ -791,6 +772,7 @@ public final class DexOptHelper {
             }
             try {
                 Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+                // Don't fail application installs if the dexopt step fails.
                 DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
                         installRequest, dexoptOptions);
                 installRequest.onDexoptFinished(dexOptResult);
@@ -800,6 +782,41 @@ public final class DexOptHelper {
                     installLock.lock();
                 }
             }
+        }
+    }
+
+    /**
+     * Same as above, but runs asynchronously.
+     */
+    static CompletableFuture<Void> performDexoptIfNeededAsync(InstallRequest installRequest,
+            DexManager dexManager, Context context) {
+        // Construct the DexoptOptions early to see if we should skip running dexopt.
+        DexoptOptions dexoptOptions = getDexoptOptionsByInstallRequest(installRequest, dexManager);
+        boolean performDexopt =
+                DexOptHelper.shouldPerformDexopt(installRequest, dexoptOptions, context);
+
+        if (performDexopt) {
+            return CompletableFuture
+                    .runAsync(() -> {
+                        try {
+                            Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "dexopt");
+                            // Don't fail application installs if the dexopt step fails.
+                            // TODO(jiakaiz): Make this async in ART Service.
+                            DexoptResult dexOptResult = DexOptHelper.dexoptPackageUsingArtService(
+                                    installRequest, dexoptOptions);
+                            installRequest.onDexoptFinished(dexOptResult);
+                        } finally {
+                            Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
+                        }
+                    }, sDexoptExecutor)
+                    .exceptionally((t) -> {
+                        // This should never happen. A normal dexopt failure should result in a
+                        // DexoptResult.DEXOPT_FAILED, not an exception.
+                        Slog.wtf(TAG, "Dexopt encountered a fatal error", t);
+                        return null;
+                    });
+        } else {
+            return CompletableFuture.completedFuture(null);
         }
     }
 
@@ -840,6 +857,20 @@ public final class DexOptHelper {
      */
     static boolean shouldPerformDexopt(InstallRequest installRequest, DexoptOptions dexoptOptions,
             Context context) {
+        // We only need to dexopt if the package meets ALL of the following conditions:
+        //   1) it is not an instant app or if it is then dexopt is enabled via gservices.
+        //   2) it is not debuggable.
+        //   3) it is not on Incremental File System.
+        //
+        // Note that we do not dexopt instant apps by default. dexopt can take some time to
+        // complete, so we skip this step during installation. Instead, we'll take extra time
+        // the first time the instant app starts. It's preferred to do it this way to provide
+        // continuous progress to the user instead of mysteriously blocking somewhere in the
+        // middle of running an instant app. The default behaviour can be overridden
+        // via gservices.
+        //
+        // Furthermore, dexopt may be skipped, depending on the install scenario and current
+        // state of the device.
         final boolean isApex = ((installRequest.getScanFlags() & SCAN_AS_APEX) != 0);
         final boolean instantApp = ((installRequest.getScanFlags() & SCAN_AS_INSTANT_APP) != 0);
         final PackageSetting ps = installRequest.getScannedPackageSetting();
