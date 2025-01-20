@@ -22,7 +22,7 @@ package {
     default_team: "trendy_team_multitasking_windowing",
 }
 
-filegroup {
+java_library_static {
     name: "wm_shell-shared-utils",
     srcs: [
         "src/com/android/wm/shell/shared/TransitionUtil.java",
@@ -72,10 +72,10 @@ java_library {
     srcs: [
         "**/desktopmode/*.java",
         "**/desktopmode/*.kt",
-        ":wm_shell-shared-utils",
     ],
     static_libs: [
         "com.android.window.flags.window-aconfig-java",
+        "wm_shell-shared-utils",
     ],
 }
 
