@@ -91,6 +91,10 @@ constructor(
         super.onCreate(savedInstanceState)
 
         onCreateV2()
+        val window = window ?: return
+        val layoutParams = window.attributes
+        layoutParams.flags = layoutParams.flags or WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER
+        window.attributes = layoutParams
     }
 
     fun onCreateV2() {
