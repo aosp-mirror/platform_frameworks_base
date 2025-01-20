@@ -33,8 +33,6 @@ object TestScenes {
 object TestOverlays {
     val OverlayA = OverlayKey("OverlayA")
     val OverlayB = OverlayKey("OverlayB")
-    val OverlayC = OverlayKey("OverlayC")
-    val OverlayD = OverlayKey("OverlayD")
 }
 
 /** Element keys that can be reused by tests. */

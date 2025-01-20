@@ -48,7 +48,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.util.fastForEach
 import androidx.compose.ui.util.fastForEachReversed
 import androidx.compose.ui.zIndex
-import com.android.compose.animation.scene.UserActionResult.ShowOverlay.HideCurrentOverlays
 import com.android.compose.animation.scene.content.Content
 import com.android.compose.animation.scene.content.Overlay
 import com.android.compose.animation.scene.content.Scene
@@ -538,27 +537,13 @@ internal class SceneTransitionLayoutImpl(
             .sortedBy { it.zIndex }
     }
 
-    internal fun hideOverlays(hide: HideCurrentOverlays) {
-        fun maybeHide(overlay: OverlayKey) {
-            if (state.canHideOverlay(overlay)) {
-                state.hideOverlay(overlay, animationScope = this.animationScope)
-            }
-        }
-
-        when (hide) {
-            HideCurrentOverlays.None -> {}
-            HideCurrentOverlays.All -> HashSet(state.currentOverlays).forEach { maybeHide(it) }
-            is HideCurrentOverlays.Some -> hide.overlays.forEach { maybeHide(it) }
-        }
-    }
-
     @VisibleForTesting
     internal fun setContentsAndLayoutTargetSizeForTest(size: IntSize) {
         lastSize = size
         (scenes.values + overlays.values).forEach { it.targetSize = size }
     }
 
-    @VisibleForTesting internal fun overlaysOrNullForTest(): Map<OverlayKey, Overlay>? = _overlays
+    internal fun overlaysOrNullForTest(): Map<OverlayKey, Overlay>? = _overlays
 }
 
 private data class LayoutElement(private val layoutImpl: SceneTransitionLayoutImpl) :
