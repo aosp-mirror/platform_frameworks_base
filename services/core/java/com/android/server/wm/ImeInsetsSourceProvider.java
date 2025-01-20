@@ -115,7 +115,7 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 // If the server visibility didn't change (still visible), and mGivenInsetsReady
                 // is set, we won't call into notifyControlChanged. Therefore, we can reset the
                 // statsToken, if available.
-                ProtoLog.d(WM_DEBUG_IME, "onPostLayout cancel statsToken, ws=%s", ws);
+                ProtoLog.w(WM_DEBUG_IME, "onPostLayout cancel statsToken, ws=%s", ws);
                 ImeTracker.forLogging().onCancelled(mStatsToken,
                         ImeTracker.PHASE_WM_POST_LAYOUT_NOTIFY_CONTROLS_CHANGED);
                 mStatsToken = null;
@@ -293,8 +293,9 @@ final class ImeInsetsSourceProvider extends InsetsSourceProvider {
                 } else {
                     ProtoLog.w(WM_DEBUG_IME,
                             "Tried to update client visibility for non-IME input target %s "
-                                    + "(current target: %s)",
-                            caller, mDisplayContent.getImeInputTarget());
+                                    + "(current target: %s, IME requested: %s)", caller,
+                            mDisplayContent.getImeInputTarget(),
+                            caller.isRequestedVisible(WindowInsets.Type.ime()));
                     ImeTracker.forLogging().onFailed(statsToken,
                             ImeTracker.PHASE_SERVER_UPDATE_CLIENT_VISIBILITY);
                 }
