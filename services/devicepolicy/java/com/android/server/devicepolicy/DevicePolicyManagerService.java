@@ -16086,6 +16086,12 @@ public class DevicePolicyManagerService extends IDevicePolicyManager.Stub {
             enforceLoggingPolicy(Boolean.TRUE.equals(securityLoggingEnabled), enabled);
         }
 
+        @Override
+        public void setInternalEventsCallback(
+                @Nullable Consumer<List<SecurityEvent>> callback) {
+            mSecurityLogMonitor.setInternalEventsCallback(callback);
+        }
+
         private List<EnforcingUser> getEnforcingUsers(Set<EnforcingAdmin> admins) {
             List<EnforcingUser> enforcingUsers = new ArrayList();
             ComponentName deviceOwner = mOwners.getDeviceOwnerComponent();

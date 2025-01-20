@@ -152,6 +152,16 @@ flag {
 }
 
 flag {
+  name: "internal_log_event_listener"
+  namespace: "enterprise"
+  description: "Allow internal listeners to see unfiltered event stream"
+  bug: "385730709"
+  metadata {
+    purpose: PURPOSE_BUGFIX
+  }
+}
+
+flag {
     name: "allow_querying_profile_type"
     is_exported: true
     namespace: "enterprise"
