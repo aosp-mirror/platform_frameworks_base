@@ -64,6 +64,7 @@ import com.android.server.wm.AppCompatConfiguration.LetterboxVerticalReachabilit
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.function.Consumer;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -1492,46 +1493,12 @@ public class WindowManagerShellCommand extends ShellCommand {
     }
 
     private int runWmShellCommand(PrintWriter pw) {
-        String arg = getNextArg();
-
-        switch (arg) {
-            case "tracing":
-                return runWmShellTracing(pw);
-            case "help":
-            default:
-                return runHelp(pw);
-        }
-    }
-
-    private int runHelp(PrintWriter pw) {
-        pw.println("Window Manager Shell commands:");
-        pw.println("  help");
-        pw.println("    Print this help text.");
-        pw.println("  tracing <start/stop>");
-        pw.println("    Start/stop shell transition tracing.");
-
-        return 0;
-    }
-
-    private int runWmShellTracing(PrintWriter pw) {
-        String arg = getNextArg();
-
-        switch (arg) {
-            case "start":
-                mInternal.mTransitionTracer.startTrace(pw);
-                break;
-            case "stop":
-                mInternal.mTransitionTracer.stopTrace(pw);
-                break;
-            case "save-for-bugreport":
-                mInternal.mTransitionTracer.saveForBugreport(pw);
-                break;
-            default:
-                getErrPrintWriter()
-                        .println("Error: expected 'start' or 'stop', but got '" + arg + "'");
-                return -1;
-        }
-
+        final String[] args = peekRemainingArgs();
+        ArrayList<String> sbArgs = new ArrayList<>();
+        sbArgs.add("wmshell-passthrough");
+        sbArgs.addAll(Arrays.asList(args));
+        mInternal.mAtmService.getStatusBarManagerInternal().passThroughShellCommand(
+                sbArgs.toArray(new String[0]), getOutFileDescriptor());
         return 0;
     }
 
@@ -1622,6 +1589,9 @@ public class WindowManagerShellCommand extends ShellCommand {
 
         pw.println("  reset [-d DISPLAY_ID]");
         pw.println("    Reset all override settings.");
+        pw.println("  shell <cmd> ...");
+        pw.println("    Runs a WMShell command.  To see a full list of available wmshell commands "
+                + "run 'adb shell wm shell help'");
         if (!IS_USER) {
             pw.println("  tracing (start | stop)");
             pw.println("    Start or stop window tracing.");

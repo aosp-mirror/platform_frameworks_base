@@ -44,8 +44,10 @@ adb shell wm logging disable-text TAG
 
 And these commands to enable protologs (in logcat) for WM Shell ([list of all shell tags](/libs/WindowManager/Shell/src/com/android/wm/shell/protolog/ShellProtoLogGroup.java)):
 ```shell
-adb shell dumpsys activity service SystemUIService WMShell protolog enable-text TAG
-adb shell dumpsys activity service SystemUIService WMShell protolog enable-text TAG
+# Note: prior to 25Q2, you may need to use:
+#   adb shell dumpsys activity service SystemUIService WMShell protolog enable-text TAG
+adb shell wm shell protolog enable-text TAG
+adb shell wm shell protolog disable-text TAG
 ```
 
 ## Winscope Tracing
@@ -138,7 +140,9 @@ part of dumping the SystemUI service.  Dumping the Shell specific data can be do
 WMShell SysUI service:
 
 ```shell
-adb shell dumpsys activity service SystemUIService WMShell
+# Note: prior to 25Q2, you may need to use:
+#   adb shell dumpsys activity service SystemUIService WMShell dump
+adb shell wm shell dump
 ```
 
 If information should be added to the dump, either:
@@ -154,10 +158,14 @@ shell command handler in your controller.
 
 ```shell
 # List all available commands
-adb shell dumpsys activity service SystemUIService WMShell help
+# Note: prior to 25Q2, you may need to use:
+#   adb shell dumpsys activity service SystemUIService WMShell help
+adb shell wm shell help
 
 # Run a specific command
-adb shell dumpsys activity service SystemUIService WMShell <cmd> <args> ...
+# Note: prior to 25Q2, you may need to use:
+#   adb shell dumpsys activity service SystemUIService WMShell <cmd> <args> ...
+adb shell wm shell <cmd> <args> ...
 ```
 
 ## Debugging in Android Studio

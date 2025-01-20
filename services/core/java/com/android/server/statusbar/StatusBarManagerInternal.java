@@ -33,6 +33,8 @@ import com.android.internal.statusbar.LetterboxDetails;
 import com.android.internal.view.AppearanceRegion;
 import com.android.server.notification.NotificationDelegate;
 
+import java.io.FileDescriptor;
+
 public interface StatusBarManagerInternal {
     void setNotificationDelegate(NotificationDelegate delegate);
     /** Show a screen pinning request for a specific task. */
@@ -272,4 +274,8 @@ public interface StatusBarManagerInternal {
      * Called when requested to enter desktop from a focused app.
      */
     void moveFocusedTaskToDesktop(int displayId);
+
+
+    /** Passes through the given shell commands to SystemUI */
+    void passThroughShellCommand(String[] args, FileDescriptor fd);
 }

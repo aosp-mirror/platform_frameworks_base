@@ -56,6 +56,8 @@ import com.android.systemui.notetask.NoteTaskInitializer;
 import com.android.systemui.settings.DisplayTracker;
 import com.android.systemui.settings.UserTracker;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.commandline.Command;
+import com.android.systemui.statusbar.commandline.CommandRegistry;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.KeyguardStateController;
 import com.android.systemui.util.kotlin.JavaAdapter;
@@ -74,6 +76,7 @@ import com.android.wm.shell.splitscreen.SplitScreen;
 import com.android.wm.shell.sysui.ShellInterface;
 
 import java.io.PrintWriter;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -122,6 +125,7 @@ public final class WMShell implements
     private final Optional<RecentTasks> mRecentTasksOptional;
 
     private final CommandQueue mCommandQueue;
+    private final CommandRegistry mCommandRegistry;
     private final ConfigurationController mConfigurationController;
     private final KeyguardStateController mKeyguardStateController;
     private final KeyguardUpdateMonitor mKeyguardUpdateMonitor;
@@ -177,6 +181,23 @@ public final class WMShell implements
     private boolean mIsSysUiStateValid;
     private WakefulnessLifecycle.Observer mWakefulnessObserver;
 
+    private final Command mShellCommand = new Command() {
+        @Override
+        public void execute(@NonNull PrintWriter pw, @NonNull List<String> args) {
+            final ArrayList<String> shellArgs = new ArrayList<>(args);
+            shellArgs.add(0, "WMShell");
+            Log.d(TAG, "Command with args: " + String.join(", ", shellArgs));
+            if (!mShell.handleCommand(shellArgs.toArray(new String[0]), pw)) {
+                pw.println("Invalid wm shell command: " + String.join(", ", args));
+            }
+        }
+
+        @Override
+        public void help(@NonNull PrintWriter pw) {
+            mShell.handleCommand(new String[] { "WMShell", "help" }, pw);
+        }
+    };
+
     @Inject
     public WMShell(
             Context context,
@@ -187,6 +208,7 @@ public final class WMShell implements
             Optional<DesktopMode> desktopMode,
             Optional<RecentTasks> recentTasks,
             CommandQueue commandQueue,
+            CommandRegistry commandRegistry,
             ConfigurationController configurationController,
             KeyguardStateController keyguardStateController,
             KeyguardUpdateMonitor keyguardUpdateMonitor,
@@ -202,6 +224,7 @@ public final class WMShell implements
         mContext = context;
         mShell = shell;
         mCommandQueue = commandQueue;
+        mCommandRegistry = commandRegistry;
         mConfigurationController = configurationController;
         mKeyguardStateController = keyguardStateController;
         mKeyguardUpdateMonitor = keyguardUpdateMonitor;
@@ -235,6 +258,8 @@ public final class WMShell implements
         mUserTracker.addCallback(mUserChangedCallback, mContext.getMainExecutor());
 
         mCommandQueue.addCallback(this);
+        mCommandRegistry.registerCommand("wmshell-passthrough", () -> mShellCommand);
+
         mPipOptional.ifPresent(this::initPip);
         mSplitScreenOptional.ifPresent(this::initSplitScreen);
         mOneHandedOptional.ifPresent(this::initOneHanded);

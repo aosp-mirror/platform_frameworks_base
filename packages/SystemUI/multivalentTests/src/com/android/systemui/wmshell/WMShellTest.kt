@@ -45,6 +45,8 @@ import com.android.systemui.settings.UserTracker
 import com.android.systemui.settings.userTracker
 import com.android.systemui.statusbar.CommandQueue
 import com.android.systemui.statusbar.commandQueue
+import com.android.systemui.statusbar.commandline.CommandRegistry
+import com.android.systemui.statusbar.commandline.commandRegistry
 import com.android.systemui.statusbar.policy.ConfigurationController
 import com.android.systemui.statusbar.policy.KeyguardStateController
 import com.android.systemui.statusbar.policy.configurationController
@@ -97,6 +99,7 @@ class WMShellTest : SysuiTestCase() {
     @Mock private lateinit var mRecentTasks: RecentTasks
 
     private val mCommandQueue: CommandQueue = kosmos.commandQueue
+    private val mCommandRegistry: CommandRegistry = kosmos.commandRegistry
     private val mConfigurationController: ConfigurationController = kosmos.configurationController
     private val mKeyguardStateController: KeyguardStateController = kosmos.keyguardStateController
     private val mKeyguardUpdateMonitor: KeyguardUpdateMonitor = kosmos.keyguardUpdateMonitor
@@ -126,6 +129,7 @@ class WMShellTest : SysuiTestCase() {
                 Optional.of(mDesktopMode),
                 Optional.of(mRecentTasks),
                 mCommandQueue,
+                mCommandRegistry,
                 mConfigurationController,
                 mKeyguardStateController,
                 mKeyguardUpdateMonitor,
@@ -137,7 +141,7 @@ class WMShellTest : SysuiTestCase() {
                 mNoteTaskInitializer,
                 communalTransitionViewModel,
                 JavaAdapter(testScope.backgroundScope),
-                mSysUiMainExecutor
+                mSysUiMainExecutor,
             )
     }
 
@@ -162,7 +166,7 @@ class WMShellTest : SysuiTestCase() {
         verify(mDesktopMode)
             .addVisibleTasksListener(
                 any(VisibleTasksListener::class.java),
-                any(Executor::class.java)
+                any(Executor::class.java),
             )
     }
 
@@ -190,7 +194,7 @@ class WMShellTest : SysuiTestCase() {
             kosmos.fakeKeyguardTransitionRepository.sendTransitionSteps(
                 from = KeyguardState.GLANCEABLE_HUB,
                 to = KeyguardState.OCCLUDED,
-                testScope
+                testScope,
             )
             kosmos.setCommunalAvailable(true)
             runCurrent()

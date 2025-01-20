@@ -363,11 +363,9 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
     public void onDisplayChanged(int displayId) {}
 
     /**
-     * Private API used by NotificationManagerService.
+     * Private API used by NotificationManagerService and other system services.
      */
     private final StatusBarManagerInternal mInternalService = new StatusBarManagerInternal() {
-        private boolean mNotificationLightOn;
-
         @Override
         public void setNotificationDelegate(NotificationDelegate delegate) {
             mNotificationDelegate = delegate;
@@ -992,6 +990,11 @@ public class StatusBarManagerService extends IStatusBarService.Stub implements D
         @Override
         public void removeQsTile(ComponentName tile) {
             StatusBarManagerService.this.remTile(tile);
+        }
+
+        @Override
+        public void passThroughShellCommand(String[] args, FileDescriptor fd) {
+            StatusBarManagerService.this.passThroughShellCommand(args, fd);
         }
     };
 
