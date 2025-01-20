@@ -4051,9 +4051,12 @@ public class DevicePolicyManager {
     public static final int EXEMPT_FROM_HIBERNATION =  3;
 
     /**
-     * Exempt an app from all power-related restrictions, including app standby and doze.
+     * Exempt an app from all power-related restrictions, including app standby.
      * In addition, the app will be able to start foreground services from the background,
      * and the user will not be able to stop foreground services run by the app.
+     *
+     * <p><strong>Note:</strong> This option does NOT exempt apps from Doze mode. In fact,
+     * DPC apps themselves are not automatically exempted from Doze mode either.
      *
      * @hide
      */
