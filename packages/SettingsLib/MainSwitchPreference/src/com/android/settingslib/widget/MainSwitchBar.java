@@ -240,6 +240,11 @@ public class MainSwitchBar extends LinearLayout implements OnCheckedChangeListen
         }
     }
 
+    /** Removes all [OnCheckedChangeListener]s. */
+    public void removeAllOnSwitchChangeListeners() {
+        mSwitchChangeListeners.clear();
+    }
+
     /**
      * Remove a listener for switch changes
      */
