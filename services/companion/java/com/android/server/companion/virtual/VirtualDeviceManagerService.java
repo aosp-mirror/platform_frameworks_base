@@ -411,6 +411,12 @@ public class VirtualDeviceManagerService extends SystemService {
         }
     }
 
+    private VirtualDeviceImpl getVirtualDeviceForId(int deviceId) {
+        synchronized (mVirtualDeviceManagerLock) {
+            return mVirtualDevices.get(deviceId);
+        }
+    }
+
     class VirtualDeviceManagerImpl extends IVirtualDeviceManager.Stub {
 
         private final VirtualDeviceImpl.PendingTrampolineCallback mPendingTrampolineCallback =
@@ -524,10 +530,7 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override // Binder call
         public VirtualDevice getVirtualDevice(int deviceId) {
-            VirtualDeviceImpl device;
-            synchronized (mVirtualDeviceManagerLock) {
-                device = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl device = getVirtualDeviceForId(deviceId);
             return device == null ? null : device.getPublicVirtualDeviceObject();
         }
 
@@ -544,11 +547,9 @@ public class VirtualDeviceManagerService extends SystemService {
         @Override // BinderCall
         @VirtualDeviceParams.DevicePolicy
         public int getDevicePolicy(int deviceId, @VirtualDeviceParams.PolicyType int policyType) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice != null
-                        ? virtualDevice.getDevicePolicy(policyType) : DEVICE_POLICY_DEFAULT;
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice != null
+                    ? virtualDevice.getDevicePolicy(policyType) : DEVICE_POLICY_DEFAULT;
         }
 
         @Override // Binder call
@@ -591,28 +592,21 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override // Binder call
         public int getAudioPlaybackSessionId(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice != null
-                        ? virtualDevice.getAudioPlaybackSessionId() : AUDIO_SESSION_ID_GENERATE;
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice != null
+                    ? virtualDevice.getAudioPlaybackSessionId() : AUDIO_SESSION_ID_GENERATE;
         }
 
         @Override // Binder call
         public int getAudioRecordingSessionId(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice != null
-                        ? virtualDevice.getAudioRecordingSessionId() : AUDIO_SESSION_ID_GENERATE;
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice != null
+                    ? virtualDevice.getAudioRecordingSessionId() : AUDIO_SESSION_ID_GENERATE;
         }
 
         @Override // Binder call
         public void playSoundEffect(int deviceId, int effectType) {
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
 
             if (virtualDevice != null) {
                 virtualDevice.playSoundEffect(effectType);
@@ -733,19 +727,13 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public int getDeviceOwnerUid(int deviceId) {
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
             return virtualDevice != null ? virtualDevice.getOwnerUid() : Process.INVALID_UID;
         }
 
         @Override
         public @Nullable VirtualSensor getVirtualSensor(int deviceId, int handle) {
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
             return virtualDevice != null ? virtualDevice.getVirtualSensorByHandle(handle) : null;
         }
 
@@ -764,11 +752,8 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public void onVirtualDisplayRemoved(IVirtualDevice virtualDevice, int displayId) {
-            VirtualDeviceImpl virtualDeviceImpl;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDeviceImpl = mVirtualDevices.get(
-                        ((VirtualDeviceImpl) virtualDevice).getDeviceId());
-            }
+            VirtualDeviceImpl virtualDeviceImpl = getVirtualDeviceForId(
+                    ((VirtualDeviceImpl) virtualDevice).getDeviceId());
             if (virtualDeviceImpl != null) {
                 virtualDeviceImpl.onVirtualDisplayRemoved(displayId);
             }
@@ -874,10 +859,7 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public @NonNull ArraySet<Integer> getDisplayIdsForDevice(int deviceId) {
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
             return virtualDevice == null ? new ArraySet<>()
                     : Arrays.stream(virtualDevice.getDisplayIds()).boxed()
                             .collect(Collectors.toCollection(ArraySet::new));
@@ -890,18 +872,14 @@ public class VirtualDeviceManagerService extends SystemService {
 
         @Override
         public long getDimDurationMillisForDeviceId(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice == null ? -1 : virtualDevice.getDimDurationMillis();
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice == null ? -1 : virtualDevice.getDimDurationMillis();
         }
 
         @Override
         public long getScreenOffTimeoutMillisForDeviceId(int deviceId) {
-            synchronized (mVirtualDeviceManagerLock) {
-                VirtualDeviceImpl virtualDevice = mVirtualDevices.get(deviceId);
-                return virtualDevice == null ? -1 : virtualDevice.getScreenOffTimeoutMillis();
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
+            return virtualDevice == null ? -1 : virtualDevice.getScreenOffTimeoutMillis();
         }
 
         @Override
@@ -915,10 +893,7 @@ public class VirtualDeviceManagerService extends SystemService {
                 return VirtualDeviceManager.PERSISTENT_DEVICE_ID_DEFAULT;
             }
 
-            VirtualDeviceImpl virtualDevice;
-            synchronized (mVirtualDeviceManagerLock) {
-                virtualDevice = mVirtualDevices.get(deviceId);
-            }
+            VirtualDeviceImpl virtualDevice = getVirtualDeviceForId(deviceId);
             return virtualDevice == null ? null : virtualDevice.getPersistentDeviceId();
         }
 
