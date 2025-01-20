@@ -36,6 +36,7 @@ import com.android.compose.animation.scene.TestScenes.SceneA
 import com.android.compose.animation.scene.TestScenes.SceneB
 import com.android.compose.animation.scene.TestScenes.SceneC
 import com.android.compose.animation.scene.content.state.TransitionState
+import com.android.compose.animation.scene.content.state.TransitionState.Companion.DistanceUnspecified
 import com.android.compose.animation.scene.content.state.TransitionState.Transition
 import com.android.compose.animation.scene.subjects.assertThat
 import com.android.compose.gesture.NestedDraggable
@@ -782,6 +783,29 @@ class DraggableHandlerTest {
             },
         )
         assertIdle(SceneB)
+    }
+
+    @Test
+    fun animateWhenDistanceUnspecified() = runGestureTest {
+        layoutState.transitions = transitions {
+            from(SceneA, to = SceneB) {
+                distance = UserActionDistance { _, _, _ -> DistanceUnspecified }
+            }
+        }
+
+        val controller = onDragStarted(overSlop = up(fractionOfScreen = 0.9f))
+
+        // The distance is not computed yet, so we don't know the "progress" value yet.
+        assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.0f)
+
+        controller.onDragStoppedAnimateNow(
+            // We are animating from SceneA to SceneA, when the distance is still unspecified.
+            velocity = velocityThreshold,
+            onAnimationStart = {
+                assertTransition(fromScene = SceneA, toScene = SceneB, progress = 0.0f)
+            },
+        )
+        assertIdle(SceneA)
     }
 
     @Test
