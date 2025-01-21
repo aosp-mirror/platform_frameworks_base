@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"為安全起見，分享螢幕畫面隱藏了這個應用程式的內容"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"已自動連上衛星"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"你可以收發訊息，沒有行動/Wi-Fi 網路也無妨"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"你可以透過有限的衛星數據收發訊息"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"要使用衛星訊息功能嗎？"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"即使沒有行動或 Wi-Fi 網路，還是可以收發訊息"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"開啟「訊息」應用程式"</string>

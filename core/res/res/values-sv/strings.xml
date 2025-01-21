@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Av säkerhetsskäl döljs appinnehållet vid skärmdelning"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Automatiskt ansluten till satellit"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Du kan skicka och ta emot meddelanden utan mobil- eller wifi-nätverk"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Du kan skicka och ta emot meddelanden och använda begränsad data via satellit"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Vill du använda satellitmeddelanden?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Skicka och ta emot meddelanden utan ett mobil- eller wifi-nätverk"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Öppna Messages"</string>

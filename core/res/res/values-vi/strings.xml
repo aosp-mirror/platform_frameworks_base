@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Nội dung ứng dụng bị ẩn khỏi tính năng chia sẻ màn hình vì lý do bảo mật"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Đã tự động kết nối với vệ tinh"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Bạn có thể gửi và nhận tin nhắn mà không cần có mạng di động hoặc mạng Wi-Fi"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Bạn có thể gửi và nhận tin nhắn cũng như sử dụng dữ liệu hạn chế qua vệ tinh"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Sử dụng tính năng nhắn tin qua vệ tinh?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Gửi và nhận tin nhắn mà không cần mạng di động hoặc Wi-Fi"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mở ứng dụng Tin nhắn"</string>

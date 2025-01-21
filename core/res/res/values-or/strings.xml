@@ -1408,7 +1408,7 @@
     <string name="install_carrier_app_notification_button" msgid="6257740533102594290">"ଆପ୍‌ ଡାଉନଲୋଡ କରନ୍ତୁ"</string>
     <string name="carrier_app_notification_title" msgid="5815477368072060250">"ନୂଆ SIM କାର୍ଡ ଭର୍ତ୍ତି କରାଗଲା"</string>
     <string name="carrier_app_notification_text" msgid="6567057546341958637">"ଏହା ସେଟଅପ୍‌ କରିବା ପାଇଁ ଟାପ୍‌ କରନ୍ତୁ"</string>
-    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"ଆପଣଙ୍କର ଟାଇମ ଜୋନ ବଦଳିଛି"</string>
+    <string name="time_zone_change_notification_title" msgid="5232503069219193218">"ଆପଣଙ୍କ ଟାଇମ ଜୋନ ପରିବର୍ତ୍ତନ ହୋଇଛି"</string>
     <string name="time_zone_change_notification_body" msgid="6135793674904665585">"ଆପଣ ବର୍ତ୍ତମାନ <xliff:g id="TIME_ZONE_DISPLAY_NAME">%1$s</xliff:g> (<xliff:g id="TIME_ZONE_OFFSET">%2$s</xliff:g>)ରେ ଅଛନ୍ତି"</string>
     <string name="time_picker_dialog_title" msgid="9053376764985220821">"ସମୟ ସେଟ୍ କରନ୍ତୁ"</string>
     <string name="date_picker_dialog_title" msgid="5030520449243071926">"ତାରିଖ ସେଟ୍‍ କରନ୍ତୁ"</string>
@@ -1799,9 +1799,9 @@
     <string name="accessibility_magnification_chooser_text" msgid="1502075582164931596">"ମେଗ୍ନିଫିକେସନ"</string>
     <string name="hearing_device_switch_phone_mic_notification_title" msgid="6645178038359708836">"ଫୋନ ମାଇକକୁ ସୁଇଚ କରିବେ?"</string>
     <string name="hearing_device_switch_hearing_mic_notification_title" msgid="4612074852145289569">"ଶ୍ରବଣ ଯନ୍ତ୍ର ମାଇକକୁ ସୁଇଚ କରିବେ?"</string>
-    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"ଭଲ ସାଉଣ୍ଡ ପାଇଁ କିମ୍ବା ଯଦି ଆପଣଙ୍କର ଶ୍ରବଣ ଯନ୍ତ୍ର ବ୍ୟାଟେରୀ କମ ଥିଲେ। କଲ ସମୟରେ ଏହା କେବଳ ଆପଣଙ୍କର ମାଇକ ସୁଇଚ କରିଥାଏ।"</string>
-    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"ହେଣ୍ଡସ-ଫ୍ରି କଲିଂ ପାଇଁ ଆପଣ ଆପଣଙ୍କର ଶ୍ରବଣ ଯନ୍ତ୍ର ମାଇକ୍ରୋଫୋନ ବ୍ୟବହାର କରିପାରିବେ। କଲ ସମୟରେ ଏହା କେବଳ ଆପଣଙ୍କର ମାଇକ ସୁଇଚ କରିଥାଏ।"</string>
-    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"ସ୍ୱିଚ କରନ୍ତୁ"</string>
+    <string name="hearing_device_switch_phone_mic_notification_text" msgid="1332426273666077412">"ଭଲ ସାଉଣ୍ଡ ପାଇଁ କିମ୍ବା ଯଦି ଆପଣଙ୍କର ଶ୍ରବଣ ଯନ୍ତ୍ର ବେଟେରୀ କମ ଥିଲେ। କଲ ସମୟରେ ଏହା କେବଳ ଆପଣଙ୍କର ମାଇକକୁ ସୁଇଚ କରିଥାଏ।"</string>
+    <string name="hearing_device_switch_hearing_mic_notification_text" msgid="8288368365767284208">"ହେଣ୍ଡସ-ଫ୍ରି କଲିଂ ପାଇଁ ଆପଣ ଆପଣଙ୍କର ଶ୍ରବଣ ଯନ୍ତ୍ର ମାଇକ୍ରୋଫୋନ ବ୍ୟବହାର କରିପାରିବେ। କଲ ସମୟରେ ଏହା କେବଳ ଆପଣଙ୍କର ମାଇକକୁ ସୁଇଚ କରିଥାଏ।"</string>
+    <string name="hearing_device_notification_switch_button" msgid="3619524619430941300">"ସୁଇଚ କରନ୍ତୁ"</string>
     <string name="hearing_device_notification_settings_button" msgid="6673651052880279178">"ସେଟିଂସ"</string>
     <string name="user_switched" msgid="7249833311585228097">"ବର୍ତ୍ତମାନର ୟୁଜର୍‌ ହେଉଛନ୍ତି <xliff:g id="NAME">%1$s</xliff:g>।"</string>
     <string name="user_switching_message" msgid="1912993630661332336">"<xliff:g id="NAME">%1$s</xliff:g>ରେ ସ୍ୱିଚ କରନ୍ତୁ…"</string>
@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"ସୁରକ୍ଷା ପାଇଁ ସ୍କ୍ରିନ ସେୟାରରୁ ଆପ ବିଷୟବସ୍ତୁକୁ ଲୁଚାଯାଇଛି"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ସାଟେଲାଇଟ ସହ ସ୍ୱତଃ କନେକ୍ଟ ହୋଇଛି"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"ଏକ ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ବିନା ଆପଣ ମେସେଜ ପଠାଇପାରିବେ ଏବଂ ପାଇପାରିବେ"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"ସେଟେଲାଇଟ ମାଧ୍ୟମରେ ଆପଣ ମେସେଜ ପଠାଇପାରିବେ ଓ ପାଇପାରିବେ ଏବଂ ସୀମିତ ଡାଟା ବ୍ୟବହାର କରିପାରିବେ"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ସେଟେଲାଇଟ ମେସେଜିଂକୁ ବ୍ୟବହାର କରିବେ?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ଏକ ମୋବାଇଲ କିମ୍ବା ୱାଇ-ଫାଇ ନେଟୱାର୍କ ବିନା ମେସେଜ ପଠାନ୍ତୁ ଏବଂ ପାଆନ୍ତୁ"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ଖୋଲନ୍ତୁ"</string>

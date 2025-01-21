@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Коопсуздук үчүн колдонмодогу контент бөлүшүлгөн экрандан жашырылды"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Спутникке автоматтык түрдө туташтырылган"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Сиз мобилдик же Wi-Fi тармагы жок эле билдирүүлөрдү жөнөтүп, ала аласыз"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Спутник аркылуу билдирүүлөрдү жөнөтүп жана алып, чектелген трафикти колдоно аласыз"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Спутник аркылуу байланышасызбы?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Мобилдик же Wi-Fi тармагына туташпай эле билдирүүлөрдү жөнөтүп, алыңыз"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Жазышуулар колдонмосун ачуу"</string>

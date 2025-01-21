@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"လုံခြုံရေးအတွက် အက်ပ်အကြောင်းအရာကို ဖန်သားပြင် မျှဝေခြင်းတွင် ဖျောက်ထားသည်"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ဂြိုဟ်တုနှင့် အလိုအလျောက် ချိတ်ဆက်ထားသည်"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များကို ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"ဂြိုဟ်တုဖြင့် မက်ဆေ့ဂျ်များ ပေးပို့လက်ခံနိုင်ပြီး အကန့်အသတ်ဖြင့် ဒေတာသုံးနိုင်သည်"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ဂြိုဟ်တုမှတစ်ဆင့် မက်ဆေ့ဂျ်ပို့ခြင်း သုံးမလား။"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"မိုဘိုင်း (သို့) Wi-Fi ကွန်ရက်မရှိဘဲ မက်ဆေ့ဂျ်များ ပို့နိုင်၊ လက်ခံနိုင်သည်"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Messages ဖွင့်ရန်"</string>

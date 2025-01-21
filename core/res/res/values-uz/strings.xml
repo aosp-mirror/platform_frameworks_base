@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Ekran namoyishida xavfsizlik maqsadida ilova kontenti berkitildi"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Sputnikka avtomatik ulandi"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil yoki Wi-Fi tarmoqsiz xabarlarni yuborishingiz va qabul qilishingiz mumkin"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Sputnik orqali xabarlar yuborish va qabul qilish hamda cheklangan trafikdan foydalanish mumkin"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Sputnik orqali xabarlashuv ishlatilsinmi?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Mobil yoki Wi-Fi tarmoq blan aloqa yoʻqligida xabar yuboring va qabul qiling"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Xabarlar ilovasini ochish"</string>

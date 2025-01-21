@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"为安全起见，屏幕共享画面已隐藏此应用的内容"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"自动连接到卫星"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"您无需使用移动网络或 WLAN 网络便能收发消息"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"您可以使用有限的数据通过卫星收发消息"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"使用卫星消息功能？"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"即使没有移动网络或 WLAN 网络，也能收发消息"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"打开“信息”应用"</string>

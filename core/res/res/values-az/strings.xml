@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Tətbiq kontenti güvənlik məsələlərinə görə ekran paylaşımından gizlədildi"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Peykə avtomatik qoşulub"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Mobil və ya Wi-Fi şəbəkəsi olmadan mesaj göndərə və qəbul edə bilərsiniz"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Peyk vasitəsilə mesaj göndərə və qəbul edə, eləcə də məhdud datadan istifadə edə bilərsiniz"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Peyk mesajlaşmasından istifadə edilsin?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Mobil və ya Wi-Fi şəbəkəsi olmadan mesajlar göndərin və qəbul edin"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Mesajı açın"</string>

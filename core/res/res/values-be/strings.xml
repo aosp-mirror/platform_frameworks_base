@@ -2461,8 +2461,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Змесціва праграмы выключана з абагульвання экрана ў мэтах бяспекі"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Аўтаматычна падключана да сістэм спадарожнікавай сувязі"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Вы можаце адпраўляць і атрымліваць паведамленні без доступу да мабільнай сеткі або Wi-Fi"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"З дапамогай спадарожнікавай сувязі вы можаце адпраўляць і атрымліваць паведамленні, а таксама выкарыстоўваць абмежаваную колькасць мабільных даных"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Выкарыстоўваць абмен паведамленнямі па спадарожнікавай сувязі?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Вы можаце адпраўляць і атрымліваць паведамленні, калі падключэнне да мабільнай сеткі або сеткі Wi-Fi адсутнічае"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Адкрыць Паведамленні"</string>

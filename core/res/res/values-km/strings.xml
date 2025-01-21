@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"បានលាក់ខ្លឹមសារកម្មវិធីពីការបង្ហាញ​អេក្រង់ដើម្បីសុវត្ថិភាព"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"ភ្ជាប់ដោយស្វ័យប្រវត្តិទៅផ្កាយរណប"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"អ្នកអាចផ្ញើ និងទទួលសារដោយមិនប្រើបណ្តាញទូរសព្ទចល័ត ឬ Wi-Fi"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"អ្នកអាចផ្ញើ និងទទួលសារ ព្រមទាំងប្រើទិន្នន័យមានកំណត់តាមរយៈផ្កាយរណប"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"ប្រើ​ការ​ផ្ញើ​សារ​តាម​ផ្កាយរណប​ឬ?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"ផ្ញើ និងទទួលសារដោយគ្មានបណ្ដាញ Wi-Fi ឬបណ្ដាញទូរសព្ទចល័ត"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"បើក​កម្មវិធី Messages"</string>

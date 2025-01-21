@@ -2459,8 +2459,7 @@
     <string name="screen_not_shared_sensitive_content" msgid="7058419185079565001">"Од безбедносни причини, содржините на апликацијата се скриени од споделувањето екран"</string>
     <string name="satellite_notification_title" msgid="4026338973463121526">"Поврзано со сателит автоматски"</string>
     <string name="satellite_notification_summary" msgid="5207364139430767162">"Може да испраќате и примате пораки без мобилна или Wi-Fi мрежа"</string>
-    <!-- no translation found for satellite_notification_summary_with_data (6486843676720429049) -->
-    <skip />
+    <string name="satellite_notification_summary_with_data" msgid="6486843676720429049">"Може да испраќате и да примате пораки и да користите ограничен интернет преку сателит"</string>
     <string name="satellite_notification_manual_title" msgid="1097504441849466279">"Да се користи „Сателитска размена на пораки“?"</string>
     <string name="satellite_notification_manual_summary" msgid="901206289846283445">"Испраќајте и примајте пораки без мобилна или Wi-Fi мрежа"</string>
     <string name="satellite_notification_open_message" msgid="4149234979688273729">"Отворете ја Messages"</string>
