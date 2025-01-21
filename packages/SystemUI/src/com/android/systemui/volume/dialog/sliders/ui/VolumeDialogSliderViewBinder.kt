@@ -23,6 +23,8 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -36,7 +38,10 @@ import androidx.compose.material3.VerticalSlider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerEvent
@@ -46,14 +51,20 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.android.compose.ui.graphics.painter.DrawablePainter
 import com.android.systemui.haptics.slider.compose.ui.SliderHapticsViewModel
+import com.android.systemui.lifecycle.rememberViewModel
 import com.android.systemui.res.R
 import com.android.systemui.volume.dialog.sliders.dagger.VolumeDialogSliderScope
 import com.android.systemui.volume.dialog.sliders.ui.compose.VolumeDialogSliderTrack
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogOverscrollViewModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderInputEventsViewModel
 import com.android.systemui.volume.dialog.sliders.ui.viewmodel.VolumeDialogSliderViewModel
+import com.android.systemui.volume.haptics.ui.VolumeHapticsConfigsProvider
 import javax.inject.Inject
+import kotlin.math.round
 import kotlin.math.roundToInt
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.filter
+import kotlinx.coroutines.flow.map
 
 @VolumeDialogSliderScope
 class VolumeDialogSliderViewBinder
@@ -91,7 +102,7 @@ private fun VolumeDialogSlider(
     hapticsViewModelFactory: SliderHapticsViewModel.Factory?,
     modifier: Modifier = Modifier,
 ) {
-    // TODO (apotapov) use hapticsViewModelFactory
+
     val colors =
         SliderDefaults.colors(
             thumbColor = MaterialTheme.colorScheme.primary,
@@ -103,6 +114,20 @@ private fun VolumeDialogSlider(
     val collectedSliderState by viewModel.state.collectAsStateWithLifecycle(null)
     val sliderState = collectedSliderState ?: return
 
+    val interactionSource = remember { MutableInteractionSource() }
+    val hapticsViewModel: SliderHapticsViewModel? =
+        hapticsViewModelFactory?.let {
+            rememberViewModel(traceName = "SliderHapticsViewModel") {
+                it.create(
+                    interactionSource,
+                    sliderState.valueRange,
+                    Orientation.Vertical,
+                    VolumeHapticsConfigsProvider.sliderHapticFeedbackConfig(sliderState.valueRange),
+                    VolumeHapticsConfigsProvider.seekableSliderTrackerConfig,
+                )
+            }
+        }
+
     val state =
         remember(sliderState.valueRange) {
             SliderState(
@@ -113,9 +138,13 @@ private fun VolumeDialogSlider(
                             .toInt(),
                 )
                 .apply {
-                    onValueChangeFinished = { viewModel.onStreamChangeFinished(value.roundToInt()) }
+                    onValueChangeFinished = {
+                        viewModel.onStreamChangeFinished(value.roundToInt())
+                        hapticsViewModel?.onValueChangeEnded()
+                    }
                     setOnValueChangeListener {
                         value = it
+                        hapticsViewModel?.addVelocityDataPoint(it)
                         overscrollViewModel.setSlider(
                             value = value,
                             min = valueRange.start,
@@ -125,13 +154,25 @@ private fun VolumeDialogSlider(
                     }
                 }
         }
-    LaunchedEffect(sliderState.value) { state.value = sliderState.value }
+    var lastDiscreteStep by remember { mutableFloatStateOf(round(sliderState.value)) }
+    LaunchedEffect(sliderState.value) {
+        state.value = sliderState.value
+        snapshotFlow { sliderState.value }
+            .map { round(it) }
+            .filter { it != lastDiscreteStep }
+            .distinctUntilChanged()
+            .collect { discreteStep ->
+                lastDiscreteStep = discreteStep
+                hapticsViewModel?.onValueChange(discreteStep)
+            }
+    }
 
     VerticalSlider(
         state = state,
         enabled = !sliderState.isDisabled,
         reverseDirection = true,
         colors = colors,
+        interactionSource = interactionSource,
         modifier =
             modifier.pointerInput(Unit) {
                 awaitPointerEventScope {
